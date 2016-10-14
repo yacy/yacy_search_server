@@ -50,6 +50,11 @@ public final class Identificator {
         }
     }
 
+    /**
+     * Append a word to the text to be analyzed.
+     * Analysis takes letter case into account (this means word should not be upper- or lower cased)
+     * @param word
+     */
     public void add(final String word) {
         if (word == null) return;
         this.detector.append(" " + word); // detector internally caches text up to maxtextlen = default = 10000 chars

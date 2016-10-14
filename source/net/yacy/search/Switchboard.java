@@ -112,9 +112,7 @@ import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
@@ -1300,6 +1298,12 @@ public final class Switchboard extends serverSwitch {
         ClientIdentification.generateYaCyBot(sysinfo);
     }
 
+    /**
+     * Switch network configuration to the new specified one
+     * @param networkDefinition YaCy network definition file path (relative to the app path) or absolute URL
+     * @throws FileNotFoundException when the file was not found
+     * @throws IOException when an error occured
+     */
     public void switchNetwork(final String networkDefinition) throws FileNotFoundException, IOException {
         this.log.info("SWITCH NETWORK: switching to '" + networkDefinition + "'");
         // pause crawls
@@ -1329,11 +1333,13 @@ public final class Switchboard extends serverSwitch {
             if ( this.dhtDispatcher != null ) {
                 this.dhtDispatcher.close();
             }
+            /* Crawlstacker is eventually triggering write operations on this.index : we must therefore close it before closing this.index */
+            this.crawlStacker.announceClose();
+            this.crawlStacker.close();
+            
             synchronized ( this.index ) {
                 this.index.close();
             }
-            this.crawlStacker.announceClose();
-            this.crawlStacker.close();
             this.webStructure.close();
 
             this.log.info("SWITCH NETWORK: START UP OF NEW INDEX DATABASE...");
@@ -2192,6 +2198,10 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
+    /**
+     * Check scheduled api calls scheduled execution time and execute all jobs due
+     * @return true if calls have been executed
+     */
     public boolean schedulerJob() {
 
         // execute scheduled API actions
@@ -2200,15 +2210,22 @@ public final class Switchboard extends serverSwitch {
         final Date now = new Date();
         try {
             final Iterator<Tables.Row> plainIterator = this.tables.iterator(WorkTables.TABLE_API_NAME);
-            final Iterator<Tables.Row> mapIterator = Tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING).iterator();
+            final Iterator<Tables.Row> mapIterator = Tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_LAST_EXEC).iterator();
             while (mapIterator.hasNext()) {
                 row = mapIterator.next();
                 if (row == null) continue;
                 
                 // select api calls according to scheduler settings
-                final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
-                if (date_next_exec != null && now.after(date_next_exec)) pks.add(UTF8.String(row.getPK()));
-                
+                final int stime = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
+                if (stime > 0) { // has scheduled repeat
+                    final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
+                    if (date_next_exec != null) { // has been executed before
+                        if (now.after(date_next_exec)) pks.add(UTF8.String(row.getPK()));
+                    } else { // was never executed before
+                        pks.add(UTF8.String(row.getPK()));
+                    }
+                }
+
                 // select api calls according to event settings
                 final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
                 if (!"off".equals(kind)) {
@@ -2238,16 +2255,6 @@ public final class Switchboard extends serverSwitch {
             }
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        }
-        for (final String pk : pks) {
-            try {
-                row = this.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
-                WorkTables.calculateAPIScheduler(row, true); // calculate next update time
-                this.tables.update(WorkTables.TABLE_API_NAME, row);
-            } catch (final Throwable e ) {
-                ConcurrentLog.logException(e);
-                continue;
-            }
         }
         startupAction = false;
         
@@ -2569,6 +2576,7 @@ public final class Switchboard extends serverSwitch {
                 this.crawlQueues.noticeURL.clear();
                 
                 // do solr optimization
+                /*
                 long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
                 long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
                 long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
@@ -2578,7 +2586,6 @@ public final class Switchboard extends serverSwitch {
                     opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
                     optimizeRequired = true;
                 }
-                
                 log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
                 if (optimizeRequired) {
                     if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
@@ -2586,6 +2593,7 @@ public final class Switchboard extends serverSwitch {
                     fulltext.optimize(opts);
                     this.optimizeLastRun = System.currentTimeMillis();
                 }
+                */
             }
             
             // write statistics
@@ -3901,7 +3909,7 @@ public final class Switchboard extends serverSwitch {
         mySeed.setLastSeenUTC();
         mySeed.put(Seed.UTC, GenericFormatter.UTCDiffString());
         mySeed.setFlagAcceptRemoteCrawl(getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
-        mySeed.setFlagAcceptRemoteIndex(getConfigBool("allowReceiveIndex", true));
+        mySeed.setFlagAcceptRemoteIndex(getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true));
         mySeed.setFlagSSLAvailable(this.getHttpServer() != null && this.getHttpServer().withSSL() && getConfigBool("server.https", false));
         if (mySeed.getFlagSSLAvailable()) mySeed.put(Seed.PORTSSL, Integer.toString(getPublicPort("port.ssl", 8443)));
 

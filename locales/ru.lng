@@ -170,9 +170,9 @@ Add new pattern:==Добавить новый шаблон:
 The right '*', after the '/', can be replaced by a==Символом '*' (звездочка), после '/' может быть заменено
 >regular expression<==>регулярным выражением<
 domain.net/fullpath<==domain.net/полный путь<
->domain.net/*<==>domain.net/*<
-*.domain.net/*<==*.domain.net/*<
-*.sub.domain.net/*<==*.sub.domain.net/*<
+#>domain.net/*<==>domain.net/*<
+#*.domain.net/*<==*.domain.net/*<
+#*.sub.domain.net/*<==*.sub.domain.net/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
 a complete <==полное <
@@ -572,9 +572,9 @@ If checked, only non-zero values and non-empty strings are written to Solr field
 Use deep-embedded local Solr&nbsp;==Использовать встроенную локальную базу Solr&nbsp;
 This will write the YaCy-embedded Solr index which stored within the YaCy DATA directory.==Для записи данных будет использоваться встроенная база Solr, которая хранится в папке DATA.
 The Solr native search interface is accessible at<br/>==Интерфейс поиска Solr доступен по ссылке
-<a href="solr/select?q=*:*&start=0&rows=3&core=collection1">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=collection1</a>==<a href="solr/select?q=*:*&start=0&rows=3&core=collection1">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=collection1</a>
+#<a href="solr/select?q=*:*&start=0&rows=3&core=collection1">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=collection1</a>==<a href="solr/select?q=*:*&start=0&rows=3&core=collection1">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=collection1</a>
 for the default search index (core: collection1) and at<br/>==для поискового индекса по-умолчанию (ядро: collection1) и <br/>
-<a href="solr/select?q=*:*&start=0&rows=3&core=webgraph">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=webgraph</a>==<a href="solr/select?q=*:*&start=0&rows=3&core=webgraph">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=webgraph</a>
+#<a href="solr/select?q=*:*&start=0&rows=3&core=webgraph">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=webgraph</a>==<a href="solr/select?q=*:*&start=0&rows=3&core=webgraph">/solr/select?q=*:*&amp;start=0&amp;rows=3&amp;core=webgraph</a>
 for the webgraph core.<br/>==для ядра вэб-контента.<br/>
 If you switch off this index, a remote Solr must be activated.==Если вы выключите использование встроенной базы, то будет активирована удалённая база Solr.
 Use remote Solr server(s)==Использовать удалённую базу Solr
@@ -1820,7 +1820,7 @@ Delete local search index (embedded Solr and old Metadata)==Удалить ло�
 Delete remote solr index==Удалить удалённый индекс базы Solr
 Delete RWI Index (DHT transmission words)==Удалить индекс RWI (передача слов в виде DHT)
 Delete Citation Index (linking between URLs)==Удалить индекс цитат (перекрестные ссылки)
-Delete First-Seen Date Table==Delete First-Seen Date Table
+#Delete First-Seen Date Table==Delete First-Seen Date Table
 Delete HTTP &amp; FTP Cache==Удалить HTTP &amp; FTP кэш
 Stop Crawler and delete Crawl Queues==Остановить индексатор и удалить очередь запросов
 Delete robots.txt Cache==Удалить кэш robots.txt
@@ -2055,7 +2055,7 @@ This is the most generic option: select a set of documents using a solr query.==
 
 #File: IndexImport_p.html
 #---------------------------
-YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': Index Import
+#YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': Index Import
 #Crawling Queue Import==Crawling Puffer Import
 #Index DB Import==Index Datenbank Import
 #The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==Der lokale Index besteht zur Zeit aus (mindestens) #[wcount]# Wörtern und #[ucount]# URLs.
@@ -4064,7 +4064,7 @@ e="Search"==e="Поиск"
 Search Page==Страница поиска
 This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.==Результат поиска может быть отправлен в RSS-ленту/<a href="http://www.opensearch.org">OpenSearch</a>.
 The query format is similar to==Формат запроса аналогичен
-SRU==SRU
+#SRU==SRU
 Click the API icon to see an example call to the search rss API.==Нажмите для просмотра примера вызова API поиска RSS-ленты.
 To see a list of all APIs, please visit the==Список всех API, смотрите на
 API wiki page==Wiki-странице API

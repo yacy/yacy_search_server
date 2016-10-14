@@ -39,6 +39,7 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.ByteArray;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public class RobotsTxtEntry {
@@ -221,9 +222,19 @@ public class RobotsTxtEntry {
         }
 
         // if the path is null or empty we set it to /
-        if (path == null || path.isEmpty()) path = "/";
-        // escaping all occurences of ; because this char is used as special char in the Robots DB
-        else  path = RobotsTxt.ROBOTS_DB_PATH_SEPARATOR_MATCHER.matcher(path).replaceAll("%3B");
+        if (path == null || path.isEmpty()) {
+        	path = "/";
+        } else {
+        	/* non-ASCII characters : let's apply the same decoding as the one used to create the denyPathList (see RobotsTxtParser.parse()) */
+        	try {
+        		path = UTF8.decodeURL(path);
+        	} catch(Exception e) {
+        		ConcurrentLog.warn(RobotsTxtEntry.class.getName(), "Could not decode path : " + path);
+        		
+        	}
+            // escaping all occurences of ; because this char is used as special char in the Robots DB
+        	path = RobotsTxt.ROBOTS_DB_PATH_SEPARATOR_MATCHER.matcher(path).replaceAll("%3B");
+        }
 
         for (final String element : this.denyPathList) {
 

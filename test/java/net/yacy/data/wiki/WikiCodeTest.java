@@ -1,6 +1,5 @@
 package net.yacy.data.wiki;
 
-import java.io.BufferedReader;
 import org.junit.Test;
 import static org.junit.Assert.*;
 

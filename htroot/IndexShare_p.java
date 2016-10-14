@@ -57,7 +57,7 @@ public class IndexShare_p {
 
         if (post.containsKey("indexsharesetting")) {
             sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, post.containsKey("distribute"));
-            sb.setConfig("allowReceiveIndex", post.containsKey("receive"));
+            sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, post.containsKey("receive"));
             sb.setConfig("defaultLinkReceiveFrequency", post.getInt("linkfreq", 30));
             sb.setConfig("defaultWordReceiveFrequency", post.getInt("wordfreq", 10));
         }

@@ -1,7 +1,5 @@
 # Yacy Docker image from latest sources
 
-[![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/luccioman/yacy_search_server/tree/docker/docker)
-
 ## Supported tags and respective Dockerfiles
 
 * latest (Dockerfile)
@@ -19,6 +17,11 @@ Using yacy_search_server/docker/Dockerfile :
 
 	cd yacy_search_server/docker
 	docker build .
+	
+To build the Alpine variant :
+
+	cd yacy_search_server/docker
+	docker build -f Dockerfile.alpine .
 	
 ## Image variants
 
@@ -51,12 +54,12 @@ You can retrieve the container IP address with `docker inspect`.
 
 #### Easier to handle
 
-	docker run --name yacy -p 8090:8090 --log-opt max-size=100m --log-opt max-file=2 luccioman/yacy
+	docker run --name yacy -p 8090:8090 -p 8443:8443 --log-opt max-size=200m --log-opt max-file=2 luccioman/yacy
 	
 ##### Options detail
 	
 * --name : allow easier management of your container (without it, docker automatically generate a new name at each startup).
-* -p : map host port and container port, allowing web interface access through the usual http://localhost:8090.
+* -p 8090:8090 -p 8443:8443 : map host ports to YaCy container ports, allowing web interface access through the usual http://localhost:8090 and https://localhost:8443 (you can set a different mapping, for example -p 443:8443 if you prefer to use the default HTTPS port on your host)
 * --log-opt max-size : limit maximum docker log file size for this container
 * --log-opt max-file : limit number of docker rotated log files for this container
 
@@ -78,9 +81,47 @@ Note that you can list all docker volumes with :
 
 	docker volume ls
 
-#### As background process
+#### Start as background process
 
 	docker run -d luccioman/yacy
+	
+### HTTPS support
+
+This images are default configured with HTTPS enabled, and use a default certificate stored in defaults/freeworldKeystore. You should use your own certificate. In order to do it, you can proceed as follow.
+
+#### Self-signed certificate
+
+A self-signed certificate will provide encrypted communications with your YaCy server, but browsers will still complain about an invalid security certificate with the error "SEC_ERROR_UNKNOWN_ISSUER". If it is sufficient for you, you can permanently add and exception to your browser.
+
+This kind of certificate can be generated and added to your YaCy Docker container with the following :
+
+	keytool -keystore /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/yacykeystore -genkey -keyalg RSA -alias yacycert
+	
+Then edit YaCy config file. For example with the nano text editor :
+
+	nano /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/yacy.conf
+
+And configure the keyStoreXXXX properties accordingly :
+
+	keyStore=/opt/yacy_search_server/DATA/SETTINGS/yacykeystore
+	keyStorePassword=yourpassword
+	
+#### Import an existing certificate:
+
+Importing a certificate validated by a certification authority (CA) will ensure you have full HTTPS support with no security errors when accessing your YaCy peer. You can import an existing certificate in pkcs12 format.
+
+First copy it to the YaCy Docker container volume :
+
+	cp [yourStore].pkcs12 /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/[yourStore].pkcs12
+	
+Then edit YaCy config file. For example with the nano text editor :
+
+	nano /var/lib/docker/volumes/[your_yacy_volume]/_data/SETTINGS/yacy.conf
+
+And configure the pkcs12XXX properties accordingly :
+
+	pkcs12ImportFile=/opt/yacy_search_server/DATA/SETTINGS/[yourStore].pkcs12
+	pkcs12ImportPwd=yourpassword
 
 ### Next starts
 
@@ -111,7 +152,7 @@ OR
 	
 Create new container based on pulled image, using volume data from old container :
 	
-	docker create --name [tmp-container_name] -p 8090:8090 --volumes-from=[container_name] luccioman/yacy:latest
+	docker create --name [tmp-container_name] -p 8090:8090 -p 8443:8443 --volumes-from=[container_name] --log-opt max-size=100m --log-opt max-file=2 luccioman/yacy:latest
 	
 Stop old container :
 

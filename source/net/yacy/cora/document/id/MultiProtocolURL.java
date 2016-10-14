@@ -137,7 +137,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     /**
      * initialization of a MultiProtocolURI to produce poison pills for concurrent blocking queues
      */
-    public MultiProtocolURL()  {
+    protected MultiProtocolURL()  {
         this.protocol = null;
         this.host = null;
         this.hostAddress = null;
@@ -181,7 +181,6 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         this.contentDomain = null;
 
         // identify protocol
-        assert (url != null);
         url = url.trim();
         
         if (url.startsWith("//")) {
@@ -192,8 +191,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             url = "smb://" + CommonPattern.BACKSLASH.matcher(url.substring(2)).replaceAll("/");
         }
 
-        if (url.length() > 1 && url.charAt(1) == ':') {
-            // maybe a DOS drive path
+        if (url.length() > 1 && (url.charAt(1) == ':' && Character.isLetter(url.charAt(0)))) {
+            // maybe a DOS drive path ( A: to z: )
             url = "file://" + url;
         }
 
@@ -216,7 +215,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (!this.protocol.equals("file") && url.substring(p + 1, p + 3).equals("//")) {
             // identify host, userInfo and file for http and ftp protocol
             int q = url.indexOf('/', p + 3);
-            if (q < 0) q = url.indexOf("?", p + 3); // check for www.test.com?searchpart
+            if (q < 0) { // check for www.test.com?searchpart
+                q = url.indexOf("?", p + 3);
+            } else { // check that '/' was not in searchpart (example http://test.com?data=1/2/3)
+                if (url.lastIndexOf("?", q) >= 0) {
+                    q = url.indexOf("?", p + 3);
+                }
+            }
             int r;
             if (q < 0) {
                 if ((r = url.indexOf('@', p + 3)) < 0) {
@@ -278,12 +283,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     this.path = h.substring(2); // "/path"  or "/c:/path"
                 } else if (h.startsWith("//")) { // "//host/path" or "//host/c:/path"
                     if (h.length() > 4 && h.charAt(3) == ':' && h.charAt(4) != '/' && h.charAt(4) != '\\') {
-                        // wrong windows path, after the doublepoint there should be a backslash
-                        h = h.substring(0, 4) + '\\' + h.substring(4);
+                        // wrong windows path, after the doublepoint there should be a backslash. Let's add a slash, as it will be slash in the normal form
+                        h = h.substring(0, 4) + '/' + h.substring(4);
                     }
                     int q = h.indexOf('/', 2);
                     if (q < 0 || h.length() > 3 && h.charAt(3) == ':') {
-                        this.path = h.substring(2); // "path"  or "c:/path"
+                    	// Missing root slash such as "path" or "c:/path" accepted, but the path attribute must by after all start with it
+                        this.path = "/" + h.substring(2); 
                     } else {
                         this.host = h.substring(2, q ); // TODO: handle "c:"  ?
                         if (this.host.equalsIgnoreCase(Domains.LOCALHOST)) this.host = null;
@@ -350,8 +356,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return this.contentDomain;
     }
 
+    /**
+     * @deprecated not used (2016-07-20), doesn't handle all protocol cases. Use MultiprotocolURL(MultiProtocolURL, String) instead
+     */
+    @Deprecated // not used 2016-07-20
     public static MultiProtocolURL newURL(final String baseURL, String relPath) throws MalformedURLException {
-        if (relPath.startsWith("//")) {
+       if (relPath.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
             relPath = "http:" + relPath;
         }
@@ -367,6 +377,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return new MultiProtocolURL(new MultiProtocolURL(baseURL), relPath);
     }
 
+    /**
+     * @deprecated not used (2016-07-20), doesn't handle all protocol cases. Use MultiprotocolURL(MultiProtocolURL, String) instead
+     */
+    @Deprecated // not used 2016-07-20
     public static MultiProtocolURL newURL(final MultiProtocolURL baseURL, String relPath) throws MalformedURLException {
         if (relPath.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
@@ -383,7 +397,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         }
         return new MultiProtocolURL(baseURL, relPath);
     }
-
+    
     public MultiProtocolURL(final MultiProtocolURL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         if (relPath == null) throw new MalformedURLException("relPath is null");
@@ -411,9 +425,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         } else if (relPath.length() > 0 && relPath.charAt(0) == '/') {
             this.path = relPath;
         } else if (baseURL.path.endsWith("/")) {
-            if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
-                throw new MalformedURLException("relative path malformed: " + relPath);
-            }
+        	/* According to RFC 3986 example in Appendix B. (https://tools.ietf.org/html/rfc3986) 
+        	   such an URL is valid : http://www.ics.uci.edu/pub/ietf/uri/#Related
+        	   
+        	   We also find similar usages in the 2016 URL living standard (https://url.spec.whatwg.org/),  
+        	   for example : https://url.spec.whatwg.org/#syntax-url-absolute-with-fragment 
+        	   
+        	   java.lang.URL constructor also accepts this form.*/
             if (relPath.startsWith("/")) this.path = baseURL.path + relPath.substring(1); else this.path = baseURL.path + relPath;
         } else {
             if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
@@ -456,7 +474,17 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         escape();
     }
 
-    //  resolve '..'
+    /**
+     * Resolve '..' segments in the path.
+     * For standard pseudo algorithms, see :
+     * <ul>
+     * <li>https://tools.ietf.org/html/rfc3986#section-5.2.4</li>
+     * <li>https://url.spec.whatwg.org/#path-state</li>
+     * <li>https://www.w3.org/TR/url/#relative-path-state</li>
+     * </ul>
+     * @param path URL path part : must not be null
+     * @return the path with '..' segments resolved
+     */
     private static final String resolveBackpath(final String path) {
         String p = path;
         if (p.isEmpty() || p.charAt(0) != '/') { p = "/" + p; }
@@ -467,6 +495,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             if (matcher.start() > end) break;
             p = matcher.replaceAll("");
             matcher.reset(p);
+        }
+        /* Let's remove any eventual remaining but inappropriate '..' segments at the beginning. 
+         * See https://tools.ietf.org/html/rfc3986#section-5.2.4 -> parts 2.C and 2.D */
+        while(p.startsWith("/../")) {
+        	p = p.substring(3);
+        }
+        if(p.equals("/..")) {
+        	p = "/";
         }
         return p.equals("") ? "/" : p;
     }
@@ -825,14 +861,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public String getFileName() {
         // this is a method not defined in any sun api
         // it returns the last portion of a path without any reference
-        final int p = this.path.lastIndexOf('/');
-        if (p < 0) return this.path;
-        if (p == this.path.length() - 1) return ""; // no file name, this is a path to a directory
-        return this.path.substring(p + 1); // the 'real' file name
-    }
+            final int p = this.path.lastIndexOf('/');
+            if (p < 0) return this.path;
+            if (p == this.path.length() - 1) return ""; // no file name, this is a path to a directory
+            return this.path.substring(p + 1); // the 'real' file name
+        }
 
     /**
-     * Get extension out of a filename
+     * Get extension out of a filename in lowercase
      * cuts off query part
      * @param fileName
      * @return extension or ""
@@ -852,12 +888,22 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return fileName.substring(p + 1, q).toLowerCase();
     }
 
+    /**
+     * Get the path (including filename)
+     * Path is never null
+     * returns may range from empty string, just "/" to a full path
+     * @return
+     */
     public String getPath() {
         return this.path;
     }
 
+    /**
+     * Get path elements (directories) as array
+     * @return array with directory names or empty array
+     */
     public String[] getPaths() {
-        String s = this.path == null ? "" : this.path.charAt(0) == '/' ? this.path.substring(1) : this.path;
+        String s = (this.path == null || this.path.length() < 1) ? "" : this.path.charAt(0) == '/' ? this.path.substring(1) : this.path;
         int p = s.lastIndexOf('/');
         if (p < 0) return new String[0];
         s = s.substring(0, p); // the paths do not contain the last part, which is considered as the getFileName() part.
@@ -867,15 +913,20 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     /**
      * return the file object to a local file
-     * this patches also 'strange' windows file paths
+     * this patches also 'strange' windows file paths (like /c|/tmp)
      * @return the file as absolute path
      */
     public File getLocalFile() {
+        // path always starts with '/' ( https://github.com/yacy/yacy_search_server/commit/1bb0b135ac5dab0adab423d89612f7b1e13f2e61 )
+        // e.g. /C:/tmp , charAt(1) == ':' never true, but keep it anyway
         char c = this.path.charAt(1);
-        if (c == ':') return new File(this.path.replace('/', '\\'));
-        if (c == '|') return new File(this.path.charAt(0) + ":" + this.path.substring(2).replace('/', '\\'));
-        c = this.path.charAt(2);
-        if (c == ':' || c == '|') return new File(this.path.charAt(1) + ":" + this.path.substring(3).replace('/', '\\'));
+        if (c == ':') return new File(this.path);
+        if (c == '|') return new File(this.path.charAt(0) + ":" + this.path.substring(2));
+        
+        if (this.path.length() > 1) { // prevent StringIndexOutOfBoundsException
+            c = this.path.charAt(2);
+            if (c == ':' || c == '|') return new File(this.path.charAt(1) + ":" + this.path.substring(3));
+        }
         return new File(this.path);
     }
 
@@ -1064,8 +1115,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return toNormalform(excludeAnchor, false);
     }
 
+    /**
+     * Generates a normal form of the URL.
+     * For file: url it normalizes also path delimiter to be '/' (replace possible Windows '\'
+     * @param excludeAnchor
+     * @param removeSessionID
+     * @return
+     */
     public String toNormalform(final boolean excludeAnchor, final boolean removeSessionID) {
-        // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
             return this.protocol + ":" + this.userInfo + "@" + this.host;
@@ -1095,6 +1152,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (!defaultPort) {
             u.append(":");
             u.append(this.port);
+        }
+        if (isFile() && urlPath.indexOf('\\') >= 0) { // normalize windows backslash (important for hash computation)
+            urlPath = urlPath.replace('\\', '/');
         }
         u.append(urlPath);
         String result = u.toString();
@@ -2423,10 +2483,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 System.out.println((jURL == null) ? "jURL rejected input" : "jURL=" + jURL.toString());
                 System.out.println((aURL == null) ? "aURL rejected input" : "aURL=" + aURL.toNormalform(false) + "; host=" + aURL.getHost() + "; path=" + aURL.getPath() + "; file=" + aURL.getFile());
             }
-            
+
             if (aURL != null && jURL != null && jURL.toString().equals(aURL.toNormalform(false))) {
                 System.out.println("jURL == aURL=" + aURL.toNormalform(false) + "; host=" + aURL.getHost() + "; path=" + aURL.getPath() + "; file=" + aURL.getFile());
-            }
+}
 
             // check stability: the normalform of the normalform must be equal to the normalform
             if (aURL != null) try {

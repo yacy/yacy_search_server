@@ -86,8 +86,8 @@ import org.apache.lucene.util.Version;
 
 public final class Fulltext {
 
-    private static final String SOLR_PATH = "solr_5_2"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
-    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10"};
+    private static final String SOLR_PATH = "solr_5_5"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2"};
     
     // class objects
     private final File                    segmentPath;
@@ -226,8 +226,8 @@ public final class Fulltext {
                 for (String name: instance.getCoreNames()) {
                     this.solrInstances.getEmbeddedConnector(name).clear();
                 }
+                this.commit(false);
             }
-            this.commit(false);
             this.solrInstances.clearCaches();
         }
     }
@@ -272,7 +272,9 @@ public final class Fulltext {
     public void close() {
         try {
             this.solrInstances.close();
-        } catch (Throwable e) {}
+        } catch (Throwable e) {
+        	ConcurrentLog.logException(e);
+        }
     }
     
     private long lastCommit = 0;
@@ -283,22 +285,33 @@ public final class Fulltext {
         getDefaultConnector().commit(softCommit);
         if (this.writeWebgraph) getWebgraphConnector().commit(softCommit);
     }
-    
+
+    /**
+     * Loads the meta data stored in the embedded solr index for the url referenced
+     * by the WordReference.
+     * The WordReference and the YaCy score (element.weight()) become part (and
+     * are accessible) of the returned document.
+     * If the no document with url.hash = solrdocument.id is found in the embedded
+     * Solr index null is return.
+     * 
+     * @param element rwi wordreference
+     * @return URIMetadataNode (solrdocument) with all fields stored in embedded solr index
+     */
     public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
         if (element == null) return null;
         WordReferenceVars wre = element.getElement();        
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
-        float score = element.getWeight();
+        long score = element.getWeight();
         URIMetadataNode node = getMetadata(wre.urlhash(), wre, score);
         return node;
     }
 
     public URIMetadataNode getMetadata(final byte[] urlHash) {
         if (urlHash == null) return null;
-        return getMetadata(urlHash, null, 0.0f);
+        return getMetadata(urlHash, null, 0L);
     }
     
-    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final float score) {
+    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long score) {
         String u = ASCII.String(urlHash);
         
         // get the metadata from Solr
@@ -577,7 +590,7 @@ public final class Fulltext {
         EmbeddedInstance esc = this.solrInstances.getEmbedded();
         File storagePath = esc.getContainerPath();
         synchronized (this.solrInstances) {
-            this.disconnectLocalSolr();
+            // this.disconnectLocalSolr(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances.close();
             try {
                 ZIPReader.unzip(solrDumpZipFile, storagePath);
@@ -610,7 +623,7 @@ public final class Fulltext {
     public void rebootSolr() {
         synchronized (this.solrInstances) {
             this.disconnectLocalSolr();
-            this.solrInstances.close();
+            // this.solrInstances.close(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances = new InstanceMirror();
             try {
                 this.connectLocalSolr();

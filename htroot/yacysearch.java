@@ -28,6 +28,9 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -852,7 +855,14 @@ public class yacysearch {
         }
         prop.put("focus", focus ? 1 : 0); // focus search field
         prop.put("searchagain", global ? "1" : "0");
-        prop.putHTML("former", originalquerystring.replaceAll(Segment.catchallString, "*"));
+        String former = originalquerystring.replaceAll(Segment.catchallString, "*");
+        prop.putHTML("former", former);
+        try {
+			prop.put("formerEncoded", URLEncoder.encode(former, StandardCharsets.UTF_8.name()));
+		} catch (UnsupportedEncodingException e) {
+			ConcurrentLog.warn("LOCAL_SEARCH", "Unsupported UTF-8 encoding!");
+			prop.put("formerEncoded", former);
+		}
         prop.put("count", itemsPerPage);
         prop.put("offset", startRecord);
         prop.put("resource", global ? "global" : "local");
@@ -876,5 +886,9 @@ public class yacysearch {
 
         // return rewrite properties
         return prop;
+    }
+    
+    public static void main(String args[]) throws UnsupportedEncodingException {
+    	System.out.println(URLEncoder.encode("aao?+ bbibu", StandardCharsets.UTF_8.name()));
     }
 }

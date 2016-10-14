@@ -60,10 +60,11 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     public final byte[] urlHash;
     private String hostHash = null;
     private final char type;
-    private int hitcount, llocal, lother, phrasesintext,
-               posinphrase, posofphrase,
-               urlcomps, urllength,
-               wordsintext, wordsintitle;
+    private int hitcount, // how often appears this word in the text
+            llocal, lother, phrasesintext,
+            posinphrase, posofphrase,
+            urlcomps, urllength,
+            wordsintext, wordsintitle;
     private int virtualAge;
     private final Queue<Integer> positions;
     private double termFrequency;
@@ -184,17 +185,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return c;
     }
 
-    public void join(final WordReferenceVars v) {
-        // combine the distance
-        this.positions.addAll(v.positions);
-        this.posinphrase = (this.posofphrase == v.posofphrase) ? Math.min(this.posinphrase, v.posinphrase) : 0;
-        this.posofphrase = Math.min(this.posofphrase, v.posofphrase);
-
-        // combine term frequency
-        this.wordsintext = this.wordsintext + v.wordsintext;
-        this.termFrequency = this.termFrequency + v.termFrequency;
-    }
-
     @Override
     public Bitfield flags() {
         return this.flags;
@@ -210,6 +200,10 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return this.type;
     }
 
+    /**
+     * How often appears this word in the text
+     * @return
+     */
     @Override
     public int hitcount() {
         return this.hitcount;
@@ -259,7 +253,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 this.hitcount,      // how often appears this word in the text
                 this.wordsintext,   // total number of words
                 this.phrasesintext, // total number of phrases
-                this.positions.isEmpty() ? 1 : this.positions.iterator().next(), // position of word in all words
+                this.positions.isEmpty() ? 0 : minposition(), // position of word in all words (WordReferenceRow stores first position in text, minpos also important for joined references)
                 this.posinphrase,   // position of word in its phrase
                 this.posofphrase,   // number of the phrase where word appears
                 this.lastModified,  // last-modified time of the document where word appears
@@ -375,19 +369,39 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.termFrequency < (d = other.termFrequency)) this.termFrequency = d;
     }
 
+    /**
+     * joins two entries into one entry
+     *
+     * Main usage is on multi word searches to combine the position values for distance ranking,
+     * A Join is valid for the same url.
+     * @param r WordReference
+     */
     @Override
     public void join(final Reference r) {
-        // joins two entries into one entry
 
         // combine the distance
         final WordReference oe = (WordReference) r;
-        for (final Integer i: r.positions()) this.positions.add(i);
-        this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
-        this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
+
+        this.positions.addAll(oe.positions());
+        
+        // join phrase
+        // this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
+        // this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
+        final int oePosofphrase = oe.posofphrase();
+        if (this.posofphrase == oePosofphrase) {
+            this.posinphrase = Math.min(this.posinphrase, oe.posinphrase());
+        } else if (this.posofphrase > oePosofphrase) {
+            this.posofphrase = oePosofphrase; // choose min posofphrase
+            this.posinphrase = oe.posinphrase(); // with corresponding posinphrase
+        }
 
         // combine term frequency
         this.termFrequency = this.termFrequency + oe.termFrequency();
-        this.wordsintext = this.wordsintext + oe.wordsintext();
+
+        this.wordsintext = Math.max(this.wordsintext, oe.wordsintext()); // as it is same url asume the word count to be the max
+        this.wordsintitle = Math.max(this.wordsintitle, oe.wordsintitle());
+        this.phrasesintext = Math.max(this.phrasesintext, oe.phrasesintext());
+        this.hitcount = Math.max(this.hitcount, oe.hitcount());
     }
 
     @Override

@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
 <title>YaCy '#[clientname]#': Crawler</title>
 #%env/templates/metas.template%# 
@@ -28,13 +28,14 @@
 <fieldset id="queues" style="width:210px;float:left;">
 <legend>Queues</legend>
       <table border="0" class="watchCrawler">
-        <tbody>
+      	<thead>
           <tr class="TableHeader"> 
             <th width="120">Queue<br/>&nbsp;</th>
             <th width="60">Size<br/>&nbsp;</th>
-            <th width="30"><span class="glyphicon glyphicon-wrench"></span>
-</th>
+            <th width="30"><span class="glyphicon glyphicon-wrench"></span></th>
           </tr>
+		</thead>
+        <tbody>
           <tr class="TableCellLight"> 
             <td align="left"><a href="IndexCreateQueues_p.html?stack=LOCAL">Local Crawler</a></td>
             <td align="right"><span id="localcrawlerqueuesize">#[localCrawlSize]#</span></td>
@@ -79,7 +80,7 @@
         </tbody>
       </table>
       #(terminate-button)#::
-      <form action="/Crawler_p.html" method="get" role="form">
+      <form action="/Crawler_p.html" method="get">
             <input type="hidden" name="queues_terminate_all" value="" />
             <button type="submit" class="btn btn-danger" onclick="return confirm('Confirm Termination of All Crawls')"><span class="glyphicon glyphicon-remove-circle"></span> Terminate All</button>
       </form>
@@ -88,12 +89,14 @@
 <fieldset id="indexsize" style="width:240px;float:left;">
 <legend>Index Size</legend>
       <table border="0" class="watchCrawler">
-        <tbody>
+      	<thead>
           <tr class="TableHeader"> 
             <th width="130">Database<br/>&nbsp;</th>
             <th width="50">Entries<br/>&nbsp;</th>
             <th width="40">Seg-<br/>ments</th>
           </tr>
+		</thead>
+        <tbody>
           <tr class="TableCellLight"> 
             <td align="left">Documents<br/><a href="#[urlpublictextSolrURL]#">solr search api</a></td>
             <td align="right"><span id="urlpublictextSize">#[urlpublictextSize]#</span></td>
@@ -121,11 +124,13 @@
 <legend>Progress</legend>
       <form action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
       <table border="0" class="watchCrawler">
-        <tbody>
+      	<thead>
           <tr class="TableHeader"> 
             <th width="160">Indicator<br/>&nbsp;</th>
             <th width="300" colspan="4">Level<br/>&nbsp;</th>
           </tr>
+		</thead>
+        <tbody>
           <tr class="TableCellLight"> 
             <td align="left">Speed / PPM<br/>(Pages Per Minute)</td>
             <td align="left" colspan="4">
@@ -219,33 +224,39 @@ window.setInterval("setTableSize()", 1000);
 <!-- crawl profile list -->
 #(crawlProfilesShow)#::
 <fieldset>
-    <legend>Running Crawls (#[count]#)</legend> 
+    <legend id="runningCrawlsLegend">Running Crawls (#[count]#)</legend> 
 <table width="96%">
 <tr><td>
-  <table border="0" summary="A list of crawl profiles and their current settings.">
+  <table border="0" summary="A list of crawl profiles and their current settings." id="crawlProfiles">
     <colgroup>
-    <col width="16" />
-    <col width="140"/>
+    	<col width="16" />
+    	<col width="140"/>
     </colgroup>
-    <tr class="TableHeader">
-      <td><strong>Name</strong></td>
-      #(debug)#::<td><strong>Count</strong></td>#(/debug)#
-      <td><strong>Status</strong></td>
-    </tr>
+    <thead>
+    	<tr class="TableHeader">
+      		<th><strong>Name</strong></th>
+      		#(debug)#::<th id="headerDebug"><strong>Count</strong></th>#(/debug)#
+      		<th><strong>Status</strong></th>
+    	</tr>
+    </thead>
+    <tbody>
     #{list}# 
-    <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
-      <td>#[name]#</td>
-      #(debug)#::<td>#[count]#</td>#(/debug)#
-      <td>#(terminateButton)#::
-        <div style="text-decoration:blink;float:left;">Running</div>
-        <form style="float:left;" action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8"><div>
-        <input type="hidden" name="handle" value="#[handle]#" />
-        <input type="submit" name="terminate" value="Terminate" class="btn btn-danger btn-xs"/>
-        </div></form>
-        #(/terminateButton)#
-      </td>
-    </tr>
-    #{/list}# 
+    	<tr class="TableCell#(dark)#Light::Dark#(/dark)#" id="#[handle]#">
+      		<td>#[name]#</td>
+      		#(debug)#::<td>#[count]#</td>#(/debug)#
+      		<td id="#[handle]#_status_cell">#(terminateButton)#::
+        		<div id="#[handle]#_status" style="text-decoration:blink;float:left;">Running</div>
+        		<form id="#[handle]#_terminate" style="float:left;" action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
+        			<div>
+        				<input type="hidden" name="handle" value="#[handle]#" />
+        				<input type="submit" name="terminate" value="Terminate" class="btn btn-danger btn-xs"/>
+        			</div>
+        		</form>
+        	#(/terminateButton)#
+      		</td>
+    	</tr>
+    #{/list}#
+    </tbody> 
   </table>
 </td>
 #(linkstructure)#

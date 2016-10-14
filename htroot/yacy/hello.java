@@ -57,12 +57,13 @@ public final class hello {
         final serverObjects prop = new serverObjects();
         final long start = System.currentTimeMillis();
         prop.put("message", "none");
-        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // read an artificial header addendum
         //ConcurrentLog.info("**hello-DEBUG**", "client request from = " + clientip);
         final InetAddress ias = Domains.dnsResolve(clientip);
         long time = System.currentTimeMillis();
         final long time_dnsResolve = System.currentTimeMillis() - time;
         if (ias == null) {
+            if (clientip == null) clientip = "<unknown>";
             Network.log.info("hello/server: failed contacting seed; clientip not resolvable (clientip=" + clientip + ", time_dnsResolve=" + time_dnsResolve + ")");
             prop.put("message", "cannot resolve your IP from your reported location " + clientip);
             return prop;

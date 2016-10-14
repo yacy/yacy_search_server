@@ -42,7 +42,6 @@ for the JavaScript code in this page.
 
   <script src="/env/bootstrap/js/jquery.min.js"></script>
   <script src="/env/bootstrap/js/bootstrap.min.js"></script>
-  <script src="/env/bootstrap/js/docs.min.js"></script>
   <script src="/env/bootstrap/js/bootstrap-switch.min.js"></script>
   
   <!-- Custom styles for this template, i.e. navigation (move this to base.css) -->

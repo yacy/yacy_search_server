@@ -213,6 +213,7 @@ public final class TemplateEngine {
         byte[] replacement;
         int bb;
         final ByteBuffer structure = new ByteBuffer();
+        final String clientbrowserlang = pattern.get("clientlanguage"); // preferred language or null (used for include files)
         while (transferUntil(pis, out, hashChar)) {
             bb = pis.read();
             keyStream.reset();
@@ -416,7 +417,7 @@ public final class TemplateEngine {
                         BufferedReader br = null;
                         try{
                             //br = new BufferedReader(new InputStreamReader(new FileInputStream( filename ))); //Simple Include
-                            br = new BufferedReader( new InputStreamReader(new FileInputStream( HTTPDFileHandler.getLocalizedFile(UTF8.String(filename))), StandardCharsets.UTF_8) ); //YaCy (with Locales)
+                            br = new BufferedReader( new InputStreamReader(new FileInputStream( HTTPDFileHandler.getLocalizedFile(UTF8.String(filename), clientbrowserlang)), StandardCharsets.UTF_8) ); //YaCy (with Locales)
                             //Read the Include
                             String line = "";
                             while ((line = br.readLine()) != null) {

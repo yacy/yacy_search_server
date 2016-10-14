@@ -81,7 +81,7 @@ public class FileLoader {
             StringBuilder content = FTPClient.dirhtml(u, null, null, null, list, true);
 
             ResponseHeader responseHeader = new ResponseHeader(200);
-            responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
+            responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date(url.lastModified())));
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
             final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
             Response response = new Response(

@@ -189,8 +189,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
         templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
     }
-
-
+    
     /* ------------------------------------------------------------ */
     protected boolean getInitBoolean(String name, boolean dft) {
         String value = getInitParameter(name);
@@ -238,7 +237,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return (reqRanges != null && reqRanges.hasMoreElements());
     }
     
-    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -291,7 +290,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             if (!hasClass && (resource == null || !resource.exists()) && !pathInContext.contains("..")) {
                 // try to get this in the alternative htDocsPath
-                resource = Resource.newResource(new File(HTTPDFileHandler.htDocsPath, pathInContext));
+                resource = Resource.newResource(new File(_htDocsPath, pathInContext));
             }
             
             if (ConcurrentLog.isFine("FILEHANDLER")) {
@@ -515,8 +514,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
             out = new WriterOutputStream(response.getWriter());
         }
 
-        response.setDateHeader(HeaderFramework.EXPIRES, System.currentTimeMillis() + 600000); // expires ten minutes in the future
-        response.setDateHeader(HeaderFramework.LAST_MODIFIED, resource.lastModified());
+        // remove the last-modified field since caching otherwise does not work
+        /*
+           https://www.ietf.org/rfc/rfc2616.txt
+           "if the response does have a Last-Modified time, the heuristic
+           expiration value SHOULD be no more than some fraction of the interval
+           since that time. A typical setting of this fraction might be 10%."
+        */
+        if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+            response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
+        }
+
+        // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
+        response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
         
         if (reqRanges == null || !reqRanges.hasMoreElements() || content_length < 0) {
             //  if there were no ranges, send entire entity
@@ -638,12 +648,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setContentType(extensionmime);
             }
         }
-
+        /*
+         * DO NOT enable this again, removal of the LAST_MODIFIED field enables caching
         long lml = resource.lastModified();
         if (lml >= 0) {
             response.setDateHeader(HeaderFramework.LAST_MODIFIED, lml);
         }
-
+        */
+        
         if (count != -1) {
             if (count < Integer.MAX_VALUE) {
                 response.setContentLength((int) count);
@@ -687,6 +699,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
+        /* Add request scheme (http or https) to allow templates to know wether original request is http or https 
+         * (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
+        legacyRequestHeader.put(HeaderFramework.X_YACY_REQUEST_SCHEME, request.getScheme());
         Switchboard sb = Switchboard.getSwitchboard();
         if (legacyRequestHeader.containsKey(RequestHeader.AUTHORIZATION)) {
             if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(request.getAuthType())) {
@@ -797,18 +812,31 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected void handleTemplate(String target,  HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Switchboard sb = Switchboard.getSwitchboard();
 
-        String localeSelection = sb.getConfig("locale.language", "default");
+        String localeSelection = sb.getConfig("locale.language", "browser");
+        if (localeSelection.endsWith("browser")) {
+            String lng = request.getLocale().getLanguage();
+            if (lng.equalsIgnoreCase("en")) { // because en is handled as "default" in localizer
+                localeSelection = "default";
+            } else {
+                localeSelection = lng;
+            }
+        }
         File targetFile = getLocalizedFile(target, localeSelection);
         File targetClass = rewriteClassFile(_resourceBase.addPath(target).getFile());
         String targetExt = target.substring(target.lastIndexOf('.') + 1);
 
         long now = System.currentTimeMillis();
-        response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
         if (target.endsWith(".css")) {
+            response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
             response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour (which is still often, others use 1 week, month or year)
         } else if (target.endsWith(".png")) {
-            response.setDateHeader(HeaderFramework.EXPIRES, now + 60000); // expires in 1 minute (reduce heavy image creation load)
+            // expires in 1 minute (reduce heavy image creation load)
+            if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+                response.getHeaders(HeaderFramework.LAST_MODIFIED).clear();
+            }
+            response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(60));
         } else {
+            response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
             response.setDateHeader(HeaderFramework.EXPIRES, now); // expires now
         }
         
@@ -902,6 +930,16 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
 
+                boolean staticImage = target.equals("/ViewImage.png");
+               
+                if (staticImage) {
+                    if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+                        response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
+                    }
+
+                    // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
+                    response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
+                }
                 final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
@@ -988,6 +1026,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("navigation-advanced_authorized", authorized ? 1 : 0);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+                templatePatterns.put(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
+                templatePatterns.put("clientlanguage", localeSelection);
                 
                 String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
 
@@ -1047,8 +1087,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
 			}
 		}
 	}
-    
-    private static String appendPath(String proplist, String path) {
+
+    /**
+     * Append a path string to comma separated string of pathes if not already
+     * contained in the proplist string
+     * @param proplist comma separated string of pathes
+     * @param path path to be appended
+     * @return comma separated string of pathes including param path
+     */
+    private String appendPath(String proplist, String path) {
         if (proplist.length() == 0) return path;
         if (proplist.contains(path)) return proplist;
         return proplist + "," + path;

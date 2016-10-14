@@ -81,7 +81,7 @@ public class ConfigLanguage_p {
                  * read from the language directory. This is very important to prevent
                  * directory traversal attacks!
                  */
-                if (langFiles.contains(selectedLanguage) || selectedLanguage.startsWith("default")) {
+                if (langFiles.contains(selectedLanguage) || selectedLanguage.startsWith("default") || selectedLanguage.startsWith("browser")) {
                     new TranslatorXliff().changeLang(env, langPath, selectedLanguage);
                 }
 
@@ -142,27 +142,28 @@ public class ConfigLanguage_p {
         final Map<String, String> langNames = Translator.langMap(env);
 
         //virtual entry
-        prop.put("langlist_0_file", "default");
-        prop.put("langlist_0_name", ((langNames.get("default") == null) ? "default" : langNames.get("default")));
+        prop.put("langlist_0_file", "browser");
+        prop.put("langlist_0_name", ((langNames.get("browser") == null) ? "browser" : langNames.get("browser")));
         prop.put("langlist_0_selected", "selected=\"selected\"");
+        prop.put("langlist_1_file", "default");
+        prop.put("langlist_1_name", ((langNames.get("default") == null) ? "default" : langNames.get("default")));
 
-        int count = 0;
-        for (final String langFile : langFiles) {
-            //+1 because of the virtual entry "default" at top
+        int count = 2; //+2 because of the virtual entry "browser" and "default" at top
+        for (final String langFile : langFiles) {  
             final String langKey = langFile.substring(0, langFile.length() -4);
             final String langName = langNames.get(langKey);
-            prop.put("langlist_" + (count + 1) + "_file", langFile);
-            prop.put("langlist_" + (count + 1) + "_name", ((langName == null) ? langKey : langName));
+            prop.put("langlist_" + (count) + "_file", langFile);
+            prop.put("langlist_" + (count) + "_name", ((langName == null) ? langKey : langName));
 
             if(env.getConfig("locale.language", "default").equals(langKey)) {
-                prop.put("langlist_" + (count + 1) + "_selected", "selected=\"selected\"");
+                prop.put("langlist_" + (count) + "_selected", "selected=\"selected\"");
                 prop.put("langlist_0_selected", " "); // reset Default
             } else {
-                prop.put("langlist_" + (count + 1) + "_selected", " ");
+                prop.put("langlist_" + (count) + "_selected", " ");
             }
             count++;
         }
-        prop.put("langlist", (count + 1));
+        prop.put("langlist", (count));
 
         //is done by Translationtemplate
         //langName = (String) langNames.get(env.getConfig("locale.language", "default"));

@@ -56,7 +56,7 @@ public class Tokenizer {
     public  static final int flag_cat_hasapp        = 23; // the page refers to (at least one) application file
 
     //private Properties analysis;
-    protected final Map<String, Word> words; // a string (the words) to (indexWord) - relation
+    protected final Map<String, Word> words; // a string (the words) to (indexWord) - relation (key: words are lowercase)
     private final Set<String> synonyms; // a set of synonyms to the words
     protected final Map<String, Set<Tagging.Metatag>> tags = new HashMap<String, Set<Tagging.Metatag>>(); // a set of tags, discovered from Autotagging
     
@@ -68,17 +68,13 @@ public class Tokenizer {
         this.words = new TreeMap<String, Word>(NaturalOrder.naturalComparator);
         this.synonyms = new LinkedHashSet<String>();
         assert text != null;
-        final Set<String> currsentwords = new HashSet<String>();
         String[] wordcache = new String[LibraryProvider.autotagging.getMaxWordsInTerm() - 1];
         for (int i = 0; i < wordcache.length; i++) wordcache[i] = "";
         String k;
         Tagging.Metatag tag;
         int wordlen;
-        int wordHandle;
-        int wordHandleCount = 0;
-        //final int sentenceHandleCount = 0;
         int allwordcounter = 0;
-        final int allsentencecounter = 0;
+        int allsentencecounter = 0;
         int wordInSentenceCounter = 1;
         boolean comb_indexof = false, last_last = false, last_index = false;
         //final Map<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
@@ -89,6 +85,14 @@ public class Tokenizer {
         try {
             while (wordenum.hasMoreElements()) {
                 String word = wordenum.nextElement().toString().toLowerCase(Locale.ENGLISH);
+                // handle punktuation (start new sentence)
+                if (word.length() == 1 && SentenceReader.punctuation(word.charAt(0))) {
+                    // store sentence
+                    if (wordInSentenceCounter > 1) // if no word in sentence repeated punktuation ".....", don't count as sentence
+                        allsentencecounter++;
+                    wordInSentenceCounter = 1;
+                    continue;
+                }
                 if (word.length() < wordminsize) continue;
 
                 // get tags from autotagging
@@ -144,40 +148,29 @@ public class Tokenizer {
                 System.arraycopy(wordcache, 1, wordcache, 0, wordcache.length - 1);
                 wordcache[wordcache.length - 1] = word;
 
-                // distinguish punctuation and words
-                wordlen = word.length();
-                if (wordlen == 1 && SentenceReader.punctuation(word.charAt(0))) { // TODO: wordlen == 1 never true (see earlier if < wordminsize )
-                    // store sentence
-                    currsentwords.clear();
-                    wordInSentenceCounter = 1;
-                } else {
-                    // check index.of detection
-                    if (last_last && comb_indexof && word.equals("modified")) {
-                        this.RESULT_FLAGS.set(flag_cat_indexof, true);
-                        wordenum.pre(true); // parse lines as they come with CRLF
-                    }
-                    if (last_index && (wordminsize > 2 || word.equals("of"))) comb_indexof = true;
-                    last_last = word.equals("last");
-                    last_index = word.equals("index");
-
-                    // store word
-                    allwordcounter++;
-                    currsentwords.add(word);
-                    Word wsp = this.words.get(word);
-                    if (wsp != null) {
-                        // word already exists
-                        wordHandle = wsp.posInText;
-                        wsp.inc();
-                    } else {
-                        // word does not yet exist, create new word entry
-                        wordHandle = wordHandleCount++;
-                        wsp = new Word(wordHandle, wordInSentenceCounter, /* sentences.size() + */ 100);
-                        wsp.flags = this.RESULT_FLAGS.clone();
-                        this.words.put(word.toLowerCase(), wsp);
-                    }
-                    // we now have the unique handle of the word, put it into the sentence:
-                    wordInSentenceCounter++;
+                // check index.of detection
+                if (last_last && comb_indexof && word.equals("modified")) {
+                    this.RESULT_FLAGS.set(flag_cat_indexof, true);
+                    wordenum.pre(true); // parse lines as they come with CRLF
                 }
+                if (last_index && (wordminsize > 2 || word.equals("of"))) comb_indexof = true;
+                last_last = word.equals("last");
+                last_index = word.equals("index");
+
+                // store word
+                allwordcounter++;
+                Word wsp = this.words.get(word);
+                if (wsp != null) {
+                    // word already exists
+                    wsp.inc();
+                } else {
+                    // word does not yet exist, create new word entry
+                    wsp = new Word(allwordcounter, wordInSentenceCounter, allsentencecounter + 100); // nomal sentence start at 100 !
+                    wsp.flags = this.RESULT_FLAGS.clone();
+                    this.words.put(word, wsp);
+                }
+                // we now have the unique handle of the word, put it into the sentence:
+                wordInSentenceCounter++;
             }
         } finally {
             wordenum.close();
@@ -218,9 +211,13 @@ public class Tokenizer {
         
         // store result
         this.RESULT_NUMB_WORDS = allwordcounter;
-        this.RESULT_NUMB_SENTENCES = allsentencecounter;
+        // if text doesn't end with punktuation but has words after last found sentence, inc sentence count for trailing text.
+        this.RESULT_NUMB_SENTENCES = allsentencecounter + (wordInSentenceCounter > 1 ? 1 : 0);
     }
-    
+
+    /**
+     * @return returns the words as word/indexWord relation map. All words are lowercase.
+     */
     public Map<String, Word> words() {
         // returns the words as word/indexWord relation map
         return this.words;

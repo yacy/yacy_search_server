@@ -37,7 +37,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.geo.Locations;
 import net.yacy.cora.storage.Files;

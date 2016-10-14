@@ -96,11 +96,18 @@ public class InstanceMirror {
         this.remoteSolrInstance = null;
     }
 
+    /**
+     * Close this instance and it's connectors and cores
+     */
     public synchronized void close() {
         Set<SolrConnector> connectors = new HashSet<SolrConnector>();
         connectors.addAll(this.mirrorConnectorCache.values());
         for (SolrConnector connector: connectors) connector.close();
         this.mirrorConnectorCache.clear();
+        // solr core of embedded instance only closed by explicite closing the instance.
+        // on mode switches a reopen of a core fails if instance did not close the core  see http://mantis.tokeek.de/view.php?id=686 which this change solves.
+        // (and a other alternative to deal with the issue)
+        disconnectEmbedded();
     }
 
     public String getDefaultCoreName() {

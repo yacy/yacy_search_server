@@ -416,12 +416,12 @@ public class QueryGoal {
         for (String s: include_strings) {
             if (Segment.catchallString.equals(s)) continue;
             if (wc > 0) w.append(" AND ");
-            w.append(dq).append(s).append(dq);
+            if (s.indexOf('~') >= 0 || s.indexOf('*') >= 0 || s.indexOf('?') >= 0) w.append(s); else w.append(dq).append(s).append(dq);
             wc++;
         }
         for (String s: exclude_strings){
             if (wc > 0) w.append(" AND -");
-            w.append(dq).append(s).append(dq);
+            if (s.indexOf('~') >= 0 || s.indexOf('*') >= 0 || s.indexOf('?') >= 0) w.append(s); else w.append(dq).append(s).append(dq);
             wc++;
         }
         if (wc > 1) {w.insert(0, '('); w.append(')');}

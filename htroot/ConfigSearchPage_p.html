@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
   <title>YaCy '#[clientname]#': Search Page</title>
   #%env/templates/metas.template%#
@@ -40,7 +40,7 @@
                         <span class="icon-bar"></span>
                       </button>
                       <div class="forceNoExternalIcon navbar-brand" id="navbar-brand" href="#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
-                                  <img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle">&nbsp;<span id="greeting"></span>
+                                  <img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle"/>&nbsp;<span id="greeting"></span>
                       </div>
                     </div>
                     <div class="navbar-collapse collapse">
@@ -49,7 +49,7 @@
                           <a href="#" data-toggle="dropdown" class="dropdown-toggle">Search Interfaces<b class="caret"></b></a>
                         </li>
                         <li id="header_help" class="dropdown">
-                                      <a href="#" data-toggle="dropdown" class="dropdown-toggle"><span class="glyphicon glyphicon-question-sign"></span></a>
+                          <a href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button"><span class="glyphicon glyphicon-question-sign"></span></a>
                         </li>
                         <li id="header_administration">
                           <button class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-cog"></span> Administration &raquo;</button>
@@ -73,16 +73,16 @@
                         <td>
                           <div style="padding-left:15px;  padding-bottom:10px; width: 100%;">
                             <div id="tagcloud" style="text-align:justify">
-                              <a href="#" target="LayouTest" rel="1" style="text-decoration: none;">Tag</a>
-                              <a href="#" target="LayouTest" rel="2" style="text-decoration: none;">Topics</a>
-                              <a href="#" target="LayouTest" rel="3" style="text-decoration: none;">Cloud</a>
-                              <a href="#" target="LayouTest" rel="4" style="text-decoration: none;">Topics</a>
-                              <a href="#" target="LayouTest" rel="6" style="text-decoration: none;">Cloud</a>
-                              <a href="#" target="LayouTest" rel="5" style="text-decoration: none;">Tag</a>
-                              <a href="#" target="LayouTest" rel="4" style="text-decoration: none;">Cloud</a>
-                              <a href="#" target="LayouTest" rel="3" style="text-decoration: none;">Topics</a>
-                              <a href="#" target="LayouTest" rel="2" style="text-decoration: none;">Tag</a>
-                              <a href="#" target="LayouTest" rel="1" style="text-decoration: none;">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none;">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none;">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none;">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none;">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none;">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none;">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none;">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none;">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none;">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none;">Cloud</a>
                             </div>
                             <script type="text/javascript" charset="utf-8">
           $.fn.tagcloud.defaults = {
@@ -244,7 +244,7 @@ var solr= $.getJSON("/solr/collection1/select?q=*:*&defType=edismax&start=0&rows
                           <td>&nbsp;|&nbsp;<a href="yacysearch.html" target="LayouTest">Pictures</a></td>
                           <td>&nbsp;|&nbsp;<a href="CacheResource_p.html" target="LayouTest">Cache</a></td>
                           <td>&nbsp;|&nbsp;<a href="proxy.html" target="LayouTest">Augmented Browsing</a></td>
-                          <td>&nbsp;|&nbsp;<a href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" /></a></td>
+                          <td>&nbsp;|&nbsp;<a href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
                           <td>&nbsp;|&nbsp;<a href="yacysearch.html" target="LayouTest">Snapshots</a></td>
                         </tr>
                         <tr>

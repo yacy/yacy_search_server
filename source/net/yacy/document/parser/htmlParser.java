@@ -34,9 +34,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.Set;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
@@ -60,21 +58,29 @@ public class htmlParser extends AbstractParser implements Parser {
 
     private static final int maxLinks = 10000;
 
-    public final static String[] htmlExtensions = new String[]{
-        "htm","html","shtml","shtm","stm","xhtml","phtml","phtm",
-        "tpl","php","php2","php3","php4","php5","cfm","asp","aspx","tex","txt","msg"
-        }; 
-    
-    public final static Set<String> htmlExtensionsSet;
-    
-    static {
-        htmlExtensionsSet = new HashSet<>(htmlExtensions.length);
-        for (String ext: htmlExtensions) htmlExtensionsSet.add(ext);
-    }
-    
     public htmlParser() {
         super("Streaming HTML Parser");
-        this.SUPPORTED_EXTENSIONS.addAll(htmlExtensionsSet);
+        this.SUPPORTED_EXTENSIONS.add("htm");
+        this.SUPPORTED_EXTENSIONS.add("html");
+        this.SUPPORTED_EXTENSIONS.add("shtml");
+        this.SUPPORTED_EXTENSIONS.add("shtm");
+        this.SUPPORTED_EXTENSIONS.add("stm");
+        this.SUPPORTED_EXTENSIONS.add("xhtml");
+        this.SUPPORTED_EXTENSIONS.add("phtml");
+        this.SUPPORTED_EXTENSIONS.add("phtm");
+        this.SUPPORTED_EXTENSIONS.add("tpl");
+        this.SUPPORTED_EXTENSIONS.add("php");
+        this.SUPPORTED_EXTENSIONS.add("php2");
+        this.SUPPORTED_EXTENSIONS.add("php3");
+        this.SUPPORTED_EXTENSIONS.add("php4");
+        this.SUPPORTED_EXTENSIONS.add("php5");
+        this.SUPPORTED_EXTENSIONS.add("cfm");
+        this.SUPPORTED_EXTENSIONS.add("asp");
+        this.SUPPORTED_EXTENSIONS.add("aspx");
+        this.SUPPORTED_EXTENSIONS.add("tex");
+        this.SUPPORTED_EXTENSIONS.add("txt");
+        this.SUPPORTED_EXTENSIONS.add("msg");
+
         this.SUPPORTED_MIME_TYPES.add("text/html");
         this.SUPPORTED_MIME_TYPES.add("text/xhtml+xml");
         this.SUPPORTED_MIME_TYPES.add("application/xhtml+xml");
@@ -97,7 +103,8 @@ public class htmlParser extends AbstractParser implements Parser {
         try {
             // first get a document from the parsed html
             Charset[] detectedcharsetcontainer = new Charset[]{null};
-            final ContentScraper scraper = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxLinks);
+            scraperObject = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxLinks);
+            ContentScraper scraper = (ContentScraper)scraperObject; // shortcut to access ContentScraper methodes
             // parseToScraper also detects/corrects/sets charset from html content tag
             final Document document = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper);
             Document documentSnapshot = null;
@@ -130,7 +137,7 @@ public class htmlParser extends AbstractParser implements Parser {
      * @param scraper
      * @return
      */
-    private static Document transformScraper(final DigestURL location, final String mimeType, final String charSet, final ContentScraper scraper) {
+    private Document transformScraper(final DigestURL location, final String mimeType, final String charSet, final ContentScraper scraper) {
         final String[] sections = new String[
                  scraper.getHeadlines(1).length +
                  scraper.getHeadlines(2).length +
@@ -150,7 +157,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 location,
                 mimeType,
                 charSet,
-                scraper,
+                this,
                 scraper.getContentLanguages(),
                 scraper.getKeywords(),
                 scraper.getTitles(),
@@ -178,7 +185,7 @@ public class htmlParser extends AbstractParser implements Parser {
         } catch (UnsupportedEncodingException e) {
             sourceStream = new ByteArrayInputStream(UTF8.getBytes(input));
         }
-        ContentScraper scraper;
+        ContentScraper scraper; // for this static methode no need to init local this.scraperObject
         try {
             scraper = parseToScraper(location, documentCharset, vocabularyScraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxLinks);
         } catch (Failure e) {
@@ -242,6 +249,7 @@ public class htmlParser extends AbstractParser implements Parser {
         }
         
         // parsing the content
+        // for this static methode no need to init local this.scraperObject here
         final ContentScraper scraper = new ContentScraper(location, maxLinks, vocabularyScraper, timezoneOffset);
         final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false, Math.max(64, Math.min(4096, sourceStream.available())));
         try {

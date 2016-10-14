@@ -62,56 +62,55 @@ public class QuickCrawlLink_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        // get segment
-        Segment indexSegment = sb.index;
+        int port = sb.getConfigInt("port", 8090);
+
+        // get the http host header
+        if (header.containsKey(HeaderFramework.HOST)) {
+            final String hostSocket = header.get(HeaderFramework.HOST);
+            final int pos = hostSocket.indexOf(':', 0);
+            if (pos != -1) {
+                port = NumberTools.parseIntDecSubstring(hostSocket, pos + 1);
+            }
+        }
+        prop.put("mode_host", Domains.LOCALHOST);
+        prop.put("mode_port", port);
 
         if (post == null) {
             // send back usage example
             prop.put("mode", "0");
-
-            // get the http host header
-            final String hostSocket = header.get(HeaderFramework.CONNECTION_PROP_HOST);
-
-            //String host = hostSocket;
-            int port = 80;
-            final int pos = hostSocket.indexOf(':',0);
-            if (pos != -1) {
-                port = NumberTools.parseIntDecSubstring(hostSocket, pos + 1);
-                //host = hostSocket.substring(0, pos);
-            }
-
-            prop.put("mode_host", Domains.LOCALHOST);
-            prop.put("mode_port", port);
-
             return prop;
         }
-        prop.put("mode", "1");
 
         // get the URL
         String crawlingStart = post.get("url",null);
-        crawlingStart = UTF8.decodeURL(crawlingStart);
-
-        // get the browser title
-        final String title = post.get("title",null);
-
-        // get other parameters if set
-        final String crawlingMustMatch  = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
-        final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
-        final int CrawlingDepth      = post.getInt("crawlingDepth", 0);
-        final boolean crawlingQ      = post.get("crawlingQ", "").equals("on");
-        final boolean followFrames   = post.get("followFrames", "").equals("on");
-        final boolean obeyHtmlRobotsNoindex = post.get("obeyHtmlRobotsNoindex", "").equals("on");
-        final boolean obeyHtmlRobotsNofollow = post.get("obeyHtmlRobotsNofollow", "").equals("on");
-        final boolean indexText      = post.get("indexText", "off").equals("on");
-        final boolean indexMedia     = post.get("indexMedia", "off").equals("on");
-        final boolean storeHTCache   = post.get("storeHTCache", "").equals("on");
-        final boolean remoteIndexing = post.get("crawlOrder", "").equals("on");
-        final String collection      = post.get("collection", "user");
-
-        prop.put("mode_url", (crawlingStart == null) ? "unknown" : crawlingStart);
-        prop.putHTML("mode_title", (title == null) ? "unknown" : title);
 
         if (crawlingStart != null) {
+            prop.put("mode", "1");
+            crawlingStart = UTF8.decodeURL(crawlingStart);
+
+             // get segment
+            Segment indexSegment = sb.index;
+
+            // get the browser title
+            final String title = post.get("title", null);
+
+            // get other parameters if set
+            final String crawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
+            final String crawlingMustNotMatch = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+            final int CrawlingDepth = post.getInt("crawlingDepth", 0);
+            final boolean crawlingQ = post.get("crawlingQ", "").equals("on");
+            final boolean followFrames = post.get("followFrames", "").equals("on");
+            final boolean obeyHtmlRobotsNoindex = post.get("obeyHtmlRobotsNoindex", "").equals("on");
+            final boolean obeyHtmlRobotsNofollow = post.get("obeyHtmlRobotsNofollow", "").equals("on");
+            final boolean indexText = post.get("indexText", "off").equals("on");
+            final boolean indexMedia = post.get("indexMedia", "off").equals("on");
+            final boolean storeHTCache = post.get("storeHTCache", "").equals("on");
+            final boolean remoteIndexing = post.get("crawlOrder", "").equals("on");
+            final String collection = post.get("collection", "user");
+
+            prop.put("mode_url", (crawlingStart == null) ? "unknown" : crawlingStart);
+            prop.putHTML("mode_title", (title == null) ? "unknown" : title);
+
             crawlingStart = crawlingStart.trim();
             try {crawlingStart = new DigestURL(crawlingStart).toNormalform(true);} catch (final MalformedURLException e1) {}
 

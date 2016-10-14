@@ -36,7 +36,7 @@
         <!-- the Solr version used in dependency section for all related dependencies -->
         <solr.version>5.5.2</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.2.17.v20160517</jetty.version>
+        <jetty.version>9.2.18.v20160721</jetty.version>
                 
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
@@ -167,29 +167,6 @@
                 </configuration>
             </plugin>
             
-            <!-- custom plugin to add YaCy release number from local Git clone 
-            sets property <releaseNr>9nnn</releasNr> <DSTAMP>yyyyMMdd</DSTAMP> 
-            ! run sub project in libbuild to install the plugin ! -->
-            <plugin>
-                <groupId>net.yacy</groupId>
-                <artifactId>maven-plugin-gitrevisionnumber</artifactId>
-                <version>1.0</version>
-                <executions>
-                    <execution>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                        <!-- optional parameter to set/change the propertyName 
-                        <configuration> 
-                            <branchPropertyName>branch</branchPropertyName>
-                            <buildNumberPropertyName>releasNr</buildNumberPropertyName> 
-                            <commitDatePropertyName>DSTAMP</commitDatePropertyName> 
-                        </configuration> 
-                        -->
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>templating-maven-plugin</artifactId>
@@ -241,6 +218,55 @@
     </build>
 
     <profiles>
+		<profile>
+			<!-- Active when .git directory is missing -->
+			<id>no-git</id>
+			<activation>
+				<file>
+					<missing>.git</missing>
+				</file>
+			</activation>
+			<properties>
+			    <!-- fallback value consistent with ant build -->
+				<releaseNr>9000</releaseNr>
+			</properties>
+		</profile>
+    	<profile>
+    		<id>git-rev-number</id>
+    		<!-- Active profile when .git folder exists -->
+			<activation>
+				<file>
+					<exists>.git</exists>
+				</file>
+			</activation>
+    		<build>
+    			<plugins>
+            		<!-- custom plugin to add YaCy release number from local Git clone 
+            		sets property <releaseNr>9nnn</releasNr> <DSTAMP>yyyyMMdd</DSTAMP> 
+            		! run sub project in libbuild to install the plugin ! -->
+            		<plugin>
+                		<groupId>net.yacy</groupId>
+                		<artifactId>maven-plugin-gitrevisionnumber</artifactId>
+                		<version>1.0</version>
+                		<executions>
+                    		<execution>
+                        		<phase>initialize</phase>
+                        		<goals>
+                            		<goal>create</goal>
+                        		</goals>
+                        		<!-- optional parameter to set/change the propertyName 
+                        		<configuration> 
+                            		<branchPropertyName>branch</branchPropertyName>
+                            		<buildNumberPropertyName>releasNr</buildNumberPropertyName> 
+                            		<commitDatePropertyName>DSTAMP</commitDatePropertyName> 
+                        		</configuration> 
+                        		-->
+                    		</execution>
+                		</executions>
+            		</plugin>
+    			</plugins>
+    		</build>
+    	</profile>
         <profile>
             <!-- profile to create a release archive -->
             <id>release-profile</id>
@@ -287,7 +313,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>1.3.1</version>
+                        <version>1.4.2</version>
                         <executions>
                             <execution>
                                 <phase>verify</phase>
@@ -297,6 +323,11 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>2.9</version>
+                    </plugin>                    
                 </plugins>
             </build>
             <reporting>
@@ -304,7 +335,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>1.3.1</version>
+                        <version>1.4.2</version>
                    </plugin>
                 </plugins>
             </reporting>
@@ -337,7 +368,8 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.11</version>
+            <version>1.12</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
@@ -466,18 +498,20 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>2.0.2</version>
+            <version>2.0.3</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>3.14</version>
+            <version>3.15</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
-            <version>3.14</version>
+            <version>3.15</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>sax</groupId>
@@ -564,12 +598,7 @@
             <artifactId>slf4j-jdk14</artifactId>
             <version>1.7.21</version>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>pt.tumba</groupId>
-            <artifactId>webcat-swf</artifactId>
-            <version>0.1</version>
-        </dependency>        
+        </dependency>       
         <dependency>
             <groupId>org.bitlet</groupId>
             <artifactId>weupnp</artifactId>
@@ -579,11 +608,6 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>2.11.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.collaborne</groupId>
-            <artifactId>xliff-core-1.2</artifactId>
-            <version>1.1</version>
         </dependency>        
         <dependency>
             <groupId>com.adobe.xmp</groupId>

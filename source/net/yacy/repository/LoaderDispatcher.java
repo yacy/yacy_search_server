@@ -331,6 +331,8 @@ public final class LoaderDispatcher {
                     }
                 }
                 LoaderDispatcher.log.info("cache hit/stale for: " + url.toNormalform(true));
+                /* Cached content can not be used : we return a null response to ensure callers will detect no cache response is available */
+                response = null;
             } else if (cachedResponse != null) {
                 LoaderDispatcher.log.warn("HTCACHE contained response header, but not content for url " + url.toNormalform(true));
             }

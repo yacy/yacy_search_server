@@ -29,6 +29,7 @@
 
 import java.util.Iterator;
 import java.util.Map;
+import net.yacy.cora.protocol.RequestHeader;
 
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.CommonPattern;
@@ -38,7 +39,7 @@ import net.yacy.server.servletProperties;
 
 public class CookieTest_p {
 
-    public static serverObjects respond(final ResponseHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
 
         // case if no values are requested
@@ -83,8 +84,14 @@ public class CookieTest_p {
             //header.
        }
 
-        prop.put("cookiesout", "1");
-        prop.putHTML("cookiesout_0_string", header.getHeaderCookies().replaceAll(";",";<br />"));
+        //prop.put("cookiesout", "1");
+        String[] cookielst = header.getHeaderCookies().split(";");
+        int i = 0;
+        for (String singleco : cookielst) {
+            prop.putHTML("cookiesout_" + i + "_string", singleco + ";"); // output with ";" for compatiblity with cookiesin
+            i++;
+        }
+        prop.put("cookiesout", i);
         return prop;
     }
 }

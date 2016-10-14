@@ -261,12 +261,33 @@ public class NewsDB {
             removeStandards();
         }
 
+        /**
+         * Create a new news record and assign data for the unique message id.
+         * This is composed of Date-String + PeerHash. Date string is with precision
+         * seconds.
+         *
+         * To allow programatically to create more than one message per second
+         * a counter which is added to the date part can be given as attritues
+         * with key "#"
+         * @param mySeed
+         * @param category
+         * @param attributes
+         */
         private Record(final Seed mySeed, final String category, final Map<String, String> attributes) {
             if (category.length() > NewsDB.categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + NewsDB.categoryStringLength + ")");
             if (attributes.toString().length() > NewsDB.this.attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + NewsDB.this.attributesMaxLength + ")");
             this.attributes = attributes;
             this.received = null;
-            this.created = new Date();
+            // workaround for publishing multiple messages. Message id must be unique and is generated date-sting(yyyyMMddhhmmss)+peerhash
+            // publishing programatically 2 messages creates same id (because created in the same second). To work around this, if map contains
+            // key="#" use value as message counter and put this conter as offset in seconds to the id time part  20161231123001 .. 20161231123002 ..
+            if (attributes.containsKey("#")) {
+                int cnt = Integer.parseInt(attributes.get("#")); // get number used as counter/offset added as second
+                // add (counter * millisecond)
+                this.created = new Date(System.currentTimeMillis() + (cnt * 1000));
+            } else {
+                this.created = new Date();
+            }
             this.category = category;
             this.distributed = 0;
             this.originator = mySeed.hash;
@@ -295,6 +316,7 @@ public class NewsDB {
             this.attributes.remove("cre");
             this.attributes.remove("rec");
             this.attributes.remove("dis");
+            this.attributes.remove("#"); // special attribute for id offset (see Record(mySeed... )
         }
 
         @Override

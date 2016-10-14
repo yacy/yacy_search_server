@@ -93,13 +93,13 @@ public class Document {
     private final Set<String> languages;
     private boolean indexingDenied;
     private final double lon, lat;
-    private final Object parserObject; // the source object that was used to create the Document
+    private final Parser parserObject; // the source object that was used to create the Document
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
     private final Date lastModified;
     private int crawldepth;
 
     public Document(final DigestURL location, final String mimeType, final String charset,
-                    final Object parserObject,
+                    final Parser parserObject,
                     final Set<String> languages,
                     final String[] keywords,
                     final List<String> titles,
@@ -162,11 +162,29 @@ public class Document {
         if (contentDomain != ContentDomain.ALL) return contentDomain;
         return this.dc_source().getContentDomainFromExt();
     }
-    
-    public Object getParserObject() {
+
+    /**
+     * The parser used to generate the document
+     * @return Parser
+     */
+    public Parser getParserObject() {
         return this.parserObject;
     }
 
+    /**
+     * Confinient call to get the source/scraper object of the underlaying parser
+     * if the parser uses a scraper, like htmlParser
+     * @return scraper object typically of type ContentScraper but may also of type DCEntry
+     */
+    public Object getScraperObject() {
+        if (this.parserObject instanceof AbstractParser) {
+            if (((AbstractParser) this.parserObject).scraperObject != null) {
+                return ((AbstractParser) this.parserObject).scraperObject;
+            }
+        }
+        return null;
+    }
+    
     public Set<String> getContentLanguages() {
         return this.languages;
     }
@@ -648,10 +666,13 @@ dc_rights
         return v;
     }
 
+    /**
+     * We find all links that are part of a reference inside a url
+     *
+     * @param links links is either a Set of AnchorURL, Strings (with urls) or htmlFilterImageEntries
+     * @return map with contained urls as key and "ref" as value
+     */
     private static Map<AnchorURL, String> allReflinks(final Collection<?> links) {
-        // links is either a Set of Strings (with urls) or
-        // htmlFilterImageEntries
-        // we find all links that are part of a reference inside a url
         final Map<AnchorURL, String> v = new HashMap<AnchorURL, String>();
         final Iterator<?> i = links.iterator();
         Object o;
@@ -675,7 +696,9 @@ dc_rights
                     continue loop;
                 }
                 u = url.toNormalform(true);
-                if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) {
+
+                // find start of a referenced http url
+                if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) { // 7 = skip the protocol part of the source url
                     i.remove();
                     u = u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
@@ -685,14 +708,28 @@ dc_rights
                         v.put(url, "ref");
                     continue loop;
                 }
-                if ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0) {
+
+                // find start of a referenced https url
+                if ((pos = u.toLowerCase().indexOf("https://", 7)) > 0) { // 7 = skip the protocol part of the source url
                     i.remove();
-                    u = "http:/" + u.substring(pos);
-                    while ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0)
-                        u = "http:/" + u.substring(pos);
+                    u = u.substring(pos);
+                    while ((pos = u.toLowerCase().indexOf("https://", 7)) > 0)
+                        u = u.substring(pos);
                     url = new AnchorURL(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
+                    continue loop;
+                }
+                
+                if ((pos = u.toLowerCase().indexOf("/www.", 11)) > 0) { // 11 = skip protocol part + www of source url "http://www."
+                    i.remove();
+                    u = url.getProtocol()+":/" + u.substring(pos);
+                    while ((pos = u.toLowerCase().indexOf("/www.", 11)) > 0)
+                        u = url.getProtocol()+":/" + u.substring(pos);
+
+                    AnchorURL addurl = new AnchorURL(u);
+                    if (!(v.containsKey(addurl)))
+                        v.put(addurl, "ref");
                     continue loop;
                 }
             } catch (final MalformedURLException e) {
@@ -934,9 +971,9 @@ dc_rights
 
         // clean up parser data
         for (final Document doc: docs) {
-            Object parserObject = doc.getParserObject();
-            if (parserObject instanceof ContentScraper) {
-                final ContentScraper html = (ContentScraper) parserObject;
+            Object scraper = doc.getScraperObject();
+            if (scraper instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) scraper;
                 html.close();
             }
         }
@@ -982,9 +1019,9 @@ dc_rights
                     if (!entry.getKey().attachedNofollow()) result.put(entry.getKey(), entry.getValue());
                 }
             }
-            final Object parser = d.getParserObject();
-            if (parser instanceof ContentScraper) {
-                final ContentScraper html = (ContentScraper) parser;
+            final Object scraper = d.getScraperObject();
+            if (scraper instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) scraper;
                 String refresh = html.getRefreshPath();
                 if (refresh != null && refresh.length() > 0) try {result.put(new AnchorURL(refresh), "refresh");} catch (final MalformedURLException e) {}
                 AnchorURL canonical = html.getCanonical();

@@ -39,7 +39,11 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
 
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.hwpf.OldWordFileFormatException;
+import org.apache.poi.hwpf.extractor.Word6Extractor;
 import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 public class docParser extends AbstractParser implements Parser {
 
@@ -57,7 +61,6 @@ public class docParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("application/x-msword");
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public Document[] parse(
             final DigestURL location,
@@ -69,20 +72,20 @@ public class docParser extends AbstractParser implements Parser {
             throws Parser.Failure, InterruptedException {
 
         final WordExtractor extractor;
-
+        POIFSFileSystem poifs = null;
         try {
-            extractor = new WordExtractor(source);
+            poifs = HWPFDocument.verifyAndBuildPOIFS(source); // to be able to delegate to parseOldWordDoc w/o source.ioException
+            extractor = new WordExtractor(poifs);
+        } catch (final OldWordFileFormatException isOldWordDoc) {
+            // if old version (Word6/Word95) delegate to old parser (as long as available in poi package)
+            return parseOldWordDoc(location, mimeType, poifs);
         } catch (final Exception e) {
             throw new Parser.Failure("error in docParser, WordTextExtractorFactory: " + e.getMessage(), location);
         }
 
         final StringBuilder contents = new StringBuilder(80);
         try {
-            contents.append(extractor.getText().trim());
-            contents.append(' ');
-            contents.append(extractor.getHeaderText());
-            contents.append(' ');
-            contents.append(extractor.getFooterText());
+            contents.append(extractor.getText()); // extractor gets all text incl. headers/footers
         } catch (final Exception e) {
             throw new Parser.Failure("error in docParser, getText: " + e.getMessage(), location);
         }
@@ -133,4 +136,77 @@ public class docParser extends AbstractParser implements Parser {
         return docs;
     }
 
+    /**
+     * Parse old Word6/95 document
+     * @param location
+     * @param mimeType
+     * @param poifs
+     * @return
+     * @throws net.yacy.document.Parser.Failure
+     */
+    public Document[] parseOldWordDoc(
+            final DigestURL location,
+            final String mimeType,
+            final POIFSFileSystem poifs) throws Failure {
+        
+        final Word6Extractor extractor;
+
+        try {
+            extractor = new Word6Extractor(poifs);
+        } catch (final Exception e) {
+            throw new Parser.Failure("error in docParser, WordTextExtractorFactory: " + e.getMessage(), location);
+        }
+
+        final StringBuilder contents = new StringBuilder(80);
+        try {
+            contents.append(extractor.getText());
+        } catch (final Exception e) {
+            throw new Parser.Failure("error in docParser, getText: " + e.getMessage(), location);
+        }
+        String title = (contents.length() > 240) ? contents.substring(0,240) : contents.toString().trim();
+        title = title.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
+        if (title.length() > 80) title = title.substring(0, 80);
+        int l = title.length();
+        while (true) {
+            title = title.replaceAll("  ", " ");
+            if (title.length() == l) break;
+            l = title.length();
+        }
+        // get keywords (for yacy as array)
+        final String keywords = extractor.getSummaryInformation().getKeywords();
+        final String[] keywlist;
+        if (keywords != null && !keywords.isEmpty()) {
+            keywlist = CommonPattern.COMMA.split(keywords);
+        } else {
+            keywlist = null;
+        }
+
+        final String subject = extractor.getSummaryInformation().getSubject();
+        List<String> descriptions = new ArrayList<String>();
+        if (subject != null && !subject.isEmpty()) descriptions.add(subject);
+
+        Document[] docs;
+        docs = new Document[]{new Document(
+            location,
+            mimeType,
+            StandardCharsets.UTF_8.name(),
+            this,
+            null,
+            keywlist,
+            singleList(title),
+            extractor.getSummaryInformation().getAuthor(), // constuctor can handle null
+            extractor.getDocSummaryInformation().getCompany(), // publisher
+            null,
+            descriptions,
+            0.0d, 0.0d,
+            contents.toString(),
+            null,
+            null,
+            null,
+            false,
+            extractor.getSummaryInformation().getLastSaveDateTime() // maybe null
+            )};
+
+        return docs;
+    }
 }
