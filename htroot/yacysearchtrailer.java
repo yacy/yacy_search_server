@@ -105,13 +105,14 @@ public class yacysearchtrailer {
             prop.put("nav-namespace", 1);
             navigatorIterator = theSearch.namespaceNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
-            String nav;
+            String nav, rawNav;
             while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = theSearch.namespaceNavigator.get(name);
                 if (count == 0) break;
-                /* We use ':' character here, it will be percent encoded later, in QueryParams.navurl() function*/
-                nav = "inurl:" + name;
+                nav = "inurl%3A" + name;
+                /* Avoid double percent encoding in QueryParams.navurl */
+                rawNav = "inurl:" + name;
                 if (!theSearch.query.modifier.toString().contains("inurl:"+name)) {
                     pos++;
                     prop.put("nav-namespace_element_" + i + "_on", 1);
@@ -121,9 +122,11 @@ public class yacysearchtrailer {
                     prop.put("nav-namespace_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-namespace_element_" + i + "_modifier", "-" + nav);
                     nav="";
+                    rawNav = "";
                 }
                 prop.put(fileType, "nav-namespace_element_" + i + "_name", name);
-                prop.put(fileType, "nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                /* URL is already percent encoded : no need to re-encode specifically for the file type */
+                prop.put("nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                 prop.put(fileType, "nav-namespace_element_" + i + "_id", "namespace_" + i);
                 prop.put("nav-namespace_element_" + i + "_count", count);
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
@@ -143,12 +146,14 @@ public class yacysearchtrailer {
             prop.put("nav-domains", 1);
             navigatorIterator = hostNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
-            String nav;
+            String nav, rawNav;
             while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = hostNavigator.get(name);
                 if (count == 0) break;
                 nav = "site%3A" + name;
+                /* Avoid double percent encoding in QueryParams.navurl */
+                rawNav = "site:" + name;
                 if (theSearch.query.modifier.sitehost == null || !theSearch.query.modifier.sitehost.contains(name)) {
                     pos++;                    
                     prop.put("nav-domains_element_" + i + "_on", 1);
@@ -158,9 +163,11 @@ public class yacysearchtrailer {
                     prop.put("nav-domains_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-domains_element_" + i + "_modifier", "-" + nav);
                     nav="";
+                    rawNav = "";
                 }
                 prop.put(fileType, "nav-domains_element_" + i + "_name", name);
-                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                /* URL is already percent encoded : no need to re-encode specifically for the file type */
+                prop.put("nav-domains_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                 prop.put(fileType, "nav-domains_element_" + i + "_id", "domains_" + i);
                 prop.put("nav-domains_element_" + i + "_count", count);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
@@ -181,12 +188,14 @@ public class yacysearchtrailer {
             prop.put("nav-languages", 1);
             navigatorIterator = languageNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
-            String nav;
+            String nav, rawNav;
             while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = languageNavigator.get(name);
                 if (count == 0) break;
                 nav = "%2Flanguage%2F" + name;
+                /* Avoid double percent encoding in QueryParams.navurl */
+                rawNav = "/language/" + name;
                 if (theSearch.query.modifier.language == null || !theSearch.query.modifier.language.contains(name)) {
                     pos++;
                     prop.put("nav-languages_element_" + i + "_on", 1);
@@ -196,10 +205,12 @@ public class yacysearchtrailer {
                     prop.put("nav-languages_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-languages_element_" + i + "_modifier", "-" + nav);
                     nav="";
+                    rawNav = "";
                 }
                 String longname = ISO639.country(name);
                 prop.put(fileType, "nav-languages_element_" + i + "_name", longname == null ? name : longname);
-                prop.put(fileType, "nav-languages_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                /* URL is already percent encoded : no need to re-encode specifically for the file type */
+                prop.put("nav-languages_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                 prop.put(fileType, "nav-languages_element_" + i + "_id", "languages_" + i);
                 prop.put("nav-languages_element_" + i + "_count", count);
                 prop.put("nav-languages_element_" + i + "_nl", 1);
@@ -219,12 +230,14 @@ public class yacysearchtrailer {
             prop.put("nav-authors", 1);
             navigatorIterator = theSearch.authorNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
-            String nav;
+            String nav, rawNav;
             while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.authorNavigator.get(name);
                 if (count == 0) break;
                 nav = (name.indexOf(' ', 0) < 0) ? "author%3A" + name : "author%3A%28" + name.replace(" ", "+") + "%29";
+                /* Avoid double percent encoding in QueryParams.navurl */
+                rawNav = (name.indexOf(' ', 0) < 0) ? "author:" + name : "author:(" + name.replace(" ", "+") + ")";
                 if (theSearch.query.modifier.author == null || !theSearch.query.modifier.author.contains(name)) {
                     pos++;
                     prop.put("nav-authors_element_" + i + "_on", 1);
@@ -234,9 +247,11 @@ public class yacysearchtrailer {
                     prop.put("nav-authors_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-authors_element_" + i + "_modifier", "-" + nav);
                     nav="";
+                    rawNav = "";
                 }
                 prop.put(fileType, "nav-authors_element_" + i + "_name", name);
-                prop.put(fileType, "nav-authors_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                /* URL is already percent encoded : no need to re-encode specifically for the file type */
+                prop.put("nav-authors_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                 prop.put(fileType, "nav-authors_element_" + i + "_id", "authors_" + i);
                 prop.put("nav-authors_element_" + i + "_count", count);
                 prop.put("nav-authors_element_" + i + "_nl", 1);
@@ -258,12 +273,14 @@ public class yacysearchtrailer {
             prop.put("nav-collections", 1);
             navigatorIterator = theSearch.collectionNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
-            String nav;
+            String nav, rawNav;
             while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.collectionNavigator.get(name);
                 if (count == 0) break;
                 nav = (name.indexOf(' ', 0) < 0) ? "collection%3A" + name : "collection%3A%28" + name.replace(" ", "+") + "%29";
+                /* Avoid double percent encoding in QueryParams.navurl */
+                rawNav = (name.indexOf(' ', 0) < 0) ? "collection:" + name : "collection:(" + name.replace(" ", "+") + ")";
                 if (theSearch.query.modifier.collection == null || !theSearch.query.modifier.collection.contains(name)) {
                     pos++;
                     prop.put("nav-collections_element_" + i + "_on", 1);
@@ -273,9 +290,11 @@ public class yacysearchtrailer {
                     prop.put("nav-collections_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-collections_element_" + i + "_modifier", "-" + nav);
                     nav="";
+                    rawNav = "";
                 }
                 prop.put(fileType, "nav-collections_element_" + i + "_name", name);
-                prop.put(fileType, "nav-collections_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, true).toString());
+                /* URL is already percent encoded : no need to re-encode specifically for the file type */
+                prop.put("nav-collections_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, true).toString());
                 prop.put(fileType, "nav-collections_element_" + i + "_id", "collections_" + i);
                 prop.put("nav-collections_element_" + i + "_count", count);
                 prop.put("nav-collections_element_" + i + "_nl", 1);
@@ -342,7 +361,7 @@ public class yacysearchtrailer {
             //theSearch.protocolNavigator.inc("http(s)", httpCount + httpsCount);            
             navigatorIterator = theSearch.protocolNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
-            String nav;
+            String nav, rawNav;
             boolean visible = false;
             String oldQuery = theSearch.query.getQueryGoal().query_original; // prepare hack to make radio-button like navigation
             String oldProtocolModifier = theSearch.query.modifier.protocol;
@@ -355,6 +374,8 @@ public class yacysearchtrailer {
                 if (count == 0) break;
                 visible = visible || "ftp,smb".indexOf(name) >= 0;
                 nav = "%2F" + name;
+                /* Avoid double percent encoding in QueryParams.navurl */
+                rawNav = "/" + name;
                 if (oldProtocolModifier == null || !oldProtocolModifier.equals(name)) {
                     pos++;
                     prop.put("nav-protocols_element_" + i + "_on", 0);
@@ -364,10 +385,12 @@ public class yacysearchtrailer {
                     prop.put("nav-protocols_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", "-" + nav);
                     nav="";
+                    rawNav = "";
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
-                String url = QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString();
-                prop.put(fileType, "nav-protocols_element_" + i + "_on_url", url);
+                /* URL is already percent encoded : no need to re-encode specifically for the file type */
+                String url = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString();
+                prop.put("nav-protocols_element_" + i + "_on_url", url);
                 prop.put("nav-protocols_element_" + i + "_count", count);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
@@ -442,12 +465,14 @@ public class yacysearchtrailer {
             prop.put("nav-filetypes", 1);
             navigatorIterator = theSearch.filetypeNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
-            String nav;
+            String nav, rawNav;
             while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.filetypeNavigator.get(name);
                 if (count == 0) break;
                 nav = "filetype%3A" + name;
+                /* Avoid double percent encoding in QueryParams.navurl */
+                rawNav = "filetype:" + name;
                 if (theSearch.query.modifier.filetype == null || !theSearch.query.modifier.filetype.contains(name) ) {
                     pos++;
                     prop.put("nav-filetypes_element_" + i + "_on", 1);
@@ -457,9 +482,11 @@ public class yacysearchtrailer {
                     prop.put("nav-filetypes_element_" + i + "_on", 0);                    
                     prop.put(fileType, "nav-filetypes_element_" + i + "_modifier", "-" + nav);
                     nav="";
+                    rawNav = "";
                 }
                 prop.put(fileType, "nav-filetypes_element_" + i + "_name", name);
-                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                /* URL is already percent encoded : no need to re-encode specifically for the file type */
+                prop.put("nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                 prop.put(fileType, "nav-filetypes_element_" + i + "_id", "filetypes_" + i);
                 prop.put("nav-filetypes_element_" + i + "_count", count);
                 prop.put("nav-filetypes_element_" + i + "_nl", 1);
@@ -484,12 +511,14 @@ public class yacysearchtrailer {
                 prop.put(fileType, "nav-vocabulary_" + navvoccount + "_navname", navname);
                 navigatorIterator = ve.getValue().keys(false);
                 int i = 0;
-                String nav;
+                String nav, rawNav;
                 while (i < 20 && navigatorIterator.hasNext()) {
                     name = navigatorIterator.next();
                     count = ve.getValue().get(name);
                     if (count == 0) break;
                     nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURL.escape(Tagging.encodePrintname(name)).toString();
+                    /* Avoid double percent encoding in QueryParams.navurl */
+                    rawNav = "/vocabulary/" + navname + "/" + MultiProtocolURL.escape(Tagging.encodePrintname(name)).toString();
                     if (!theSearch.query.modifier.toString().contains("/vocabulary/" + navname + "/" + name.replace(' ', '_'))) {
                         prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 1);
                         prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", nav);
@@ -497,9 +526,11 @@ public class yacysearchtrailer {
                         prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 0);
                         prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", "-" + nav);
                         nav="";
+                        rawNav = "";
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, nav, false).toString());
+                    /* URL is already percent encoded : no need to re-encode specifically for the file type */
+                    prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_id", "vocabulary_" + navname + "_" + i);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
