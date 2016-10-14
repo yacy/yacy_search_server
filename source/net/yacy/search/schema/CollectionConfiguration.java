@@ -95,6 +95,7 @@ import net.yacy.document.SentenceReader;
 import net.yacy.document.Tokenizer;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.IconEntry;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -315,6 +316,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         	add(doc, CollectionSchema.keywords, keywords);
         }
 
+        /* Metadata node may contain one favicon url when transmitted as dht chunk */
+        processIcons(doc, allAttr, md.getIcons());
         if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, md.limage());
         if (allAttr || contains(CollectionSchema.linkscount_i)) add(doc, CollectionSchema.linkscount_i, md.llocal() + md.lother());
         if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, md.llocal());
@@ -525,6 +528,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         final Object scraper = document.getScraperObject();
         boolean containsCanonical = false;
         DigestURL canonical = null;
+        
+        processIcons(doc, allAttr, inboundLinks, outboundLinks, document.getIcons().values());
+        
         if (scraper instanceof ContentScraper) {
             final ContentScraper html = (ContentScraper) scraper;
             List<ImageEntry> images = html.getImages();
@@ -648,45 +654,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (articles.size() > 0) add(doc, CollectionSchema.article_txt, articles);
 
             // images
-            final ArrayList<String> imgprots = new ArrayList<String>(images.size());
-            final Integer[] imgheights = new Integer[images.size()];
-            final Integer[] imgwidths = new Integer[images.size()];
-            final Integer[] imgpixels = new Integer[images.size()];
-            final String[] imgstubs = new String[images.size()];
-            final String[] imgalts  = new String[images.size()];
-            int withalt = 0;
-            int i = 0;
-            LinkedHashSet<String> images_text_map = new LinkedHashSet<String>();
-            for (final ImageEntry ie: images) {
-                final MultiProtocolURL uri = ie.url();
-                inboundLinks.remove(uri);
-                outboundLinks.remove(uri);
-                imgheights[i] = ie.height();
-                imgwidths[i] = ie.width();
-                imgpixels[i] = ie.height() < 0 || ie.width() < 0 ? -1 : ie.height() * ie.width();
-                String protocol = uri.getProtocol();
-                imgprots.add(protocol);
-                imgstubs[i] = uri.toString().substring(protocol.length() + 3);
-                imgalts[i] = ie.alt();
-                for (String it: CommonPattern.SPACE.split(uri.toTokens())) images_text_map.add(it);
-                if (ie.alt() != null && ie.alt().length() > 0) {
-                    SentenceReader sr = new SentenceReader(ie.alt());
-                    while (sr.hasNext()) images_text_map.add(sr.next().toString());
-                    withalt++;
-                }
-                i++;
-            }
-            StringBuilder images_text = new StringBuilder(images_text_map.size() * 6 + 1);
-            for (String s: images_text_map) images_text.append(s.trim()).append(' ');
-            if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, images.size());
-            if (allAttr || contains(CollectionSchema.images_protocol_sxt)) add(doc, CollectionSchema.images_protocol_sxt, protocolList2indexedList(imgprots));
-            if (allAttr || contains(CollectionSchema.images_urlstub_sxt)) add(doc, CollectionSchema.images_urlstub_sxt, imgstubs);
-            if (allAttr || contains(CollectionSchema.images_alt_sxt)) add(doc, CollectionSchema.images_alt_sxt, imgalts);
-            if (allAttr || contains(CollectionSchema.images_height_val)) add(doc, CollectionSchema.images_height_val, imgheights);
-            if (allAttr || contains(CollectionSchema.images_width_val)) add(doc, CollectionSchema.images_width_val, imgwidths);
-            if (allAttr || contains(CollectionSchema.images_pixel_val)) add(doc, CollectionSchema.images_pixel_val, imgpixels);
-            if (allAttr || contains(CollectionSchema.images_withalt_i)) add(doc, CollectionSchema.images_withalt_i, withalt);
-            if (allAttr || contains(CollectionSchema.images_text_t)) add(doc, CollectionSchema.images_text_t, images_text.toString().trim());
+            processImages(doc, allAttr, inboundLinks, outboundLinks, images);
 
             // style sheets
             if (allAttr || contains(CollectionSchema.css_tag_sxt)) {
@@ -1012,6 +980,137 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         enrich(doc, condenser.synonyms(), document.getGenericFacets());
         return doc;
     }
+    
+	/**
+	 * Add icons metadata to Solr doc when corresponding schema attributes are
+	 * enabled.
+	 * 
+	 * @param doc
+	 *            solr document to fill. Must not be null.
+	 * @param allAttr
+	 *            all attributes are enabled.
+	 * @param icons
+	 *            document icon entries.
+	 */
+	private void processIcons(SolrInputDocument doc, boolean allAttr, Collection<IconEntry> icons) {
+		processIcons(doc, allAttr, null, null, icons);
+	}
+    
+	/**
+	 * Add icons metadata to Solr doc when corresponding schema attributes are
+	 * enabled. Remove icons urls from inboudLinks and outboundLinks.
+	 * 
+	 * @param doc
+	 *            solr document to fill. Must not be null.
+	 * @param allAttr
+	 *            all attributes are enabled.
+	 * @param inboundLinks
+	 *            all document inbound links.
+	 * @param outboundLinks
+	 *            all document outbound links.
+	 * @param icons
+	 *            document icon entries.
+	 */
+	private void processIcons(SolrInputDocument doc, boolean allAttr, LinkedHashMap<DigestURL, String> inboundLinks,
+			LinkedHashMap<DigestURL, String> outboundLinks, Collection<IconEntry> icons) {
+		if (icons != null) {
+			final List<String> protocols = new ArrayList<String>(icons.size());
+			final String[] sizes = new String[icons.size()];
+			final String[] stubs = new String[icons.size()];
+			final String[] rels = new String[icons.size()];
+			int i = 0;
+			/* Prepare solr field values */
+			for (final IconEntry ie : icons) {
+				final DigestURL url = ie.getUrl();
+
+				if(inboundLinks != null) {
+					inboundLinks.remove(url);
+				}
+				if(outboundLinks != null) {
+					outboundLinks.remove(url);
+				}
+
+				String protocol = url.getProtocol();
+				protocols.add(protocol);
+
+				/*
+				 * There may be multiple sizes and multiple rels for one icon :
+				 * we store this as flat string as currently solr doesn't
+				 * support multidimensionnal array fields
+				 */
+				sizes[i] = ie.sizesToString();
+				stubs[i] = url.toString().substring(protocol.length() + 3);
+				rels[i] = ie.relToString();
+
+				i++;
+			}
+			if (allAttr || contains(CollectionSchema.icons_protocol_sxt)) {
+				add(doc, CollectionSchema.icons_protocol_sxt, protocolList2indexedList(protocols));
+			}
+			if (allAttr || contains(CollectionSchema.icons_urlstub_sxt)) {
+				add(doc, CollectionSchema.icons_urlstub_sxt, stubs);
+			}
+			if (allAttr || contains(CollectionSchema.icons_rel_sxt)) {
+				add(doc, CollectionSchema.icons_rel_sxt, rels);
+			}
+			if (allAttr || contains(CollectionSchema.icons_sizes_sxt)) {
+				add(doc, CollectionSchema.icons_sizes_sxt, sizes);
+			}
+		}
+	}
+
+    /**
+     * Add images metadata to Solr doc when corresponding schema attributes are enabled. 
+     * Remove images urls from inboudLinks and outboundLinks.
+     * @param doc solr document to fill
+     * @param allAttr all attributes are enabled
+     * @param inboundLinks all document inbound links
+     * @param outboundLinks all document outbound links
+     * @param images document images
+     */
+	private void processImages(SolrVector doc, boolean allAttr, LinkedHashMap<DigestURL, String> inboundLinks,
+			LinkedHashMap<DigestURL, String> outboundLinks, List<ImageEntry> images) {
+		final ArrayList<String> imgprots = new ArrayList<String>(images.size());
+		final Integer[] imgheights = new Integer[images.size()];
+		final Integer[] imgwidths = new Integer[images.size()];
+		final Integer[] imgpixels = new Integer[images.size()];
+		final String[] imgstubs = new String[images.size()];
+		final String[] imgalts  = new String[images.size()];
+		int withalt = 0;
+		int i = 0;
+		LinkedHashSet<String> images_text_map = new LinkedHashSet<String>();
+		/* Prepare flat solr field values */
+		for (final ImageEntry ie: images) {
+		    final MultiProtocolURL uri = ie.url();
+		    inboundLinks.remove(uri);
+		    outboundLinks.remove(uri);
+		    imgheights[i] = ie.height();
+		    imgwidths[i] = ie.width();
+		    imgpixels[i] = ie.height() < 0 || ie.width() < 0 ? -1 : ie.height() * ie.width();
+		    String protocol = uri.getProtocol();
+		    imgprots.add(protocol);
+		    imgstubs[i] = uri.toString().substring(protocol.length() + 3);
+		    imgalts[i] = ie.alt();
+		    for (String it: CommonPattern.SPACE.split(uri.toTokens())) images_text_map.add(it);
+		    if (ie.alt() != null && ie.alt().length() > 0) {
+		        SentenceReader sr = new SentenceReader(ie.alt());
+		        while (sr.hasNext()) images_text_map.add(sr.next().toString());
+		        withalt++;
+		    }
+		    i++;
+		}
+		StringBuilder images_text = new StringBuilder(images_text_map.size() * 6 + 1);
+		for (String s: images_text_map) images_text.append(s.trim()).append(' ');
+		if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, images.size());
+		if (allAttr || contains(CollectionSchema.images_protocol_sxt)) add(doc, CollectionSchema.images_protocol_sxt, protocolList2indexedList(imgprots));
+		if (allAttr || contains(CollectionSchema.images_urlstub_sxt)) add(doc, CollectionSchema.images_urlstub_sxt, imgstubs);
+		if (allAttr || contains(CollectionSchema.images_alt_sxt)) add(doc, CollectionSchema.images_alt_sxt, imgalts);
+		if (allAttr || contains(CollectionSchema.images_height_val)) add(doc, CollectionSchema.images_height_val, imgheights);
+		if (allAttr || contains(CollectionSchema.images_width_val)) add(doc, CollectionSchema.images_width_val, imgwidths);
+		if (allAttr || contains(CollectionSchema.images_pixel_val)) add(doc, CollectionSchema.images_pixel_val, imgpixels);
+		if (allAttr || contains(CollectionSchema.images_withalt_i)) add(doc, CollectionSchema.images_withalt_i, withalt);
+		if (allAttr || contains(CollectionSchema.images_text_t)) add(doc, CollectionSchema.images_text_t, images_text.toString().trim());
+	}
     
     /**
      * attach additional information to the document to enable navigation features
@@ -1993,14 +2092,24 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return a;
     }
     
+    /**
+     * Uncompress indexed iplist of protocol names to a list of specified dimension.
+     * @param iplist indexed list typically produced by protocolList2indexedList
+     * @param dimension size of target list
+     * @return a list of protocol names
+     */
     public static List<String> indexedList2protocolList(Collection<Object> iplist, int dimension) {
         List<String> a = new ArrayList<String>(dimension);
         for (int i = 0; i < dimension; i++) a.add("http");
         if (iplist == null) return a;
         for (Object ip : iplist) {
             // ip format is 001-https but can be 4 digits  1011-https
-            int i = ((String) ip).indexOf('-');
-            a.set(Integer.parseInt(((String) ip).substring(0, i)), ((String) ip).substring(i+1));
+        	String indexedProtocol = ((String) ip); 
+            int i = indexedProtocol.indexOf('-');
+            /* Silently ignore badly formatted entry */
+            if(i > 0 && indexedProtocol.length() > (i + 1)) {
+            	a.set(Integer.parseInt(indexedProtocol.substring(0, i)), indexedProtocol.substring(i+1));
+            }
         }
         return a;
     }

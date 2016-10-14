@@ -104,7 +104,7 @@ public class SolrSelectServlet extends HttpServlet {
         RESPONSE_WRITER.put("grephtml", new GrepHTMLResponseWriter());
         RESPONSE_WRITER.put("rss", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
         RESPONSE_WRITER.put("opensearch", opensearchResponseWriter); //try http://localhost:8090/solr/select?wt=rss&q=olympia&hl=true&hl.fl=text_t,h1,h2
-        RESPONSE_WRITER.put("yjson", new YJsonResponseWriter()); //try http://localhost:8090/solr/select?wt=json&q=olympia&hl=true&hl.fl=text_t,h1,h2
+        RESPONSE_WRITER.put("yjson", new YJsonResponseWriter()); //try http://localhost:8090/solr/select?wt=yjson&q=olympia&hl=true&hl.fl=text_t,h1,h2
         RESPONSE_WRITER.put("gsa", new GSAResponseWriter());
     }
 

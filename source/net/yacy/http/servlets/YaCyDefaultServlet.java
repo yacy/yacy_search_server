@@ -66,6 +66,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.InvalidURLLicenceException;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.UserDB.Entry;
 import net.yacy.kelondro.util.FileUtils;
@@ -873,7 +874,20 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 } else {
                     tmp = invokeServlet(targetClass, legacyRequestHeader, args);
                 }
-            } catch (InvocationTargetException | IllegalArgumentException | IllegalAccessException e) {
+            } catch(InvocationTargetException e) {
+            	if(e.getCause() instanceof InvalidURLLicenceException) {
+                	/* A non authaurized user is trying to fetch a image with a bad or already released license code */
+                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
+                	return;
+                }
+            	if(e.getCause() instanceof TemplateMissingParameterException) {
+                	/* A template is used but miss some required parameter */
+                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
+                	return;
+                }
+            	ConcurrentLog.logException(e);
+                throw new ServletException(targetFile.getAbsolutePath());
+            } catch (IllegalArgumentException | IllegalAccessException e) {
                 ConcurrentLog.logException(e);
                 throw new ServletException(targetFile.getAbsolutePath());
             }

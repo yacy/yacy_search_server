@@ -1,27 +1,7 @@
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
-
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.peers.graphics.EncodedImage;
-import net.yacy.server.serverObjects;
-
-// ViewImagePerfTest.java
+// ImageViewerPerfTest.java
 // -----------------------
 // part of YaCy
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2006
-// created 03.04.2006
+// Copyright 2016 by luccioman; https://github.com/luccioman
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,13 +17,33 @@ import net.yacy.server.serverObjects;
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.peers.graphics.EncodedImage;
+import net.yacy.server.serverObjects;
+
+
+
 /**
- * Test to measure image render performance by ViewImage
+ * Test to measure image render performance by 
  * 
  * @author luc
  *
  */
-public class ViewImagePerfTest extends ViewImageTest {
+public class ImageViewerPerfTest extends ImageViewerTest {
 
 	/** Default minimum measurement time */
 	private static final int DEFAULT_MIN_MEASURE_TIME = 10;
@@ -56,7 +56,7 @@ public class ViewImagePerfTest extends ViewImageTest {
 	 *            main parameters : args[7] may contain minimum measurement time
 	 *            in secondes. Default : 10.
 	 */
-	public ViewImagePerfTest(String args[]) {
+	public ImageViewerPerfTest(String args[]) {
 		this.minMeasureTime = getMinMeasurementTime(args);
 	}
 
@@ -87,7 +87,7 @@ public class ViewImagePerfTest extends ViewImageTest {
 	 * @param outDir
 	 *            output directory
 	 * @param post
-	 *            ViewImage post parameters
+	 *             post parameters
 	 * @param failures
 	 *            map failed file urls to eventual exception
 	 * @param inFile
@@ -100,7 +100,7 @@ public class ViewImagePerfTest extends ViewImageTest {
 			File inFile) throws IOException {
 		/* Delete eventual previous result file */
 		System.out
-				.println("Measuring ViewImage render with file : " + inFile.getAbsolutePath() + " encoded To : " + ext);
+				.println("Measuring  render with file : " + inFile.getAbsolutePath() + " encoded To : " + ext);
 		File outFile = new File(outDir, inFile.getName() + "." + ext);
 		if (outFile.exists()) {
 			outFile.delete();
@@ -115,7 +115,7 @@ public class ViewImagePerfTest extends ViewImageTest {
 			beginTime = System.nanoTime();
 			ImageInputStream inStream = ImageIO.createImageInputStream(inFile);
 			try {
-				img = ViewImage.parseAndScale(post, true, urlString, ext, inStream);
+				img = this.VIEWER.parseAndScale(post, true, new DigestURL(urlString), ext, inStream);
 			} catch (Exception e) {
 				error = e;
 			}
@@ -131,7 +131,7 @@ public class ViewImagePerfTest extends ViewImageTest {
 		}
 		PrintWriter resultsWriter = new PrintWriter(new FileWriter(new File(outDir, "results_perfs.txt"), true));
 		try {
-			writeMessage("Measured ViewImage render with file : " + inFile.getAbsolutePath() + " encoded To : " + ext,
+			writeMessage("Measured  render with file : " + inFile.getAbsolutePath() + " encoded To : " + ext,
 					resultsWriter);
 			if(img == null) {
 				writeMessage("Image could not be rendered! Measurement show time needed to read and parse image data until error detection.", resultsWriter);
@@ -176,7 +176,7 @@ public class ViewImagePerfTest extends ViewImageTest {
 	 *            <li>args[1] : output format name (for example : "jpg") for
 	 *            rendered image. Defaut : "png".</li>
 	 *            <li>args[2] : ouput folder URL. Default :
-	 *            "[system tmp dir]/ViewImageTest".</li>
+	 *            "[system tmp dir]/Test".</li>
 	 *            <li>args[3] : max width (in pixels) for rendered image. May be
 	 *            set to zero to specify no max width. Default : no value.</li>
 	 *            <li>args[4] : max height (in pixels) for rendered image. May
@@ -194,7 +194,7 @@ public class ViewImagePerfTest extends ViewImageTest {
 	 *             when a read/write error occured
 	 */
 	public static void main(String args[]) throws IOException {
-		ViewImagePerfTest test = new ViewImagePerfTest(args);
+		ImageViewerPerfTest test = new ImageViewerPerfTest(args);
 		File inFile = test.getInputURL(args);
 		String ext = test.getEncodingExt(args);
 		File outDir = test.getOuputDir(args);
@@ -207,10 +207,10 @@ public class ViewImagePerfTest extends ViewImageTest {
 			inFiles = new File[1];
 			inFiles[0] = inFile;
 			System.out.println(
-					"Measuring ViewImage render with file : " + inFile.getAbsolutePath() + " encoded To : " + ext);
+					"Measuring  render with file : " + inFile.getAbsolutePath() + " encoded To : " + ext);
 		} else if (inFile.isDirectory()) {
 			inFiles = inFile.listFiles();
-			System.out.println("Measuring ViewImage render with files in folder : " + inFile.getAbsolutePath()
+			System.out.println("Measuring  render with files in folder : " + inFile.getAbsolutePath()
 					+ " encoded To : " + ext);
 		} else {
 			inFiles = new File[0];

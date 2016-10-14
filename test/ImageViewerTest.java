@@ -1,29 +1,7 @@
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
-import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
-
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.peers.graphics.EncodedImage;
-import net.yacy.server.serverObjects;
-
-// ViewImageTest.java
+// ImageViewerTest.java
 // -----------------------
 // part of YaCy
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2006
-// created 03.04.2006
+// Copyright 2016 by luccioman; https://github.com/luccioman
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,19 +17,43 @@ import net.yacy.server.serverObjects;
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
+
+import javax.imageio.ImageIO;
+import javax.imageio.stream.ImageInputStream;
+
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.peers.graphics.EncodedImage;
+import net.yacy.server.serverObjects;
+import net.yacy.visualization.ImageViewer;
+
 /**
- * Test rendering of one or more image files by ViewImage
+ * Test rendering of one or more image files by ImageViewer
  * 
  * @author luc
  *
  */
-public class ViewImageTest {
+public class ImageViewerTest {
 
 	/** Default image */
 	private static final String DEFAULT_IMG_RESOURCES = "/viewImageTest/test";
 
 	/** Default output encoding format */
 	private static final String DEFAULT_OUT_EXT = "png";
+	
+	/** Viewer  instance */
+	protected final ImageViewer VIEWER = new ImageViewer();
 
 	/**
 	 * @param args
@@ -65,7 +67,7 @@ public class ViewImageTest {
 		if (args != null && args.length > 0) {
 			fileURL = args[0];
 		} else {
-			URL defaultURL = ViewImageTest.class.getResource(DEFAULT_IMG_RESOURCES);
+			URL defaultURL = ImageViewerTest.class.getResource(DEFAULT_IMG_RESOURCES);
 			if (defaultURL == null) {
 				throw new IllegalArgumentException("File not found : " + DEFAULT_IMG_RESOURCES);
 			}
@@ -97,7 +99,7 @@ public class ViewImageTest {
 	}
 
 	/**
-	 * Build post parameters to use with ViewImage
+	 * Build post parameters to use with ImageViewer
 	 * 
 	 * @param args
 	 *            main parameters : args[3] and args[4] may respectively contain
@@ -238,7 +240,7 @@ public class ViewImageTest {
 	 * @param outDir
 	 *            output directory
 	 * @param post
-	 *            ViewImage post parameters
+	 *            ImageViewer post parameters
 	 * @param inFiles
 	 *            files or directories to process
 	 * @param processedFiles
@@ -269,7 +271,7 @@ public class ViewImageTest {
 	 * parameters must not be null.
 	 * @param ext output encoding image format
 	 * @param outDir output directory
-	 * @param post ViewImage post parameters
+	 * @param post ImageViewer post parameters
 	 * @param failures map failed file urls to eventual exception
 	 * @param inFile file image to process
 	 * @throws IOException when an read/write error occured
@@ -287,7 +289,7 @@ public class ViewImageTest {
 		EncodedImage img = null;
 		Throwable error = null;
 		try {
-			img = ViewImage.parseAndScale(post, true, urlString, ext, inStream);
+			img = this.VIEWER.parseAndScale(post, true, new DigestURL(urlString), ext, inStream);
 		} catch (Throwable e) {
 			error = e;
 		}
@@ -322,7 +324,7 @@ public class ViewImageTest {
 	 *            <li>args[1] : output format name (for example : "jpg") for
 	 *            rendered image. Defaut : "png".</li>
 	 *            <li>args[2] : ouput folder URL. Default :
-	 *            "[system tmp dir]/ViewImageTest".</li>
+	 *            "[system tmp dir]/ImageViewerTest".</li>
 	 *            <li>args[3] : max width (in pixels) for rendered image. May be
 	 *            set to zero to specify no max width. Default : no value.</li>
 	 *            <li>args[4] : max height (in pixels) for rendered image. May
@@ -338,7 +340,7 @@ public class ViewImageTest {
 	 *             when a read/write error occured
 	 */
 	public static void main(String args[]) throws IOException {
-		ViewImageTest test = new ViewImageTest();
+		ImageViewerTest test = new ImageViewerTest();
 		File inFile = test.getInputURL(args);
 		String ext = test.getEncodingExt(args);
 		File outDir = test.getOuputDir(args);
@@ -350,11 +352,11 @@ public class ViewImageTest {
 		if (inFile.isFile()) {
 			inFiles = new File[1];
 			inFiles[0] = inFile;
-			System.out.println("Testing ViewImage rendering with input file : " + inFile.getAbsolutePath()
+			System.out.println("Testing ImageViewer rendering with input file : " + inFile.getAbsolutePath()
 					+ " encoded To : " + ext);
 		} else if (inFile.isDirectory()) {
 			inFiles = inFile.listFiles();
-			System.out.println("Testing ViewImage rendering with input files in folder : " + inFile.getAbsolutePath()
+			System.out.println("Testing ImageViewer rendering with input files in folder : " + inFile.getAbsolutePath()
 					+ " encoded To : " + ext);
 		} else {
 			inFiles = new File[0];

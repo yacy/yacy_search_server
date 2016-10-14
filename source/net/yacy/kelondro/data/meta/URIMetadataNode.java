@@ -22,17 +22,23 @@
 
 package net.yacy.kelondro.data.meta;
 
+import java.awt.Dimension;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import org.apache.solr.common.SolrDocument;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.MicroDate;
@@ -49,6 +55,9 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.SentenceReader;
 import net.yacy.document.Tokenizer;
 import net.yacy.document.parser.pdfParser;
+import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.IconEntry;
+import net.yacy.document.parser.html.IconLinkRelations;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -63,8 +72,6 @@ import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.utils.crypt;
-
-import org.apache.solr.common.SolrDocument;
 
 
 /**
@@ -90,6 +97,12 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     private String alternative_urlname;
     private TextSnippet textSnippet = null;
 
+    /**
+     * Creates an instance from encoded properties.
+     * @param prop encoded properties
+     * @param collection collection origin (e.g. "dht")
+     * @throws MalformedURLException
+     */
     public URIMetadataNode(final Properties prop, String collection) throws MalformedURLException {
         // generates an plasmaLURLEntry using the properties from the argument
         // the property names must correspond to the one from toString
@@ -159,7 +172,13 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         if (prop.containsKey("wi")) {
             this.word = new WordReferenceVars(new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""))), false);
         }
+        if (prop.containsKey("favicon")) {
+        	final String rawFaviconURL = crypt.simpleDecode(prop.getProperty("favicon", ""));
+        	DigestURL faviconURL = new DigestURL(rawFaviconURL);
+        	this.setIconsFields(faviconURL);
+        }
     }
+    
 
     public URIMetadataNode(final SolrDocument doc) throws MalformedURLException {
         super();
@@ -512,7 +531,145 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         }
         return list.iterator();
     }
+    
+    /**
+     * Extracts icon entries from this solr document
+     * @return icon entries collection eventually empty
+     */
+	public final Collection<IconEntry> getIcons() {
+		Collection<IconEntry> icons = new ArrayList<>();
+		List<?> iconsUrlStubsList = getFieldValuesAsList(CollectionSchema.icons_urlstub_sxt.getSolrFieldName());
+		if (iconsUrlStubsList != null) {
 
+			List<String> ports = CollectionConfiguration.indexedList2protocolList(
+					getFieldValues(CollectionSchema.icons_protocol_sxt.getSolrFieldName()), iconsUrlStubsList.size());
+			List<?> allSizes = getFieldValuesAsList(CollectionSchema.icons_sizes_sxt.getSolrFieldName());
+			List<?> allRels = getFieldValuesAsList(CollectionSchema.icons_rel_sxt.getSolrFieldName());
+
+			Object item;
+			for (int index = 0; index < iconsUrlStubsList.size(); index++) {
+				item = iconsUrlStubsList.get(index);
+				String urlStub = null;
+				if (item instanceof String) {
+					urlStub = (String) item;
+					String iconURLStr = (ports != null && ports.size() > index ? ports.get(index) : "http") + "://" + urlStub;
+					
+					DigestURL iconURL;
+					try {
+						iconURL = new DigestURL(iconURLStr);
+					} catch (MalformedURLException e) {
+						continue;
+					}
+
+					Set<String> rels = null;
+					if (allRels.size() > index) {
+						item = allRels.get(index);
+						if (item instanceof String) {
+							rels = ContentScraper.parseSpaceSeparatedTokens((String) item);
+						}
+					}
+					/* This may happen when icons_rel_sxt field has been disabled in solr schema */
+					if(rels == null) {
+						rels = new HashSet<>();
+						rels.add("unknown");
+					}
+
+					Set<Dimension> sizes = null;
+					if (allSizes.size() > index) {
+						item = allSizes.get(index);
+						if (item instanceof String) {
+							sizes = ContentScraper.parseSizes((String) item);
+						}
+					}
+					
+					icons.add(new IconEntry(iconURL, rels, sizes));
+				}
+			}
+		}
+		return icons;
+	}
+	
+	/**
+	 * Try to extract icon entry with preferred size from this solr document.
+	 * We look preferably for a standard icon but accept as a fallback other icons.
+	 * @param preferredSize preferred size
+	 * @return icon entry or null
+	 */
+	public IconEntry getFavicon(Dimension preferredSize) {
+		IconEntry faviconEntry = null;
+		boolean foundStandard = false;
+		double closestDistance = Double.MAX_VALUE;
+		for (IconEntry icon : this.getIcons()) {
+			boolean isStandard = icon.isStandardIcon();
+			double distance = IconEntry.getDistance(icon.getClosestSize(preferredSize), preferredSize);
+			boolean match = false;
+			if (foundStandard) {
+				/*
+				 * Already found a standard icon : now must find a standard icon
+				 * with closer size
+				 */
+				match = isStandard && distance < closestDistance;
+			} else {
+				/*
+				 * No standard icon yet found : prefer a standard icon, or check
+				 * size
+				 */
+				match = isStandard || distance <= closestDistance;
+			}
+			if (match) {
+				faviconEntry = icon;
+				closestDistance = distance;
+				foundStandard = isStandard;
+				if (isStandard && distance == 0.0) {
+					break;
+				}
+			}
+		}
+		
+		return faviconEntry;
+	}
+	
+	/**
+	 * Use iconURL to set icons related field on this solr document.
+	 * 
+	 * @param iconURL icon URL
+	 */
+	private void setIconsFields(DigestURL iconURL) {
+		final List<String> protocols = new ArrayList<String>(1);
+		final List<String> sizes = new ArrayList<String>(1);
+		final List<String> stubs = new ArrayList<String>(1);
+		final List<String> rels = new ArrayList<String>(1);
+
+		if (iconURL != null) {
+			String protocol = iconURL.getProtocol();
+			protocols.add(protocol);
+
+			sizes.add("");
+			stubs.add(iconURL.toString().substring(protocol.length() + 3));
+			rels.add(IconLinkRelations.ICON.getRelValue());
+		}
+
+		this.setField(CollectionSchema.icons_protocol_sxt.name(), protocols);
+		this.setField(CollectionSchema.icons_urlstub_sxt.name(), stubs);
+		this.setField(CollectionSchema.icons_rel_sxt.name(), rels);
+		this.setField(CollectionSchema.icons_sizes_sxt.name(), sizes);
+	}
+
+    /**
+     * @param name field name
+     * @return field values from field name eventually immutable empty list when field has no values or is not a List
+     */
+    public List<?> getFieldValuesAsList(String name) {
+		Collection<Object> fieldValues = getFieldValues(name);
+		List<?> list;
+		if (fieldValues instanceof List<?>) {
+			list = (List<?>) fieldValues;
+		} else {
+			list = Collections.EMPTY_LIST;
+		}
+		return list;
+    }
+    
     public static Date getDate(SolrDocument doc, final CollectionSchema key) {
         Date x = doc == null ? null : (Date) doc.getFieldValue(key.getSolrFieldName());
         Date now = new Date();
@@ -600,6 +757,13 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
                 // append also word properties
                 final String wprop = this.word().toPropertyForm();
                 s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(wprop));
+            }
+            /* Add favicon URL with preferred size being 16x16 pixels if known */
+            if(!this.getIcons().isEmpty()) {
+            	IconEntry faviconEntry = this.getFavicon(new Dimension(16, 16));
+            	if(faviconEntry != null) {
+            		s.append(",favicon=").append(crypt.simpleEncode(faviconEntry.getUrl().toNormalform(false)));
+            	}
             }
             return s;
         } catch (final Throwable e) {
