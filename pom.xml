@@ -36,7 +36,7 @@
         <!-- the Solr version used in dependency section for all related dependencies -->
         <solr.version>5.5.2</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.2.18.v20160721</jetty.version>
+        <jetty.version>9.2.19.v20160908</jetty.version>
                 
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
@@ -608,11 +608,6 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>2.11.0</version>
-        </dependency>        
-        <dependency>
-            <groupId>com.adobe.xmp</groupId>
-            <artifactId>xmpcore</artifactId>
-            <version>5.1.2</version>
         </dependency>        
 
         <!-- special setup for dependencies not found in maven repository
