@@ -1448,9 +1448,9 @@ public final class SearchEvent {
      * @param resultEntry to add
      * @param score current ranking
      */
-    public void addResult(URIMetadataNode resultEntry, final float score) {
+    public void addResult(URIMetadataNode resultEntry, final long score) {
         if (resultEntry == null) return;
-        final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, this.ref /*this.getTopicNavigator(MAX_TOPWORDS)*/);
+        final long ranking = (score * 128) + postRanking(resultEntry, this.ref /*this.getTopicNavigator(MAX_TOPWORDS)*/);
         // TODO: above was originally using (see below), but getTopicNavigator returns this.ref and possibliy alters this.ref on first call (this.ref.size < 2 -> this.ref.clear)
         // TODO: verify and straighten the use of addTopic, getTopic and getTopicNavigator and related score calculation
         // final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, this.getTopicNavigator(MAX_TOPWORDS));
@@ -1486,8 +1486,8 @@ public final class SearchEvent {
             r += (128 * referencesCount / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
         } /* else r += 0; */
         // prefer hit with 'prefer' pattern
-        if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) r += 256 << this.query.ranking.coeff_prefer;
-        if (this.query.prefer.matcher(rentry.title()).matches()) r += 256 << this.query.ranking.coeff_prefer;
+        if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) r += 255 << this.query.ranking.coeff_prefer;
+        if (this.query.prefer.matcher(rentry.title()).matches()) r += 255 << this.query.ranking.coeff_prefer;
 
         // apply 'common-sense' heuristic using references
         final String urlstring = rentry.url().toNormalform(true);
@@ -1512,8 +1512,8 @@ public final class SearchEvent {
         String queryword;
         while (shi.hasNext()) {
             queryword = shi.next();
-            if (urlcompmap.contains(queryword)) r += 256 << this.query.ranking.coeff_appurl;
-            if (descrcompmap.contains(queryword)) r += 256 << this.query.ranking.coeff_app_dc_title;
+            if (urlcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_appurl;
+            if (descrcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_app_dc_title;
         }
         return r;
     }

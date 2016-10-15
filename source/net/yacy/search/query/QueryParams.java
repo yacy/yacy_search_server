@@ -224,7 +224,6 @@ public final class QueryParams {
         } catch (final PatternSyntaxException ex) {
             throw new IllegalArgumentException("Not a valid regular expression: " + prefer, ex);
         }
-        this.prefer.toString().equals(matchnothing_pattern.toString());
         assert language != null;
         this.targetlang = language;
         this.metatags = metatags;
