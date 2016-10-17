@@ -336,7 +336,24 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (virtualAge() > (v = other.virtualAge())) this.virtualAge = v;
         if (this.wordsintext > (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext > (v = other.phrasesintext)) this.phrasesintext = v;
-        if (other.positions != null) a(this.positions, min(this.positions, other.positions));
+
+        int minpos = min(this.positions, other.positions);
+        if (minpos != Integer.MAX_VALUE) {
+            int odist = other.distance();
+            int dist = this.distance();
+            this.positions.clear(); // we want only the min
+            this.positions.add(minpos);
+            // handle distance for multi word queries
+            // distance is calculated from positions, must be at least 2 positions for calculation
+            if (odist > 0 && odist < dist) {
+                this.positions.add(minpos + odist);
+            } else if (dist > 0) {
+                this.positions.add(minpos + dist);
+            } else if (odist > 0) {
+                this.positions.add(minpos + odist);
+            }
+        }
+
         if (this.posinphrase > (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase > (v = other.posofphrase)) this.posofphrase = v;
         if (this.lastModified > (w = other.lastModified)) this.lastModified = w;
@@ -358,7 +375,22 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (virtualAge() < (v = other.virtualAge())) this.virtualAge = v;
         if (this.wordsintext < (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext < (v = other.phrasesintext)) this.phrasesintext = v;
-        if (other.positions != null) a(this.positions, max(this.positions, other.positions));
+
+        int maxpos = max(this.positions, other.positions);
+        if (maxpos != Integer.MIN_VALUE) {
+            int odist = other.distance();
+            int dist = this.distance();
+            this.positions.clear();
+            this.positions.add(maxpos);
+            // handle distance for multi word queries
+            // distance is calculated from positions, must be at least 2 positions for calculation
+            if (odist > dist) {
+                this.positions.add(maxpos - odist); // special cas for max, to not be altered by the pos for distance use pos before maxpos
+            } else if (dist > 0) {
+                this.positions.add(maxpos - dist);
+            }
+        }
+
         if (this.posinphrase < (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase < (v = other.posofphrase)) this.posofphrase = v;
         if (this.lastModified < (w = other.lastModified)) this.lastModified = w;

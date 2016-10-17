@@ -32,13 +32,6 @@ import java.util.Iterator;
 
 public abstract class AbstractReference implements Reference {
 
-    protected static void a(Collection<Integer> a, int i) {
-        assert a != null;
-        if (i == Integer.MAX_VALUE || i == Integer.MIN_VALUE) return; // signal for 'do nothing'
-        a.clear();
-        a.add(i);
-    }
-    
     protected static int max(Collection<Integer> a, Collection<Integer> b) {
         if (a == null || a.isEmpty()) return max(b);
         if (b == null || b.isEmpty()) return max(a);
