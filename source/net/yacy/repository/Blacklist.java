@@ -60,6 +60,8 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 public class Blacklist {
+	
+	private final static ConcurrentLog log = new ConcurrentLog(Blacklist.class.getSimpleName());
 
     public enum BlacklistType {
         DHT, CRAWLER, PROXY, SEARCH, SURFTIPS, NEWS;
@@ -122,14 +124,14 @@ public class Blacklist {
      * Close (shutdown) this "sub-system", add more here for shutdown.
      */
     public final synchronized void close() {
-        ConcurrentLog.fine("Blacklist", "Shutting down blacklists ...");
+    	log.fine("Shutting down blacklists ...");
 
         // Save cache
         for (final BlacklistType blacklistType : BlacklistType.values()) {
             saveDHTCache(blacklistType);
         }
 
-        ConcurrentLog.fine("Blacklist", "All blacklists has been shutdown.");
+        log.fine("All blacklists has been shutdown.");
     }
 
     private final void setRootPath(final File rootPath) {
@@ -228,7 +230,7 @@ public class Blacklist {
                     }
                     if (a.indexOf("?*", 0) > 0) {
                         // prevent "Dangling meta character '*'" exception
-                        ConcurrentLog.warn("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + a);
+                    	log.warn("ignored blacklist path to prevent 'Dangling meta character' exception: " + a);
                         continue;
                     }
                     loadedPathsPattern.add(Pattern.compile(a, Pattern.CASE_INSENSITIVE)); // add case insesitive regex
@@ -373,7 +375,7 @@ public class Blacklist {
                 try {
                 		pw.close();
                 } catch (final Exception e) {
-                    ConcurrentLog.warn("Blacklist", "could not close stream to " + 
+                	log.warn("could not close stream to " + 
                     		blacklistToUse + "! " + e.getMessage());
                 }
         	}
@@ -437,7 +439,7 @@ public class Blacklist {
                 try {
                     pw.close();
                 } catch (final Exception e) {
-                    ConcurrentLog.warn("Blacklist", "could not close stream to "
+                	log.warn("could not close stream to "
                             + blacklistSourcefile + "! " + e.getMessage());
                 }
             }
@@ -581,6 +583,10 @@ public class Blacklist {
 	protected final static boolean isListed(final String hostlow, final String path,
 			final Map<String, Set<Pattern>> blacklistMapMatched,
 			final Map<String, Set<Pattern>> blacklistMapNotMatched) {
+		long beginTime = 0;
+		if(log.isFine()) {
+			beginTime = System.nanoTime();
+		}
 		final String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
 
         Pattern[] app;
@@ -651,6 +657,13 @@ public class Blacklist {
                     //System.out.println(e.toString());
                 }
             }
+        }
+        if(log.isFine()) {
+        	/* Trace URLs spending too much CPU time : set Blacklist.level = FINE in yacy.logging file */
+        	long timeInSeconds = (System.nanoTime() - beginTime) / 1000000000;
+        	if(timeInSeconds > 10) {
+        		log.fine("Long processing : " + timeInSeconds + " seconds. URL :  " + hostlow + path);
+        	}
         }
         return matched;
 	}
