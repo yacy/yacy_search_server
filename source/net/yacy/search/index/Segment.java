@@ -138,7 +138,6 @@ public class Segment {
         this.segmentPath = segmentPath;
         archivePath.mkdirs();
         
-        // create LURL-db
         this.fulltext = new Fulltext(segmentPath, archivePath, collectionConfiguration, webgraphConfiguration);
         this.termIndex = null;
         this.urlCitationIndex = null;

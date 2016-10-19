@@ -417,7 +417,7 @@ public final class CrawlStacker {
                 CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                     ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
         } else {
-            return "double in: LURL-DB, oldDate = " + oldDate.toString();
+            return "double in: local index, oldDate = " + oldDate.toString();
         }
 
         return null;
