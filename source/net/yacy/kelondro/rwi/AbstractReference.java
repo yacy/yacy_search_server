@@ -126,7 +126,9 @@ public abstract class AbstractReference implements Reference {
             if (s0 > 0) d += Math.abs(s0 - s1);
             s0 = s1;
         }
-        return d / (positions().size() - 1);
+        // despite first line checks for size < 2 Arithmetic exception div by zero occured  (1.91/9278 2016-10-19)
+        // added d == 0 condition as protection for this (which was in all above tests the case)
+        return d == 0 ? 0 : d / (positions().size() - 1);
     }
     
     @Override
