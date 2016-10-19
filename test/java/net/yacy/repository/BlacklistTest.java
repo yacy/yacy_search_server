@@ -84,9 +84,12 @@ public class BlacklistTest {
     	patterns.add(Pattern.compile(".*\\.js"));
     	patterns.add(Pattern.compile(".*\\.jpg"));
     	patterns.add(Pattern.compile(".*BannerAd.*"));
-    	patterns.add(Pattern.compile("(.*/)*search.*"));
-    	patterns.add(Pattern.compile("(.*/)*bizad.*"));
-    	patterns.add(Pattern.compile("(.*/)*member/.*"));
+    	
+    	// Form "(.*/|)term.*" should be preferred over "(.*/)*term.*" which is consuming far too much CPU on JDK 7 and URLs with many path segments
+    	
+    	patterns.add(Pattern.compile("(.*/|)search.*"));
+    	patterns.add(Pattern.compile("(.*/|)bizad.*"));
+    	patterns.add(Pattern.compile("(.*/|)member/.*"));
     	blacklistMapNotMatched.put(".*.*", patterns);
     	
     	Assert.assertTrue(Blacklist.isListed("site.blacklisted.net", "", blacklistMapMatched, blacklistMapNotMatched));
@@ -99,6 +102,20 @@ public class BlacklistTest {
 
     	Assert.assertFalse(Blacklist.isListed("fr.notblacklisted.org", "/index.html", blacklistMapMatched, blacklistMapNotMatched));
     	Assert.assertFalse(Blacklist.isListed("js.blacklisted.org", "/index.html", blacklistMapMatched, blacklistMapNotMatched));
+    	
+    	Assert.assertTrue(Blacklist.isListed("fr.notblacklisted.org", "/search.html", blacklistMapMatched, blacklistMapNotMatched));
+    	Assert.assertTrue(Blacklist.isListed("fr.notblacklisted.org", "/aa/search.html", blacklistMapMatched, blacklistMapNotMatched));
+    	Assert.assertTrue(Blacklist.isListed("fr.notblacklisted.org", "/aa/bb/search.html", blacklistMapMatched, blacklistMapNotMatched));
+    	Assert.assertTrue(Blacklist.isListed("fr.notblacklisted.org", "/aa/bb/search/index.html", blacklistMapMatched, blacklistMapNotMatched));
+    	Assert.assertTrue(Blacklist.isListed("fr.notblacklisted.org", "/search/index.html", blacklistMapMatched, blacklistMapNotMatched));
+    	Assert.assertTrue(Blacklist.isListed("fr.notblacklisted.org", "/searchengine/index.html", blacklistMapMatched, blacklistMapNotMatched));
+    	Assert.assertTrue(Blacklist.isListed("fr.notblacklisted.org", "/searchengine", blacklistMapMatched, blacklistMapNotMatched));
+    	Assert.assertTrue(Blacklist.isListed("fr.notblacklisted.org", "/aaa/searchengine", blacklistMapMatched, blacklistMapNotMatched));
+    	
+    	Assert.assertFalse(Blacklist.isListed("fr.notblacklisted.org", "/thesearch.html", blacklistMapMatched, blacklistMapNotMatched));
+    	Assert.assertFalse(Blacklist.isListed("fr.notblacklisted.org", "/aa/thesearch.html", blacklistMapMatched, blacklistMapNotMatched));
+    	    	
+    	Assert.assertFalse(Blacklist.isListed("fr.notblacklisted.org", "/path/with/many/segments/e/f/g/h/i/j/k/l/m/n/o/p/q/r/s/t/u/v/w/x/y/z/file.html", blacklistMapMatched, blacklistMapNotMatched));
     }
 
 }
