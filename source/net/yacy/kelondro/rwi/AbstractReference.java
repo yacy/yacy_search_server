@@ -28,6 +28,7 @@ package net.yacy.kelondro.rwi;
 
 import java.util.Collection;
 import java.util.Iterator;
+import net.yacy.cora.util.ConcurrentLog;
 
 
 public abstract class AbstractReference implements Reference {
@@ -128,7 +129,15 @@ public abstract class AbstractReference implements Reference {
         }
         // despite first line checks for size < 2 Arithmetic exception div by zero occured  (1.91/9278 2016-10-19)
         // added d == 0 condition as protection for this (which was in all above tests the case)
-        return d == 0 ? 0 : d / (positions().size() - 1);
+        try {
+            return d == 0 ? 0 : d / (positions().size() - 1);
+        } catch (ArithmeticException ex) {
+            // TODO: in peer to peer normalization of rwi queue modifies concurrently positions resulting in div by 0 exception
+            // with effect of above check position() < 2 is false but now true, it also results in changing ranking results until normalization is finished
+            // see related/causing code  ReferenceOrder.normalizewith() and WordReferenceVars.max()/WordReferenceVars.min() -> refacturing of posintext, distance, min, max needed
+            ConcurrentLog.fine("AbstractReference", "word distance calculation:" + ex.getMessage());
+            return 0;
+        }
     }
     
     @Override
