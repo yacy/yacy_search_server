@@ -356,7 +356,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (u.endsWith(".")) u = u.substring(0, u.length() - 1); // remove the '.' that was appended above
             s = p + 6;
             try {
-                this.anchors.add(new AnchorURL(u));
+                this.addAnchor(new AnchorURL(u));
                 continue;
             } catch (final MalformedURLException e) {}
         }
@@ -505,7 +505,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if(src != null) {
             	tag.opts.put("src", src.toNormalform(true));
             	src.setAll(tag.opts);
-            	//this.anchors.add(src); // don't add the frame to the anchors because the webgraph should not contain such links (by definition)
+            	//this.addAnchor(src); // don't add the frame to the anchors because the webgraph should not contain such links (by definition)
             	this.frames.add(src);
             	this.evaluationScores.match(Element.framepath, src.toNormalform(true));
             }
@@ -539,7 +539,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 if(url != null) {
                 	tag.opts.put("href", url.toNormalform(true));
                 	url.setAll(tag.opts);
-                	this.anchors.add(url);
+                	this.addAnchor(url);
                 }
             }
         } else if (tag.name.equalsIgnoreCase("link")) {
@@ -574,7 +574,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 } else if (rel.equalsIgnoreCase("canonical")) {
                     tag.opts.put("name", this.titles.size() == 0 ? "" : this.titles.iterator().next());
                     newLink.setAll(tag.opts);
-                    this.anchors.add(newLink);
+                    this.addAnchor(newLink);
                     this.canonical = newLink;
                 } else if (rel.equalsIgnoreCase("publisher")) {
                     this.publisher = newLink;
@@ -590,7 +590,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 } else if (!rel.equalsIgnoreCase("stylesheet") && !rel.equalsIgnoreCase("alternate stylesheet")) {
                     tag.opts.put("name", linktitle);
                     newLink.setAll(tag.opts);
-                    this.anchors.add(newLink);
+                    this.addAnchor(newLink);
                 }
             }
         } else if(tag.name.equalsIgnoreCase("embed") || tag.name.equalsIgnoreCase("source")) { //html5 tag
@@ -605,7 +605,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                         final EmbedEntry ie = new EmbedEntry(url, width, height, tag.opts.getProperty("type", EMPTY_STRING), tag.opts.getProperty("pluginspage", EMPTY_STRING));
                         this.embeds.put(url, ie);
                         url.setAll(tag.opts);
-                        // this.anchors.add(url); // don't add the embed to the anchors because the webgraph should not contain such links (by definition)
+                        // this.addAnchor(url); // don't add the embed to the anchors because the webgraph should not contain such links (by definition)
                     }
                 }
             } catch (final NumberFormatException e) {}
@@ -615,13 +615,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 AnchorURL url = absolutePath(tag.opts.getProperty("value", EMPTY_STRING));
                 tag.opts.put("value", url.toNormalform(true));
                 url.setAll(tag.opts);
-                this.anchors.add(url);
+                this.addAnchor(url);
             }
         } else if (tag.name.equalsIgnoreCase("iframe")) {
             final AnchorURL src = absolutePath(tag.opts.getProperty("src", EMPTY_STRING));
             tag.opts.put("src", src.toNormalform(true));
             src.setAll(tag.opts);
-            //this.anchors.add(src); // don't add the iframe to the anchors because the webgraph should not contain such links (by definition)
+            //this.addAnchor(src); // don't add the iframe to the anchors because the webgraph should not contain such links (by definition)
             this.iframes.add(src);
             this.evaluationScores.match(Element.iframepath, src.toNormalform(true));
         } else if (tag.name.equalsIgnoreCase("html")) {
@@ -631,7 +631,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
 
         // fire event
-        fireScrapeTag0(tag.name, tag.opts);
+        this.fireScrapeTag0(tag.name, tag.opts);
     }
 
     @Override
@@ -652,7 +652,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 tag.opts.put("href", url.toNormalform(true)); // we must assign this because the url may have resolved backpaths and may not be absolute
                 url.setAll(tag.opts);
                 recursiveParse(url, tag.content.getChars());
-                this.anchors.add(url);
+                this.addAnchor(url);
             }
             this.evaluationScores.match(Element.apath, href);
         }
@@ -727,7 +727,16 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
 
         // fire event
-        fireScrapeTag1(tag.name, tag.opts, tag.content.getChars());
+        this.fireScrapeTag1(tag.name, tag.opts, tag.content.getChars());
+    }
+    
+    /**
+     * Add an anchor to the anchors list, and trigger any eventual listener
+     * @param anchor anchor to add. Must not be null.
+     */
+    protected void addAnchor(AnchorURL anchor) {
+    	this.anchors.add(anchor);
+    	this.fireAddAnchor(anchor.toNormalform(false));
     }
 
 
@@ -755,7 +764,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             }
         }
         for (final AnchorURL entry: scraper.getAnchors()) {
-            this.anchors.add(entry);
+            this.addAnchor(entry);
         }
         String line = cleanLine(CharacterCoding.html2unicode(stripAllTags(scraper.content.getChars())));
         StringBuilder altakk = new StringBuilder();
@@ -1221,24 +1230,40 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         System.out.println("TEXT     :" + this.content.toString());
     }
 
+    /**
+     * Register a listener for some scrape events
+     * @param listener ScraperListener implementation
+     */
     @Override
     public void registerHtmlFilterEventListener(final ScraperListener listener) {
         if (listener != null) {
-            this.htmlFilterEventListeners.add(ScraperListener.class, listener);
+        	if(listener instanceof ContentScraperListener) {
+        		this.htmlFilterEventListeners.add(ContentScraperListener.class, (ContentScraperListener)listener);
+        	} else {
+        		this.htmlFilterEventListeners.add(ScraperListener.class, listener);
+        	}
         }
     }
 
+    /**
+     * Unregister a listener previously registered
+     * @param listener ScraperListener implementation
+     */
     @Override
     public void deregisterHtmlFilterEventListener(final ScraperListener listener) {
         if (listener != null) {
-            this.htmlFilterEventListeners.remove(ScraperListener.class, listener);
+        	if(listener instanceof ContentScraperListener) {
+        		this.htmlFilterEventListeners.remove(ContentScraperListener.class, (ContentScraperListener)listener);
+        	} else {
+        		this.htmlFilterEventListeners.remove(ScraperListener.class, listener);
+        	}
         }
     }
 
     private void fireScrapeTag0(final String tagname, final Properties tagopts) {
         final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
-        for (int i=0; i<listeners.length; i+=2) {
-            if (listeners[i]==ScraperListener.class) {
+        for (int i = 0; i < listeners.length; i += 2) {
+            if (listeners[i] == ScraperListener.class || listeners[i] == ContentScraperListener.class) {
                     ((ScraperListener)listeners[i+1]).scrapeTag0(tagname, tagopts);
             }
         }
@@ -1246,9 +1271,22 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     private void fireScrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
         final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
-        for (int i=0; i<listeners.length; i+=2) {
-            if (listeners[i]==ScraperListener.class) {
+        for (int i = 0; i < listeners.length; i += 2) {
+            if (listeners[i] == ScraperListener.class  || listeners[i] == ContentScraperListener.class) {
                     ((ScraperListener)listeners[i+1]).scrapeTag1(tagname, tagopts, text);
+            }
+        }
+    }
+    
+    /**
+     * Fire addAnchor event to any listener implemening {@link ContentScraperListener} interface
+     * @param url anchor url
+     */
+    private void fireAddAnchor(final String anchorURL) {
+        final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
+        for (int i = 0; i < listeners.length; i += 2) {
+            if (listeners[i] == ContentScraperListener.class) {
+                    ((ContentScraperListener)listeners[i+1]).anchorAdded(anchorURL);
             }
         }
     }

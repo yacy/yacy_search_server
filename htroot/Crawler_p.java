@@ -21,6 +21,7 @@
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -47,6 +48,7 @@ import net.yacy.cora.util.JSONException;
 import net.yacy.cora.util.JSONObject;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
+import net.yacy.crawler.FileCrawlStarterTask;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.NoticedURL.StackType;
@@ -483,22 +485,16 @@ public class Crawler_p {
                 if ("file".equals(crawlingMode) && post.containsKey("crawlingFile") && crawlingFile != null) {
                     final String crawlingFileContent = post.get("crawlingFile$file", "");
                     try {
-                        // check if the crawl filter works correctly
-                        final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new VocabularyScraper(), timezoneOffset);
-                        final Writer writer = new TransformerWriter(null, null, scraper, null, false);
-                        if (crawlingFile != null && crawlingFile.exists()) {
-                            FileUtils.copy(new FileInputStream(crawlingFile), writer);
-                        } else {
-                            FileUtils.copy(crawlingFileContent, writer);
-                        }
-                        writer.close();
-
-                        // get links and generate filter
-                        hyperlinks_from_file = scraper.getAnchors();
                         if (newcrawlingdepth > 0) {
                             if (fullDomain) {
+                            	/* Crawl is restricted to start domains or sub-paths : we have to get all the start links now. 
+                            	 * Otherwise we can get them asynchronously later, thus allowing to handle more efficiently large start crawlingFiles */
+                                hyperlinks_from_file = crawlingFileStart(crawlingFile, timezoneOffset, crawlingFileContent);
                                 newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks_from_file);
                             } else if (subPath) {
+                            	/* Crawl is restricted to start domains or sub-paths : we have to get all the start links now. 
+                            	 * Otherwise we can get them asynchronously later, thus allowing to handle more efficiently large start crawlingFiles */
+                                hyperlinks_from_file = crawlingFileStart(crawlingFile, timezoneOffset, crawlingFileContent);
                                 newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks_from_file);
                             }
                         }
@@ -627,17 +623,24 @@ public class Crawler_p {
                         ConcurrentLog.logException(e);
                     }
                 } else if ("file".equals(crawlingMode)) {
-                    if (post.containsKey("crawlingFile") && crawlingFile != null && hyperlinks_from_file != null) {
-                        try {
-                            if (newcrawlingdepth > 0) {
-                                if (fullDomain) {
-                                    newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks_from_file);
-                                } else if (subPath) {
-                                    newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks_from_file);
+                    if (post.containsKey("crawlingFile") && crawlingFile != null) {
+                         try {
+                            if(newcrawlingdepth > 0 && (fullDomain || subPath)) {
+                            	/* All links must have already been loaded because they are the part of the newcrawlingMustMatch filter */
+                            	if(hyperlinks_from_file != null) {
+                                    sb.crawler.putActive(handle, profile);
+                                	sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks_from_file, profile.timezoneOffset());
                                 }
+                            } else {
+								/* No restriction on domains or subpath : we scrape now links and asynchronously push them to the crawlStacker */
+								final String crawlingFileContent = post.get("crawlingFile$file", "");
+								final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000,
+										new VocabularyScraper(), profile.timezoneOffset());
+								FileCrawlStarterTask crawlStarterTask = new FileCrawlStarterTask(crawlingFile, crawlingFileContent, scraper, profile,
+										sb.crawlStacker, sb.peers.mySeed().hash.getBytes());
+	                            sb.crawler.putActive(handle, profile);
+	                            crawlStarterTask.start();
                             }
-                            sb.crawler.putActive(handle, profile);
-                            sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks_from_file, profile.timezoneOffset());
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); // crawlfilter does not match url
                             prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
@@ -755,6 +758,58 @@ public class Crawler_p {
         // return rewrite properties
         return prop;
     }
+
+    /**
+     * Scrape crawlingFile or crawlingFileContent and get all anchor links from it.
+     * @param crawlingFile crawl start file (must not be null)
+     * @param timezoneOffset local timezone offset
+     * @param crawlingFileContent content of the crawling file (optional : used only when crawlingFile does no exists)
+     * @return all the anchor links from the crawling file
+     * @throws MalformedURLException
+     * @throws IOException
+     * @throws FileNotFoundException
+     */
+	private static List<AnchorURL> crawlingFileStart(final File crawlingFile, int timezoneOffset,
+			final String crawlingFileContent) throws MalformedURLException, IOException, FileNotFoundException {
+		List<AnchorURL> hyperlinks_from_file;
+		// check if the crawl filter works correctly
+		final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new VocabularyScraper(), timezoneOffset);
+		final Writer writer = new TransformerWriter(null, null, scraper, null, false);
+		if((crawlingFileContent == null || crawlingFileContent.isEmpty()) && crawlingFile != null) {
+			/* Let's report here detailed error to help user when he selected a wrong file */
+			if(!crawlingFile.exists()) {
+				throw new FileNotFoundException(crawlingFile.getAbsolutePath() +  " does not exists");
+			}
+			if(!crawlingFile.isFile()) {
+				throw new FileNotFoundException(crawlingFile.getAbsolutePath() +  " exists but is not a regular file");
+			}
+			if(!crawlingFile.canRead()) {
+				throw new IOException("Can not read : " + crawlingFile.getAbsolutePath());
+			}
+		}
+		if (crawlingFile != null) {
+			FileInputStream inStream = null;
+			try {
+				inStream = new FileInputStream(crawlingFile);
+				FileUtils.copy(inStream, writer);
+			} finally {
+				if(inStream != null) {
+					try {
+						inStream.close();
+					} catch(IOException ignoredException) {
+						ConcurrentLog.info("Crawler_p", "Could not close crawlingFile : " + crawlingFile.getAbsolutePath());
+					}
+				}
+			}
+		} else {
+		    FileUtils.copy(crawlingFileContent, writer);
+		}
+		writer.close();
+
+		// get links and generate filter
+		hyperlinks_from_file = scraper.getAnchors();
+		return hyperlinks_from_file;
+	}
 
     private static Date timeParser(final boolean recrawlIfOlderCheck, final int number, final String unit) {
         if (!recrawlIfOlderCheck) return null;
