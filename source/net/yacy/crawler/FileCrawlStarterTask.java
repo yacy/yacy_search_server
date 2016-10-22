@@ -156,9 +156,17 @@ public class FileCrawlStarterTask extends Thread {
 			writer.close();
 		} catch (IOException e) {
 			log.severe("Error parsing the crawlingFile " + this.crawlingFile.getAbsolutePath(), e);
-		} catch (Throwable t) {
-			/* Other errors are likely to occur when the crawl is interrupted : still log this at warning level to avoid polluting regular error log level */
-			log.warn("Error parsing the crawlingFile " + this.crawlingFile.getAbsolutePath(), t);
+		} catch (IllegalCrawlProfileException e) {
+			/* We should get here when the crawl is stopped manually before termination */
+			log.info("Parsing crawlingFile " + this.crawlingFile.getAbsolutePath() + " terminated. Crawl profile "
+					+ this.profile.handle() + " is no more active.");
+		} catch (Exception e) {
+			/*
+			 * Other errors are likely to occur when the crawl is interrupted :
+			 * still log this at warning level to avoid polluting regular error
+			 * log level
+			 */
+			log.warn("Error parsing the crawlingFile " + this.crawlingFile.getAbsolutePath(), e);
 		} finally {
 			if (inStream != null) {
 				try {

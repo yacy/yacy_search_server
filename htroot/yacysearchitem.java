@@ -376,13 +376,13 @@ public class yacysearchitem {
 	 *         is null
 	 */
 	private static String processFaviconURL(final boolean authenticated, DigestURL faviconURL) {
-		final String iconUrlExt = MultiProtocolURL.getFileExtension(faviconURL.getFileName());
-	    /* Image format ouput for ViewFavicon servlet : default is png, except with gif and svg icons */
-	    final String viewFaviconExt = !iconUrlExt.isEmpty() && ImageViewer.isBrowserRendered(iconUrlExt) ? iconUrlExt : "png";
-		
 		/* Only use licence code for non authentified users. For authenticated users licence would never be released and would unnecessarily fill URLLicense.permissions. */
 		StringBuilder contentFaviconURL = new StringBuilder();
 		if (faviconURL != null) {
+			final String iconUrlExt = MultiProtocolURL.getFileExtension(faviconURL.getFileName());
+		    /* Image format ouput for ViewFavicon servlet : default is png, except with gif and svg icons */
+		    final String viewFaviconExt = !iconUrlExt.isEmpty() && ImageViewer.isBrowserRendered(iconUrlExt) ? iconUrlExt : "png";
+		    
 			contentFaviconURL.append("ViewFavicon.").append(viewFaviconExt).append("?maxwidth=16&maxheight=16&isStatic=true&quadratic");
 			if (authenticated) {
 				contentFaviconURL.append("&url=").append(faviconURL.toNormalform(true));

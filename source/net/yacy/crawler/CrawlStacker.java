@@ -172,6 +172,7 @@ public final class CrawlStacker {
      * @param hyperlinks crawl starting points links to stack
      * @param replace Specify whether old indexed entries should be replaced
      * @param timezoneOffset local time-zone offset
+     * @throws IllegalCrawlProfileException when the crawl profile is not active
      */
     public void enqueueEntries(
             final byte[] initiator,
@@ -189,8 +190,9 @@ public final class CrawlStacker {
             } else {
             	error = "Rejected " + hyperlinks.size() + " crawl entries. Reason : LOST STACKER PROFILE HANDLE '" + profileHandle + "'";            	
             }
-            CrawlStacker.log.info(error); // this is NOT an error but a normal effect when terminating a crawl queue
-            return;
+            CrawlStacker.log.info(error); // this is NOT an error but a normal behavior when terminating a crawl queue
+            /* Throw an exception to signal caller it can stop stacking URLs using this crawl profile */
+            throw new IllegalCrawlProfileException("Profile " + profileHandle + " is no more active");
         }
         if (replace) {
             // delete old entries, if exists to force a re-load of the url (thats wanted here)
