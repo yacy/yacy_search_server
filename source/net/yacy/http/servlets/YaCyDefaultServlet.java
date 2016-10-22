@@ -1223,7 +1223,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 Thread[] p = new Thread[t];
                 for (int j = 0; j < t; j++) {
                     files.put(POISON);
-                    p[j] = new Thread() {
+                    p[j] = new Thread("YaCyDefaultServlet.parseMultipart-" + j) {
                         @Override
                         public void run() {
                             Map.Entry<String, byte[]> job;

@@ -462,7 +462,7 @@ public final class SearchEvent {
         final Thread waitForThread;
         
         public RWIProcess(final Thread waitForThread) {
-            super();
+            super("SearchEvent.RWIProcess(" + waitForThread != null ? waitForThread.getName() : "" + ")");
             this.waitForThread = waitForThread;
         }
         
@@ -1389,7 +1389,7 @@ public final class SearchEvent {
                     success = true;
                 } else {
 
-                    new Thread() {
+                    new Thread("SearchEvent.drainStacksToResult.getSnippet") {
                         @Override
                         public void run() {
                             SearchEvent.this.oneFeederStarted();

@@ -47,6 +47,7 @@ public class SitemapImporter extends Thread {
     private final Switchboard sb;
 
     public SitemapImporter(final Switchboard sb, final DigestURL sitemapURL, final CrawlProfile profileEntry) {
+    	super("SitemapImporter(" + sitemapURL != null ? sitemapURL.toNormalform(false) : "" + ")");
         assert sitemapURL != null;
         this.sb = sb;
         this.siteMapURL = sitemapURL;

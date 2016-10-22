@@ -714,6 +714,7 @@ public final class Fulltext {
         private final boolean dom, text;
 
         private Export(final File f, final String filter, final String query, final ExportFormat format, final boolean dom, final boolean text) {
+        	super("Fulltext.Export");
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
             this.pattern = filter == null ? null : Pattern.compile(filter);

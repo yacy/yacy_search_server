@@ -965,7 +965,7 @@ public final class FileUtils {
      * @param concurrent if this shall run concurrently
      */
     public static void checkCharset(final File file, final String givenCharset, final boolean concurrent) {
-        Thread t = new Thread() {
+        Thread t = new Thread("FileUtils.checkCharset") {
             @Override
             public void run() {
                 try {

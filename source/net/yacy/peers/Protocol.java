@@ -821,6 +821,7 @@ public final class Protocol {
     	 * @param storeDocs solr documents collection to put to segment
     	 */
     	public WriteMetadataNodeToLocalIndexThread(Segment segment, Collection<URIMetadataNode> storeDocs) {
+    		super("WriteMetadataNodeToLocalIndexThread");
     		this.segment = segment;
     		this.storeDocs = storeDocs;
     	}
@@ -1282,6 +1283,7 @@ public final class Protocol {
     	 * @param docs solr documents collection to put to segment
     	 */
     	public WriteToLocalIndexThread(Segment segment, Collection<SolrInputDocument> docs) {
+    		super("WriteToLocalIndexThread");
     		this.segment = segment;
     		this.docs = docs;
     	}

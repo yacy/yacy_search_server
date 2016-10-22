@@ -384,7 +384,7 @@ public class RobotsTxt {
         final BlockingQueue<CheckEntry> out = new LinkedBlockingQueue<CheckEntry>();
         final Thread[] threads = new Thread[concurrency];
         for (int i = 0; i < concurrency; i++) {
-            threads[i] = new Thread() {
+            threads[i] = new Thread("RobotsTxt.massCrawlCheck-" + i) {
                 @Override
                 public void run() {
                     DigestURL u;

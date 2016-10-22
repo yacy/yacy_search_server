@@ -610,6 +610,7 @@ public final class LoaderDispatcher {
         private final ClientIdentification.Agent agent;
 
         public Loader(final DigestURL url, final File cache, final int maxFileSize, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent) {
+        	super("LoaderDispatcher.Loader");
             this.url = url;
             this.cache = cache;
             this.maxFileSize = maxFileSize;

@@ -421,7 +421,7 @@ public final class yacy {
 		final String iframesource = switchBoard.getConfig("donation.iframesource", "");
 		final String iframetarget = switchBoard.getConfig("donation.iframetarget", "");
 		final File iframefile = new File(htDocsDirectory, iframetarget);
-		if (!iframefile.exists()) new Thread() {
+		if (!iframefile.exists()) new Thread("yacy.importDonationIFrame") {
 		    @Override
 		    public void run() {
 		        final ClientIdentification.Agent agent = ClientIdentification.getAgent(ClientIdentification.yacyInternetCrawlerAgentName);
@@ -788,7 +788,7 @@ class shutdownHookThread extends Thread {
     private final Thread mainThread;
 
     public shutdownHookThread(final Thread mainThread, final Switchboard sb) {
-        super();
+        super("yacy.shutdownHookThread");
         this.sb = sb;
         this.mainThread = mainThread;
     }

@@ -91,7 +91,7 @@ public class HostBalancer implements Balancer {
      * return immediately (as large unfinished crawls may take longer to load)
      */
     private void init() {
-        Thread t = new Thread() {
+        Thread t = new Thread("HostBalancer.init") {
             @Override
             public void run() {
                 final String[] hostlist = hostsPath.list();

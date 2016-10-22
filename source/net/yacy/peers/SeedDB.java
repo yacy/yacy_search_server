@@ -1098,7 +1098,7 @@ public final class SeedDB implements AlternativeDomainNames {
     public void loadSeedListConcurrently(final String seedListFileURL, final AtomicInteger scc, final int timeout, final boolean checkAge) {
         // uses the superseed to initialize the database with known seeds
 
-        Thread seedLoader = new Thread() {
+        Thread seedLoader = new Thread("SeedDB.loadSeedListConcurrently") {
             @Override
             public void run() {
                 // load the seed list

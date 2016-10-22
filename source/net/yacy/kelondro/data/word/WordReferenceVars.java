@@ -503,6 +503,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	private long maxtime;
     	private final boolean local;
     	private TransformDistributor(final ReferenceContainer<WordReference> container, final BlockingQueue<WordReferenceVars> out, final long maxtime, final boolean local) {
+    		super("WordReferenceVars.TransformDistributor");
     		this.container = container;
     		this.out = out;
     		this.maxtime = maxtime;
@@ -556,6 +557,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	private final boolean local;
 
     	private TransformWorker(final BlockingQueue<WordReferenceVars> out, final long maxtime, final boolean local) {
+    		super("WordReferenceVars.TransformWorker");
     		this.in = new LinkedBlockingQueue<Row.Entry>();
     		this.out = out;
     		this.maxtime = maxtime;

@@ -28,6 +28,7 @@ public class Shutdown extends Thread {
     private final String reason;
 
     public Shutdown(final Switchboard sb, final long delay, final String reason) {
+    	super(Shutdown.class.getSimpleName());
         this.sb = sb;
         this.delay = delay;
         this.reason = reason;

@@ -2045,7 +2045,7 @@ public final class Switchboard extends serverSwitch {
         assert this.crawlStacker != null;
         Thread[] indexer = new Thread[concurrency];
         for (int t = 0; t < concurrency; t++) {
-            indexer[t] = new Thread() {
+            indexer[t] = new Thread("Switchboard.processSurrogate-" + t) {
                 @Override
                 public void run() {
                     VocabularyScraper scraper = new VocabularyScraper();
@@ -3145,6 +3145,7 @@ public final class Switchboard extends serverSwitch {
             Thread t = new Thread() {
                 @Override
                 public void run() {
+                	this.setName("Switchboard.stackURLs");
                     String failreason;
                     if ((failreason = Switchboard.this.stackUrl(profile, turl)) == null) successurls.add(turl); else failurls.put(turl, failreason);
                 }
@@ -3745,7 +3746,7 @@ public final class Switchboard extends serverSwitch {
      * @param resulturl the result doc which outbound links to add to crawler
      */
     public final void heuristicSearchResults(final URIMetadataNode resulturl) {
-        new Thread() {
+        new Thread("Switchboard.heuristicSearchResults") {
 
             @Override
             public void run() {

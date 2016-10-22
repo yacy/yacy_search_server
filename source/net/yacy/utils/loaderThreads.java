@@ -109,6 +109,7 @@ public class loaderThreads {
         final ClientIdentification.Agent agent;
 
         public loaderThread(final DigestURL url, final loaderProcess process, final ClientIdentification.Agent agent) {
+        	super("loaderThreads.loaderThread");
             this.url = url;
             this.process = process;
             this.error = null;

@@ -51,6 +51,7 @@ public class ErrorCacheFiller extends Thread {
 	 * @param cache error cache to fill. Must not be null.
 	 */
 	public ErrorCacheFiller(Switchboard sb, ErrorCache cache) {
+		super(ErrorCacheFiller.class.getSimpleName());
 		if(sb == null || cache == null) {
 			throw new IllegalArgumentException("Unexpected null parameters");
 		}

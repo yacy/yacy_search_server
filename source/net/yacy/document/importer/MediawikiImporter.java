@@ -95,6 +95,7 @@ public class MediawikiImporter extends Thread implements Importer {
 
 
     public MediawikiImporter(final File sourcefile, final File targetdir) {
+    	super("MediawikiImporter(" + sourcefile != null ? sourcefile.getAbsolutePath() : "null sourcefile" +")");
     	this.sourcefile = sourcefile;
     	this.docsize = sourcefile.length();
     	this.approxdocs = (int) (this.docsize * docspermbinxmlbz2 / 1024L / 1024L);
@@ -296,7 +297,9 @@ public class MediawikiImporter extends Thread implements Importer {
     public static class indexMaker extends Thread {
 
         File mediawikixml;
+        
         public indexMaker(final File mediawikixml) {
+        	super("MediawikiImporter.indexMaker " + mediawikixml != null ? mediawikixml.getName() : "");
             this.mediawikixml = mediawikixml;
         }
 

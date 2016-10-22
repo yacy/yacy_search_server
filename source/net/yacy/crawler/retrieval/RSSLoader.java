@@ -63,6 +63,7 @@ public class RSSLoader extends Thread {
     private final ClientIdentification.Agent agent;
 
     public RSSLoader(final Switchboard sb, final DigestURL urlf, final Map<String, Pattern> collections, final ClientIdentification.Agent agent) {
+    	super("RSSLoader(" + urlf != null ? urlf.toNormalform(true) : "" + ")");
         this.sb = sb;
         this.urlf = urlf;
         this.collections = collections;

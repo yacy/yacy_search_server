@@ -81,6 +81,7 @@ public class Switchboard {
     public static class InfoUpdater extends Thread {
         long steptime;
         public InfoUpdater(long steptime) {
+        	super("Switchboard.InfoUpdater");
             this.steptime = steptime;
         }
         @Override
@@ -105,7 +106,7 @@ public class Switchboard {
         private final Semaphore shutdownSemaphore;
 
         public shutdownHookThread(final Thread mainThread, Semaphore semaphore) {
-            super();
+            super("Switchboard.shutdownHookThread");
             this.mainThread = mainThread;
             this.shutdownSemaphore = semaphore;
         }

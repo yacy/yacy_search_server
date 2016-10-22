@@ -87,6 +87,7 @@ public class ReferenceOrder {
         private final boolean local;
         
         public NormalizeDistributor(final ReferenceContainer<WordReference> container, final LinkedBlockingQueue<WordReferenceVars> out, final int threads, final long maxtime, final boolean local) {
+        	super("ReferenceOrder.NormalizeDistributor");
             this.container = container;
             this.out = out;
             this.threads = threads;
@@ -144,6 +145,7 @@ public class ReferenceOrder {
         private final long maxtime;
 
         public NormalizeWorker(final BlockingQueue<WordReferenceVars> out, final Semaphore termination, long maxtime) {
+        	super("ReferenceOrder.NormalizeWorker");
             this.out = out;
             this.termination = termination;
             this.decodedEntries = new LinkedBlockingQueue<WordReferenceVars>();

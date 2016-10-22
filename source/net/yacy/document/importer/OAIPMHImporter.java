@@ -62,6 +62,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     private final ClientIdentification.Agent agent;
 
     public OAIPMHImporter(final LoaderDispatcher loader, final ClientIdentification.Agent agent, final DigestURL source) {
+    	super(OAIPMHImporter.class.getSimpleName());
         this.agent = agent;
         this.serialNumber = importerCounter--;
         this.loader = loader;
