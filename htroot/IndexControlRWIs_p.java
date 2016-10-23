@@ -519,7 +519,7 @@ public class IndexControlRWIs_p {
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_lother", entry.word().lother());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_hitcount", entry.word().hitcount());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_worddistance", 0);
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_pos", entry.word().minposition());
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_pos", entry.word().posintext());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_phrase", entry.word().posofphrase());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_posinphrase", entry.word().posinphrase());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_urlcomps", entry.word().urlcomps());

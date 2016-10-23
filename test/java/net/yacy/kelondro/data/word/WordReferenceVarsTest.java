@@ -57,36 +57,39 @@ public class WordReferenceVarsTest {
         ientry.setWord(word);
 
         WordReferenceVars wvMin = new WordReferenceVars(ientry, true);
-        wvMin.addPosition(10); // add position for distance testing
-
-        WordReferenceVars wvMax = wvMin.clone();
-
         // create a other reference
-        WordReferenceVars wvOther = new WordReferenceVars(ientry, true);
+        WordReferenceVars wvOther = wvMin.clone();
+        
+        word.posInText = maxposintext;
+        ientry.setWord(word);
+        WordReferenceVars wvMax = new WordReferenceVars(ientry, true);
+
+        wvMin.addPosition(10); // add position for distance testing
+        wvMax.addPosition(maxposintext); // add position for distance testing
         wvOther.addPosition(maxposintext); // add position (max) for distance testing
 
         // test min for posintext and distance
         wvMin.min(wvOther);
-        assertEquals("min posintext", minposintext, wvMin.minposition());
+        assertEquals("min posintext", minposintext, wvMin.posintext());
         assertEquals("min distance", 5, wvMin.distance());
 
         wvMin.min(wvOther); // test repeated call doesn't change result
-        assertEquals("min posintext (repeat)", minposintext, wvMin.minposition());
+        assertEquals("min posintext (repeat)", minposintext, wvMin.posintext());
         assertEquals("min distance (repeat)", 5, wvMin.distance());
 
         // test max for posintext and distance
         wvMax.max(wvOther);
-        assertEquals("max posintext", maxposintext, wvMax.maxposition());
+        assertEquals("max posintext", maxposintext, wvMax.posintext());
         assertEquals("max distance", maxposintext - minposintext, wvMax.distance());
 
         wvMax.max(wvOther); // test repeated calls don't change result
         wvMax.max(wvOther);
-        assertEquals("max posintext (repeat)", maxposintext, wvMax.maxposition());
+        assertEquals("max posintext (repeat)", maxposintext, wvMax.posintext());
         assertEquals("max distance (repeat)", maxposintext - minposintext, wvMax.distance());
 
         // reverse test
         wvOther.max(wvMax);
-        assertEquals("max posintext (reverse)", maxposintext, wvOther.maxposition());
+        assertEquals("max posintext (reverse)", maxposintext, wvOther.posintext());
         assertEquals("max distance (repeat)", maxposintext - minposintext, wvOther.distance());
 
     }

@@ -155,7 +155,7 @@ public class SegmentTest {
 
         // creates one test url with this text in the rwi index
         DigestURL url = new DigestURL("http://test.org/test.html");
-        storeTestDocTextToTermIndex(url, "One Two Three Four Five. This is a test text. One two three for five.");
+        storeTestDocTextToTermIndex(url, "One Two Three Four Five. This is a test text. One two three for five");
         // posintext                       1   2    3    4    5     6    7    8    9
         // hitcount ("five")                                  1               1                             2
         // posofphrase                    |-------100------------| |------101---------| |--------102----------|
@@ -171,7 +171,7 @@ public class SegmentTest {
         // do the search
         TermSearch<WordReference> result = index.termIndex.query(queryHashes, excludeHashes, urlselection, termFactory, Integer.MAX_VALUE);
 
-        // get the joined resutls
+        // get the joined results
         ReferenceContainer<WordReference> wc = result.joined();
 
         // we should have now one result (stored to index above)
@@ -181,7 +181,7 @@ public class SegmentTest {
         WordReference r = wc.getReference(url.hash());
 
         // min position of search word in text (posintext)
-        assertEquals("minposition('five')", 5, r.minposition());
+        assertEquals("min posintext('five')", 5, r.posintext());
         // occurence of search words in text
         assertEquals("hitcount('five')", 2, r.hitcount());
 
@@ -190,15 +190,6 @@ public class SegmentTest {
         assertEquals("posofphrase", 100, r.posofphrase());
         assertEquals("posinphrase", 5, r.posinphrase());
 
-        // currently the results are not as expected for a multi-word query
-        // (reason: Reference container is backed by ReferenceRow (which doen't hold positions of joined references) ergo can't return related results
-        System.out.println("-----------------");
-        System.out.println("positions=" + r.positions() + " (expected=5,8)");
-        // max position of search word in text
-        System.out.println("maxposition=" + r.maxposition() + " (expected=8)");
-        // for a multiword query distance expected to be the avg of search word positions in text
-        System.out.println("distance=" + r.distance() + " (expected=3)");
-        System.out.println("-----------------");
     }
 
 }

@@ -183,4 +183,9 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public int posintext() {
+        throw new UnsupportedOperationException();
+    }
+
 }
