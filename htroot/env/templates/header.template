@@ -12,7 +12,7 @@
         <img id="greeting-icon" class="yacylogo" src="/env/grafics/yacy.png" alt="YaCy" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">
         <span style="position:absolute;top:50%;float:left;">&nbsp;Administration</span>
       </a>
-      <form class="navbar-form" method="get" accept-charset="UTF-8" action="/yacysearch.html" style="padding-left:200px;max-width:400px;">
+      <form class="navbar-form" method="get" accept-charset="UTF-8" action="yacysearch.html" style="padding-left:200px;max-width:400px;">
         <input name="query" placeholder="Search..." class="form-control" type="text" size="36" maxlength="200" value=""/>
         <input type="hidden" name="resource" value="global" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
@@ -23,14 +23,14 @@
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
         <li id="header_restart">
-          <form action="/Steering.html" method="get">
+          <form action="Steering.html" method="get">
             <input type="hidden" name="restart" value="" />
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-warning" onclick="return confirm('Confirm Re-Start')"><span class="glyphicon glyphicon-fire"></span> Re-Start</button>
           </form>
         </li>
         <li>&nbsp;</li>
         <li id="header_shutdown">
-          <form action="/Steering.html" method="get">
+          <form action="Steering.html" method="get">
             <input type="hidden" name="shutdown" value="" />
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="return confirm('Confirm Shutdown')"><span class="glyphicon glyphicon-off"></span> Shutdown</button>
           </form>
@@ -50,7 +50,7 @@
         </ul>
         </li>
         <li id="header_administration">
-          <form action="/index.html" method="get">
+          <form action="index.html" method="get">
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary"><span class="glyphicon glyphicon-search"></span> Search Interface &raquo;</button>
           </form>
         </li>
