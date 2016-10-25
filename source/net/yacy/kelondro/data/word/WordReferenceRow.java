@@ -49,7 +49,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     public static final Row urlEntryRow = new Row(new Column[]{
             new Column("h", Column.celltype_string,    Column.encoder_bytes, Word.commonHashLength, "urlhash"),
             new Column("a", Column.celltype_cardinal,  Column.encoder_b256,  2, "lastModified"),
-            new Column("s", Column.celltype_cardinal,  Column.encoder_b256,  2, "freshUntil"),
+            new Column("s", Column.celltype_cardinal,  Column.encoder_b256,  2, "freshUntil"), // TODO: unused (since 2009)
             new Column("u", Column.celltype_cardinal,  Column.encoder_b256,  1, "wordsInTitle"),
             new Column("w", Column.celltype_cardinal,  Column.encoder_b256,  2, "wordsInText"),
             new Column("p", Column.celltype_cardinal,  Column.encoder_b256,  2, "phrasesInText"),
@@ -247,11 +247,17 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return (int) this.entry.getColLong(col_lastModified);  // this is the time in MicoDateDays format
     }
 
+    /**
+     * @return date recalculated from MicroDateDays (accuracy = 1 Day, time always 0:00)
+     */
     @Override
     public long lastModified() {
         return MicroDate.reverseMicroDateDays(this.entry.getColLong(col_lastModified));
     }
 
+    /**
+     * @return  occurences of word in text (in the rang 0..255)
+     */
     @Override
     public int hitcount() {
         return (0xff & this.entry.getColByte(col_hitcount));
