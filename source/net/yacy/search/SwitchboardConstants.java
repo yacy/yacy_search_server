@@ -491,6 +491,8 @@ public final class SwitchboardConstants {
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
 
+    public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount"; // max lines displayed in standard search navigators/facets
+
     /**
      * ranking+evaluation
      */

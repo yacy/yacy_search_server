@@ -200,6 +200,7 @@ import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.RankingProfile;
@@ -1164,6 +1165,9 @@ public final class Switchboard extends serverSwitch {
 
         this.trail = new LinkedBlockingQueue<String>();
 
+        // set configurable ui defaults
+        QueryParams.FACETS_STANDARD_MAXCOUNT = sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT); // max number of navigator/facet lines
+        
         this.log.config("Finished Switchboard Initialization");
     }
 

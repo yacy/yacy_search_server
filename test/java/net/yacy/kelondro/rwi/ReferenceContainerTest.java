@@ -89,7 +89,7 @@ public class ReferenceContainerTest {
 
         assertNotNull("getReference failed", wc);
 
-        // TODO: ReferenceContainer used for rwi results. As it distance doesn't persist after adding ref to container making the distance ranking obsolete -> remove or fix
+        // TODO: ReferenceContainer used for rwi results. As distance doesn't persist after adding ref to container making the distance ranking obsolete -> remove or fix
         System.out.println("-----------------------------------------------------------");
         System.out.println("WordReference (word distance) before add to container:  " + wentry.distance());
         System.out.println("WordReference (word distance) after get from container: " + wc.distance());

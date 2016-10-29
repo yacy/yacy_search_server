@@ -857,6 +857,9 @@ search.result.show.snapshots = false
 search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language
 #search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language,collections,date
 
+# max number of items displayed in search navigators
+search.navigation.maxcount=100
+
 # search result verification and snippet fetch caching rules
 # each search result can be verified byloading the link from the web
 # this can be enhanced using a cache. In some cases it may be appropriate

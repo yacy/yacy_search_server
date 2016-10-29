@@ -37,6 +37,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.query.QueryParams;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -93,6 +94,12 @@ public class ConfigSearchPage_p {
                 if (post.getBoolean("search.navigation.date")) nav += "date,";
                 if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1);
                 sb.setConfig("search.navigation", nav);
+                // maxcount default
+                int navmaxcnt = post.getInt("search.navigation.maxcount", QueryParams.FACETS_STANDARD_MAXCOUNT);
+                if (navmaxcnt > 5) {
+                    sb.setConfig(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, navmaxcnt);
+                    if (navmaxcnt != QueryParams.FACETS_STANDARD_MAXCOUNT) QueryParams.FACETS_STANDARD_MAXCOUNT = navmaxcnt;
+                }
             }
             if (post.containsKey("searchpage_default")) {
                 // load defaults from defaults/yacy.init file
@@ -174,6 +181,7 @@ public class ConfigSearchPage_p {
         prop.put("search.navigation.namespace", sb.getConfig("search.navigation", "").indexOf("namespace",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.topics", sb.getConfig("search.navigation", "").indexOf("topics",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.date", sb.getConfig("search.navigation", "").indexOf("date",0) >= 0 ? 1 : 0);
+        prop.put("search.navigation.maxcount", sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT));
 
         prop.put("about.headline", sb.getConfig("about.headline", "About"));
         prop.put("about.body", sb.getConfig("about.body", ""));

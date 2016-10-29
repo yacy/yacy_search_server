@@ -80,7 +80,7 @@ import org.apache.solr.util.DateFormatUtil;
 
 public final class QueryParams {
 
-    public static int FACETS_STANDARD_MAXCOUNT = 10000;
+    public static int FACETS_STANDARD_MAXCOUNT = 100; // max count of item lines in navigator
     public static int FACETS_DATE_MAXCOUNT = 640;
     
     public enum Searchdom {
