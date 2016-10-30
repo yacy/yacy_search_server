@@ -278,9 +278,9 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next().trim();
                 count = theSearch.collectionNavigator.get(name);
                 if (count == 0) break;
-                nav = (name.indexOf(' ', 0) < 0) ? "collection%3A" + name : "collection%3A%28" + name.replace(" ", "+") + "%29";
+                nav = "collection%3A" + name;
                 /* Avoid double percent encoding in QueryParams.navurl */
-                rawNav = (name.indexOf(' ', 0) < 0) ? "collection:" + name : "collection:(" + name.replace(" ", "+") + ")";
+                rawNav = "collection:" + name;
                 if (theSearch.query.modifier.collection == null || !theSearch.query.modifier.collection.contains(name)) {
                     pos++;
                     prop.put("nav-collections_element_" + i + "_on", 1);
@@ -362,7 +362,6 @@ public class yacysearchtrailer {
             navigatorIterator = theSearch.protocolNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav, rawNav;
-            boolean visible = false;
             String oldQuery = theSearch.query.getQueryGoal().query_original; // prepare hack to make radio-button like navigation
             String oldProtocolModifier = theSearch.query.modifier.protocol;
             if (oldProtocolModifier != null && oldProtocolModifier.length() > 0) {theSearch.query.modifier.remove("/" + oldProtocolModifier); theSearch.query.modifier.remove(oldProtocolModifier);}
@@ -372,7 +371,6 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next().trim();
                 count = theSearch.protocolNavigator.get(name);
                 if (count == 0) break;
-                visible = visible || "ftp,smb".indexOf(name) >= 0;
                 nav = "%2F" + name;
                 /* Avoid double percent encoding in QueryParams.navurl */
                 rawNav = "/" + name;
