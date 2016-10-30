@@ -57,7 +57,12 @@ public class QueryModifier {
         this.to = null;
         this.modifier = new StringBuilder(20);
     }
-    
+
+    /**
+     * Parse query string for query modifier parameters
+     * @param querystring
+     * @return query string with parameters removed
+     */
     public String parse(String querystring) {
 
         // parse protocol
@@ -142,15 +147,16 @@ public class QueryModifier {
         }
         
         // parse collection
-        final int collectioni = querystring.indexOf("collection:", 0);
-        if (collectioni >= 0) {
+        int collectioni = querystring.indexOf("collection:", 0);
+        while (collectioni >= 0) { // due to possible collision with "on:" modifier make sure no "collection:" remains
             int ftb = querystring.indexOf(' ', collectioni);
             this.collection = querystring.substring(collectioni + 11, ftb == -1 ? querystring.length() : ftb);
             querystring = querystring.replace("collection:" + this.collection, "").replace("  ", " ").trim();
-            add("collection:" + this.collection);
+            collectioni = querystring.indexOf("collection:", 0);
         }
+        if (this.collection != null) add("collection:" + this.collection);
         
-        // parse on-date
+        // parse on-date, must be after "collection:" as "on:" contained in it
         final int oni = querystring.indexOf("on:", 0);
         if (oni >= 0) {
             int ftb = querystring.indexOf(' ', oni);
@@ -201,7 +207,13 @@ public class QueryModifier {
         
         return querystring.trim();
     }
-    
+
+    /**
+     * Parse query string for filetype (file extension) parameter
+     * @param querystring
+     * @param filetypePrefix "filetype:"
+     * @return querystring with filetype parameter removed
+     */
     private String filetypeParser(String querystring, final String filetypePrefix) {
         final int ftp = querystring.indexOf(filetypePrefix, 0);
         if ( ftp >= 0 ) {
@@ -212,7 +224,7 @@ public class QueryModifier {
             while ( !filetype.isEmpty() && filetype.charAt(0) == '.' ) {
                 filetype = filetype.substring(1);
             }
-            add("filetype:" + filetype);
+            add(filetypePrefix + filetype);
             if (filetype.isEmpty()) filetype = null;
             if (querystring.length() == 0) querystring = "*";
         }
