@@ -190,23 +190,14 @@ function toggleVisibility(name, count) {
 <script>if (#[count]# <= 8) toggleVisibility('namespace', #[count]#);</script>
 #(/nav-namespace)#
 
-#(nav-authors)#::
+#{navs}#
 <ul class="nav nav-sidebar menugroup">
-<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('authors', #[count]#);">Author [#[count]#] <span style="float:right" id="chevron-authors" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('#[name]#', #[count]#);">#[displayname]# [#[count]#] <span style="float:right" id="chevron-#[name]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>
-<script>if (#[count]# <= 8) toggleVisibility('authors', #[count]#);</script>
-#(/nav-authors)#
-
-#(nav-collections)#::
-<ul class="nav nav-sidebar menugroup">
-<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('collections', #[count]#);">Collection [#[count]#] <span style="float:right" id="chevron-collections" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
-#{element}#
-<li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
-#{/element}#</ul>
-<script>if (#[count]# <= 8) toggleVisibility('collections', #[count]#);</script>
-#(/nav-collections)#
+<script>if (#[count]# <= 8) toggleVisibility('#[name]#', #[count]#);</script>
+#{/navs}#
 
 #{nav-vocabulary}#
 <ul class="nav nav-sidebar menugroup">

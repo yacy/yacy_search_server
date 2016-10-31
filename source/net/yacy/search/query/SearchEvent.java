@@ -68,6 +68,7 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LargeNumberCache;
@@ -97,6 +98,9 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
+import net.yacy.search.navigator.Navigator;
+import net.yacy.search.navigator.RestrictedStringNavigator;
+import net.yacy.search.navigator.StringNavigator;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -144,8 +148,6 @@ public final class SearchEvent {
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
     public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
     public final ScoreMap<String> hostNavigator; // a counter for the appearance of host names
-    public final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
-    public final ScoreMap<String> collectionNavigator; // a counter for the appearances of collections
     public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
     public final ScoreMap<String> filetypeNavigator; // a counter for file types
@@ -153,6 +155,8 @@ public final class SearchEvent {
     public final ScoreMap<String> languageNavigator; // a counter for appearance of languages
     public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
+    // map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms)
+    public final Map<String, StringNavigator> navigatorPlugins; // map of active search navigators key=internal navigator name
     private final LoaderDispatcher                        loader;
     private final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     private final boolean                                 deleteIfSnippetFail;
@@ -257,8 +261,6 @@ public final class SearchEvent {
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
         this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
-        this.authorNavigator = navcfg.contains("authors") ? new ConcurrentScoreMap<String>() : null;
-        this.collectionNavigator = navcfg.contains("collections") ? new ConcurrentScoreMap<String>() : null;
         this.namespaceNavigator = navcfg.contains("namespace") ? new ConcurrentScoreMap<String>() : null;
         this.hostNavigator = navcfg.contains("hosts") ? new ConcurrentScoreMap<String>() : null;
         this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
@@ -267,6 +269,31 @@ public final class SearchEvent {
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
         this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
+        // prepare configured search navigation (plugins)
+        this.navigatorPlugins = new LinkedHashMap<String, StringNavigator>();
+        String[] navnames = navcfg.split(",");
+        for (String navname : navnames) {
+            if (navname.contains("authors")) {
+                this.navigatorPlugins.put("authors", new StringNavigator("Authors", CollectionSchema.author_sxt));
+            }
+            if (navname.contains("collections")) {
+                RestrictedStringNavigator tmpnav = new RestrictedStringNavigator("Collection", CollectionSchema.collection_sxt);
+                // exclude default internal collection names
+                tmpnav.addForbidden("dht");
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_AUTOCRAWL_DEEP);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_AUTOCRAWL_SHALLOW);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_PROXY);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_REMOTE);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_GREEDY_LEARNING_TEXT);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SURROGATE);
+                this.navigatorPlugins.put("collections", tmpnav);
+            }
+        }
+
         this.snippets = new ConcurrentHashMap<String, LinkedHashSet<String>>(); 
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
         if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
@@ -813,6 +840,19 @@ public final class SearchEvent {
         timer = System.currentTimeMillis();
 
         // collect navigation information
+
+        // iterate over active navigator plugins to let them update the counters
+        for (String s : this.navigatorPlugins.keySet()) {
+            Navigator navi = this.navigatorPlugins.get(s);
+            if (navi != null) {
+                if (facets == null || facets.isEmpty()) { // just in case we got no solr facet
+                    navi.incDocList(nodeList);
+                } else {
+                    navi.incFacet(facets);
+                }
+            }
+        }
+
         ReversibleScoreMap<String> fcts;
         if (this.locationNavigator != null) {
             fcts = facets.get(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
@@ -834,7 +874,6 @@ public final class SearchEvent {
                     if (host.startsWith("www.")) host = host.substring(4);
                     this.hostNavigator.inc(host, hc);
                 }
-                //this.hostNavigator.inc(fcts);
             }
         }
 
@@ -877,16 +916,6 @@ public final class SearchEvent {
                 }
                 this.languageNavigator.inc(fcts);
             }
-        }
-
-        if (this.authorNavigator != null) {
-            fcts = facets.get(CollectionSchema.author_sxt.getSolrFieldName());
-            if (fcts != null) this.authorNavigator.inc(fcts);
-        }
-
-        if (this.collectionNavigator != null) {
-            fcts = facets.get(CollectionSchema.collection_sxt.getSolrFieldName());
-            if (fcts != null) this.collectionNavigator.inc(fcts);
         }
 
         if (this.protocolNavigator != null) {
@@ -1303,6 +1332,15 @@ public final class SearchEvent {
             }
             
             // from here: collect navigation information
+            // TODO: it may be a little bit late here, to update navigator counters
+
+            // iterate over active navigator plugins (the rwi metadata may contain the field the plugin counts)
+            for (String s : this.navigatorPlugins.keySet()) {
+                Navigator navi = this.navigatorPlugins.get(s);
+                if (navi != null) {
+                    navi.incDoc(page);
+                }
+            }
 
             // namespace navigation
             if (this.namespaceNavigator != null) {
