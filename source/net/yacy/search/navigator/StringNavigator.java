@@ -1,5 +1,5 @@
 /**
- * Navigator.java
+ * StringNavigator.java
  * (C) 2016 by reger24; https://github.com/reger24
  *
  * This is a part of YaCy, a peer-to-peer based web search engine
@@ -33,12 +33,13 @@ import net.yacy.search.query.QueryModifier;
 import net.yacy.search.schema.CollectionSchema;
 
 /**
- *
+ * Search navigator for simple string entries based on ScoreMap to count and
+ * order the result list by counted occurence
  */
 public class StringNavigator  extends ConcurrentScoreMap<String> implements Navigator {
 
     public String title;
-    public CollectionSchema field;
+    protected final CollectionSchema field;
 
     public StringNavigator(String title, CollectionSchema field) {
         super();
@@ -137,5 +138,13 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
         } else {
             return modifier.toString().contains(getQueryModifier() + "(" + name + ")");
         }
+    }
+
+    @Override
+    public String getIndexFieldName() {
+        if (field != null)
+            return field.getSolrFieldName();
+        else
+            return "";
     }
 }

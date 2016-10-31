@@ -156,7 +156,7 @@ public final class SearchEvent {
     public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
     // map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms)
-    public final Map<String, StringNavigator> navigatorPlugins; // map of active search navigators key=internal navigator name
+    public final Map<String, Navigator> navigatorPlugins; // map of active search navigators key=internal navigator name
     private final LoaderDispatcher                        loader;
     private final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     private final boolean                                 deleteIfSnippetFail;
@@ -270,7 +270,7 @@ public final class SearchEvent {
         this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
         // prepare configured search navigation (plugins)
-        this.navigatorPlugins = new LinkedHashMap<String, StringNavigator>();
+        this.navigatorPlugins = new LinkedHashMap<String, Navigator>();
         String[] navnames = navcfg.split(",");
         for (String navname : navnames) {
             if (navname.contains("authors")) {
@@ -845,7 +845,7 @@ public final class SearchEvent {
         for (String s : this.navigatorPlugins.keySet()) {
             Navigator navi = this.navigatorPlugins.get(s);
             if (navi != null) {
-                if (facets == null || facets.isEmpty()) { // just in case we got no solr facet
+                if (facets == null || facets.isEmpty() || !facets.containsKey(navi.getIndexFieldName())) { // just in case we got no solr facet
                     navi.incDocList(nodeList);
                 } else {
                     navi.incFacet(facets);

@@ -44,7 +44,7 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
-import net.yacy.search.navigator.StringNavigator;
+import net.yacy.search.navigator.Navigator;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
@@ -469,7 +469,7 @@ public class yacysearchtrailer {
         int ni = 0;
         for (String naviname : theSearch.navigatorPlugins.keySet()) {
 
-            StringNavigator navi = theSearch.navigatorPlugins.get(naviname);
+            Navigator navi = theSearch.navigatorPlugins.get(naviname);
             if (navi.isEmpty()) {
                 continue;
             }

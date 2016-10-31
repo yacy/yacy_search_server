@@ -93,4 +93,9 @@ public interface Navigator extends ScoreMap<String> {
      * @return true if navigator key is mentioned as modifier
      */
     public boolean modifieractive(QueryModifier modifier, String name);
+
+    /**
+     * @return the name of the index field, the fieldname counted in incDoc, incDoclList, incFacet
+     */
+    public String getIndexFieldName();
 }
