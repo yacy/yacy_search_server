@@ -6,27 +6,13 @@
 #{/element}#
 </yacy:facet>
 #(/nav-domains)#
-#(nav-namespace)#::
-<yacy:facet name="namespace" displayname="Namespace" type="String" min="0" max="0" mean="0">
+#{navs}#
+<yacy:facet name="#[name]#" displayname="#[displayname]#" type="String" min="0" max="0" mean="0">
 #{element}#
-<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" url="#[url]#"/>
+    <yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" url="#[url]#"/>
 #{/element}#
 </yacy:facet>
-#(/nav-namespace)#
-#(nav-authors)#::
-<yacy:facet name="authors" displayname="Authors" type="String" min="0" max="0" mean="0">
-#{element}#
-<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" url="#[url]#"/>
-#{/element}#
-</yacy:facet>
-#(/nav-authors)#
-#(nav-collections)#::
-<yacy:facet name="collections" displayname="Collections" type="String" min="0" max="0" mean="0">
-#{element}#
-<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" url="#[url]#"/>
-#{/element}#
-</yacy:facet>
-#(/nav-collections)#
+#{/navs}#
 #(nav-filetypes)#::
 <yacy:facet name="filetypes" displayname="Filetypes" type="String" min="0" max="0" mean="0">
 #{element}#

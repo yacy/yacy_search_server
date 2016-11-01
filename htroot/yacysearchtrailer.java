@@ -131,8 +131,7 @@ public class yacysearchtrailer {
                     rawNav = "";
                 }
                 prop.put(fileType, "nav-domains_element_" + i + "_name", name);
-                /* URL is already percent encoded : no need to re-encode specifically for the file type */
-                prop.put("nav-domains_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
+                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                 prop.put(fileType, "nav-domains_element_" + i + "_id", "domains_" + i);
                 prop.put("nav-domains_element_" + i + "_count", count);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
@@ -174,8 +173,7 @@ public class yacysearchtrailer {
                 }
                 String longname = ISO639.country(name);
                 prop.put(fileType, "nav-languages_element_" + i + "_name", longname == null ? name : longname);
-                /* URL is already percent encoded : no need to re-encode specifically for the file type */
-                prop.put("nav-languages_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
+                prop.put(fileType, "nav-languages_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                 prop.put(fileType, "nav-languages_element_" + i + "_id", "languages_" + i);
                 prop.put("nav-languages_element_" + i + "_count", count);
                 prop.put("nav-languages_element_" + i + "_nl", 1);
@@ -218,7 +216,7 @@ public class yacysearchtrailer {
                 prop.put("nav-topics_element_" + i + "_on", 1);
                 prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
-                prop.put("nav-topics_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, name, false).toString());
+                prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, name, false).toString());
                 prop.put("nav-topics_element_" + i + "_count", count);
                 int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (1 + maxcount - mincount);
                 fontsize = Math.max(TOPWORDS_MINSIZE, fontsize - (name.length() - 5));
@@ -267,9 +265,9 @@ public class yacysearchtrailer {
                     rawNav = "";
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
-                /* URL is already percent encoded : no need to re-encode specifically for the file type */
                 String url = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString();
                 prop.put("nav-protocols_element_" + i + "_on_url", url);
+                prop.put(fileType, "nav-protocols_element_" + i + "_url", url);
                 prop.put("nav-protocols_element_" + i + "_count", count);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
@@ -364,8 +362,7 @@ public class yacysearchtrailer {
                     rawNav = "";
                 }
                 prop.put(fileType, "nav-filetypes_element_" + i + "_name", name);
-                /* URL is already percent encoded : no need to re-encode specifically for the file type */
-                prop.put("nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
+                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                 prop.put(fileType, "nav-filetypes_element_" + i + "_id", "filetypes_" + i);
                 prop.put("nav-filetypes_element_" + i + "_count", count);
                 prop.put("nav-filetypes_element_" + i + "_nl", 1);
@@ -408,8 +405,7 @@ public class yacysearchtrailer {
                         rawNav = "";
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-                    /* URL is already percent encoded : no need to re-encode specifically for the file type */
-                    prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
+                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_id", "vocabulary_" + navname + "_" + i);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
@@ -469,8 +465,7 @@ public class yacysearchtrailer {
                     rawNav = "";
                 }
                 prop.put(fileType, "navs_" + ni + "_element_" + i + "_name", navi.getElementDisplayName(name));
-                // URL is already percent encoded : no need to re-encode specifically for the file type
-                prop.put("navs_" + ni + "_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
+                prop.put(fileType, "navs_" + ni + "_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
                 prop.put(fileType, "navs_" + ni + "_element_" + i + "_id", naviname + "_" + i);
                 prop.put("navs_" + ni + "_element_" + i + "_count", count);
                 prop.put("navs_" + ni + "_element_" + i + "_nl", 1);
