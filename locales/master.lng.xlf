@@ -2123,6 +2123,12 @@
     <trans-unit id="34c085e7" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Augmented Browsing&lt;</source>
     </trans-unit>
+    <trans-unit id="37b12af6" xml:space="preserve" approved="no" translate="yes">
+       <source>For this option URL proxy must be enabled.</source>
+    </trans-unit>    
+    <trans-unit id="a0b7e36a" xml:space="preserve" approved="no"  translate="yes">
+       <source>max. items</source>
+    </trans-unit>    
     <trans-unit id="2f43be1e" xml:space="preserve" approved="no" translate="yes">
        <source>"Save Settings"</source>
     </trans-unit>
@@ -4238,9 +4244,6 @@
     </trans-unit>
     <trans-unit id="d7c19933" xml:space="preserve" approved="no" translate="yes">
        <source>pos in phrase&lt;/td&gt;</source>
-    </trans-unit>
-    <trans-unit id="fe602610" xml:space="preserve" approved="no" translate="yes">
-       <source>word distance&lt;/td&gt;</source>
     </trans-unit>
     <trans-unit id="6779a8aa" xml:space="preserve" approved="no" translate="yes">
        <source>&lt;td&gt;authority&lt;/td&gt;</source>
