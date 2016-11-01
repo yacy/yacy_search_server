@@ -99,48 +99,9 @@ public class yacysearchtrailer {
         prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
         prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
 
-        // namespace navigators
         String name;
         int count;
         Iterator<String> navigatorIterator;
-        if (theSearch.namespaceNavigator == null || theSearch.namespaceNavigator.isEmpty()) {
-            prop.put("nav-namespace", 0);
-        } else {
-            prop.put("nav-namespace", 1);
-            navigatorIterator = theSearch.namespaceNavigator.keys(false);
-            int i = 0, pos = 0, neg = 0;
-            String nav, rawNav;
-            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
-                name = navigatorIterator.next();
-                count = theSearch.namespaceNavigator.get(name);
-                if (count == 0) break;
-                nav = "inurl%3A" + name;
-                /* Avoid double percent encoding in QueryParams.navurl */
-                rawNav = "inurl:" + name;
-                if (!theSearch.query.modifier.toString().contains("inurl:"+name)) {
-                    pos++;
-                    prop.put("nav-namespace_element_" + i + "_on", 1);
-                    prop.put(fileType, "nav-namespace_element_" + i + "_modifier", nav);
-                } else {
-                    neg++;                    
-                    prop.put("nav-namespace_element_" + i + "_on", 0);
-                    prop.put(fileType, "nav-namespace_element_" + i + "_modifier", "-" + nav);
-                    nav="";
-                    rawNav = "";
-                }
-                prop.put(fileType, "nav-namespace_element_" + i + "_name", name);
-                /* URL is already percent encoded : no need to re-encode specifically for the file type */
-                prop.put("nav-namespace_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
-                prop.put(fileType, "nav-namespace_element_" + i + "_id", "namespace_" + i);
-                prop.put("nav-namespace_element_" + i + "_count", count);
-                prop.put("nav-namespace_element_" + i + "_nl", 1);
-                i++;
-            }
-            prop.put("nav-namespace_element", i);
-            i--;
-            prop.put("nav-namespace_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0) prop.put("nav-namespace", 0); // this navigation is not useful
-        }
 
         // domain navigators
         final ScoreMap<String> hostNavigator = theSearch.hostNavigator;

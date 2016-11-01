@@ -181,15 +181,6 @@ function toggleVisibility(name, count) {
 <script>if (#[count]# <= 8) toggleVisibility('languages', #[count]#);</script>
 #(/nav-languages)#
 
-#(nav-namespace)#::
-<ul class="nav nav-sidebar menugroup">
-<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('namespace', #[count]#);">Name Space [#[count]#] <span style="float:right" id="chevron-namespace" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
-#{element}#
-<li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
-#{/element}#</ul>
-<script>if (#[count]# <= 8) toggleVisibility('namespace', #[count]#);</script>
-#(/nav-namespace)#
-
 #{navs}#
 <ul class="nav nav-sidebar menugroup">
 <li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('#[name]#', #[count]#);">#[displayname]# [#[count]#] <span style="float:right" id="chevron-#[name]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>

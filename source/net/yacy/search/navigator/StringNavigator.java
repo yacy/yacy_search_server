@@ -22,10 +22,8 @@
  */
 package net.yacy.search.navigator;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -84,7 +82,7 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
                     mod = ":";
             }
         } else {
-            mod = ":";
+            mod = "";
         }
         return mod;
     }
@@ -111,21 +109,17 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
     @Override
     public void incDoc(URIMetadataNode doc) {
         if (field != null) {
-            if (field.getType() == SolrType.date) {
-                Date dd = (Date) doc.getFieldValue(field.getSolrFieldName());
-                String year = Integer.toString(dd.getYear() + 1900);
-                this.inc(year);
-            } else {
-                Object val = doc.getFieldValue(field.getSolrFieldName());
-                if (val instanceof List) {
-                    List<String> ll = (List) val;
-                    for (String s : ll) {
+            Object val = doc.getFieldValue(field.getSolrFieldName());
+            if (val instanceof List) {
+                List<String> ll = (List) val;
+                for (String s : ll) {
+                    if (!s.isEmpty()) {
                         this.inc(s);
                     }
-                } else {
-                    if (val != null) {
-                        this.inc((String) val);
-                    }
+                }
+            } else {
+                if (val != null) {
+                    this.inc((String) val);
                 }
             }
         }

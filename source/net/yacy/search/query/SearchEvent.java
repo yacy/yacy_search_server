@@ -98,6 +98,7 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
+import net.yacy.search.navigator.NameSpaceNavigator;
 import net.yacy.search.navigator.Navigator;
 import net.yacy.search.navigator.RestrictedStringNavigator;
 import net.yacy.search.navigator.StringNavigator;
@@ -148,7 +149,6 @@ public final class SearchEvent {
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
     public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
     public final ScoreMap<String> hostNavigator; // a counter for the appearance of host names
-    public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
     public final ScoreMap<String> filetypeNavigator; // a counter for file types
     public final ScoreMap<String> dateNavigator; // a counter for file types
@@ -261,7 +261,6 @@ public final class SearchEvent {
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
         this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
-        this.namespaceNavigator = navcfg.contains("namespace") ? new ConcurrentScoreMap<String>() : null;
         this.hostNavigator = navcfg.contains("hosts") ? new ConcurrentScoreMap<String>() : null;
         this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
         this.filetypeNavigator = navcfg.contains("filetype") ? new ConcurrentScoreMap<String>() : null;
@@ -291,6 +290,9 @@ public final class SearchEvent {
                 tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
                 tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SURROGATE);
                 this.navigatorPlugins.put("collections", tmpnav);
+            }
+            if (navname.contains("namespace")) {
+                this.navigatorPlugins.put("namespace", new NameSpaceNavigator("Name Space"));
             }
         }
 
@@ -1339,19 +1341,6 @@ public final class SearchEvent {
                 Navigator navi = this.navigatorPlugins.get(s);
                 if (navi != null) {
                     navi.incDoc(page);
-                }
-            }
-
-            // namespace navigation
-            if (this.namespaceNavigator != null) {
-                String pagepath = page.url().getPath();
-                if ((p = pagepath.indexOf(':')) >= 0) {
-                    pagepath = pagepath.substring(0, p);
-                    p = pagepath.lastIndexOf('/');
-                    if (p >= 0) {
-                        pagepath = pagepath.substring(p + 1);
-                        this.namespaceNavigator.inc(pagepath);
-                    }
                 }
             }
 
