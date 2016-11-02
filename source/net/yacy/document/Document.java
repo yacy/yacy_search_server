@@ -95,7 +95,7 @@ public class Document {
     private final double lon, lat;
     private final Parser parserObject; // the source object that was used to create the Document
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
-    private final Date lastModified;
+    private final Date lastModified; // creation or last modification date of the source document
     private int crawldepth;
 
     public Document(final DigestURL location, final String mimeType, final String charset,
@@ -513,6 +513,9 @@ dc_rights
         return this.emaillinks;
     }
 
+    /**
+     * @return last modification date of the source document
+     */
     public Date getLastModified() {
         return this.lastModified;
     }
