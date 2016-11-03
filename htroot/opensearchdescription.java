@@ -24,9 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -40,26 +39,12 @@ public class opensearchdescription {
         String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
         if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
 
-        String thisaddress = header.get(HeaderFramework.HOST); // returns host:port (if not default http/https ports)
-        String thisprotocol = "http";
-        if (thisaddress == null) {
-            thisaddress = Domains.LOCALHOST + ":" + sb.getConfig("port", "8090");
-        } else {
-            final String sslport = ":" + sb.getConfig("port.ssl", "8443");
-            if (thisaddress.endsWith(sslport)) { // connection on ssl port, use https protocol
-                thisprotocol = "https";
-            }
-        }
-        /* YaCyDefaultServelt should have filled this custom header, making sure we know here wether original request is http or https
-         *  (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
-        thisprotocol = header.get(HeaderFramework.X_YACY_REQUEST_SCHEME, thisprotocol);
+        final String thisContext = YaCyDefaultServlet.getContext(header, sb);
         
         final serverObjects prop = new serverObjects();
         prop.put("compareyacy", post != null && post.getBoolean("compare_yacy") ? 1 : 0);
-        prop.putXML("thisaddress", thisaddress);
-        prop.putXML("compareyacy_thisaddress", thisaddress);
-        prop.putXML("thisprotocol", thisprotocol);
-        prop.putXML("compareyacy_thisprotocol", thisprotocol);
+        prop.putXML("thisContext", thisContext);
+        prop.putXML("compareyacy_thisContext", thisContext);
         prop.putXML("SearchPageGreeting", promoteSearchPageGreeting);
         prop.putXML("clientname", sb.peers.mySeed().getName());
         prop.putXML("compareyacy_search_left", post == null ? compare_yacy.defaultsearchL : post.get("left", compare_yacy.defaultsearchL));

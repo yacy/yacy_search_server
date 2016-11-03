@@ -33,11 +33,10 @@ import java.net.MalformedURLException;
 import java.util.Properties;
 
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -230,29 +229,13 @@ public class ConfigPortal {
         prop.put("target_special_pattern", sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, ""));
 
         /* Address used in code template */
-        String myaddress = (sb.peers == null) || sb.peers.mySeed() == null || sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
+        String myaddress = (sb.peers == null) || sb.peers.mySeed() == null || sb.peers.mySeed().getIPs().isEmpty() ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIPs().iterator().next());
         if (myaddress == null) {
             myaddress = "localhost:" + sb.getLocalPort();
         }
         prop.put("myaddress", myaddress);
         
-        /* Address used to generate the preview frames : let's use the adress and port as requested. (Same behavior as opensearchdescription.java) */
-        String myPreviewAddress = header.get(HeaderFramework.HOST); // returns host:port (if not default http/https ports)
-        String myPreviewProtocol = "http";
-        if (myPreviewAddress == null) {
-        	myPreviewAddress = Domains.LOCALHOST + ":" + sb.getConfig("port", "8090");
-        } else {
-            final String sslport = ":" + sb.getConfig("port.ssl", "8443");
-            if (myPreviewAddress.endsWith(sslport)) { // connection on ssl port, use https protocol
-                myPreviewProtocol = "https";
-            }
-        }
-        /* YaCyDefaultServelt should have filled this custom header, making sure we know here wether original request is http or https
-         *  (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
-        myPreviewProtocol = header.get(HeaderFramework.X_YACY_REQUEST_SCHEME, myPreviewProtocol);
-        
-        prop.put("myPreviewAddress", myPreviewAddress);
-        prop.put("myPreviewProtocol", myPreviewProtocol);
+        prop.put("myPreviewContext", YaCyDefaultServlet.getContext(header, sb));
         return prop;
     }
 

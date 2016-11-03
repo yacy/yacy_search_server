@@ -62,6 +62,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ByteBuffer;
@@ -691,6 +692,46 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         }
         return result;
+    }
+    
+    /**
+     * Returns the URL base for this peer, determined from request header when present. Use this when absolute URL rendering is required, 
+     * otherwise relative URLs should be preferred.
+     * @param header request header.
+     * @param sb Switchboard instance.
+     * @return the application context (URL request base) from request header or default configuration. This is
+     * either http://hostname:port or https://hostname:sslport
+     */
+    public static String getContext(final RequestHeader header, final Switchboard sb) {
+        String hostAndPort = null;
+        if(header != null) {
+        	hostAndPort = header.get(HeaderFramework.HOST);
+        }
+        String protocol = "http";
+        if (hostAndPort == null) {
+        	if(sb != null) {
+        		hostAndPort = Domains.LOCALHOST + ":" + sb.getConfigInt("port", 8090);
+        	} else {
+        		hostAndPort = Domains.LOCALHOST + ":8090";
+        	}
+        } else {
+            final String sslport;
+            if(sb != null) {
+            	sslport = ":" + sb.getConfigInt("port.ssl", 8443);
+            } else {
+            	sslport = ":8443";
+            }
+            if (hostAndPort.endsWith(sslport)) { // connection on ssl port, use https protocol
+                protocol = "https";
+            }
+        }
+        /* YaCyDefaultServelt should have filled this custom header, making sure we know here whether original request is http or https
+         *  (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
+        protocol = header.get(HeaderFramework.X_YACY_REQUEST_SCHEME, protocol);
+        
+        /* Note : this implementation lets the responsibility to any eventual Reverse Proxy to eventually rewrite the rendered absolute URL */
+        
+        return protocol + "://" + hostAndPort;
     }
 
     protected RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
