@@ -27,11 +27,11 @@ import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.federate.opensearch.SRURSSConnector;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.LibraryProvider;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -44,6 +44,8 @@ public class yacysearch_location {
         final serverObjects prop = new serverObjects();
 
         prop.put("kml", 0);
+        
+        final String peerContext = YaCyDefaultServlet.getContext(header, sb);
 
         if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("kml") ||
             header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("xml") ||
@@ -66,14 +68,13 @@ public class yacysearch_location {
             final double lat = post.getDouble("lat", 0.0d);
             final double radius = post.getDouble("r", 0.0d);
             //i.e. http://localhost:8090/yacysearch_location.kml?query=berlin&maximumTime=2000&maximumRecords=100
-
+            
             int placemarkCounter = 0;
             if (query.length() > 0 && search_query) {
                 final Set<GeoLocation> locations = LibraryProvider.geoLoc.find(query, true);
                 for (final String qp: CommonPattern.SPACES.split(query)) {
                     locations.addAll(LibraryProvider.geoLoc.find(qp, true));
                 }
-                String ip = sb.peers.mySeed().getIP();
                 for (final GeoLocation location: locations) {
                     // write for all locations a point to this message
                     double lo = location.lon();
@@ -86,7 +87,7 @@ public class yacysearch_location {
                     prop.put("kml_placemark_" + placemarkCounter + "_subject", "");
                     prop.put("kml_placemark_" + placemarkCounter + "_description", "");
                     prop.put("kml_placemark_" + placemarkCounter + "_date", "");
-                    prop.putXML("kml_placemark_" + placemarkCounter + "_url", "http://" + sb.peers.mySeed().getPublicAddress(ip) + "/yacysearch.html?query=" + location.getName());
+                    prop.putXML("kml_placemark_" + placemarkCounter + "_url", peerContext + "/yacysearch.html?query=" + location.getName());
                     prop.put("kml_placemark_" + placemarkCounter + "_pointname", location.getName());
                     prop.put("kml_placemark_" + placemarkCounter + "_lon", lo);
                     prop.put("kml_placemark_" + placemarkCounter + "_lat", la);
@@ -128,15 +129,13 @@ public class yacysearch_location {
             if (post == null) return prop;
             String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
             if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
-            String hostName = header.get("Host", Domains.LOCALHOST);
-            if (hostName.indexOf(':',0) == -1) hostName += ":" + env.getLocalPort();
             final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
             final boolean global = post.get("kml_resource", "local").equals("global");
 
             prop.put("kml_date822", HeaderFramework.formatRFC1123(new Date()));
             prop.put("kml_promoteSearchPageGreeting", promoteSearchPageGreeting);
-            prop.put("kml_rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.png");
-            prop.put("kml_searchBaseURL", "http://" + hostName + "/yacysearch_location.rss");
+            prop.put("kml_rssYacyImageURL", peerContext + "/env/grafics/yacy.png");
+            prop.put("kml_searchBaseURL", peerContext + "/yacysearch_location.rss");
             prop.putXML("kml_rss_query", originalquerystring);
             prop.put("kml_rss_queryenc", originalquerystring.replace(' ', '+'));
             prop.put("kml_resource", global ? "global" : "local");

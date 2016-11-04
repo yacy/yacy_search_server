@@ -37,7 +37,7 @@
 <rss version="2.0">
 	<channel>
 		<title><![CDATA[YaCy '#[peer]#': Bookmarks]]></title>
-		<link>http://#[address]#/api/bookmarks/get_bookmarks.xml</link>
+		<link>#[address]#/api/bookmarks/get_bookmarks.xml</link>
 		<description><![CDATA[#[user]#'s Bookmark-Feed]]></description>
 	</channel>
 	#{bookmarks}#<item>
