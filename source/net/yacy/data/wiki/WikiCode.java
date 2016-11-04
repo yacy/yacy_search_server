@@ -578,7 +578,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     /**
      * Processes tags which are connected to links and images.
      * @author [AS], [MN]
-     * @param hostport
+     * @param hostport (optional) host and port, added when not empty as the base of relative Wiki link URLs.
      * @param line line of text to be transformed from wiki code to HTML
      * @return HTML fragment
      */
@@ -630,12 +630,12 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     }
                 }
 
-                // replace incomplete URLs and make them point to http://peerip:port/...
+                // eventually replace incomplete URLs and make them point to http://peerip:port/...
                 // with this feature you can access an image in DATA/HTDOCS/share/yacy.gif
                 // using the wikicode [[Image:share/yacy.gif]]
                 // or an image DATA/HTDOCS/grafics/kaskelix.jpg with [[Image:grafics/kaskelix.jpg]]
                 // you are free to use other sub-paths of DATA/HTDOCS
-                if (kl.indexOf("://",0) < 1) {
+                if (kl.indexOf("://",0) < 1 && hostport != null && !hostport.isEmpty()) {
                     kl = "http://" + hostport + "/" + kl;
                 }
 
@@ -677,12 +677,12 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             else {
                 kv = kl;
             }
-            // replace incomplete URLs and make them point to http://peerip:port/...
+            // eventually replace incomplete URLs and make them point to http://peerip:port/...
             // with this feature you can access a file at DATA/HTDOCS/share/page.html
             // using the wikicode [share/page.html]
             // or a file DATA/HTDOCS/www/page.html with [www/page.html]
             // you are free to use other sub-paths of DATA/HTDOCS
-            if (kl.indexOf("://",0) < 1) {
+            if (kl.indexOf("://",0) < 1 && hostport != null && !hostport.isEmpty()) {
                 kl = "http://" + hostport + "/" + kl;
             }
             line = line.substring(0, positionOfOpeningTag) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_EXTERNAL_LINK);

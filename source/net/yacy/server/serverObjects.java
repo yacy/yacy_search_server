@@ -352,16 +352,46 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
 
+    /**
+     * Add a String to the map. The content of the String is first parsed and interpreted as Wiki code.
+     * @param hostport (optional) peer host and port, added when not empty as the base of relative Wiki link URLs.
+     * @param key key name as String.
+     * @param wikiCode wiki code content as String.
+     */
     public void putWiki(final String hostport, final String key, final String wikiCode){
         this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
     }
+    
+    /**
+     * Add a String to the map. The content of the String is first parsed and interpreted as Wiki code.
+     * @param key key name as String.
+     * @param wikiCode wiki code content as String.
+     */
+    public void putWiki(final String key, final String wikiCode){
+        this.putWiki(null, key, wikiCode);
+    }
 
+    /**
+     * Add a byte array to the map. The content of the array is first parsed and interpreted as Wiki code.
+     * @param hostport (optional) peer host and port, added when not empty as the base of relative Wiki link URLs.
+     * @param key key name as String.
+     * @param wikiCode wiki code content as byte array.
+     */
     public void putWiki(final String hostport, final String key, final byte[] wikiCode) {
         try {
             this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
         } catch (final UnsupportedEncodingException e) {
             this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Add a byte array to the map. The content of the array is first parsed and interpreted as Wiki code.
+     * @param key key name as String.
+     * @param wikiCode wiki code content as byte array.
+     */
+    public void putWiki(final String key, final byte[] wikiCode) {
+    	this.putWiki(null, key, wikiCode);
     }
 
     // inc variant: for counters
