@@ -228,14 +228,7 @@ public class ConfigPortal {
         prop.put("target_selected_special_searchresult", "searchresult".equals(target_special) ? 1 : 0);
         prop.put("target_special_pattern", sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, ""));
 
-        /* Address used in code template */
-        String myaddress = (sb.peers == null) || sb.peers.mySeed() == null || sb.peers.mySeed().getIPs().isEmpty() ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIPs().iterator().next());
-        if (myaddress == null) {
-            myaddress = "localhost:" + sb.getLocalPort();
-        }
-        prop.put("myaddress", myaddress);
-        
-        prop.put("myPreviewContext", YaCyDefaultServlet.getContext(header, sb));
+        prop.put("myContext", YaCyDefaultServlet.getContext(header, sb));
         return prop;
     }
 
