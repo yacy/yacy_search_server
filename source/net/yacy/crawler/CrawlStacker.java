@@ -36,6 +36,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
@@ -440,7 +441,7 @@ public final class CrawlStacker {
                 CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                     ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
         } else {
-            return "double in: local index, oldDate = " + oldDate.toString();
+            return "double in: local index, oldDate = " + ISO8601Formatter.FORMATTER.format(new Date(oldDate));
         }
 
         return null;
