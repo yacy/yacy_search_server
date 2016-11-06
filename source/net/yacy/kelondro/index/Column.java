@@ -267,15 +267,18 @@ public final class Column implements Cloneable, Serializable {
         }
 
         switch (this.encoder) {
-        case encoder_b64e:
-            s.append(" {b64e}");
-            break;
-        case encoder_b256:
-            s.append(" {b256}");
-            break;
-        default:
-            s.append(" {b256}");
-            break;
+            case encoder_b64e:
+                s.append(" {b64e}");
+                break;
+            case encoder_b256:
+                s.append(" {b256}");
+                break;
+            case encoder_bytes:
+                s.append(" {bytes}");
+                break;
+            default:
+                s.append(" {b256}");
+                break;
         }
         return s.toString();
     }
