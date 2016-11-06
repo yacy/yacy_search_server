@@ -62,6 +62,11 @@ public final class Column implements Cloneable, Serializable {
         this.description = description;
     }
 
+    /**
+     * Create column from definiton string
+     *
+     * @param celldef syntax: "celltype cellname-cellwidth {encoder} \"descripton\""
+     */
     public Column(String celldef) {
         // define column with column syntax
         // example: <UDate-3>
@@ -127,8 +132,8 @@ public final class Column implements Cloneable, Serializable {
                 this.nickname = celldef;
                 celldef = "";
             } else {
-                this.nickname = celldef.substring(0, p);
-                celldef = celldef.substring(q + 1);
+                this.nickname = celldef.substring(0, q);
+                celldef = celldef.substring(q + 1).trim();
             }
         } else {
             this.nickname = celldef.substring(0, p);
