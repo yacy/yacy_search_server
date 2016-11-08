@@ -6,7 +6,7 @@
     #%env/templates/metas.template%#
     <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?query=#[former]#" />
     <link rel="search" type="application/opensearchdescription+xml" title="YaCy '#[clientname]#'" href="opensearchdescription.xml" />
-    <script type="text/javascript" src="/env/bootstrap/js/typeahead.jquery.min.js"></script>
+    <script type="text/javascript" src="env/bootstrap/js/typeahead.jquery.min.js"></script>
     <script type="text/javascript" src="js/html.js"></script>
     <script type="text/javascript">
      var suggestMatcher = function() {
@@ -48,7 +48,7 @@
     #(/topmenu)#
     
     <!-- this is the single exception in page design where we do not want a top-left application icon because we show a big one in the middle of the page -->
-	<script>document.getElementById("greeting-icon").src="/env/grafics/invisible.png"</script>
+	<script>document.getElementById("greeting-icon").src="env/grafics/invisible.png"</script>
 	
 	<h2 class="yacy"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.largeImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="margin: auto;"/></a></h2>
     <h2 class="yacy">#[promoteSearchPageGreeting]#</h2>
@@ -69,7 +69,7 @@
 	        #(searchaudio)#::<input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;#(/searchaudio)#
 	        #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;#(/searchvideo)#
 	        #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications#(/searchapp)#
-	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1" onclick="this.href='/index.html?searchoptions=1&amp;former='+document.getElementById('searchinput').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchinput').contentdom)">more options...</a>::#(/searchoptions)#
+	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1" onclick="this.href='index.html?searchoptions=1&amp;former='+document.getElementById('searchinput').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchinput').contentdom)">more options...</a>::#(/searchoptions)#
         </div>
         #(/searchdomswitches)#
         <input type="hidden" name="nav" value="#[search.navigation]#" />

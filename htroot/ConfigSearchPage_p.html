@@ -189,12 +189,12 @@
                 
                 
                 <input type="checkbox" name="search.navigation.date" value="true" #(search.navigation.date)#::checked="checked" #(/search.navigation.date)# /> Date Navigation
-<link rel="stylesheet" href="/env/morris.css">
-<script src="/js/raphael-min.js"></script>
-<script src="/js/morris.js"></script>
+<link rel="stylesheet" href="env/morris.css">
+<script src="js/raphael-min.js"></script>
+<script src="js/morris.js"></script>
 <div id="graph" style="height:200px"></div>
 <script>
-var solr= $.getJSON("/solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index", function(data) {
+var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index", function(data) {
 	dates_in_content_dts = data.facet_counts.facet_fields.dates_in_content_dts;
 	var parsed = [];
     for (var i = 0; i < dates_in_content_dts.length; i = i + 2) {

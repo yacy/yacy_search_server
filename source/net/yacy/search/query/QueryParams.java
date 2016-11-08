@@ -693,7 +693,7 @@ public final class QueryParams {
     public static StringBuilder navurlBase(final RequestHeader.FileType ext, final QueryParams theQuery, final String newModifier, boolean newModifierReplacesOld) {
 
         StringBuilder sb = new StringBuilder(120);
-        sb.append("/yacysearch.");
+        sb.append("yacysearch.");
         sb.append(ext.name().toLowerCase());
         sb.append("?query=");
 

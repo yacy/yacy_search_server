@@ -3,7 +3,7 @@
 function loadBanner() {
 	for (var i = 0; i < document.images.length; i++) {
 		if (document.images[i].src.indexOf("Banner.png") > 0) {
-			document.images[i].src = "/Banner.png?textcolor=000000&bgcolor=ffffff&bordercolor=aaaaaa&time=" + (new Date()).getTime();
+			document.images[i].src = "../../Banner.png?textcolor=000000&bgcolor=ffffff&bordercolor=aaaaaa&time=" + (new Date()).getTime();
 			break;
 		}
 	}
@@ -15,7 +15,7 @@ $(function() {
 	});
 	$("#login").click(function() {
 		$.ajax({
-   			url: "/api/bookmarks/xbel/xbel.xml?login=true",
+   			url: "../../api/bookmarks/xbel/xbel.xml?login=true",
    			method : "GET",
    			dataType: "xml",    			
    			success: function(xml) {
@@ -151,4 +151,4 @@ $(function() {
 		<td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
 	</tr>
 </table>
-<img src="/Banner.png?textcolor=000000&bgcolor=ffffff&bordercolor=aaaaaa" alt="banner" class="banner"/>
+<img src="../../Banner.png?textcolor=000000&bgcolor=ffffff&bordercolor=aaaaaa" alt="banner" class="banner"/>

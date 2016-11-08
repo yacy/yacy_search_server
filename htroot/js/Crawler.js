@@ -19,8 +19,8 @@
 */
 
 DELETE_STRING="delete";
-BAR_IMG1="/env/grafics/green-block.png";
-BAR_IMG2="/env/grafics/red-block.png";
+BAR_IMG1="env/grafics/green-block.png";
+BAR_IMG2="env/grafics/red-block.png";
 WORDCACHEBAR_LENGTH=1/4;
 
 var statusRPC;
@@ -91,12 +91,12 @@ function refresh(){
 	wait=refreshInterval;
 	statusLoaded=false;
 	requestStatus();
-	getRSS("/api/feed.xml?count=20&set=REMOTEINDEXING,LOCALINDEXING&time=" + (new Date()).getTime());
+	getRSS("api/feed.xml?count=20&set=REMOTEINDEXING,LOCALINDEXING&time=" + (new Date()).getTime());
 }
 
 function requestStatus(){
 	statusRPC=createRequestObject();
-	statusRPC.open('get', '/api/status_p.xml?html=');
+	statusRPC.open('get', 'api/status_p.xml?html=');
 	statusRPC.onreadystatechange = handleStatus;
 	statusRPC.send(null);
 }
@@ -370,12 +370,12 @@ function putQueueState(queue, state) {
 	if (state == "paused") {
 		a.href = "Crawler_p.html?continue=" + queue;
 		a.title = "Continue this queue (" + state + ")";
-		img.src = "/env/grafics/start.gif";
+		img.src = "env/grafics/start.gif";
 		img.alt = "Continue this queue";
 	} else {
 		a.href = "Crawler_p.html?pause=" + queue;
 		a.title = "Pause this queue (" + state + ")";
-		img.src = "/env/grafics/pause.gif";
+		img.src = "env/grafics/pause.gif";
 		img.alt = "Pause this queue";
 	}
 }
