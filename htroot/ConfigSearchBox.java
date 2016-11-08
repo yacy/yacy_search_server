@@ -24,19 +24,19 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class ConfigSearchBox {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        String myaddress =  sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
-        if (myaddress == null) myaddress = "localhost:" + sb.getLocalPort();
-        prop.put("myaddress", myaddress);
+        /* Fill the base URL used to render a sample code integration example */
+        prop.put("myaddress", YaCyDefaultServlet.getContext(header, sb));
         return prop;
     }
 
