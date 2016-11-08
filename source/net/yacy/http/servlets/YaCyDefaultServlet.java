@@ -98,6 +98,7 @@ import org.eclipse.jetty.util.MultiPartOutputStream;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 
+import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
@@ -695,41 +696,69 @@ public class YaCyDefaultServlet extends HttpServlet  {
     }
     
     /**
-     * Returns the URL base for this peer, determined from request header when present. Use this when absolute URL rendering is required, 
-     * otherwise relative URLs should be preferred.
+     * Returns the URL base for this peer, determined from request HTTP header "Host" when present. Use this when absolute URL rendering is required, 
+     * otherwise relative URLs should be preferred.<br/>
+     * Note : this implementation lets the responsibility to any eventual Reverse Proxy to eventually rewrite the rendered absolute URL. Example Apache directive :
+     * <code>Substitute "s|http://internal.yacypeer.com:8090/|http://www.example.com/yacy/|in"</code>.
+     * From a security point of view this is preferable than eventually relying blindly here on a X-Forwarded-Host HTTP header that can be forged by an attacker.
      * @param header request header.
      * @param sb Switchboard instance.
      * @return the application context (URL request base) from request header or default configuration. This is
      * either http://hostname:port or https://hostname:sslport
      */
     public static String getContext(final RequestHeader header, final Switchboard sb) {
+        String protocol = "http";
         String hostAndPort = null;
         if(header != null) {
-        	hostAndPort = header.get(HeaderFramework.HOST);
+        	if(hostAndPort == null){
+            	hostAndPort = header.get(HeaderFramework.HOST);
+            	
+            	/* We can try here to figure out if we are using http or https, relying on the port used.
+            	 * This only works port is not standard (80 or 443) : if so HeaderFramework.X_YACY_REQUEST_SCHEME will be more reliable */
+                final String sslport;
+                if(sb != null) {
+                	sslport = ":" + sb.getConfigInt("port.ssl", 8443);
+                } else {
+                	sslport = ":8443";
+                }
+                if (hostAndPort != null && hostAndPort.endsWith(sslport)) { // connection on ssl port, use https protocol
+                    protocol = "https";
+                }
+        	}
         }
-        String protocol = "http";
+        /* Host and port still null : let's use the default local ones */
         if (hostAndPort == null) {
         	if(sb != null) {
         		hostAndPort = Domains.LOCALHOST + ":" + sb.getConfigInt("port", 8090);
         	} else {
         		hostAndPort = Domains.LOCALHOST + ":8090";
         	}
-        } else {
-            final String sslport;
-            if(sb != null) {
-            	sslport = ":" + sb.getConfigInt("port.ssl", 8443);
-            } else {
-            	sslport = ":8443";
-            }
-            if (hostAndPort.endsWith(sslport)) { // connection on ssl port, use https protocol
-                protocol = "https";
-            }
         }
-        /* YaCyDefaultServelt should have filled this custom header, making sure we know here whether original request is http or https
-         *  (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
-        protocol = header.get(HeaderFramework.X_YACY_REQUEST_SCHEME, protocol);
         
-        /* Note : this implementation lets the responsibility to any eventual Reverse Proxy to eventually rewrite the rendered absolute URL */
+        if(header != null) {
+        	/* YaCyDefaultServelt should have filled this custom header, making sure we know here whether original request is http or https
+        	 *  (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
+        	String protocolHeader = header.get(HeaderFramework.X_YACY_REQUEST_SCHEME, "").toLowerCase();
+        	
+    		/* Let's check this custom header has a valid value */
+        	if("http".equals(protocolHeader) || "https".equals(protocolHeader)) {
+        		protocol = protocolHeader.toLowerCase();
+        	} else if(!protocolHeader.isEmpty()) {
+    			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal " + HeaderFramework.X_YACY_REQUEST_SCHEME + " header value : " + protocolHeader);
+    		}
+        	
+    		/* This peer can also be behind a reverse proxy requested using https, even if the request coming to this YaCy peer is http only
+    		 * Possible scenario (happens for example when YaCy is deployed on Heroku Platform) : User browser -> https://reverseProxy/yacyURL -> http://yacypeer/yacyURL
+    		 * In that case, absolute URLs rendered by this peer (in rss feeds for example) must effectively start with the https scheme */
+        	protocolHeader = header.get(HttpHeaders.X_FORWARDED_PROTO.toString(), "").toLowerCase();
+        	
+    		/* Here we only allow an upgrade from HTTP to HTTPS, not the reverse (we don't want a forged HTTP header by an eventual attacker to force fallback to HTTP) */
+        	if("https".equals(protocolHeader)) {
+        		protocol = protocolHeader;
+        	} else if(!protocolHeader.isEmpty()) {
+    			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal " + HttpHeaders.X_FORWARDED_PROTO.toString() + " header value : " + protocolHeader);
+    		}
+        }
         
         return protocol + "://" + hostAndPort;
     }
