@@ -116,5 +116,26 @@ public class YaCyDefaultServletTest {
 		assertEquals("http://myhost.com:8090", YaCyDefaultServlet.getContext(header, null));
 	}
 	
+	/**
+	 * Tests on getRelativeBase()
+	 */
+	@Test
+	public void testGetRelativeBase() {
+		assertEquals("", YaCyDefaultServlet.getRelativeBase(null));
+		assertEquals("", YaCyDefaultServlet.getRelativeBase(""));
+		assertEquals("", YaCyDefaultServlet.getRelativeBase("/"));
+		assertEquals("", YaCyDefaultServlet.getRelativeBase("/file.html"));
+		assertEquals("", YaCyDefaultServlet.getRelativeBase("file.html"));
+		assertEquals("", YaCyDefaultServlet.getRelativeBase("resource"));
+		assertEquals("../", YaCyDefaultServlet.getRelativeBase("folder/file.html"));
+		assertEquals("../", YaCyDefaultServlet.getRelativeBase("folder/resource"));
+		assertEquals("../", YaCyDefaultServlet.getRelativeBase("/folder/resource"));
+		assertEquals("../", YaCyDefaultServlet.getRelativeBase("a/b"));
+		assertEquals("../../", YaCyDefaultServlet.getRelativeBase("folder/subfolder/resource"));
+		assertEquals("../../", YaCyDefaultServlet.getRelativeBase("/folder/subfolder/resource"));
+		assertEquals("../", YaCyDefaultServlet.getRelativeBase("folder/"));
+		assertEquals("../../", YaCyDefaultServlet.getRelativeBase("folder/subfolder/"));
+	}
+	
 
 }

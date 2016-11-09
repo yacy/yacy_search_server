@@ -8,8 +8,8 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" id="navbar-brand" href="/" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
-        <img id="greeting-icon" class="yacylogo" src="/env/grafics/yacy.png" alt="YaCy" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">
+      <a class="navbar-brand" id="navbar-brand" href="./" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
+        <img id="greeting-icon" class="yacylogo" src="env/grafics/yacy.png" alt="YaCy" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">
         <span style="position:absolute;top:50%;float:left;">&nbsp;Administration</span>
       </a>
       <form class="navbar-form" method="get" accept-charset="UTF-8" action="yacysearch.html" style="padding-left:200px;max-width:400px;">

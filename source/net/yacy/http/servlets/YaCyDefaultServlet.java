@@ -1064,6 +1064,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
                 templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, sb.peers.myID());
                 templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
+                templatePatterns.put(servletProperties.RELATIVE_BASE, YaCyDefaultServlet.getRelativeBase(target));
                 Seed myPeer = sb.peers.mySeed();
                 templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
@@ -1116,6 +1117,30 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 parseSSI (bas.toByteArray(),request,response);
             }
         }
+    }
+    
+    /**
+     * Returns the relative path prefix necessary to reach htroot from the deepest level of targetPath.<br>
+     * Example : targetPath="api/citation.html" returns "../"
+     * targetPath is supposed to have been cleaned earlier from special chars such as "?", spaces, "//".
+     * @param targetPath target path relative to htroot
+     * @return the relative path prefix, eventually empty
+     */
+    protected static String getRelativeBase(String targetPath) {
+    	StringBuilder relativeBase = new StringBuilder();
+    	if(targetPath != null) {
+    		/* Normalize target path : it is relative to htroot, starting with a slash or not */
+    		if(targetPath.startsWith("/")) {
+    			targetPath = targetPath.substring(1, targetPath.length());
+    		}
+    		
+    		int slashIndex = targetPath.indexOf('/', 0);
+    		while(slashIndex >= 0) {
+    			relativeBase.append("../");
+    			slashIndex = targetPath.indexOf('/', slashIndex + 1);
+    		}
+    	}
+    	return relativeBase.toString();
     }
 
     /**

@@ -32,6 +32,9 @@ public class servletProperties extends serverObjects {
     public static final String PEER_STAT_MYTIME = "mytime";
     public static final String PEER_STAT_CLIENTNAME = "clientname";
     public static final String PEER_STAT_CLIENTID = "clientid";
+    /** Key of the relative path part from requested file to reach htroot, to be used in templates such as metas.template.
+     * Example : target="api/citation.html" -> relativeBase="../" */
+    public static final String RELATIVE_BASE = "relativeBase";
 
     private String prefix="";
 

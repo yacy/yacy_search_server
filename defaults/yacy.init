@@ -289,8 +289,8 @@ promoteSearchPageGreeting.useNetworkName = false
 # the following attributes can be used to define a custom image, alternative text and home page on the search page
 promoteSearchPageGreeting.homepage = http://yacy.net
 promoteSearchPageGreeting.imageAlt = YaCy project web site
-promoteSearchPageGreeting.largeImage = /env/grafics/YaCyLogo_120ppi.png
-promoteSearchPageGreeting.smallImage = /env/grafics/YaCyLogo_60ppi.png
+promoteSearchPageGreeting.largeImage = env/grafics/YaCyLogo_120ppi.png
+promoteSearchPageGreeting.smallImage = env/grafics/YaCyLogo_60ppi.png
 
 # the path to the public reverse word index for text files (web pages)
 # the primary path is relative to the data root, the secondary path is an absolute path
@@ -1149,7 +1149,7 @@ content.phpbb3.dumpfile =
 # search engine teaser: an about box in search results
 # this is only shown, if the about.body is filled
 about.headline=Please support YaCy!
-about.body=<iframe src="env/donate.html" width="100%" height="90" border="0" frameborder="0" scrolling="no" hspace="0" vspace="0" name="donate"></iframe><br/><div style="padding:8px;">If you run a YaCy server, feel free to replace our donation plea with your own support message, use the <a href="/ConfigPortal.html">Portal Configuration</a> servlet.</div>
+about.body=<iframe src="env/donate.html" width="100%" height="90" border="0" frameborder="0" scrolling="no" hspace="0" vspace="0" name="donate"></iframe><br/><div style="padding:8px;">If you run a YaCy server, feel free to replace our donation plea with your own support message, use the <a href="ConfigPortal.html">Portal Configuration</a> servlet.</div>
 
 donation.iframesource=http://yacy.net/include/donate.html
 donation.iframetarget=env/donate.html

@@ -121,35 +121,35 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         //writer.write("<link rel=\"transformation\" href=\"http://www-sop.inria.fr/acacia/soft/RDFa2RDFXML.xsl\"/>\n");
 
         writer.write("<!-- Bootstrap core CSS -->\n");
-        writer.write("<link href=\"/env/bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n");
-        writer.write("<link href=\"/env/bootstrap/css/bootstrap-switch.min.css\" rel=\"stylesheet\">\n");
-        //writer.write("<script src=\"/env/bootstrap/js/jquery.min.js\"></script>\n");
-        //writer.write("<script src=\"/env/bootstrap/js/bootstrap.min.js\"></script>\n");
-        //writer.write("<script src=\"/env/bootstrap/js/bootstrap-switch.min.js\"></script>\n");
+        writer.write("<link href=\"../env/bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n");
+        writer.write("<link href=\"../env/bootstrap/css/bootstrap-switch.min.css\" rel=\"stylesheet\">\n");
+        //writer.write("<script src=\"../env/bootstrap/js/jquery.min.js\"></script>\n");
+        //writer.write("<script src=\"../env/bootstrap/js/bootstrap.min.js\"></script>\n");
+        //writer.write("<script src=\"../env/bootstrap/js/bootstrap-switch.min.js\"></script>\n");
         writer.write("<!-- Custom styles for this template, i.e. navigation (move this to base.css) -->\n");
-        writer.write("<link href=\"/env/bootstrap-base.css\" rel=\"stylesheet\">\n");
+        writer.write("<link href=\"../env/bootstrap-base.css\" rel=\"stylesheet\">\n");
         //writer.write("<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->\n");
         //writer.write("<!--[if lt IE 9]>\n");
-        //writer.write("  <script src=\"/env/bootstrap/js/html5shiv.js\"></script>\n");
-        //writer.write("  <script src=\"/env/bootstrap/js/respond.min.js\"></script>\n");
+        //writer.write("  <script src=\"../env/bootstrap/js/html5shiv.js\"></script>\n");
+        //writer.write("  <script src=\"../env/bootstrap/js/respond.min.js\"></script>\n");
         //writer.write("<![endif]-->\n");
         writer.write("<!-- old css styles -->\n");
-        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/env/base.css\" />\n");
-        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/style.css\" />\n");
+        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"../env/base.css\" />\n");
+        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/style.css\" />\n");
         writer.write("<!--[if lt IE 6]>\n");
-        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/oldie.css\" />\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/oldie.css\" />\n");
         writer.write("<![endif]-->\n");
         writer.write("<!--[if lte IE 6.0]>\n");
-        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/ie6.css\" />\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/ie6.css\" />\n");
         writer.write("<![endif]-->\n");
         writer.write("<!--[if lte IE 7.0]>\n");
-        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/ie7.css\" />\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/ie7.css\" />\n");
         writer.write("<![endif]-->\n");
         writer.write("<!-- (C), Architecture: Michael Peter Christen; Contact: mc <at> yacy.net -->\n");
 
         NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
         paramsList.remove("wt");
-        String xmlquery = dqp.matcher("/solr/select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
+        String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
 
         DocList response = ((ResultContext) values.get("response")).docs;
         final int sz = response.size();
@@ -194,7 +194,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         
         // add a link to re-crawl this url (in case it is a remote metadata only entry)
         String sku = tdoc.get(CollectionSchema.sku.getSolrFieldName());
-        final String jsc= "javascript:w = window.open('/QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&followFrames=on&obeyHtmlRobotsNoindex=on&obeyHtmlRobotsNofollow=off&xdstopw=on&title='+escape('"+title+"')+'&url='+escape('"+sku+"'),'_blank','height=250,width=600,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();";
+        final String jsc= "javascript:w = window.open('../QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&followFrames=on&obeyHtmlRobotsNoindex=on&obeyHtmlRobotsNofollow=off&xdstopw=on&title='+escape('"+title+"')+'&url='+escape('"+sku+"'),'_blank','height=250,width=600,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();";
         writer.write("<div class='btn btn-default btn-sm' style='float:right' onclick=\""+jsc+"\">re-crawl url</div>\n");
 
         writer.write("<h1 property=\"dc:Title\">" + title + "</h1>\n");

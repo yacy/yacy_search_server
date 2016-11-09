@@ -27,11 +27,11 @@
           <li>&nbsp;&nbsp;<i>Example Calls to the Search API:</i></li>
           <li><a href="yacysearch.json?query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;YaCy JSON</a></li>
           <li><a href="yacysearch.rss?query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;YaCy RSS/Opensearch</a></li>
-          <li><a href="/solr/select?hl=false&wt=opensearch&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&sort=load_date_dt+desc&q=description_txt:%5B*%20TO%20*%5D" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr RSS/Opensearch</a></li>
-          <li><a href="/solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / JSON</a></li>
-          <li><a href="/solr/collection1/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / XML</a></li>
-          <li><a href="/solr/webgraph/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Webgraph Core / XML</a></li>
-          <li><a href="/gsa/search?q=www&num=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Google Appliance API / XML</a></li>
+          <li><a href="solr/select?hl=false&wt=opensearch&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&sort=load_date_dt+desc&q=description_txt:%5B*%20TO%20*%5D" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr RSS/Opensearch</a></li>
+          <li><a href="solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / JSON</a></li>
+          <li><a href="solr/collection1/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / XML</a></li>
+          <li><a href="solr/webgraph/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Webgraph Core / XML</a></li>
+          <li><a href="gsa/search?q=www&num=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Google Appliance API / XML</a></li>
         </ul>
       </li>
       <li id="header_help" class="dropdown">
