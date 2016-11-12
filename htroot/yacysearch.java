@@ -65,6 +65,7 @@ import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkTables;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Tokenizer;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.Formatter;
@@ -147,13 +148,10 @@ public class yacysearch {
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         
         // adding some additional properties needed for the rss feed
-        String hostName = header.get("Host", Domains.LOCALHOST);
-        if ( hostName.indexOf(':', 0) == -1 ) {
-            hostName += ":" + env.getLocalPort();
-        }
-        prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
-        prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.png");
-        prop.put("thisaddress", hostName);
+        String peerContext = YaCyDefaultServlet.getContext(header, sb);
+        prop.put("searchBaseURL", peerContext + "/yacysearch.html");
+        prop.put("rssYacyImageURL", peerContext + "/env/grafics/yacy.png");
+        prop.put("thisaddress", peerContext);
         final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
         final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
         boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
@@ -878,11 +876,6 @@ public class yacysearch {
         prop.putXML("rss_queryenc", originalquerystring.replace(' ', '+'));
 
         sb.localSearchLastAccess = System.currentTimeMillis();
-
-        // hostname and port (assume locahost if nothing helps)
-        final String hostIP = sb.peers.mySeed().getIP();
-        prop.put("myhost", hostIP != null ? hostIP : Domains.LOCALHOST);
-        prop.put("myport", Domains.LOCALHOST.equals(hostIP) ? sb.getLocalPort() : sb.getPublicPort("port", 8090));
 
         // return rewrite properties
         return prop;

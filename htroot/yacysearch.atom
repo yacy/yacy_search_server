@@ -12,7 +12,7 @@
 		<opensearch:startIndex>#[num-results_offset]#</opensearch:startIndex>
 		<opensearch:itemsPerPage>#[num-results_itemsPerPage]#</opensearch:itemsPerPage>
                 <link rel="self" href="#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[search.verify]#"/>
-		<link rel="search" href="http://#[thisaddress]#/opensearchdescription.xml" type="application/opensearchdescription+xml"/>
+		<link rel="search" href="#[thisaddress]#/opensearchdescription.xml" type="application/opensearchdescription+xml"/>
 		<opensearch:Query role="request" searchTerms="#[rss_queryenc]#" />
                 <id>http://#[clientid]#.yacyh/</id>
 
