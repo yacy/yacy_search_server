@@ -216,17 +216,17 @@ img.help {
 -------------------------------------*/
 
 .filetree span.err { 
-	background: url(/yacy/ui/img-2/stop.png) 0 0 no-repeat;
+	background: url(../yacy/ui/img-2/stop.png) 0 0 no-repeat;
 	padding: 1px 0px 0px 18px; 
 	display: block;
 }
 .filetree span.question { 
-	background: url(/yacy/ui/img-2/question_blue.png) 0 0 no-repeat;
+	background: url(../yacy/ui/img-2/question_blue.png) 0 0 no-repeat;
 	padding: 1px 0px 0px 18px; 
 	display: block;
 }
 .filetree span.crawl { 
-	background: url(/yacy/ui/img/crawl.png) 0 0 no-repeat;
+	background: url(../yacy/ui/img/crawl.png) 0 0 no-repeat;
 	padding: 1px 0px 0px 18px; 
 	display: block;
 }

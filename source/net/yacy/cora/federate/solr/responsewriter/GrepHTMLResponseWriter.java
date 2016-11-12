@@ -83,8 +83,8 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
         assert values.get("response") != null;
 
         writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n");
-        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/env/base.css\" />\n");
-        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/style.css\" />\n");
+        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"../env/base.css\" />\n");
+        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/style.css\" />\n");
         SolrParams params = request.getOriginalParams();
         String grep = params.get("grep");
         String query = "";
@@ -106,7 +106,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
         }
         NamedList<Object> paramsList = params.toNamedList();
         paramsList.remove("wt");
-        String xmlquery = dqp.matcher("/solr/select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
+        String xmlquery = dqp.matcher("select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
         
         DocList response = ((ResultContext) values.get("response")).docs;
         final int sz = response.size();
@@ -164,7 +164,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
     }
     
     private static void writedd(Writer writer, String line, String grep) throws IOException {
-        writer.write("<dd><a href=\"/solr/select?q=text_t:%22");
+        writer.write("<dd><a href=\"select?q=text_t:%22");
         XML.escapeAttributeValue(line, writer);
         writer.write("%22&rows=100&grep=%22");
         XML.escapeAttributeValue(grep, writer);
