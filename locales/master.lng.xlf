@@ -3052,7 +3052,7 @@
        <source>You can also use an automatic domain-restriction to fully crawl a single domain.</source>
     </trans-unit>
     <trans-unit id="a200eeed" xml:space="preserve" approved="no" translate="yes">
-       <source>Attention: you can test the functionality of your regular expressions using the &lt;a href="/RegexTest.html"&gt;Regular Expression Tester&lt;/a&gt; within YaCy&lt;/a&gt;.</source>
+       <source>Attention: you can test the functionality of your regular expressions using the &lt;a href="RegexTest.html"&gt;Regular Expression Tester&lt;/a&gt; within YaCy&lt;/a&gt;.</source>
     </trans-unit>
     <trans-unit id="80c17409" xml:space="preserve" approved="no" translate="yes">
        <source>You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.</source>
