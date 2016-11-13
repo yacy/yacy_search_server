@@ -1297,7 +1297,6 @@ Use filter==Использовать фильтр
 Restrict to start domain(s)==Запретить запуск домена
 Restrict to sub-path(s)==Запретить часть пути
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Фильтр это emacs-подобное регулярное выражение, которое должно совпадать с ссылками для индексации;
-#The filter is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regular expression</a>==Фильтр это <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярное выражение</a>
 #that must match with the URLs which are used to be crawled; default is 'catch all'.==которые должны совпадать с ссылками для индексации; по-умолчанию 'берутся все'.
 Example: to allow only urls that contain the word 'science', set the must-match filter to '.*science.*'.==Например, для разрешения только ссылок, содержащих слово 'science' , нужно установить фильтр '.*science.*'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==Вы можете также использовать автоматическое ограничение домена при полном индексировании простого домена.
