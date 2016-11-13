@@ -18,6 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.graphics.OSMTile;
@@ -58,7 +59,7 @@ public class osm {
          * The (C) symbol is not available in our font, so we use the letters (C) instead.
          */
         PrintTool.print(map, map.getWidth() - 6, map.getHeight() - 6, 0, "(C) OPENSTREETMAP CONTRIBUTORS", 1, 80);
-        return new EncodedImage(map, header.get("EXT", null), true);
+        return new EncodedImage(map, header.get(HeaderFramework.CONNECTION_PROP_EXT, null), true);
    }
 
 }

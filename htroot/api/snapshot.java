@@ -38,6 +38,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Html2Image;
@@ -67,7 +68,7 @@ public class snapshot {
         final Switchboard sb = (Switchboard) env;
 
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        final String ext = header.get("EXT", "");
+        final String ext = header.get(HeaderFramework.CONNECTION_PROP_EXT, "");
         
         
         if (ext.equals("rss")) {

@@ -86,7 +86,7 @@ public class ViewFavicon {
 	public static Object respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
 		final Switchboard sb = (Switchboard) env;
-		String ext = header.get("EXT", null);
+		String ext = header.get(HeaderFramework.CONNECTION_PROP_EXT, null);
 		boolean isPNGTarget = "png".equalsIgnoreCase(ext);
 
 		ImageInputStream imageInStream = null;

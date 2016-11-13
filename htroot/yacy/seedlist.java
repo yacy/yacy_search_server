@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.JSONObject;
 import net.yacy.peers.Seed;
@@ -71,7 +72,7 @@ public final class seedlist {
         final serverObjects prop = new serverObjects();
         
         // write simple-encoded seed lines or json
-        String EXT = header.get("EXT");
+        String EXT = header.get(HeaderFramework.CONNECTION_PROP_EXT);
         boolean json = EXT != null && EXT.equals("json");
         boolean xml = EXT != null && EXT.equals("xml");
         
