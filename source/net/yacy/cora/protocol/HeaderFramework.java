@@ -108,11 +108,6 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String X_ROBOTS = "X-Robots";
 
     public static final String X_YACY_INDEX_CONTROL = "X-YaCy-Index-Control";
-    //public static final String X_YACY_PREVIOUS_REQUEST_LINE = "X-Previous-Request-Line";
-    public static final String X_YACY_KEEP_ALIVE_REQUEST_COUNT = "X-Keep-Alive-Request-Count";
-    public static final String X_YACY_ORIGINAL_REQUEST_LINE = "X-Original-Request-Line";
-    public static final String X_YACY_MEDIA_TITLE = "X-YaCy-Media-Title"; // can be attached to media files which do not have metadata; this will be used as title
-    public static final String X_YACY_MEDIA_KEYWORDS = "X-YaCy-Media-Keywords"; // can be attached to media files which do not have metadata; this will be used as keywords (space-separared list of words)
     /** Added when generating legacy request header to allow template servlets to know the original request scheme : "http" or "https" */
     public static final String X_YACY_REQUEST_SCHEME = "X-YaCy-Request-Scheme"; // TODO: after completing implementation of HttpServletRequest getScheme() should be used and this can be removed
 

@@ -64,15 +64,15 @@ public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
 
         String refererHost;
         // update AccessTracker
-        final String remodeip = request.getRemoteAddr();
-        serverAccessTracker.track(remodeip, pathInContext);
+        final String remoteip = request.getRemoteAddr();
+        serverAccessTracker.track(remoteip, pathInContext);
         
         try {
             refererHost = new MultiProtocolURL(request.getHeader(RequestHeader.REFERER)).getHost();
         } catch (MalformedURLException e) {
             refererHost = null;
         }                          
-        final boolean accessFromLocalhost = Domains.isLocalhost(remodeip) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
+        final boolean accessFromLocalhost = Domains.isLocalhost(remoteip) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
         // ! note : accessFromLocalhost compares localhost ip pattern
         final boolean grantedForLocalhost = adminAccountGrantedForLocalhost && accessFromLocalhost;
         boolean protectedPage = adminAccountNeededForAllPages || (pathInContext.indexOf("_p.") > 0);

@@ -454,7 +454,7 @@ public final class HTTPDProxyHandler {
 
             requestHeader.remove(HeaderFramework.HOST);
 
-            final HTTPClient client = setupHttpClient(requestHeader, agent, connectHost);
+            final HTTPClient client = setupHttpClient(requestHeader, agent);
 
             // send request
             try {
@@ -773,10 +773,9 @@ public final class HTTPDProxyHandler {
      * creates a new HttpClient and sets parameters according to proxy needs
      *
      * @param requestHeader
-     * @param connectHost may be 'host:port' or 'host:port/path'
      * @return
      */
-    private static HTTPClient setupHttpClient(final RequestHeader requestHeader, final ClientIdentification.Agent agent, final String connectHost) {
+    private static HTTPClient setupHttpClient(final RequestHeader requestHeader, final ClientIdentification.Agent agent) {
         // setup HTTP-client
     	final HTTPClient client = new HTTPClient(agent, timeout);
     	client.setHeader(requestHeader.entrySet());
@@ -891,10 +890,6 @@ public final class HTTPDProxyHandler {
 
         // remove transfer encoding header
         headers.remove(HeaderFramework.TRANSFER_ENCODING);
-
-        //removing yacy status headers
-        headers.remove(HeaderFramework.X_YACY_KEEP_ALIVE_REQUEST_COUNT);
-        headers.remove(HeaderFramework.X_YACY_ORIGINAL_REQUEST_LINE);
     }
 
     private static void setViaHeader(final HeaderFramework header, final String httpVer) {
