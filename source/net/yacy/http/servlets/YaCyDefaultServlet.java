@@ -711,23 +711,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
     public static String getContext(final RequestHeader header, final Switchboard sb) {
         String protocol = "http";
         String hostAndPort = null;
-        if(header != null) {
-        	if(hostAndPort == null){
-            	hostAndPort = header.get(HeaderFramework.HOST);
-            	
-            	/* We can try here to figure out if we are using http or https, relying on the port used.
-            	 * This only works port is not standard (80 or 443) : if so HeaderFramework.X_YACY_REQUEST_SCHEME will be more reliable */
-                final String sslport;
-                if(sb != null) {
-                	sslport = ":" + sb.getConfigInt("port.ssl", 8443);
-                } else {
-                	sslport = ":8443";
-                }
-                if (hostAndPort != null && hostAndPort.endsWith(sslport)) { // connection on ssl port, use https protocol
-                    protocol = "https";
-                }
-        	}
+        if (header != null) {
+            hostAndPort = header.get(HeaderFramework.HOST);
+            protocol = header.getScheme();
         }
+
         /* Host and port still null : let's use the default local ones */
         if (hostAndPort == null) {
         	if(sb != null) {

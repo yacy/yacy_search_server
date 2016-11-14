@@ -39,7 +39,6 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.NumberTools;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.search.Switchboard;
@@ -62,16 +61,15 @@ public class QuickCrawlLink_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        int port = sb.getConfigInt("port", 8090);
+        int port;
 
         // get the http host header
         if (header.containsKey(HeaderFramework.HOST)) {
-            final String hostSocket = header.get(HeaderFramework.HOST);
-            final int pos = hostSocket.indexOf(':', 0);
-            if (pos != -1) {
-                port = NumberTools.parseIntDecSubstring(hostSocket, pos + 1);
-            }
+            port = header.getServerPort();
+        } else {
+            port = sb.getConfigInt("port", 8090);
         }
+        
         prop.put("mode_host", Domains.LOCALHOST);
         prop.put("mode_port", port);
 
