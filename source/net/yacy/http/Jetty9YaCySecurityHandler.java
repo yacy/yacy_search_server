@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -63,15 +64,15 @@ public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
 
         String refererHost;
         // update AccessTracker
-        refererHost = request.getRemoteAddr();
-        serverAccessTracker.track(refererHost, pathInContext);
+        final String remodeip = request.getRemoteAddr();
+        serverAccessTracker.track(remodeip, pathInContext);
         
         try {
-            refererHost = new MultiProtocolURL(request.getHeader("Referer")).getHost();
+            refererHost = new MultiProtocolURL(request.getHeader(RequestHeader.REFERER)).getHost();
         } catch (MalformedURLException e) {
             refererHost = null;
         }                          
-        final boolean accessFromLocalhost = Domains.isLocalhost(request.getRemoteHost()) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
+        final boolean accessFromLocalhost = Domains.isLocalhost(remodeip) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
         // ! note : accessFromLocalhost compares localhost ip pattern
         final boolean grantedForLocalhost = adminAccountGrantedForLocalhost && accessFromLocalhost;
         boolean protectedPage = adminAccountNeededForAllPages || (pathInContext.indexOf("_p.") > 0);
@@ -85,7 +86,7 @@ public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
                 return null; // quick return for local admin
             } else if (accessFromLocalhost) {
                 // last chance to authentify using the admin from localhost
-                final String credentials = request.getHeader("Authorization");
+                final String credentials = request.getHeader(RequestHeader.AUTHORIZATION);
                 if (credentials != null && credentials.length() > 60 && credentials.startsWith("Basic ")) {
                     final String foruser = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
                     final String adminAccountBase64MD5 = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
