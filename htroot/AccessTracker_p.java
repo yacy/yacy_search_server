@@ -35,7 +35,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.Seed;
@@ -55,6 +54,19 @@ public class AccessTracker_p {
             accessClone.addAll(m);
         } catch (final ConcurrentModificationException e) {}
         return accessClone;
+    }
+    
+    /**
+     * Remove any eventual slash character at the beginning of path.
+     * @param path a path relative to YaCy context
+     * @return the path relative to this servlet : with no starting slash
+     */
+    private static String getRelativePathToThis(final String path) {
+    	String relativePath = path;
+    	if(path != null && path.startsWith("/")) {
+    		relativePath = relativePath.substring(1, relativePath.length());
+    	}
+    	return relativePath;
     }
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -109,6 +121,10 @@ public class AccessTracker_p {
                             prop.putHTML("page_list_" + entCount + "_host", host);
                             prop.put("page_list_" + entCount + "_date", GenericFormatter.SIMPLE_FORMATTER.format(new Date(entry.getTime())));
                             prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
+                            /* For better integration of YaCy peers behind a reverse proxy subfolder, 
+                             * ensure a path relative to this servlet (with no starting slash) is used for links URLs.
+                             * We keep the pathes starting with a slash for display only. */
+                            prop.putHTML("page_list_" + entCount + "_relativePath", getRelativePathToThis(entry.getPath()));
                             entCount++;
                         }
                     } catch (final ConcurrentModificationException e) {
@@ -128,6 +144,10 @@ public class AccessTracker_p {
                                 prop.putHTML("page_list_" + entCount + "_host", host);
                                 prop.put("page_list_" + entCount + "_date", GenericFormatter.SIMPLE_FORMATTER.format(new Date(entry.getTime())));
                                 prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
+                                /* For better integration of YaCy peers behind a reverse proxy subfolder, 
+                                 * ensure a path relative to this servlet (with no starting slash) is used for links URLs.
+                                 * We keep the pathes starting with a slash for display only. */
+                                prop.putHTML("page_list_" + entCount + "_relativePath", getRelativePathToThis(entry.getPath()));
                                 entCount++;
                         }
                     }
