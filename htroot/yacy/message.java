@@ -71,7 +71,7 @@ public final class message {
         if (!Protocol.authentifyRequest(post, env)) return prop;
 
         final String process = post.get("process", "permission");
-        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // read an artificial header addendum
+        final String clientip = header.getRemoteAddr();
         final InetAddress ias = clientip != null ? Domains.dnsResolve(clientip) : null;
 
         final int messagesize = 10240;
@@ -90,7 +90,7 @@ public final class message {
 
         if ((sb.isRobinsonMode()) &&
         	 (!((sb.isPublicRobinson()) ||
-        	    (sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))))) {
+        	    (sb.isInMyCluster(header.getRemoteAddr()))))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("response", "-1"); // request rejected
             return prop;

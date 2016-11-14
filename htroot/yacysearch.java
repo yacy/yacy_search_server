@@ -114,7 +114,7 @@ public class yacysearch {
             (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
                 "network.unit.description",
                 "") : env.getConfig(SwitchboardConstants.GREETING, "");
-        final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
+        final String client = header.getRemoteAddr(); // the search client who initiated the search
         
         // in case that the crawler is running and the search user is the peer admin, we expect that the user wants to check recently crawled document
         // to ensure that recent crawl results are inside the search results, we do a soft commit here. This is also important for live demos!

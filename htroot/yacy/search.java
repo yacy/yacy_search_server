@@ -101,7 +101,7 @@ public final class search {
 
         if (post == null || env == null) return prop;
         if (!Protocol.authentifyRequest(post, env)) return prop;
-        final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
+        final String client = header.getRemoteAddr();
 
         //System.out.println("yacy: search received request = " + post.toString());
 

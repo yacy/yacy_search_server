@@ -78,7 +78,7 @@ public class Blog {
         prop.put("display", 1); // Fixed to 1
 
 
-        final boolean xml = (header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml");
+        final boolean xml = header.getPathInfo().endsWith(".xml");
         /* Peer URL base : used to generate absolute URLs in Blog.rss */
         final String context = YaCyDefaultServlet.getContext(header, sb);
 
@@ -104,7 +104,7 @@ public class Blog {
         }
 
         String pagename = post.get("page", DEFAULT_PAGE);
-        final String ip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
+        final String ip = header.getRemoteAddr();
 
         String strAuthor = post.get("author", "anonymous");
 

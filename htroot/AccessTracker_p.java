@@ -62,7 +62,7 @@ public class AccessTracker_p {
 
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        prop.setLocalized(!(header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml"));
+        prop.setLocalized(!header.getPathInfo().endsWith(".xml"));
         int page = 0;
         if (post != null) {
             page = post.getInt("page", 0);

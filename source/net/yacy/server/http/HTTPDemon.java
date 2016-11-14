@@ -156,8 +156,6 @@ public final class HTTPDemon {
             // set rewrite values
             final serverObjects tp = new serverObjects();
 
-            String clientIP = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); if (clientIP == null) clientIP = Domains.LOCALHOST;
-
             tp.put("peerName", (switchboard.peers == null) ? "" : switchboard.peers.myName());
             tp.put("errorMessageType", Integer.toString(errorcase));
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);

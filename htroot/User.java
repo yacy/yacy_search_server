@@ -29,7 +29,6 @@
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -63,7 +62,8 @@ public class User{
             prop.put("logged-in_identified-by", "2");
             //try via ip
             if(entry == null){
-                entry=sb.userDB.ipAuth((requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
+                final String ip = requestHeader.getRemoteAddr();
+                entry = sb.userDB.ipAuth((ip != null ? ip : "xxxxxx"));
                 if(entry != null){
                     prop.put("logged-in_identified-by", "0");
                 }
@@ -154,7 +154,8 @@ public class User{
         if(post!=null && post.containsKey("logout")){
             prop.put("logged-in", "0");
             if(entry != null){
-                entry.logout((requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "xxxxxx")), UserDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
+                final String ip = requestHeader.getRemoteAddr();
+                entry.logout((ip != null ? ip : "xxxxxx"), UserDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
             }else{
                 sb.userDB.adminLogout(UserDB.getLoginToken(requestHeader.getHeaderCookies()));
             }

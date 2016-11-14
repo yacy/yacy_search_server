@@ -147,12 +147,8 @@ public class ConfigBasic {
                 UPnP.addPortMappings();
             }
 
-            String host = null;
-            if (header.containsKey(HeaderFramework.HOST)) {
-                host = header.get(HeaderFramework.HOST);
-                final int idx = host.indexOf(':',0);
-                if (idx != -1) host = host.substring(0,idx);
-            } else {
+            String host = header.getServerName();
+            if (host == null) {
                 host = Domains.myPublicLocalIP().getHostAddress();
             }
 

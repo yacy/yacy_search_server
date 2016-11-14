@@ -37,7 +37,7 @@ public final class BlacklistHelper {
         }
 
         if (newEntry == null || newEntry.isEmpty()) {
-            return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
+            return header.getPathInfo() + "?selectList=&selectedListName=" + blacklistToUse;
         }
 
         // ignore empty entries
@@ -104,7 +104,7 @@ public final class BlacklistHelper {
         }
 
         if (oldEntry == null || oldEntry.isEmpty()) {
-            return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
+            return header.getPathInfo() + "?selectList=&selectedListName=" + blacklistToUse;
         }
 
 

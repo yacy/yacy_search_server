@@ -91,7 +91,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String PRAGMA = "Pragma";
     public static final String CACHE_CONTROL = "Cache-Control";
 
-    public static final String DATE = "Date";
+    public static final String DATE = "Date"; // time message/response was created, https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.18
     public static final String LAST_MODIFIED = "Last-Modified";
     public static final String SERVER = "Server";
 
@@ -114,7 +114,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String X_YACY_MEDIA_TITLE = "X-YaCy-Media-Title"; // can be attached to media files which do not have metadata; this will be used as title
     public static final String X_YACY_MEDIA_KEYWORDS = "X-YaCy-Media-Keywords"; // can be attached to media files which do not have metadata; this will be used as keywords (space-separared list of words)
     /** Added when generating legacy request header to allow template servlets to know the original request scheme : "http" or "https" */
-    public static final String X_YACY_REQUEST_SCHEME = "X-YaCy-Request-Scheme";
+    public static final String X_YACY_REQUEST_SCHEME = "X-YaCy-Request-Scheme"; // TODO: after completing implementation of HttpServletRequest getScheme() should be used and this can be removed
 
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String SET_COOKIE2 = "Set-Cookie2";
@@ -424,7 +424,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * @return mime or on missing header field "application/octet-stream"
      */
     public String mime() {
-        final String tmpstr = get(CONTENT_TYPE, "application/octet-stream");
+        final String tmpstr = this.get(CONTENT_TYPE, "application/octet-stream");
         final int pos = tmpstr.indexOf(';');
         if (pos > 0) {
             return tmpstr.substring(0, pos).trim();
@@ -500,7 +500,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * @see org.apache.commons.fileupload.RequestContext#getContentType()
      */
     public String getContentType() {
-        return get(CONTENT_TYPE);
+        return this.get(CONTENT_TYPE);
     }
 
     protected Date headerDate(final String kind) {
@@ -768,16 +768,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         return "";
     }
 
-    public void addHeader(final String key, final String value) {
-        this.headerProps.add(new Entry(key, value));
-    }
-
     public Vector<Entry> getAdditionalHeaderProperties() {
         return this.headerProps;
-    }
-
-    public void setAdditionalHeaderProperties(final Vector<Entry> mycookies){
-        this.headerProps=mycookies;
     }
 
     /*

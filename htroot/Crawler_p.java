@@ -258,7 +258,7 @@ public class Crawler_p {
                         if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
                         
                     } catch (final MalformedURLException e) {
-                        ConcurrentLog.warn("Crawler_p", "crawl start url invalid" + e.getMessage());
+                        ConcurrentLog.warn("Crawler_p", "crawl start url invalid: " + e.getMessage());
                     }
                 } else {
                 	crawlName = crawlingFile.getName();
