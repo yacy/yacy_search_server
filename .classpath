@@ -87,7 +87,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-57_1.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
-	<classpathentry kind="lib" path="lib/jsoup-1.9.2.jar"/>
+	<classpathentry kind="lib" path="lib/jsoup-1.10.1.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/weupnp-0.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/common-image-3.2.1.jar"/>

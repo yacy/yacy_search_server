@@ -206,7 +206,7 @@
         <pathelement location="${lib}/jetty-xml-9.2.19.v20160908.jar" />
     	<pathelement location="${lib}/jsch-0.1.53.jar" />
     	<pathelement location="${lib}/json-simple-1.1.1.jar" />
-    	<pathelement location="${lib}/jsoup-1.9.2.jar" />
+    	<pathelement location="${lib}/jsoup-1.10.1.jar" />
     	<pathelement location="${lib}/log4j-over-slf4j-1.7.21.jar" />
     	<pathelement location="${lib}/lucene-analyzers-common-5.5.2.jar" />
     	<pathelement location="${lib}/lucene-analyzers-phonetic-5.5.2.jar" />
