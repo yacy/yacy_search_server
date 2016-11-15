@@ -703,9 +703,11 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public Locale getLocale() {
         if (this._request != null) {
             return _request.getLocale();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
+        } else if (super.containsKey(HeaderFramework.ACCEPT_LANGUAGE)) {
+            final String lng = super.get(HeaderFramework.ACCEPT_LANGUAGE);
+            return new Locale(lng);
         }
+        return Locale.getDefault(); // to avoid dependency on Switchboard just use system default
     }
 
     @Override

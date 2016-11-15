@@ -64,6 +64,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -666,6 +667,14 @@ public final class Switchboard extends serverSwitch {
         ListManager.listsPath = blacklistsPath;
         ListManager.reloadBlacklists();
 
+        // Set jvm default locale to match UI language (
+        String lng = this.getConfig("locale.language", "en");
+        if (!"browser".equals(lng) && !"default".equals(lng)) {
+            Locale.setDefault(new Locale(lng));
+        } else {
+            lng = "en"; // default = English
+        }
+
         // load badwords (to filter the topwords)
         if ( badwords == null || badwords.isEmpty() ) {
             File badwordsFile = new File(appPath, "DATA/SETTINGS/" + SwitchboardConstants.LIST_BADWORDS_DEFAULT);
@@ -689,8 +698,7 @@ public final class Switchboard extends serverSwitch {
             }
             stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
             // append locale language stopwords using setting of interface language (file yacy.stopwords.xx)
-            String lng = this.getConfig("locale.language", "en");
-            if ("default".equals(lng)) lng="en"; // english is stored as default (needed for locale html file overlay)
+            // english is stored as default (needed for locale html file overlay)
             File stopwordsFilelocale = new File (dataPath, "DATA/SETTINGS/"+stopwordsFile.getName()+"."+lng);
             if (!stopwordsFilelocale.exists()) stopwordsFilelocale = new File (appPath, "defaults/"+stopwordsFile.getName()+"."+lng);
             if (stopwordsFilelocale.exists()) {
@@ -3420,7 +3428,7 @@ public final class Switchboard extends serverSwitch {
             }
     
             if (s != null) {
-                Switchboard.this.log.info("addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
+                this.log.info("addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
             }
         }
     }
