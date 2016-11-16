@@ -69,18 +69,29 @@ public final class FileUtils {
 
     private static final int DEFAULT_BUFFER_SIZE = 1024; // this is also the maximum chunk size
 
+    /**
+     * Copy a whole InputStream to an OutputStream. Important : it is the responsibility of the caller to close the input and output streams.
+     *
+     * @param source InputStream instance
+     * @param dest OutputStream instance
+     * @param count the total amount of bytes to copy (-1 for all, else must be greater than zero)
+     * @return Total number of bytes copied.
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
+     */
     public static long copy(final InputStream source, final OutputStream dest) throws IOException {
         return copy(source, dest, -1);
     }
 
     /**
-     * Copies an InputStream to an OutputStream. Important : it is the responsibility of the caller to close the input and output streams.
+     * Copies a specified amount of bytes from an InputStream to an OutputStream. Important : it is the responsibility of the caller to close the input and output streams.
      *
-     * @param source InputStream
-     * @param dest OutputStream
+     * @param source InputStream instance
+     * @param dest OutputStream instance
      * @param count the total amount of bytes to copy (-1 for all, else must be greater than zero)
      * @return Total number of bytes copied.
-     * @throws IOException
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
      * @see #copy(InputStream source, File dest)
      * @see #copyRange(File source, OutputStream dest, int start)
      * @see #copy(File source, OutputStream dest)
@@ -114,23 +125,63 @@ public final class FileUtils {
         return total;
     }
 
+    /**
+     * Copy a whole InputStream to a Writer, using the default platform charset to decode input stream bytes.
+     * Important : it is the responsibility of the caller to close the input stream and output writer.
+     *
+     * @param source InputStream instance
+     * @param dest Writer instance
+     * @return the total number of characters copied.
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
+     */
     public static int copy(final InputStream source, final Writer dest) throws IOException {
         final InputStreamReader reader = new InputStreamReader(source);
         return copy(reader, dest);
     }
 
+    /**
+     * Copy a whole InputStream to a Writer, using the specified charset to decode input stream bytes.
+     * Important : it is the responsibility of the caller to close the input stream and output writer.
+     *
+     * @param source InputStream instance
+     * @param dest Writer instance
+     * @return the total number of characters copied.
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
+     */
     public static int copy(final InputStream source, final Writer dest, final Charset inputCharset)
         throws IOException {
         final InputStreamReader reader = new InputStreamReader(source, inputCharset);
         return copy(reader, dest);
     }
 
+    /**
+     * Copy a String to Writer.
+     * Important : it is the responsibility of the caller to close the output writer.
+     *
+     * @param source String instance
+     * @param dest writer instance
+     * @return the total number of characters copied (source.length)
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
+     */
     public static int copy(final String source, final Writer dest) throws IOException {
         dest.write(source);
         dest.flush();
         return source.length();
     }
 
+    /**
+     * Copy a whole Reader to a Writer.
+     * Important : it is the responsibility of the caller to close the input reader and output writer.
+     *
+     * @param source InputStream instance
+     * @param dest Writer instance
+     * @return the total number of characters copied.
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
+     */
     public static int copy(final Reader source, final Writer dest) throws IOException {
         assert source != null;
         assert dest != null;
@@ -160,6 +211,15 @@ public final class FileUtils {
         return count;
     }
 
+    /**
+     * Copy a whole InputStream to a File.
+     * Important : it is the responsibility of the caller to close the input stream.
+     *
+     * @param source InputStream instance
+     * @param dest File instance
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
+     */
     public static void copy(final InputStream source, final File dest) throws IOException {
         copy(source, dest, -1);
     }
@@ -167,10 +227,11 @@ public final class FileUtils {
     /**
      * Copies an InputStream to a File. Important : it is the responsibility of the caller to close the source stream.
      *
-     * @param source InputStream
-     * @param dest File
-     * @param count the amount of bytes to copy
-     * @throws IOException
+     * @param source InputStream instance
+     * @param dest File instance
+     * @param count the amount of bytes to copy (-1 for all, else must be greater than zero)
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
      * @see #copy(InputStream source, OutputStream dest)
      * @see #copyRange(File source, OutputStream dest, int start)
      * @see #copy(File source, OutputStream dest)
@@ -200,11 +261,13 @@ public final class FileUtils {
 
     /**
      * Copies a part of a File to an OutputStream.
-     *
-     * @param source File
-     * @param dest OutputStream
+     * Important : it is the responsibility of the caller to close the destination stream.
+     * @param source File instance
+     * @param dest OutputStream instance
      * @param start Number of bytes to skip from the beginning of the File
-     * @throws IOException
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
+     * @throws IllegalStateException when an error occurred while skipping bytes
      * @see #copy(InputStream source, OutputStream dest)
      * @see #copy(InputStream source, File dest)
      * @see #copy(File source, OutputStream dest)
@@ -237,9 +300,10 @@ public final class FileUtils {
     /**
      * Copies a File to an OutputStream. Important : it is the responsibility of the caller to close the output stream.
      *
-     * @param source File
-     * @param dest OutputStream
-     * @throws IOException
+     * @param source File instance
+     * @param dest OutputStream instance
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
      * @see #copy(InputStream source, OutputStream dest)
      * @see #copy(InputStream source, File dest)
      * @see #copyRange(File source, OutputStream dest, int start)
@@ -260,11 +324,28 @@ public final class FileUtils {
         }
     }
 
+    /**
+     * Copy a whole byte array to an output stream.
+     * Important : it is the responsibility of the caller to close the output stream.
+     *
+     * @param source a byte array
+     * @param dest OutputStream instance
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
+     */
     public static void copy(final byte[] source, final OutputStream dest) throws IOException {
         dest.write(source, 0, source.length);
         dest.flush();
     }
 
+    /**
+     * Copy a whole byte array to a destination file.
+     *
+     * @param source a byte array
+     * @param dest File instance
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when a parameter is null
+     */
     public static void copy(final byte[] source, final File dest) throws IOException {
         copy(new ByteArrayInputStream(source), dest);
     }
@@ -273,7 +354,8 @@ public final class FileUtils {
      * Read fully source stream and close it.
      * @param source must not be null
      * @return source content as a byte array.
-     * @throws IOException when a read/write error occured
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when source parameter is null
      */
     public static byte[] read(final InputStream source) throws IOException {
     	byte[] content;
@@ -289,6 +371,14 @@ public final class FileUtils {
     	return content;
     }
 
+    /**
+     * Read the specified amount of bytes from a source stream.
+     * Important : it is the responsibility of the caller to close the stream.
+     * @param source InputStream instance. Must not be null
+     * @return source content as a byte array.
+     * @throws IOException when a read/write error occurred
+     * @throws NullPointerException when source parameter is null
+     */
     public static byte[] read(final InputStream source, final int count) throws IOException {
         if ( count > 0 ) {
             final byte[] b = new byte[count];
