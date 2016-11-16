@@ -630,7 +630,7 @@ public final class Switchboard extends serverSwitch {
         this.proxyLastAccess = System.currentTimeMillis() - 10000;
         this.localSearchLastAccess = System.currentTimeMillis() - 10000;
         this.remoteSearchLastAccess = System.currentTimeMillis() - 10000;
-        this.adminAuthenticationLastAccess = System.currentTimeMillis();
+        this.adminAuthenticationLastAccess = 0; // timestamp last admin authentication (as not autenticated here, stamp with 0)
         this.optimizeLastRun = System.currentTimeMillis();
         this.webStructure = new WebStructureGraph(new File(this.queuesRoot, "webStructure.map"));
 
@@ -3490,12 +3490,20 @@ public final class Switchboard extends serverSwitch {
      * http-authentify: auth-level 4
      *
      * @param requestHeader
-     *  - requestHeader..AUTHORIZATION = B64encode("adminname:password") or = B64encode("adminname:valueOf_Base64MD5cft")
+     *  - requestHeader.AUTHORIZATION = B64encode("adminname:password") or = B64encode("adminname:valueOf_Base64MD5cft")
      *  - adminAccountBase64MD5 = MD5(B64encode("adminname:password") or = "MD5:"+MD5("adminname:peername:password")
      * @return the auth-level as described above or 1 which means 'not authorized'. a 0 is returned in case of
      *         fraud attempts
      */
     public int adminAuthenticated(final RequestHeader requestHeader) {
+
+        // authorization (earlier) by servlet container with username/password
+        // as this stays true as long as authenticated browser is open (even after restart of YaCy) add a timeout check to look at credentials again
+        // TODO: same is true for credential checks below (at least with BASIC auth -> login should expire at least on restart
+        if (requestHeader.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString())) {
+            if (adminAuthenticationLastAccess + 60000 > System.currentTimeMillis()) // 1 minute
+            return 4; // hard-authenticated, quick return
+        }
 
         // authorization in case that there is no account stored
         final String adminAccountUserName = getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
@@ -3554,9 +3562,9 @@ public final class Switchboard extends serverSwitch {
             } else {
                 // handle DIGEST auth (realmValue = adminAccountBase (set for lecacyHeader in DefaultServlet for authenticated requests)
                 if (adminAccountBase64MD5.equals(realmValue)) {
-            adminAuthenticationLastAccess = System.currentTimeMillis();
-            return 4; // hard-authenticated, all ok
-        }
+                    adminAuthenticationLastAccess = System.currentTimeMillis();
+                    return 4; // hard-authenticated, all ok
+                }
             }
         } else {
             // handle old option  adminAccountBase64MD5="xxxxxxx" = encodeMD55Hex(encodeB64("adminname:password")
