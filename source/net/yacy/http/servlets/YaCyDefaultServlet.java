@@ -1105,11 +1105,25 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setContentType(mimeType);
                 response.setStatus(HttpServletResponse.SC_OK);
                 ByteArrayOutputStream bas = new ByteArrayOutputStream(4096);
-                // apply templates
-                TemplateEngine.writeTemplate(targetFile.getName(), fis, bas, templatePatterns);                
-                fis.close();
-                // handle SSI
-                parseSSI (bas.toByteArray(),request,response);
+                try {
+                	// apply templates
+                	TemplateEngine.writeTemplate(targetFile.getName(), fis, bas, templatePatterns);
+                	
+                    // handle SSI
+                    parseSSI (bas.toByteArray(),request,response);
+                } finally {
+                	try {
+                		fis.close();
+                	} catch(IOException ignored) {
+                		ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: could not close target file " + targetFile.getName());
+                	}
+                	
+                	try {
+                		bas.close();
+                	} catch(IOException ignored) {
+                		/* Should never happen with a ByteArrayOutputStream */
+                	}
+                }
             }
         }
     }
