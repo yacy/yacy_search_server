@@ -49,7 +49,7 @@ for the JavaScript code in this page.
     
   <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!--[if lt IE 9]>
-    <script src="#[relativeBase]#env/bootstrap/js/html5shiv.js"></script>
+    <script src="#[relativeBase]#env/bootstrap/js/html5shiv.min.js"></script>
     <script src="#[relativeBase]#env/bootstrap/js/respond.min.js"></script>
   <![endif]-->
 
