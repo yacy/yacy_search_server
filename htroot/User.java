@@ -27,6 +27,7 @@
 //javac -classpath .:../Classes Message.java
 //if the shell's current path is HTROOT
 
+import javax.servlet.ServletException;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
@@ -53,7 +54,7 @@ public class User{
         prop.put("logged-in_username", "");
         prop.put("logged-in_returnto", "");
         //identified via HTTPPassword
-        entry=sb.userDB.proxyAuth((requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")));
+        entry=sb.userDB.proxyAuth(requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
         if(entry != null){
         	prop.put("logged-in_identified-by", "1");
         //try via cookie
@@ -159,10 +160,9 @@ public class User{
             }else{
                 sb.userDB.adminLogout(UserDB.getLoginToken(requestHeader.getHeaderCookies()));
             }
-            //XXX: This should not be needed anymore, because of isLoggedout
-            if(! (requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
-            	prop.authenticationRequired();
-            }
+            try {
+                requestHeader.logout(); // servlet container session logout
+            } catch (ServletException ex) {}
             if(post.containsKey("returnto")){
                 prop.putHTML(serverObjects.ACTION_LOCATION, post.get("returnto"));
             }
