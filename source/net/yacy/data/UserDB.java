@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import javax.servlet.http.HttpServletRequest;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
@@ -129,18 +130,21 @@ public final class UserDB {
     }    
 
     /**
-     * Use a ProxyAuth Value to authenticate user.
-     * @param auth base64 Encoded String, which contains "username:pw".
+     * Use a ProxyAuth Value to authenticate user from HttpHeader.Authentication.
+     * This supports only Basic authentication
+     * @param auth "BASIC " followed by base64 Encoded String, which contains "username:pw" for basic authentication
      */
-    public Entry proxyAuth(final String auth) {
+    public Entry proxyAuth(final String authHeader) {
         Entry entry = null;
-        
-        if (auth != null) {
-            final String[] tmp = Base64Order.standardCoder.decodeString(auth.trim()).split(":");
-            if (tmp.length == 2) {
-                entry = this.passwordAuth(tmp[0], tmp[1]);
-                if (entry == null) {
-                    entry = this.md5Auth(tmp[0], tmp[1]);
+        if (authHeader != null) {
+            if (authHeader.toUpperCase().startsWith(HttpServletRequest.BASIC_AUTH)) {
+                String auth = authHeader.substring(6); // take out prefix "BASIC"
+                final String[] tmp = Base64Order.standardCoder.decodeString(auth.trim()).split(":");
+                if (tmp.length == 2) {
+                    entry = this.passwordAuth(tmp[0], tmp[1]);
+                    if (entry == null) {
+                        entry = this.md5Auth(tmp[0], tmp[1]);
+                    }
                 }
             }
         }
