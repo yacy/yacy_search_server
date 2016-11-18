@@ -146,6 +146,21 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         return false;
     }
 
+    /**
+     * Gets the header entry "Cookie" as on string containing all cookies
+     *
+     * @return String with cookies separated by ';'
+     * @see getCookies()
+     */
+    public String getHeaderCookies() { // TODO: harmonize with standard getCookies
+        String cookiestring = this.get(COOKIE); // get from legacy or HttpServletRequest
+        if (cookiestring == null) {
+            return "";
+        } else {
+            return cookiestring;
+        }
+    }
+
     // implementation of HttpServletRequest procedures
     // the general approach is to prefer values in the YaCy legacy RequestHeader.map and if no value exists
     // to use the httpservletrequest. This approach is used, because legacy requestheader allows to add or
