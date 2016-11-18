@@ -463,7 +463,10 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         if (_request != null) {
             _request.logout();
         }
-        throw new UnsupportedOperationException("Not supported yet.");
+
+        super.remove(AUTHORIZATION);
+        // TODO: take care of legacy login cookie (and possibly cached UserDB login status)
+
     }
 
     @Override
