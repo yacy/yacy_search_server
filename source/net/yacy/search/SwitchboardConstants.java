@@ -43,7 +43,11 @@ public final class SwitchboardConstants {
      * With introduction of DIGEST authentication all passwords are MD5 encoded and calculatd as <code>username:adminrealm:password</code>
      * To differentiate old and new admin passwords, use the new calculated passwords a "MD5:" prefix.
      */
-    public static final String ADMIN_ACCOUNT                = "adminAccount";
+    
+    public static final String ADMIN_ACCOUNT                = "adminAccount"; // not used anymore (did hold clear text  username:pwd)
+
+    // this holds the credential "MD5:" + Digest.encodeMD5Hex(adminAccountUserName + ":" + adminRealm + ":" + password)
+    // or the depreciated old style MapTools.encodeMD5Hex( Base64Order.standardCoder.encode(adminAccountUserName + ":" + password) )
     public static final String ADMIN_ACCOUNT_B64MD5         = "adminAccountBase64MD5";
     public static final String ADMIN_ACCOUNT_USER_NAME      = "adminAccountUserName"; // by default 'admin'
     public static final String ADMIN_ACCOUNT_FOR_LOCALHOST  = "adminAccountForLocalhost";
