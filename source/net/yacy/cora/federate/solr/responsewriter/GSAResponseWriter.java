@@ -35,6 +35,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.http.servlets.GSAsearchServlet;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
@@ -279,7 +280,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
                 }
                 if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
                     Date d = new Date(Long.parseLong(value.stringValue()));
-                    writer.write("<FS NAME=\"date\" VALUE=\"" + HeaderFramework.formatGSAFS(d) + "\"/>\n");
+                    writer.write("<FS NAME=\"date\" VALUE=\"" + formatGSAFS(d) + "\"/>\n");
                     //OpensearchResponseWriter.solitaireTag(writer, GSAToken.CACHE_LAST_MODIFIED.getSolrFieldName(), HeaderFramework.formatRFC1123(d));
                     //texts.add(value.stringValue());
                     continue;
@@ -350,4 +351,19 @@ public class GSAResponseWriter implements QueryResponseWriter {
         } 
         return text;
     }
+
+    /**
+     * Format date for GSA (short form of ISO8601 date format)
+     * @param date
+     * @return datestring "yyyy-mm-dd"
+     * @see ISO8601Formatter
+     */
+    public final String formatGSAFS(final Date date) {
+        if (date == null) return "";
+        synchronized (GSAsearchServlet.FORMAT_GSAFS) {
+            final String s = GSAsearchServlet.FORMAT_GSAFS.format(date);
+            return s;
+        }
+    }
+
 }

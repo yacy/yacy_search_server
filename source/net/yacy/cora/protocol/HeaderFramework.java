@@ -246,11 +246,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss Z"; // with numeric time zone indicator as defined in RFC5322
     private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
     private static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
-    private static final String PATTERN_GSAFS = "yyyy-MM-dd";
     public  static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
     public  static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US);
     public  static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
-    public  static final SimpleDateFormat FORMAT_GSAFS        = new SimpleDateFormat(PATTERN_GSAFS, Locale.US);
     private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
     private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
 
@@ -282,22 +280,6 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             lastRFC1123long = date.getTime();
             lastRFC1123string = s;
             return s;
-        }
-    }
-
-    public static final String formatGSAFS(final Date date) {
-        if (date == null) return "";
-        synchronized (FORMAT_GSAFS) {
-            final String s = FORMAT_GSAFS.format(date);
-            return s;
-        }
-    }
-    
-    public static final Date parseGSAFS(final String datestring) {
-        try {
-            return FORMAT_GSAFS.parse(datestring);
-        } catch (final ParseException e) {
-            return null;
         }
     }
 
@@ -355,6 +337,12 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         return put("*" + key + "-" + Integer.toString(c), value);
     }
 
+    /**
+     * Count occurence of header keys, look for original header name and a
+     * numbered version of the header *headername-NUMBER , with NUMBER starting at 1
+     * @param key the raw header name
+     * @return number of headers with same name
+     */
     public int keyCount(final String key) {
         if (!(containsKey(key))) return 0;
         int c = 1;
@@ -370,15 +358,27 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         return result;
     }
 
-    // return multiple results
+    /**
+     * Get one Header of headers with same name.
+     * The headers are internally numbered
+     * @param key the raw header name
+     * @param count the number of the numbered header name (0 = same as get(key))
+     * @return value of header with number=count
+     */
     public String getSingle(final String key, final int count) {
-        if (count == 0) return get(key, null);
-        return get("*" + key + "-" + count, null);
+        if (count == 0) return get(key); // first look for just the key
+        return get("*" + key + "-" + count); // now for the numbered header names
     }
 
-    public Object[] getMultiple(final String key) {
+    /**
+     * Get multiple header values with same header name.
+     * The header names are internally numbered (format *key-1)
+     * @param key the raw header name
+     * @return header values
+     */
+    public String[] getMultiple(final String key) {
         final int count = keyCount(key);
-        final Object[] result = new Object[count];
+        final String[] result = new String[count];
         for (int i = 0; i < count; i++) result[i] = getSingle(key, i);
         return result;
     }
