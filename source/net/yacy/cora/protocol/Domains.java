@@ -842,7 +842,8 @@ public class Domains {
 
     /**
      * Reads the port out of a url string (the url must start with a protocol
-     * like http://). If no port is given, default ports are returned
+     * like http:// to return correct default port). If no port is given, default
+     * ports are returned. On missing protocol, port=80 is assumed.
      * @param target url (must start with protocol)
      * @return port number 
      */
@@ -870,8 +871,7 @@ public class Domains {
         if ( p < 0 ) return port;
 
         // the ':' must be a port divider or part of ipv6
-        int pos;
-        if (((pos = target.lastIndexOf(']')) < 0) || (pos < p)) {
+        if (target.lastIndexOf(']') < p) {
             port = Integer.parseInt(target.substring(p + 1));
         }
         return port;
