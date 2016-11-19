@@ -839,7 +839,13 @@ public class Domains {
         if (p > 0) target = target.substring(0, p);
         return target;
     }
-    
+
+    /**
+     * Reads the port out of a url string (the url must start with a protocol
+     * like http://). If no port is given, default ports are returned
+     * @param target url (must start with protocol)
+     * @return port number 
+     */
     public static int stripToPort(String target) {
         int port = 80; // default port
         
@@ -863,8 +869,11 @@ public class Domains {
         p = target.lastIndexOf(':');        
         if ( p < 0 ) return port;
 
-        // the ':' must be a port divider
-        port = Integer.parseInt(target.substring(p + 1));
+        // the ':' must be a port divider or part of ipv6
+        int pos;
+        if (((pos = target.lastIndexOf(']')) < 0) || (pos < p)) {
+            port = Integer.parseInt(target.substring(p + 1));
+        }
         return port;
     }
     
