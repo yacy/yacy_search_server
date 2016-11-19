@@ -675,27 +675,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
     }
-
-    /**
-     * Convert ServletRequest header to YaCy RequestHeader
-     * @param request ServletRequest
-     * @return RequestHeader created from ServletRequest
-     * @deprecated use RequestHeader(HttpServletRequest); but .remove(key) can't be used after switch to new instance
-     */
-    @Deprecated // TODO: only used for proxy, should be handled there
-    public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
-        RequestHeader result = new RequestHeader();
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String headerName = headerNames.nextElement();
-            Enumeration<String> headers = request.getHeaders(headerName);
-            while (headers.hasMoreElements()) {
-                String header = headers.nextElement();
-                result.add(headerName, header);
-            }
-        }
-        return result;
-    }
     
     /**
      * Returns the URL base for this peer, determined from request HTTP header "Host" when present. Use this when absolute URL rendering is required, 

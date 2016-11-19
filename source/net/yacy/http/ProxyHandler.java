@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketException;
 import java.util.Date;
+import java.util.Enumeration;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -43,10 +44,9 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.document.TextParser;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
-import net.yacy.http.servlets.YaCyDefaultServlet;
+import net.yacy.document.TextParser;
 import net.yacy.server.http.HTTPDProxyHandler;
 import net.yacy.server.http.MultiOutputStream;
 
@@ -129,7 +129,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
 		
 		sb.proxyLastAccess = System.currentTimeMillis();
         
-        RequestHeader proxyHeaders = YaCyDefaultServlet.convertHeaderFromJetty(request);
+        RequestHeader proxyHeaders = ProxyHandler.convertHeaderFromJetty(request);
         setProxyHeaderForClient(request, proxyHeaders);
 
         final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);
@@ -227,7 +227,27 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         logProxyAccess(request);
         baseRequest.setHandled(true);
 	}
-       
+
+    /**
+     * Convert ServletRequest header to modifiable YaCy RequestHeader
+     *
+     * @param request ServletRequest
+     * @return RequestHeader created from ServletRequest
+     */
+    public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
+        RequestHeader result = new RequestHeader();
+        Enumeration<String> headerNames = request.getHeaderNames();
+        while (headerNames.hasMoreElements()) {
+            String headerName = headerNames.nextElement();
+            Enumeration<String> headers = request.getHeaders(headerName);
+            while (headers.hasMoreElements()) {
+                String header = headers.nextElement();
+                result.add(headerName, header);
+            }
+        }
+        return result;
+    }
+
     /**
      * adds specific header elements for the connection of the internal
      * httpclient to the remote server according to local config

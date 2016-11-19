@@ -31,6 +31,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.http.ProxyHandler;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.server.http.ChunkedInputStream;
@@ -116,7 +117,7 @@ public class YaCyProxyServlet extends HttpServlet implements Servlet {
         if (proxyurl.getPort() != -1) {
             hostwithport += ":" + proxyurl.getPort();
         }
-        RequestHeader yacyRequestHeader = YaCyDefaultServlet.convertHeaderFromJetty(request);
+        RequestHeader yacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
         yacyRequestHeader.remove(RequestHeader.KEEP_ALIVE);
         yacyRequestHeader.remove(HeaderFramework.CONTENT_LENGTH);
         

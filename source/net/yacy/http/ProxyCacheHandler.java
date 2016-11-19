@@ -65,7 +65,7 @@ public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler 
             ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url.hash());
 
             if (cachedResponseHeader != null) {
-                RequestHeader proxyHeaders = YaCyDefaultServlet.convertHeaderFromJetty(request);
+                RequestHeader proxyHeaders = ProxyHandler.convertHeaderFromJetty(request);
                 // TODO: this convertion is only necessary
                 final net.yacy.crawler.retrieval.Request yacyRequest = new net.yacy.crawler.retrieval.Request(
                         null,
