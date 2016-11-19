@@ -91,20 +91,27 @@ public class User{
         }else if(sb.verifyAuthentication(requestHeader)){
             prop.put("logged-in", "2");
         //identified via form-login
-        //TODO: this does not work for a static admin, yet.
-        }else if(post != null && post.containsKey("username") && post.containsKey("password")){
+        } else if (post != null && post.containsKey("username") && post.containsKey("password")) {
         	if (post.containsKey("returnto"))
         		prop.putHTML("logged-in_returnto", post.get("returnto"));
             final String username=post.get("username");
             final String password=post.get("password");
             prop.putHTML("logged-in_username", username);
 
-            entry=sb.userDB.passwordAuth(username, password);
-            final boolean staticAdmin = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").equals(
-                    Digest.encodeMD5Hex(
-                            Base64Order.standardCoder.encodeString(username + ":" + password)
-                    )
-            );
+            entry = sb.userDB.passwordAuth(username, password);
+            boolean staticAdmin = false;
+            if (entry == null) {
+                // check for old style admin account
+                staticAdmin = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").equals(
+                        Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(username + ":" + password)));
+                if (!staticAdmin) {
+                    // check for DIGEST authentication admin account
+                    final String realm = sb.getConfig(SwitchboardConstants.ADMIN_REALM, "YaCy");
+                    staticAdmin = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").equals(
+                            "MD5:" + Digest.encodeMD5Hex(username + ":" + realm + ":" + password));
+                }
+            }
+
             String cookie="";
             if(entry != null)
                 //set a random token in a cookie
