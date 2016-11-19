@@ -35,18 +35,51 @@ public class DomainsTest {
     @Test
     public void testStripToPort() {
         Map<String, Integer> testHost = new HashMap();
-
+        // key = teststring, value = expected port
         testHost.put("[3ffe:2a00:100:7031::1]:80", 80);
         testHost.put("https://[3ffe:2a00:100:7031::1]:80/test.html", 80);
         testHost.put("[3ffe:2a00:100:7031::1]/test.html", 80);
         testHost.put("http://[3ffe:2a00:100:7031::1]/test.html", 80);
         testHost.put("[3ffe:2a00:100:7031::1]:8090/test.html", 8090);
+        testHost.put("ftp://[3ffe:2a00:100:7031::1]/test.html", 21);
 
         for (String host : testHost.keySet()) {
             int port = Domains.stripToPort(host);
             int expectedPort = testHost.get(host);
             assertEquals(host, expectedPort, port);
 
+        }
+    }
+
+    /**
+     * Test of stripToHostName method, of class Domains.
+     */
+    @Test
+    public void testStripToHostName() {
+        Map<String, String> testHost = new HashMap();
+        // key = teststring, value = expected host
+        testHost.put("[3ffe:2a00:100:7031::1]:80", "3ffe:2a00:100:7031::1");
+        testHost.put("https://[3ffe:2a00:100:7032::1]:80/test.html", "3ffe:2a00:100:7032::1");
+        testHost.put("[3ffe:2a00:100:7033::1]/test.html", "3ffe:2a00:100:7033::1");
+        testHost.put("http://[3ffe:2a00:100:7034::1]/test.html", "3ffe:2a00:100:7034::1");
+        testHost.put("[3ffe:2a00:100:7035::1]:8090/test.html", "3ffe:2a00:100:7035::1");
+        testHost.put("ftp://[3ffe:2a00:100:7036::1]/test.html", "3ffe:2a00:100:7036::1");
+
+        testHost.put("http://test1.org/test.html", "test1.org");
+        testHost.put("http://test2.org:80/test.html", "test2.org");
+        testHost.put("http://test3.org:7777/test.html", "test3.org");
+        testHost.put("http://www.test4.org/test.html", "www.test4.org");
+        testHost.put("http://www.test5.org:80/test.html", "www.test5.org");
+        testHost.put("http://www.test6.org:7777/test.html", "www.test6.org");
+
+        testHost.put("test7.org/test.html", "test7.org");
+        testHost.put("test8.org:80/test.html", "test8.org");
+        testHost.put("test9.org:7777/test.html", "test9.org");
+
+        for (String teststr : testHost.keySet()) {
+            String host = Domains.stripToHostName(teststr);
+            String expectedHost = testHost.get(teststr);
+            assertEquals(teststr, expectedHost, host);
         }
     }
 }

@@ -817,24 +817,19 @@ public class Domains {
         // IPv4 / host heuristics
         p = target.lastIndexOf(':');        
         if ( p < 0 ) {
-            // may be IPv4 or IPv6, we chop off brackets if exist
-            if (target.charAt(0) == '[') target = target.substring(1);
-            if (target.charAt(target.length() - 1) == ']') target = target.substring(0, target.length() - 1);
             p = target.lastIndexOf('%');
             if (p > 0) target = target.substring(0, p);
             return target;
         }
         
         // the ':' at pos p may be either a port divider or a part of an IPv6 address
-        if (target.charAt(p - 1) == ']') {
-            target = target.substring(1, p - 1);
-            p = target.lastIndexOf('%');
-            if (p > 0) target = target.substring(0, p);
-            return target;
+        if ( p > target.lastIndexOf(']')) { // if after ] it's a port divider (not IPv6 part)
+            target = target.substring(0, p );
         }
         
-        // the ':' must be a port divider
-        target = target.substring(0, p);
+        // may be IPv4 or IPv6, we chop off brackets if exist
+        if (target.charAt(0) == '[') target = target.substring(1);
+        if (target.charAt(target.length() - 1) == ']') target = target.substring(0, target.length() - 1);
         p = target.lastIndexOf('%');
         if (p > 0) target = target.substring(0, p);
         return target;
