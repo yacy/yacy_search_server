@@ -71,7 +71,6 @@ public class ConfigAccounts_p {
                 // check passed. set account:
                 // old: // env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "MD5:"+Digest.encodeMD5Hex(user + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":"+ pw1));
-                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);
                 // make sure server accepts new credentials
                 Jetty9HttpServerImpl jhttpserver = (Jetty9HttpServerImpl)sb.getHttpServer();
@@ -97,7 +96,6 @@ public class ConfigAccounts_p {
                     if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty()) {
                         // make a 'random' password
                         env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + sb.genRandomPassword());
-                        env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
                     }
                 } else {
                     sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);

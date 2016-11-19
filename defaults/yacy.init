@@ -385,13 +385,12 @@ serverClient=*
 #use User_p.html to create some Users.
 use_proxyAccounts=true
 
-# adminAccount: a user:password - pair for administration of
+# adminAccountBase64MD5: a encoded user:password - pair for administration of
 # settings through the web interface
 # should be set to a secret. By default it is without a password
 # but you are encouraged to set it to another value on the page
 # http://localhost:8090/ConfigAccounts_p.html
-#adminAccount=admin:mysecretpassword
-adminAccount=
+#adminAccountBase64=MD5:{admin:realm:mysecretpassword}
 adminAccountBase64MD5=
 adminAccountUserName=admin
 
