@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -507,14 +506,6 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         return null;
     }
 
-    public static boolean supportChunkedEncoding(final Properties conProp) {
-    	// getting the http version of the client
-    	final String httpVer = conProp.getProperty(CONNECTION_PROP_HTTP_VER);
-
-    	// only clients with http version 1.1 supports chunk
-        return !(httpVer.equals(HTTP_VERSION_0_9) || httpVer.equals(HTTP_VERSION_1_0));
-    }
-
     public StringBuilder toHeaderString(
             final String httpVersion,
             final int httpStatusCode,
@@ -589,11 +580,15 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         //String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
 
         int port, pos;
-        if ((pos = host.lastIndexOf(':')) < 0 || host.charAt(pos - 1) != ']') {
+        if ((pos = host.lastIndexOf(':')) < 0) {
             port = Domains.stripToPort(protocol + "://" + host); // use stripToPort to get default ports
         } else {
-            port = NumberTools.parseIntDecSubstring(host, pos + 1);
-            host = host.substring(0, pos);
+            if (pos > host.indexOf(']')) { // check for ipv6
+                port = NumberTools.parseIntDecSubstring(host, pos + 1);
+                host = host.substring(0, pos);
+            } else {
+                port = Domains.stripToPort(protocol + "://" + host); // use stripToPort to get default ports
+            }
         }
 
         final DigestURL url = new DigestURL(protocol, host, port, (args == null) ? path : path + "?" + args);
