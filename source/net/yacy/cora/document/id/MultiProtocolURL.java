@@ -181,7 +181,6 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         this.contentDomain = null;
 
         // identify protocol
-        assert (url != null);
         url = url.trim();
         
         if (url.startsWith("//")) {
@@ -192,8 +191,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             url = "smb://" + CommonPattern.BACKSLASH.matcher(url.substring(2)).replaceAll("/");
         }
 
-        if (url.length() > 1 && url.charAt(1) == ':') {
-            // maybe a DOS drive path
+        if (url.length() > 1 && (url.charAt(1) == ':' && Character.isLetter(url.charAt(0)))) {
+            // maybe a DOS drive path ( A: to z: )
             url = "file://" + url;
         }
 
@@ -284,12 +283,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     this.path = h.substring(2); // "/path"  or "/c:/path"
                 } else if (h.startsWith("//")) { // "//host/path" or "//host/c:/path"
                     if (h.length() > 4 && h.charAt(3) == ':' && h.charAt(4) != '/' && h.charAt(4) != '\\') {
-                        // wrong windows path, after the doublepoint there should be a backslash
-                        h = h.substring(0, 4) + '\\' + h.substring(4);
+                        // wrong windows path, after the doublepoint there should be a backslash. Let's add a slash, as it will be slash in the normal form
+                        h = h.substring(0, 4) + '/' + h.substring(4);
                     }
                     int q = h.indexOf('/', 2);
                     if (q < 0 || h.length() > 3 && h.charAt(3) == ':') {
-                        this.path = h.substring(2); // "path"  or "c:/path"
+                    	// Missing root slash such as "path" or "c:/path" accepted, but the path attribute must by after all start with it
+                        this.path = "/" + h.substring(2); 
                     } else {
                         this.host = h.substring(2, q ); // TODO: handle "c:"  ?
                         if (this.host.equalsIgnoreCase(Domains.LOCALHOST)) this.host = null;
@@ -397,7 +397,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         }
         return new MultiProtocolURL(baseURL, relPath);
     }
-
+    
     public MultiProtocolURL(final MultiProtocolURL baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         if (relPath == null) throw new MalformedURLException("relPath is null");
@@ -425,9 +425,13 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         } else if (relPath.length() > 0 && relPath.charAt(0) == '/') {
             this.path = relPath;
         } else if (baseURL.path.endsWith("/")) {
-            if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
-                throw new MalformedURLException("relative path malformed: " + relPath);
-            }
+        	/* According to RFC 3986 example in Appendix B. (https://tools.ietf.org/html/rfc3986) 
+        	   such an URL is valid : http://www.ics.uci.edu/pub/ietf/uri/#Related
+        	   
+        	   We also find similar usages in the 2016 URL living standard (https://url.spec.whatwg.org/),  
+        	   for example : https://url.spec.whatwg.org/#syntax-url-absolute-with-fragment 
+        	   
+        	   java.lang.URL constructor also accepts this form.*/
             if (relPath.startsWith("/")) this.path = baseURL.path + relPath.substring(1); else this.path = baseURL.path + relPath;
         } else {
             if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
@@ -470,7 +474,17 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         escape();
     }
 
-    //  resolve '..'
+    /**
+     * Resolve '..' segments in the path.
+     * For standard pseudo algorithms, see :
+     * <ul>
+     * <li>https://tools.ietf.org/html/rfc3986#section-5.2.4</li>
+     * <li>https://url.spec.whatwg.org/#path-state</li>
+     * <li>https://www.w3.org/TR/url/#relative-path-state</li>
+     * </ul>
+     * @param path URL path part : must not be null
+     * @return the path with '..' segments resolved
+     */
     private static final String resolveBackpath(final String path) {
         String p = path;
         if (p.isEmpty() || p.charAt(0) != '/') { p = "/" + p; }
@@ -481,6 +495,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             if (matcher.start() > end) break;
             p = matcher.replaceAll("");
             matcher.reset(p);
+        }
+        /* Let's remove any eventual remaining but inappropriate '..' segments at the beginning. 
+         * See https://tools.ietf.org/html/rfc3986#section-5.2.4 -> parts 2.C and 2.D */
+        while(p.startsWith("/../")) {
+        	p = p.substring(3);
+        }
+        if(p.equals("/..")) {
+        	p = "/";
         }
         return p.equals("") ? "/" : p;
     }
@@ -891,15 +913,20 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
     /**
      * return the file object to a local file
-     * this patches also 'strange' windows file paths
+     * this patches also 'strange' windows file paths (like /c|/tmp)
      * @return the file as absolute path
      */
     public File getLocalFile() {
+        // path always starts with '/' ( https://github.com/yacy/yacy_search_server/commit/1bb0b135ac5dab0adab423d89612f7b1e13f2e61 )
+        // e.g. /C:/tmp , charAt(1) == ':' never true, but keep it anyway
         char c = this.path.charAt(1);
-        if (c == ':') return new File(this.path.replace('/', '\\'));
-        if (c == '|') return new File(this.path.charAt(0) + ":" + this.path.substring(2).replace('/', '\\'));
-        c = this.path.charAt(2);
-        if (c == ':' || c == '|') return new File(this.path.charAt(1) + ":" + this.path.substring(3).replace('/', '\\'));
+        if (c == ':') return new File(this.path);
+        if (c == '|') return new File(this.path.charAt(0) + ":" + this.path.substring(2));
+        
+        if (this.path.length() > 1) { // prevent StringIndexOutOfBoundsException
+            c = this.path.charAt(2);
+            if (c == ':' || c == '|') return new File(this.path.charAt(1) + ":" + this.path.substring(3));
+        }
         return new File(this.path);
     }
 

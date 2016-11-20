@@ -2123,6 +2123,12 @@
     <trans-unit id="34c085e7" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Augmented Browsing&lt;</source>
     </trans-unit>
+    <trans-unit id="37b12af6" xml:space="preserve" approved="no" translate="yes">
+       <source>For this option URL proxy must be enabled.</source>
+    </trans-unit>    
+    <trans-unit id="a0b7e36a" xml:space="preserve" approved="no"  translate="yes">
+       <source>max. items</source>
+    </trans-unit>    
     <trans-unit id="2f43be1e" xml:space="preserve" approved="no" translate="yes">
        <source>"Save Settings"</source>
     </trans-unit>
@@ -3046,7 +3052,7 @@
        <source>You can also use an automatic domain-restriction to fully crawl a single domain.</source>
     </trans-unit>
     <trans-unit id="a200eeed" xml:space="preserve" approved="no" translate="yes">
-       <source>Attention: you can test the functionality of your regular expressions using the &lt;a href="/RegexTest.html"&gt;Regular Expression Tester&lt;/a&gt; within YaCy&lt;/a&gt;.</source>
+       <source>Attention: you can test the functionality of your regular expressions using the &lt;a href="RegexTest.html"&gt;Regular Expression Tester&lt;/a&gt; within YaCy&lt;/a&gt;.</source>
     </trans-unit>
     <trans-unit id="80c17409" xml:space="preserve" approved="no" translate="yes">
        <source>You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.</source>
@@ -4238,9 +4244,6 @@
     </trans-unit>
     <trans-unit id="d7c19933" xml:space="preserve" approved="no" translate="yes">
        <source>pos in phrase&lt;/td&gt;</source>
-    </trans-unit>
-    <trans-unit id="fe602610" xml:space="preserve" approved="no" translate="yes">
-       <source>word distance&lt;/td&gt;</source>
     </trans-unit>
     <trans-unit id="6779a8aa" xml:space="preserve" approved="no" translate="yes">
        <source>&lt;td&gt;authority&lt;/td&gt;</source>
@@ -8222,6 +8225,12 @@
     <trans-unit id="523a9f20" xml:space="preserve" approved="no" translate="yes">
        <source>Supporter&lt;</source>
     </trans-unit>
+    <trans-unit id="3fcf2cf5" xml:space="preserve" approved="no" translate="yes">
+       <source>Please enter a comment to your link recommendation.</source>
+    </trans-unit>
+    <trans-unit id="853ccb62" xml:space="preserve" approved="no" translate="yes">
+       <source>Your Vote is also considered without a comment.</source>
+    </trans-unit>    
     <trans-unit id="9a640c04" xml:space="preserve" approved="no" translate="yes">
        <source>Supporter are switched off for users without authorization</source>
     </trans-unit>
@@ -8699,7 +8708,7 @@
   </body>
 </file>
 
-<file original="TransNews_p.html"  source-language="en"  target-language="aa"  datatype="html">
+<file original="TransNews_p.html" source-language="en" datatype="html">
   <body>
     <trans-unit id="d0ae4d2d" xml:space="preserve" approved="no" translate="yes">
        <source>Translation News for Language</source>
@@ -9734,6 +9743,9 @@
     <trans-unit id="cee5ec51" xml:space="preserve" approved="no" translate="yes">
        <source>List of other web pages with citations</source>
     </trans-unit>
+    <trans-unit id="74cccb8f" xml:space="preserve" approved="no" translate="yes">
+       <source>Similar documents from different hosts:</source>
+    </trans-unit>   
   </body>
 </file>
 
@@ -10591,6 +10603,12 @@
     <trans-unit id="e5eb9948" xml:space="preserve" approved="no" translate="yes">
        <source>only pages from top-level-domains</source>
     </trans-unit>
+    <trans-unit id="6b8b308b" xml:space="preserve" approved="no" translate="yes">
+       <source>only pages with a date between &amp;lt;date1&amp;gt; and &amp;lt;date2&amp;gt; in content</source>
+    </trans-unit>
+    <trans-unit id="7fae2eb1" xml:space="preserve" approved="no" translate="yes">
+       <source>only pages with &amp;lt;date&amp;gt; in content</source>
+    </trans-unit>    
     <trans-unit id="f0ec5b4f" xml:space="preserve" approved="no" translate="yes">
        <source>only resources from http or https servers</source>
     </trans-unit>

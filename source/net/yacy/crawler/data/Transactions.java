@@ -211,6 +211,7 @@ public class Transactions {
             Thread t = new Thread(){
                 @Override
                 public void run() {
+                	this.setName("Transactions.store");
                     executorRunning.incrementAndGet();
                     try {
                         Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath);

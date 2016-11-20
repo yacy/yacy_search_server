@@ -8,11 +8,11 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" id="navbar-brand" href="/" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
-        <img id="greeting-icon" class="yacylogo" src="/env/grafics/yacy.png" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">
+      <a class="navbar-brand" id="navbar-brand" href="./" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
+        <img id="greeting-icon" class="yacylogo" src="env/grafics/yacy.png" alt="YaCy" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">
         <span style="position:absolute;top:50%;float:left;">&nbsp;Administration</span>
       </a>
-      <form class="navbar-form" method="get" accept-charset="UTF-8" action="/yacysearch.html" style="padding-left:200px;max-width:400px;">
+      <form class="navbar-form" method="get" accept-charset="UTF-8" action="yacysearch.html" style="padding-left:200px;max-width:400px;">
         <input name="query" placeholder="Search..." class="form-control" type="text" size="36" maxlength="200" value=""/>
         <input type="hidden" name="resource" value="global" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
@@ -23,34 +23,34 @@
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
         <li id="header_restart">
-          <form action="/Steering.html" method="get" role="form">
+          <form action="Steering.html" method="get">
             <input type="hidden" name="restart" value="" />
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-warning" onclick="return confirm('Confirm Re-Start')"><span class="glyphicon glyphicon-fire"></span> Re-Start</button>
           </form>
         </li>
         <li>&nbsp;</li>
         <li id="header_shutdown">
-          <form action="/Steering.html" method="get" role="form">
+          <form action="Steering.html" method="get">
             <input type="hidden" name="shutdown" value="" />
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="return confirm('Confirm Shutdown')"><span class="glyphicon glyphicon-off"></span> Shutdown</button>
           </form>
         </li>
         <li id="header_help" class="dropdown">
-          <a href="#" data-toggle="dropdown" class="dropdown-toggle"><span class="glyphicon glyphicon-question-sign"></span></a>
+          <a href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-question-sign"></span></a>
           <ul class="dropdown-menu">
           <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About This Page</a></li>
           <li id="header_tutorial"><a href="http://yacy.net/tutorials/">YaCy Tutorials</a></li>
           <li id="header_jslicense"><a href="jslicense.html" data-jslicense="1">JavaScript information</a></li>
-          <li class="divider"></li>
-          <li id="header_tutorial"><a href="http://yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
-          <li id="header_tutorial"><a href="http://forum.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
-          <li id="header_tutorial"><a href="http://wiki.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Project Wiki</a></li>
-          <li id="header_tutorial"><a href="https://github.com/yacy/yacy_search_server/commits/master" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
-          <li id="header_tutorial"><a href="http://bugs.yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker</a></li>
+          <li class="divider" role="separator"></li>
+          <li id="header_download"><a href="http://yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
+          <li id="header_community"><a href="http://forum.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
+          <li id="header_wiki"><a href="http://wiki.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Project Wiki</a></li>
+          <li id="header_git"><a href="https://github.com/yacy/yacy_search_server/commits/master" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
+          <li id="header_bugs"><a href="http://bugs.yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker</a></li>
         </ul>
         </li>
         <li id="header_administration">
-          <form action="/index.html" method="get" role="form">
+          <form action="index.html" method="get">
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary"><span class="glyphicon glyphicon-search"></span> Search Interface &raquo;</button>
           </form>
         </li>

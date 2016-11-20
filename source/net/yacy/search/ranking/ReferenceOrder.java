@@ -87,6 +87,7 @@ public class ReferenceOrder {
         private final boolean local;
         
         public NormalizeDistributor(final ReferenceContainer<WordReference> container, final LinkedBlockingQueue<WordReferenceVars> out, final int threads, final long maxtime, final boolean local) {
+        	super("ReferenceOrder.NormalizeDistributor");
             this.container = container;
             this.out = out;
             this.threads = threads;
@@ -144,6 +145,7 @@ public class ReferenceOrder {
         private final long maxtime;
 
         public NormalizeWorker(final BlockingQueue<WordReferenceVars> out, final Semaphore termination, long maxtime) {
+        	super("ReferenceOrder.NormalizeWorker");
             this.out = out;
             this.termination = termination;
             this.decodedEntries = new LinkedBlockingQueue<WordReferenceVars>();
@@ -219,26 +221,23 @@ public class ReferenceOrder {
      * @return a ranking: the higher the number, the better is the ranking
      */
     public long cardinal(final WordReference t) {
-        //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
-        final Bitfield flags = t.flags();
         assert this.min != null;
         assert this.max != null;
         assert t != null;
         assert this.ranking != null;
+        final Bitfield flags = t.flags();
         final long tf = ((this.max.termFrequency() == this.min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-this.min.termFrequency())*256.0)/(this.max.termFrequency() - this.min.termFrequency())))) << this.ranking.coeff_termfrequency);
         //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
-        final int maxmaxpos = this.max.maxposition(); // returns Integer.MIN_VALUE if positions empty
-        final int minminpos = this.min.minposition();
         final long r =
              ((256 - DigestURL.domLengthNormalized(t.urlhash())) << this.ranking.coeff_domlength)
-           + ((this.max.urlcomps()      == this.min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - this.min.urlcomps()     ) << 8) / (this.max.urlcomps()     - this.min.urlcomps())     )) << this.ranking.coeff_urlcomps)
-           + ((this.max.urllength()     == this.min.urllength()  )   ? 0 : (256 - (((t.urllength()    - this.min.urllength()    ) << 8) / (this.max.urllength()    - this.min.urllength())    )) << this.ranking.coeff_urllength)
-           + ((maxmaxpos == minminpos || maxmaxpos < 0)              ? 0 : (256 - (((t.minposition()  - minminpos) << 8) / (maxmaxpos - minminpos))) << this.ranking.coeff_posintext)
-           + ((this.max.posofphrase()   == this.min.posofphrase())   ? 0 : (256 - (((t.posofphrase()  - this.min.posofphrase()  ) << 8) / (this.max.posofphrase()  - this.min.posofphrase())  )) << this.ranking.coeff_posofphrase)
-           + ((this.max.posinphrase()   == this.min.posinphrase())   ? 0 : (256 - (((t.posinphrase()  - this.min.posinphrase()  ) << 8) / (this.max.posinphrase()  - this.min.posinphrase())  )) << this.ranking.coeff_posinphrase)
-           + ((this.max.distance()      == this.min.distance()   )   ? 0 : (256 - (((t.distance()     - this.min.distance()     ) << 8) / (this.max.distance()     - this.min.distance())     )) << this.ranking.coeff_worddistance)
-           + ((this.max.virtualAge()    == this.min.virtualAge())    ? 0 :        (((t.virtualAge()   - this.min.virtualAge()   ) << 8) / (this.max.virtualAge()   - this.min.virtualAge())    ) << this.ranking.coeff_date)
+           + ((this.max.urlcomps()      == this.min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - this.min.urlcomps()    ) << 8) / (this.max.urlcomps()    - this.min.urlcomps())    )) << this.ranking.coeff_urlcomps)
+           + ((this.max.urllength()     == this.min.urllength()  )   ? 0 : (256 - (((t.urllength()    - this.min.urllength()   ) << 8) / (this.max.urllength()   - this.min.urllength())   )) << this.ranking.coeff_urllength)
+           + ((this.max.posintext()     == this.min.posintext())     ? 0 : (256 - (((t.posintext()    - this.min.posintext()   ) << 8) / (this.max.posintext()   - this.min.posintext())   )) << this.ranking.coeff_posintext)
+           + ((this.max.posofphrase()   == this.min.posofphrase())   ? 0 : (256 - (((t.posofphrase()  - this.min.posofphrase() ) << 8) / (this.max.posofphrase() - this.min.posofphrase()) )) << this.ranking.coeff_posofphrase)
+           + ((this.max.posinphrase()   == this.min.posinphrase())   ? 0 : (256 - (((t.posinphrase()  - this.min.posinphrase() ) << 8) / (this.max.posinphrase() - this.min.posinphrase()) )) << this.ranking.coeff_posinphrase)
+           + ((this.max.distance()      == this.min.distance()   )   ? 0 : (256 - (((t.distance()     - this.min.distance()    ) << 8) / (this.max.distance()    - this.min.distance())    )) << this.ranking.coeff_worddistance)
+           + ((this.max.virtualAge()    == this.min.virtualAge())    ? 0 :        (((t.virtualAge()   - this.min.virtualAge()  ) << 8) / (this.max.virtualAge()  - this.min.virtualAge())   ) << this.ranking.coeff_date)
            + ((this.max.wordsintitle()  == this.min.wordsintitle())  ? 0 : (((t.wordsintitle() - this.min.wordsintitle()  ) << 8) / (this.max.wordsintitle() - this.min.wordsintitle())  ) << this.ranking.coeff_wordsintitle)
            + ((this.max.wordsintext()   == this.min.wordsintext())   ? 0 : (((t.wordsintext()  - this.min.wordsintext()   ) << 8) / (this.max.wordsintext()  - this.min.wordsintext())   ) << this.ranking.coeff_wordsintext)
            + ((this.max.phrasesintext() == this.min.phrasesintext()) ? 0 : (((t.phrasesintext()- this.min.phrasesintext() ) << 8) / (this.max.phrasesintext()- this.min.phrasesintext()) ) << this.ranking.coeff_phrasesintext)
@@ -266,19 +265,20 @@ public class ReferenceOrder {
     }
     
     public long cardinal(final URIMetadataNode t) {
-        //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
-        final Bitfield flags = t.flags();
         assert t != null;
         assert this.ranking != null;
-        final long r =
+        final Bitfield flags = t.flags();
+        long r =
              ((256 - DigestURL.domLengthNormalized(t.hash())) << this.ranking.coeff_domlength)
-           + ((256 - (t.urllength() << 8)) << this.ranking.coeff_urllength)
+           // TODO: here we score currently absolute numbers (e.g. t.urllength() : (35 << coeff), in contrast rwi calculation is ((between min=0, max=255) << coeff) for each of the score factors
+           // + ((256 - (t.urllength() << 8)) << this.ranking.coeff_urllength) // TODO: this is for valid url always NEGATIVE
            + (t.virtualAge()  << this.ranking.coeff_date)
            + (t.wordsintitle()<< this.ranking.coeff_wordsintitle)
            + (t.wordCount()   << this.ranking.coeff_wordsintext)
            + (t.llocal()      << this.ranking.coeff_llocal)
            + (t.lother()      << this.ranking.coeff_lother)
+           //
            + ((this.ranking.coeff_authority > 12) ? (authority(t.hosthash()) << this.ranking.coeff_authority) : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << this.ranking.coeff_appurl             : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << this.ranking.coeff_app_dc_title       : 0)

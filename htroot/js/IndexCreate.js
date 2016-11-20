@@ -25,8 +25,8 @@
 * for the JavaScript code in this file.
 */
 
-var AJAX_OFF="/env/grafics/empty.gif";
-var AJAX_ON="/env/grafics/ajax.gif";
+var AJAX_OFF="env/grafics/empty.gif";
+var AJAX_ON="env/grafics/ajax.gif";
 var timeout="";
 
 function handleResponse(){
@@ -52,14 +52,14 @@ function handleResponse(){
         }
         if (docrobotsOK==1){
         	img=document.createElement("img");
-        	img.setAttribute("src", "/env/grafics/ok.png");
+        	img.setAttribute("src", "env/grafics/ok.png");
         	img.setAttribute("width", "32px");
         	img.setAttribute("height", "32px");
 			img.setAttribute("alt", "robots.txt - OK");
         	robotsOKspan.appendChild(img);
         } else if(docrobotsOK==0){
 			img=document.createElement("img");
-        	img.setAttribute("src", "/env/grafics/bad.png");
+        	img.setAttribute("src", "env/grafics/bad.png");
         	img.setAttribute("width", "32px");
         	img.setAttribute("height", "32px");
 			img.setAttribute("alt", "robots.txt - Bad");
@@ -105,6 +105,6 @@ function loadInfos() {
 	
 	url=document.getElementById("crawlingURL").value;
 	if (url.indexOf("ftp") == 0 || url.indexOf("smb") == 0) document.getElementById("crawlingQ").checked = true; // since the pdf parser update for page separation, we need to set this
-	sndReq('/api/getpageinfo_p.xml?actions=title,robots&url='+url);
-	document.getElementById("api").innerHTML = "<a href='http://localhost:8090/api/getpageinfo_p.xml?actions=title,robots&url=" + url + "' id='apilink'><img src='/env/grafics/api.png' width='60' height='40' alt='API'/></a><span>See the page info about the start url.</span>";
+	sndReq('api/getpageinfo_p.xml?actions=title,robots&url='+url);
+	document.getElementById("api").innerHTML = "<a href='api/getpageinfo_p.xml?actions=title,robots&url=" + url + "' id='apilink'><img src='env/grafics/api.png' width='60' height='40' alt='API'/></a><span>See the page info about the start url.</span>";
 }

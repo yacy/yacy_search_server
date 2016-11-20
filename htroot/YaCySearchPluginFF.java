@@ -27,9 +27,7 @@
 //javac -classpath .:../Classes Status.java
 //if the shell's current path is HTROOT
 
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.NumberTools;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -46,16 +44,8 @@ public class YaCySearchPluginFF {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-        // getting the http host header
-        final String hostSocket = header.get(HeaderFramework.HOST);
-
-        String host = hostSocket;
-        int port = 80;
-        final int pos = hostSocket.indexOf(':',0);
-        if (pos != -1) {
-            port = NumberTools.parseIntDecSubstring(hostSocket, pos + 1);
-            host = hostSocket.substring(0, pos);
-        }
+        String host = header.getServerName();
+        int port = header.getServerPort();
 
         prop.put("host", host);
         prop.put("port", port);

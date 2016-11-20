@@ -101,7 +101,7 @@ public class urls {
         }
 
         if (post.get("call", "").equals("urlhashlist")) {
-            // retrieve a list of urls from the LURL-db by a given list of url hashes
+            // retrieve a list of urls from the local index by a given list of url hashes
             final String urlhashes = post.get("hashes", "");
             if (urlhashes.length() % 12 != 0) return prop;
             final int count = urlhashes.length() / 12;

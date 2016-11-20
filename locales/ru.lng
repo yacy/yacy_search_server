@@ -1297,11 +1297,10 @@ Use filter==Использовать фильтр
 Restrict to start domain(s)==Запретить запуск домена
 Restrict to sub-path(s)==Запретить часть пути
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Фильтр это emacs-подобное регулярное выражение, которое должно совпадать с ссылками для индексации;
-#The filter is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regular expression</a>==Фильтр это <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярное выражение</a>
 #that must match with the URLs which are used to be crawled; default is 'catch all'.==которые должны совпадать с ссылками для индексации; по-умолчанию 'берутся все'.
 Example: to allow only urls that contain the word 'science', set the must-match filter to '.*science.*'.==Например, для разрешения только ссылок, содержащих слово 'science' , нужно установить фильтр '.*science.*'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==Вы можете также использовать автоматическое ограничение домена при полном индексировании простого домена.
-Attention: you can test the functionality of your regular expressions using the <a href="/RegexTest.html">Regular Expression Tester</a> within YaCy</a>.==Внимание! Вы можете проверить правильность ваших регулярных выражений используя <a href="/RegexTest.html">тестер</a> в YaCy</a>.
+Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy</a>.==Внимание! Вы можете проверить правильность ваших регулярных выражений используя <a href="/RegexTest.html">тестер</a> в YaCy</a>.
 #Must-Not-Match Filter==Фильтр "не должно совпадать"
 #This filter must not match to allow that the page is accepted for crawling.==Dieser Filter muss nicht passen, um zu erlauben, dass die Seite zum crawlen akzeptiert wird.
 #The empty string is a never-match filter which should do well for most cases.==Пустая строка означает фильтр "никогда не совпадать", который хорошо подходит в большинстве случаев.
@@ -2207,7 +2206,7 @@ Content Analysis==Анализ содержимого
 These are document analysis attributes.==Аттрибуты анализа документов.
 Double Content Detection==Двойное определение содержимого
 Double-Content detection is done using a ranking on a 'unique'-Field, named 'fuzzy_signature_unique_b'.==Двойное определение содержимого выполняется с помощью ранжирования поля 'fuzzy_signature_unique_b'. 
-This field is set during parsing and is influenced by two attributes for the <a href="http://lucene.apache.org/solr/api-4_0_0-BETA/org/apache/solr/update/processor/TextProfileSignature.html">TextProfileSignature</a> class.==Это поле устанавливается во время анализа и описывается двумя аттрибутами класса<a href="http://lucene.apache.org/solr/api-4_0_0-BETA/org/apache/solr/update/processor/TextProfileSignature.html">  TextProfileSignature</a>.
+This field is set during parsing and is influenced by two attributes for the <a href="https://lucene.apache.org/solr/5_5_2/solr-core/org/apache/solr/update/processor/TextProfileSignature.html" target="_blank">TextProfileSignature</a> class.==Это поле устанавливается во время анализа и описывается двумя аттрибутами класса<a href="https://lucene.apache.org/solr/5_5_2/solr-core/org/apache/solr/update/processor/TextProfileSignature.html" target="_blank">  TextProfileSignature</a>.
 This is the minimum length of a word which shall be considered as element of the signature. Should be either 2 or 3.==Минимальная длина слова, которое должно рассматриваться в качестве элемента сигнатуры. Может быть 2 или 3
 The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less=='quantRate' это  количество слов, которые необходимы для вычисления сигнатуры. Чем выше это число, тем меньше
 words are used for the signature.==слов используется для сигнатуры.

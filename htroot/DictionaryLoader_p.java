@@ -303,10 +303,20 @@ public class DictionaryLoader_p {
         }
 
         if (post.containsKey("syn0Activate")) {
+        	FileInputStream inStream = null;
             try {
-                FileUtils.copy(new FileInputStream(synonym_de_default), synonym_de_production);
+            	inStream = new FileInputStream(synonym_de_default);
+                FileUtils.copy(inStream, synonym_de_production);
             } catch (IOException e) {
                 ConcurrentLog.logException(e);
+            } finally {
+            	if(inStream != null) {
+            		try {
+						inStream.close();
+					} catch (IOException ignored) {
+						ConcurrentLog.warn("DictionaryLoader", "Could not close file " + synonym_de_default.getName());
+					}
+            	}
             }
             SynonymLibrary.init(synonyms_path);
         }

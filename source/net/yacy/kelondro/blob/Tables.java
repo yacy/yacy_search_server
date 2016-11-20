@@ -157,7 +157,7 @@ public class Tables implements Iterable<String> {
     }
 
     public boolean hasIndex (final String tableName) {
-    	return this.cidx.contains(tableName);
+    	return this.cidx.containsKey(tableName);
     }
 
     public boolean hasIndex(final String tableName, final String columnName) {
@@ -297,14 +297,20 @@ public class Tables implements Iterable<String> {
         }
     }
 
+    /**
+     * @param tablename
+     * @return true if table in use
+     */
     public boolean hasHeap(final String tablename) {
-        try {
-            return getHeap(tablename) != null;
-        } catch (final IOException e) {
-            return false;
-        }
+        return this.tables.containsKey(tablename);
     }
 
+    /**
+     * Get or create a heap table/file
+     * @param tablename
+     * @return existing or created heap
+     * @throws IOException
+     */
     public BEncodedHeap getHeap(final String tablename) throws IOException {
         final String table = tablename + suffix;
         BEncodedHeap heap = this.tables.get(tablename);

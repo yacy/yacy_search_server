@@ -127,7 +127,7 @@ public class Wiki {
             prop.putHTML(serverObjects.ACTION_LOCATION, "/Wiki.html?page=" + pagename);
             prop.put(serverObjects.ACTION_LOCATION, prop.get(serverObjects.ACTION_LOCATION));
         }
-
+        
         if (post != null && post.containsKey("edit")) {
             if ((access.equals("admin") && (!sb.verifyAuthentication(header)))) {
                 // check access right for admin
@@ -147,7 +147,9 @@ public class Wiki {
             prop.putHTML("mode_pagename", pagename);
             prop.putHTML("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
-            prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_page", post.get("content", ""));
+            /* We do not fill hostport parameter : relative links should stay relative as it is more reliable 
+             * when the peer is behind any kind of reverse Proxy */
+            prop.putWiki("mode_page", post.get("content", ""));
             prop.putHTML("mode_page-code", post.get("content", ""));
         }
         //end contrib of [MN]
@@ -237,7 +239,9 @@ public class Wiki {
                     prop.putHTML("mode_versioning_pagename", pagename);
                     prop.putHTML("mode_versioning_author", oentry.author());
                     prop.put("mode_versioning_date", dateString(oentry.date()));
-                    prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_versioning_page", oentry.page());
+                    /* We do not fill hostport parameter : relative links should stay relative as it is more reliable 
+                     * when the peer is behind any kind of reverse Proxy */
+                    prop.putWiki("mode_versioning_page", oentry.page());
                     prop.putHTML("mode_versioning_page-code", UTF8.String(oentry.page()));
                 }
             } catch (final IOException e) {
@@ -252,7 +256,9 @@ public class Wiki {
             prop.putHTML("mode_pagename", pagename);
             prop.putHTML("mode_author", page.author());
             prop.put("mode_date", dateString(page.date()));
-            prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_page", page.page());
+            /* We do not fill hostport parameter : relative links should stay relative as it is more reliable 
+             * when the peer is behind any kind of reverse Proxy */
+            prop.putWiki("mode_page", page.page());
 
             prop.put("controls", "0");
             prop.putHTML("controls_pagename", pagename);

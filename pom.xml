@@ -36,7 +36,7 @@
         <!-- the Solr version used in dependency section for all related dependencies -->
         <solr.version>5.5.2</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.2.18.v20160721</jetty.version>
+        <jetty.version>9.2.19.v20160908</jetty.version>
                 
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
@@ -313,7 +313,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>1.3.1</version>
+                        <version>1.4.2</version>
                         <executions>
                             <execution>
                                 <phase>verify</phase>
@@ -323,6 +323,11 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>2.9</version>
+                    </plugin>                    
                 </plugins>
             </build>
             <reporting>
@@ -330,7 +335,7 @@
                     <plugin>
                         <groupId>org.owasp</groupId>
                         <artifactId>dependency-check-maven</artifactId>
-                        <version>1.3.1</version>
+                        <version>1.4.2</version>
                    </plugin>
                 </plugins>
             </reporting>
@@ -462,7 +467,8 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.9.2</version>
+            <version>1.10.1</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.youcruit.com.cybozu.labs</groupId>
@@ -493,18 +499,20 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>2.0.2</version>
+            <version>2.0.3</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>3.14</version>
+            <version>3.15</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
-            <version>3.14</version>
+            <version>3.15</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>sax</groupId>
@@ -601,11 +609,6 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>2.11.0</version>
-        </dependency>        
-        <dependency>
-            <groupId>com.adobe.xmp</groupId>
-            <artifactId>xmpcore</artifactId>
-            <version>5.1.2</version>
         </dependency>        
 
         <!-- special setup for dependencies not found in maven repository

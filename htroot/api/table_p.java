@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
@@ -40,7 +41,7 @@ public class table_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-        final String EXT = header.get("EXT", "");
+        final String EXT = header.get(HeaderFramework.CONNECTION_PROP_EXT, "");
         final boolean html = EXT.equals("html");
         final boolean xml = EXT.equals("xml");
 

@@ -138,7 +138,6 @@ public class Segment {
         this.segmentPath = segmentPath;
         archivePath.mkdirs();
         
-        // create LURL-db
         this.fulltext = new Fulltext(segmentPath, archivePath, collectionConfiguration, webgraphConfiguration);
         this.termIndex = null;
         this.urlCitationIndex = null;
@@ -583,12 +582,14 @@ public class Segment {
         final String urlNormalform = url.toNormalform(true);
         final String language = votedLanguage(url, urlNormalform, document, condenser); // identification of the language
 
-        // STORE URL TO LOADED-URL-DB
-        Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();
+        // get last modified date of the document to be used for the rwi index
+        // (the lastmodified document propery should be the same in rwi and fulltext (calculated in yacy2solr))
+        Date modDate = responseHeader == null ? document.getLastModified() : responseHeader.lastModified();
         if (modDate == null) modDate = new Date();
+        if (document.getLastModified().before(modDate)) modDate = document.getLastModified();
         if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
         char docType = Response.docType(document.dc_format());
-        
+
         // CREATE SOLR DOCUMENT
         final CollectionConfiguration collectionConfig = this.fulltext.getDefaultConfiguration();
         final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(this, collections, responseHeader, document, condenser, referrerURL, language, crawlProfile.isPushCrawlProfile(), this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);

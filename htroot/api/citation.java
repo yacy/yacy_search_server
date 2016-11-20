@@ -200,7 +200,7 @@ public class citation {
                 dd.append("makes ").append(Integer.toString(scores.get(u))).append(" citations: of ").append(url);
                 for (Map.Entry<String, Set<DigestURL>> se: sentenceOcc.entrySet()) {
                     Set<DigestURL> occurls = se.getValue();
-                    if (occurls != null && occurls.contains(uu)) dd.append("<br/><a href=\"/solr/select?q=text_t:%22").append(se.getKey().replace('"', '\'')).append("%22&rows=100&grep=&wt=grephtml\">").append(se.getKey()).append("</a>");
+                    if (occurls != null && occurls.contains(uu)) dd.append("<br/><a href=\"../solr/select?q=text_t:%22").append(se.getKey().replace('"', '\'')).append("%22&rows=100&grep=&wt=grephtml\">").append(se.getKey()).append("</a>");
                 }
                 prop.put("citations_" + i + "_dd", dd.toString());
                 i++;

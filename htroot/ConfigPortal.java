@@ -33,11 +33,10 @@ import java.net.MalformedURLException;
 import java.util.Properties;
 
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.WorkTables;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -81,6 +80,7 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, post.get(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, post.get(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, post.get(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+                sb.setConfig(SwitchboardConstants.GREETING_IMAGE_ALT, post.get(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET_DEFAULT, post.get("target", "_self"));
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL, post.get("target_special", "_self"));
                 sb.setConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, post.get("target_special_pattern", "_self"));
@@ -139,6 +139,7 @@ public class ConfigPortal {
                 sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, config.getProperty(SwitchboardConstants.GREETING_HOMEPAGE,"http://yacy.net"));
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, config.getProperty(SwitchboardConstants.GREETING_LARGE_IMAGE,"env/grafics/YaCyLogo_120ppi.png"));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, config.getProperty(SwitchboardConstants.GREETING_SMALL_IMAGE,"env/grafics/YaCyLogo_60ppi.png"));
+                sb.setConfig(SwitchboardConstants.GREETING_IMAGE_ALT, config.getProperty(SwitchboardConstants.GREETING_IMAGE_ALT,"YaCy project web site"));
                 sb.setConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, config.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE,"Status.html"));
                 sb.setConfig(SwitchboardConstants.INDEX_FORWARD, config.getProperty(SwitchboardConstants.INDEX_FORWARD,""));
                 HTTPDFileHandler.indexForward = "";
@@ -165,6 +166,7 @@ public class ConfigPortal {
         prop.putHTML(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.putHTML(SwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
         prop.putHTML(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        prop.putHTML(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
         prop.putHTML(SwitchboardConstants.INDEX_FORWARD, sb.getConfig(SwitchboardConstants.INDEX_FORWARD, ""));
         prop.put("publicTopmenu", sb.getConfigBool("publicTopmenu", false) ? 1 : 0);
         prop.put(SwitchboardConstants.PUBLIC_SEARCHPAGE, sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, false) ? 1 : 0);
@@ -226,30 +228,7 @@ public class ConfigPortal {
         prop.put("target_selected_special_searchresult", "searchresult".equals(target_special) ? 1 : 0);
         prop.put("target_special_pattern", sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, ""));
 
-        /* Address used in code template */
-        String myaddress = (sb.peers == null) || sb.peers.mySeed() == null || sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
-        if (myaddress == null) {
-            myaddress = "localhost:" + sb.getLocalPort();
-        }
-        prop.put("myaddress", myaddress);
-        
-        /* Address used to generate the preview frames : let's use the adress and port as requested. (Same behavior as opensearchdescription.java) */
-        String myPreviewAddress = header.get(HeaderFramework.HOST); // returns host:port (if not default http/https ports)
-        String myPreviewProtocol = "http";
-        if (myPreviewAddress == null) {
-        	myPreviewAddress = Domains.LOCALHOST + ":" + sb.getConfig("port", "8090");
-        } else {
-            final String sslport = ":" + sb.getConfig("port.ssl", "8443");
-            if (myPreviewAddress.endsWith(sslport)) { // connection on ssl port, use https protocol
-                myPreviewProtocol = "https";
-            }
-        }
-        /* YaCyDefaultServelt should have filled this custom header, making sure we know here wether original request is http or https
-         *  (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
-        myPreviewProtocol = header.get(HeaderFramework.X_YACY_REQUEST_SCHEME, myPreviewProtocol);
-        
-        prop.put("myPreviewAddress", myPreviewAddress);
-        prop.put("myPreviewProtocol", myPreviewProtocol);
+        prop.put("myContext", YaCyDefaultServlet.getContext(header, sb));
         return prop;
     }
 

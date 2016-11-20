@@ -51,9 +51,9 @@ public final class query {
         final Switchboard sb = (Switchboard) ss;
 
         // remember the peer contact for peer statistics
-        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        final String clientip = header.getRemoteAddr();
         final String userAgent = header.get(HeaderFramework.USER_AGENT, "<unknown>");
-        sb.peers.peerActions.setUserAgent(clientip, userAgent);
+        if (clientip != null) sb.peers.peerActions.setUserAgent(clientip, userAgent);
 
         final serverObjects prop = new serverObjects();
         prop.put("magic", Network.magic);
@@ -65,7 +65,7 @@ public final class query {
 
         if ((sb.isRobinsonMode()) &&
             (!sb.isPublicRobinson()) &&
-            (!sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))) {
+            (!sb.isInMyCluster(clientip))) {
         	// if we are a robinson cluster, answer only if we are public robinson peers,
         	// or we are a private cluster and the requester is in our cluster.
           	// if we don't answer, the remote peer will recognize us as junior peer,

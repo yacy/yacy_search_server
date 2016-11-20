@@ -118,7 +118,7 @@ public class MessageSend_p {
                             prop.putXML("mode_permission_message", message);
                             prop.putHTML("mode_permission_hash", hash);
                             if (post.containsKey("preview")) {
-                                prop.putWiki(sb.peers.mySeed().getPublicAddress(ip), "mode_permission_previewmessage", message);
+                                prop.putWiki("mode_permission_previewmessage", message);
                             }
 
                         } catch (final NumberFormatException e) {

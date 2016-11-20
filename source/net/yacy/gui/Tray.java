@@ -125,6 +125,11 @@ public final class Tray {
 	}
 	
 	private class TrayAnimation extends Thread {
+		
+		public TrayAnimation() {
+			super(TrayAnimation.class.getSimpleName());
+		}
+		
 	    int ic = 0;
 	    @Override
         public void run() {

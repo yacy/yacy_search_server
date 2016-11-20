@@ -87,12 +87,12 @@ a:hover {
 
 /* mark external links */
 a[href^="http://"], a[href^="https://"]  {
-  background: url(/env/grafics/external.png) center right no-repeat;
+  background: url(grafics/external.png) center right no-repeat;
   padding-right: 14px;
 }
 
 /* exception for links in search results and image links */
-a[target="_self"], a[class="forceNoExternalIcon"], a[class="navbar-brand"], a[class="yacylogo"] {
+a[target="_self"], a[class="forceNoExternalIcon"], a[class="navbar-brand"], a[class="yacylogo"], .searchresults a {
   background: transparent;
   padding-right: 0px;
 }
@@ -444,7 +444,7 @@ div.yacylogo {
 
 div.head h1 {
   padding:6px;
-  background:url(/env/grafics/yacy.png) 10px center no-repeat;
+  background:url(grafics/yacy.png) 10px center no-repeat;
   font-weight: bold;
   font-size: 1.8em;
   text-align: center;
@@ -522,7 +522,7 @@ a.bookmarkTitle {
 }
 
 a.BookmarkLink {
-  background:url(/env/grafics/addlink.png) left center no-repeat;
+  background:url(grafics/addlink.png) left center no-repeat;
   padding-left:15px;
 }
 
@@ -535,13 +535,13 @@ a.MenuItemLink{
 }
 
 a.MenuItemLink.lock{
-  background-image:url(/env/grafics/lock.gif);
+  background-image:url(grafics/lock.gif);
   background-position:2px center;
   background-repeat:no-repeat;
 }
 
 a.MenuItemLink.unlock{
-  background-image:url(/env/grafics/lockopen.gif);
+  background-image:url(grafics/lockopen.gif);
   background-position:2px center;
   background-repeat:no-repeat;
 }
@@ -562,15 +562,15 @@ div.urlactions a {
 }
 
 a.bookmarklink:hover, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
-  background:url(/env/grafics/bookmark.gif) center center no-repeat;
+  background:url(grafics/bookmark.gif) center center no-repeat;
 }
 
 a.recommendlink:hover, div.searchresults:hover a.recommendlink, div.searchresults.hover a.recommendlink {
-  background:url(/env/grafics/plus.gif) center center no-repeat;
+  background:url(grafics/plus.gif) center center no-repeat;
 }
 
 a.deletelink:hover, div.searchresults:hover a.deletelink, div.searchresults.hover a.deletelink {
-  background:url(/env/grafics/minus.gif) center center no-repeat;
+  background:url(grafics/minus.gif) center center no-repeat;
 }
 
 ul.SubMenu a.MenuItemLink {
@@ -596,7 +596,7 @@ ul.SubMenu em {
 }
 
 ul.SubMenu em.lock {
-  background-image:url(/env/grafics/lock.gif);
+  background-image:url(grafics/lock.gif);
   background-position:2px center;
   background-repeat:no-repeat;
 }
@@ -814,7 +814,7 @@ body#help dt {
   font-weight:bold;
 }
 body#Settings ul.settingsMenu li {
-  list-style-image:url(/env/grafics/down.gif);
+  list-style-image:url(grafics/down.gif);
 }
 body#Surftips div.searchresults {
   float:left;
@@ -905,22 +905,22 @@ ul.folder {
 ul.folder > li a {
 	list-style-type: none;
 	padding-left: 20px;
- 	background: url(/env/grafics/doc2.gif) no-repeat;
+ 	background: url(grafics/doc2.gif) no-repeat;
 }
 ul.folder li.treeMenu_opened a {
 	list-style-type: none;
 	padding-left: 20px;
- 	background: url(/env/grafics/doc2.gif) no-repeat;
+ 	background: url(grafics/doc2.gif) no-repeat;
 }
 ul.folder li.treeMenu_closed {
 	list-style-type: none;
 	padding-left: 20px;
- 	background: url(/env/grafics/closed.gif) no-repeat;
+ 	background: url(grafics/closed.gif) no-repeat;
 }
 ul.folder li.treeMenu_opened {
 	list-style-type: none;
 	padding-left: 20px;
- 	background: url(/env/grafics/opened.gif) no-repeat;
+ 	background: url(grafics/opened.gif) no-repeat;
 }
 /*
 ul.folder li.treeMenu_opened ul {

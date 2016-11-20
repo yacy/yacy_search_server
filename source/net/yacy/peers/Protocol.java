@@ -259,6 +259,10 @@ public final class Protocol {
             mySeed.setIPs(Switchboard.getSwitchboard().myPublicIPs());
         } else {
             final String myIP = result.get("yourip");
+            if (myIP == null) {
+                Network.log.info("yacyClient.hello result error: Peer sent incompleet hello message (key yourip is missing)");
+                return null; // no success
+            }
             // with the IPv6 extension, this may contain several ips, separated by comma ','
             HashSet<String> h = new HashSet<>();
             for (String s: CommonPattern.COMMA.split(myIP)) {
@@ -817,6 +821,7 @@ public final class Protocol {
     	 * @param storeDocs solr documents collection to put to segment
     	 */
     	public WriteMetadataNodeToLocalIndexThread(Segment segment, Collection<URIMetadataNode> storeDocs) {
+    		super("WriteMetadataNodeToLocalIndexThread");
     		this.segment = segment;
     		this.storeDocs = storeDocs;
     	}
@@ -1278,6 +1283,7 @@ public final class Protocol {
     	 * @param docs solr documents collection to put to segment
     	 */
     	public WriteToLocalIndexThread(Segment segment, Collection<SolrInputDocument> docs) {
+    		super("WriteToLocalIndexThread");
     		this.segment = segment;
     		this.docs = docs;
     	}

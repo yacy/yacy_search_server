@@ -24,9 +24,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -69,7 +72,11 @@ import org.apache.solr.util.FastWriter;
 public class GSAsearchServlet extends HttpServlet {
 
     private static final long serialVersionUID = 7835985518515673885L;
-    
+
+    // GSA date formatter (short form of ISO8601 date format)
+    private static final String PATTERN_GSAFS = "yyyy-MM-dd";
+    public static final SimpleDateFormat FORMAT_GSAFS = new SimpleDateFormat(PATTERN_GSAFS, Locale.US);
+
     private final static GSAResponseWriter responseWriter = new GSAResponseWriter();
 
     @Override
@@ -88,12 +95,11 @@ public class GSAsearchServlet extends HttpServlet {
     
     // ------------------------------------------
     /**
-     * from here copy of htroot/gsa/gsasearchresult.java
+     * from here copy of old htroot/gsa/gsasearchresult.java
      * with modification to use HttpServletRequest instead of (yacy) RequestHeader
      */
     
- 
-    public static void respond(final HttpServletRequest header, final Switchboard sb, final OutputStream out) {
+    private void respond(final HttpServletRequest header, final Switchboard sb, final OutputStream out) {
 
         // remember the peer contact for peer statistics
         String clientip = header.getRemoteAddr();
@@ -169,9 +175,9 @@ public class GSAsearchServlet extends HttpServlet {
             for (String dr: daterange) {
                 String from_to[] = dr.endsWith("..") ? new String[]{dr.substring(0, dr.length() - 2), ""} : dr.startsWith("..") ? new String[]{"", dr.substring(2)} : dr.split("\\.\\.");
                 if (from_to.length != 2) continue;
-                Date from = HeaderFramework.parseGSAFS(from_to[0]);
+                Date from = this.parseGSAFS(from_to[0]);
                 if (from == null) from = new Date(0);
-                Date to = HeaderFramework.parseGSAFS(from_to[1]);
+                Date to = this.parseGSAFS(from_to[1]);
                 if (to == null) to = new Date();
                 to.setTime(to.getTime() + 24L * 60L * 60L * 1000L); // we add a day because the day is inclusive
                 String z = CollectionSchema.last_modified.getSolrFieldName() + ":[" + ISO8601Formatter.FORMATTER.format(from) + " TO " + ISO8601Formatter.FORMATTER.format(to) + "]";
@@ -257,5 +263,19 @@ public class GSAsearchServlet extends HttpServlet {
         }
         AccessTracker.addToDump(originalQuery, Integer.toString(matches));
         ConcurrentLog.info("GSA Query", "results: " + matches + ", for query:" + post.toString());
+    }
+
+    /**
+     * Parse GSA date string (short form of ISO8601 date format)
+     * @param datestring
+     * @return date or null
+     * @see ISO8601Formatter
+     */
+    public final Date parseGSAFS(final String datestring) {
+        try {
+            return FORMAT_GSAFS.parse(datestring);
+        } catch (final ParseException e) {
+            return null;
+        }
     }
 }

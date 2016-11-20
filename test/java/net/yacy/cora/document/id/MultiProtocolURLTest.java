@@ -38,15 +38,17 @@ public class MultiProtocolURLTest {
         String[][] testStrings = new String[][]{
             new String[]{"/..home", "/..home"},
             new String[]{"/test/..home/test.html", "/test/..home/test.html"},
-            new String[]{"/../", "/../"},
-            new String[]{"/..", "/.."},
             new String[]{"/test/..", "/"},
             new String[]{"/test/../", "/"},
             new String[]{"/test/test2/..", "/test"},
             new String[]{"/test/test2/../", "/test/"},
             new String[]{"/test/test2/../hallo", "/test/hallo"},
             new String[]{"/test/test2/../hallo/", "/test/hallo/"},
-            new String[]{"/home/..test/../hallo/../", "/home/"}
+            new String[]{"/home/..test/../hallo/../", "/home/"},
+            /* No path segments prior to the '..' segment : '..' still has to be removed (See https://tools.ietf.org/html/rfc3986#section-5.2.4 -> parts 2.C and 2.D )*/
+            new String[]{"/../", "/"},
+            new String[]{"/..", "/"},
+            new String[]{"/../../../image.jpg", "/image.jpg"}
         };
         String testhost = "http://localhost";
         for (int i = 0; i < testStrings.length; i++) {
@@ -223,7 +225,7 @@ public class MultiProtocolURLTest {
      * Test of getFileExtension method, of class MultiProtocolURL.
      */
     @Test
-    public void testGetFileExtension() throws MalformedURLException {
+    public void testGetFileExtension() {
         Map<String, String> testurls = new HashMap<String, String>();
         //  key=testurl, value=result
         testurls.put("path/file.xml","xml"); // easiest

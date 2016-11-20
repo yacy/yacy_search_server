@@ -172,7 +172,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 noDoubleImages,
                 scraper.indexingDenied(),
                 scraper.getDate());
-        ppd.setFavicon(scraper.getFavicon());
+        ppd.setIcons(scraper.getIcons());
 
         return ppd;
     }

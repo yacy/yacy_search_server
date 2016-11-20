@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -77,7 +78,7 @@ public class CacheResource_p {
         }
 
         // check request type
-        if (header.get("EXT", "html").equals("png")) {
+        if (header.get(HeaderFramework.CONNECTION_PROP_EXT, "html").equals("png")) {
             // a png was requested
             return ImageParser.parse(u, resource);
         }

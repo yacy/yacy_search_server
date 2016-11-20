@@ -36,6 +36,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
@@ -151,26 +152,49 @@ public final class CrawlStacker {
         if (CrawlStacker.log.isFinest()) CrawlStacker.log.finest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
         this.requestQueue.enQueue(entry);
     }
+    
     public void enqueueEntriesAsynchronous(
             final byte[] initiator,
             final String profileHandle,
             final List<AnchorURL> hyperlinks,
             final int timezoneOffset) {
-        new Thread() {
+        new Thread("enqueueEntriesAsynchronous") {
             @Override
             public void run() {
-                Thread.currentThread().setName("enqueueEntriesAsynchronous");
                 enqueueEntries(initiator, profileHandle, hyperlinks, true, timezoneOffset);
             }
         }.start();
     }
-
-    private void enqueueEntries(
+    
+    /**
+     * Enqueue crawl start entries
+     * @param initiator Hash of the peer initiating the crawl
+     * @param profileHandle name of the active crawl profile
+     * @param hyperlinks crawl starting points links to stack
+     * @param replace Specify whether old indexed entries should be replaced
+     * @param timezoneOffset local time-zone offset
+     * @throws IllegalCrawlProfileException when the crawl profile is not active
+     */
+    public void enqueueEntries(
             final byte[] initiator,
             final String profileHandle,
             final List<AnchorURL> hyperlinks,
             final boolean replace,
             final int timezoneOffset) {
+    	/* Let's check if the profile is still active before removing any existing entry */
+        byte[] handle = UTF8.getBytes(profileHandle);
+        final CrawlProfile profile = this.crawler.get(handle);
+        if (profile == null) {
+            String error;
+            if(hyperlinks.size() == 1) {
+            	error = "Rejected URL : " + hyperlinks.get(0).toNormalform(false) + ". Reason : LOST STACKER PROFILE HANDLE '" + profileHandle + "'";  
+            } else {
+            	error = "Rejected " + hyperlinks.size() + " crawl entries. Reason : LOST STACKER PROFILE HANDLE '" + profileHandle + "'";            	
+            }
+            CrawlStacker.log.info(error); // this is NOT an error but a normal behavior when terminating a crawl queue
+            /* Throw an exception to signal caller it can stop stacking URLs using this crawl profile */
+            throw new IllegalCrawlProfileException("Profile " + profileHandle + " is no more active");
+        }
         if (replace) {
             // delete old entries, if exists to force a re-load of the url (thats wanted here)
             Set<String> hosthashes = new HashSet<String>();
@@ -417,7 +441,7 @@ public final class CrawlStacker {
                 CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                     ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
         } else {
-            return "double in: LURL-DB, oldDate = " + oldDate.toString();
+            return "double in: local index, oldDate = " + ISO8601Formatter.FORMATTER.format(new Date(oldDate));
         }
 
         return null;

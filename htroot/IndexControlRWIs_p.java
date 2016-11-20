@@ -489,14 +489,14 @@ public class IndexControlRWIs_p {
             DigestURL url;
             URIMetadataNode entry;
             String us;
-            float rn = Float.MIN_VALUE;
+            long rn = Long.MIN_VALUE;
             while (!theSearch.rwiIsEmpty() && (entry = theSearch.pullOneFilteredFromRWI(false)) != null) {
                 url = entry.url();
                 if ( url == null ) {
                     continue;
                 }
                 us = url.toNormalform(true);
-                if ( rn == Float.MIN_VALUE ) {
+                if ( rn == Long.MIN_VALUE ) {
                     rn = entry.score();
                 }
                 prop.put("genUrlList_urlList_" + i + "_urlExists", "1");
@@ -507,7 +507,7 @@ public class IndexControlRWIs_p {
                 prop.putHTML("genUrlList_urlList_" + i + "_urlExists_urlString", us);
                 prop.put("genUrlList_urlList_" + i + "_urlExists_urlStringShort",
                     (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20, 40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_ranking", Float.toString(entry.score() - rn));
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_ranking", entry.score() - rn);
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_domlength", DigestURL.domLengthEstimation(entry.hash()));
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_tf", 1000.0 * entry.word().termFrequency());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (theSearch.getOrder() == null) ? -1 : theSearch.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
@@ -518,8 +518,7 @@ public class IndexControlRWIs_p {
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_llocal", entry.word().llocal());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_lother", entry.word().lother());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_hitcount", entry.word().hitcount());
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_worddistance", 0);
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_pos", entry.word().minposition());
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_pos", entry.word().posintext());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_phrase", entry.word().posofphrase());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_posinphrase", entry.word().posinphrase());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_urlcomps", entry.word().urlcomps());

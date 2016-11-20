@@ -95,14 +95,14 @@ Move selected pattern(s) to==移动选中规则
 #You can select them here for deletion==您可以从这里选择要删除的项
 Add new pattern:==添加新规则:
 "Add URL pattern"=="添加URL规则"
-The right '*', after the '/', can be replaced by a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a>.== 在 '/' 后边的 '*' ,可用<a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">正则表达式</a>表示.
+The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.== 在 '/' 后边的 '*' ,可用<a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">正则表达式</a>表示.
 domain.net/fullpath<==domain.net/绝对路径<
 #>domain.net/*<==>domain.net/*<
 #*.domain.net/*<==*.domain.net/*<
 #*.sub.domain.net/*<==*.sub.domain.net/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
-a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a> (slow)==一个完整的<a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">正则表达式</a> (慢)
+a complete <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a> (slow)==一个完整的<a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">正则表达式</a> (慢)
 #was removed from blacklist==wurde aus Blacklist entfernt
 #was added to the blacklist==wurde zur Blacklist hinzugefügt
 Activate this list for==为以下条目激活此名单
@@ -982,7 +982,7 @@ Use filter==使用过滤器
 Restrict to start domain==限制为起始域
 Restrict to sub-path==限制为子路经
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Dieser Filter ist ein emacs-ähnlicher regulärer Ausdruck, der mit den zu crawlenden URLs übereinstimmen muss;
-The filter is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regular expression</a>==过滤是一组<a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">正则表达式</a>
+The filter is a <b><a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>==过滤是一组<b><a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">正则表达式</a></b>
 that must match with the URLs which are used to be crawled; default is 'catch all'.==, 它们表示了要抓取的链接规则; 默认是'抓取所有'.
 Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'.==比如: 如果仅抓取包含'科学'的链接, 可将过滤器设置为 '.*.*'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==您也可以使用域限制来抓取整个域.

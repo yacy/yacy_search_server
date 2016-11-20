@@ -43,7 +43,11 @@ public final class SwitchboardConstants {
      * With introduction of DIGEST authentication all passwords are MD5 encoded and calculatd as <code>username:adminrealm:password</code>
      * To differentiate old and new admin passwords, use the new calculated passwords a "MD5:" prefix.
      */
-    public static final String ADMIN_ACCOUNT                = "adminAccount";
+    
+    public static final String ADMIN_ACCOUNT                = "adminAccount"; // not used anymore (did hold clear text  username:pwd)
+
+    // this holds the credential "MD5:" + Digest.encodeMD5Hex(adminAccountUserName + ":" + adminRealm + ":" + password)
+    // or the depreciated old style MapTools.encodeMD5Hex( Base64Order.standardCoder.encode(adminAccountUserName + ":" + password) )
     public static final String ADMIN_ACCOUNT_B64MD5         = "adminAccountBase64MD5";
     public static final String ADMIN_ACCOUNT_USER_NAME      = "adminAccountUserName"; // by default 'admin'
     public static final String ADMIN_ACCOUNT_FOR_LOCALHOST  = "adminAccountForLocalhost";
@@ -467,6 +471,7 @@ public final class SwitchboardConstants {
     public static final String GREETING_HOMEPAGE     = "promoteSearchPageGreeting.homepage";
     public static final String GREETING_LARGE_IMAGE  = "promoteSearchPageGreeting.largeImage";
     public static final String GREETING_SMALL_IMAGE  = "promoteSearchPageGreeting.smallImage";
+    public static final String GREETING_IMAGE_ALT    = "promoteSearchPageGreeting.imageAlt";
 
     /**
      * browser pop up
@@ -489,6 +494,8 @@ public final class SwitchboardConstants {
     public static final String SEARCH_TARGET_SPECIAL_PATTERN  = "search.target.special.pattern"; // ie 'own' addresses in topframe, 'other' in iframe
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
+
+    public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount"; // max lines displayed in standard search navigators/facets
 
     /**
      * ranking+evaluation

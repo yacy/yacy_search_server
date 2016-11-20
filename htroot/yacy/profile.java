@@ -53,7 +53,7 @@ public final class profile {
 
         if ((sb.isRobinsonMode()) &&
            	(!sb.isPublicRobinson()) &&
-           	(!sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))) {
+           	(!sb.isInMyCluster(header.getRemoteAddr()))) {
                // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("list", "0");
             return prop;

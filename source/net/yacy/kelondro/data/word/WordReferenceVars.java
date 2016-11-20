@@ -62,11 +62,12 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     private final char type;
     private int hitcount, // how often appears this word in the text
             llocal, lother, phrasesintext,
+            posintext, // word position in text
             posinphrase, posofphrase,
             urlcomps, urllength,
             wordsintext, wordsintitle;
     private int virtualAge;
-    private final Queue<Integer> positions;
+    private Queue<Integer> positions; // word positons of joined references
     private double termFrequency;
     private final boolean local;
 
@@ -78,6 +79,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             final int      hitcount,      // how often appears this word in the text
             final int      wordcount,     // total number of words
             final int      phrasecount,   // total number of phrases
+            final int      posintext,     // first position of word in text
             final Queue<Integer> ps,      // positions of words that are joined into the reference
             final int      posinphrase,   // position of word in its phrase
             final int      posofphrase,   // number of the phrase where word appears
@@ -100,9 +102,15 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.llocal = outlinksSame;
         this.lother = outlinksOther;
         this.phrasesintext = phrasecount;
-        this.positions = new LinkedBlockingQueue<Integer>();
-        if (!ps.isEmpty()) for (final Integer i: ps) this.positions.add(i);
+        
+        if (ps != null && !ps.isEmpty()) {
+            this.positions = new LinkedBlockingQueue<Integer>();
+            for (final Integer i : ps) this.positions.add(i);
+        } else {
+            this.positions = null;
+        }
         this.posinphrase = posinphrase;
+        this.posintext = posintext;
         this.posofphrase = posofphrase;
         this.urlcomps = urlComps;
         this.urllength = urlLength;
@@ -124,9 +132,15 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.llocal = e.llocal();
         this.lother = e.lother();
         this.phrasesintext = e.phrasesintext();
-        this.positions = new LinkedBlockingQueue<Integer>();
-        if (!e.positions().isEmpty()) for (final Integer i: e.positions()) this.positions.add(i);
+        
+        if (e.positions() != null && !e.positions().isEmpty()) {
+            this.positions = new LinkedBlockingQueue<Integer>();
+            for (final Integer i: e.positions()) this.positions.add(i);
+        } else {
+            this.positions = null;
+        }
         this.posinphrase = e.posinphrase();
+        this.posintext = e.posintext();
         this.posofphrase = e.posofphrase();
         this.urlcomps = e.urlcomps();
         this.urllength = e.urllength();
@@ -152,6 +166,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.phrasesintext = 0;
         this.positions = null;
         this.posinphrase = 0;
+        this.posintext = 0;
         this.posofphrase = 0;
         this.urlcomps = 0;
         this.urllength = 0;
@@ -172,6 +187,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 this.hitcount,
                 this.wordsintext,
                 this.phrasesintext,
+                this.posintext,
                 this.positions,
                 this.posinphrase,
                 this.posofphrase,
@@ -234,6 +250,20 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return this.posinphrase;
     }
 
+    /**
+     * First word position in text.
+     * @return min position
+     */
+    @Override
+    public int posintext() {
+        return this.posintext;
+    }
+
+    /**
+     * Word positions for joined references (for multi word queries).
+     * @see posintext()
+     * @return the word positions of the joined references
+     */
     @Override
     public Collection<Integer> positions() {
         return this.positions;
@@ -253,7 +283,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 this.hitcount,      // how often appears this word in the text
                 this.wordsintext,   // total number of words
                 this.phrasesintext, // total number of phrases
-                this.positions.isEmpty() ? 0 : this.positions.iterator().next(), // position of word in all words (
+                this.posintext,     // position of word in all words (WordReferenceRow stores first position in text)
                 this.posinphrase,   // position of word in its phrase
                 this.posofphrase,   // number of the phrase where word appears
                 this.lastModified,  // last-modified time of the document where word appears
@@ -336,7 +366,22 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (virtualAge() > (v = other.virtualAge())) this.virtualAge = v;
         if (this.wordsintext > (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext > (v = other.phrasesintext)) this.phrasesintext = v;
-        if (other.positions != null) a(this.positions, min(this.positions, other.positions));
+        if (this.posintext > (v = other.posintext)) this.posintext = v;
+
+        // calculate and remember min distance
+        if (this.positions != null || other.positions != null) {
+            int odist = other.distance();
+            int dist = this.distance();
+            if (odist > 0 && odist < dist) {
+                if (this.positions == null) {
+                    this.positions = new LinkedBlockingQueue<Integer>();
+                } else {
+                    this.positions.clear();
+                }
+                this.positions.add(this.posintext + odist);
+            }
+        }
+
         if (this.posinphrase > (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase > (v = other.posofphrase)) this.posofphrase = v;
         if (this.lastModified > (w = other.lastModified)) this.lastModified = w;
@@ -358,7 +403,22 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (virtualAge() < (v = other.virtualAge())) this.virtualAge = v;
         if (this.wordsintext < (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext < (v = other.phrasesintext)) this.phrasesintext = v;
-        if (other.positions != null) a(this.positions, max(this.positions, other.positions));
+        if (this.posintext < (v = other.posintext)) this.posintext = v;
+
+        // calculate and remember max distance
+        if (this.positions != null || other.positions != null) {
+            int odist = other.distance();
+            int dist = this.distance();
+            if (odist > 0 && odist > dist) {
+                if (this.positions == null) {
+                    this.positions = new LinkedBlockingQueue<Integer>();
+                } else {
+                    this.positions.clear();
+                }
+                this.positions.add(this.posintext + odist);
+            }
+        }
+
         if (this.posinphrase < (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase < (v = other.posofphrase)) this.posofphrase = v;
         if (this.lastModified < (w = other.lastModified)) this.lastModified = w;
@@ -372,19 +432,37 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     /**
      * joins two entries into one entry
      *
-     * Main usage is on multi word searches to combine the position values for distance ranking,
+     * Main usage is on multi word searches to combine the position values for ranking and word distance calculation,
      * A Join is valid for the same url.
      * @param r WordReference
      */
     @Override
     public void join(final Reference r) {
 
-        // combine the distance
         final WordReference oe = (WordReference) r;
 
-        this.positions.addAll(oe.positions());
-        this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
-        this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
+        // choose min posintext (for > 0)
+        if (this.posintext > 0 && oe.posintext() > 0) {
+            if (this.posintext > oe.posintext()) {
+                this.addPosition(this.posintext); // remember larger position (for distance calculation)
+                this.posintext = oe.posintext();
+            } else {
+                this.addPosition(oe.posintext()); // remember other position (for distance calculation)
+            }
+        } else if (this.posintext == 0) {
+            this.posintext = oe.posintext();
+        }
+       
+        // join phrase
+        // this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
+        // this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
+        final int oePosofphrase = oe.posofphrase();
+        if (this.posofphrase == oePosofphrase) {
+            this.posinphrase = Math.min(this.posinphrase, oe.posinphrase());
+        } else if (this.posofphrase > oePosofphrase) {
+            this.posofphrase = oePosofphrase; // choose min posofphrase
+            this.posinphrase = oe.posinphrase(); // with corresponding posinphrase
+        }
 
         // combine term frequency
         this.termFrequency = this.termFrequency + oe.termFrequency();
@@ -424,8 +502,13 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return o1.compareTo(o2);
     }
 
+    /**
+     * Add a position for word distance calculation to the list if position > 0
+     * @param position
+     */
     public void addPosition(final int position) {
-        this.positions.add(position);
+        if (this.positions == null && position > 0) this.positions = new LinkedBlockingQueue<Integer>();
+        if (position > 0) this.positions.add(position);
     }
 
     /**
@@ -433,7 +516,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
      * @param container
      * @return a blocking queue filled with WordReferenceVars that is still filled when the object is returned
      */
-
     public static BlockingQueue<WordReferenceVars> transform(final ReferenceContainer<WordReference> container, final long maxtime, final boolean local) {
     	final LinkedBlockingQueue<WordReferenceVars> vars = new LinkedBlockingQueue<WordReferenceVars>();
     	if (container.size() <= 100) {
@@ -462,6 +544,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	private long maxtime;
     	private final boolean local;
     	private TransformDistributor(final ReferenceContainer<WordReference> container, final BlockingQueue<WordReferenceVars> out, final long maxtime, final boolean local) {
+    		super("WordReferenceVars.TransformDistributor");
     		this.container = container;
     		this.out = out;
     		this.maxtime = maxtime;
@@ -515,6 +598,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	private final boolean local;
 
     	private TransformWorker(final BlockingQueue<WordReferenceVars> out, final long maxtime, final boolean local) {
+    		super("WordReferenceVars.TransformWorker");
     		this.in = new LinkedBlockingQueue<Row.Entry>();
     		this.out = out;
     		this.maxtime = maxtime;

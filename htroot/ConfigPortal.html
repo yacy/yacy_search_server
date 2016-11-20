@@ -30,6 +30,9 @@
           <dt>URL of a Large Corporate Image</dt>
           <dd><input type="text" name="promoteSearchPageGreeting.largeImage" value="#[promoteSearchPageGreeting.largeImage]#" size="60" /></dd>
           
+          <dt>Alternative text for Corporate Images</dt>
+          <dd><input type="text" name="promoteSearchPageGreeting.imageAlt" value="#[promoteSearchPageGreeting.imageAlt]#" size="60" /></dd>
+          
           <dt>Enable Search for Everyone?</dt>
           <dd>
           <input type="radio" name="publicSearchpage" value="true" #(publicSearchpage)#::checked="checked"#(/publicSearchpage)# />Search is available for everyone&nbsp;
@@ -136,7 +139,7 @@
     </h3>
     <fieldset><pre>
       &lt;iframe name=&quot;target&quot;
-       src=&quot;http://#[myaddress]#/index.html?display=2&amp;resource=local&quot;
+       src=&quot;#[myContext]#/index.html?display=2&amp;resource=local&quot;
        width=&quot;100%&quot;
        height=&quot;410&quot;
        frameborder=&quot;0&quot;
@@ -146,7 +149,7 @@
     </pre></fieldset>
     This would look like:
     <iframe name="target"
-       src="#[myPreviewProtocol]#://#[myPreviewAddress]#/index.html?display=2&amp;resource=local&amp;focus=0"
+       src="index.html?display=2&amp;resource=local&amp;focus=0"
        width="100%"
        height="410"
        frameborder="0"
@@ -159,7 +162,7 @@
     </h3>
     <fieldset><pre>
       &lt;iframe name=&quot;target2&quot;
-       src=&quot;http://#[myaddress]#/yacysearch.html?display=2&amp;resource=local&quot;
+       src=&quot;#[myContext]#/yacysearch.html?display=2&amp;resource=local&quot;
        width=&quot;100%&quot;
        height=&quot;180&quot;
        frameborder=&quot;0&quot;
@@ -169,7 +172,7 @@
     </pre></fieldset>
     This would look like:
     <iframe name="target2"
-       src="#[myPreviewProtocol]#://#[myPreviewAddress]#/yacysearch.html?display=2&amp;resource=local&amp;focus=0"
+       src="yacysearch.html?display=2&amp;resource=local&amp;focus=0"
        width="100%"
        height="180"
        frameborder="0"
@@ -183,7 +186,7 @@
     </h3>
     <fieldset><pre>
       &lt;iframe name="target3"
-       src=&quot;http://#[myaddress]#/yacyinteractive.html?display=2&quot;
+       src=&quot;#[myContext]#/yacyinteractive.html?display=2&quot;
        width=&quot;100%&quot;
        height=&quot;180&quot;
        frameborder=&quot;0&quot;
@@ -193,7 +196,7 @@
     </pre></fieldset>
     This would look like:
     <iframe name="target3"
-       src="#[myPreviewProtocol]#://#[myPreviewAddress]#/yacyinteractive.html?display=2&amp;focus=0"
+       src="yacyinteractive.html?display=2&amp;focus=0"
        width="100%"
        height="180"
        frameborder="0"

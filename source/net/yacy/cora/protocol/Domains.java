@@ -817,29 +817,31 @@ public class Domains {
         // IPv4 / host heuristics
         p = target.lastIndexOf(':');        
         if ( p < 0 ) {
-            // may be IPv4 or IPv6, we chop off brackets if exist
-            if (target.charAt(0) == '[') target = target.substring(1);
-            if (target.charAt(target.length() - 1) == ']') target = target.substring(0, target.length() - 1);
             p = target.lastIndexOf('%');
             if (p > 0) target = target.substring(0, p);
             return target;
         }
         
         // the ':' at pos p may be either a port divider or a part of an IPv6 address
-        if (target.charAt(p - 1) == ']') {
-            target = target.substring(1, p - 1);
-            p = target.lastIndexOf('%');
-            if (p > 0) target = target.substring(0, p);
-            return target;
+        if ( p > target.lastIndexOf(']')) { // if after ] it's a port divider (not IPv6 part)
+            target = target.substring(0, p );
         }
         
-        // the ':' must be a port divider
-        target = target.substring(0, p);
+        // may be IPv4 or IPv6, we chop off brackets if exist
+        if (target.charAt(0) == '[') target = target.substring(1);
+        if (target.charAt(target.length() - 1) == ']') target = target.substring(0, target.length() - 1);
         p = target.lastIndexOf('%');
         if (p > 0) target = target.substring(0, p);
         return target;
     }
-    
+
+    /**
+     * Reads the port out of a url string (the url must start with a protocol
+     * like http:// to return correct default port). If no port is given, default
+     * ports are returned. On missing protocol, port=80 is assumed.
+     * @param target url (must start with protocol)
+     * @return port number 
+     */
     public static int stripToPort(String target) {
         int port = 80; // default port
         
@@ -863,8 +865,10 @@ public class Domains {
         p = target.lastIndexOf(':');        
         if ( p < 0 ) return port;
 
-        // the ':' must be a port divider
-        port = Integer.parseInt(target.substring(p + 1));
+        // the ':' must be a port divider or part of ipv6
+        if (target.lastIndexOf(']') < p) {
+            port = Integer.parseInt(target.substring(p + 1));
+        }
         return port;
     }
     

@@ -85,14 +85,14 @@ Move selected pattern(s) to==सलेक्टेड पैटर्न (ओं
 #You can select them here for deletion==आप इन्हें देलेतिओन के लिए सेलेक्ट कर सकते हैं 
 Add new pattern:==नया पैटर्न जोड़े :
 "Add URL pattern"=="नया यूआरएल पैटर्न जोड़े "
-The right '*', after the '/', can be replaced by a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a>.== दाहिने"*" के बाद "/" बदला जा सकता है <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">रेगेक्स के द्वारा </a>.
+The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.== दाहिने"*" के बाद "/" बदला जा सकता है <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">रेगेक्स के द्वारा </a>.
 domain.net/fullpath<==डोमेन .नेट /फुल्ल्पथ <
 >domain.net/*<==>डोमेन .नेट /* <
 *.domain.net/*<==*.डोमेन .नेट /*<
 *.sub.domain.net/*<==*.सुब .डोमेन .दे /*<
 #sub.domain.*/*<==सुब .डोमेन .*/*<
 #domain.*/*<==डोमेन .*/*<
-a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a> (slow)==एक पूरा   <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">रेगेक्स</a> (मगर धीरे )
+a complete <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a> (slow)==एक पूरा   <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">रेगेक्स</a> (मगर धीरे )
 #was removed from blacklist==ब्लैकलिस्ट से हटा दिया गया था 
 #was added to the blacklist==ब्लैकलिस्ट में जोड़ा गया था 
 Activate this list for==इस लिस्ट को सक्रिय करें
@@ -988,7 +988,7 @@ Use filter==फिल्टर का प्रयोग करें
 Restrict to start domain==डोमेन शुरू करने के लिए प्रतिबंधित
 Restrict to sub-path==उप पथ के लिए प्रतिबंधित
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==फिल्टर क्रॉल करने के लिए उपयोग किया जाता है जो यूआरएल के साथ मैच चाहिए कि एक ईमैक्स की तरह नियमित अभिव्यक्ति है
-The filter is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regular expression</a>==फिल्टर एक <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html"> नियमित अभिव्यक्ति है </ a>
+The filter is a <b><a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression==फिल्टर एक<b> <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank"> नियमित अभिव्यक्ति है 
 that must match with the URLs which are used to be crawled; default is 'catch all'.==कि क्रॉल करने के लिए उपयोग किया जाता है जो यूआरएल के साथ मेल खाना चाहिए, डिफ़ॉल्ट है  'सभी को पकड़ने '
 Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'.==उदाहरण: '.. * विज्ञान * ' शब्द शामिल है केवल यूआरएल  'विज्ञान ', फिल्टर सेट की अनुमति देने के लिए 
 You can also use an automatic domain-restriction to fully crawl a single domain.==आप यह भी पूरी तरह से एक ही डोमेन क्रॉल करने के लिए डोमेन प्रतिबंध एक स्वत: उपयोग कर सकते हैं.

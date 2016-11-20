@@ -241,7 +241,6 @@ public class migration {
         String acc;
         if ((acc = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT, "")).length() > 0) {
             sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
-            sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
         }
 
         // fix unsafe old passwords

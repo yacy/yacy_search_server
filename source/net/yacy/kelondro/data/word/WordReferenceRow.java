@@ -26,7 +26,6 @@
 
 package net.yacy.kelondro.data.word;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import net.yacy.cora.date.MicroDate;
@@ -50,7 +49,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     public static final Row urlEntryRow = new Row(new Column[]{
             new Column("h", Column.celltype_string,    Column.encoder_bytes, Word.commonHashLength, "urlhash"),
             new Column("a", Column.celltype_cardinal,  Column.encoder_b256,  2, "lastModified"),
-            new Column("s", Column.celltype_cardinal,  Column.encoder_b256,  2, "freshUntil"),
+            new Column("s", Column.celltype_cardinal,  Column.encoder_b256,  2, "freshUntil"), // TODO: unused (since 2009)
             new Column("u", Column.celltype_cardinal,  Column.encoder_b256,  1, "wordsInTitle"),
             new Column("w", Column.celltype_cardinal,  Column.encoder_b256,  2, "wordsInText"),
             new Column("p", Column.celltype_cardinal,  Column.encoder_b256,  2, "phrasesInText"),
@@ -160,6 +159,12 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry.setCol(col_reserve2, 0);
     }
 
+    /**
+     * Constructor for WordReferences from title words or as template for content
+     * words (with reduced number of input parameters, skipping the parameter
+     * later set by setWord() for a WordReferenceRow template or not relevant if
+     * used for words from title).
+     */
     public WordReferenceRow(final byte[]   urlHash,
                             final int      urlLength,     // byte-length of complete URL
                             final int      urlComps,      // number of path components
@@ -242,29 +247,41 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return (int) this.entry.getColLong(col_lastModified);  // this is the time in MicoDateDays format
     }
 
+    /**
+     * @return date recalculated from MicroDateDays (accuracy = 1 Day, time always 0:00)
+     */
     @Override
     public long lastModified() {
-        return MicroDate.reverseMicroDateDays((int) this.entry.getColLong(col_lastModified));
+        return MicroDate.reverseMicroDateDays(this.entry.getColLong(col_lastModified));
     }
 
+    /**
+     * @return  occurences of word in text (in the rang 0..255)
+     */
     @Override
     public int hitcount() {
         return (0xff & this.entry.getColByte(col_hitcount));
     }
 
     /**
-     * First position of word in text.
+     * @return first positon of word in text
+     */
+    @Override
+    public int posintext() {
+        int pos = (int) this.entry.getColLong(col_posintext);
+        return pos;
+    }
+
+    /**
      * positions() is used to remember word positions for each query word of an
-     * multi word search query. As we currently don't include a separate posintext()
-     * function, we use positions to make the posintext value available.
-     * @return Collection with one element
+     * multi word search query.
+     * WordReferenceRow is for one WordReference and has no means to return multiple positions
+     * but is required by the interface.
+     * @return null
      */
     @Override
     public Collection<Integer> positions() {
-        int pos = (int) this.entry.getColLong(col_posintext);
-        ArrayList arr = new ArrayList<Integer>(1);
-        arr.add(pos);
-        return arr;
+        return null;
     }
 
     @Override

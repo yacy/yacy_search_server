@@ -176,24 +176,28 @@ function updatepage(str) {
     
     #(genUrlProfile)#
     ::No entry found for URL-hash #[urlhash]#
-    ::<iframe src="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[urlhash]#%22" width="100%" height="420" frameborder="0" scrolling="no"></iframe><br />
-
-    <form action="ViewFile.html" method="get" accept-charset="UTF-8">
-		<input type="hidden" name="viewMode" value="parsed" />
-		<input type="hidden" name="show" value="Show" />
-		<input type="hidden" name="urlHash" value="#[urlhash]#" />
-		<input type="submit" value="Show Content" name="showcontent" class="btn btn-primary" style="width:240px;"/><br />
-	</form>
-	<form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-		<input type="hidden" name="keystring" value="" />
-		<input type="hidden" name="keyhash" value="" />
-		<input type="hidden" name="urlstring" value="" />
-		<input type="hidden" name="urlhash" value="#[urlhash]#" />
-		<input type="submit" value="Delete URL" name="urlhashdelete" class="btn btn-primary" style="width:240px;"/><br />
-		<span class="small">&nbsp;this may produce unresolved references at other word indexes but they do not harm</span><br /><br />
-		<input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" class="btn btn-primary" style="width:240px;"/><br />
-		<span class="small">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br />
-	</form>
+    ::<iframe src="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[urlhash]#%22" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
+    <br />
+    <p>
+      <form action="ViewFile.html" method="get" accept-charset="UTF-8">
+        <input type="hidden" name="viewMode" value="parsed" />
+        <input type="hidden" name="show" value="Show" />
+        <input type="hidden" name="urlHash" value="#[urlhash]#" />
+        <input type="submit" value="Show Content" name="showcontent" class="btn btn-primary" style="width:240px;"/><br />
+      </form>
+    </p>
+    <p>
+      <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+        <input type="hidden" name="keystring" value="" />
+        <input type="hidden" name="keyhash" value="" />
+        <input type="hidden" name="urlstring" value="" />
+        <input type="hidden" name="urlhash" value="#[urlhash]#" />
+        <input type="submit" value="Delete URL" name="urlhashdelete" class="btn btn-danger" style="width:240px;"/><br />
+        <span class="small">&nbsp;this may produce unresolved references at other word indexes but they do not harm</span><br /><br />
+        <input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" class="btn btn-danger" /><br />
+        <span class="small">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br />
+      </form>
+    </p>
     #(/genUrlProfile)#
     
     #[result]#

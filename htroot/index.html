@@ -1,12 +1,12 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
   <head>
     #(forward)#::<meta http-equiv="REFRESH" content="0; url=#[target]#" />#(/forward)#
     <title>YaCy '#[clientname]#': Search Page</title>
     #%env/templates/metas.template%#
     <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?query=#[former]#" />
     <link rel="search" type="application/opensearchdescription+xml" title="YaCy '#[clientname]#'" href="opensearchdescription.xml" />
-    <script type="text/javascript" src="/env/bootstrap/js/typeahead.jquery.min.js"></script>
+    <script type="text/javascript" src="env/bootstrap/js/typeahead.jquery.min.js"></script>
     <script type="text/javascript" src="js/html.js"></script>
     <script type="text/javascript">
      var suggestMatcher = function() {
@@ -48,9 +48,9 @@
     #(/topmenu)#
     
     <!-- this is the single exception in page design where we do not want a top-left application icon because we show a big one in the middle of the page -->
-	<script>document.getElementById("greeting-icon").src="/env/grafics/invisible.png"</script>
+	<script>document.getElementById("greeting-icon").src="env/grafics/invisible.png"</script>
 	
-	<h2 class="yacy"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.largeImage]#" alt="yacy" style="margin: auto;"/></a></h2>
+	<h2 class="yacy"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.largeImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="margin: auto;"/></a></h2>
     <h2 class="yacy">#[promoteSearchPageGreeting]#</h2>
 
     <form class="search form-inline" action="yacysearch.html" method="get" id="searchform" accept-charset="UTF-8">
@@ -69,7 +69,7 @@
 	        #(searchaudio)#::<input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;#(/searchaudio)#
 	        #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;#(/searchvideo)#
 	        #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications#(/searchapp)#
-	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1" onclick="this.href='/index.html?searchoptions=1&amp;former='+document.getElementById('searchinput').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchinput').contentdom)">more options...</a>::#(/searchoptions)#
+	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1" onclick="this.href='index.html?searchoptions=1&amp;former='+document.getElementById('searchinput').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchinput').contentdom)">more options...</a>::#(/searchoptions)#
         </div>
         #(/searchdomswitches)#
         <input type="hidden" name="nav" value="#[search.navigation]#" />
@@ -85,29 +85,35 @@
       ::
       </fieldset>
        
-      <table>
+      <table role="presentation">
         <tr>
-          <td><label for="count">Results per page</label>:</td>
+          <td><label id="maxResultsLabel">Results per page</label>:</td>
           <td>
-            <input type="radio" name="maximumRecords" id="mr10" value="10" #(count-10)#::checked="checked"#(/count-10)#/><label for="mr10">10</label>
-            <input type="radio" name="maximumRecords" id="mr50" value="50" #(count-50)#::checked="checked"#(/count-50)#/><label for="mr50">50</label>
-            <input type="radio" name="maximumRecords" id="mr100" value="100" #(count-100)#::checked="checked"#(/count-100)#/><label for="mr100">100</label>
+          	<fieldset aria-labelledby="maxResultsLabel">
+            	<input type="radio" name="maximumRecords" id="mr10" value="10" #(count-10)#::checked="checked"#(/count-10)#/><label for="mr10">10</label>
+            	<input type="radio" name="maximumRecords" id="mr50" value="50" #(count-50)#::checked="checked"#(/count-50)#/><label for="mr50">50</label>
+            	<input type="radio" name="maximumRecords" id="mr100" value="100" #(count-100)#::checked="checked"#(/count-100)#/><label for="mr100">100</label>
+            </fieldset>
           </td>
         </tr>
+        #(resource-select)#::
         <tr>
-          #(resource-select)#::
-          <td><label for="resource">Resource</label>:</td>
+          <td><label id="resourceLabel">Resource</label>:</td>
           <td>
-            <input type="radio" name="resource" id="rglobal" value="global" checked="checked" /><label for="rglobal">the peer-to-peer network</label>
-            <input type="radio" name="resource" id="rlocal" value="local"><label for="rlocal">only the local index</label>
+          	<fieldset aria-labelledby="resourceLabel">
+            	<input type="radio" name="resource" id="rglobal" value="global" checked="checked" /><label for="rglobal">the peer-to-peer network</label>
+            	<input type="radio" name="resource" id="rlocal" value="local"><label for="rlocal">only the local index</label>
+            </fieldset>
           </td>::
-          <td><label for="resource">Resource</label>:</td>
+          <td><label id="resourceLabel">Resource</label>:</td>
           <td>
-            <input type="radio" name="resource" id="rglobal" value="global"/><label for="rglobal">the peer-to-peer network</label>
-            <input type="radio" name="resource" id="rlocal" value="local" checked="checked"/><label for="rlocal">only the local index</label>
+          	<fieldset aria-labelledby="resourceLabel">
+            	<input type="radio" name="resource" id="rglobal" value="global"/><label for="rglobal">the peer-to-peer network</label>
+            	<input type="radio" name="resource" id="rlocal" value="local" checked="checked"/><label for="rlocal">only the local index</label>
+            </fieldset>
           </td>
-          #(/resource-select)#
         </tr>
+        #(/resource-select)#
         <tr>
           <td>
             <label for="prefermaskfilter">Prefer mask</label>:
@@ -149,6 +155,12 @@
           <dd>only pages with as-author-anotated &lt;author&gt;</dd>
           <dt>tld:&lt;tld&gt;</dt>
           <dd>only pages from top-level-domains &lt;tld&gt;</dd>
+          #(datesincontent)#::
+            <dt>on:&lt;date&gt;</dt>
+            <dd>only pages with &lt;date&gt; in content</dd>
+            <dt>from:&lt;date1&gt; to:&lt;date2&gt;</dt>
+            <dd>only pages with a date between &lt;date1&gt; and &lt;date2&gt; in content</dd>
+          #(/datesincontent)#
           <dt>/http</dt>
           <dd>only resources from http or https servers</dd>
           <dt>/ftp</dt>

@@ -151,6 +151,7 @@ public class sitemapParser extends AbstractParser implements Parser {
         private final BlockingQueue<URLEntry> queue;
         private final ClientIdentification.Agent agent;
         public SitemapReader(final InputStream source, final ClientIdentification.Agent agent) {
+        	super(SitemapReader.class.getSimpleName());
             this.source = source;
             this.queue = new ArrayBlockingQueue<URLEntry>(10000);
             this.agent = agent;

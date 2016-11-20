@@ -278,6 +278,18 @@ outboundlinks_urlstub_sxt
 ## external links, the visible anchor text
 outboundlinks_anchortext_txt
 
+## all icon links without the protocol and '://'
+icons_urlstub_sxt
+
+## all icon links protocols : split from icons_urlstub to provide some compression, as http protocol is implied as default and not stored
+icons_protocol_sxt
+
+## all icon links relationships space separated (e.g. 'icon apple-touch-icon')
+icons_rel_sxt
+
+## all icon sizes space separated (e.g. '16x16 32x32')
+icons_sizes_sxt
+
 ## all text/words appearing in image alt texts or the tokenized url
 images_text_t
 

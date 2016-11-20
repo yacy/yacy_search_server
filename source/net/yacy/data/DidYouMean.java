@@ -399,6 +399,11 @@ public class DidYouMean {
      * <b>Note:</b> the loop runs (alphabet.length * len) tests.
      */
     public class ChangingOneLetter extends Thread {
+    	
+    	public ChangingOneLetter() {
+    		super("ChangingOneLetter");
+    	}
+    	
         @Override
         public void run() {
             char m;
@@ -421,6 +426,10 @@ public class DidYouMean {
      * <b>Note:</b> the loop runs (len) tests.
      */
 	private class DeletingOneLetter extends Thread {
+		public DeletingOneLetter() {
+			super("DeletingOneLetter");
+		}
+		
         @Override
         public void run() {
             for (int i = 0; i < DidYouMean.this.wordLen; i++) {
@@ -437,6 +446,10 @@ public class DidYouMean {
      * <b>Note:</b> the loop runs (alphabet.length * len) tests.
      */
 	private class AddingOneLetter extends Thread {
+		public AddingOneLetter() {
+			super("AddingOneLetter");
+		}
+		
         @Override
         public void run() {
             for (int i = 0; i <= DidYouMean.this.wordLen; i++) {
@@ -455,6 +468,10 @@ public class DidYouMean {
      * <b>Note:</b> the loop runs (len-1) tests.
      */
 	private class ReversingTwoConsecutiveLetters extends Thread {
+		public ReversingTwoConsecutiveLetters() {
+			super("ReversingTwoConsecutiveLetters");
+		}
+		
         @Override
         public void run() {
             for (int i = 0; i < DidYouMean.this.wordLen - 1; i++) {

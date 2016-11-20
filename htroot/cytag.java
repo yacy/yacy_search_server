@@ -31,7 +31,6 @@ import java.io.IOException;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.ImageParser;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -56,7 +55,8 @@ public class cytag {
         appendJSON(connect, "nick",  (post == null) ? "" : post.get("nick", ""));
         appendJSON(connect, "tag",   (post == null) ? "" : post.get("tag", ""));
         appendJSON(connect, "icon",  (post == null) ? "" : post.get("icon", ""));
-        appendJSON(connect, "ip",    header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, ""));
+        final String ip = header.getRemoteAddr();
+        appendJSON(connect, "ip",    (ip == null) ? "" : ip);
         appendJSON(connect, "agent", header.get("User-Agent", ""));
         connect.append('}');
         

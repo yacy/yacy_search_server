@@ -68,6 +68,7 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LargeNumberCache;
@@ -97,6 +98,10 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
+import net.yacy.search.navigator.NameSpaceNavigator;
+import net.yacy.search.navigator.Navigator;
+import net.yacy.search.navigator.RestrictedStringNavigator;
+import net.yacy.search.navigator.StringNavigator;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -144,15 +149,14 @@ public final class SearchEvent {
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
     public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
     public final ScoreMap<String> hostNavigator; // a counter for the appearance of host names
-    public final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
-    public final ScoreMap<String> collectionNavigator; // a counter for the appearances of collections
-    public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
     public final ScoreMap<String> filetypeNavigator; // a counter for file types
     public final ScoreMap<String> dateNavigator; // a counter for file types
     public final ScoreMap<String> languageNavigator; // a counter for appearance of languages
     public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
+    // map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms)
+    public final Map<String, Navigator> navigatorPlugins; // map of active search navigators key=internal navigator name
     private final LoaderDispatcher                        loader;
     private final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     private final boolean                                 deleteIfSnippetFail;
@@ -257,9 +261,6 @@ public final class SearchEvent {
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
         this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
-        this.authorNavigator = navcfg.contains("authors") ? new ConcurrentScoreMap<String>() : null;
-        this.collectionNavigator = navcfg.contains("collections") ? new ConcurrentScoreMap<String>() : null;
-        this.namespaceNavigator = navcfg.contains("namespace") ? new ConcurrentScoreMap<String>() : null;
         this.hostNavigator = navcfg.contains("hosts") ? new ConcurrentScoreMap<String>() : null;
         this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
         this.filetypeNavigator = navcfg.contains("filetype") ? new ConcurrentScoreMap<String>() : null;
@@ -267,6 +268,34 @@ public final class SearchEvent {
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
         this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
+        // prepare configured search navigation (plugins)
+        this.navigatorPlugins = new LinkedHashMap<String, Navigator>();
+        String[] navnames = navcfg.split(",");
+        for (String navname : navnames) {
+            if (navname.contains("authors")) {
+                this.navigatorPlugins.put("authors", new StringNavigator("Authors", CollectionSchema.author_sxt));
+            }
+            if (navname.contains("collections")) {
+                RestrictedStringNavigator tmpnav = new RestrictedStringNavigator("Collection", CollectionSchema.collection_sxt);
+                // exclude default internal collection names
+                tmpnav.addForbidden("dht");
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_AUTOCRAWL_DEEP);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_AUTOCRAWL_SHALLOW);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_PROXY);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_REMOTE);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_GREEDY_LEARNING_TEXT);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
+                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SURROGATE);
+                this.navigatorPlugins.put("collections", tmpnav);
+            }
+            if (navname.contains("namespace")) {
+                this.navigatorPlugins.put("namespace", new NameSpaceNavigator("Name Space"));
+            }
+        }
+
         this.snippets = new ConcurrentHashMap<String, LinkedHashSet<String>>(); 
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
         if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
@@ -462,7 +491,7 @@ public final class SearchEvent {
         final Thread waitForThread;
         
         public RWIProcess(final Thread waitForThread) {
-            super();
+            super("SearchEvent.RWIProcess(" + waitForThread != null ? waitForThread.getName() : "" + ")");
             this.waitForThread = waitForThread;
         }
         
@@ -813,6 +842,19 @@ public final class SearchEvent {
         timer = System.currentTimeMillis();
 
         // collect navigation information
+
+        // iterate over active navigator plugins to let them update the counters
+        for (String s : this.navigatorPlugins.keySet()) {
+            Navigator navi = this.navigatorPlugins.get(s);
+            if (navi != null) {
+                if (facets == null || facets.isEmpty() || !facets.containsKey(navi.getIndexFieldName())) { // just in case we got no solr facet
+                    navi.incDocList(nodeList);
+                } else {
+                    navi.incFacet(facets);
+                }
+            }
+        }
+
         ReversibleScoreMap<String> fcts;
         if (this.locationNavigator != null) {
             fcts = facets.get(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
@@ -834,7 +876,6 @@ public final class SearchEvent {
                     if (host.startsWith("www.")) host = host.substring(4);
                     this.hostNavigator.inc(host, hc);
                 }
-                //this.hostNavigator.inc(fcts);
             }
         }
 
@@ -877,16 +918,6 @@ public final class SearchEvent {
                 }
                 this.languageNavigator.inc(fcts);
             }
-        }
-
-        if (this.authorNavigator != null) {
-            fcts = facets.get(CollectionSchema.author_sxt.getSolrFieldName());
-            if (fcts != null) this.authorNavigator.inc(fcts);
-        }
-
-        if (this.collectionNavigator != null) {
-            fcts = facets.get(CollectionSchema.collection_sxt.getSolrFieldName());
-            if (fcts != null) this.collectionNavigator.inc(fcts);
         }
 
         if (this.protocolNavigator != null) {
@@ -1303,17 +1334,13 @@ public final class SearchEvent {
             }
             
             // from here: collect navigation information
+            // TODO: it may be a little bit late here, to update navigator counters
 
-            // namespace navigation
-            if (this.namespaceNavigator != null) {
-                String pagepath = page.url().getPath();
-                if ((p = pagepath.indexOf(':')) >= 0) {
-                    pagepath = pagepath.substring(0, p);
-                    p = pagepath.lastIndexOf('/');
-                    if (p >= 0) {
-                        pagepath = pagepath.substring(p + 1);
-                        this.namespaceNavigator.inc(pagepath);
-                    }
+            // iterate over active navigator plugins (the rwi metadata may contain the field the plugin counts)
+            for (String s : this.navigatorPlugins.keySet()) {
+                Navigator navi = this.navigatorPlugins.get(s);
+                if (navi != null) {
+                    navi.incDoc(page);
                 }
             }
 
@@ -1389,7 +1416,7 @@ public final class SearchEvent {
                     success = true;
                 } else {
 
-                    new Thread() {
+                    new Thread("SearchEvent.drainStacksToResult.getSnippet") {
                         @Override
                         public void run() {
                             SearchEvent.this.oneFeederStarted();
@@ -1448,9 +1475,9 @@ public final class SearchEvent {
      * @param resultEntry to add
      * @param score current ranking
      */
-    public void addResult(URIMetadataNode resultEntry, final float score) {
+    public void addResult(URIMetadataNode resultEntry, final long score) {
         if (resultEntry == null) return;
-        final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, this.ref /*this.getTopicNavigator(MAX_TOPWORDS)*/);
+        final long ranking = (score * 128) + postRanking(resultEntry, this.ref /*this.getTopicNavigator(MAX_TOPWORDS)*/);
         // TODO: above was originally using (see below), but getTopicNavigator returns this.ref and possibliy alters this.ref on first call (this.ref.size < 2 -> this.ref.clear)
         // TODO: verify and straighten the use of addTopic, getTopic and getTopicNavigator and related score calculation
         // final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, this.getTopicNavigator(MAX_TOPWORDS));
@@ -1486,8 +1513,8 @@ public final class SearchEvent {
             r += (128 * referencesCount / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
         } /* else r += 0; */
         // prefer hit with 'prefer' pattern
-        if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) r += 256 << this.query.ranking.coeff_prefer;
-        if (this.query.prefer.matcher(rentry.title()).matches()) r += 256 << this.query.ranking.coeff_prefer;
+        if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) r += 255 << this.query.ranking.coeff_prefer;
+        if (this.query.prefer.matcher(rentry.title()).matches()) r += 255 << this.query.ranking.coeff_prefer;
 
         // apply 'common-sense' heuristic using references
         final String urlstring = rentry.url().toNormalform(true);
@@ -1512,8 +1539,8 @@ public final class SearchEvent {
         String queryword;
         while (shi.hasNext()) {
             queryword = shi.next();
-            if (urlcompmap.contains(queryword)) r += 256 << this.query.ranking.coeff_appurl;
-            if (descrcompmap.contains(queryword)) r += 256 << this.query.ranking.coeff_app_dc_title;
+            if (urlcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_appurl;
+            if (descrcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_app_dc_title;
         }
         return r;
     }
@@ -1671,6 +1698,8 @@ public final class SearchEvent {
         // boolean fakeImageHost = ms.url().getHost() != null && ms.url().getHost().indexOf("wikipedia") > 0; // pages with image extension from wikipedia do not contain image files but html files... I know this is a bad hack, but many results come from wikipedia and we must handle that
         // generalize above hack (regarding url with file extension but beeing a html (with html mime)
         if (doc.doctype() == Response.DT_IMAGE) {
+        	/* Icons are not always .ico files and should now be indexed in icons_urlstub_sxt. But this test still makes sense for older indexed documents, 
+        	 * or documents coming from previous versions peers */
             if (!doc.url().getFileName().endsWith(".ico")) { // we don't want favicons
                 final String id = ASCII.String(doc.hash());
                 // check image size
@@ -1695,6 +1724,8 @@ public final class SearchEvent {
                 List<Object> width = widthO == null ? null : (List<Object>) widthO;
                 for (int c = 0; c < img.size(); c++) {
                     String image_urlstub =  (String) img.get(c);
+                	/* Icons are not always .ico files and should now be indexed in icons_urlstub_sxt. But this test still makes sense for older indexed documents, 
+                	 * or documents coming from previous versions peers */
                     if (image_urlstub.endsWith(".ico")) continue; // we don't want favicons, makes the result look idiotic
                     try {
                         int h = height == null ? 0 : (Integer) height.get(c);

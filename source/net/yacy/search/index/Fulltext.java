@@ -272,7 +272,9 @@ public final class Fulltext {
     public void close() {
         try {
             this.solrInstances.close();
-        } catch (Throwable e) {}
+        } catch (Throwable e) {
+        	ConcurrentLog.logException(e);
+        }
     }
     
     private long lastCommit = 0;
@@ -283,22 +285,33 @@ public final class Fulltext {
         getDefaultConnector().commit(softCommit);
         if (this.writeWebgraph) getWebgraphConnector().commit(softCommit);
     }
-    
+
+    /**
+     * Loads the meta data stored in the embedded solr index for the url referenced
+     * by the WordReference.
+     * The WordReference and the YaCy score (element.weight()) become part (and
+     * are accessible) of the returned document.
+     * If the no document with url.hash = solrdocument.id is found in the embedded
+     * Solr index null is return.
+     * 
+     * @param element rwi wordreference
+     * @return URIMetadataNode (solrdocument) with all fields stored in embedded solr index
+     */
     public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
         if (element == null) return null;
         WordReferenceVars wre = element.getElement();        
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
-        float score = element.getWeight();
+        long score = element.getWeight();
         URIMetadataNode node = getMetadata(wre.urlhash(), wre, score);
         return node;
     }
 
     public URIMetadataNode getMetadata(final byte[] urlHash) {
         if (urlHash == null) return null;
-        return getMetadata(urlHash, null, 0.0f);
+        return getMetadata(urlHash, null, 0L);
     }
     
-    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final float score) {
+    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long score) {
         String u = ASCII.String(urlHash);
         
         // get the metadata from Solr
@@ -577,7 +590,7 @@ public final class Fulltext {
         EmbeddedInstance esc = this.solrInstances.getEmbedded();
         File storagePath = esc.getContainerPath();
         synchronized (this.solrInstances) {
-            this.disconnectLocalSolr();
+            // this.disconnectLocalSolr(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances.close();
             try {
                 ZIPReader.unzip(solrDumpZipFile, storagePath);
@@ -610,7 +623,7 @@ public final class Fulltext {
     public void rebootSolr() {
         synchronized (this.solrInstances) {
             this.disconnectLocalSolr();
-            this.solrInstances.close();
+            // this.solrInstances.close(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances = new InstanceMirror();
             try {
                 this.connectLocalSolr();
@@ -701,6 +714,7 @@ public final class Fulltext {
         private final boolean dom, text;
 
         private Export(final File f, final String filter, final String query, final ExportFormat format, final boolean dom, final boolean text) {
+        	super("Fulltext.Export");
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
             this.pattern = filter == null ? null : Pattern.compile(filter);

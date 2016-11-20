@@ -21,7 +21,7 @@ function linkstructure(hostname, element, width, height, maxtime, maxnodes) {
 	var nodes = {};
 	var links = [];
 	var linkstructure = {};
-	$.getJSON("/api/linkstructure.json?about=" + hostname + "&maxtime=" + maxtime + "&maxnodes=" + maxnodes, function(linkstructure) {
+	$.getJSON("api/linkstructure.json?about=" + hostname + "&maxtime=" + maxtime + "&maxnodes=" + maxnodes, function(linkstructure) {
 		links = linkstructure.graph;
 		links.forEach(function(link) {
 			  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, type:"Inbound"});

@@ -30,13 +30,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.JSONObject;
-import net.yacy.data.URLLicense;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
@@ -50,7 +48,6 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
-
 
 /**
  * write the opensearch result in YaCys special way to include as much as in opensearch is included.
@@ -162,8 +159,6 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                         String filename = url.getFileName();
                         solitaireTag(writer, "link", u);
                         solitaireTag(writer, "file", filename);
-                        // get image license
-                        if (Classification.isImageExtension(MultiProtocolURL.getFileExtension(filename))) URLLicense.aquireLicense(urlhash, url.toNormalform(true));
                     } catch (final MalformedURLException e) {}
                     continue;
                 }

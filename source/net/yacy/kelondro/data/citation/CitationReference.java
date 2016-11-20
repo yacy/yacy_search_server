@@ -156,17 +156,12 @@ public class CitationReference implements Reference, Serializable {
     }
 
     @Override
-    public int maxposition() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public int minposition() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public Collection<Integer> positions() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int posintext() {
         throw new UnsupportedOperationException();
     }
 

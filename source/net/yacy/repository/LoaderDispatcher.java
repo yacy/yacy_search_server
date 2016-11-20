@@ -331,6 +331,8 @@ public final class LoaderDispatcher {
                     }
                 }
                 LoaderDispatcher.log.info("cache hit/stale for: " + url.toNormalform(true));
+                /* Cached content can not be used : we return a null response to ensure callers will detect no cache response is available */
+                response = null;
             } else if (cachedResponse != null) {
                 LoaderDispatcher.log.warn("HTCACHE contained response header, but not content for url " + url.toNormalform(true));
             }
@@ -608,6 +610,7 @@ public final class LoaderDispatcher {
         private final ClientIdentification.Agent agent;
 
         public Loader(final DigestURL url, final File cache, final int maxFileSize, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent) {
+        	super("LoaderDispatcher.Loader");
             this.url = url;
             this.cache = cache;
             this.maxFileSize = maxFileSize;

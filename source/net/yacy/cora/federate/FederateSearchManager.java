@@ -324,7 +324,7 @@ public class FederateSearchManager {
 
         // job to iterate through Solr index to find links to opensearchdescriptions
         // started as background job as connect timeouts may cause it run a long time
-        final Thread job = new Thread() {
+        final Thread job = new Thread(FederateSearchManager.class.getSimpleName() + ".discoverFromSolrIndex") {
             @Override
             public void run() {
                 try {

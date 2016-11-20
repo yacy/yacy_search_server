@@ -188,7 +188,7 @@ public class AccessTracker {
         while (!remoteSearches.isEmpty()) {
             addToDump(remoteSearches.removeFirst(), 0);
         }
-        Thread t = new Thread() {
+        Thread t = new Thread("AccessTracker.dumpLog") {
             @Override
             public void run() {
                 ArrayList<String> logCopy = new ArrayList<String>();

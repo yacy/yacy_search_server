@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
@@ -40,7 +41,7 @@ public class Tables_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-        final String ext = header.get("EXT", "");
+        final String ext = header.get(HeaderFramework.CONNECTION_PROP_EXT, "");
         //final boolean json = ext.equals("json");
         final boolean xml = ext.equals("xml");
         

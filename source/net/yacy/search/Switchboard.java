@@ -64,6 +64,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -200,6 +201,7 @@ import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.RankingProfile;
@@ -628,7 +630,7 @@ public final class Switchboard extends serverSwitch {
         this.proxyLastAccess = System.currentTimeMillis() - 10000;
         this.localSearchLastAccess = System.currentTimeMillis() - 10000;
         this.remoteSearchLastAccess = System.currentTimeMillis() - 10000;
-        this.adminAuthenticationLastAccess = System.currentTimeMillis();
+        this.adminAuthenticationLastAccess = 0; // timestamp last admin authentication (as not autenticated here, stamp with 0)
         this.optimizeLastRun = System.currentTimeMillis();
         this.webStructure = new WebStructureGraph(new File(this.queuesRoot, "webStructure.map"));
 
@@ -665,6 +667,14 @@ public final class Switchboard extends serverSwitch {
         ListManager.listsPath = blacklistsPath;
         ListManager.reloadBlacklists();
 
+        // Set jvm default locale to match UI language (
+        String lng = this.getConfig("locale.language", "en");
+        if (!"browser".equals(lng) && !"default".equals(lng)) {
+            Locale.setDefault(new Locale(lng));
+        } else {
+            lng = "en"; // default = English
+        }
+
         // load badwords (to filter the topwords)
         if ( badwords == null || badwords.isEmpty() ) {
             File badwordsFile = new File(appPath, "DATA/SETTINGS/" + SwitchboardConstants.LIST_BADWORDS_DEFAULT);
@@ -688,8 +698,7 @@ public final class Switchboard extends serverSwitch {
             }
             stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
             // append locale language stopwords using setting of interface language (file yacy.stopwords.xx)
-            String lng = this.getConfig("locale.language", "en");
-            if ("default".equals(lng)) lng="en"; // english is stored as default (needed for locale html file overlay)
+            // english is stored as default (needed for locale html file overlay)
             File stopwordsFilelocale = new File (dataPath, "DATA/SETTINGS/"+stopwordsFile.getName()+"."+lng);
             if (!stopwordsFilelocale.exists()) stopwordsFilelocale = new File (appPath, "defaults/"+stopwordsFile.getName()+"."+lng);
             if (stopwordsFilelocale.exists()) {
@@ -1164,6 +1173,9 @@ public final class Switchboard extends serverSwitch {
 
         this.trail = new LinkedBlockingQueue<String>();
 
+        // set configurable ui defaults
+        QueryParams.FACETS_STANDARD_MAXCOUNT = sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT); // max number of navigator/facet lines
+        
         this.log.config("Finished Switchboard Initialization");
     }
 
@@ -1298,6 +1310,12 @@ public final class Switchboard extends serverSwitch {
         ClientIdentification.generateYaCyBot(sysinfo);
     }
 
+    /**
+     * Switch network configuration to the new specified one
+     * @param networkDefinition YaCy network definition file path (relative to the app path) or absolute URL
+     * @throws FileNotFoundException when the file was not found
+     * @throws IOException when an error occured
+     */
     public void switchNetwork(final String networkDefinition) throws FileNotFoundException, IOException {
         this.log.info("SWITCH NETWORK: switching to '" + networkDefinition + "'");
         // pause crawls
@@ -1327,11 +1345,13 @@ public final class Switchboard extends serverSwitch {
             if ( this.dhtDispatcher != null ) {
                 this.dhtDispatcher.close();
             }
+            /* Crawlstacker is eventually triggering write operations on this.index : we must therefore close it before closing this.index */
+            this.crawlStacker.announceClose();
+            this.crawlStacker.close();
+            
             synchronized ( this.index ) {
                 this.index.close();
             }
-            this.crawlStacker.announceClose();
-            this.crawlStacker.close();
             this.webStructure.close();
 
             this.log.info("SWITCH NETWORK: START UP OF NEW INDEX DATABASE...");
@@ -2037,7 +2057,7 @@ public final class Switchboard extends serverSwitch {
         assert this.crawlStacker != null;
         Thread[] indexer = new Thread[concurrency];
         for (int t = 0; t < concurrency; t++) {
-            indexer[t] = new Thread() {
+            indexer[t] = new Thread("Switchboard.processSurrogate-" + t) {
                 @Override
                 public void run() {
                     VocabularyScraper scraper = new VocabularyScraper();
@@ -2293,7 +2313,6 @@ public final class Switchboard extends serverSwitch {
                 && getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty() ) {
                 // make a 'random' password, this will keep the ability to log in from localhost without password
                 setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + this.genRandomPassword());
-                setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
             }
 
             // stop greedylearning if limit is reached
@@ -3137,6 +3156,7 @@ public final class Switchboard extends serverSwitch {
             Thread t = new Thread() {
                 @Override
                 public void run() {
+                	this.setName("Switchboard.stackURLs");
                     String failreason;
                     if ((failreason = Switchboard.this.stackUrl(profile, turl)) == null) successurls.add(turl); else failurls.put(turl, failreason);
                 }
@@ -3407,7 +3427,7 @@ public final class Switchboard extends serverSwitch {
             }
     
             if (s != null) {
-                Switchboard.this.log.info("addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
+                this.log.info("addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
             }
         }
     }
@@ -3469,12 +3489,20 @@ public final class Switchboard extends serverSwitch {
      * http-authentify: auth-level 4
      *
      * @param requestHeader
-     *  - requestHeader..AUTHORIZATION = B64encode("adminname:password") or = B64encode("adminname:valueOf_Base64MD5cft")
+     *  - requestHeader.AUTHORIZATION = B64encode("adminname:password") or = B64encode("adminname:valueOf_Base64MD5cft")
      *  - adminAccountBase64MD5 = MD5(B64encode("adminname:password") or = "MD5:"+MD5("adminname:peername:password")
      * @return the auth-level as described above or 1 which means 'not authorized'. a 0 is returned in case of
      *         fraud attempts
      */
     public int adminAuthenticated(final RequestHeader requestHeader) {
+
+        // authorization (earlier) by servlet container with username/password
+        // as this stays true as long as authenticated browser is open (even after restart of YaCy) add a timeout check to look at credentials again
+        // TODO: same is true for credential checks below (at least with BASIC auth -> login should expire at least on restart
+        if (requestHeader.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString())) {
+            if (adminAuthenticationLastAccess + 60000 > System.currentTimeMillis()) // 1 minute
+            return 4; // hard-authenticated, quick return
+        }
 
         // authorization in case that there is no account stored
         final String adminAccountUserName = getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
@@ -3533,9 +3561,9 @@ public final class Switchboard extends serverSwitch {
             } else {
                 // handle DIGEST auth (realmValue = adminAccountBase (set for lecacyHeader in DefaultServlet for authenticated requests)
                 if (adminAccountBase64MD5.equals(realmValue)) {
-            adminAuthenticationLastAccess = System.currentTimeMillis();
-            return 4; // hard-authenticated, all ok
-        }
+                    adminAuthenticationLastAccess = System.currentTimeMillis();
+                    return 4; // hard-authenticated, all ok
+                }
             }
         } else {
             // handle old option  adminAccountBase64MD5="xxxxxxx" = encodeMD55Hex(encodeB64("adminname:password")
@@ -3737,7 +3765,7 @@ public final class Switchboard extends serverSwitch {
      * @param resulturl the result doc which outbound links to add to crawler
      */
     public final void heuristicSearchResults(final URIMetadataNode resulturl) {
-        new Thread() {
+        new Thread("Switchboard.heuristicSearchResults") {
 
             @Override
             public void run() {

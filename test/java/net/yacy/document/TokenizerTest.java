@@ -2,7 +2,9 @@
 package net.yacy.document;
 
 import java.net.MalformedURLException;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import net.yacy.cora.document.WordCache;
 import net.yacy.kelondro.data.word.Word;
 import org.junit.Test;
@@ -36,4 +38,23 @@ public class TokenizerTest {
         assertEquals("occurence of 'words' ", 2, w.occurrences());
     }
 
+    /**
+     * Test of RESULT_NUMB_SENTENCES, of class Tokenizer.
+     */
+    @Test
+    public void testNumberOfSentences() {
+        Set<String> testText = new HashSet();
+        // text with 5 sentences
+        testText.add("Sentence One. Sentence Two. Comment on this. This is sentence four! Good By................");
+        testText.add("Sentence One. Sentence two. Sentence 3? Sentence 4! Sentence w/o punktuation at end of text");
+        testText.add("!!! ! ! ! Sentence One. Sentence two. Sentence 3? Sentence 4! Sentence 5 ! ! ! !!!");
+
+        WordCache meaningLib = new WordCache(null);
+        boolean doAutotagging = false;
+        VocabularyScraper scraper = null;
+        for (String text : testText) {
+            Tokenizer t = new Tokenizer(null, text, meaningLib, doAutotagging, scraper);
+            assertEquals("Tokenizer.RESULT_NUMB_SENTENCES", 5, t.RESULT_NUMB_SENTENCES);
+        }
+    }
 }

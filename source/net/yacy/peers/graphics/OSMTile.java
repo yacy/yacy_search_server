@@ -82,6 +82,7 @@ public class OSMTile {
         RasterPlotter m;
         int xt, yt, xc, yc, z;
         public Place(final RasterPlotter m, final int xt, final int yt, final int xc, final int yc, final int z) {
+        	super("OSMTile.Place(" + xt + "," + yt+ ")");
             this.m = m; this.xt = xt; this.yt = yt; this.xc = xc; this.yc = yc; this.z = z;
         }
         @Override

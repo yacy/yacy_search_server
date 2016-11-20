@@ -90,7 +90,7 @@ public class PerformanceQueues_p {
         String threadName;
         BusyThread thread;
 
-        final boolean xml = (header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml");
+        final boolean xml = header.getPathInfo().endsWith(".xml");
         prop.setLocalized(!xml);
 
         // calculate totals

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -31,6 +30,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.http.ProxyHandler;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.server.http.ChunkedInputStream;
@@ -90,7 +90,7 @@ public class YaCyProxyServlet extends HttpServlet implements Servlet {
             response.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT); // Need better test that isInitial
             return;
         }
-        URL proxyurl = null;
+        DigestURL proxyurl = null;
         String strARGS = request.getQueryString();
         if (strARGS == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
@@ -101,10 +101,9 @@ public class YaCyProxyServlet extends HttpServlet implements Servlet {
             final String strUrl = strARGS.substring(4); // strip "url="
 
             try {
-                proxyurl = new URL(strUrl);
+                proxyurl = new DigestURL(strUrl);
             } catch (final MalformedURLException e) {
-                proxyurl = new URL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
-
+                proxyurl = new DigestURL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
             }
         }
         if (proxyurl == null) {
@@ -116,15 +115,13 @@ public class YaCyProxyServlet extends HttpServlet implements Servlet {
         if (proxyurl.getPort() != -1) {
             hostwithport += ":" + proxyurl.getPort();
         }
-        RequestHeader yacyRequestHeader = YaCyDefaultServlet.convertHeaderFromJetty(request);
+        RequestHeader yacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
         yacyRequestHeader.remove(RequestHeader.KEEP_ALIVE);
         yacyRequestHeader.remove(HeaderFramework.CONTENT_LENGTH);
         
         final HashMap<String, Object> prop = new HashMap<String, Object>();
         prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
-        prop.put(HeaderFramework.CONNECTION_PROP_PROTOCOL, proxyurl.getProtocol());
-        prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
-        prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
+        prop.put(HeaderFramework.CONNECTION_PROP_DIGESTURL, proxyurl);
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST, request);
 

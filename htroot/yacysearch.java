@@ -28,6 +28,9 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
@@ -62,6 +65,7 @@ import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkTables;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Tokenizer;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.Formatter;
@@ -110,7 +114,7 @@ public class yacysearch {
             (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
                 "network.unit.description",
                 "") : env.getConfig(SwitchboardConstants.GREETING, "");
-        final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
+        final String client = header.getRemoteAddr(); // the search client who initiated the search
         
         // in case that the crawler is running and the search user is the peer admin, we expect that the user wants to check recently crawled document
         // to ensure that recent crawl results are inside the search results, we do a soft commit here. This is also important for live demos!
@@ -144,13 +148,10 @@ public class yacysearch {
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         
         // adding some additional properties needed for the rss feed
-        String hostName = header.get("Host", Domains.LOCALHOST);
-        if ( hostName.indexOf(':', 0) == -1 ) {
-            hostName += ":" + env.getLocalPort();
-        }
-        prop.put("searchBaseURL", "http://" + hostName + "/yacysearch.html");
-        prop.put("rssYacyImageURL", "http://" + hostName + "/env/grafics/yacy.png");
-        prop.put("thisaddress", hostName);
+        String peerContext = YaCyDefaultServlet.getContext(header, sb);
+        prop.put("searchBaseURL", peerContext + "/yacysearch.html");
+        prop.put("rssYacyImageURL", peerContext + "/env/grafics/yacy.png");
+        prop.put("thisaddress", peerContext);
         final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
         final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
         boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
@@ -852,7 +853,14 @@ public class yacysearch {
         }
         prop.put("focus", focus ? 1 : 0); // focus search field
         prop.put("searchagain", global ? "1" : "0");
-        prop.putHTML("former", originalquerystring.replaceAll(Segment.catchallString, "*"));
+        String former = originalquerystring.replaceAll(Segment.catchallString, "*");
+        prop.putHTML("former", former);
+        try {
+			prop.put("formerEncoded", URLEncoder.encode(former, StandardCharsets.UTF_8.name()));
+		} catch (UnsupportedEncodingException e) {
+			ConcurrentLog.warn("LOCAL_SEARCH", "Unsupported UTF-8 encoding!");
+			prop.put("formerEncoded", former);
+		}
         prop.put("count", itemsPerPage);
         prop.put("offset", startRecord);
         prop.put("resource", global ? "global" : "local");
@@ -869,12 +877,11 @@ public class yacysearch {
 
         sb.localSearchLastAccess = System.currentTimeMillis();
 
-        // hostname and port (assume locahost if nothing helps)
-        final String hostIP = sb.peers.mySeed().getIP();
-        prop.put("myhost", hostIP != null ? hostIP : Domains.LOCALHOST);
-        prop.put("myport", Domains.LOCALHOST.equals(hostIP) ? sb.getLocalPort() : sb.getPublicPort("port", 8090));
-
         // return rewrite properties
         return prop;
+    }
+    
+    public static void main(String args[]) throws UnsupportedEncodingException {
+    	System.out.println(URLEncoder.encode("aao?+ bbibu", StandardCharsets.UTF_8.name()));
     }
 }

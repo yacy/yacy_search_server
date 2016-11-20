@@ -168,4 +168,8 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public int posintext() {
+        throw new UnsupportedOperationException();    }
+
 }

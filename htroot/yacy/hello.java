@@ -57,7 +57,7 @@ public final class hello {
         final serverObjects prop = new serverObjects();
         final long start = System.currentTimeMillis();
         prop.put("message", "none");
-        String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // read an artificial header addendum
+        String clientip = header.getRemoteAddr();
         //ConcurrentLog.info("**hello-DEBUG**", "client request from = " + clientip);
         final InetAddress ias = Domains.dnsResolve(clientip);
         long time = System.currentTimeMillis();

@@ -40,12 +40,11 @@
 <script>$("#resource-switch-form").popover(); $("[name='resource-switch']").bootstrapSwitch();</script>
 #(/resource-select)#
 
-<p class="navbutton">
+<p class="navbutton"></p>
 <div class="btn-group btn-group-justified">
   <div class="btn-group btn-group-xs"><button type="button" id="sort_button_context" class="btn btn-default" onclick="document.getElementById('search').value=document.getElementById('search').value.replace(' /date','');document.searchform.submit();">Context Ranking</button></div>
   <div class="btn-group btn-group-xs"><button type="button" id="sort_button_date" class="btn btn-default" onclick="document.getElementById('search').value=document.getElementById('search').value + ' /date';document.searchform.submit();">Sort by Date</button></div>
 </div>
-</p>
 <script>
   if (document.getElementById('search').value.indexOf(" /date") == -1) {
 	document.getElementById("sort_button_context").setAttribute("class","btn btn-default active");
@@ -56,7 +55,7 @@
   }
 </script>
 
-#(searchdomswitches)#::<p class="navbutton">
+#(searchdomswitches)#::<p class="navbutton"></p>
 <div class="btn-group btn-group-justified">
   #(searchtext)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='text';document.searchform.submit();"::#(/check)#>Documents</button></div>#(/searchtext)#
   #(searchimage)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='image';document.searchform.submit();"::#(/check)#>Images</button></div>#(/searchimage)#
@@ -64,9 +63,10 @@
   #(searchvideo)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='video';document.searchform.submit();"::#(/check)#>Video</button></div>#(/searchvideo)#
   #(searchapp)#::<div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(check)#:: active#(/check)#"#(check)# onclick="document.getElementById('contentdom').value='app';document.searchform.submit();"::#(/check)#>Apps</button></div>#(/searchapp)#
 </div>
-</p>#(/searchdomswitches)#
+#(/searchdomswitches)#
 
 #(nav-protocols)#::
+<p class="navbutton"></p>
 <div class="btn-group btn-group-justified">
 #{element}#
   <div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(on)#:: active#(/on)#"#(on)# onclick="window.location.href='#[url]#';"::#(/on)#>#[name]# (#[count]#)</button></div>
@@ -76,7 +76,7 @@
 
 #(nav-topics)#<p>&nbsp;</p>::
 <div id="tagcloud" style="text-align:justify">#{element}#
-<a rel="#[count]#" href="#[url]#" style="text-decoration:none;font-size:#[size]#px;">#[name]#</a>
+<a href="#[url]#" style="text-decoration:none;font-size:#[size]#px;">#[name]#</a>
 #{/element}#</div>
 #(/nav-topics)#
 
@@ -92,9 +92,9 @@ show search results for "#[query]#" on map</a>
 #(/cat-location)#
 
 #(nav-dates)#::
-<link rel="stylesheet" href="/env/morris.css">
-<script src="/js/raphael-min.js"></script>
-<script src="/js/morris.js"></script>
+<link rel="stylesheet" href="env/morris.css">
+<script src="js/raphael-min.js"></script>
+<script src="js/morris.js"></script>
 <script>
 	document.getElementById("datehistogram").style = "height:200px";
 	dates_in_content_dts = [#{element}#"#[name]#","#[count]#"#(nl)#::,#(/nl)##{/element}#];
@@ -181,32 +181,14 @@ function toggleVisibility(name, count) {
 <script>if (#[count]# <= 8) toggleVisibility('languages', #[count]#);</script>
 #(/nav-languages)#
 
-#(nav-namespace)#::
+#{navs}#
 <ul class="nav nav-sidebar menugroup">
-<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('namespace', #[count]#);">Name Space [#[count]#] <span style="float:right" id="chevron-namespace" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('#[name]#', #[count]#);">#[displayname]# [#[count]#] <span style="float:right" id="chevron-#[name]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>
-<script>if (#[count]# <= 8) toggleVisibility('namespace', #[count]#);</script>
-#(/nav-namespace)#
-
-#(nav-authors)#::
-<ul class="nav nav-sidebar menugroup">
-<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('authors', #[count]#);">Author [#[count]#] <span style="float:right" id="chevron-authors" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
-#{element}#
-<li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
-#{/element}#</ul>
-<script>if (#[count]# <= 8) toggleVisibility('authors', #[count]#);</script>
-#(/nav-authors)#
-
-#(nav-collections)#::
-<ul class="nav nav-sidebar menugroup">
-<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('collections', #[count]#);">Collection [#[count]#] <span style="float:right" id="chevron-collections" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
-#{element}#
-<li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
-#{/element}#</ul>
-<script>if (#[count]# <= 8) toggleVisibility('collections', #[count]#);</script>
-#(/nav-collections)#
+<script>if (#[count]# <= 8) toggleVisibility('#[name]#', #[count]#);</script>
+#{/navs}#
 
 #{nav-vocabulary}#
 <ul class="nav nav-sidebar menugroup">

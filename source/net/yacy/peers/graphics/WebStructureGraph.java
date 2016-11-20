@@ -30,7 +30,6 @@ package net.yacy.peers.graphics;
 import java.io.File;
 import java.io.Serializable;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -451,7 +450,12 @@ public class WebStructureGraph {
 
         @Override
         public Collection<Integer> positions() {
-            return new ArrayList<Integer>(0);
+            return null;
+        }
+
+        @Override
+        public int posintext() {
+            throw new UnsupportedOperationException();
         }
     }
 

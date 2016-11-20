@@ -62,10 +62,12 @@ import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.InvalidURLLicenceException;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.UserDB.Entry;
 import net.yacy.kelondro.util.FileUtils;
@@ -96,6 +98,7 @@ import org.eclipse.jetty.util.MultiPartOutputStream;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 
+import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
@@ -672,35 +675,66 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
     }
-
+    
     /**
-     * Convert ServletRequest header to YaCy RequestHeader
-     * @param request ServletRequest
-     * @return RequestHeader created from ServletRequest
+     * Returns the URL base for this peer, determined from request HTTP header "Host" when present. Use this when absolute URL rendering is required, 
+     * otherwise relative URLs should be preferred.<br/>
+     * Note : this implementation lets the responsibility to any eventual Reverse Proxy to eventually rewrite the rendered absolute URL. Example Apache directive :
+     * <code>Substitute "s|http://internal.yacypeer.com:8090/|http://www.example.com/yacy/|in"</code>.
+     * From a security point of view this is preferable than eventually relying blindly here on a X-Forwarded-Host HTTP header that can be forged by an attacker.
+     * @param header request header.
+     * @param sb Switchboard instance.
+     * @return the application context (URL request base) from request header or default configuration. This is
+     * either http://hostname:port or https://hostname:sslport
      */
-    public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
-        RequestHeader result = new RequestHeader();
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String headerName = headerNames.nextElement();
-            Enumeration<String> headers = request.getHeaders(headerName);
-            while (headers.hasMoreElements()) {
-                String header = headers.nextElement();
-                result.add(headerName, header);
-            }
+    public static String getContext(final RequestHeader header, final Switchboard sb) {
+        String protocol = "http";
+        String hostAndPort = null;
+        if (header != null) {
+            hostAndPort = header.get(HeaderFramework.HOST);
+            protocol = header.getScheme();
         }
-        return result;
+
+        /* Host and port still null : let's use the default local ones */
+        if (hostAndPort == null) {
+        	if(sb != null) {
+        		hostAndPort = Domains.LOCALHOST + ":" + sb.getConfigInt("port", 8090);
+        	} else {
+        		hostAndPort = Domains.LOCALHOST + ":8090";
+        	}
+        }
+        
+        if(header != null) {
+        	String protocolHeader = header.getScheme();
+        	
+    		/* Let's check this header has a valid value */
+        	if("http".equals(protocolHeader) || "https".equals(protocolHeader)) {
+        		protocol = protocolHeader.toLowerCase();
+        	} else if(protocolHeader != null && !protocolHeader.isEmpty()) {
+    			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal " + HeaderFramework.X_YACY_REQUEST_SCHEME + " header value : " + protocolHeader);
+    		}
+        	
+    		/* This peer can also be behind a reverse proxy requested using https, even if the request coming to this YaCy peer is http only
+    		 * Possible scenario (happens for example when YaCy is deployed on Heroku Platform) : User browser -> https://reverseProxy/yacyURL -> http://yacypeer/yacyURL
+    		 * In that case, absolute URLs rendered by this peer (in rss feeds for example) must effectively start with the https scheme */
+        	protocolHeader = header.get(HttpHeaders.X_FORWARDED_PROTO.toString(), "").toLowerCase();
+        	
+    		/* Here we only allow an upgrade from HTTP to HTTPS, not the reverse (we don't want a forged HTTP header by an eventual attacker to force fallback to HTTP) */
+        	if("https".equals(protocolHeader)) {
+        		protocol = protocolHeader;
+        	} else if(!protocolHeader.isEmpty()) {
+    			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal " + HttpHeaders.X_FORWARDED_PROTO.toString() + " header value : " + protocolHeader);
+    		}
+        }
+        
+        return protocol + "://" + hostAndPort;
     }
 
-    protected RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
-        RequestHeader legacyRequestHeader = convertHeaderFromJetty(request);
+    private RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
+        RequestHeader legacyRequestHeader = new RequestHeader(request);
 
-        legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
-        legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);
+        legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target); // target may contain a server side include (SSI)
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
-        /* Add request scheme (http or https) to allow templates to know wether original request is http or https 
-         * (when default ports (80 and 443) are used, there is no way to distinguish the two schemes relying only on the Host header) */
-        legacyRequestHeader.put(HeaderFramework.X_YACY_REQUEST_SCHEME, request.getScheme());
         Switchboard sb = Switchboard.getSwitchboard();
         if (legacyRequestHeader.containsKey(RequestHeader.AUTHORIZATION)) {
             if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(request.getAuthType())) {
@@ -808,6 +842,17 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return m;
     }
 
+    /**
+     * Handles a YaCy servlet template, reads the template and replaces the template
+     * items with actual values. Because of supported server side includes target 
+     * might not be the same as request.getPathInfo
+     * 
+     * @param target the path to the template
+     * @param request the remote servlet request
+     * @param response
+     * @throws IOException
+     * @throws ServletException
+     */
     protected void handleTemplate(String target,  HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Switchboard sb = Switchboard.getSwitchboard();
 
@@ -873,7 +918,20 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 } else {
                     tmp = invokeServlet(targetClass, legacyRequestHeader, args);
                 }
-            } catch (InvocationTargetException | IllegalArgumentException | IllegalAccessException e) {
+            } catch(InvocationTargetException e) {
+            	if(e.getCause() instanceof InvalidURLLicenceException) {
+                	/* A non authaurized user is trying to fetch a image with a bad or already released license code */
+                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
+                	return;
+                }
+            	if(e.getCause() instanceof TemplateMissingParameterException) {
+                	/* A template is used but miss some required parameter */
+                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
+                	return;
+                }
+            	ConcurrentLog.logException(e);
+                throw new ServletException(targetFile.getAbsolutePath());
+            } catch (IllegalArgumentException | IllegalAccessException e) {
                 ConcurrentLog.logException(e);
                 throw new ServletException(targetFile.getAbsolutePath());
             }
@@ -916,16 +974,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
 
-                boolean staticImage = target.equals("/ViewImage.png");
-               
-                if (staticImage) {
-                    if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
-                        response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
-                    }
-
-                    // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
-                    response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
-                }
+                updateRespHeadersForImages(target, response);
                 final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
@@ -937,6 +986,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
 
             if (tmp instanceof InputStream) {
+            	/* Images and favicons can also be written directly from an inputStream */
+            	updateRespHeadersForImages(target, response);
+            	
                 writeInputStream(response, targetExt, (InputStream)tmp);
                 return;
             }
@@ -986,6 +1038,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
                 templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, sb.peers.myID());
                 templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
+                templatePatterns.put(servletProperties.RELATIVE_BASE, YaCyDefaultServlet.getRelativeBase(target));
                 Seed myPeer = sb.peers.mySeed();
                 templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
@@ -1012,6 +1065,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("navigation-advanced_authorized", authorized ? 1 : 0);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+                templatePatterns.put(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
                 templatePatterns.put("clientlanguage", localeSelection);
                 
                 String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
@@ -1030,14 +1084,68 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setContentType(mimeType);
                 response.setStatus(HttpServletResponse.SC_OK);
                 ByteArrayOutputStream bas = new ByteArrayOutputStream(4096);
-                // apply templates
-                TemplateEngine.writeTemplate(targetFile.getName(), fis, bas, templatePatterns);                
-                fis.close();
-                // handle SSI
-                parseSSI (bas.toByteArray(),request,response);
+                try {
+                	// apply templates
+                	TemplateEngine.writeTemplate(targetFile.getName(), fis, bas, templatePatterns);
+                	
+                    // handle SSI
+                    parseSSI (bas.toByteArray(),request,response);
+                } finally {
+                	try {
+                		fis.close();
+                	} catch(IOException ignored) {
+                		ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: could not close target file " + targetFile.getName());
+                	}
+                	
+                	try {
+                		bas.close();
+                	} catch(IOException ignored) {
+                		/* Should never happen with a ByteArrayOutputStream */
+                	}
+                }
             }
         }
     }
+    
+    /**
+     * Returns the relative path prefix necessary to reach htroot from the deepest level of targetPath.<br>
+     * Example : targetPath="api/citation.html" returns "../"
+     * targetPath is supposed to have been cleaned earlier from special chars such as "?", spaces, "//".
+     * @param targetPath target path relative to htroot
+     * @return the relative path prefix, eventually empty
+     */
+    protected static String getRelativeBase(String targetPath) {
+    	StringBuilder relativeBase = new StringBuilder();
+    	if(targetPath != null) {
+    		/* Normalize target path : it is relative to htroot, starting with a slash or not */
+    		if(targetPath.startsWith("/")) {
+    			targetPath = targetPath.substring(1, targetPath.length());
+    		}
+    		
+    		int slashIndex = targetPath.indexOf('/', 0);
+    		while(slashIndex >= 0) {
+    			relativeBase.append("../");
+    			slashIndex = targetPath.indexOf('/', slashIndex + 1);
+    		}
+    	}
+    	return relativeBase.toString();
+    }
+
+    /**
+     * Eventually update response headers for image resources
+     * @param target the query target
+     * @param response servlet response to eventually update
+     */
+	private void updateRespHeadersForImages(String target, HttpServletResponse response) {
+		if (target.equals("/ViewImage.png") || target.equals("/ViewFavicon.png")) {
+		    if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+		        response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
+		    }
+
+		    // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
+		    response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
+		}
+	}
 
 
     /**
@@ -1198,7 +1306,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 Thread[] p = new Thread[t];
                 for (int j = 0; j < t; j++) {
                     files.put(POISON);
-                    p[j] = new Thread() {
+                    p[j] = new Thread("YaCyDefaultServlet.parseMultipart-" + j) {
                         @Override
                         public void run() {
                             Map.Entry<String, byte[]> job;

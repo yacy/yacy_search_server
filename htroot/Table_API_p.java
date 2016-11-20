@@ -313,7 +313,7 @@ public class Table_API_p {
                 } else {
                     prop.put("showtable_list_" + count + "_isCrawlerStart", 0);
                 }
-                prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getPublicPort("port", 8090) + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)));
+                prop.putHTML("showtable_list_" + count + "_inline_url", UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)));
                 prop.put("showtable_list_" + count + "_scheduler_inline", inline ? "true" : "false");
                 prop.put("showtable_list_" + count + "_scheduler_filter", typefilter.pattern());
                 prop.put("showtable_list_" + count + "_scheduler_query", query.pattern());

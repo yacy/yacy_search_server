@@ -70,7 +70,7 @@ public class Network {
         prop.put("menu", post == null ? 2 : (post.get("menu", "").equals("embed")) ? 0 : (post.get("menu","").equals("simple")) ? 1 : 2);
         if (sb.peers.mySeed() != null) prop.put("menu_newpeer_peerhash", sb.peers.mySeed().hash);
 
-        prop.setLocalized(!(requestHeader.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml"));
+        prop.setLocalized(!requestHeader.getPathInfo().endsWith(".xml"));
         prop.putHTML("page_networkTitle", sb.getConfig("network.unit.description", "unspecified"));
         prop.putHTML("page_networkName", sb.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
@@ -530,7 +530,7 @@ public class Network {
         prop.putNum("table_rt", System.currentTimeMillis() - start);
 
         // Adding CORS Access header for Network.xml
-        final String path = requestHeader.get(HeaderFramework.CONNECTION_PROP_PATH);
+        final String path = requestHeader.getPathInfo();
         if(path != null && path.endsWith(".xml")) {
             final ResponseHeader outgoingHeader = new ResponseHeader(200);
     		outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");

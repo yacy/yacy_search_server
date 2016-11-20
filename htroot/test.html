@@ -9,9 +9,8 @@
 
     <title>Dashboard Template for Bootstrap</title>
 
-    <script src="/env/bootstrap/js/jquery.min.js"></script>
-    <script src="/env/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/env/bootstrap/js/docs.min.js"></script>
+    <script src="env/bootstrap/js/jquery.min.js"></script>
+    <script src="env/bootstrap/js/bootstrap.min.js"></script>
     
     <!-- Bootstrap core CSS -->
     <link href="env/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -19,11 +18,11 @@
     <!-- Custom styles for this template -->
     <link href="env/bootstrap-base.css" rel="stylesheet">
 
-    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
+  <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  <!--[if lt IE 9]>
+    <script src="env/bootstrap/js/html5shiv.min.js"></script>
+    <script src="env/bootstrap/js/respond.min.js"></script>
+  <![endif]-->
     
     <!-- style for hypertree -->
     <link href="env/hypertree.css" rel="stylesheet">
@@ -59,7 +58,7 @@
               </ul>
             </li>
             <li id="header_administration">
-              <form action="/Status.html" method="get" role="form">
+              <form action="Status.html" method="get">
                 <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn">Administration &raquo;</button>
               </form>
             </li>
@@ -96,8 +95,8 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           <h1 class="page-header">Dashboard</h1>
 
-<script src="/js/d3.v3.min.js"></script>
-<script src="/js/hypertree.js"></script>
+<script src="js/d3.v3.min.js"></script>
+<script src="js/hypertree.js"></script>
 <div id="linkstructure"></div>
 <script>$(document).ready(linkstructure("yacy.net", "#linkstructure", 1280, 720, 1000, 1000));</script>
 

@@ -84,14 +84,14 @@ Move selected pattern(s) to==Перемістити вибрані шаблон�
 #You can select them here for deletion==Ви можете тут вибрати їх для видалення
 Add new pattern:==Додати новий шаблон:
 "Add URL pattern"=="Додати шаблон URL"
-The right '*', after the '/', can be replaced by a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a>.==Права "*", після "/", може бути замінена на <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярний вираз</a>.
+The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.==Права "*", після "/", може бути замінена на <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">регулярний вираз</a>.
 domain.net/fullpath<==domain.de/повний шлях<
 #>domain.net/*<==>domain.de/*<
 #*.domain.net/*<==*.domain.de/*<
 #*.sub.domain.net/*<==*.sub.domain.de/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
-a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a> (slow)==повний <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярний вираз</a> (повільний)
+a complete <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a> (slow)==повний <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">регулярний вираз</a> (повільний)
 #was removed from blacklist==було видалено з чорного списку
 #was added to the blacklist==було додано до чорного списку
 Activate this list for==Активува цей список для
@@ -1073,7 +1073,7 @@ Use filter==Використовувати фільтр
 Restrict to start domain==Обмежити до початкового домену
 Restrict to sub-path==Обмежити до початкового шляху
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Це emacs-подібний регулярний вираз, яий повинен співпадати зі сканованими URL;
-The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">regular expression</a></b>==Цей фільтр <b><a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярний вираз</a></b>,
+The filter is a <b><a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>==Цей фільтр <b><a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">регулярний вираз</a></b>,
 that <b>must match</b> with the URLs which are used to be crawled; default is 'catch all'.==який <b>повинен співпадати</b> з URL, що використовуються при скануванні. За умовчанням встановлено значення "Дозволити все".
 Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'.==Приклад: Щоб дозволити тільки URL-адреси, що містять слово "Wissenschaft", створюється фільтр ".*Wissenschaft.*".
 You can also use an automatic domain-restriction to fully crawl a single domain.==Ви можете також використовувати автоматичне обмеження домену для повного сканування певного домену.

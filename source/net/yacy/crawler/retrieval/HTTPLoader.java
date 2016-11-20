@@ -162,8 +162,20 @@ public final class HTTPLoader {
 				if (profile != null && !CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) {
 					// put redirect url on the crawler queue to repeat a
 					// double-check
-					request.redirectURL(redirectionUrl);
-					this.sb.crawlStacker.stackCrawl(request);
+    	        	/* We have to clone the request instance and not to modify directly its URL, 
+    	        	 * otherwise the stackCrawl() function would reject it, because detecting it as already in the activeWorkerEntries */
+                    Request redirectedRequest = new Request(request.initiator(),
+                    		redirectionUrl,
+                    		request.referrerhash(),
+                    		request.name(),
+                    		request.appdate(),
+                    		request.profileHandle(),
+                    		request.depth(),
+                    		request.timezoneOffset());
+    	            String rejectReason = this.sb.crawlStacker.stackCrawl(redirectedRequest);
+    	            if(rejectReason != null) {
+                        throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " aborted. Reason : " + rejectReason);
+    	            }
 					// in the end we must throw an exception (even if this is
 					// not an error, just to abort the current process
 					throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " to "
@@ -349,10 +361,24 @@ public final class HTTPLoader {
     	        // we have two use cases here: loading from a crawl or just loading the url. Check this:
     	        if (profile != null && !CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) {
                     // put redirect url on the crawler queue to repeat a double-check
-                    request.redirectURL(redirectionUrl);
-    	            this.sb.crawlStacker.stackCrawl(request);
+    	        	/* We have to clone the request instance and not to modify directly its URL, 
+    	        	 * otherwise the stackCrawl() function would reject it, because detecting it as already in the activeWorkerEntries */
+                    Request redirectedRequest = new Request(request.initiator(),
+                    		redirectionUrl,
+                    		request.referrerhash(),
+                    		request.name(),
+                    		request.appdate(),
+                    		request.profileHandle(),
+                    		request.depth(),
+                    		request.timezoneOffset());
+    	            String rejectReason = this.sb.crawlStacker.stackCrawl(redirectedRequest);
     	            // in the end we must throw an exception (even if this is not an error, just to abort the current process
+    	            if(rejectReason != null) {
+                        throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " aborted. Reason : " + rejectReason);
+    	            }
                     throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " to " + redirectionUrl.toNormalform(false) + " placed on crawler queue for double-check");
+    	            
+
     	        }
     	        
                 // if we are already doing a shutdown we don't need to retry crawling

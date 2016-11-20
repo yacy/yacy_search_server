@@ -20,14 +20,43 @@
 
 package net.yacy.cora.protocol;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.security.Principal;
+import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
+import java.util.Locale;
 import java.util.Map;
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUpgradeHandler;
+import javax.servlet.http.Part;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.util.NumberTools;
 
-public class RequestHeader extends HeaderFramework {
+/**
+ * YaCy servlet request header.
+ * YaCy runs in a servlet container (Jetty), starting 2016 this implements the
+ * widely used HttpServletRequest for tighter and further standardization and
+ * adherence to common standards, to make the use of HttpServletRequest parameters
+ * available to YaCy servlets.
+ */
+public class RequestHeader extends HeaderFramework implements HttpServletRequest {
 
     // request header properties
 
@@ -58,22 +87,21 @@ public class RequestHeader extends HeaderFramework {
         HTML, JSON, XML
     }
 
+    private final HttpServletRequest _request; // reference to the original request
     private Date date_cache_IfModifiedSince = null;
-    
+
     public RequestHeader() {
         super();
+        this._request = null;
     }
 
-    public RequestHeader(final Map<String, String> reverseMappingCache) {
-        super(reverseMappingCache);
-    }
-
-    public RequestHeader(final Map<String, String> reverseMappingCache, final Map<String, String> othermap)  {
-        super(reverseMappingCache, othermap);
+    public RequestHeader(HttpServletRequest request) {
+        super();
+        this._request = request;
     }
 
     public DigestURL referer() {
-        final String referer = get(REFERER, null);
+        final String referer = get(REFERER);
         if (referer == null) return null;
         try {
             return new DigestURL(referer);
@@ -91,32 +119,13 @@ public class RequestHeader extends HeaderFramework {
     
     public Date ifModifiedSince() {
         if (this.date_cache_IfModifiedSince != null) return date_cache_IfModifiedSince;
-        this.date_cache_IfModifiedSince = headerDate(RequestHeader.IF_MODIFIED_SINCE);
+        long time = this.getDateHeader(RequestHeader.IF_MODIFIED_SINCE);
+        if (time > 0) this.date_cache_IfModifiedSince = new Date(time);
         return this.date_cache_IfModifiedSince;
     }
 
-    public Object ifRange() {
-        if (containsKey(IF_RANGE)) {
-            final Date rangeDate = parseHTTPDate(get(IF_RANGE));
-            if (rangeDate != null)
-                return rangeDate;
-
-            return get(IF_RANGE);
-        }
-        return null;
-    }
-
-    public String userAgent() {
-        return get(USER_AGENT, "");
-    }
-
-    public boolean acceptGzip() {
-        return ((containsKey(ACCEPT_ENCODING)) &&
-                ((get(ACCEPT_ENCODING)).toUpperCase().indexOf("GZIP",0)) != -1);
-    }
-
     public FileType fileType() {
-        String path = get(HeaderFramework.CONNECTION_PROP_PATH);
+        String path = this.getPathInfo();
         if (path == null) return FileType.HTML;
         path = path.toLowerCase();
         if (path.endsWith(".json")) return FileType.JSON;
@@ -126,10 +135,9 @@ public class RequestHeader extends HeaderFramework {
         return FileType.HTML;
     }
 
-
     public boolean accessFromLocalhost() {
         // authorization for localhost, only if flag is set to grant localhost access as admin
-        final String clientIP = this.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "");
+        final String clientIP = this.getRemoteAddr();
         if ( !Domains.isLocalhost(clientIP) ) {
             return false;
         }
@@ -137,4 +145,712 @@ public class RequestHeader extends HeaderFramework {
         if (refererHost == null || refererHost.isEmpty() || Domains.isLocalhost(refererHost)) return true;
         return false;
     }
+
+    /**
+     * Gets the header entry "Cookie" as on string containing all cookies
+     *
+     * @return String with cookies separated by ';'
+     * @see getCookies()
+     */
+    public String getHeaderCookies() { // TODO: harmonize with standard getCookies
+        String cookiestring = this.get(COOKIE); // get from legacy or HttpServletRequest
+        if (cookiestring == null) {
+            return "";
+        } else {
+            return cookiestring;
+        }
+    }
+
+    // implementation of HttpServletRequest procedures
+    // the general approach is to prefer values in the YaCy legacy RequestHeader.map and if no value exists
+    // to use the httpservletrequest. This approach is used, because legacy requestheader allows to add or
+    // change header values. This makes sure a modified or added value is used.
+    // At this point of implementation a original request is not required, so test for _request != null is needed.
+
+    /**
+     * This overrides the legacy get() to make sure the original _request values
+     * are considered
+     * @param key header name
+     * @return value
+     */
+    @Override
+    public String get(Object key) {
+        String value = super.get(key); // important to use super.get
+        if (value == null && _request != null) {
+            return _request.getHeader((String)key);
+        }
+        return value;
+    }
+
+    /**
+     * Override legacy containsKey to be sure original request headers are incl.
+     * in the check.
+     * Use of this legacy methode is discouraged
+     * @param key headername
+     * @return
+     */
+    @Override
+    public boolean containsKey(Object key) {
+        boolean val = super.containsKey(key);
+        if (val) {
+            return val;
+        } else if (_request != null) {
+            return _request.getHeader((String) key) != null;
+        }
+        return val;
+    }
+
+    /**
+     * Override legacy mime()
+     * @return mime string or "application/octet-stream" if content type missing
+     * @see getContentType()
+     */
+    @Override
+    public String mime() {
+        if (super.containsKey(HeaderFramework.CONTENT_TYPE)) {
+            return super.mime();
+        } else {
+            if (_request != null) {
+                return _request.getContentType();
+            }
+        }
+        return "application/octet-stream";
+    }
+
+    @Override
+    public String getAuthType() {
+        if (_request != null) {
+            return _request.getAuthType();
+        } else if (super.containsKey(RequestHeader.AUTHORIZATION)) {
+            return HttpServletRequest.BASIC_AUTH; // legacy supported only BASIC
+        }
+        return null;
+    }
+
+    @Override
+    public Cookie[] getCookies() {
+        if (_request != null) {
+            return _request.getCookies();
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public long getDateHeader(String name) {
+        Date d = super.headerDate(name);
+        if (d != null) {
+            return d.getTime();
+        } else {
+            if (_request != null) {
+                return _request.getDateHeader(name);
+            }
+            return -1;
+        }
+    }
+
+    @Override
+    public String getHeader(String name) {
+        return this.get(name);
+    }
+
+    @Override
+    public Enumeration<String> getHeaders(String name) {
+        if (_request != null) {
+            return _request.getHeaders(name);
+        }
+        return null;
+    }
+
+    @Override
+    public Enumeration<String> getHeaderNames() {
+        if (_request != null) {
+            return _request.getHeaderNames();
+        }
+        return null; // not supported in legacy RequestHeader, safe to return null
+    }
+
+    @Override
+    public int getIntHeader(String name) {
+        if (super.containsKey(name)) {
+            String val = super.get(name);
+            if (val != null) {
+                try {
+                    return Integer.parseInt(val);
+                } catch (NumberFormatException ex) {}
+            }
+        } else if(_request != null) {
+            return _request.getIntHeader(name);
+        }
+        return -1;
+    }
+
+    @Override
+    public String getMethod() {
+        if (_request != null) {
+            return _request.getMethod();
+        } else {
+            return HeaderFramework.METHOD_POST;
+        }
+    }
+
+    @Override
+    public String getPathInfo() {
+        if (super.containsKey(HeaderFramework.CONNECTION_PROP_PATH)) {
+            return super.get(HeaderFramework.CONNECTION_PROP_PATH);
+        } else if (_request != null) {
+            return _request.getPathInfo();
+        }
+        return ""; // TODO: in difference to standard return empty string (instead null) as we not always check for null
+    }
+
+    @Override
+    public String getPathTranslated() {
+        if (_request != null) {
+            return _request.getPathTranslated();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public String getContextPath() {
+        if (_request != null) {
+            return _request.getContextPath();
+        } else {
+            return "";
+        }
+    }
+
+    @Override
+    public String getQueryString() {
+        if (_request != null) {
+            return _request.getQueryString();
+        } else {
+            // in case of discoraged use of arbitrary header prop
+            return super.get(HeaderFramework.CONNECTION_PROP_ARGS);
+        }
+    }
+
+    @Override
+    public String getRemoteUser() {
+        if (_request != null)
+            return _request.getRemoteUser();
+        else
+            return null;
+    }
+
+    @Override
+    public boolean isUserInRole(String role) {
+        if (_request != null) {
+            return _request.isUserInRole(role);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public Principal getUserPrincipal() {
+        if (_request != null) {
+            return _request.getUserPrincipal();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public String getRequestedSessionId() {
+        if (_request != null) {
+            return _request.getRequestedSessionId();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public String getRequestURI() {
+        if (_request != null) {
+            return _request.getRequestURI();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public StringBuffer getRequestURL() {
+        if (_request != null) {
+            return _request.getRequestURL();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public String getServletPath() {
+        if (_request != null) {
+            return _request.getServletPath();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public HttpSession getSession(boolean create) {
+        if (_request != null) {
+            return _request.getSession(create);
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public HttpSession getSession() {
+        if (_request != null) {
+            return _request.getSession();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public String changeSessionId() {
+        if (_request != null) {
+            return _request.changeSessionId();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public boolean isRequestedSessionIdValid() {
+        if (_request != null) {
+            return _request.isRequestedSessionIdValid();
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isRequestedSessionIdFromCookie() {
+        if (_request != null) {
+            return _request.isRequestedSessionIdFromCookie();
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isRequestedSessionIdFromURL() {
+        if (_request != null) {
+            return _request.isRequestedSessionIdFromURL();
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isRequestedSessionIdFromUrl() {
+        if (_request != null) {
+            return _request.isRequestedSessionIdFromUrl();
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
+        if (_request != null) {
+            return _request.authenticate(response);
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public void login(String username, String password) throws ServletException {
+        if (_request != null) {
+            _request.login(username, password);
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void logout() throws ServletException {
+        if (_request != null) {
+            _request.logout();
+        }
+
+        super.remove(AUTHORIZATION);
+        // TODO: take care of legacy login cookie (and possibly cached UserDB login status)
+
+    }
+
+    @Override
+    public Collection<Part> getParts() throws IOException, ServletException {
+        if (_request != null) {
+            return _request.getParts();
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Part getPart(String name) throws IOException, ServletException {
+        if (_request != null) {
+            return _request.getPart(name);
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {
+        if (_request != null) {
+            return _request.upgrade(handlerClass);
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Object getAttribute(String name) {
+        if (_request != null) {
+            return _request.getAttribute(name);
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public Enumeration<String> getAttributeNames() {
+        if (_request != null) {
+            return _request.getAttributeNames();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public String getCharacterEncoding() {
+        String enc = super.getCharacterEncoding();
+        if (enc == null && _request != null) return _request.getCharacterEncoding();
+        return enc;
+    }
+
+    @Override
+    public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
+        if (_request != null) {
+            _request.setCharacterEncoding(env);
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int getContentLength() {
+        int len = super.getContentLength();
+        if (len < 0 && _request != null) return _request.getContentLength();
+        return len;
+    }
+
+    @Override
+    public long getContentLengthLong() {
+        long len = super.getContentLengthLong();
+        if (len < 0 && _request != null) return _request.getContentLengthLong();
+        return len;
+    }
+
+    @Override
+    public String getContentType() {
+        if (super.containsKey(HeaderFramework.CONTENT_TYPE)) {
+            return super.mime();
+        } else {
+            if (_request != null) {
+                return _request.getContentType();
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+        if (_request != null) {
+            return _request.getInputStream();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public String getParameter(String name) {
+        if (_request != null) {
+            return _request.getParameter(name);
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public Enumeration<String> getParameterNames() {
+        if (_request != null) {
+            return _request.getParameterNames();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public String[] getParameterValues(String name) {
+        if (_request != null) {
+            return _request.getParameterValues(name);
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public Map<String, String[]> getParameterMap() {
+        if (_request != null) {
+            return _request.getParameterMap();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public String getProtocol() {
+        // here we can directly check original request, as protocol is not expected to be modified
+        if (_request != null) {
+            return _request.getProtocol();
+        } else {
+            return this.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
+        }
+    }
+
+    @Override
+    public String getScheme() {
+        // here we can directly check original request first, as scheme is not expected to be changed
+        if (_request != null) {
+            return _request.getScheme();
+        } else {
+            if (super.containsKey(HeaderFramework.X_YACY_REQUEST_SCHEME)) {
+                return super.get(HeaderFramework.X_YACY_REQUEST_SCHEME);
+            } else {
+                return "http";
+            }
+        }
+    }
+
+    @Override
+    public String getServerName() {
+        if (super.containsKey(HeaderFramework.HOST)) {
+            final String hostport = super.get(HeaderFramework.HOST);
+            if (hostport.contains("[")) { // handle ipv6
+                final int pos = hostport.lastIndexOf(']');
+                if (pos > 0) {
+                    return hostport.substring(0, pos + 1);
+                }
+            } else if (hostport.contains(":")) {
+                final int pos = hostport.indexOf(':');
+                if (pos > 0) {
+                    return hostport.substring(0, pos);
+                }
+            }
+            return hostport;
+        } else if (_request != null) {
+            return _request.getServerName();
+        } else {
+            return Domains.LOCALHOST;
+        }
+    }
+
+    @Override
+    public int getServerPort() {
+        if (super.containsKey(HeaderFramework.HOST)) {
+            final String hostport = super.get(HeaderFramework.HOST);
+            int port = getScheme().equals("https") ? 443 : 80; // init with default ports
+            final int pos = hostport.lastIndexOf(':');
+            if (pos > 0 && hostport.lastIndexOf(']') < pos) { // check for ipv6
+                port = NumberTools.parseIntDecSubstring(hostport, pos + 1);
+            }
+            return port;
+        } else if (_request != null) {
+            return _request.getServerPort();
+        } else {
+            return 80;
+        }
+    }
+
+    @Override
+    public BufferedReader getReader() throws IOException {
+        if (_request != null) {
+            return _request.getReader();
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String getRemoteAddr() {
+        if (this._request != null) {
+            return _request.getRemoteAddr();
+        } else {
+            return super.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
+        }
+    }
+
+    @Override
+    public String getRemoteHost() {
+        if (_request != null) {
+            return _request.getRemoteHost();
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void setAttribute(String name, Object o) {
+        if (_request != null) {
+            _request.setAttribute(name, o);
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void removeAttribute(String name) {
+        if (_request != null) {
+            _request.removeAttribute(name);
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public Locale getLocale() {
+        if (this._request != null) {
+            return _request.getLocale();
+        } else if (super.containsKey(HeaderFramework.ACCEPT_LANGUAGE)) {
+            final String lng = super.get(HeaderFramework.ACCEPT_LANGUAGE);
+            return new Locale(lng);
+        }
+        return Locale.getDefault(); // to avoid dependency on Switchboard just use system default
+    }
+
+    @Override
+    public Enumeration<Locale> getLocales() {
+        if (this._request != null) {
+            return _request.getLocales();
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+
+    @Override
+    public boolean isSecure() {
+        if (_request != null) {
+            return _request.isSecure();
+        }
+        return false;
+    }
+
+    @Override
+    public RequestDispatcher getRequestDispatcher(String path) {
+        if (_request != null) {
+            return _request.getRequestDispatcher(path);
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    @Deprecated // Deprecated. As of Version 2.1 of the Java Servlet API, use ServletContext.getRealPath(java.lang.String) instead.
+    public String getRealPath(String path) {
+        if (_request != null) {
+            return _request.getRealPath(path);
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int getRemotePort() {
+        if (_request != null) {
+            return _request.getRemotePort();
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String getLocalName() {
+        if (_request != null) {
+            return _request.getLocalName();
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String getLocalAddr() {
+        if (_request != null) {
+            return _request.getLocalAddr();
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int getLocalPort() {
+        if (_request != null) {
+            return _request.getLocalPort();
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public ServletContext getServletContext() {
+        if (_request != null) {
+            return _request.getServletContext();
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public AsyncContext startAsync() throws IllegalStateException {
+        if (_request != null) {
+            return _request.startAsync();
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
+        if (_request != null) {
+            startAsync(servletRequest, servletResponse);
+        }
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean isAsyncStarted() {
+        if (_request != null) {
+            return _request.isAsyncStarted();
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isAsyncSupported() {
+        if (_request != null) {
+            return _request.isAsyncStarted();
+        }
+        return false;
+    }
+
+    @Override
+    public AsyncContext getAsyncContext() {
+        if (_request != null) {
+            return _request.getAsyncContext();
+        }
+        return null;
+    }
+
+    @Override
+    public DispatcherType getDispatcherType() {
+        if (_request != null) {
+            return _request.getDispatcherType();
+        }
+        return null;
+    }
+
+
+
+
 }

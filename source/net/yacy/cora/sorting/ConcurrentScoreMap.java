@@ -32,17 +32,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 
 public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<E> {
 
-    protected final ConcurrentHashMap<E, AtomicLong> map; // a mapping from a reference to the cluster key
-    private long gcount;
+    protected final ConcurrentHashMap<E, AtomicInteger> map; // a mapping from a reference to the cluster key
+    private long gcount; // sum of all scores
 
     public ConcurrentScoreMap()  {
-        this.map = new ConcurrentHashMap<E, AtomicLong>();
+        this.map = new ConcurrentHashMap<E, AtomicInteger>();
         this.gcount = 0;
     }
 
@@ -77,8 +77,8 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
      */
     @Override
     public void shrinkToMinScore(final int minScore) {
-        final Iterator<Map.Entry<E, AtomicLong>> i = this.map.entrySet().iterator();
-        Map.Entry<E, AtomicLong> entry;
+        final Iterator<Map.Entry<E, AtomicInteger>> i = this.map.entrySet().iterator();
+        Map.Entry<E, AtomicInteger> entry;
         while (i.hasNext()) {
             entry = i.next();
             if (entry.getValue().intValue() < minScore) i.remove();
@@ -109,7 +109,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         if (obj == null) return;
 
         // use atomic operations
-        this.map.putIfAbsent(obj, new AtomicLong(0));
+        this.map.putIfAbsent(obj, new AtomicInteger(0));
         this.map.get(obj).incrementAndGet();
 
         // increase overall counter
@@ -121,7 +121,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         if (obj == null) return;
 
         // use atomic operations
-        this.map.putIfAbsent(obj, new AtomicLong(0));
+        this.map.putIfAbsent(obj, new AtomicInteger(0));
         this.map.get(obj).decrementAndGet();
 
         // increase overall counter
@@ -133,12 +133,12 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         if (obj == null) return;
 
         // use atomic operations
-        final AtomicLong old = this.map.putIfAbsent(obj, new AtomicLong(0));
+        final AtomicInteger old = this.map.putIfAbsent(obj, new AtomicInteger(newScore));
         // adjust overall counter if value replaced
-        if (old != null) this.gcount -= old.longValue(); // must use old befor setting a new value (it's a object reference)
-
-        this.map.get(obj).set(newScore);
-
+        if (old != null) {
+            this.gcount -= old.intValue(); // must use old before setting a new value (it's a object reference)
+            this.map.get(obj).set(newScore);
+        }
         // increase overall counter
         this.gcount += newScore;
     }
@@ -148,7 +148,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         if (obj == null) return;
 
         // use atomic operations
-        this.map.putIfAbsent(obj, new AtomicLong(0));
+        this.map.putIfAbsent(obj, new AtomicInteger(0));
         this.map.get(obj).addAndGet(incrementScore);
 
         // increase overall counter
@@ -164,7 +164,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
     public int delete(final E obj) {
         // deletes entry and returns previous score
         if (obj == null) return 0;
-        final AtomicLong score = this.map.remove(obj);
+        final AtomicInteger score = this.map.remove(obj);
         if (score == null) return 0;
 
         // decrease overall counter
@@ -180,7 +180,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
     @Override
     public int get(final E obj) {
         if (obj == null) return 0;
-        final AtomicLong score = this.map.get(obj);
+        final AtomicInteger score = this.map.get(obj);
         if (score == null) return 0;
         return score.intValue();
     }
@@ -188,7 +188,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
     public int getMinScore() {
         if (this.map.isEmpty()) return -1;
         int minScore = Integer.MAX_VALUE;
-        for (final Map.Entry<E, AtomicLong> entry : this.map.entrySet())
+        for (final Map.Entry<E, AtomicInteger> entry : this.map.entrySet())
             if (entry.getValue().intValue() < minScore) {
                 minScore = entry.getValue().intValue();
             }
@@ -199,7 +199,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         if (this.map.isEmpty())
             return -1;
         int maxScore = Integer.MIN_VALUE;
-        for (final Map.Entry<E, AtomicLong> entry : this.map.entrySet())
+        for (final Map.Entry<E, AtomicInteger> entry : this.map.entrySet())
             if (entry.getValue().intValue() > maxScore) {
                 maxScore = entry.getValue().intValue();
             }
@@ -211,13 +211,17 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         return this.map.toString();
     }
 
+    /**
+     * @param up true = asc order, fals = reverse order
+     * @return iteratior accessing the keys in ordered by score values
+     */
     @Override
     public Iterator<E> keys(final boolean up) {
         // re-organize entries
         final TreeMap<Integer, Set<E>> m = new TreeMap<Integer, Set<E>>();
         Set<E> s;
         Integer is;
-        for (final Map.Entry<E, AtomicLong> entry: this.map.entrySet()) {
+        for (final Map.Entry<E, AtomicInteger> entry: this.map.entrySet()) {
             is = new Integer(entry.getValue().intValue());
             s = m.get(is);
             if (s == null) {

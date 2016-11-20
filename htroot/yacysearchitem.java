@@ -24,8 +24,12 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.awt.Dimension;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -48,6 +52,7 @@ import net.yacy.crawler.data.Transactions;
 import net.yacy.crawler.data.Transactions.State;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.URLLicense;
+import net.yacy.document.parser.html.IconEntry;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.NewsPool;
@@ -66,6 +71,7 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.crypt;
 import net.yacy.utils.nxTools;
+import net.yacy.visualization.ImageViewer;
 
 public class yacysearchitem {
 
@@ -127,31 +133,13 @@ public class yacysearchitem {
             final DigestURL resultURL = result.url();
             final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
 
-            final int port = resultURL.getPort();
-            DigestURL faviconURL = null;
-            if ((fileType == FileType.HTML || fileType == FileType.JSON) && !sb.isIntranetMode()) try {
-                faviconURL = new DigestURL(resultURL.getProtocol() + "://" + resultURL.getHost() + ((port != -1) ? (":" + port) : "") + "/favicon.ico");
-            } catch (final MalformedURLException e1) {
-                ConcurrentLog.logException(e1);
-                faviconURL = null;
-            }
             final String resource = theSearch.query.domType.toString();
             final String origQ = theSearch.query.getQueryGoal().getQueryString(true);
             prop.put("content", 1); // switch on specific content
             prop.put("content_authorized", authenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
             if (authenticated) { // only needed if authorized
-                boolean bookmarkexists;
-                // check url exists in bookkmarks
-                    bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
-                prop.put("content_authorized_bookmark", !bookmarkexists);
-                // bookmark icon check for YMarks
-                //prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
-                prop.putHTML("content_authorized_bookmark_bookmarklink", "yacysearch.html?query=" + origQ.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&resource=" + resource + "&time=3&bookmarkref=" + urlhash + "&bookmarkurl=" + crypt.simpleEncode(resultUrlstring) + "&urlmaskfilter=.*");
-                prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
-                prop.putHTML("content_authorized_recommend_deletelink", "yacysearch.html?query=" + origQ.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&deleteref=" + urlhash + "&urlmaskfilter=.*");
-                prop.putHTML("content_authorized_recommend_recommendlink", "yacysearch.html?query=" + origQ.replace(' ', '+') + "&Enter=Search&count=" + theSearch.query.itemsPerPage() + "&offset=" + (theSearch.query.neededResults() - theSearch.query.itemsPerPage()) + "&order=" + crypt.simpleEncode(theSearch.query.ranking.toExternalString()) + "&resource=" + resource + "&time=3&recommendref=" + urlhash + "&urlmaskfilter=.*");
-                prop.put("content_authorized_urlhash", urlhash);
+                addAuthorizedActions(sb, prop, theSearch, resultUrlstring, resource, origQ, urlhash);
             }
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
@@ -193,8 +181,11 @@ public class yacysearchitem {
             boolean isAtomFeed = header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("atom");
             String resultFileName = resultURL.getFileName();
             prop.putHTML("content_target", target);
-            //if (faviconURL != null && fileType == FileType.HTML) sb.loader.loadIfNotExistBackground(faviconURL, 1024 * 1024 * 10, null, ClientIdentification.yacyIntranetCrawlerAgent);
-            prop.putHTML("content_faviconCode", URLLicense.aquireLicense(faviconURL)); // acquire license for favicon url loading
+            DigestURL faviconURL = null;
+            if ((fileType == FileType.HTML || fileType == FileType.JSON) && !sb.isIntranetMode()) {
+            	faviconURL = getFaviconURL(result, new Dimension(16, 16));
+            }
+            prop.putHTML("content_faviconUrl", processFaviconURL(authenticated, faviconURL));
             prop.put("content_urlhash", urlhash);
             prop.put("content_ranking", Float.toString(result.score()));
             Date[] events = result.events();
@@ -309,7 +300,7 @@ public class yacysearchitem {
 
         if (theSearch.query.contentdom == Classification.ContentDomain.IMAGE) {
             // image search; shows thumbnails
-            processImage(sb, prop, item, theSearch, target_special_pattern, timeout);
+            processImage(sb, prop, item, theSearch, target_special_pattern, timeout, authenticated);
             theSearch.query.transmitcount = item + 1;
             return prop;
         }
@@ -341,6 +332,130 @@ public class yacysearchitem {
 
         return prop;
     }
+
+	/**
+	 * Tries to retrieve favicon url from solr result document, or generates
+	 * default favicon URL (i.e. "http://host/favicon.ico") from resultURL and
+	 * port.
+	 * 
+	 * @param result
+	 *            solr document result. Must not be null.
+	 * @param preferredSize preferred icon size. If no one matches, most close icon is returned.
+	 * @return favicon URL or null when even default favicon URL can not be generated
+	 * @throws NullPointerException when one requested parameter is null
+	 */
+	protected static DigestURL getFaviconURL(final URIMetadataNode result, Dimension preferredSize) {
+		/*
+		 * We look preferably for a standard icon with preferred size, but
+		 * accept as a fallback other icons below 128x128 or with no known size
+		 */
+		IconEntry faviconEntry = result.getFavicon(preferredSize);
+		DigestURL faviconURL;
+		if (faviconEntry == null) {
+			try {
+				String defaultFaviconURL = result.url().getProtocol() + "://" + result.url().getHost()
+						+ ((result.url().getPort() != -1) ? (":" + result.url().getPort()) : "") + "/favicon.ico";
+				faviconURL = new DigestURL(defaultFaviconURL);
+			} catch (final MalformedURLException e1) {
+				ConcurrentLog.logException(e1);
+				faviconURL = null;
+			}
+		} else {
+			faviconURL = faviconEntry.getUrl();
+		}
+
+		return faviconURL;
+	}
+
+	/**
+	 * @param authenticated
+	 *            true when current user is authenticated
+	 * @param faviconURL
+	 *            url icon of web site
+	 * @return url to propose in search result or empty string when faviconURL
+	 *         is null
+	 */
+	private static String processFaviconURL(final boolean authenticated, DigestURL faviconURL) {
+		/* Only use licence code for non authentified users. For authenticated users licence would never be released and would unnecessarily fill URLLicense.permissions. */
+		StringBuilder contentFaviconURL = new StringBuilder();
+		if (faviconURL != null) {
+			final String iconUrlExt = MultiProtocolURL.getFileExtension(faviconURL.getFileName());
+		    /* Image format ouput for ViewFavicon servlet : default is png, except with gif and svg icons */
+		    final String viewFaviconExt = !iconUrlExt.isEmpty() && ImageViewer.isBrowserRendered(iconUrlExt) ? iconUrlExt : "png";
+		    
+			contentFaviconURL.append("ViewFavicon.").append(viewFaviconExt).append("?maxwidth=16&maxheight=16&isStatic=true&quadratic");
+			if (authenticated) {
+				contentFaviconURL.append("&url=").append(faviconURL.toNormalform(true));
+			} else {
+				contentFaviconURL.append("&code=").append(URLLicense.aquireLicense(faviconURL));
+			}
+		}
+		return contentFaviconURL.toString();
+	}
+	
+    /**
+     * Add action links reserved to authorized users. All parameters must be non null.
+     * @param sb the main Switchboard instance
+     * @param prop properties map to feed
+     * @param theSearch search event
+     * @param resultUrlstring URL of the result item
+     * @param resource resource scope ("local" or "global")
+     * @param origQ origin query terms
+     * @param urlhash URL hash of the result item
+     */
+	private static void addAuthorizedActions(final Switchboard sb, final serverObjects prop,
+			final SearchEvent theSearch, final String resultUrlstring, final String resource, final String origQ,
+			final String urlhash) {
+		// check if url exists in bookmarks
+		boolean bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
+		prop.put("content_authorized_bookmark", !bookmarkexists);
+		// bookmark icon check for YMarks
+		//prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
+		
+		/* Bookmark, delete and recommend action links share the same URL prefix */
+		StringBuilder linkBuilder = new StringBuilder();
+		String actionLinkPrefix = linkBuilder.append("yacysearch.html?query=").append(origQ.replace(' ', '+'))
+				.append("&Enter=Search&count=").append(theSearch.query.itemsPerPage()).append("&offset=")
+				.append((theSearch.query.neededResults() - theSearch.query.itemsPerPage())).append("&resource=")
+				.append(resource).append("&time=3").toString();
+		linkBuilder.setLength(0);
+		
+		String encodedURLString;
+		try {
+			encodedURLString = URLEncoder.encode(crypt.simpleEncode(resultUrlstring), StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e1) {
+			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
+			encodedURLString = crypt.simpleEncode(resultUrlstring);
+		}
+		String bookmarkLink = linkBuilder.append(actionLinkPrefix).append("&bookmarkref=").append(urlhash)
+				.append("&bookmarkurl=").append(encodedURLString).append("&urlmaskfilter=.*")
+				.toString();
+		linkBuilder.setLength(0);
+		
+		/* Delete and recommend action links share the same URL suffix */
+		String encodedRanking;
+		try {
+			encodedRanking = URLEncoder.encode(crypt.simpleEncode(theSearch.query.ranking.toExternalString()), StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e1) {
+			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
+			encodedRanking = crypt.simpleEncode(resultUrlstring);
+		}
+		String actionLinkSuffix = linkBuilder.append(urlhash)
+				.append("&urlmaskfilter=.*").append("&order=").append(encodedRanking).toString();
+		linkBuilder.setLength(0);
+		
+		String deleteLink = linkBuilder.append(actionLinkPrefix).append("&deleteref=").append(actionLinkSuffix).toString();
+		linkBuilder.setLength(0);
+		String recommendLink = linkBuilder.append(actionLinkPrefix).append("&recommendref=").append(actionLinkSuffix).toString();
+		linkBuilder.setLength(0);
+		
+		prop.put("content_authorized_bookmark_bookmarklink", bookmarkLink);
+		prop.put("content_authorized_recommend_deletelink", deleteLink);
+		prop.put("content_authorized_recommend_recommendlink", recommendLink);
+		
+		prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
+		prop.put("content_authorized_urlhash", urlhash);
+	}
     
 
     /**
@@ -351,9 +466,10 @@ public class yacysearchitem {
      * @param theSearch search event
      * @param target_special_pattern
      * @param timeout result getting timeOut
+     * @param authenticated set to true when user authentication is ok
      */
 	private static void processImage(final Switchboard sb, final serverObjects prop, final int item,
-			final SearchEvent theSearch, final String target_special_pattern, long timeout) {
+			final SearchEvent theSearch, final String target_special_pattern, long timeout, boolean authenticated) {
 		prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
 		try {
 		    SearchEvent.ImageResult image = theSearch.oneImageResult(item, timeout);
@@ -363,11 +479,26 @@ public class yacysearchitem {
 
 		    final String license = URLLicense.aquireLicense(image.imageUrl); // this is just the license key to get the image forwarded through the YaCy thumbnail viewer, not an actual lawful license
 		    /* Image format ouput for ViewImage servlet : default is png, except with gif and svg images */
-		    final String viewImageExt = !imageUrlExt.isEmpty() && ViewImage.isBrowserRendered(imageUrlExt) ? imageUrlExt : "png";
+		    final String viewImageExt = !imageUrlExt.isEmpty() && ImageViewer.isBrowserRendered(imageUrlExt) ? imageUrlExt : "png";
 		    /* Thumb URL */
-		    prop.putHTML("content_item_hrefCache", "ViewImage." + viewImageExt + "?maxwidth=" + DEFAULT_IMG_WIDTH + "&maxheight=" + DEFAULT_IMG_HEIGHT + "&code="+license+"&isStatic=true&quadratic=&url=" + imageUrlstring);
+			StringBuilder thumbURLBuilder = new StringBuilder("ViewImage.").append(viewImageExt).append("?maxwidth=")
+					.append(DEFAULT_IMG_WIDTH).append("&maxheight=").append(DEFAULT_IMG_HEIGHT)
+					.append("&isStatic=true&quadratic");
+		    /* Only use licence code for non authentified users. For authenticated users licence would never be released and would unnecessarily fill URLLicense.permissions. */
+		    if(authenticated) {
+		    	thumbURLBuilder.append("&url=").append(imageUrlstring);
+		    } else {
+		    	thumbURLBuilder.append("&code=").append(URLLicense.aquireLicense(image.imageUrl));
+		    }
+		    String thumbURL = thumbURLBuilder.toString();
+		    prop.putHTML("content_item_hrefCache", thumbURL);
 		    /* Full size preview URL */
-		    prop.putHTML("content_item_hrefFullPreview", "ViewImage." + viewImageExt + "?code="+license+"&isStatic=true&url=" + imageUrlstring);
+		    if(authenticated) {
+		    	prop.putHTML("content_item_hrefFullPreview", "ViewImage." + viewImageExt + "?isStatic=true&url=" + imageUrlstring);
+		    } else {
+		    	/* Not authenticated : full preview URL must be the same as thumb URL */
+		    	prop.putHTML("content_item_hrefFullPreview", thumbURL);
+		    }
 		    prop.putHTML("content_item_href", imageUrlstring);
 		    prop.putHTML("content_item_target", target);
 		    prop.put("content_item_code", license);
@@ -379,7 +510,7 @@ public class yacysearchitem {
 		    /* When image content is rendered by browser :
 		     * - set smaller dimension to 100% in order to crop image on other dimension with CSS style 'overflow:hidden' on image container 
 		     * - set negative margin top behave like ViewImage which sets an offset when cutting to square */
-			if (ViewImage.isBrowserRendered(imageUrlExt)) {
+			if (ImageViewer.isBrowserRendered(imageUrlExt)) {
 				if (image.width > image.height) {
 					/* Landscape orientation */
 					itemWidth = "";
