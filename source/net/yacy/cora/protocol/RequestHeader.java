@@ -537,8 +537,14 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public void setCharacterEncoding(String env) throws UnsupportedEncodingException {
         if (_request != null) {
             _request.setCharacterEncoding(env);
+        } else {
+            // charset part of Content-Type header
+            // Example: "Content-Type: text/html; charset=ISO-8859-4"
+            // see https://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.17
+            //
+            final String mime = mime();
+            super.put(CONTENT_TYPE, mime + "; charset=" + env);
         }
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -618,7 +624,7 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         if (_request != null) {
             return _request.getProtocol();
         } else {
-            return this.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
+            return super.get(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
         }
     }
 
