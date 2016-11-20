@@ -131,7 +131,7 @@ public class Messages_p {
                     prop.putXML("mode_messages_"+count+"_key", key);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
 
-                    if ((header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".rss")) {
+                    if (header.getPathInfo().endsWith(".rss")) {
                     	// set the peer address
                     	prop.put("mode_messages_"+count+"_context", context);
 
