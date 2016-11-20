@@ -277,41 +277,31 @@ public final class HTTPDProxyHandler {
 
             final String ip   = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
 
-            DigestURL url = null;
-            try {
-                url = HeaderFramework.getRequestURL(conProp);
-                if (log.isFine()) log.fine(reqID +" GET "+ url);
-                if (log.isFinest()) log.finest(reqID +"    header: "+ requestHeader);
+            DigestURL url = (DigestURL) conProp.get(HeaderFramework.CONNECTION_PROP_DIGESTURL);
+            if (log.isFine()) log.fine(reqID +" GET "+ url.toString());
+            if (log.isFinest()) log.finest(reqID +"    header: "+ requestHeader);
 
-                //redirector
-                if (redirectorEnabled){
-                    synchronized(redirectorProcess){
-                        redirectorWriter.println(url.toNormalform(true));
-                        redirectorWriter.flush();
-                    }
-                    final String newUrl = redirectorReader.readLine();
-                    if (!newUrl.equals("")) {
-                        try {
-                            url = new DigestURL(newUrl);
-                        } catch(final MalformedURLException e){}//just keep the old one
-                    }
-                    if (log.isFinest()) log.finest(reqID +"    using redirector to "+ url);
-                    conProp.put(HeaderFramework.CONNECTION_PROP_HOST, url.getHost()+":"+url.getPort());
-                    conProp.put(HeaderFramework.CONNECTION_PROP_PATH, url.getPath());
-                    requestHeader.put(HeaderFramework.HOST, url.getHost()+":"+url.getPort());
-                    requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, url.getPath());
+            //redirector
+            if (redirectorEnabled) {
+                synchronized (redirectorProcess) {
+                    redirectorWriter.println(url.toNormalform(true));
+                    redirectorWriter.flush();
                 }
-            } catch (final MalformedURLException e) {
-                // get header info for error logging
-                final String host = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
-                final String path = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH); // always starts with leading '/'
-                final String args = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS); // may be null if no args were given
-                final String errorMsg = "ERROR: internal error with url generation: host=" +
-                                  host + ", path=" + path + ", args=" + args;
-                log.severe(errorMsg);
-                HTTPDemon.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
-                return;
+                final String newUrl = redirectorReader.readLine();
+                if (!newUrl.equals("")) {
+                    try {
+                        url = new DigestURL(newUrl);
+                    } catch (final MalformedURLException e) {
+                    }//just keep the old one
+                }
+                if (log.isFinest()) {
+                    log.finest(reqID + "    using redirector to " + url);
+                }
+                conProp.put(HeaderFramework.CONNECTION_PROP_DIGESTURL, url);
+                requestHeader.put(HeaderFramework.HOST, url.getHost() + ":" + url.getPort());
+                requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, url.getPath());
             }
+
 
             // check the blacklist
             // blacklist idea inspired by [AS]:
@@ -1049,14 +1039,13 @@ public final class HTTPDProxyHandler {
         }));
 
         // getting some connection properties
-        String orgHostPort = "80";
-        String orgHostName = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
+        DigestURL orgurl = (DigestURL) conProp.get(HeaderFramework.CONNECTION_PROP_DIGESTURL);
+        int orgHostPort = orgurl.getPort();
+        String orgHostName = orgurl.getHost();
         if (orgHostName == null) orgHostName = "unknown";
         orgHostName = orgHostName.toLowerCase();
-        orgHostPort = Integer.toString(Domains.stripToPort(orgHostName));
-        orgHostName = Domains.stripToHostName(orgHostName);
-        String orgHostPath = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH); if (orgHostPath == null) orgHostPath = "";
-        String orgHostArgs = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS); if (orgHostArgs == null) orgHostArgs = "";
+        String orgHostPath = orgurl.getPath(); if (orgHostPath == null) orgHostPath = "";
+        String orgHostArgs = orgurl.getSearchpart();; if (orgHostArgs == null) orgHostArgs = "";
         if (orgHostArgs.length() > 0) orgHostArgs = "?" + orgHostArgs;
         detailedErrorMsgMap.put("hostName", orgHostName);
 
@@ -1183,13 +1172,8 @@ public final class HTTPDProxyHandler {
         logMessage.append(' ');
 
         // URL
-        final String requestURL = (String) conProp.get(HeaderFramework.CONNECTION_PROP_URL);
-        final String requestArgs = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);
-        logMessage.append(requestURL);
-        if (requestArgs != null) {
-            logMessage.append("?")
-                           .append(requestArgs);
-        }
+        final DigestURL requestURL = (DigestURL) conProp.get(HeaderFramework.CONNECTION_PROP_DIGESTURL);
+        logMessage.append(requestURL.toString());
         logMessage.append(' ');
 
         // Rfc931
@@ -1197,9 +1181,8 @@ public final class HTTPDProxyHandler {
         logMessage.append(' ');
 
         //  Peerstatus/Peerhost
-        final String host = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
         logMessage.append("DIRECT/");
-        logMessage.append(host);
+        logMessage.append(requestURL.getHost());
         logMessage.append(' ');
 
         // Type

@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -122,7 +121,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
             return;
         }
         // 2 -  get target url
-        URL proxyurl = null;
+        DigestURL proxyurl = null;
         final String strUrl = request.getParameter("url");
         if (strUrl == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
@@ -130,9 +129,9 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
         }
 
         try {
-            proxyurl = new URL(strUrl);
+            proxyurl = new DigestURL(strUrl);
         } catch (final MalformedURLException e) {
-            proxyurl = new URL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
+            proxyurl = new DigestURL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
         }
         
         if (proxyurl == null) {
@@ -151,11 +150,8 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
         
         final HashMap<String, Object> prop = new HashMap<String, Object>();
         prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
-        prop.put(HeaderFramework.CONNECTION_PROP_PROTOCOL, proxyurl.getProtocol());
-        prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
-        prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
+        prop.put(HeaderFramework.CONNECTION_PROP_DIGESTURL, proxyurl);
         prop.put(HeaderFramework.CONNECTION_PROP_METHOD, request.getMethod()); // only needed for HTTPDeamon errormsg in case of blacklisted url
-        if (proxyurl.getQuery() != null) prop.put(HeaderFramework.CONNECTION_PROP_ARGS, proxyurl.getQuery());
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST, request);
 

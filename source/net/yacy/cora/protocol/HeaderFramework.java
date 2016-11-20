@@ -24,12 +24,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
@@ -40,10 +38,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.NumberTools;
 
 
 /**
@@ -200,7 +196,6 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String CONNECTION_PROP_METHOD = "METHOD";
     public static final String CONNECTION_PROP_PATH = "PATH";
     public static final String CONNECTION_PROP_EXT = "EXT";
-    public static final String CONNECTION_PROP_URL = "URL";
     public static final String CONNECTION_PROP_ARGS = "ARGS";
     public static final String CONNECTION_PROP_CLIENTIP = "CLIENTIP";
     public static final String CONNECTION_PROP_PERSISTENT = "PERSISTENT";
@@ -208,6 +203,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String CONNECTION_PROP_REQUEST_END = "REQUEST_END";
 
     /* PROPERTIES: Client -> Proxy */
+    public static final String CONNECTION_PROP_DIGESTURL = "URL"; // value DigestURL object
     public static final String CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST = "CLIENT_HTTPSERVLETREQUEST";
 
     /* PROPERTIES: Proxy -> Client */
@@ -563,36 +559,6 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         }
         // end header
         theHeader.append("\r\n");
-    }
-
-    /**
-     * Generate a url from Header properties
-     * @param conProp containing host, path, query and protocol (defaults to http if missing)
-     * @return url
-     * @throws MalformedURLException
-     */
-    public static DigestURL getRequestURL(final HashMap<String, Object> conProp) throws MalformedURLException {
-        String host =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
-        final String path =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
-        final String args =    (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
-        String protocol = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PROTOCOL);
-        if (protocol == null) protocol = "http";
-        //String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
-
-        int port, pos;
-        if ((pos = host.lastIndexOf(':')) < 0) {
-            port = Domains.stripToPort(protocol + "://" + host); // use stripToPort to get default ports
-        } else {
-            if (pos > host.indexOf(']')) { // check for ipv6
-                port = NumberTools.parseIntDecSubstring(host, pos + 1);
-                host = host.substring(0, pos);
-            } else {
-                port = Domains.stripToPort(protocol + "://" + host); // use stripToPort to get default ports
-            }
-        }
-
-        final DigestURL url = new DigestURL(protocol, host, port, (args == null) ? path : path + "?" + args);
-        return url;
     }
 
     /**

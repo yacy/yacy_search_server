@@ -30,14 +30,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -138,20 +136,9 @@ public final class HTTPDemon {
             }
 
             // generating the desired request url
-            String host = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
-            String path = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH); if (path == null) path = "/";
-            final String args = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);
+
             final String method = (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD);
-
-            final int port = Domains.stripToPort(host);
-            host = Domains.stripToHostName(host);
-
-            String urlString;
-            try {
-                urlString = (new DigestURL((method.equals(HeaderFramework.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
-            } catch (final MalformedURLException e) {
-                urlString = "invalid URL";
-            }
+            DigestURL url = (DigestURL) conProp.get(HeaderFramework.CONNECTION_PROP_DIGESTURL);
 
             // set rewrite values
             final serverObjects tp = new serverObjects();
@@ -159,8 +146,8 @@ public final class HTTPDemon {
             tp.put("peerName", (switchboard.peers == null) ? "" : switchboard.peers.myName());
             tp.put("errorMessageType", Integer.toString(errorcase));
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
-            tp.put("requestMethod",    (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD));
-            tp.put("requestURL",       urlString);
+            tp.put("requestMethod",    method);
+            tp.put("requestURL",       url.toString());
 
             switch (errorcase) {
                 case ERRORCASE_FILE:
