@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.yacy.cora.federate.FederateSearchManager;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
@@ -146,6 +147,17 @@ public class SolrSelectServlet extends HttpServlet {
                 QueryGoal qg = new QueryGoal(querystring);
                 StringBuilder solrQ = qg.collectionTextQuery();
                 mmsp.getMap().put(CommonParams.Q, new String[]{solrQ.toString()}); // sru patch
+                
+                // experimental p2p enrichment if flag to do so is set
+                /*
+                final String p2pQuery = querystring;
+                new Thread() {
+                    @Override
+                    public void run() {
+                        FederateSearchManager.getManager().query(p2pQuery);
+                    }
+                }.start();
+                */
             }
             String q = mmsp.get(CommonParams.Q, "");
             if (querystring.length() == 0) querystring = q;
