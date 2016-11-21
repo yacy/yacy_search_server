@@ -117,6 +117,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("      xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n");
         writer.write("      xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n");
         writer.write("<head profile=\"http://www.w3.org/2003/g/data-view\">\n");
+        writer.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
         this.writeJSLicence(writer);
         //writer.write("<link rel=\"transformation\" href=\"http://www-sop.inria.fr/acacia/soft/RDFa2RDFXML.xsl\"/>\n");
 

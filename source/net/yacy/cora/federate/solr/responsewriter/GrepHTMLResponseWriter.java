@@ -83,6 +83,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
         assert values.get("response") != null;
 
         writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n");
+        writer.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
         writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"../env/base.css\" />\n");
         writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/style.css\" />\n");
         SolrParams params = request.getOriginalParams();
