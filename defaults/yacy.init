@@ -854,7 +854,7 @@ search.result.show.snapshots = false
 # can be temporary different if search string is given with differen navigation values
 # assigning no value(s) means that no navigation is shown
 search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language
-#search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language,collections,date
+#search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language,collections,date,year,year:dates_in_content_dts:Event
 
 # max number of items displayed in search navigators
 search.navigation.maxcount=100

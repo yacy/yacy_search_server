@@ -79,8 +79,8 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
     }
 
     @Override
-    public String getQueryModifier() {
-        return "/language/";
+    public String getQueryModifier(final String key) {
+        return "/language/" + key;
     }
 
     /**
@@ -89,7 +89,7 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
      * @return display name of language
      */
     @Override
-    public String getElementDisplayName(String lng) {
+    public String getElementDisplayName(final String lng) {
         String longname = ISO639.country(lng);
         if (longname == null) {
             return lng;
@@ -105,7 +105,7 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
      * @return true if contained in modifier.language
      */
     @Override
-    public boolean modifieractive(QueryModifier modifier, String name) {
+    public boolean modifieractive(final QueryModifier modifier, final String name) {
         if (modifier.language != null && modifier.language.contains(name)) {
             return true;
         } else {

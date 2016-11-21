@@ -102,6 +102,7 @@ import net.yacy.search.navigator.NameSpaceNavigator;
 import net.yacy.search.navigator.Navigator;
 import net.yacy.search.navigator.RestrictedStringNavigator;
 import net.yacy.search.navigator.StringNavigator;
+import net.yacy.search.navigator.YearNavigator;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -293,6 +294,25 @@ public final class SearchEvent {
             }
             if (navname.contains("namespace")) {
                 this.navigatorPlugins.put("namespace", new NameSpaceNavigator("Name Space"));
+            }
+            // YearNavigator with possible def of :fieldname:title in configstring
+            if (navname.contains("year")) {
+                if ((navname.indexOf(':')) > 0) { // example "year:dates_in_content_dts:Events"
+                    String[] navfielddef = navname.split(":");
+                    try {
+                        // year:fieldname:title
+                        CollectionSchema field = CollectionSchema.valueOf(navfielddef[1]);
+                        if (navfielddef.length > 2) {
+                            this.navigatorPlugins.put(navfielddef[1], new YearNavigator(navfielddef[2], field));
+                        } else {
+                            this.navigatorPlugins.put(navfielddef[1], new YearNavigator("Year-" + navfielddef[1], field));
+                        }
+                    } catch (java.lang.IllegalArgumentException ex) {
+                        log.severe("wrong navigator name in config: \"" + navname + "\" " + ex.getMessage());
+                    }
+                } else { // "year" only use default last_modified
+                    this.navigatorPlugins.put("year", new YearNavigator("Year", CollectionSchema.last_modified));
+                }
             }
         }
 

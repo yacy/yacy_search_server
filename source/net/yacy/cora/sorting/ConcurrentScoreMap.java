@@ -212,8 +212,9 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
     }
 
     /**
-     * @param up true = asc order, fals = reverse order
-     * @return iteratior accessing the keys in ordered by score values
+     * Creates and returns a sorted view to the keys. Sortorder is the score value.
+     * @param up true = asc order, false = reverse order
+     * @return iterator accessing the keys in order of score values
      */
     @Override
     public Iterator<E> keys(final boolean up) {
@@ -222,7 +223,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         Set<E> s;
         Integer is;
         for (final Map.Entry<E, AtomicInteger> entry: this.map.entrySet()) {
-            is = new Integer(entry.getValue().intValue());
+            is = entry.getValue().intValue();
             s = m.get(is);
             if (s == null) {
                 s = new HashSet<E>();

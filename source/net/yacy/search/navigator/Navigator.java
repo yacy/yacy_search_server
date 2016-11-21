@@ -47,15 +47,15 @@ public interface Navigator extends ScoreMap<String> {
      * @param key original key as counted in this navigator
      * @return a translated display text for a key
      */
-    public String getElementDisplayName(String key) ;
+    public String getElementDisplayName(final String key) ;
 
     /**
-     * Returns the query modifier prefix. This is used (needed) within the servlet
+     * Returns the query modifier. This is used (needed) within the servlet
      * to create a new modifier for a activated (clicked) navigator item.
      *
      * @return the query modifier prefix (if any, eg. "filetype:" or "author:" )
      */
-    public String getQueryModifier() ;
+    public String getQueryModifier(final String key) ;
 
     /**
      * Add counts for this navigator from documents in the provided list.
@@ -92,7 +92,7 @@ public interface Navigator extends ScoreMap<String> {
      * @param name the navigator key to check
      * @return true if navigator key is mentioned as modifier
      */
-    public boolean modifieractive(QueryModifier modifier, String name);
+    public boolean modifieractive(final QueryModifier modifier, final String name);
 
     /**
      * @return the name of the index field, the fieldname counted in incDoc, incDoclList, incFacet

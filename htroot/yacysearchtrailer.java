@@ -444,14 +444,13 @@ public class yacysearchtrailer {
                 if (count == 0) {
                     break;
                 }
-                String encname = ((name.indexOf(' ', 0) < 0) ? name : "(" + name + ")");
+
+                rawNav = navi.getQueryModifier(name);
                 try {
-                    nav = URLEncoder.encode(navi.getQueryModifier() + encname, StandardCharsets.UTF_8.name());
+                    nav = URLEncoder.encode(rawNav, StandardCharsets.UTF_8.name());
                 } catch (UnsupportedEncodingException ex) {
                     nav = "";
                 }
-
-                rawNav = navi.getQueryModifier() + encname;
                 boolean isactive = navi.modifieractive(theSearch.query.modifier, name);
                 if (!isactive) {
                     pos++;

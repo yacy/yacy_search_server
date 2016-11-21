@@ -22,6 +22,7 @@
  */
 package net.yacy.search.navigator;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
@@ -51,35 +52,36 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
     }
 
     @Override
-    public String getElementDisplayName(String e) {
+    public String getElementDisplayName(final String e) {
         return e;
     }
 
     @Override
-    public String getQueryModifier() {
+    public String getQueryModifier(final String key) {
         String mod;
         if (field != null) {
             switch (field) {
                 case author_sxt:
-                    mod = "author:";
+                    String tmpkey = key.indexOf(' ') > 0 ? "(" + key + ")" : key; // may contain spaces
+                    mod = "author:" + tmpkey;
                     break;
                 case url_protocol_s:
-                    mod = "/";
+                    mod = "/" + key;
                     break;
                 case url_file_ext_s:
-                    mod = "filetype:";
+                    mod = "filetype:" + key;
                     break;
                 case collection_sxt:
-                    mod = "collection:";
+                    mod = "collection:" + key;
                     break;
                 case host_s:
-                    mod = "site:";
+                    mod = "site:" + key;
                     break;
                 case language_s:
-                    mod = "/language/";
+                    mod = "/language/" + key;
                     break;
                 default:
-                    mod = ":";
+                    mod = key;
             }
         } else {
             mod = "";
@@ -106,19 +108,24 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
         }
     }
 
+    /**
+     * Increase the score for the key value contained in the defined field in
+     * the doc.
+     * @param doc Solrdocument with field for the key content
+     */
     @Override
     public void incDoc(URIMetadataNode doc) {
         if (field != null) {
             Object val = doc.getFieldValue(field.getSolrFieldName());
-            if (val instanceof List) {
-                List<String> ll = (List) val;
-                for (String s : ll) {
-                    if (!s.isEmpty()) {
-                        this.inc(s);
+            if (val != null) {
+                if (val instanceof Collection) {
+                    Collection<String> ll = (Collection) val;
+                    for (String s : ll) {
+                        if (!s.isEmpty()) {
+                            this.inc(s);
+                        }
                     }
-                }
-            } else {
-                if (val != null) {
+                } else {
                     this.inc((String) val);
                 }
             }
@@ -126,12 +133,8 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
     }
 
     @Override
-    public boolean modifieractive(QueryModifier modifier, String name) {
-        if (name.indexOf(' ') < 0) {
-            return modifier.toString().contains(getQueryModifier() + name);
-        } else {
-            return modifier.toString().contains(getQueryModifier() + "(" + name + ")");
-        }
+    public boolean modifieractive(final QueryModifier modifier, final String name) {
+        return modifier.toString().contains(getQueryModifier(name));
     }
 
     @Override

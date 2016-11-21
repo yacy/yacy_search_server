@@ -37,9 +37,9 @@ public class NameSpaceNavigator extends StringNavigator implements Navigator {
     }
 
     @Override
-     public String getQueryModifier() {
-         return "inurl:";
-     }
+    public String getQueryModifier(final String key) {
+        return "inurl:" + key;
+    }
 
     @Override
     public void incDocList(List<URIMetadataNode> docs) {
