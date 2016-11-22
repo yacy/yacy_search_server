@@ -62,8 +62,11 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
         if (field != null) {
             switch (field) {
                 case author_sxt:
-                    String tmpkey = key.indexOf(' ') > 0 ? "(" + key + ")" : key; // may contain spaces
-                    mod = "author:" + tmpkey;
+                    if (key.indexOf(' ') > 0) { // may contain spaces
+                        mod = "author:(" + key + ")";
+                    } else {
+                        mod = "author:" + key;
+                    }
                     break;
                 case url_protocol_s:
                     mod = "/" + key;

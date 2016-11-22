@@ -133,7 +133,11 @@ public class YearNavigator extends StringNavigator implements Navigator {
         } else {
             years = new TreeSet(Collections.reverseOrder());
         }
-        Iterator<String> it = this.iterator();
+
+        // make sure keys with high score are included (display may be limited in size)
+        // Iterator<String> it = this.iterator();
+        Iterator<String> it = super.keys(false);
+
         while (it.hasNext()) {
             years.add(it.next());
         }
