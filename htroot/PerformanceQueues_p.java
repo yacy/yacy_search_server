@@ -29,7 +29,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.protocol.ConnectionInfo;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.rwi.IndexCell;
@@ -235,7 +234,15 @@ public class PerformanceQueues_p {
 
             // storing the new values into configfile
             sb.setConfig(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX,maxBusy);
-            //switchboard.setConfig("crawler.MinIdleThreads",minIdle);
+            
+            /*
+             * configuring the robots.txt loading pool
+             */
+            // get the current crawler pool configuration
+            maxBusy = post.getInt("Robots.txt Pool_maxActive", SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT);
+
+            // storing the new values into configfile
+            sb.setConfig(SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX, maxBusy);
 
             /*
              * configuring the http pool
@@ -278,12 +285,16 @@ public class PerformanceQueues_p {
         prop.put("pool_0_name","Crawler Pool");
         prop.put("pool_0_maxActive", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 0));
         prop.put("pool_0_numActive", sb.crawlQueues.activeWorkerEntries().size());
+        
+        prop.put("pool_1_name","Robots.txt Pool");
+        prop.put("pool_1_maxActive", sb.getConfigInt(SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX, SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT));
+        prop.put("pool_1_numActive", sb.crawlQueues.activeWorkerEntries().size());
 
-        prop.put("pool_1_name", "httpd Session Pool");
-        prop.put("pool_1_maxActive", ConnectionInfo.getServerMaxcount());
-        prop.put("pool_1_numActive", ConnectionInfo.getServerCount());
+        prop.put("pool_2_name", "httpd Session Pool");
+        prop.put("pool_2_maxActive", ConnectionInfo.getServerMaxcount());
+        prop.put("pool_2_numActive", ConnectionInfo.getServerCount());
 
-        prop.put("pool", "2");
+        prop.put("pool", "3");
 
         // parse initialization memory settings
         final String Xmx = sb.getConfig("javastart_Xmx", "Xmx600m").substring(3);

@@ -1087,6 +1087,9 @@ thumbnailProgram =
 # - wiki      : the wiki-page
 httpd.robots.txt = locked,dirs,bookmarks,network,news,status,profile
 
+# maximum number of robots.txt loading threads
+robots.txt.MaxActiveThreads = 200
+
 # class to use for parsing wikicode
 wikiParser.class = de.anomic.data.wikiCode
 

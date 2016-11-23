@@ -870,7 +870,8 @@ public final class Switchboard extends serverSwitch {
         
         // load the robots.txt db
         this.log.config("Initializing robots.txt DB");
-        this.robots = new RobotsTxt(this.tables, this.loader);
+		this.robots = new RobotsTxt(this.tables, this.loader,
+				this.getConfigInt(SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX, SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT));
         try {
             this.log.config("Loaded robots.txt DB: " + this.robots.size() + " entries");
         } catch (final IOException e) {
@@ -1868,6 +1869,7 @@ public final class Switchboard extends serverSwitch {
         this.crawlStacker.announceClose();
         this.crawlStacker.close();
         this.crawlQueues.close();
+        this.robots.close();
         this.indexingDocumentProcessor.shutdown();
         this.indexingCondensementProcessor.shutdown();
         this.indexingAnalysisProcessor.shutdown();

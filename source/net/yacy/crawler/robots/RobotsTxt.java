@@ -31,11 +31,16 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -49,8 +54,9 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.BEncodedHeap;
-import net.yacy.repository.LoaderDispatcher;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.repository.LoaderDispatcher;
 
 public class RobotsTxt {
 
@@ -64,12 +70,24 @@ public class RobotsTxt {
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
     private final WorkTables tables;
     private final LoaderDispatcher loader;
+    /** Thread pool used to launch concurrent tasks */
+	private ThreadPoolExecutor threadPool; 
 
     private static class DomSync {
     	private DomSync() {}
     }
 
-    public RobotsTxt(final WorkTables worktables, LoaderDispatcher loader) {
+    /**
+     * 
+     * @param worktables
+     * @param loader
+     * @param maxConcurrentTheads maximum active threads this instance is allowed to run for its concurrent tasks
+     */
+    public RobotsTxt(final WorkTables worktables, LoaderDispatcher loader, final int maxActiveTheads) {
+    	this.threadPool = new ThreadPoolExecutor(maxActiveTheads, maxActiveTheads,
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(),
+                new NamePrefixThreadFactory(RobotsTxt.class.getSimpleName()));
         this.syncObjects = new ConcurrentHashMap<String, DomSync>();
         this.tables = worktables;
         this.loader = loader;
@@ -88,6 +106,13 @@ public class RobotsTxt {
         log.info("clearing robots table");
         this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).clear();
         this.syncObjects.clear();
+    }
+    
+    public void close() {
+    	/* Shutdown all active robots.txt loading threads */
+    	if(this.threadPool != null) {
+    		this.threadPool.shutdownNow();
+    	}
     }
 
     public int size() throws IOException {
@@ -246,7 +271,19 @@ public class RobotsTxt {
                 }
             }
         };
-        if (concurrent) t.start(); else t.run();
+        if (concurrent) {
+        	this.threadPool.execute(t);
+        } else {
+        	t.run();
+        }
+    }
+    
+    /**
+     * @return the approximate number of threads that are actively
+     * executing robots.txt loading tasks
+     */
+    public int getActiveThreads() {
+    	return this.threadPool != null ? this.threadPool.getActiveCount() : 0;
     }
 
     private void processOldEntry(RobotsTxtEntry robotsTxt4Host, DigestURL robotsURL, BEncodedHeap robotsTable) {
@@ -374,45 +411,59 @@ public class RobotsTxt {
         }
     }
     
-    public Collection<CheckEntry> massCrawlCheck(final Collection<DigestURL> rootURLs, final ClientIdentification.Agent userAgent, final int concurrency) {
-        // put the rootURLs into a blocking queue as input for concurrent computation
-        final BlockingQueue<DigestURL> in = new LinkedBlockingQueue<DigestURL>();
-        try {
-            for (DigestURL u: rootURLs) in.put(u);
-            for (int i = 0; i < concurrency; i++) in.put(DigestURL.POISON);
-        } catch (InterruptedException e) {}
-        final BlockingQueue<CheckEntry> out = new LinkedBlockingQueue<CheckEntry>();
-        final Thread[] threads = new Thread[concurrency];
-        for (int i = 0; i < concurrency; i++) {
-            threads[i] = new Thread("RobotsTxt.massCrawlCheck-" + i) {
-                @Override
-                public void run() {
-                    DigestURL u;
-                    try {
-                        while ((u = in.take()) != DigestURL.POISON) {
-                            // try to load the robots
-                            RobotsTxtEntry robotsEntry = getEntry(u, userAgent);
-                            boolean robotsAllowed = robotsEntry == null ? true : !robotsEntry.isDisallowed(u);
-							if (robotsAllowed) {
-								try {
-									Request request = loader.request(u, true, false);
-									Response response = loader.load(request, CacheStrategy.NOCACHE,
-											BlacklistType.CRAWLER, userAgent);
-									out.put(new CheckEntry(u, robotsEntry, response, null));
-								} catch (final IOException e) {
-									out.put(new CheckEntry(u, robotsEntry, null, "error response: " + e.getMessage()));
-								}
-							} else {
-								out.put(new CheckEntry(u, robotsEntry, null, null));
-							}
-                        }
-                    } catch (InterruptedException e) {}
-                }
-            };
-            threads[i].start();
+    /**
+     * A unit task to load a robots.txt entry
+     */
+    private class CrawlCheckTask implements Callable<CheckEntry> {
+    	
+    	private final DigestURL url;
+    	private final ClientIdentification.Agent userAgent;
+    	
+    	public CrawlCheckTask(final DigestURL url, final ClientIdentification.Agent userAgent) {
+    		this.url = url;
+    		this.userAgent = userAgent;
+    	}
+
+		@Override
+		public CheckEntry call() throws Exception {
+            // try to load the robots
+            RobotsTxtEntry robotsEntry = getEntry(this.url, this.userAgent);
+            boolean robotsAllowed = robotsEntry == null ? true : !robotsEntry.isDisallowed(this.url);
+			if (robotsAllowed) {
+				try {
+					Request request = loader.request(this.url, true, false);
+					Response response = loader.load(request, CacheStrategy.NOCACHE,
+							BlacklistType.CRAWLER, userAgent);
+					return new CheckEntry(this.url, robotsEntry, response, null);
+				} catch (final IOException e) {
+					return new CheckEntry(this.url, robotsEntry, null, "error response: " + e.getMessage());
+				}
+			}
+			return new CheckEntry(this.url, robotsEntry, null, null);
+		}
+
+    	
+    }
+    
+    public Collection<CheckEntry> massCrawlCheck(final Collection<DigestURL> rootURLs, final ClientIdentification.Agent userAgent) {
+        final List<Future<CheckEntry>> futures = new ArrayList<>();
+        	for (DigestURL u: rootURLs) {
+        		futures.add(this.threadPool.submit(new CrawlCheckTask(u, userAgent)));
+        	}
+        final Collection<CheckEntry> results = new ArrayList<>();
+        /* Now collect the results concurrently loaded */
+        for(Future<CheckEntry> future: futures) {
+        	try {
+				results.add(future.get());
+			} catch (InterruptedException e) {
+				log.warn("massCrawlCheck was interrupted before retrieving all results.");
+				break;
+			} catch (ExecutionException e) {
+				/* A robots.txt loading failed : let's continue and try to get the next result
+				 * (most of time this should not happen, as Exceptions are caught inside the concurrent task) */
+				continue;
+			}
         }
-        // wait for termiation
-        try {for (Thread t: threads) t.join();} catch (InterruptedException e1) {}
-        return out;
+        return results;
     }
 }

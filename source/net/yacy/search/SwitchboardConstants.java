@@ -342,6 +342,10 @@ public final class SwitchboardConstants {
     public static final String HTTPC_NAME_CACHE_CACHING_PATTERNS_NO = "httpc.nameCacheNoCachingPatterns";
     public static final String ROBOTS_TXT                       = "httpd.robots.txt";
     public static final String ROBOTS_TXT_DEFAULT               = RobotsTxtConfig.LOCKED + "," + RobotsTxtConfig.DIRS;
+    /** Key of the setting configuring how many active robots.txt loading threads may be running on the same time at max */
+    public static final String ROBOTS_TXT_THREADS_ACTIVE_MAX       = "robots.txt.MaxActiveThreads";
+    /** Default value of the setting configuring how many active robots.txt loading threads may be running on the same time at max */
+    public static final int ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT       = 200;
 
     /**
      * <p><code>public static final String <strong>BLACKLIST_CLASS_DEFAULT</strong> = "de.anomic.plasma.urlPattern.defaultURLPattern"</code></p>

@@ -42,7 +42,7 @@ public class HostBalancerTest {
         assertEquals("After clear", 0, hb.size());
 
         WorkTables wt = new WorkTables(datadir);
-        RobotsTxt rob = new RobotsTxt(wt, null);
+        RobotsTxt rob = new RobotsTxt(wt, null, 10);
 
         String res = hb.push(req, null, rob); // push url
         assertNull(res); // should have no error text
