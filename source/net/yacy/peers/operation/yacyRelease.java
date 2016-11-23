@@ -231,11 +231,14 @@ public final class yacyRelease extends yacyVersion {
         // parsing the content and filtering+parsing links
         // returns the version info if successful, null otherwise
         Document scraper;
+        final String initialThreadName = Thread.currentThread().getName();
         try {
             final DigestURL uri = location.getLocationURL();
             Thread.currentThread().setName("allReleaseFrom - host " + uri.getHost()); // makes it more easy to see which release blocks process in thread dump
             scraper = Switchboard.getSwitchboard().loader.loadDocument(uri, CacheStrategy.NOCACHE, null, ClientIdentification.yacyInternetCrawlerAgent);
         } catch (final IOException e) {
+        	/* Restore the thread initial name */
+        	Thread.currentThread().setName(initialThreadName);
             return null;
         }
 
@@ -260,6 +263,9 @@ public final class yacyRelease extends yacyVersion {
             }
         }
         Switchboard.getSwitchboard().setConfig("update.time.lookup", System.currentTimeMillis());
+        
+    	/* Restore the thread initial name */
+    	Thread.currentThread().setName(initialThreadName);
         return new DevAndMainVersions(devReleases, mainReleases);
     }
 

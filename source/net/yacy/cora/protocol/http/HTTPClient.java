@@ -677,6 +677,7 @@ public class HTTPClient {
 	        assert !hrequest.expectContinue();
 	    }
 
+	    final String initialThreadName = Thread.currentThread().getName();
 	    Thread.currentThread().setName("HTTPClient-" + httpUriRequest.getURI());
         final long time = System.currentTimeMillis();
 	    try {
@@ -711,6 +712,9 @@ public class HTTPClient {
             throw new IOException("Client can't execute: "
             		+ (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
             		+ " duration=" + Long.toString(System.currentTimeMillis() - time) + " for url " + httpUriRequest.getURI().toString());
+        } finally {
+        	/* Restore the thread initial name */
+        	Thread.currentThread().setName(initialThreadName);
         }
     }
 

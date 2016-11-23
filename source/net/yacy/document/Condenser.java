@@ -71,7 +71,9 @@ public final class Condenser extends Tokenizer {
             ) {
         super(document.dc_source(), indexText ? document.getTextString() : "", meaningLib, doAutotagging, scraper);
         
+        final String initialThreadName = Thread.currentThread().getName();
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
+        
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
         this.dates_in_content = new LinkedHashSet<Date>();
@@ -208,6 +210,9 @@ public final class Condenser extends Tokenizer {
         this.fuzzy_signature = EnhancedTextProfileSignature.getSignatureLong(fuzzySignatureFactory);
         this.fuzzy_signature_text = fuzzySignatureFactory.getSignatureText().toString();
         this.exact_signature = EnhancedTextProfileSignature.getSignatureLong(text);
+
+        /* Restore the current thread initial name */
+        Thread.currentThread().setName(initialThreadName);
     }
 
     private void insertTextToWords(
