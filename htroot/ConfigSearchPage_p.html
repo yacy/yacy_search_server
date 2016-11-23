@@ -67,22 +67,36 @@
                 <!-- the sidebar navigation -->
                 <div>
                   <fieldset>
-                      <table>
+                    <table>
+                      <tr>
+                        <td><input type="checkbox" name="search.navigation.protocol" value="true" #(search.navigation.protocol)#::checked="checked" #(/search.navigation.protocol)# /></td>
+                        <td>
+                          <p class="navbutton"></p>
+                          <div class="btn-group">
+                            <span><button class="btn btn-default btn-xs">http</button><button class="btn btn-default btn-xs">https</button><button class="btn btn-default btn-xs">&nbsp;ftp&nbsp;</button><button class="btn btn-default btn-xs">&nbsp;smb&nbsp;</button><button class="btn btn-default btn-xs">file</button>
+                          </div>
+                        </td>
+                      </tr>                       
                       <tr>
                         <td><input type="checkbox" name="search.navigation.topics" value="true" #(search.navigation.topics)#::checked="checked" #(/search.navigation.topics)# /></td>
                         <td>
                           <div style="padding-left:15px;  padding-bottom:10px; width: 100%;">
                             <div id="tagcloud" style="text-align:justify">
-                              <a href="#" target="LayouTest" style="text-decoration: none;">Tag</a>
-                              <a href="#" target="LayouTest" style="text-decoration: none;">Topics</a>
-                              <a href="#" target="LayouTest" style="text-decoration: none;">Cloud</a>
-                              <a href="#" target="LayouTest" style="text-decoration: none;">Topics</a>
-                              <a href="#" target="LayouTest" style="text-decoration: none;">Cloud</a>
-                              <a href="#" target="LayouTest" style="text-decoration: none;">Tag</a>
-                              <a href="#" target="LayouTest" style="text-decoration: none;">Cloud</a>
-                              <a href="#" target="LayouTest" style="text-decoration: none;">Topics</a>
-                              <a href="#" target="LayouTest" style="text-decoration: none;">Tag</a>
-                              <a href="#" target="LayouTest" style="text-decoration: none;">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 10px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 9px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 10px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 8px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 11px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 12px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 13px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 15px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 14px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 12px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 8px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 10px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 9px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 8px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 11px">Tag</a>                              
                             </div>
                             <script type="text/javascript" charset="utf-8">
           $.fn.tagcloud.defaults = {
@@ -102,12 +116,6 @@
                                 <li><h3>Location</h3></li>
                           </ul></td>
                       </tr>                          
-                      <tr>
-                        <td><input type="checkbox" name="search.navigation.protocol" value="true" #(search.navigation.protocol)#::checked="checked" #(/search.navigation.protocol)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarProtocols" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Protocol</h3></li>
-                          </ul></td>
-                      </tr>
                       <tr>
                         <td><input type="checkbox" name="search.navigation.filetype" value="true" #(search.navigation.filetype)#::checked="checked" #(/search.navigation.filetype)# /></td>
                         <td><ul class="nav nav-sidebar menugroup" id="sidebarFiletypes" style="padding-left:15px; padding-right:10px;">
