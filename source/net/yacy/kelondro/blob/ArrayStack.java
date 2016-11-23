@@ -879,7 +879,8 @@ public class ArrayStack implements BLOB {
         assert mem() <= m : "m = " + m + ", mem() = " + mem();
     }
 
-    private static final ExecutorService DELETE_EXECUTOR = Executors.newCachedThreadPool();
+	private static final ExecutorService DELETE_EXECUTOR = Executors
+			.newCachedThreadPool(new NamePrefixThreadFactory(ArrayStack.class.getSimpleName() + ".DELETE_EXECUTOR"));
 
     /**
      * close the BLOB

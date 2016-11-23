@@ -60,6 +60,7 @@ import net.yacy.cora.storage.KeyList;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
@@ -795,7 +796,8 @@ public class Domains {
         cacheHit_Insert++;
     }
 
-    final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newCachedThreadPool());
+	final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(
+			Executors.newCachedThreadPool(new NamePrefixThreadFactory("InetAddress.getByName")));
 
     /**
      * strip off any parts of an url, address string (containing host/ip:port) or raw IPs/Hosts,

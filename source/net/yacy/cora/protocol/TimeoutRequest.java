@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import net.yacy.cora.util.ConcurrentLog;
-
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 
@@ -76,7 +76,8 @@ public class TimeoutRequest<E> {
             throw new ExecutionException(e1);
         }
         }
-        final ExecutorService service = Executors.newSingleThreadExecutor();
+		final ExecutorService service = Executors
+				.newSingleThreadExecutor(new NamePrefixThreadFactory("TimeoutRequest"));
         try {
             final Future<E> taskFuture = service.submit(this.call);
             final Runnable t = new Runnable() {

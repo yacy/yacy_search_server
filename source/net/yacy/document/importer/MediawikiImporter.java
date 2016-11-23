@@ -64,6 +64,7 @@ import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.content.SurrogateReader;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
@@ -169,7 +170,8 @@ public class MediawikiImporter extends Thread implements Importer {
             boolean page = false, text = false;
             String title = null;
             final BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
-            final ExecutorService service = Executors.newCachedThreadPool();
+			final ExecutorService service = Executors.newCachedThreadPool(
+					new NamePrefixThreadFactory(MediawikiImporter.class.getSimpleName() + ".convertConsumer"));
             final convertConsumer[] consumers = new convertConsumer[threads];
             final Future<?>[] consumerResults = (Future<?>[]) Array.newInstance(Future.class, threads);
             for (int i = 0; i < threads; i++) {
@@ -326,7 +328,8 @@ public class MediawikiImporter extends Thread implements Importer {
         final PositionAwareReader in = new PositionAwareReader(dumpFile);
         final indexProducer producer = new indexProducer(100, idxFromMediawikiXML(dumpFile));
         final wikiConsumer consumer = new wikiConsumer(100, producer);
-        final ExecutorService service = Executors.newCachedThreadPool();
+		final ExecutorService service = Executors.newCachedThreadPool(
+				new NamePrefixThreadFactory(MediawikiImporter.class.getSimpleName() + ".createIndex"));
         final Future<Integer> producerResult = service.submit(consumer);
         final Future<Integer> consumerResult = service.submit(producer);
         service.shutdown();

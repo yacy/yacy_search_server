@@ -72,6 +72,7 @@ import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.UserDB.Entry;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.operation.yacyBuildProperties;
@@ -151,7 +152,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
     protected static final int SIZE_FILE_THRESHOLD = 1024 * 1024 * 1024; // 1GB is a lot but appropriate for multi-document pushed using the push_p.json servlet
     protected static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
-    private final static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newCachedThreadPool());
+	private final static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newCachedThreadPool(
+			new NamePrefixThreadFactory(YaCyDefaultServlet.class.getSimpleName() + ".timeLimiter")));
     /* ------------------------------------------------------------ */
     @Override
     public void init() throws UnavailableException {
