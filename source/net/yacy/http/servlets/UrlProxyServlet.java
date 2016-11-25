@@ -151,7 +151,6 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
         final HashMap<String, Object> prop = new HashMap<String, Object>();
         prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
         prop.put(HeaderFramework.CONNECTION_PROP_DIGESTURL, proxyurl);
-        prop.put(HeaderFramework.CONNECTION_PROP_METHOD, request.getMethod()); // only needed for HTTPDeamon errormsg in case of blacklisted url
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST, request);
 

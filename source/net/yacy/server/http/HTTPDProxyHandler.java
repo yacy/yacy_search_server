@@ -1167,7 +1167,8 @@ public final class HTTPDProxyHandler {
         logMessage.append(' ');
 
         // Method
-        final String requestMethod = (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD);
+        HttpServletRequest origrequest = (HttpServletRequest) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST);
+        final String requestMethod = origrequest.getMethod();
         logMessage.append(requestMethod);
         logMessage.append(' ');
 
