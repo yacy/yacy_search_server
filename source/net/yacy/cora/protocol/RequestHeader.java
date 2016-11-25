@@ -221,10 +221,8 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public String getAuthType() {
         if (_request != null) {
             return _request.getAuthType();
-        } else if (super.containsKey(RequestHeader.AUTHORIZATION)) {
-            return HttpServletRequest.BASIC_AUTH; // legacy supported only BASIC
         }
-        return null;
+        return null; // according to spec return only value if authenticated
     }
 
     @Override
@@ -469,8 +467,9 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public void login(String username, String password) throws ServletException {
         if (_request != null) {
             _request.login(username, password);
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
