@@ -59,10 +59,9 @@ public class CookieTest_p {
                 e = it.next();
                 if ("Cookie".equals(e.getKey())) {
                     final String cookies[] = CommonPattern.SEMICOLON.split(e.getValue());
-                    for(final String cookie : cookies)
-                    {
+                    for (final String cookie : cookies) {
                         final String nameValue[] = cookie.split("=");
-                        outgoingHeader.setCookie(nameValue[0].trim(),nameValue.length>1 ? (nameValue[1].trim()) : "","Thu, 01-Jan-99 00:00:01 GMT");
+                        outgoingHeader.setCookie(nameValue[0].trim(), nameValue.length > 1 ? (nameValue[1].trim()) : "", 0);
                     }
                 }
             }

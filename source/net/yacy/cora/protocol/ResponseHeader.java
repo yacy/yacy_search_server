@@ -20,10 +20,12 @@
 
 package net.yacy.cora.protocol;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
+import javax.servlet.http.Cookie;
 
 import org.apache.http.Header;
 
@@ -139,103 +141,47 @@ public class ResponseHeader extends HeaderFramework {
      * Holds header properties
      */
     //Since properties such as cookies can be multiple, we cannot use HashMap here. We have to use Vector.
-    private Vector<Entry> headerProps = new Vector<Entry>();
-
-    /**
-     * Implementation of Map.Entry. Structure that hold two values - exactly what we need!
-     */
-    public static class Entry implements Map.Entry<String, String> {
-        private final String k;
-        private String v;
-        Entry(final String k, final String v) {
-            this.k = k;
-            this.v = v;
-        }
-        @Override
-        public String getKey() {
-            return this.k;
-        }
-        @Override
-        public String getValue() {
-            return this.v;
-        }
-        @Override
-        public String setValue(final String v) {
-            final String r = this.v;
-            this.v = v;
-            return r;
-        }
-    }
+    private List<Cookie> cookieStore; // init on first access
 
     /**
      * Sets Cookie on the client machine.
      *
      * @param name Cookie name
      * @param value Cookie value
-     * @param expires when should this cookie be autmatically deleted. If <b>null</b> - cookie will stay forever
+     * @param maxage time to live in seconds, none negative number, according to https://tools.ietf.org/html/rfc2109, 0=discard in https://tools.ietf.org/html/rfc2965
      * @param path Path the cookie belongs to. Default - "/". Can be <b>null</b>.
      * @param domain Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
      * @param secure If true cookie will be send only over safe connection such as https
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCookie(final String name, final String value, final String expires, final String path, final String domain, final boolean secure)
+    public void setCookie(final String name, final String value, final Integer maxage, final String path, final String domain, final boolean secure)
     {
          /*
          * TODO:Here every value can be validated for correctness if needed
          * For example semicolon should be not in any of the values
          * However an exception in this case would be an overhead IMHO.
          */
-        String cookieString = name + "=" + value + ";";
-        if (expires != null) cookieString += " expires=" + expires + ";";
-        if (path != null) cookieString += " path=" + path + ";";
-        if (domain != null) cookieString += " domain=" + domain + ";";
-        if (secure) cookieString += " secure;";
-        this.headerProps.add(new Entry("Set-Cookie", cookieString));
+        if (this.cookieStore == null) this.cookieStore = new ArrayList<Cookie>();
+        Cookie c = new Cookie (name, value);
+        if (maxage != null) c.setMaxAge(maxage);
+        if (path != null) c.setPath(path);
+        if (domain != null) c.setDomain(domain);
+        if (secure) c.setSecure(secure);
+        this.cookieStore.add(c);
     }
     /**
      * Sets Cookie on the client machine.
      *
      * @param name Cookie name
      * @param value Cookie value
-     * @param expires when should this cookie be automatically deleted. If <b>null</b> - cookie will stay forever
-     * @param path Path the cookie belongs to. Default - "/". Can be <b>null</b>.
-     * @param domain Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
+     * @param maxage time to live in seconds, none negative number, according to https://tools.ietf.org/html/rfc2109, 0=discard in https://tools.ietf.org/html/rfc2965
      *
      * Note: this cookie will be sent over each connection independent if it is safe connection or not.
      * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
      */
-    public void setCookie(final String name, final String value, final String expires, final String path, final String domain)
+    public void setCookie(final String name, final String value, final Integer maxage)
     {
-        setCookie( name,  value,  expires,  path,  domain, false);
-    }
-    /**
-     * Sets Cookie on the client machine.
-     *
-     * @param name Cookie name
-     * @param value Cookie value
-     * @param expires when should this cookie be automatically deleted. If <b>null</b> - cookie will stay forever
-     * @param path Path the cookie belongs to. Default - "/". Can be <b>null</b>.
-     *
-     * Note: this cookie will be sent over each connection independent if it is safe connection or not.
-     * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
-     */
-    public void setCookie(final String name, final String value, final String expires, final String path)
-    {
-        setCookie( name,  value,  expires,  path,  null, false);
-    }
-    /**
-     * Sets Cookie on the client machine.
-     *
-     * @param name Cookie name
-     * @param value Cookie value
-     * @param expires when should this cookie be automatically deleted. If <b>null</b> - cookie will stay forever
-     *
-     * Note: this cookie will be sent over each connection independent if it is safe connection or not.
-     * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
-     */
-    public void setCookie(final String name, final String value, final String expires)
-    {
-        setCookie( name,  value,  expires,  null,  null, false);
+        setCookie( name,  value,  maxage,  null,  null, false);
     }
     /**
      * Sets Cookie on the client machine.
@@ -251,8 +197,8 @@ public class ResponseHeader extends HeaderFramework {
         setCookie( name,  value,  null,  null,  null, false);
     }
 
-    public Vector<Entry> getAdditionalHeaderProperties() {
-        return this.headerProps;
+    public List<Cookie> getCookiesEntries() {
+        return this.cookieStore;
     }
 
     /*

@@ -54,6 +54,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.UnavailableException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -1001,10 +1002,16 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns = new servletProperties();
             } else if (tmp instanceof servletProperties) {
                 templatePatterns = (servletProperties) tmp;
+                // handle login cookie
+                if (templatePatterns.getOutgoingHeader() != null && templatePatterns.getOutgoingHeader().getCookiesEntries() != null) {
+                    for (Cookie c : templatePatterns.getOutgoingHeader().getCookiesEntries()) {
+                        response.addCookie(c);
+                    }
+                }
             } else {
                 templatePatterns = new servletProperties((serverObjects) tmp);
             }
-     
+
             // handle YaCy http commands
             // handle action auth: check if the servlets requests authentication
             if (templatePatterns.containsKey(serverObjects.ACTION_AUTHENTICATE)) {

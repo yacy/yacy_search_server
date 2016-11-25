@@ -34,6 +34,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -135,9 +137,8 @@ public final class HTTPDemon {
                 else httpStatusText = "Unknown";
             }
 
-            // generating the desired request url
-
-            final String method = (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD);
+            HttpServletRequest origrequest = (HttpServletRequest) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST);
+            final String method = origrequest.getMethod();
             DigestURL url = (DigestURL) conProp.get(HeaderFramework.CONNECTION_PROP_DIGESTURL);
 
             // set rewrite values
@@ -272,15 +273,13 @@ public final class HTTPDemon {
                     responseHeader.put(HeaderFramework.CONTENT_LENGTH, "0");
 
                 //read custom headers
-                final Iterator<ResponseHeader.Entry> it = responseHeader.getAdditionalHeaderProperties().iterator();
-                ResponseHeader.Entry e;
-                while(it.hasNext()) {
+                if (responseHeader.getContentType() != null) {
+                    for (Cookie c : responseHeader.getCookiesEntries()) {
                         //Append user properties to the main String
                         //TODO: Should we check for user properites. What if they intersect properties that are already in header?
-                    e = it.next();
-                    header.append(e.getKey()).append(": ").append(e.getValue()).append("\r\n");
+                        header.append(HeaderFramework.SET_COOKIE+": "+c.getName()).append("=").append(c.getValue()).append(";\r\n");
+                    }
                 }
-
                 // write header
                 final Iterator<String> i = responseHeader.keySet().iterator();
                 String key;
