@@ -273,7 +273,7 @@ public final class HTTPDemon {
                     responseHeader.put(HeaderFramework.CONTENT_LENGTH, "0");
 
                 //read custom headers
-                if (responseHeader.getContentType() != null) {
+                if (responseHeader.getCookiesEntries() != null) {
                     for (Cookie c : responseHeader.getCookiesEntries()) {
                         //Append user properties to the main String
                         //TODO: Should we check for user properites. What if they intersect properties that are already in header?
