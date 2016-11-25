@@ -288,7 +288,7 @@ public class HostBrowser {
                         int c = 0; for (Entry<Long, Integer> entry: statMap.entrySet()) {
                             prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_key", entry.getKey());
                             prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_count", entry.getValue());
-                            prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_a", "http://localhost:" + sb.getConfigInt("port", 8090) + "/solr/collection1/select?q=host_s:" + host + " AND " + facetentry.getKey() + ":" + entry.getKey() + "&defType=edismax&start=0&rows=1000&fl=sku,crawldepth_i");
+                            prop.put("hostanalysis_facets_" + fc + "_facet_" + c + "_a", "solr/collection1/select?q=host_s:" + host + " AND " + facetentry.getKey() + ":" + entry.getKey() + "&defType=edismax&start=0&rows=1000&fl=sku,crawldepth_i");
                             c++;
                         }
                         prop.put("hostanalysis_facets_" + fc + "_facet", c);

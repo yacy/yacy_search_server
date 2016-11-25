@@ -93,7 +93,7 @@ public class Crawler_p {
 
         Segment segment = sb.index;
         Fulltext fulltext = segment.fulltext();
-        String localSolr = "/solr/select?core=collection1&q=*:*&start=0&rows=3";
+        String localSolr = "solr/select?core=collection1&q=*:*&start=0&rows=3";
         String remoteSolr = env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, localSolr);
         if (!remoteSolr.endsWith("/")) remoteSolr = remoteSolr + "/";
         prop.put("urlpublictextSolrURL", fulltext.connectedLocalSolr() ? localSolr : remoteSolr + "collection1/select?&q=*:*&start=0&rows=3");
