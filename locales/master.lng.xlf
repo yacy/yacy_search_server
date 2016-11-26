@@ -843,6 +843,9 @@
     <trans-unit id="6ad966f5" xml:space="preserve" approved="no" translate="yes">
        <source>Username too short. Username must be &amp;gt;= 4 Characters.</source>
     </trans-unit>
+    <trans-unit id="1bf77769" xml:space="preserve" approved="no" translate="yes">
+       <source>Username already used (not allowed).</source>
+    </trans-unit>
     <trans-unit id="e79780cf" xml:space="preserve" approved="no" translate="yes">
        <source>No password is set for the administration account.</source>
     </trans-unit>

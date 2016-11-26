@@ -185,7 +185,11 @@ public class ConfigAccounts_p {
                 prop.put("error", "2"); //PW does not match
                 return prop;
             }
-
+            // do not allow same username as staticadmin
+            if (username.equalsIgnoreCase(sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,"admin"))) {
+                prop.put("error", "4");
+                return prop;
+            }
             final String firstName = post.get("firstname");
             final String lastName = post.get("lastname");
             final String address = post.get("address");
