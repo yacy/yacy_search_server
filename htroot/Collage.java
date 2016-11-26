@@ -66,7 +66,6 @@ public class Collage {
         prop.put("emb", (embed) ? "0" : "1");
 
         if (nextOrigin != null) {
-        	System.out.println("NEXTORIGIN=" + nextOrigin.imageEntry.url().toNormalform(true));
             if (fifoSize == 0 || origins[fifoPos] != nextOrigin) {
                 fifoPos = fifoPos + 1 >= fifoMax ? 0 : fifoPos + 1;
                 fifoSize = fifoSize + 1 > fifoMax ? fifoMax : fifoSize + 1;
@@ -100,7 +99,7 @@ public class Collage {
 
                 final long z = imgZIndex[i];
                 prop.put("imgurl_list_" + c + "_url",
-                       "<a href=\"" + baseURL.toNormalform(true) + "\">"
+                       "<a href=\"" + baseURL.toNormalform(true) + "\" class=\"forceNoExternalIcon\">"
                        + "<img src=\"" + imageURL.toNormalform(true) + "\" "
                        + "style=\""
                        + ((imgWidth[i] == 0 || imgHeight[i] == 0) ? "" : "width:" + imgWidth[i] + "px;height:" + imgHeight[i] + "px;")
