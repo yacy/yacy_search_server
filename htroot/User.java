@@ -54,7 +54,7 @@ public class User{
         prop.put("logged-in_username", "");
         prop.put("logged-in_returnto", "");
         //identified via HTTPPassword
-        entry=sb.userDB.proxyAuth(requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
+        entry=sb.userDB.proxyAuth(requestHeader.get(RequestHeader.AUTHORIZATION));
         if(entry != null){
         	prop.put("logged-in_identified-by", "1");
         //try via cookie
@@ -113,13 +113,9 @@ public class User{
             }
 
             String cookie="";
-            if(entry != null)
+            if(entry != null) {
                 //set a random token in a cookie
                 cookie=sb.userDB.getCookie(entry);
-            else if(staticAdmin)
-                cookie=sb.userDB.getAdminCookie();
-
-            if(entry != null || staticAdmin){
                 final ResponseHeader outgoingHeader=new ResponseHeader(200);
                 outgoingHeader.setCookie("login", cookie);
                 prop.setOutgoingHeader(outgoingHeader);
@@ -164,8 +160,6 @@ public class User{
             if(entry != null){
                 final String ip = requestHeader.getRemoteAddr();
                 entry.logout((ip != null ? ip : "xxxxxx"), UserDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
-            }else{
-                sb.userDB.adminLogout(UserDB.getLoginToken(requestHeader.getHeaderCookies()));
             }
             try {
                 requestHeader.logout(); // servlet container session logout

@@ -52,7 +52,14 @@ import net.yacy.kelondro.util.kelondroException;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
-
+/**
+ * Holds details of users that can login to YaCy, their rights and credentials.
+ * Caches succesfull login, holding cookie and/or ip information.
+ *
+ * In addition a systemadmin (static admin) account is available by default,
+ * included in the global Switchboard configuration.
+ *
+ */
 public final class UserDB {
     
     private static final int USERNAME_MIN_LENGTH = 4;
@@ -60,7 +67,7 @@ public final class UserDB {
     private MapHeap userTable;
     private final File userTableFile;
     private final Map<String, String> ipUsers = new HashMap<String, String>();
-    private final Map<String, Object> cookieUsers = new HashMap<String, Object>();
+    private final Map<String, Entry> cookieUsers = new HashMap<String, Entry>(); // mapping to identify user by a login cookie "login=<token>"
     
     public UserDB(final File userTableFile) throws IOException {
         this.userTableFile = userTableFile;
@@ -249,35 +256,16 @@ public final class UserDB {
     public Entry cookieAuth(final String cookieString){
         final String token = getLoginToken(cookieString);
         if (cookieUsers.containsKey(token)) {
-            final Object entry = cookieUsers.get(token);
-            if (entry instanceof Entry) //String would mean static Admin
-                return (Entry)entry;
+            final Entry entry = cookieUsers.get(token);
+            return entry;
         }
         return null;
-    }
-    
-    public boolean cookieAdminAuth(final String cookieString){
-        final String token = getLoginToken(cookieString);
-        if (cookieUsers.containsKey(token)) {
-            final Object entry = cookieUsers.get(token);
-            if (entry instanceof String && entry.equals("admin")) {
-                return true;
-            }
-        }
-        return false;
     }
 
     public String getCookie(final Entry entry){
         final Random r = new Random();
         final String token = Long.toString(Math.abs(r.nextLong()), 36);
         cookieUsers.put(token, entry);
-        return token;
-    }
-
-    public String getAdminCookie(){
-        final Random r = new Random();
-        final String token = Long.toString(Math.abs(r.nextLong()), 36);
-        cookieUsers.put(token, "admin");
         return token;
     }
     
@@ -290,13 +278,6 @@ public final class UserDB {
             }
         }
         return "";
-    }
-    
-    public void adminLogout(final String logintoken){
-        if (cookieUsers.containsKey(logintoken)) {
-            //XXX: We could check, if its == "admin", but we want to logout anyway.
-            cookieUsers.remove(logintoken);
-        }
     }
 
     public enum AccessRight {
