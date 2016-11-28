@@ -41,6 +41,8 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.InvalidURLLicenceException;
 import net.yacy.data.URLLicense;
@@ -48,6 +50,7 @@ import net.yacy.http.servlets.TemplateMissingParameterException;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.LoaderDispatcher;
+import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 
 /**
@@ -131,6 +134,17 @@ public class ImageViewer {
 			throw new IOException("Input stream could no be open");
 		}
 		return inStream;
+	}
+	
+	/**
+	 * Check the request header to decide whether full image viewing is allowed for a given request.
+	 * @param header request header. When null, false is returned.
+	 * @param sb switchboard instance.
+	 * @return true when full image view is allowed for this request
+	 */
+	public static boolean hasFullViewingRights(final RequestHeader header, Switchboard sb) {
+		return header != null && (Domains.isLocalhost(header.getRemoteAddr())
+		|| (sb != null && sb.verifyAuthentication(header)));
 	}
 
 	/**

@@ -185,7 +185,7 @@ public class yacysearchitem {
             if ((fileType == FileType.HTML || fileType == FileType.JSON) && !sb.isIntranetMode()) {
             	faviconURL = getFaviconURL(result, new Dimension(16, 16));
             }
-            prop.putHTML("content_faviconUrl", processFaviconURL(authenticated, faviconURL));
+            prop.putHTML("content_faviconUrl", processFaviconURL(ImageViewer.hasFullViewingRights(header, sb), faviconURL));
             prop.put("content_urlhash", urlhash);
             prop.put("content_ranking", Float.toString(result.score()));
             Date[] events = result.events();
@@ -300,7 +300,7 @@ public class yacysearchitem {
 
         if (theSearch.query.contentdom == Classification.ContentDomain.IMAGE) {
             // image search; shows thumbnails
-            processImage(sb, prop, item, theSearch, target_special_pattern, timeout, authenticated);
+            processImage(sb, prop, item, theSearch, target_special_pattern, timeout, ImageViewer.hasFullViewingRights(header, sb));
             theSearch.query.transmitcount = item + 1;
             return prop;
         }
@@ -368,14 +368,14 @@ public class yacysearchitem {
 	}
 
 	/**
-	 * @param authenticated
-	 *            true when current user is authenticated
+	 * @param hasFullViewingRights
+	 *            true when current user has full favicon viewing rights
 	 * @param faviconURL
 	 *            url icon of web site
 	 * @return url to propose in search result or empty string when faviconURL
 	 *         is null
 	 */
-	private static String processFaviconURL(final boolean authenticated, DigestURL faviconURL) {
+	private static String processFaviconURL(final boolean hasFullViewingRights, DigestURL faviconURL) {
 		/* Only use licence code for non authentified users. For authenticated users licence would never be released and would unnecessarily fill URLLicense.permissions. */
 		StringBuilder contentFaviconURL = new StringBuilder();
 		if (faviconURL != null) {
@@ -384,7 +384,7 @@ public class yacysearchitem {
 		    final String viewFaviconExt = !iconUrlExt.isEmpty() && ImageViewer.isBrowserRendered(iconUrlExt) ? iconUrlExt : "png";
 		    
 			contentFaviconURL.append("ViewFavicon.").append(viewFaviconExt).append("?maxwidth=16&maxheight=16&isStatic=true&quadratic");
-			if (authenticated) {
+			if (hasFullViewingRights) {
 				contentFaviconURL.append("&url=").append(faviconURL.toNormalform(true));
 			} else {
 				contentFaviconURL.append("&code=").append(URLLicense.aquireLicense(faviconURL));
@@ -466,10 +466,10 @@ public class yacysearchitem {
      * @param theSearch search event
      * @param target_special_pattern
      * @param timeout result getting timeOut
-     * @param authenticated set to true when user authentication is ok
+     * @param fullViewingRights set to true when current user has full image viewing rights
      */
 	private static void processImage(final Switchboard sb, final serverObjects prop, final int item,
-			final SearchEvent theSearch, final String target_special_pattern, long timeout, boolean authenticated) {
+			final SearchEvent theSearch, final String target_special_pattern, long timeout, boolean fullViewingRights) {
 		prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
 		try {
 		    SearchEvent.ImageResult image = theSearch.oneImageResult(item, timeout);
@@ -485,7 +485,7 @@ public class yacysearchitem {
 					.append(DEFAULT_IMG_WIDTH).append("&maxheight=").append(DEFAULT_IMG_HEIGHT)
 					.append("&isStatic=true&quadratic");
 		    /* Only use licence code for non authentified users. For authenticated users licence would never be released and would unnecessarily fill URLLicense.permissions. */
-		    if(authenticated) {
+		    if(fullViewingRights) {
 		    	thumbURLBuilder.append("&url=").append(imageUrlstring);
 		    } else {
 		    	thumbURLBuilder.append("&code=").append(URLLicense.aquireLicense(image.imageUrl));
@@ -493,7 +493,7 @@ public class yacysearchitem {
 		    String thumbURL = thumbURLBuilder.toString();
 		    prop.putHTML("content_item_hrefCache", thumbURL);
 		    /* Full size preview URL */
-		    if(authenticated) {
+		    if(fullViewingRights) {
 		    	prop.putHTML("content_item_hrefFullPreview", "ViewImage." + viewImageExt + "?isStatic=true&url=" + imageUrlstring);
 		    } else {
 		    	/* Not authenticated : full preview URL must be the same as thumb URL */

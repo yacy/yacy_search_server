@@ -29,7 +29,6 @@ import javax.imageio.stream.ImageInputStream;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.ConcurrentARC;
@@ -98,8 +97,7 @@ public class ViewFavicon {
 				pngIconCache.clear();
 			}
 
-			final boolean auth = Domains.isLocalhost(header.getRemoteAddr())
-					|| sb.verifyAuthentication(header); // handle access rights
+			final boolean auth = ImageViewer.hasFullViewingRights(header, sb); // handle access rights
 
 			DigestURL url = VIEWER.parseURL(post, auth);
 
