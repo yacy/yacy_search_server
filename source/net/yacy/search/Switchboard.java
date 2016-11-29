@@ -82,6 +82,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -143,6 +144,7 @@ import net.yacy.data.BookmarksDB;
 import net.yacy.data.ListManager;
 import net.yacy.data.MessageBoard;
 import net.yacy.data.UserDB;
+import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.WorkTables;
 import net.yacy.data.wiki.WikiBoard;
 import net.yacy.data.wiki.WikiCode;
@@ -3530,9 +3532,23 @@ public final class Switchboard extends serverSwitch {
             return 1;
         }
 
-        // security check against too long authorization strings
-        if ( realmValue.length() > 256 ) {
-            return 0;
+        if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(requestHeader.getAuthType())) {
+            // security check against too long authorization strings (for BASIC auth)
+            if (realmValue.length() > 256) {
+                return 0;
+            }
+        } else {
+            // handle DIGEST auth by servlet container
+            if (requestHeader.getUserPrincipal() != null) { // user is authenticated (by Servlet container)
+                if (requestHeader.isUserInRole(AccessRight.ADMIN_RIGHT.toString())) {
+                    // we could double check admin right (but we trust embedded container)
+                    // String username = requestHeader.getUserPrincipal().getName();
+                    // if ((username.equalsIgnoreCase(sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin")))
+                    //        || (sb.userDB.getEntry(username).hasRight(AccessRight.ADMIN_RIGHT)))
+                    adminAuthenticationLastAccess = System.currentTimeMillis();
+                    return 4; // has admin right
+                }
+            }
         }
 
         // authorization by encoded password, only for localhost access

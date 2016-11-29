@@ -69,8 +69,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.InvalidURLLicenceException;
-import net.yacy.data.UserDB.AccessRight;
-import net.yacy.data.UserDB.Entry;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
@@ -738,31 +736,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target); // target may contain a server side include (SSI)
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
-        Switchboard sb = Switchboard.getSwitchboard();
-        if (legacyRequestHeader.containsKey(RequestHeader.AUTHORIZATION)) {
-            if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(request.getAuthType())) {
-            } else {
-                // handle DIGEST auth for legacyHeader (create username:md5pwdhash
-                if (request.getUserPrincipal() != null) {
-                    String userpassEncoded = request.getHeader(RequestHeader.AUTHORIZATION); // e.g. "Basic AdminMD5hash"
-                    if (userpassEncoded != null) {
-                        if (request.isUserInRole(AccessRight.ADMIN_RIGHT.toString()) && !sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5,"").isEmpty()) {
-                            // fake admin authentication for legacyRequestHeader (as e.g. DIGEST is not supported by legacyRequestHeader)
-                            legacyRequestHeader.put(RequestHeader.AUTHORIZATION, HttpServletRequest.BASIC_AUTH + " "
-                                    + sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
-                        } else {
-                            // fake Basic auth header for Digest auth  (Basic username:md5pwdhash)
-                            String username = request.getRemoteUser();
-                            Entry user = sb.userDB.getEntry(username);
-                            if (user != null) {
-                                legacyRequestHeader.put(RequestHeader.AUTHORIZATION, HttpServletRequest.BASIC_AUTH + " "
-                                        + username + ":" + user.getMD5EncodedUserPwd());
-                            }
-                        }
-                    }
-                }
-            }
-        }
         return legacyRequestHeader;
     }
 
