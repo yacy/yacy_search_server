@@ -1,5 +1,5 @@
 <script>
-  if (document.getElementById("progressbar").getAttribute('class') != "progress-bar progress-bar-success") {
+  if (document.getElementById("progressbar") != null && document.getElementById("progressbar").getAttribute('class') != "progress-bar progress-bar-success") {
 	  document.getElementById("progressbar").setAttribute('style',"width:100%");
       document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;-webkit-transition:-webkit-transform 0s;");
 	  document.getElementById("progressbar").setAttribute('class',"progress-bar progress-bar-success");
