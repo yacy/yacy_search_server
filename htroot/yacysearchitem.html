@@ -27,7 +27,7 @@
   #(showDate)#::#[date]##(/showDate)#
   #(showEvent)#::on #[date]##(/showEvent)#
   #(showSize)#::&nbsp;|&nbsp;#[sizename]##(/showSize)#
-  #(showMetadata)#::&nbsp;|&nbsp;<a href="solr/select?q=id:%22#[urlhash]#%22&defType=edismax&start=0&rows=1&core=collection1&wt=html" target="_blank" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a>#(/showMetadata)#
+  #(showMetadata)#::&nbsp;|&nbsp;<a href="solr/select?q=id:%22#[urlhash]#%22&defType=edismax&start=0&rows=1&core=collection1&wt=html" target="_blank">Metadata</a>#(/showMetadata)#
   #(showParser)#::&nbsp;|&nbsp;<a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#" target="_blank">Parser</a>#(/showParser)#
   #(showCitation)#::&nbsp;|&nbsp;<a href="api/citation.html?hash=#[urlhash]#&filter=true" target="_blank">Citations</a>#(/showCitation)#
   #(showPictures)#::&nbsp;|&nbsp;<a href="yacysearch.html?contentdom=image&url=#[link]#&query=#[former]#+inurl:#[link]#" target="_blank">Pictures</a>#(/showPictures)#
