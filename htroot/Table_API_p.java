@@ -296,7 +296,7 @@ public class Table_API_p {
                         final MultiProtocolURL u = new MultiProtocolURL("http://localhost:8090" + editUrl);                       
                         prop.put("showtable_list_" + count + "_isCrawlerStart", 2);
                         prop.put("showtable_list_" + count + "_isCrawlerStart_pk", UTF8.String(row.getPK()));
-                        prop.put("showtable_list_" + count + "_isCrawlerStart_servlet", "/CrawlStartExpert.html");
+                        prop.put("showtable_list_" + count + "_isCrawlerStart_servlet", "CrawlStartExpert.html");
                         Map<String, String> attr = u.getAttributes();
                         int ac = 0;
                         for (Map.Entry<String, String> entry: attr.entrySet()) {
@@ -308,7 +308,10 @@ public class Table_API_p {
                     } else {
                         // short calls
                         prop.put("showtable_list_" + count + "_isCrawlerStart", 1);
-                        prop.put("showtable_list_" + count + "_isCrawlerStart_url", editUrl);
+                        /* For better integration of YaCy peers behind a reverse proxy subfolder, 
+                         * ensure a path relative to this servlet (with no starting slash) is used for clone links.
+                         * We keep the paths starting with a slash for other URL displays. */
+                        prop.put("showtable_list_" + count + "_isCrawlerStart_url", editUrl.startsWith("/") ? editUrl.substring(1, editUrl.length()) : editUrl);
                     }
                 } else {
                     prop.put("showtable_list_" + count + "_isCrawlerStart", 0);
