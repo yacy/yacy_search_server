@@ -63,8 +63,8 @@ public class SynonymLibrary {
                     if (line.charAt(line.length() - 1) == '}') line = line.substring(0, line.length() - 1);
                     if (line.charAt(0) == '{') line = line.substring(1);
                     String[] words = CommonPattern.COMMA.split(line);
-                    Set<String> synonyms = new HashSet<String>();
-                    Set<String> keys = new HashSet<String>();
+                    Set<String> synonyms = new HashSet<String>(words.length);
+                    Set<String> keys = new HashSet<String>(words.length);
                     for (String word: words) {
                         word = word.trim();
                         if (word.length() < 2) continue;
@@ -102,7 +102,7 @@ public class SynonymLibrary {
     /**
      * for a given word, return a list of synonym words
      * @param word
-     * @return a list of synonyms bot without the requested word
+     * @return a list of synonyms but without the requested word
      */
     public static Set<String> getSynonyms(String word) {
         if (word == null) return null;
