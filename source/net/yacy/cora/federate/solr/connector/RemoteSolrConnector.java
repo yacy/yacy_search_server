@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import net.yacy.cora.federate.solr.instance.SolrInstance;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.solr.instance.ShardInstance;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 import org.apache.solr.client.solrj.ResponseParser;
 import org.apache.solr.client.solrj.SolrClient;
@@ -52,7 +54,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     public RemoteSolrConnector(final SolrInstance instance, final boolean useBinaryResponseWriter) throws IOException {
         super();
         this.instance = instance;
-        this.useBinaryResponseWriter = useBinaryResponseWriter;
+        this.useBinaryResponseWriter = useBinaryResponseWriter && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_BINARYRESPONSEENABLED, true);
         this.corename = this.instance.getDefaultCoreName();
         SolrClient s = instance.getServer(this.corename);
         super.init(s);
@@ -61,7 +63,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     public RemoteSolrConnector(final SolrInstance instance, final boolean useBinaryResponseWriter, String corename) {
         super();
         this.instance = instance;
-        this.useBinaryResponseWriter = useBinaryResponseWriter;
+        this.useBinaryResponseWriter = useBinaryResponseWriter && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_BINARYRESPONSEENABLED, true);
         this.corename = corename == null ? this.instance.getDefaultCoreName() : corename;
         SolrClient s = instance.getServer(this.corename);
         super.init(s);
