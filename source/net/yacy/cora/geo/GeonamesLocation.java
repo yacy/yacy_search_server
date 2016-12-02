@@ -133,7 +133,7 @@ public class GeonamesLocation implements Locations {
                 fields = CommonPattern.TAB.split(line);
                 final long population = Long.parseLong(fields[14]);
                 if (minPopulation > 0 && population < minPopulation) continue;
-                final int geonameid = Integer.parseInt(fields[0]);
+                final Integer geonameid = Integer.valueOf(fields[0]);
                 locnames = new HashSet<StringBuilder>();
                 locnames.add(new StringBuilder(fields[1]));
                 locnames.add(new StringBuilder(fields[2]));
