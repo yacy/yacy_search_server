@@ -141,13 +141,14 @@ public class ConfigLanguage_p {
         Collections.sort(langFiles);
         final Map<String, String> langNames = Translator.langMap(env);
 
-        //virtual entry
+        //virtual entry (without a language file, but needed in choice list)
+        final String sellang = env.getConfig("locale.language", "default");
         prop.put("langlist_0_file", "browser");
         prop.put("langlist_0_name", ((langNames.get("browser") == null) ? "browser" : langNames.get("browser")));
-        prop.put("langlist_0_selected", "selected=\"selected\"");
+        prop.put("langlist_0_selected", sellang.equals("browser") ? "selected=\"selected\"":" ");
         prop.put("langlist_1_file", "default");
         prop.put("langlist_1_name", ((langNames.get("default") == null) ? "default" : langNames.get("default")));
-
+        prop.put("langlist_1_selected", sellang.equals("default") ? "selected=\"selected\"":" ");
         int count = 2; //+2 because of the virtual entry "browser" and "default" at top
         for (final String langFile : langFiles) {  
             final String langKey = langFile.substring(0, langFile.length() -4);
@@ -155,9 +156,8 @@ public class ConfigLanguage_p {
             prop.put("langlist_" + (count) + "_file", langFile);
             prop.put("langlist_" + (count) + "_name", ((langName == null) ? langKey : langName));
 
-            if(env.getConfig("locale.language", "default").equals(langKey)) {
+            if(sellang.equals(langKey)) {
                 prop.put("langlist_" + (count) + "_selected", "selected=\"selected\"");
-                prop.put("langlist_0_selected", " "); // reset Default
             } else {
                 prop.put("langlist_" + (count) + "_selected", " ");
             }
