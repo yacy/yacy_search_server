@@ -230,6 +230,7 @@ public final class UserDB {
                 authok = md5pwd.equals(Digest.encodeMD5Hex(user + ":" + password));
             }
             if (authok) {
+                entry.updateLastAccess(false);
                 return entry;
             }
         }
@@ -248,6 +249,7 @@ public final class UserDB {
     public Entry md5Auth(final String user, final String md5) {
         final Entry entry = this.getEntry(user);
         if (entry != null && entry.getMD5EncodedUserPwd().endsWith(md5)) { // user pwd migth have prefix "MD5:"
+            entry.updateLastAccess(false);
             return entry;
             }
         return null;
@@ -312,8 +314,8 @@ public final class UserDB {
     }
     
     public class Entry {
-        public static final String MD5ENCODED_USERPWD_STRING = "MD5_user:pwd";
-
+        public static final String MD5ENCODED_USERPWD_STRING = "MD5_user:pwd";  // value = "MD5:" + MD5Hex(username +":"+ realm + ":" pwd)
+                                                                                // oldstyle = MD5Hex(username +":"+ pwd)
         public static final String USER_FIRSTNAME = "firstName";
         public static final String USER_LASTNAME = "lastName";
         public static final String USER_ADDRESS = "address";
@@ -508,7 +510,10 @@ public final class UserDB {
             }
             return newTimeUsed;
         }
-        
+
+        /**
+         * @return encode credential = "MD5:" + MD5Hex(username +":"+ realm + ":" pwd) or null. (old style = MD5Hex(username +":"+ pwd)
+         */
         public String getMD5EncodedUserPwd() {
             return (this.mem.containsKey(MD5ENCODED_USERPWD_STRING)) ? this.mem.get(MD5ENCODED_USERPWD_STRING) : null;
         }
