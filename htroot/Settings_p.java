@@ -25,7 +25,6 @@
 import java.util.HashMap;
 import java.util.Iterator;
 
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
@@ -126,8 +125,7 @@ public final class Settings_p {
         prop.put("serveruser","server");
         
         // clientIP
-        prop.putXML("clientIP", header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>")); // read an artificial header addendum
-        
+        prop.putXML("clientIP", header.getRemoteAddr() == null ? "<unknown>" : header.getRemoteAddr());
         /* 
          * seed upload settings
          */
