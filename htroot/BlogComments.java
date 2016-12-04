@@ -77,7 +77,7 @@ public class BlogComments {
         }
 
         if (!hasRights) {
-            final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
+            final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION));
             if (userentry != null && userentry.hasRight(UserDB.AccessRight.BLOG_RIGHT)) {
                 hasRights = true;
             } else if (post.containsKey("login")) {

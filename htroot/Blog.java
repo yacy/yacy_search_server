@@ -39,7 +39,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.BlogBoard;
@@ -94,7 +93,7 @@ public class Blog {
         final int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
         if (!hasRights) {
-            final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
+            final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION));
             if (userentry != null && userentry.hasRight(UserDB.AccessRight.BLOG_RIGHT)) {
                 hasRights=true;
             } else if (post.containsKey("login")) {
