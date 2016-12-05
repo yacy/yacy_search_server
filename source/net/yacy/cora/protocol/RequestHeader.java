@@ -324,8 +324,7 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         if (_request != null) {
             return _request.getQueryString();
         } else {
-            // in case of discoraged use of arbitrary header prop
-            return super.get(HeaderFramework.CONNECTION_PROP_ARGS);
+            return null;
         }
     }
 
@@ -710,16 +709,18 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public void setAttribute(String name, Object o) {
         if (_request != null) {
             _request.setAttribute(name, o);
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void removeAttribute(String name) {
         if (_request != null) {
             _request.removeAttribute(name);
+        } else {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

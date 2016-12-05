@@ -195,7 +195,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String CONNECTION_PROP_METHOD = "METHOD";
     public static final String CONNECTION_PROP_PATH = "PATH";
     public static final String CONNECTION_PROP_EXT = "EXT";
-    public static final String CONNECTION_PROP_ARGS = "ARGS";
+    // public static final String CONNECTION_PROP_ARGS = "ARGS"; // use getQueryString() or getParameter()
     public static final String CONNECTION_PROP_CLIENTIP = "CLIENTIP";
     public static final String CONNECTION_PROP_PERSISTENT = "PERSISTENT";
     public static final String CONNECTION_PROP_REQUEST_START = "REQUEST_START";
