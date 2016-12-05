@@ -50,8 +50,10 @@ public class Tagging {
 
     private final String navigatorName;
     private final Map<String, String> synonym2term;
-    private final Map<String, String> term2synonym;
-    private final Map<String, String> term2objectlink;
+    
+    /** Terms associated to TagginEntry instances each having a synonym and an eventual object link */
+    private final Map<String, TaggingEntry> term2entries;
+    
     private File propFile;
     private boolean isFacet; // true if the vocabulary shall generate a navigation facet
 
@@ -93,8 +95,7 @@ public class Tagging {
     public Tagging(String name) {
         this.navigatorName = name;
         this.synonym2term = new ConcurrentHashMap<String, String>();
-        this.term2synonym = new ConcurrentHashMap<String, String>();
-        this.term2objectlink = new ConcurrentHashMap<String, String>();
+        this.term2entries= new ConcurrentHashMap<String, TaggingEntry>();
         this.namespace = DEFAULT_NAMESPACE;
         this.predicate = this.namespace + name;
         this.objectspace = null;
@@ -122,8 +123,7 @@ public class Tagging {
         this.objectspace = objectspace;
         if (propFile == null) {
             this.synonym2term.clear();
-            this.term2synonym.clear();
-            this.term2objectlink.clear();
+            this.term2entries.clear();
             this.namespace = DEFAULT_NAMESPACE;
             this.predicate = this.namespace + this.navigatorName;
 
@@ -134,8 +134,12 @@ public class Tagging {
 			        term = normalizeKey(e.getKey());
 			        v = normalizeTerm(e.getKey());
 			        this.synonym2term.put(v, term);
-			        this.term2synonym.put(term, v);
-			        if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
+			        if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) {
+			        	this.term2entries.put(term, new TaggingEntryWithObjectLink(v, e.getValue().getObjectlink()));
+			        } else {
+			        	this.term2entries.put(term, new SynonymTaggingEntry(v));
+			        }
+			        	
 			        continue vocloop;
 			    }
 			    term = normalizeKey(e.getKey());
@@ -149,12 +153,15 @@ public class Tagging {
 			        if (synonym.isEmpty()) continue tagloop;
 				    synonyms.add(synonym);
 			        this.synonym2term.put(synonym, term);
-			        this.term2synonym.put(term, synonym);
+			        this.term2entries.put(term, new SynonymTaggingEntry(synonym));
 			    }
 			    String synonym = normalizeTerm(term);
 			    this.synonym2term.put(synonym, term);
-			    this.term2synonym.put(term, synonym);
-                if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) this.term2objectlink.put(term, e.getValue().getObjectlink());
+                if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) {
+                	this.term2entries.put(term, new TaggingEntryWithObjectLink(synonym, e.getValue().getObjectlink()));
+                } else {
+                	this.term2entries.put(term, new SynonymTaggingEntry(synonym));
+                }
 			    synonyms.add(synonym);
 			}
         } else {
@@ -179,11 +186,12 @@ public class Tagging {
         for (String loc: locNames) {
             String syn = normalizeTerm(loc);
             this.synonym2term.put(syn, loc);
-            this.term2synonym.put(loc, syn);
             geo = location.find(loc, true);
             if (!geo.isEmpty()) {
                 g = geo.iterator().next();
-                this.term2objectlink.put(loc, "http://www.openstreetmap.org/?lat=" + g.lat() + "&lon=" + g.lon() + "&zoom=16");
+                this.term2entries.put(loc, new LocationTaggingEntry(syn, g));
+            } else {
+            	this.term2entries.put(loc, new SynonymTaggingEntry(syn));
             }
         }
     }
@@ -191,8 +199,7 @@ public class Tagging {
     private void init() throws IOException {
         if (this.propFile == null) return;
         this.synonym2term.clear();
-        this.term2synonym.clear();
-        this.term2objectlink.clear();
+        this.term2entries.clear();
         this.namespace = DEFAULT_NAMESPACE;
         this.predicate = this.namespace + this.navigatorName;
         this.objectspace = null;
@@ -231,8 +238,11 @@ public class Tagging {
                     term = normalizeKey(pl[0]);
                     v = normalizeTerm(pl[0]);
                     this.synonym2term.put(v, term);
-                    this.term2synonym.put(term, v);
-                    if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
+                    if (pl[2] != null && pl[2].length() > 0) {
+                    	this.term2entries.put(term, new TaggingEntryWithObjectLink(v, pl[2]));
+                    } else {
+                    	this.term2entries.put(term, new SynonymTaggingEntry(v));
+                    }
                     continue vocloop;
                 }
                 term = normalizeKey(pl[0]);
@@ -247,12 +257,15 @@ public class Tagging {
                     if (synonym.isEmpty()) continue tagloop;
                     synonyms.add(synonym);
                     this.synonym2term.put(synonym, term);
-                    this.term2synonym.put(term, synonym);
+                    this.term2entries.put(term, new SynonymTaggingEntry(synonym));
                 }
                 String synonym = normalizeTerm(term);
                 this.synonym2term.put(synonym, term);
-                this.term2synonym.put(term, synonym);
-                if (pl[2] != null && pl[2].length() > 0) this.term2objectlink.put(term, pl[2]);
+                if (pl[2] != null && pl[2].length() > 0) {
+                	this.term2entries.put(term, new TaggingEntryWithObjectLink(synonym, pl[2]));
+                } else {
+                	this.term2entries.put(term, new SynonymTaggingEntry(synonym));
+                }
                 synonyms.add(synonym);
             }
         } catch (final InterruptedException e) {
@@ -270,7 +283,7 @@ public class Tagging {
     }
     
     public int size() {
-        return this.term2objectlink.size();
+        return this.term2entries.size();
     }
 
     public void put(String term, String synonyms, String objectlink) throws IOException {
@@ -375,13 +388,15 @@ public class Tagging {
 
     private Map<String, Set<String>> reconstructionSets() {
         Map<String, Set<String>> r = new TreeMap<String, Set<String>>();
-        for (Map.Entry<String, String> e: this.term2synonym.entrySet()) {
+        for (Map.Entry<String, TaggingEntry> e: this.term2entries.entrySet()) {
             Set<String> s = r.get(e.getKey());
             if (s == null) {
                 s = new TreeSet<String>();
                 r.put(e.getKey(), s);
             }
-            if (e.getValue() != null && e.getValue().length() != 0) s.add(e.getValue());
+            if (e.getValue() != null && e.getValue().getSynonym() != null && e.getValue().getSynonym().length() != 0) {
+            	s.add(e.getValue().getSynonym());
+            }
         }
         for (Map.Entry<String, String> e: this.synonym2term.entrySet()) {
             Set<String> s = r.get(e.getValue());
@@ -398,14 +413,22 @@ public class Tagging {
         Map<String, Set<String>> r = reconstructionSets();
         Map<String, SOTuple> map = new TreeMap<String, SOTuple>();
         for (Map.Entry<String, Set<String>> e: r.entrySet()) {
-            String objectlink = this.term2objectlink.get(e.getKey());
-            map.put(e.getKey(), new SOTuple(e.getValue().toArray(new String[e.getValue().size()]), objectlink == null ? "" : objectlink));
+        	TaggingEntry entry = this.term2entries.get(e.getKey());
+        	String objectLink = null;
+        	if(entry != null) {
+        		objectLink = entry.getObjectLink();
+        	}
+            map.put(e.getKey(), new SOTuple(e.getValue().toArray(new String[e.getValue().size()]), objectLink == null ? "" : objectLink));
         }
         return map;
     }
 
     public String getObjectlink(String term) {
-        return this.term2objectlink.get(term);
+        TaggingEntry entry = this.term2entries.get(term);
+        if(entry != null) {
+        	return entry.getObjectLink();
+        }
+        return null;
     }
 
     public Map<String, SOTuple> list() {
@@ -526,7 +549,7 @@ public class Tagging {
 
     @Override
     public String toString() {
-        return this.term2synonym.toString();
+        return this.term2entries.toString();
     }
 
     private final static Pattern PATTERN_AE = Pattern.compile("\u00E4"); // german umlaute hack for better matching
