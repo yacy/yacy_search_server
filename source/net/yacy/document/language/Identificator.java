@@ -24,8 +24,8 @@
 
 package net.yacy.document.language;
 
-import java.io.File;
 import java.util.ArrayList;
+
 import com.cybozu.labs.langdetect.Detector;
 import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;
@@ -41,9 +41,11 @@ public final class Identificator {
     private Detector detector;
     private Language language;
 
+    /**
+     * Default constructor. Requires the DetectorFactory language profiles to be loaded before.
+     */
     public Identificator() {
         try {
-            if(DetectorFactory.getLangList().isEmpty()) DetectorFactory.loadProfile(new File("langdetect").toString());
             this.detector = DetectorFactory.create();
         } catch (LangDetectException e) {
             ConcurrentLog.logException(e);
@@ -56,33 +58,37 @@ public final class Identificator {
      * @param word
      */
     public void add(final String word) {
-        if (word == null) return;
+        if (word == null || this.detector == null) {
+        	return;
+        }
         this.detector.append(" " + word); // detector internally caches text up to maxtextlen = default = 10000 chars
     }
 
     /**
      * Get the detected language with highest probability
      * if detection probability is above 0.3 (30%)
-     * Underlaying detector differentiates zh-cn and zh-tw, these are returned as zh here.
+     * Underlying detector differentiates zh-cn and zh-tw, these are returned as zh here.
      * @return 2 char language code (ISO 639-1)
      */
     public String getLanguage() {
-        try {
-            ArrayList<Language> probabilities = this.detector.getProbabilities();
-            if(probabilities.isEmpty()) return null;
-            this.language = this.detector.getProbabilities().get(0);
-        } catch (LangDetectException e) {
-            // this contains mostly the message "no features in text"
-            //ConcurrentLog.logException(e);
-            return null;
-        }
-        // Return language only if probability is higher than 30% to account for missing language profiles
-        if (this.language.prob > 0.3) {
-            if (this.language.lang.length() == 2)
-                return this.language.lang;
-            else
-                return this.language.lang.substring(0,2);
-        }
+    	if(this.detector != null) {
+    		try {
+    			ArrayList<Language> probabilities = this.detector.getProbabilities();
+    			if(probabilities.isEmpty()) return null;
+    			this.language = this.detector.getProbabilities().get(0);
+    		} catch (LangDetectException e) {
+    			// this contains mostly the message "no features in text"
+    			//ConcurrentLog.logException(e);
+    			return null;
+    		}
+    		// Return language only if probability is higher than 30% to account for missing language profiles
+    		if (this.language.prob > 0.3) {
+    			if (this.language.lang.length() == 2) {
+    				return this.language.lang;
+    			}
+    			return this.language.lang.substring(0,2);
+    		}
+    	}
 
         return null;
 
@@ -95,8 +101,8 @@ public final class Identificator {
     public double getProbability() {
         if (language != null) {
             return language.prob;
-        } else
-            return 0.0;
+        }
+        return 0.0;
     }
 
 }

@@ -217,6 +217,8 @@ import net.yacy.utils.crypt;
 import net.yacy.utils.upnp.UPnP;
 import net.yacy.visualization.CircleTool;
 
+import com.cybozu.labs.langdetect.DetectorFactory;
+import com.cybozu.labs.langdetect.LangDetectException;
 import com.google.common.io.Files;
 
 
@@ -410,6 +412,14 @@ public final class Switchboard extends serverSwitch {
                 ProbabilisticClassifier.initialize(Switchboard.this.classificationPath);
             }
         }.start();
+        
+        // init the language detector
+        this.log.config("Loading language profiles");
+        try {
+			DetectorFactory.loadProfile(new File(appPath, "langdetect").toString());
+		} catch (LangDetectException e) {
+			ConcurrentLog.logException(e);
+		}
 
         // init global host name cache
         Domains.init(new File(this.workPath, "globalhosts.list"));
