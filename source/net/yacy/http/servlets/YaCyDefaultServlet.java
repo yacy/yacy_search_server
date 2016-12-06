@@ -66,6 +66,7 @@ import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.InvalidURLLicenceException;
@@ -869,7 +870,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 args.put(argName, request.getParameter(argName));
             }
             //TODO: for SSI request, local parameters are added as attributes, put them back as parameter for the legacy request
-            //      likely this should be implemented via httpservletrequestwrapper to supply complete parameters  
+            //      likely this should be implemented via httpservletrequestwrapper to supply complete parameters
             Enumeration<String> attNames = request.getAttributeNames();
             while (attNames.hasMoreElements()) {
                 String argName = attNames.nextElement();
@@ -975,10 +976,23 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns = new servletProperties();
             } else if (tmp instanceof servletProperties) {
                 templatePatterns = (servletProperties) tmp;
-                // handle login cookie
-                if (templatePatterns.getOutgoingHeader() != null && templatePatterns.getOutgoingHeader().getCookiesEntries() != null) {
-                    for (Cookie c : templatePatterns.getOutgoingHeader().getCookiesEntries()) {
-                        response.addCookie(c);
+
+                if (templatePatterns.getOutgoingHeader() != null) {
+                    // handle responseHeader entries set by servlet
+                    ResponseHeader tmpouthdr = templatePatterns.getOutgoingHeader();
+                    for (String hdrkey : tmpouthdr.keySet()) {
+                        if (!HeaderFramework.STATUS_CODE.equals(hdrkey)) { // skip default init response status value (not std. )
+                            String val = tmpouthdr.get(hdrkey);
+                            if (!response.containsHeader(hdrkey) && val != null) { // to be on the safe side, add only new hdr (mainly used for CORS_ALLOW_ORIGIN)
+                                response.setHeader(hdrkey, tmpouthdr.get(hdrkey));
+                            }
+                        }
+                    }
+                    // handle login cookie
+                    if (tmpouthdr.getCookiesEntries() != null) {
+                        for (Cookie c : tmpouthdr.getCookiesEntries()) {
+                            response.addCookie(c);
+                        }
                     }
                 }
             } else {
@@ -1025,7 +1039,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
                 boolean authorized = sb.adminAuthenticated(legacyRequestHeader) >= 2;
-                templatePatterns.put("authorized", authorized ? 1 : 0);
+                templatePatterns.put("authorized", authorized ? 1 : 0); // used in templates and other html (e.g. to display lock/unlock symbol)
 
                 templatePatterns.put("simpleheadernavbar", sb.getConfig("decoration.simpleheadernavbar", "navbar-default"));
                 
