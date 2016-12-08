@@ -48,6 +48,7 @@ import javax.servlet.http.Part;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.NumberTools;
+import org.eclipse.jetty.server.CookieCutter;
 
 /**
  * YaCy servlet request header.
@@ -229,8 +230,15 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public Cookie[] getCookies() {
         if (_request != null) {
             return _request.getCookies();
+        } else {
+            String cstr = super.get(COOKIE);
+            if (cstr != null) {
+                CookieCutter cc = new CookieCutter(); // reuse jetty cookie parser
+                cc.addCookieField(cstr);
+                return cc.getCookies();
+            }
+            return null;
         }
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
