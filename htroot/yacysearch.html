@@ -63,9 +63,9 @@
 <body id="yacysearch" #(focus)#::onLoad="document.searchform.query.focus();"#(/focus)#>
 
     #(topmenu)#
-    #%env/templates/embeddedheader.template%#
+    #%env/templates/embeddedSearchHeader.template%#
     ::
-    #%env/templates/simpleheader.template%#
+    #%env/templates/simpleSearchHeader.template%#
     <script type="text/javascript">
       document.getElementById("header_websearch").className += " active";
     </script>
@@ -88,11 +88,15 @@ Use the RSS search result format to add static searches to your RSS reader, if y
 
   <div class="row">
     <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
+#(topmenu)#
+<form class="search small" name="searchform" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;">
+::
+<form class="search small col-xs-9 col-sm-5 col-lg-5" name="searchform" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;">
+#(/topmenu)#
 
-<form class="search small" name="searchform" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;max-width:500px;">
-
-  <div class="input-group">
-    <input name="query" id="search" type="text" class="form-control searchinput typeahead" size="40" maxlength="200" placeholder="#[promoteSearchPageGreeting]#" value="#[former]#" #(focus)#::autofocus="autofocus"#(/focus)# onFocus="this.select()" onclick="document.getElementById('Enter').innerHTML = 'search'"/>
+  <div class="input-group" style="max-width:445px;">
+    <input name="query" id="search" type="text" class="form-control searchinput typeahead" size="40" maxlength="200" 
+    	placeholder="#[promoteSearchPageGreeting]#" value="#[former]#" #(focus)#::autofocus="autofocus"#(/focus)# onFocus="this.select()" onclick="document.getElementById('Enter').innerHTML = 'search'"/>
     <div class="input-group-btn">
        <button id="Enter" name="Enter" class="btn btn-default" type="submit">search</button>
     </div>
