@@ -221,7 +221,7 @@ public final class HTTPDProxyHandler {
          */
         if (sb.getConfigBool("proxy.monitorCookies", false)) {
             if (requestHeader.containsKey(RequestHeader.COOKIE)) {
-                final Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getMultiple(RequestHeader.COOKIE)};
+                final Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getCookies()};
                 synchronized(sb.outgoingCookies) {
                     sb.outgoingCookies.put(targethost, entry);
                 }
