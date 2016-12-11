@@ -68,7 +68,6 @@ import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LargeNumberCache;
@@ -98,11 +97,8 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
-import net.yacy.search.navigator.NameSpaceNavigator;
 import net.yacy.search.navigator.Navigator;
-import net.yacy.search.navigator.RestrictedStringNavigator;
-import net.yacy.search.navigator.StringNavigator;
-import net.yacy.search.navigator.YearNavigator;
+import net.yacy.search.navigator.NavigatorPlugins;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -270,51 +266,7 @@ public final class SearchEvent {
         this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
         // prepare configured search navigation (plugins)
-        this.navigatorPlugins = new LinkedHashMap<String, Navigator>();
-        String[] navnames = navcfg.split(",");
-        for (String navname : navnames) {
-            if (navname.contains("authors")) {
-                this.navigatorPlugins.put("authors", new StringNavigator("Authors", CollectionSchema.author_sxt));
-            }
-            if (navname.contains("collections")) {
-                RestrictedStringNavigator tmpnav = new RestrictedStringNavigator("Collection", CollectionSchema.collection_sxt);
-                // exclude default internal collection names
-                tmpnav.addForbidden("dht");
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_AUTOCRAWL_DEEP);
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_AUTOCRAWL_SHALLOW);
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_PROXY);
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_REMOTE);
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT);
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT);
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_GREEDY_LEARNING_TEXT);
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA);
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA);
-                tmpnav.addForbidden("robot_" + CrawlSwitchboard.CRAWL_PROFILE_SURROGATE);
-                this.navigatorPlugins.put("collections", tmpnav);
-            }
-            if (navname.contains("namespace")) {
-                this.navigatorPlugins.put("namespace", new NameSpaceNavigator("Name Space"));
-            }
-            // YearNavigator with possible def of :fieldname:title in configstring
-            if (navname.contains("year")) {
-                if ((navname.indexOf(':')) > 0) { // example "year:dates_in_content_dts:Events"
-                    String[] navfielddef = navname.split(":");
-                    try {
-                        // year:fieldname:title
-                        CollectionSchema field = CollectionSchema.valueOf(navfielddef[1]);
-                        if (navfielddef.length > 2) {
-                            this.navigatorPlugins.put(navfielddef[1], new YearNavigator(navfielddef[2], field));
-                        } else {
-                            this.navigatorPlugins.put(navfielddef[1], new YearNavigator("Year-" + navfielddef[1], field));
-                        }
-                    } catch (java.lang.IllegalArgumentException ex) {
-                        log.severe("wrong navigator name in config: \"" + navname + "\" " + ex.getMessage());
-                    }
-                } else { // "year" only use default last_modified
-                    this.navigatorPlugins.put("year", new YearNavigator("Year", CollectionSchema.last_modified));
-                }
-            }
-        }
+        this.navigatorPlugins = NavigatorPlugins.initFromCfgString(navcfg);
 
         this.snippets = new ConcurrentHashMap<String, LinkedHashSet<String>>(); 
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
