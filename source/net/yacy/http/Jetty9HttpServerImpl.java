@@ -205,12 +205,16 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             int i=0;
             while (st.hasMoreTokens()) {
                 String ip = st.nextToken();
-                iphandler.addWhite(ip);
+                try {
+                    iphandler.addWhite(ip); // accepts only ipv4
+                } catch (IllegalArgumentException nex) { // catch number format exception on non ipv4 input
+                    ConcurrentLog.severe("SERVER", "Server Access Settings - IP filter: " + nex.getMessage());
+                    continue;
+                }
                 i++;
             }          
             if (i > 0) {
                 iphandler.addWhite("127.0.0.1"); // allow localhost (loopback addr)
-                iphandler.setServer(server);
                 iphandler.setHandler(crashHandler);
                 server.setHandler(iphandler);
                 ConcurrentLog.info("SERVER","activated IP access restriction to: [127.0.0.1," + white +"] (this works only correct with start parameter -Djava.net.preferIPv4Stack=true)");
