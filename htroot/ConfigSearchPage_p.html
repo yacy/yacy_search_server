@@ -129,29 +129,20 @@
                           </ul></td>
                       </tr>
                       <tr>
-                        <td><input type="checkbox" name="search.navigation.namespace" value="true" #(search.navigation.namespace)#::checked="checked" #(/search.navigation.namespace)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarNameSpace" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Wiki Name Space</h3></li>
-                          </ul></td>
-                      </tr>
-                      <tr>
                         <td><input type="checkbox" name="search.navigation.language" value="true" #(search.navigation.language)#::checked="checked" #(/search.navigation.language)# /></td>
                         <td><ul class="nav nav-sidebar menugroup" id="sidebarLanguages" style="padding-left:15px; padding-right:10px;">
                           <li><h3>Language</h3></li>
                           </ul></td>
                       </tr>
+                      #{search.navigation.plugin}#
                       <tr>
-                        <td><input type="checkbox" name="search.navigation.authors" value="true" #(search.navigation.authors)#::checked="checked" #(/search.navigation.authors)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarAuthors" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Author</h3></li>
-                          </ul></td>
+                        <td><button class="btn btn-xs" name="del.nav" value="#[name]#"><span class="glyphicon glyphicon-remove" style="color: red"/></button></td>
+                        <td><ul class="nav nav-sidebar menugroup"  style="padding-left:15px; padding-right:10px;">
+                          <li><h3>#[displayname]#</h3></li>
+                          </ul><input type="hidden" name="search.navigation.active" value="#[name]#" />
+                        </td>
                       </tr>
-                      <tr>
-                        <td><input type="checkbox" name="search.navigation.collections" value="true" #(search.navigation.collections)#::checked="checked" #(/search.navigation.collections)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarCollections" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Collection</h3></li>
-                          </ul></td>
-                      </tr>
+                      #{/search.navigation.plugin}#
                       <tr>
                         <td></td>
                         <td><ul class="nav nav-sidebar menugroup" id="vocabulary" style="padding-left:15px; padding-right:10px;">
@@ -161,15 +152,13 @@
                       <tr>    
                         <td></td>
                         <td><div id="sidebarAbout" style="padding-left:15px; padding-right:10px; margin-top: 5px;">
-                          <h3>about#[about.headline]#</h3>
+                          <h3>#[about.headline]#</h3>
                           <div>#[about.body]#</div>
                           </div></td>
                       </tr>
                     </table>
-                    <label for="search.navigation.maxcount">max. items</label>
-                    <input type="text" id="search.navigation.maxcount" name="search.navigation.maxcount" size="4" value="#[search.navigation.maxcount]#">
                   </fieldset>
-                </div>                        
+                </div>    
               </td>
               <td valign="top">
                 <div style="float: left;">
@@ -286,15 +275,28 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
         </table>
       </td>
     </tr>
+  </table>
+  <table>
     <tr>
       <td>
-        <fieldset>
-          <dt>&nbsp;</dt>
-          <dd>
-            <input type="submit" name="searchpage_set" value="Save Settings" class="btn btn-primary" />&nbsp;&nbsp;
-            <input type="submit" name="searchpage_default" value="Set Default Values" class="btn btn-primary" />
-          </dd>
+        <fieldset><legend>Add Navigators</legend>
+          <label for="search.navigation.navname">append</label>
+          <select type="text" name="search.navigation.navname">
+            <option value="authors">Authors</option>
+            <option value="collections">Collection</option>
+            <option value="namespace">Wiki Name Space</option>
+            <option value="year">Year</option>
+          </select>
+          <button type="submit" name="add.nav" class="btn btn-xs btn-default" ><span class="glyphicon glyphicon-plus-sign" style="color: green"/></button><br>
+          <label for="search.navigation.maxcount">max. items</label>
+          <input type="text" id="search.navigation.maxcount" name="search.navigation.maxcount" size="3" value="#[search.navigation.maxcount]#">
         </fieldset>
+      </td>
+      <td>
+        <div style="padding-left:25px;">
+          <input type="submit" name="searchpage_set" value="Save Settings" class="btn btn-primary" />&nbsp;&nbsp;
+          <input type="submit" name="searchpage_default" value="Set Default Values" class="btn btn-primary" />
+        </div>
       </td>
     </tr>
   </table>
