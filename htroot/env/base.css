@@ -92,7 +92,7 @@ a[href^="http://"], a[href^="https://"]  {
 }
 
 /* exception for links in search results and image links */
-a[target="_self"], a[class="forceNoExternalIcon"], a[class="navbar-brand"], a[class="yacylogo"], .searchresults a {
+a[target="_self"], a[class="forceNoExternalIcon"], a[class="navbar-brand hidden-xs"], a[class="navbar-brand"], a[class="yacylogo"], .searchresults a {
   background: transparent;
   padding-right: 0px;
 }
