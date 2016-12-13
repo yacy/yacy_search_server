@@ -155,9 +155,9 @@
 </head>
 <body id="yacysearch_location" onload="init(); #(initsearch)#::search();#(/initsearch)#">
     #(topmenu)#
-    #%env/templates/embeddedheader.template%#
+    #%env/templates/embeddedSearchHeader.template%#
     ::
-    #%env/templates/simpleheader.template%#
+    #%env/templates/simpleSearchHeader.template%#
     #(/topmenu)#
 <div id="api" style="top:58px;">
 <a href="yacysearch_location.rss" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
@@ -173,8 +173,12 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 
 <div class="row">
 <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
-<form class="search small" name="searchform" action="" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;max-width:500px;">
-  <div class="input-group">
+#(topmenu)#
+<form class="search small" name="searchform" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;">
+::
+<form class="search small col-xs-9 col-sm-5 col-lg-5" name="searchform" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;">
+#(/topmenu)#
+  <div class="input-group" style="max-width:445px;">
     <input type="text" class="form-control searchinput typeahead" value="#(initsearch)#::#[query]##(/initsearch)#" id="query" size="42" autofocus="autofocus" onFocus="this.select()" />
     <div class="input-group-btn">
        <button id="Enter" class="btn btn-default" type="submit" onclick="search(); return false;" value="search" onsubmit="search(); return false;">search</button>
