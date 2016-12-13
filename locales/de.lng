@@ -430,6 +430,13 @@ Access Configuration==Zugangseinstellungen
 Basic Configuration==Grundkonfiguration
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer benötigt einige Grundinformationen, um korrekt zu funktionieren
 Select a language for the interface==Wählen Sie eine Sprache für das Interface
+English==Englisch
+Fran&ccedil;ais==Französisch
+&#27721;&#35821;/&#28450;&#35486==Chinesisch
+&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;==Russisch
+&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;==Ukrainisch
+&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;==Hindi
+&#26085;&#26412;&#35486;==Japanisch
 Use Case: what do you want to do with YaCy:==Anwendungsfall: Was Sie mit YaCy tun wollen:
 Community-based web search==Gemeinschafts-basierte Web Suche
 Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==Treten Sie dem globalen Netzwerk 'freeworld' bei und unterstützen Sie es, durchsuchen Sie das Internet mit einem unzensierten, von den Benutzern gestalteten Suchnetzwerk
@@ -440,7 +447,7 @@ This path can be accessed at ==Der Pfad ist erreichbar unter
 Use that path as crawl start point.==Verwenden Sie diesen Pfad als den Startpunkt für den Crawl.
 Intranet Indexing==Intranet Indexierung
 Create a search portal for your intranet or web pages or your (shared) file system.==Ein Suchportal für Ihre Intranet oder öffentlichen Webseiten oder ihr (verteiltes) Dateisystem.
-URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URLs mit folgenden Protokollen (HTTP/HTPPS/FTP) und einem lokalen Domainnamen oder einer IP oder folgende URLs können verwendet werden
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URLs mit folgenden Protokollen (HTTP/HTTPS/FTP) und einem lokalen Domainnamen oder einer IP oder folgende URLs können verwendet werden
 or smb:==oder smb:
 Your peer name has not been customized; please set your own peer name==Ihr Peername wurde noch nicht angepasst; bitte setzen Sie einen eigenen Peernamen ein
 You may change your peer name==Sie können Ihren Peernamen ändern
