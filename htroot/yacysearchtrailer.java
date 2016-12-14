@@ -256,22 +256,25 @@ public class yacysearchtrailer {
                 if (oldProtocolModifier == null || !oldProtocolModifier.equals(name)) {
                     pos++;
                     prop.put("nav-protocols_element_" + i + "_on", 0);
+                    prop.put("nav-protocols_element_" + i + "_onclick", 0);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", nav);
                 } else {
                     neg++;                    
                     prop.put("nav-protocols_element_" + i + "_on", 1);
+                    prop.put("nav-protocols_element_" + i + "_onclick", 1);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", "-" + nav);
                     nav="";
                     rawNav = "";
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
                 String url = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString();
-                prop.put("nav-protocols_element_" + i + "_on_url", url);
+                prop.put("nav-protocols_element_" + i + "_onclick_url", url);
                 prop.put(fileType, "nav-protocols_element_" + i + "_url", url);
                 prop.put("nav-protocols_element_" + i + "_count", count);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
             }
+            if (i == 1) prop.put("nav-protocols_element_0_onclick", 0); // allow to unselect, if only one button
             theSearch.query.modifier.protocol = oldProtocolModifier;
             if (oldProtocolModifier != null && oldProtocolModifier.length() > 0) theSearch.query.modifier.add(oldProtocolModifier.startsWith("/") ? oldProtocolModifier : "/" + oldProtocolModifier);
             theSearch.query.getQueryGoal().query_original = oldQuery;
