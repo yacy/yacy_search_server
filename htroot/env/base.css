@@ -1107,3 +1107,31 @@ div#tagcloud {
 }
 
 /******* yacysearchtrailer.html end ***********/
+
+/************* header.template ****************/
+/* Specific styles for the header template */
+
+/* Header search form bootstrap styles overrides for extra smal screen sizes*/
+#header-search-form {
+	max-width: 80%;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+    border: 0 !important;
+    -webkit-box-shadow: unset !important;
+    box-shadow: unset !important;
+}
+
+/* Header greeting icon */
+#header-greeting-icon {
+	height:auto; 
+	width:auto; 
+	max-width:200px; 
+	max-height:32px;
+	vertical-align:middle;
+	margin-top: -6px;
+}
+
+
+/************* header.template end ************/

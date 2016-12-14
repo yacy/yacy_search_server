@@ -1,19 +1,21 @@
 <!-- top navigation -->
 <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
   <div class="container-fluid">
+    <div class="collapse navbar-collapse navbar-header">
+      <a class="navbar-brand" id="navbar-brand" href="./">
+        <span><img id="header-greeting-icon" class="yacylogo" src="env/grafics/yacy.png" alt="YaCy"></span>
+        <span>&nbsp;Administration</span>
+      </a>
+    </div>
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
         <span class="sr-only">Toggle navigation</span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" id="navbar-brand" href="./" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
-        <img id="greeting-icon" class="yacylogo" src="env/grafics/yacy.png" alt="YaCy" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">
-        <span style="position:absolute;top:50%;float:left;">&nbsp;Administration</span>
-      </a>
-      <form class="navbar-form" method="get" accept-charset="UTF-8" action="yacysearch.html" style="padding-left:200px;max-width:400px;">
-        <input name="query" placeholder="Search..." class="form-control" type="text" size="36" maxlength="200" value=""/>
+      <form id="header-search-form" class="navbar-form" method="get" accept-charset="UTF-8" action="yacysearch.html">
+        <input name="query" placeholder="Search..." class="form-control" type="text" size="30" maxlength="200" value=""/>
         <input type="hidden" name="resource" value="global" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
@@ -25,14 +27,20 @@
         <li id="header_restart">
           <form action="Steering.html" method="get">
             <input type="hidden" name="restart" value="" />
-            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-warning" onclick="return confirm('Confirm Re-Start')"><span class="glyphicon glyphicon-fire"></span> Re-Start</button>
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-warning" onclick="return confirm('Confirm Re-Start')" title="Restart">
+            	<span class="glyphicon glyphicon-fire"></span>
+            	<span class="hidden-sm"> Re-Start</span>
+            </button>
           </form>
         </li>
         <li>&nbsp;</li>
         <li id="header_shutdown">
           <form action="Steering.html" method="get">
             <input type="hidden" name="shutdown" value="" />
-            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="return confirm('Confirm Shutdown')"><span class="glyphicon glyphicon-off"></span> Shutdown</button>
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="return confirm('Confirm Shutdown')" title="Shutdown">
+            	<span class="glyphicon glyphicon-off"></span>
+            	<span class="hidden-sm"> Shutdown</span>
+            </button>
           </form>
         </li>
         <li id="header_help" class="dropdown">
@@ -51,7 +59,10 @@
         </li>
         <li id="header_administration">
           <form action="index.html" method="get">
-            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary"><span class="glyphicon glyphicon-search"></span> Search Interface &raquo;</button>
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary" title="Search Interface">
+            	<span class="glyphicon glyphicon-search"></span>
+            	<span class="hidden-sm hidden-md"> Search Interface &raquo;</span>
+            </button>
           </form>
         </li>
       </ul>
