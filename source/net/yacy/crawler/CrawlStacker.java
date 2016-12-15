@@ -585,7 +585,7 @@ public final class CrawlStacker {
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
         final InetAddress ia = Domains.dnsResolve(host);
         return (local) ?
-            ("the host '" + host + "' is local, but local addresses are not accepted: " + ((ia == null) ? "null" : ia.getHostAddress())) :
+            ("the host '" + host + "' is local, but local addresses are not accepted: " + ((ia == null) ? "DNS lookup resulted in null (unknown host name)" : ia.getHostAddress())) :
             ("the host '" + host + "' is global, but global addresses are not accepted: " + ((ia == null) ? "null" : ia.getHostAddress()));
     }
 
