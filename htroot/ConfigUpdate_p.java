@@ -70,6 +70,7 @@ public class ConfigUpdate_p {
         prop.put("candeploy_configCommit", "0");
         prop.put("candeploy_autoUpdate", "0");
         prop.put("candeploy_downloadsAvailable", "0");
+        prop.put("candeploy_downloadError", "0");
 
         if (post != null) {
             // check if update is supposed to be installed and a release is defined
@@ -86,21 +87,26 @@ public class ConfigUpdate_p {
                 final String release = post.get("releasedownload", "");
                 if (!release.isEmpty()) {
                     try {
-                	yacyRelease versionToDownload = new yacyRelease(new DigestURL(release));
+                    	yacyRelease versionToDownload = new yacyRelease(new DigestURL(release));
 
-                	// replace this version with version which contains public key
-                	final yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);
-                	final Set<yacyRelease> mostReleases = versionToDownload.isMainRelease() ? allReleases.main : allReleases.dev;
-                	for (final yacyRelease rel : mostReleases) {
-                	    if (rel.equals(versionToDownload)) {
-                		versionToDownload = rel;
-                		break;
-                	    }
-                	}
-                	versionToDownload.downloadRelease();
+                    	// replace this version with version which contains public key
+                    	final yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);
+                    	final Set<yacyRelease> mostReleases = versionToDownload.isMainRelease() ? allReleases.main : allReleases.dev;
+                    	for (final yacyRelease rel : mostReleases) {
+                    		if (rel.equals(versionToDownload)) {
+                    			versionToDownload = rel;
+                    			break;
+                    		}
+                    	}
+                    	File downloadedRelease = versionToDownload.downloadRelease();
+                    	if(downloadedRelease == null) {
+                    		prop.put("candeploy_downloadError", "1");
+                    		prop.putHTML("candeploy_downloadError_releasedownload", release);
+                    	}
                     } catch (final IOException e) {
-                	// TODO Auto-generated catch block
-                        ConcurrentLog.logException(e);
+                    	ConcurrentLog.logException(e);
+                    	prop.put("candeploy_downloadError", "1");
+                    	prop.putHTML("candeploy_downloadError_releasedownload", release);
                     }
                 }
             }

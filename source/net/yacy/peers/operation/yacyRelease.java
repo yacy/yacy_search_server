@@ -44,6 +44,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.http.HttpStatus;
+
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
@@ -304,6 +306,10 @@ public final class yacyRelease extends yacyVersion {
             client.setTimout(120000);
             client.GET(getUrl().toString(), false);
             int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+            if(statusCode != HttpStatus.SC_OK) {
+            	/* HTTP status is not OK (200) : let's stop here to avoid creating a invalid download file*/
+            	throw new IOException("HTTP response status code : " + statusCode);
+            }
             final ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
 
             final boolean unzipped = header.gzip() && (header.mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
