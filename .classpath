@@ -90,13 +90,13 @@
 	<classpathentry kind="lib" path="lib/jsoup-1.10.1.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/weupnp-0.1.4.jar"/>
-	<classpathentry kind="lib" path="lib/common-image-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/common-io-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/common-lang-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/imageio-core-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/imageio-metadata-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/imageio-tiff-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/imageio-bmp-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/common-image-3.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/common-io-3.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/common-lang-3.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-core-3.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-metadata-3.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-tiff-3.3.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-bmp-3.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/jsonic-1.2.0.jar"/>
 	<classpathentry kind="lib" path="lib/langdetect.jar"/>
 	<classpathentry kind="output" path="gen"/>

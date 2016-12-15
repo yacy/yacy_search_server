@@ -163,9 +163,9 @@
     	<pathelement location="${lib}/bcmail-jdk15-1.46.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-1.46.jar" />
     	<pathelement location="${lib}/chardet.jar" />
-    	<pathelement location="${lib}/common-image-3.2.1.jar" />
-    	<pathelement location="${lib}/common-io-3.2.1.jar" />
-    	<pathelement location="${lib}/common-lang-3.2.1.jar" />
+    	<pathelement location="${lib}/common-image-3.3.1.jar" />
+    	<pathelement location="${lib}/common-io-3.3.1.jar" />
+    	<pathelement location="${lib}/common-lang-3.3.1.jar" />
     	<pathelement location="${lib}/commons-codec-1.10.jar" />
     	<pathelement location="${lib}/commons-compress-1.12.jar" />
     	<pathelement location="${lib}/commons-fileupload-1.3.2.jar" />
@@ -180,10 +180,10 @@
         <pathelement location="${lib}/httpcore-4.4.5.jar" />
         <pathelement location="${lib}/httpmime-4.5.2.jar" />
         <pathelement location="${lib}/icu4j-57_1.jar" />
-    	<pathelement location="${lib}/imageio-bmp-3.2.1.jar" />
-    	<pathelement location="${lib}/imageio-core-3.2.1.jar" />
-    	<pathelement location="${lib}/imageio-metadata-3.2.1.jar" />
-    	<pathelement location="${lib}/imageio-tiff-3.2.1.jar" />
+    	<pathelement location="${lib}/imageio-bmp-3.3.1.jar" />
+    	<pathelement location="${lib}/imageio-core-3.3.1.jar" />
+    	<pathelement location="${lib}/imageio-metadata-3.3.1.jar" />
+    	<pathelement location="${lib}/imageio-tiff-3.3.1.jar" />
         <pathelement location="${lib}/J7Zip-modified.jar" />
         <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
     	<pathelement location="${lib}/jaudiotagger-2.0.4-20111207.115108-15.jar" />
