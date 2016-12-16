@@ -476,11 +476,13 @@ public final class yacyRelease extends yacyVersion {
 
     /**
      * stop yacy and run a batch script, applies a new release and restarts yacy
-     * @param releaseFile
+     * @param releaseFile release file to apply
+     * @return true when release file has been successfully extracted and asynchronous update has been triggered
      */
-    public static void deployRelease(final File releaseFile) {
+    public static boolean deployRelease(final File releaseFile) {
+    	boolean restartTriggered = false;
         if (yacyBuildProperties.isPkgManager()) {
-            return;
+            return restartTriggered;
         }
         try {
             final Switchboard sb = Switchboard.getSwitchboard();
@@ -488,7 +490,7 @@ public final class yacyRelease extends yacyVersion {
             try{
                 tarTools.unTar(tarTools.getInputStream(releaseFile), sb.getDataPath() + "/DATA/RELEASE/".replace("/", File.separator));
             } catch (final Exception e){
-                ConcurrentLog.severe("UNTAR", "failed", e);
+                throw new IOException("Could not untar release file", e);
             }
             String script = null;
             String scriptFileName = null;
@@ -560,12 +562,14 @@ public final class yacyRelease extends yacyVersion {
             OS.deployScript(scriptFile, script);
             ConcurrentLog.info("UPDATE", "wrote update-script to " + scriptFile.getAbsolutePath());
             OS.execAsynchronous(scriptFile);
+            restartTriggered = true;
             ConcurrentLog.info("UPDATE", "script is running");
             sb.setConfig("update.time.deploy", System.currentTimeMillis());
             sb.terminate(10, "auto-deploy for " + releaseFile.getName());
         } catch (final IOException e) {
             ConcurrentLog.severe("UPDATE", "update failed", e);
         }
+        return restartTriggered;
     }
 
     public static void main(final String[] args) {

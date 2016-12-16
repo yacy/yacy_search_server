@@ -80,10 +80,16 @@ public class Steering {
             final File releaseFile = new File(sb.releasePath, releaseFileName);
             if (FileUtils.isInDirectory(releaseFile, sb.releasePath)) {
                 if ((!devenvironment) && (releaseFileName.length() > 0) && (releaseFile.exists())) {
-                    yacyRelease.deployRelease(releaseFile);
+                    if(yacyRelease.deployRelease(releaseFile)) {
+                    	prop.put("info", "5");
+                    	prop.putHTML("info_release", releaseFileName);
+                    } else {
+                    	prop.put("info", "7");
+                    	prop.putHTML("info_release", releaseFileName);
+                    }
+                } else {
+                	prop.put("info", "8");
                 }
-                prop.put("info", "5");
-                prop.putHTML("info_release", releaseFileName);
             } else {
                 prop.put("info", "6");
             }

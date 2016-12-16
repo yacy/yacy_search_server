@@ -2498,9 +2498,13 @@ public final class Switchboard extends serverSwitch {
                     this.log
                         .info("AUTO-UPDATE: omitting update because download failed (file cannot be found, is too small or signature is bad)");
                 } else {
-                    yacyRelease.deployRelease(downloaded);
-                    terminate(10, "auto-update to install " + downloaded.getName());
-                    this.log.info("AUTO-UPDATE: deploy and restart initiated");
+                    if(yacyRelease.deployRelease(downloaded)) {
+                    	terminate(10, "auto-update to install " + downloaded.getName());
+                    	this.log.info("AUTO-UPDATE: deploy and restart initiated");
+                    } else {
+                        this.log
+                        .info("AUTO-UPDATE: omitting update because an error occurred while trying to deploy the release.");
+                    }
                 }
             }
 
@@ -4032,6 +4036,11 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
+    /**
+     * Triggers asynchronous shutdown occurring after a given delay
+     * @param delay delay time in milliseconds
+     * @param reason shutdown reason for log information
+     */
     public void terminate(final long delay, final String reason) {
         if ( delay <= 0 ) {
             throw new IllegalArgumentException("The shutdown delay must be greater than 0.");

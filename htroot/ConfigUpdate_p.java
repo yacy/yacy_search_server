@@ -149,10 +149,14 @@ public class ConfigUpdate_p {
                         sb.getLog().info("AUTO-UPDATE: omitting update because download failed (file cannot be found, is too small or signature was bad)");
                         prop.put("candeploy_autoUpdate", "4");
                     } else {
-                        yacyRelease.deployRelease(downloaded);
-                        sb.terminate(10, "manual release update to " + downloaded.getName());
-                        sb.getLog().info("AUTO-UPDATE: deploy and restart initiated");
-                        prop.put("candeploy_autoUpdate", "1");
+                        if(yacyRelease.deployRelease(downloaded)) {
+                        	sb.terminate(10, "manual release update to " + downloaded.getName());
+                        	sb.getLog().info("AUTO-UPDATE: deploy and restart initiated");
+                        	prop.put("candeploy_autoUpdate", "1");
+                        } else {
+                            sb.getLog().info("AUTO-UPDATE: omitting update because an error occurred while trying to deploy the release..");
+                            prop.put("candeploy_autoUpdate", "5");
+                        }
                     }
                 }
             }
