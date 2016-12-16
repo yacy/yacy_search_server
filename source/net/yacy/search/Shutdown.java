@@ -22,11 +22,19 @@ package net.yacy.search;
 
 import net.yacy.cora.util.ConcurrentLog;
 
+/**
+ * Thread used to trigger the server shutdown after a given delay.
+ */
 public class Shutdown extends Thread {
     private final Switchboard sb;
     private final long delay;
     private final String reason;
 
+    /**
+     * @param sb Switchboard instance
+     * @param delay delay in milliseconds
+     * @param reason shutdown reason for log information
+     */
     public Shutdown(final Switchboard sb, final long delay, final String reason) {
     	super(Shutdown.class.getSimpleName());
         this.sb = sb;
