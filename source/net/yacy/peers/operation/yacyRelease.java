@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -44,8 +45,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.http.HttpStatus;
-
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
@@ -54,9 +53,10 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.retrieval.Request;
+import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Document;
 import net.yacy.document.parser.tarParser;
 import net.yacy.kelondro.io.CharBuffer;
@@ -292,25 +292,36 @@ public final class yacyRelease extends yacyVersion {
 
         final String name = getUrl().getFileName();
         byte[] signatureBytes = null;
-        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
 
         // download signature first, if public key is available
         try {
             if (this.publicKey != null) {
-            	final byte[] signatureData = client.GETbytes(getUrl().toString() + ".sig", null, null, false);
+				final Request request = Switchboard.getSwitchboard().loader
+						.request(new DigestURL(getUrl().toString() + ".sig"), true, false);
+				final Response response = Switchboard.getSwitchboard().loader.load(request, CacheStrategy.NOCACHE,
+						Integer.MAX_VALUE, null, ClientIdentification.yacyInternetCrawlerAgent);
+            	byte[] signatureData = null;
+            	if(response != null && response.validResponseStatus()) {
+            		signatureData = response.getContent();
+            	}
                 if (signatureData == null) {
                     ConcurrentLog.warn("yacyVersion", "download of signature " + getUrl().toString() + " failed. ignoring signature file.");
                 }
                 else signatureBytes = Base64Order.standardCoder.decode(UTF8.String(signatureData).trim());
             }
-            client.setTimout(120000);
-            client.GET(getUrl().toString(), false);
-            int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
-            if(statusCode != HttpStatus.SC_OK) {
-            	/* HTTP status is not OK (200) : let's stop here to avoid creating a invalid download file*/
-            	throw new IOException("HTTP response status code : " + statusCode);
+            
+			final Request request = Switchboard.getSwitchboard().loader.request(new DigestURL(getUrl().toString()),
+					true, false);
+			final Response response = Switchboard.getSwitchboard().loader.load(request, CacheStrategy.NOCACHE,
+					Integer.MAX_VALUE, null, ClientIdentification.yacyInternetCrawlerAgent);
+			if(response == null) {
+            	throw new IOException("Could not get a response");
+			}
+            if(!response.validResponseStatus()) {
+            	/* HTTP status is not OK : let's stop here to avoid creating a invalid download file*/
+            	throw new IOException("HTTP response status code : " + response.getStatus());
             }
-            final ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
+            final ResponseHeader header = response.getResponseHeader();
 
             final boolean unzipped = header.gzip() && (header.mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
             if (unzipped && name.endsWith(".tar.gz")) {
@@ -323,7 +334,7 @@ public final class yacyRelease extends yacyVersion {
                 SignatureOutputStream verifyOutput = null;
                 try {
                     verifyOutput = new SignatureOutputStream(new FileOutputStream(download), CryptoLib.signAlgorithm, this.publicKey);
-                    client.writeTo(new BufferedOutputStream(verifyOutput));
+                    FileUtils.copy(response.getContent(), new BufferedOutputStream(verifyOutput));
 
                     if (!verifyOutput.verify(signatureBytes)) throw new IOException("Bad Signature!");
                 } catch (final NoSuchAlgorithmException e) {
@@ -331,8 +342,9 @@ public final class yacyRelease extends yacyVersion {
                 } catch (final SignatureException e) {
                     throw new IOException("Signature exception");
                 } finally {
-                    if (verifyOutput != null)
-                    verifyOutput.close();
+                    if (verifyOutput != null) {
+                    	verifyOutput.close();
+                    }
                 }
                 // Save signature
                 final File signatureFile = new File(download.getAbsoluteFile() + ".sig");
@@ -340,7 +352,15 @@ public final class yacyRelease extends yacyVersion {
                 if ((!signatureFile.exists()) || (signatureFile.length() == 0)) throw new IOException("create signature file failed");
             } else {
                 // just copy into file
-                client.writeTo(new BufferedOutputStream(new FileOutputStream(download)));
+                OutputStream downloadOutStream = null;
+                try {
+                	downloadOutStream = new BufferedOutputStream(new FileOutputStream(download));
+                	FileUtils.copy(response.getContent(), downloadOutStream);
+                } finally {
+                	if(downloadOutStream != null) {
+                		downloadOutStream.close();
+                	}
+                }
             }
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + getUrl() + " failed");
             // check again if this is actually a tar.gz or tar file since the httpc may have decompressed it
@@ -358,12 +378,6 @@ public final class yacyRelease extends yacyVersion {
                 if (download.exists()) ConcurrentLog.warn("yacyVersion", "could not delete file "+ download);
             }
             download = null;
-        } finally {
-        	try {
-				client.finish();
-			} catch (final IOException e) {
-				ConcurrentLog.severe("yacyVersion", "finish of " + getName() + " failed: " + e.getMessage());
-			}
         }
         this.releaseFile = download;
         Switchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());
