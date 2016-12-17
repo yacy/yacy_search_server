@@ -58,25 +58,14 @@ public class YacyDomainHandler extends AbstractHandler implements Handler {
     @Override
     public void handle(String target, Request baseRequest, HttpServletRequest request,
             HttpServletResponse response) throws IOException, ServletException {
-        String host = request.getServerName();
-        String resolved = alternativeResolvers.resolve(host);
+        String host = request.getServerName(); // is hostname (without port)
+        String resolved = alternativeResolvers.resolve(host); // is a host|ip with port
         if (resolved != null) {
-            // split resolved into host, port and path
-            String path;
-            String hostPort;
-            int posPath = resolved.indexOf('/');
-            if (posPath >= 0) {
-                path = resolved.substring(posPath);
-                hostPort = resolved.substring(0, posPath);
-            } else {
-                path = "";
-                hostPort = resolved;
-            }
-            int newPort = Domains.stripToPort(hostPort);
-            String newHost = Domains.stripToHostName(hostPort);
+            int newPort = Domains.stripToPort(resolved);
+            String newHost = Domains.stripToHostName(resolved);
             if (alternativeResolvers.myIPs().contains(newHost)) return;  
             if (Domains.isLocal(newHost, null)) return;
-            RequestDispatcher dispatcher = request.getRequestDispatcher(path + target);
+            RequestDispatcher dispatcher = request.getRequestDispatcher(target);
             dispatcher.forward(new DomainRequestWrapper(request, newHost, newPort), response);
             baseRequest.setHandled(true);
         }
