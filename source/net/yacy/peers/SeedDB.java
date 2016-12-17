@@ -927,6 +927,9 @@ public final class SeedDB implements AlternativeDomainNames {
 
     /**
      * resolve a yacy address
+     * http://PEERHASH.yacyh or http://PEERNAME.yacy
+     * or deprecated  http://subdom.PEERNAME.yacy resolved to http://host:port/subdom (no matching target servlets)
+     * to the actual host:port
      */
     @Override
     public String resolve(String host) {
