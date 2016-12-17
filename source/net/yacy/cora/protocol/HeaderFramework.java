@@ -47,9 +47,6 @@ import net.yacy.cora.util.ConcurrentLog;
  * keys are not compared by the equal() method, but are always
  * treated as string and compared as
  * key.uppercase().equal(.uppercase(comparator))
- * You use this class by first creation of a static HashMap
- * that then is used a the reverse mapping cache for every new
- * instance of this class.
  */
 public class HeaderFramework extends TreeMap<String, String> implements Map<String, String> {
 
@@ -211,26 +208,13 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     public static final String CONNECTION_PROP_PROXY_RESPOND_HEADER = "PROXY_RESPOND_HEADER";
     public static final String CONNECTION_PROP_PROXY_RESPOND_SIZE = "PROXY_REQUEST_SIZE";
 
-    private final Map<String, String> reverseMappingCache;
-
     public HeaderFramework() {
-        this(null);
-    }
-
-    public HeaderFramework(final Map<String, String> reverseMappingCache) {
-        // this creates a new TreeMap with a case insensitive mapping
-        // to provide a put-method that translates given keys into their
-        // 'proper' appearance, a translation cache is needed.
-        // upon instantiation, such a mapping cache can be handed over
-        // If the reverseMappingCache is null, none is used
         super(ASCII.insensitiveASCIIComparator);
-        this.reverseMappingCache = reverseMappingCache;
     }
 
-    public HeaderFramework(final Map<String, String> reverseMappingCache, final Map<String, String> othermap)  {
+    public HeaderFramework(final Map<String, String> othermap)  {
         // creates a case insensitive map from another map
         super(ASCII.insensitiveASCIIComparator);
-        this.reverseMappingCache = reverseMappingCache;
 
         // load with data
         if (othermap != null) putAll(othermap);
@@ -302,26 +286,6 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             try { return format.parse(s); } catch (final ParseException e) {}
         }
         return null;
-    }
-
-    // we override the put method to make use of the reverseMappingCache
-    @Override
-    public String put(final String key, final String value) {
-        final String upperK = key.toUpperCase();
-
-        if (this.reverseMappingCache == null) {
-            return super.put(key, value);
-        }
-
-        if (this.reverseMappingCache.containsKey(upperK)) {
-            // we put in the value using the reverse mapping
-            return super.put(this.reverseMappingCache.get(upperK), value);
-        }
-
-        // we put in without a cached key and store the key afterwards
-        final String r = super.put(key, value);
-        this.reverseMappingCache.put(upperK, key);
-        return r;
     }
 
     // to make the occurrence of multiple keys possible, we add them using a counter

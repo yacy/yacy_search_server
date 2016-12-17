@@ -22,7 +22,6 @@ package net.yacy.cora.protocol;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.Cookie;
@@ -53,13 +52,8 @@ public class ResponseHeader extends HeaderFramework {
         }
     }
 
-    public ResponseHeader(final int statusCode, final HashMap<String, String> reverseMappingCache) {
-        super(reverseMappingCache);
-        this.put(HeaderFramework.STATUS_CODE, Integer.toString(statusCode));
-    }
-
-    public ResponseHeader(final HashMap<String, String> reverseMappingCache, final Map<String, String> othermap)  {
-        super(reverseMappingCache, othermap);
+    public ResponseHeader(final Map<String, String> othermap)  {
+        super(othermap);
     }
 
     public int getStatusCode() {

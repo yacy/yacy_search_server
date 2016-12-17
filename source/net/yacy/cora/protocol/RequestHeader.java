@@ -452,6 +452,7 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         }
     }
 
+    @Deprecated // As of Version 2.1 of the Java Servlet API, use isRequestedSessionIdFromURL() instead.
     @Override
     public boolean isRequestedSessionIdFromUrl() {
         if (_request != null) {
