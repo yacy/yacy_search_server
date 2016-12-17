@@ -18,7 +18,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -30,6 +29,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.AbstractFormatter;
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
@@ -283,9 +283,9 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_pk", UTF8.String(row.getPK()));
                 prop.put("showtable_list_" + count + "_count", count);
                 prop.put("showtable_list_" + count + "_callcount", callcount);
-                prop.put("showtable_list_" + count + "_dateRecording", date_recording == null ? "-" : DateFormat.getDateTimeInstance().format(date_recording));
-                prop.put("showtable_list_" + count + "_dateLastExec", date_last_exec == null ? "-" : DateFormat.getDateTimeInstance().format(date_last_exec));
-                prop.put("showtable_list_" + count + "_dateNextExec", date_next_exec == null ? "-" : DateFormat.getDateTimeInstance().format(date_next_exec));
+                prop.put("showtable_list_" + count + "_dateRecording", date_recording == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_recording));
+                prop.put("showtable_list_" + count + "_dateLastExec", date_last_exec == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_last_exec));
+                prop.put("showtable_list_" + count + "_dateNextExec", date_next_exec == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_next_exec));
                 prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
                 prop.put("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
                 // check type & action to link crawl start URLs back to CrawlStartExpert.html
