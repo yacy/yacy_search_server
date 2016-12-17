@@ -26,13 +26,12 @@
 //if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.http.entity.mime.content.ContentBody;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.RequestHeader;
@@ -49,9 +48,8 @@ import net.yacy.utils.crypt;
 
 public class MessageSend_p {
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     public static String dateString(final Date date) {
-        return SimpleFormatter.format(date);
+        return GenericFormatter.SIMPLE_FORMATTER.format(date);
     }
 
 

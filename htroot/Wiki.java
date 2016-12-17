@@ -31,13 +31,12 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -57,9 +56,8 @@ public class Wiki {
     //private static String ListLevel = "";
     //private static String numListLevel = "";
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     public static String dateString(final Date date) {
-        return SimpleFormatter.format(date);
+        return GenericFormatter.SIMPLE_FORMATTER.format(date);
     }
 
 

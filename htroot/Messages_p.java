@@ -26,12 +26,11 @@
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.TreeMap;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -48,11 +47,10 @@ import com.google.common.io.Files;
 
 public class Messages_p {
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     private static final String PEERSKNOWN = "peersKnown_";
 
     public static String dateString(final Date date) {
-        return SimpleFormatter.format(date);
+        return GenericFormatter.SIMPLE_FORMATTER.format(date);
     }
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
