@@ -62,10 +62,13 @@ public class FileLoader {
         DigestURL url = request.url();
         if (!url.getProtocol().equals("file")) throw new IOException("wrong protocol for FileLoader: " + url.getProtocol());
 
-        RequestHeader requestHeader = new RequestHeader();
+        RequestHeader requestHeader = null;
         if (request.referrerhash() != null) {
             DigestURL ur = this.sb.getURL(request.referrerhash());
-            if (ur != null) requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true));
+            if (ur != null) {
+                requestHeader = new RequestHeader();
+                requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true));
+            }
         }
 
         // process directories: transform them to html with meta robots=noindex (using the ftpc lib)

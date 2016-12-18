@@ -212,7 +212,7 @@ public class Response {
     public Response(final Request request, final CrawlProfile profile) {
         this.request = request;
         // request and response headers may be zero in case that we process surrogates
-        this.requestHeader = new RequestHeader();
+        this.requestHeader = null;
         this.responseHeader = new ResponseHeader(200);
         this.responseHeader.put(HeaderFramework.CONTENT_TYPE, Classification.ext2mime(MultiProtocolURL.getFileExtension(request.url().getFileName()), "text/plain")); // tell parser how to handle the content
         this.profile = profile;

@@ -284,13 +284,13 @@ public final class HTTPLoader {
 			throws IOException {
 		final RequestHeader requestHeader = new RequestHeader();
 		requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
-		DigestURL refererURL = null;
 		if (request.referrerhash() != null) {
-			refererURL = this.sb.getURL(request.referrerhash());
+                    DigestURL refererURL = this.sb.getURL(request.referrerhash());
+                    if (refererURL != null) {
+                        requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
+                    }
 		}
-		if (refererURL != null) {
-			requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
-		}
+
 		requestHeader.put(HeaderFramework.ACCEPT, this.sb.getConfig("crawler.http.accept", DEFAULT_ACCEPT));
 		requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE,
 				this.sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));

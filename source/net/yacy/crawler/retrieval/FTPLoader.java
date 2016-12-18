@@ -117,10 +117,13 @@ public class FTPLoader {
 
             if (file.isEmpty()) {
                 // directory -> get list of files
-                final RequestHeader requestHeader = new RequestHeader();
+                RequestHeader requestHeader = null;
                 if (request.referrerhash() != null) {
                     final DigestURL u = this.sb.getURL(request.referrerhash());
-                    if (u != null) requestHeader.put(RequestHeader.REFERER, u.toNormalform(true));
+                    if (u != null) {
+                        requestHeader = new RequestHeader();
+                        requestHeader.put(RequestHeader.REFERER, u.toNormalform(true));
+                    }
                 }
 
                 final StringBuilder dirList = ftpClient.dirhtml(path);
@@ -223,10 +226,13 @@ public class FTPLoader {
         final Date fileDate = ftpClient.entryDate(path);
 
         // create response header
-        final RequestHeader requestHeader = new RequestHeader();
+        RequestHeader requestHeader = null;
         if (request.referrerhash() != null) {
             final DigestURL refurl = this.sb.getURL(request.referrerhash());
-            if (refurl != null) requestHeader.put(RequestHeader.REFERER, refurl.toNormalform(true));
+            if (refurl != null) {
+                requestHeader = new RequestHeader();
+                requestHeader.put(RequestHeader.REFERER, refurl.toNormalform(true));
+            }
         }
         final ResponseHeader responseHeader = new ResponseHeader(200);
         responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(fileDate));

@@ -566,9 +566,8 @@ public final class yacy {
         if (encodedPassword == null) encodedPassword = ""; // not defined
 
         // send 'wget' to web interface
-        final RequestHeader requestHeader = new RequestHeader();
         final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-        con.setHeader(requestHeader.entrySet());
+        // con.setHeader(requestHeader.entrySet());
         try {
             con.GETbytes("http://localhost:"+ port +"/" + path, config.getProperty(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,"admin"), encodedPassword, false);
             if (con.getStatusCode() > 199 && con.getStatusCode() < 300) {
