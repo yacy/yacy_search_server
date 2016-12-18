@@ -296,7 +296,7 @@ public final class Cache {
         }
         if (hdb == null) return null;
 
-        return new ResponseHeader(null, hdb);
+        return new ResponseHeader(hdb);
     }
 
 
