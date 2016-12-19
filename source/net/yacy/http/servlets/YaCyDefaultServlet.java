@@ -243,7 +243,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             throws ServletException, IOException {
         String pathInfo; 
         Enumeration<String> reqRanges = null;
-        boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null; 
+        boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
         if (included) {
             pathInfo = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
             if (pathInfo == null) {
@@ -855,18 +855,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
         
         if ((targetClass != null)) {
             serverObjects args = new serverObjects();
-            Enumeration<String> argNames = request.getParameterNames();
+            Enumeration<String> argNames = request.getParameterNames(); // on ssi jetty dispatcher merged local ssi query parameters
             while (argNames.hasMoreElements()) {
                 String argName = argNames.nextElement();
                 // standard attributes are just pushed as string
                 args.put(argName, request.getParameter(argName));
-            }
-            //TODO: for SSI request, local parameters are added as attributes, put them back as parameter for the legacy request
-            //      likely this should be implemented via httpservletrequestwrapper to supply complete parameters
-            Enumeration<String> attNames = request.getAttributeNames();
-            while (attNames.hasMoreElements()) {
-                String argName = attNames.nextElement();
-                args.put(argName, request.getAttribute(argName).toString());
             }
             RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
             // add multipart-form fields to parameter
