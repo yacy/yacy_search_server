@@ -113,7 +113,12 @@
                       <tr>
                           <td><input type="checkbox" name="search.navigation.location" value="true" #(search.navigation.location)#::checked="checked" #(/search.navigation.location)# /></td>
                           <td><ul class="nav nav-sidebar menugroup" id="sidebarLocation" style="padding-left:15px; padding-right:10px;">
-                                <li><h3>Location</h3></li>
+                            <li><h3>Location</h3></li>  
+                            #(search.navigation.location)#::
+                            <li>
+                              <img src="env/grafics/earthsearch.png" width="100%" height="86" alt="earthsearchlogo" /><br/>
+                              show search results on map
+                            </li>#(/search.navigation.location)#                                
                           </ul></td>
                       </tr>                          
                       <tr>
