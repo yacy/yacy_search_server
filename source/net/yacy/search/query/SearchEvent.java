@@ -142,6 +142,8 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     public Thread rwiProcess;
     public Thread localsolrsearch;
+    /** Offset of the next local Solr index request
+     * Example : last local request with offset=10 and itemsPerPage=20, sets this attribute to 30. */
     private int localsolroffset;
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
     public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
@@ -323,9 +325,9 @@ public final class SearchEvent {
 
         // start a local solr search
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, true, this.excludeintext_image), 0, this.query.itemsPerPage, null /*this peer*/, 0, Switchboard.urlBlacklist);
+            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, true, this.excludeintext_image), this.query.offset, this.query.itemsPerPage, null /*this peer*/, 0, Switchboard.urlBlacklist);
         }
-        this.localsolroffset = this.query.itemsPerPage;
+        this.localsolroffset = this.query.offset + this.query.itemsPerPage;
         
         // start a local RWI search concurrently
         this.rwiProcess = null;
@@ -1576,31 +1578,68 @@ public final class SearchEvent {
         // (happens if a search pages is accessed a second time)
         final long finishTime = timeout == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + timeout;
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.getResultCount(), 0, 0), false);
+		
         // wait until a local solr is finished, we must do that to be able to check if we need more
-        if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join(100);} catch (final InterruptedException e) {}}
-        if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
-        if (item >= this.localsolroffset && this.local_solr_stored.get() >= item) {
-            // load remaining solr results now
+		if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {
+			try {
+				this.localsolrsearch.join(100);
+			} catch (final InterruptedException e) {
+				log.warn("Wait for local solr search was interrupted.");
+			}
+		}
+		if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && this.localsolrsearch.isAlive()) {
+			try {
+				this.localsolrsearch.join();
+			} catch (final InterruptedException e) {
+				log.warn("Wait for local solr search was interrupted.");
+			}
+		}
+        if (this.remote && item >= this.localsolroffset && this.local_solr_stored.get() >= item) {
+			/* Request mixing remote and local Solr results : load remaining local solr results now. 
+			 * For local only search, a new SearchEvent should be created, starting directly at the requested offset,
+			 * thus allowing to handle last pages of large resultsets
+			 */
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
             if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
-            if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image), this.localsolroffset, nextitems, null /*this peer*/, 0, Switchboard.urlBlacklist);
-            }
-            this.localsolroffset += nextitems;
+			if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
+				this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
+						this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image),
+						this.localsolroffset, nextitems, null /* this peer */, 0, Switchboard.urlBlacklist);
+			}
+			this.localsolroffset += nextitems;
         }
         
         // now pull results as long as needed and as long as possible
-        if (this.remote && item < 10 && this.resultList.sizeAvailable() <= item) try {Thread.sleep(100);} catch (final InterruptedException e) {ConcurrentLog.logException(e);}
-        while ( this.resultList.sizeAvailable() <= item &&
+		if (this.remote && item < 10 && this.resultList.sizeAvailable() <= item) {
+			try {
+				Thread.sleep(100);
+			} catch (final InterruptedException e) {
+				log.warn("Remote search results wait was interrupted.");
+			}
+		}
+		
+        final int resultListIndex;
+        if (this.remote) {
+        	resultListIndex = item;
+        } else {
+        	resultListIndex = item - (this.localsolroffset - this.query.itemsPerPage);
+        }
+        while ( this.resultList.sizeAvailable() <= resultListIndex &&
                 (this.rwiQueueSize() > 0 || this.nodeStack.sizeQueue() > 0 ||
                 (!this.feedingIsFinished() && System.currentTimeMillis() < finishTime))) {
-            if (!drainStacksToResult()) try {Thread.sleep(10);} catch (final InterruptedException e) {ConcurrentLog.logException(e);}
+			if (!drainStacksToResult()) {
+				try {
+					Thread.sleep(10);
+				} catch (final InterruptedException e) {
+					log.warn("Search results wait was interrupted.");
+				}
+			}
         }
         
         // check if we have a success
-        if (this.resultList.sizeAvailable() > item) {
+        if (this.resultList.sizeAvailable() > resultListIndex) {
             // we have the wanted result already in the result array .. return that
-            final URIMetadataNode re = this.resultList.element(item).getElement();
+            final URIMetadataNode re = this.resultList.element(resultListIndex).getElement();
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "fetched, item = " + item + ", available = " + this.getResultCount() + ": " + re.urlstring(), 0, 0), false);
             
             /*

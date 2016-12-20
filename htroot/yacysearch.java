@@ -171,6 +171,7 @@ public class yacysearch {
             prop.put("indexof", "off");
             prop.put("constraint", "");
             prop.put("depth", "0");
+            prop.put("localQuery", "0");
             prop.put(
                 "search.verify",
                 (post == null) ? sb.getConfig("search.verify", "iffresh") : post.get("verify", "iffresh"));
@@ -849,6 +850,7 @@ public class yacysearch {
             }
 
             prop.put("depth", "0");
+            prop.put("localQuery", theSearch.query.isLocal() ? "1" : "0");
 
         }
         prop.put("focus", focus ? 1 : 0); // focus search field

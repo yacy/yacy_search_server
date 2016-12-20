@@ -222,7 +222,8 @@ function latestinfo() {
   self.xmlHttpReq.onreadystatechange = function() {
     if (self.xmlHttpReq.readyState == 4) {
       var rsp = eval("(" + self.xmlHttpReq.responseText + ")");
-      statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase);
+      
+      statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#);
     }
   };
   self.xmlHttpReq.send(null);

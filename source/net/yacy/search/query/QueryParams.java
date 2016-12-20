@@ -187,7 +187,13 @@ public final class QueryParams {
         this.contentdom = contentdom;
         this.timezoneOffset = timezoneOffset;
         this.itemsPerPage = Math.min((specialRights) ? 10000 : 1000, itemsPerPage);
-        this.offset = Math.max(0, Math.min((specialRights) ? 10000 - this.itemsPerPage : 1000 - this.itemsPerPage, offset));
+        if(domType == Searchdom.LOCAL) {
+        	/* No offset restriction on local index only requests, as only itemsPerPage will be loaded */
+        	this.offset = Math.max(0, offset);
+        } else {
+        	/* Offset has to be limited on requests mixing local and remote results, because all results before offset are loaded */
+        	this.offset = Math.max(0, Math.min((specialRights) ? 10000 - this.itemsPerPage : 1000 - this.itemsPerPage, offset));
+        }
         try {
             this.urlMaskString = urlMask;
             // solr doesn't like slashes, backslashes or doublepoints; remove them // urlmask = ".*\\." + ft + "(\\?.*)?";

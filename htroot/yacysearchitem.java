@@ -101,6 +101,7 @@ public class yacysearchitem {
         prop.put("references", "0");
         prop.put("rssreferences", "0");
         prop.put("dynamic", "0");
+        prop.put("localQuery", "0");
 
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
@@ -119,6 +120,7 @@ public class yacysearchitem {
         prop.put("remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
         prop.put("navurlBase", QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false).toString());
+        prop.put("localQuery", theSearch.query.isLocal() ? "1" : "0");
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
 
         long timeout = item == 0 ? 10000 : (theSearch.query.isLocal() ? 1000 : 3000);
