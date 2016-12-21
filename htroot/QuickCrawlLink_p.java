@@ -90,7 +90,11 @@ public class QuickCrawlLink_p {
             Segment indexSegment = sb.index;
 
             // get the browser title
-            final String title = post.get("title", null);
+            String title = post.get("title", null);
+            if(title != null) {
+            	/* Decode eventual special(non ASCII) characters in title */
+            	title = UTF8.decodeURL(title);
+            }
 
             // get other parameters if set
             final String crawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
