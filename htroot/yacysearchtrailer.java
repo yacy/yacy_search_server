@@ -338,46 +338,6 @@ public class yacysearchtrailer {
             if (pos == 1 && neg == 0) prop.put("nav-dates", 0); // this navigation is not useful
         }
 
-        // filetype navigators
-        if (theSearch.filetypeNavigator == null || theSearch.filetypeNavigator.isEmpty()) {
-            prop.put("nav-filetypes", 0);
-        } else {
-            prop.put("nav-filetypes", 1);
-            navigatorIterator = theSearch.filetypeNavigator.keys(false);
-            int i = 0, pos = 0, neg = 0;
-            String nav, rawNav;
-            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
-                name = navigatorIterator.next().trim();
-                count = theSearch.filetypeNavigator.get(name);
-                if (count == 0) break;
-                nav = "filetype%3A" + name;
-                /* Avoid double percent encoding in QueryParams.navurl */
-                rawNav = "filetype:" + name;
-                if (theSearch.query.modifier.filetype == null || !theSearch.query.modifier.filetype.contains(name) ) {
-                    pos++;
-                    prop.put("nav-filetypes_element_" + i + "_on", 1);
-                    prop.put(fileType, "nav-filetypes_element_" + i + "_modifier", nav);
-                } else {
-                    neg++;                    
-                    prop.put("nav-filetypes_element_" + i + "_on", 0);                    
-                    prop.put(fileType, "nav-filetypes_element_" + i + "_modifier", "-" + nav);
-                    nav="";
-                    rawNav = "";
-                }
-                prop.put(fileType, "nav-filetypes_element_" + i + "_name", name);
-                prop.put(fileType, "nav-filetypes_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
-                prop.put(fileType, "nav-filetypes_element_" + i + "_id", "filetypes_" + i);
-                prop.put("nav-filetypes_element_" + i + "_count", count);
-                prop.put("nav-filetypes_element_" + i + "_nl", 1);
-                i++;
-            }
-            prop.put("nav-filetypes_element", i);
-            prop.put("nav-filetypes_count", i);
-            i--;
-            prop.put("nav-filetypes_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0) prop.put("nav-filetypes", 0); // this navigation is not useful
-        }
-
         // vocabulary navigators
         final Map<String, ScoreMap<String>> vocabularyNavigators = theSearch.vocabularyNavigator;
         if (vocabularyNavigators != null && !vocabularyNavigators.isEmpty()) {

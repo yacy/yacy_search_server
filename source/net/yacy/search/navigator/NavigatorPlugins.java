@@ -24,6 +24,7 @@ package net.yacy.search.navigator;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import net.yacy.crawler.CrawlSwitchboard;
 import static net.yacy.search.query.SearchEvent.log;
 import net.yacy.search.schema.CollectionSchema;
@@ -32,6 +33,23 @@ import net.yacy.search.schema.CollectionSchema;
  * Class to create and manipulate search navigator plugin list
  */
 public class NavigatorPlugins {
+
+    /**
+     * List of available navigators
+     * @return Map key=navigatorCfgname, value=std.DisplayName
+     */
+    static public Map<String, String> listAvailable() {
+        Map<String, String> defaultnavplugins = new TreeMap();
+        defaultnavplugins.put("filetype", "Filetype");
+        // defaultnavplugins.put("hosts", "Provider");
+        // defaultnavplugins.put("language", "Language");
+        defaultnavplugins.put("authors", "Authors");
+        defaultnavplugins.put("collections", "Collection");
+        defaultnavplugins.put("namespace", "Wiki Name Space");
+        defaultnavplugins.put("year", "Year");
+        // defaultnavplugins.put("year:dates_in_content_dts:Event","Event");
+        return defaultnavplugins;
+    }
 
     /**
      * Creates map of active search navigators from comma separated config string
@@ -65,6 +83,18 @@ public class NavigatorPlugins {
                 navigatorPlugins.put("collections", tmpnav);
             }
 
+            if (navname.contains("filetype")) {
+                navigatorPlugins.put("filetype", new FileTypeNavigator("Filetype", CollectionSchema.url_file_ext_s));
+            }
+/*
+            if (navname.contains("hosts")) {
+                navigatorPlugins.put("hosts", new HostNavigator("Provider", CollectionSchema.host_s));
+            }
+
+            if (navname.contains("language")) {
+                navigatorPlugins.put("language", new LanguageNavigator("Language"));
+            }
+*/
             if (navname.contains("namespace")) {
                 navigatorPlugins.put("namespace", new NameSpaceNavigator("Wiki Name Space"));
             }

@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -86,7 +87,7 @@ public class ConfigSearchPage_p {
                 // construct navigation String
                 String nav = "";
                 if (post.getBoolean("search.navigation.location")) nav += "location,";
-                if (post.getBoolean("search.navigation.filetype")) nav += "filetype,";
+                // if (post.getBoolean("search.navigation.filetype")) nav += "filetype,";
                 if (post.getBoolean("search.navigation.protocol")) nav += "protocol,";
                 if (post.getBoolean("search.navigation.hosts")) nav += "hosts,";
                 if (post.getBoolean("search.navigation.language")) nav += "language,";
@@ -112,7 +113,7 @@ public class ConfigSearchPage_p {
 
             if (post.containsKey("add.nav")) { // button: add navigator plugin to ative list
                 String navname = post.get("search.navigation.navname");
-                if (navname != null) {
+                if (navname != null && !navname.isEmpty()) {
                     String naviconf = sb.getConfig("search.navigation", "");
                     naviconf += "," + navname;
                     sb.setConfig("search.navigation", naviconf);
@@ -196,7 +197,7 @@ public class ConfigSearchPage_p {
         prop.put("search.result.show.snapshots", sb.getConfigBool("search.result.show.snapshots", false) ? 1 : 0);
 
         prop.put("search.navigation.location", sb.getConfig("search.navigation", "").indexOf("location",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.filetype", sb.getConfig("search.navigation", "").indexOf("filetype",0) >= 0 ? 1 : 0);
+        // prop.put("search.navigation.filetype", sb.getConfig("search.navigation", "").indexOf("filetype",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.protocol", sb.getConfig("search.navigation", "").indexOf("protocol",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);
         prop.put("search.navigation.language", sb.getConfig("search.navigation", "").indexOf("language",0) >= 0 ? 1 : 0);
@@ -216,6 +217,23 @@ public class ConfigSearchPage_p {
             i++;
         }
         prop.put("search.navigation.plugin", i);
+
+        // fill select field options (only navs not already active)
+        Map<String, String> defaultnavplugins = NavigatorPlugins.listAvailable();
+        i=0;
+        for (String navname : defaultnavplugins.keySet()) {
+            if (!navplugins.containsKey(navname)) {
+                prop.put("search.navigation.list_" + i + "_name", navname);
+                prop.put("search.navigation.list_" + i + "_displayname", defaultnavplugins.get(navname));
+                i++;
+            }
+        }
+        if (i == 0) { // on no new nav avail. put in dummy name to indicate empty list
+            prop.put("search.navigation.list_" + i + "_name", "");
+            prop.put("search.navigation.list_" + i + "_displayname", "---");
+            i = 1;
+        }
+        prop.put("search.navigation.list", i);
 
         prop.put("search.navigation.maxcount", sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT));
 

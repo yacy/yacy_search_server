@@ -73,7 +73,6 @@ import net.yacy.data.WorkTables;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.ProbabilisticClassifier;
-import net.yacy.document.TextParser;
 import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
@@ -149,7 +148,6 @@ public final class SearchEvent {
     public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
     public final ScoreMap<String> hostNavigator; // a counter for the appearance of host names
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
-    public final ScoreMap<String> filetypeNavigator; // a counter for file types
     public final ScoreMap<String> dateNavigator; // a counter for file types
     public final ScoreMap<String> languageNavigator; // a counter for appearance of languages
     public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
@@ -262,7 +260,6 @@ public final class SearchEvent {
         this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
         this.hostNavigator = navcfg.contains("hosts") ? new ConcurrentScoreMap<String>() : null;
         this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
-        this.filetypeNavigator = navcfg.contains("filetype") ? new ConcurrentScoreMap<String>() : null;
         this.dateNavigator = navcfg.contains("date") ? new ClusteredScoreMap<String>(true) : null;
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
         this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
@@ -850,27 +847,6 @@ public final class SearchEvent {
                     if (host.startsWith("www.")) host = host.substring(4);
                     this.hostNavigator.inc(host, hc);
                 }
-            }
-        }
-
-        if (this.filetypeNavigator != null) {
-            fcts = facets.get(CollectionSchema.url_file_ext_s.getSolrFieldName());
-            if (fcts != null) {
-                // remove all filetypes that we don't know
-                Iterator<String> i = fcts.iterator();
-                while (i.hasNext()) {
-                    String ext = i.next();
-                    if (this.query.contentdom == ContentDomain.TEXT) {
-                        if ((Classification.isImageExtension(ext) && this.excludeintext_image) ||
-                            (TextParser.supportsExtension(ext) != null && !Classification.isAnyKnownExtension(ext))) {
-                            //Log.logInfo("SearchEvent", "removed unknown extension " + ext + " from navigation.");
-                            i.remove();
-                        }
-                    } else { // for image and media search also limit to known extension
-                        if (!Classification.isAnyKnownExtension(ext)) i.remove();
-                    }
-                }
-                this.filetypeNavigator.inc(fcts);
             }
         }
 

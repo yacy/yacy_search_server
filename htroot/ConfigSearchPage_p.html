@@ -122,12 +122,6 @@
                           </ul></td>
                       </tr>                          
                       <tr>
-                        <td><input type="checkbox" name="search.navigation.filetype" value="true" #(search.navigation.filetype)#::checked="checked" #(/search.navigation.filetype)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarFiletypes" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Filetype</h3></li>
-                          </ul></td>
-                      </tr>
-                      <tr>
                         <td><input type="checkbox" name="search.navigation.hosts" value="true" #(search.navigation.hosts)#::checked="checked" #(/search.navigation.hosts)# /></td>
                         <td><ul class="nav nav-sidebar menugroup" id="sidebarDomains" style="padding-left:15px; padding-right:10px;">
                           <li><h3>Provider</h3></li>
@@ -287,10 +281,9 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
         <fieldset><legend>Add Navigators</legend>
           <label for="search.navigation.navname">append</label>
           <select type="text" name="search.navigation.navname">
-            <option value="authors">Authors</option>
-            <option value="collections">Collection</option>
-            <option value="namespace">Wiki Name Space</option>
-            <option value="year">Year</option>
+            #{search.navigation.list}#
+            <option value="#[name]#">#[displayname]#</option>
+            #{/search.navigation.list}#
           </select>
           <button type="submit" name="add.nav" class="btn btn-xs btn-default" ><span class="glyphicon glyphicon-plus-sign" style="color: green"/></button><br>
           <label for="search.navigation.maxcount">max. items</label>

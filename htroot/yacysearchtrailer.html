@@ -165,15 +165,6 @@ function toggleVisibility(name, count) {
 <script>if (#[count]# <= 8) toggleVisibility('domains', #[count]#);</script>
 #(/nav-domains)#
 
-#(nav-filetypes)#::
-<ul class="nav nav-sidebar menugroup">
-<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('filetypes', #[count]#);">Filetype [#[count]#] <span style="float:right" id="chevron-filetypes" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
-#{element}#
-<li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
-#{/element}#</ul>
-<script>if (#[count]# <= 8) toggleVisibility('filetypes', #[count]#);</script>
-#(/nav-filetypes)#
-
 #(nav-languages)#::
 <ul class="nav nav-sidebar menugroup">
 <li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('languages', #[count]#);">Language [#[count]#] <span style="float:right" id="chevron-languages" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
