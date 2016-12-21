@@ -47,9 +47,9 @@ function renderPaginationButtons(offset, itemscount, itemsperpage, totalcount, l
 	var thispage = Math.floor(offset / itemsperpage);
 	var firstPage = thispage - (thispage % 10);
 	if (thispage == 0) {
-		resnav += "<li class=\"disabled\"><a href=\"#\">&laquo;</a></li>";
+		resnav += "<li class=\"disabled\"><a title=\"Previous page\" href=\"#\">&laquo;</a></li>";
 	} else {
-	 	resnav += "<li><a id=\"prevpage\" href=\"";
+	 	resnav += "<li><a id=\"prevpage\" title=\"Previous page\" href=\"";
 	    resnav += (navurlbase + "&amp;startRecord=" + ((thispage - 1) * itemsperpage));
 	  	resnav += "\">&laquo;</a></li>";
 	}
@@ -69,9 +69,9 @@ function renderPaginationButtons(offset, itemscount, itemsperpage, totalcount, l
 	    }
 	}
 	if ((localQuery && thispage >= (totalPagesNb - 1)) || (!localQuery && thispage >= (numberofpages - 1))) {
-		resnav += "<li class=\"disabled\"><a href=\"#\">&raquo;</a></li>";
+		resnav += "<li class=\"disabled\"><a href=\"#\" title=\"Next page\">&raquo;</a></li>";
 	} else {
-	    resnav += "<li><a id=\"nextpage\" href=\"";
+	    resnav += "<li><a id=\"nextpage\" title=\"Next page\" href=\"";
 	    resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
 	    resnav += "\">&raquo;</a>";
 	}
