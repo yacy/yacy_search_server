@@ -52,5 +52,7 @@ VOLUME ["/opt/yacy_search_server/DATA"]
 # Next commands run as yacy as non-root user for improved security
 USER yacy
 
-# Start yacy in debug mode (-d) to display console logs and to wait for yacy process
-CMD sh /opt/yacy_search_server/startYACY.sh -d
+
+# Add and set entrypoint script to start and stop YaCy 
+ADD entrypoint.sh /bin/entrypoint.sh
+ENTRYPOINT ["/bin/entrypoint.sh"]
