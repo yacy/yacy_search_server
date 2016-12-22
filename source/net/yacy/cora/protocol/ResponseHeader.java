@@ -48,7 +48,7 @@ public class ResponseHeader extends HeaderFramework {
         super();
         this.put(HeaderFramework.STATUS_CODE, Integer.toString(statusCode));
         for (final Header h : headers) {
-        	add(h.getName(), h.getValue());
+            add(h.getName(), h.getValue());
         }
     }
 
@@ -155,28 +155,17 @@ public class ResponseHeader extends HeaderFramework {
          * For example semicolon should be not in any of the values
          * However an exception in this case would be an overhead IMHO.
          */
-        if (this.cookieStore == null) this.cookieStore = new ArrayList<Cookie>();
-        Cookie c = new Cookie (name, value);
-        if (maxage != null) c.setMaxAge(maxage);
-        if (path != null) c.setPath(path);
-        if (domain != null) c.setDomain(domain);
-        if (secure) c.setSecure(secure);
-        this.cookieStore.add(c);
+        if (!name.isEmpty()) {
+            if (this.cookieStore == null) this.cookieStore = new ArrayList<Cookie>();
+            Cookie c = new Cookie (name, value);
+            if (maxage != null) c.setMaxAge(maxage);
+            if (path != null) c.setPath(path);
+            if (domain != null) c.setDomain(domain);
+            if (secure) c.setSecure(secure);
+            this.cookieStore.add(c);
+        }
     }
-    /**
-     * Sets Cookie on the client machine.
-     *
-     * @param name Cookie name
-     * @param value Cookie value
-     * @param maxage time to live in seconds, none negative number, according to https://tools.ietf.org/html/rfc2109, 0=discard in https://tools.ietf.org/html/rfc2965
-     *
-     * Note: this cookie will be sent over each connection independent if it is safe connection or not.
-     * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
-     */
-    public void setCookie(final String name, final String value, final Integer maxage)
-    {
-        setCookie( name,  value,  maxage,  null,  null, false);
-    }
+    
     /**
      * Sets Cookie on the client machine.
      *

@@ -61,7 +61,7 @@ public class CookieTest_p {
                     final String cookies[] = CommonPattern.SEMICOLON.split(e.getValue());
                     for (final String cookie : cookies) {
                         final String nameValue[] = cookie.split("=");
-                        outgoingHeader.setCookie(nameValue[0].trim(), nameValue.length > 1 ? (nameValue[1].trim()) : "", 0);
+                        outgoingHeader.setCookie(nameValue[0].trim(), nameValue.length > 1 ? (nameValue[1].trim()) : "");
                     }
                 }
             }
