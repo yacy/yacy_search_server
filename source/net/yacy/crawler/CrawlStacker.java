@@ -227,12 +227,9 @@ public final class CrawlStacker {
             }
 
             if (url.getProtocol().equals("ftp")) {
-                // put the whole ftp site on the crawl stack
-                String userInfo = url.getUserInfo();
-                int p = userInfo == null ? -1 : userInfo.indexOf(':');
-                String user = userInfo == null ? FTPClient.ANONYMOUS : userInfo.substring(0, p);
-                String pw = userInfo == null || p == -1 ? "anomic" : userInfo.substring(p + 1);
-                enqueueEntriesFTP(initiator, profileHandle, url.getHost(), url.getPort(), user, pw, replace, timezoneOffset);
+                /* put ftp site entries on the crawl stack, 
+                 * using the crawl profile depth to control how many children folders of the url are stacked */
+                enqueueEntriesFTP(initiator, profile, url, replace, timezoneOffset);
             } else {
                 // put entry on crawl stack
                 enqueueEntry(new Request(
@@ -248,24 +245,35 @@ public final class CrawlStacker {
             }
         }
     }
-
+    
+    /**
+     * Asynchronously enqueue crawl start entries for a ftp url.
+     * @param initiator Hash of the peer initiating the crawl
+     * @param profile the active crawl profile
+     * @param ftpURL crawl start point URL : protocol must be ftp
+     * @param replace Specify whether old indexed entries should be replaced
+     * @param timezoneOffset local time-zone offset
+     */
     public void enqueueEntriesFTP(
             final byte[] initiator,
-            final String profileHandle,
-            final String host,
-            final int port,
-            final String user,
-            final String pw,
+            final CrawlProfile profile,
+            final DigestURL ftpURL,
             final boolean replace,
             final int timezoneOffset) {
         final CrawlQueues cq = this.nextQueue;
+        final String userInfo = ftpURL.getUserInfo();
+        final int p = userInfo == null ? -1 : userInfo.indexOf(':');
+        final String user = userInfo == null ? FTPClient.ANONYMOUS : userInfo.substring(0, p);
+        final String pw = userInfo == null || p == -1 ? "anomic" : userInfo.substring(p + 1);
+        final String host = ftpURL.getHost();
+        final int port = ftpURL.getPort();
         new Thread() {
             @Override
             public void run() {
                 Thread.currentThread().setName("enqueueEntriesFTP");
                 BlockingQueue<FTPClient.entryInfo> queue;
                 try {
-                    queue = FTPClient.sitelist(host, port, user, pw);
+                    queue = FTPClient.sitelist(host, port, user, pw, ftpURL.getPath(), profile.depth());
                     FTPClient.entryInfo entry;
                     while ((entry = queue.take()) != FTPClient.POISON_entryInfo) {
 
@@ -289,7 +297,7 @@ public final class CrawlStacker {
                                 null,
                                 MultiProtocolURL.unescape(entry.name),
                                 entry.date,
-                                profileHandle,
+                                profile.handle(),
                                 0,
                                 timezoneOffset));
                     }
