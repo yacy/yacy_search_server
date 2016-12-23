@@ -1,4 +1,5 @@
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -13,10 +14,24 @@ public class urlproxyheader {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        final String proxyurlstr = post.get("url",""); // the url of remote page currently viewed
-        prop.put("proxyurl", proxyurlstr);
+        String proxyurlstr = post.get("url",""); // the url of remote page currently viewed
+        boolean hasRights = sb.verifyAuthentication(requestHeader);
+        prop.put("allowbookmark", hasRights);
 
-        if (proxyurlstr.startsWith("https")) {
+        if (post.containsKey("addbookmark")) {
+            proxyurlstr = post.get("bookmark");
+            Bookmark bmk = sb.bookmarksDB.createorgetBookmark(proxyurlstr, null);
+            if (bmk != null) {
+                bmk.setPublic(false);
+                bmk.addTag("/proxy"); // add to bookmark folder
+                sb.bookmarksDB.saveBookmark(bmk);
+            }
+        }
+        
+        prop.put("proxyurl", proxyurlstr);
+        prop.put("allowbookmark_proxyurl", proxyurlstr);
+
+        if (proxyurlstr.startsWith("https") && !requestHeader.getScheme().equalsIgnoreCase("https")) {
             prop.put("httpsAlertMsg", "1");
         } else {
             prop.put("httpsAlertMsg", "0");

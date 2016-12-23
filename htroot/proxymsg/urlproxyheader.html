@@ -2,8 +2,11 @@
 <html>
     <body style="background:white">
         <div align="center" style="width:98%; padding:5px; background:white; border-bottom: medium solid lightgrey;">
-            <form method="get" target="_parent" action="#[proxyurl]#">
-                <input type="submit" value="YaCy stop proxy"> #(httpsAlertMsg)#:: &nbsp;  - <span style='color:red'>(Warning: secure target viewed over normal http)</span>#(/httpsAlertMsg)#
+            <form method="get" action="?url=#[proxyurl]#">
+              <button name="exit" onclick="parent.location='#[proxyurl]#'">YaCy stop proxy</button> 
+                #(httpsAlertMsg)#:: &nbsp;  - <span style='color:red'>(Warning: secure target viewed over normal http)</span>#(/httpsAlertMsg)#
+              #(allowbookmark)#::<input type="hidden" name="bookmark" value="#[proxyurl]#">
+              <input type="submit" name="addbookmark" value="add bookmark">#(/allowbookmark)#
             </form>
         </div>
     </body>
