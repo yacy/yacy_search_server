@@ -396,12 +396,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         final String classprop = tag.opts.getProperty("class", EMPTY_STRING);
         this.vocabularyScraper.check(this.root, classprop, tag.content);
         
-        // itemprop
+        // itemprop (schema.org)
         String itemprop = tag.opts.getProperty("itemprop");
         if (itemprop != null) {
             String propval = tag.opts.getProperty("content");
-            if (propval == null) propval = tag.opts.getProperty("datetime"); // html5 example: <time itemprop="startDate" datetime="2016-01-26">today</time> while each prop is optional
-            if (propval != null) {
+            if (propval == null) propval = tag.opts.getProperty("datetime"); // html5 + schema.org#itemprop example: <time itemprop="startDate" datetime="2016-01-26">today</time> while each prop is optional
+            if (propval != null) {                                           // html5 example: <time datetime="2016-01-26">today</time> while each prop is optional
                 if ("startDate".equals(itemprop)) try {
                     // parse ISO 8601 date
                     Date startDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
@@ -646,7 +646,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
                 if (followDenied()) {
                     String rel = tag.opts.getProperty("rel", EMPTY_STRING);
-                    if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow"; 
+                    if (rel.length() == 0) rel = "nofollow"; else if (rel.indexOf("nofollow") < 0) rel += ",nofollow";
                     tag.opts.put("rel", rel);
                 }
                 tag.opts.put("text", stripAllTags(tag.content.getChars())); // strip any inline html in tag text like  "<a ...> <span>test</span> </a>"
@@ -726,8 +726,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.articles.add(h);
         } else if (tag.name.equalsIgnoreCase(TagName.time.name())) { // html5 tag <time datetime="2016-12-23">Event</time>
-            h = tag.opts.getProperty("datetime");
-            if (h != null) {
+            h = tag.opts.getProperty("datetime"); // TODO: checkOpts() also parses datetime property if in combination with schema.org itemprop=startDate/endDate
+            if (h != null) { // datetime property is optional
                 try {
                     Date startDate = ISO8601Formatter.FORMATTER.parse(h, this.timezoneOffset).getTime();
                     this.startDates.add(startDate);
