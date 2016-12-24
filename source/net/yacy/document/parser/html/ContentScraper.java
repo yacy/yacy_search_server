@@ -120,7 +120,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         script(TagType.pair),
         span(TagType.pair),
         div(TagType.pair),
-        article(TagType.pair),
+        article(TagType.pair), // html5
+        time(TagType.pair), // html5 <time datetime>
         // tags used to capture tag content
         // TODO: considere to use </head> or <body> as trigger to scape for text content
         style(TagType.pair); // embedded css (if not declared as tag content is parsed as text)
@@ -724,6 +725,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if (tag.name.equalsIgnoreCase("article")) {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.articles.add(h);
+        } else if (tag.name.equalsIgnoreCase(TagName.time.name())) { // html5 tag <time datetime="2016-12-23">Event</time>
+            h = tag.opts.getProperty("datetime");
+            if (h != null) {
+                try {
+                    Date startDate = ISO8601Formatter.FORMATTER.parse(h, this.timezoneOffset).getTime();
+                    this.startDates.add(startDate);
+                } catch (ParseException ex) { }
+            }
         }
 
         // fire event

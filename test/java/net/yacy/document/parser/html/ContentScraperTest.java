@@ -21,7 +21,17 @@
 package net.yacy.document.parser.html;
 
 import java.awt.Dimension;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.Writer;
+import java.net.MalformedURLException;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Set;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.document.VocabularyScraper;
+import net.yacy.kelondro.util.FileUtils;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -121,5 +131,32 @@ public class ContentScraperTest {
 		tokens = ContentScraper.parseSpaceSeparatedTokens(null);
 		Assert.assertEquals(0, tokens.size());
 	}
+
+    @Test
+    public void testGetStartDates() throws MalformedURLException, IOException {
+        List<Date> dateResultList;
+        DigestURL root = new DigestURL("http://test.org/test.html");
+
+        String page = "<html><body>"
+                + "<time datetime='2016-12-23'>23. Dezember 2016</time>" // html5 time tag
+                + "</body></html>";
+
+        ContentScraper scraper = new ContentScraper(root, 10, new VocabularyScraper(), 0);
+        final Writer writer = new TransformerWriter(null, null, scraper, null, false);
+
+        FileUtils.copy(new StringReader(page), writer);
+        writer.close();
+
+        dateResultList = scraper.getStartDates();
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(0); // to zero hours
+        cal.set(2016, Calendar.DECEMBER, 23);
+
+        for (Date d : dateResultList) {
+            Assert.assertEquals(cal.getTime(), d);
+        }
+        scraper.close();
+    }
 
 }
