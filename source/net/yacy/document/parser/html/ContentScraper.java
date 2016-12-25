@@ -300,29 +300,29 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 if (newtext[r] == ' ') {
                     r--;
                     if (newtext[r] == 'N') {
-                        this.lat =  Float.parseFloat(new String(newtext, r + 2, p - r - 2)) +
-                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
+                        this.lat =  Double.parseDouble(new String(newtext, r + 2, p - r - 2)) +
+                                    Double.parseDouble(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
                         if (this.lon != 0.0d) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'S') {
-                        this.lat = -Float.parseFloat(new String(newtext, r + 2, p - r - 2)) -
-                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
+                        this.lat = -Double.parseDouble(new String(newtext, r + 2, p - r - 2)) -
+                                    Double.parseDouble(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
                         if (this.lon != 0.0d) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'E') {
-                        this.lon =  Float.parseFloat(new String(newtext, r + 2, p - r - 2)) +
-                                    Float.parseFloat(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
+                        this.lon =  Double.parseDouble(new String(newtext, r + 2, p - r - 2)) +
+                                    Double.parseDouble(new String(newtext, p + pl + 1, q - p - pl - 1)) / 60.0d;
                         if (this.lat != 0.0d) break location;
                         s = q + 6;
                         continue location;
                     }
                     if (newtext[r] == 'W') {
-                        this.lon = -Float.parseFloat(new String(newtext, r + 2, p - r - 2)) -
-                                    Float.parseFloat(new String(newtext, p + 2, q - p - pl - 1)) / 60.0d;
+                        this.lon = -Double.parseDouble(new String(newtext, r + 2, p - r - 2)) -
+                                    Double.parseDouble(new String(newtext, p + 2, q - p - pl - 1)) / 60.0d;
                         if (this.lat != 0.0d) break location;
                         s = q + 6;
                         continue location;
@@ -399,19 +399,34 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // itemprop (schema.org)
         String itemprop = tag.opts.getProperty("itemprop");
         if (itemprop != null) {
-            String propval = tag.opts.getProperty("content");
+            String propval = tag.opts.getProperty("content"); // value for <meta itemprop="" content=""> see https://html.spec.whatwg.org/multipage/microdata.html#values
             if (propval == null) propval = tag.opts.getProperty("datetime"); // html5 + schema.org#itemprop example: <time itemprop="startDate" datetime="2016-01-26">today</time> while each prop is optional
             if (propval != null) {                                           // html5 example: <time datetime="2016-01-26">today</time> while each prop is optional
-                if ("startDate".equals(itemprop)) try {
-                    // parse ISO 8601 date
-                    Date startDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
-                    this.startDates.add(startDate);
-                } catch (ParseException e) {}
-                if ("endDate".equals(itemprop)) try {
-                    // parse ISO 8601 date
-                    Date endDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
-                    this.endDates.add(endDate);
-                } catch (ParseException e) {}
+                // check <itemprop with value="" > (schema.org)
+                switch (itemprop) {
+                    // <meta> itemprops of main element with microdata <div itemprop="geo" itemscope itemtype="http://schema.org/GeoCoordinates">
+                    case "latitude": // <meta itemprop="latitude" content="47.2649990" />
+                        this.lat = Double.parseDouble(propval); // TODO: possibly overwrite existing value (multiple coordinates in document)
+                        break;                                  // TODO: risk to mix up existing coordinate if longitude not given too
+                    case "longitude": // <meta itemprop="longitude" content="11.3428720" />
+                        this.lon = Double.parseDouble(propval); // TODO: possibly overwrite existing value (multiple coordinates in document)
+                        break;                                  // TODO: risk to mix up existing coordinate if latitude not given too
+
+                    case "startDate": // <meta itemprop="startDate" content="2016-04-21T20:00">
+                        try {
+                            // parse ISO 8601 date
+                            Date startDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
+                            this.startDates.add(startDate);
+                        } catch (ParseException e) {}
+                        break;
+                    case "endDate":
+                        try {
+                            // parse ISO 8601 date
+                            Date endDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
+                            this.endDates.add(endDate);
+                        } catch (ParseException e) {}
+                        break;
+                }
             }
         }
     }

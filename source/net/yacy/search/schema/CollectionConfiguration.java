@@ -87,7 +87,6 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.ProbabilisticClassifier;
@@ -637,7 +636,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             final List<Date> startDates = html.getStartDates();
             if (startDates.size() > 0) add(doc, CollectionSchema.startDates_dts, startDates.toArray(new Date[startDates.size()]));
-            final List<Date> endDates = html.getStartDates();
+            final List<Date> endDates = html.getEndDates();
             if (endDates.size() > 0) add(doc, CollectionSchema.endDates_dts, endDates.toArray(new Date[endDates.size()]));
             
             final List<String> articles = html.getArticles();
