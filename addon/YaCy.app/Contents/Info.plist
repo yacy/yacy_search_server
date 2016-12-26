@@ -7,7 +7,7 @@
 <key>CFBundleDisplayName</key>
 <string>YaCy</string>
 <key>CFBundleShortVersionString</key>
-<string>1.90</string>
+<string>1.92</string>
 <key>CFBundleGetInfoString</key>
 <string>Peer-to-Peer Search Engine</string>
 <key>NSHumanReadableCopyright</key>
@@ -15,7 +15,7 @@
 <key>CFBundleIdentifier</key>
 <string>net.yacy.yacy</string>
 <key>CFBundleVersion</key>
-<string>1.90</string>
+<string>1.92</string>
 <key>CFBundleAllowMixedLocalizations</key>
 <string>true</string>
 <key>CFBundleExecutable</key>
