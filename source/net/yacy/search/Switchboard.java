@@ -1872,6 +1872,10 @@ public final class Switchboard extends serverSwitch {
     
     public synchronized void close() {
         this.log.config("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
+        /* Print also to the standard output : when this method is triggered by the shutdown hook thread, the LogManager is likely to have
+         * been concurrently reset by its own shutdown hook thread */
+        System.out.println("SWITCHBOARD Performing shutdown steps...");
+        
         MemoryTracker.stopSystemProfiling();
         terminateAllThreads(true);
         net.yacy.gui.framework.Switchboard.shutdown();
@@ -1915,6 +1919,9 @@ public final class Switchboard extends serverSwitch {
             ConcurrentLog.logException(e);
         }
         this.log.config("SWITCHBOARD SHUTDOWN TERMINATED");
+        /* Print also to the standard output : when this method is triggered by the shutdown hook thread, the LogManager is likely to have
+         * been concurrently reset by its own shutdown hook thread */
+        System.out.println("SWITCHBOARD Shutdown steps terminated.");
     }
 
     /**

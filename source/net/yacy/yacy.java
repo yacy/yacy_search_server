@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.Files;
 
@@ -50,7 +51,6 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
-import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
@@ -365,7 +365,7 @@ public final class yacy {
                 // registering shutdown hook
                 ConcurrentLog.config("STARTUP", "Registering Shutdown Hook");
                 final Runtime run = Runtime.getRuntime();
-                run.addShutdownHook(new shutdownHookThread(Thread.currentThread(), sb));
+                run.addShutdownHook(new shutdownHookThread(sb, shutdownSemaphore));
 
                 // save information about available memory after all initializations
                 //try {
@@ -784,12 +784,12 @@ public final class yacy {
 */
 class shutdownHookThread extends Thread {
     private final Switchboard sb;
-    private final Thread mainThread;
+    private final Semaphore shutdownSemaphore;
 
-    public shutdownHookThread(final Thread mainThread, final Switchboard sb) {
+    public shutdownHookThread(final Switchboard sb, final Semaphore shutdownSemaphore) {
         super("yacy.shutdownHookThread");
         this.sb = sb;
-        this.mainThread = mainThread;
+        this.shutdownSemaphore = shutdownSemaphore;
     }
 
     @Override
@@ -797,6 +797,9 @@ class shutdownHookThread extends Thread {
         try {
             if (!this.sb.isTerminated()) {
                 ConcurrentLog.config("SHUTDOWN","Shutdown via shutdown hook.");
+                /* Print also to the standard output, as the LogManager is likely to have
+                 * been concurrently reset by its own shutdown hook thread */
+                System.out.println("SHUTDOWN Starting shutdown via shutdown hook.");
 
                 // sending the yacy main thread a shutdown signal
                 ConcurrentLog.fine("SHUTDOWN","Signaling shutdown to the switchboard.");
@@ -804,9 +807,10 @@ class shutdownHookThread extends Thread {
 
                 // waiting for the yacy thread to finish execution
                 ConcurrentLog.fine("SHUTDOWN","Waiting for main thread to finish.");
-                if (this.mainThread.isAlive() && !this.sb.isTerminated()) {
-                    this.mainThread.join();
-                }
+                
+                /* Main thread will release the shutdownSemaphore once completely terminated.
+                 * We do not wait indefinitely as the application is supposed here to quickly terminate */
+                this.shutdownSemaphore.tryAcquire(30, TimeUnit.SECONDS);
             }
         } catch (final Exception e) {
             ConcurrentLog.severe("SHUTDOWN","Unexpected error. " + e.getClass().getName(),e);
