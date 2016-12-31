@@ -140,6 +140,10 @@ And configure the pkcs12XXX properties accordingly :
 
 	docker exec [your_container_name] /opt/yacy_search_server/stopYACY.sh
 	
+* OR run :
+
+	docker stop [your_container_name]
+	
 ### Upgrade
 
 You can upgrade your YaCy container the Docker way with the following commands sequence.

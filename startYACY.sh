@@ -224,10 +224,16 @@ else
 	echo "**  STOP         YaCy: execute stopYACY.sh and wait some seconds             **"
     echo "**  GET HELP for YaCy: see http://wiki.yacy.net and http://forum.yacy.de     **"
 	echo "*******************************************************************************"
-	echo " >> YaCy started as daemon process. Administration at http://localhost:$PORT << "
-	eval $cmdline
-	if [ "$TAILLOG" -eq "1" -a ! "$DEBUG" -eq "1" ];then
-		sleep 1
-		tail -f DATA/LOG/yacy00.log
+	if [ $DEBUG -eq 1 ] #debug
+	then
+		# with exec the java process become the main process and will receive signals such as SIGTERM
+		exec $cmdline
+	else
+		echo " >> YaCy started as daemon process. Administration at http://localhost:$PORT << "
+		eval $cmdline
+		if [ "$TAILLOG" -eq "1" -a ! "$DEBUG" -eq "1" ];then
+			sleep 1
+			tail -f DATA/LOG/yacy00.log
+		fi
 	fi
 fi
