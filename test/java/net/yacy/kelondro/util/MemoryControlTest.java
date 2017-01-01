@@ -1,11 +1,14 @@
 
 package net.yacy.kelondro.util;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 
 
+/** OOMs */
+@Ignore
 public class MemoryControlTest {
 
     final int onemb = 1024 * 1024;

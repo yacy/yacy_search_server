@@ -59,7 +59,7 @@ public class MonitorHandler extends AbstractHandler {
 		final ConnectionInfo info = new ConnectionInfo(
 				baseRequest.getProtocol(),
 				baseRequest.getRemoteAddr() + ":" + baseRequest.getRemotePort(),
-				baseRequest.getMethod() + " " + uri.getPath() + ';' + uri.getParam(),
+				baseRequest.getMethod() + " " + uri.getPathQuery(),
 				connection.hashCode(),
 				baseRequest.getTimeStamp(),
 				-1);
