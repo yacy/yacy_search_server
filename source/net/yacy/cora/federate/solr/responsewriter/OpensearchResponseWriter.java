@@ -20,20 +20,6 @@
 
 package net.yacy.cora.federate.solr.responsewriter;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.DublinCore;
@@ -41,7 +27,6 @@ import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.search.schema.CollectionSchema;
-
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
 import org.apache.solr.common.util.NamedList;
@@ -54,6 +39,12 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.net.MalformedURLException;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class OpensearchResponseWriter implements QueryResponseWriter {
 
@@ -110,7 +101,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         assert values.get("response") != null;
 
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocList response = ((ResultContext) values.get("response")).docs;
+        DocList response = ((ResultContext) values.get("response")).getDocList();
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> facetCounts = (SimpleOrderedMap<Object>) values.get("facet_counts");
         @SuppressWarnings("unchecked")

@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.facebook.presto:presto-parser:0.122">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/facebook/presto/presto-parser/0.122/presto-parser-0.122.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/facebook/presto/presto-parser/0.122/presto-parser-0.122-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/facebook/presto/presto-parser/0.122/presto-parser-0.122-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

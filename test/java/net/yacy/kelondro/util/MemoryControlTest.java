@@ -1,8 +1,9 @@
 
 package net.yacy.kelondro.util;
 
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 
 public class MemoryControlTest {
@@ -32,7 +33,8 @@ public class MemoryControlTest {
             if (MemoryControl.request(memblock, false)) {
                 x[i] = new byte[memblock];
             }
-        
+
+
             i++;
         }
         System.out.println("allocated " + i + " * " + memblock/onemb + " MB = " + i*memblock/onemb + " MB");

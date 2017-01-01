@@ -20,15 +20,11 @@
 
 package net.yacy.cora.federate.solr.instance;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-
-import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrRequest;
+import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.StreamingResponseCallback;
-import org.apache.solr.client.solrj.SolrRequest.METHOD;
 import org.apache.solr.client.solrj.beans.DocumentObjectBinder;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.SolrPingResponse;
@@ -36,6 +32,10 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 public class ServerMirror extends SolrClient {
 
@@ -430,8 +430,10 @@ public class ServerMirror extends SolrClient {
         return null;
     }
     
+
+
     @Override
-    public void shutdown() {
+    public void close() throws IOException {
         if (this.solr0 != null)
             try {
                 this.solr0.close();
@@ -444,6 +446,6 @@ public class ServerMirror extends SolrClient {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-    }
 
+    }
 }

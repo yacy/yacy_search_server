@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.eclipse.jetty:jetty-rewrite:9.3.8.v20160314">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-rewrite/9.3.8.v20160314/jetty-rewrite-9.3.8.v20160314.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-rewrite/9.3.8.v20160314/jetty-rewrite-9.3.8.v20160314-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/eclipse/jetty/jetty-rewrite/9.3.8.v20160314/jetty-rewrite-9.3.8.v20160314-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

@@ -20,17 +20,7 @@
 
 package net.yacy.cora.federate.solr.responsewriter;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import net.yacy.cora.federate.solr.SolrType;
-
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
 import org.apache.solr.common.SolrDocument;
@@ -52,6 +42,10 @@ import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.DateFormatUtil;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.*;
 
 public class EnhancedXMLResponseWriter implements QueryResponseWriter {
 
@@ -82,7 +76,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         assert values.get("response") != null;
 
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocList response = ((ResultContext) values.get("response")).docs;
+        DocList response = ((ResultContext) values.get("response")).getDocList();
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
         writeProps(writer, "responseHeader", responseHeader); // this.writeVal("responseHeader", responseHeader);

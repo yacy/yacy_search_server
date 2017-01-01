@@ -20,13 +20,6 @@
 
 package net.yacy.cora.federate.solr.connector;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
@@ -34,14 +27,19 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.schema.CollectionSchema;
-
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * The purpose of this connector is to provide a non-blocking interface to solr.
@@ -297,9 +295,9 @@ public class ConcurrentUpdateSolrConnector implements SolrConnector {
         //if (this.missCache.contains(id)) return null;
         SolrInputDocument idoc = this.docBuffer.get(id);
         if (idoc != null) {
-            //System.out.println("*** docBuffer cache hit; docBuffer.size() = " + docBuffer.size());
+            throw new RuntimeException("*** docBuffer cache hit; docBuffer.size() = " + docBuffer.size());
             //Thread.dumpStack();
-            return ClientUtils.toSolrDocument(idoc);
+            //return ClientUtils.toSolrDocument(idoc);
         }
         SolrDocument solrdoc = this.connector.getDocumentById(id, AbstractSolrConnector.ensureEssentialFieldsIncluded(fields));
         if (solrdoc == null) {
