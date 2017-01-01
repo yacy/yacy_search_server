@@ -53,4 +53,4 @@ VOLUME ["/opt/yacy_search_server/DATA"]
 USER yacy
 
 # Start yacy in debug mode (-d) to display console logs and to wait for yacy process
-CMD sh /opt/yacy_search_server/startYACY.sh -d
+CMD ["/bin/sh","/opt/yacy_search_server/startYACY.sh","-d"]
