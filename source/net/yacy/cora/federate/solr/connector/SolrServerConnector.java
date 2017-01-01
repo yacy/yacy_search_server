@@ -20,38 +20,37 @@
 
 package net.yacy.cora.federate.solr.connector;
 
+import net.yacy.cora.federate.solr.instance.ServerShard;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.search.schema.CollectionSchema;
+import org.apache.lucene.analysis.LegacyNumericTokenStream;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.impl.XMLResponseParser;
+import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
+import org.apache.solr.client.solrj.request.LukeRequest;
+import org.apache.solr.client.solrj.request.UpdateRequest;
+import org.apache.solr.client.solrj.response.LukeResponse;
+import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.util.NamedList;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import net.yacy.cora.federate.solr.instance.ServerShard;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.search.schema.CollectionSchema;
-
-import org.apache.lucene.analysis.NumericTokenStream;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.solr.common.util.NamedList;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.client.solrj.impl.XMLResponseParser;
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
-import org.apache.solr.client.solrj.request.LukeRequest;
-import org.apache.solr.client.solrj.request.UpdateRequest;
-import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
-import org.apache.solr.client.solrj.response.LukeResponse;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.params.CommonParams;
-
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
     protected final static ConcurrentLog log = new ConcurrentLog(SolrServerConnector.class.getName());
-    public final static NumericTokenStream classLoaderSynchro = new NumericTokenStream();
+    public final static LegacyNumericTokenStream classLoaderSynchro = new LegacyNumericTokenStream();
     // pre-instantiate this object to prevent sun.misc.Launcher$AppClassLoader deadlocks
     // this is a very nasty problem; solr instantiates objects dynamically which can cause deadlocks
     static {

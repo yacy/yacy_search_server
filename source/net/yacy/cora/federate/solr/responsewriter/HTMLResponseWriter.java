@@ -20,20 +20,8 @@
 
 package net.yacy.cora.federate.solr.responsewriter;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.search.schema.CollectionSchema;
-
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
 import org.apache.solr.common.params.SolrParams;
@@ -51,6 +39,13 @@ import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.DateFormatUtil;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class HTMLResponseWriter implements QueryResponseWriter {
 
@@ -154,7 +149,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         paramsList.remove("wt");
         String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
 
-        DocList response = ((ResultContext) values.get("response")).docs;
+        DocList response = ((ResultContext) values.get("response")).getDocList();
         final int sz = response.size();
         if (sz > 0) {
             SolrIndexSearcher searcher = request.getSearcher();

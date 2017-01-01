@@ -19,24 +19,6 @@
  */
 package net.yacy.http.servlets;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
@@ -51,7 +33,6 @@ import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
-
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
@@ -62,6 +43,19 @@ import org.apache.solr.response.QueryResponseWriter;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.util.FastWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 
 /**
@@ -257,7 +251,7 @@ public class GSAsearchServlet extends HttpServlet {
         Object rv = response.getValues().get("response");
         int matches = 0;
         if (rv != null && rv instanceof ResultContext) {
-            matches = ((ResultContext) rv).docs.matches();
+            matches = ((ResultContext) rv).getDocList().matches();
         } else if (rv != null && rv instanceof SolrDocumentList) {
             matches = (int) ((SolrDocumentList) rv).getNumFound();
         }

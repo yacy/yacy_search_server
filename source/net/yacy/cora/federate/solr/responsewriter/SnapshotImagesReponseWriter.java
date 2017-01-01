@@ -1,12 +1,6 @@
 package net.yacy.cora.federate.solr.responsewriter;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.HashSet;
-import java.util.Set;
-
 import net.yacy.search.schema.CollectionSchema;
-
 import org.apache.lucene.document.Document;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
@@ -16,6 +10,11 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * this writer is supposed to be used to generate iframes. It generates links for the /api/snapshot.jpg servlet.
@@ -53,7 +52,7 @@ public class SnapshotImagesReponseWriter implements QueryResponseWriter  {
             NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
             paramsList.remove("wt");
             
-            DocList response = ((ResultContext) values.get("response")).docs;
+            DocList response = ((ResultContext) values.get("response")).getDocList();
             final int sz = response.size();
             if (sz > 0) {
                 SolrIndexSearcher searcher = request.getSearcher();

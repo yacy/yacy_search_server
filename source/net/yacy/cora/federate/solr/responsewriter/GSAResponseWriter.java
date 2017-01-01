@@ -148,7 +148,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
         long start = System.currentTimeMillis();
 
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocList response = ((ResultContext) rsp.getValues().get("response")).docs;
+        DocList response = ((ResultContext) rsp.getValues().get("response")).getDocList();
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) rsp.getValues().get("highlighting");
         Map<String, LinkedHashSet<String>> snippets = OpensearchResponseWriter.highlighting(highlighting);

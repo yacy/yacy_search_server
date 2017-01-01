@@ -24,25 +24,27 @@
 
 package net.yacy.http;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.UserDB.Entry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import org.eclipse.jetty.security.HashLoginService;
 import org.eclipse.jetty.security.LoginService;
-import org.eclipse.jetty.security.MappedLoginService;
 import org.eclipse.jetty.server.UserIdentity;
 import org.eclipse.jetty.util.security.Credential;
+
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * jetty login service, provides admin and YaCy.UserDB users with role assignment
  * with DIGEST auth by default Jetty uses the name of the loginSevice as realmname (which is part of all password hashes)
  */
-public class YaCyLoginService extends MappedLoginService implements LoginService {
+public class YaCyLoginService extends HashLoginService implements LoginService {
 
     @Override
-    protected UserIdentity loadUser(String username) {    
+    protected UserPrincipal loadUserInfo(String username) {
         if (username == null || username.isEmpty()) return null; // quick exit
 
         final Switchboard sb = Switchboard.getSwitchboard();
@@ -74,18 +76,43 @@ public class YaCyLoginService extends MappedLoginService implements LoginService
         }
 
         if (credential != null) {
+
+            UserPrincipal u = super.loadUserInfo(username);
+            u.authenticate(credential);
             if (roles != null) {
-                return putUser(username, credential, roles);
+                setRoleInfo(u, roles);
             }
-            return putUser(username, credential); // w/o role makes not much sense, but succeeds login....
+            return u;
         }
         return null;
     }
 
-    @Override
-    protected void loadUsers() throws IOException {
-	// don't load any users into MappedLoginService on startup
-        // we use loadUser for dynamic checking
+    protected void setRoleInfo(UserPrincipal user, String... rolesAdd)
+    {
+        UserIdentity id = _propertyUserStore.getUserIdentity(user.getName());
+        if (id == null)
+            return;
+
+
+        Set<Principal> roles = id.getSubject().getPrincipals();
+        for (String r : rolesAdd)
+            roles.add(new RolePrincipal(r));
     }
+
+    public boolean removeUser(String username) {
+        UserIdentity uid = _propertyUserStore.getUserIdentity(username);
+        if (uid!=null) {
+            logout(uid);
+            return true;
+        }
+        return false;
+    }
+
+
+//    @Override
+//    protected void loadUsers() throws IOException {
+//	// don't load any users into MappedLoginService on startup
+//        // we use loadUser for dynamic checking
+//    }
 
 }

@@ -20,36 +20,10 @@
 
 package net.yacy.http.servlets;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import net.yacy.cora.federate.FederateSearchManager;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
-import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
-import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
-import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
-import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
-import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
-import net.yacy.cora.federate.solr.responsewriter.SnapshotImagesReponseWriter;
-import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.*;
 import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -59,28 +33,37 @@ import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
-import static org.apache.solr.common.params.MultiMapSolrParams.addParam;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestInfo;
-import org.apache.solr.response.BinaryResponseWriter;
-import org.apache.solr.response.QueryResponseWriter;
-import org.apache.solr.response.ResultContext;
-import org.apache.solr.response.SolrQueryResponse;
-import org.apache.solr.response.XSLTResponseWriter;
+import org.apache.solr.response.*;
 import org.apache.solr.search.DocList;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.servlet.cache.HttpCacheHeaderUtil;
 import org.apache.solr.servlet.cache.Method;
 import org.apache.solr.util.FastWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.apache.solr.common.params.MultiMapSolrParams.addParam;
 
 /*
  * taken from the Solr 3.6.0 code, which is now deprecated;
@@ -261,7 +244,7 @@ public class SolrSelectServlet extends HttpServlet {
                 
 
                 NamedList<?> values = rsp.getValues();
-                DocList r = ((ResultContext) values.get("response")).docs;
+                DocList r = ((ResultContext) values.get("response")).getDocList();
                 int numFound = r.matches();
                 AccessTracker.addToDump(querystring, Integer.toString(numFound), new Date());
                 

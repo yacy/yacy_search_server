@@ -24,18 +24,17 @@
 
 package net.yacy.http;
 
-import java.io.IOException;
+import net.yacy.cora.protocol.ConnectionInfo;
+import net.yacy.cora.protocol.Domains;
+import org.eclipse.jetty.http.HttpURI;
+import org.eclipse.jetty.io.Connection;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.yacy.cora.protocol.ConnectionInfo;
-import net.yacy.cora.protocol.Domains;
-
-import org.eclipse.jetty.io.Connection;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.handler.AbstractHandler;
+import java.io.IOException;
 
 public class MonitorHandler extends AbstractHandler {
 	
@@ -56,10 +55,11 @@ public class MonitorHandler extends AbstractHandler {
             HttpServletResponse response) throws IOException, ServletException {
 		
 		final Connection connection = baseRequest.getHttpChannel().getEndPoint().getConnection();
+		HttpURI uri = baseRequest.getHttpURI();
 		final ConnectionInfo info = new ConnectionInfo(
 				baseRequest.getProtocol(),
 				baseRequest.getRemoteAddr() + ":" + baseRequest.getRemotePort(),
-				baseRequest.getMethod() + " " + baseRequest.getUri().getPathAndParam(),
+				baseRequest.getMethod() + " " + uri.getPath() + ';' + uri.getParam(),
 				connection.hashCode(),
 				baseRequest.getTimeStamp(),
 				-1);

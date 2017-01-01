@@ -20,53 +20,22 @@
 
 package net.yacy.document;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.CommonPattern;
-import net.yacy.document.parser.apkParser;
-import net.yacy.document.parser.audioTagParser;
-import net.yacy.document.parser.bzipParser;
-import net.yacy.document.parser.csvParser;
-import net.yacy.document.parser.docParser;
-import net.yacy.document.parser.genericParser;
-import net.yacy.document.parser.gzipParser;
-import net.yacy.document.parser.htmlParser;
-import net.yacy.document.parser.linkScraperParser;
-import net.yacy.document.parser.mmParser;
-import net.yacy.document.parser.odtParser;
-import net.yacy.document.parser.ooxmlParser;
-import net.yacy.document.parser.pdfParser;
-import net.yacy.document.parser.pptParser;
-import net.yacy.document.parser.psParser;
-import net.yacy.document.parser.rssParser;
-import net.yacy.document.parser.rtfParser;
-import net.yacy.document.parser.sevenzipParser;
-import net.yacy.document.parser.sidAudioParser;
-import net.yacy.document.parser.tarParser;
-import net.yacy.document.parser.torrentParser;
-import net.yacy.document.parser.vcfParser;
-import net.yacy.document.parser.vsdParser;
-import net.yacy.document.parser.xlsParser;
-import net.yacy.document.parser.zipParser;
+import net.yacy.document.parser.*;
 import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.document.parser.images.metadataImageParser;
 import net.yacy.document.parser.images.svgParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+//import net.yacy.document.parser.sevenzipParser;
 
 public final class TextParser {
 
@@ -102,7 +71,7 @@ public final class TextParser {
         initParser(new psParser());
         initParser(new rssParser());
         initParser(new rtfParser());
-        initParser(new sevenzipParser());
+        //initParser(new sevenzipParser());
         initParser(new sidAudioParser());
         initParser(new svgParser());
         initParser(new tarParser());
