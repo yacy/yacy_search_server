@@ -489,26 +489,37 @@ public final class Fulltext {
     }
     
     /**
-     * remove a list of id's from the index
+     * remove a list of id's from the index (matching fulltext.id and webgraph.source_id_s
      * @param deleteIDs a list of urlhashes; each denoting a document
-     * @param concurrently if true, then the method returnes immediately and runs concurrently
      */
     public void remove(final Collection<String> deleteIDs) {
         if (deleteIDs == null || deleteIDs.size() == 0) return;
         try {
             this.getDefaultConnector().deleteByIds(deleteIDs);
-            if (this.writeWebgraph) this.getWebgraphConnector().deleteByIds(deleteIDs);
+            if (this.writeWebgraph) { // Webgraph.id is combination of sourceHash+targetHash+hexCounter, to be successful use source_id_s and/or target_id_s
+                for (String id : deleteIDs) {
+                    this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.name() + ":" + id);
+                }
+            }
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
     }
-    
+
+    /**
+     * Deletes document with id=urlHash from fulltext index and document with
+     * source_id_s=urlHash from webgraph index
+     * @param urlHash the document id
+     * @return
+     */
     public boolean remove(final byte[] urlHash) {
         if (urlHash == null) return false;
         try {
             String id = ASCII.String(urlHash);
             this.getDefaultConnector().deleteById(id);
-            if (this.writeWebgraph) this.getWebgraphConnector().deleteById(id);
+            if (this.writeWebgraph) { // Webgraph.id is combination of sourceHash+targetHash+hexCounter, to be successful use source_id_s and/or target_id_s
+                this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s + ":" + id);
+            }
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
