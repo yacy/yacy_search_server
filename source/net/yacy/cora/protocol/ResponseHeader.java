@@ -158,7 +158,7 @@ public class ResponseHeader extends HeaderFramework {
         if (!name.isEmpty()) {
             if (this.cookieStore == null) this.cookieStore = new ArrayList<Cookie>();
             Cookie c = new Cookie (name, value);
-            if (maxage != null) c.setMaxAge(maxage);
+            if (maxage != null && maxage >= 0) c.setMaxAge(maxage);
             if (path != null) c.setPath(path);
             if (domain != null) c.setDomain(domain);
             if (secure) c.setSecure(secure);

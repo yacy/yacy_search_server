@@ -152,8 +152,10 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
      *
      * @return String with cookies separated by ';'
      * @see getCookies()
+     * @deprecated depreceated since 1.92, use getCookies()
      */
-    public String getHeaderCookies() { // TODO: harmonize with standard getCookies
+    @Deprecated
+    public String getHeaderCookies() {
         String cookiestring = this.get(COOKIE); // get from legacy or HttpServletRequest
         if (cookiestring == null) {
             return "";

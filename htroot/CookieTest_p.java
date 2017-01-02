@@ -27,12 +27,9 @@
 // javac -classpath .:../classes index.java
 // if the shell's current path is HTROOT
 
-import java.util.Iterator;
-import java.util.Map;
+import javax.servlet.http.Cookie;
 import net.yacy.cora.protocol.RequestHeader;
-
 import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.util.CommonPattern;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
@@ -53,22 +50,14 @@ public class CookieTest_p {
         final servletProperties prop = new servletProperties();
         if (post.containsKey("act") && "clear_cookie".equals(post.get("act"))) {
             final ResponseHeader outgoingHeader = new ResponseHeader(200);
-            final Iterator<Map.Entry<String, String>> it = header.entrySet().iterator();
-            Map.Entry<String, String> e;
-            while (it.hasNext()) {
-                e = it.next();
-                if ("Cookie".equals(e.getKey())) {
-                    final String cookies[] = CommonPattern.SEMICOLON.split(e.getValue());
-                    for (final String cookie : cookies) {
-                        final String nameValue[] = cookie.split("=");
-                        outgoingHeader.setCookie(nameValue[0].trim(), nameValue.length > 1 ? (nameValue[1].trim()) : "");
-                    }
+            Cookie[] cookies = header.getCookies();
+            if (cookies != null) {
+                for (final Cookie cookie : cookies) {
+                    outgoingHeader.setCookie(cookie.getName(), cookie.getValue(), cookie.getMaxAge(), cookie.getPath(), cookie.getDomain(), cookie.getSecure());
                 }
             }
-
             prop.setOutgoingHeader(outgoingHeader);
             prop.put("coockiesout", "0");
-            //header.
 
         } else if (post.containsKey("act") && "set_cookie".equals(post.get("act"))) {
             final String cookieName = post.get("cookie_name").trim();
@@ -80,15 +69,15 @@ public class CookieTest_p {
             prop.put("cookiesin", "1");
             prop.putHTML("cookiesin_0_name", cookieName);
             prop.putHTML("cookiesin_0_value", cookieValue);
-            //header.
        }
 
-        //prop.put("cookiesout", "1");
-        String[] cookielst = header.getHeaderCookies().split(";");
+        Cookie[] cookielst = header.getCookies();
         int i = 0;
-        for (String singleco : cookielst) {
-            prop.putHTML("cookiesout_" + i + "_string", singleco + ";"); // output with ";" for compatiblity with cookiesin
-            i++;
+        if (cookielst != null) {
+            for (Cookie singleco : cookielst) {
+                prop.putHTML("cookiesout_" + i + "_string", singleco.getName() + "=" + singleco.getValue() + ";"); // output with ";" for compatiblity with cookiesin
+                i++;
+            }
         }
         prop.put("cookiesout", i);
         return prop;
