@@ -24,36 +24,26 @@
 
 package net.yacy.http;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.util.StringTokenizer;
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.SSLContext;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.utils.PKCS12Tool;
 import org.eclipse.jetty.http.HttpVersion;
-import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.SecureRequestCustomizer;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.handler.DefaultHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.IPAccessHandler;
+import org.eclipse.jetty.server.*;
+import org.eclipse.jetty.server.handler.*;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.KeyStore;
+import java.util.StringTokenizer;
 
 /**
  * class to embedded Jetty 9 http server into YaCy
@@ -340,7 +330,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         Jetty9YaCySecurityHandler hx = this.server.getChildHandlerByClass(Jetty9YaCySecurityHandler.class);
         if (hx != null) {
             YaCyLoginService loginservice = (YaCyLoginService) hx.getLoginService();
-            loginservice.loadUser(username);
+            loginservice.loadUserInfo(username);
         }
     }
 

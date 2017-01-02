@@ -22,38 +22,12 @@
 
 package net.yacy.search.index;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.lang.reflect.Array;
-import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
-import java.util.zip.Deflater;
-import java.util.zip.GZIPOutputStream;
-
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
-import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
-import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
-import net.yacy.cora.federate.solr.connector.ShardSelection;
-import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.federate.solr.connector.*;
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.InstanceMirror;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
@@ -75,18 +49,29 @@ import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
 import net.yacy.search.schema.WebgraphSchema;
-
+import org.apache.lucene.util.Version;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.SolrInfoMBean;
+
+import java.io.*;
+import java.lang.reflect.Array;
+import java.net.MalformedURLException;
+import java.text.DateFormat;
+import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+import java.util.zip.Deflater;
+import java.util.zip.GZIPOutputStream;
+
 import org.apache.solr.util.DateFormatUtil;
-import org.apache.lucene.util.Version;
 
 public final class Fulltext {
 
-    private static final String SOLR_PATH = "solr_5_5"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_PATH = "solr_6_3"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
     private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2"};
     
     // class objects

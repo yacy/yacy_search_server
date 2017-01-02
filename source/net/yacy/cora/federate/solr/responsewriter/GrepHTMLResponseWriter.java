@@ -20,17 +20,8 @@
 
 package net.yacy.cora.federate.solr.responsewriter;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import net.yacy.document.SentenceReader;
 import net.yacy.search.schema.CollectionSchema;
-
 import org.apache.lucene.document.Document;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
@@ -44,6 +35,14 @@ import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * this response writer shows a list of documents with the lines containing matches
@@ -109,7 +108,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
         paramsList.remove("wt");
         String xmlquery = dqp.matcher("select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
         
-        DocList response = ((ResultContext) values.get("response")).docs;
+        DocList response = ((ResultContext) values.get("response")).getDocList();
         final int sz = response.size();
         if (sz > 0) {
             SolrIndexSearcher searcher = request.getSearcher();
