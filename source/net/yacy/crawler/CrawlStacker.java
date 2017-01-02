@@ -267,6 +267,7 @@ public final class CrawlStacker {
         final String pw = userInfo == null || p == -1 ? "anomic" : userInfo.substring(p + 1);
         final String host = ftpURL.getHost();
         final int port = ftpURL.getPort();
+        final int pathParts = ftpURL.getPaths().length;
         new Thread() {
             @Override
             public void run() {
@@ -289,6 +290,10 @@ public final class CrawlStacker {
                             CrawlStacker.this.indexSegment.fulltext().remove(urlhash);
                             cq.noticeURL.removeByURLHash(urlhash);
                         }
+                        
+                        /* Each entry is a children resource of the starting ftp URL : 
+                         * take into account the sub folder depth in the crawl depth control */
+                        int nextDepth = Math.max(0, url.getPaths().length - pathParts);
 
                         // put entry on crawl stack
                         enqueueEntry(new Request(
@@ -298,7 +303,7 @@ public final class CrawlStacker {
                                 MultiProtocolURL.unescape(entry.name),
                                 entry.date,
                                 profile.handle(),
-                                0,
+                                nextDepth,
                                 timezoneOffset));
                     }
                 } catch (final IOException e1) {
