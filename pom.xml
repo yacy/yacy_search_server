@@ -247,7 +247,7 @@
             		<plugin>
                 		<groupId>net.yacy</groupId>
                 		<artifactId>maven-plugin-gitrevisionnumber</artifactId>
-                		<version>1.0</version>
+                		<version>1.1</version>
                 		<executions>
                     		<execution>
                         		<phase>initialize</phase>
