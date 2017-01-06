@@ -103,8 +103,7 @@ public class htmlParser extends AbstractParser implements Parser {
         try {
             // first get a document from the parsed html
             Charset[] detectedcharsetcontainer = new Charset[]{null};
-            scraperObject = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxLinks);
-            ContentScraper scraper = (ContentScraper)scraperObject; // shortcut to access ContentScraper methodes
+            ContentScraper scraper = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxLinks);
             // parseToScraper also detects/corrects/sets charset from html content tag
             final Document document = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper);
             Document documentSnapshot = null;
@@ -172,8 +171,9 @@ public class htmlParser extends AbstractParser implements Parser {
                 noDoubleImages,
                 scraper.indexingDenied(),
                 scraper.getDate());
+        ppd.setScraperObject(scraper);
         ppd.setIcons(scraper.getIcons());
-
+        
         return ppd;
     }
 
