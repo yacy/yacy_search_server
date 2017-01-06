@@ -184,10 +184,15 @@ public class yacysearchitem {
             String resultFileName = resultURL.getFileName();
             prop.putHTML("content_target", target);
             DigestURL faviconURL = null;
-            if ((fileType == FileType.HTML || fileType == FileType.JSON) && !sb.isIntranetMode()) {
+            if ((fileType == FileType.HTML || fileType == FileType.JSON) && (resultURL.isHTTP() || resultURL.isHTTPS())) {
             	faviconURL = getFaviconURL(result, new Dimension(16, 16));
             }
-            prop.putHTML("content_faviconUrl", processFaviconURL(ImageViewer.hasFullViewingRights(header, sb), faviconURL));
+            if(faviconURL == null) {
+            	prop.put("content_favicon", 0);
+            } else {
+            	prop.put("content_favicon", 1);
+            }
+            prop.putHTML("content_favicon_faviconUrl", processFaviconURL(ImageViewer.hasFullViewingRights(header, sb), faviconURL));
             prop.put("content_urlhash", urlhash);
             prop.put("content_ranking", Float.toString(result.score()));
             Date[] events = result.events();
