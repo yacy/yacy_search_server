@@ -26,6 +26,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +61,7 @@ import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
+import net.yacy.repository.BlacklistHostAndPath;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -374,8 +377,9 @@ public class IndexControlRWIs_p {
                         Word.commonHashOrder,
                         urlb.size());
                 if ( post.containsKey("blacklisturls") ) {
-                    final String[] supportedBlacklistTypes = env.getConfigArray("BlackLists.types", "");
 					DigestURL url;
+					/* Prepare the new blacklist items list to add then them in one operation for better performance */
+					final Collection<BlacklistHostAndPath> items = new ArrayList<>();
 					for ( final byte[] b : urlb ) {
 					    try {
 					        urlHashes.put(b);
@@ -386,29 +390,27 @@ public class IndexControlRWIs_p {
                             url = segment.fulltext().getURL(ASCII.String(b));
                             segment.fulltext().remove(b);
                             if ( url != null ) {
-                                for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
-                                    if ( ListManager.listSetContains(
-                                        supportedBlacklistType + ".BlackLists",
-                                        blacklist) ) {
-                                        try {
-                                            Switchboard.urlBlacklist.add(
-                                                BlacklistType.valueOf(supportedBlacklistType),
-                                                blacklist,
-                                                url.getHost(),
-                                                url.getFile());
-                                        } catch (PunycodeException e) {
-                                            ConcurrentLog.warn(APP_NAME,
-                                                            "Unable to add blacklist entry to blacklist "
-                                                                            + supportedBlacklistType, e);
-                                        }
-                                    }
-                                }
-                                SearchEventCache.cleanupEvents(true);
+                            	items.add(new BlacklistHostAndPath(url.getHost(), url.getFile()));
                             }
                         } catch (IOException e1) {
                             ConcurrentLog.logException(e1);
                         }
 					}
+                    for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
+                        if ( ListManager.listSetContains(
+                            supportedBlacklistType + ".BlackLists",
+                            blacklist) ) {
+                            try {
+                                Switchboard.urlBlacklist.add(supportedBlacklistType,
+                                    blacklist, items);
+                            } catch (PunycodeException e) {
+                                ConcurrentLog.warn(APP_NAME,
+                                                "Unable to add blacklist entries to blacklist "
+                                                                + supportedBlacklistType, e);
+                            }
+                        }
+                    }
+                    SearchEventCache.cleanupEvents(true);
                 }
 
                 if ( post.containsKey("blacklistdomains") ) {

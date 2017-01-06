@@ -47,6 +47,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
+import net.yacy.repository.BlacklistHostAndPath;
 import net.yacy.repository.Blacklist.BlacklistError;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -389,6 +390,8 @@ public class BlacklistCleaner_p {
                     final String[] oldEntry, final String[] newEntry) {
         removeEntries(blacklistToUse, supportedBlacklistTypes, oldEntry);
         String host, path;
+        /* Prepare the new blacklist items list to add then them in one operation for better performance */
+        final Collection<BlacklistHostAndPath> newEntries = new ArrayList<>();
         for (final String n : newEntry) {
             final int pos = n.indexOf('/', 0);
             if (pos < 0) {
@@ -398,21 +401,21 @@ public class BlacklistCleaner_p {
                 host = n.substring(0, pos);
                 path = n.substring(pos + 1);
             }
-            for (final BlacklistType s : supportedBlacklistTypes) {
-                if (ListManager.listSetContains(s + ".BlackLists",
-                                blacklistToUse)) {
-                    try {
-                        Switchboard.urlBlacklist.add(s, blacklistToUse, host,
-                                        path);
-                    } catch (PunycodeException e) {
-                        ConcurrentLog.warn(APP_NAME,
-                                        "Unable to add blacklist entry to blacklist "
-                                                        + s, e);
-                    }
+            newEntries.add(new BlacklistHostAndPath(host, path));
+        }
+        for (final BlacklistType s : supportedBlacklistTypes) {
+            if (ListManager.listSetContains(s + ".BlackLists",
+                            blacklistToUse)) {
+                try {
+                    Switchboard.urlBlacklist.add(s, blacklistToUse, newEntries);
+                } catch (PunycodeException e) {
+                    ConcurrentLog.warn(APP_NAME,
+                                    "Unable to add blacklist entry to blacklist "
+                                                    + s, e);
                 }
             }
-            SearchEventCache.cleanupEvents(true);
         }
+        SearchEventCache.cleanupEvents(true);
         return newEntry.length;
     }
 }
