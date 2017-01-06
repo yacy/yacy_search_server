@@ -58,6 +58,13 @@ import net.yacy.server.serverSwitch;
 import org.xml.sax.SAXException;
 
 
+/**
+ * Handle blacklist import operations. Either :
+ * <ul>
+ * <li>load items for selection</li>
+ * <li>or import selected items</li>
+ * </ul>
+ */
 public class sharedBlacklist_p {
 
     public static final int STATUS_NONE = 0;
@@ -68,6 +75,19 @@ public class sharedBlacklist_p {
     public static final int STATUS_WRONG_INVOCATION = 5;
     public static final int STATUS_PARSE_ERROR = 6;
 
+    /**
+     * Try to load blacklist items for selection or to import selected items.
+     * Handled blacklist source types :
+     * <ul>
+     * <li>hash : hash signature of a peer having a shared blacklist</li>
+     * <li>url : blacklist url</li>
+     * <li>file : local filesystem blacklist file path</li>
+     * </ul>
+     * @param header current servlet request header
+     * @param post must contain selected blacklist items or a blacklist resource to load
+     * @param env server environment
+     * @return the servlet answer
+     */
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         // return variable that accumulates replacements
