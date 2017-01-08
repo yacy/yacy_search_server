@@ -59,7 +59,7 @@ public class User{
         	prop.put("logged-in_identified-by", "1");
         //try via cookie
         }else{
-            entry=sb.userDB.cookieAuth(requestHeader.getHeaderCookies());
+            entry=sb.userDB.cookieAuth(requestHeader.getCookies());
             prop.put("logged-in_identified-by", "2");
             //try via ip
             if(entry == null){
@@ -159,7 +159,7 @@ public class User{
             prop.put("logged-in", "0");
             if(entry != null){
                 final String ip = requestHeader.getRemoteAddr();
-                entry.logout((ip != null ? ip : "xxxxxx"), UserDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
+                entry.logout((ip != null ? ip : "xxxxxx"), UserDB.getLoginToken(requestHeader.getCookies()));
             }
             try {
                 requestHeader.logout(); // servlet container session logout

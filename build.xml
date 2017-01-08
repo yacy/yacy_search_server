@@ -84,7 +84,12 @@
     <delete file="${libbuild}/GitRevTask.jar" failonerror="false" />
     <javac srcdir="${libbuild}/GitRevTask" includeantruntime="true" encoding="UTF-8">
     	<classpath>
-    		<pathelement location="${libbuild}/org.eclipse.jgit-1.1.0.201109151100-r.jar" />
+    		<pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
+    		<!-- Next are the jgit dependencies -->
+    		<pathelement location="${libbuild}/httpclient-4.3.6.jar" />
+    		<pathelement location="${libbuild}/JavaEWAH-0.7.9.jar" />
+    		<pathelement location="${libbuild}/jsch-0.1.53.jar" />
+    		<pathelement location="${libbuild}/slf4j-api-1.7.2.jar" />
     	</classpath>
     </javac>
     <jar destfile="${libbuild}/GitRevTask.jar" basedir="${libbuild}/GitRevTask">
@@ -98,7 +103,12 @@
   	<taskdef resource="GitRevTask.properties">
 		<classpath>
 			<pathelement location="${libbuild}/GitRevTask.jar" />
-			<pathelement location="${libbuild}/org.eclipse.jgit-1.1.0.201109151100-r.jar" />
+    		<pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
+    		<!-- Next are the jgit dependencies -->
+    		<pathelement location="${libbuild}/httpclient-4.3.6.jar" />
+    		<pathelement location="${libbuild}/JavaEWAH-0.7.9.jar" />
+    		<pathelement location="${libbuild}/jsch-0.1.53.jar" />
+    		<pathelement location="${libbuild}/slf4j-api-1.7.2.jar" />
 		</classpath>
   	</taskdef>
   	<gitRev repoPath="${yacyroot}" branchprop="branch" revprop="releaseNr" dateprop="DSTAMP" />

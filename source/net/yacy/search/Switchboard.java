@@ -3574,7 +3574,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // authorization by hit in userDB (authtype username:encodedpassword - handed over by DefaultServlet)
-        if ( this.userDB.hasAdminRight(realmProp, requestHeader.getHeaderCookies()) ) {
+        if ( this.userDB.hasAdminRight(realmProp, requestHeader.getCookies()) ) {
             adminAuthenticationLastAccess = System.currentTimeMillis();
             return 4; //return, because 4=max
         }

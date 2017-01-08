@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -317,6 +319,89 @@ public class Blacklist {
         }
     }
     
+	/**
+	 * Adds entries to a given blacklist internal data and updates the source
+	 * file
+	 * 
+	 * @param blacklistType
+	 * @param blacklistToUse
+	 *            source file
+	 * @param items
+	 *            blacklist host/path items to add
+	 * @throws PunycodeException
+	 */
+	public final void add(final BlacklistType blacklistType, final String blacklistToUse,
+			final Collection<BlacklistHostAndPath> items) throws PunycodeException {
+
+		if (items != null) {
+			PrintWriter pw = null;
+			try {
+				/* Get the content of the blacklist file in memory */
+				final Set<String> blacklist = new HashSet<String>(
+						FileUtils.getListArray(new File(this.blacklistRootPath, blacklistToUse)));
+				/* Open a writer on the file */
+				pw = new PrintWriter(new FileWriter(new File(this.blacklistRootPath, blacklistToUse), true));
+
+				for (BlacklistHostAndPath itemToAdd : items) {
+					final String host = itemToAdd.getHost();
+					final String path = itemToAdd.getPath();
+					final String safeHost = Punycode.isBasic(host) ? host : MultiProtocolURL.toPunycode(host);
+
+					if (contains(blacklistType, safeHost, path)) {
+						/* Continue to the next item */
+						continue;
+					}
+					if (safeHost == null) {
+						log.warn("host must not be null");
+						/* Continue to the next item */
+						continue;
+					}
+					if (path == null) {
+						log.warn("path must not be null");
+						/* Continue to the next item */
+						continue;
+					}
+
+					String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
+					final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
+
+					// avoid PatternSyntaxException e
+					final String h = ((!isMatchable(safeHost) && !safeHost.isEmpty() && safeHost.charAt(0) == '*')
+							? "." + safeHost : safeHost).toLowerCase();
+					if (!p.isEmpty() && p.charAt(0) == '*') {
+						p = "." + p;
+					}
+
+					Set<Pattern> hostList;
+					if (!(blacklistMap.containsKey(h) && ((hostList = blacklistMap.get(h)) != null))) {
+						blacklistMap.put(h, (hostList = new HashSet<Pattern>()));
+					}
+
+					Pattern pattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE);
+
+					hostList.add(pattern);
+
+					// Append the line to the file.
+					final String newEntry = h + "/" + pattern;
+					if (!blacklist.contains(newEntry)) {
+						pw.println(newEntry);
+						blacklist.add(newEntry);
+					}
+
+				}
+			} catch (final IOException e) {
+				ConcurrentLog.logException(e);
+			} finally {
+				if (pw != null) {
+					pw.close();
+					if (pw.checkError()) {
+						log.warn("could not close stream to " + blacklistToUse + "! ");
+					}
+				}
+			}
+		}
+	}
+    
     /**
      * Adds entry to a given blacklist internal data and updates the source file
      * @param blacklistType
@@ -326,60 +411,9 @@ public class Blacklist {
      * @throws PunycodeException
      */
     public final void add(final BlacklistType blacklistType, final String blacklistToUse, final String host, final String path) throws PunycodeException {
-    	
-        final String safeHost = Punycode.isBasic(host) ? host : MultiProtocolURL.toPunycode(host);
-        
-        if (contains(blacklistType, safeHost, path)) {
-    		return;
-    	}
-        if (safeHost == null) {
-            throw new IllegalArgumentException("host may not be null");
-        }
-        if (path == null) {
-            throw new IllegalArgumentException("path may not be null");
-        }
-
-        String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
-        final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
-
-        // avoid PatternSyntaxException e
-        final String h = ((!isMatchable(safeHost) && !safeHost.isEmpty() && safeHost.charAt(0) == '*') ? "." + safeHost : safeHost).toLowerCase();
-        if (!p.isEmpty() && p.charAt(0) == '*') {
-            p = "." + p;
-        }
-
-        Set<Pattern> hostList;
-        if (!(blacklistMap.containsKey(h) && ((hostList = blacklistMap.get(h)) != null))) {
-            blacklistMap.put(h, (hostList = new HashSet<Pattern>()));
-        }
-        
-        Pattern pattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE); 
-        
-        hostList.add(pattern); 
-
-        // Append the line to the file.
-        PrintWriter pw = null;
-        try {
-        	final String newEntry = h + "/" + pattern;
-        	if (!blacklistFileContains(blacklistRootPath, 
-        			blacklistToUse, newEntry)) {
-	            pw = new PrintWriter(new FileWriter(new File(blacklistRootPath, 
-	            		blacklistToUse), true));
-	            pw.println(newEntry);
-	            pw.close();
-        	}
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        } finally {
-        	if (pw != null) {
-                try {
-                		pw.close();
-                } catch (final Exception e) {
-                	log.warn("could not close stream to " + 
-                    		blacklistToUse + "! " + e.getMessage());
-                }
-        	}
-        }
+    	final Collection<BlacklistHostAndPath> oneItemList = new ArrayList<>();
+    	oneItemList.add(new BlacklistHostAndPath(host, path));
+        this.add(blacklistType, blacklistToUse, oneItemList);
     }
 
     /**

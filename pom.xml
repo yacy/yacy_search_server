@@ -31,8 +31,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <!-- the Solr version used in dependency section for all related dependencies -->
         <solr.version>6.3.0</solr.version>
         <!-- the Jetty version used in dependency section for all related dependencies -->
@@ -67,7 +67,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.0</version>
                 <configuration>
                     <excludes>
                         <!-- special exclude for compatibility with ant build script
@@ -231,6 +231,7 @@
 				<releaseNr>9000</releaseNr>
 			</properties>
 		</profile>
+
     	<!--<profile>-->
     		<!--<id>git-rev-number</id>-->
     		<!--&lt;!&ndash; Active profile when .git folder exists &ndash;&gt;-->

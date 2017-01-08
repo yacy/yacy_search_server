@@ -183,7 +183,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     public URIMetadataNode(final SolrDocument doc) throws MalformedURLException {
         super();
         for (String name : doc.getFieldNames()) {
-            this.addField(name, doc.getFieldValue(name));
+            this.setField(name, doc.getFieldValue(name));
         }
         /* score shall contain the YaCy score, getFieldValue("score") moved to
         *  SearchEvent.addNodes() where the YaCy ranking for nodes is calculated
@@ -196,12 +196,12 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         if (!hashstr.isEmpty()) { // remote id might not correspond in all cases
             final String myhash = ASCII.String(this.url.hash());
             if (!hashstr.equals(myhash)) {
-                this.addField(CollectionSchema.id.getSolrFieldName(), myhash);
+                this.setField(CollectionSchema.id.getSolrFieldName(), myhash);
                 ConcurrentLog.fine("URIMetadataNode", "updated document.ID of " + urlRaw + " from " + hashstr + " to " + myhash);
                 // ususally the hosthash matches but just to be on the safe site
                 final String hostidstr = getString(CollectionSchema.host_id_s); // id or empty string
                 if (!hostidstr.isEmpty() && !hostidstr.equals(this.url.hosthash())) {
-                    this.addField(CollectionSchema.host_id_s.getSolrFieldName(), this.url.hosthash());
+                    this.setField(CollectionSchema.host_id_s.getSolrFieldName(), this.url.hosthash());
                 }
             }
         }

@@ -30,6 +30,12 @@ import java.util.Set;
 import net.yacy.cora.lod.Literal;
 import net.yacy.cora.lod.Vocabulary;
 
+/**
+ * Dublin Core Metadata Element Set, Version 1.1
+ * http://www.dublincore.org/documents/dces/ The Dublin Core Metadata Element
+ * Set is a vocabulary of fifteen properties for use in resource description.
+ *
+ */
 public enum DublinCore implements Vocabulary {
 
     Contributor,
@@ -48,19 +54,19 @@ public enum DublinCore implements Vocabulary {
     Title,
     Type;
 
-    public final static String IDENTIFIER = "http://dublincore.org/documents/2010/10/11/dces/";
+    public final static String NAMESPACE = "http://purl.org/dc/elements/1.1/";
     public final static String PREFIX = "dc";
 
     private final String predicate, uriref;
 
     private DublinCore() {
-        this.predicate = IDENTIFIER +  this.name().toLowerCase();
+        this.predicate = NAMESPACE +  this.name().toLowerCase();
         this.uriref = PREFIX + ':' + this.name().toLowerCase();
     }
 
     @Override
     public String getNamespace() {
-        return IDENTIFIER;
+        return NAMESPACE;
     }
 
     @Override

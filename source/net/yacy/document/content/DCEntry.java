@@ -334,9 +334,9 @@ public class DCEntry extends MultiMapSolrParams {
         t.add(getTitle());
         
         // for processing during indexing, embed entry as source scraperObject in a standard parserobj object
-        genericParser parserobj = new genericParser(this); // init the simplest parser with DCEntry as source/scraperObject used during indexing
+        genericParser parserobj = new genericParser(); // init the simplest parser with DCEntry as source/scraperObject used during indexing
 
-        return new Document(
+        Document document = new Document(
             getIdentifier(true),
             "text/html",
             StandardCharsets.UTF_8.name(),
@@ -355,6 +355,8 @@ public class DCEntry extends MultiMapSolrParams {
             null,
             false,
             getDate());
+        document.setScraperObject(this); // TODO: used during indexing to access some possible but special YaCy meta tags in surrogate source ( <md:solrfilename>value ) -> optimize/find alternative
+        return document;
     }
 
     public void writeXML(OutputStreamWriter os) throws IOException {

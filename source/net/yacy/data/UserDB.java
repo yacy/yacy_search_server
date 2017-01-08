@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import net.yacy.cora.document.encoding.UTF8;
@@ -43,7 +44,6 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.blob.MapHeap;
@@ -159,15 +159,15 @@ public final class UserDB {
     }
 
     public Entry getUser(final RequestHeader header){
-        return getUser(header.get(RequestHeader.AUTHORIZATION), header.getHeaderCookies());
+        return getUser(header.get(RequestHeader.AUTHORIZATION), header.getCookies());
     }
 
-    public Entry getUser(final String auth, final String cookies){
+    public Entry getUser(final String auth, final Cookie[] cookies){
         Entry entry=null;
         if(auth != null) {
             entry=proxyAuth(auth);
         }
-        if(entry == null) {
+        if(entry == null && cookies != null) {
             entry=cookieAuth(cookies);
         }
         return entry;
@@ -180,7 +180,7 @@ public final class UserDB {
      * @param auth http-headerline for authorisation.
      * @param cookies
      */
-    public boolean hasAdminRight(final String auth, final String cookies) {
+    public boolean hasAdminRight(final String auth, final Cookie[] cookies) {
         final Entry entry = getUser(auth, cookies);
         return (entry != null) ? entry.hasRight(AccessRight.ADMIN_RIGHT) : false;
     }
@@ -255,8 +255,15 @@ public final class UserDB {
         return null;
     }
 
-    public Entry cookieAuth(final String cookieString){
-        final String token = getLoginToken(cookieString);
+    /**
+     * Returns the user entry matching the cookie login token created and set
+     * on login.
+     * 
+     * @param cookies
+     * @return user entry or null
+     */
+    public Entry cookieAuth(final Cookie[] cookies){
+        final String token = getLoginToken(cookies);
         if (cookieUsers.containsKey(token)) {
             final Entry entry = cookieUsers.get(token);
             return entry;
@@ -270,13 +277,18 @@ public final class UserDB {
         cookieUsers.put(token, entry);
         return token;
     }
-    
-    public static String getLoginToken(final String cookies){
-        final String[] cookie = CommonPattern.SEMICOLON.split(cookies); //TODO: Mozilla uses "; "
-        for (final String c :cookie) {
-            String[] pair = c.split("=");
-            if (pair[0].trim().equals("login")) {
-                return pair[1].trim();
+
+    /**
+     * Extracts the token set as value in a cookie with name "login"
+     * @param cookies
+     * @return login token string
+     */
+    public static String getLoginToken(final Cookie[] cookies) {
+        if (cookies != null) {
+            for (final Cookie c : cookies) {
+                if (c.getName().equals("login")) {
+                    return c.getValue().trim();
+                }
             }
         }
         return "";
