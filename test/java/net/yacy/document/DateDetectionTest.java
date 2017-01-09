@@ -22,7 +22,7 @@ public class DateDetectionTest {
         cal.set(2016, Calendar.JANUARY, 1); // set the target date
 
         // test some date input representations
-        Set<String> testtext = new LinkedHashSet();
+        Set<String> testtext = new LinkedHashSet<>();
         testtext.add("2016-01-01");
         testtext.add("2016/01/01");
         testtext.add("1.1.2016");
@@ -43,10 +43,11 @@ public class DateDetectionTest {
 
         // test holidays
         cal = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
-        int currentyear = cal.get(Calendar.YEAR); // instance is init to NOW
+        int currentyear = cal.get(Calendar.YEAR); // instance is initilized to NOW
         cal.clear(); // get rid of sec, millisec
         cal.set(currentyear, Calendar.JANUARY, 1); // use Calendar const (month is 0 based)
 
+        testtext.clear();
         testtext.add("Neujahr");
         testtext.add("New Year's Day");
 
@@ -93,7 +94,7 @@ public class DateDetectionTest {
     public void testParseLineNoDate() {
 
         // test input representations
-        Set<String> testtext = new LinkedHashSet();
+        Set<String> testtext = new LinkedHashSet<>();
         testtext.add("3.1.2.0102"); // example of a program version string
         // testtext.add("3.1.20.0102"); // date end-capture not working (on modification conflict with YMD parser)
         testtext.add("v3.1.21");
