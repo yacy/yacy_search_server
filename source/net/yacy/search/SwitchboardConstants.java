@@ -26,7 +26,7 @@
 
 package net.yacy.search;
 
-import net.yacy.kelondro.util.MapTools;
+import net.yacy.cora.order.Digest;
 import net.yacy.server.http.RobotsTxtConfig;
 
 /**
@@ -39,7 +39,7 @@ public final class SwitchboardConstants {
     /**
      * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
      * <p>Name of the setting holding the authentication hash for the static <code>admin</code>-account. It is calculated
-     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link MapTools#encodeMD5Hex(String)}.</p>
+     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link Digest#encodeMD5Hex(String)}.</p>
      * With introduction of DIGEST authentication all passwords are MD5 encoded and calculatd as <code>username:adminrealm:password</code>
      * To differentiate old and new admin passwords, use the new calculated passwords a "MD5:" prefix.
      */
@@ -101,7 +101,6 @@ public final class SwitchboardConstants {
      * <p>Name of the local crawler thread, popping one entry off the Local Crawl Queue, and passing it to the
      * proxy cache enqueue thread to download and further process it</p>
      *
-     * @see Switchboard#PROXY_CACHE_ENQUEUE
      */
     public static final String CRAWLJOB_LOCAL_CRAWL                             = "50_localcrawl";
     public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_START                = "coreCrawlJob";
@@ -126,7 +125,7 @@ public final class SwitchboardConstants {
      * <p><code>public static final String <strong>CRAWLJOB_REMOTE_CRAWL_LOADER</strong> = "60_remotecrawlloader"</code></p>
      * <p>Name of the remote crawl list loading thread</p>
      *
-     * @see Switchboard#CRAWLJOB_REMOTE_CRAWL_LOADER
+     * @see #CRAWLJOB_REMOTE_CRAWL_LOADER
      */
     public static final String CRAWLJOB_REMOTE                                 = "crawlResponse"; // enable/disable response to remote crawl requests
     public static final String CRAWLJOB_REMOTE_CRAWL_LOADER                    = "60_remotecrawlloader";
@@ -211,7 +210,7 @@ public final class SwitchboardConstants {
      * <p><code>public static final String <strong>INDEX_DIST_ALLOW</strong> = "allowDistributeIndex"</code></p>
      * <p>Name of the setting whether Index Distribution shall be allowed (and the DHT-thread therefore started) or not</p>
      *
-     * @see Switchboard#INDEX_DIST_ALLOW_WHILE_CRAWLING
+     * @see #INDEX_DIST_ALLOW_WHILE_CRAWLING
      */
     public static final String INDEX_DIST_ALLOW                 = "allowDistributeIndex";
     public static final String INDEX_RECEIVE_ALLOW              = "allowReceiveIndex";
@@ -224,7 +223,7 @@ public final class SwitchboardConstants {
      * the Local Crawler Queue is filled.</p>
      * <p>This setting only has effect if {@link #INDEX_DIST_ALLOW} is enabled</p>
      *
-     * @see Switchboard#INDEX_DIST_ALLOW
+     * @see #INDEX_DIST_ALLOW
      */
     public static final String INDEX_DIST_ALLOW_WHILE_CRAWLING  = "allowDistributeIndexWhileCrawling";
     public static final String INDEX_DIST_ALLOW_WHILE_INDEXING  = "allowDistributeIndexWhileIndexing";
@@ -251,14 +250,6 @@ public final class SwitchboardConstants {
     public static final String PROXY_INDEXING_LOCAL_TEXT        = "proxyIndexingLocalText";
     public static final String PROXY_INDEXING_LOCAL_MEDIA       = "proxyIndexingLocalMedia";
     public static final String PROXY_CACHE_SIZE                 = "proxyCacheSize";
-    /**
-     * <p><code>public static final String <strong>PROXY_CACHE_LAYOUT</strong> = "proxyCacheLayout"</code></p>
-     * <p>Name of the setting which file-/folder-layout the proxy cache shall use. Possible values are {@link #PROXY_CACHE_LAYOUT_TREE}
-     * and {@link #PROXY_CACHE_LAYOUT_HASH}</p>
-     *
-     * @see Switchboard#PROXY_CACHE_LAYOUT_TREE
-     * @see Switchboard#PROXY_CACHE_LAYOUT_HASH
-     */
     public static final String PROXY_YACY_ONLY                 = "proxyYacyOnly";
     public static final String PROXY_TRANSPARENT_PROXY         = "isTransparentProxy";
 
@@ -360,8 +351,6 @@ public final class SwitchboardConstants {
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
      * downloaded webpages and their respective ressources and HTTP-headers are stored. It is the location containing
      * the proxy-cache</p>
-     *
-     * @see Switchboard#PROXY_CACHE_LAYOUT for details on the file-layout in this path
      */
     public static final String HTCACHE_PATH             = "proxyCache";
     public static final String HTCACHE_PATH_DEFAULT     = "DATA/HTCACHE";
@@ -415,13 +404,6 @@ public final class SwitchboardConstants {
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
      * DBs containing "work" of the user are saved. Such include bookmarks, messages, wiki, blog</p>
      *
-     * @see Switchboard#DBFILE_BLOG
-     * @see Switchboard#DBFILE_BOOKMARKS
-     * @see Switchboard#DBFILE_BOOKMARKS_DATES
-     * @see Switchboard#DBFILE_BOOKMARKS_TAGS
-     * @see Switchboard#DBFILE_MESSAGE
-     * @see Switchboard#DBFILE_WIKI
-     * @see Switchboard#DBFILE_WIKI_BKP
      */
     public static final String WORK_PATH                = "workPath";
     public static final String WORK_PATH_DEFAULT        = "DATA/WORK";

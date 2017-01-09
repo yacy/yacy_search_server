@@ -126,10 +126,9 @@ public class Segment {
 
     /**
      * create a new Segment
-     * @param log
-     * @param segmentPath that should be the path ponting to the directory "SEGMENT"
-     * @param collectionSchema
-     * @throws IOException 
+     * @param log logger instance
+     * @param segmentPath that should be the path pointing to the directory "SEGMENT"
+     * @throws IOException when an error occurs
      */
     public Segment(final ConcurrentLog log, final File segmentPath, final File archivePath,
             final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) throws IOException {
@@ -399,7 +398,7 @@ public class Segment {
 
     /**
      * get the load time of a resource.
-     * @param urlHash
+     * @param urlhash the resource hash
      * @return the time in milliseconds since epoch for the load time or -1 if the document does not exist
      */
     public long getLoadTime(final String urlhash) throws IOException {

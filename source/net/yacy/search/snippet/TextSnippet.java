@@ -412,7 +412,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     /**
      * Marks all words in current line which have the same
      * hash values as the ones contained in argument.
-     * @param queryHashes hashes of search words
+     * @param queryGoal the query goal
      * @return line with marked words
      */
     public String getLineMarked(final QueryGoal queryGoal) {
@@ -503,7 +503,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
      * @param queryHashes hashes of the words to mark
      * @return the marked word if one of the hashes matches,
      * else the unmarked word
-     * @see #getLineMarked(Set)
+     * @see #getLineMarked(QueryGoal)
      */
     private static String getWordMarked(
             final String word, final Set<byte[]> queryHashes) {

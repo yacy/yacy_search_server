@@ -52,7 +52,7 @@ public class ISO8601Formatter extends AbstractFormatter implements DateFormatter
     }
     
     /**
-     * Parse dates as defined in {@linkplain http://www.w3.org/TR/NOTE-datetime}.
+     * Parse dates as defined in <a href="http://www.w3.org/TR/NOTE-datetime">http://www.w3.org/TR/NOTE-datetime</a>.
      * This format (also specified in ISO8601) allows different "precisions".
      * The following lower precision versions for the complete date 
      * "2007-12-19T10:20:30.567+0300" are allowed:<br>

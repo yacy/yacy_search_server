@@ -65,7 +65,7 @@ public class ListAccumulator {
 
     /**
      * Adds a new entry to a list identified by a given name.
-     * @param key The name of the list the entry is to be added to.
+     * @param list The name of the list the entry is to be added to.
      * @param entry The new entry.
      * @return True if the entry has been added, else false (if list does not exists).
      */
@@ -125,16 +125,14 @@ public class ListAccumulator {
     }
 
     /**
-     * Returns a {@link List} which contains all the {@link List Lists} of entries.
-     * @return list of lists.
+     * @return a {@link List} which contains all the {@link List Lists} of entries.
      */
     public List<List<String>> getEntryLists() {
         return entries;
     }
 
     /**
-     * Returns a {@link List} which contains all the {@link Map Maps} of entries.
-     * @return
+     * @return a {@link List} which contains all the {@link Map Maps} of entries.
      */
     public List<Map<String,String>> getPropertyMaps() {
         return properties;

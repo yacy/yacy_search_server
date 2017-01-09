@@ -80,7 +80,7 @@ public interface Navigator extends ScoreMap<String> {
      * The navigator looks for a field in the document and increases the counts
      * depending on the value in the document field.
      *
-     * @param docs document
+     * @param doc document
      */
     public void incDoc(URIMetadataNode doc);
 

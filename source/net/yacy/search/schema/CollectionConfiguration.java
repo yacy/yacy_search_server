@@ -218,7 +218,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      * @param doc
      * @param allAttr
      * @param digestURL
-     * @param doctype
      * @return the normalized url
      */
     public String addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURL digestURL) {
@@ -2104,13 +2103,13 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return a;
     }
     
-    /**
-     * encode a string containing attributes from anchor rel properties binary:
-     * bit 0: "me" contained in rel
-     * bit 1: "nofollow" contained in rel
-     * @param rel
-     * @return binary encoded information about rel
-     */
+//    /**
+//     * encode a string containing attributes from anchor rel properties binary:
+//     * bit 0: "me" contained in rel
+//     * bit 1: "nofollow" contained in rel
+//     * @param rel
+//     * @return binary encoded information about rel
+//     */
     /*
     private static List<Integer> relEval(final List<String> rel) {
         List<Integer> il = new ArrayList<Integer>(rel.size());

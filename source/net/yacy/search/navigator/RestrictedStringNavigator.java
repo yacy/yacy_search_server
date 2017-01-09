@@ -81,7 +81,6 @@ public class RestrictedStringNavigator extends StringNavigator implements Naviga
 
     /**
      * Increase counter if item allowed and not forbidden
-     * @param key
      */
     @Override
     public void inc(ScoreMap<String> map) {

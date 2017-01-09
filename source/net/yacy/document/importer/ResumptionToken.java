@@ -88,8 +88,7 @@ public class ResumptionToken extends TreeMap<String, String> {
 
     /**
      * compute a url that can be used to resume the retrieval from the OAI-PMH resource
-     * @param givenURL
-     * @return
+     * @return the computed url
      * @throws IOException in case that no follow-up url can be generated; i.e. if the expiration date is exceeded
      */
     public DigestURL resumptionURL() throws IOException {
@@ -149,10 +148,10 @@ public class ResumptionToken extends TreeMap<String, String> {
     }
 
     /**
-     * an expiration date of a resumption token that addresses how long a cached set will
-     * stay in the cache of the oai-pmh server. See:
-     * http://www.openarchives.org/OAI/2.0/guidelines-repository.htm#CachedResultSet
-     * @return
+     * See:
+     * <a href="http://www.openarchives.org/OAI/2.0/guidelines-repository.htm#CachedResultSet">Implementation Guidelines for the Open Archives</a>
+     * @return an expiration date of a resumption token that addresses how long a cached set will
+     * stay in the cache of the oai-pmh server
      */
     public Date getExpirationDate() {
         final String d = get("expirationDate");
@@ -174,8 +173,8 @@ public class ResumptionToken extends TreeMap<String, String> {
      * In other cases, it is permissible for repositories to revise
      * the estimate during a list request sequence.
      * An attribute according to
-     * http://www.openarchives.org/OAI/2.0/guidelines-repository.htm#completeListSize
-     * @return
+     * <a href="http://www.openarchives.org/OAI/2.0/guidelines-repository.htm#completeListSize">Implementation Guidelines for the Open Archives</a>
+     * @return the completeListSize attribute
      */
     public int getCompleteListSize() {
         final String t = get("completeListSize");
@@ -188,8 +187,8 @@ public class ResumptionToken extends TreeMap<String, String> {
      * thus it is always "0" in the first incomplete list response.
      * It should only be specified if it is consistently used in all responses.
      * An attribute according to
-     * http://www.openarchives.org/OAI/2.0/guidelines-repository.htm#completeListSize
-     * @return
+     * <a href="http://www.openarchives.org/OAI/2.0/guidelines-repository.htm#completeListSize">Implementation Guidelines for the Open Archives</a>
+     * @return the cursor attribute
      */
     public int getCursor() {
         final String t = get("cursor");
@@ -198,10 +197,9 @@ public class ResumptionToken extends TreeMap<String, String> {
     }
 
     /**
-     * get a token of the stateless transfer in case that no expiration date is given
-     * see:
-     * http://www.openarchives.org/OAI/2.0/guidelines-repository.htm#StateInResumptionToken
-     * @return
+     * See:
+     * <a href="http://www.openarchives.org/OAI/2.0/guidelines-repository.htm#StateInResumptionToken">Implementation Guidelines for the Open Archives</a>
+     * @return a token of the stateless transfer in case that no expiration date is given
      */
     public String getToken() {
         return get("token");

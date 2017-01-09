@@ -148,9 +148,9 @@ public class YearNavigator extends StringNavigator implements Navigator {
     /**
      * For date_in_content_dts it return true if form:YEAR and to:YEAR is part
      * of the modifier, otherwise false.
-     * @param modifier
+     * @param modifier the search query modifier
      * @param name 4 digit year string
-     * @return
+     * @return true when when the modifier is active
      */
     @Override
     public boolean modifieractive(QueryModifier modifier, String name) {

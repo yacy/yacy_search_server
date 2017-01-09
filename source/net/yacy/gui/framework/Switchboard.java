@@ -210,9 +210,9 @@ public class Switchboard {
     
     /**
      * convenience access to boolean values in properties
-     * @param key
-     * @param dflt
-     * @return
+     * @param key property key
+     * @param dflt default value
+     * @return the boolean value from properties or dflt when it is not defined
      */
     public static boolean getBool(String key, boolean dflt) {
         if (!properties.containsKey(key)) return dflt;

@@ -669,11 +669,7 @@ public final class QueryParams {
 
     /**
      * make a query anchor tag
-     * @param page
-     * @param theQuery
-     * @param originalUrlMask
-     * @param addToQuery
-     * @return
+     * @return the anchor url builder
      */
     public static StringBuilder navurl(final RequestHeader.FileType ext, final int page, final QueryParams theQuery, final String newQueryString, boolean newModifierReplacesOld) {
 

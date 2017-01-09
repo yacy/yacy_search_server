@@ -100,7 +100,7 @@ import org.apache.http.util.EntityUtils;
 
 
 /**
- * HttpClient implementation which uses HttpComponents Client {@link http://hc.apache.org/}
+ * HttpClient implementation which uses <a href="http://hc.apache.org/">HttpComponents Client</a>.
  *
  * @author sixcooler
  *

@@ -45,21 +45,21 @@ public class YMarkUtil {
     public final static Pattern FOLDERS_SEPARATOR_PATTERN = Pattern.compile(FOLDERS_SEPARATOR);
     
     /**
-     * conveniance function to generate url hashes for YMark bookmarks
+     * convenience function to generate url hashes for YMark bookmarks
      * @param url a string representation of a valid url
      * @return a byte[] hash for the input URL string
      * @throws MalformedURLException
-     * @see net.yacy.kelondro.data.meta.DigestURI.DigestURI(String url, byte[] hash).hash()
+     * @see {@link DigestURL#hash()}
      */
     public final static byte[] getBookmarkId(String url) throws MalformedURLException {
 		return (new DigestURL(url)).hash();
     }
 
     /**
-     * conveniance function to generate word hashes for YMark tags and folders
+     * convenience function to generate word hashes for YMark tags and folders
      * @param key a tag or folder name
      * @return a byte[] hash for the input string
-     * @see net.yacy.kelondro.data.word.Word.word2hash(final String word)
+     * @see net.yacy.kelondro.data.word.Word#word2hash(String)
      */
     public final static byte[] getKeyId(final String key) {
         return Word.word2hash(key.toLowerCase());

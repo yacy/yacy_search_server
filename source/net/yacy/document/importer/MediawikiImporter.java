@@ -123,8 +123,7 @@ public class MediawikiImporter extends Thread implements Importer {
     }
 
     /**
-     * return the number of articles per second
-     * @return
+     * @return the number of articles per second
      */
     @Override
     public int speed() {
@@ -133,8 +132,7 @@ public class MediawikiImporter extends Thread implements Importer {
     }
 
     /**
-     * return the remaining seconds for the completion of all records in milliseconds
-     * @return
+     * @return the remaining seconds for the completion of all records in milliseconds
      */
     @Override
     public long remainingTime() {

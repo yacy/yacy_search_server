@@ -41,7 +41,7 @@ public class LargeNumberCache {
      * Returns a Integer instance representing the specified int value.
      * If a new Integer instance is not required, this method
      * should generally be used in preference to the constructor
-     * {@link #Integer(int)}, as this method is likely to yield
+     * {@link Integer#Integer(int)}, as this method is likely to yield
      * significantly better space and time performance by caching
      * frequently requested values.
      *
