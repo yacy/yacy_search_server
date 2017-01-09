@@ -133,7 +133,7 @@ public class ListAccumulator {
     }
 
     /**
-     * Returns a {@link List} which contains all the {@link Maps} of entries.
+     * Returns a {@link List} which contains all the {@link Map Maps} of entries.
      * @return
      */
     public List<Map<String,String>> getPropertyMaps() {

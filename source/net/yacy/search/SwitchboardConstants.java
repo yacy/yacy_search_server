@@ -347,13 +347,10 @@ public final class SwitchboardConstants {
     /** Default value of the setting configuring how many active robots.txt loading threads may be running on the same time at max */
     public static final int ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT       = 200;
 
-    /**
-     * <p><code>public static final String <strong>BLACKLIST_CLASS_DEFAULT</strong> = "de.anomic.plasma.urlPattern.defaultURLPattern"</code></p>
-     * <p>Package and name of YaCy's {@link DefaultBlacklist default} blacklist implementation</p>
-     *
-     * @see DefaultBlacklist for a detailed overview about the syntax of the default implementation
-     */
+    /** Key of the setting configuring the bluelist file name */
     public static final String LIST_BLUE                = "plasmaBlueList";
+    
+    /** Default bluelist file name */
     public static final String LIST_BLUE_DEFAULT        = null;
     public static final String LIST_BADWORDS_DEFAULT    = "yacy.badwords";
     public static final String LIST_STOPWORDS_DEFAULT   = "yacy.stopwords";
