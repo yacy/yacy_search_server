@@ -11,7 +11,7 @@
     </formats>
 
     
-    <baseDirectory>YaCy</baseDirectory>
+    <baseDirectory>yacy</baseDirectory>
 
     <fileSets>
         <fileSet>
