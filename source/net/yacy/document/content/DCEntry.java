@@ -122,7 +122,7 @@ public class DCEntry extends MultiMapSolrParams {
     /**
      * get Identifier (url) (so far only used for surrogate processing)
      * @param useRelationAsAlternative true = take relation if no identifier resolves to url
-     * @return
+     * @return this entry identifier url
      */
     public DigestURL getIdentifier(boolean useRelationAsAlternative) {
         // identifier may be included multiple times (with all kinds of syntax - example is from on record)

@@ -219,7 +219,7 @@ public final class TransformerWriter extends Writer {
     /**
      * 
      * @param content
-     * @return
+     * @return content or empty array
      */
     private char[] filterTag(final char[] content) {
         if (this.tagStack.size() == 0) {

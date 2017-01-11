@@ -765,7 +765,7 @@ dc_rights
      * This is similar to mergeDocuments but directly joins internal content variables,
      * uses less parsed details and keeps this documents crawl data (like crawldepth, lastmodified)
      *
-     * @see mergeDocuments()
+     * @see #mergeDocuments(DigestURL, String, Document[])
      * @param docs to be included
      * @throws IOException
      */

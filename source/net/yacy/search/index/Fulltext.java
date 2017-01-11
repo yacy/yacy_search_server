@@ -247,8 +247,7 @@ public final class Fulltext {
     }
     
     /**
-     * get the size of the webgraph index
-     * @return
+     * @return the size of the webgraph index
      */
     public long webgraphSize() {
         return this.writeWebgraph ? this.getWebgraphConnector().getSize() : 0;
@@ -375,7 +374,7 @@ public final class Fulltext {
     /**
      * using a fragment of the url hash (6 bytes: bytes 6 to 11) it is possible to address all urls from a specific domain
      * here such a fragment can be used to delete all these domains at once
-     * @param hosthash the hash of the host to be deleted
+     * @param hosthashes the hashes of the hosts to be deleted
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
      * @throws IOException
      */
@@ -445,9 +444,8 @@ public final class Fulltext {
     
     /**
      * remove a full subpath from the index
-     * @param subpath the left path of the url; at least until the end of the host
+     * @param basepath the left path of the url; at least until the end of the host
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
-     * @param concurrently if true, then the method returnes immediately and runs concurrently
      */
     public int remove(final String basepath, Date freshdate) {
         DigestURL uri;
@@ -495,7 +493,7 @@ public final class Fulltext {
      * Deletes document with id=urlHash from fulltext index and document with
      * source_id_s=urlHash from webgraph index
      * @param urlHash the document id
-     * @return
+     * @return false
      */
     public boolean remove(final byte[] urlHash) {
         if (urlHash == null) return false;
@@ -555,7 +553,7 @@ public final class Fulltext {
     
     /**
      * create a dump file from the current solr directory
-     * @return
+     * @return file reference to the dump
      */
     public File dumpSolr() {
         EmbeddedInstance esc = this.solrInstances.getEmbedded();

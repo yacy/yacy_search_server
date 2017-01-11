@@ -41,8 +41,6 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
      * an ImageEntry represents the appearance of an image in a document. It considers also that an image can be used as an button for a web link
      * and stores the web link also.
      * @param imageurl the link to the image
-     * @param linkurl the link which is called when the image is pressed on a web browser. null if the image was not used as link button
-     * @param anchortext the text inside the anchor body where the image link appears (including the image tag). null if the image was not used as link button
      * @param alt the als text in the alt tag
      * @param width the width of the image if known, or -1 if unknown
      * @param height the height of the image if known, or -1 if unknown

@@ -134,7 +134,7 @@ public class htmlParser extends AbstractParser implements Parser {
      * @param mimeType
      * @param charSet
      * @param scraper
-     * @return
+     * @return a Document instance
      */
     private Document transformScraper(final DigestURL location, final String mimeType, final String charSet, final ContentScraper scraper) {
         final String[] sections = new String[
