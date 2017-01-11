@@ -310,7 +310,7 @@ public class SplitTable implements Index, Iterable<Row.Entry> {
     public int writeBufferSize() {
         int s = 0;
         for (final Index index : this.tables.values()) {
-            if (index instanceof Cache) s += ((Cache) index).writeBufferSize();
+            if (index instanceof Cache) s += Cache.writeBufferSize();
         }
         return s;
     }

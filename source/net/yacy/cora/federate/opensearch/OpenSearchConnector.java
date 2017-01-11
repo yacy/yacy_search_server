@@ -57,7 +57,7 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
     /**
      * replace Opensearchdescription search template parameter with actual values
      */
-    private String parseSearchTemplate(String searchurltemplate, String query, int start, int rows) {
+    private static String parseSearchTemplate(String searchurltemplate, String query, int start, int rows) {
         String tmps = searchurltemplate.replaceAll("\\?}", "}"); // some optional parameters may include question mark '{param?}='
         tmps = tmps.replace("{startIndex}", Integer.toString(start));
         tmps = tmps.replace("{startPage}", "");
@@ -81,7 +81,7 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
         List<URIMetadataNode> docs = new ArrayList<URIMetadataNode>();
 
         // see http://www.loc.gov/standards/sru/
-        String searchurl = this.parseSearchTemplate(baseurl, query.getQueryGoal().getQueryString(false), 0, query.itemsPerPage);
+        String searchurl = OpenSearchConnector.parseSearchTemplate(baseurl, query.getQueryGoal().getQueryString(false), 0, query.itemsPerPage);
         try {
             MultiProtocolURL aurl = new MultiProtocolURL(searchurl);
             try {

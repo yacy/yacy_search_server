@@ -41,7 +41,7 @@ public class SMWListSyncThread {
 		}
     }
 
-	private final String wikiurlify (String s) {
+	private static String wikiurlify(String s) {
 		String ret = s;
 		ret = ret.replace("-", "-2D");
 		ret = ret.replace("+", "-2B");

@@ -375,7 +375,7 @@ public class Snapshots {
      * @param fulltext
      * @return the crawldepth of the document
      */
-    public int getDepth(final DigestURL url, final Fulltext fulltext) {
+    public static int getDepth(final DigestURL url, final Fulltext fulltext) {
         Integer depth = null;
         if (fulltext.getDefaultConfiguration().contains(CollectionSchema.crawldepth_i)) {
             try {
@@ -440,15 +440,15 @@ public class Snapshots {
         return pathToShard;
     }
 
-    private String pathToHostPortDir(final String host, final int port) {
+    private static String pathToHostPortDir(final String host, final int port) {
         return host + "." + port;
     }
     
-    private String pathToDepthDir(final int depth) {
+    private static String pathToDepthDir(final int depth) {
         return depth < 10 ? "0" + depth : Integer.toString(depth);
     }
     
-    private String pathToShard(final String urlhash) {
+    private static String pathToShard(final String urlhash) {
         return urlhash.substring(0, 2);
     }
 

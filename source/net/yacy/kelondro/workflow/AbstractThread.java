@@ -130,7 +130,7 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
         // If we reach this point, the process is closed
     }
 
-    private final void logError(final String text,final Throwable thrown) {
+    private static void logError(final String text, final Throwable thrown) {
         if (log == null) {
             ConcurrentLog.severe("THREAD-CONTROL", text, thrown);
         } else {

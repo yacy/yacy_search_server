@@ -26,28 +26,15 @@
 //
 package net.yacy.utils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.security.SignatureException;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.kelondro.io.CharBuffer;
+
+import java.io.*;
+import java.security.*;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
-
-import net.yacy.cora.order.Base64Order;
-import net.yacy.kelondro.io.CharBuffer;
 
 
 /**
@@ -127,7 +114,7 @@ public class CryptoLib {
 	return this.sign.verify(signBuffer);
     }
 
-    public KeyPair genKeyPair() throws NoSuchAlgorithmException {
+    public static KeyPair genKeyPair() throws NoSuchAlgorithmException {
 	KeyPairGenerator kpg = KeyPairGenerator.getInstance(algorithm);
 	kpg.initialize(bitkey);
 	return kpg.generateKeyPair();
@@ -174,7 +161,7 @@ public class CryptoLib {
 	    } else if(args[0].equals("--gen-key") && args.length==3) {
 		CryptoLib cl = new CryptoLib();
 
-		KeyPair kp = cl.genKeyPair();
+		KeyPair kp = CryptoLib.genKeyPair();
 
 		FileWriter privFile = new FileWriter(args[1]);
 		privFile.write(Base64Order.standardCoder.encode(

@@ -147,7 +147,7 @@ public class AutotaggingLibrary {
      * maximum number of compound tags (number of words in one tag)
      * @return
      */
-    public int getMaxWordsInTerm() {
+    public static int getMaxWordsInTerm() {
     	//TODO: calculate from database
     	return 4;
     }

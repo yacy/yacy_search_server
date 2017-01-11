@@ -234,7 +234,7 @@ public class BDecoder {
         }
     }
     
-    private Map<String, BObject> convertToMap(final List<BObject> list) {
+    private static Map<String, BObject> convertToMap(final List<BObject> list) {
         final Map<String, BObject> m = new LinkedHashMap<String, BObject>();
         final int length = list.size();
         byte[] key;

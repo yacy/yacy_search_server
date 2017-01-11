@@ -233,7 +233,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     }
 
     /* ------------------------------------------------------------ */
-    protected boolean hasDefinedRange(Enumeration<String> reqRanges) {
+    protected static boolean hasDefinedRange(Enumeration<String> reqRanges) {
         return (reqRanges != null && reqRanges.hasMoreElements());
     }
     
@@ -415,7 +415,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     /* Check modification date headers.
      * send a 304 response instead of content if not modified since
      */
-    protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
+    protected static boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
             throws IOException {
         try {
             if (!request.getMethod().equals(HttpMethod.HEAD.asString())) {
@@ -724,7 +724,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return protocol + "://" + hostAndPort;
     }
 
-    private RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
+    private static RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
         RequestHeader legacyRequestHeader = new RequestHeader(request);
 
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target); // target may contain a server side include (SSI)
@@ -755,7 +755,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return _resourceBase.addPath(path).getFile();
     }
 
-    protected File rewriteClassFile(final File template) {
+    protected static File rewriteClassFile(final File template) {
         try {
             String f = template.getCanonicalPath();
             final int p = f.lastIndexOf('.');
@@ -1117,7 +1117,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @param target the query target
      * @param response servlet response to eventually update
      */
-	private void updateRespHeadersForImages(String target, HttpServletResponse response) {
+	private static void updateRespHeadersForImages(String target, HttpServletResponse response) {
 		if (target.equals("/ViewImage.png") || target.equals("/ViewFavicon.png")) {
 		    if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
 		        response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
@@ -1136,7 +1136,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @param tmp
      * @throws IOException when a read/write error occured.
      */
-	private void writeInputStream(HttpServletResponse response, String targetExt, InputStream inStream)
+	private static void writeInputStream(HttpServletResponse response, String targetExt, InputStream inStream)
 			throws IOException {
 		final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
 		response.setContentType(mimeType);
@@ -1169,7 +1169,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @param path path to be appended
      * @return comma separated string of pathes including param path
      */
-    private String appendPath(String proplist, String path) {
+    private static String appendPath(String proplist, String path) {
         if (proplist.length() == 0) return path;
         if (proplist.contains(path)) return proplist;
         return proplist + "," + path;
@@ -1178,7 +1178,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     /**
      * parse SSI line and include resource (<!--#include virtual="file.html" -->)
      */
-    protected void parseSSI(final byte[] in, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected static void parseSSI(final byte[] in, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         ByteBuffer buffer = new ByteBuffer(in);
         OutputStream out = response.getOutputStream();
         final byte[] inctxt ="<!--#include virtual=\"".getBytes();
@@ -1223,7 +1223,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @param request
      * @param args found fields/values are added to the map
      */
-    protected void parseMultipart(final HttpServletRequest request, final serverObjects args) throws IOException {
+    protected static void parseMultipart(final HttpServletRequest request, final serverObjects args) throws IOException {
 
         // reject too large uploads
         if (request.getContentLength() > SIZE_FILE_THRESHOLD) throw new IOException("FileUploadException: uploaded file too large = " + request.getContentLength());

@@ -112,11 +112,11 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         return this.contains(field.getSolrFieldName());
     }
 
-    public void remove(final SolrInputDocument doc, final SchemaDeclaration key) {
+    public static void remove(final SolrInputDocument doc, final SchemaDeclaration key) {
         key.remove(doc);
     }
     
-    public void remove(final SolrInputDocument doc, final String key) {
+    public static void remove(final SolrInputDocument doc, final String key) {
         doc.removeField(key);
     }
 

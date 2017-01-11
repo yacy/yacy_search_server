@@ -68,7 +68,7 @@ public class ImageViewer {
 	 * @throws MalformedURLException when url is malformed
 	 * @throws TemplateMissingParameterException when urlString or urlLicense is missing (the one needed depends on auth)
 	 */
-	public DigestURL parseURL(final serverObjects post, final boolean auth)
+	public static DigestURL parseURL(final serverObjects post, final boolean auth)
 			throws MalformedURLException {
 		final String urlString = post.get("url", "");
 		final String urlLicense = post.get("code", "");
@@ -114,8 +114,8 @@ public class ImageViewer {
 	 * @throws IOException
 	 *             when a read/write error occured. 
 	 */
-	public InputStream openInputStream(final serverObjects post, final LoaderDispatcher loader,
-			final boolean auth, DigestURL url) throws IOException {
+	public static InputStream openInputStream(final serverObjects post, final LoaderDispatcher loader,
+                                              final boolean auth, DigestURL url) throws IOException {
 		InputStream inStream = null;
 		if (url != null) {
 			try {
@@ -183,8 +183,8 @@ public class ImageViewer {
 	 * @throws IOException
 	 *             when image could not be parsed or encoded to specified format.
 	 */
-	public EncodedImage parseAndScale(serverObjects post, boolean auth, DigestURL url, String ext,
-			ImageInputStream imageInStream) throws IOException {
+	public static EncodedImage parseAndScale(serverObjects post, boolean auth, DigestURL url, String ext,
+                                             ImageInputStream imageInStream) throws IOException {
 		EncodedImage encodedImage;
 
 		// BufferedImage image = ImageIO.read(imageInStream);
@@ -287,7 +287,7 @@ public class ImageViewer {
 	 * @throws IOException
 	 *             when an error occured
 	 */
-	private BufferedImage readImage(ImageReader reader) throws IOException {
+	private static BufferedImage readImage(ImageReader reader) throws IOException {
 		BufferedImage image;
 		try {
 			image = reader.read(0);
@@ -313,7 +313,7 @@ public class ImageViewer {
 	 * @throws IOException
 	 *             when a read/write error occured.
 	 */
-	private byte[] readRawImage(ImageInputStream inStream) throws IOException {
+	private static byte[] readRawImage(ImageInputStream inStream) throws IOException {
 		byte[] buffer = new byte[4096];
 		int l = 0;
 		ByteArrayOutputStream outStream = new ByteArrayOutputStream();
@@ -337,7 +337,7 @@ public class ImageViewer {
 	 * 
 	 * @return dimensions to render image
 	 */
-	protected Dimension calculateDimensions(final int originWidth, final int originHeight, final Dimension max) {
+	protected static Dimension calculateDimensions(final int originWidth, final int originHeight, final Dimension max) {
 		int resultWidth;
 		int resultHeight;
 		if (max.width < originWidth || max.height < originHeight) {
@@ -371,8 +371,8 @@ public class ImageViewer {
 	 *            true when acces rigths are OK.
 	 * @return maximum dimensions to render image
 	 */
-	protected Dimension calculateMaxDimensions(final boolean auth, final int originWidth, final int originHeight,
-			final int maxWidth, final int maxHeight) {
+	protected static Dimension calculateMaxDimensions(final boolean auth, final int originWidth, final int originHeight,
+                                                      final int maxWidth, final int maxHeight) {
 		int resultWidth;
 		int resultHeight;
 		// in case of not-authorized access shrink the image to prevent
@@ -401,7 +401,7 @@ public class ImageViewer {
 	 *            image to scale. Must not be null.
 	 * @return a scaled image
 	 */
-	public BufferedImage scale(final int width, final int height, final BufferedImage image) {
+	public static BufferedImage scale(final int width, final int height, final BufferedImage image) {
 		// compute scaled image
 		Image scaled = image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
 		final MediaTracker mediaTracker = new MediaTracker(new Container());
@@ -456,7 +456,7 @@ public class ImageViewer {
 	 *            image width
 	 * @return max square area fitting inside dimensions
 	 */
-	public Rectangle getMaxSquare(final int h, final int w) {
+	public static Rectangle getMaxSquare(final int h, final int w) {
 		Rectangle square;
 		if (w > h) {
 			final int offset = (w - h) / 2;
@@ -475,7 +475,7 @@ public class ImageViewer {
 	 *            image to crop
 	 * @return
 	 */
-	public BufferedImage makeSquare(BufferedImage image) {
+	public static BufferedImage makeSquare(BufferedImage image) {
 		final int w = image.getWidth();
 		final int h = image.getHeight();
 		if (w > h) {

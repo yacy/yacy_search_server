@@ -34,6 +34,7 @@ import java.util.TreeMap;
 
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.language.synonyms.AutotaggingLibrary;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.NaturalOrder;
@@ -68,7 +69,7 @@ public class Tokenizer {
         this.words = new TreeMap<String, Word>(NaturalOrder.naturalComparator);
         this.synonyms = new LinkedHashSet<String>();
         assert text != null;
-        String[] wordcache = new String[LibraryProvider.autotagging.getMaxWordsInTerm() - 1];
+        String[] wordcache = new String[AutotaggingLibrary.getMaxWordsInTerm() - 1];
         for (int i = 0; i < wordcache.length; i++) wordcache[i] = "";
         String k;
         Tagging.Metatag tag;

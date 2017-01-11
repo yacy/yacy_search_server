@@ -1,12 +1,15 @@
 package net.yacy.utils.translation;
 
-import java.io.File;
-import java.util.List;
-import java.util.Map;
 import net.yacy.data.Translator;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import java.io.File;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TranslatorXliffTest {
 
@@ -38,7 +41,7 @@ public class TranslatorXliffTest {
             assertTrue(txlif.saveAsXliff(filename.substring(0, 2), xlftmp, origTrans));
 
             // load created xliff file
-            Map<String, Map<String, String>> xliffTrans = txlif.loadTranslationsListsFromXliff(xlftmp);
+            Map<String, Map<String, String>> xliffTrans = TranslatorXliff.loadTranslationsListsFromXliff(xlftmp);
 
             // compare content
             assertEquals(origTrans.size(), xliffTrans.size());

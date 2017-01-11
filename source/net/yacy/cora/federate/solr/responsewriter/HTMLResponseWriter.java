@@ -70,7 +70,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
      * @param writer must be non null
      * @throws IOException when a write error occured
      */
-	private void writeJSLicence(final Writer writer) throws IOException {
+	private static void writeJSLicence(final Writer writer) throws IOException {
 		writer.write("<script>");
 		writer.write("/*");
 		writer.write("@licstart  The following is the entire license notice for the");
@@ -115,7 +115,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("      xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n");
         writer.write("<head profile=\"http://www.w3.org/2003/g/data-view\">\n");
         writer.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
-        this.writeJSLicence(writer);
+        HTMLResponseWriter.writeJSLicence(writer);
         //writer.write("<link rel=\"transformation\" href=\"http://www-sop.inria.fr/acacia/soft/RDFa2RDFXML.xsl\"/>\n");
 
         writer.write("<!-- Bootstrap core CSS -->\n");

@@ -382,7 +382,7 @@ public final class QueryParams {
         }
         
         // construct query
-        final SolrQuery params = getBasicParams(getFacets, this.queryGoal.collectionTextFilterQuery(excludeintext_image));
+        final SolrQuery params = getBasicParams(getFacets, QueryGoal.collectionTextFilterQuery(excludeintext_image));
         int rankingProfile = this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0;
         params.setQuery(this.queryGoal.collectionTextQuery().toString());
         Ranking actRanking = indexSegment.fulltext().getDefaultConfiguration().getRanking(rankingProfile); // for a by-date ranking select different ranking profile
@@ -421,7 +421,7 @@ public final class QueryParams {
         }
         
         // construct query
-        final SolrQuery params = getBasicParams(getFacets, this.queryGoal.collectionImageFilterQuery());
+        final SolrQuery params = getBasicParams(getFacets, QueryGoal.collectionImageFilterQuery());
         params.setQuery(this.queryGoal.collectionImageQuery(this.modifier).toString());
         
         // set boosts

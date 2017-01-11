@@ -39,10 +39,10 @@
         <jetty.version>9.4.0.v20161208</jetty.version>
                 
         <!-- properties used for filtering yacyBuildProperties.java -->       
-        <REPL_DATE>${DSTAMP}</REPL_DATE>
-        <REPL_RELEASE>yacy_v${project.version}_${DSTAMP}_${releaseNr}.tar.gz</REPL_RELEASE>
+        <!--<REPL_DATE>${DSTAMP}</REPL_DATE>-->
+        <!--<REPL_RELEASE>yacy_v${project.version}_${DSTAMP}_${releaseNr}.tar.gz</REPL_RELEASE>-->
+        <!--<REPL_REVISION_NR>${releaseNr}</REPL_REVISION_NR>-->
         <REPL_VERSION>${project.version}</REPL_VERSION>
-        <REPL_REVISION_NR>${releaseNr}</REPL_REVISION_NR>
         <REPL_YACY_ROOT_DIR>.</REPL_YACY_ROOT_DIR>
         <REPL_PKGMANAGER>false</REPL_PKGMANAGER>
         <REPL_RESTARTCMD>/etc/init.d/yacy restart</REPL_RESTARTCMD>

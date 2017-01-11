@@ -180,7 +180,7 @@ public class GenerationMemoryStrategy extends MemoryStrategy {
      * @param collected specifies whether trying to get the memory usage after the jvm recycled unused objects
      * @return MemoryUsage of given MemoryPoolMXBean
      */
-    private MemoryUsage getUsage(final MemoryPoolMXBean bean, final boolean collected) {
+    private static MemoryUsage getUsage(final MemoryPoolMXBean bean, final boolean collected) {
     	if (collected) {
     		try {
 				final MemoryUsage usage = bean.getCollectionUsage();

@@ -88,7 +88,7 @@ public class TranslationManager extends TranslatorXliff {
      * @param targetLngTxt the translated text
      * @return true = if map was modified, otherwise false
      */
-    public boolean addTranslation(Map<String, Map<String, String>> translation, final String relFileName, final String sourceLngTxt, final String targetLngTxt) {
+    public static boolean addTranslation(Map<String, Map<String, String>> translation, final String relFileName, final String sourceLngTxt, final String targetLngTxt) {
         boolean modified = false;
 
         Map<String, String> transFile;

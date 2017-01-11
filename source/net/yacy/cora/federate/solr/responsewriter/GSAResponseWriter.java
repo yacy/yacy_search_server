@@ -358,7 +358,7 @@ public class GSAResponseWriter implements QueryResponseWriter {
      * @return datestring "yyyy-mm-dd"
      * @see ISO8601Formatter
      */
-    public final String formatGSAFS(final Date date) {
+    public static String formatGSAFS(final Date date) {
         if (date == null) return "";
         synchronized (GSAsearchServlet.FORMAT_GSAFS) {
             final String s = GSAsearchServlet.FORMAT_GSAFS.format(date);

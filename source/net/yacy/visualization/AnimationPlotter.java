@@ -66,7 +66,7 @@ public class AnimationPlotter {
         }
     }
     
-    private String intformat(final int i) {
+    private static String intformat(final int i) {
         String n = Integer.toString(i);
         while (n.length() < 6) n = '0' + n;
         return n;

@@ -74,8 +74,8 @@ public class Translator {
      * @param translationTable translation entries : text to translate -> translation
      * @return source translated
      */
-    public String translate(final StringBuilder source,
-            final Map<String, String> translationTable) {
+    public static String translate(final StringBuilder source,
+                                   final Map<String, String> translationTable) {
         final Set<Map.Entry<String, String>> entries = translationTable.entrySet();
         StringBuilder builder = new StringBuilder(source);
         for (final Entry<String, String> entry : entries) {
@@ -170,7 +170,7 @@ public class Translator {
      * @param translationList map of translations
      * @return true when destFile was sucessfully written, false otherwise
      */
-    public boolean translateFile(final File sourceFile, final File destFile, final Map<String, String> translationList){
+    public static boolean translateFile(final File sourceFile, final File destFile, final Map<String, String> translationList){
 
         StringBuilder content = new StringBuilder();
         BufferedReader br = null;
@@ -220,7 +220,7 @@ public class Translator {
      * @param extensions file extension to include in translation
      * @return
      */
-    public boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final Map<String, Map<String, String>> translationLists, final String extensions){
+    public static boolean translateFiles(final File sourceDir, final File destDir, final File baseDir, final Map<String, Map<String, String>> translationLists, final String extensions){
         destDir.mkdirs();
         final List<String> exts = ListManager.string2vector(extensions);
         final File[] sourceFiles = sourceDir.listFiles(new ExtensionsFileFilter(exts));

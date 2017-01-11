@@ -1,9 +1,5 @@
 package net.yacy.cora.federate.solr.connector;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Date;
-import java.util.HashSet;
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
@@ -12,9 +8,15 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.AfterClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashSet;
+
+import static org.junit.Assert.*;
 
 
 public class EmbeddedSolrConnectorTest {
@@ -45,7 +47,8 @@ public class EmbeddedSolrConnectorTest {
 
     @AfterClass
     public static void finalizeTesting() {
-        localCollectionInstance.close();
+        if (localCollectionInstance!=null)
+            localCollectionInstance.close();
     }
 
     /**

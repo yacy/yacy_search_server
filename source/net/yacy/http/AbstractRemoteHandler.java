@@ -163,7 +163,7 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
     /**
      * helper for proxy IP config pattern check
      */
-    private boolean proxyippatternmatch(final String key) {
+    private static boolean proxyippatternmatch(final String key) {
         // the cfgippattern is a comma-separated list of patterns
         // each pattern may contain one wildcard-character '*' which matches anything
         final String cfgippattern = Switchboard.getSwitchboard().getConfig("proxyClient", "*");

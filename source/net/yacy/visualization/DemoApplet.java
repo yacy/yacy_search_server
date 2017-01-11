@@ -64,7 +64,7 @@ public class DemoApplet extends Applet implements Runnable {
         }
     }
 
-    public void paintFrame(final RasterPlotter m) {
+    public static void paintFrame(final RasterPlotter m) {
         RasterPlotter.demoPaint(m);
         final int y = (int) (System.currentTimeMillis() / 10 % 300);
         m.setColor(RasterPlotter.GREY);

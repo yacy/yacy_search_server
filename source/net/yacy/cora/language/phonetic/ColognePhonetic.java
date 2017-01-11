@@ -411,7 +411,7 @@ public class ColognePhonetic implements StringEncoder {
     /**
      * Converts the string to upper case and replaces germanic characters as defined in {@link #PREPROCESS_MAP}.
      */
-    private String preprocess(String text) {
+    private static String preprocess(String text) {
         text = text.toUpperCase(Locale.GERMAN);
 
         char[] chrs = text.toCharArray();

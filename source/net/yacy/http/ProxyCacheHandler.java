@@ -36,7 +36,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
-import net.yacy.http.servlets.YaCyDefaultServlet;
 
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
@@ -46,7 +45,7 @@ import org.eclipse.jetty.server.Request;
  */
 public class ProxyCacheHandler extends AbstractRemoteHandler implements Handler {
 
-    private void handleRequestFromCache(@SuppressWarnings("unused") HttpServletRequest request, HttpServletResponse response, ResponseHeader cachedResponseHeader, byte[] content) throws IOException {
+    private static void handleRequestFromCache(@SuppressWarnings("unused") HttpServletRequest request, HttpServletResponse response, ResponseHeader cachedResponseHeader, byte[] content) throws IOException {
 
         // TODO: check if-modified
         for (Entry<String, String> entry : cachedResponseHeader.entrySet()) {

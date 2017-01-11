@@ -272,7 +272,7 @@ public class pdfParser extends AbstractParser implements Parser {
      * @param pdf the document to parse
      * @return all detected links
      */
-    private Collection<AnchorURL>[] extractPdfLinks(final PDDocument pdf) {
+    private static Collection<AnchorURL>[] extractPdfLinks(final PDDocument pdf) {
         Collection<AnchorURL>[] linkCollections = (Collection<AnchorURL>[]) new Collection<?>[pdf.getNumberOfPages()];
         int pagecount = 0;
         for (PDPage page : pdf.getPages()) {

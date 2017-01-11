@@ -84,7 +84,7 @@ public class GuiHandler extends Handler {
         }
     }
 
-    public final int getSize() {
+    public static int getSize() {
     	return GuiHandler.size;
     }
 

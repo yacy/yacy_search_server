@@ -282,7 +282,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         }
     }
     
-    private void logSystem(final String text) {
+    private static void logSystem(final String text) {
         if (log == null) ConcurrentLog.config("THREAD-CONTROL", text);
         else log.config(text);
     }

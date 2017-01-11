@@ -267,7 +267,7 @@ public class HTTPClient {
      *
      * @param userAgent
      */
-    public void setUserAgent(final ClientIdentification.Agent agent) {
+    public static void setUserAgent(final ClientIdentification.Agent agent) {
     	clientBuilder.setUserAgent(agent.userAgent);
     }
 

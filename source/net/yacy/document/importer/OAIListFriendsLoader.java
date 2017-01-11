@@ -105,7 +105,7 @@ public class OAIListFriendsLoader implements Serializable {
     }
 
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
-    private SAXParser getParser() throws SAXException {
+    private static SAXParser getParser() throws SAXException {
     	SAXParser parser = tlSax.get();
     	if (parser == null) {
     		try {

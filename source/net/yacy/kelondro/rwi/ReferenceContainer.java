@@ -26,16 +26,6 @@
 
 package net.yacy.kelondro.rwi;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
-
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
@@ -44,6 +34,10 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.*;
 
 
 /**
@@ -120,7 +114,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public ReferenceContainer<ReferenceType> merge(final ReferenceContainer<ReferenceType> c) throws SpaceExceededException {
-        return new ReferenceContainer<ReferenceType>(this.factory, this.termHash, super.merge(c));
+        return new ReferenceContainer<>(this.factory, this.termHash, super.merge(c));
     }
 
     public Reference replace(final Reference entry) throws SpaceExceededException {

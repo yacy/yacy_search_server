@@ -106,11 +106,11 @@ public class BlogBoardComments {
         return ret;
     }
 
-    public String guessAuthor(final String ip) {
+    public static String guessAuthor(final String ip) {
         return WikiBoard.guessAuthor(ip);
     }
 
-    public CommentEntry newEntry(final String key, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page) {
+    public static CommentEntry newEntry(final String key, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page) {
         return new CommentEntry(normalize(key), subject, author, ip, date, page);
     }
 
@@ -129,7 +129,7 @@ public class BlogBoardComments {
         return read(key, this.database);
     }
 
-    private CommentEntry read(final String key, final MapHeap base) {
+    private static CommentEntry read(final String key, final MapHeap base) {
         String copyOfKey = normalize(key);
         copyOfKey = copyOfKey.substring(0, Math.min(copyOfKey.length(), KEY_LENGTH));
         Map<String, String> record;

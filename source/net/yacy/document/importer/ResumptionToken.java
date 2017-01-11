@@ -115,7 +115,7 @@ public class ResumptionToken extends TreeMap<String, String> {
         return new DigestURL(u);
     }
 
-    private StringBuilder escape(final String s) {
+    private static StringBuilder escape(final String s) {
         final int len = s.length();
         final StringBuilder sbuf = new StringBuilder(len + 10);
         for (int i = 0; i < len; i++) {

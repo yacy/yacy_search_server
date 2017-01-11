@@ -101,7 +101,7 @@ public class BlogBoard {
         return (key == null) ? "null": key.trim().toLowerCase().replaceAll(" ", "%20");
     }
 
-    public String guessAuthor(final String ip) {
+    public static String guessAuthor(final String ip) {
         return WikiBoard.guessAuthor(ip);
     }
 

@@ -234,7 +234,7 @@ public final class Tray {
 		}
 	}
 
-    private String startupMessage() {
+    private static String startupMessage() {
         if (deutsch)
             return "YaCy startet, bitte warten...";
         else if (french)
@@ -250,7 +250,7 @@ public final class Tray {
         return "YaCy is running at http://localhost:" + sb.getLocalPort();
     }
 
-    private String shutdownMessage() {
+    private static String shutdownMessage() {
         if (deutsch) return "YaCy wird beendet, bitte warten...";
         else if(french)
         	return "YaCy est en cours d'arrêt, veuillez patienter...";

@@ -284,7 +284,7 @@ public class YaCyProxyServlet extends HttpServlet implements Servlet {
         }
     }
 
-    private String readLine(final InputStream in) throws IOException {
+    private static String readLine(final InputStream in) throws IOException {
         final ByteArrayOutputStream buf = new ByteArrayOutputStream();
         int b;
         while ((b = in.read()) != '\r' && b != -1) {
@@ -303,7 +303,7 @@ public class YaCyProxyServlet extends HttpServlet implements Servlet {
     /**
      * helper for proxy IP config pattern check
      */
-    private boolean proxyippatternmatch(final String key) {
+    private static boolean proxyippatternmatch(final String key) {
         // the cfgippattern is a comma-separated list of patterns
         // each pattern may contain one wildcard-character '*' which matches anything
         final String cfgippattern = Switchboard.getSwitchboard().getConfig("proxyURL.access", "*");

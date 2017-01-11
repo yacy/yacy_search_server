@@ -86,7 +86,7 @@ public class ProbabilisticClassifier {
             bayes.learn(NONE_CATEGORY, categoryBuffer.get(NONE_CATEGORY_NAME));
         }
 
-        private List<String> normalize(String phrase) {
+        private static List<String> normalize(String phrase) {
             String cleanphrase = phrase.toLowerCase().replaceAll("\\W", " ");
             String[] rawtokens = cleanphrase.split("\\s");
             List<String> tokens = new ArrayList<>();

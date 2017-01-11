@@ -69,18 +69,18 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         timeout = sb.getConfigInt("proxy.clientTimeout", 10000);
     }
 
-	private void convertHeaderToJetty(HttpResponse in, HttpServletResponse out) {
+	private static void convertHeaderToJetty(HttpResponse in, HttpServletResponse out) {
 		for(Header h: in.getAllHeaders()) {
 			out.addHeader(h.getName(), h.getValue());
 		}
 	}
 	
-	private void cleanResponseHeader(HttpResponse headers) {
+	private static void cleanResponseHeader(HttpResponse headers) {
 		headers.removeHeaders(HeaderFramework.CONTENT_ENCODING);
 		headers.removeHeaders(HeaderFramework.CONTENT_LENGTH);
 	}
 	
-	private void deleteFromCache(final byte[] hash) {
+	private static void deleteFromCache(final byte[] hash) {
 		// long size = -1;
         ResponseHeader rh = Cache.getResponseHeader(hash);
         if (rh != null) {

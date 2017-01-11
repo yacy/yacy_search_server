@@ -485,7 +485,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @param relTokens relationship tokens (parsed from a rel attribute)
      * @return a Set of icon relations, eventually empty
      */
-    public Set<String> retainIconRelations(Collection<String> relTokens) {
+    public static Set<String> retainIconRelations(Collection<String> relTokens) {
     	HashSet<String> iconRels = new HashSet<>();
     	for(String token : relTokens) {
     		if(IconLinkRelations.isIconRel(token)) {

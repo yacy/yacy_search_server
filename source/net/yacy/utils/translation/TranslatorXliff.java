@@ -65,7 +65,7 @@ public class TranslatorXliff extends Translator {
      * @return a HashMap, which contains for each File a HashMap with
      * translations.
      */
-    public Map<String, Map<String, String>> loadTranslationsListsFromXliff(final File xliffFile) {
+    public static Map<String, Map<String, String>> loadTranslationsListsFromXliff(final File xliffFile) {
 
         final Map<String, Map<String, String>> lngLists = new TreeMap<String, Map<String, String>>(); //list of translationLists for different files.
         /**
@@ -187,7 +187,7 @@ public class TranslatorXliff extends Translator {
      * @param localTrans translation to be merged to master
      * @return resulting map with all entries from master and localTrans
      */
-    protected Map<String, Map<String, String>> mergeTranslationLists(Map<String, Map<String, String>> masterTrans, Map<String, Map<String, String>> localTrans) {
+    protected static Map<String, Map<String, String>> mergeTranslationLists(Map<String, Map<String, String>> masterTrans, Map<String, Map<String, String>> localTrans) {
         if (localTrans != null && !localTrans.isEmpty()) {
             for (String transfilename : localTrans.keySet()) { // get translation filename
 
@@ -214,7 +214,7 @@ public class TranslatorXliff extends Translator {
      *
      * @return true on success
      */
-    public boolean saveAsXliff(final String targetLanguageCode, File xliffFile, Map<String, Map<String, String>> lng) {
+    public static boolean saveAsXliff(final String targetLanguageCode, File xliffFile, Map<String, Map<String, String>> lng) {
 
         final String sourceLanguage = "en"; // source language is always English
         OutputStreamWriter output;
@@ -268,7 +268,7 @@ public class TranslatorXliff extends Translator {
      * @param output output file
      * @throws IOException
      */
-    private void writeFileSection(final String filename, final Map<String, String> textlist, OutputStreamWriter output) throws IOException {
+    private static void writeFileSection(final String filename, final Map<String, String> textlist, OutputStreamWriter output) throws IOException {
         if (!filename.isEmpty()) {
             output.write("#File: " + filename + "\n"
                     + "#---------------------------\n");
@@ -300,7 +300,7 @@ public class TranslatorXliff extends Translator {
      *
      * @return true on success
      */
-    public boolean saveAsLngFile(final String targetLanguageCode, File lngFile, Map<String, Map<String, String>> lng) {
+    public static boolean saveAsLngFile(final String targetLanguageCode, File lngFile, Map<String, Map<String, String>> lng) {
 
         OutputStreamWriter output;
 
@@ -339,7 +339,7 @@ public class TranslatorXliff extends Translator {
      * @param html input string
      * @return xml string
      */
-    private String toXmlStr(String s) {
+    private static String toXmlStr(String s) {
 
         int control = s.indexOf("&");
         while (control >= 0) {
@@ -377,7 +377,7 @@ public class TranslatorXliff extends Translator {
      * @param langFile the path with filename to the language file
      * @return a path to DATA/LOCALE/langFile.filename()
      */
-    public File getScratchFile(final File langFile) {
+    public static File getScratchFile(final File langFile) {
         if (Switchboard.getSwitchboard() != null) { // for debug and testing were switchboard is null
             File f = Switchboard.getSwitchboard().getDataPath("locale.translated_html", "DATA/LOCALE");
             f = new File(f.getParentFile(), langFile.getName());

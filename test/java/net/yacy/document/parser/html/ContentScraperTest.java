@@ -20,21 +20,20 @@
 
 package net.yacy.document.parser.html;
 
-import java.awt.Dimension;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.document.VocabularyScraper;
+import net.yacy.kelondro.util.FileUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.awt.*;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.Writer;
-import java.net.MalformedURLException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import net.yacy.cora.document.id.DigestURL;
-import net.yacy.document.VocabularyScraper;
-import net.yacy.kelondro.util.FileUtils;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 /**
  * Unit tests for ContentScrapper class.
@@ -133,7 +132,7 @@ public class ContentScraperTest {
 	}
 
     @Test
-    public void testGetStartDates() throws MalformedURLException, IOException {
+    public void testGetStartDates() throws IOException {
         List<Date> dateResultList;
         DigestURL root = new DigestURL("http://test.org/test.html");
 

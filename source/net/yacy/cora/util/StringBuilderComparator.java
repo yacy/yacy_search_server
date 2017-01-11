@@ -104,7 +104,7 @@ public class StringBuilderComparator implements Comparator<StringBuilder> {
 
     // methods that can be useful for StringBuilder as replacement of String
 
-    public int indexOf(final StringBuilder sb, final char ch) {
+    public static int indexOf(final StringBuilder sb, final char ch) {
         final int max = sb.length();
         for (int i = 0; i < max ; i++) {
             if (sb.charAt(i) == ch) return i;
@@ -112,7 +112,7 @@ public class StringBuilderComparator implements Comparator<StringBuilder> {
         return -1;
     }
 
-    public int indexOf(final StringBuilder sb, final int off, final char ch) {
+    public static int indexOf(final StringBuilder sb, final int off, final char ch) {
         final int max = sb.length();
         for (int i = off; i < max ; i++) {
             if (sb.charAt(i) == ch) return i;
@@ -120,7 +120,7 @@ public class StringBuilderComparator implements Comparator<StringBuilder> {
         return -1;
     }
 
-    public StringBuilder[] split(final StringBuilder sb, final char c) {
+    public static StringBuilder[] split(final StringBuilder sb, final char c) {
         int next = 0;
         int off = 0;
         final ArrayList<String> list = new ArrayList<String>();

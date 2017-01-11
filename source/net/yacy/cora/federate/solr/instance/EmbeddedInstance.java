@@ -20,6 +20,15 @@
 
 package net.yacy.cora.federate.solr.instance;
 
+import com.google.common.io.Files;
+import net.yacy.cora.document.encoding.ASCII;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.kelondro.util.MemoryControl;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.core.CoreContainer;
+import org.apache.solr.core.SolrCore;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,22 +36,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.document.encoding.ASCII;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.util.MemoryControl;
-
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.core.CoreContainer;
-import org.apache.solr.core.SolrCore;
-
-import com.google.common.io.Files;
-
 public class EmbeddedInstance implements SolrInstance {
     
     private final static String[] confFiles = {"solrconfig.xml", "schema.xml", "stopwords.txt", "synonyms.txt", "protwords.txt", "currency.xml", "elevate.xml", "xslt/example.xsl", "xslt/json.xsl", "lang/"};
                                               // additional a optional   solrcore.properties     (or solrcore.x86.properties for 32bit systems is copied
-    private CoreContainer coreContainer;
+    private final CoreContainer coreContainer;
     private String defaultCoreName;
     private SolrCore defaultCore;
     private SolrClient defaultCoreServer;
@@ -244,7 +242,7 @@ public class EmbeddedInstance implements SolrInstance {
         for (SolrCore core: cores.values()) core.close();
         if (this.coreContainer != null) try {
             this.coreContainer.shutdown();
-            this.coreContainer = null;
+            //this.coreContainer = null;
         } catch (final Throwable e) {ConcurrentLog.logException(e);}
     }
     

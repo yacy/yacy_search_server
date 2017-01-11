@@ -88,7 +88,7 @@ public class YMarkCrawlStart extends HashMap<String,String>{
 		return (!this.isEmpty() && this.date_next_exec.after(new Date()));
 	}
 
-	public boolean isRunning(final CrawlSwitchboard crawler) {
+	public static boolean isRunning(final CrawlSwitchboard crawler) {
 		final Iterator<byte[]> iter = crawler.getActive().iterator();
 		while(iter.hasNext()) {
 			final byte[] key = iter.next();

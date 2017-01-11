@@ -314,11 +314,11 @@ public class Metaphone implements StringEncoder {
         return code.toString();
     }
 
-    private boolean isVowel(StringBuilder string, int index) {
+    private static boolean isVowel(StringBuilder string, int index) {
         return VOWELS.indexOf(string.charAt(index)) >= 0;
     }
 
-    private boolean isPreviousChar(StringBuilder string, int index, char c) {
+    private static boolean isPreviousChar(StringBuilder string, int index, char c) {
         boolean matches = false;
         if( index > 0 &&
             index < string.length() ) {
@@ -327,7 +327,7 @@ public class Metaphone implements StringEncoder {
         return matches;
     }
 
-    private boolean isNextChar(StringBuilder string, int index, char c) {
+    private static boolean isNextChar(StringBuilder string, int index, char c) {
         boolean matches = false;
         if( index >= 0 &&
             index < string.length() - 1 ) {
@@ -336,7 +336,7 @@ public class Metaphone implements StringEncoder {
         return matches;
     }
 
-    private boolean regionMatch(StringBuilder string, int index, String test) {
+    private static boolean regionMatch(StringBuilder string, int index, String test) {
         boolean matches = false;
         if( index >= 0 &&
             (index + test.length() - 1) < string.length() ) {
@@ -346,7 +346,7 @@ public class Metaphone implements StringEncoder {
         return matches;
     }
 
-    private boolean isLastChar(int wdsz, int n) {
+    private static boolean isLastChar(int wdsz, int n) {
         return n + 1 == wdsz;
     } 
     

@@ -501,7 +501,7 @@ public class Tagging {
     private final static Pattern PATTERN_SLASHPLUS = Pattern.compile("/|\\+");
     private final static Pattern PATTERN_SPACESPACE = Pattern.compile("  ");
     
-    private final String normalizeKey(String k) {
+    private static String normalizeKey(String k) {
         k = k.trim();
         // remove symbols that are bad in a query attribute
         k = PATTERN_SPACESLASHPLUS.matcher(k).replaceAll(", ");

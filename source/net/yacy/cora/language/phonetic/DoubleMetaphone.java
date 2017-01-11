@@ -280,9 +280,9 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'C' cases
      */
-    private int handleC(String value, 
-                        DoubleMetaphoneResult result, 
-                        int index) {
+    private static int handleC(String value,
+                               DoubleMetaphoneResult result,
+                               int index) {
         if (conditionC0(value, index)) {  // very confusing, moved out
             result.append('K');
             index += 2;
@@ -334,9 +334,9 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'CC' cases
      */
-    private int handleCC(String value, 
-                         DoubleMetaphoneResult result, 
-                         int index) {
+    private static int handleCC(String value,
+                                DoubleMetaphoneResult result,
+                                int index) {
         if (contains(value, index + 2, 1, "I", "E", "H") && 
             !contains(value, index + 2, 2, "HU")) {
             //-- "bellocchio" but not "bacchus" --//
@@ -360,9 +360,9 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'CH' cases
      */
-    private int handleCH(String value, 
-                         DoubleMetaphoneResult result, 
-                         int index) {
+    private static int handleCH(String value,
+                                DoubleMetaphoneResult result,
+                                int index) {
         if (index > 0 && contains(value, index, 4, "CHAE")) {   // Michael
             result.append('K', 'X');
             return index + 2;
@@ -473,9 +473,9 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'GH' cases
      */
-    private int handleGH(String value, 
-                         DoubleMetaphoneResult result, 
-                         int index) {
+    private static int handleGH(String value,
+                                DoubleMetaphoneResult result,
+                                int index) {
         if (index > 0 && !isVowel(charAt(value, index - 1))) {
             result.append('K');
             index += 2;
@@ -507,9 +507,9 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'H' cases
      */
-    private int handleH(String value, 
-                        DoubleMetaphoneResult result, 
-                        int index) {
+    private static int handleH(String value,
+                               DoubleMetaphoneResult result,
+                               int index) {
         //-- only keep if first & before vowel or between 2 vowels --//
         if ((index == 0 || isVowel(charAt(value, index - 1))) && 
             isVowel(charAt(value, index + 1))) {
@@ -525,8 +525,8 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'J' cases
      */
-    private int handleJ(String value, DoubleMetaphoneResult result, int index, 
-                        boolean slavoGermanic) {
+    private static int handleJ(String value, DoubleMetaphoneResult result, int index,
+                               boolean slavoGermanic) {
         if (contains(value, index, 4, "JOSE") || contains(value, 0, 4, "SAN ")) {
                 //-- obvious Spanish, "Jose", "San Jacinto" --//
                 if ((index == 0 && (charAt(value, index + 4) == ' ') || 
@@ -560,9 +560,9 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'L' cases
      */
-    private int handleL(String value, 
-                        DoubleMetaphoneResult result, 
-                        int index) {
+    private static int handleL(String value,
+                               DoubleMetaphoneResult result,
+                               int index) {
         if (charAt(value, index + 1) == 'L') {
             if (conditionL0(value, index)) {
                 result.appendPrimary('L');
@@ -580,9 +580,9 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'P' cases
      */
-    private int handleP(String value, 
-                        DoubleMetaphoneResult result, 
-                        int index) {
+    private static int handleP(String value,
+                               DoubleMetaphoneResult result,
+                               int index) {
         if (charAt(value, index + 1) == 'H') {
             result.append('F');
             index += 2;
@@ -596,10 +596,10 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'R' cases
      */
-    private int handleR(String value, 
-                        DoubleMetaphoneResult result, 
-                        int index, 
-                        boolean slavoGermanic) {
+    private static int handleR(String value,
+                               DoubleMetaphoneResult result,
+                               int index,
+                               boolean slavoGermanic) {
         if (index == value.length() - 1 && !slavoGermanic && 
             contains(value, index - 2, 2, "IE") && 
             !contains(value, index - 4, 2, "ME", "MA")) {
@@ -666,9 +666,9 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'SC' cases
      */
-    private int handleSC(String value, 
-                         DoubleMetaphoneResult result, 
-                         int index) {
+    private static int handleSC(String value,
+                                DoubleMetaphoneResult result,
+                                int index) {
         if (charAt(value, index + 2) == 'H') {
             //-- Schlesinger's rule --//
             if (contains(value, index + 3, 
@@ -728,9 +728,9 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'W' cases
      */
-    private int handleW(String value, 
-                        DoubleMetaphoneResult result, 
-                        int index) {
+    private static int handleW(String value,
+                               DoubleMetaphoneResult result,
+                               int index) {
         if (contains(value, index, 2, "WR")) {
             //-- can also be in middle of word --//
             result.append('R');
@@ -788,8 +788,8 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Handles 'Z' cases
      */
-    private int handleZ(String value, DoubleMetaphoneResult result, int index, 
-                        boolean slavoGermanic) {
+    private static int handleZ(String value, DoubleMetaphoneResult result, int index,
+                               boolean slavoGermanic) {
         if (charAt(value, index + 1) == 'H') {
             //-- Chinese pinyin e.g. "zhao" or Angelina "Zhang" --//
             result.append('J');
@@ -810,7 +810,7 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Complex condition 0 for 'C'
      */
-    private boolean conditionC0(String value, int index) {
+    private static boolean conditionC0(String value, int index) {
         if (contains(value, index, 4, "CHIA")) {
             return true;
         } else if (index <= 1) {
@@ -829,7 +829,7 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Complex condition 0 for 'CH'
      */
-    private boolean conditionCH0(String value, int index) {
+    private static boolean conditionCH0(String value, int index) {
         if (index != 0) {
             return false;
         } else if (!contains(value, index + 1, 5, "HARAC", "HARIS") && 
@@ -845,7 +845,7 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Complex condition 1 for 'CH'
      */
-    private boolean conditionCH1(String value, int index) {
+    private static boolean conditionCH1(String value, int index) {
         return ((contains(value, 0, 4, "VAN ", "VON ") || contains(value, 0, 
                                                                    3, "SCH")) ||
                 contains(value, index - 2, 6, "ORCHES", "ARCHIT", "ORCHID") ||
@@ -857,7 +857,7 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Complex condition 0 for 'L'
      */
-    private boolean conditionL0(String value, int index) {
+    private static boolean conditionL0(String value, int index) {
         if (index == value.length() - 3 && 
             contains(value, index - 1, 4, "ILLO", "ILLA", "ALLE")) {
             return true;
@@ -873,7 +873,7 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Complex condition 0 for 'M'
      */
-    private boolean conditionM0(String value, int index) {
+    private static boolean conditionM0(String value, int index) {
         if (charAt(value, index + 1) == 'M') {
             return true;
         }
@@ -888,7 +888,7 @@ public class DoubleMetaphone implements StringEncoder {
      * Determines whether or not a value is of slavo-germanic orgin. A value is
      * of slavo-germanic origin if it contians any of 'W', 'K', 'CZ', or 'WITZ'.
      */
-    private boolean isSlavoGermanic(String value) {
+    private static boolean isSlavoGermanic(String value) {
         return value.indexOf('W') > -1 || value.indexOf('K') > -1 || 
             value.indexOf("CZ") > -1 || value.indexOf("WITZ") > -1;
     }
@@ -896,7 +896,7 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Determines whether or not a character is a vowel or not
      */
-    private boolean isVowel(char ch) {
+    private static boolean isVowel(char ch) {
         return VOWELS.indexOf(ch) != -1;
     }
 
@@ -905,7 +905,7 @@ public class DoubleMetaphone implements StringEncoder {
      * return <code>true</code> if the value starts with any of 'GN', 'KN',
      * 'PN', 'WR' or 'PS'.
      */    
-    private boolean isSilentStart(String value) {
+    private static boolean isSilentStart(String value) {
         boolean result = false;
         for (String element : SILENT_START) {
             if (value.startsWith(element)) {
@@ -919,7 +919,7 @@ public class DoubleMetaphone implements StringEncoder {
     /**
      * Cleans the input
      */    
-    private String cleanInput(String input) {
+    private static String cleanInput(String input) {
         if (input == null) {
             return null;
         }
@@ -935,7 +935,7 @@ public class DoubleMetaphone implements StringEncoder {
      * it returns <code>Character.MIN_VALUE</code> so that there is some sort
      * of a default
      */    
-    protected char charAt(String value, int index) {
+    protected static char charAt(String value, int index) {
         if (index < 0 || index >= value.length()) {
             return Character.MIN_VALUE;
         } 

@@ -3447,7 +3447,7 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
-    public void initBookmarks(boolean b) {
+    public static void initBookmarks(boolean b) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

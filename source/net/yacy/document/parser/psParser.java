@@ -66,7 +66,7 @@ public class psParser extends AbstractParser implements Parser {
 		}
     }
 
-    private boolean testForPs2Ascii() {
+    private static boolean testForPs2Ascii() {
         try {
             String procOutputLine = null;
             final StringBuilder procOutput = new StringBuilder(80);
@@ -227,7 +227,7 @@ public class psParser extends AbstractParser implements Parser {
      * @param outputFile
      * @throws Exception
      */
-    private void parseUsingPS2ascii(final File inputFile, final File outputFile) throws Exception {
+    private static void parseUsingPS2ascii(final File inputFile, final File outputFile) throws Exception {
     	int execCode = 0;
     	StringBuilder procErr = null;
     	try {

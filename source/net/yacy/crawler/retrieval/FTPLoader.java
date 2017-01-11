@@ -170,7 +170,7 @@ public class FTPLoader {
     /**
      * @param ftpClient
      */
-    private void closeConnection(final FTPClient ftpClient) {
+    private static void closeConnection(final FTPClient ftpClient) {
         // closing connection
         ftpClient.exec("close", false);
         ftpClient.exec("exit", false);
@@ -179,7 +179,7 @@ public class FTPLoader {
     /**
      * establish a connection to the ftp server (open, login, set transfer mode)
      */
-    private boolean openConnection(final FTPClient ftpClient, final DigestURL entryUrl) {
+    private static boolean openConnection(final FTPClient ftpClient, final DigestURL entryUrl) {
         // get username and password
         final String userInfo = entryUrl.getUserInfo();
         String userName = FTPClient.ANONYMOUS, userPwd = "anomic";
@@ -287,7 +287,7 @@ public class FTPLoader {
      * @param entryUrl
      * @return
      */
-    private String getPath(final MultiProtocolURL entryUrl) {
+    private static String getPath(final MultiProtocolURL entryUrl) {
         return MultiProtocolURL.unescape(entryUrl.getPath()).replace("\"", "\"\"");
     }
 

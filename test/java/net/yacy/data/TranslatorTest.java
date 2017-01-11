@@ -49,13 +49,13 @@ public class TranslatorTest {
         String result;
         for (String stringToExamine : noChange) {
             StringBuilder source = new StringBuilder(stringToExamine);
-            result = t.translate(source, translationTable);
+            result = Translator.translate(source, translationTable);
             assertEquals(result, stringToExamine);
         }
 
         for (String stringToExamine : doChange) {
             StringBuilder source = new StringBuilder(stringToExamine);
-            result = t.translate(source, translationTable);
+            result = Translator.translate(source, translationTable);
             assertNotEquals(result, stringToExamine);
         }
     }

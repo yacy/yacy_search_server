@@ -113,7 +113,7 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
         logSystem("thread '" + this.getName() + "' terminated.");
     }
 
-    private void logSystem(final String text) {
+    private static void logSystem(final String text) {
         if (log == null) {
             ConcurrentLog.config("THREAD-CONTROL", text);
         } else {

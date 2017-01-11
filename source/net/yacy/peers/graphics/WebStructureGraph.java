@@ -487,10 +487,10 @@ public class WebStructureGraph {
         return hostReferenceIndexCache;
     }
 
-    private void incomingReferencesEnrich(
-        final ReferenceContainerCache<HostReference> idx,
-        final Iterator<WebStructureGraph.StructureEntry> structureIterator,
-        final long time) {
+    private static void incomingReferencesEnrich(
+            final ReferenceContainerCache<HostReference> idx,
+            final Iterator<WebStructureGraph.StructureEntry> structureIterator,
+            final long time) {
         // we iterate over all structure entries.
         // one structure entry has information that a specific host links to a list of other hosts
         final long timeout = time == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + time;

@@ -255,7 +255,7 @@ public class vcfParser extends AbstractParser implements Parser {
         }
     }
 
-    private String decodeQuotedPrintable(final String s) {
+    private static String decodeQuotedPrintable(final String s) {
         if (s == null) return null;
         final byte[] b = UTF8.getBytes(s);
         final StringBuilder sb = new StringBuilder();

@@ -212,7 +212,7 @@ public class FilterEngine {
         return false;
     }
 
-    public int checkError(final String element, final Map<String, String> properties) {
+    public static int checkError(final String element, final Map<String, String> properties) {
 
         final boolean allowRegex = (properties != null) && properties.get("allowRegex").equalsIgnoreCase("true");
         int slashPos;

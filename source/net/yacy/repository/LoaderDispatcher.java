@@ -412,7 +412,7 @@ public final class LoaderDispatcher {
      * @param agent agent identifier
      * @param url target url
      */
-	private void checkAccessTime(ClientIdentification.Agent agent, final DigestURL url) {
+	private static void checkAccessTime(ClientIdentification.Agent agent, final DigestURL url) {
 		if (!url.isLocal()) {
 			String host = url.getHost();
 			final Long lastAccess = accessTime.get(host);

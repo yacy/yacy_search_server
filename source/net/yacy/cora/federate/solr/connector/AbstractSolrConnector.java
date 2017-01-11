@@ -599,7 +599,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         this.add(docs);
     }
     
-    private SolrInputDocument partialUpdatePatch(final SolrInputDocument docIn) {
+    private static SolrInputDocument partialUpdatePatch(final SolrInputDocument docIn) {
         SolrInputDocument docOut = new SolrInputDocument();
         docOut.setField(CollectionSchema.id.name(), docIn.getFieldValue(CollectionSchema.id.name()));
         for (Entry<String, SolrInputField> entry: docIn.entrySet()) {

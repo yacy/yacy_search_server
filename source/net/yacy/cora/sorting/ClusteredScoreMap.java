@@ -110,7 +110,7 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         }
     }
 
-    private long scoreKey(final int elementNr, final int elementCount) {
+    private static long scoreKey(final int elementNr, final int elementCount) {
         return (((elementCount & 0xFFFFFFFFL)) << 32) | ((elementNr & 0xFFFFFFFFL));
     }
 

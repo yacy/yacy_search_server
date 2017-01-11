@@ -360,7 +360,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
      * @param sb Switchboard
      * @return default or sslcontext according to config
      */
-    private SSLContext initSslContext(Switchboard sb) {
+    private static SSLContext initSslContext(Switchboard sb) {
 
         // getting the keystore file name
         String keyStoreFileName = sb.getConfig("keyStore", "").trim();

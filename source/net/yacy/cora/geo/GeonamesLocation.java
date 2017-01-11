@@ -176,7 +176,7 @@ public class GeonamesLocation implements Locations {
 	 * @return true when s0 starts with s1
 	 * @throws NullPointerException when a parameter is null
 	 */
-	private boolean caseIncensitiveStartsWith(final String s0, final String s1) {
+	private static boolean caseIncensitiveStartsWith(final String s0, final String s1) {
         final int l1 = s1.length();
         if (s0.length() < l1) {
         	return false;
@@ -196,7 +196,7 @@ public class GeonamesLocation implements Locations {
         } else {
             final SortedMap<String, List<Integer>> cities = this.name2ids.tailMap(anyname);
             for ( final Map.Entry<String, List<Integer>> e : cities.entrySet() ) {
-                if (this.caseIncensitiveStartsWith(e.getKey(), anyname) ) {
+                if (GeonamesLocation.caseIncensitiveStartsWith(e.getKey(), anyname) ) {
                     r.addAll(e.getValue());
                 } else {
                     break;
@@ -232,7 +232,7 @@ public class GeonamesLocation implements Locations {
         }
         final SortedMap<String, List<Integer>> tail = this.name2ids.tailMap(s);
         for ( final String name : tail.keySet() ) {
-            if (this.caseIncensitiveStartsWith(name, s) ) {
+            if (GeonamesLocation.caseIncensitiveStartsWith(name, s) ) {
                 a.add(name);
             } else {
                 break;
@@ -250,7 +250,7 @@ public class GeonamesLocation implements Locations {
         final String sString = s.toString();
         final SortedMap<String, List<Integer>> tail = this.name2ids.tailMap(sString);
         for ( final String name : tail.keySet() ) {
-            if (this.caseIncensitiveStartsWith(name, sString) ) {
+            if (GeonamesLocation.caseIncensitiveStartsWith(name, sString) ) {
                 a.add(new StringBuilder(name));
             } else {
                 break;

@@ -84,7 +84,7 @@ public class ListDirs {
 		return files;
 	}
 
-	private ArrayList<File> getFilesRecursive(final File start) {
+	private static ArrayList<File> getFilesRecursive(final File start) {
 		final File[] fileList = start.listFiles();
 		final ArrayList<File> completeList = new ArrayList<File>();
 		for(final File file: fileList) {

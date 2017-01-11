@@ -1036,11 +1036,11 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return isSenior() || isPrincipal();
     }
 
-    public final boolean isOnline(final String type) {
+    public static boolean isOnline(final String type) {
         return type.equals(Seed.PEERTYPE_SENIOR) || type.equals(Seed.PEERTYPE_PRINCIPAL);
     }
 
-    public long nextLong(final Random random, final long n) {
+    public static long nextLong(final Random random, final long n) {
         return Math.abs(random.nextLong()) % n;
     }
 

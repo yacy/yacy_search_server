@@ -1540,7 +1540,7 @@ public final class SearchEvent {
                 }
                 final String reason = "no text snippet; errorCode = " + snippet.getErrorCode();
                 if (this.deleteIfSnippetFail) {
-                    this.workTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.getQueryGoal().getIncludeHashes());
+                    WorkTables.failURLsRegisterMissingWord(this.query.getSegment().termIndex(), page.url(), this.query.getQueryGoal().getIncludeHashes());
                 }
                 SearchEvent.log.info("sorted out url " + page.url().toNormalform(true) + " during search: " + reason);
                 return null;

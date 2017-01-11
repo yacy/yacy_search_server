@@ -201,7 +201,7 @@ public class FTPClient {
         return ret;
     }
 
-    private String[] line2args(final String line) {
+    private static String[] line2args(final String line) {
         // parse the command line
         if ((line == null) || (line.isEmpty())) {
             return null;
@@ -657,7 +657,7 @@ public class FTPClient {
         return true;
     }
 
-    public boolean HASH() {
+    public static boolean HASH() {
         log.warn("no games implemented");
         return true;
     }
@@ -742,7 +742,7 @@ public class FTPClient {
         return argList.split("\\s");
     }
 
-    public boolean JOIN(String[] args) {
+    public static boolean JOIN(String[] args) {
 
         // make sure the specified dest file does not exist
         final String dest_name = args[1];
@@ -846,7 +846,7 @@ public class FTPClient {
         return true;
     }
 
-    public boolean COPY(final String[] args) {
+    public static boolean COPY(final String[] args) {
         final File dest_file = new File(args[2]);
         if (dest_file.exists()) {
             log.warn("copy: destination file " + args[2] + " already exists");
@@ -1010,7 +1010,7 @@ public class FTPClient {
      * @param reply
      * @return first digit of the reply code
      */
-    private int getStatus(final String reply) {
+    private static int getStatus(final String reply) {
         return Integer.parseInt(reply.substring(0, 1));
     }
 
@@ -1020,7 +1020,7 @@ public class FTPClient {
      * @param reply
      * @return
      */
-    private int getStatusCode(final String reply) {
+    private static int getStatusCode(final String reply) {
         return Integer.parseInt(reply.substring(0, 3));
     }
 
@@ -1030,7 +1030,7 @@ public class FTPClient {
      * @param reply
      * @return
      */
-    private boolean isNotPositiveCompletion(final String reply) {
+    private static boolean isNotPositiveCompletion(final String reply) {
         return getStatus(reply) != 2;
     }
 
@@ -1161,7 +1161,7 @@ public class FTPClient {
         }
     }
 
-    private String ls(final File inode) {
+    private static String ls(final File inode) {
         if ((inode == null) || (!inode.exists())) {
             return "";
         }
@@ -1193,7 +1193,7 @@ public class FTPClient {
         return s;
     }
 
-    private String lenformatted(String s, int l) {
+    private static String lenformatted(String s, int l) {
         l = l - s.length();
         while (l > 0) {
             s = " " + s;
@@ -1332,7 +1332,7 @@ public class FTPClient {
     /**
      * @param list
      */
-    private void printElements(final List<String> list) {
+    private static void printElements(final List<String> list) {
         log.info("---- v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v---v");
         for (final String element : list) {
             log.info(element);
@@ -1594,7 +1594,7 @@ public class FTPClient {
         if (this.DataSocketPassive != null) this.DataSocketPassive.close();
     }
 
-    public boolean PROMPT() {
+    public static boolean PROMPT() {
         log.warn("prompt is always off");
         return true;
     }
@@ -1750,12 +1750,12 @@ public class FTPClient {
         return true;
     }
 
-    public boolean APPEND() {
+    public static boolean APPEND() {
         log.warn("not yet supported");
         return true;
     }
 
-    public boolean HELP() {
+    public static boolean HELP() {
         log.info("---- ftp HELP ----");
         log.info("");
         log.info("This ftp client shell can act as command shell for the local host as well for the");
@@ -1865,52 +1865,52 @@ public class FTPClient {
         return true;
     }
 
-    public boolean QUOTE() {
+    public static boolean QUOTE() {
         log.warn("not yet supported");
         return true;
     }
 
-    public boolean BELL() {
+    public static boolean BELL() {
         log.warn("not yet supported");
         return true;
     }
 
-    public boolean MDELETE() {
+    public static boolean MDELETE() {
         log.warn("not yet supported");
         return true;
     }
 
-    public boolean SEND() {
+    public static boolean SEND() {
         log.warn("not yet supported");
         return true;
     }
 
-    public boolean DEBUG() {
+    public static boolean DEBUG() {
         log.warn("not yet supported");
         return true;
     }
 
-    public boolean MLS() {
+    public static boolean MLS() {
         log.warn("not yet supported");
         return true;
     }
 
-    public boolean TRACE() {
+    public static boolean TRACE() {
         log.warn("not yet supported");
         return true;
     }
 
-    public boolean MPUT() {
+    public static boolean MPUT() {
         log.warn("not yet supported");
         return true;
     }
 
-    public boolean TYPE() {
+    public static boolean TYPE() {
         log.warn("not yet supported");
         return true;
     }
 
-    public boolean CREATE() {
+    public static boolean CREATE() {
         log.warn("not yet supported");
         return true;
     }
@@ -1957,7 +1957,7 @@ public class FTPClient {
         }
     }
 
-    private String reverse(final String s) {
+    private static String reverse(final String s) {
         if (s.length() < 2) {
             return s;
         }
@@ -2479,7 +2479,7 @@ public class FTPClient {
      *
      * @return
      */
-    public int getTimeout() {
+    public static int getTimeout() {
         return ControlSocketTimeout;
     }
 

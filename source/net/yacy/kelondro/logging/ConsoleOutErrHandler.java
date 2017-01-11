@@ -88,7 +88,7 @@ public final class ConsoleOutErrHandler extends Handler {
 
     }
 
-    private Level parseLevel(final String levelName) {
+    private static Level parseLevel(final String levelName) {
         try {
             return (levelName == null) ? Level.INFO : Level.parse(levelName);
         } catch (final Exception e) {
@@ -96,7 +96,7 @@ public final class ConsoleOutErrHandler extends Handler {
         }
     }
 
-    private Filter makeFilter(final String name) {
+    private static Filter makeFilter(final String name) {
         if (name == null) return null;
 
         Filter f = null;
@@ -111,7 +111,7 @@ public final class ConsoleOutErrHandler extends Handler {
         return f;
     }
 
-    private Formatter makeFormatter(final String name) {
+    private static Formatter makeFormatter(final String name) {
         if (name == null) return null;
 
         Formatter f = null;

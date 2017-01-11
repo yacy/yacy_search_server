@@ -355,7 +355,7 @@ public class GraphPlotter implements Cloneable {
         return image;
     }
     
-    private int raster(final double pos, final int raster) {
+    private static int raster(final double pos, final int raster) {
         if (raster <= 1) return (int) pos;
         return ((int) (pos / raster)) * raster;
     }

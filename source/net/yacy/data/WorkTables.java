@@ -345,7 +345,7 @@ public class WorkTables extends Tables {
         row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, new Date(d));
     }
 
-    public void failURLsRegisterMissingWord(IndexCell<WordReference> indexCell, final DigestURL url, HandleSet queryHashes) {
+    public static void failURLsRegisterMissingWord(IndexCell<WordReference> indexCell, final DigestURL url, HandleSet queryHashes) {
 
         // remove words from index
         if (indexCell != null) {

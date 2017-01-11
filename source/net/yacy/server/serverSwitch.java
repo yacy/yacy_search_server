@@ -727,7 +727,7 @@ public class serverSwitch {
 	 * 
 	 * @return random password which is 20 characters long.
 	 */
-	public String genRandomPassword() {
+	public static String genRandomPassword() {
 		return genRandomPassword(20);
 	}
 
@@ -738,7 +738,7 @@ public class serverSwitch {
 	 *            length o password
 	 * @return password of given length
 	 */
-	public String genRandomPassword(final int length) {
+	public static String genRandomPassword(final int length) {
 		byte[] bytes = new byte[length];
 		pwGenerator.nextBytes(bytes);
 		return Digest.encodeMD5Hex(bytes);

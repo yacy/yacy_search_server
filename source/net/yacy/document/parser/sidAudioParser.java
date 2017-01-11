@@ -116,7 +116,7 @@ public class sidAudioParser extends AbstractParser implements Parser {
      * @param header must contain at least the header of the SID file.
      * @return values parsed from the input data
      */
-    private Map<String, String> parseHeader(final byte[] header) {
+    private static Map<String, String> parseHeader(final byte[] header) {
         final byte[] name = new byte[32];
         for (int i = 0; i < 32; i++) {
             name[i] = header[i + 16];

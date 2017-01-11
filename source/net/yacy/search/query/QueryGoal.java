@@ -341,7 +341,7 @@ public class QueryGoal {
      * @param noimages  true if filter for images should be included
      * @return Solr filter query
      */
-    public List<String> collectionTextFilterQuery(boolean noimages) {
+    public static List<String> collectionTextFilterQuery(boolean noimages) {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
@@ -375,7 +375,7 @@ public class QueryGoal {
      *
      * @return Solr filter query for image urls
      */
-    public List<String> collectionImageFilterQuery() {
+    public static List<String> collectionImageFilterQuery() {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls

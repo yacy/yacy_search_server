@@ -108,7 +108,7 @@ public final class Cache implements Index, Iterable<Row.Entry> {
         this.readMissCache.optimize();
     }
 
-    public final int writeBufferSize() {
+    public static int writeBufferSize() {
         return 0;
     }
 

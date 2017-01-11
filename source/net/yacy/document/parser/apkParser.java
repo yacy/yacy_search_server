@@ -380,7 +380,7 @@ public class apkParser extends AbstractParser implements Parser  {
          * @param strOff offset position
          * @return the computed string
          */
-        public String compXmlStringAt(byte[] arr, int strOff) {
+        public static String compXmlStringAt(byte[] arr, int strOff) {
             int strLen = arr[strOff + 1] << 8 & 0xff00 | arr[strOff] & 0xff;
             char[] chars = new char[strLen];
             for (int ii = 0; ii < strLen; ii++) {
@@ -396,7 +396,7 @@ public class apkParser extends AbstractParser implements Parser  {
          * @param off byte array offset position
          * @return value of a Little Endian 32 bit word from the byte array at offset off.
          */
-        public int LEW(byte[] arr, int off) {
+        public static int LEW(byte[] arr, int off) {
             return arr[off + 3] << 24 & 0xff000000 | arr[off + 2] << 16 & 0xff0000 | arr[off + 1] << 8 & 0xff00 | arr[off] & 0xFF;
         } // end of LEW
     

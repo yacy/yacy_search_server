@@ -19,8 +19,6 @@
  */
 package net.yacy.kelondro.rwi;
 
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.crawler.retrieval.Response;
@@ -29,10 +27,12 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.util.Bitfield;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for ReferenceContainer class.
@@ -50,7 +50,7 @@ public class ReferenceContainerTest {
         ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
         byte[] termHash = Word.word2hash("test");
 
-        ReferenceContainer<WordReference> rc = new ReferenceContainer(wordReferenceFactory, termHash);
+        ReferenceContainer<WordReference> rc = new ReferenceContainer<>(wordReferenceFactory, termHash);
 
         // prepare a WordReference to be added to the container
         DigestURL url = new DigestURL("http://test.org/test.html");

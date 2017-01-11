@@ -1458,8 +1458,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 	 * @param rankings postprocessed rankings
 	 * @param allcount global postprocessed documents count
 	 */
-	private void postprocessWebgraph(final Segment segment, final WebgraphConfiguration webgraph, String webgraphquery,
-			final Map<String, CRV> rankings, final AtomicInteger allcount) {
+	private static void postprocessWebgraph(final Segment segment, final WebgraphConfiguration webgraph, String webgraphquery,
+                                            final Map<String, CRV> rankings, final AtomicInteger allcount) {
 		postprocessingActivity = "collecting host facets for webgraph cr calculation";
 		ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
 		final Set<String> omitFields = new HashSet<String>();
@@ -1706,7 +1706,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
     }
     
-    private void set_unique_flag(CollectionSchema field, final SolrDocument doc, final SolrInputDocument sid, final SolrDocument d) {
+    private static void set_unique_flag(CollectionSchema field, final SolrDocument doc, final SolrInputDocument sid, final SolrDocument d) {
         Object sb = doc.getFieldValue(field.getSolrFieldName());
         boolean sbb = sb != null && ((Boolean) sb).booleanValue();
         Object ob = d == null ? null : d.getFieldValue(field.getSolrFieldName());
