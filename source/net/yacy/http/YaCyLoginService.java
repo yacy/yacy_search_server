@@ -78,11 +78,17 @@ public class YaCyLoginService extends HashLoginService implements LoginService {
         if (credential != null) {
 
             UserPrincipal u = super.loadUserInfo(username);
-            u.authenticate(credential);
-            if (roles != null) {
-                setRoleInfo(u, roles);
+            if (u == null) {
+                UserPrincipal p = new UserPrincipal(username, credential);
+                setRoleInfo(p, roles);
+                return p;
+            } else {
+                u.authenticate(credential);
+                if (roles != null) {
+                    setRoleInfo(u, roles);
+                }
+                return u;
             }
-            return u;
         }
         return null;
     }
