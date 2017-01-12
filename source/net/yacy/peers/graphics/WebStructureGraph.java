@@ -1,4 +1,4 @@
-// plasmaWebStructure.java
+// WebStructureGraph.java
 // -----------------------------
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 15.05.2007 on http://yacy.net
@@ -65,19 +65,34 @@ import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 
+/**
+ * Holds lists of links per host names to allow reconstructing a web graph structure of links.
+ */
 public class WebStructureGraph {
 
-    public static int maxref = 200; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
-    public static int maxhosts = 10000; // maximum number of hosts in web structure map
+	/** Maximum number of references per host, to avoid overflow when a large link farm occurs (i.e. wikipedia) */
+    public static int maxref = 200;
+    
+    /** Maximum number of hosts in web structure map */
+    public static int maxhosts = 10000;
 
     private final static ConcurrentLog log = new ConcurrentLog("WebStructureGraph");
 
+    /** Backup file */
     private final File structureFile;
+    /** Older structure entries (notably loaded from the backup file) */
     private final TreeMap<String, byte[]> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    
+    /** Recently computed structure entries */
     private final TreeMap<String, byte[]> structure_new;
+    
+    /** Queue used to receive new entries to store */
     private final BlockingQueue<LearnObject> publicRefDNSResolvingQueue;
+    
+    /** Worker thread consuming the publicRefDNSResolvingQueue */
     private final PublicRefDNSResolvingProcess publicRefDNSResolvingWorker;
 
+    /** Entry used to terminate the worker thread */
     private final static LearnObject leanrefObjectPOISON = new LearnObject(null, null);
 
     private static class LearnObject {
@@ -90,6 +105,13 @@ public class WebStructureGraph {
         }
     }
 
+	/**
+	 * Constructs an instance, eventually loads entries from the supplied backup
+	 * structureFile when it exists and starts the worker thread.
+	 * 
+	 * @param structureFile
+	 *            backup file
+	 */
     public WebStructureGraph(final File structureFile) {
         this.structure_old = new TreeMap<String, byte[]>();
         this.structure_new = new TreeMap<String, byte[]>();

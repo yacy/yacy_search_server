@@ -45,8 +45,51 @@ import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
+/**
+ * Retrieval of a web links structure.
+ */
 public class webstructure {
 
+	/**
+	 * Retrieve the locally known web links structure of a specified resource ("about" parameter supplied) or
+	 * the whole computed links structure since install (no parameter supplied)
+	 * or since last start or last call ("latest" parameter supplied).
+	 * Returned object contains the following information :
+	 * <ul>
+	 * 	<li>in all cases :
+	 * 		<ul>
+	 * 			<li>accumulated list of outgoing links to other domains (per host accumulated anchors)</li>
+	 * 		</ul>
+	 * 	</li>
+	 *  <li>when "about" parameter is filled :
+	 *  	<ul>
+	 * 			<li>accumulated list of incoming links from other domains (per host accumulated references)</li>
+	 * 			<li>detailed list of outgoing links (anchors) from documents to references</li>
+     * 			<li>detailed list of incoming links (citations) from other documents (their references) - reverse link structure</li>
+     * 		</ul>
+     * 	</li>
+	 * </ul>
+	 * Information detail is limited by {@link WebStructureGraph#maxhosts} and {@link WebStructureGraph#maxref} constants.
+	 * 
+	 * @param header
+	 *            servlet request header
+	 * @param post
+	 *            request parameters. Supported keys :
+	 *            <ul>
+	 *            <li>about : get only links structure about the resource
+	 *            specified as value. Supported values : host hash, URL hash,
+	 *            host name or URL</li>
+	 *            <li>latest (ignored when about parameter is valued): get the structure that have been computed during
+	 *            the current run-time of YaCy, and with each next call only an
+	 *            update to the next list of references.</li>
+	 *            <li>agentName : name of the user agent string used to load the
+	 *            "about" resource</li>
+	 *            </ul>
+	 * @param env
+	 *            server environment
+	 * @return the servlet answer object
+	 * @see WebStructureGraph
+	 */
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
