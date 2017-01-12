@@ -84,7 +84,7 @@ This is a list of searches that had been requested from remote peer search inter
 #---------------------------
 Augmented Browsing<==Angereichertes Browsen<
 URL Proxy Settings<==URL Proxy Einstellungen<
-With this settings you can activate or deactivate URL proxy which is the method used for augmentation.==Mit diesen Einstellungen können Sie den URL Proxy an- oder abschalten der als Methode zum Anreichern verwendet wird.
+With this settings you can activate or deactivate URL proxy.==Mit diesen Einstellungen können Sie den URL Proxy an- oder abschalten.
 Service call: ==Serviceaufruf: 
 , where parameter is the url of an external web page.==, wobei der parameter für die URL der externen Webseite steht.
 #URL proxy:==URL Proxy:

@@ -140,7 +140,7 @@
        <source>URL Proxy Settings&lt;</source>
     </trans-unit>
     <trans-unit id="90a945e6" xml:space="preserve" approved="no" translate="yes">
-       <source>With this settings you can activate or deactivate URL proxy which is the method used for augmentation.</source>
+       <source>With this settings you can activate or deactivate URL proxy.</source>
     </trans-unit>
     <trans-unit id="32cdc9ef" xml:space="preserve" approved="no" translate="yes">
        <source>Service call: </source>
