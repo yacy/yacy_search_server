@@ -119,7 +119,7 @@ public class webstructure {
                 try {
                     url = new DigestURL(about.indexOf("://") >= 0 ? about : "http://" + about); // accept also domains
                     urlhash = url.hash();
-                    hosthash = ASCII.String(urlhash, 6, 6);
+                    hosthash = url.hosthash();
                 } catch (final MalformedURLException e) {
                 }
             }

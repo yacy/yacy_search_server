@@ -331,7 +331,7 @@ public class HostBrowser {
                 prop.putHTML("outbound_host", host);
                 if (authorized) prop.putHTML("outbound_admin_host", host); //used for WebStructurePicture_p link
                 prop.putHTML("inbound_host", host);
-                String hosthash = ASCII.String(uri.hash(), 6, 6);
+                String hosthash = uri.hosthash();
                 String[] pathparts = uri.getPaths();
                 
                 // get all files for a specific host from the index
