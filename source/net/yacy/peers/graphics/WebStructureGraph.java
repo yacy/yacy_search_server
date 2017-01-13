@@ -78,8 +78,9 @@ public class WebStructureGraph {
 
     private final static ConcurrentLog log = new ConcurrentLog("WebStructureGraph");
 
-    /** Backup file */
+    /** Eventual backup file */
     private final File structureFile;
+    
     /** Older structure entries (notably loaded from the backup file) */
     private final TreeMap<String, byte[]> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
     
@@ -95,11 +96,17 @@ public class WebStructureGraph {
     /** Entry used to terminate the worker thread */
     private final static LearnObject leanrefObjectPOISON = new LearnObject(null, null);
 
-    private static class LearnObject {
+    /**
+     * Used to feed a new entry to this web structure
+     */
+    protected static class LearnObject {
+    	/** Source URL */
         private final DigestURL url;
+        
+        /** Target link URLs */
         private final Set<DigestURL> globalRefURLs;
 
-        private LearnObject(final DigestURL url, final Set<DigestURL> globalRefURLs) {
+        protected LearnObject(final DigestURL url, final Set<DigestURL> globalRefURLs) {
             this.url = url;
             this.globalRefURLs = globalRefURLs;
         }
@@ -118,20 +125,19 @@ public class WebStructureGraph {
         this.structureFile = structureFile;
         this.publicRefDNSResolvingQueue = new LinkedBlockingQueue<LearnObject>();
 
-        // load web structure
+        // load web structure from file if exists
         Map<String, byte[]> loadedStructureB;
         try {
-            loadedStructureB =
-                (this.structureFile.exists())
-                    ? FileUtils.loadMapB(this.structureFile)
-                    : new TreeMap<String, byte[]>();
+        	if(this.structureFile != null && this.structureFile.exists()) {
+        		loadedStructureB = FileUtils.loadMapB(this.structureFile);
+                log.info("loaded dump of " + loadedStructureB.size() + " entries from " + this.structureFile.toString());
+        	} else {
+        		loadedStructureB = new TreeMap<String, byte[]>();
+        	}
         } catch (final OutOfMemoryError e ) {
             loadedStructureB = new TreeMap<String, byte[]>();
         }
-        if ( loadedStructureB != null ) {
-            this.structure_old.putAll(loadedStructureB);
-        }
-        log.info("loaded dump of " + loadedStructureB.size() + " entries from " + this.structureFile.toString());
+        this.structure_old.putAll(loadedStructureB);
         
         // delete out-dated entries in case the structure is too big
         if ( this.structure_old.size() > maxhosts ) {
@@ -611,33 +617,29 @@ public class WebStructureGraph {
     }
 
 
-    private void learnrefs(final LearnObject lro) {
-        final Set<String> refhosts = new HashSet<String>();
-        String hosthash;
-        for ( final DigestURL u : lro.globalRefURLs ) {
-            if (Switchboard.getSwitchboard().shallTerminate()) break;
-            hosthash = ASCII.String(u.hash(), 6, 6);
-            if (!exists(hosthash)) {
-                // this must be recorded as an host with no references
-                synchronized ( this.structure_new ) {
-                    this.structure_new.put(hosthash + "," + u.getHost(), UTF8.getBytes(none2refstr()));
-                }
-            }
-            refhosts.add(hosthash);
-        }
+    protected void learnrefs(final LearnObject lro) {
         final DigestURL url = lro.url;
-        hosthash = ASCII.String(url.hash(), 6, 6);
+        final String sourceHosthash = ASCII.String(url.hash(), 6, 6);
 
         // parse the new reference string and join it with the stored references
-        final StructureEntry structure = outgoingReferences(hosthash);
+        final StructureEntry structure = outgoingReferences(sourceHosthash);
         final Map<String, Integer> refs = (structure == null) ? new HashMap<String, Integer>() : structure.references;
         int c;
-        for (String dom: refhosts) {
-            c = 0;
-            if ( refs.containsKey(dom) ) {
-                c = (refs.get(dom)).intValue();
+        for (final DigestURL u : lro.globalRefURLs) {
+        	String domain = ASCII.String(u.hash(), 6, 6);
+        	if (Switchboard.getSwitchboard() != null && Switchboard.getSwitchboard().shallTerminate()) break;
+            if (!exists(domain)) {
+                // this must be recorded as an host with no references
+                synchronized ( this.structure_new ) {
+                    this.structure_new.put(domain + "," + u.getHost(), UTF8.getBytes(none2refstr()));
+                }
             }
-            refs.put(dom, Integer.valueOf(++c));
+            c = 0;
+            Integer existingCount = refs.get(domain);
+            if ( existingCount != null) {
+                c = existingCount.intValue();
+            }
+            refs.put(domain, Integer.valueOf(++c));
         }
 
         // check if the maxref is exceeded
@@ -667,7 +669,7 @@ public class WebStructureGraph {
 
         // store the map back to the structure
         synchronized ( this.structure_new ) {
-            this.structure_new.put(hosthash + "," + url.getHost(), UTF8.getBytes(map2refstr(refs)));
+            this.structure_new.put(sourceHosthash + "," + url.getHost(), UTF8.getBytes(map2refstr(refs)));
         }
     }
 
@@ -781,11 +783,17 @@ public class WebStructureGraph {
     }
 
     public static class StructureEntry implements Comparable<StructureEntry> {
+        /** the tail of the host hash */
+        public String hosthash;
         
-        public String hosthash; // the tail of the host hash
-        public String hostname; // the host name
-        public String date; // date of latest change
-        public Map<String, Integer> references; // a map from the referenced host hash to the number of referenced to that host
+        /** the host name */
+        public String hostname;
+        
+        /** date of latest change */
+        public String date;
+        
+        /** a map from the referenced host hash to the number of referenced to that host */
+        public Map<String, Integer> references;
 
         private StructureEntry(final String hosthash, final String hostname) {
             this(hosthash, hostname, GenericFormatter.SHORT_DAY_FORMATTER.format(), new HashMap<String, Integer>());
@@ -831,33 +839,35 @@ public class WebStructureGraph {
         }
 
         // save to web structure file
-        log.info("Saving Web Structure File: new = "
-            + this.structure_new.size()
-            + " entries, old = "
-            + this.structure_old.size()
-            + " entries");
-        final long time = System.currentTimeMillis();
-        joinOldNew();
-        log.info("dumping " + structure_old.size() + " entries to " + structureFile.toString());
-        if ( !this.structure_old.isEmpty() ) {
-            synchronized ( this.structure_old ) {
-                if ( !this.structure_old.isEmpty() ) {
-                    FileUtils
-                        .saveMapB(
-                            this.structureFile,
-                            this.structure_old,
-                            "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
-                    final long t = Math.max(1, System.currentTimeMillis() - time);
-                    log.info("Saved Web Structure File: "
-                        + this.structure_old.size()
-                        + " entries in "
-                        + t
-                        + " milliseconds, "
-                        + (this.structure_old.size() * 1000 / t)
-                        + " entries/second");
-                }
-                this.structure_old.clear();
-            }
+        if(this.structureFile != null) {
+        	log.info("Saving Web Structure File: new = "
+        			+ this.structure_new.size()
+        			+ " entries, old = "
+        			+ this.structure_old.size()
+        			+ " entries");
+        	final long time = System.currentTimeMillis();
+        	joinOldNew();
+        	log.info("dumping " + structure_old.size() + " entries to " + structureFile.toString());
+        	if ( !this.structure_old.isEmpty() ) {
+        		synchronized ( this.structure_old ) {
+        			if ( !this.structure_old.isEmpty() ) {
+        				FileUtils
+                        	.saveMapB(
+                        			this.structureFile,
+                        			this.structure_old,
+                        			"Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
+        				final long t = Math.max(1, System.currentTimeMillis() - time);
+        				log.info("Saved Web Structure File: "
+        						+ this.structure_old.size()
+        						+ " entries in "
+        						+ t
+        						+ " milliseconds, "
+        						+ (this.structure_old.size() * 1000 / t)
+        						+ " entries/second");
+        			}
+        			this.structure_old.clear();
+        		}
+        	}
         }
     }
 }
