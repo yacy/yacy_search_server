@@ -3242,9 +3242,8 @@ public final class Switchboard extends serverSwitch {
         }
         
         // remove the document from the error-db
-        byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
         Set<String> hosthashes = new HashSet<String>();
-        hosthashes.add(ASCII.String(hosthash));
+        hosthashes.add(url.hosthash());
         this.crawlQueues.errorURL.removeHosts(hosthashes);
         this.index.fulltext().remove(urlhash);
 

@@ -33,7 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
@@ -117,7 +116,7 @@ public class WebStructurePicture_p {
                 String host = hostlist[i];
                 String hash = null;
                 try {
-                    hash = ASCII.String((new DigestURL("http://" + host)).hash(), 6, 6);
+                    hash = new DigestURL("http://" + host).hosthash();
                 } catch (final MalformedURLException e) {
                     continue;
                 }

@@ -619,14 +619,14 @@ public class WebStructureGraph {
 
     protected void learnrefs(final LearnObject lro) {
         final DigestURL url = lro.url;
-        final String sourceHosthash = ASCII.String(url.hash(), 6, 6);
+        final String sourceHosthash = url.hosthash();
 
         // parse the new reference string and join it with the stored references
         final StructureEntry structure = outgoingReferences(sourceHosthash);
         final Map<String, Integer> refs = (structure == null) ? new HashMap<String, Integer>() : structure.references;
         int c;
         for (final DigestURL u : lro.globalRefURLs) {
-        	String domain = ASCII.String(u.hash(), 6, 6);
+        	String domain = u.hosthash();
         	if (Switchboard.getSwitchboard() != null && Switchboard.getSwitchboard().shallTerminate()) break;
             if (!exists(domain)) {
                 // this must be recorded as an host with no references

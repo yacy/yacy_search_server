@@ -200,9 +200,7 @@ public final class CrawlStacker {
             Set<String> hosthashes = new HashSet<String>();
             for (final AnchorURL url: hyperlinks) {
                 if (url == null) continue;
-                final byte[] urlhash = url.hash();
-                byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
-                hosthashes.add(ASCII.String(hosthash));
+                hosthashes.add(url.hosthash());
             }
             this.nextQueue.errorURL.removeHosts(hosthashes);
         }

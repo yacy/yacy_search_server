@@ -68,7 +68,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
             else h = "http://" + h;
         }
         DigestURL url = new DigestURL(h);
-        return (url == null) ? null : ASCII.String(url.hash(), 6, 6);
+        return (url == null) ? null : url.hosthash();
     }
 
     /**
@@ -209,8 +209,13 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         return this.hash;
     }
 
+    /**
+     * <p>Extract a fragment of the url hash that can be used as a hash for the host name part of this url.</p>
+     * <p><strong>WARNING : two URLs with the same host name but different protocols or ports will produce two different host hashes with this method!</strong></p> 
+     * @return a 6-byte hash fragment
+     */
     public String hosthash() {
-        return ASCII.String(this.hash(), 6, 6);
+    	return ASCII.String(this.hash(), 6, 6);
     }
     
     /**
@@ -333,10 +338,15 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         return hash.toString();
     }
 
+    /**
+     * Compute a 6-byte hash fragment that can be used to identify the domain name of an url.
+     * @param host host name. Must not be null.
+     * @return 6 bytes base64 encoded String
+     */
     public static final String hosthash6(final String host) {
         return hosthash6("http", host, 80);
     }
-
+    
     //private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
     public static final int domLengthEstimation(final byte[] urlHashBytes) {

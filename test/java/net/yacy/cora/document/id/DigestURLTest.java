@@ -3,8 +3,11 @@ package net.yacy.cora.document.id;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
+
 import junit.framework.TestCase;
 import net.yacy.cora.document.encoding.ASCII;
+
+import org.junit.Assert;
 import org.junit.Test;
 
 public class DigestURLTest extends TestCase {
@@ -31,6 +34,27 @@ public class DigestURLTest extends TestCase {
             System.out.println(" -> " + resolvedURL);
 
         }
+    }
+    
+    /**
+     * Test for {@link DigestURL#hosthash()}
+     */
+    @Test
+    public void testHostHash() throws MalformedURLException {
+    	/* Shortest example valid http url : protocol + domain name*/
+    	String hostHash = new DigestURL("http://example.test").hosthash();
+    	
+    	Assert.assertEquals("With path", hostHash, new DigestURL("http://example.test/path/").hosthash());
+    	Assert.assertEquals("With resource", hostHash, new DigestURL("http://example.test/path/").hosthash());
+    	Assert.assertEquals("With query parameters", hostHash, new DigestURL("http://example.test/path/").hosthash());
+    	Assert.assertEquals("Document with anchor identifier", hostHash, new DigestURL("http://example.test/path/").hosthash());
+    	
+    	/* The next two asserts would be debatable but reflect the current implementation */
+    	Assert.assertNotEquals("Different protocol", hostHash, new DigestURL("https://example.test").hosthash());
+    	Assert.assertNotEquals("Different port", hostHash, new DigestURL("http://example.test:8080").hosthash());
+    	
+    	Assert.assertNotEquals("With a different TLD", hostHash, new DigestURL("http://example.net").hosthash());
+    	
     }
 
     /**

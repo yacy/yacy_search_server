@@ -245,7 +245,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 
     public String hosthash() {
         String hosthash = (String) this.getFieldValue(CollectionSchema.host_id_s.getSolrFieldName());
-        if (hosthash == null) hosthash = ASCII.String(this.url.hash(), 6, 6);
+        if (hosthash == null) hosthash = this.url.hosthash();
         return hosthash;
     }
 
