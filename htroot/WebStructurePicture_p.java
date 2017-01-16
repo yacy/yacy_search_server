@@ -24,16 +24,12 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.net.MalformedURLException;
-import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
@@ -114,18 +110,11 @@ public class WebStructurePicture_p {
             String[] hostlist = CommonPattern.COMMA.split(hosts);
             for (int i = 0; i < hostlist.length; i++) {
                 String host = hostlist[i];
-                String hash = null;
-                try {
-                    hash = new DigestURL("http://" + host).hosthash();
-                } catch (final MalformedURLException e) {
-                    continue;
-                }
-                Map.Entry<String, String> centernode = new AbstractMap.SimpleEntry<String, String>(hash, host);
                 double angle = 2.0d * i * Math.PI / hostlist.length;
                 if (hostlist.length == 3) angle -= Math.PI / 2;
                 if (hostlist.length == 4) angle += Math.PI / 4;
-                graph.addNode(centernode.getValue(), Math.cos(angle) / 8, Math.sin(angle) / 8, 0);
-                place(graph, sb.webStructure, centernode, bf, nodes, timeout, hostlist.length == 1 ? 0 : 1, hostlist.length == 1 ? depth : depth + 1, cyc);
+                graph.addNode(host, Math.cos(angle) / 8, Math.sin(angle) / 8, 0);
+                place(graph, sb.webStructure, host, bf, nodes, timeout, hostlist.length == 1 ? 0 : 1, hostlist.length == 1 ? depth : depth + 1, cyc);
             }
 
             // apply physics to it to get a better shape
@@ -151,19 +140,18 @@ public class WebStructurePicture_p {
     }
 
     private static final int place(
-                    final GraphPlotter graph, final WebStructureGraph structure, Map.Entry<String, String> pivotnode,
+                    final GraphPlotter graph, final WebStructureGraph structure, String hostName,
                     int bf, int maxnodes, final long timeout, int nextlayer, final int maxlayer, final int cyc) {
-        Point pivotpoint = graph.getNode(pivotnode.getValue());
+        Point pivotpoint = graph.getNode(hostName);
         int branches = 0;
         if (nextlayer == maxlayer) return branches;
         nextlayer++;
         final double radius = 1.0 / (1 << nextlayer);
-        final WebStructureGraph.StructureEntry sr = structure.outgoingReferences(pivotnode.getKey());
-        final Map<String, Integer> next = (sr == null) ? new HashMap<String, Integer>() : sr.references;
+        final Map<String, Integer> next = structure.outgoingReferencesByHostName(hostName);
         ClusteredScoreMap<String> next0 = new ClusteredScoreMap<String>(false);
         for (Map.Entry<String, Integer> entry: next.entrySet()) next0.set(entry.getKey(), entry.getValue());
         // first set points to next hosts
-        final List<Map.Entry<String, String>> targets = new ArrayList<Map.Entry<String, String>>();
+        final Set<String> targetHostNames = new HashSet<String>();
         int maxtargetrefs = 8, maxthisrefs = 8;
         int targetrefs, thisrefs;
         double rr, re;
@@ -176,7 +164,7 @@ public class WebStructurePicture_p {
             targetrefs = structure.referencesCount(targethash); // can be cpu/time-critical
             maxtargetrefs = Math.max(targetrefs, maxtargetrefs);
             maxthisrefs = Math.max(thisrefs, maxthisrefs);
-            targets.add(new AbstractMap.SimpleEntry<String, String>(targethash, targethost));
+            targetHostNames.add(targethost);
             if (graph.getNode(targethost) != null) continue;
             // set a new point. It is placed on a circle around the host point
             final double angle = ((Base64Order.enhancedCoder.cardinal((targethash + "____").getBytes()) / maxlongd) + (cyc / 360.0d)) * 2.0d * Math.PI;
@@ -189,11 +177,11 @@ public class WebStructurePicture_p {
         }
         // recursively set next hosts
         int nextnodes;
-        for (Map.Entry<String, String> target: targets) {
-            nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, target, bf, maxnodes, timeout, nextlayer, maxlayer, cyc);
+        for (String targetHostName: targetHostNames) {
+            nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, targetHostName, bf, maxnodes, timeout, nextlayer, maxlayer, cyc);
             branches += nextnodes;
             maxnodes -= nextnodes;
-            graph.setEdge(pivotnode.getValue(), target.getValue());
+            graph.setEdge(hostName, targetHostName);
         }
         return branches;
     }

@@ -354,6 +354,37 @@ public class WebStructureGraph {
         return new StructureEntry(hosthash, hostname, date, h);
     }
     
+    /**
+     * Compute outgoing references from source hostName on any source protocol or port.
+     * @param srcHostName reference source host name
+     * @return outgoing references mapped from target host hash to count
+     */
+    public Map<String, Integer> outgoingReferencesByHostName(final String srcHostName) {
+        Set<String> srcHostHashes = this.hostName2HostHashes(srcHostName);
+        final Map<String, Integer> targetHashesToCount = new HashMap<String, Integer>();
+        for(String srcHostHash : srcHostHashes) {
+        	final WebStructureGraph.StructureEntry sr = this.outgoingReferences(srcHostHash);
+        	if(sr != null) {
+        		for(java.util.Map.Entry<String, Integer> ref : sr.references.entrySet()) {
+        			Integer refsNb = targetHashesToCount.get(ref.getKey());
+        			if(refsNb != null) {
+        				if(ref.getValue() != null) {
+        					refsNb += ref.getValue();
+        				}
+        			} else {
+        				if(ref.getValue() != null) {
+        					refsNb = ref.getValue();
+        				} else {
+        					refsNb = Integer.valueOf(0);
+        				}
+        			}
+        			targetHashesToCount.put(ref.getKey(), refsNb);
+        		}
+        	}
+        }
+        return targetHashesToCount;
+    }
+    
     public StructureEntry incomingReferences(final String hosthash) {
         final String hostname = hostHash2hostName(hosthash);
         if ( hostname == null ) {
@@ -743,29 +774,50 @@ public class WebStructureGraph {
         }
     }
 
+    /**
+     * @return the host name having the most outgoing references or null when the structure is empty
+     */
     public String hostWithMaxReferences() {
         // find host with most references
-        String maxhost = null;
+        Map<String, Integer> hostNamesToRefsNb = new TreeMap<>();
         int refsize, maxref = 0;
+        String hostName, maxHostName = null;
+        Integer refsNb;
         synchronized ( this.structure_old ) {
             for ( final Map.Entry<String, byte[]> entry : this.structure_old.entrySet() ) {
                 refsize = entry.getValue().length;
-                if ( refsize > maxref ) {
-                    maxref = refsize;
-                    maxhost = entry.getKey().substring(7);
+                hostName = entry.getKey().substring(7);
+                refsNb = hostNamesToRefsNb.get(hostName);
+                if(refsNb == null) {
+                	refsNb = refsize;
+                } else {
+                	refsNb += refsize;
                 }
+                if ( refsNb > maxref ) {
+                    maxref = refsNb;
+                    maxHostName = hostName;
+                }
+                hostNamesToRefsNb.put(hostName, refsNb);
             }
         }
         synchronized ( this.structure_new ) {
             for ( final Map.Entry<String, byte[]> entry : this.structure_new.entrySet() ) {
                 refsize = entry.getValue().length;
-                if ( refsize > maxref ) {
-                    maxref = refsize;
-                    maxhost = entry.getKey().substring(7);
+                hostName = entry.getKey().substring(7);
+                refsNb = hostNamesToRefsNb.get(hostName);
+                if(refsNb == null) {
+                	refsNb = refsize;
+                } else {
+                	refsNb += refsize;
                 }
+                if ( refsNb > maxref ) {
+                    maxref = refsNb;
+                    maxHostName = hostName;
+                }
+                hostNamesToRefsNb.put(hostName, refsNb);
             }
         }
-        return maxhost;
+        return maxHostName;
     }
     
     public ReversibleScoreMap<String> hostReferenceScore() {

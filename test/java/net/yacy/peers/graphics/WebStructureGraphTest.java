@@ -23,6 +23,7 @@ package net.yacy.peers.graphics;
 
 import java.net.MalformedURLException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -115,6 +116,53 @@ public class WebStructureGraphTest {
 			Assert.assertEquals(1, outRefs.references.size());
 			/* 3 accumulated links to that target host */
 			Assert.assertEquals(Integer.valueOf(3), outRefs.references.get(indexTarget.hosthash()));
+			
+		} finally {
+			graph.close();
+		}
+	}
+	
+	/**
+	 * Out going references by host name
+	 */
+	@Test
+	public void outgoingReferencesByHostName() throws MalformedURLException {
+		WebStructureGraph graph = new WebStructureGraph(null);
+		try {
+			final DigestURL httpSource = new DigestURL("http://source.net/index.html");
+			Set<DigestURL> targets = new HashSet<>();
+			final DigestURL indexTarget = new DigestURL("http://target.com/index.html");
+			targets.add(indexTarget);
+			LearnObject lro = new LearnObject(httpSource, targets);
+			graph.learnrefs(lro);
+			
+			final DigestURL httpsSource = new DigestURL("https://source.net/index.html");
+			targets = new HashSet<>();
+			final DigestURL pathTarget = new DigestURL("http://target.com/path");
+			targets.add(pathTarget);
+			lro = new LearnObject(httpsSource, targets);
+			graph.learnrefs(lro);
+			
+			final DigestURL otherPortSource = new DigestURL("https://source.net:8080/index.html");
+			targets = new HashSet<>();
+			final DigestURL queryTarget = new DigestURL("http://target.com/query?param=value");
+			targets.add(queryTarget);
+			lro = new LearnObject(otherPortSource, targets);
+			graph.learnrefs(lro);
+
+			/* Check that accumulated references from the host name is retrieved from structure */
+			Map<String, Integer> outRefs = graph.outgoingReferencesByHostName("source.net");
+			
+			Assert.assertNotNull(outRefs);
+			Assert.assertEquals(1, outRefs.size());
+			Assert.assertEquals(new DigestURL("http://target.com").hosthash(), outRefs.keySet().iterator().next());
+			Assert.assertEquals(Integer.valueOf(3), outRefs.values().iterator().next());
+			
+			/* Check that accumulated references from unknown host name is empty */
+			outRefs = graph.outgoingReferencesByHostName("test.net");
+			
+			Assert.assertNotNull(outRefs);
+			Assert.assertTrue(outRefs.isEmpty());
 			
 		} finally {
 			graph.close();
