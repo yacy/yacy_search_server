@@ -25,8 +25,10 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -102,12 +104,12 @@ public class webstructure {
         if (about != null) {
             DigestURL url = null;
             byte[] urlhash = null;
-            String hosthash = null;
+            Set<String> hostHashes = new HashSet<>();
             if (about.length() == 6 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
-            	hosthash = about;
+            	hostHashes.add(about);
             } else if (about.length() == 12 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
             	urlhash = ASCII.getBytes(about);
-            	hosthash = about.substring(6);
+            	hostHashes.add(about.substring(6));
             	try {
                     url = authenticated ? sb.getURL(urlhash) : null;
                 } catch (IOException e) {
@@ -119,27 +121,37 @@ public class webstructure {
                 try {
                     url = new DigestURL(about.indexOf("://") >= 0 ? about : "http://" + about); // accept also domains
                     urlhash = url.hash();
-                    hosthash = url.hosthash();
+                    if(about.indexOf("://") >= 0) {
+                    	hostHashes.add(url.hosthash());
+                    } else {
+                    	hostHashes.addAll(sb.webStructure.hostName2HostHashes(about));
+                    }
                 } catch (final MalformedURLException e) {
                 }
             }
-            if (hosthash != null) {
+            if (!hostHashes.isEmpty()) {
                 prop.put("out", 1);
                 prop.put("in", 1);
-                WebStructureGraph.StructureEntry sentry = sb.webStructure.outgoingReferences(hosthash);
-                if (sentry != null && sentry.references.size() > 0) {
-                    reference(prop, "out", 0, sentry, sb.webStructure);
-                    prop.put("out_domains", 1);
-                } else {
-                    prop.put("out_domains", 0);
+                int inCount = 0, outCount = 0;
+                for(final String hostHash: hostHashes) {
+                	WebStructureGraph.StructureEntry sentry = sb.webStructure.outgoingReferences(hostHash);
+                	if (sentry != null && sentry.references.size() > 0) {
+                		reference(prop, "out", outCount, sentry, sb.webStructure);
+                		outCount++;
+                	} else {
+                		prop.put("out_domains", 0);
+                	}
+                	sentry = sb.webStructure.incomingReferences(hostHash);
+                	if (sentry != null && sentry.references.size() > 0) {
+                		reference(prop, "in", inCount, sentry, sb.webStructure);
+                		prop.put("in_domains", 1);
+                		inCount++;
+                	} else {
+                		prop.put("in_domains", 0);
+                	}
                 }
-                sentry = sb.webStructure.incomingReferences(hosthash);
-                if (sentry != null && sentry.references.size() > 0) {
-                    reference(prop, "in", 0, sentry, sb.webStructure);
-                    prop.put("in_domains", 1);
-                } else {
-                    prop.put("in_domains", 0);
-                }
+        		prop.put("out_domains", outCount);
+        		prop.put("in_domains", inCount);
             }
             if (urlhash != null) {
             	// anchors

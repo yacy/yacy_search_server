@@ -560,8 +560,12 @@ public class WebStructureGraph {
         }
     }
 
+    /**
+     * 
+     * @param hosthash
+     * @return the number of hosts that are referenced by this hosthash
+     */
     public int referencesCount(final String hosthash) {
-        // returns the number of hosts that are referenced by this hosthash
         assert hosthash.length() == 6 : "hosthash = " + hosthash;
         if (hosthash == null || hosthash.length() != 6) return 0;
         SortedMap<String, byte[]> tailMap;
@@ -591,6 +595,10 @@ public class WebStructureGraph {
         return c;
     }
 
+    /**
+     * @param hosthash host name hash
+     * @return the host name corresponding to the given hash or null when the hash is not known
+     */
     public String hostHash2hostName(final String hosthash) {
         // returns the host as string, null if unknown
         assert hosthash.length() == 6;
@@ -615,6 +623,42 @@ public class WebStructureGraph {
         }
         return null;
     }
+    
+	/**
+	 * Look for host hashes corresponding to the given host name. There can be
+	 * multiple host hashes for one host name as the used hash function
+	 * {@link DigestURL#hosthash()} returns a different result for each
+	 * different protocol or port with a same host name.
+	 * 
+	 * @param hostName
+	 *            host name
+	 * @return the host hashes corresponding to the given host name or an emtpy set when
+	 *         the host name is not known
+	 */
+	public Set<String> hostName2HostHashes(final String hostName) {
+		Set<String> hashes = new HashSet<>();
+		synchronized (this.structure_old) {
+			String keyHostName, hash;
+			for (String key : structure_old.keySet()) {
+				hash = key.substring(0, 6);
+				keyHostName = key.substring(7);
+				if (keyHostName.equalsIgnoreCase(hostName)) {
+					hashes.add(hash);
+				}
+			}
+		}
+		synchronized (this.structure_new) {
+			String keyHostName, hash;
+			for (String key : structure_new.keySet()) {
+				hash = key.substring(0, 6);
+				keyHostName = key.substring(7);
+				if (keyHostName.equalsIgnoreCase(hostName)) {
+					hashes.add(hash);
+				}
+			}
+		}
+		return hashes;
+	}
 
 
     protected void learnrefs(final LearnObject lro) {

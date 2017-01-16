@@ -252,7 +252,15 @@ public class WebStructureGraphTest {
 				graph.outgoingReferences(sourceHash);
 			}
 			endTime = System.nanoTime();
-			System.out.println("testPerfs outgoingReferences running time : " + ((endTime - beginTime) / 1000000000) + " seconds"); 
+			System.out.println("testPerfs outgoingReferences running time : " + ((endTime - beginTime) / 1000000000) + " seconds");
+			
+			beginTime = System.nanoTime();
+			/* Loop and look for host hashes from host name on each sample generated source */
+			for(int i = 0; i < WebStructureGraph.maxhosts; i++) {
+				graph.hostName2HostHashes("source" + i + ".net");
+			}
+			endTime = System.nanoTime();
+			System.out.println("testPerfs hostName2HostHashes running time : " + ((endTime - beginTime) / 1000000000) + " seconds"); 
 			
 		} finally {
 			graph.close();
