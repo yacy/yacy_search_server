@@ -263,7 +263,7 @@ public class webstructure {
 
     public static void reference(serverObjects prop, String prefix, int c, WebStructureGraph.StructureEntry sentry, WebStructureGraph ws) {
         prop.put(prefix + "_domains_" + c + "_hash", sentry.hosthash);
-        prop.put(prefix + "_domains_" + c + "_domain", sentry.hostname);
+        prop.putXML(prefix + "_domains_" + c + "_domain", sentry.hostname);
         prop.put(prefix + "_domains_" + c + "_date", sentry.date);
         Iterator<Map.Entry<String, Integer>> k = sentry.references.entrySet().iterator();
         Map.Entry<String, Integer> refentry;
@@ -276,7 +276,7 @@ public class webstructure {
             refdom = ws.hostHash2hostName(refhash);
             if (refdom == null) continue refloop;
             prop.put(prefix + "_domains_" + c + "_citations_" + d + "_refhash", refhash);
-            prop.put(prefix + "_domains_" + c + "_citations_" + d + "_refdom", refdom);
+            prop.putXML(prefix + "_domains_" + c + "_citations_" + d + "_refdom", refdom);
             refcount = refentry.getValue();
             prop.put(prefix + "_domains_" + c + "_citations_" + d + "_refcount", refcount.intValue());
             d++;
