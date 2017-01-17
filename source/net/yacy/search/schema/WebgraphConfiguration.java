@@ -143,8 +143,6 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         add(edge, WebgraphSchema.target_order_i, target_order);
         if (allAttr || contains(WebgraphSchema.load_date_dt)) {
             Date loadDate = new Date();
-            Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();
-            if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
             add(edge, WebgraphSchema.load_date_dt, loadDate);
         }
         if (allAttr || contains(WebgraphSchema.last_modified)) add(edge, WebgraphSchema.last_modified, responseHeader == null ? new Date() : responseHeader.lastModified());
