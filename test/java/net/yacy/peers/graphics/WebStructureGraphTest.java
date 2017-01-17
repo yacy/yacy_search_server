@@ -261,6 +261,59 @@ public class WebStructureGraphTest {
 	}
 	
 	/**
+	 * Incoming references from multiple sources on the same host to one target
+	 * URL accumulated between old and new structure
+	 */
+	@Test
+	public void testIncomingReferencesFromNewAndOld() throws MalformedURLException {
+
+		WebStructureGraph graph = new WebStructureGraph(null);
+		try {
+			final DigestURL indexSource = new DigestURL("http://source.net/index.html");
+			final String sourceHash = indexSource.hosthash();
+			Set<DigestURL> targets = new HashSet<>();
+
+			final DigestURL target = new DigestURL("http://target.com/index.html");
+			final String targetHash = target.hosthash();
+			targets.add(target);
+
+			LearnObject lro = new LearnObject(indexSource, targets);
+			graph.learnrefs(lro);
+			
+			/* Backup learned reference to the old structure */
+			graph.joinOldNew();
+			
+			final DigestURL pathSource = new DigestURL("http://source.net/path/doc.html");
+			targets = new HashSet<>();
+			targets.add(target);
+
+			lro = new LearnObject(pathSource, targets);
+			graph.learnrefs(lro);
+			
+			final DigestURL querySource = new DigestURL("http://source.net/query?param=value");
+			targets = new HashSet<>();
+			targets.add(target);
+
+			lro = new LearnObject(querySource, targets);
+			graph.learnrefs(lro);
+
+			/* Check that reference to the exact target URL is retrieved from structure */
+			StructureEntry inRefs = graph.incomingReferences(targetHash);
+			
+			Assert.assertNotNull(inRefs);
+			Assert.assertEquals("target.com", inRefs.hostname);
+			Assert.assertNotNull(inRefs.references);
+			/* One accumulated host source reference */
+			Assert.assertEquals(1, inRefs.references.size());
+			/* 3 accumulated links from that host */
+			Assert.assertEquals(Integer.valueOf(3), inRefs.references.get(sourceHash));
+			
+		} finally {
+			graph.close();
+		}
+	}
+	
+	/**
 	 * Simple performance measurements with a test structure filled to its limits.
 	 */
 	public static void main(String args[]) throws MalformedURLException {

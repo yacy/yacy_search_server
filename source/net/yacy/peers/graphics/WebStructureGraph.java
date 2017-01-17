@@ -81,10 +81,18 @@ public class WebStructureGraph {
     /** Eventual backup file */
     private final File structureFile;
     
-    /** Older structure entries (notably loaded from the backup file) */
-    private final TreeMap<String, byte[]> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    /** 
+     * <p>Older structure entries (notably loaded from the backup file).</p>
+     * <p>Maps from two parts concatenated string keys to byte array encoded references lists : 
+     * "'b64hash(6)','hostname" to 'date-yyyymmdd(8)'{'target-b64hash(6)''target-count-hex(4)'}*</p> 
+     * */
+    private final TreeMap<String, byte[]> structure_old;
     
-    /** Recently computed structure entries */
+    /** 
+     * <p>Recently computed structure entries</p>
+     * <p>Maps from two parts concatenated string keys to byte array encoded references lists : 
+     * "'b64hash(6)','hostname" to 'date-yyyymmdd(8)'{'target-b64hash(6)''target-count-hex(4)'}*</p> 
+     *  */
     private final TreeMap<String, byte[]> structure_new;
     
     /** Queue used to receive new entries to store */
@@ -164,6 +172,9 @@ public class WebStructureGraph {
         this.publicRefDNSResolvingWorker.start();
     }
 
+    /**
+     * Task consuming the queue of new entries to compute and add to the structure
+     */
     private class PublicRefDNSResolvingProcess extends Thread {
         private PublicRefDNSResolvingProcess() {
             this.setName("WebStructureGraph.PublicRefDNSResolvingProcess");
@@ -181,6 +192,9 @@ public class WebStructureGraph {
         }
     }
 
+    /**
+     * Clear the complete web structure.
+     */
     public void clear() {
         this.structure_old.clear();
         this.structure_new.clear();
@@ -236,12 +250,20 @@ public class WebStructureGraph {
         }
     }
 
+    /**
+     * @param refs references information serialized in a string
+     * @return the decoded references map size
+     */
     private static int refstr2count(final String refs) {
         if (refs == null || refs.length() <= 8) return 0;
         assert (refs.length() - 8) % 10 == 0 : "refs = " + refs + ", length = " + refs.length();
         return (refs.length() - 8) / 10;
     }
 
+    /**
+     * @param refs references information serialized in a string
+     * @return the decoded references mapping from host hashes to counts
+     */
     private static Map<String, Integer> refstr2map(final String refs) {
         if (refs == null || refs.length() <= 8) return new HashMap<String, Integer>();
         final Map<String, Integer> map = new HashMap<String, Integer>();
@@ -260,10 +282,17 @@ public class WebStructureGraph {
         return map;
     }
 
+    /**
+     * @return an empty references map serialized to a string
+     */
     private static String none2refstr() {
         return GenericFormatter.SHORT_DAY_FORMATTER.format();
     }
     
+    /**
+     * @param map references mapping from host hashes to counts
+     * @return the map serialized as a string
+     */
     private static String map2refstr(final Map<String, Integer> map) {
         final StringBuilder s = new StringBuilder(GenericFormatter.PATTERN_SHORT_DAY.length() + map.size() * 10);
         s.append(GenericFormatter.SHORT_DAY_FORMATTER.format());
@@ -289,6 +318,10 @@ public class WebStructureGraph {
         return s.toString();
     }
 
+    /**
+     * @param hosthash host hash
+     * @return true when this host hash is present in this web structure (either in latest or elder known entries)
+     */
     public boolean exists(final String hosthash) {
         // returns a map with a hosthash(String):refcount(Integer) relation
         assert hosthash.length() == 6;
@@ -314,6 +347,11 @@ public class WebStructureGraph {
         return false;
     }
     
+    /**
+     * Compute outgoing references from the source host hash
+     * @param srcHostName reference source host hash
+     * @return outgoing structure with references mapped from target host hashes to counts or null when the host is not known
+     */
     public StructureEntry outgoingReferences(final String hosthash) {
         // returns a map with a hosthash(String):refcount(Integer) relation
         assert hosthash.length() == 6;
@@ -355,9 +393,9 @@ public class WebStructureGraph {
     }
     
     /**
-     * Compute outgoing references from source hostName on any source protocol or port.
+     * Compute outgoing references from the source hostName on any source protocol or port.
      * @param srcHostName reference source host name
-     * @return outgoing references mapped from target host hash to count
+     * @return outgoing references mapped from target host hashes to counts. Can be empty when the host name is not known.
      */
     public Map<String, Integer> outgoingReferencesByHostName(final String srcHostName) {
         Set<String> srcHostHashes = this.hostName2HostHashes(srcHostName);
@@ -385,6 +423,11 @@ public class WebStructureGraph {
         return targetHashesToCount;
     }
     
+    /**
+     * Compute incoming references to the target host hash
+     * @param hosthash reference target host hash
+     * @return incoming structure with references mapped from source host hashes to counts or null when the target is not known
+     */
     public StructureEntry incomingReferences(final String hosthash) {
         final String hostname = hostHash2hostName(hosthash);
         if ( hostname == null ) {
@@ -767,6 +810,9 @@ public class WebStructureGraph {
         }
     }
 
+    /**
+     * Feed the elder entries structure map with latest computed entries map and then clear this last one.
+     */
     public void joinOldNew() {
         synchronized ( this.structure_new ) {
             joinStructure(this.structure_old, this.structure_new);
@@ -835,18 +881,38 @@ public class WebStructureGraph {
         return result;
     }
     
+    /**
+     * @param latest <ul>
+     * <li>true : iterate only the latest computed entries</li>
+     * <li>false : iterate only the elder computed entries, excluding the latest</li>
+     * </ul>
+     * @return an iterator over the web structure
+     */
     public Iterator<StructureEntry> structureEntryIterator(final boolean latest) {
         return new StructureIterator(latest);
     }
 
+    /**
+     * Iterator over the web structure
+     */
     private class StructureIterator extends LookAheadIterator<StructureEntry> implements Iterator<StructureEntry> {
 
+    	/** Internal iterator instance */
         private final Iterator<Map.Entry<String, byte[]>> i;
 
+        /**
+         * @param latest <ul>
+         * <li>true : iterate only the latest computed entries</li>
+         * <li>false : iterate only the elder computed entries, excluding the latest</li>
+         * </ul>
+         */
         private StructureIterator(final boolean latest) {
             this.i = ((latest) ? WebStructureGraph.this.structure_new : WebStructureGraph.this.structure_old).entrySet().iterator();
         }
 
+        /**
+         * Iterate to the next structure entry, decoding on the fly the references information from the byte array
+         */
         @Override
         public StructureEntry next0() {
             Map.Entry<String, byte[]> entry = null;
@@ -879,7 +945,7 @@ public class WebStructureGraph {
     }
 
     public static class StructureEntry implements Comparable<StructureEntry> {
-        /** the tail of the host hash */
+        /** 6 bytes host hash */
         public String hosthash;
         
         /** the host name */
@@ -888,9 +954,14 @@ public class WebStructureGraph {
         /** date of latest change */
         public String date;
         
-        /** a map from the referenced host hash to the number of referenced to that host */
+        /** a map from the referenced host hash to the number of references to that host */
         public Map<String, Integer> references;
 
+        /**
+         * Create a new empty (no references) entry
+         * @param hosthash host hash
+         * @param hostname host name
+         */
         private StructureEntry(final String hosthash, final String hostname) {
             this(hosthash, hostname, GenericFormatter.SHORT_DAY_FORMATTER.format(), new HashMap<String, Integer>());
         }
