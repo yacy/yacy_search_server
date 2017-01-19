@@ -71,10 +71,13 @@ import net.yacy.search.Switchboard;
 public class WebStructureGraph {
 
 	/** Maximum number of references per host, to avoid overflow when a large link farm occurs (i.e. wikipedia) */
-    public static int maxref = 200;
+    public static final int maxref = 200;
     
     /** Maximum number of hosts in web structure map */
-    public static int maxhosts = 10000;
+    public static final int maxhosts = 10000;
+    
+    /** Maximum number of parsed anchors when computing the structure of a newly added document */
+    public static final int MAX_PARSED_ANCHORS = 1000;
 
     private final static ConcurrentLog log = new ConcurrentLog("WebStructureGraph");
 
@@ -207,7 +210,7 @@ public class WebStructureGraph {
         final HashSet<DigestURL> globalRefURLs = new HashSet<DigestURL>();
         final String refhost = url.getHost();
         DigestURL u;
-        int maxref = 1000;
+        int maxref = MAX_PARSED_ANCHORS;
         while ( it.hasNext() && maxref-- > 0 ) {
             u = it.next();
             if ( u == null ) {

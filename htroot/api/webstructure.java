@@ -53,10 +53,10 @@ import net.yacy.server.serverSwitch;
 public class webstructure {
 
 	/**
-	 * Retrieve the locally known web links structure of a specified resource ("about" parameter supplied) or
+	 * <p>Retrieve the locally known web links structure of a specified resource ("about" parameter supplied) or
 	 * the whole computed links structure since install (no parameter supplied)
-	 * or since last start or last call ("latest" parameter supplied).
-	 * Returned object contains the following information :
+	 * or since last start or last call ("latest" parameter supplied).</p>
+	 * <p>Returned object contains the following information :
 	 * <ul>
 	 * 	<li>in all cases :
 	 * 		<ul>
@@ -66,12 +66,30 @@ public class webstructure {
 	 *  <li>when "about" parameter is filled :
 	 *  	<ul>
 	 * 			<li>accumulated list of incoming links from other domains (per host accumulated references)</li>
-	 * 			<li>detailed list of outgoing links (anchors) from documents to references</li>
+	 * 			<li>detailed list of outgoing links (anchors) from document at "about" URL to references</li>
      * 			<li>detailed list of incoming links (citations) from other documents (their references) - reverse link structure</li>
      * 		</ul>
      * 	</li>
 	 * </ul>
-	 * Information detail is limited by {@link WebStructureGraph#maxhosts} and {@link WebStructureGraph#maxref} constants.
+	 * <p>
+	 * Remarks :
+	 * <ul>
+	 * <li>Information detail is limited by {@link WebStructureGraph#maxhosts}, {@link WebStructureGraph#maxref} and {@link WebStructureGraph#MAX_PARSED_ANCHORS} constants.</li>
+	 * <li>Requesting client must be authenticated (as admin or requesting from localhost enabled) otherwise results will be empty</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * <p>
+	 * Example API calls :
+	 * <ul>
+	 * <li>domain name and index page structure : http://localhost:8090/api/webstructure.xml?about=yacy.net</li>
+	 * <li>domain name structure : http://localhost:8090/api/webstructure.xml?about=yacy.net&documentStructure=false</li>
+     * <li>hosts accumulated structure and specific resource structure : http://localhost:8090/api/webstructure.xml?about=http://yacy.net/fr/API.html</li>
+	 * <li>whole locally known hosts web structure : http://localhost:8090/api/webstructure.xml</li>
+	 * <li>recently locally computed hosts web structure : http://localhost:8090/api/webstructure.xml?latest=</li>
+	 * </ul>
+	 * </p>
+	 * 
 	 * 
 	 * @param header
 	 *            servlet request header
@@ -84,8 +102,8 @@ public class webstructure {
 	 *            <li>latest (ignored when about parameter is valued): get the structure that have been computed during
 	 *            the current run-time of YaCy, and with each next call only an
 	 *            update to the next list of references.</li>
-	 *            <li>agentName : name of the user agent string used to load the
-	 *            "about" resource</li>
+	 *            <li>agentName : name of the user agent string used to load the "about" resource</li>
+	 *            <li>documentStructure : set to false when you only want the hosts accumulated references for the "about" resource</li>
 	 *            </ul>
 	 * @param env
 	 *            server environment
@@ -153,7 +171,17 @@ public class webstructure {
         		prop.put("out_domains", outCount);
         		prop.put("in_domains", inCount);
             }
-            if (urlhash != null) {
+            
+			/*
+			 * It is possible not to scrape document and look for citations by
+			 * setting documentStructure parameter to "false"
+			 */
+			boolean documentStructure = true;
+			if (post != null && "false".equals(post.get("documentStructure", "true"))) {
+				documentStructure = false;
+			}
+            
+            if (urlhash != null && documentStructure) {
             	// anchors
                 prop.put("references", 1);
                 net.yacy.document.Document scraper = null;
