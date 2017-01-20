@@ -368,7 +368,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.12</version>
+            <version>1.13</version>
             <type>jar</type>
         </dependency>
         <dependency>
