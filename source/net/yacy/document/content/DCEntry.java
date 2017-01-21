@@ -211,16 +211,19 @@ public class DCEntry extends MultiMapSolrParams {
         // TODO: implement complete list of ISO639-2/ISO639-3 language codes
         if (l != null && l.length() == 3) {
             if (l.startsWith("ger") || l.startsWith("deu")) l = "de";
-            if (l.startsWith("eng")) l = "en";
-            if (l.startsWith("rus")) l = "ru";
-            if (l.startsWith("jpn")) l = "ja";
-            if (l.startsWith("ita")) l = "it";
-            if (l.startsWith("por")) l = "pt";
-            if (l.startsWith("spa")) l = "es";
-            if (l.startsWith("chi") || l.startsWith("zho")) l = "zh";
-            if (l.startsWith("fre") || l.startsWith("fra")) l = "fr";
-            if (l.startsWith("eus") || l.startsWith("baq")) l = "eu";
-            if (l.startsWith("gre") || l.startsWith("ell")) l = "el";
+            else if (l.startsWith("eng")) l = "en";
+            else if (l.startsWith("rus")) l = "ru";
+            else if (l.startsWith("jpn")) l = "ja";
+            else if (l.startsWith("ita")) l = "it";
+            else if (l.startsWith("por")) l = "pt";
+            else if (l.startsWith("pol")) l = "pl";
+            else if (l.startsWith("spa")) l = "es";
+            else if (l.startsWith("ukr")) l = "uk";
+            else if (l.startsWith("chi") || l.startsWith("zho")) l = "zh";
+            else if (l.startsWith("fre") || l.startsWith("fra")) l = "fr";
+            else if (l.startsWith("eus") || l.startsWith("baq")) l = "eu";
+            else if (l.startsWith("gre") || l.startsWith("ell")) l = "el";
+
             return l;
         }
         if (l == null) l = getIdentifier(true).language(); // determine from identifier-url.TLD
