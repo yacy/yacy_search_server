@@ -44,6 +44,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -65,6 +66,9 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
+/**
+ * Browser for indexed resources
+ */
 public class HostBrowser {
     
     final static long TIMEOUT = 10000L;
@@ -73,6 +77,32 @@ public class HostBrowser {
         LINK, INDEX, EXCLUDED, FAILED, RELOAD;
     }
     
+    /**
+     * <p>Retrieve local index entries for a path, or for hosts with the most references. Also allow some maintaining operations on entries with load errors.</p>
+     * <p>Some parameters need administrator authentication or unauthenticated local host requests to be allowed : load, deleteLoadErrors, delete and reload404.
+     * The "load" parameter can also be applied without authentication when "browser.load4everyone" configuration setting is true.</p>
+     * @param header servlet request header
+     * @param post request parameters. Supported keys :<ul>
+     * 				<li>admin : when "true", display in the html page render the administration context (menu and top navbar)</li>
+     * 				<li>path : root URL or host name to browse (ignored when the hosts parameter is filled)</li>
+     * 				<li>load : URL to crawl and index. The path URL is crawled and indexed when this parameter is present but empty.</li>
+     * 				<li>deleteLoadErrors : delete from the local index documents with load error (HTTP status different from 200 or any other failure).</li>
+     * 				<li>hosts : generate hosts with most references list. Supported values : 
+     * 					<ul>
+     * 						<li>"crawling" : restrict to host currently crawled</li>
+     * 						<li>"error" : restrict to hosts with having at least one resource load error</li>
+     * 					</ul>
+     * 				</li>
+     * 				<li>delete : delete from the index whole documents tree matching the path prefix</li>
+     * 				<li>reload404 : reload documents matching the path prefix and which previously failed to load due to a network error</li>
+     * 				<li>facetcount : </li>
+     * 				<li>complete : we want only root paths for complete lists</li>
+     *				<li>nepr :</li>
+     *				<li>showlinkstructure : </li>
+     * 			</ul>
+     * @param env server environment
+     * @return the servlet answer object
+     */
     @SuppressWarnings({ "unchecked" })
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
@@ -209,6 +239,18 @@ public class HostBrowser {
                 
                 // collect hosts from crawler
                 final Map<String, Integer[]> crawler = (authorized) ? sb.crawlQueues.noticeURL.getDomainStackHosts(StackType.LOCAL, sb.robots) : new HashMap<String, Integer[]>();
+
+                final Map<String, Integer> hostNameToPendingCount = new HashMap<>();
+                for(Entry<String, Integer[]>crawlerEntry: crawler.entrySet()) {
+                    /* The local stack returns keys composed of "hostname:port" : we now sum pending URLs counts by host name */
+                	String hostName = Domains.stripToHostName(crawlerEntry.getKey());
+                	Integer pendingCount = hostNameToPendingCount.get(hostName);
+                	if(pendingCount == null) {
+                		pendingCount = 0;
+                	}
+                	pendingCount += crawlerEntry.getValue()[0];
+                	hostNameToPendingCount.put(hostName, pendingCount);
+                }
                 
                 // collect the errorurls
                 Map<String, ReversibleScoreMap<String>> exclfacets = authorized ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
@@ -223,13 +265,15 @@ public class HostBrowser {
                     host = i.next();
                     prop.put("hosts_list_" + c + "_admin", admin ? "true" : "false");
                     prop.putHTML("hosts_list_" + c + "_host", host);
-                    boolean inCrawler = crawler.containsKey(host);
+                    boolean inCrawler = hostNameToPendingCount.containsKey(host);
                     int exclcount = exclscore.get(host);
                     int failcount = failscore.get(host);
                     int errors = exclcount + failcount;
                     prop.put("hosts_list_" + c + "_count", hostscore.get(host));
                     prop.put("hosts_list_" + c + "_crawler", inCrawler ? 1 : 0);
-                    if (inCrawler) prop.put("hosts_list_" + c + "_crawler_pending", crawler.get(host)[0]);
+                    if (inCrawler) {
+                    	prop.put("hosts_list_" + c + "_crawler_pending", hostNameToPendingCount.get(host));
+                    }
                     prop.put("hosts_list_" + c + "_errors", errors > 0 ? 1 : 0);
                     if (errors > 0) {
                         prop.put("hosts_list_" + c + "_errors_exclcount", exclcount);
