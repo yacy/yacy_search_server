@@ -82,11 +82,25 @@ public class HostBrowser {
      * <p>Some parameters need administrator authentication or unauthenticated local host requests to be allowed : load, deleteLoadErrors, delete, reload404, 
      * hosts="crawling" and hosts="error".
      * The "load" parameter can also be applied without authentication when "browser.load4everyone" configuration setting is true.</p>
+     * <p>
+     * Configuration settings :
+     * <ul>
+     * 	<li>browser.autoload : allow the administrator to stack URLs to the local crawl queue, manually with the "load" parameter, 
+     * 		or automatically when the "path" parameter is filled with an unknown URL</li>
+     *  <li>browser.load4everyone : allow everyone to stack URLs to the local crawl queue. 
+     *  		"browser.autoload" has also to be set to true to enable automatic loading on an unknown path</li>
+     *  <li>publicSearchpage : set to false to restrict use of this servlet to authenticated administrator only</li>
+     *  <li>publicTopmenu : set to false to hide the top navigation bar to non authenticated users</li>
+     *  <li>decoration.hostanalysis : add supplementary hosts information for debug/analysis purpose</li>
+     *  <li>decoration.grafics.linkstructure : display a link structure graph when the path parameter is filled</li>
+     * </ul>
+     * </p>
      * @param header servlet request header
      * @param post request parameters. Supported keys :<ul>
      * 				<li>admin : when "true", display in the html page render the administration context (menu and top navbar)</li>
-     * 				<li>path : root URL or host name to browse (ignored when the hosts parameter is filled)</li>
-     * 				<li>load : URL to crawl and index. The path URL is crawled and indexed when this parameter is present but empty.</li>
+     * 				<li>path : root URL or host name to browse (ignored when the hosts parameter is filled). When not yet locally indexed, this URL can be automatically crawled and indexed 
+     * 					when "browser.autoload" or "browser.load4everyone" configuration settings are set to true.</li>
+     * 				<li>load : URL to crawl and index.</li>
      * 				<li>deleteLoadErrors : delete from the local index documents with load error (HTTP status different from 200 or any other failure).</li>
      * 				<li>hosts : generate hosts with most references list. Supported values : 
      * 					<ul>
@@ -99,7 +113,7 @@ public class HostBrowser {
      * 				<li>facetcount : </li>
      * 				<li>complete : we want only root paths for complete lists</li>
      *				<li>nepr :</li>
-     *				<li>showlinkstructure : </li>
+     *				<li>showlinkstructure : when present, display a link graph for path</li>
      * 			</ul>
      * @param env server environment
      * @return the servlet answer object
