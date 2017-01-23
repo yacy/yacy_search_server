@@ -607,6 +607,7 @@ public class HostBrowser {
                             if (loadRight) {
                                 prop.putHTML("files_list_" + c + "_type_stored_load_url", entry.getKey());
                                 prop.putHTML("files_list_" + c + "_type_stored_load_path", path);
+                                prop.putHTML("files_list_" + c + "_type_stored_load_admin", Boolean.toString(admin));
                             }
                             if (++c >= maxcount) break;
                         }
