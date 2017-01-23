@@ -79,7 +79,8 @@ public class HostBrowser {
     
     /**
      * <p>Retrieve local index entries for a path, or for hosts with the most references. Also allow some maintaining operations on entries with load errors.</p>
-     * <p>Some parameters need administrator authentication or unauthenticated local host requests to be allowed : load, deleteLoadErrors, delete and reload404.
+     * <p>Some parameters need administrator authentication or unauthenticated local host requests to be allowed : load, deleteLoadErrors, delete, reload404, 
+     * hosts="crawling" and hosts="error".
      * The "load" parameter can also be applied without authentication when "browser.load4everyone" configuration setting is true.</p>
      * @param header servlet request header
      * @param post request parameters. Supported keys :<ul>
@@ -146,6 +147,11 @@ public class HostBrowser {
             prop.put("result", "You are not allowed to use this page. Please ask an administrator for permission.");
             prop.putNum("ucount", 0);
             return prop;
+        }
+        
+        if(authorized) {
+        	/* Fill the "admin" parameter for authorized links */
+        	prop.put("authorized_admin", Boolean.toString(admin));
         }
 
         String path = post == null ? "" : post.get("path", "").trim();
