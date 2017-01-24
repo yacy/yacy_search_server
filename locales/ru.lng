@@ -80,7 +80,7 @@ Access Dates==Время доступа
 This is a list of searches that had been requested from remote peer search interface==Это список поисковых запросов, которые были запрошены удалёнными узлами. 
 #-----------------------------
 
-#File: AugmentedBrowsing_p.html
+#File: Settings_UrlProxyAccess.inc
 #---------------------------
 Augmented Browsing<==Расширенный просмотр<
 URL Proxy Settings<==Настройки URL-прокси<

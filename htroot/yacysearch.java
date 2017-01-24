@@ -883,8 +883,4 @@ public class yacysearch {
         // return rewrite properties
         return prop;
     }
-    
-    public static void main(String args[]) throws UnsupportedEncodingException {
-    	System.out.println(URLEncoder.encode("aao?+ bbibu", StandardCharsets.UTF_8.name()));
-    }
 }

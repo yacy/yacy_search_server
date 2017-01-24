@@ -203,7 +203,7 @@ public class QueryGoal {
      * the modifier are held separately in a search paramter modifier
      *
      * @param encodeHTML
-     * @return
+     * @return the search query string
      */
     public String getQueryString(final boolean encodeHTML) {
         if (this.query_original == null) return null;

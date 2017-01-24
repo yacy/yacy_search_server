@@ -124,7 +124,7 @@ This file will not contain any additional information==Ce fichier ne contiendra 
 URL:==Une URL :
 #-----------------------------
 
-#File: AugmentedBrowsing_p.html
+#File: Settings_UrlProxyAccess.inc
 #---------------------------
 Augmented Browsing<==Navigation augmentée<
 URL Proxy Settings<==Configuration du Proxy<
@@ -941,7 +941,41 @@ The scheduler on crawls can be changed or removed using the <a href="Table_API_p
 
 #File: HostBrowser.html
 #---------------------------
+Browse the index of #[ucount]# documents.==Naviguer dans les #[ucount]# documents de l'index.
+Enter a host or an URL for a file list or view a list of==Saisir un nom de domaine ou une URL pour obtenir une liste de fichiers, ou visualiser la liste de
+>all hosts<==>tous les domaines<
+>only hosts with urls pending in the crawler<==>seulement ceux en cours d'indexation<
+> or <==> ou <
+>only with load errors<==>seulement ceux ayant des erreurs de chargement<
+Host/URL==Nom de domaine/URL
+Browse Host==Explorer
+"Delete Subpath"=="Supprimer la sous-arborescence"
+Browser for==Arborescence de
 Index Browser==Explorateur d'index
+"Re-load load-failure docs (404s etc)"=="Recharger les documents en erreur (404s etc.)"
+Confirm Deletion==Veuillez confirmer la suppression
+>Host List<==>Liste de domaines<
+Count Colors:==Couleurs :
+Documents without Errors==Documents sans erreurs
+Pending in Crawler==En attente d'indexation
+Crawler Excludes<==Exclus de l'indexation<
+Load Errors<==Erreurs de chargement<
+documents stored for host: #[hostsize]#==documents indexés pour le domaine: #[hostsize]#
+documents stored for subpath: #[subpathloadsize]#==documents indexés pour la sous-arborescence : #[subpathloadsize]#
+unloaded documents detected in subpath: #[subpathdetectedsize]#==documents non indexés détectés dans la sous-arborescence : #[subpathdetectedsize]#
+>Path<==>Chemin<
+>stored<==>indexé(s)<
+>linked<==>lié(s)<
+>pending<==>en attente d'indexation<
+>excluded<==>exclus<
+>failed<==>en échec<
+Show Metadata==Afficher les méta-données
+link, detected from context==lien, détecté depuis le contexte
+load &amp; index==charger &amp; indexer
+>indexed<==>indexé<
+>loading<==>en cours de chargement<
+Outbound Links, outgoing from #[host]# - Host List==Liens sortants, depuis #[host]# - Liste de domaines
+Inbound Links, incoming to #[host]# - Host List==Liens entrants, vers #[host]# - Liste de domaines
 #-----------------------------
 
 #File: IndexCreateIndexingQueue_p.html

@@ -99,12 +99,11 @@ public class LibraryProvider {
     }
 
     /**
-     * initialize the LibraryProvider as static class. This assigns default paths, and initializes the
+     * Initialize the LibraryProvider as static class. This assigns default paths, and initializes the
      * dictionary classes Additionally, if default dictionaries are given in the source path, they are
      * translated into the input format inside the DATA/DICTIONARIES directory
      *
-     * @param pathToSource
-     * @param pathToDICTIONARIES
+     * @param rootPath parent path of dictionaries
      */
     public static void initialize(final File rootPath) {
         dictSource = new File(rootPath, path_to_source_dictionaries);

@@ -10,10 +10,4 @@
     </ul>
   </div>
   
-  <div class="SubMenugroup">
-    <h3>Augmented Content</h3>
-    <ul class="SubMenu">
-      <li><a href="AugmentedBrowsing_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Augmented Browsing</a></li>
-    </ul>
-  </div>
 </div>

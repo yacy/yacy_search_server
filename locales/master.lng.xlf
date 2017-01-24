@@ -131,7 +131,7 @@
   </body>
 </file>
 
-<file original="AugmentedBrowsing_p.html"  source-language="en"  datatype="html">
+<file original="Settings_UrlProxyAccess.inc"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="1b8e9ae5" xml:space="preserve" approved="no" translate="yes">
        <source>Augmented Browsing&lt;</source>
@@ -140,7 +140,7 @@
        <source>URL Proxy Settings&lt;</source>
     </trans-unit>
     <trans-unit id="90a945e6" xml:space="preserve" approved="no" translate="yes">
-       <source>With this settings you can activate or deactivate URL proxy which is the method used for augmentation.</source>
+       <source>With this settings you can activate or deactivate URL proxy.</source>
     </trans-unit>
     <trans-unit id="32cdc9ef" xml:space="preserve" approved="no" translate="yes">
        <source>Service call: </source>
@@ -7285,6 +7285,10 @@
     <trans-unit id="aff61eb" xml:space="preserve" approved="no" translate="yes">
        <source>Your need to restart YaCy to activate the changes.</source>
     </trans-unit>
+    <trans-unit id="0000033" xml:space="preserve" approved="no" translate="yes">
+       <source>URL Proxy settings have been saved.</source>
+    </trans-unit>    
+    
   </body>
 </file>
 

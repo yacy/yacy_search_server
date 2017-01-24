@@ -78,7 +78,11 @@ public class serverObjects implements Serializable, Cloneable {
     
     private static final long serialVersionUID = 3999165204849858546L;
     public static final String ACTION_AUTHENTICATE = "AUTHENTICATE";
+    
+    /** Key for an URL redirection : should be associated with the redirected location. 
+     * The main servlet handles this to produce an HTTP 302 status. */
     public static final String ACTION_LOCATION = "LOCATION";
+    
 	public final static String ADMIN_AUTHENTICATE_MSG = "admin log-in. If you don't know the password, set it with {yacyhome}/bin/passwd.sh {newpassword}";
 
     private final static Pattern patternNewline = Pattern.compile("\n");

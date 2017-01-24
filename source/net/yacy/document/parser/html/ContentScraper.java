@@ -217,8 +217,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     /**
      * scrape a document
      * @param root the document root url
-     * @param maxLinks the maximum number of links to scapre
-     * @param classDetector a map from class names to vocabulary names to scrape content from the DOM with associated class name
+     * @param maxLinks the maximum number of links to scrape
+     * @param vocabularyScraper handles maps from class names to vocabulary names and from documents to a map from vocabularies to terms
+     * @param timezoneOffset local time zone offset
      */
     @SuppressWarnings("unchecked")
     public ContentScraper(final DigestURL root, int maxLinks, final VocabularyScraper vocabularyScraper, int timezoneOffset) {

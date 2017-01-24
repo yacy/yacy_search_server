@@ -433,7 +433,7 @@ public final class TextParser {
     /**
      * checks if the parser supports the given extension. It is not only checked if the parser can parse such files,
      * it is also checked if the extension is not included in the extension-deny list.
-     * @param extention
+     * @param ext extension name
      * @return an error if the extension is not supported, null otherwise
      */
     public static String supportsExtension(final String ext) {
@@ -448,9 +448,9 @@ public final class TextParser {
     }
 
     /**
-     * checks if the parser supports the given extension. It is not only checked if the parser can parse such files,
+     * checks if the parser supports the given extension or the file at the specified url. It is not only checked if the parser can parse such files,
      * it is also checked if the extension is not included in the extension-deny list.
-     * @param extention
+     * @param url url to check
      * @return an error if the extension is not supported, null otherwise
      */
     public static String supportsExtension(final MultiProtocolURL url) {

@@ -1009,7 +1009,7 @@ svnRevision=0
 currentSkin=pdbootstrap
 
 # flag to show if pages shall be usable for non-admin users
-# this can be applied to the Surftips.html and yacysearch.html page
+# this can be applied to the Surftips.html, yacysearch.html and HostBrowser.html pages
 publicSurftips = true
 publicSearchpage = true
 
@@ -1244,7 +1244,9 @@ contentcontrol.smwimport.targetlist = contentcontrol
 contentcontrol.smwimport.defaultcategory = yacy
 
 # host browser settings
+# Allow the administrator to stack URLs to the local crawl queue from the host browser page, automatically (when a path is unknown) or manually through a "load and index" link
 browser.autoload = false
+# Allow everyone to stack URLs to the local crawl queue. "browser.autoload" has also to be set to true to enable automatic loading on an unknown path.
 browser.load4everyone = false
 
 # greedy learning: fast information acquisition heuristic for new peers 

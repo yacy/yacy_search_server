@@ -110,7 +110,8 @@ public interface Balancer {
 
     /**
      * get a list of domains that are currently maintained as domain stacks
-     * @return a map of clear text strings of host names to an integer array: {the size of the domain stack, guessed delta waiting time}
+     * @return a map of clear text strings of host names (each host name eventually concatenated with a port, depending on the implementation) 
+     * 		to an integer array: {the size of the domain stack, guessed delta waiting time}
      */
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots);
     

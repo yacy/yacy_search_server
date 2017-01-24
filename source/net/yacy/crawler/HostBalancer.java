@@ -484,7 +484,7 @@ public class HostBalancer implements Balancer {
 
     /**
      * get a list of domains that are currently maintained as domain stacks
-     * @return a map of clear text strings of host names to an integer array: {the size of the domain stack, guessed delta waiting time}
+     * @return a map of clear text strings of host names + ports to an integer array: {the size of the domain stack, guessed delta waiting time}
      */
     @Override
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots) {

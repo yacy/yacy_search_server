@@ -68,7 +68,7 @@ public class YaCyProxyServlet extends HttpServlet implements Servlet {
         final HttpServletResponse response = (HttpServletResponse) res;
 
         if (!Switchboard.getSwitchboard().getConfigBool("proxyURL", false)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed. URL proxy globally switched off (see: Content Semantic -> Augmented Browsing -> URL proxy)");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed. URL proxy globally switched off (see: System Administration -> Advanced Settings -> URL proxy)");
             return;
         }
         
@@ -76,7 +76,7 @@ public class YaCyProxyServlet extends HttpServlet implements Servlet {
         if (!Domains.isThisHostIP(remoteHost)) {
             if (!proxyippatternmatch(remoteHost)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                        "proxy use not granted for IP " + remoteHost + " (see: Content Semantic -> Augmented Browsing -> Restrict URL proxy use filter)");
+                        "proxy use not granted for IP " + remoteHost + " (see: System Administration -> Advanced Settings -> Restrict URL proxy use filter)");
                 return;
             }
         }

@@ -36,8 +36,7 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
     /**
      * Default constructor, using the default YaCy Solr field language_s.
      *
-     * @param title
-     * @param field the SolrDocument schema field containing language code
+     * @param title the navigator display name
      */
     public LanguageNavigator(String title) {
         super(title, CollectionSchema.language_s);

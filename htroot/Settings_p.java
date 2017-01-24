@@ -52,6 +52,9 @@ public final class Settings_p {
         else if (page.equals("proxy")) {
             prop.put("settingsTables", "Settings_Proxy.inc");
         }
+        else if (page.equals("UrlProxyAccess")) {
+            prop.put("settingsTables", "Settings_UrlProxyAccess.inc");
+        }
         else if (page.equals("ServerAccess")) {	
             prop.put("settingsTables", "Settings_ServerAccess.inc");
         }
@@ -117,7 +120,13 @@ public final class Settings_p {
                 prop.put("proxyuser",s.substring(0, pos));
             }*/
         }
-        
+
+        // Url proxy settings
+        prop.putHTML("urlproxyfilter", env.getConfig("proxyURL.access", "127.0.0.1,0:0:0:0:0:0:0:1"));
+        prop.putHTML("urlproxydomains", env.getConfig("proxyURL.rewriteURLs", "domainlist"));
+        prop.put("urlproxyenabled_checked", env.getConfigBool("proxyURL", false) ? "1" : "0");
+        prop.put("urlproxyuseforresults_checked", env.getConfigBool("proxyURL.useforresults", false) ? "1" : "0");
+
         // server access filter
         prop.putHTML("serverfilter", env.getConfig("serverClient", "*"));
         

@@ -120,7 +120,7 @@
         </tbody>
       </table>
 </fieldset>
-<fieldset id="progress" style="width:500px;float:left;">
+<fieldset id="progress" style="width:530px;float:left;">
 <legend>Progress</legend>
       <form action="Crawler_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
       <table border="0" class="watchCrawler">
@@ -134,11 +134,13 @@
           <tr class="TableCellLight"> 
             <td align="left">Speed / PPM<br/>(Pages Per Minute)</td>
             <td align="left" colspan="4">
-            <input id="customPPM" name="customPPM" type="number" min="10" max="30000" style="width:62px" value="#[customPPMdefault]#" />PPM
-            <input id="latencyFactor" name="latencyFactor" type="number" min="0.1" max="3.0" step="0.1" style="width:40px" value="#[latencyFactorDefault]#" />LF
-            <input id="MaxSameHostInQueue" name="MaxSameHostInQueue" type="number" min="1" max="30" style="width:32px" value="#[MaxSameHostInQueueDefault]#" />MH            
+            <input id="customPPM" name="customPPM" type="number" min="10" max="30000" style="width:5em" value="#[customPPMdefault]#" /><label for="customPPM"><abbr title="Pages Per Minute">PPM</abbr></label>
+            <input id="latencyFactor" name="latencyFactor" type="number" min="0.1" max="3.0" step="0.1" style="width:3.5em" value="#[latencyFactorDefault]#" />
+            <label for="latencyFactor"><abbr title="Latency Factor">LF</abbr></label>
+            <input id="MaxSameHostInQueue" name="MaxSameHostInQueue" type="number" min="1" max="30" style="width:3em" value="#[MaxSameHostInQueueDefault]#" />
+            <label for="MaxSameHostInQueue"><abbr title="Max same Host in queue">MH</abbr></label>
             <input type="submit" name="crawlingPerformance" value="set" />
-            (<a href="Crawler_p.html?crawlingPerformance=minimum">min</a>/<a href="Crawler_p.html?crawlingPerformance=maximum">max</a>)
+            (<a href="Crawler_p.html?crawlingPerformance=minimum" title="Set PPM to the default minimum value">min</a>/<a href="Crawler_p.html?crawlingPerformance=maximum" title="Set PPM to the default maximum value">max</a>)
             </td>
           </tr>
           <tr class="TableCellLight"> 

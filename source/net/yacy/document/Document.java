@@ -93,7 +93,9 @@ public class Document {
     private final Set<String> languages;
     private boolean indexingDenied;
     private final double lon, lat;
-    private final Parser parserObject; // the source object that was used to create the Document
+    private final Parser parserObject; // the parser object that was used to create the Document
+    // TODO: to allow to use scraper during indexing (for some parsers) it has to be remembered here, but it holds redundant information.
+    private  Object scraperObject; // remember the source object that was used to create the Document (used during indexing)
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
     private final Date lastModified; // creation or last modification date of the source document
     private int crawldepth;
@@ -150,8 +152,9 @@ public class Document {
         this.generic_facets = new HashMap<String, Set<String>>();
         this.lastModified = lastModified == null ? new Date() : lastModified;
         this.crawldepth = 999; // unknown yet
+        this.scraperObject = null; // will be set by setScraperObject()
     }
-    
+
     /**
      * Get the content domain of a document. This tries to get the content domain from the mime type
      * and if this fails it uses alternatively the content domain from the file extension.
@@ -172,19 +175,32 @@ public class Document {
     }
 
     /**
-     * Confinient call to get the source/scraper object of the underlaying parser
+     * Convenient call to get the source/scraper object of the underlaying parser
      * if the parser uses a scraper, like htmlParser
      * @return scraper object typically of type ContentScraper but may also of type DCEntry
      */
     public Object getScraperObject() {
-        if (this.parserObject instanceof AbstractParser) {
-            if (((AbstractParser) this.parserObject).scraperObject != null) {
-                return ((AbstractParser) this.parserObject).scraperObject;
-            }
-        }
-        return null;
+        return this.scraperObject;
     }
-    
+
+    /**
+     * Remember the scraper object used, to be able to access used scraper by
+     * getScraperObject().
+     * This is used for surrogate parsers to set a other source/scraper then ContentScraper
+     * used e.g. by htmlParser.
+     * @param scraper 
+     */
+    public void setScraperObject(Object scraper) {
+        if (this.scraperObject != null) {
+            if (this.scraperObject instanceof ContentScraper) {
+                // support garbage collection
+                ((ContentScraper) this.scraperObject).close();
+            }
+            this.scraperObject = null;
+        }
+        this.scraperObject = scraper;
+    }
+
     public Set<String> getContentLanguages() {
         return this.languages;
     }
@@ -749,7 +765,7 @@ dc_rights
      * This is similar to mergeDocuments but directly joins internal content variables,
      * uses less parsed details and keeps this documents crawl data (like crawldepth, lastmodified)
      *
-     * @see mergeDocuments()
+     * @see #mergeDocuments(DigestURL, String, Document[])
      * @param docs to be included
      * @throws IOException
      */
@@ -978,6 +994,7 @@ dc_rights
             if (scraper instanceof ContentScraper) {
                 final ContentScraper html = (ContentScraper) scraper;
                 html.close();
+                doc.scraperObject = null;
             }
         }
 

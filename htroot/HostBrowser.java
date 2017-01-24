@@ -44,6 +44,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailType;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
@@ -65,6 +66,9 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
+/**
+ * Browser for indexed resources
+ */
 public class HostBrowser {
     
     final static long TIMEOUT = 10000L;
@@ -73,6 +77,47 @@ public class HostBrowser {
         LINK, INDEX, EXCLUDED, FAILED, RELOAD;
     }
     
+    /**
+     * <p>Retrieve local index entries for a path, or for hosts with the most references. Also allow some maintaining operations on entries with load errors.</p>
+     * <p>Some parameters need administrator authentication or unauthenticated local host requests to be allowed : load, deleteLoadErrors, delete, reload404, 
+     * hosts="crawling" and hosts="error".
+     * The "load" parameter can also be applied without authentication when "browser.load4everyone" configuration setting is true.</p>
+     * <p>
+     * Configuration settings :
+     * <ul>
+     * 	<li>browser.autoload : allow the administrator to stack URLs to the local crawl queue, manually with the "load" parameter, 
+     * 		or automatically when the "path" parameter is filled with an unknown URL</li>
+     *  <li>browser.load4everyone : allow everyone to stack URLs to the local crawl queue. 
+     *  		"browser.autoload" has also to be set to true to enable automatic loading on an unknown path</li>
+     *  <li>publicSearchpage : set to false to restrict use of this servlet to authenticated administrator only</li>
+     *  <li>publicTopmenu : set to false to hide the top navigation bar to non authenticated users</li>
+     *  <li>decoration.hostanalysis : add supplementary hosts information for debug/analysis purpose</li>
+     *  <li>decoration.grafics.linkstructure : display a link structure graph when the path parameter is filled</li>
+     * </ul>
+     * </p>
+     * @param header servlet request header
+     * @param post request parameters. Supported keys :<ul>
+     * 				<li>admin : when "true", display in the html page render the administration context (menu and top navbar)</li>
+     * 				<li>path : root URL or host name to browse (ignored when the hosts parameter is filled). When not yet locally indexed, this URL can be automatically crawled and indexed 
+     * 					when "browser.autoload" or "browser.load4everyone" configuration settings are set to true.</li>
+     * 				<li>load : URL to crawl and index.</li>
+     * 				<li>deleteLoadErrors : delete from the local index documents with load error (HTTP status different from 200 or any other failure).</li>
+     * 				<li>hosts : generate hosts with most references list. Supported values : 
+     * 					<ul>
+     * 						<li>"crawling" : restrict to host currently crawled</li>
+     * 						<li>"error" : restrict to hosts with having at least one resource load error</li>
+     * 					</ul>
+     * 				</li>
+     * 				<li>delete : delete from the index whole documents tree matching the path prefix</li>
+     * 				<li>reload404 : reload documents matching the path prefix and which previously failed to load due to a network error</li>
+     * 				<li>facetcount : </li>
+     * 				<li>complete : we want only root paths for complete lists</li>
+     *				<li>nepr :</li>
+     *				<li>showlinkstructure : when present, display a link graph for path</li>
+     * 			</ul>
+     * @param env server environment
+     * @return the servlet answer object
+     */
     @SuppressWarnings({ "unchecked" })
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
@@ -116,6 +161,11 @@ public class HostBrowser {
             prop.put("result", "You are not allowed to use this page. Please ask an administrator for permission.");
             prop.putNum("ucount", 0);
             return prop;
+        }
+        
+        if(authorized) {
+        	/* Fill the "admin" parameter for authorized links */
+        	prop.put("authorized_admin", Boolean.toString(admin));
         }
 
         String path = post == null ? "" : post.get("path", "").trim();
@@ -209,6 +259,18 @@ public class HostBrowser {
                 
                 // collect hosts from crawler
                 final Map<String, Integer[]> crawler = (authorized) ? sb.crawlQueues.noticeURL.getDomainStackHosts(StackType.LOCAL, sb.robots) : new HashMap<String, Integer[]>();
+
+                final Map<String, Integer> hostNameToPendingCount = new HashMap<>();
+                for(Entry<String, Integer[]>crawlerEntry: crawler.entrySet()) {
+                    /* The local stack returns keys composed of "hostname:port" : we now sum pending URLs counts by host name */
+                	String hostName = Domains.stripToHostName(crawlerEntry.getKey());
+                	Integer pendingCount = hostNameToPendingCount.get(hostName);
+                	if(pendingCount == null) {
+                		pendingCount = 0;
+                	}
+                	pendingCount += crawlerEntry.getValue()[0];
+                	hostNameToPendingCount.put(hostName, pendingCount);
+                }
                 
                 // collect the errorurls
                 Map<String, ReversibleScoreMap<String>> exclfacets = authorized ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
@@ -223,13 +285,15 @@ public class HostBrowser {
                     host = i.next();
                     prop.put("hosts_list_" + c + "_admin", admin ? "true" : "false");
                     prop.putHTML("hosts_list_" + c + "_host", host);
-                    boolean inCrawler = crawler.containsKey(host);
+                    boolean inCrawler = hostNameToPendingCount.containsKey(host);
                     int exclcount = exclscore.get(host);
                     int failcount = failscore.get(host);
                     int errors = exclcount + failcount;
                     prop.put("hosts_list_" + c + "_count", hostscore.get(host));
                     prop.put("hosts_list_" + c + "_crawler", inCrawler ? 1 : 0);
-                    if (inCrawler) prop.put("hosts_list_" + c + "_crawler_pending", crawler.get(host)[0]);
+                    if (inCrawler) {
+                    	prop.put("hosts_list_" + c + "_crawler_pending", hostNameToPendingCount.get(host));
+                    }
                     prop.put("hosts_list_" + c + "_errors", errors > 0 ? 1 : 0);
                     if (errors > 0) {
                         prop.put("hosts_list_" + c + "_errors_exclcount", exclcount);
@@ -245,6 +309,7 @@ public class HostBrowser {
                     }
                 }
                 prop.put("hosts_list", c);
+                prop.put("hosts_authorized", authorized ? 1 : 0);
                 prop.put("hosts", 1);
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
@@ -331,7 +396,7 @@ public class HostBrowser {
                 prop.putHTML("outbound_host", host);
                 if (authorized) prop.putHTML("outbound_admin_host", host); //used for WebStructurePicture_p link
                 prop.putHTML("inbound_host", host);
-                String hosthash = ASCII.String(uri.hash(), 6, 6);
+                String hosthash = uri.hosthash();
                 String[] pathparts = uri.getPaths();
                 
                 // get all files for a specific host from the index
@@ -557,6 +622,7 @@ public class HostBrowser {
                             if (loadRight) {
                                 prop.putHTML("files_list_" + c + "_type_stored_load_url", entry.getKey());
                                 prop.putHTML("files_list_" + c + "_type_stored_load_path", path);
+                                prop.putHTML("files_list_" + c + "_type_stored_load_admin", Boolean.toString(admin));
                             }
                             if (++c >= maxcount) break;
                         }
@@ -682,7 +748,7 @@ public class HostBrowser {
                 c++;
                 if (c % 80 == 0) sbi.append("<br/>");
             }
-            if (sbi.length() > 0) sbi.insert(0, "<br/>internal referrer:</br>");
+            if (sbi.length() > 0) sbi.insert(0, "<br/>internal referrer:");
             StringBuilder sbe = new StringBuilder();
             c = 0;
             for (String s: references_external_urls) {
@@ -690,7 +756,7 @@ public class HostBrowser {
                 c++;
                 if (c % 80 == 0) sbe.append("<br/>");
             }
-            if (sbe.length() > 0) sbe.insert(0, "<br/>external referrer:</br>");
+            if (sbe.length() > 0) sbe.insert(0, "<br/>external referrer:");
             return
                     (this.crawldepth == 998 ? "unknown crawldepth" : this.crawldepth >= 0 ? "crawldepth: " + this.crawldepth : "") +
                     (this.cr_c != null ? ", cr=" + (Math.round(this.cr_c * 1000.0d) / 1000.0d) : "") +

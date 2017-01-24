@@ -122,7 +122,7 @@ public class DCEntry extends MultiMapSolrParams {
     /**
      * get Identifier (url) (so far only used for surrogate processing)
      * @param useRelationAsAlternative true = take relation if no identifier resolves to url
-     * @return
+     * @return this entry identifier url
      */
     public DigestURL getIdentifier(boolean useRelationAsAlternative) {
         // identifier may be included multiple times (with all kinds of syntax - example is from on record)
@@ -211,16 +211,19 @@ public class DCEntry extends MultiMapSolrParams {
         // TODO: implement complete list of ISO639-2/ISO639-3 language codes
         if (l != null && l.length() == 3) {
             if (l.startsWith("ger") || l.startsWith("deu")) l = "de";
-            if (l.startsWith("eng")) l = "en";
-            if (l.startsWith("rus")) l = "ru";
-            if (l.startsWith("jpn")) l = "ja";
-            if (l.startsWith("ita")) l = "it";
-            if (l.startsWith("por")) l = "pt";
-            if (l.startsWith("spa")) l = "es";
-            if (l.startsWith("chi") || l.startsWith("zho")) l = "zh";
-            if (l.startsWith("fre") || l.startsWith("fra")) l = "fr";
-            if (l.startsWith("eus") || l.startsWith("baq")) l = "eu";
-            if (l.startsWith("gre") || l.startsWith("ell")) l = "el";
+            else if (l.startsWith("eng")) l = "en";
+            else if (l.startsWith("rus")) l = "ru";
+            else if (l.startsWith("jpn")) l = "ja";
+            else if (l.startsWith("ita")) l = "it";
+            else if (l.startsWith("por")) l = "pt";
+            else if (l.startsWith("pol")) l = "pl";
+            else if (l.startsWith("spa")) l = "es";
+            else if (l.startsWith("ukr")) l = "uk";
+            else if (l.startsWith("chi") || l.startsWith("zho")) l = "zh";
+            else if (l.startsWith("fre") || l.startsWith("fra")) l = "fr";
+            else if (l.startsWith("eus") || l.startsWith("baq")) l = "eu";
+            else if (l.startsWith("gre") || l.startsWith("ell")) l = "el";
+
             return l;
         }
         if (l == null) l = getIdentifier(true).language(); // determine from identifier-url.TLD
@@ -334,9 +337,9 @@ public class DCEntry extends MultiMapSolrParams {
         t.add(getTitle());
         
         // for processing during indexing, embed entry as source scraperObject in a standard parserobj object
-        genericParser parserobj = new genericParser(this); // init the simplest parser with DCEntry as source/scraperObject used during indexing
+        genericParser parserobj = new genericParser(); // init the simplest parser with DCEntry as source/scraperObject used during indexing
 
-        return new Document(
+        Document document = new Document(
             getIdentifier(true),
             "text/html",
             StandardCharsets.UTF_8.name(),
@@ -355,6 +358,8 @@ public class DCEntry extends MultiMapSolrParams {
             null,
             false,
             getDate());
+        document.setScraperObject(this); // TODO: used during indexing to access some possible but special YaCy meta tags in surrogate source ( <md:solrfilename>value ) -> optimize/find alternative
+        return document;
     }
 
     public void writeXML(OutputStreamWriter os) throws IOException {

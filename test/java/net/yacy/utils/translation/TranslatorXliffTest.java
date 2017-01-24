@@ -1,7 +1,6 @@
 package net.yacy.utils.translation;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import net.yacy.data.Translator;
@@ -26,7 +25,7 @@ public class TranslatorXliffTest {
      * test files to test/DATA and compares translation text
      */
     @Test
-    public void testLoadTranslationsListsFromXliff() throws IOException {
+    public void testLoadTranslationsListsFromXliff() {
         List<String> lngFiles = Translator.langFiles(new File("locales"));
         for (String filename : lngFiles) {
             // load translation list
@@ -35,8 +34,8 @@ public class TranslatorXliffTest {
             TranslatorXliff txlif = new TranslatorXliff();
 
             // save as xliff file
-            File xlftmp = new File("test/Data", filename + ".xlf");
-            txlif.saveAsXliff(filename.substring(0, 2), xlftmp, origTrans);
+            File xlftmp = new File(System.getProperty("java.io.tmpdir", ""), filename + ".xlf");
+            assertTrue(txlif.saveAsXliff(filename.substring(0, 2), xlftmp, origTrans));
 
             // load created xliff file
             Map<String, Map<String, String>> xliffTrans = txlif.loadTranslationsListsFromXliff(xlftmp);
@@ -53,9 +52,9 @@ public class TranslatorXliffTest {
                 for (String ss : origList.keySet()) {
                     assertTrue("translation key", xliffList.containsKey(ss));
                     String origVal = origList.get(ss);
-                    // it is possible that intentionally empty translation is given
+                    // it is possible that intentionally empty or equals to source translation is given
                     // in this case xliff target is missing (=null)
-                    if (origVal != null && !origVal.isEmpty()) {
+                    if (origVal != null && !origVal.isEmpty() &&!origVal.equals(ss)) {
                         String xliffVal = xliffList.get(ss);
                         if (!origVal.equals(xliffVal)) {
                             assertEquals("translation value", origVal, xliffVal);

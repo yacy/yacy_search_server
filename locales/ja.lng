@@ -66,7 +66,7 @@ Access Dates==アクセスの日時
 This is a list of searches that had been requested from remote peer search interface==これはリモート ピアの検索インターフェースからリクエストされた検索の一覧です. 
 #-----------------------------
 
-#File: AugmentedBrowsing_p.html
+#File: Settings_UrlProxyAccess.inc
 #---------------------------
 Augmented Browsing<==増強されたブラウジング<
 URL Proxy Settings<==URL プロキシ設定<

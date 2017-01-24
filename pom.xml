@@ -34,7 +34,7 @@
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
         <!-- the Solr version used in dependency section for all related dependencies -->
-        <solr.version>5.5.2</solr.version> 
+        <solr.version>5.5.3</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
         <jetty.version>9.2.19.v20160908</jetty.version>
                 
@@ -247,7 +247,7 @@
             		<plugin>
                 		<groupId>net.yacy</groupId>
                 		<artifactId>maven-plugin-gitrevisionnumber</artifactId>
-                		<version>1.0</version>
+                		<version>1.1</version>
                 		<executions>
                     		<execution>
                         		<phase>initialize</phase>
@@ -368,7 +368,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.12</version>
+            <version>1.13</version>
             <type>jar</type>
         </dependency>
         <dependency>

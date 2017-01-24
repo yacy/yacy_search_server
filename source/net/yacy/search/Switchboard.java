@@ -1686,9 +1686,9 @@ public final class Switchboard extends serverSwitch {
     }
 
     /**
-     * in nocheck mode the isLocal property is not checked to omit DNS lookup. Can only be done in allip mode
+     * In nocheck mode the isLocal property is not checked to omit DNS lookup. Can only be done in allip mode
      *
-     * @return
+     * @return true when in nocheck mode
      */
     public boolean isIPNoCheckMode() {
         return isAllIPMode() && getConfigBool(SwitchboardConstants.NETWORK_DOMAIN_NOCHECK, false);
@@ -1788,7 +1788,7 @@ public final class Switchboard extends serverSwitch {
      * exceeded, null is returned. If a limit is exceeded, then the name of the service that caused the
      * caution is returned
      *
-     * @return
+     * @return null or a service name
      */
     public String onlineCaution() {
         if ( System.currentTimeMillis() - this.proxyLastAccess < Integer.parseInt(getConfig(
@@ -1834,12 +1834,12 @@ public final class Switchboard extends serverSwitch {
     }
 
     /**
-     * {@link CrawlProfiles Crawl Profiles} are saved independently from the queues themselves and therefore
+     * {@link CrawlProfile Crawl Profiles} are saved independently from the queues themselves and therefore
      * have to be cleaned up from time to time. This method only performs the clean-up if - and only if - the
-     * {@link IndexingStack switchboard}, {@link LoaderDispatcher loader} and {@link plasmaCrawlNURL local
+     * {@link Switchboard switchboard}, {@link LoaderDispatcher loader} and {@link CrawlQueues local
      * crawl} queues are all empty.
      * <p>
-     * Then it iterates through all existing {@link CrawlProfiles crawl profiles} and removes all profiles
+     * Then it iterates through all existing {@link CrawlProfile crawl profiles} and removes all profiles
      * which are not hard-coded.
      * </p>
      * <p>
@@ -1847,10 +1847,6 @@ public final class Switchboard extends serverSwitch {
      * will be returned</i>
      * </p>
      *
-     * @see #CRAWL_PROFILE_PROXY hardcoded
-     * @see #CRAWL_PROFILE_REMOTE hardcoded
-     * @see #CRAWL_PROFILE_SNIPPET_TEXT hardcoded
-     * @see #CRAWL_PROFILE_SNIPPET_MEDIA hardcoded
      * @return whether this method has done something or not (i.e. because the queues have been filled or
      *         there are no profiles left to clean up)
      * @throws <b>InterruptedException</b> if the current thread has been interrupted, i.e. by the shutdown
@@ -3246,9 +3242,8 @@ public final class Switchboard extends serverSwitch {
         }
         
         // remove the document from the error-db
-        byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
         Set<String> hosthashes = new HashSet<String>();
-        hosthashes.add(ASCII.String(hosthash));
+        hosthashes.add(url.hosthash());
         this.crawlQueues.errorURL.removeHosts(hosthashes);
         this.index.fulltext().remove(urlhash);
 
@@ -3319,12 +3314,12 @@ public final class Switchboard extends serverSwitch {
     }
     
     /**
-     * load the content of a URL, parse the content and add the content to the index This process is started
+     * load the content of some URLs, parse the content and add the content to the index This process is started
      * concurrently. The method returns immediately after the call.
      * Loaded/indexed pages are added to the given SearchEvent. If this is not required prefer addToCrawler
      * to spare concurrent processes, bandwidth and intransparent crawl/load activity
      *
-     * @param url the url that shall be indexed
+     * @param urls the urls that shall be indexed
      * @param searchEvent (optional) a search event that shall get results from the indexed pages directly
      *        feeded. If object is null then it is ignored
      * @throws IOException
@@ -3413,11 +3408,11 @@ public final class Switchboard extends serverSwitch {
     }
 
      /**
-     * add url to Crawler - which itself loads the URL, parses the content and adds it to the index
+     * add urls to Crawler - which itself loads the URL, parses the content and adds it to the index
      * transparent alternative to "addToIndex" including, double in crawler check, display in crawl monitor
      * but doesn't return results for a ongoing search
      *
-     * @param url the url that shall be indexed
+     * @param urls the urls that shall be indexed
      * @param asglobal true adds the url to global crawl queue (for remote crawling), false to the local crawler
      */
     public void addToCrawler(final Collection<DigestURL> urls, final boolean asglobal) {

@@ -287,6 +287,16 @@ public class SettingsAck_p {
             return prop;
         }
 
+        if (post.containsKey("urlproxySettings")) {
+            env.setConfig("proxyURL.access", post.get("urlproxyfilter"));
+            env.setConfig("proxyURL.rewriteURLs", post.get("urlproxydomains"));
+            env.setConfig("proxyURL", "on".equals(post.get("urlproxyenabled")) ? true : false);
+            env.setConfig("proxyURL.useforresults", "on".equals(post.get("urlproxyuseforresults")) ? true : false);
+            prop.put("info_success", "1");
+            prop.put("info", "33");
+            return prop;
+        }
+
         if (post.containsKey("seedUploadRetry")) {
             String error;
             if ((error = Network.saveSeedList(sb)) == null) {

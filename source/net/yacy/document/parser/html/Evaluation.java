@@ -41,15 +41,15 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 
 
-/*
+/**
  * This class provides methods to use a pattern analysis for html files
  * The pattern analysis is generic and can be configured using a field-name/pattern property
  * configuration file.
  * Such a configuration file has names of the structure
- * <subject-name>_<document-element>
+ * &lt;subject-name&gt;_&lt;document-element&gt;
  * and values are regular java expressions
- * A html file is scanned for pattern matchings within a specific <document-element>
- * and if such a matching can be found then the <attribute-name> is collected as
+ * A html file is scanned for pattern matchings within a specific &lt;document-element&gt;
+ * and if such a matching can be found then the &lt;attribute-name&gt; is collected as
  * subject for the scanned document
  * patternProperties files must have special file names where the file name
  * starts with the word "parser." and must end with ".properties"
@@ -192,10 +192,10 @@ public class Evaluation {
     }
 
     /**
-     * calculate the scores for a model
-     * the scores is a attribute/count map which count how often a specific attribute was found
+     * Calculate the scores for a model.
+     * The scores is a attribute/count map which count how often a specific attribute was found
      * @param modelName
-     * @return
+     * @return the calculated scores
      */
     public ClusteredScoreMap<String> getScores(final String modelName) {
         return this.modelMap.get(modelName);

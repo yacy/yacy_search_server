@@ -25,8 +25,10 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -45,8 +47,69 @@ import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
+/**
+ * Retrieval of a web links structure.
+ */
 public class webstructure {
 
+	/**
+	 * <p>Retrieve the locally known web links structure of a specified resource ("about" parameter supplied) or
+	 * the whole computed links structure since install (no parameter supplied)
+	 * or since last start or last call ("latest" parameter supplied).</p>
+	 * <p>Returned object contains the following information :
+	 * <ul>
+	 * 	<li>in all cases :
+	 * 		<ul>
+	 * 			<li>accumulated list of outgoing links to other domains (per host accumulated anchors)</li>
+	 * 		</ul>
+	 * 	</li>
+	 *  <li>when "about" parameter is filled :
+	 *  	<ul>
+	 * 			<li>accumulated list of incoming links from other domains (per host accumulated references)</li>
+	 * 			<li>detailed list of outgoing links (anchors) from document at "about" URL to references</li>
+     * 			<li>detailed list of incoming links (citations) from other documents (their references) - reverse link structure</li>
+     * 		</ul>
+     * 	</li>
+	 * </ul>
+	 * <p>
+	 * Remarks :
+	 * <ul>
+	 * <li>Information detail is limited by {@link WebStructureGraph#maxhosts}, {@link WebStructureGraph#maxref} and {@link WebStructureGraph#MAX_PARSED_ANCHORS} constants.</li>
+	 * <li>Requesting client must be authenticated (as admin or requesting from localhost enabled) otherwise results will be empty</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * <p>
+	 * Example API calls :
+	 * <ul>
+	 * <li>domain name and index page structure : http://localhost:8090/api/webstructure.xml?about=yacy.net</li>
+	 * <li>domain name structure : http://localhost:8090/api/webstructure.xml?about=yacy.net&documentStructure=false</li>
+     * <li>hosts accumulated structure and specific resource structure : http://localhost:8090/api/webstructure.xml?about=http://yacy.net/fr/API.html</li>
+	 * <li>whole locally known hosts web structure : http://localhost:8090/api/webstructure.xml</li>
+	 * <li>recently locally computed hosts web structure : http://localhost:8090/api/webstructure.xml?latest=</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * 
+	 * @param header
+	 *            servlet request header
+	 * @param post
+	 *            request parameters. Supported keys :
+	 *            <ul>
+	 *            <li>about : get only links structure about the resource
+	 *            specified as value. Supported values : host hash, URL hash,
+	 *            host name or URL</li>
+	 *            <li>latest (ignored when about parameter is valued): get the structure that have been computed during
+	 *            the current run-time of YaCy, and with each next call only an
+	 *            update to the next list of references.</li>
+	 *            <li>agentName : name of the user agent string used to load the "about" resource</li>
+	 *            <li>documentStructure : set to false when you only want the hosts accumulated references for the "about" resource</li>
+	 *            </ul>
+	 * @param env
+	 *            server environment
+	 * @return the servlet answer object
+	 * @see WebStructureGraph
+	 */
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
@@ -59,12 +122,12 @@ public class webstructure {
         if (about != null) {
             DigestURL url = null;
             byte[] urlhash = null;
-            String hosthash = null;
+            Set<String> hostHashes = new HashSet<>();
             if (about.length() == 6 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
-            	hosthash = about;
+            	hostHashes.add(about);
             } else if (about.length() == 12 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
             	urlhash = ASCII.getBytes(about);
-            	hosthash = about.substring(6);
+            	hostHashes.add(about.substring(6));
             	try {
                     url = authenticated ? sb.getURL(urlhash) : null;
                 } catch (IOException e) {
@@ -76,29 +139,49 @@ public class webstructure {
                 try {
                     url = new DigestURL(about.indexOf("://") >= 0 ? about : "http://" + about); // accept also domains
                     urlhash = url.hash();
-                    hosthash = ASCII.String(urlhash, 6, 6);
+                    if(about.indexOf("://") >= 0) {
+                    	hostHashes.add(url.hosthash());
+                    } else {
+                    	hostHashes.addAll(sb.webStructure.hostName2HostHashes(about));
+                    }
                 } catch (final MalformedURLException e) {
                 }
             }
-            if (hosthash != null) {
+            if (!hostHashes.isEmpty()) {
                 prop.put("out", 1);
                 prop.put("in", 1);
-                WebStructureGraph.StructureEntry sentry = sb.webStructure.outgoingReferences(hosthash);
-                if (sentry != null && sentry.references.size() > 0) {
-                    reference(prop, "out", 0, sentry, sb.webStructure);
-                    prop.put("out_domains", 1);
-                } else {
-                    prop.put("out_domains", 0);
+                int inCount = 0, outCount = 0;
+                for(final String hostHash: hostHashes) {
+                	WebStructureGraph.StructureEntry sentry = sb.webStructure.outgoingReferences(hostHash);
+                	if (sentry != null && sentry.references.size() > 0) {
+                		reference(prop, "out", outCount, sentry, sb.webStructure);
+                		outCount++;
+                	} else {
+                		prop.put("out_domains", 0);
+                	}
+                	sentry = sb.webStructure.incomingReferences(hostHash);
+                	if (sentry != null && sentry.references.size() > 0) {
+                		reference(prop, "in", inCount, sentry, sb.webStructure);
+                		prop.put("in_domains", 1);
+                		inCount++;
+                	} else {
+                		prop.put("in_domains", 0);
+                	}
                 }
-                sentry = sb.webStructure.incomingReferences(hosthash);
-                if (sentry != null && sentry.references.size() > 0) {
-                    reference(prop, "in", 0, sentry, sb.webStructure);
-                    prop.put("in_domains", 1);
-                } else {
-                    prop.put("in_domains", 0);
-                }
+        		prop.put("out_domains", outCount);
+        		prop.put("in_domains", inCount);
             }
-            if (urlhash != null) {
+            
+			/*
+			 * It is possible not to scrape document and look for citations by
+			 * setting documentStructure parameter to "false"
+			 */
+			boolean documentStructure = true;
+			if (post != null && "false".equals(post.get("documentStructure", "true"))) {
+				documentStructure = false;
+			}
+            
+            if (urlhash != null && documentStructure) {
             	// anchors
                 prop.put("references", 1);
                 net.yacy.document.Document scraper = null;
@@ -208,7 +291,7 @@ public class webstructure {
 
     public static void reference(serverObjects prop, String prefix, int c, WebStructureGraph.StructureEntry sentry, WebStructureGraph ws) {
         prop.put(prefix + "_domains_" + c + "_hash", sentry.hosthash);
-        prop.put(prefix + "_domains_" + c + "_domain", sentry.hostname);
+        prop.putXML(prefix + "_domains_" + c + "_domain", sentry.hostname);
         prop.put(prefix + "_domains_" + c + "_date", sentry.date);
         Iterator<Map.Entry<String, Integer>> k = sentry.references.entrySet().iterator();
         Map.Entry<String, Integer> refentry;
@@ -221,7 +304,7 @@ public class webstructure {
             refdom = ws.hostHash2hostName(refhash);
             if (refdom == null) continue refloop;
             prop.put(prefix + "_domains_" + c + "_citations_" + d + "_refhash", refhash);
-            prop.put(prefix + "_domains_" + c + "_citations_" + d + "_refdom", refdom);
+            prop.putXML(prefix + "_domains_" + c + "_citations_" + d + "_refdom", refdom);
             refcount = refentry.getValue();
             prop.put(prefix + "_domains_" + c + "_citations_" + d + "_refcount", refcount.intValue());
             d++;
