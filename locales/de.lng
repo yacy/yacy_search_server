@@ -1469,6 +1469,7 @@ Inbound Links, incoming to #[host]# - Host List==Eingehende Links, eingehend auf
 #browse #[host]#==Durchsuche #[host]#
 ##[count]# URLs==#[count]# URL(s)
 #Administration Options==Administration Optionen
+<html lang="en">==<html lang="de">
 #-----------------------------
 
 #File: HostBrowserAdmin_p.html

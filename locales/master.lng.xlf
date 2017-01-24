@@ -3993,6 +3993,18 @@
     <trans-unit id="134de3fa" xml:space="preserve" approved="no" translate="yes">
        <source>Inbound Links, incoming to #[host]# - Host List</source>
     </trans-unit>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
+    <trans-unit id="7fb1970b" xml:space="preserve" approved="no" translate="yes">
+       <source>'number of documents about this date'</source>
+    </trans-unit>
+    <trans-unit id="b5964c06" xml:space="preserve" approved="no" translate="yes">
+       <source>"show link structure graph"</source>
+    </trans-unit>
+    <trans-unit id="9c0d6fd2" xml:space="preserve" approved="no" translate="yes">
+       <source>Host has load error(s)</source>
+    </trans-unit>
   </body>
 </file>
 

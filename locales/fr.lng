@@ -976,6 +976,19 @@ load &amp; index==charger &amp; indexer
 >loading<==>en cours de chargement<
 Outbound Links, outgoing from #[host]# - Host List==Liens sortants, depuis #[host]# - Liste de domaines
 Inbound Links, incoming to #[host]# - Host List==Liens entrants, vers #[host]# - Liste de domaines
+<html lang="en">==<html lang="fr">
+'number of documents about this date'=='Nombre de documents liés à cette date'
+"show link structure graph"=="Afficher le graphique d'arborescence de liens"
+Host has load error(s)==Erreur(s) de chargement sur ce domaine
+#-----------------------------
+
+#File: HostBrowserAdmin_p.html
+#---------------------------
+Administration Options==Options d'administration
+Delete all==Supprimer toutes les
+>Load Errors<==>erreurs de chargement<
+from index==de l'index
+"Delete Load Errors"=="Supprimer"
 #-----------------------------
 
 #File: IndexCreateIndexingQueue_p.html

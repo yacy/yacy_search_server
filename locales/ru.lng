@@ -1590,6 +1590,7 @@ Outbound Links, outgoing from #[host]# - Host List==Внешние ссылки,
 Inbound Links, incoming to #[host]# - Host List==Внутренние ссылки, входящие в #[host]# - список хостов
 #browse #[host]#==просмотр #[host]#
 ##[count]# URLs==#[count]# ссылок
+<html lang="en">==<html lang="ru">
 #-----------------------------
 
 #File: HostBrowserAdmin_p.html
