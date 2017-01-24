@@ -309,6 +309,7 @@ public class HostBrowser {
                     }
                 }
                 prop.put("hosts_list", c);
+                prop.put("hosts_authorized", authorized ? 1 : 0);
                 prop.put("hosts", 1);
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
