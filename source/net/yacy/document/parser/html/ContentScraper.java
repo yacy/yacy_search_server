@@ -1128,6 +1128,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         content = this.metas.get("date");
         if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
 
+        // <meta name="DC.date.modified" content="YYYY-MM-DD" />
+        content = this.metas.get("dc.date.modified");
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
+        
+        // <meta name="DC.date.created" content="YYYY-MM-DD" />
+        content = this.metas.get("dc.date.created");
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
+        
         // <meta name="DC.date" content="YYYY-MM-DD" />
         content = this.metas.get("dc.date");
         if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
