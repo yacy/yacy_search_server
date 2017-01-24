@@ -747,7 +747,7 @@ public class HostBrowser {
                 c++;
                 if (c % 80 == 0) sbi.append("<br/>");
             }
-            if (sbi.length() > 0) sbi.insert(0, "<br/>internal referrer:</br>");
+            if (sbi.length() > 0) sbi.insert(0, "<br/>internal referrer:");
             StringBuilder sbe = new StringBuilder();
             c = 0;
             for (String s: references_external_urls) {
@@ -755,7 +755,7 @@ public class HostBrowser {
                 c++;
                 if (c % 80 == 0) sbe.append("<br/>");
             }
-            if (sbe.length() > 0) sbe.insert(0, "<br/>external referrer:</br>");
+            if (sbe.length() > 0) sbe.insert(0, "<br/>external referrer:");
             return
                     (this.crawldepth == 998 ? "unknown crawldepth" : this.crawldepth >= 0 ? "crawldepth: " + this.crawldepth : "") +
                     (this.cr_c != null ? ", cr=" + (Math.round(this.cr_c * 1000.0d) / 1000.0d) : "") +

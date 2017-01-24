@@ -1,6 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "DTD/xhtml1-transitional.dtd">
-<!-- This page is only XHTML 1.0 Transitional because target is being used in a links -->
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>YaCy '#[clientname]#': Index Browser</title>
     #%env/templates/metas.template%#
@@ -42,7 +41,7 @@ function updatepage(str) {
   
   if (totalResults > 0 && firstChannel.items.length > 0) {
     var item;
-    html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
+    html += "<table class=\"networkTable\" style=\"border-width:0; width:99%;\" cellpadding=\"2\" cellspacing=\"1\">";
     html += "<tr class=\"TableHeader\" valign=\"bottom\">";
     html += "<td>URL from index (total results = " + totalResults + ")<\/td>";
     for (var i = 0; i < firstChannel.items.length; i++) {
@@ -101,7 +100,7 @@ function updatepage(str) {
      <fieldset><legend>Host List</legend>
       #{list}#
       <div style="float:left; padding:1px 5px 1px 5px;">
-        <div style="width:180px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><img src="env/grafics/#(type)#invisible.png::burn-e.gif::construction.gif#(/type)#" align="left" width="12" height="8">&nbsp;<a href="HostBrowser.html?admin=#[admin]#&path=#[host]#&facetcount=#[count]#">#[host]#</a></div></div>
+        <div style="width:180px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div><img src="env/grafics/#(type)#invisible.png::burn-e.gif::construction.gif#(/type)#" alt="#(type)#::Host has load error(s)::Pending in Crawler#(/type)#" title="#(type)#::Host has load error(s)::Pending in Crawler#(/type)#" style="float:left" width="12" height="8">&nbsp;<a href="HostBrowser.html?admin=#[admin]#&path=#[host]#&facetcount=#[count]#">#[host]#</a></div></div>
         <div style="width:120px; text-align:right; float: left; white-space:nowrap; overflow:hidden;"><span class="commit">#[count]#</span>#(crawler)#::/<span class="pending">#[pending]#</span>#(/crawler)##(errors)#::/<span class="info">#[exclcount]#</span>/<span class="error">#[failcount]#</span>#(/errors)# URLs</div>
       </div>
       #{/list}#
@@ -153,15 +152,15 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
     #(hostanalysis)#::
     <fieldset><legend>Host Analysis</legend>
       #{facets}#
-      <table class="sortable" border="0" style="float:left">
+      <table class="sortable" style="float:left; border-width: 0">
       <tr class="TableCellDark">
-        <td align="left" colspan="5" nowrap class="pending">#[facetname]#</td>
- 	    <td align="right" colspan="5" nowrap class="listingok">#</td>
+        <td style="text-align:left;white-space:nowrap" colspan="5" class="pending">#[facetname]#</td>
+ 	    <td style="text-align:right;white-space:nowrap" colspan="5" class="listingok">#</td>
       </tr>
       #{facet}#
       <tr class="TableCellLight">
-        <td align="left" colspan="5" nowrap class="pending">#[key]#</td>
- 	    <td align="right" colspan="5" nowrap class="listingok"><a href="#[a]#" target="_blank" class="forceNoExternalIcon">#[count]#</a></td>
+        <td style="text-align:left;white-space:nowrap" colspan="5" class="pending">#[key]#</td>
+ 	    <td style="text-align:right;white-space:nowrap" colspan="5" class="listingok"><a href="#[a]#" target="_blank" class="forceNoExternalIcon">#[count]#</a></td>
       </tr>
       #{/facet}#
       </table>&nbsp;&nbsp;
@@ -173,50 +172,50 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
      <fieldset><legend>Browser for <a href="#[path]#" target="_blank">#[path]#</a></legend>
      <p>documents stored for host: #[hostsize]#; documents stored for subpath: #[subpathloadsize]#; unloaded documents detected in subpath: #[subpathdetectedsize]# <!-- #(complete)#;<a href="HostBrowser.html?admin=#[admin]#&complete=true&path=#[path]#">get complete list</a>::<a href="HostBrowser.html?admin=#[admin]#&path=#[path]#">directory view</a>#(/complete)#-->
      </p>
-      <table class="sortable" border="0" style="float:left">
+      <table class="sortable" style="float:left; border-width: 0">
       <tr>
-        <th align="center" width="32"></th>
-        <th align="left" width="600" class="listing">Path</th>
-        <td align="right" class="listingem">stored</td>
-        <td align="right" class="listingem">linked</td>
-        <td align="right" class="listingem">pending</td>
-        <td align="right" class="listingem">excluded</td>
-        <td align="right" class="listingem">failed</td>
+        <th style="text-align:center; width:32"></th>
+        <th style="text-align:left; width: 600" class="listing">Path</th>
+        <td style="text-align:right" class="listingem">stored</td>
+        <td style="text-align:right" class="listingem">linked</td>
+        <td style="text-align:right" class="listingem">pending</td>
+        <td style="text-align:right" class="listingem">excluded</td>
+        <td style="text-align:right" class="listingem">failed</td>
       </tr>
       #(root)#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-        <td align="center"></td>
-        <td align="left" nowrap ><a href="HostBrowser.html?admin=#[admin]#&path=#[path]#" class="listing">..</a></td>
-        <td align="right" colspan="5" nowrap></td>
+        <td style="text-align:center"></td>
+        <td style="text-align:left;white-space:nowrap"><a href="HostBrowser.html?admin=#[admin]#&path=#[path]#" class="listing">..</a></td>
+        <td style="text-align:right;white-space:nowrap" colspan="5"></td>
       </tr>::
       #(/root)#
       #{list}#
         #(type)#<!--file-->
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-          <td align="center"><div id="info"><a href="ViewFile.html?url=#[url]#"><img src="env/grafics/doc.gif"/></a><span>Show Metadata</span></div></td>
-          <td align="left" nowrap class=#(stored)#"listingem"::"listing"#(/stored)#><a href="#[url]#" target="_blank">#[url]#</a></td>
+          <td style="text-align:center"><div><a href="ViewFile.html?url=#[url]#"><img src="env/grafics/doc.gif" alt=""/></a><span>Show Metadata</span></div></td>
+          <td style="text-align:left;white-space:nowrap" class=#(stored)#"listingem"::"listing"#(/stored)#><a href="#[url]#" target="_blank">#[url]#</a></td>
           #(stored)#
-          #(load)#<td align="left" colspan="5" nowrap class="listingem">link, detected from context</td>::<td align="left" colspan="5" nowrap class="listingnok"><a href="HostBrowser.html?admin=#[admin]#&load=#[url]#&path=#[path]#">load &amp; index</a>#(/load)#</td>::
-          <td align="left" colspan="1" nowrap class="listingok">indexed</td><td align="left" colspan="4" nowrap class="listingem">#[comment]#</td>::
- 		  <td align="left" colspan="5" nowrap class="pending">loading</td>::
- 		  <td align="left" colspan="5" nowrap class="listingnok">#[error]#</td>
+          #(load)#<td style="text-align:left;white-space:nowrap" colspan="5" class="listingem">link, detected from context</td>::<td style="text-align:left;white-space:nowrap" colspan="5" class="listingnok"><a href="HostBrowser.html?admin=#[admin]#&load=#[url]#&path=#[path]#">load &amp; index</a>#(/load)#</td>::
+          <td style="text-align:left;white-space:nowrap" colspan="1" class="listingok">indexed</td><td style="text-align:left;white-space:nowrap" colspan="4" class="listingem">#[comment]#</td>::
+ 		  <td style="text-align:left;white-space:nowrap" colspan="5" class="pending">loading</td>::
+ 		  <td style="text-align:left;white-space:nowrap" colspan="5" class="listingnok">#[error]#</td>
           #(/stored)#
         </tr>::<!--folder-->
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-          <td align="center"><img src="env/grafics/dir.gif"/></td>
-          <td align="left" nowrap class="listing"><a href="HostBrowser.html?admin=#[admin]#&path=#[url]#" class="listing">#[url]#</a></td>
-          <td align="right" class="commit">#[stored]#</td>
-          <td align="right" class="listing">#[linked]#</td>
-          <td align="right" #(pendingVisible)#class="listingem"::class="pending"#(/pendingVisible)#>#[pending]#</td>
-          <td align="right" #(excludedVisible)#class="listingem"::class="error"#(/excludedVisible)#>#[excluded]#</td>
-          <td align="right" #(failedVisible)#class="listingem"::class="error"#(/failedVisible)#>#[failed]#</td>
+          <td style="text-align:center"><img src="env/grafics/dir.gif" alt="Directory"/></td>
+          <td style="text-align:left;white-space:nowrap" class="listing"><a href="HostBrowser.html?admin=#[admin]#&path=#[url]#" class="listing">#[url]#</a></td>
+          <td style="text-align:right" class="commit">#[stored]#</td>
+          <td style="text-align:right" class="listing">#[linked]#</td>
+          <td style="text-align:right" #(pendingVisible)#class="listingem"::class="pending"#(/pendingVisible)#>#[pending]#</td>
+          <td style="text-align:right" #(excludedVisible)#class="listingem"::class="error"#(/excludedVisible)#>#[excluded]#</td>
+          <td style="text-align:right" #(failedVisible)#class="listingem"::class="error"#(/failedVisible)#>#[failed]#</td>
         </tr>
         #(/type)#
       #{/list}#
       </table>
     </fieldset>
     
-    #(linkgraph)#<div align="center"><form><input name="showlinkstructure" onClick="location.href = location.toString() + '&showlinkstructure=';" class="btn btn-default btn-xs" value="show link structure graph"/></form></div>::
+    #(linkgraph)#<div style="text-align:center"><form><input name="showlinkstructure" onClick="location.href = location.toString() + '&showlinkstructure=';" class="btn btn-default btn-xs" value="show link structure graph"/></form></div>::
     <script src="js/d3.v3.min.js"></script>
     <script src="js/hypertree.js"></script>
     <div id="linkstructure"></div>
@@ -230,7 +229,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
      <fieldset><legend>Outbound Links, outgoing from #[host]# - Host List</legend>
       #{list}#
       <div style="float:left; padding:1px 5px 1px 5px;">
-        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><a href="HostBrowser.html?admin=#[admin]#&path=#[link]#">#[host]#</a></div></div>
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div><a href="HostBrowser.html?admin=#[admin]#&path=#[link]#">#[host]#</a></div></div>
         <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# URLs</div>
       </div>
       #{/list}#
@@ -246,7 +245,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
      <fieldset><legend>Inbound Links, incoming to #[host]# - Host List</legend>
       #{list}#
       <div style="float:left; padding:1px 5px 1px 5px;">
-        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div id="info"><a href="HostBrowser.html?admin=#[admin]#&path=#[host]#">#[host]#</a></div></div>
+        <div style="width:160px; text-align:left; float: left; white-space:nowrap; overflow:hidden;"><div><a href="HostBrowser.html?admin=#[admin]#&path=#[host]#">#[host]#</a></div></div>
         <div style="width:80px; text-align:right; float: left; white-space:nowrap; overflow:hidden;">#[count]# URLs</div>
       </div>
       #{/list}#
