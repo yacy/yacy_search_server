@@ -50,13 +50,12 @@ public class IODispatcher extends Thread {
 
     private static final ConcurrentLog log = new ConcurrentLog("IODispatcher");
 
-    private   Semaphore                    controlQueue;
-    private   final Semaphore              termination;
+    private   Semaphore                    controlQueue; // controls that only one io job is running
+    private   final Semaphore              termination; // released if thread is safe to terminate
     private   ArrayBlockingQueue<MergeJob> mergeQueue;
     private   ArrayBlockingQueue<DumpJob<? extends Reference>> dumpQueue;
-    //private ReferenceFactory<ReferenceType> factory;
     private   boolean                      terminate;
-    private final int                          writeBufferSize;
+    private final int                      writeBufferSize;
 
     public IODispatcher(final int dumpQueueLength, final int mergeQueueLength, final int writeBufferSize) {
         this.termination = new Semaphore(0);
@@ -165,6 +164,9 @@ public class IODispatcher extends Thread {
                         log.severe("main run job was interrupted (1)", e);
                     } catch (final Throwable e) {
                         log.severe("main run job had errors (1), dump to " + f + " failed.", e);
+                    } finally {
+                        // make sure (on error) loop never hangs on controlQueue.acquire() (after/on error) - as the terminate() call releases only one controlQueue permit
+                        if (this.terminate) this.controlQueue.release();
                     }
                     continue loop;
                 }
@@ -186,6 +188,9 @@ public class IODispatcher extends Thread {
                         } else {
                             log.severe("main run job had errors (2), dump to " + f + " failed. Input files are " + f1 + " and " + f2, e);
                         }
+                    } finally {
+                        // make sure (on error) loop never hangs on controlQueue.acquire() (after/on error)
+                        if (this.terminate) this.controlQueue.release();
                     }
                     continue loop;
                 }
@@ -195,7 +200,7 @@ public class IODispatcher extends Thread {
                     log.info("caught termination signal");
                     break;
                 }
-                
+
             } catch (final Throwable e) {
                 log.severe("main run job failed (X)", e);
             }
