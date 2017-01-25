@@ -250,6 +250,10 @@ public final class SearchEvent {
         this.peers = peers;
         this.workTables = workTables;
         this.query = query;
+        if(query != null) {
+        	/* Image counter will eventually grow up faster than offset, but must start first with the same value as query offset */
+        	this.imagePageCounter = query.offset;
+        }
         this.loader = loader;
         this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(max_results_node, false);
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
@@ -1635,6 +1639,7 @@ public final class SearchEvent {
         return null;
     }
 
+    /** Image results counter */
     private int imagePageCounter = 0;
     private LinkedHashMap<String, ImageResult> imageViewed = new LinkedHashMap<String, ImageResult>();
     private LinkedHashMap<String, ImageResult> imageSpareGood = new LinkedHashMap<String, ImageResult>();
