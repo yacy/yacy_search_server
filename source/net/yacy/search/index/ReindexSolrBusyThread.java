@@ -27,6 +27,7 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionConfiguration;
@@ -138,7 +139,8 @@ import org.apache.solr.common.SolrInputDocument;
                             start = start + chunksize;
                             querylist.set(currentquery, docstoreindex);
                             for (SolrDocument doc : xdocs) {
-                                SolrInputDocument idoc = colcfg.toSolrInputDocument(doc);
+                                URIMetadataNode pdoc = new URIMetadataNode(doc); // use Metadata as it verifies correct/current Doc.ID
+                                SolrInputDocument idoc = colcfg.toSolrInputDocument(pdoc);
                                 Switchboard.getSwitchboard().index.putDocument(idoc);
                                 processed++;
                             }
