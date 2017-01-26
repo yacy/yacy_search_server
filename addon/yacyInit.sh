@@ -4,6 +4,16 @@
 #
 # Provided by Matthias Kempka, 26.12.2004
 
+### BEGIN INIT INFO
+# Provides:          yacy
+# Required-Start:    $network
+# Required-Stop:     $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Distributed web search engine
+# Description:       yacy is a distributed search engine config-file is <yacy_search_server>/DATA/SETTINGS/yacy.conf
+### END INIT INFO
+
 # ensure java is in the path
 PATH=/sbin:/bin:/usr/sbin:/usr/local/bin:/usr/bin
 # installation directory
