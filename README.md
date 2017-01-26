@@ -199,7 +199,6 @@ scripts you can create more shell api access methods yourself easily.
 ## Contact
 
 Our primary point of contact is the german forum at http://forum.yacy.net
-There is also an english forum at http://www.yacy-forum.org
 We encourage you to start a YaCy forum in your own language.
 
 If you have any questions, please do not hesitate to contact the maintainer:
