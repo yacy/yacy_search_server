@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
   <head>
   <title>YaCy '#[clientname]#': Performance Settings</title>
   #%env/templates/metas.template%#
@@ -26,7 +26,7 @@
       <fieldset>
         <legend>Memory Settings</legend>
         <dl>
-          <dt><label for="Xmx">Memory reserved for JVM</label></dt>
+          <dt><label for="Xmx">Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr></label></dt>
           <dd><input name="Xmx" id="Xmx" type="text" size="5" maxlength="5" value="#[Xmx]#" /> MByte&nbsp;
               <input type="submit" class="btn btn-primary" name="setStartup" value="Set" />&nbsp;
               #(setStartupCommit)#::<div class="commit">Accepted change. This will take effect after <strong>restart</strong> of YaCy. <br/><a href="Steering.html?restart=" onclick="return confirm('Confirm Restart')">restart now</a></div>::<div class="error"></div>#(/setStartupCommit)#
@@ -38,17 +38,87 @@
     <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
         <legend>Resource Observer</legend>
-        <dl>
-          <dt>&nbsp;</dt>
-          <dd>DHT-Trigger #(observerTrigger)#not triggered::<strong>triggered</strong>#(/observerTrigger)# <a href="?resetObserver=">[reset state]</a></dd>
-          <dt><label for="diskFree">HDD</label></dt>
-          <dd>disable crawls below <input name="diskFree" id="diskFree" type="text" size="4" value="#[diskFree]#" /> MiB free space,<br/>
-              disable DHT-in below <input name="diskFreeHardlimit" id="diskFreeHardlimit" type="text" size="4" value="#[diskFreeHardlimit]#" /> MiB free space</dd>
-          <dt><label for="memoryAcceptDHT">RAM</label></dt>
-          <dd>disable DHT-in below <input name="memoryAcceptDHT" id="memoryAcceptDHT" type="text" size="4" value="#[memoryAcceptDHT]#" /> MiB free space</dd>
-          <dt>&nbsp;</dt>
-          <dd><input type="submit" class="btn btn-primary" name="setObserver" value="Save" /></dd>
-        </dl>
+        <div class="col-sm-12">
+        	<abbr title="Distributed Hash Table">DHT</abbr>-Trigger #(observerTrigger)#not triggered::<strong>triggered</strong>#(/observerTrigger)# <a href="?resetObserver=">[reset state]</a>
+        </div>
+        <div class="col-sm-6">
+        	<fieldset>
+	        	<legend>Free space disk</legend>
+        		<div class="form-group">
+        			<label for="diskFree">Steady-state minimum</label>
+          			<input name="diskFree" id="diskFree" type="text" size="4" value="#[diskFree]#" title="Amount of space (in Mebibytes) that should be kept free as steady state"/> <abbr title="Mebibyte">MiB</abbr>. Disable crawls when free space is below.
+        		</div>
+        		<div class="form-group">
+		        	<label for="diskFreeHardlimit">Absolute minimum</label>
+            		<input name="diskFreeHardlimit" id="diskFreeHardlimit" type="text" size="4" value="#[diskFreeHardlimit]#" title="Amount of space (in Mebibytes) that should at least be kept free as hard limit"/> <abbr title="Mebibyte">MiB</abbr>. Disable <abbr title="Distributed Hash Table">DHT</abbr>-in when free space is below.
+        		</div>
+        		<div class="form-group">
+					<label for="diskFreeAutoregulate">Autoregulate</label>
+					<input name="diskFreeAutoregulate" id="diskFreeAutoregulate" type="checkbox" #(diskFreeAutoregulate)#::checked#(/diskFreeAutoregulate)# aria-describedby="autoregulateFreeInfo"/> when absolute minimum limit has been reached.
+			  		<div class="info" style="float:right">
+				  		<img src="env/grafics/i16.gif" width="16" height="16" alt="Free space disk autoregulation info"/>
+			  			<div style="right:0px;" id="autoregulateFreeInfo">
+							The autoregulation task performs the following sequence of operations, stopping once free space disk is over the steady-state value :
+							<ol>
+								<li>delete old releases</li>
+								<li>delete logs</li>
+								<li>delete robots.txt table</li>
+								<li>delete news</li>
+								<li>clear HTCACHE</li>
+								<li>clear citations</li>
+								<li>throw away large crawl queues</li>
+								<li>cut away too large RWIs</li>
+							</ol>
+            			</div>
+            		</div>
+				</div>
+			</fieldset>
+		</div>
+		<div class="col-sm-6">
+			<fieldset>
+        		<legend>Used space disk</legend>
+        		<div class="form-group">
+        			<label for="diskUsed">Steady-state maximum</label>
+          			<input name="diskUsed" id="diskUsed" type="text" size="7" value="#[diskUsed]#" title="Maximum amount of space (in Mebibytes) that should be used as steady state"/> <abbr title="Mebibyte">MiB</abbr>. Disable crawls when used space is over.
+				</div>
+				<div class="form-group">
+              		<label for="diskUsedHardlimit">Absolute maximum</label>
+              		<input name="diskUsedHardlimit" id="diskUsedHardlimit" type="text" size="7" value="#[diskUsedHardlimit]#" title="Maximum amount of space (in Mebibytes) that should be used as hard limit"/> <abbr title="Mebibyte">MiB</abbr>. Disable <abbr title="Distributed Hash Table">DHT</abbr>-in when used space is over.
+            	</div>
+            	<div class="form-group">
+			  		<label for="diskUsedAutoregulate">Autoregulate</label>
+			  		<input name="diskUsedAutoregulate" id="diskUsedAutoregulate" type="checkbox" #(diskUsedAutoregulate)#::checked#(/diskUsedAutoregulate)# aria-describedby="autoregulateUsedInfo"> when absolute maximum limit has been reached.
+			  		<div class="info" style="float:right">
+			  			<img src="env/grafics/i16.gif" width="16" height="16" alt="Used space disk autoregulation info"/>
+			  			<div style="right:0px;" id="autoregulateUsedInfo">
+							The autoregulation task performs the following sequence of operations, stopping once used space disk is below the steady-state value:
+							<ol>
+								<li>delete old releases</li>
+								<li>delete logs</li>
+								<li>delete robots.txt table</li>
+								<li>delete news</li>
+								<li>clear HTCACHE</li>
+								<li>clear citations</li>
+								<li>throw away large crawl queues</li>
+								<li>cut away too large RWIs</li>
+							</ol>
+            			</div>
+            		</div>
+				</div>
+        	</fieldset>
+        </div>
+        <div class="col-sm-12">
+        	<fieldset>
+        		<legend><abbr title="Random Access Memory">RAM</abbr></legend>
+          		<div class="form-group">
+          			<label for="memoryAcceptDHT">disable <abbr title="Distributed Hash Table">DHT</abbr>-in below</label>
+          			<input name="memoryAcceptDHT" id="memoryAcceptDHT" type="text" size="4" value="#[memoryAcceptDHT]#" /> <abbr title="Mebibyte">MiB</abbr> free space
+          		</div>
+        	</fieldset>
+        </div>
+        <div class="col-sm-6">
+       		<input type="submit" class="btn btn-primary" name="setObserver" value="Save" />
+       	</div>
       </fieldset>
     </form>
   
@@ -79,7 +149,7 @@
 	        <td align="right"><input id="crawlPauseRemotesearch" name="crawlPauseRemotesearch" type="text" size="20" maxlength="100" value="#[crawlPauseRemotesearch]#" /></td>
 	      </tr>
 	      <tr class="TableCellLight">
-	        <td align="left" colspan="2"><input type="submit" class="btn btn-sm btn-primary"name="onlineCautionSubmit" value="Enter New Parameters" />
+	        <td align="left" colspan="2"><input type="submit" class="btn btn-sm btn-primary" name="onlineCautionSubmit" value="Enter New Parameters" />
 	        Changes take effect immediately</td>
 	      </tr>
 	    </table>

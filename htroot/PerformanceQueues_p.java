@@ -72,11 +72,29 @@ public class PerformanceQueues_p {
 	            prop.put("setStartupCommit", "1");
             }
             if(post.containsKey("diskFree")) {
-            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, post.getInt("diskFree", 3000));
+            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, post.getLong("diskFree", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT));
             }
             if(post.containsKey("diskFreeHardlimit")) {
-            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, post.getInt("diskFreeHardlimit", 1000));
+            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, post.getLong("diskFreeHardlimit", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT_DEFAULT));
+            	
+            	/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
+            	 * so we take only in account when the relate diskFreeHardlimit is set */
+				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE,
+						post.getBoolean("diskFreeAutoregulate"));
             }
+			if (post.containsKey("diskUsed")) {
+				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE,
+						post.getLong("diskUsed", SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT));
+			}
+			if (post.containsKey("diskUsedHardlimit")) {
+				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT, post.getLong("diskUsedHardlimit",
+						SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT));
+				
+				/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
+				 * so we take only in account when the related diskFreeHardlimit is set */
+				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE,
+						post.getBoolean("diskUsedAutoregulate"));
+			}
             if(post.containsKey("memoryAcceptDHT")) {
             	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, post.getInt("memoryAcceptDHT", 50));
             }
@@ -308,6 +326,14 @@ public class PerformanceQueues_p {
         final boolean observerTrigger = !MemoryControl.properState();
         prop.put("diskFree", diskFree);
         prop.put("diskFreeHardlimit", diskFreeHardlimit);
+		prop.put("diskFreeAutoregulate", sb.getConfigBool(SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE,
+				SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE_DEFAULT) ? 1 : 0);
+		prop.put("diskUsed", sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE,
+				SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT));
+		prop.put("diskUsedHardlimit", sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT,
+				SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT));
+		prop.put("diskUsedAutoregulate", sb.getConfigBool(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE,
+				SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE_DEFAULT) ? 1 : 0);
         prop.put("memoryAcceptDHT", memoryAcceptDHT);
         if(observerTrigger) prop.put("observerTrigger", "1");
 

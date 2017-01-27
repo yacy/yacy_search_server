@@ -1038,11 +1038,11 @@ div#tagcloud {
     margin: 10px 0;
 }
 
-.info span {
+.info span, .info div {
   display: none;
 }
 
-.info:hover span {
+.info:hover span, .info:hover div {
   display: block;
   position: absolute;
   font-size:1em;

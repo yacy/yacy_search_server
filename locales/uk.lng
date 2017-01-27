@@ -2167,20 +2167,19 @@ Attributes==Властивості
 
 #File: Performance_p.html
 #---------------------------
+<html lang="en">==<html lang="uk">
 Performance Settings==Установки живлення
 Memory Settings==Налаштування пам’яті
-Memory reserved for JVM==Пам’ять, утримувана для JVM
+Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Пам’ять, утримувана для <abbr title="Java Virtual Machine">JVM</abbr>
 "Set"=="Виставити"
 Resource Observer==Спостерігач за ресурсами
-DHT-Trigger==DHT-перемикач
+<abbr title="Distributed Hash Table">DHT</abbr>-Trigger==<abbr title="Distributed Hash Table">DHT</abbr>-перемикач
 not triggered:==не перемкнено:
 >triggered==>перемкнено
 reset state==відновити стан
-HDD==Місце на жорсткому диску
-disable crawls below==Вимкнути сканування при менше
-free space==вільної пам’яті
-disable DHT-in below==Вимкнути отримання DHT при менше
-RAM==Основна пам’ять
+> free space==> вільної пам’яті
+disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Вимкнути отримання <abbr title="Distributed Hash Table">DHT</abbr> при менше
+<abbr title="Random Access Memory">RAM</abbr>==Основна пам’ять
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Зміни прийняті. Вони вступлять в силу тільки після перезапуску <strong>YaCy</strong>
 restart now</a>==перезапустити зараз</a>
 Confirm Restart==Підтрвердіть перезапуск

@@ -1996,20 +1996,19 @@ Attributes==属性
 
 #File: Performance_p.html
 #---------------------------
+<html lang="en">==<html lang="cn">
 Performance Settings==性能设置
 Memory Settings==内存设置
-Memory reserved for JVM==JVM内存设置
+Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==<abbr title="Java Virtual Machine">JVM</abbr>内存设置
 "Set"=="设置"
 Resource Observer==资源查看
-DHT-Trigger==DHT-触发
+<abbr title="Distributed Hash Table">DHT</abbr>-Trigger==<abbr title="Distributed Hash Table">DHT</abbr>-触发
 not triggered:==未触发:
 >triggered==>已触发
 reset state==重置
-HDD==硬盘
-disable crawls below==停止crawl当低于
-free space==空闲空间
-disable DHT-in below==停止接收DHT当低于
-RAM==内存
+> free space==> 空闲空间
+disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==停止接收<abbr title="Distributed Hash Table">DHT</abbr>当低于
+<abbr title="Random Access Memory">RAM</abbr>==内存
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==已接受改变. 在YaCy<strong>重启</strong>后生效
 restart now</a>==立即重启</a>
 Confirm Restart==确定重启

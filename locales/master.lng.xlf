@@ -6499,7 +6499,7 @@
        <source>Memory Settings</source>
     </trans-unit>
     <trans-unit id="68be88d1" xml:space="preserve" approved="no" translate="yes">
-       <source>Memory reserved for JVM</source>
+       <source>Memory reserved for &lt;abbr title="Java Virtual Machine"&gt;JVM&lt;/abbr&gt;</source>
     </trans-unit>
     <trans-unit id="2066342" xml:space="preserve" approved="no" translate="yes">
        <source>"Set"</source>
@@ -6508,7 +6508,7 @@
        <source>Resource Observer</source>
     </trans-unit>
     <trans-unit id="4e7c891b" xml:space="preserve" approved="no" translate="yes">
-       <source>DHT-Trigger</source>
+       <source>&lt;abbr title="Distributed Hash Table"&gt;DHT&lt;/abbr&gt;-Trigger</source>
     </trans-unit>
     <trans-unit id="e2777230" xml:space="preserve" approved="no" translate="yes">
        <source>not triggered:</source>
@@ -6520,19 +6520,19 @@
        <source>reset state</source>
     </trans-unit>
     <trans-unit id="116c8" xml:space="preserve" approved="no" translate="yes">
-       <source>HDD</source>
+       <source>Free space disk</source>
     </trans-unit>
     <trans-unit id="7911d675" xml:space="preserve" approved="no" translate="yes">
-       <source>disable crawls below</source>
+       <source>Disable crawls when free space is below</source>
     </trans-unit>
     <trans-unit id="738c9a52" xml:space="preserve" approved="no" translate="yes">
-       <source>free space</source>
+       <source>&gt; free space</source>
     </trans-unit>
     <trans-unit id="9963f88b" xml:space="preserve" approved="no" translate="yes">
-       <source>disable DHT-in below</source>
+       <source>disable &lt;abbr title="Distributed Hash Table"&gt;DHT&lt;/abbr&gt;-in below</source>
     </trans-unit>
     <trans-unit id="13bfe" xml:space="preserve" approved="no" translate="yes">
-       <source>RAM</source>
+       <source>&lt;abbr title="Random Access Memory"&gt;RAM&lt;/abbr&gt;</source>
     </trans-unit>
     <trans-unit id="8f4087b8" xml:space="preserve" approved="no" translate="yes">
        <source>Accepted change. This will take effect after &lt;strong&gt;restart&lt;/strong&gt; of YaCy</source>

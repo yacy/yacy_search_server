@@ -409,19 +409,48 @@ public final class SwitchboardConstants {
     public static final String WORK_PATH_DEFAULT        = "DATA/WORK";
 
 
-    /**
+    /*
      * ResourceObserver
      * We apply the naming of control circuit states to resources observer limit values (steady-state value, over/undershot)
      * under/overshot states in the system are supposed to be regulated to match the steady-state value
      * ATTENTION: be aware that using the autoregulate-option causes that the search index data is DELETED as soon as threshold-values are reached!
      */
-    public static final String RESOURCE_DISK_FREE_AUTOREGULATE    = "resource.disk.free.autoregulate";
-    public static final String RESOURCE_DISK_FREE_MIN_STEADYSTATE = "resource.disk.free.min.steadystate"; // the target steady-state of minimum disk space left
-    public static final String RESOURCE_DISK_FREE_MIN_UNDERSHOT   = "resource.disk.free.min.undershot"; // the undershot below the steady-state of minimum disk free as absolute size
     
+    /** Setting key to enable auto-regulation on disk free threshold values */
+    public static final String RESOURCE_DISK_FREE_AUTOREGULATE    = "resource.disk.free.autoregulate";
+    
+    /** Default disk free auto-regulation activation setting */
+    public static final boolean RESOURCE_DISK_FREE_AUTOREGULATE_DEFAULT    = false;
+    
+    /** Setting key for the target steady-state of minimum disk space left */
+    public static final String RESOURCE_DISK_FREE_MIN_STEADYSTATE = "resource.disk.free.min.steadystate";
+    
+    /** Default value for target steady-state of minimum disk space left */
+    public static final long RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT = 2048L;
+    
+    /** Setting key for the undershot below the steady-state of minimum disk free as absolute size */
+    public static final String RESOURCE_DISK_FREE_MIN_UNDERSHOT   = "resource.disk.free.min.undershot";
+    
+    /** Default value for undershot below the steady-state of minimum disk free as absolute size */
+    public static final long RESOURCE_DISK_FREE_MIN_UNDERSHOT_DEFAULT   = 1024L;
+    
+    /** Setting key to enable auto-regulation on disk used threshold values */
     public static final String RESOURCE_DISK_USED_AUTOREGULATE    = "resource.disk.used.autoregulate";
+    
+    /** Default disk used auto-regulation activation setting */
+    public static final boolean RESOURCE_DISK_USED_AUTOREGULATE_DEFAULT    = false;
+    
+    /** Setting key for the disk used maximum steady state value */
     public static final String RESOURCE_DISK_USED_MAX_STEADYSTATE = "resource.disk.used.max.steadystate";
-    public static final String RESOURCE_DISK_USED_MAX_OVERSHOT    = "resource.disk.used.max.overshot";    
+    
+    /** Default disk used maximum steady state value (in mebibyte)*/
+    public static final long RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT = 524288L;
+    
+    /** Setting key for the disk used hard upper limit value */
+    public static final String RESOURCE_DISK_USED_MAX_OVERSHOT    = "resource.disk.used.max.overshot";
+    
+    /** Default disk used hard upper limit value (in mebibyte) */
+    public static final long RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT    = 1048576L;
     
     public static final String MEMORY_ACCEPTDHT = "memory.acceptDHTabove"; // minimum memory to accept dht-in (MiB)
     public static final String INDEX_RECEIVE_AUTODISABLED = "memory.disabledDHT"; // set if DHT was disabled by ResourceObserver

@@ -2431,20 +2431,19 @@ Attributes==Attribute
 
 #File: Performance_p.html
 #---------------------------
+<html lang="en">==<html lang="de">
 Performance Settings==Leistungseinstellungen
 Memory Settings==Speicher Einstellungen
-Memory reserved for JVM==Für JVM reservierter Speicher
+Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Für <abbr title="Java Virtual Machine">JVM</abbr> reservierter Speicher
 "Set"=="Setzen"
 Resource Observer==Ressourcen Beobachter
-DHT-Trigger==DHT-Umschalter
+<abbr title="Distributed Hash Table">DHT</abbr>-Trigger==<abbr title="Distributed Hash Table">DHT</abbr>-Umschalter
 not triggered:==nicht ausgelöst:
 >triggered==>ausgelöst
 reset state==Status zurücksetzen
-HDD==Festplattenspeicher
-disable crawls below==Deaktivere Crawls unter
-free space==freiem Speicher
-disable DHT-in below==Deaktivere eingehende DHT Transfers unter
-RAM==Arbeitsspeicher
+> free space==> freiem Speicher
+disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Deaktivere eingehende <abbr title="Distributed Hash Table">DHT</abbr> Transfers unter
+<abbr title="Random Access Memory">RAM</abbr>==Arbeitsspeicher
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Änderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
 restart now</a>==jetzt neustarten</a>
 Confirm Restart==Bestätige Neustart

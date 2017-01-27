@@ -2535,20 +2535,18 @@ Attributes==Аттрибуты
 
 #File: Performance_p.html
 #---------------------------
+<html lang="en">==<html lang="ru">
 Performance Settings==Настройки производительности
 Memory Settings==Настройки оперативной памяти
-Memory reserved for JVM==Резервирование динамической памяти для Java
+Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Резервирование динамической памяти для Java
 "Set"=="Сохранить"
 Resource Observer==Обзор ресурсов
-DHT-Trigger==DHT-триггер
+<abbr title="Distributed Hash Table">DHT</abbr>-Trigger==<abbr title="Distributed Hash Table">DHT</abbr>-триггер
 not triggered:==не срабатывает:
 >triggered==>ausgelöst
 reset state==сбросить состояние
-HDD==Жесткий диск
-disable crawls below==Остановить индексаторы при достижении
-free space==свободного места
-disable DHT-in below==Остановить DHT-приём при достижении
-RAM==RAM
+> free space==> свободного места
+disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Остановить <abbr title="Distributed Hash Table">DHT</abbr>-приём при достижении
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Изменения будут применены после <strong>перезапуска</strong> YaCy
 restart now</a>==Перезапустить сейчас</a>
 Confirm Restart==Подтвердить перезапуск
