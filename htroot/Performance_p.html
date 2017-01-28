@@ -57,7 +57,7 @@
 					<input name="diskFreeAutoregulate" id="diskFreeAutoregulate" type="checkbox" #(diskFreeAutoregulate)#::checked#(/diskFreeAutoregulate)# aria-describedby="autoregulateFreeInfo"/> when absolute minimum limit has been reached.
 			  		<div class="info" style="float:right">
 				  		<img src="env/grafics/i16.gif" width="16" height="16" alt="Free space disk autoregulation info"/>
-			  			<div style="right:0px;" id="autoregulateFreeInfo">
+			  			<div class="infobox" style="right:0px;" id="autoregulateFreeInfo">
 							The autoregulation task performs the following sequence of operations, stopping once free space disk is over the steady-state value :
 							<ol>
 								<li>delete old releases</li>
@@ -90,7 +90,7 @@
 			  		<input name="diskUsedAutoregulate" id="diskUsedAutoregulate" type="checkbox" #(diskUsedAutoregulate)#::checked#(/diskUsedAutoregulate)# aria-describedby="autoregulateUsedInfo"> when absolute maximum limit has been reached.
 			  		<div class="info" style="float:right">
 			  			<img src="env/grafics/i16.gif" width="16" height="16" alt="Used space disk autoregulation info"/>
-			  			<div style="right:0px;" id="autoregulateUsedInfo">
+			  			<div class="infobox" style="right:0px;" id="autoregulateUsedInfo">
 							The autoregulation task performs the following sequence of operations, stopping once used space disk is below the steady-state value:
 							<ol>
 								<li>delete old releases</li>
