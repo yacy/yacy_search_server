@@ -133,9 +133,6 @@
 
 <file original="Settings_UrlProxyAccess.inc"  source-language="en"  datatype="html">
   <body>
-    <trans-unit id="1b8e9ae5" xml:space="preserve" approved="no" translate="yes">
-       <source>Augmented Browsing&lt;</source>
-    </trans-unit>
     <trans-unit id="cfee6436" xml:space="preserve" approved="no" translate="yes">
        <source>URL Proxy Settings&lt;</source>
     </trans-unit>
@@ -2122,9 +2119,6 @@
     </trans-unit>
     <trans-unit id="479c86d8" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Cache&lt;</source>
-    </trans-unit>
-    <trans-unit id="34c085e7" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Augmented Browsing&lt;</source>
     </trans-unit>
     <trans-unit id="37b12af6" xml:space="preserve" approved="no" translate="yes">
        <source>For this option URL proxy must be enabled.</source>
@@ -10484,12 +10478,6 @@
     </trans-unit>
     <trans-unit id="b2137635" xml:space="preserve" approved="no" translate="yes">
        <source>Knowledge Loader</source>
-    </trans-unit>
-    <trans-unit id="44dbab11" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Augmented Content&lt;</source>
-    </trans-unit>
-    <trans-unit id="ae4eec37" xml:space="preserve" approved="no" translate="yes">
-       <source>Augmented Browsing</source>
     </trans-unit>
   </body>
 </file>

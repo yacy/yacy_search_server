@@ -150,6 +150,38 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 ConcurrentLog.warn("SolrCollectionWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
         	}
         }
+        checkFieldRelationConsistency();
+    }
+
+    /**
+     * Check and update schema configuration with required related fields.
+     * If a specific field is enabled, there might be a other field internal
+     * processes rely on. Enable these required fields.
+     * For example, the outboundlinks are split into protocol and url part. The
+     * correct original url can only be assembled if both fields are available (protocol + url = originalUrl)
+     */
+    private void checkFieldRelationConsistency() {
+        Entry e;
+        // for correct assembly of outboundlinks  outboundlinks_protocol_sxt + outboundlinks_urlstub_sxt is needed
+        if (this.contains(CollectionSchema.outboundlinks_urlstub_sxt) && !this.contains(CollectionSchema.outboundlinks_protocol_sxt)) {
+            e = new Entry(CollectionSchema.outboundlinks_protocol_sxt.name(), CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName(), true);
+            this.put(CollectionSchema.outboundlinks_protocol_sxt.name(), e);
+        }
+        // for correct assembly of inboundlinks  inboundlinks_protocol_sxt + inboundlinks_urlstub_sxt is needed
+        if (this.contains(CollectionSchema.inboundlinks_urlstub_sxt) && !this.contains(CollectionSchema.inboundlinks_protocol_sxt)) {
+            e = new Entry(CollectionSchema.inboundlinks_protocol_sxt.name(), CollectionSchema.inboundlinks_protocol_sxt.getSolrFieldName(), true);
+            this.put(CollectionSchema.inboundlinks_protocol_sxt.name(), e);
+        }
+        // for correct assembly of icon url  icons_protocol_sxt + icons_urlstub_sxt is needed
+        if (this.contains(CollectionSchema.icons_urlstub_sxt) && !this.contains(CollectionSchema.icons_protocol_sxt)) {
+            e = new Entry(CollectionSchema.icons_protocol_sxt.name(), CollectionSchema.icons_protocol_sxt.getSolrFieldName(), true);
+            this.put(CollectionSchema.icons_protocol_sxt.name(), e);
+        }
+        // for correct assembly of image url  images_protocol_sxt + images_urlstub_sxt is needed
+        if (this.contains(CollectionSchema.images_urlstub_sxt) && !this.contains(CollectionSchema.images_protocol_sxt)) {
+            e = new Entry(CollectionSchema.images_protocol_sxt.name(), CollectionSchema.images_protocol_sxt.getSolrFieldName(), true);
+            this.put(CollectionSchema.images_protocol_sxt.name(), e);
+        }
     }
 
     public String[] allFields() {
@@ -183,6 +215,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      */
     @Override
     public void commit() throws IOException {
+        checkFieldRelationConsistency(); // in case of changes, check related fields are enabled before save
         try {
             super.commit();
             // make sure the enum SolrField.SolrFieldName is current
