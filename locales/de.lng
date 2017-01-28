@@ -82,7 +82,6 @@ This is a list of searches that had been requested from remote peer search inter
 
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
-Augmented Browsing<==Angereichertes Browsen<
 URL Proxy Settings<==URL Proxy Einstellungen<
 With this settings you can activate or deactivate URL proxy.==Mit diesen Einstellungen können Sie den URL Proxy an- oder abschalten.
 Service call: ==Serviceaufruf: 
@@ -97,9 +96,7 @@ Define client filter. Default: ==Definiere den Client Filter. Standardeinstellun
 URL substitution:==Ersetzen von URLs:
 Define URL substitution rules which allow navigating in proxy environment. Possible values: all, domainlist. Default: domainlist.==Definiere die Regeln zum Ersetzen von URLs die Navigation in der Proxy Umgebung erlauben. Mögliche Werte: all, domainlist. Standardeinstellung: domainlist.
 "Submit"=="Absenden"
-Augmented Browsing Settings==Angereicherte Browser Einstellungen
 #>Enabled<==>Aktiviert<
-Enables or disables augmented browsing. If enabled, all websites will be modified during loading.==Schaltet angereichertes Browsing an oder ab. Wenn aktiviert werden alle Webseite während des Ladens modifiziert.
 #-----------------------------
 
 #File: Autocrawl_p.html
@@ -881,7 +878,6 @@ http://url-of-the-search-result.net==http://URL-des-Suchergebnisses.de
 #>Citation<==>Citation<
 >Pictures<==>Bilder<
 #>Cache<==>Cache<
->Augmented Browsing<==>Angereichertes Browsen<
 "Save Settings"=="Einstellungen Speichern"
 "Set Default Values"=="Setze Standardwerte"
 #-----------------------------
@@ -4042,10 +4038,6 @@ Content Semantic==Inhalt Semantik
 >Automated Annotation<==>Automatische Annotation<
 Auto-Annotation Vocabulary Editor==Auto-Annotation Vokabellisten Editor
 Knowledge Loader==Wissensdatenbank-Lader
-# Submenu Augmented Content
->Augmented Content<==>Angereicherter Inhalt<
-Augmented Browsing==Angereichertes Browsing
-Filters and Modules==Filter und Module
 #-----------------------------
 
 #File: env/templates/submenuTargetAnalysis.template
