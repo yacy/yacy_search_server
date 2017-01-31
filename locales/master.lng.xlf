@@ -6484,8 +6484,11 @@
   </body>
 </file>
 
-<file original="Performance_p.html"  source-language="en"  datatype="html">
+<file original="Performance_p.html"  source-language="en" datatype="html">
   <body>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
     <trans-unit id="b6245a53" xml:space="preserve" approved="no" translate="yes">
        <source>Performance Settings</source>
     </trans-unit>
@@ -6494,6 +6497,9 @@
     </trans-unit>
     <trans-unit id="68be88d1" xml:space="preserve" approved="no" translate="yes">
        <source>Memory reserved for &lt;abbr title="Java Virtual Machine"&gt;JVM&lt;/abbr&gt;</source>
+    </trans-unit>
+    <trans-unit id="45ce6f5" xml:space="preserve" approved="no" translate="yes">
+       <source>MByte</source>
     </trans-unit>
     <trans-unit id="2066342" xml:space="preserve" approved="no" translate="yes">
        <source>"Set"</source>
@@ -6516,8 +6522,86 @@
     <trans-unit id="116c8" xml:space="preserve" approved="no" translate="yes">
        <source>Free space disk</source>
     </trans-unit>
+    <trans-unit id="2a274524" xml:space="preserve" approved="no" translate="yes">
+       <source>Steady-state minimum</source>
+    </trans-unit>
+    <trans-unit id="482f12cb" xml:space="preserve" approved="no" translate="yes">
+       <source>Amount of space (in Mebibytes) that should be kept free as steady state</source>
+    </trans-unit>
+    <trans-unit id="19f46a61" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;abbr title="Mebibyte"&gt;MiB&lt;/abbr&gt;</source>
+    </trans-unit>
     <trans-unit id="7911d675" xml:space="preserve" approved="no" translate="yes">
-       <source>Disable crawls when free space is below</source>
+       <source>Disable crawls when free space is below.</source>
+    </trans-unit>
+    <trans-unit id="44d11685" xml:space="preserve" approved="no" translate="yes">
+       <source>Absolute minimum</source>
+    </trans-unit>
+    <trans-unit id="3f7b5e40" xml:space="preserve" approved="no" translate="yes">
+       <source>Amount of space (in Mebibytes) that should at least be kept free as hard limit</source>
+    </trans-unit>
+    <trans-unit id="ebaee24c" xml:space="preserve" approved="no" translate="yes">
+       <source>Disable &lt;abbr title="Distributed Hash Table"&gt;DHT&lt;/abbr&gt;-in when free space is below.</source>
+    </trans-unit>
+    <trans-unit id="435dd828" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Autoregulate&lt;</source>
+    </trans-unit>
+    <trans-unit id="72b3a7d0" xml:space="preserve" approved="no" translate="yes">
+       <source>when absolute minimum limit has been reached.</source>
+    </trans-unit>
+    <trans-unit id="b227df87" xml:space="preserve" approved="no" translate="yes">
+       <source>The autoregulation task performs the following sequence of operations, stopping once free space disk is over the steady-state value</source>
+    </trans-unit>
+    <trans-unit id="89841f7a" xml:space="preserve" approved="no" translate="yes">
+       <source>delete old releases</source>
+    </trans-unit>
+    <trans-unit id="b9a70304" xml:space="preserve" approved="no" translate="yes">
+       <source>delete logs</source>
+    </trans-unit>
+    <trans-unit id="3acbd38e" xml:space="preserve" approved="no" translate="yes">
+       <source>delete robots.txt table</source>
+    </trans-unit>
+    <trans-unit id="b9a7c828" xml:space="preserve" approved="no" translate="yes">
+       <source>delete news</source>
+    </trans-unit>
+    <trans-unit id="40312b03" xml:space="preserve" approved="no" translate="yes">
+       <source>clear HTCACHE</source>
+    </trans-unit>
+    <trans-unit id="7ab17059" xml:space="preserve" approved="no" translate="yes">
+       <source>clear citations</source>
+    </trans-unit>
+    <trans-unit id="6e3be398" xml:space="preserve" approved="no" translate="yes">
+       <source>throw away large crawl queues</source>
+    </trans-unit>
+    <trans-unit id="b8f2d6f4" xml:space="preserve" approved="no" translate="yes">
+       <source>cut away too large RWIs</source>
+    </trans-unit>
+    <trans-unit id="1ebd1c9a" xml:space="preserve" approved="no" translate="yes">
+       <source>Used space disk</source>
+    </trans-unit>
+    <trans-unit id="1d0d6b36" xml:space="preserve" approved="no" translate="yes">
+       <source>Steady-state maximum</source>
+    </trans-unit>
+    <trans-unit id="989a7e02" xml:space="preserve" approved="no" translate="yes">
+       <source>Maximum amount of space (in Mebibytes) that should be used as steady state</source>
+    </trans-unit>
+    <trans-unit id="8d960d37" xml:space="preserve" approved="no" translate="yes">
+       <source>Disable crawls when used space is over.</source>
+    </trans-unit>
+    <trans-unit id="37b73c97" xml:space="preserve" approved="no" translate="yes">
+       <source>Absolute maximum</source>
+    </trans-unit>
+    <trans-unit id="35295b05" xml:space="preserve" approved="no" translate="yes">
+       <source>Maximum amount of space (in Mebibytes) that should be used as hard limit</source>
+    </trans-unit>
+    <trans-unit id="84b7f25a" xml:space="preserve" approved="no" translate="yes">
+       <source>Disable &lt;abbr title="Distributed Hash Table"&gt;DHT&lt;/abbr&gt;-in when used space is over.</source>
+    </trans-unit>
+    <trans-unit id="a6d37e2" xml:space="preserve" approved="no" translate="yes">
+       <source>when absolute maximum limit has been reached.</source>
+    </trans-unit>
+    <trans-unit id="50eeecaf" xml:space="preserve" approved="no" translate="yes">
+       <source>The autoregulation task performs the following sequence of operations, stopping once used space disk is below the steady-state value</source>
     </trans-unit>
     <trans-unit id="738c9a52" xml:space="preserve" approved="no" translate="yes">
        <source>&gt; free space</source>
@@ -6569,9 +6653,6 @@
     </trans-unit>
     <trans-unit id="dabcaaf2" xml:space="preserve" approved="no" translate="yes">
        <source>indexer delay (milliseconds) after case occurency</source>
-    </trans-unit>
-    <trans-unit id="8efe6fac" xml:space="preserve" approved="no" translate="yes">
-       <source>Proxy:</source>
     </trans-unit>
     <trans-unit id="aac0f79d" xml:space="preserve" approved="no" translate="yes">
        <source>Local Search:</source>

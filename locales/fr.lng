@@ -1413,7 +1413,65 @@ Delete All News==Supprimer toutes les nouvelles
 
 #File: Performance_p.html
 #---------------------------
+<html lang="en">==<html lang="fr">
 Performance Settings==Param&egrave;tres de performance
+Memory Settings==Mémoire
+Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Mémoire allouée à la <abbr title="Java Virtual Machine">JVM</abbr>
+MByte==Mégaoctets
+"Set"=="Appliquer"
+Resource Observer==Contrôle des ressources
+<abbr title="Distributed Hash Table">DHT</abbr>-Trigger==Déclenchement de <abbr title="Distributed Hash Table">DHT</abbr>
+not triggered:==non déclenché :
+>triggered==>déclenché
+reset state==réinitialiser
+Free space disk==Espace disque disponible
+Steady-state minimum==Valeur nominale
+Amount of space (in Mebibytes) that should be kept free as steady state==Espace disque nominal (en Mébioctets) à laisser libre
+<abbr title="Mebibyte">MiB</abbr>==<abbr title="Mébioctet">Mio</abbr>
+Disable crawls when free space is below.==Désactive l'indexation lorsque l'espace disque disponible est inférieur.
+Absolute minimum==Limite minimale stricte
+Amount of space (in Mebibytes) that should at least be kept free as hard limit==Quantité minimale d'espace disque (en Mébioctets) à laisser impérativement libre
+Disable <abbr title="Distributed Hash Table">DHT</abbr>-in when free space is below.==Désactive la réception de <abbr title="Distributed Hash Table">DHT</abbr> lorsque l'espace disque disponible est inférieur.
+>Autoregulate<==>Réguler automatiquement<
+when absolute minimum limit has been reached.==lorsque la limite minimale stricte est atteinte.
+The autoregulation task performs the following sequence of operations, stopping once free space disk is over the steady-state value==La fonction d'autorégulation exécute la séquence d'opérations suivante, stoppée dès que l'espace disque disponible est supérieur à la valeur nominale
+delete old releases==supprime les paquets d'installation anciens
+delete logs==supprime les journaux d'exécution
+delete robots.txt table==supprime la table robots.txt
+delete news==supprime les nouvelles
+clear HTCACHE==vide le cache HTTP
+clear citations==vide les citations
+throw away large crawl queues==supprime les grandes files d'attente d'indexation
+cut away too large RWIs==nettoie les entrées d'index distribué (RWI) trop grandes
+Used space disk==Espace disque utilisé
+Steady-state maximum==Valeur nominale
+Maximum amount of space (in Mebibytes) that should be used as steady state==Occupation nominale de l'espace disque (en Mébioctets)
+Disable crawls when used space is over.==Désactive l'indexation lorsque l'espace disque utilisé est supérieur.
+Absolute maximum==Limite maximale stricte
+Maximum amount of space (in Mebibytes) that should be used as hard limit==Occupation maximale de l'espace disque (en Mébioctets) à respecter impérativement
+Disable <abbr title="Distributed Hash Table">DHT</abbr>-in when used space is over.==Désactive la réception de <abbr title="Distributed Hash Table">DHT</abbr> lorsque l'espace disque utilisé est supérieur.
+when absolute maximum limit has been reached.==lorsque la limite maximale stricte est atteinte.
+The autoregulation task performs the following sequence of operations, stopping once used space disk is below the steady-state value==La fonction d'autorégulation exécute la séquence d'opérations suivante, stoppée dès que l'espace disque utilisé est inférieur à la valeur nominale
+> free space==> d'espace libre
+disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Désactiver la réception de <abbr title="Distributed Hash Table">DHT</abbr> en-dessous de
+Accepted change. This will take effect after <strong>restart</strong> of YaCy==Modification enregistrée. Elle sera effective après <strong>redémarrage</strong> de YaCy
+restart now</a>==redémarrer maintenant</a>
+Confirm Restart==Confirmer le redémarrage
+refresh graph==Rafraîchir le graphique
+Save==Appliquer
+Changes take effect immediately==Prise en compte immédiate
+Online Caution Settings:==Mise en pause
+This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==Temps de mise en pause de l'indexeur lorsque le proxy est utilisé, ou qu'une recherche locale ou distante est effectuée.
+The delay is extended by this time each time the proxy is accessed afterwards.==Le temps de pause est allongé de cette même valeur à chaque fois qu'une des fonctionnalités concernées est réutilisée pendant la pause.
+This shall improve performance of the affected process (proxy or search).==Cela peut permettre d'améliorer les performances des fonctionnalités concernées (proxy ou recherche).
+(current delta is==Les temps actuels sont respectivement de
+seconds since last proxy/local-search/remote-search access.)==secondes depuis le dernier accès au proxy, à la recherche locale et à la recherche distante.
+Online Caution Case==Fonctionnalité
+indexer delay (milliseconds) after case occurency==Temps de pause de l'indexeur (en ms)
+Local Search:==Recherche locale :
+Remote Search:==Recherche distante :
+"Enter New Parameters"=="Appliquer"
+Online Caution Settings==Mise en pause
 #-----------------------------
 
 #File: PerformanceQueues_p.html
