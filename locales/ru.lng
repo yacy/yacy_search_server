@@ -2541,9 +2541,6 @@ Memory Settings==Настройки оперативной памяти
 Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Резервирование динамической памяти для Java
 "Set"=="Сохранить"
 Resource Observer==Обзор ресурсов
-<abbr title="Distributed Hash Table">DHT</abbr>-Trigger==<abbr title="Distributed Hash Table">DHT</abbr>-триггер
-not triggered:==не срабатывает:
->triggered==>ausgelöst
 reset state==сбросить состояние
 > free space==> свободного места
 disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Остановить <abbr title="Distributed Hash Table">DHT</abbr>-приём при достижении

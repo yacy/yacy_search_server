@@ -1420,10 +1420,15 @@ Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Mémoire allo
 MByte==Mégaoctets
 "Set"=="Appliquer"
 Resource Observer==Contrôle des ressources
-<abbr title="Distributed Hash Table">DHT</abbr>-Trigger==Déclenchement de <abbr title="Distributed Hash Table">DHT</abbr>
-not triggered:==non déclenché :
->triggered==>déclenché
-reset state==réinitialiser
+Memory state==État de la mémoire
+>proper<==>sain<
+>exhausted<==>espace libre insuffisant<
+reset state==réinitialiser l'état
+Enough memory is available for proper operation.==Il y a suffisamment de mémoire à disposition pour un fonctionnement correct.
+Within the last eleven minutes, at least four operations have tried to request memory that would have reduced free space within the minimum required.==Durant les onze dernières minutes, au moins quatre opérations ont tenté d'obtenir une quantité de mémoire qui aurait réduit l'espace libre en-deçà du minimum requis.
+Minimum required==Minimum requis
+Amount of memory (in Mebibytes) that should at least be free for proper operation==Quantité de mémoire minimale (en Mébioctets) qui devrait rester disponible pour un fonctionnement correct
+Disable <abbr title="Distributed Hash Table">DHT</abbr>-in below.==Désactive la réception de <abbr title="Distributed Hash Table">DHT</abbr> en-dessous.
 Free space disk==Espace disque disponible
 Steady-state minimum==Valeur nominale
 Amount of space (in Mebibytes) that should be kept free as steady state==Espace disque nominal (en Mébioctets) à laisser libre

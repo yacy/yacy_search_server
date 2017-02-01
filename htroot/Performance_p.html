@@ -38,9 +38,6 @@
     <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset>
         <legend>Resource Observer</legend>
-        <div class="col-sm-12">
-        	<abbr title="Distributed Hash Table">DHT</abbr>-Trigger #(observerTrigger)#not triggered::<strong>triggered</strong>#(/observerTrigger)# <a href="?resetObserver=">[reset state]</a>
-        </div>
         <div class="col-sm-6">
         	<fieldset>
 	        	<legend>Free space disk</legend>
@@ -110,9 +107,22 @@
         <div class="col-sm-12">
         	<fieldset>
         		<legend><abbr title="Random Access Memory">RAM</abbr></legend>
+        		<div class="form-group">
+        			Memory state : #(observerTrigger)#<span aria-describedby="properStateInfo">proper</span>
+        			<span class="info">
+        				<img src="env/grafics/i16.gif" width="16" height="16" alt="Proper state info"/>
+        				<span class="infobox" id="properStateInfo">Enough memory is available for proper operation.</span>
+        			</span>::
+        			<strong aria-describedby="exhaustedStateInfo">exhausted</strong>
+        			<span class="info">
+        				<img src="env/grafics/i16.gif" width="16" height="16" alt="Exhausted state info"/>
+        				<span class="infobox" id="exhaustedStateInfo">Within the last eleven minutes, at least four operations have tried to request memory that would have reduced free space within the minimum required.</span>
+        			</span>#(/observerTrigger)#
+        			<a href="?resetObserver=">[reset state]</a>
+        		</div>
           		<div class="form-group">
-          			<label for="memoryAcceptDHT">disable <abbr title="Distributed Hash Table">DHT</abbr>-in below</label>
-          			<input name="memoryAcceptDHT" id="memoryAcceptDHT" type="text" size="4" value="#[memoryAcceptDHT]#" /> <abbr title="Mebibyte">MiB</abbr> free space
+          			<label for="memoryAcceptDHT">Minimum required</label>
+          			<input name="memoryAcceptDHT" id="memoryAcceptDHT" type="text" size="4" value="#[memoryAcceptDHT]#" title="Amount of memory (in Mebibytes) that should at least be free for proper operation"/> <abbr title="Mebibyte">MiB</abbr> free space. Disable <abbr title="Distributed Hash Table">DHT</abbr>-in below.
           		</div>
         	</fieldset>
         </div>

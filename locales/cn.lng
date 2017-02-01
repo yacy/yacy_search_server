@@ -2002,9 +2002,6 @@ Memory Settings==内存设置
 Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==<abbr title="Java Virtual Machine">JVM</abbr>内存设置
 "Set"=="设置"
 Resource Observer==资源查看
-<abbr title="Distributed Hash Table">DHT</abbr>-Trigger==<abbr title="Distributed Hash Table">DHT</abbr>-触发
-not triggered:==未触发:
->triggered==>已触发
 reset state==重置
 > free space==> 空闲空间
 disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==停止接收<abbr title="Distributed Hash Table">DHT</abbr>当低于

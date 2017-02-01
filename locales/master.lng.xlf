@@ -6508,16 +6508,31 @@
        <source>Resource Observer</source>
     </trans-unit>
     <trans-unit id="4e7c891b" xml:space="preserve" approved="no" translate="yes">
-       <source>&lt;abbr title="Distributed Hash Table"&gt;DHT&lt;/abbr&gt;-Trigger</source>
+       <source>Memory state</source>
     </trans-unit>
     <trans-unit id="e2777230" xml:space="preserve" approved="no" translate="yes">
-       <source>not triggered:</source>
+       <source>&gt;proper&lt;</source>
     </trans-unit>
     <trans-unit id="31e39d9" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;triggered</source>
+       <source>&gt;exhausted&lt;</source>
     </trans-unit>
     <trans-unit id="7ade7e80" xml:space="preserve" approved="no" translate="yes">
        <source>reset state</source>
+    </trans-unit>
+    <trans-unit id="a5c476c2" xml:space="preserve" approved="no" translate="yes">
+       <source>Enough memory is available for proper operation.</source>
+    </trans-unit>
+    <trans-unit id="6a62f3de" xml:space="preserve" approved="no" translate="yes">
+       <source>Within the last eleven minutes, at least four operations have tried to request memory that would have reduced free space within the minimum required.</source>
+    </trans-unit>
+    <trans-unit id="5c75ef91" xml:space="preserve" approved="no" translate="yes">
+       <source>Minimum required</source>
+    </trans-unit>
+    <trans-unit id="be97a043" xml:space="preserve" approved="no" translate="yes">
+       <source>Amount of memory (in Mebibytes) that should at least be free for proper operation</source>
+    </trans-unit>
+    <trans-unit id="41c7401c" xml:space="preserve" approved="no" translate="yes">
+       <source>Disable &lt;abbr title="Distributed Hash Table"&gt;DHT&lt;/abbr&gt;-in below.</source>
     </trans-unit>
     <trans-unit id="116c8" xml:space="preserve" approved="no" translate="yes">
        <source>Free space disk</source>
