@@ -1397,7 +1397,7 @@ public final class SearchEvent {
                 success = true;
             }
         } else {
-            Thread t = new Thread() {
+            Thread t = new Thread("SearchEvent.drainStacksToResult.oneFilteredFromRWI") {
                 @Override
                 public void run() {
                     SearchEvent.this.oneFeederStarted();
