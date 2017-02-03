@@ -102,7 +102,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
         String q = params.get(CommonParams.Q);
         String fq = params.get(CommonParams.FQ);
         String threadname = Thread.currentThread().getName();
-        if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq));
+        if (q != null) Thread.currentThread().setName("Remote solr query: q = " + q + (fq == null ? "" : ", fq = " + fq));
         
         QueryRequest request = new QueryRequest(params);
         ResponseParser responseParser = useBinaryResponseWriter ? new BinaryResponseParser() : new XMLResponseParser();
