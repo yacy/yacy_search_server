@@ -466,7 +466,7 @@ public final class SearchEvent {
         final Thread waitForThread;
         
         public RWIProcess(final Thread waitForThread) {
-            super("SearchEvent.RWIProcess(" + waitForThread != null ? waitForThread.getName() : "" + ")");
+            super("SearchEvent.RWIProcess(" + (waitForThread != null ? waitForThread.getName() : "") + ")");
             this.waitForThread = waitForThread;
         }
         
