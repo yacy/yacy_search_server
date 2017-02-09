@@ -72,6 +72,8 @@ public final class Settings_p {
         }
         else if (page.equals("crawler")) {
             prop.put("settingsTables", "Settings_Crawler.inc");
+        } else if (page.equals("debug")) {
+            prop.put("settingsTables", "Settings_Debug.inc");
         } else {
             prop.put("settingsTables", "");
         }
@@ -195,6 +197,20 @@ public final class Settings_p {
         // http server info
         prop.put("server.https",sb.getConfigBool("server.https", false));
         prop.put("server.https_port.ssl", sb.getConfig("port.ssl","8443"));
+        
+        // debug/analysis
+        prop.put("solrBinaryResponseChecked", env.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED, 
+        		SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT) ? 1 : 0);
+        
+        /* For easier user understanding, the following flags controlling data sources selection 
+         * are rendered in the UI as checkboxes corresponding to enabled value when ticked */
+        prop.put("searchLocalDHTChecked", !env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_OFF, false) ? 1 : 0);
+        prop.put("searchLocalSolrChecked", !env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false) ? 1 : 0);
+        prop.put("searchRemoteDHTChecked", !env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false) ? 1 : 0);
+        prop.put("searchRemoteSolrChecked", !env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false) ? 1 : 0);
+        
+        prop.put("searchTestLocalDHTChecked", env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false) ? 1 : 0);
+        prop.put("searchTestLocalSolrChecked", env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false) ? 1 : 0);
         
         // return rewrite properties
         return prop;

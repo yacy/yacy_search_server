@@ -890,6 +890,9 @@ remotesearch.result.store.maxsize=-1
 remotesearch.maxload.rwi=8.0
 remotesearch.maxload.solr=4.0
 
+# Control whether remote Solr instances responses should be binary encoded. Responses are transferred as XML when set to false. 
+remote.solr.binaryResponse.enabled=true
+
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.
 useYacyReferer = false

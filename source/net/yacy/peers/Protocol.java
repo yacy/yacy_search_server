@@ -1077,7 +1077,13 @@ public final class Protocol {
             try {
                 this.instance = new RemoteInstance("http://" + this.address, null, "solr", this.timeout); // this is a 'patch configuration' which considers 'solr' as default collection
                 try {
-                    this.solrConnector = new RemoteSolrConnector(this.instance, this.mySeed ? true : this.target.getVersion() >= 1.63, "solr");
+					boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
+					if (Switchboard.getSwitchboard() != null) {
+						useBinaryResponseWriter = Switchboard.getSwitchboard().getConfigBool(
+								SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
+								SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT);
+					}
+                    this.solrConnector = new RemoteSolrConnector(this.instance, useBinaryResponseWriter && (this.mySeed ? true : this.target.getVersion() >= 1.63), "solr");
 					if (!solrConnector.isClosed() && !this.closed) {
 						try {
 							this.rsp[0] = this.solrConnector.getResponseByParams(solrQuery);

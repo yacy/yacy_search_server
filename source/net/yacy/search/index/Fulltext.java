@@ -71,6 +71,7 @@ import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
@@ -178,7 +179,13 @@ public final class Fulltext {
 
     public RemoteSolrConnector getDefaultRemoteSolrConnector() {
         try {
-            return this.solrInstances.getDefaultRemoteConnector(true);
+    		boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
+    		if (Switchboard.getSwitchboard() != null) {
+    			useBinaryResponseWriter = Switchboard.getSwitchboard().getConfigBool(
+    					SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
+    					SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT);
+    		}
+            return this.solrInstances.getDefaultRemoteConnector(useBinaryResponseWriter);
         } catch (IOException e) {
             return null;
         }

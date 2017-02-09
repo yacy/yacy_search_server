@@ -286,6 +286,20 @@ public final class SwitchboardConstants {
     public static final String REMOTESEARCH_RESULT_STORE_MAXSIZE= "remotesearch.result.store.maxsize";
     public static final String REMOTESEARCH_MAXLOAD_RWI         = "remotesearch.maxload.rwi";
     public static final String REMOTESEARCH_MAXLOAD_SOLR        = "remotesearch.maxload.solr";
+    
+	/**
+	 * Setting key to configure whether responses from remote Solr instances
+	 * should be binary encoded :
+	 * <ul>
+	 * <li>true : more efficient, uses the solrj binary response parser</li>
+	 * <li>false : responses are transferred as XML, which can be captured and
+	 * parsed by any external XML aware tool for debug/analysis</li>
+	 * </ul>
+	 */
+    public static final String REMOTE_SOLR_BINARY_RESPONSE_ENABLED = "remote.solr.binaryResponse.enabled";
+    
+    /** Default configuration setting for remote Solr responses binary encoding */
+    public static final boolean REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT            = true;
 
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED      = "federated.service.solr.indexing.enabled";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL          = "federated.service.solr.indexing.url";
@@ -314,15 +328,25 @@ public final class SwitchboardConstants {
     public static final String CRAWLER_USER_AGENT_MINIMUMDELTA  = "crawler.userAgent.minimumdelta";
     public static final String CRAWLER_USER_AGENT_CLIENTTIMEOUT = "crawler.userAgent.clienttimeout";
     
-    /**
-     * debug flags
-     */
-    public static final String DEBUG_SEARCH_LOCAL_DHT_OFF       = "debug.search.local.dht.off"; // =true: do not use the local dht/rwi index (which is not done if we do remote searches)
-    public static final String DEBUG_SEARCH_LOCAL_SOLR_OFF      = "debug.search.local.solr.off"; // =true: do not use solr
-    public static final String DEBUG_SEARCH_REMOTE_DHT_OFF      = "debug.search.remote.dht.off"; // =true: do not use dht/rwi
-    public static final String DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL= "debug.search.remote.dht.testlocal"; // =true: do not use dht, search local peer in a shortcut to the own server
-    public static final String DEBUG_SEARCH_REMOTE_SOLR_OFF     = "debug.search.remote.solr.off"; // =true: do not use solr
-    public static final String DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL= "debug.search.remote.solr.testlocal"; // =true: do not use dht, search local peer in a shortcut to the own server
+    /* --- debug flags ---  */
+    
+    /** when set to true : do not use the local dht/rwi index (which is not done if we do remote searches) */
+    public static final String DEBUG_SEARCH_LOCAL_DHT_OFF       = "debug.search.local.dht.off";
+    
+    /** when set to true : do not use local solr index */
+    public static final String DEBUG_SEARCH_LOCAL_SOLR_OFF      = "debug.search.local.solr.off";
+    
+    /** when set to true : do not use remote dht/rwi */
+    public static final String DEBUG_SEARCH_REMOTE_DHT_OFF      = "debug.search.remote.dht.off";
+    
+    /** when set to true : do not use remote solr indexes */
+    public static final String DEBUG_SEARCH_REMOTE_SOLR_OFF     = "debug.search.remote.solr.off";
+    
+    /** when set to true : do not use dht, search local peer in a shortcut to the own server */
+    public static final String DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL= "debug.search.remote.dht.testlocal";
+    
+    /** when set to true : do not use dht, search local peer in a shortcut to the own server */
+    public static final String DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL= "debug.search.remote.solr.testlocal";
     
     /**
      * <p><code>public static final String <strong>WORDCACHE_MAX_COUNT</strong> = "wordCacheMaxCount"</code></p>

@@ -42,6 +42,7 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.query.SearchEventCache;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -510,6 +511,39 @@ public class SettingsAck_p {
             }
             prop.put("info_port.ssl", port);
             prop.put("info", "32");
+            return prop;
+        }
+        
+        // Debug/Analysis settings
+        if (post.containsKey("debugAnalysisSettings")) {
+        	boolean tickedCheckbox = post.containsKey("solrBinaryResponse");
+            env.setConfig(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED, tickedCheckbox);
+            
+            tickedCheckbox = post.containsKey("searchTestLocalDHT");
+            env.setConfig(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, tickedCheckbox);
+
+            tickedCheckbox = post.containsKey("searchTestLocalSolr");
+            env.setConfig(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, tickedCheckbox);
+            
+            /* For easier user understanding, the following flags controlling data sources selection 
+             * are rendered in the UI as checkboxes corresponding to enabled value when ticked */
+            tickedCheckbox = post.containsKey("searchLocalDHT");
+            env.setConfig(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_OFF, !tickedCheckbox);
+            
+            tickedCheckbox = post.containsKey("searchLocalSolr");
+            env.setConfig(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, !tickedCheckbox);
+            
+            tickedCheckbox = post.containsKey("searchRemoteDHT");
+            env.setConfig(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, !tickedCheckbox);
+
+            tickedCheckbox = post.containsKey("searchRemoteSolr");
+            env.setConfig(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, !tickedCheckbox);
+            
+            /* Let's clean up all search events as these settings affect how search is performed and we don't
+             * want cached results obtained with the previous settings */
+            SearchEventCache.cleanupEvents(true);
+            
+            prop.put("info", "34");
             return prop;
         }
 
