@@ -122,7 +122,7 @@ public class Wiki {
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_WIKI_UPDATE, map);
             }
             page = newEntry;
-            prop.putHTML(serverObjects.ACTION_LOCATION, "/Wiki.html?page=" + pagename);
+            prop.putHTML(serverObjects.ACTION_LOCATION, "Wiki.html?page=" + pagename);
             prop.put(serverObjects.ACTION_LOCATION, prop.get(serverObjects.ACTION_LOCATION));
         }
         

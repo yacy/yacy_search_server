@@ -80,7 +80,7 @@ public class Blacklist_p {
 
                 blacklistToUse = post.get("newListName", "").trim();
                 if (blacklistToUse.isEmpty()) {
-                    prop.put(serverObjects.ACTION_LOCATION,"");
+                    prop.put(serverObjects.ACTION_LOCATION, "Blacklist_p.html");
                     return prop;
                 }
 
@@ -127,7 +127,7 @@ public class Blacklist_p {
 
                 blacklistToUse = post.get("selectedListName");
                 if (blacklistToUse == null || blacklistToUse.isEmpty()) {
-                    prop.put(serverObjects.ACTION_LOCATION,"");
+                    prop.put(serverObjects.ACTION_LOCATION, "Blacklist_p.html");
                     return prop;
                 }
 
@@ -155,7 +155,7 @@ public class Blacklist_p {
 
                 blacklistToUse = post.get("selectedListName", "").trim();
                 if (blacklistToUse == null || blacklistToUse.isEmpty()) {
-                    prop.put(serverObjects.ACTION_LOCATION, "");
+                    prop.put(serverObjects.ACTION_LOCATION, "Blacklist_p.html");
                     return prop;
                 }
 
@@ -178,7 +178,7 @@ public class Blacklist_p {
 
                 blacklistToUse = post.get("selectedListName", "").trim();
                 if (blacklistToUse == null || blacklistToUse.isEmpty()) {
-                    prop.put(serverObjects.ACTION_LOCATION, "");
+                    prop.put(serverObjects.ACTION_LOCATION, "Blacklist_p.html");
                     return prop;
                 }
 
