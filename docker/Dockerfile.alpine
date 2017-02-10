@@ -16,7 +16,7 @@ WORKDIR /tmp
 # --- Begin of apache ant install : from binary distribution because ant is not in alpine packages
 
 # set ant version once in a environment variable
-ENV ANT_VERSION 1.10.0
+ENV ANT_VERSION 1.10.1
 
 # All in one step to reduce image size growth :
 # - add gnupg package
@@ -26,8 +26,8 @@ ENV ANT_VERSION 1.10.0
 # - remove archive and gnupg package
 RUN apk update && \
 	apk add --no-cache gnupg && \
-	curl -fSL http://www.eu.apache.org/dist//ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz -o apache-ant-${ANT_VERSION}-bin.tar.gz && \
-	curl -fSL https://www.apache.org/dist/ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz.asc -o apache-ant-${ANT_VERSION}-bin.tar.gz.asc && \
+	curl -fSL https://archive.apache.org/dist/ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz -o apache-ant-${ANT_VERSION}-bin.tar.gz && \
+	curl -fSL https://archive.apache.org/dist/ant/binaries/apache-ant-${ANT_VERSION}-bin.tar.gz.asc -o apache-ant-${ANT_VERSION}-bin.tar.gz.asc && \
 	curl -fSL https://www.apache.org/dist/ant/KEYS | gpg --import && \
 	gpg --verify apache-ant-${ANT_VERSION}-bin.tar.gz.asc && \
 	tar xzf apache-ant-${ANT_VERSION}-bin.tar.gz && \
