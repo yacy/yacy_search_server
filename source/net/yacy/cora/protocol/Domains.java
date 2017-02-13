@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -728,6 +729,9 @@ public class Domains {
 
     public static synchronized void close() {
         if (globalHosts != null) try {globalHosts.close();} catch (final IOException e) {log.warn(e);}
+        if(getByNameService != null) {
+        	getByNameService.shutdownNow();
+        }
     }
 
     /**
@@ -795,9 +799,11 @@ public class Domains {
         NAME_CACHE_HIT.insertIfAbsent(host, i);
         cacheHit_Insert++;
     }
+    
+	final private static ExecutorService getByNameService = Executors
+			.newCachedThreadPool(new NamePrefixThreadFactory("InetAddress.getByName"));
 
-	final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(
-			Executors.newCachedThreadPool(new NamePrefixThreadFactory("InetAddress.getByName")));
+	final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(getByNameService);
 
     /**
      * strip off any parts of an url, address string (containing host/ip:port) or raw IPs/Hosts,

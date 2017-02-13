@@ -19,19 +19,22 @@
  */
 package net.yacy.cora.federate;
 
-import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.storage.Configuration;
@@ -49,8 +52,6 @@ import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.WebgraphSchema;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 
 /**
  * Handling of queries to configured remote OpenSearch systems.
@@ -107,8 +108,8 @@ public class FederateSearchManager {
                                 ConcurrentLog.config("FederateSearchManager", "Error in configuration of: " + url);
                             }
                         } else { // handle opensearch url template
-                            OpenSearchConnector osc = new OpenSearchConnector();
-                            if (osc.init(name, url)) {
+                            OpenSearchConnector osc = new OpenSearchConnector(url);
+                            if (osc.init(name, sb.getDataPath()+ "/DATA/SETTINGS/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name))) {
                                 conlist.add(osc);
                             }
                         }
@@ -234,8 +235,13 @@ public class FederateSearchManager {
                 try {
                     conf.commit();
                     if (active) {
-                        OpenSearchConnector osd = new OpenSearchConnector();
-                        if (osd.init(name, urlTemplate)) {
+                        OpenSearchConnector osd = new OpenSearchConnector(urlTemplate);
+                        String htmlMappingFile = null;
+                        Switchboard sb = Switchboard.getSwitchboard();
+                        if(sb != null) {
+                        	htmlMappingFile = sb.getDataPath()+ "/DATA/SETTINGS/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name);
+                        }
+                        if (osd.init(name, htmlMappingFile)) {
                             conlist.add(osd);
                         }
                     }
@@ -407,9 +413,8 @@ public class FederateSearchManager {
                                     ConcurrentLog.config("FederateSearchManager", "Init error in configuration of: " + url);
                                 }
                             } else { // handle opensearch url template
-                                OpenSearchConnector osd;
-                                osd = new OpenSearchConnector();
-                                if (osd.init(name, url)) {
+                                OpenSearchConnector osd = new OpenSearchConnector(url);
+                                if (osd.init(name, confFile.getParent()+"/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name))) {
                                     conlist.add(osd);
                                 }
                             }

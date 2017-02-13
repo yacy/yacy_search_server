@@ -48,18 +48,10 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.ConnectionInfo;
-import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.util.Memory;
-import net.yacy.kelondro.util.NamePrefixThreadFactory;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -97,6 +89,16 @@ import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.ByteArrayBuffer;
 import org.apache.http.util.EntityUtils;
+
+import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.ConnectionInfo;
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.Memory;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
 /**
@@ -559,6 +561,74 @@ public class HTTPClient {
 	 */
     public int getStatusCode() {
 	    return this.httpResponse.getStatusLine().getStatusCode();
+	}
+    
+    /**
+     * Get Mime type from the response header
+     * @return mime type (trimmed and lower cased) or null when not specified
+     */
+	public String getMimeType() {
+		String mimeType = null;
+		if (this.httpResponse != null) {
+
+			Header contentType = this.httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+
+			if (contentType != null) {
+
+				mimeType = contentType.getValue();
+
+				if (mimeType != null) {
+					mimeType = mimeType.trim().toLowerCase();
+
+					final int pos = mimeType.indexOf(';');
+					if(pos >= 0) {
+						mimeType = mimeType.substring(0, pos);
+					}
+				}
+			}
+		}
+		return mimeType;
+	}
+	
+	/**
+	 * Get character encoding from the response header
+	 * 
+	 * @return the characters set name or null when not specified
+	 */
+	public String getCharacterEncoding() {
+		String charsetName = null;
+		if (this.httpResponse != null) {
+
+			Header contentTypeHeader = this.httpResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE);
+
+			if (contentTypeHeader != null) {
+
+				String contentType = contentTypeHeader.getValue();
+
+				if (contentType != null) {
+
+					final String[] parts = CommonPattern.SEMICOLON.split(contentType);
+					if (parts != null && parts.length > 1) {
+
+						for (int i = 1; i < parts.length; i++) {
+							final String param = parts[i].trim();
+							if (param.startsWith("charset=")) {
+								String charset = param.substring("charset=".length()).trim();
+								if (charset.length() > 0 && (charset.charAt(0) == '\"' || charset.charAt(0) == '\'')) {
+									charset = charset.substring(1);
+								}
+								if (charset.endsWith("\"") || charset.endsWith("'")) {
+									charset = charset.substring(0, charset.length() - 1);
+								}
+								charsetName = charset.trim();
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return charsetName;
 	}
 
     /**
