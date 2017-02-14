@@ -580,7 +580,7 @@ If you leave the field empty, no peer asks your peer. If you fill in a '*', your
 
 #-----------------------------
 
-#File: ConfigParser.html
+#File: ConfigParser_p.html
 #---------------------------
 Parser Configuration==पार्सर कॉन्फ़िगरेशन
 Content Parser Settings==कंटेन्ट पार्सर सेटिंग्स

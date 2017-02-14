@@ -616,7 +616,7 @@ If you leave the field empty, no peer asks your peer. If you fill in a '*', your
 "Save"=="Зберегти"
 #-----------------------------
 
-#File: ConfigParser.html
+#File: ConfigParser_p.html
 #---------------------------
 Parser Configuration==Настройка обробника
 Content Parser Settings==Налаштування обробника вмісту

@@ -792,7 +792,7 @@ If you leave the field empty, no peer asks your peer. If you fill in a '*', your
 "Save"=="Сохранить"
 #-----------------------------
 
-#File: ConfigParser.html
+#File: ConfigParser_p.html
 #---------------------------
 Parser Configuration==Конфигурация парсера
 Content Parser Settings==Настройки анализа контента

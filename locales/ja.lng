@@ -543,7 +543,7 @@ Indexing Domain==索引付けのドメイン
 "Save"=="保存する"
 #-----------------------------
 
-#File: ConfigParser.html
+#File: ConfigParser_p.html
 #---------------------------
 Parser Configuration==構文解析器の構成
 Content Parser Settings==コンテントの構文解析器の構成
