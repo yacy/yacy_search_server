@@ -35,7 +35,7 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 
-public class ConfigParser {
+public class ConfigParser_p {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
@@ -44,11 +44,6 @@ public class ConfigParser {
 
 
         if (post != null) {
-            if (!sb.verifyAuthentication(header)) {
-                // force log-in
-            	prop.authenticationRequired();
-                return prop;
-            }
 
             if (post.containsKey("parserSettings")) {
                 post.remove("parserSettings");
