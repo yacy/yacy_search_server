@@ -247,10 +247,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     /**
-     * add uri attributes to solr document
+     * add uri attributes to solr document and assign the document id
      * @param doc
      * @param allAttr
-     * @param digestURL
+     * @param digestURL used to calc. the document.id and the doc.sku=(in index stored url)
      * @return the normalized url
      */
     public String addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURL digestURL) {
@@ -305,13 +305,20 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         return us;
     }
-    
+
+    /**
+     * Convert a URIMetadataNode, which has some private fields to a pure
+     * SolrInputDocument with all field values from the input.
+     * This also assigns the document.id with the YaCy url.hash()
+     * @param md
+     * @return
+     */
     public SolrInputDocument metadata2solr(final URIMetadataNode md) {
 
         SolrInputDocument doc = toSolrInputDocument(md); //urimetadatanode stores some values in private fields, add now to sorldocument
 
         boolean allAttr = this.isEmpty();
-        addURIAttributes(doc, allAttr, md.url());
+        addURIAttributes(doc, allAttr, md.url()); // assign doc.id, doc.sku and url attribute fields
 
         String title = md.dc_title();
         if (allAttr || contains(CollectionSchema.title_count_i)) add(doc, CollectionSchema.title_count_i, 1);
@@ -873,18 +880,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         
         String content = document.getTextString();
-        String tokens = digestURL.toTokens();
-        if (content == null || content.length() == 0) {
-            content = tokens;
-        } else {
-            String[] t = CommonPattern.SPACE.split(tokens);
-            for (String r: t) {
-                if (r.length() > 0 &&
-                    content.indexOf(" " + r + " ") < 0 &&
-                    !content.startsWith(r + " ") &&
-                    !content.endsWith(" " + r)) content += " " + r;
-            }
-        }
 
         // handle image source meta data
         if (document.getContentDomain() == ContentDomain.IMAGE) {
@@ -1298,9 +1293,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 			final AtomicInteger allcount) {
 		final Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
         final Set<String> uniqueURLs = new ConcurrentHashSet<String>(); // will be used in a concurrent environment
-        final Set<String> omitFields = new HashSet<String>();
-        omitFields.add(CollectionSchema.process_sxt.getSolrFieldName());
-        omitFields.add(CollectionSchema.harvestkey_s.getSolrFieldName());
+        final Set<String> localOmitFields = new HashSet<String>();
+        localOmitFields.add(CollectionSchema.process_sxt.getSolrFieldName());
+        localOmitFields.add(CollectionSchema.harvestkey_s.getSolrFieldName());
         final Collection<String> failids = new ConcurrentHashSet<String>();
         final AtomicInteger countcheck = new AtomicInteger(0);
         final AtomicInteger proccount = new AtomicInteger();
@@ -1383,7 +1378,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                     try {
                                         DigestURL url = new DigestURL(u, ASCII.getBytes(i));
                                         byte[] id = url.hash();
-                                        SolrInputDocument sid = byPartialUpdate ? new SolrInputDocument() : collection.toSolrInputDocument(doc, omitFields);
+                                        SolrInputDocument sid = byPartialUpdate ? new SolrInputDocument() : collection.toSolrInputDocument(doc, localOmitFields);
                                         sid.setField(CollectionSchema.id.getSolrFieldName(), i);
                                         for (Object tag: proctags) try {
                                             
@@ -1427,10 +1422,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                                         if (byPartialUpdate) {
                                             sid.setField(CollectionSchema.process_sxt.getSolrFieldName(), null); // setting this to null will cause a removal when doing a partial update
                                             sid.setField(CollectionSchema.harvestkey_s.getSolrFieldName(), null);
-                                        } else {
+                                        } /*else { // fields are omitted on sid creation
                                             sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
                                             sid.removeField(CollectionSchema.harvestkey_s.getSolrFieldName());
-                                        }
+                                        }*/
                                         // with standard solr fields selected, the sid now contains the fields
                                         // id, http_unique_b, www_unique_b, references_i, references_internal_i, references_external_i, references_exthosts_i, host_extent_i
                                         // and the value for host_extent_i is by default 2147483647
