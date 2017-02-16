@@ -165,7 +165,8 @@ public class HTMLResponseWriter implements QueryResponseWriter {
             Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
             LinkedHashMap<String, String> tdoc = translateDoc(schema, doc);
 
-            String title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc           
+            String title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc
+            if (title == null) title = "";
             if (sz == 1) {
                 writer.write("<title>" + title + "</title>\n</head><body>\n");
             } else {
