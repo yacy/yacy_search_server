@@ -690,8 +690,26 @@ public final class Fulltext {
         SolrDocument lastdoc = lastdoclist.get(0);
         Object firstdateobject = firstdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
         Object lastdateobject = lastdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-        Date firstdate = (Date) firstdateobject;
-        Date lastdate = (Date) lastdateobject;
+        
+    	/* When firstdate or lastdate is null, we use a default one just to generate a proper dump file path 
+    	 * This should not happen because load_date_dt field is mandatory in the main Solr schema, 
+    	 * but for some reason some documents might end up here with an empty load_date_dt field value */
+        final Date firstdate;
+        if(firstdateobject instanceof Date) {
+        	firstdate = (Date) firstdateobject;
+        } else {
+			ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
+					+ firstdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+        	firstdate = new Date(0);
+        }
+        final Date lastdate;
+        if(lastdateobject instanceof Date) {
+        	lastdate = (Date) lastdateobject;
+        } else {
+			ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
+					+ lastdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+        	lastdate = new Date(0);
+        }
         String s = new File(path, yacy_dump_prefix +
                 "f" + GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate) + "_" +
                 "l" + GenericFormatter.FORMAT_SHORT_MINUTE.format(lastdate) + "_" +
@@ -715,6 +733,11 @@ public final class Fulltext {
         this.exportthread = new Export(f, filter, query, format, dom, text);
         this.exportthread.start();
         return this.exportthread;
+    }
+    
+    public static void main(String args[]) {
+    	Date firstdate = null;
+    	System.out.println(GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate));
     }
 
     public Export export() {
