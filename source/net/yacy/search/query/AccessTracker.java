@@ -342,15 +342,15 @@ public class AccessTracker {
     
     public static void main(String[] args) {
         // i.e. /Users/admin/git/rc1/DATA/LOG/queries.log 20140522135156 20140614223118
-        String file = "C:\\src\\github\\yacy_search_server\\DATA\\LOG\\queries.log";
+        String file = args[0];
         Date from;
-   //     try {
-            from = new Date(0);//GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[1], 0).getTime();
-            Date to = new Date();//GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[2], 0).getTime();
+        try {
+            from = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[1], 0).getTime();
+            Date to = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[2], 0).getTime();
             List<EventTracker.Event> dump = readLog(new File(file), from, to);
             for (EventTracker.Event s: dump) System.out.println(s.toString());
-  //      } catch (ParseException e) {
-  //          e.printStackTrace();
-  //      }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     }
 }
