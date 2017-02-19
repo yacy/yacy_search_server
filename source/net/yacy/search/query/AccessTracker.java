@@ -154,20 +154,30 @@ public class AccessTracker {
     private static void addToDump(final QueryParams query, int resultCount) {
         String queryString = query.getQueryGoal().getQueryString(false);
         if (queryString == null || queryString.isEmpty()) return;
-        addToDump(queryString, Integer.toString(resultCount), new Date(query.starttime));
+        addToDump(queryString, resultCount, new Date(query.starttime), "qs");
     }
 
-    public static void addToDump(String querystring, String resultcount) {
-        addToDump(querystring, resultcount, new Date());
+    public static void addToDump(String querystring, int resultCount) {
+        addToDump(querystring, resultCount, new Date(), "qs");
     }
 
-    public static void addToDump(String querystring, String resultcount, Date d) {
+    /**
+     * Add a line to the queries log
+     *
+     * @param querystring the original query
+     * @param resultcount found results
+     * @param d start time
+     * @param querySyntax used syntax (qs=normal querstring, sq=solr querystring,
+     */
+    public static void addToDump(String querystring, int resultcount, Date d, String querySyntax) {
         //if (query.resultcount == 0) return;
         if (querystring == null || querystring.isEmpty()) return;
         final StringBuilder sb = new StringBuilder(40);
         sb.append(GenericFormatter.SHORT_SECOND_FORMATTER.format(d));
         sb.append(' ');
         sb.append(resultcount);
+        sb.append(' ');
+        sb.append(querySyntax);
         sb.append(' ');
         sb.append(querystring);
         synchronized (log) {
@@ -332,15 +342,15 @@ public class AccessTracker {
     
     public static void main(String[] args) {
         // i.e. /Users/admin/git/rc1/DATA/LOG/queries.log 20140522135156 20140614223118
-        String file = args[0];
+        String file = "C:\\src\\github\\yacy_search_server\\DATA\\LOG\\queries.log";
         Date from;
-        try {
-            from = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[1], 0).getTime();
-            Date to = GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[2], 0).getTime();
+   //     try {
+            from = new Date(0);//GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[1], 0).getTime();
+            Date to = new Date();//GenericFormatter.SHORT_SECOND_FORMATTER.parse(args[2], 0).getTime();
             List<EventTracker.Event> dump = readLog(new File(file), from, to);
             for (EventTracker.Event s: dump) System.out.println(s.toString());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
+  //      } catch (ParseException e) {
+  //          e.printStackTrace();
+  //      }
     }
 }

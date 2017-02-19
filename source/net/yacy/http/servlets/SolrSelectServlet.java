@@ -39,7 +39,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.yacy.cora.federate.FederateSearchManager;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
@@ -162,16 +161,16 @@ public class SolrSelectServlet extends HttpServlet {
             String q = mmsp.get(CommonParams.Q, "");
             if (querystring.length() == 0) querystring = q;
             if (!mmsp.getMap().containsKey(CommonParams.START)) {
-                int startRecord = mmsp.getFieldInt("startRecord", null, 0);
+                int startRecord = mmsp.getFieldInt("startRecord", null, CommonParams.START_DEFAULT);
                 mmsp.getMap().remove("startRecord");
                 mmsp.getMap().put(CommonParams.START, new String[]{Integer.toString(startRecord)}); // sru patch
             }
             if (!mmsp.getMap().containsKey(CommonParams.ROWS)) {
-                int maximumRecords = mmsp.getFieldInt("maximumRecords", null, 10);
+                int maximumRecords = mmsp.getFieldInt("maximumRecords", null, CommonParams.ROWS_DEFAULT);
                 mmsp.getMap().remove("maximumRecords");
                 mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(maximumRecords)}); // sru patch
             } 
-            mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(Math.min(mmsp.getInt(CommonParams.ROWS, 10), (authenticated) ? 100000000 : 100))});            
+            mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(Math.min(mmsp.getInt(CommonParams.ROWS, CommonParams.ROWS_DEFAULT), (authenticated) ? 100000000 : 100))});
             
             // set ranking according to profile number if ranking attributes are not given in the request
             Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr);
@@ -207,9 +206,9 @@ public class SolrSelectServlet extends HttpServlet {
                 if (!mmsp.getMap().containsKey("hl.simple.pre")) mmsp.getMap().put("hl.simple.pre", new String[]{"<b>"});
                 if (!mmsp.getMap().containsKey("hl.simple.post")) mmsp.getMap().put("hl.simple.post", new String[]{"</b>"});
                 if (!mmsp.getMap().containsKey("hl.fragsize")) mmsp.getMap().put("hl.fragsize", new String[]{Integer.toString(SearchEvent.SNIPPET_MAX_LENGTH)});
-                if (!mmsp.getMap().containsKey("fl")) mmsp.getMap().put("fl", new String[]{
+                if (!mmsp.getMap().containsKey(CommonParams.FL)) mmsp.getMap().put(CommonParams.FL, new String[]{
                     CollectionSchema.sku.getSolrFieldName() + "," +
-                    CollectionSchema.title + "," +
+                    CollectionSchema.title.getSolrFieldName() + "," +
                     CollectionSchema.description_txt.getSolrFieldName() + "," +
                     CollectionSchema.id.getSolrFieldName() + "," +
                     CollectionSchema.url_paths_sxt.getSolrFieldName() + "," +
@@ -254,7 +253,7 @@ public class SolrSelectServlet extends HttpServlet {
 
                 // check error
                 if (rsp.getException() != null) {
-                    AccessTracker.addToDump(querystring, "0", new Date());
+                    AccessTracker.addToDump(querystring, 0, new Date(), "sq");
                     sendError(hresponse, rsp.getException());
                     return;
                 }
@@ -263,7 +262,7 @@ public class SolrSelectServlet extends HttpServlet {
                 NamedList<?> values = rsp.getValues();
                 DocList r = ((ResultContext) values.get("response")).docs;
                 int numFound = r.matches();
-                AccessTracker.addToDump(querystring, Integer.toString(numFound), new Date());
+                AccessTracker.addToDump(querystring, numFound, new Date(), "sq");
                 
                 // write response header
                 final String contentType = responseWriter.getContentType(req, rsp);

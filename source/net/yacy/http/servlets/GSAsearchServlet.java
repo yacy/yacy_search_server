@@ -261,7 +261,7 @@ public class GSAsearchServlet extends HttpServlet {
         } else if (rv != null && rv instanceof SolrDocumentList) {
             matches = (int) ((SolrDocumentList) rv).getNumFound();
         }
-        AccessTracker.addToDump(originalQuery, Integer.toString(matches));
+        AccessTracker.addToDump(originalQuery, matches);
         ConcurrentLog.info("GSA Query", "results: " + matches + ", for query:" + post.toString());
     }
 
