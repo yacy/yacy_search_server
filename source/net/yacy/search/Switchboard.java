@@ -102,7 +102,6 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.Ranking;
-import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
@@ -488,29 +487,6 @@ public final class Switchboard extends serverSwitch {
             // update the working scheme with the backup scheme. This is necessary to include new features.
             // new features are always activated by default (if activated in input-backupScheme)
             solrCollectionConfigurationWork.fill(solrCollectionConfigurationInit, true);
-            // switch on some fields which are necessary for ranking and faceting
-            SchemaConfiguration.Entry entry;
-            for (CollectionSchema field: new CollectionSchema[]{
-                    CollectionSchema.host_s, CollectionSchema.load_date_dt,
-                    CollectionSchema.url_file_ext_s, CollectionSchema.last_modified,                      // needed for media search and /date operator
-                    /*YaCySchema.url_paths_sxt,*/ CollectionSchema.host_organization_s,                   // needed to search in the url
-                    /*YaCySchema.inboundlinks_protocol_sxt,*/ CollectionSchema.inboundlinks_urlstub_sxt,  // needed for HostBrowser
-                    /*YaCySchema.outboundlinks_protocol_sxt,*/ CollectionSchema.outboundlinks_urlstub_sxt,// needed to enhance the crawler
-                    CollectionSchema.httpstatus_i                                                         // used in all search queries to filter out error documents
-                }) {
-                entry = solrCollectionConfigurationWork.get(field.name());
-                if (entry != null) {
-                    entry.setEnable(true);
-                    solrCollectionConfigurationWork.put(field.name(), entry);
-                }
-            }
-            
-            // activate some fields that are necessary here
-            entry = solrCollectionConfigurationWork.get(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
-            if (entry != null) {
-                entry.setEnable(true);
-                solrCollectionConfigurationWork.put(CollectionSchema.images_urlstub_sxt.getSolrFieldName(), entry);
-            }
             solrCollectionConfigurationWork.commit();
         } catch (final IOException e) {ConcurrentLog.logException(e);}
         

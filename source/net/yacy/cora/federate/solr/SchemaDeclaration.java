@@ -33,7 +33,10 @@ public interface SchemaDeclaration {
      */
     public String name(); // default field name (according to SolCell default schema) <= enum.name()
     
-    public String getSolrFieldName(); // return the default or custom solr field name to use for solr requests
+    /**
+     * @return the default or custom solr field name to use for solr requests
+     */
+    public String getSolrFieldName();
 
     public SolrType getType();
 
@@ -50,6 +53,11 @@ public interface SchemaDeclaration {
     public boolean isDocValue();
 
     public String getComment();
+
+    /**
+     * @return true when this field is mandatory for proper operation
+     */
+    public boolean isMandatory();
 
     public void setSolrFieldName(String name);
 

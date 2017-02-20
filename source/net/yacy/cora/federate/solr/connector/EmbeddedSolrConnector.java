@@ -420,7 +420,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
-     * @return the load date if any entry in solr exists, -1 otherwise
+     * @return the load date if any entry in solr exists, null otherwise
      * @throws IOException
      */
     @Override

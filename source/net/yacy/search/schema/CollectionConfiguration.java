@@ -150,6 +150,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 ConcurrentLog.warn("SolrCollectionWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
         	}
         }
+        checkMandatoryFields(); // Check minimum needed fields for proper operation are enabled
         checkFieldRelationConsistency();
     }
 
@@ -181,6 +182,27 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (this.contains(CollectionSchema.images_urlstub_sxt) && !this.contains(CollectionSchema.images_protocol_sxt)) {
             e = new Entry(CollectionSchema.images_protocol_sxt.name(), CollectionSchema.images_protocol_sxt.getSolrFieldName(), true);
             this.put(CollectionSchema.images_protocol_sxt.name(), e);
+        }
+    }
+    
+    /**
+     * Check and update schema configuration with fields strictly needed for proper YaCy operation.
+     */
+    private void checkMandatoryFields() {
+        SchemaConfiguration.Entry entry;
+        for (CollectionSchema field: CollectionSchema.values()) {
+        	if(field.isMandatory()) {
+        		entry = this.get(field.name());
+            	if (entry != null) {
+            		if(!entry.enabled()) {
+            			entry.setEnable(true);
+            			ConcurrentLog.info("SolrCollectionWriter", "Forced activation of mandatory field " + field.name());
+            		}
+            	} else {
+            		this.put(field.name(), new Entry(field.name(), field.getSolrFieldName(), true));
+            		ConcurrentLog.info("SolrCollectionWriter", "Added missing mandatory field " + field.name());
+            	}
+        	}
         }
     }
 
@@ -215,6 +237,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      */
     @Override
     public void commit() throws IOException {
+    	checkMandatoryFields(); // Check minimum needed fields for proper operation are enabled
         checkFieldRelationConsistency(); // in case of changes, check related fields are enabled before save
         try {
             super.commit();

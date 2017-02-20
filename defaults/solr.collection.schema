@@ -24,6 +24,9 @@ dates_in_content_dts
 ## the number of entries in dates_in_content_sxt
 dates_in_content_count_i
 
+## time when resource was loaded
+load_date_dt
+
 ## content of itemprop attributes with content='startDate'
 startDates_dts
 
@@ -42,17 +45,11 @@ www_unique_b
 ## content of title tag, text (mandatory field)
 title
 
-## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b
-#title_exact_signature_l
-
-## flag shows if title is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same title, the unique-flag is set to false, boolean
-#title_unique_b
-
 ## id of the host, a 6-byte hash that is part of the document id (mandatory field)
 host_id_s
 
-## the md5 of the raw source
-#md5_s
+## host of the url, string
+host_s
 
 ## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t
 exact_signature_l
@@ -60,20 +57,11 @@ exact_signature_l
 ## flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search
 exact_signature_unique_b
 
-## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
-#exact_signature_copycount_i
-
 ## 64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t
 fuzzy_signature_l
-
-## intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies
-#fuzzy_signature_text_t
     
 ## flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search
 fuzzy_signature_unique_b
-
-## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
-#fuzzy_signature_copycount_i
 
 ## the size of the raw source (mandatory field)
 size_i
@@ -86,9 +74,6 @@ failtype_s
     
 ## html status return code (i.e. "200" for ok), -1 if not loaded (see content of failreason_t for this case), int (mandatory field)
 httpstatus_i
-
-## redirect url if the error code is 299 < httpstatus_i < 310
-#httpstatus_redirect_s
 
 ## number of unique http references, should be equal to references_internal_i + references_external_i
 references_i
@@ -105,17 +90,63 @@ references_exthosts_i
 ## crawl depth of web page according to the number of steps that the crawler did to get to this document; if the crawl was started at a root document, then this is equal to the clickdepth
 crawldepth_i
 
-## needed (post-)processing steps on this metadata set
-#process_sxt
-
 ## key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated.
 harvestkey_s
 
+## the file name extension
+url_file_ext_s
+
+## either the second level domain or, if a ccSLD is used, the third level domain. Needed to search in the url
+host_organization_s
+
+## internal links, only the protocol. Needed for HostBrowser
+inboundlinks_protocol_sxt
+
+## internal links, the url only without the protocol. For correct assembly of inboundlinks  inboundlinks_protocol_sxt + inboundlinks_urlstub_sxt is needed
+inboundlinks_urlstub_sxt
+
+## external links, only the protocol. For correct assembly of outboundlinks  outboundlinks_protocol_sxt + outboundlinks_urlstub_sxt is needed
+outboundlinks_protocol_sxt
+
+## external links, the url only without the protocol. Needed to enhance the crawler
+outboundlinks_urlstub_sxt
+
+## all image links without the protocol and '://'. For correct assembly of image url  images_protocol_sxt + images_urlstub_sxt is needed
+images_urlstub_sxt
+
+## all image link protocols
+images_protocol_sxt
+
+
+### No more mandatory (have been mandatory in some older YaCy versions)
+
+## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b
+#title_exact_signature_l
+
+## flag shows if title is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same title, the unique-flag is set to false, boolean
+#title_unique_b
+
+## the md5 of the raw source
+#md5_s
+
+## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
+#exact_signature_copycount_i
+
+## intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies
+#fuzzy_signature_text_t
+
+## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
+#fuzzy_signature_copycount_i
+
+## redirect url if the error code is 299 < httpstatus_i < 310
+#httpstatus_redirect_s
+
+## needed (post-)processing steps on this metadata set
+#process_sxt
+
+
 
 ### optional but highly recommended values, part of the index distribution process
-
-## time when resource was loaded
-load_date_dt
 
 ## date until resource shall be considered as fresh
 fresh_date_dt
@@ -260,20 +291,8 @@ h6_txt
 ## content of <meta name="generator" content=#content#> tag, text
 #metagenerator_t
 
-## internal links, only the protocol
-inboundlinks_protocol_sxt
-
-## internal links, the url only without the protocol
-inboundlinks_urlstub_sxt
-
 ## internal links, the visible anchor text
 inboundlinks_anchortext_txt
-
-## external links, only the protocol
-outboundlinks_protocol_sxt
-
-## external links, the url only without the protocol
-outboundlinks_urlstub_sxt
 
 ## external links, the visible anchor text
 outboundlinks_anchortext_txt
@@ -292,12 +311,6 @@ icons_sizes_sxt
 
 ## all text/words appearing in image alt texts or the tokenized url
 images_text_t
-
-## all image links without the protocol and '://'
-images_urlstub_sxt
-
-## all image link protocols
-images_protocol_sxt
 
 ## all image link alt tag
 images_alt_sxt
@@ -416,9 +429,6 @@ url_file_name_s
 ## tokens generated from url_file_name_s which can be used for better matching and result boosting
 #url_file_name_tokens_t
 
-## the file name extension
-url_file_ext_s
-
 ## number of all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name
 url_paths_count_i
     
@@ -437,14 +447,8 @@ url_paths_sxt
 ## number of all characters in the url == length of sku field
 url_chars_i
 
-## host of the url, string
-host_s
-
 ## the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used.
 #host_dnc_s
-    
-## either the second level domain or, if a ccSLD is used, the third level domain
-host_organization_s
     
 ## the organization and dnc concatenated with '.'
 #host_organizationdnc_s

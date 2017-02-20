@@ -200,6 +200,11 @@ public enum WebgraphSchema implements SchemaDeclaration {
     public final String getComment() {
         return this.comment;
     }
+    
+    @Override
+    public boolean isMandatory() {
+    	return false;
+    }
 
     @Override
     public final void add(final SolrInputDocument doc, final String value) {

@@ -31,44 +31,55 @@ import org.apache.solr.common.SolrInputDocument;
 public enum CollectionSchema implements SchemaDeclaration {
     
     // mandatory
-    id(SolrType.string, true, true, false, false, false, "primary key of document, the URL hash **mandatory field**"),
-    sku(SolrType.string, true, true, false, true, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
+    id(SolrType.string, true, true, false, false, false, "primary key of document, the URL hash **mandatory field**", true),
+    sku(SolrType.string, true, true, false, true, true, "url of document", true), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
     //sku(SolrType.text_en_splitting_tight, true, true, false, true, true, "url of document"), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
-    last_modified(SolrType.date, true, true, false, false, false, "last-modified from http header"), // date document was last modified
-    dates_in_content_dts(SolrType.date, true, true, true, false, true, "if date expressions can be found in the content, these dates are listed here as date objects in order of the appearances"),
-    dates_in_content_count_i(SolrType.num_integer, true, true, false, false, false, "the number of entries in dates_in_content_sxt"),
-    startDates_dts(SolrType.date, true, true, true, false, true, "content of itemprop attributes with content='startDate'"),
-    endDates_dts(SolrType.date, true, true, true, false, true, "content of itemprop attributes with content='endDate'"),
-    content_type(SolrType.string, true, true, true, false, false, "mime-type of document"),
-    http_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url which was http then appears as https (or vice versa) then the field is false"),
-    www_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url within the subdomain www then appears without that subdomain (or vice versa) then the field is false"),
-    title(SolrType.text_general, true, true, true, false, true, "content of title tag"),
+    last_modified(SolrType.date, true, true, false, false, false, "last-modified from http header", true), // date document was last modified, needed for media search and /date operator
+    dates_in_content_dts(SolrType.date, true, true, true, false, true, "if date expressions can be found in the content, these dates are listed here as date objects in order of the appearances", true),
+    dates_in_content_count_i(SolrType.num_integer, true, true, false, false, false, "the number of entries in dates_in_content_sxt", true),
+    load_date_dt(SolrType.date, true, true, false, false, false, "time when resource was loaded", true),
+    startDates_dts(SolrType.date, true, true, true, false, true, "content of itemprop attributes with content='startDate'", true),
+    endDates_dts(SolrType.date, true, true, true, false, true, "content of itemprop attributes with content='endDate'", true),
+    content_type(SolrType.string, true, true, true, false, false, "mime-type of document", true),
+    http_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url which was http then appears as https (or vice versa) then the field is false", true),
+    www_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url within the subdomain www then appears without that subdomain (or vice versa) then the field is false", true),
+    title(SolrType.text_general, true, true, true, false, true, "content of title tag", true),
+    host_id_s(SolrType.string, true, true, false, false, false, "id of the host, a 6-byte hash that is part of the document id", true),// String hosthash();
+    host_s(SolrType.string, true, true, false, false, true, "host of the url", true),
+    exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t", true),
+    exact_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search", true),
+    fuzzy_signature_l(SolrType.num_long, true, true, false, false, false, "64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t", true),
+    fuzzy_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search", true),
+    size_i(SolrType.num_integer, true, true, false, false, false, "the size of the raw source", true),// int size();
+    failreason_s(SolrType.string, true, true, false, false, false, "fail reason if a page was not loaded. if the page was loaded then this field is empty", true),
+    failtype_s(SolrType.string, true, true, false, false, false, "fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'", true),
+    httpstatus_i(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded", true),
+    references_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references, should be equal to references_internal_i + references_external_i", true),
+    references_internal_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from same host to referenced url", true),
+    references_external_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from external hosts", true),
+    references_exthosts_i(SolrType.num_integer, true, true, false, false, false, "number of external hosts which provide http references", true),
+    crawldepth_i(SolrType.num_integer, true, true, false, false, false, "crawl depth of web page according to the number of steps that the crawler did to get to this document; if the crawl was started at a root document, then this is equal to the clickdepth", true),
+    harvestkey_s(SolrType.string, true, true, false, false, false, "key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated.", true),
+    url_file_ext_s(SolrType.string, true, true, false, false, true, "the file name extension", true),
+    host_organization_s(SolrType.string, true, true, false, false, true, "either the second level domain or, if a ccSLD is used, the third level domain", true), // needed to search in the url
+    inboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "internal links, the url only without the protocol", true), // needed for HostBrowser
+    inboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "internal links, only the protocol", true), // for correct assembly of inboundlinks  inboundlinks_protocol_sxt + inboundlinks_urlstub_sxt is needed
+    outboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "external links, only the protocol", true), // for correct assembly of outboundlinks  outboundlinks_protocol_sxt + outboundlinks_urlstub_sxt is needed
+    outboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "external links, the url only without the protocol", true), // needed to enhance the crawler
+    images_urlstub_sxt(SolrType.string, true, true, true, false, true, "all image links without the protocol and '://'", true),
+    images_protocol_sxt(SolrType.string, true, true, true, false, false, "all image link protocols", true), // for correct assembly of image url  images_protocol_sxt + images_urlstub_sxt is needed
+    
+    // no more mandatory (have been mandatory in some older YaCy versions)
     title_exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b"),
     title_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if title is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same title, the unique-flag is set to false"),
-    host_id_s(SolrType.string, true, true, false, false, false, "id of the host, a 6-byte hash that is part of the document id"),// String hosthash();
     md5_s(SolrType.string, true, true, false, false, false, "the md5 of the raw source"),// String md5();
-    exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t"),
-    exact_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search"),
     exact_signature_copycount_i(SolrType.num_integer, true, true, false, false, false, "counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)"),
-    fuzzy_signature_l(SolrType.num_long, true, true, false, false, false, "64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t"),
     fuzzy_signature_text_t(SolrType.text_general, true, true, false, false, true, "intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies"),
-    fuzzy_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search"),
     fuzzy_signature_copycount_i(SolrType.num_integer, true, true, false, false, false, "counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)"),
-    size_i(SolrType.num_integer, true, true, false, false, false, "the size of the raw source"),// int size();
-    failreason_s(SolrType.string, true, true, false, false, false, "fail reason if a page was not loaded. if the page was loaded then this field is empty"),
-    failtype_s(SolrType.string, true, true, false, false, false, "fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'"),
-    httpstatus_i(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded"),
-/**/httpstatus_redirect_s(SolrType.string, true, true, false, false, false, "redirect url if the error code is 299 < httpstatus_i < 310"), // TODO: delete candidate, not used so far (2014-12-26)
-    references_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references, should be equal to references_internal_i + references_external_i"),
-    references_internal_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from same host to referenced url"),
-    references_external_i(SolrType.num_integer, true, true, false, false, false, "number of unique http references from external hosts"),
-    references_exthosts_i(SolrType.num_integer, true, true, false, false, false, "number of external hosts which provide http references"),
-    crawldepth_i(SolrType.num_integer, true, true, false, false, false, "crawl depth of web page according to the number of steps that the crawler did to get to this document; if the crawl was started at a root document, then this is equal to the clickdepth"),
+    /**/httpstatus_redirect_s(SolrType.string, true, true, false, false, false, "redirect url if the error code is 299 < httpstatus_i < 310"), // TODO: delete candidate, not used so far (2014-12-26)
     process_sxt(SolrType.string, true, true, true, false, false, "needed (post-)processing steps on this metadata set"),
-    harvestkey_s(SolrType.string, true, true, false, false, false, "key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated."),
     
     // optional but recommended, part of index distribution
-    load_date_dt(SolrType.date, true, true, false, false, false, "time when resource was loaded"),
     fresh_date_dt(SolrType.date, true, true, false, false, false, "date until resource shall be considered as fresh"),
     referrer_id_s(SolrType.string, true, true, false, false, false, "id of the referrer to this document, discovered during crawling"),// byte[] referrerHash();
     publisher_t(SolrType.text_general, true, true, false, false, true, "the name of the publisher of the document"),// String dc_publisher();
@@ -132,11 +143,7 @@ public enum CollectionSchema implements SchemaDeclaration {
             // bit 16: "unavailable_after" contained in http header X-Robots-Tag
     robots_i(SolrType.num_integer, true, true, false, false, false, "content of <meta name=\"robots\" content=#content#> tag and the \"X-Robots-Tag\" HTTP property"),
     metagenerator_t(SolrType.text_general, true, true, false, false, false, "content of <meta name=\"generator\" content=#content#> tag"),
-    inboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "internal links, only the protocol"),
-    inboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "internal links, the url only without the protocol"),
     inboundlinks_anchortext_txt(SolrType.text_general, true, true, true, false, true, "internal links, the visible anchor text"),
-    outboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "external links, only the protocol"),
-    outboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "external links, the url only without the protocol"),
     outboundlinks_anchortext_txt(SolrType.text_general, true, true, true, false, true, "external links, the visible anchor text"),
     
     icons_urlstub_sxt(SolrType.string, true, true, true, false, true, "all icon links without the protocol and '://'"),
@@ -146,8 +153,6 @@ public enum CollectionSchema implements SchemaDeclaration {
     icons_sizes_sxt(SolrType.num_integer, true, true, true, false, false, "all icon sizes space separated (e.g. '16x16 32x32')"),
     
     images_text_t(SolrType.text_general, true, true, false, false, true, "all text/words appearing in image alt texts or the tokenized url"),
-    images_urlstub_sxt(SolrType.string, true, true, true, false, true, "all image links without the protocol and '://'"),
-    images_protocol_sxt(SolrType.string, true, true, true, false, false, "all image link protocols"),
     images_alt_sxt(SolrType.string, true, true, true, false, true, "all image link alt tag"), // no need to index this; don't turn it into a txt field; use images_text_t instead
     images_height_val(SolrType.num_integer, true, true, true, false, false, "size of images:height"),
     images_width_val(SolrType.num_integer, true, true, true, false, false, "size of images:width"),
@@ -186,7 +191,6 @@ public enum CollectionSchema implements SchemaDeclaration {
     url_protocol_s(SolrType.string, true, true, false, false, false, "the protocol of the url"),
     url_file_name_s(SolrType.string, true, true, false, false, true, "the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension"),
     url_file_name_tokens_t(SolrType.text_general, true, true, false, false, true, "tokens generated from url_file_name_s which can be used for better matching and result boosting"),
-    url_file_ext_s(SolrType.string, true, true, false, false, true, "the file name extension"),
     url_paths_count_i(SolrType.num_integer, true, true, false, false, false, "number of all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name"),
     url_paths_sxt(SolrType.string, true, true, true, false, true, "all path elements in the url hpath (see: http://www.ietf.org/rfc/rfc1738.txt) without the file name"),
     url_parameter_i(SolrType.num_integer, true, true, false, false, false, "number of key-value pairs in search part of the url"),
@@ -194,9 +198,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     url_parameter_value_sxt(SolrType.string, true, true, true, false, false, "the values from key-value pairs in the search part of the url"),
     url_chars_i(SolrType.num_integer, true, true, false, false, false, "number of all characters in the url == length of sku field"),
 
-    host_s(SolrType.string, true, true, false, false, true, "host of the url"),
     host_dnc_s(SolrType.string, true, true, false, false, true, "the Domain Class Name, either the TLD or a combination of ccSLD+TLD if a ccSLD is used."),
-    host_organization_s(SolrType.string, true, true, false, false, true, "either the second level domain or, if a ccSLD is used, the third level domain"),
     host_organizationdnc_s(SolrType.string, true, true, false, false, true, "the organization and dnc concatenated with '.'"),
     host_subdomain_s(SolrType.string, true, true, false, false, true, "the remaining part of the host without organizationdnc"),
     host_extent_i(SolrType.num_integer, true, true, false, false, false, "number of documents from the same host; can be used to measure references_internal_i for likelihood computation"),
@@ -260,8 +262,15 @@ public enum CollectionSchema implements SchemaDeclaration {
     private final SolrType type;
     private final boolean indexed, stored, searchable, multiValued, omitNorms, docValues;
     private String comment;
-
+    
+    /** When true, the field must be enabled for proper YaCy operation */
+    private boolean mandatory = false;
+    
     private CollectionSchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final boolean searchable, final String comment) {
+        this(type, indexed, stored, multiValued, omitNorms, searchable, comment, false);
+    }
+
+    private CollectionSchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final boolean searchable, final String comment, final boolean mandatory) {
         this.type = type;
         this.indexed = indexed;
         this.stored = stored;
@@ -269,6 +278,7 @@ public enum CollectionSchema implements SchemaDeclaration {
         this.omitNorms = omitNorms;
         this.searchable = searchable;
         this.comment = comment;
+        this.mandatory = mandatory;
         this.docValues = (type == SolrType.string || type == SolrType.date || type.name().startsWith("num_"));
         // verify our naming scheme
         String name = this.name();
@@ -352,6 +362,11 @@ public enum CollectionSchema implements SchemaDeclaration {
     @Override
     public final String getComment() {
         return this.comment;
+    }
+    
+    @Override
+    public final boolean isMandatory() {
+    	return this.mandatory;
     }
     
     @Override
