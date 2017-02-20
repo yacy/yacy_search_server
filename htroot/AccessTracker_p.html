@@ -116,6 +116,13 @@
       #{/list}#
     </tbody>
     </table>
+    #(nav-topics)#<p>&nbsp;</p>::<p>&nbsp;</p>
+    <fieldset><legend>Top Search Words (last 7 Days)</legend>
+    <div id="tagcloud" style="text-align:justify">#{element}#
+    <a href="yacysearch.html?query=#[name]#&amp;resource=local" style="text-decoration:none;font-size:#[size]#px;">#[name]#</a> (#[count]#)
+    #{/element}#</div>
+    </fieldset>
+    #(/nav-topics)#
     ::
     <h2>Local Search Host Tracker</h2>
     <p>This is a list of searches that had been requested from this' peer search interface</p>

@@ -24,10 +24,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeSet;
@@ -36,8 +39,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.Seed;
+import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.QueryParams;
@@ -260,6 +267,57 @@ public class AccessTracker_p {
             prop.putNum("page_snippettime_avg1", (double) stimeSum1 / rcount);
             prop.putNum("page_resulttime_avg1", (double) rtimeSum1 / rcount);
             prop.putNum("page_total", (page == 2) ? AccessTracker.size(AccessTracker.Location.local) : AccessTracker.size(AccessTracker.Location.remote));
+
+            // calculate top search query words
+            if (page == 2 && AccessTracker.getDumpFile() != null && AccessTracker.getDumpFile().exists()) {
+                Date toDate = new Date();
+                Date fromDate = new Date(toDate.getTime() - 7 * 24 * 3600 * 1000); // 7 Days earlier
+                List<EventTracker.Event> evList = AccessTracker.readLog(AccessTracker.getDumpFile(), fromDate, toDate);
+                ScoreMap<String> topicNavigator = new ConcurrentScoreMap<String>();
+                for (EventTracker.Event ev : evList) {
+                    String qs = ev.payload.toString();
+                    if (qs.startsWith("qs ")) { // currently only raw querystring "qs" lines are included
+                        String[] words = CommonPattern.SPACE.split(qs.substring(3));
+                        for (String w : words) {
+                            if (!w.isEmpty()) {
+                                topicNavigator.inc(w);
+                            }
+                        }
+                    }
+                }
+
+                if (topicNavigator == null || topicNavigator.isEmpty()) {
+                    prop.put("page_nav-topics", "0");
+                } else {
+                    // topics navigator
+                    final int TOPWORDS_MAXCOUNT = 20;
+                    final int TOPWORDS_MINSIZE = 9;
+                    final int TOPWORDS_MAXSIZE = 24;
+                    int count;
+                    prop.put("page_nav-topics", "1");
+                    String name;
+                    int i = 0;
+                    int maxcount = 0;
+                    Iterator<String> navigatorIterator = topicNavigator.keys(false);
+
+                    while (i < TOPWORDS_MAXCOUNT && navigatorIterator.hasNext()) {
+                        name = navigatorIterator.next();
+                        count = topicNavigator.get(name);
+                        if (maxcount == 0) {
+                            maxcount = count;
+                        }
+                        prop.put("page_nav-topics_element_" + i + "_on", 1);
+                        prop.put("page_nav-topics_element_" + i + "_name", name);
+                        prop.put("page_nav-topics_element_" + i + "_count", count);
+                        int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count / maxcount);
+                        fontsize = Math.max(TOPWORDS_MINSIZE, fontsize);
+                        prop.put("page_nav-topics_element_" + i + "_size", fontsize); // font size in pixel
+                        i++;
+                    }
+                    prop.put("page_nav-topics_element", i);
+                    prop.put("page_nav-topics_count", i);
+                }
+            } // eof - calculate top search query words
         } else if ((page == 3) || (page == 5)) {
             final Iterator<Entry<String, TreeSet<Long>>> i = (page == 3) ? sb.localSearchTracker.entrySet().iterator() : sb.remoteSearchTracker.entrySet().iterator();
             String host;
