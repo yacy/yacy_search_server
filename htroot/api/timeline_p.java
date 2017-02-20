@@ -75,9 +75,9 @@ public final class timeline_p {
         // get a time period
         Date fromDate = new Date(0);
         Date toDate = new Date();
-        try {fromDate = GenericFormatter.SHORT_SECOND_FORMATTER.parse(post.get("from", "20031215182700"), 0).getTime();} catch (ParseException e) {}
-        try {toDate = GenericFormatter.SHORT_SECOND_FORMATTER.parse(post.get("to", GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date())), 0).getTime();} catch (ParseException e) {}
- 
+        try {fromDate = GenericFormatter.SHORT_SECOND_FORMATTER.parse(post.get("from", GenericFormatter.SHORT_SECOND_FORMATTER.format(fromDate)), 0).getTime();} catch (ParseException e) {}
+        try {toDate = GenericFormatter.SHORT_SECOND_FORMATTER.parse(post.get("to", GenericFormatter.SHORT_SECOND_FORMATTER.format(toDate)), 0).getTime();} catch (ParseException e) {}
+        
         // get latest dump;
         AccessTracker.dumpLog();
         
