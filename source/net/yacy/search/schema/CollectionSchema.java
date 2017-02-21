@@ -41,15 +41,9 @@ public enum CollectionSchema implements SchemaDeclaration {
     startDates_dts(SolrType.date, true, true, true, false, true, "content of itemprop attributes with content='startDate'", true),
     endDates_dts(SolrType.date, true, true, true, false, true, "content of itemprop attributes with content='endDate'", true),
     content_type(SolrType.string, true, true, true, false, false, "mime-type of document", true),
-    http_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url which was http then appears as https (or vice versa) then the field is false", true),
-    www_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url within the subdomain www then appears without that subdomain (or vice versa) then the field is false", true),
     title(SolrType.text_general, true, true, true, false, true, "content of title tag", true),
     host_id_s(SolrType.string, true, true, false, false, false, "id of the host, a 6-byte hash that is part of the document id", true),// String hosthash();
     host_s(SolrType.string, true, true, false, false, true, "host of the url", true),
-    exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t", true),
-    exact_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search", true),
-    fuzzy_signature_l(SolrType.num_long, true, true, false, false, false, "64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t", true),
-    fuzzy_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search", true),
     size_i(SolrType.num_integer, true, true, false, false, false, "the size of the raw source", true),// int size();
     failreason_s(SolrType.string, true, true, false, false, false, "fail reason if a page was not loaded. if the page was loaded then this field is empty", true),
     failtype_s(SolrType.string, true, true, false, false, false, "fail type if a page was not loaded. This field is either empty, 'excl' or 'fail'", true),
@@ -72,11 +66,9 @@ public enum CollectionSchema implements SchemaDeclaration {
     // no more mandatory (have been mandatory in some older YaCy versions)
     title_exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b"),
     title_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if title is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same title, the unique-flag is set to false"),
-    md5_s(SolrType.string, true, true, false, false, false, "the md5 of the raw source"),// String md5();
     exact_signature_copycount_i(SolrType.num_integer, true, true, false, false, false, "counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)"),
     fuzzy_signature_text_t(SolrType.text_general, true, true, false, false, true, "intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies"),
     fuzzy_signature_copycount_i(SolrType.num_integer, true, true, false, false, false, "counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)"),
-    /**/httpstatus_redirect_s(SolrType.string, true, true, false, false, false, "redirect url if the error code is 299 < httpstatus_i < 310"), // TODO: delete candidate, not used so far (2014-12-26)
     process_sxt(SolrType.string, true, true, true, false, false, "needed (post-)processing steps on this metadata set"),
     
     // optional but recommended, part of index distribution
@@ -87,8 +79,14 @@ public enum CollectionSchema implements SchemaDeclaration {
     audiolinkscount_i(SolrType.num_integer, true, true, false, false, false, "number of links to audio resources"),// int laudio();
     videolinkscount_i(SolrType.num_integer, true, true, false, false, false, "number of links to video resources"),// int lvideo();
     applinkscount_i(SolrType.num_integer, true, true, false, false, false, "number of links to application resources"),// int lapp();
-
+    
     // optional but recommended
+    http_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url which was http then appears as https (or vice versa) then the field is false"),
+    www_unique_b(SolrType.bool, true, true, false, false, false, "unique-field which is true when an url appears the first time. If the same url within the subdomain www then appears without that subdomain (or vice versa) then the field is false"),
+    exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of text_t"),
+    exact_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if exact_signature_l is unique at the time of document creation, used for double-check during search"),
+    fuzzy_signature_l(SolrType.num_long, true, true, false, false, false, "64 bit of the Lookup3Signature from EnhancedTextProfileSignature of text_t"),
+    fuzzy_signature_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if fuzzy_signature_l is unique at the time of document creation, used for double-check during search"),
     coordinate_p(SolrType.location, true, true, false, false, false, "point in degrees of latitude,longitude as declared in WSG84"),
     coordinate_p_0_coordinate(SolrType.coordinate, true, false, false, false, false, "automatically created subfield, (latitude)"),
     coordinate_p_1_coordinate(SolrType.coordinate, true, false, false, false, false, "automatically created subfield, (longitude)"),
@@ -117,6 +115,12 @@ public enum CollectionSchema implements SchemaDeclaration {
     h4_txt(SolrType.text_general, true, true, true, false, true, "h4 header"),
     h5_txt(SolrType.text_general, true, true, true, false, true, "h5 header"),
     h6_txt(SolrType.text_general, true, true, true, false, true, "h6 header"),
+    
+    // unused, delete candidates
+    @Deprecated
+    md5_s(SolrType.string, true, true, false, false, false, "the md5 of the raw source"),// String md5();
+    @Deprecated
+    /**/httpstatus_redirect_s(SolrType.string, true, true, false, false, false, "redirect url if the error code is 299 < httpstatus_i < 310"), // TODO: delete candidate, not used so far (2014-12-26)
 
     // optional values, not part of standard YaCy handling (but useful for external applications)
     collection_sxt(SolrType.string, true, true, true, false, false, "tags that are attached to crawls/index generation to separate the search result into user-defined subsets"),
