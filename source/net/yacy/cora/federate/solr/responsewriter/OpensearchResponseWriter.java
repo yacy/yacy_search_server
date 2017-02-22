@@ -141,8 +141,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                         "    xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\"\n" +
                         "    xmlns:media=\"http://search.yahoo.com/mrss/\"\n" +
                         "    xmlns:atom=\"http://www.w3.org/2005/Atom\"\n" +
-                        "    xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n" +
-                        "    xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\"\n" +
+                        "    xmlns:dc=\"" + DublinCore.NAMESPACE + "\"\n" +
+                        "    xmlns:geo=\"" + Geo.NAMESPACE + "\"\n" +
                         ">\n").toCharArray());
         openTag(writer, "channel");
         solitaireTag(writer, "opensearch:totalResults", Integer.toString(resHead.numFound));

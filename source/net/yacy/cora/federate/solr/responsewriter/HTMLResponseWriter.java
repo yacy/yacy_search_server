@@ -28,10 +28,10 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.federate.solr.SolrType;
+import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
@@ -54,7 +54,6 @@ import org.apache.solr.util.DateFormatUtil;
 
 public class HTMLResponseWriter implements QueryResponseWriter {
 
-    private static final Set<String> DEFAULT_FIELD_LIST = null;
     public static final Pattern dqp = Pattern.compile("\"");
     
     public HTMLResponseWriter() {
@@ -116,7 +115,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         //writer.write("-->\n");
         writer.write("<html xmlns=\"http://www.w3.org/1999/xhtml\"\n");
         writer.write("      xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n");
-        writer.write("      xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n");
+        writer.write("      xmlns:dc=\"" + DublinCore.NAMESPACE + "\"\n");
         writer.write("      xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n");
         writer.write("<head profile=\"http://www.w3.org/2003/g/data-view\">\n");
         writer.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
@@ -162,7 +161,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
             IndexSchema schema = request.getSchema();
 
             int id = iterator.nextDoc();
-            Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
+            Document doc = searcher.doc(id);
             LinkedHashMap<String, String> tdoc = translateDoc(schema, doc);
 
             String title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc
@@ -179,7 +178,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
 
             while (iterator.hasNext()) {
                 id = iterator.nextDoc();
-                doc = searcher.doc(id, DEFAULT_FIELD_LIST);
+                doc = searcher.doc(id);
                 tdoc = translateDoc(schema, doc);
                 title = tdoc.get(CollectionSchema.title.getSolrFieldName());
                 writeDoc(writer, tdoc, title);
@@ -201,7 +200,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         final String jsc= "javascript:w = window.open('../QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&followFrames=on&obeyHtmlRobotsNoindex=on&obeyHtmlRobotsNofollow=off&xdstopw=on&title=" + URLEncoder.encode(title, StandardCharsets.UTF_8.name()) + "&url='+escape('"+sku+"'),'_blank','height=250,width=600,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();";
         writer.write("<div class='btn btn-default btn-sm' style='float:right' onclick=\""+jsc+"\">re-crawl url</div>\n");
 
-        writer.write("<h1 property=\"dc:Title\">" + title + "</h1>\n");
+        writer.write("<h1 property=\"" + DublinCore.Title.getURIref()+ "\">" + title + "</h1>\n");
         writer.write("<dl>\n");
         for (Map.Entry<String, String> entry: tdoc.entrySet()) {
             writer.write("<dt>");
