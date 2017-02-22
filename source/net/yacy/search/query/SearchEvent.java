@@ -1567,7 +1567,7 @@ public final class SearchEvent {
 				log.warn("Wait for local solr search was interrupted.");
 			}
 		}
-		if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && this.localsolrsearch.isAlive()) {
+		if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && (this.localsolrsearch != null && this.localsolrsearch.isAlive())) {
 			try {
 				this.localsolrsearch.join();
 			} catch (final InterruptedException e) {
