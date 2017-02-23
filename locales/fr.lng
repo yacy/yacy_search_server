@@ -73,7 +73,7 @@ This is a list of #[num]# requests to the local http server within the last hour
 Showing #[num]# requests.==Affichage de #[num]# requêtes.
 >Host<==>Hôte<
 >Path<==>Chemin<
-Access Count During==Nombre d'accès par période prédécente
+Access Count During==Nombre d'accès par période précédente
 last Second==Seconde
 last Minute==Minute
 last 10 Minutes==10 Minutes
@@ -276,8 +276,8 @@ no==non
 "edit"=="modifier"
 File:==Fichier:
 import as Public== importer en public
-"private bookmark"=="marque page priv&eacute;"
-"public bookmark"=="marque page public"
+"private bookmark"=="marque-page priv&eacute;"
+"public bookmark"=="marque-page public"
 Tagged with==Marqu&eacute; par
 Edit==&eacute;diter
 Delete==Supprimer
@@ -302,12 +302,12 @@ No password is set for the administration account.==Aucun mot de passe n'est d&e
 Please define a password for the admin account.==Veuillez d&eacute;finir un mot de passe pour le compte admin.
 Admin Account==Compte admin
 Access from localhost without account==Acc&egrave;s sans compte &agrave; partir d'un navigateur local
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==L'acc&egrave;s &agrave; votre noeud depuis votre ordinateur (acc&egrave;s local) est autorisé. La cr&eacute;ation d'un compte administrateur n'est pas n&eacute;cessaire.
+Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==L'acc&egrave;s &agrave; votre nœud depuis votre ordinateur (acc&egrave;s local) est autorisé. La cr&eacute;ation d'un compte administrateur n'est pas n&eacute;cessaire.
 Access only with qualified account==Acc&egrave;s avec un compte autoris&eacute; uniquement
 You need this only if you want a remote access to your peer.==N&eacute;cessaire uniquement si vous d&eacute;sirez disposer d'un acc&egrave;s &agrave; distance &agrave; votre noeud.
 Peer User:==Utilisateur du noeud:
-New Peer Password:==Nouveau mot de passe du noeud:
-Repeat Peer Password:==Entrer &agrave; nouveau le mot de passe du noeud:
+New Peer Password:==Nouveau mot de passe du nœud:
+Repeat Peer Password:==Entrer &agrave; nouveau le mot de passe du nœud:
 "Define Administrator"=="D&eacute;finir l'administrateur"
 Select user==Choisir un utilisateur
 New user==Nouvel utilisateur
@@ -337,7 +337,7 @@ The selected skin and language also affects the appearance of the search page.==
 If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Si vous utilisez YaCy pour créer un <a href="ConfigPortal.html">portail de recherche</a> vous pouvez alors
 change the appearance of the search page here.==modifier l'aspect de la page de recherche ici.
 Skin Selection==Sélection du thème
-Select one of the default skins, download new skins, or create your own skin.==Sélectionnez l'un des thèmes par défaut, téléchargez de nouveaux thèmes ou créez le votre.
+Select one of the default skins, download new skins, or create your own skin.==Sélectionnez l'un des thèmes par défaut, téléchargez de nouveaux thèmes ou créez le vôtre.
 Current skin==Thème actuel
 Available Skins==Thèmes disponibles
 "Use"=="Utiliser"
@@ -401,7 +401,7 @@ Opening a router port is <i>not</i> a YaCy-specific task;==Ouvrir un port sur un
 you can see instruction videos everywhere in the internet, just search for <a href="http://www.youtube.com/results?search_query=Open+Ports+on+a+Router">Open Ports on a &lt;our-router-type&gt; Router</a> and add your router type as search term.==Des vid&eacute;os montrant la marche &agrave; suivre sont disponibles partout sur le web, cherchez par exemple <a href="http://www.youtube.com/results?search_query=Ouvrir des ports sur un routeur">Ouvrir des ports sur un routeur &lt;type_de_routeur&gt;</a> en ajoutant votre type de routeur comme mot-clé recherché.
 you can see instruction videos everywhere in the internet, just search for ==Des vid&eacute;os montrant la marche &agrave; suivre sont disponibles partout sur le web, cherchez par exemple 
 However: if you fail to open a router port, you can nevertheless use YaCy with full functionality, the only function that is missing is on the side of the other YaCy users because they cannot see your peer.==Cependant, vous pourrez profiter de toutes les fonctionnalit&eacute;s de YaCy m&ecirc;me si vous ne parvenez pas &agrave; ouvrir un port sur votre routeur. L'unique fonction manquante se situera du c&ocirc;t&eacute; des autres utilisateurs de YaCy car ils ne pourront pas voir votre noeud.
-Your peer can be reached by other peers==Votre noeud est joignable par les autres noeuds du r&eacute;seau
+Your peer can be reached by other peers==Votre noeud est joignable par les autres nœuds du r&eacute;seau
 Peer Port:==Port logiciel du noeud:
 Set by system property==Configuré via la propriété système
 with SSL==avec SSL
@@ -420,7 +420,7 @@ monitor at the network page</a> what the other peers are doing==consulter la pag
 You did not set a user name and/or a password.==Vous n'avez pas saisi de nom d'utilisateur et/ou de mot de passe.
 Some pages are protected by passwords.==Certaines pages sont prot&eacute;g&eacute;es par mot de passe.
 You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Vous devriez définir un mot de passe via le menu <a href="ConfigAccounts_p.html">Comptes</a> pour sécuriser votre noeud YaCy.</p>::
-Your Peer name is a default name; please set an individual peer name.== Le nom de votre noeud est un nom par d&eacute;faut. veuillez lui donner un nom individuel.
+Your Peer name is a default name; please set an individual peer name.== Le nom de votre noeud est un nom par d&eacute;faut. Veuillez lui donner un nom individuel.
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Vous n'avez pas ouvert de port sur votre pare-feu ou votre routeur ne fournit pas le port serveur &agrave; votre pair.
 This is needed if you want to fully participate in the YaCy network.==Cela est n&eacute;cessaire pour participer pleinement au r&eacute;seau YaCy.
 You can also use your peer without opening it, but this is not recomended.==Vous pouvez aussi utiliser votre pair sans l'ouvrir, mais cela n'est pas recommand&eacute;.
@@ -451,7 +451,7 @@ That means: right after the search request the portal page of the host is loaded
 Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).==Parceque cette indexation immédiate doit obéir aux règles des robots.txt et qu'il y a un délai minimal entre deux chargements de pages consécutifs, cette heuristique est assez lente, mais peut permettre de trouver tous les résultats souhaités lors d'une seconde recherche (après une pause de quelques sedondes).
 search-result: shallow crawl on all displayed search results==Résultat de recherche : indexation superficielle sur tous les résultats affichés
 When a search is made then all displayed result links are crawled with a depth-1 crawl.==Lorsqu'une recherche est effectuée, tous les résultats affichés sont indexés avec une profondeur de -1.
-This means: right after the search request every page is loaded and every page that is linked on this page.==Explication : juste après exécution de la requête de recherche, toutes les pages de résultats sont indexées ainsi que tous les liens qu'elle contiennent.
+This means: right after the search request every page is loaded and every page that is linked on this page.==Explication : juste après exécution de la requête de recherche, toutes les pages de résultats sont indexées ainsi que tous les liens qu'elles contiennent.
 If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==Si vous cochez 'Ajouter en tant que tâche d'indexation globale', les pages à indexer sont ajoutées à la file d'attente d'indexation globale (les noeuds distants peuvent piocher dans cette liste).
 Default is to add the links to the local crawl queue (your peer crawls the linked pages).==Par défaut les liens sont ajoutés à la file d'attente d'indexation locale (votre noeud indexe lui-même les liens).
 add as global crawl job==Ajouter en tant que tâche d'indexation globale
@@ -804,7 +804,7 @@ Auto-Dom-Filter:==Filtre Auto-Dom:
 Depth:==Profondeur:
 This option will automatically create a domain-filter which limits the crawl on domains the crawler==Cette option cr&eacute;era automatiquement un filtre de domaine qui limite le crawl au domaine du crawler
 will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==trouvera &agrave; la profondeur donn&eacute;e. On peut par exemple utiliser cette option pour crawler une page avec des marques-pages
-restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==tout en limitant la recherche au domaines de cette page. La profondeur adequate
+restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==tout en limitant la recherche aux domaines de cette page. La profondeur adéquate
 for this example would be 1.==pour cet exemple sera 1.
 The default value 0 gives no restrictions.==La valeur par d&eacute;faut 0 n'applique aucune limitation.
 Maximum Pages per Domain:==Maximum de pages par domaine:
