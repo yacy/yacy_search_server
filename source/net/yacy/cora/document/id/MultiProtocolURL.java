@@ -33,8 +33,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -182,7 +184,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
         // identify protocol
         url = url.trim();
-        
+
         if (url.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
             url = "http:" + url;
@@ -678,61 +680,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return sbuf;
     }
 
-    // from: http://www.w3.org/International/unescape.java (2015-02-19 !! this eats up characters > 0x80 hex !!)
     public static String unescape(final String s) {
-        final int l  = s.length();
-        final StringBuilder sbuf = new StringBuilder(l);
-        int ch = -1;
-        int b, sumb = 0;
-        for (int i = 0, more = -1; i < l; i++) {
-            /* Get next byte b from URL segment s */
-            switch (ch = s.charAt(i)) {
-                case '%':
-                    if (i + 2 < l) {
-                        ch = s.charAt(++i);
-                        final int hb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
-                        ch = s.charAt(++i);
-                        final int lb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase ((char) ch) - 'a') & 0xF;
-                        b = (hb << 4) | lb;
-                    } else {
-                        b = ch;
-                    }
-                    break;
-                case '+':
-                    b = ' ';
-                    break;
-                default:
-                    b = ch;
-            }
-            /* Decode byte b as UTF-8, sumb collects incomplete chars */
-            if ((b & 0xc0) == 0x80) {               // 10xxxxxx (continuation byte)
-                sumb = (sumb << 6) | (b & 0x3f);    // Add 6 bits to sumb
-                if (--more == 0) sbuf.append((char) sumb); // Add char to sbuf
-            } else if ((b & 0x80) == 0x00) {        // 0xxxxxxx (yields 7 bits)
-                if (more > 0) { // 2015-2-19 if this then prev loop was no complete multibyte char (just add it, instead of eating it up)
-                    sbuf.append(s.charAt(i-1));
-                    more = -1;
-                }
-                sbuf.append((char) b);              // Store in sbuf
-            } else if ((b & 0xe0) == 0xc0) {        // 110xxxxx (yields 5 bits)
-                sumb = b & 0x1f;
-                more = 1;                           // Expect 1 more byte
-            } else if ((b & 0xf0) == 0xe0) {        // 1110xxxx (yields 4 bits)
-                sumb = b & 0x0f;
-                more = 2;                           // Expect 2 more bytes
-            } else if ((b & 0xf8) == 0xf0) {        // 11110xxx (yields 3 bits)
-                sumb = b & 0x07;
-                more = 3;                           // Expect 3 more bytes
-            } else if ((b & 0xfc) == 0xf8) {        // 111110xx (yields 2 bits)
-                sumb = b & 0x03;
-                more = 4;                           // Expect 4 more bytes
-            } else /*if ((b & 0xfe) == 0xfc)*/ {    // 1111110x (yields 1 bit)
-                sumb = b & 0x01;
-                more = 5;                           // Expect 5 more bytes
-            }
-            /* We don't test if the UTF-8 encoding is well-formed */
+        try {
+            return URLDecoder.decode(s, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return null; // unreachable
         }
-        return sbuf.toString();
     }
 
     private void identPort(final String inputURL, final int dflt) throws MalformedURLException {
