@@ -37,6 +37,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -184,7 +185,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 
         // identify protocol
         url = url.trim();
-
+        
         if (url.startsWith("//")) {
             // patch for urls starting with "//" which can be found in the wild
             url = "http:" + url;
@@ -680,12 +681,20 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return sbuf;
     }
 
+    /**
+     * Decodes a <code>application/x-www-form-urlencoded</code> string using UTF-8 encoding.
+     *
+     * @param s the string to decode
+     * @return the newly decoded string
+     */
     public static String unescape(final String s) {
-        try {
-            return URLDecoder.decode(s, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return null; // unreachable
-        }
+    	try {
+			return URLDecoder.decode(s, StandardCharsets.UTF_8.name());
+		} catch (UnsupportedEncodingException e) {
+			/* This should not happen */
+			ConcurrentLog.logException(e);
+			return s;
+		}
     }
 
     private void identPort(final String inputURL, final int dflt) throws MalformedURLException {
@@ -887,15 +896,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return ((this.port >= 0) && (this.host != null)) ? this.host + ":" + this.port : ((this.host != null) ? this.host : "");
     }
 
+    /**
+     * @return the host part of this URL, Punycode encoded for Internationalized Domain Names
+     */
     public String getHost() {
-        /*
-        if (this.host == null) return null;
-        if (this.host.length() > 0 && this.host.charAt(0) == '[') {
-            int p = this.host.indexOf(']');
-            if (p < 0) return this.host;
-            return this.host.substring(1, p);
-        }
-        */
         return this.host;
     }
     
@@ -975,8 +979,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     /**
-     * Tokenized url as string (without the protocol)
-     * @return example "host com path file ext"
+     * Tokenizes url as string (without the protocol).
+     * For example "http://host.com/path/file.txt" returns "host com path file ext" 
+     * @return url tokens as one string
      */
     public String toTokens() {
         return toTokens(unescape(this.urlstub(true,true)));
@@ -993,7 +998,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         char c;
         for (int i = 0; i < s.length(); i++) {
             c = s.charAt(i);
-            if ((c >= '0' && c <='9') || (c >= 'a' && c <='z') || (c >= 'A' && c <='Z')) sb.append(c); else sb.append(' ');
+            if (Character.isAlphabetic(c) || Character.isDigit(c)) sb.append(c); else sb.append(' ');
         }
 
         // split the string into tokens and add all camel-case splitting
@@ -1059,8 +1064,8 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
     
     private static CharType charType(final char c) {
-        if (c >= 'a' && c <= 'z') return CharType.low;
-        if (c >= '0' && c <= '9') return CharType.number;
+        if (Character.isLowerCase(c)) return CharType.low;
+        if (Character.isDigit(c)) return CharType.number;
         return CharType.high;
     }
     
