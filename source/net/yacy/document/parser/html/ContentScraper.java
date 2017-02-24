@@ -274,7 +274,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     @Override
     public void scrapeText(final char[] newtext0, final String insideTag) {
         // System.out.println("SCRAPE: " + UTF8.String(newtext));
-        if (insideTag != null && ("script".equals(insideTag) || "style".equals(insideTag))) return;
+        if (insideTag != null && (TagName.script.name().equals(insideTag) || TagName.style.name().equals(insideTag))) return;
         int p, pl, q, s = 0;
         char[] newtext = CharacterCoding.html2unicode(new String(newtext0)).toCharArray();
         

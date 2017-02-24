@@ -39,6 +39,7 @@ import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Stack;
+import net.yacy.document.parser.html.ContentScraper.TagName;
 
 import net.yacy.kelondro.io.CharBuffer;
 
@@ -197,6 +198,11 @@ public final class TransformerWriter extends Writer {
             final char[] text = new char[in.length - tagend - 1];
             System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
             return filterTag(text, quotechar, tag, false);
+        }
+
+        // don't add text from within <script> section, here e.g. a "if 1<a" expression could confuse tag detection
+        if (this.tagStack.size()>0 && this.tagStack.lastElement().name.equals(TagName.script.name())) {
+            return new char[0];
         }
 
         // an opening tag
