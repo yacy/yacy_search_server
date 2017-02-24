@@ -18,21 +18,9 @@ sku
 ## last-modified from http header, date (mandatory field)
 last_modified
 
-## if date expressions can be found in the content, these dates are listed here as date objects in order of the appearances
-dates_in_content_dts
-
-## the number of entries in dates_in_content_sxt
-dates_in_content_count_i
-
 ## time when resource was loaded
 load_date_dt
 
-## content of itemprop attributes with content='startDate'
-startDates_dts
-
-## content of itemprop attributes with content='endDate'
-endDates_dts
-    
 ## mime-type of document, string (mandatory field)
 content_type
 
@@ -57,24 +45,6 @@ failtype_s
 ## html status return code (i.e. "200" for ok), -1 if not loaded (see content of failreason_t for this case), int (mandatory field)
 httpstatus_i
 
-## number of unique http references, should be equal to references_internal_i + references_external_i
-references_i
-
-## number of unique http references from same host to referenced url
-references_internal_i
-
-## number of unique http references from external hosts
-references_external_i
-
-## number of external hosts which provide http references
-references_exthosts_i
-
-## crawl depth of web page according to the number of steps that the crawler did to get to this document; if the crawl was started at a root document, then this is equal to the clickdepth
-crawldepth_i
-
-## key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated.
-harvestkey_s
-
 ## the file name extension
 url_file_ext_s
 
@@ -98,28 +68,6 @@ images_urlstub_sxt
 
 ## all image link protocols
 images_protocol_sxt
-
-
-### No more mandatory (have been mandatory in some older YaCy versions)
-
-## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b
-#title_exact_signature_l
-
-## flag shows if title is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same title, the unique-flag is set to false, boolean
-#title_unique_b
-
-## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
-#exact_signature_copycount_i
-
-## intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies
-#fuzzy_signature_text_t
-
-## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
-#fuzzy_signature_copycount_i
-
-## needed (post-)processing steps on this metadata set
-#process_sxt
-
 
 
 ### optional but highly recommended values, part of the index distribution process
@@ -147,6 +95,54 @@ applinkscount_i
 
 
 ### optional but highly recommended values, not part of the index distribution process
+
+## the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b
+#title_exact_signature_l
+
+## flag shows if title is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same title, the unique-flag is set to false, boolean
+#title_unique_b
+
+## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
+#exact_signature_copycount_i
+
+## intermediate data produced in EnhancedTextProfileSignature: a list of word frequencies
+#fuzzy_signature_text_t
+
+## counter for the number of documents which are not unique (== count of not-unique-flagged documents + 1)
+#fuzzy_signature_copycount_i
+
+## needed (post-)processing steps on this metadata set
+#process_sxt
+
+## if date expressions can be found in the content, these dates are listed here as date objects in order of the appearances
+dates_in_content_dts
+
+## the number of entries in dates_in_content_sxt
+dates_in_content_count_i
+
+## content of itemprop attributes with content='startDate'
+startDates_dts
+
+## content of itemprop attributes with content='endDate'
+endDates_dts
+
+## number of unique http references, should be equal to references_internal_i + references_external_i
+references_i
+
+## number of unique http references from same host to referenced url
+references_internal_i
+
+## number of unique http references from external hosts
+references_external_i
+
+## number of external hosts which provide http references
+references_exthosts_i
+
+## crawl depth of web page according to the number of steps that the crawler did to get to this document; if the crawl was started at a root document, then this is equal to the clickdepth
+crawldepth_i
+
+## key from a harvest process (i.e. the crawl profile hash key) which is needed for near-realtime postprocessing. This shall be deleted as soon as postprocessing has been terminated.
+harvestkey_s
 
 ## unique-field which is true when an url appears the first time. If the same url which was http then appears as https (or vice versa) then the field is false
 http_unique_b
