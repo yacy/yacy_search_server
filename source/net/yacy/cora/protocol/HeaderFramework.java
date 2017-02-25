@@ -35,6 +35,7 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.CommonPattern;
@@ -100,7 +101,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 
     public static final String X_YACY_INDEX_CONTROL = "X-YaCy-Index-Control";
     /** Added when generating legacy request header to allow template servlets to know the original request scheme : "http" or "https" */
-    public static final String X_YACY_REQUEST_SCHEME = "X-YaCy-Request-Scheme"; // TODO: after completing implementation of HttpServletRequest getScheme() should be used and this can be removed
+    @Deprecated /** use getScheme() (header not used in any request, 2017-02-22) */
+    public static final String X_YACY_REQUEST_SCHEME = "X-YaCy-Request-Scheme";
 
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String SET_COOKIE2 = "Set-Cookie2";
@@ -223,10 +225,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
     private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss Z"; // with numeric time zone indicator as defined in RFC5322
     private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
-    private static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
-    public  static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
-    public  static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US);
-    public  static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
+    public  static final SimpleDateFormat FORMAT_RFC1123 = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
+    public  static final SimpleDateFormat FORMAT_RFC1036 = new SimpleDateFormat(PATTERN_RFC1036, Locale.US);
     private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
     private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
 
@@ -240,7 +240,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             // RFC 1036/850 (old)      "Monday, 12-Nov-07 10:11:12 GMT"
             FORMAT_RFC1036,
             // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
-            FORMAT_ANSIC,
+            GenericFormatter.FORMAT_ANSIC,
     };
 
 

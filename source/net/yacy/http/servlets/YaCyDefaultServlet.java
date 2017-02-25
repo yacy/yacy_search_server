@@ -705,7 +705,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         	if("http".equals(protocolHeader) || "https".equals(protocolHeader)) {
         		protocol = protocolHeader.toLowerCase();
         	} else if(protocolHeader != null && !protocolHeader.isEmpty()) {
-    			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal " + HeaderFramework.X_YACY_REQUEST_SCHEME + " header value : " + protocolHeader);
+    			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal protocol scheme header value : " + protocolHeader);
     		}
         	
     		/* This peer can also be behind a reverse proxy requested using https, even if the request coming to this YaCy peer is http only

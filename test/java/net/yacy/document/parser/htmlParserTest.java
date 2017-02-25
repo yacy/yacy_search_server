@@ -167,9 +167,8 @@ public class htmlParserTest extends TestCase {
                 + "</html>";
         ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10);
 
-        System.out.println(scraper.getText());
         String txt = scraper.getText();
-        System.out.println("ScraperTagTest: [" + textSource + "] = [" + txt + "]");
+        System.out.println("ScraperScriptTagTest: [" + textSource + "] = [" + txt + "]");
         assertEquals(txt, textSource);
     }
 }
