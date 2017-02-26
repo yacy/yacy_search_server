@@ -64,35 +64,35 @@ public class YaCyDefaultServletTest {
 	
 	/**
 	 * getContext() : standard "Host" header is filled with hostname and port, 
-	 * custom "X-YaCy-Request-Scheme" header indicates the protocol
+	 * custom "CONNECTION_PROP_PROTOCOL" header indicates the protocol
 	 */
 	@Test
 	public void testGetContextCustomProtocolHeader() {
 		RequestHeader header = new RequestHeader();
 		header.put(HeaderFramework.HOST, "myhost.com:8443");
-		header.put(HeaderFramework.X_YACY_REQUEST_SCHEME, "https");
+		header.put(HeaderFramework.CONNECTION_PROP_PROTOCOL, "https");
 		assertEquals("https://myhost.com:8443", YaCyDefaultServlet.getContext(header, null));
 		
 		header = new RequestHeader();
 		header.put(HeaderFramework.HOST, "myhost.com:8090");
-		header.put(HeaderFramework.X_YACY_REQUEST_SCHEME, "http");
+		header.put(HeaderFramework.CONNECTION_PROP_PROTOCOL, "http");
 		assertEquals("http://myhost.com:8090", YaCyDefaultServlet.getContext(header, null));
 	}
 	
 	/**
 	 * getContext() : standard "Host" header is filled only with hostname (default standard port), 
-	 * custom "X-YaCy-Request-Scheme" indicates the protocol
+	 * custom "CONNECTION_PROP_PROTOCOL" indicates the protocol
 	 */
 	@Test
 	public void testGetContextDefaultPortCustomProtocolHeader() {
 		RequestHeader header = new RequestHeader();
 		header.put(HeaderFramework.HOST, "myhost.com");
-		header.put(HeaderFramework.X_YACY_REQUEST_SCHEME, "http");
+		header.put(HeaderFramework.CONNECTION_PROP_PROTOCOL, "http");
 		assertEquals("http://myhost.com", YaCyDefaultServlet.getContext(header, null));
 		
 		header = new RequestHeader();
 		header.put(HeaderFramework.HOST, "myhost.com");
-		header.put(HeaderFramework.X_YACY_REQUEST_SCHEME, "https");
+		header.put(HeaderFramework.CONNECTION_PROP_PROTOCOL, "https");
 		assertEquals("https://myhost.com", YaCyDefaultServlet.getContext(header, null));
 	}
 	
@@ -104,14 +104,14 @@ public class YaCyDefaultServletTest {
 		/* Different protocols : HTTPS on proxy, HTTP on peer */
 		RequestHeader header = new RequestHeader();
 		header.put(HeaderFramework.HOST, "myhost.com");
-		header.put(HeaderFramework.X_YACY_REQUEST_SCHEME, "http");
+		header.put(HeaderFramework.CONNECTION_PROP_PROTOCOL, "http");
 		header.put(HttpHeaders.X_FORWARDED_PROTO.toString(), "https");
 		assertEquals("https://myhost.com", YaCyDefaultServlet.getContext(header, null));
 		
 		/* Illegal X-Forwarded-Proto header value */
 		header = new RequestHeader();
 		header.put(HeaderFramework.HOST, "myhost.com:8090");
-		header.put(HeaderFramework.X_YACY_REQUEST_SCHEME, "http");
+		header.put(HeaderFramework.CONNECTION_PROP_PROTOCOL, "http");
 		header.put(HttpHeaders.X_FORWARDED_PROTO.toString(), "http://attacker.com?query=");
 		assertEquals("http://myhost.com:8090", YaCyDefaultServlet.getContext(header, null));
 	}

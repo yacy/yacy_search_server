@@ -188,6 +188,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     // One of the usages is in proxy operation to prepare header values to be set as header values upon connection
     //  * use of properties as header values is discouraged (e.g. as proxy transmits it as arbitrary headers) [2016-8-21]
     public static final String CONNECTION_PROP_HTTP_VER = "HTTP";
+    @Deprecated // use CONNECTION_PROP_DIGESTURL // misleading custom header (compared to servletrequest) get(CONNECTION_PROP_PROTOCOL) = servletrequest.getScheme()
     public static final String CONNECTION_PROP_PROTOCOL = "PROTOCOL";
     public static final String CONNECTION_PROP_HOST = "HOST";
     public static final String CONNECTION_PROP_USER = "USER";

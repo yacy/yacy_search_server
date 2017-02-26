@@ -643,7 +643,11 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         if (_request != null) {
             return _request.getScheme();
         } else {
-            return "http";
+            if (super.containsKey(HeaderFramework.CONNECTION_PROP_PROTOCOL)) {
+                return super.get(HeaderFramework.CONNECTION_PROP_PROTOCOL);
+            } else {
+                return "http";
+            }
         }
     }
 
