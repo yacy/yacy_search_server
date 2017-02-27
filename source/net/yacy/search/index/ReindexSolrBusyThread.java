@@ -144,6 +144,9 @@ import org.apache.solr.common.SolrInputDocument;
                                 Switchboard.getSwitchboard().index.putDocument(idoc);
                                 processed++;
                             }
+                            if (xdocs.size() >= docstoreindex) { // number processed docs >= found docs -> end condition for this query as no more docs avail-
+                                querylist.delete(currentquery);  // 2017-02-27 added on occurence of 21 docs found 21 processed but somehow on next call 21 docs again found (some commit issue ??)
+                            }
                         }                        
                     } catch (final IOException ex) {
                         ConcurrentLog.warn("MIGRATION-REINDEX", "remove following query from list due to error, q=" + currentquery);
