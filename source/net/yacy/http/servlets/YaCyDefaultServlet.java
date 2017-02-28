@@ -1020,6 +1020,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, sb.peers.myID());
                 templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
                 templatePatterns.put(servletProperties.RELATIVE_BASE, YaCyDefaultServlet.getRelativeBase(target));
+                templatePatterns.put(SwitchboardConstants.REFERRER_POLICY, sb.getConfig(SwitchboardConstants.REFERRER_POLICY, SwitchboardConstants.REFERRER_POLICY_DEFAULT));
                 Seed myPeer = sb.peers.mySeed();
                 templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);

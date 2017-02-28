@@ -4,7 +4,7 @@
   #(favicon)#::
   <img width="16" height="16" src="#[faviconUrl]#" id="f#[urlhash]#" class="favicon" style="width:16px; height:16px;" alt="" />
   #(/favicon)#  
-  <a href="#[link]#" target="#[target]#">#[title]#</a></h4>
+  <a href="#[link]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[title]#</a></h4>
   <div class="urlactions">
     #(heuristic)#::
     <img width="16" height="9" src="env/grafics/heuristic_redundant.gif" title="heuristic:#[name]# (redundant)" style="width:16px; height:9px;" alt="heuristic:#[name]# (redundant)"/>::
@@ -24,7 +24,7 @@
     #(/authorized)#
   </div>
   <p class="snippet"><span class="snippetLoaded" id="h#[urlhash]#">#[description]#</span></p>
-  <p class="url"><a href="#[link]#" id="url#[urlhash]#" target="#[target]#">#[urlname]#</a></p>
+  <p class="url"><a href="#[link]#" id="url#[urlhash]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[urlname]#</a></p>
   <p class="urlinfo">
   #(showDate)#::#[date]##(/showDate)#
   #(showEvent)#::on #[date]##(/showEvent)#
@@ -45,14 +45,14 @@
     <a href="#[hrefFullPreview]#" target="#[target]#" class="thumblink" onclick="return hs.expand(this)">
       <img src="#[hrefCache]#" width="#[width]#" height="#[height]#" style="#[style]#" alt="#[name]#" />
     </a>
-    <div class="highslide-caption"><a href="#[href]#" target="#[target]#">#[name]#</a><br /><a href="#[source]#" target="#[target]#">#[sourcedom]#</a></div>
+    <div class="highslide-caption"><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[name]#</a><br /><a href="#[source]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[sourcedom]#</a></div>
   </div>#(/item)#
   ::
-  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>#(/item)#
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a></tr>#(/item)#
   ::
-  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>#(/item)#
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a></tr>#(/item)#
   ::
-  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>#(/item)#
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a></tr>#(/item)#
 #(/content)#
 
 <script type="text/javascript">

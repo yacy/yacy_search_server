@@ -89,6 +89,12 @@ server.maxTrackingCount = 1000
 # maximum number of hosts that are tracked
 server.maxTrackingHostCount = 100
 
+# Global HTTP Referrer policy delivered by meta tag (see https://www.w3.org/TR/referrer-policy/ for available policies)
+# Can be left empty : the browser should then fallback to the default "no-referrer-when-downgrade" policy
+# Be careful, some policies will also affect YaCy internal links : "no-referrer", "same-origin", "origin" and "strict-origin". This can be useful 
+# for example when proxyURL.useforresults is set to true, to control the referrer information initially sent by YaCy proxy when visiting search results
+referrer.meta.policy=origin-when-cross-origin
+
 # maximum file sizes: since some users experience problems with too large files
 # the file size of database files can be limited. Larger files can be used to get a
 # better IO performance and to use less RAM; however, if the size must be limited
@@ -833,6 +839,12 @@ search.items = 10
 search.target = _self
 search.target.special = _self
 search.target.special.pattern =
+
+# When true, override the global referrer.meta.policy value and add the standard noreferrer link type to search results links : 
+# this instructs the browser that it should not send any referrer information at all when visiting them
+# Be careful : some websites might reject requests with no referrer
+# Supported by more browsers than the meta referrer tag
+search.result.noreferrer=false
 
 # search result lines may show additional information for each search hit
 # these information pieces may be switched on or off

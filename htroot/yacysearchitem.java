@@ -122,6 +122,7 @@ public class yacysearchitem {
         prop.put("navurlBase", QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false).toString());
         prop.put("localQuery", theSearch.query.isLocal() ? "1" : "0");
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
+        final boolean noreferrer = sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_NOREFERRER, SwitchboardConstants.SEARCH_RESULT_NOREFERRER_DEFAULT);
 
         long timeout = item == 0 ? 10000 : (theSearch.query.isLocal() ? 1000 : 3000);
         
@@ -177,6 +178,7 @@ public class yacysearchitem {
             } else {
                 prop.putXML("content_link", resultUrlstring); // putXML for rss
             }
+            prop.put("content_noreferrer", noreferrer ? 1 : 0);
             
 // END interaction
 
@@ -307,7 +309,7 @@ public class yacysearchitem {
 
         if (theSearch.query.contentdom == Classification.ContentDomain.IMAGE) {
             // image search; shows thumbnails
-            processImage(sb, prop, item, theSearch, target_special_pattern, timeout, ImageViewer.hasFullViewingRights(header, sb));
+            processImage(sb, prop, item, theSearch, target_special_pattern, timeout, ImageViewer.hasFullViewingRights(header, sb), noreferrer);
             theSearch.query.transmitcount = item + 1;
             return prop;
         }
@@ -326,6 +328,7 @@ public class yacysearchitem {
                 final String resultUrlstring = ms.url().toNormalform(true);
                 final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
                 prop.putHTML("content_item_href", resultUrlstring);
+                prop.put("content_item_noreferrer", noreferrer ? 1 : 0);
                 prop.putHTML("content_item_hrefshort", nxTools.shortenURLString(resultUrlstring, MAX_URL_LENGTH));
                 prop.putHTML("content_item_target", target);
                 prop.putHTML("content_item_name", shorten(ms.title(), MAX_NAME_LENGTH));
@@ -474,9 +477,10 @@ public class yacysearchitem {
      * @param target_special_pattern
      * @param timeout result getting timeOut
      * @param fullViewingRights set to true when current user has full image viewing rights
+     * @param noreferrer set to true when the noreferrer link type should be added to the original image source links
      */
 	private static void processImage(final Switchboard sb, final serverObjects prop, final int item,
-			final SearchEvent theSearch, final String target_special_pattern, long timeout, boolean fullViewingRights) {
+			final SearchEvent theSearch, final String target_special_pattern, long timeout, boolean fullViewingRights, final boolean noreferrer) {
 		prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
 		try {
 		    SearchEvent.ImageResult image = theSearch.oneImageResult(item, timeout);
@@ -544,6 +548,7 @@ public class yacysearchitem {
 		    prop.put("content_item_attr", ""/*(ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"*/); // attributes, here: original size of image
 		    prop.put("content_item_urlhash", ASCII.String(image.imageUrl.hash()));
 		    prop.put("content_item_source", image.sourceUrl.toNormalform(true));
+		    prop.put("content_item_noreferrer", noreferrer ? 1 : 0);
 		    prop.putXML("content_item_source-xml", image.sourceUrl.toNormalform(true));
 		    prop.put("content_item_sourcedom", image.sourceUrl.getHost());
 		    prop.put("content_item_nl", (item == theSearch.query.offset) ? 0 : 1);

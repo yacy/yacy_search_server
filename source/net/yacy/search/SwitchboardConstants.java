@@ -273,6 +273,12 @@ public final class SwitchboardConstants {
     public static final String CLUSTER_MODE_PUBLIC_PEER         = "publicpeer";
     public static final String CLUSTER_MODE_PRIVATE_PEER        = "privatepeer";
     public static final String CLUSTER_PEERS_IPPORT             = "cluster.peers.ipport";
+    
+    /** Key of the global HTTP Referrer policy delivered by meta tag */
+    public static final String REFERRER_POLICY = "referrer.meta.policy";
+    
+    /** Default value for the global HTTP Referrer policy delivered by meta tag */
+    public static final String REFERRER_POLICY_DEFAULT = "origin-when-cross-origin";
 
     
     public static final String DHT_ENABLED                      = "network.unit.dht";
@@ -532,6 +538,12 @@ public final class SwitchboardConstants {
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
 
     public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount"; // max lines displayed in standard search navigators/facets
+    
+    /** Key of the setting controlling whether a noreferrer link type should be added to search result links */
+    public static final String SEARCH_RESULT_NOREFERRER = "search.result.noreferrer";
+    
+    /** Default setting value controlling whether a noreferrer link type should be added to search result links */
+    public static final boolean SEARCH_RESULT_NOREFERRER_DEFAULT = false;
 
     /**
      * ranking+evaluation

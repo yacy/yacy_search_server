@@ -4,6 +4,7 @@
   <meta name="keywords" content="YaCy HTTP search engine spider indexer java network open free download Mac Windows Linux Software development" />
   <meta name="description" content="Software HTTP Freeware Home Page" />
   <meta name="copyright" content="Michael Christen et al." />
+  <meta name="referrer" content="#[referrer.meta.policy]#"/>
   
   <!-- Ensure proper rendering and touch zooming on mobile devices -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
