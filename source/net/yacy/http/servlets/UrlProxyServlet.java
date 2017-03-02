@@ -184,7 +184,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
             if (location.startsWith("http")) {
                 location = request.getServletPath() + "?url=" + location;
             } else {
-                location = request.getServletPath() + "?url=http://" + hostwithport + "/" + location;
+                location = request.getServletPath() + "?url=" + proxyurl.getProtocol() + "://" + hostwithport + "/" + location;
             }
             response.addHeader(HeaderFramework.LOCATION, location);
         } 
