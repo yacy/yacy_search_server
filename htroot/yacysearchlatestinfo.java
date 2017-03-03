@@ -27,6 +27,7 @@ public class yacysearchlatestinfo {
             prop.put("remoteResourceSize", 0);
             prop.put("remoteIndexCount", 0);
             prop.put("remotePeerCount", 0);
+            prop.putJSON("navurlBase", "#");
             return prop;
         }
 
