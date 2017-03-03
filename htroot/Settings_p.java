@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.http.ReferrerPolicy;
 import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacySeedUploader;
@@ -57,6 +58,8 @@ public final class Settings_p {
         }
         else if (page.equals("ServerAccess")) {	
             prop.put("settingsTables", "Settings_ServerAccess.inc");
+        } else if (page.equals("referrer")) {	
+            prop.put("settingsTables", "Settings_Referrer.inc");
         }
         else if (page.equals("SystemBehaviour")) {
             prop.put("settingsTables", "Settings_SystemBehaviour.inc");
@@ -201,6 +204,29 @@ public final class Settings_p {
         // debug/analysis
         prop.put("solrBinaryResponseChecked", env.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED, 
         		SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT) ? 1 : 0);
+        
+        // Referrer Policy
+        final String metaPolicy = env.getConfig(SwitchboardConstants.REFERRER_META_POLICY, 
+        		SwitchboardConstants.REFERRER_META_POLICY_DEFAULT);
+        prop.put("metaPolicyNoReferrerChecked", ReferrerPolicy.NO_REFERRER.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicySameOriginChecked", ReferrerPolicy.SAME_ORIGIN.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyStrictOriginChecked", ReferrerPolicy.STRICT_ORIGIN.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyOriginChecked", ReferrerPolicy.ORIGIN.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyStrictOriginWhenCrossOriginChecked", ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyOriginWhenCrossOriginChecked", ReferrerPolicy.ORIGIN_WHEN_CROSS_ORIGIN.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyNoReferrerWhenDowngradeChecked", ReferrerPolicy.NO_REFERRER_WHEN_DOWNGRADE.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyEmptyChecked", ReferrerPolicy.EMPTY.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyUnsafeUrlChecked", ReferrerPolicy.UNSAFE_URL.getValue().equals(metaPolicy) ? 1 : 0);
+        if(ReferrerPolicy.contains(metaPolicy)) {
+        	prop.put("metaPolicyCustom", 0);
+        } else {
+        	prop.put("metaPolicyCustom", 1);
+        	prop.put("metaPolicyCustom_checked", 1);
+        	prop.put("metaPolicyCustom_value", metaPolicy);
+        }
+        
+        prop.put("searchResultNoReferrerChecked", env.getConfigBool(SwitchboardConstants.SEARCH_RESULT_NOREFERRER, 
+        		SwitchboardConstants.SEARCH_RESULT_NOREFERRER_DEFAULT) ? 1 : 0);
         
         /* For easier user understanding, the following flags controlling data sources selection 
          * are rendered in the UI as checkboxes corresponding to enabled value when ticked */

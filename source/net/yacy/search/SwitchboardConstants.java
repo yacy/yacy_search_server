@@ -275,10 +275,10 @@ public final class SwitchboardConstants {
     public static final String CLUSTER_PEERS_IPPORT             = "cluster.peers.ipport";
     
     /** Key of the global HTTP Referrer policy delivered by meta tag */
-    public static final String REFERRER_POLICY = "referrer.meta.policy";
+    public static final String REFERRER_META_POLICY = "referrer.meta.policy";
     
     /** Default value for the global HTTP Referrer policy delivered by meta tag */
-    public static final String REFERRER_POLICY_DEFAULT = "origin-when-cross-origin";
+    public static final String REFERRER_META_POLICY_DEFAULT = "origin-when-cross-origin";
 
     
     public static final String DHT_ENABLED                      = "network.unit.dht";

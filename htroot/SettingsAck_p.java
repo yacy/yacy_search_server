@@ -546,6 +546,18 @@ public class SettingsAck_p {
             prop.put("info", "34");
             return prop;
         }
+        
+        // Referrer Policy settings
+        if (post.containsKey("referrerPolicySettings")) {
+        	String metaPolicy = post.get("metaPolicy", SwitchboardConstants.REFERRER_META_POLICY_DEFAULT);
+            env.setConfig(SwitchboardConstants.REFERRER_META_POLICY, metaPolicy);
+            
+        	boolean tickedCheckbox = post.containsKey("searchResultNoReferrer");
+            env.setConfig(SwitchboardConstants.SEARCH_RESULT_NOREFERRER, tickedCheckbox);
+            
+            prop.put("info", "35");
+            return prop;
+        }
 
         // nothing made
         prop.put("info", "1");//no information submitted
