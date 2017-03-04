@@ -256,7 +256,8 @@ public final class HTTPDProxyHandler {
     }
 
     /**
-     * Get a page from the remote server as proxy request for the client
+     * Get a page from the remote server as proxy request for the client.
+     * The target url is expected in the conProp CONNECTION_PROP_DIGESTURL
      *
      * @param conProp a collection of properties about the connection, like URL
      * @param requestHeader The header lines of the connection from the request
@@ -298,8 +299,6 @@ public final class HTTPDProxyHandler {
                     log.finest(reqID + "    using redirector to " + url);
                 }
                 conProp.put(HeaderFramework.CONNECTION_PROP_DIGESTURL, url);
-                requestHeader.put(HeaderFramework.HOST, url.getHost() + ":" + url.getPort());
-                requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, url.getPath());
             }
 
 
@@ -401,7 +400,7 @@ public final class HTTPDProxyHandler {
      * Get requested proxied page from the web
      *
      * @param conProp
-     * @param url
+     * @param url requested target url
      * @param requestHeader
      * @param cachedResponseHeader
      * @param respond

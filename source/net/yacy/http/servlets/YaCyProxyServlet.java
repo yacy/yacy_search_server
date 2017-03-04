@@ -125,9 +125,6 @@ public class YaCyProxyServlet extends HttpServlet implements Servlet {
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST, request);
 
-        yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
-        yacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath());
-
         final ByteArrayOutputStream tmpproxyout = new ByteArrayOutputStream();
         HTTPDProxyHandler.doGet(prop, yacyRequestHeader, tmpproxyout, ClientIdentification.yacyProxyAgent);
         

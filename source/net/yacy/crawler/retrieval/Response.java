@@ -791,24 +791,14 @@ public class Response {
 
     public DigestURL referrerURL() {
         if (this.requestHeader == null) return null;
-        try {
-            final String r = this.requestHeader.get(RequestHeader.REFERER, null);
-            if (r == null) return null;
-            return new DigestURL(r);
-        } catch (final Exception e) {
-            return null;
-        }
+        return this.requestHeader.referer();
     }
 
     public byte[] referrerHash() {
         if (this.requestHeader == null) return null;
-        final String u = this.requestHeader.get(RequestHeader.REFERER, "");
-        if (u == null || u.isEmpty()) return null;
-        try {
-            return new DigestURL(u).hash();
-        } catch (final Exception e) {
-            return null;
-        }
+        final DigestURL url = this.requestHeader.referer();
+        if (url == null) return null;
+        return url.hash();
     }
 
     public boolean validResponseStatus() {
