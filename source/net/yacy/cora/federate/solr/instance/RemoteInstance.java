@@ -50,6 +50,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.entity.GzipDecompressingEntity;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
@@ -140,7 +141,7 @@ public class RemoteInstance implements SolrInstance {
                     BasicScheme basicAuth = new BasicScheme();
                     HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
                     authCache.put(targetHost, basicAuth);
-                    context.setAttribute(org.apache.http.client.protocol.ClientContext.AUTH_CACHE, authCache);
+                    context.setAttribute(org.apache.http.client.protocol.HttpClientContext.AUTH_CACHE, authCache);
                     this.setHttpRequestRetryHandler(new org.apache.http.impl.client.DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
                     return context;
                 }
@@ -152,7 +153,7 @@ public class RemoteInstance implements SolrInstance {
                 @Override
                 public void process(final HttpRequest request, final HttpContext context) throws IOException {
                     if (!request.containsHeader(HeaderFramework.ACCEPT_ENCODING)) request.addHeader(HeaderFramework.ACCEPT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
-                    if (!request.containsHeader("Connection")) request.addHeader("Connection", "close"); // prevent CLOSE_WAIT
+                    if (!request.containsHeader(HTTP.CONN_DIRECTIVE)) request.addHeader(HTTP.CONN_DIRECTIVE, "close"); // prevent CLOSE_WAIT
                 }
 
             });

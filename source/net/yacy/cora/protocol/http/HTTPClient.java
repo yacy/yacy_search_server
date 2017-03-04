@@ -852,7 +852,7 @@ public class HTTPClient {
             }
     	}
     	if (this.host != null) httpUriRequest.setHeader(HTTP.TARGET_HOST, this.host);
-        httpUriRequest.setHeader("Connection", "close"); // don't keep alive, prevent CLOSE_WAIT state
+        httpUriRequest.setHeader(HTTP.CONN_DIRECTIVE, "close"); // don't keep alive, prevent CLOSE_WAIT state
     }
 
     private void storeConnectionInfo(final HttpUriRequest httpUriRequest) {
