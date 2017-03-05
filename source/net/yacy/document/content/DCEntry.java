@@ -25,6 +25,8 @@
 
 package net.yacy.document.content;
 
+import com.ibm.icu.util.ULocale;
+
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
@@ -42,6 +44,8 @@ import org.apache.solr.common.params.MultiMapSolrParams;
 
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
@@ -74,13 +78,13 @@ public class DCEntry extends MultiMapSolrParams {
             double lon
             ) {
         super(new TreeMap<String, String[]>((Collator) insensitiveCollator.clone()));
-        this.getMap().put("dc:identifier", new String[]{url.toNormalform(true)});
-        this.getMap().put("dc:date", new String[]{ISO8601Formatter.FORMATTER.format(date)});
-        this.getMap().put("dc:title", new String[]{title});
-        this.getMap().put("dc:creator", new String[]{author});
-        this.getMap().put("dc:description", new String[]{body});
-        this.getMap().put("geo:lat", new String[]{Double.toString(lat)});
-        this.getMap().put("geo:long", new String[]{Double.toString(lon)});
+        this.getMap().put(DublinCore.Identifier.getURIref(), new String[]{url.toNormalform(true)});
+        this.getMap().put(DublinCore.Date.getURIref(), new String[]{ISO8601Formatter.FORMATTER.format(date)});
+        this.getMap().put(DublinCore.Title.getURIref(), new String[]{title});
+        this.getMap().put(DublinCore.Creator.getURIref(), new String[]{author});
+        this.getMap().put(DublinCore.Description.getURIref(), new String[]{body});
+        this.getMap().put(Geo.Lat.getURIref(), new String[]{Double.toString(lat)});
+        this.getMap().put(Geo.Long.getURIref(), new String[]{Double.toString(lon)});
     }
 
     /*
@@ -105,7 +109,7 @@ public class DCEntry extends MultiMapSolrParams {
     public Date getDate() {
         String d = this.get("docdatetime");
         if (d == null) d = this.get("date");
-        if (d == null) d = this.get("dc:date");
+        if (d == null) d = this.get(DublinCore.Date.getURIref());
         if (d == null) d = this.get("last-modified");
         if (d == null) return null;
         if (d.isEmpty()) return null;
@@ -133,7 +137,7 @@ public class DCEntry extends MultiMapSolrParams {
         if (u == null) u = this.get("sku");
         
         if (u == null) {
-            final String[] urls = this.getParams("dc:identifier");
+            final String[] urls = this.getParams(DublinCore.Identifier.getURIref());
             if (urls == null) {
                 return useRelationAsAlternative ? getRelation() : null;
             }
@@ -157,7 +161,7 @@ public class DCEntry extends MultiMapSolrParams {
     }
 
     public DigestURL getRelation() {
-        String u = this.get("dc:relation");
+        String u = this.get(DublinCore.Relation.getURIref());
         if (u == null) return null;
         String[] urls = CommonPattern.SEMICOLON.split(u);
         if (urls.length > 1) {
@@ -206,9 +210,8 @@ public class DCEntry extends MultiMapSolrParams {
 
     //modified by copperdust; Ukraine, 2012
     public String getLanguage() {//final language computation
-        String l = this.get("dc:language");//from document metainfo
+        String l = this.get(DublinCore.Language.getURIref());//from document metainfo
         // OAI uses often 3-char languages (ISO639-2) convert to ISO639-1 2-char code)
-        // TODO: implement complete list of ISO639-2/ISO639-3 language codes
         if (l != null && l.length() == 3) {
             if (l.startsWith("ger") || l.startsWith("deu")) l = "de";
             else if (l.startsWith("eng")) l = "en";
@@ -223,7 +226,12 @@ public class DCEntry extends MultiMapSolrParams {
             else if (l.startsWith("fre") || l.startsWith("fra")) l = "fr";
             else if (l.startsWith("eus") || l.startsWith("baq")) l = "eu";
             else if (l.startsWith("gre") || l.startsWith("ell")) l = "el";
-
+            else {
+                // icu.ULocale performs a normalization (of ISO639-2/T) to ISO639-1 2-char language code
+                // (fyi: ISO639-2 allows (T)erminology and (B)ibliographic (e.g. chi=zh and zho=zh), ICU handles (T) )
+                ULocale loc = new ULocale(l);
+                l = loc.getLanguage();
+            }
             return l;
         }
         if (l == null) l = getIdentifier(true).language(); // determine from identifier-url.TLD
@@ -232,39 +240,39 @@ public class DCEntry extends MultiMapSolrParams {
     }
 
     public String getType() {
-        String t = this.get("dc:type");
+        String t = this.get(DublinCore.Type.getURIref());
         if (t == null) return "";
         return t;
     }
 
     public String getFormat() {
-        String t = this.get("dc:format");
+        String t = this.get(DublinCore.Format.getURIref());
         if (t == null) return "";
         return t;
     }
 
     public String getSource() {
-        String t = this.get("dc:source");
+        String t = this.get(DublinCore.Source.getURIref());
         if (t == null) return "";
         return t;
     }
 
     public String getRights() {
-        String t = this.get("dc:rights");
+        String t = this.get(DublinCore.Rights.getURIref());
         if (t == null) return "";
         return t;
     }
 
     public String getTitle() {
         String t = this.get("title");
-        if (t == null) t = this.get("dc:title");
+        if (t == null) t = this.get(DublinCore.Title.getURIref());
         t = stripCDATA(t);
         if (t == null) return "";
         return t;
     }
 
     public String getPublisher() {
-        String t = this.get("dc:publisher");
+        String t = this.get(DublinCore.Publisher.getURIref());
         t = stripCDATA(t);
         if (t == null) return "";
         return t;
@@ -272,14 +280,14 @@ public class DCEntry extends MultiMapSolrParams {
 
     public String getCreator() {
         String t = this.get("author");
-        if (t == null) t = this.get("dc:creator");
+        if (t == null) t = this.get(DublinCore.Creator.getURIref());
         t = stripCDATA(t);
         if (t == null) return "";
         return t;
     }
 
     public List<String> getDescriptions() {
-        String[] t = this.getParams("dc:description");
+        String[] t = this.getParams(DublinCore.Description.getURIref());
         List<String> descriptions = new ArrayList<String>();
         if (t == null) return descriptions;
         for (String s: t) descriptions.add(stripCDATA(s));
@@ -297,7 +305,7 @@ public class DCEntry extends MultiMapSolrParams {
             t = stripCDATA(t);
             return CommonPattern.SEMICOLON.split(t);
         }
-        tx = this.getParams("dc:subject");
+        tx = this.getParams(DublinCore.Subject.getURIref());
         
         if (tx != null) {
             for (int i = 0; i < tx.length; i++) {
@@ -308,15 +316,15 @@ public class DCEntry extends MultiMapSolrParams {
     }
 
     public double getLon() {
-        String t = this.get("geo:long");
-        if (t == null) t = this.get("geo:lon");
+        String t = this.get(Geo.Long.getURIref());
+        if (t == null) t = this.get("geo:lon"); // try geo:long with possible typing error
         t = stripCDATA(t);
         if (t == null) return 0.0d;
         return Double.parseDouble(t);
     }
 
     public double getLat() {
-        String t = this.get("geo:lat");
+        String t = this.get(Geo.Lat.getURIref());
         t = stripCDATA(t);
         if (t == null) return 0.0d;
         return Double.parseDouble(t);
