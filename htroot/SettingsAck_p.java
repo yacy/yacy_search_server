@@ -33,7 +33,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.Formatter;
@@ -56,9 +55,8 @@ public class SettingsAck_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        // get referer for backlink
-        final MultiProtocolURL referer = header.referer();
-        prop.put("needsRestart_referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true));
+        // set default backlink
+        prop.put("needsRestart_referer", "Settings_p.html");
         prop.put("needsRestart", false);
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
 
@@ -97,6 +95,9 @@ public class SettingsAck_p {
 
         // proxy password
         if (post.containsKey("proxyaccount")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=ProxyAccess");
+            
             /*
              * display port info
              */
@@ -150,6 +151,9 @@ public class SettingsAck_p {
 
         // http networking
         if (post.containsKey("httpNetworking")) {
+        	
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=ProxyAccess");
 
             // set transparent proxy flag
             boolean isTransparentProxy = post.containsKey("isTransparentProxy");
@@ -169,13 +173,15 @@ public class SettingsAck_p {
             // setting X-Forwarded-for header property
             env.setConfig("proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader"));
             prop.put("info_proxy.sendXForwardedForHeader", post.containsKey("proxy.sendXForwardedForHeader")? "on" : "off");
-
+            
             prop.put("info", "20");
             return prop;
         }
 
         // server access
         if (post.containsKey("serveraccount")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=ServerAccess");
         	
         	// fileHost
         	String fileHost = (post.get("fileHost")).trim();
@@ -252,6 +258,8 @@ public class SettingsAck_p {
         }
 
         if (post.containsKey("proxysettings")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=proxy");
 
             /* ====================================================================
              * Reading out the remote proxy settings
@@ -289,6 +297,9 @@ public class SettingsAck_p {
         }
 
         if (post.containsKey("urlproxySettings")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=UrlProxyAccess");
+            
             env.setConfig("proxyURL.access", post.get("urlproxyfilter"));
             env.setConfig("proxyURL.rewriteURLs", post.get("urlproxydomains"));
             env.setConfig("proxyURL", "on".equals(post.get("urlproxyenabled")) ? true : false);
@@ -299,6 +310,9 @@ public class SettingsAck_p {
         }
 
         if (post.containsKey("seedUploadRetry")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=seed");
+            
             String error;
             if ((error = Network.saveSeedList(sb)) == null) {
                 // trying to upload the seed-list file
@@ -313,6 +327,9 @@ public class SettingsAck_p {
         }
 
         if (post.containsKey("seedSettings")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=seed");
+            
             // get the currently used uploading method
             final String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
             final String newSeedUploadMethod = post.get("seedUploadMethod");
@@ -345,6 +362,11 @@ public class SettingsAck_p {
                 }
                 return prop;
             }
+        }
+        
+        if (post.containsKey("seedFileSettings") || post.containsKey("seedFtpSettings") || post.containsKey("seedScpSettings")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=seed");
         }
 
         /*
@@ -406,6 +428,9 @@ public class SettingsAck_p {
          * Message forwarding configuration
          */
         if (post.containsKey("msgForwarding")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=messageForwarding");
+            
             env.setConfig("msgForwardingEnabled", post.containsKey("msgForwardingEnabled"));
             env.setConfig("msgForwardingCmd", post.get("msgForwardingCmd"));
             env.setConfig("msgForwardingTo", post.get("msgForwardingTo"));
@@ -420,6 +445,9 @@ public class SettingsAck_p {
 
         // Crawler settings
         if (post.containsKey("crawlerSettings")) {
+        	
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=crawler");
 
             // get Crawler Timeout
             String timeoutStr = post.get("crawler.clientTimeout");
@@ -505,6 +533,10 @@ public class SettingsAck_p {
 
         // change https port
         if (post.containsKey("port.ssl")) {
+        	
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=ProxyAccess");
+        	
             int port = post.getInt("port.ssl", 8443);
             if (port > 0 && port != env.getConfigInt("port.ssl", 8443)) {
                 env.setConfig("port.ssl", port);
@@ -516,6 +548,9 @@ public class SettingsAck_p {
         
         // Debug/Analysis settings
         if (post.containsKey("debugAnalysisSettings")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=debug");
+            
         	boolean tickedCheckbox = post.containsKey("solrBinaryResponse");
             env.setConfig(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED, tickedCheckbox);
             
@@ -549,6 +584,9 @@ public class SettingsAck_p {
         
         // Referrer Policy settings
         if (post.containsKey("referrerPolicySettings")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=referrer");
+            
         	String metaPolicy = post.get("metaPolicy", SwitchboardConstants.REFERRER_META_POLICY_DEFAULT);
             env.setConfig(SwitchboardConstants.REFERRER_META_POLICY, metaPolicy);
             
