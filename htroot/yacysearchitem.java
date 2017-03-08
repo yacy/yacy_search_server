@@ -102,6 +102,7 @@ public class yacysearchitem {
         prop.put("rssreferences", "0");
         prop.put("dynamic", "0");
         prop.put("localQuery", "0");
+        prop.put("statistics", "0");
 
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
@@ -111,16 +112,17 @@ public class yacysearchitem {
         }
 
         // dynamically update count values
-        prop.put("offset", theSearch.query.neededResults() - theSearch.query.itemsPerPage() + 1);
-        prop.put("itemscount", Formatter.number(Math.min((item < 0) ? theSearch.query.neededResults() : item + 1, theSearch.getResultCount())));
-        prop.put("itemsperpage", Formatter.number(theSearch.query.itemsPerPage));
-        prop.put("totalcount", Formatter.number(theSearch.getResultCount(), true));
-        prop.put("localResourceSize", Formatter.number(theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get(), true));
-        prop.put("remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
-        prop.put("remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
-        prop.put("remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
-        prop.put("navurlBase", QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false).toString());
-        prop.put("localQuery", theSearch.query.isLocal() ? "1" : "0");
+        prop.put("statistics", "1");
+        prop.put("statistics_offset", theSearch.query.neededResults() - theSearch.query.itemsPerPage() + 1);
+        prop.put("statistics_itemscount", Formatter.number(Math.min((item < 0) ? theSearch.query.neededResults() : item + 1, theSearch.getResultCount())));
+        prop.put("statistics_itemsperpage", Formatter.number(theSearch.query.itemsPerPage));
+        prop.put("statistics_totalcount", Formatter.number(theSearch.getResultCount(), true));
+        prop.put("statistics_localResourceSize", Formatter.number(theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get(), true));
+        prop.put("statistics_remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
+        prop.put("statistics_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
+        prop.put("statistics_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
+        prop.put("statistics_navurlBase", QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false).toString());
+        prop.put("statistics_localQuery", theSearch.query.isLocal() ? "1" : "0");
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
         final boolean noreferrer = sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_NOREFERRER, SwitchboardConstants.SEARCH_RESULT_NOREFERRER_DEFAULT);
 
