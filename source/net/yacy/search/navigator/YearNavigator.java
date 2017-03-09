@@ -22,6 +22,7 @@
  */
 package net.yacy.search.navigator;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -97,20 +98,21 @@ public class YearNavigator extends StringNavigator implements Navigator {
             if (field.getType() == SolrType.date) {
                 Object val = doc.getFieldValue(field.getSolrFieldName());
                 if (val != null) {
+                    Calendar cal = Calendar.getInstance();
                     if (val instanceof Collection) {
                         Collection<Object> ll = (Collection) val;
                         for (Object o : ll) {
                             if (o instanceof String) {
                                 this.inc((String) o);
                             } else if (o instanceof Date) {
-                                Date dd = (Date) o;
-                                String year = Integer.toString(dd.getYear() + 1900);
+                                cal.setTime((Date) o);
+                                String year = Integer.toString(cal.get(Calendar.YEAR));
                                 this.inc(year);
                             }
                         }
                     } else {
-                        Date dd = (Date) val;
-                        String year = Integer.toString(dd.getYear() + 1900);
+                        cal.setTime((Date) val);
+                        String year = Integer.toString(cal.get(Calendar.YEAR));
                         this.inc(year);
                     }
                 }
@@ -131,7 +133,7 @@ public class YearNavigator extends StringNavigator implements Navigator {
         if (up) {
             years = new TreeSet<String>();
         } else {
-            years = new TreeSet(Collections.reverseOrder());
+            years = new TreeSet<String>(Collections.reverseOrder());
         }
 
         // make sure keys with high score are included (display may be limited in size)

@@ -39,7 +39,7 @@ public class NavigatorPlugins {
      * @return Map key=navigatorCfgname, value=std.DisplayName
      */
     static public Map<String, String> listAvailable() {
-        Map<String, String> defaultnavplugins = new TreeMap();
+        Map<String, String> defaultnavplugins = new TreeMap<String, String>();
         defaultnavplugins.put("filetype", "Filetype");
         // defaultnavplugins.put("hosts", "Provider");
         // defaultnavplugins.put("language", "Language");
