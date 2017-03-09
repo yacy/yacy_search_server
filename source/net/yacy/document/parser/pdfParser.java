@@ -63,7 +63,6 @@ import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
-import org.apache.pdfbox.pdmodel.PDPageTree;
 
 
 public class pdfParser extends AbstractParser implements Parser {
