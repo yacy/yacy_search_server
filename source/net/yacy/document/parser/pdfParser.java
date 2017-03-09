@@ -63,6 +63,7 @@ import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import org.apache.pdfbox.pdmodel.PDPageTree;
 
 
 public class pdfParser extends AbstractParser implements Parser {
@@ -219,9 +220,10 @@ public class pdfParser extends AbstractParser implements Parser {
                     t.start();
                     t.join(3000); // pdfbox likes to forget to terminate ... (quite often)
                     if (t.isAlive()) t.interrupt();
+                    contentBytes = writer.getBytes(); // get final text before closing writer
+                    writer.close(); // free writer resources
                 }
-                contentBytes = writer.getBytes(); // get final text before closing writer
-
+                
                 Collection<AnchorURL> pdflinksCombined = new HashSet<AnchorURL>();
                 for (Collection<AnchorURL> pdflinksx: pdflinks) if (pdflinksx != null) pdflinksCombined.addAll(pdflinksx);
                 result = new Document[]{new Document(
@@ -245,7 +247,6 @@ public class pdfParser extends AbstractParser implements Parser {
                         docDate)};
             }         
         } catch (final Throwable e) {
-            //close the writer (in finally)
             //throw new Parser.Failure(e.getMessage(), location);
         } finally {
             try {pdfDoc.close();} catch (final Throwable e) {}
