@@ -49,6 +49,7 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.NumberTools;
 import org.eclipse.jetty.server.CookieCutter;
+import org.eclipse.jetty.util.URIUtil;
 
 /**
  * YaCy servlet request header.
@@ -378,7 +379,7 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         if (_request != null) {
             return _request.getRequestURI();
         } else {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return super.get(HeaderFramework.CONNECTION_PROP_PATH, "/"); // TODO: property as header discouraged (but currently used)
         }
     }
 
@@ -387,7 +388,10 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         if (_request != null) {
             return _request.getRequestURL();
         } else {
-            throw new UnsupportedOperationException("Not supported yet.");
+            StringBuffer sbuf = new StringBuffer(32);
+            URIUtil.appendSchemeHostPort(sbuf, this.getScheme(), this.getServerName(), this.getServerPort());
+            sbuf.append(this.getRequestURI());
+            return sbuf;
         }
     }
 
