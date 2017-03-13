@@ -39,6 +39,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.lod.vocabulary.Geo;
+import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.CommonPattern;
 
@@ -59,9 +60,9 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         guid(new String[]{"guid"}),
         ttl(new String[]{"ttl"}),
         docs(new String[]{"docs"}), // url to the documentation for the format used in the RSS file
-        size(new String[]{"size","length","yacy:size"}),
-        lon(new String[]{"geo:lon", Geo.Long.getURIref()}),
-        lat(new String[]{"geo:lat", Geo.Lat.getURIref()});
+        size(new String[]{"size", "length", YaCyMetadata.size.getURIref()}),
+        lon(new String[]{Geo.Long.getURIref(), "geo:lon"}), // include possible misspelling geo:lon (instead of geo:long)
+        lat(new String[]{Geo.Lat.getURIref()});
         //point("gml:pos,georss:point,coordinates");
         
         private Set<String> keys;
