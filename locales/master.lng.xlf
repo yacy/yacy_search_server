@@ -1537,16 +1537,16 @@
        <source>Distributed Computing Network for Domain</source>
     </trans-unit>
     <trans-unit id="7a54a32c" xml:space="preserve" approved="no" translate="yes">
-       <source>You can configure if you want to participate at the global YaCy network or if you want to have your</source>
+       <source>Enable Peer-to-Peer Mode to participate in the global YaCy network,</source>
     </trans-unit>
     <trans-unit id="4a3a56d" xml:space="preserve" approved="no" translate="yes">
-       <source>own separate search cluster with or without connection to the global network. You may also define</source>
+       <source>or if you want your own separate search cluster with or without connection to the global network.</source>
     </trans-unit>
     <trans-unit id="8c5f22fb" xml:space="preserve" approved="no" translate="yes">
-       <source>a completely independent search engine instance, without any data exchange between your peer and other</source>
+       <source>Enable 'Robinson Mode' for a completely independent search engine instance,</source>
     </trans-unit>
     <trans-unit id="4e15b5fb" xml:space="preserve" approved="no" translate="yes">
-       <source>peers, which we call a 'Robinson' peer.</source>
+       <source>without any data exchange between your peer and other peers.</source>
     </trans-unit>
     <trans-unit id="1a0eef3a" xml:space="preserve" approved="no" translate="yes">
        <source>Peer-to-Peer Mode</source>

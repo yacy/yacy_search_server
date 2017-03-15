@@ -644,11 +644,13 @@ Long Description==Lange Beschreibung
 Indexing Domain==Indexierungs Domain
 #DHT==DHT
 "Change Network"=="Netzwerk wechseln"
+
 Distributed Computing Network for Domain==Verteiltes Rechnen Netzwerk für die Domain
-You can configure if you want to participate at the global YaCy network or if you want to have your==Sie können einstellen, ob Sie am globalen YaCy-Netzwerk teilnehmen wollen oder ob Sie einen eigenen
-own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben möchten. Sie können auch
-a completely independent search engine instance, without any data exchange between your peer and other==eine vollkommen unabhängige Instanz einer Suchmaschine, ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers, definieren.
-peers, which we call a 'Robinson' peer.==Dies nennen wir einen 'Robinson'-Peer.
+Enable Peer-to-Peer Mode to participate in the global YaCy network,==Aktiviere Peer-to-Peer Modus um am globalen YaCy-Netzwerk teilzunehmen,
+or if you want your own separate search cluster with or without connection to the global network.==oder wenn sie ein separates Such-Cluster, mit oder ohne Verbindung zum globalen Netzwerk einrichten wollen.
+Enable 'Robinson Mode' for a completely independent search engine instance,==Aktiviere 'Robinson Mode' um eine vollkommen unabhängige Instanz einer Suchmaschine,
+without any data exchange between your peer and other peers.==ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers einzurichten.
+
 Peer-to-Peer Mode==Peer-to-Peer Modus
 >Index Distribution==>Index-Verteilung
 This enables automated, DHT-ruled Index Transmission to other peers==Dies aktiviert den automatischen, DHT-basierten Versand an andere Peers
