@@ -461,7 +461,8 @@
         <dependency>
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
-            <version>0.1.53</version>
+            <version>0.1.54</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.googlecode.json-simple</groupId>
