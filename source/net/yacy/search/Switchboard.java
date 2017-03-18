@@ -2529,12 +2529,12 @@ public final class Switchboard extends serverSwitch {
             checkInterruption();
 
             // execute the (post-) processing steps for all entries that have a process tag assigned
-            Fulltext fulltext = index.fulltext();
-            CollectionConfiguration collection1Configuration = fulltext.getDefaultConfiguration();
             boolean allCrawlsFinished = this.crawler.allCrawlsFinished(this.crawlQueues);
             int proccount = 0;
     
             if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+                Fulltext fulltext = index.fulltext();
+                CollectionConfiguration collection1Configuration = fulltext.getDefaultConfiguration();
 
                 boolean process_key_exist = collection1Configuration.contains(CollectionSchema.process_sxt);
                 if (!process_key_exist) log.info("postprocessing deactivated: field process_sxt is not enabled");
@@ -3016,7 +3016,7 @@ public final class Switchboard extends serverSwitch {
                 searchEvent,
                 sourceName,
                 getConfigBool(SwitchboardConstants.DHT_ENABLED, false),
-                this.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null,
+                this.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt(SwitchboardConstants.SERVER_PORT, 8090) : null,
                 this.getConfig("crawler.http.acceptLanguage", null));
         final RSSFeed feed =
             EventChannel.channels(queueEntry.initiator() == null
@@ -3907,7 +3907,7 @@ public final class Switchboard extends serverSwitch {
     private static long indeSizeCache = 0;
     private static long indexSizeTime = 0;
     public void updateMySeed() {
-        this.peers.mySeed().put(Seed.PORT, Integer.toString(getPublicPort("port", 8090)));
+        this.peers.mySeed().put(Seed.PORT, Integer.toString(getPublicPort(SwitchboardConstants.SERVER_PORT, 8090)));
 
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - this.startupTime) / 1000;
@@ -3935,10 +3935,10 @@ public final class Switchboard extends serverSwitch {
         mySeed.setFlagAcceptRemoteCrawl(getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
         mySeed.setFlagAcceptRemoteIndex(getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true));
         mySeed.setFlagSSLAvailable(this.getHttpServer() != null && this.getHttpServer().withSSL() && getConfigBool("server.https", false));
-        if (mySeed.getFlagSSLAvailable()) mySeed.put(Seed.PORTSSL, Integer.toString(getPublicPort("port.ssl", 8443)));
+        if (mySeed.getFlagSSLAvailable()) mySeed.put(Seed.PORTSSL, Integer.toString(getPublicPort(SwitchboardConstants.SERVER_SSLPORT, 8443)));
 
         // set local ips
-        String staticIP = this.getConfig("staticIP", "");
+        String staticIP = this.getConfig(SwitchboardConstants.SERVER_STATICIP, "");
         if (staticIP.length() > 0) mySeed.setIP(staticIP);
         Set<String> publicips = myPublicIPs();
         if (!mySeed.clash(publicips)) mySeed.setIPs(publicips);

@@ -136,7 +136,7 @@ public class ConfigBasic {
         if (!(env.getLocalPort() == port) || env.getConfigBool("server.https", false) != ssl) {
             // validate port
             final YaCyHttpServer theServerCore =  env.getHttpServer();
-            env.setConfig("port", port);
+            env.setConfig(SwitchboardConstants.SERVER_PORT, port);
             env.setConfig("server.https", ssl);
             
             // redirect the browser to the new port

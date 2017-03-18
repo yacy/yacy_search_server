@@ -200,11 +200,11 @@ public class SettingsAck_p {
             if (error == null) {
                 serverCore.useStaticIP = true;
                 sb.peers.mySeed().setIP(staticIP);
-                env.setConfig("staticIP", staticIP);
+                env.setConfig(SwitchboardConstants.SERVER_STATICIP, staticIP);
             } else {
                 serverCore.useStaticIP = false;
                 sb.peers.mySeed().setIP("");
-                env.setConfig("staticIP", "");
+                env.setConfig(SwitchboardConstants.SERVER_STATICIP, "");
             }
             
             // server access data
@@ -538,8 +538,8 @@ public class SettingsAck_p {
             prop.put("needsRestart_referer", "Settings_p.html?page=ProxyAccess");
         	
             int port = post.getInt("port.ssl", 8443);
-            if (port > 0 && port != env.getConfigInt("port.ssl", 8443)) {
-                env.setConfig("port.ssl", port);
+            if (port > 0 && port != env.getConfigInt(SwitchboardConstants.SERVER_SSLPORT, 8443)) {
+                env.setConfig(SwitchboardConstants.SERVER_SSLPORT, port);
             }
             prop.put("info_port.ssl", port);
             prop.put("info", "32");

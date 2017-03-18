@@ -43,7 +43,7 @@ public final class SwitchboardConstants {
      * With introduction of DIGEST authentication all passwords are MD5 encoded and calculatd as <code>username:adminrealm:password</code>
      * To differentiate old and new admin passwords, use the new calculated passwords a "MD5:" prefix.
      */
-    
+
     public static final String ADMIN_ACCOUNT                = "adminAccount"; // not used anymore (did hold clear text  username:pwd)
 
     // this holds the credential "MD5:" + Digest.encodeMD5Hex(adminAccountUserName + ":" + adminRealm + ":" + password)
@@ -53,7 +53,12 @@ public final class SwitchboardConstants {
     public static final String ADMIN_ACCOUNT_FOR_LOCALHOST  = "adminAccountForLocalhost";
     public static final String ADMIN_ACCOUNT_All_PAGES      = "adminAccountAllPages";
     public static final String ADMIN_REALM                  = "adminRealm";
-    
+
+    // server settings
+    public static final String SERVER_PORT                  = "port"; // port for the http server
+    public static final String SERVER_SSLPORT               = "port.ssl"; // port for https
+    public static final String SERVER_STATICIP              = "staticIP"; // static IP of http server
+
     public static final String PUBLIC_SEARCHPAGE            = "publicSearchpage";
     
     public static final int   CRAWLJOB_SYNC = 0;

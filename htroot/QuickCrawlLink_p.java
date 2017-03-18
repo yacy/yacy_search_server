@@ -42,6 +42,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -67,7 +68,7 @@ public class QuickCrawlLink_p {
         if (header.containsKey(HeaderFramework.HOST)) {
             port = header.getServerPort();
         } else {
-            port = sb.getConfigInt("port", 8090);
+            port = sb.getConfigInt(SwitchboardConstants.SERVER_PORT, 8090);
         }
         
         prop.put("mode_host", Domains.LOCALHOST);

@@ -99,7 +99,7 @@ public class Network
         peernews.addMessage(new RSSMessage("YaCy started", "", ""));
 
         // ensure that correct IP is used
-        final String staticIP = sb.getConfig("staticIP", "");
+        final String staticIP = sb.getConfig(SwitchboardConstants.SERVER_STATICIP, "");
         if (staticIP.length() != 0 && Seed.isProperIP(staticIP)) {
             serverCore.useStaticIP = true;
             sb.peers.mySeed().setIP(staticIP);
@@ -423,7 +423,7 @@ public class Network
             if (this.sb.peers.mySeed().isProper(true) == null) return true;
 
             // still no success
-            final String ip = this.sb.getConfig("staticIP", "");
+            final String ip = this.sb.getConfig(SwitchboardConstants.SERVER_STATICIP, "");
 
             if (Seed.isProperIP(ip)) {
                 this.sb.peers.mySeed().setIP(ip);

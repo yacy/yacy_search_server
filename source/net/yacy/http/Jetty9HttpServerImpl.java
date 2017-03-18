@@ -83,7 +83,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             final SSLContext sslContext = initSslContext(sb);
             if (sslContext != null) {
 
-                int sslport = sb.getConfigInt("port.ssl", 8443);
+                int sslport = sb.getConfigInt(SwitchboardConstants.SERVER_SSLPORT, 8443);
                 sslContextFactory.setSslContext(sslContext);
 
                 // SSL HTTP Configuration
@@ -298,7 +298,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                 try { // reconnect with new settings (instead to stop/start server, just manipulate connectors
                     final Connector[] cons = server.getConnectors();
                     final int port = Switchboard.getSwitchboard().getLocalPort();
-                    final int sslport = Switchboard.getSwitchboard().getConfigInt("port.ssl", 8443);
+                    final int sslport = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.SERVER_SSLPORT, 8443);
                     for (Connector con : cons) {
                         // check http connector
                         if (con.getName().startsWith("httpd") && ((ServerConnector)con).getPort() != port) {

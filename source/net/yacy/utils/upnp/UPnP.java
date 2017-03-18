@@ -32,6 +32,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 import org.bitlet.weupnp.GatewayDevice;
 import org.bitlet.weupnp.GatewayDiscover;
@@ -53,9 +54,9 @@ public class UPnP {
 	private static final Map<UPnPMappingType, UPnPMapping> MAPPINGS = new EnumMap<>(
 			UPnPMappingType.class);
 	static {
-		MAPPINGS.put(UPnPMappingType.HTTP, new UPnPMapping("port", null, "TCP",
+		MAPPINGS.put(UPnPMappingType.HTTP, new UPnPMapping(SwitchboardConstants.SERVER_PORT, null, "TCP",
 				"YaCy HTTP"));
-		MAPPINGS.put(UPnPMappingType.HTTPS, new UPnPMapping("port.ssl",
+		MAPPINGS.put(UPnPMappingType.HTTPS, new UPnPMapping(SwitchboardConstants.SERVER_SSLPORT,
 				"server.https", "TCP", "YaCy HTTPS"));
 	}
 

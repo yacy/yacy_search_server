@@ -559,7 +559,7 @@ public final class yacy {
         final Properties config = configuration("COMMAND-STEERING", homePath);
 
         // read port
-        final int port = Integer.parseInt(config.getProperty("port", "8090"));
+        final int port = Integer.parseInt(config.getProperty(SwitchboardConstants.SERVER_PORT, "8090"));
 
         // read password
         String encodedPassword = (String) config.get(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5);
@@ -634,7 +634,7 @@ public final class yacy {
                     // prevents also creation of a log file while just opening browser
                     System.out.println("WARNING: the file " + lockFile + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
 
-                    int port = Integer.parseInt(p.getProperty("port", "8090"));
+                    int port = Integer.parseInt(p.getProperty(SwitchboardConstants.SERVER_PORT, "8090"));
                     if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
                         Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
                         // Thats it; YaCy was running, the user is happy, we can stop now.

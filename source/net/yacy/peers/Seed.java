@@ -79,6 +79,7 @@ import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.operation.yacyVersion;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.utils.Bitfield;
 import net.yacy.utils.crypt;
 
@@ -1135,7 +1136,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final Seed newSeed = new Seed(hashs);
 
         // now calculate other information about the host
-        final int port = Switchboard.getSwitchboard().getPublicPort("port", 8090); //get port from config
+        final int port = Switchboard.getSwitchboard().getPublicPort(SwitchboardConstants.SERVER_PORT, 8090); //get port from config
         newSeed.dna.put(Seed.NAME, defaultPeerName() );
         newSeed.dna.put(Seed.PORT, Integer.toString(port));
         return newSeed;

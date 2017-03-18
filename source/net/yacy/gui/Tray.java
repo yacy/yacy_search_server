@@ -273,7 +273,7 @@ public final class Tray {
 	private void openBrowserPage(final String browserPopUpPage) {
 		if(!menuEnabled) return;
 		// no need for https, because we are on localhost
-		Browser.openBrowser("http://localhost:" + sb.getConfig("port", "8090") + "/" + browserPopUpPage);
+		Browser.openBrowser("http://localhost:" + sb.getConfig(SwitchboardConstants.SERVER_PORT, "8090") + "/" + browserPopUpPage);
 	}
 
 	private PopupMenu getPopupMenu() {
