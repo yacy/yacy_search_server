@@ -40,6 +40,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
+import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
@@ -273,7 +274,7 @@ public class AccessTracker_p {
                 Date toDate = new Date();
                 Date fromDate = new Date(toDate.getTime() - 7 * 24 * 3600 * 1000); // 7 Days earlier
                 List<EventTracker.Event> evList = AccessTracker.readLog(AccessTracker.getDumpFile(), fromDate, toDate);
-                ScoreMap<String> topicNavigator = new ConcurrentScoreMap<String>();
+                OrderedScoreMap<String> topicNavigator = new OrderedScoreMap<String>(String.CASE_INSENSITIVE_ORDER);
                 for (EventTracker.Event ev : evList) {
                     String qs = ev.payload.toString();
                     if (qs.startsWith("qs ")) { // currently only raw querystring "qs" lines are included
@@ -290,22 +291,19 @@ public class AccessTracker_p {
                     prop.put("page_nav-topics", "0");
                 } else {
                     // topics navigator
-                    final int TOPWORDS_MAXCOUNT = 20;
+                    final int TOPWORDS_MAXCOUNT = 25;
                     final int TOPWORDS_MINSIZE = 9;
                     final int TOPWORDS_MAXSIZE = 24;
                     int count;
                     prop.put("page_nav-topics", "1");
                     String name;
                     int i = 0;
-                    int maxcount = 0;
-                    Iterator<String> navigatorIterator = topicNavigator.keys(false);
+                    int maxcount = topicNavigator.getMaxScore();
+                    Iterator<String> navigatorIterator = topicNavigator.iterator();
 
                     while (i < TOPWORDS_MAXCOUNT && navigatorIterator.hasNext()) {
                         name = navigatorIterator.next();
                         count = topicNavigator.get(name);
-                        if (maxcount == 0) {
-                            maxcount = count;
-                        }
                         prop.put("page_nav-topics_element_" + i + "_on", 1);
                         prop.put("page_nav-topics_element_" + i + "_name", name);
                         prop.put("page_nav-topics_element_" + i + "_count", count);
