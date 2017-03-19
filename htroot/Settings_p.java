@@ -198,8 +198,9 @@ public final class Settings_p {
         prop.putHTML("crawler.file.maxFileSize",sb.getConfig("crawler.file.maxFileSize", "-1"));
 
         // http server info
-        prop.put("server.https",sb.getConfigBool("server.https", false));
-        prop.put("server.https_port.ssl", sb.getConfig("port.ssl","8443"));
+        prop.put("server.https", sb.getConfigBool("server.https", false));
+        prop.put("server.https_port.ssl", sb.getConfig(SwitchboardConstants.SERVER_SSLPORT,"8443"));
+        prop.put("port.shutdown", sb.getConfig(SwitchboardConstants.SERVER_SHUTDOWNPORT, "-1"));
         
         // debug/analysis
         prop.put("solrBinaryResponseChecked", env.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED, 

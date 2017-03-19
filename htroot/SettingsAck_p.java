@@ -531,6 +531,22 @@ public class SettingsAck_p {
             return prop;
         }
 
+        // server port settings
+        if (post.containsKey("serverports")) {
+            int port = post.getInt("port", 8090);
+            if (port > 0) env.setConfig(SwitchboardConstants.SERVER_PORT, port);
+            int portssl = post.getInt("port.ssl", 8443);
+            if (portssl > 0) env.setConfig(SwitchboardConstants.SERVER_SSLPORT, portssl);
+            int portshutdown = post.getInt("port.shutdown", -1);
+            env.setConfig(SwitchboardConstants.SERVER_SHUTDOWNPORT, portshutdown);
+            prop.put("info_port", port);
+            prop.put("info_port.ssl", portssl);
+            prop.put("info_port.shutdown", portshutdown);
+            prop.put("needsRestart_referer", "Settings_p.html?page=ServerAccess");
+            prop.put("info", "36");
+            return prop;
+        }
+
         // change https port
         if (post.containsKey("port.ssl")) {
         	

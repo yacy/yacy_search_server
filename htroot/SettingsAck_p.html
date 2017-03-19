@@ -194,7 +194,20 @@
     ::<!-- 34: Debug/Analysis settings changed -->
     <p>Debug/Analysis settings have been saved.</p>
     ::<!-- 35: Referrer policy settings changed -->
-    <p>Referrer policy settings have been saved.</p>   
+    <p>Referrer policy settings have been saved.</p>
+    ::<!-- 36: Server port settings changed -->
+    <p>The ports are now configured as follows (active on next start).</p>
+      <table>
+        <tr>
+          <td>HTTP port</td><td> <span class="settingsValue">#[port]#</span></td>
+        </tr>
+        <tr>
+          <td>HTTPS port</td><td> <span class="settingsValue">#[port.ssl]#</span></td>
+        </tr>
+        <tr>          
+          <td>Shutdown port</td><td> <span class="settingsValue">#[port.shutdown]#</span></td>
+        </tr>
+      </table>
     #(/info)#
     <p></p>
     #(needsRestart)#

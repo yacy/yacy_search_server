@@ -47,9 +47,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -208,6 +212,7 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
+import net.yacy.server.serverCore;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.RobotsTxtConfig;
 import net.yacy.utils.CryptoLib;
@@ -4036,7 +4041,71 @@ public final class Switchboard extends serverSwitch {
         return this.terminate;
     }
 
+    /**
+     * Wait until the shutdown semaphore is released.
+     * Optionally if config defines a shutdown port a thread is initalized, to
+     * listen on a defined shutdown port on the local loopback address. If a
+     * connection is made to the shutdown port an a text containig "shutdown"
+     * command, a shutdown is initiated.
+     * @return
+     * @throws InterruptedException
+     */
     public boolean waitForShutdown() throws InterruptedException {
+        final int shutdownPort;
+        if ((shutdownPort = this.getConfigInt(SwitchboardConstants.SERVER_SHUTDOWNPORT, 0)) > 0) {
+            // init thread to listen to a shutdown port - to receive a shutdown signal
+            Thread shutdownThread = new Thread() {
+                @Override
+                public void run() {
+                    ServerSocket ss = null;
+                    try {
+                        
+                        shutdownloop: while (true) {
+                            ss = new ServerSocket(shutdownPort, 0, InetAddress.getLoopbackAddress());
+                            Socket shSocket = ss.accept();
+
+                            InputStream in = shSocket.getInputStream();
+                            BufferedReader inreader = new BufferedReader(new InputStreamReader(in));
+                            String cmd = inreader.readLine(); // read a input line to check for command shutdown
+
+                            // check for shutdown command, accept e.g. http://localhost:8009/shutdown connect with input line "GET /shutdown HTTP/1.1"
+                            if (cmd != null && !cmd.isEmpty()) {
+                                if (cmd.contains("shutdown")) {
+                                    if (cmd.contains("HTTP")) { // write a min. http response
+                                        OutputStream out = shSocket.getOutputStream();
+                                        out.write(UTF8.getBytes("HTTP/1.1 200 OK"));
+                                        out.write(serverCore.CRLF);
+                                        out.close();
+                                    }
+                                    ss.close();
+                                    terminate("shutdown signal received on shutdown port");
+                                } else if (cmd.contains("restart")) {
+                                    if (cmd.contains("HTTP")) { // write a min. http response
+                                        OutputStream out = shSocket.getOutputStream();
+                                        out.write(UTF8.getBytes("HTTP/1.1 200 OK"));
+                                        out.write(serverCore.CRLF);
+                                        out.close();
+                                    }
+                                    ss.close();
+                                    yacyRelease.restart();
+                                }
+                                break shutdownloop; // important to get out of the loop
+                            }
+                            ss.close(); // we don't want to accept any additional input (abort/disconnect if not expected input)
+                        }
+                    } catch (IOException ex) {
+                    } finally {
+                        if (ss != null) {
+                            try {
+                                ss.close();
+                            } catch (IOException ex) { }
+                        }
+                    }
+                }
+            };
+            shutdownThread.start();
+        }
+
         this.shutdownSync.acquire();
         return this.terminate;
     }

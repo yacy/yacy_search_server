@@ -59,4 +59,28 @@
   </tr>
 </table>
 </fieldset>
+
+<fieldset><legend id="serverports">Server Port Settings</legend>
+<table border="0" cellspacing="5">
+  <tr valign="top">
+    <td>Server port:</td>
+    <td><input name="port" type="text" size="7" maxlength="80" value="#[port]#" /></td>
+    <td>This is the main port for all http communication. A change requires a restart.</td>
+  </tr>
+  <tr valign="top">
+    <td>Server ssl port:</td>
+    <td><input name="port.ssl" type="text" size="7" maxlength="80" value="#[server.https_port.ssl]#" /></td>
+    <td>This is the port to connect via https. A change requires a restart.</td>
+  </tr>
+  <tr valign="top">
+    <td>Shutdown port:</td>
+    <td><input name="port.shutdown" type="text" size="7" maxlength="80" value="#[port.shutdown]#" /></td>
+    <td>This is the local port on the loopback address (127.0.0.1 or :1) to listen for a shutdown signal to stop the YaCy server (-1 disables the shutdown port).A change requires a restart.</td>
+  </tr>
+  <tr valign="top">
+    <td colspan="3"><input type="submit" name="serverports" class="btn btn-primary" value="Submit" /></td>
+  </tr>
+</table>
+</fieldset>
+
 </form>

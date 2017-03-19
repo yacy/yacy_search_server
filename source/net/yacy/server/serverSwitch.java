@@ -157,7 +157,7 @@ public class serverSwitch {
 	@Deprecated
 	public String myPublicIP() {
 		// if a static IP was configured, we have to return it here ...
-		final String staticIP = getConfig("staticIP", "");
+		final String staticIP = getConfig(SwitchboardConstants.SERVER_STATICIP, "");
 		if (staticIP.length() > 0)
 			return staticIP;
 
@@ -176,7 +176,7 @@ public class serverSwitch {
 	 */
 	public Set<String> myPublicIPs() {
 		// if a static IP was configured, we have to return it here ...
-		final String staticIP = getConfig("staticIP", "");
+		final String staticIP = getConfig(SwitchboardConstants.SERVER_STATICIP, "");
 		if (staticIP.length() > 0) {
 			HashSet<String> h = new HashSet<>();
 			h.add(staticIP);
@@ -254,7 +254,7 @@ public class serverSwitch {
 		if(localPort != null) {
 			return localPort;
 		}
-		return getConfigInt("port", 8090);
+		return getConfigInt(SwitchboardConstants.SERVER_PORT, 8090);
 	}
 
 	// a logger for this switchboard
