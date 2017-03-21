@@ -2003,15 +2003,6 @@ Password (repeat same as above):==mot de passe (bitte zur Sicherheit erneut eing
 #value="submit">==value="Speichern">
 #-----------------------------
 
-#File: Settings_SystemBehaviour.inc
-#---------------------------
-#System Behaviour Settings==System Einstellungen
-#Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite beim Start von YaCy:
-#"enable"=="Aktivieren"
-#"disable"=="Deaktivieren"
-
-#-----------------------------
-
 #File: Status.html
 #---------------------------
 Console Status==&Eacute;tat de la console

@@ -7868,6 +7868,30 @@
     <trans-unit id="3c6c4174" xml:space="preserve" approved="no" translate="yes">
        <source>value="Submit"</source>
     </trans-unit>
+    <trans-unit id="f2f1bee5" xml:space="preserve" approved="no" translate="yes">
+       <source>Server Port Settings</source>
+    </trans-unit>
+    <trans-unit id="246950dc" xml:space="preserve" approved="no" translate="yes">
+       <source>Server port:</source>
+    </trans-unit>
+    <trans-unit id="11ba0b94" xml:space="preserve" approved="no" translate="yes">
+       <source>This is the main port for all http communication (default is 8090).</source>
+    </trans-unit>
+    <trans-unit id="995db35f" xml:space="preserve" approved="no" translate="yes">
+       <source>A change requires a restart.</source>
+    </trans-unit>
+    <trans-unit id="ce203048" xml:space="preserve" approved="no" translate="yes">
+       <source>Server ssl port:</source>
+    </trans-unit>
+    <trans-unit id="7960e3f5" xml:space="preserve" approved="no" translate="yes">
+       <source>This is the port to connect via https (default is 8443).</source>
+    </trans-unit>
+    <trans-unit id="13e3c5af" xml:space="preserve" approved="no" translate="yes">
+       <source>Shutdown port:</source>
+    </trans-unit>
+    <trans-unit id="b2287092" xml:space="preserve" approved="no" translate="yes">
+       <source>This is the local port on the loopback address (127.0.0.1 or :1) to listen for a shutdown signal to stop the YaCy server (-1 disables the shutdown port, recommended default is 8005).</source>
+    </trans-unit>                   
   </body>
 </file>
 

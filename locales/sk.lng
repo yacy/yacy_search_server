@@ -1652,14 +1652,6 @@ Password (repeat same as above):==Heslo (zopakujte prosim):
 value="submit">==value="Uloz">
 #-----------------------------
 
-#File: Settings_SystemBehaviour.inc
-#---------------------------
-System Behaviour Settings==Systemove nastavenia
-Auto pop-up of status page on start-up:==Automaticky pop-up stranky stavu pri starte YaCy:
-"enable"=="aktivuj"
-"disable"=="deaktivuj"
-#-----------------------------
-
 #File: simple_search.html
 #---------------------------
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Vyhladavacia stranka
