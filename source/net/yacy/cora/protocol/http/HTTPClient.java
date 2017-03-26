@@ -54,10 +54,13 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -66,6 +69,7 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.Lookup;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
@@ -79,6 +83,7 @@ import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ContentBody;
+import org.apache.http.impl.auth.BasicSchemeFactory;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
@@ -96,6 +101,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.http.auth.YaCyDigestSchemeFactory;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.Memory;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
@@ -296,6 +302,10 @@ public class HTTPClient {
      * This method GETs a page from the server.
      *
      * @param uri the url to get
+     * @param username user name for HTTP authentication : only sent requesting localhost
+     * @param pass password for HTTP authentication : only sent when requesting localhost
+     * @param concurrent whether a new thread should be created to handle the request. 
+     * Ignored when requesting localhost or when the authentication password is not null
      * @return content bytes
      * @throws IOException
      */
@@ -307,6 +317,10 @@ public class HTTPClient {
      * This method GETs a page from the server.
      *
      * @param uri the url to get
+     * @param username user name for HTTP authentication : only sent requesting localhost
+     * @param pass password for HTTP authentication : only sent when requesting localhost
+     * @param concurrent whether a new thread should be created to handle the request. 
+     * Ignored when requesting localhost or when the authentication password is not null
      * @return content bytes
      * @throws IOException
      */
@@ -318,7 +332,11 @@ public class HTTPClient {
      * This method GETs a page from the server.
      *
      * @param uri the url to get
+     * @param username user name for HTTP authentication : only sent requesting localhost
+     * @param pass password for HTTP authentication : only sent when requesting localhost
      * @param maxBytes to get
+     * @param concurrent whether a new thread should be created to handle the request. 
+     * Ignored when requesting localhost or when the authentication password is not null
      * @return content bytes
      * @throws IOException
      */
@@ -331,7 +349,11 @@ public class HTTPClient {
      * This method GETs a page from the server.
      *
      * @param uri the url to get
-     * @param maxBytes to get
+     * @param username user name for HTTP authentication : only sent requesting localhost
+     * @param pass password for HTTP authentication : only sent when requesting localhost
+     * @param maxBytes maximum response bytes to read
+     * @param concurrent whether a new thread should be created to handle the request. 
+     * Ignored when requesting localhost or when the authentication password is not null
      * @return content bytes
      * @throws IOException
      */
@@ -351,9 +373,18 @@ public class HTTPClient {
         
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
-                AuthScope.ANY, // thats ok since we tested for localhost!
+        		new AuthScope("localhost", url.getPort()),
                 new UsernamePasswordCredentials(username, pass));
-        CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider).build();
+        
+        /* Use the custom YaCyDigestScheme for HTTP Digest Authentication */
+        final Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
+                .register(AuthSchemes.BASIC, new BasicSchemeFactory())
+                .register(AuthSchemes.DIGEST, new YaCyDigestSchemeFactory())
+                .build();
+        
+        
+		CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
+				.setDefaultAuthSchemeRegistry(authSchemeRegistry).build();
         byte[] content = null;
         try {
             this.httpResponse = httpclient.execute(httpGet);
@@ -502,6 +533,23 @@ public class HTTPClient {
      * @throws IOException
      */
     public byte[] POSTbytes(final MultiProtocolURL url, final String vhost, final Map<String, ContentBody> post, final boolean usegzip, final boolean concurrent) throws IOException {
+    	return POSTbytes(url, vhost, post, null, null, usegzip, concurrent);
+    }
+    
+    /**
+     * Send data using HTTP POST method to the server named by vhost
+     *
+     * @param url address to request on the server
+     * @param vhost name of the server at address which should respond. When null, localhost is assumed.
+     * @param post data to send (name-value-pairs)
+     * @param userName user name for HTTP authentication : only sent when requesting localhost
+     * @param password encoded password for HTTP authentication : only sent when requesting localhost
+     * @param usegzip if the body should be gzipped
+     * @return response body
+     * @throws IOException when an error occurred
+     */
+    public byte[] POSTbytes(final MultiProtocolURL url, final String vhost, final Map<String, ContentBody> post, 
+    		final String userName, final String password, final boolean usegzip, final boolean concurrent) throws IOException {
     	final HttpPost httpPost = new HttpPost(url.toNormalform(true));
     	final boolean localhost = Domains.isLocalhost(url.getHost());
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
@@ -518,8 +566,46 @@ public class HTTPClient {
         } else {
             httpPost.setEntity(multipartEntity);
         }
-
-        return getContentBytes(httpPost, Integer.MAX_VALUE, concurrent);
+        
+        if (!localhost || password == null) {
+            return getContentBytes(httpPost, Integer.MAX_VALUE, concurrent);
+        }
+        
+        byte[] content = null;
+        
+        final CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(
+                new AuthScope("localhost", url.getPort()),
+                new UsernamePasswordCredentials(userName, password));
+        
+        /* Use the custom YaCyDigestScheme for HTTP Digest Authentication */
+        final Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
+                .register(AuthSchemes.BASIC, new BasicSchemeFactory())
+                .register(AuthSchemes.DIGEST, new YaCyDigestSchemeFactory())
+                .build();
+        
+        
+		CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
+				.setDefaultAuthSchemeRegistry(authSchemeRegistry).build();
+		
+        try {
+            this.httpResponse = httpclient.execute(httpPost);
+            try {
+                HttpEntity httpEntity = this.httpResponse.getEntity();
+                if (httpEntity != null) {
+                    if (getStatusCode() == HttpStatus.SC_OK) {
+                        content = getByteArray(httpEntity, Integer.MAX_VALUE);
+                    }
+                    // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+                    EntityUtils.consume(httpEntity);
+                }
+            } finally {
+                this.httpResponse.close();
+            }
+        } finally {
+            httpclient.close();
+        }
+        return content;
     }
 
     /**
