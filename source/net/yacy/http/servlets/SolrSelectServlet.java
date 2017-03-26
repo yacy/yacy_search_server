@@ -21,12 +21,10 @@
 package net.yacy.http.servlets;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,7 +63,6 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
-import static org.apache.solr.common.params.MultiMapSolrParams.addParam;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
@@ -89,8 +86,14 @@ import org.apache.solr.util.FastWriter;
 public class SolrSelectServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
     
-    public final static Map<String, QueryResponseWriter> RESPONSE_WRITER = new HashMap<String, QueryResponseWriter>();
-    static {
+    public final Map<String, QueryResponseWriter> RESPONSE_WRITER = new HashMap<String, QueryResponseWriter>();
+
+    /**
+     * Default initialization, adds additional and custom result response writers
+     * in addition to the Solr default writers.
+     */
+    @Override
+    public void init() {
         RESPONSE_WRITER.putAll(SolrCore.DEFAULT_RESPONSE_WRITERS);
         XSLTResponseWriter xsltWriter = new XSLTResponseWriter();
         OpensearchResponseWriter opensearchResponseWriter = new OpensearchResponseWriter();
@@ -183,7 +186,7 @@ public class SolrSelectServlet extends HttpServlet {
                 if (bq.length() > 0) mmsp.getMap().put(DisMaxParams.BQ, StringUtils.split(bq,"\t\n\r\f")); // bq split into multiple query params, allowing space in single query
                 if (bf.length() > 0) mmsp.getMap().put("boost", new String[]{bf}); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
             }
-            
+
             // get a response writer for the result
             String wt = mmsp.get(CommonParams.WT, "xml"); // maybe use /solr/select?q=*:*&start=0&rows=10&wt=exml
             QueryResponseWriter responseWriter = RESPONSE_WRITER.get(wt);
@@ -232,7 +235,7 @@ public class SolrSelectServlet extends HttpServlet {
             if (ranking != null) { // ranking normally never null
                 final String qf = ranking.getQueryFields();
                 if (qf.length() > 4) { // make sure qf has content (else use df)
-                    addParam(DisMaxParams.QF, qf, mmsp.getMap()); // add QF that we set to be best suited for our index
+                    MultiMapSolrParams.addParam(DisMaxParams.QF, qf, mmsp.getMap()); // add QF that we set to be best suited for our index
                             // TODO: if every peer applies a decent QF itself, this can be reverted to getMap().put()
                 } else {
                     mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
@@ -303,39 +306,11 @@ public class SolrSelectServlet extends HttpServlet {
         }
     }
 
-    private static void sendError(HttpServletResponse hresponse, Throwable ex) throws IOException {
+    private void sendError(HttpServletResponse hresponse, Throwable ex) throws IOException {
         int code = (ex instanceof SolrException) ? ((SolrException) ex).code() : 500;
         StringWriter sw = new StringWriter();
         ex.printStackTrace(new PrintWriter(sw));
         hresponse.sendError((code < 100) ? 500 : code, ex.getMessage() + "\n\n" + sw.toString());
-    }
-
-    public static void waitForSolr(String context, int port) throws Exception {
-        // A raw term query type doesn't check the schema
-        URL url = new URL("http://127.0.0.1:" + port + context + "/select?q={!raw+f=test_query}ping");
-
-        Exception ex=null;
-        // Wait for a total of 20 seconds: 100 tries, 200 milliseconds each
-        for (int i = 0; i < 600; i++) {
-            try {
-                InputStream stream = url.openStream();
-                stream.close();
-            } catch (final IOException e) {
-                ex=e;
-                Thread.sleep(200);
-                continue;
-            }
-            return;
-        }
-        throw new RuntimeException("Jetty/Solr unresponsive", ex);
-    }
-
-    public static class Servlet404 extends HttpServlet {
-        private static final long serialVersionUID=-4497069674942245148L;
-        @Override
-        public void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
-            res.sendError(404, "Can not find: " + req.getRequestURI());
-        }
     }
 
 }

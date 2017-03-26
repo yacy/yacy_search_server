@@ -693,11 +693,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
         /* Host and port still null : let's use the default local ones */
         if (hostAndPort == null) {
-        	if(sb != null) {
-        		hostAndPort = Domains.LOCALHOST + ":" + sb.getConfigInt("port", 8090);
-        	} else {
-        		hostAndPort = Domains.LOCALHOST + ":8090";
-        	}
+            if (sb != null) {
+                hostAndPort = Domains.LOCALHOST + ":" + sb.getConfigInt(SwitchboardConstants.SERVER_PORT, 8090);
+            } else {
+                hostAndPort = Domains.LOCALHOST + ":8090";
+            }
         }
         
         if(header != null) {
