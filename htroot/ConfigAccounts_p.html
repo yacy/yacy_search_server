@@ -30,6 +30,7 @@
 
     <fieldset><legend>Admin Account</legend>
       <form action="ConfigAccounts_p.html" method="post" accept-charset="UTF-8">
+      	  <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
           <fieldset>
             <legend>
             <input type="radio" name="access" id="access_localhost" value="localhost"#(localhost.checked)#:: checked="checked"#(/localhost.checked)# />
@@ -60,6 +61,7 @@
     
     <fieldset><legend>Access Rules</legend>
       <form action="ConfigAccounts_p.html" method="post" accept-charset="UTF-8">
+      		<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
             <dl class="userConfig">
               <dt>Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.</dt>
               <dd><input type="checkbox" name="adminAccountAllPages" data-size="small"#(adminAccountAllPages.checked)#:: checked="checked"#(/adminAccountAllPages.checked)#></dd>
@@ -74,6 +76,7 @@
     
     <fieldset><legend>User Accounts</legend>
 	<form action="ConfigAccounts_p.html" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
       <fieldset><legend>Select user</legend>
         <dl>
           <dt><label for="user">Select user</label>:</dt>
@@ -93,6 +96,7 @@
     </form>
     
     <form action="ConfigAccounts_p.html" method="post" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
       <fieldset><legend>Edit current user: #[username]#</legend>
         <!-- Hidden(text for debugging): <input type="text" name="current_user" value="#[current_user]#" readonly> -->
         <input type="hidden" name="current_user" value="#[current_user]#" />

@@ -11,6 +11,7 @@
     <h2>Index Deletion</h2>
     <p>The search index contains #[doccount]# documents. You can delete them here. Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.</p>
     <form id="IndexDeletionPath" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset>
       <legend>Delete by URL Matching</legend>
       <p>Delete all documents within a sub-path of the given urls. That means all documents must start with one of the url stubs as given here.</p>
@@ -31,7 +32,8 @@
     </fieldset>
     </form>
     
-    <form id="IndexDeletionAge" action="IndexDeletion_p.html" method="get" accept-charset="UTF-8">
+    <form id="IndexDeletionAge" action="IndexDeletion_p.html" method="post" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset>
       <legend>Delete by Age</legend>
       <p>Delete all documents which are older than a given time period.</p>
@@ -78,7 +80,8 @@
     </fieldset>
     </form>
     
-    <form id="IndexDeletionCollection" action="IndexDeletion_p.html" method="get" accept-charset="UTF-8">
+    <form id="IndexDeletionCollection" action="IndexDeletion_p.html" method="post" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset>
       <legend>Delete Collections</legend>
       <p>Delete all documents which are inside specific collections.</p>
@@ -104,6 +107,7 @@
     </form>
     
     <form id="IndexDeletionQuery" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset>
       <legend>Delete by Solr Query</legend>
       <p>This is the most generic option: select a set of documents using a solr query.</p>

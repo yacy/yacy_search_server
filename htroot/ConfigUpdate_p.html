@@ -1,7 +1,6 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
   <head>
-    #(forwardToSteering)#::<meta http-equiv="REFRESH" content="0; url=/Steering.html?update=1&amp;releaseinstall=#[release]#" />#(/forwardToSteering)#
     <title>YaCy '#[clientname]#': System Update</title>
     #%env/templates/metas.template%#
   </head>
@@ -35,10 +34,11 @@
         #(/downloadError)#
       </p></form></dd>
       <dt><br />Downloaded Releases</dt>
-      <dd><form action="ConfigUpdate_p.html" method="get" accept-charset="UTF-8"><p>
+      <dd><form action="Steering.html" method="post" accept-charset="UTF-8"><p>
 		#(downloadsAvailable)#
 		No downloaded releases available for deployment.
 		::
+		<input type="hidden" name="update" value="1"/>
 		&nbsp;<select name="releaseinstall">
 		#(/downloadsAvailable)#
         #{downloadedreleases}#
@@ -46,8 +46,9 @@
         #{/downloadedreleases}#
         #(downloadsAvailable)#::</select>#(/downloadsAvailable)#
         #(deployenabled)#::no&nbsp;automated installation on development environments::
+		<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
     	&nbsp;&nbsp;<input type="submit" name="update" class="btn btn-primary" value="Install Release" #(buttonsActive)#disabled="disabled"::#(/buttonsActive)#/>
-        &nbsp;&nbsp;<input type="submit" name="deleteRelease" class="btn btn-danger" value="Delete Release" #(buttonsActive)#disabled="disabled"::#(/buttonsActive)#/>
+        &nbsp;&nbsp;<input type="submit" name="deleteRelease" formaction="ConfigUpdate_p.html" class="btn btn-danger" value="Delete Release" #(buttonsActive)#disabled="disabled"::#(/buttonsActive)#/>
         #(/deployenabled)#		
       </p></form></dd>
       <dt><br />Automatic Update</dt>

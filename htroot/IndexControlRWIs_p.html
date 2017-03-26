@@ -28,6 +28,7 @@
     
     #(limitations)#::
     <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset><legend>Limitations</legend>
       <dl>
         <dt class="TableCellDark">Index Reference Size</dt>
@@ -47,6 +48,7 @@
     <p>No entry for word hash #[wordhash]#</p>::
 	<p>Search result:
 	<form name="selection" action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <table border="0">
 	  <tr class="TableHeader">
 	  	<td style="background-color:#FFFFFF">&nbsp;</td>

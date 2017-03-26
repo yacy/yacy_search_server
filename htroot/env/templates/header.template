@@ -22,12 +22,66 @@
         <input type="hidden" name="nav" value="all" />
       </form>
     </div>
+	<script type="text/javascript">
+	    /**
+	    * Request the server for a valid transaction token and then send a steering request
+	    * @param tokenInputId HTML identifier of the transaction token input field
+	    * @param formId identifier of the form
+	    */
+		function sendSteeringRequest(tokenInputId, formId) {
+			var xhr = new XMLHttpRequest();
+			xhr.onreadystatechange = function() {
+				if (xhr.readyState == XMLHttpRequest.DONE) {
+					if(xhr.status != 200) {
+						if(xhr.status == 401) {
+							alert("Please authenticate with administrator credentials.");
+						} else {
+							alert("The server rejected the request or is not responding!");
+						}
+					} else {
+						var requestSent = false;
+						var transactionTokenInput = document.getElementById(tokenInputId);
+						if(transactionTokenInput) {
+							transactionTokenInput.value = xhr.getResponseHeader("X-YaCy-Transaction-Token")
+							var restartForm = document.getElementById(formId);
+							if(restartForm) {
+								requestSent = true;
+								restartForm.submit();
+							}
+						}
+						if(!requestSent) {
+							alert("Could not send the request to the server!");
+						}
+					}
+				}
+			};
+			xhr.open("get", "Steering.html", true);
+			xhr.send();
+		}
+		
+		/** Trigger the server restart after asking for user confirm */
+		function confirmRestart() {
+			if(confirm('Confirm Re-Start')) {
+				sendSteeringRequest("restartTransactionToken", "restartForm");
+			}
+		}
+		
+		/** Trigger the server restart after asking for user confirm */
+		function confirmShutdown() {
+			if(confirm('Confirm Shutdown')) {
+				sendSteeringRequest("shutdownTransactionToken", "shutdownForm");
+			}
+		}
+	</script>
     <div class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
         <li id="header_restart">
-          <form action="Steering.html" method="get">
+          <form action="Steering.html" method="post" id="restartForm">
+			<input type="hidden" name="transactionToken" value="" id="restartTransactionToken"/>
             <input type="hidden" name="restart" value="" />
-            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-warning" onclick="return confirm('Confirm Re-Start')" title="Restart">
+          </form>
+          <form action="Steering.html" method="get">
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-warning" onclick="confirmRestart(); return false;" title="Restart">
             	<span class="glyphicon glyphicon-fire"></span>
             	<span class="hidden-sm"> Re-Start</span>
             </button>
@@ -35,9 +89,12 @@
         </li>
         <li>&nbsp;</li>
         <li id="header_shutdown">
-          <form action="Steering.html" method="get">
+          <form action="Steering.html" method="post" id="shutdownForm">
+			<input type="hidden" name="transactionToken" value="" id="shutdownTransactionToken"/>
             <input type="hidden" name="shutdown" value="" />
-            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="return confirm('Confirm Shutdown')" title="Shutdown">
+          </form>
+          <form action="Steering.html" method="get">
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="confirmShutdown(); return false;" title="Shutdown">
             	<span class="glyphicon glyphicon-off"></span>
             	<span class="hidden-sm"> Shutdown</span>
             </button>

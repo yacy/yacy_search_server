@@ -34,20 +34,27 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.TransactionManager;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class ConfigProperties_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
 
         String key = "";
         String value = "";
 
         //change a key
         if (post != null && post.containsKey("key") && post.containsKey("value")) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             key = post.get("key").trim();
             value = post.get("value").trim();
             if (key != null && !key.isEmpty()) {

@@ -33,9 +33,11 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.UserDB;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.http.Jetty9HttpServerImpl;
@@ -45,10 +47,14 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class ConfigAccounts_p {
-
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+	
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        
         final Switchboard sb = Switchboard.getSwitchboard();
         UserDB.Entry entry = null;
 
@@ -56,10 +62,12 @@ public class ConfigAccounts_p {
         boolean localhostAccess = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
 
         if (post != null && post.containsKey("setAccess")) {
+        	TransactionManager.checkPostTransaction(header, post);
             sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES, post.getBoolean(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES));
         }
         
         if (post != null && post.containsKey("setAdmin")) {
+        	TransactionManager.checkPostTransaction(header, post);
             localhostAccess = post.get("access", "").equals("localhost");
             final String user = post.get("adminuser", "");
             final String pw1  = post.get("adminpw1", "");
@@ -149,6 +157,7 @@ public class ConfigAccounts_p {
             //user=from userlist
             //current_user = edited user
         } else if (post.containsKey("user") && !"newuser".equals(post.get("user"))){
+        	TransactionManager.checkPostTransaction(header, post);
             if (post.containsKey("change_user")) {
                 //defaults for newuser are set above
                 entry = sb.userDB.getEntry(post.get("user"));
@@ -174,6 +183,7 @@ public class ConfigAccounts_p {
                 sb.userDB.removeEntry(post.get("user"));
             }
         } else if (post.containsKey("change")) { //New User / edit User
+        	TransactionManager.checkPostTransaction(header, post);
             prop.put("text", "0");
             prop.put("error", "0");
 

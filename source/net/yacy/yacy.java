@@ -38,24 +38,34 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.apache.http.entity.mime.content.ContentBody;
+
 import com.google.common.io.Files;
 
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.sorting.Array;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Response;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.Translator;
 import net.yacy.document.Document;
 import net.yacy.gui.YaCyApp;
@@ -545,7 +555,10 @@ public final class yacy {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
-        submitURL(homePath, "Steering.html?shutdown=", "Terminate YaCy");
+        
+        final LinkedHashMap<String,ContentBody> post = new LinkedHashMap<String,ContentBody>();
+        post.put("shutdown", UTF8.StringBody(""));
+        submitPostURL(homePath, "Steering.html", "Terminate YaCy", post);
     }
 
     public static void update(final File homePath) {
@@ -555,6 +568,77 @@ public final class yacy {
         submitURL(homePath, "ConfigUpdate_p.html?autoUpdate=", "Update YaCy to most recent version");
     }
 
+    /**
+     * Submits post data to the local peer URL, authenticating as administrator
+     * @param homePath directory containing YaCy DATA folder
+     * @param path url relative path part
+     * @param processdescription description of the operation for logging purpose
+     * @param post data to post
+     */
+    private static void submitPostURL(final File homePath, final String path, final String processdescription, final Map<String, ContentBody> post) {
+        final Properties config = configuration("COMMAND-STEERING", homePath);
+
+        // read port
+        final int port = Integer.parseInt(config.getProperty(SwitchboardConstants.SERVER_PORT, "8090"));
+
+        // read password
+        final String encodedPassword = config.getProperty(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
+        final String adminUser = config.getProperty(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+
+        // send 'wget' to web interface
+        final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
+        // con.setHeader(requestHeader.entrySet());
+        try {
+        	/* First get a valid transaction token using HTTP GET */
+            con.GETbytes("http://localhost:"+ port +"/" + path, adminUser, encodedPassword, false);
+            
+            if (con.getStatusCode() != HttpStatus.SC_OK) {
+                throw new IOException("Error response from YACY socket: " + con.getHttpResponse().getStatusLine());
+            }
+            
+            final Header transactionTokenHeader = con.getHttpResponse().getFirstHeader(HeaderFramework.X_YACY_TRANSACTION_TOKEN);
+            if(transactionTokenHeader == null) {
+            	throw new IOException("Could not retrieve a valid transaction token");
+            }
+
+            /* Then POST the request */
+            post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, UTF8.StringBody(transactionTokenHeader.getValue()));
+            con.POSTbytes(new MultiProtocolURL("http://localhost:"+ port +"/" + path), null, post, adminUser, encodedPassword, false, false);
+            if (con.getStatusCode() >= HttpStatus.SC_OK && con.getStatusCode() < HttpStatus.SC_MULTIPLE_CHOICES) {
+                ConcurrentLog.config("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
+            } else {
+            	ConcurrentLog.severe("COMMAND-STEERING", "error response from YACY socket: " + con.getHttpResponse().getStatusLine());
+            	
+                try {
+        			HTTPClient.closeConnectionManager();
+        		} catch (final InterruptedException e1) {
+        			e1.printStackTrace();
+        		}
+            	
+                System.exit(-1);
+            }
+        } catch (final IOException e) {
+            ConcurrentLog.severe("COMMAND-STEERING", "could not establish connection to YACY socket: " + e.getMessage());
+            
+            try {
+    			HTTPClient.closeConnectionManager();
+    		} catch (final InterruptedException e1) {
+    			e1.printStackTrace();
+    		}
+            
+            System.exit(-1);
+        }
+
+        try {
+			HTTPClient.closeConnectionManager();
+		} catch (final InterruptedException e) {
+			e.printStackTrace();
+		}
+
+        // finished
+        ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
+    }
+    
     private static void submitURL(final File homePath, final String path, final String processdescription) {
         final Properties config = configuration("COMMAND-STEERING", homePath);
 

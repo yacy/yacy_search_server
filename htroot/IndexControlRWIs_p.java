@@ -46,6 +46,7 @@ import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
+import net.yacy.data.TransactionManager;
 import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
@@ -80,7 +81,7 @@ public class IndexControlRWIs_p {
 
     private final static String errmsg = "not possible to compute word from hash";
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -89,7 +90,12 @@ public class IndexControlRWIs_p {
         prop.putHTML("keystring", "");
         prop.put("keyhash", "");
         prop.put("result", "");
-        prop.put("limitations", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
+        final boolean limitationsEnabled = (post == null || post.containsKey("maxReferencesLimit"));
+        prop.put("limitations", limitationsEnabled ? 1 : 0);
+        if(limitationsEnabled) {
+            /* Acquire a transaction token for the next available POST form submission */
+            prop.put("limitations_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        }
 
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
@@ -152,6 +158,9 @@ public class IndexControlRWIs_p {
 
             // set reference limitation
             if ( post.containsKey("maxReferencesLimit") ) {
+            	/* Check the transaction is valid */
+            	TransactionManager.checkPostTransaction(header, post);
+            	
                 if ( post.get("maxReferencesRadio", "").equals("on") ) {
                     ReferenceContainer.maxReferences = post.getInt("maxReferences", 0);
                 } else {
@@ -162,6 +171,9 @@ public class IndexControlRWIs_p {
 
             // delete word
             if ( post.containsKey("keyhashdeleteall") ) {
+            	/* Check the transaction is valid */
+            	TransactionManager.checkPostTransaction(header, post);
+            	
                 try {
                     if ( delurl || delurlref ) {
                         // generate urlx: an array of url hashes to be deleted
@@ -245,6 +257,9 @@ public class IndexControlRWIs_p {
 
             // transfer to other peer
             if ( post.containsKey("keyhashtransfer") ) {
+            	/* Check the transaction is valid */
+            	TransactionManager.checkPostTransaction(header, post);
+            	
                 try {
                     if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
                         prop.put("keystring", "&lt;" + errmsg + "&gt;");
@@ -454,6 +469,9 @@ public class IndexControlRWIs_p {
             }
 
             if ( prop.getInt("searchresult", 0) == 3 ) {
+                /* Acquire a transaction token for the next available POST form submissions */
+                prop.put("searchresult_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+                
                 listHosts(prop, keyhash, sb);
             }
         }

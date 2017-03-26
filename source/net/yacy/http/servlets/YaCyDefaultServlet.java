@@ -69,7 +69,9 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.BadTransactionException;
 import net.yacy.data.InvalidURLLicenceException;
+import net.yacy.data.TransactionManager;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
@@ -882,13 +884,25 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
             } catch(InvocationTargetException e) {
             	if(e.getCause() instanceof InvalidURLLicenceException) {
-                	/* A non authaurized user is trying to fetch a image with a bad or already released license code */
+                	/* A non authorized user is trying to fetch a image with a bad or already released license code */
                 	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
+                	return;
+                }
+            	if(e.getCause() instanceof BadTransactionException) {
+                	/* A request for a protected page with server-side effects failed because the transaction is not valid :
+                	 * for example because missing or invalid transaction token*/
+                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage() 
+                			+ " If you sent this request with a web browser, please refresh the origin page.");
                 	return;
                 }
             	if(e.getCause() instanceof TemplateMissingParameterException) {
                 	/* A template is used but miss some required parameter */
                 	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
+                	return;
+                }
+            	if(e.getCause() instanceof DisallowedMethodException) {
+                	/* The request was sent using an disallowed HTTP method */
+                	response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getCause().getMessage());
                 	return;
                 }
             	ConcurrentLog.logException(e);
@@ -982,6 +996,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
             } else {
                 templatePatterns = new servletProperties((serverObjects) tmp);
+            }
+            
+            if(templatePatterns.containsKey(TransactionManager.TRANSACTION_TOKEN_PARAM)) {
+                /* The response contains a transaction token : we also write the transaction token as a custom header 
+                 * to allow usage by external tools (such as curl or wget) without the need to parse HTML */
+                response.setHeader(HeaderFramework.X_YACY_TRANSACTION_TOKEN, templatePatterns.get(TransactionManager.TRANSACTION_TOKEN_PARAM));
             }
 
             // handle YaCy http commands

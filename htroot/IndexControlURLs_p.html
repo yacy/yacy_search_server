@@ -94,6 +94,7 @@ function updatepage(str) {
     </form>
     
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset#(cleanup)# disabled="disabled"::#(/cleanup)#><legend>Cleanup</legend>
       <dl>
         <dt class="TableCellDark">Index Deletion</dt>
@@ -115,6 +116,7 @@ function updatepage(str) {
     
     #(dumprestore)#::
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset><legend>Optimize Solr</legend>
       <dl>
         <dt>&nbsp;</dt>
@@ -125,6 +127,7 @@ function updatepage(str) {
     </fieldset>
     </form>
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset><legend>Reboot Solr Core</legend>
       <dl>
         <dt>&nbsp;</dt>
@@ -160,6 +163,7 @@ function updatepage(str) {
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
         <td>
           <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+            <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
             <div>
               <input type="hidden" name="domain" value="#[domain]#" />
               <input type="hidden" name="lines" value="#[lines]#" />
@@ -188,6 +192,7 @@ function updatepage(str) {
     </p>
     <p>
       <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+        <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
         <input type="hidden" name="keystring" value="" />
         <input type="hidden" name="keyhash" value="" />
         <input type="hidden" name="urlstring" value="" />

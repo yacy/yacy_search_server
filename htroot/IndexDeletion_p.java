@@ -37,6 +37,7 @@ import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.QueryModifier;
@@ -47,10 +48,13 @@ import net.yacy.server.serverSwitch;
 
 public class IndexDeletion_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
 
         SolrConnector defaultConnector = sb.index.fulltext().getDefaultConnector();
         SolrConnector webgraphConnector = sb.index.fulltext().getWebgraphConnector();
@@ -121,6 +125,9 @@ public class IndexDeletion_p {
         int count = post == null ? -1 : post.getInt("count", -1);
 
         if (post != null && (post.containsKey("simulate-urldelete") || post.containsKey("engage-urldelete"))) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             boolean simulate = post.containsKey("simulate-urldelete");
             // parse the input
             urldelete = urldelete.trim(); 
@@ -180,6 +187,9 @@ public class IndexDeletion_p {
         }
 
         if (post != null && (post.containsKey("simulate-timedelete") || post.containsKey("engage-timedelete"))) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             boolean simulate = post.containsKey("simulate-timedelete");
             Date deleteageDate = null;
             long t = timeParser(timedelete_number, timedelete_unit); // year, month, day, hour
@@ -206,6 +216,9 @@ public class IndexDeletion_p {
         }
         
         if (post != null && (post.containsKey("simulate-collectiondelete") || post.containsKey("engage-collectiondelete"))) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             boolean simulate = post.containsKey("simulate-collectiondelete");
             collectiondelete = collectiondelete.replaceAll(" ","").replaceAll(",", "|");
             String query = collectiondelete_mode_unassigned_checked ? "-" + CollectionSchema.collection_sxt + AbstractSolrConnector.CATCHALL_DTERM : collectiondelete.length() == 0 ? CollectionSchema.collection_sxt + ":\"\"" : QueryModifier.parseCollectionExpression(collectiondelete);
@@ -228,6 +241,9 @@ public class IndexDeletion_p {
         }
         
         if (post != null && (post.containsKey("simulate-querydelete") || post.containsKey("engage-querydelete"))) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             boolean simulate = post.containsKey("simulate-querydelete");
 
             SolrConnector connector = schemaName.equals(CollectionSchema.CORE_NAME) ? defaultConnector : sb.index.fulltext().getWebgraphConnector();

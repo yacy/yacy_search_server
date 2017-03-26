@@ -6,7 +6,7 @@ if [ -z "$1" ]; then
 	exit 2
 fi
 
-(./apicall.sh "ConfigAccounts_p.html?setAdmin=&adminuser=admin&adminpw1=$1&adminpw2=$1&access=" > /dev/null && \
+(./protectedPostApiCall.sh "ConfigAccounts_p.html" "setAdmin=&adminuser=admin&adminpw1=$1&adminpw2=$1&access=" && \
 echo "Password for User Name 'admin' set to '$1'") || \
 (echo "Password setting failed" && \
 exit 1)

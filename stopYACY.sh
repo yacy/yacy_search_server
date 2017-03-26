@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 cd `dirname $0`
 
-(bin/apicall.sh "Steering.html?shutdown=true" > /dev/null && \
+(bin/protectedPostApiCall.sh "Steering.html" "shutdown=true" > /dev/null && \
 
 echo "Please wait until the YaCy daemon process terminates [wget]" && \
 echo "You can monitor this with 'tail -f DATA/LOG/yacy00.log' and 'fuser log/yacy00.log'") || \

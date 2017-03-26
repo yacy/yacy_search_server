@@ -23,19 +23,28 @@
   
   
     <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
       <fieldset>
         <legend>Memory Settings</legend>
         <dl>
           <dt><label for="Xmx">Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr></label></dt>
           <dd><input name="Xmx" id="Xmx" type="text" size="5" maxlength="5" value="#[Xmx]#" /> MByte&nbsp;
               <input type="submit" class="btn btn-primary" name="setStartup" value="Set" />&nbsp;
-              #(setStartupCommit)#::<div class="commit">Accepted change. This will take effect after <strong>restart</strong> of YaCy. <br/><a href="Steering.html?restart=" onclick="return confirm('Confirm Restart')">restart now</a></div>::<div class="error"></div>#(/setStartupCommit)#
           </dd>
         </dl>
       </fieldset>
     </form>
+    #(setStartupCommit)#::<div class="commit">Accepted change. This will take effect after <strong>restart</strong> of YaCy. <br/>
+    	<form action="Steering.html" method="post">
+			<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+			<input type="hidden" name="restart" value="" />
+            <button type="submit" class="btn btn-warning" onclick="return confirm('Confirm Re-Start')" title="Restart now">Restart now</button>
+        </form>
+    </div>
+    ::<div class="error"></div>#(/setStartupCommit)#
     
     <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	   <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
       <fieldset>
         <legend>Resource Observer</legend>
         <div class="col-sm-6">
@@ -133,6 +142,7 @@
     </form>
   
   <form action="Performance_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	  <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
 	  <fieldset><legend>Online Caution Settings:</legend>
 	  <p>
 	    This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.

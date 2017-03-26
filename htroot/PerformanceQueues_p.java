@@ -30,6 +30,7 @@ import java.util.Map;
 
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.TransactionManager;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
@@ -50,11 +51,17 @@ public class PerformanceQueues_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         File defaultSettingsFile = new File(sb.getAppPath(), "defaults/yacy.init");
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
 
         // get segment
         Segment indexSegment = sb.index;
 
         if(post != null) {
+        	/* Check the transaction is valid : validation apply then for every uses of this post parameter */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
         	if(post.containsKey("defaultFile")){
 	            // TODO check file-path!
 	            final File value = new File(sb.getAppPath(), post.get("defaultFile", "defaults/yacy.init"));
@@ -70,6 +77,9 @@ public class PerformanceQueues_p {
 	            sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
 	            sb.setConfig("javastart_Xms", "Xms" + xms + "m");
 	            prop.put("setStartupCommit", "1");
+	            
+	            /* Acquire a transaction token for the restart operation */
+	            prop.put("setStartupCommit_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header, "/Steering.html"));
             }
             if(post.containsKey("diskFree")) {
             	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, post.getLong("diskFree", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT));

@@ -103,6 +103,10 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     /** Added when generating legacy request header to allow template servlets to know the original request scheme : "http" or "https" */
     @Deprecated /** use getScheme() (header not used in any request, 2017-02-22) */
     public static final String X_YACY_REQUEST_SCHEME = "X-YaCy-Request-Scheme";
+    
+    /** Added to responses embedding a hidden HTML field containing a transaction token, 
+     * to allow easier retrieval (without HTML parsing) of the token value by external tools such as bash scripts */
+    public static final String X_YACY_TRANSACTION_TOKEN = "X-YaCy-Transaction-Token";
 
     public static final String SET_COOKIE = "Set-Cookie";
     public static final String SET_COOKIE2 = "Set-Cookie2";

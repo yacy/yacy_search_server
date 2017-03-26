@@ -35,6 +35,7 @@ import java.util.TreeSet;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.operation.yacyBuildProperties;
@@ -46,7 +47,7 @@ import net.yacy.server.serverSwitch;
 
 public class ConfigUpdate_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
@@ -73,15 +74,6 @@ public class ConfigUpdate_p {
         prop.put("candeploy_downloadError", "0");
 
         if (post != null) {
-            // check if update is supposed to be installed and a release is defined
-            if (post.containsKey("update") && !post.get("releaseinstall", "").isEmpty()) {
-                prop.put("forwardToSteering", "1");
-                prop.putHTML("forwardToSteering_release",post.get("releaseinstall", ""));
-                prop.put("deploys", "1");
-                prop.put("candeploy", "2"); // display nothing else
-                return prop;
-            }
-
             if (post.containsKey("downloadRelease")) {
                 // download a release
                 final String release = post.get("releasedownload", "");
@@ -208,6 +200,8 @@ public class ConfigUpdate_p {
         // check if there are any downloaded releases and if there are enable the update buttons
         prop.put("candeploy_downloadsAvailable", (downloadedReleases.isEmpty()) ? "0" : "1");
         prop.put("candeploy_deployenabled_buttonsActive", (downloadedReleases.isEmpty() || devenvironment) ? "0" : "1");
+        /* Acquire a transaction token for the update operation */
+        prop.put("candeploy_deployenabled_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header, "/Steering.html"));
 
         int relcount = 0;
         for(final yacyRelease release : downloadedReleases) {
