@@ -68,6 +68,9 @@
     <trans-unit id="cdc460c1" xml:space="preserve" approved="no" translate="yes">
        <source>Local Search Log</source>
     </trans-unit>
+    <trans-unit id="37711023" xml:space="preserve" approved="no" translate="yes">
+       <source>Top Search Words (last 7 Days)</source>
+    </trans-unit>      
     <trans-unit id="c7f1f7c3" xml:space="preserve" approved="no" translate="yes">
        <source>Local Search Host Tracker</source>
     </trans-unit>
