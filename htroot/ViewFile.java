@@ -356,6 +356,7 @@ public class ViewFile {
         prop.put("error", "0");
         prop.put("error_url", url.toNormalform(true));
         prop.put("error_hash", urlHash);
+        prop.put("error_inurldb_hash", urlHash);
         prop.put("error_wordCount", wordCount);
         prop.put("error_firstSeen", "");
         long firstseen = sb.index.getFirstSeenTime(ASCII.getBytes(urlHash));
