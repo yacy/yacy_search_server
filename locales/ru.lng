@@ -1719,7 +1719,7 @@ Index Reference Size==Размер индекса ссылок
 No reference size limitation (this may cause strong CPU load when words are searched that appear very often)==Без ограничений (это может сильно нагружать процессор, если искомые слова ищутся слишком часто)
 Limitation of number of references per word:==Ограничение числа ссылок на слово:
 (this causes that old references are deleted if that limit is reached)==(старые ссылки будут удалены, если достигнут предела)
-"Set References Limit"=="Установить"
+>Set References Limit<==>Установить<
 #Cleanup==Очистка
 #>Index Deletion<==>Удаление индекса<
 #>Delete Search Index<==>Удалить поисковый индекс<

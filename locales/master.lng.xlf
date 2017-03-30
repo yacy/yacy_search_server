@@ -4126,7 +4126,7 @@
        <source>(this causes that old references are deleted if that limit is reached)</source>
     </trans-unit>
     <trans-unit id="d83b311f" xml:space="preserve" approved="no" translate="yes">
-       <source>"Set References Limit"</source>
+       <source>&gt;Set References Limit&lt;</source>
     </trans-unit>
     <trans-unit id="eb446daa" xml:space="preserve" approved="no" translate="yes">
        <source>No entry for word '#[word]#'</source>

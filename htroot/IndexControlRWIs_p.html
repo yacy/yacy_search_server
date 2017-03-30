@@ -28,15 +28,16 @@
     
     #(limitations)#::
     <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <input type="hidden" name="maxReferencesLimit" value="Set References Limit" />
 	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset><legend>Limitations</legend>
       <dl>
         <dt class="TableCellDark">Index Reference Size</dt>
-        <dd><input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOff" value="off" #(maxReferencesRadioChecked)#checked="checked"::#(/maxReferencesRadioChecked)# onclick="window.location.href='IndexControlRWIs_p.html?maxReferencesRadio=off&maxReferencesLimit='"/>
+        <dd><input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOff" value="off" #(maxReferencesRadioChecked)#checked="checked"::#(/maxReferencesRadioChecked)# onclick="this.form.submit()"/>
             No reference size limitation (this may cause strong CPU load when words are searched that appear very often)<br/>
-            <input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOn" value="on" #(maxReferencesRadioChecked)#::checked="checked"#(/maxReferencesRadioChecked)# onclick="window.location.href='IndexControlRWIs_p.html?maxReferencesRadio=on&maxReferencesLimit=&maxReferences=#[maxReferences]#'"/>
+            <input type="radio" name="maxReferencesRadio" id="maxReferencesRadioOn" value="on" #(maxReferencesRadioChecked)#::checked="checked"#(/maxReferencesRadioChecked)# onclick="this.form.submit()"/>
             Limitation of number of references per word: <input type="text" name="maxReferences" value="#[maxReferences]#" size="9" maxlength="12" onfocus="document.getElementById('maxReferencesRadioOff').checked = false;document.getElementById('maxReferencesRadioOn').checked = true"/> (this causes that old references are deleted if that limit is reached)<br/><br/>
-            <input type="submit" name="maxReferencesLimit" id="maxReferencesLimit" value="Set References Limit" class="btn btn-primary" style="width:240px;"/>
+            <button type="submit" id="maxReferencesLimit" class="btn btn-primary" style="width:240px;">Set References Limit</button>
         </dd>
       </dl>
     </fieldset>

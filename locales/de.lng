@@ -1594,7 +1594,7 @@ Index Reference Size==Index Referenzgröße
 No reference size limitation (this may cause strong CPU load when words are searched that appear very often)==Kein Referenzgrößen Limit (Dies kann sehr hohe CPU Auslastung erzeigen wenn Wörter gesucht werden die sehr häufig vorkommen)
 Limitation of number of references per word:==Limitierung der Anzahl der Referenzen pro Wort:
 (this causes that old references are deleted if that limit is reached)==(sorgt dafür dass alte References gelöscht werden wenn das Limit erreicht ist)
-"Set References Limit"=="Setze das Referenz Limit"
+>Set References Limit<==>Setze das Referenz Limit<
 #Cleanup==Aufräumen
 #>Index Deletion<==>Index Löschung<
 #>Delete Search Index<==>Lösche Suchindex<

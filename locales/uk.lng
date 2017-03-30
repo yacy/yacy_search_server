@@ -1464,7 +1464,7 @@ Index Reference Size==Кількість посилань
 No reference size limitation (this may cause strong CPU load when words are searched that appear very often)==Без обмеження кількості посилань (може викликати сильне завантаженння CPU при пошуку дуже частих слів)
 Limitation of number of references per word==Обмеження кількості посилань на слово
 this causes that old references als deleted if that limit is reached==старіші посилання видаляються, якщо межа досягнена
-"Set References Limit"=="Виставити обмеження посилань"
+>Set References Limit<==>Виставити обмеження посилань<
 #-----------------------------
 
 #File: IndexControlURLs_p.html
