@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
@@ -72,7 +73,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
     /**
      * Append YaCy JavaScript license information to writer
      * @param writer must be non null
-     * @throws IOException when a write error occured
+     * @throws IOException when a write error occurred
      */
 	private void writeJSLicence(final Writer writer) throws IOException {
 		writer.write("<script>");
@@ -151,7 +152,10 @@ public class HTMLResponseWriter implements QueryResponseWriter {
 
         NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
         paramsList.remove("wt");
-        String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
+        
+        final String coreName = request.getCore().getName();
+        
+        String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName).replaceAll("%22");
 
         DocList response = ((ResultContext) values.get("response")).docs;
         final int sz = response.size();
@@ -164,24 +168,39 @@ public class HTMLResponseWriter implements QueryResponseWriter {
             Document doc = searcher.doc(id);
             LinkedHashMap<String, String> tdoc = translateDoc(schema, doc);
 
-            String title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc
-            if (title == null) title = "";
-            if (sz == 1) {
-                writer.write("<title>" + title + "</title>\n</head><body>\n");
+            
+            String title;
+            if(CollectionSchema.CORE_NAME.equals(coreName)) {
+            	title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc
+            	if (title == null) title = "";
+            	if (sz == 1) {
+            		writer.write("<title>" + title + "</title>\n</head><body>\n");
+            	} else {
+            		writer.write("<title>Documents List</title>\n</head><body>\n");
+            	}
+            } else if(WebgraphSchema.CORE_NAME.equals(coreName)) {
+            	title = "";
+            	writer.write("<title>Links list</title>\n</head><body>\n");
             } else {
-                writer.write("<title>Document List</title>\n</head><body>\n");
+            	title = "";
+            	writer.write("<title>Solr documents List</title>\n</head><body>\n");
             }
             writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
             writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
 
-            writeDoc(writer, tdoc, title);
+            writeDoc(writer, tdoc, title, coreName);
 
             while (iterator.hasNext()) {
                 id = iterator.nextDoc();
                 doc = searcher.doc(id);
                 tdoc = translateDoc(schema, doc);
-                title = tdoc.get(CollectionSchema.title.getSolrFieldName());
-                writeDoc(writer, tdoc, title);
+                if(CollectionSchema.CORE_NAME.equals(coreName)) {
+                	title = tdoc.get(CollectionSchema.title.getSolrFieldName());
+                    if (title == null) title = "";
+                } else {
+                	title = "";
+                }
+                writeDoc(writer, tdoc, title, coreName);
             }
         } else {
             writer.write("<title>No Document Found</title>\n</head><body>\n");
@@ -191,16 +210,21 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("</body></html>\n");
     }
 
-    private static final void writeDoc(Writer writer, LinkedHashMap<String, String> tdoc, String title) throws IOException {
+    private static final void writeDoc(final Writer writer, final LinkedHashMap<String, String> tdoc, final String title, final String coreName) throws IOException {
         writer.write("<form name=\"yacydoc" + title + "\" method=\"post\" action=\"#\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\">\n");
         writer.write("<fieldset>\n");
         
         // add a link to re-crawl this url (in case it is a remote metadata only entry)
-        String sku = tdoc.get(CollectionSchema.sku.getSolrFieldName());
-        final String jsc= "javascript:w = window.open('../QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&followFrames=on&obeyHtmlRobotsNoindex=on&obeyHtmlRobotsNofollow=off&xdstopw=on&title=" + URLEncoder.encode(title, StandardCharsets.UTF_8.name()) + "&url='+escape('"+sku+"'),'_blank','height=250,width=600,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();";
-        writer.write("<div class='btn btn-default btn-sm' style='float:right' onclick=\""+jsc+"\">re-crawl url</div>\n");
+        if(CollectionSchema.CORE_NAME.equals(coreName)) {
+        	String sku = tdoc.get(CollectionSchema.sku.getSolrFieldName());
+        	if(sku != null) {
+        		final String jsc= "javascript:w = window.open('../QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&followFrames=on&obeyHtmlRobotsNoindex=on&obeyHtmlRobotsNofollow=off&xdstopw=on&title=" + URLEncoder.encode(title, StandardCharsets.UTF_8.name()) + "&url='+escape('"+sku+"'),'_blank','height=250,width=600,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();";
+        		writer.write("<div class='btn btn-default btn-sm' style='float:right' onclick=\""+jsc+"\">re-crawl url</div>\n");
+        	}
+        	
+            writer.write("<h1 property=\"" + DublinCore.Title.getURIref()+ "\">" + title + "</h1>\n");
+        }
 
-        writer.write("<h1 property=\"" + DublinCore.Title.getURIref()+ "\">" + title + "</h1>\n");
         writer.write("<dl>\n");
         for (Map.Entry<String, String> entry: tdoc.entrySet()) {
             writer.write("<dt>");
