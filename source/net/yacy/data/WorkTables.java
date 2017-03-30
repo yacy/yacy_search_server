@@ -40,6 +40,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
 import org.apache.http.entity.mime.content.ContentBody;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -49,6 +51,7 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ConcurrentLog;
@@ -106,10 +109,27 @@ public class WorkTables extends Tables {
     public byte[] recordAPICall(final serverObjects post, final String servletName, final String type, final String comment) {
         // remove the apicall attributes from the post object
         String[] pks = post.remove(TABLE_API_COL_APICALL_PK);
+        
         byte[] pk = pks == null ? null : UTF8.getBytes(pks[0]);
 
+        
+        /* Before API URL serialization, we set any eventual transaction token value to empty : 
+         * this will later help identify a new valid transaction token will be necessary, 
+         * but without revealing it in the URL displayed in the process scheduler and storing an invalid value */
+        final String transactionToken = post.get(TransactionManager.TRANSACTION_TOKEN_PARAM);
+        if(transactionToken != null) {
+        	post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, "");
+        }
+        
         // generate the apicall url - without the apicall attributes
         final String apiurl = /*"http://localhost:" + getConfig("port", "8090") +*/ "/" + servletName + "?" + post.toString();
+        
+        /* Now restore the eventual transaction token to prevent side effects on the post object eventually still used by the caller */
+        if(transactionToken != null) {
+        	post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, transactionToken);
+        } else {
+        	post.remove(TransactionManager.TRANSACTION_TOKEN_PARAM);
+        }
 
         // read old entry from the apicall table (if exists)
         Row row = null;
@@ -181,8 +201,25 @@ public class WorkTables extends Tables {
             if (unit.equals("minutes") && time < 10) time = 10;
         }
 
+        
+        /* Before API URL serialization, we set any eventual transaction token value to empty : 
+         * this will later help identify a new valid transaction token will be necessary, 
+         * but without revealing it in the URL displayed in the process scheduler and storing an invalid value */
+        final String transactionToken = post.get(TransactionManager.TRANSACTION_TOKEN_PARAM);
+        if(transactionToken != null) {
+        	post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, "");
+        }
+        
         // generate the apicall url - without the apicall attributes
         final String apiurl = /*"http://localhost:" + getConfig("port", "8090") +*/ "/" + servletName + "?" + post.toString();
+        
+        /* Now restore the eventual transaction token to prevent side effects on the post object eventually still used by the caller */
+        if(transactionToken != null) {
+        	post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, transactionToken);
+        } else {
+        	post.remove(TransactionManager.TRANSACTION_TOKEN_PARAM);
+        }
+        
         byte[] pk = null;
         // insert entry
         try {
@@ -237,26 +274,24 @@ public class WorkTables extends Tables {
             String theapicall = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)) + "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
             try {
                 MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall);
+                final Map<String, String> attributes = url.getAttributes();
+                final boolean isTokenProtectedAPI = attributes.containsKey(TransactionManager.TRANSACTION_TOKEN_PARAM);
                 // use 4 param MultiProtocolURL to allow api_row_url with searchpart (like url?p=a&p2=b ) in client.GETbytes()
-                if (theapicall.length() > 1000) {
+                if (theapicall.length() > 1000 || isTokenProtectedAPI) {
                     // use a POST to execute the call
-                    Map<String, ContentBody> post = new HashMap<>();
-                    for (Map.Entry<String, String> a: url.getAttributes().entrySet()) {
-                        post.put(a.getKey(), UTF8.StringBody(a.getValue()));
-                    }
-                    url = new MultiProtocolURL("http", host, port, url.getFileName());
-                    try {
-                        client.POSTbytes(url, "localhost", post, false, false);
-                    } catch (final IOException e) {
-                        ConcurrentLog.logException(e);
-                        l.put(url.toString(), -1);
-                    }
+                    execPostAPICall(host, port, username, pass, client, l, url, isTokenProtectedAPI);
                 } else {
                     // use a GET to execute the call
                     ConcurrentLog.info("WorkTables", "executing url: " + url.toNormalform(true));
                     try {
                         client.GETbytes(url, username, pass, false); // use GETbytes(MultiProtocolURL,..) form to allow url in parameter (&url=path%
-                        l.put(url.toNormalform(true), client.getStatusCode());
+                        if(client.getStatusCode() == HttpStatus.SC_METHOD_NOT_ALLOWED) {
+                        	/* GET method not allowed (HTTP 450 status) : this may be an old API entry, 
+                        	 * now restricted to HTTP POST and requiring a transaction token. We try now with POST. */
+                        	execPostAPICall(host, port, username, pass, client, l, url, true);
+                        } else {
+                        	l.put(url.toNormalform(true), client.getStatusCode());
+                        }
                     } catch (final IOException e) {
                         ConcurrentLog.logException(e);
                         l.put(url.toString(), -1);
@@ -268,8 +303,78 @@ public class WorkTables extends Tables {
         }
         return l;
     }
+
+    /**
+     * Executes an API call using HTTP POST method to the YaCy peer with the given parameters
+     * @param host the peer host name
+     * @param port the peer port
+     * @param username authentication user name
+     * @param pass authentication encoded password
+     * @param client the HTTP client to use
+     * @param results the results map to update
+     * @param apiURL the full API URL with all parameters
+     * @param isTokenProtectedAPI set to true when the API is protected by a transaction token
+     * @throws MalformedURLException when the HTTP POST url could not be derived from apiURL
+     */
+	private void execPostAPICall(String host, int port, final String username, final String pass,
+			final HTTPClient client, final LinkedHashMap<String, Integer> results, 
+			final MultiProtocolURL apiURL, final boolean isTokenProtectedAPI) throws MalformedURLException {
+		Map<String, ContentBody> post = new HashMap<>();
+		for (Map.Entry<String, String> a: apiURL.getAttributes().entrySet()) {
+		    post.put(a.getKey(), UTF8.StringBody(a.getValue()));
+		}
+
+		final MultiProtocolURL url = new MultiProtocolURL("http", host, port, apiURL.getPath());
+		
+		try {
+			if (isTokenProtectedAPI) {
+		        // Eventually acquire first a new valid transaction token before posting data
+				client.GETbytes(url, username, pass, false);
+				if (client.getStatusCode() != HttpStatus.SC_OK) {
+					/* Do not fail immediately, the token may be no more necessary on this API : 
+					 * let's log a warning but try anyway the POST call that will eventually reject the request */
+					ConcurrentLog.warn("APICALL", "Could not retrieve a transaction token for " + apiURL.toNormalform(true));
+				} else {
+
+					final Header transactionTokenHeader = client.getHttpResponse()
+							.getFirstHeader(HeaderFramework.X_YACY_TRANSACTION_TOKEN);
+					if (transactionTokenHeader == null) {
+						/*
+						 * Do not fail immediately, the token may be no more
+						 * necessary on this API : let's log a warning but try
+						 * anyway the POST call that will eventually reject the
+						 * request
+						 */
+						ConcurrentLog.warn("APICALL",
+								"Could not retrieve a transaction token for " + apiURL.toNormalform(true));
+					} else {
+						post.put(TransactionManager.TRANSACTION_TOKEN_PARAM,
+								UTF8.StringBody(transactionTokenHeader.getValue()));
+					}
+				}
+				
+			}
+			
+			client.POSTbytes(url, "localhost", post, username, pass, false, false);
+			
+			results.put(apiURL.toNormalform(true), client.getStatusCode());
+		} catch (final IOException e) {
+			ConcurrentLog.logException(e);
+			results.put(apiURL.toNormalform(true), -1);
+		}
+	}
     
-    public static int execAPICall(String host, int port, String path, byte[] pk, final String username, final String pass) {
+	/**
+	 * Executes an HTTP GET API call 
+	 * @param host target host name
+	 * @param port target port
+	 * @param path target path
+	 * @param pk the primary key of the api call
+     * @param username authentication user name
+     * @param pass authentication encoded password
+	 * @return the API response HTTP status, or -1 when an error occured
+	 */
+    public static int execGetAPICall(String host, int port, String path, byte[] pk, final String username, final String pass) {
         // now call the api URLs and store the result status
         final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
         client.setTimout(120000);
@@ -289,7 +394,6 @@ public class WorkTables extends Tables {
      * @param pk the primary key of the entry
      * @param host the host where the api shall be called
      * @param port the port on the host
-     * @param realm authentification realm
      * @return the http status code of the api call or -1 if any other IOException occurred
      */
     public int execAPICall(String pk, String host, int port, final String username, final String pass) {

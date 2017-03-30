@@ -212,7 +212,7 @@ public class CrawlStartScanner_p
                         if ( url != null ) {
                             String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99&directDocByURL=off";
                             path += "&crawlingURL=" + url.toNormalform(true);
-                            WorkTables.execAPICall(
+                            WorkTables.execGetAPICall(
                                 Domains.LOCALHOST,
                                 sb.getLocalPort(),
                                 path,
@@ -259,7 +259,7 @@ public class CrawlStartScanner_p
                                     String path =
                                         "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99";
                                     path += "&crawlingURL=" + urlString;
-                                    WorkTables.execAPICall(
+                                    WorkTables.execGetAPICall(
                                         Domains.LOCALHOST,
                                         sb.getLocalPort(),
                                         path,
