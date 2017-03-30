@@ -477,6 +477,26 @@
             <type>jar</type>
         </dependency>
         <dependency>
+            <groupId>org.jwat</groupId>
+            <artifactId>jwat-common</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jwat</groupId>
+            <artifactId>jwat-gzip</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jwat</groupId>
+            <artifactId>jwat-warc</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jwat</groupId>
+            <artifactId>jwat-archive-common</artifactId>
+            <version>1.0.4</version>
+        </dependency>        
+        <dependency>
             <groupId>com.youcruit.com.cybozu.labs</groupId>
             <artifactId>langdetect</artifactId>
             <version>1.1.2-20151117</version>
