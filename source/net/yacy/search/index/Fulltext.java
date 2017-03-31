@@ -59,6 +59,7 @@ import net.yacy.cora.federate.solr.instance.InstanceMirror;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.solr.instance.ShardInstance;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.FlatJSONResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
@@ -650,7 +651,7 @@ public final class Fulltext {
     }
 
     public static enum ExportFormat {
-        text("txt"), html("html"), rss("rss"), solr("xml");
+        text("txt"), html("html"), rss("rss"), solr("xml"), elasticsearch("flatjson");
         private final String ext;
         private ExportFormat(String ext) {this.ext = ext;}
         public String getExt() {return this.ext;}
@@ -801,15 +802,18 @@ public final class Fulltext {
                         this.count++;
                     }
                 } else {
-                    if (this.format == ExportFormat.solr || (this.text && this.format == ExportFormat.text)) {
+                    if (this.format == ExportFormat.solr || this.format == ExportFormat.elasticsearch || (this.text && this.format == ExportFormat.text)) {
                         BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true);
                         SolrDocument doc;
                         while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                             String url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
                             if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
                             CRIgnoreWriter sw = new CRIgnoreWriter();
-                            if (this.text) sw.write((String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName())); else EnhancedXMLResponseWriter.writeDoc(sw, doc);
+                            if (this.text) sw.write((String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName()));
+                            if (this.format == ExportFormat.solr) EnhancedXMLResponseWriter.writeDoc(sw, doc);
+                            if (this.format == ExportFormat.elasticsearch) FlatJSONResponseWriter.writeDoc(sw, doc);
                             sw.close();
+                            if (this.format == ExportFormat.elasticsearch) pw.println("{\"index\":{}}");
                             String d = sw.toString();
                             pw.println(d);
                             this.count++;
