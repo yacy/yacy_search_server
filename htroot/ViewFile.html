@@ -103,7 +103,7 @@ function updatepage(str) {
       <fieldset><legend>URL Metadata</legend>
         <dl>
           <dt>URL:</dt><dd><a href="#[url]#">#[url]#</a></dd>
-          <dt>Hash:</dt><dd><a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[hash]#%22">#[hash]#</a> (click this for full metadata)</dd>
+          <dt>Hash:</dt><dd>#(inurldb)##[hash]#::<a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[hash]#%22">#[hash]#</a> (click this for full metadata)#(/inurldb)#</dd>
           <dt>In Metadata:</dt><dd>#(inurldb)#no::yes#(/inurldb)#</dd>
           <dt>In Cache:</dt><dd>#(incache)#no::yes#(/incache)#</dd>
           <dt>First Seen:</dt><dd>#[firstSeen]#</dd>

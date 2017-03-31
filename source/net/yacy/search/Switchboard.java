@@ -164,6 +164,7 @@ import net.yacy.document.Tokenizer;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
+import net.yacy.document.importer.WarcImporter;
 import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.html.Evaluation;
@@ -2002,6 +2003,16 @@ public final class Switchboard extends serverSwitch {
                 if (zis != null) try {zis.close();} catch (final IOException e) {}
             }
             return moved;
+        } else if (s.endsWith(".warc") || s.endsWith(".warc.gz")) {
+            try {
+                InputStream is = new BufferedInputStream(new FileInputStream(infile));
+                WarcImporter wri = new WarcImporter();
+                wri.indexWarcRecords(is);
+                moved = infile.renameTo(outfile);
+            } catch (IOException ex) {
+                log.warn("IO Error processing warc file " + infile);
+            }
+            return moved;
         }
         InputStream is = null;
         try {
@@ -2162,7 +2173,9 @@ public final class Switchboard extends serverSwitch {
 
                     if ( surrogate.endsWith(".xml")
                         || surrogate.endsWith(".xml.gz")
-                        || surrogate.endsWith(".xml.zip") ) {
+                        || surrogate.endsWith(".xml.zip")
+                        || surrogate.endsWith(".warc")
+                        || surrogate.endsWith(".warc.gz") ) {
                         // read the surrogate file and store entry in index
                         if ( processSurrogate(surrogate) ) {
                             return true;
