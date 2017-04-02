@@ -19,12 +19,12 @@
         <input name="urlstartone" type="text" value="#[defaulturl]#" size="80" />
         <input name="submit" type="submit" class="btn btn-primary" value="Import OAI-PMH source" />
         #(import-one)#::
-        <p><dl>
+        <dl>
           <dt>Source:</dt><dd>#[source]#</dd>
           <dt>Processed:</dt><dd>#[count]# records</dd>
           <dt>ResumptionToken:</dt><dd>#[rt]#</dd>
-        </dl></p>
-        ::<p>Import failed: #[error]#</p>
+        </dl>
+        ::<p class="error">Import failed: #[error]#</p>
         #(/import-one)#
         </fieldset>
     </form>
