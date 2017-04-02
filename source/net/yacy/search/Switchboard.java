@@ -2005,9 +2005,13 @@ public final class Switchboard extends serverSwitch {
             return moved;
         } else if (s.endsWith(".warc") || s.endsWith(".warc.gz")) {
             try {
-                InputStream is = new BufferedInputStream(new FileInputStream(infile));
-                WarcImporter wri = new WarcImporter();
-                wri.indexWarcRecords(is);
+                WarcImporter wri = new WarcImporter(infile);
+                wri.start();
+                try {
+                    wri.join();
+                } catch (InterruptedException ex) {
+                    return moved;
+                }
                 moved = infile.renameTo(outfile);
             } catch (IOException ex) {
                 log.warn("IO Error processing warc file " + infile);

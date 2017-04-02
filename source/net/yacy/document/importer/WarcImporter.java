@@ -22,6 +22,9 @@
  */
 package net.yacy.document.importer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import net.yacy.cora.document.id.DigestURL;
@@ -52,7 +55,29 @@ import org.jwat.warc.WarcRecord;
  * http://archive-access.sourceforge.net/warc/warc_file_format-0.9.html
  * http://archive-access.sourceforge.net/warc/
  */
-public class WarcImporter {
+public class WarcImporter extends Thread implements Importer {
+
+    static public Importer job; // static object to assure only one importer is running (if started from a servlet, this object is used to store the thread)
+
+    private final InputStream source; // current input warc archive
+    private String name; // file name of input source
+    
+    private int recordCnt; // number of responses indexed (for statistic)
+    private long startTime; // (for statistic)
+    private final long sourceSize; // length of the input source (for statistic)
+    private long consumed; // bytes consumed from input source (for statistic)
+
+    public WarcImporter(InputStream f) {
+        source = f;
+        recordCnt = 0;
+        sourceSize = -1;
+    }
+
+    public WarcImporter(File f) throws FileNotFoundException{
+       name = f.getName();
+       sourceSize = f.length();
+       source = new FileInputStream(f);
+    }
 
     /**
      * Reads a Warc file and adds all contained responses to the index.
@@ -64,7 +89,8 @@ public class WarcImporter {
     public void indexWarcRecords(InputStream f) throws IOException {
 
         byte[] content;
-        int cnt = 0;
+        job = this;
+        startTime = System.currentTimeMillis();
 
         WarcReader localwarcReader = WarcReaderFactory.getReader(f);
         WarcRecord wrec = localwarcReader.getNextRecord();
@@ -126,13 +152,82 @@ public class WarcImporter {
                         );
 
                         Switchboard.getSwitchboard().toIndexer(response);
-                        cnt++;
+                        recordCnt++;
                     }
                 }
             }
+            this.consumed = localwarcReader.getConsumed();
             wrec = localwarcReader.getNextRecord();
         }
         localwarcReader.close();
-        ConcurrentLog.info("WarcImporter", "Indexed " + cnt + " documents");
+        ConcurrentLog.info("WarcImporter", "Indexed " + recordCnt + " documents");
+        job = null;
     }
+
+    @Override
+    public void run() {
+        try {
+            this.indexWarcRecords(this.source);
+        } catch (IOException ex) {
+            ConcurrentLog.info("WarcImporter", ex.getMessage());
+        }
+    }
+
+    /**
+     * Filename of the input source
+     * @return
+     */
+    @Override
+    public String source() {
+        return this.name;
+    }
+
+    /**
+     * Number of responses (pages) indexed
+     * @return
+     */
+    @Override
+    public int count() {
+        return this.recordCnt;
+    }
+
+    /**
+     * Indexed responses per second
+     * @return
+     */
+    @Override
+    public int speed() {
+        if (this.recordCnt == 0) return 0;
+        return (int) (this.recordCnt / Math.max(0L, runningTime() ));
+    }
+
+    /**
+     * Duration in seconds running, working on the current import source
+     * @return duration in seconds
+     */
+    @Override
+    public long runningTime() {
+        return (System.currentTimeMillis() - this.startTime) / 1000L;
+    }
+
+    /**
+     * Estimate on time remaining calculated from length of input source and
+     * processed bytes.
+     * @return duration in seconds
+     */
+    @Override
+    public long remainingTime() {
+        if (this.consumed == 0) {
+            return 0;
+        } else {
+            long speed = this.consumed / runningTime();
+            return (this.sourceSize - this.consumed) / speed;
+        }
+    }
+
+    @Override
+    public String status() {
+        return "";
+    }
+
 }
