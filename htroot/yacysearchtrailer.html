@@ -69,9 +69,9 @@
 
 #(nav-protocols)#::
 <p class="navbutton"></p>
-<div class="btn-group btn-group-justified">
+<div id="nav-protocols" class="btn-group btn-group-justified">
 #{element}#
-  <div class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(on)#:: active#(/on)#"#(onclick)# onclick="window.location.href='#[url]#';"::#(/onclick)#>#[name]# (#[count]#)</button></div>
+  <div id="nav-protocols-#[name]#" class="btn-group btn-group-xs"><button type="button" class="btn btn-default#(on)#:: active#(/on)#"#(onclick)# onclick="window.location.href='#[url]#';"::#(/onclick)#>#[name]# (#[count]#)</button></div>
 #{/element}#
 </div>
 #(/nav-protocols)#
@@ -83,7 +83,7 @@
 #(/nav-topics)#
 
 #(cat-location)#::
-<ul class="nav nav-sidebar menugroup">
+<ul id="cat-location" class="nav nav-sidebar menugroup">
 <li><h3>Location</h3></li>
 <li>
 <a href="yacysearch_location.html?query=#[queryenc]#" class="MenuItemLink">
