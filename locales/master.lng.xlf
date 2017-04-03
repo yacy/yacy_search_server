@@ -2659,6 +2659,47 @@
   </body>
 </file>
 
+<file original="CookieTest_p.html"  source-language="en"  datatype="html">
+  <body>
+    <trans-unit id="Line0004" xml:space="preserve" approved="no" translate="yes">
+       <source>Cookie - Test Page</source>
+    </trans-unit>
+    <trans-unit id="Line0009" xml:space="preserve" approved="no" translate="yes">
+       <source>Here is a cookie test page.</source>
+    </trans-unit>
+    <trans-unit id="Line0014" xml:space="preserve" approved="no" translate="yes">
+       <source>Just clean it</source>
+    </trans-unit>
+    <trans-unit id="Line0022" xml:space="preserve" approved="no" translate="yes">
+       <source>Name:</source>
+    </trans-unit>
+    <trans-unit id="Line0024" xml:space="preserve" approved="no" translate="yes">
+       <source>Value:</source>
+    </trans-unit>
+    <trans-unit id="Line0027" xml:space="preserve" approved="no" translate="yes">
+       <source>Dear server, set this cookie for me!</source>
+    </trans-unit>
+    <trans-unit id="Line0031" xml:space="preserve" approved="no" translate="yes">
+       <source>Cookies at this browser:</source>
+    </trans-unit>
+    <trans-unit id="Line0042" xml:space="preserve" approved="no" translate="yes">
+       <source>Cookies coming to server:</source>
+    </trans-unit>
+    <trans-unit id="Line0051" xml:space="preserve" approved="no" translate="yes">
+       <source>Cookies server sent:</source>
+    </trans-unit>
+    <trans-unit id="Line0057" xml:space="preserve" approved="no" translate="yes">
+       <source>YaCy is a GPL'ed project</source>
+    </trans-unit>
+    <trans-unit id="Line0058" xml:space="preserve" approved="no" translate="yes">
+       <source>with the target of implementing a P2P-based global search engine.</source>
+    </trans-unit>
+    <trans-unit id="Line0059" xml:space="preserve" approved="no" translate="yes">
+       <source>Architecture (C) by</source>
+    </trans-unit>
+  </body>
+</file>
+
 <file original="CrawlCheck_p.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="c3c61b8f" xml:space="preserve" approved="no" translate="yes">
@@ -9002,6 +9043,9 @@
     </trans-unit>
     <trans-unit id="ecd950ae" xml:space="preserve" approved="no" translate="yes">
        <source>Save translation</source>
+    </trans-unit>
+    <trans-unit id="Line0050" xml:space="preserve" approved="no" translate="yes">
+       <source>Check for remote translation proposals and/or share your own added translations</source>
     </trans-unit>
   </body>
 </file>
