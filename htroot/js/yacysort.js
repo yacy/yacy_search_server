@@ -72,6 +72,33 @@ var laterPage = function() {
   displayPage();
 };
 
+// pageNumber starts at 0.
+var numberedPage = function(pageNumber) {
+  // Find all items.
+  var allItems = $("#resultscontainer .searchresults");
+
+  var itemNumber = pageNumber * requestedResults;
+
+  // Check if the item number is too high.
+  while ( allItems.length - 1 < itemNumber) {
+    itemNumber = itemNumber - requestedResults;
+  }
+
+  // If the beginning of results is requested, set highestRanking to Infinity.
+  if ( itemNumber <= 0 ) {
+    highestRanking = Infinity;
+  }
+  else {
+    var item = allItems.get(itemNumber);
+    highestRanking = parseFloat($(item).data("ranking"));
+  }
+
+  console.log("highestRanking is now " + highestRanking);
+
+  // Update the display to show the new page.
+  displayPage();
+};
+
 var processSidebarNavProtocols = function(navProtocolsOld, navProtocolsNew) {
   navProtocolsOld.find(".btn-group-xs").each( function(index, oldProtocol) {
     var protocolId = $(oldProtocol).attr("id");
