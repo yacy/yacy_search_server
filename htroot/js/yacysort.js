@@ -227,10 +227,12 @@ var processSidebar = function(data) {
     // TODO: we should assign an "id" attribute to the "authors" <ul>.
     processSidebarMenuGroup($("#authors_0").parent(), newSidebar.find("#authors_0").parent());
 
-    // TODO: Wiki Name Space
+    // TODO: test Wiki Name Space
+    // TODO: we should assign an "id" attribute to the "namespace" <ul>.
+    processSidebarMenuGroup($("#namespace_0").parent(), newSidebar.find("#namespace_0").parent());
 
     // TODO: test filetype
-    // TODO: we should assign an "id" attribute to the "authors" <ul>.
+    // TODO: we should assign an "id" attribute to the "filetype" <ul>.
     processSidebarMenuGroup($("#filetype_0").parent(), newSidebar.find("#filetype_0").parent());
 
     // TODO: navs
