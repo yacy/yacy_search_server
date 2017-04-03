@@ -35,6 +35,7 @@ import java.util.Properties;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
@@ -50,6 +51,9 @@ public class ConfigPortal_p {
         final Switchboard sb = (Switchboard) env;
 
         if (post != null) {
+        	/* Check this is a valid transaction */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             if (post.containsKey("popup")) {
                 final String popup = post.get("popup", "status");
                 if ("front".equals(popup)) {
@@ -154,6 +158,9 @@ public class ConfigPortal_p {
                 sb.setConfig("search.excludehosth", config.getProperty("search.excludehosth",""));
             }
         }
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
 
         prop.putHTML(SwitchboardConstants.GREETING, sb.getConfig(SwitchboardConstants.GREETING, ""));
         prop.putHTML(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));

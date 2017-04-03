@@ -24,6 +24,7 @@ import java.util.Iterator;
 import java.util.Map;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -33,7 +34,7 @@ import net.yacy.utils.translation.TranslationManager;
 
 public class Translator_p {
 
-    public static servletProperties respond(@SuppressWarnings("unused") final RequestHeader requestHeader, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+    public static servletProperties respond(final RequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
         try {
             final servletProperties prop = new servletProperties();
             final Switchboard sb = (Switchboard) env;
@@ -112,6 +113,9 @@ public class Translator_p {
                     }
                     // handle (modified) input text
                     if (i == textlistid && post != null) {
+                    	/* Check this is a valid transaction */
+                    	TransactionManager.checkPostTransaction(requestHeader, post);
+                    	
                         if (editapproved) { // switch already translated in edit mode by copying to local translation
                             // not saved here as not yet modified/approved
                             localTransMgr.addTranslation(localTrans, filename, sourcetext, targettxt);
@@ -138,6 +142,9 @@ public class Translator_p {
                     changed = true;
                 }
                 if (changed) {
+                	/* Check this is a valid transaction */
+                	TransactionManager.checkPostTransaction(requestHeader, post);
+                	
                     localTransMgr.saveAsLngFile(langcfg, locallngfile, localTrans);
                     // adhoc translate this file
                     // 1. get/calc the path
@@ -150,6 +157,10 @@ public class Translator_p {
                     localTransMgr.translateFile(sourceFile, destFile, origTextList); // do the translation
                 }
             }
+            
+            /* Acquire a transaction token for the next POST form submission */
+            prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(requestHeader));
+            
             prop.put("textlist", i);
             return prop;
         } catch (IOException ex) {

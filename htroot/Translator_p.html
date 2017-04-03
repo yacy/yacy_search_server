@@ -13,6 +13,7 @@
 
     <p>Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.</p>
     <form id="Translation" method="post" action="Translator_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
       <fieldset>
         <legend>
           <label>UI Translation</label>
