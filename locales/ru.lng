@@ -420,7 +420,7 @@ Appearance and Integration==Внешний вид
 You can change the appearance of the YaCy interface with skins.==Вы можете изменить внешний вид YaCy используя скины.
 #You can change the appearance of YaCy with skins==Вы можете изменить внешний вид YaCy со скинами
 The selected skin and language also affects the appearance of the search page.==Выбранный скин и язык, также влияют на внешний вид страницы поиска.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Если вы <a href="ConfigPortal.html">создадите поиск с Yacy, </a>
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==Если вы <a href="ConfigPortal_p.html">создадите поиск с Yacy, </a>
 change the appearance of the search page here.==то изменить внешний вид страницы поиска вы можете здесь.
 #and the default icons and links on the search page can be replaced with you own.==и стандартные иконки и ссылки на странице поиска будут заменены на ваши.
 Skin Selection==Выбор скина
@@ -806,7 +806,7 @@ If you want to test a specific parser you can do so using the==Если вы ж�
 "Submit"=="Установить"
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
 Integration of a Search Portal==Интеграция поиска
 If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==Если вы хотите интегрировать YaCy как поиск для веб-страниц, то вы можете менять иконки и сообщения на странице поиска.

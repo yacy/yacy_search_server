@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.sql.Date;
 import java.util.Map;
 import java.util.Properties;
-import java.util.TreeMap;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -62,7 +61,7 @@ public class ConfigSearchPage_p {
             if (post.containsKey("searchpage_set")) {
                 final String newGreeting = post.get(SwitchboardConstants.GREETING, "");
                 // store this call as api call
-                sb.tables.recordAPICall(post, "ConfigPortal.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "new portal design. greeting: " + newGreeting);
+                sb.tables.recordAPICall(post, "ConfigPortal_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "new portal design. greeting: " + newGreeting);
 
                 sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu"));
                 sb.setConfig("search.options", post.getBoolean("search.options"));

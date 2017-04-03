@@ -328,7 +328,7 @@ Appearance and Integration==अप्पेअरेञ्चे और इं�
 You can change the appearance of the YaCy interface with skins.==Yacy के इंटरफ़ेस और स्किन्स को आप बदल सकते हैं,
 #You can change the appearance of YaCy with skins==Yacy के इंटरफ़ेस और स्किन्स को आप बदल सकते हैं,
 The selected skin and language also affects the appearance of the search page.==चयनित स्किन्स और भाषा भी सर्च पेज की अपीयरेंस को प्रभावित करता है.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==अगर आप YaCy साथ <a href="ConfigPortal.html">एक सर्च पोर्टल बनाते हैं</a> तो आप
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==अगर आप YaCy साथ <a href="ConfigPortal_p.html">एक सर्च पोर्टल बनाते हैं</a> तो आप
 change the appearance of the search page here.==यहाँ सर्च पेज के स्वरूप को बदल सकते हैं.
 #and the default icons and links on the search page can be replaced with you own.==और सर्च पेज पर डिफ़ॉल्ट चिह्न और लिंक आप के अनुसार बदला जा सकता है
 Skin Selection==स्किन चयन
@@ -613,7 +613,7 @@ BMP Image Parser==बीएमपी छवि पार्सर
 "Submit"==" सबमिट "
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
 Integration of a Search Portal== एक खोज पोर्टल की इंटीग्रेशन 
 If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.== यदि आप अपने वेब पृष्ठों के लिए पोर्टल के रूप में याची  एकीकृत करना चाहते हैं, तो आप खोज पृष्ठ पर माउस और संदेशों को बदलने के लिए चाह सकते हैं.

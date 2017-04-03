@@ -948,7 +948,7 @@
        <source>The selected skin and language also affects the appearance of the search page.</source>
     </trans-unit>
     <trans-unit id="234b8c23" xml:space="preserve" approved="no" translate="yes">
-       <source>If you &lt;a href="ConfigPortal.html"&gt;create a search portal with YaCy&lt;/a&gt; then you can</source>
+       <source>If you &lt;a href="ConfigPortal_p.html"&gt;create a search portal with YaCy&lt;/a&gt; then you can</source>
     </trans-unit>
     <trans-unit id="619edb0a" xml:space="preserve" approved="no" translate="yes">
        <source>change the appearance of the search page here.</source>
@@ -1685,7 +1685,7 @@
   </body>
 </file>
 
-<file original="ConfigPortal.html"  source-language="en"  datatype="html">
+<file original="ConfigPortal_p.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="63cce208" xml:space="preserve" approved="no" translate="yes">
        <source>Integration of a Search Portal</source>
