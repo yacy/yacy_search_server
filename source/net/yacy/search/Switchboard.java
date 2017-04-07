@@ -54,6 +54,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -90,6 +91,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.contentcontrol.SMWListSyncThread;
@@ -123,6 +125,9 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.JSONArray;
+import net.yacy.cora.util.JSONObject;
+import net.yacy.cora.util.JSONTokener;
 import net.yacy.cora.util.Memory;
 import net.yacy.crawler.CrawlStacker;
 import net.yacy.crawler.CrawlSwitchboard;
@@ -2011,6 +2016,32 @@ public final class Switchboard extends serverSwitch {
                 moved = infile.renameTo(outfile);
             } catch (IOException ex) {
                 log.warn("IO Error processing warc file " + infile);
+            }
+            return moved;
+        } else if (s.endsWith(".flatjson")) {
+            try {
+                InputStream is = new BufferedInputStream(new FileInputStream(infile));
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    JSONTokener jt = new JSONTokener(line);
+                    JSONObject json = new JSONObject(jt);
+                    if ((json.has("index") && json.length() == 1) || json.length() == 0) continue;
+                    SolrInputDocument surrogate = new SolrInputDocument();
+                    for (String key: json.keySet()) {
+                        Object o = json.get(key);
+                        if (o instanceof JSONArray) {
+                            // todo: ass array
+                        } else {
+                            surrogate.put(key, new SolrInputField(o.toString()));
+                        }
+                    }
+                    Switchboard.this.index.putDocument(surrogate);
+                }
+                is.close();
+                moved = infile.renameTo(outfile);
+            } catch (IOException ex) {
+                log.warn("IO Error processing flatjson file " + infile);
             }
             return moved;
         }
