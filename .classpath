@@ -32,14 +32,14 @@
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.24.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.4.6.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.10.1.jar"/>
-	<classpathentry kind="lib" path="lib/xmpcore-5.1.2.jar"/>
+	<classpathentry kind="lib" path="lib/xmpcore-5.1.3.jar"/>
 	<classpathentry kind="lib" path="lib/jcifs-1.3.17.jar"/>
 	<classpathentry kind="lib" path="lib/guava-18.0.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.5.jar"/>
 	<classpathentry kind="lib" path="lib/zookeeper-3.4.6.jar"/>
 	<classpathentry kind="lib" path="lib/org.restlet.jar"/>
-	<classpathentry kind="lib" path="lib/fontbox-2.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/pdfbox-2.0.4.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-2.0.5.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-2.0.5.jar"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.15.jar"/>
@@ -64,26 +64,26 @@
 	<classpathentry kind="lib" path="lib/httpclient-4.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.5.3.jar"/>
 	<classpathentry kind="lib" path="lib/noggit-0.6.jar"/>
-	<classpathentry kind="lib" path="lib/solr-core-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/solr-solrj-5.5.3.jar"/>
+	<classpathentry kind="lib" path="lib/solr-core-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/solr-solrj-5.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/woodstox-core-asl-4.4.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-analyzers-common-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-classification-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-codecs-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-core-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-facet-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-grouping-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-highlighter-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-join-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-memory-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-misc-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-queries-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-queryparser-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-spatial-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-suggest-5.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-backward-codecs-5.5.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-analyzers-common-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-classification-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-codecs-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-core-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-facet-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-grouping-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-highlighter-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-join-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-memory-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-misc-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-queries-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-queryparser-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-spatial-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-suggest-5.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-backward-codecs-5.5.4.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-58_2.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>

@@ -403,7 +403,7 @@ Appearance and Integration==外観と統合
 You can change the appearance of the YaCy interface with skins.==あなたはスキンによってYaCyのインターフェースの外観を変更する事ができます.
 #You can change the appearance of YaCy with skins==あなたはスキンによってYaCyのインターフェースの外観を変更する事ができます
 The selected skin and language also affects the appearance of the search page.==選択されたスキンと言語は検索ページの外観にも影響を与えます.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==もしあなたが<a href="ConfigPortal.html">YaCyで検索ポータルを作成</a>するならば
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==もしあなたが<a href="ConfigPortal_p.html">YaCyで検索ポータルを作成</a>するならば
 change the appearance of the search page here.==ここで検索ページの外観を変更できます.
 #and the default icons and links on the search page can be replaced with you own.==そして検索ページの既定のアイコンとリンクを自分のもので置き換える事ができます.
 Skin Selection==スキンの選択
@@ -554,7 +554,7 @@ Content Parser Settings==コンテントの構文解析器の構成
 "Submit"=="確定"
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
 Integration of a Search Portal==検索ポータルの統合
 #-----------------------------
@@ -619,7 +619,7 @@ Search Page<==検索ページ<
 >Search Result Page Layout Configuration<==>検索結果のページのレイアウトの構成<
 >Appearance<==>外観<
  menu for different skins.== 別のスキンの為のメニュー.
-Other portal settings can be adjusted in <a href="ConfigPortal.html">Generic Search Portal</a> menu.==他のポータルの設定は<a href="ConfigPortal.html">一般的な検索ポータル</a> メニューで調整できます
+Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.==他のポータルの設定は<a href="ConfigPortal_p.html">一般的な検索ポータル</a> メニューで調整できます
 >Page Template<==>ページのテンプレート<
 #>Administration<==>管理<
 >Web Search<==>ウェブ検索<

@@ -176,7 +176,7 @@
     </ul>
     <ul class="nav nav-sidebar menugroup">
       <li><h3>Search Portal Integration</h3></li>
-      <li><a href="ConfigPortal.html" class="MenuItemLink">Portal Configuration</a></li>
+      <li><a href="ConfigPortal_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Portal Configuration</a></li>
       <li><a href="ConfigAppearance_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Portal Design</a></li>
       <li><a href="RankingSolr_p.html" class="MenuItemLink #(authorized)#lock::unlock#(/authorized)#">Ranking and Heuristics</a></li>
     </ul>

@@ -334,7 +334,7 @@ Set Access Rules==Définir les règles d'accès
 Appearance and Integration==Apparence et intégration
 You can change the appearance of the YaCy interface with skins.==Vous pouvez personnaliser l'interface YaCy avec des thèmes.
 The selected skin and language also affects the appearance of the search page.==Le thème et la langue sélectionnés affectent aussi l'aspect de la page de recherche.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Si vous utilisez YaCy pour créer un <a href="ConfigPortal.html">portail de recherche</a> vous pouvez alors
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==Si vous utilisez YaCy pour créer un <a href="ConfigPortal_p.html">portail de recherche</a> vous pouvez alors
 change the appearance of the search page here.==modifier l'aspect de la page de recherche ici.
 Skin Selection==Sélection du thème
 Select one of the default skins, download new skins, or create your own skin.==Sélectionnez l'un des thèmes par défaut, téléchargez de nouveaux thèmes ou créez le vôtre.

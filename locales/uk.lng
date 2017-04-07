@@ -341,8 +341,8 @@ Appearance and Integration==Зовнішній вигляд та інтегра�
 You can change the appearance of the YaCy interface with skins.==Ви можете змінити зовнішній вигляд інтерфейсу YaCy з допомогою шкури.
 #You can change the appearance of YaCy with skins==Ви можете змінити зовнішній вигляд YaCy зі шкурами
 The selected skin and language also affects the appearance of the search page.==Вибрані дизайн і мова також впливають на зовнішній вигляд сторінки пошуку.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Якщо ви <a href="ConfigPortal.html">створюєте пошуковий портал з Yacy</a>, то можете
-change the appearance of the search page here.==змінити появу пошукової сторінки <a href="ConfigPortal.html">тут</a>, а також змінити графіку та стиль посилань пошукової сторінки на власні.
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==Якщо ви <a href="ConfigPortal_p.html">створюєте пошуковий портал з Yacy</a>, то можете
+change the appearance of the search page here.==змінити появу пошукової сторінки <a href="ConfigPortal_p.html">тут</a>, а також змінити графіку та стиль посилань пошукової сторінки на власні.
 #and the default icons and links on the search page can be replaced with you own.==і стандартні іконки та посилання на сторінці пошуку можуть бути замінені на власні.
 Skin Selection==Вибір шкурки
 Select one of the default skins, download new skins, or create your own skin.==Виберіть один з існуючих скінів, завантажте новий або створіть для себе новий.
@@ -655,7 +655,7 @@ enable/disable==ввімкнути/вимкнути
 >Extension==>Розширення
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
 Integration of a Search Portal==Інтегрування пошукового порталу
 If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==Якщо ви хочете вбудувати YaCy в якості пошукового порталу у веб-сайт, ви також можете змінити значки та повідомлення на сторінках пошуку.

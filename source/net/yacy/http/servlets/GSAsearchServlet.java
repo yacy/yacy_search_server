@@ -109,7 +109,7 @@ public class GSAsearchServlet extends HttpServlet {
         sb.peers.peerActions.setUserAgent(clientip, userAgent);
 
         // --- handled by Servlet securityHandler
-        // check if user is allowed to search (can be switched in /ConfigPortal.html)
+        // check if user is allowed to search (can be switched in /ConfigPortal_p.html)
         boolean authenticated = header.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString()); //sb.adminAuthenticated(header) >= 2;
         // final boolean searchAllowed = authenticated || sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true);
         // if (!searchAllowed) return null;

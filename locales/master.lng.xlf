@@ -948,7 +948,7 @@
        <source>The selected skin and language also affects the appearance of the search page.</source>
     </trans-unit>
     <trans-unit id="234b8c23" xml:space="preserve" approved="no" translate="yes">
-       <source>If you &lt;a href="ConfigPortal.html"&gt;create a search portal with YaCy&lt;/a&gt; then you can</source>
+       <source>If you &lt;a href="ConfigPortal_p.html"&gt;create a search portal with YaCy&lt;/a&gt; then you can</source>
     </trans-unit>
     <trans-unit id="619edb0a" xml:space="preserve" approved="no" translate="yes">
        <source>change the appearance of the search page here.</source>
@@ -1685,7 +1685,7 @@
   </body>
 </file>
 
-<file original="ConfigPortal.html"  source-language="en"  datatype="html">
+<file original="ConfigPortal_p.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="63cce208" xml:space="preserve" approved="no" translate="yes">
        <source>Integration of a Search Portal</source>
@@ -2655,6 +2655,47 @@
     </trans-unit>
     <trans-unit id="c9ec7b18" xml:space="preserve" approved="no" translate="yes">
        <source>"Disable Cookie Monitoring"</source>
+    </trans-unit>
+  </body>
+</file>
+
+<file original="CookieTest_p.html"  source-language="en"  datatype="html">
+  <body>
+    <trans-unit id="Line0004" xml:space="preserve" approved="no" translate="yes">
+       <source>Cookie - Test Page</source>
+    </trans-unit>
+    <trans-unit id="Line0009" xml:space="preserve" approved="no" translate="yes">
+       <source>Here is a cookie test page.</source>
+    </trans-unit>
+    <trans-unit id="Line0014" xml:space="preserve" approved="no" translate="yes">
+       <source>Just clean it</source>
+    </trans-unit>
+    <trans-unit id="Line0022" xml:space="preserve" approved="no" translate="yes">
+       <source>Name:</source>
+    </trans-unit>
+    <trans-unit id="Line0024" xml:space="preserve" approved="no" translate="yes">
+       <source>Value:</source>
+    </trans-unit>
+    <trans-unit id="Line0027" xml:space="preserve" approved="no" translate="yes">
+       <source>Dear server, set this cookie for me!</source>
+    </trans-unit>
+    <trans-unit id="Line0031" xml:space="preserve" approved="no" translate="yes">
+       <source>Cookies at this browser:</source>
+    </trans-unit>
+    <trans-unit id="Line0042" xml:space="preserve" approved="no" translate="yes">
+       <source>Cookies coming to server:</source>
+    </trans-unit>
+    <trans-unit id="Line0051" xml:space="preserve" approved="no" translate="yes">
+       <source>Cookies server sent:</source>
+    </trans-unit>
+    <trans-unit id="Line0057" xml:space="preserve" approved="no" translate="yes">
+       <source>YaCy is a GPL'ed project</source>
+    </trans-unit>
+    <trans-unit id="Line0058" xml:space="preserve" approved="no" translate="yes">
+       <source>with the target of implementing a P2P-based global search engine.</source>
+    </trans-unit>
+    <trans-unit id="Line0059" xml:space="preserve" approved="no" translate="yes">
+       <source>Architecture (C) by</source>
     </trans-unit>
   </body>
 </file>
@@ -4704,6 +4745,9 @@
     <trans-unit id="aa903601" xml:space="preserve" approved="no" translate="yes">
        <source>(Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/SURROGATE/in/)</source>
     </trans-unit>
+    <trans-unit id="Line0038" xml:space="preserve" approved="no" translate="yes">
+       <source>(Rich and full-text Elasticsearch data, one document per line in one flat JSON file, can be bulk-imported to elasticsearch with the command "curl -XPOST localhost:9200/collection1/yacy/_bulk --data-binary @yacy_dump_XXX.flatjson")</source>
+    </trans-unit>
     <trans-unit id="cd50c4fa" xml:space="preserve" approved="no" translate="yes">
        <source>Full URL List:</source>
     </trans-unit>
@@ -5032,6 +5076,65 @@
     </trans-unit>
     <trans-unit id="76d0f23f" xml:space="preserve" approved="no" translate="yes">
        <source>Bad input data:</source>
+    </trans-unit>
+  </body>
+</file>
+
+<file original="IndexImportWarc_p.html"  source-language="en"  datatype="html">
+  <body>
+    <trans-unit id="Line004" xml:space="preserve" approved="no" translate="yes">
+       <source>Warc Import</source>
+    </trans-unit>
+    <trans-unit id="Line013" xml:space="preserve" approved="no" translate="yes">
+       <source>Web Archive File Import</source>
+    </trans-unit>    
+    <trans-unit id="Line0016" xml:space="preserve" approved="no" translate="yes">
+       <source>No import thread is running, you can start a new thread here</source>
+    </trans-unit>
+    <trans-unit id="Line0020" xml:space="preserve" approved="no" translate="yes">
+       <source>Warc File Selection: select an warc file (which may be gz compressed)</source>
+    </trans-unit>
+    <trans-unit id="Line0022" xml:space="preserve" approved="no" translate="yes">
+       <source>You can download warc archives for example here</source>
+    </trans-unit>
+    <trans-unit id="Line0023" xml:space="preserve" approved="no" translate="yes">
+       <source>Internet Archive</source>
+    </trans-unit>
+    <trans-unit id="Line0029" xml:space="preserve" approved="no" translate="yes">
+       <source>Import Warc File</source>
+    </trans-unit>
+    <trans-unit id="Line0037" xml:space="preserve" approved="no" translate="yes">
+       <source>Import Process</source>
+    </trans-unit>
+    <trans-unit id="13794b50" xml:space="preserve" approved="no" translate="yes">
+       <source>Thread:</source>
+    </trans-unit>
+    <trans-unit id="Line0040" xml:space="preserve" approved="no" translate="yes">
+       <source>Warc File:</source>
+    </trans-unit>
+    <trans-unit id="8ffbfacc" xml:space="preserve" approved="no" translate="yes">
+       <source>Processed:</source>
+    </trans-unit>
+    <trans-unit id="Line0041" xml:space="preserve" approved="no" translate="yes">
+       <source>Entries</source>
+    </trans-unit>
+    <trans-unit id="93fbf4f3" xml:space="preserve" approved="no" translate="yes">
+       <source>Speed:</source>
+    </trans-unit>
+    <trans-unit id="Line0042" xml:space="preserve" approved="no" translate="yes">
+       <source>pages per second</source>
+    </trans-unit>
+    <trans-unit id="d2dce52c" xml:space="preserve" approved="no" translate="yes">
+       <source>Running Time:</source>
+    </trans-unit>
+    <trans-unit id="b7cb1afd" xml:space="preserve" approved="no" translate="yes">
+       <source>hours,</source>
+    </trans-unit>
+    <trans-unit id="afaa7f3d" xml:space="preserve" approved="no" translate="yes">
+       <source>minutes&lt;</source>
+    </trans-unit>
+    <trans-unit id="5d1ec023" xml:space="preserve" approved="no" translate="yes">
+       <source>Remaining Time:</source>
     </trans-unit>
   </body>
 </file>
@@ -8940,6 +9043,9 @@
     </trans-unit>
     <trans-unit id="ecd950ae" xml:space="preserve" approved="no" translate="yes">
        <source>Save translation</source>
+    </trans-unit>
+    <trans-unit id="Line0050" xml:space="preserve" approved="no" translate="yes">
+       <source>Check for remote translation proposals and/or share your own added translations</source>
     </trans-unit>
   </body>
 </file>

@@ -48,6 +48,7 @@ public class NavigatorPlugins {
         defaultnavplugins.put("namespace", "Wiki Name Space");
         defaultnavplugins.put("year", "Year");
         // defaultnavplugins.put("year:dates_in_content_dts:Event","Event");
+        defaultnavplugins.put("keywords", "Keywords");
         return defaultnavplugins;
     }
 
@@ -117,6 +118,10 @@ public class NavigatorPlugins {
                 } else { // "year" only use default last_modified
                     navigatorPlugins.put("year", new YearNavigator("Year", CollectionSchema.last_modified));
                 }
+            }
+            
+            if (navname.contains("keywords")) {
+                navigatorPlugins.put("keywords", new TokenizedStringNavigator("Keywords", CollectionSchema.keywords));
             }
         }
         return navigatorPlugins;

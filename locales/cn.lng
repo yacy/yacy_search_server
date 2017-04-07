@@ -342,8 +342,8 @@ Appearance and Integration==外观界面
 You can change the appearance of the YaCy interface with skins.==您可以在这里修改YaCy的外观界面.
 #You can change the appearance of YaCy with skins==Sie können hier das Erscheinungsbild von YaCy mit Skins ändern
 The selected skin and language also affects the appearance of the search page.==选择的皮肤和语言也会影响到搜索页面的外观.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==如果您<a href="ConfigPortal.html">创建YaCy门户</a>,
-change the appearance of the search page here.==那么您能在<a href="ConfigPortal.html">这里</a> 改变搜索页面的外观.
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==如果您<a href="ConfigPortal_p.html">创建YaCy门户</a>,
+change the appearance of the search page here.==那么您能在<a href="ConfigPortal_p.html">这里</a> 改变搜索页面的外观.
 #and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
 Skin Selection==选择皮肤
 Select one of the default skins, download new skins, or create your own skin.==选择一个默认皮肤, 下载新皮肤或者创建属于您自己的皮肤.
@@ -619,7 +619,7 @@ enable/disable Parser==Parser 开启 / 关闭
 "Submit"=="提交"
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
 Integration of a Search Portal==搜索门户设置
 If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==如果您想将YaCy作为您的网站搜索门户, 您可能需要在这改变搜索页面的图标和信息.

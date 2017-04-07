@@ -383,8 +383,8 @@ Save User==Benutzer speichern
 Appearance and Integration==Erscheinungsbild und Integration
 You can change the appearance of the YaCy interface with skins.==Sie können hier das Aussehen der YaCy Oberfläche mit Skins verändern,
 The selected skin and language also affects the appearance of the search page.==das ausgewählte Design und die gewählte Sprache wirken sich auch auf das Erscheinungsbild der Suchseite aus.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Wenn Sie <a href="ConfigPortal.html">ein Such-Portal mit Yacy erstellen möchten</a> können Sie
-change the appearance of the search page here.==das Erscheinungsbild der Suchseite <a href="ConfigPortal.html">hier</a> weitgehend ändern und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==Wenn Sie <a href="ConfigPortal_p.html">ein Such-Portal mit Yacy erstellen möchten</a> können Sie
+change the appearance of the search page here.==das Erscheinungsbild der Suchseite <a href="ConfigPortal_p.html">hier</a> weitgehend ändern und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
 #and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
 Skin Selection==Skinauswahl
 Select one of the default skins, download new skins, or create your own skin.==Wählen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder erstellen Sie selbst einen neuen Skin.
@@ -708,7 +708,7 @@ If you want to test a specific parser you can do so using the==Wenn Sie einen be
 "Submit"=="Speichern"
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
 Integration of a Search Portal==Integration eines Suchportals
 If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==Wenn Sie YaCy als Suchportal für Ihre Webseiten integrieren wollen, können Sie auch die Icons und Nachrichten auf den Suchseiten verändern.
