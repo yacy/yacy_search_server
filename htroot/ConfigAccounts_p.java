@@ -156,8 +156,8 @@ public class ConfigAccounts_p {
             //user != current_user
             //user=from userlist
             //current_user = edited user
-        } else if (post.containsKey("user") && !"newuser".equals(post.get("user"))){
-        	TransactionManager.checkPostTransaction(header, post);
+        } else if (post.containsKey("user") && !"newuser".equals(post.get("user"))) {
+            TransactionManager.checkPostTransaction(header, post);
             if (post.containsKey("change_user")) {
                 //defaults for newuser are set above
                 entry = sb.userDB.getEntry(post.get("user"));
@@ -183,7 +183,7 @@ public class ConfigAccounts_p {
                 sb.userDB.removeEntry(post.get("user"));
             }
         } else if (post.containsKey("change")) { //New User / edit User
-        	TransactionManager.checkPostTransaction(header, post);
+            TransactionManager.checkPostTransaction(header, post);
             prop.put("text", "0");
             prop.put("error", "0");
 
@@ -270,7 +270,24 @@ public class ConfigAccounts_p {
                 prop.putHTML("text_username", username);
                 prop.put("text", "2");
             }//edit user
+            
             prop.putHTML("username", username);
+            if (entry != null) {
+                //TODO: set username read-only in html
+                prop.putHTML("current_user", entry.getUserName());
+                prop.putHTML("username", entry.getUserName());
+                prop.putHTML("firstname", entry.getFirstName());
+                prop.putHTML("lastname", entry.getLastName());
+                prop.putHTML("address", entry.getAddress());
+                prop.put("timelimit", entry.getTimeLimit());
+                prop.put("timeused", entry.getTimeUsed());
+                int count = 0;
+                for (final AccessRight right : rights) {
+                    prop.put("rights_" + count + "_set", entry.hasRight(right) ? "1" : "0");
+                    count++;
+                }
+                prop.put("rights", count);
+            }
         }
 
         //Generate Userlist
@@ -289,4 +306,4 @@ public class ConfigAccounts_p {
         // return rewrite properties
         return prop;
     }
-}
+                    }
