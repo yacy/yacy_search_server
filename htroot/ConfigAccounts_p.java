@@ -55,7 +55,7 @@ public class ConfigAccounts_p {
         /* Acquire a transaction token for the next POST form submission */
         prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
         
-        final Switchboard sb = Switchboard.getSwitchboard();
+        final Switchboard sb = (Switchboard) env;
         UserDB.Entry entry = null;
 
         // admin password
@@ -306,4 +306,4 @@ public class ConfigAccounts_p {
         // return rewrite properties
         return prop;
     }
-                    }
+}
