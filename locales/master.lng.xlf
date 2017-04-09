@@ -1936,6 +1936,9 @@
     <trans-unit id="c06925e" xml:space="preserve" approved="no" translate="yes">
        <source>Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.</source>
     </trans-unit>
+    <trans-unit id="Line0013" xml:space="preserve" approved="no" translate="yes">
+       <source>is a voluntary agreement most search-engines (including YaCy) follow.</source>
+    </trans-unit>    
     <trans-unit id="19b9bf10" xml:space="preserve" approved="no" translate="yes">
        <source>It disallows crawlers to access webpages or even entire domains.</source>
     </trans-unit>
@@ -8973,6 +8976,9 @@
     <trans-unit id="6fb5a4ce" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;here&lt;</source>
     </trans-unit>
+    <trans-unit id="Line0018" xml:space="preserve" approved="no" translate="yes">
+       <source>To edit or add local translations you can use</source>
+    </trans-unit>    
     <trans-unit id="40bca1e" xml:space="preserve" approved="no" translate="yes">
        <source>File:</source>
     </trans-unit>
