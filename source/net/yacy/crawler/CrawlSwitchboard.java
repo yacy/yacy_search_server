@@ -59,6 +59,8 @@ import net.yacy.search.SwitchboardConstants;
 
 public final class CrawlSwitchboard {
 	
+    public static final String CRAWL_PROFILE_AUTOCRAWL_DEEP = "autocrawlDeep";
+    public static final String CRAWL_PROFILE_AUTOCRAWL_SHALLOW = "autocrawlShallow";
     public static final String CRAWL_PROFILE_PROXY = "proxy";
     public static final String CRAWL_PROFILE_REMOTE = "remote";
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_TEXT = "snippetLocalText";
