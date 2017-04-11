@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>YaCy '#[clientname]#': MediaWiki Dump Import</title>
     #%env/templates/metas.template%#    
@@ -14,23 +14,26 @@
     
     #(import)#
     <p>#(status)#No import thread is running, you can start a new thread here::Bad input data: #[message]# #(/status)#</p>
-    <form action="IndexImportMediawiki_p.html" method="get" accept-charset="UTF-8">
-        <!-- no post method here, we don't want to transmit the whole file, only the path-->
+    <form action="IndexImportMediawiki_p.html" method="post" accept-charset="UTF-8" class="form-horizontal">
         <fieldset>
           <legend>MediaWiki Dump File Selection: select an XML file (which may be bz2- or gz-encoded)</legend>
+          <p>
           You can import MediaWiki dumps here. An example is the file
           <a href="http://dumps.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2">
           http://dumps.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2</a>.
-          <br />
+          </p>
+          <p>
           Dumps must be stored in the local file system in XML format and may be compressed in gz or bz2.
-          <br />
-          <div class="input-group">
-             <span style="display: inline-block">
-                <input name="file" style="" type="file" value="" size="75" /></span>
-             <div class="btn-group">
-                <input name="submit" class="btn btn-primary" type="submit" value="Import MediaWiki Dump" />
-             </div>
+          </p>
+          <div class="form-group">
+          	<div class="col-sm-3 col-md-2 col-lg-2">
+          		<label for="file" class="control-label" >Dump file path</label>
+           	</div>
+           	<div class="col-sm-9 col-md-8 col-lg-8">
+           		<input id="file" class="form-control" name="file" type="text" title="Dump file path on this YaCy server file system" required="required"/>
+           	</div>
           </div>
+          <input name="submit" class="btn btn-primary" type="submit" value="Import MediaWiki Dump" />
         </fieldset>
     </form>
     <p>
