@@ -13,7 +13,12 @@
     <h2>MediaWiki Dump Import</h2>
     
     #(import)#
-    <p>#(status)#No import thread is running, you can start a new thread here::Bad input data: #[message]# #(/status)#</p>
+    <p>#(status)#<div class="alert alert-info" role="alert">No import thread is running, you can start a new thread here</div>
+    ::<div class="alert alert-danger" role="alert">Error : file argument must be a path to a document in the local file system</div>
+    ::<div class="alert alert-danger" role="alert">Error : file not found "#[sourceFile]#"</div>
+    ::<div class="alert alert-danger" role="alert">Error : can not read file "#[sourceFile]#"</div>
+    ::<div class="alert alert-danger" role="alert">Error : you selected a directory ("#[sourceFile]#")</div>
+    #(/status)#</p>
     <form action="IndexImportMediawiki_p.html" method="post" accept-charset="UTF-8" class="form-horizontal">
         <fieldset>
           <legend>MediaWiki Dump File Selection: select an XML file (which may be bz2- or gz-encoded)</legend>
