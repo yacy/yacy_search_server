@@ -596,7 +596,7 @@ public class CrawlQueues {
         query.add("group.main", "true");
         query.add("rows", rows);
         query.setQuery(this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_QUERY, "*:*"));
-        query.setFields("host_s,url_protocol_s");
+        query.setFields("sku");
         query.addSort("load_date_dt", SolrQuery.ORDER.asc);
         query.addFilterQuery(dateQuery);
         
@@ -692,7 +692,7 @@ public class CrawlQueues {
                     deep = true;
                 }
                 DigestURL url;
-                final String u = doc.getFieldValue("url_protocol_s").toString() + "://" + doc.getFieldValue("host_s").toString();
+                final String u = doc.getFieldValue("sku").toString();
                 try {
                     url = new DigestURL(u);
                 } catch (final MalformedURLException e) {
