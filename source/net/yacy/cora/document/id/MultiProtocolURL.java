@@ -2147,7 +2147,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      */
     public java.io.File getFSFile() throws MalformedURLException {
         if (!isFile()) throw new MalformedURLException();
-        return new java.io.File(this.toNormalform(true).substring(5));
+        return new java.io.File(unescape(this.toNormalform(true)).substring("file://".length()));
     }
 
     /**
