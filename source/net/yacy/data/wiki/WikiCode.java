@@ -589,8 +589,9 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
         int p;
         int positionOfOpeningTag;
         int positionOfClosingTag;
+        int fromIndex = 0;
         // internal links and images
-        while ((positionOfOpeningTag = line.indexOf(WIKI_OPEN_LINK)) >= 0) {
+        while ((positionOfOpeningTag = line.indexOf(WIKI_OPEN_LINK, fromIndex)) >= 0) {
             positionOfClosingTag = line.indexOf(WIKI_CLOSE_LINK, positionOfOpeningTag + LEN_WIKI_OPEN_LINK);
             if (positionOfClosingTag <= positionOfOpeningTag) {
                 break;
@@ -640,16 +641,19 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 }
 
                 line = line.substring(0, positionOfOpeningTag) + "<img src=\"" + kl + "\"" + align + alt + ">" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_LINK);
+                fromIndex = positionOfClosingTag + LEN_WIKI_CLOSE_LINK;
             }
             // this is the part of the code that is responsible for Youtube video links supporting only the video ID as parameter
             else if (kl.startsWith(WIKI_VIDEO_YOUTUBE)) {
             	kl = kl.substring(LEN_WIKI_VIDEO_YOUTUBE);
             	line = line.substring(0, positionOfOpeningTag) + "" + "<object width=\"425\" height=\"350\"><param name=\"movie\" value=\"http://www.youtube.com/v/" + kl + "\"></param><param name=\"wmode\" value=\"transparent\"></param><embed src=\"http://www.youtube.com/v/" + kl + "\" type=\"application/x-shockwave-flash\" wmode=\"transparent\" width=\"425\" height=\"350\"></embed></object>";
+            	break;
             }
             // this is the part of the code that is responsible for Vimeo video links supporting only the video ID as parameter
             else if (kl.startsWith(WIKI_VIDEO_VIMEO)) {
             	kl = kl.substring(LEN_WIKI_VIDEO_VIMEO);
             	line = line.substring(0, positionOfOpeningTag) + "" + "<iframe src=\"http://player.vimeo.com/video/" + kl + "\" width=\"425\" height=\"350\" frameborder=\"0\" webkitAllowFullScreen mozallowfullscreen allowFullScreen></iframe>";
+            	break;
             }
             // if it's no image, it might be an internal link
             else {
@@ -660,11 +664,13 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                     kv = kl;
                 }
                 line = line.substring(0, positionOfOpeningTag) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_LINK); // oob exception in append() !
+                fromIndex = positionOfClosingTag + LEN_WIKI_CLOSE_LINK;
             }
         }
-
+        
+        fromIndex = 0;
         // external links
-        while ((positionOfOpeningTag = line.indexOf(WIKI_OPEN_EXTERNAL_LINK)) >= 0) {
+        while ((positionOfOpeningTag = line.indexOf(WIKI_OPEN_EXTERNAL_LINK, fromIndex)) >= 0) {
             positionOfClosingTag = line.indexOf(WIKI_CLOSE_EXTERNAL_LINK, positionOfOpeningTag + LEN_WIKI_OPEN_EXTERNAL_LINK);
             if (positionOfClosingTag <= positionOfOpeningTag) {
                 break;
@@ -686,6 +692,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
                 kl = "http://" + hostport + "/" + kl;
             }
             line = line.substring(0, positionOfOpeningTag) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + line.substring(positionOfClosingTag + LEN_WIKI_CLOSE_EXTERNAL_LINK);
+            fromIndex = positionOfClosingTag + LEN_WIKI_CLOSE_EXTERNAL_LINK;
         }
         return line;
     }
