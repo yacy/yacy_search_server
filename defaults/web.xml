@@ -122,7 +122,7 @@
         changing the peer name will invalidate all passwords 
         !!! Attention !!! prior to change this to DIGEST you have to reenter your password
         to calculate a correct password hash -->
-        <auth-method>BASIC</auth-method>
+        <auth-method>DIGEST</auth-method>
     </login-config>
 
     <!-- Roles -->

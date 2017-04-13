@@ -31,13 +31,12 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -57,9 +56,8 @@ public class Wiki {
     //private static String ListLevel = "";
     //private static String numListLevel = "";
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     public static String dateString(final Date date) {
-        return SimpleFormatter.format(date);
+        return GenericFormatter.SIMPLE_FORMATTER.format(date);
     }
 
 
@@ -124,10 +122,10 @@ public class Wiki {
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_WIKI_UPDATE, map);
             }
             page = newEntry;
-            prop.putHTML(serverObjects.ACTION_LOCATION, "/Wiki.html?page=" + pagename);
+            prop.putHTML(serverObjects.ACTION_LOCATION, "Wiki.html?page=" + pagename);
             prop.put(serverObjects.ACTION_LOCATION, prop.get(serverObjects.ACTION_LOCATION));
         }
-
+        
         if (post != null && post.containsKey("edit")) {
             if ((access.equals("admin") && (!sb.verifyAuthentication(header)))) {
                 // check access right for admin
@@ -147,7 +145,9 @@ public class Wiki {
             prop.putHTML("mode_pagename", pagename);
             prop.putHTML("mode_author", author);
             prop.put("mode_date", dateString(new Date()));
-            prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_page", post.get("content", ""));
+            /* We do not fill hostport parameter : relative links should stay relative as it is more reliable 
+             * when the peer is behind any kind of reverse Proxy */
+            prop.putWiki("mode_page", post.get("content", ""));
             prop.putHTML("mode_page-code", post.get("content", ""));
         }
         //end contrib of [MN]
@@ -237,7 +237,9 @@ public class Wiki {
                     prop.putHTML("mode_versioning_pagename", pagename);
                     prop.putHTML("mode_versioning_author", oentry.author());
                     prop.put("mode_versioning_date", dateString(oentry.date()));
-                    prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_versioning_page", oentry.page());
+                    /* We do not fill hostport parameter : relative links should stay relative as it is more reliable 
+                     * when the peer is behind any kind of reverse Proxy */
+                    prop.putWiki("mode_versioning_page", oentry.page());
                     prop.putHTML("mode_versioning_page-code", UTF8.String(oentry.page()));
                 }
             } catch (final IOException e) {
@@ -252,7 +254,9 @@ public class Wiki {
             prop.putHTML("mode_pagename", pagename);
             prop.putHTML("mode_author", page.author());
             prop.put("mode_date", dateString(page.date()));
-            prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_page", page.page());
+            /* We do not fill hostport parameter : relative links should stay relative as it is more reliable 
+             * when the peer is behind any kind of reverse Proxy */
+            prop.putWiki("mode_page", page.page());
 
             prop.put("controls", "0");
             prop.putHTML("controls_pagename", pagename);

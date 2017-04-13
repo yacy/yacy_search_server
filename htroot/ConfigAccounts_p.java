@@ -33,9 +33,11 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.UserDB;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.http.Jetty9HttpServerImpl;
@@ -45,21 +47,27 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class ConfigAccounts_p {
-
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+	
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
-        final Switchboard sb = Switchboard.getSwitchboard();
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        
+        final Switchboard sb = (Switchboard) env;
         UserDB.Entry entry = null;
 
         // admin password
         boolean localhostAccess = sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
 
         if (post != null && post.containsKey("setAccess")) {
+        	TransactionManager.checkPostTransaction(header, post);
             sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES, post.getBoolean(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES));
         }
         
         if (post != null && post.containsKey("setAdmin")) {
+        	TransactionManager.checkPostTransaction(header, post);
             localhostAccess = post.get("access", "").equals("localhost");
             final String user = post.get("adminuser", "");
             final String pw1  = post.get("adminpw1", "");
@@ -71,7 +79,6 @@ public class ConfigAccounts_p {
                 // check passed. set account:
                 // old: // env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "MD5:"+Digest.encodeMD5Hex(user + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":"+ pw1));
-                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);
                 // make sure server accepts new credentials
                 Jetty9HttpServerImpl jhttpserver = (Jetty9HttpServerImpl)sb.getHttpServer();
@@ -97,7 +104,6 @@ public class ConfigAccounts_p {
                     if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty()) {
                         // make a 'random' password
                         env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + sb.genRandomPassword());
-                        env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
                     }
                 } else {
                     sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
@@ -150,7 +156,8 @@ public class ConfigAccounts_p {
             //user != current_user
             //user=from userlist
             //current_user = edited user
-        } else if (post.containsKey("user") && !"newuser".equals(post.get("user"))){
+        } else if (post.containsKey("user") && !"newuser".equals(post.get("user"))) {
+            TransactionManager.checkPostTransaction(header, post);
             if (post.containsKey("change_user")) {
                 //defaults for newuser are set above
                 entry = sb.userDB.getEntry(post.get("user"));
@@ -176,6 +183,7 @@ public class ConfigAccounts_p {
                 sb.userDB.removeEntry(post.get("user"));
             }
         } else if (post.containsKey("change")) { //New User / edit User
+            TransactionManager.checkPostTransaction(header, post);
             prop.put("text", "0");
             prop.put("error", "0");
 
@@ -187,7 +195,11 @@ public class ConfigAccounts_p {
                 prop.put("error", "2"); //PW does not match
                 return prop;
             }
-
+            // do not allow same username as staticadmin
+            if (username.equalsIgnoreCase(sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,"admin"))) {
+                prop.put("error", "4");
+                return prop;
+            }
             final String firstName = post.get("firstname");
             final String lastName = post.get("lastname");
             final String address = post.get("address");
@@ -258,7 +270,24 @@ public class ConfigAccounts_p {
                 prop.putHTML("text_username", username);
                 prop.put("text", "2");
             }//edit user
+            
             prop.putHTML("username", username);
+            if (entry != null) {
+                //TODO: set username read-only in html
+                prop.putHTML("current_user", entry.getUserName());
+                prop.putHTML("username", entry.getUserName());
+                prop.putHTML("firstname", entry.getFirstName());
+                prop.putHTML("lastname", entry.getLastName());
+                prop.putHTML("address", entry.getAddress());
+                prop.put("timelimit", entry.getTimeLimit());
+                prop.put("timeused", entry.getTimeUsed());
+                int count = 0;
+                for (final AccessRight right : rights) {
+                    prop.put("rights_" + count + "_set", entry.hasRight(right) ? "1" : "0");
+                    count++;
+                }
+                prop.put("rights", count);
+            }
         }
 
         //Generate Userlist

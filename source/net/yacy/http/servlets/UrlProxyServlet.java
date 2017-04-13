@@ -5,7 +5,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -26,6 +25,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.http.ProxyHandler;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.server.http.ChunkedInputStream;
@@ -98,7 +98,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
 
         // 1 - check usser access rights
         if (!Switchboard.getSwitchboard().getConfigBool("proxyURL", false)) {
-            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed. URL proxy globally switched off (see: Content Semantic -> Augmented Browsing -> URL proxy)");
+            response.sendError(HttpServletResponse.SC_FORBIDDEN,"proxy use not allowed. URL proxy globally switched off (see: System Administration -> Advanced Settings -> URL proxy)");
             return;
         }
         
@@ -106,7 +106,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
         if (!Domains.isThisHostIP(remoteHost)) {
             if (!proxyippatternmatch(remoteHost)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,
-                        "proxy use not granted for IP " + remoteHost + " (see: Content Semantic -> Augmented Browsing -> Restrict URL proxy use filter)");
+                        "proxy use not granted for IP " + remoteHost + " (see: System Administration -> Advanced Settings -> URL Proxy Access Settings -> Restrict URL proxy use filter)");
                 return;
             }
         }
@@ -121,7 +121,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
             return;
         }
         // 2 -  get target url
-        URL proxyurl = null;
+        DigestURL proxyurl = null;
         final String strUrl = request.getParameter("url");
         if (strUrl == null) {
             response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
@@ -129,9 +129,9 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
         }
 
         try {
-            proxyurl = new URL(strUrl);
+            proxyurl = new DigestURL(strUrl);
         } catch (final MalformedURLException e) {
-            proxyurl = new URL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
+            proxyurl = new DigestURL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
         }
         
         if (proxyurl == null) {
@@ -144,21 +144,15 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
             hostwithport += ":" + proxyurl.getPort();
         }
         // 4 - get target url
-        RequestHeader yacyRequestHeader = YaCyDefaultServlet.convertHeaderFromJetty(request);
+        RequestHeader yacyRequestHeader = ProxyHandler.convertHeaderFromJetty(request);
         yacyRequestHeader.remove(RequestHeader.KEEP_ALIVE);
         yacyRequestHeader.remove(HeaderFramework.CONTENT_LENGTH);
         
         final HashMap<String, Object> prop = new HashMap<String, Object>();
         prop.put(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
-        prop.put(HeaderFramework.CONNECTION_PROP_PROTOCOL, proxyurl.getProtocol());
-        prop.put(HeaderFramework.CONNECTION_PROP_HOST, hostwithport);
-        prop.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath().replaceAll(" ", "%20"));
-        prop.put(HeaderFramework.CONNECTION_PROP_METHOD, request.getMethod()); // only needed for HTTPDeamon errormsg in case of blacklisted url
-        if (proxyurl.getQuery() != null) prop.put(HeaderFramework.CONNECTION_PROP_ARGS, proxyurl.getQuery());
+        prop.put(HeaderFramework.CONNECTION_PROP_DIGESTURL, proxyurl);
         prop.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
-
-        yacyRequestHeader.put(HeaderFramework.HOST, hostwithport );
-        yacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, proxyurl.getPath());
+        prop.put(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST, request);
 
         // 4 & 5 get & index target url
         final ByteArrayOutputStream tmpproxyout = new ByteArrayOutputStream();
@@ -187,7 +181,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
             if (location.startsWith("http")) {
                 location = request.getServletPath() + "?url=" + location;
             } else {
-                location = request.getServletPath() + "?url=http://" + hostwithport + "/" + location;
+                location = request.getServletPath() + "?url=" + proxyurl.getProtocol() + "://" + hostwithport + "/" + location;
             }
             response.addHeader(HeaderFramework.LOCATION, location);
         } 

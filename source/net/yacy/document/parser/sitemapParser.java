@@ -31,7 +31,6 @@ import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -116,9 +115,8 @@ public class sitemapParser extends AbstractParser implements Parser {
     public static SitemapReader parse(final DigestURL sitemapURL, final ClientIdentification.Agent agent) throws IOException {
         // download document
         ConcurrentLog.info("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true));
-        final RequestHeader requestHeader = new RequestHeader();
         final HTTPClient client = new HTTPClient(agent);
-        client.setHeader(requestHeader.entrySet());
+        // client.setHeader(requestHeader.entrySet());
         try {
             client.GET(sitemapURL.toNormalform(false), false);
             if (client.getStatusCode() != 200) {
@@ -152,6 +150,7 @@ public class sitemapParser extends AbstractParser implements Parser {
         private final BlockingQueue<URLEntry> queue;
         private final ClientIdentification.Agent agent;
         public SitemapReader(final InputStream source, final ClientIdentification.Agent agent) {
+        	super(SitemapReader.class.getSimpleName());
             this.source = source;
             this.queue = new ArrayBlockingQueue<URLEntry>(10000);
             this.agent = agent;

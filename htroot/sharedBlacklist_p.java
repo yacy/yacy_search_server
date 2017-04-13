@@ -32,11 +32,15 @@
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.xml.sax.SAXException;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
@@ -49,15 +53,21 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
+import net.yacy.repository.BlacklistHostAndPath;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
-import org.xml.sax.SAXException;
 
-
+/**
+ * Handle blacklist import operations. Either :
+ * <ul>
+ * <li>load items for selection</li>
+ * <li>or import selected items</li>
+ * </ul>
+ */
 public class sharedBlacklist_p {
 
     public static final int STATUS_NONE = 0;
@@ -68,6 +78,19 @@ public class sharedBlacklist_p {
     public static final int STATUS_WRONG_INVOCATION = 5;
     public static final int STATUS_PARSE_ERROR = 6;
 
+    /**
+     * Try to load blacklist items for selection or to import selected items.
+     * Handled blacklist source types :
+     * <ul>
+     * <li>hash : hash signature of a peer having a shared blacklist</li>
+     * <li>url : blacklist url</li>
+     * <li>file : local filesystem blacklist file path</li>
+     * </ul>
+     * @param header current servlet request header
+     * @param post must contain selected blacklist items or a blacklist resource to load
+     * @param env server environment
+     * @return the servlet answer
+     */
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         // return variable that accumulates replacements
@@ -206,9 +229,11 @@ public class sharedBlacklist_p {
                 try {
                     // loop through the received entry list
                     final int num = post.getInt("num", 0);
-                    for(int i = 0; i < num; i++){
-                        if( post.containsKey("item" + i) ){
-                            String newItem = post.get("item" + i);
+                    final Collection<BlacklistHostAndPath> newItems = new ArrayList<>();
+                    /* Prepare the new blacklist items list to add then them in one operation for better performance */
+                    for(int i = 0; i < num; i++) {
+                    	String newItem = post.get("item" + i);
+                        if(newItem != null){
 
                             //This should not be needed...
                             if ( newItem.startsWith("http://") ){
@@ -222,16 +247,16 @@ public class sharedBlacklist_p {
                                 pos = newItem.length();
                                 newItem = newItem + "/.*";
                             }
-
-                            if (Switchboard.urlBlacklist != null) {
-                                for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
-                                    if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists",selectedBlacklistName)) {
-                                        Switchboard.urlBlacklist.add(supportedBlacklistType,selectedBlacklistName,newItem.substring(0, pos), newItem.substring(pos + 1));
-                                    }
-                                }
-                                SearchEventCache.cleanupEvents(true);
+                            newItems.add(new BlacklistHostAndPath(newItem.substring(0, pos), newItem.substring(pos + 1)));
+                        }
+                    }
+                    if (Switchboard.urlBlacklist != null) {
+                        for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
+                            if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists",selectedBlacklistName)) {
+                                Switchboard.urlBlacklist.add(supportedBlacklistType, selectedBlacklistName, newItems);
                             }
                         }
+                        SearchEventCache.cleanupEvents(true);
                     }
                 } catch (final Exception e) {
                     prop.put("status", "1");

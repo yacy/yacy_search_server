@@ -84,14 +84,14 @@ Move selected pattern(s) to==Перемістити вибрані шаблон�
 #You can select them here for deletion==Ви можете тут вибрати їх для видалення
 Add new pattern:==Додати новий шаблон:
 "Add URL pattern"=="Додати шаблон URL"
-The right '*', after the '/', can be replaced by a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a>.==Права "*", після "/", може бути замінена на <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярний вираз</a>.
+The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.==Права "*", після "/", може бути замінена на <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">регулярний вираз</a>.
 domain.net/fullpath<==domain.de/повний шлях<
->domain.net/*<==>domain.de/*<
-*.domain.net/*<==*.domain.de/*<
-*.sub.domain.net/*<==*.sub.domain.de/*<
+#>domain.net/*<==>domain.de/*<
+#*.domain.net/*<==*.domain.de/*<
+#*.sub.domain.net/*<==*.sub.domain.de/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
-a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a> (slow)==повний <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярний вираз</a> (повільний)
+a complete <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a> (slow)==повний <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">регулярний вираз</a> (повільний)
 #was removed from blacklist==було видалено з чорного списку
 #was added to the blacklist==було додано до чорного списку
 Activate this list for==Активува цей список для
@@ -341,8 +341,8 @@ Appearance and Integration==Зовнішній вигляд та інтегра�
 You can change the appearance of the YaCy interface with skins.==Ви можете змінити зовнішній вигляд інтерфейсу YaCy з допомогою шкури.
 #You can change the appearance of YaCy with skins==Ви можете змінити зовнішній вигляд YaCy зі шкурами
 The selected skin and language also affects the appearance of the search page.==Вибрані дизайн і мова також впливають на зовнішній вигляд сторінки пошуку.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Якщо ви <a href="ConfigPortal.html">створюєте пошуковий портал з Yacy</a>, то можете
-change the appearance of the search page here.==змінити появу пошукової сторінки <a href="ConfigPortal.html">тут</a>, а також змінити графіку та стиль посилань пошукової сторінки на власні.
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==Якщо ви <a href="ConfigPortal_p.html">створюєте пошуковий портал з Yacy</a>, то можете
+change the appearance of the search page here.==змінити появу пошукової сторінки <a href="ConfigPortal_p.html">тут</a>, а також змінити графіку та стиль посилань пошукової сторінки на власні.
 #and the default icons and links on the search page can be replaced with you own.==і стандартні іконки та посилання на сторінці пошуку можуть бути замінені на власні.
 Skin Selection==Вибір шкурки
 Select one of the default skins, download new skins, or create your own skin.==Виберіть один з існуючих скінів, завантажте новий або створіть для себе новий.
@@ -616,7 +616,7 @@ If you leave the field empty, no peer asks your peer. If you fill in a '*', your
 "Save"=="Зберегти"
 #-----------------------------
 
-#File: ConfigParser.html
+#File: ConfigParser_p.html
 #---------------------------
 Parser Configuration==Настройка обробника
 Content Parser Settings==Налаштування обробника вмісту
@@ -655,7 +655,7 @@ enable/disable==ввімкнути/вимкнути
 >Extension==>Розширення
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
 Integration of a Search Portal==Інтегрування пошукового порталу
 If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==Якщо ви хочете вбудувати YaCy в якості пошукового порталу у веб-сайт, ви також можете змінити значки та повідомлення на сторінках пошуку.
@@ -1073,7 +1073,7 @@ Use filter==Використовувати фільтр
 Restrict to start domain==Обмежити до початкового домену
 Restrict to sub-path==Обмежити до початкового шляху
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Це emacs-подібний регулярний вираз, яий повинен співпадати зі сканованими URL;
-The filter is a <b><a href="http://download.oracle.com/javase/6/docs/api/java/util/regex/Pattern.html">regular expression</a></b>==Цей фільтр <b><a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">регулярний вираз</a></b>,
+The filter is a <b><a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>==Цей фільтр <b><a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">регулярний вираз</a></b>,
 that <b>must match</b> with the URLs which are used to be crawled; default is 'catch all'.==який <b>повинен співпадати</b> з URL, що використовуються при скануванні. За умовчанням встановлено значення "Дозволити все".
 Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'.==Приклад: Щоб дозволити тільки URL-адреси, що містять слово "Wissenschaft", створюється фільтр ".*Wissenschaft.*".
 You can also use an automatic domain-restriction to fully crawl a single domain.==Ви можете також використовувати автоматичне обмеження домену для повного сканування певного домену.
@@ -1464,7 +1464,7 @@ Index Reference Size==Кількість посилань
 No reference size limitation (this may cause strong CPU load when words are searched that appear very often)==Без обмеження кількості посилань (може викликати сильне завантаженння CPU при пошуку дуже частих слів)
 Limitation of number of references per word==Обмеження кількості посилань на слово
 this causes that old references als deleted if that limit is reached==старіші посилання видаляються, якщо межа досягнена
-"Set References Limit"=="Виставити обмеження посилань"
+>Set References Limit<==>Виставити обмеження посилань<
 #-----------------------------
 
 #File: IndexControlURLs_p.html
@@ -1747,7 +1747,7 @@ The assortment directory containing parts of the word index.==Каталог н�
 The words directory containing parts of the word index.==Каталог слів містить частини індексу слів.
 The assortment file that should be imported.==Файл набору, що повинен бути імпортований.
 The assortment file must have the postfix==Файл набору повинен мати закінчення
-.db".==.db".
+#.db".==.db".
 If you would like to import an assortment file from the <tt>PLASMADBACLUSTERABKP</tt>==Якщо ви хочете імпортувати файл набору з <tt>PLASMADBACLUSTERABKP</tt>,
 you have to rename it first.==ви повинні спочатку його перейменувати.
 >Notes:==>Примітки:
@@ -2167,20 +2167,16 @@ Attributes==Властивості
 
 #File: Performance_p.html
 #---------------------------
+<html lang="en">==<html lang="uk">
 Performance Settings==Установки живлення
 Memory Settings==Налаштування пам’яті
-Memory reserved for JVM==Пам’ять, утримувана для JVM
+Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Пам’ять, утримувана для <abbr title="Java Virtual Machine">JVM</abbr>
 "Set"=="Виставити"
 Resource Observer==Спостерігач за ресурсами
-DHT-Trigger==DHT-перемикач
-not triggered:==не перемкнено:
->triggered==>перемкнено
 reset state==відновити стан
-HDD==Місце на жорсткому диску
-disable crawls below==Вимкнути сканування при менше
-free space==вільної пам’яті
-disable DHT-in below==Вимкнути отримання DHT при менше
-RAM==Основна пам’ять
+> free space==> вільної пам’яті
+disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Вимкнути отримання <abbr title="Distributed Hash Table">DHT</abbr> при менше
+<abbr title="Random Access Memory">RAM</abbr>==Основна пам’ять
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Зміни прийняті. Вони вступлять в силу тільки після перезапуску <strong>YaCy</strong>
 restart now</a>==перезапустити зараз</a>
 Confirm Restart==Підтрвердіть перезапуск
@@ -2505,7 +2501,7 @@ Crawl results will appear in the==Показ результатів знаход
 Peers offering remote crawl URLs==Вузли, що пропонують URL для віддаленого сканування
 If the remote crawl option is switched on, then this peer will load URLs from the following remote peers:==Якщо віддалене сканування увімкнене, то цей вузол скануватиме URL-адреси з таких віддалених вузлів:
 >Name<==>Ім’я<
->Remote<br/>Crawl<==>Remote<br/>Crawl<
+#>Remote<br/>Crawl<==>Remote<br/>Crawl<
 >Release/<br/>SVN<==>Випуск/SVN<
 >PPM<==>Сторінок За Хвилину (PPM)<
 >QPH<==>Запитів За Годину (QPH)<

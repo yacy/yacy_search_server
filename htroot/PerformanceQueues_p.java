@@ -29,8 +29,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.cora.protocol.ConnectionInfo;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.TransactionManager;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.util.FileUtils;
@@ -51,11 +51,17 @@ public class PerformanceQueues_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         File defaultSettingsFile = new File(sb.getAppPath(), "defaults/yacy.init");
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
 
         // get segment
         Segment indexSegment = sb.index;
 
         if(post != null) {
+        	/* Check the transaction is valid : validation apply then for every uses of this post parameter */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
         	if(post.containsKey("defaultFile")){
 	            // TODO check file-path!
 	            final File value = new File(sb.getAppPath(), post.get("defaultFile", "defaults/yacy.init"));
@@ -71,13 +77,34 @@ public class PerformanceQueues_p {
 	            sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
 	            sb.setConfig("javastart_Xms", "Xms" + xms + "m");
 	            prop.put("setStartupCommit", "1");
+	            
+	            /* Acquire a transaction token for the restart operation */
+	            prop.put("setStartupCommit_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header, "/Steering.html"));
             }
             if(post.containsKey("diskFree")) {
-            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, post.getInt("diskFree", 3000));
+            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, post.getLong("diskFree", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT));
             }
             if(post.containsKey("diskFreeHardlimit")) {
-            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, post.getInt("diskFreeHardlimit", 1000));
+            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, post.getLong("diskFreeHardlimit", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT_DEFAULT));
+            	
+            	/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
+            	 * so we take only in account when the relate diskFreeHardlimit is set */
+				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE,
+						post.getBoolean("diskFreeAutoregulate"));
             }
+			if (post.containsKey("diskUsed")) {
+				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE,
+						post.getLong("diskUsed", SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT));
+			}
+			if (post.containsKey("diskUsedHardlimit")) {
+				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT, post.getLong("diskUsedHardlimit",
+						SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT));
+				
+				/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
+				 * so we take only in account when the related diskFreeHardlimit is set */
+				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE,
+						post.getBoolean("diskUsedAutoregulate"));
+			}
             if(post.containsKey("memoryAcceptDHT")) {
             	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, post.getInt("memoryAcceptDHT", 50));
             }
@@ -90,7 +117,7 @@ public class PerformanceQueues_p {
         String threadName;
         BusyThread thread;
 
-        final boolean xml = (header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml");
+        final boolean xml = header.getPathInfo().endsWith(".xml");
         prop.setLocalized(!xml);
 
         // calculate totals
@@ -235,7 +262,15 @@ public class PerformanceQueues_p {
 
             // storing the new values into configfile
             sb.setConfig(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX,maxBusy);
-            //switchboard.setConfig("crawler.MinIdleThreads",minIdle);
+            
+            /*
+             * configuring the robots.txt loading pool
+             */
+            // get the current crawler pool configuration
+            maxBusy = post.getInt("Robots.txt Pool_maxActive", SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT);
+
+            // storing the new values into configfile
+            sb.setConfig(SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX, maxBusy);
 
             /*
              * configuring the http pool
@@ -278,12 +313,16 @@ public class PerformanceQueues_p {
         prop.put("pool_0_name","Crawler Pool");
         prop.put("pool_0_maxActive", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 0));
         prop.put("pool_0_numActive", sb.crawlQueues.activeWorkerEntries().size());
+        
+        prop.put("pool_1_name","Robots.txt Pool");
+        prop.put("pool_1_maxActive", sb.getConfigInt(SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX, SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT));
+        prop.put("pool_1_numActive", sb.crawlQueues.activeWorkerEntries().size());
 
-        prop.put("pool_1_name", "httpd Session Pool");
-        prop.put("pool_1_maxActive", ConnectionInfo.getServerMaxcount());
-        prop.put("pool_1_numActive", ConnectionInfo.getServerCount());
+        prop.put("pool_2_name", "httpd Session Pool");
+        prop.put("pool_2_maxActive", ConnectionInfo.getServerMaxcount());
+        prop.put("pool_2_numActive", ConnectionInfo.getServerCount());
 
-        prop.put("pool", "2");
+        prop.put("pool", "3");
 
         // parse initialization memory settings
         final String Xmx = sb.getConfig("javastart_Xmx", "Xmx600m").substring(3);
@@ -297,6 +336,14 @@ public class PerformanceQueues_p {
         final boolean observerTrigger = !MemoryControl.properState();
         prop.put("diskFree", diskFree);
         prop.put("diskFreeHardlimit", diskFreeHardlimit);
+		prop.put("diskFreeAutoregulate", sb.getConfigBool(SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE,
+				SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE_DEFAULT) ? 1 : 0);
+		prop.put("diskUsed", sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE,
+				SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT));
+		prop.put("diskUsedHardlimit", sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT,
+				SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT));
+		prop.put("diskUsedAutoregulate", sb.getConfigBool(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE,
+				SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE_DEFAULT) ? 1 : 0);
         prop.put("memoryAcceptDHT", memoryAcceptDHT);
         if(observerTrigger) prop.put("observerTrigger", "1");
 

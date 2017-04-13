@@ -19,25 +19,30 @@
  */
 package net.yacy.cora.federate;
 
-import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.opensearch.OpenSearchConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.storage.Configuration.Entry;
 import net.yacy.cora.storage.Files;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.robots.RobotsTxtEntry;
 import net.yacy.document.parser.xml.opensearchdescriptionReader;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Bitfield;
@@ -49,21 +54,32 @@ import net.yacy.search.query.QueryModifier;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.WebgraphSchema;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 
 /**
  * Handling of queries to configured remote OpenSearch systems.
  */
 public class FederateSearchManager {
 
-    private final int accessDelay = 15000; // delay between connects (in ms)
+	/** Delay between connects (in ms) */
+    private final int accessDelay = 15000;
 
     private File confFile = null; // later initialized to DATA/SETTINGS/heuristicopensearch.conf
-    private HashSet<AbstractFederateSearchConnector> conlist; // connector list
-    protected Configuration cfg;//PropertiesConfiguration cfg;
-    private static FederateSearchManager manager = null; // self referenc for static .getManager()
+    
+    /** Connectors list */
+    private HashSet<AbstractFederateSearchConnector> conlist;
+    
+    /** PropertiesConfiguration cfg */
+    protected Configuration cfg;
+    
+    /** Switchboard instance */
+    private Switchboard switchboard;
+    
+    /** Self reference for static .getManager() */
+    private static FederateSearchManager manager = null;
 
+    /**
+     * @param sb switchboard instance. Must not be null.
+     */
     public FederateSearchManager(Switchboard sb) {
         super();
         this.conlist = new HashSet<AbstractFederateSearchConnector>();
@@ -72,6 +88,7 @@ public class FederateSearchManager {
         if (sb == null) {
             return;
         }
+        this.switchboard = sb;
         // Data needed  active  name, url(template), desc, rule-when-to-use, specifics
         confFile = new File(sb.getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
         if (!confFile.exists()) {
@@ -107,8 +124,8 @@ public class FederateSearchManager {
                                 ConcurrentLog.config("FederateSearchManager", "Error in configuration of: " + url);
                             }
                         } else { // handle opensearch url template
-                            OpenSearchConnector osc = new OpenSearchConnector();
-                            if (osc.init(name, url)) {
+                            OpenSearchConnector osc = new OpenSearchConnector(url);
+                            if (osc.init(name, sb.getDataPath()+ "/DATA/SETTINGS/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name))) {
                                 conlist.add(osc);
                             }
                         }
@@ -179,7 +196,6 @@ public class FederateSearchManager {
     public List<URIMetadataNode> query(String querystr) {
 
         final QueryGoal qg = new QueryGoal(querystr);
-        final Switchboard sb = Switchboard.getSwitchboard();
         Bitfield filter = new Bitfield();
         final QueryParams query = new QueryParams(
                 qg,
@@ -202,8 +218,8 @@ public class FederateSearchManager {
                 MultiProtocolURL.TLD_any_zone_filter,
                 "",
                 false,
-                sb.index,
-                sb.getRanking(),
+                this.switchboard.index,
+                this.switchboard.getRanking(),
                 "",//userAgent
                 0.0d, 0.0d, 0.0d,
                 new String[0]);
@@ -234,8 +250,9 @@ public class FederateSearchManager {
                 try {
                     conf.commit();
                     if (active) {
-                        OpenSearchConnector osd = new OpenSearchConnector();
-                        if (osd.init(name, urlTemplate)) {
+                        OpenSearchConnector osd = new OpenSearchConnector(urlTemplate);
+                        String htmlMappingFile = this.switchboard.getDataPath()+ "/DATA/SETTINGS/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name);
+                        if (osd.init(name, htmlMappingFile)) {
                             conlist.add(osd);
                         }
                     }
@@ -266,12 +283,38 @@ public class FederateSearchManager {
      */
     protected Set<AbstractFederateSearchConnector> getBest(final QueryParams query) {
         HashSet<AbstractFederateSearchConnector> retset = new HashSet<AbstractFederateSearchConnector>();
-        // currently only enforces limits (min access delay, frequency)
+        MultiProtocolURL connectorURL;
         for (AbstractFederateSearchConnector fsc : conlist) {
+        	try {
+				connectorURL = new MultiProtocolURL(fsc.baseurl);
+			} catch (MalformedURLException e) {
+				ConcurrentLog.warn("FederateSearchManager", "Malformed connector URL : " + fsc.baseurl);
+				continue;
+			}
+        	RobotsTxtEntry robotsEntry = null;
+        	int robotsDelay = 0;
+			if (this.switchboard != null && this.switchboard.robots != null) {
+				robotsEntry = this.switchboard.robots.getEntry(connectorURL,
+						ClientIdentification.yacyInternetCrawlerAgent);
+				if(robotsEntry != null) {
+					robotsDelay = robotsEntry.getCrawlDelayMillis();
+				}
+			}
+        	
             // check access time
-            if (fsc.lastaccesstime + accessDelay < System.currentTimeMillis()) { // enforce 15 sec delay between searches to same system
-                retset.add(fsc);
+			long currentTime = System.currentTimeMillis();
+            if ((fsc.lastaccesstime + accessDelay < currentTime) 
+            		&& (fsc.lastaccesstime + robotsDelay < currentTime) ) { 
+            	// enforce 15 sec delay between searches to same system, and also check any eventual robots.txt Crawl-delay directive
+    			if (robotsEntry == null || !robotsEntry.isDisallowed(connectorURL)) {
+                    // also check robots.txt exclusion
+    				retset.add(fsc);
+    			} else {
+    				ConcurrentLog.warn("FederateSearchManager",
+    						"Connector URL is disallowed by robots.txt : " + fsc.baseurl);
+    			}
             }
+
         }
         return retset;
     }
@@ -284,7 +327,7 @@ public class FederateSearchManager {
      * @return true if background discover job was started, false if job not
      * started
      */
-    public boolean discoverFromSolrIndex(Switchboard sb) {
+    public boolean discoverFromSolrIndex(final Switchboard sb) {
         if (sb == null) {
             return false;
         }
@@ -324,7 +367,7 @@ public class FederateSearchManager {
 
         // job to iterate through Solr index to find links to opensearchdescriptions
         // started as background job as connect timeouts may cause it run a long time
-        final Thread job = new Thread() {
+        final Thread job = new Thread(FederateSearchManager.class.getSimpleName() + ".discoverFromSolrIndex") {
             @Override
             public void run() {
                 try {
@@ -345,20 +388,40 @@ public class FederateSearchManager {
                                 SolrDocument sdoc = docidx.next();
 
                                 String hrefurltxt = sdoc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName()) + "://" + sdoc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
+                                URL url;
                                 try {
-                                    URL url = new URL(hrefurltxt);
-                                    //TODO: check Blacklist
-                                    if (dblmem.add(url.getAuthority())) { // use only main path to detect double entries
-                                        opensearchdescriptionReader os = new opensearchdescriptionReader(hrefurltxt);
-                                        if (os.getRSSorAtomUrl() != null) {
-                                            // add found system to config file
+                                    url = new URL(hrefurltxt);
+                                } catch (final MalformedURLException ex) {
+                                	ConcurrentLog.warn("FederateSearchManager", "OpenSearch description URL is malformed : " + hrefurltxt);
+                                	continue;
+                                }
+                                //TODO: check Blacklist
+                                if (dblmem.add(url.getAuthority())) { // use only main path to detect double entries
+                                    opensearchdescriptionReader os = new opensearchdescriptionReader(hrefurltxt);
+                                    if (os.getRSSorAtomUrl() != null) {
+                                     	/* Check eventual robots.txt policy */
+                                      	RobotsTxtEntry robotsEntry = null;
+                                      	MultiProtocolURL templateURL;
+                                       	try {
+                                       		templateURL = new MultiProtocolURL(os.getRSSorAtomUrl());
+                                       	} catch (final MalformedURLException ex) {
+                                           	ConcurrentLog.warn("FederateSearchManager", "OpenSearch description URL is malformed : " + hrefurltxt);
+                                           	continue;
+                                        }
+                                       	if(sb.robots != null) {
+                                       		robotsEntry = sb.robots.getEntry(templateURL, ClientIdentification.yacyInternetCrawlerAgent);
+                                       	}
+
+                                   		if(robotsEntry != null && robotsEntry.isDisallowed(templateURL)) {
+                                   			ConcurrentLog.info("FederateSearchManager", "OpenSearch description template URL is disallowed by robots.xt");
+                                   		} else {
+                                   			// add found system to config file
                                             addOpenSearchTarget(os.getShortName(), os.getRSSorAtomUrl(), false, os.getItem("LongName"));
                                             ConcurrentLog.info("FederateSearchManager", "added " + os.getShortName() + " " + hrefurltxt);
-                                        } else {
-                                            ConcurrentLog.info("FederateSearchManager", "osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
-                                        }
+                                    	}
+                                    } else {
+                                    	ConcurrentLog.info("FederateSearchManager", "osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
                                     }
-                                } catch (final MalformedURLException ex) {
                                 }
                             }
                         } else {
@@ -407,9 +470,8 @@ public class FederateSearchManager {
                                     ConcurrentLog.config("FederateSearchManager", "Init error in configuration of: " + url);
                                 }
                             } else { // handle opensearch url template
-                                OpenSearchConnector osd;
-                                osd = new OpenSearchConnector();
-                                if (osd.init(name, url)) {
+                                OpenSearchConnector osd = new OpenSearchConnector(url);
+                                if (osd.init(name, confFile.getParent()+"/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name))) {
                                     conlist.add(osd);
                                 }
                             }

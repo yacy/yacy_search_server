@@ -39,11 +39,11 @@ import java.util.Locale;
 import java.util.Map;
 
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.BlogBoard;
 import net.yacy.data.UserDB;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
@@ -77,22 +77,23 @@ public class Blog {
         prop.put("display", 1); // Fixed to 1
 
 
-        final boolean xml = (header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml");
-        final String address = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
+        final boolean xml = header.getPathInfo().endsWith(".xml");
+        /* Peer URL base : used to generate absolute URLs in Blog.rss */
+        final String context = YaCyDefaultServlet.getContext(header, sb);
 
         prop.put("mode_admin", hasRights ? "1" : "0");
 
         if (post == null) {
             prop.putHTML("peername", sb.peers.mySeed().getName());
-            prop.put("address", address);
-            return putBlogDefault(prop, sb, address, 0, 10, hasRights, xml);
+            prop.put("context", context);
+            return putBlogDefault(prop, sb, context, 0, 10, hasRights, xml);
         }
 
         final int start = post.getInt("start",0); //indicates from where entries should be shown
         final int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
         if (!hasRights) {
-            final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
+            final UserDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION));
             if (userentry != null && userentry.hasRight(UserDB.AccessRight.BLOG_RIGHT)) {
                 hasRights=true;
             } else if (post.containsKey("login")) {
@@ -102,7 +103,7 @@ public class Blog {
         }
 
         String pagename = post.get("page", DEFAULT_PAGE);
-        final String ip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, Domains.LOCALHOST);
+        final String ip = header.getRemoteAddr();
 
         String strAuthor = post.get("author", "anonymous");
 
@@ -192,7 +193,7 @@ public class Blog {
                 prop.putHTML("mode_author", UTF8.String(author));
                 prop.putHTML("mode_subject", post.get("subject",""));
                 prop.put("mode_date", dateString(new Date()));
-                prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_page", post.get("content", ""));
+                prop.putWiki("mode_page", post.get("content", ""));
                 prop.putHTML("mode_page-code", post.get("content", ""));
             }
             else {
@@ -228,14 +229,14 @@ public class Blog {
                 // XXX: where are "peername" and "address" used in the template?
                 // XXX: "clientname" is already set to the peername, no need for a new setting
                 prop.putHTML("peername", sb.peers.mySeed().getName());
-                prop.put("address", address);
+                prop.put("context", context);
                 //index all entries
-                putBlogDefault(prop, sb, address, start, num, hasRights, xml);
+                putBlogDefault(prop, sb, context, start, num, hasRights, xml);
             }
             else {
                 //only show 1 entry
                 prop.put("mode_entries", "1");
-                putBlogEntry(sb, prop, page, address, 0, hasRights, xml);
+                putBlogEntry(prop, page, context, 0, hasRights, xml);
             }
         }
 
@@ -246,7 +247,7 @@ public class Blog {
     private static serverObjects putBlogDefault(
             final serverObjects prop,
             final Switchboard switchboard,
-            final String address,
+            final String context,
             int start,
             int num,
             final boolean hasRights,
@@ -264,10 +265,9 @@ public class Blog {
         while (i.hasNext() && (num == 0 || num > count)) {
             if(0 < start--) continue;
             putBlogEntry(
-                    switchboard,
                     prop,
                     switchboard.blogDB.readBlogEntry(i.next()),
-                    address,
+                    context,
                     count++,
                     hasRights,
                     xml);
@@ -295,10 +295,9 @@ public class Blog {
     }
 
     private static serverObjects putBlogEntry(
-            final Switchboard sb,
             final serverObjects prop,
             final BlogBoard.BlogEntry entry,
-            final String address,
+            final String context,
             final int number,
             final boolean hasRights,
             final boolean xml)
@@ -313,21 +312,21 @@ public class Blog {
         } else {
             prop.put("mode_entries_" + number + "_commentsactive", "1");
             prop.put("mode_entries_" + number + "_commentsactive_pageid", entry.getKey());
-            prop.put("mode_entries_" + number + "_commentsactive_address", address);
+            prop.put("mode_entries_" + number + "_commentsactive_context", context);
             prop.put("mode_entries_" + number + "_commentsactive_comments", entry.getCommentsSize());
         }
 
         prop.put("mode_entries_" + number + "_date", dateString(entry.getDate()));
         prop.put("mode_entries_" + number + "_rfc822date", HeaderFramework.formatRFC1123(entry.getDate()));
         prop.put("mode_entries_" + number + "_pageid", entry.getKey());
-        prop.put("mode_entries_" + number + "_address", address);
+        prop.put("mode_entries_" + number + "_context", context);
         prop.put("mode_entries_" + number + "_ip", entry.getIp());
 
         if (xml) {
             prop.put("mode_entries_" + number + "_page", entry.getPage());
             prop.put("mode_entries_" + number + "_timestamp", entry.getTimestamp());
         } else {
-            prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_entries_" + number + "_page", entry.getPage());
+            prop.putWiki("mode_entries_" + number + "_page", entry.getPage());
         }
 
         if (hasRights) {

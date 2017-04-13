@@ -206,7 +206,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String threadname = Thread.currentThread().getName();
         String ql = ""; try {ql = URLDecoder.decode(req.getParams().toString(), StandardCharsets.UTF_8.name());} catch (UnsupportedEncodingException e) {}
-        Thread.currentThread().setName("solr query: " + ql); // for debugging in Threaddump
+        Thread.currentThread().setName("Embedded solr query: " + ql); // for debugging in Threaddump
         ConcurrentLog.fine("EmbeddedSolrConnector.query", "QUERY: " + ql);
         
         SolrQueryResponse rsp = new SolrQueryResponse();
@@ -331,7 +331,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String threadname = Thread.currentThread().getName();
         String ql = ""; try {ql = URLDecoder.decode(params.toString(), StandardCharsets.UTF_8.name());} catch (UnsupportedEncodingException e) {}
-        Thread.currentThread().setName("solr query: q=" + ql);
+        Thread.currentThread().setName("Embedded.getResponseByParams solr query: q=" + ql);
         ConcurrentLog.info("EmbeddedSolrConnector.getResponseByParams", "QUERY: " + ql);
         //System.out.println("EmbeddedSolrConnector.getResponseByParams * QUERY: " + ql); System.out.println("STACKTRACE: " + ConcurrentLog.stackTrace());
         QueryResponse rsp;
@@ -365,7 +365,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         String sort = params.get(CommonParams.SORT);
         String threadname = Thread.currentThread().getName();
         try {
-            if (q != null) Thread.currentThread().setName("solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort)); // for debugging in Threaddump
+            if (q != null) Thread.currentThread().setName("Embedded.getDocumentListByParams solr query: q = " + q + (fq == null ? "" : ", fq = " + fq) + (sort == null ? "" : ", sort = " + sort)); // for debugging in Threaddump
             response = this.query(req);
             if (q != null) Thread.currentThread().setName(threadname);
             if (response == null) throw new IOException("response == null");
@@ -420,7 +420,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
-     * @return the load date if any entry in solr exists, -1 otherwise
+     * @return the load date if any entry in solr exists, null otherwise
      * @throws IOException
      */
     @Override

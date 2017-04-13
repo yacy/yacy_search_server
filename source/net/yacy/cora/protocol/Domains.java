@@ -48,6 +48,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
@@ -60,6 +61,7 @@ import net.yacy.cora.storage.KeyList;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 import com.google.common.net.InetAddresses;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
@@ -727,6 +729,9 @@ public class Domains {
 
     public static synchronized void close() {
         if (globalHosts != null) try {globalHosts.close();} catch (final IOException e) {log.warn(e);}
+        if(getByNameService != null) {
+        	getByNameService.shutdownNow();
+        }
     }
 
     /**
@@ -794,8 +799,11 @@ public class Domains {
         NAME_CACHE_HIT.insertIfAbsent(host, i);
         cacheHit_Insert++;
     }
+    
+	final private static ExecutorService getByNameService = Executors
+			.newCachedThreadPool(new NamePrefixThreadFactory("InetAddress.getByName"));
 
-    final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newCachedThreadPool());
+	final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(getByNameService);
 
     /**
      * strip off any parts of an url, address string (containing host/ip:port) or raw IPs/Hosts,
@@ -817,29 +825,31 @@ public class Domains {
         // IPv4 / host heuristics
         p = target.lastIndexOf(':');        
         if ( p < 0 ) {
-            // may be IPv4 or IPv6, we chop off brackets if exist
-            if (target.charAt(0) == '[') target = target.substring(1);
-            if (target.charAt(target.length() - 1) == ']') target = target.substring(0, target.length() - 1);
             p = target.lastIndexOf('%');
             if (p > 0) target = target.substring(0, p);
             return target;
         }
         
         // the ':' at pos p may be either a port divider or a part of an IPv6 address
-        if (target.charAt(p - 1) == ']') {
-            target = target.substring(1, p - 1);
-            p = target.lastIndexOf('%');
-            if (p > 0) target = target.substring(0, p);
-            return target;
+        if ( p > target.lastIndexOf(']')) { // if after ] it's a port divider (not IPv6 part)
+            target = target.substring(0, p );
         }
         
-        // the ':' must be a port divider
-        target = target.substring(0, p);
+        // may be IPv4 or IPv6, we chop off brackets if exist
+        if (target.charAt(0) == '[') target = target.substring(1);
+        if (target.charAt(target.length() - 1) == ']') target = target.substring(0, target.length() - 1);
         p = target.lastIndexOf('%');
         if (p > 0) target = target.substring(0, p);
         return target;
     }
-    
+
+    /**
+     * Reads the port out of a url string (the url must start with a protocol
+     * like http:// to return correct default port). If no port is given, default
+     * ports are returned. On missing protocol, port=80 is assumed.
+     * @param target url (must start with protocol)
+     * @return port number 
+     */
     public static int stripToPort(String target) {
         int port = 80; // default port
         
@@ -863,8 +873,10 @@ public class Domains {
         p = target.lastIndexOf(':');        
         if ( p < 0 ) return port;
 
-        // the ':' must be a port divider
-        port = Integer.parseInt(target.substring(p + 1));
+        // the ':' must be a port divider or part of ipv6
+        if (target.lastIndexOf(']') < p) {
+            port = Integer.parseInt(target.substring(p + 1));
+        }
         return port;
     }
     

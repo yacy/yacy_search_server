@@ -119,6 +119,7 @@ public class IndexSchema_p {
             if (showline) {
                 prop.put("schema_" + c + "_dark", dark ? 1 : 0); dark = !dark;
                 prop.put("schema_" + c + "_checked", cs.contains(field.name()) ? 1 : 0);
+                prop.put("schema_" + c + "_required", field.isMandatory() ? 1 : 0);
                 prop.putHTML("schema_" + c + "_key", field.name());
                 prop.putHTML("schema_" + c + "_solrfieldname",field.name().equalsIgnoreCase(field.getSolrFieldName()) ? "" : field.getSolrFieldName());
                 if (field.getComment() != null) prop.putHTML("schema_" + c + "_comment",field.getComment());

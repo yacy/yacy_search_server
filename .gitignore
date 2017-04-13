@@ -17,3 +17,5 @@ RELEASE/
 /DATA.cloud/
 yacy.log
 /target/
+/test/DATA/
+/javadoc/

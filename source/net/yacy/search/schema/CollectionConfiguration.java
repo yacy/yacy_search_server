@@ -48,6 +48,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
+import org.eclipse.jetty.util.ConcurrentHashSet;
+
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
@@ -80,7 +87,6 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.ProbabilisticClassifier;
@@ -88,6 +94,7 @@ import net.yacy.document.SentenceReader;
 import net.yacy.document.Tokenizer;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.IconEntry;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.citation.CitationReference;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -99,13 +106,6 @@ import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReport;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.QueryParams;
-
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.SolrInputField;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 
 
 public class CollectionConfiguration extends SchemaConfiguration implements Serializable {
@@ -150,6 +150,60 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                 ConcurrentLog.warn("SolrCollectionWriter", " solr schema file " + configurationFile.getAbsolutePath() + " is missing declaration for '" + field.name() + "'");
         	}
         }
+        checkMandatoryFields(); // Check minimum needed fields for proper operation are enabled
+        checkFieldRelationConsistency();
+    }
+
+    /**
+     * Check and update schema configuration with required related fields.
+     * If a specific field is enabled, there might be a other field internal
+     * processes rely on. Enable these required fields.
+     * For example, the outboundlinks are split into protocol and url part. The
+     * correct original url can only be assembled if both fields are available (protocol + url = originalUrl)
+     */
+    private void checkFieldRelationConsistency() {
+        Entry e;
+        // for correct assembly of outboundlinks  outboundlinks_protocol_sxt + outboundlinks_urlstub_sxt is needed
+        if (this.contains(CollectionSchema.outboundlinks_urlstub_sxt) && !this.contains(CollectionSchema.outboundlinks_protocol_sxt)) {
+            e = new Entry(CollectionSchema.outboundlinks_protocol_sxt.name(), CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName(), true);
+            this.put(CollectionSchema.outboundlinks_protocol_sxt.name(), e);
+        }
+        // for correct assembly of inboundlinks  inboundlinks_protocol_sxt + inboundlinks_urlstub_sxt is needed
+        if (this.contains(CollectionSchema.inboundlinks_urlstub_sxt) && !this.contains(CollectionSchema.inboundlinks_protocol_sxt)) {
+            e = new Entry(CollectionSchema.inboundlinks_protocol_sxt.name(), CollectionSchema.inboundlinks_protocol_sxt.getSolrFieldName(), true);
+            this.put(CollectionSchema.inboundlinks_protocol_sxt.name(), e);
+        }
+        // for correct assembly of icon url  icons_protocol_sxt + icons_urlstub_sxt is needed
+        if (this.contains(CollectionSchema.icons_urlstub_sxt) && !this.contains(CollectionSchema.icons_protocol_sxt)) {
+            e = new Entry(CollectionSchema.icons_protocol_sxt.name(), CollectionSchema.icons_protocol_sxt.getSolrFieldName(), true);
+            this.put(CollectionSchema.icons_protocol_sxt.name(), e);
+        }
+        // for correct assembly of image url  images_protocol_sxt + images_urlstub_sxt is needed
+        if (this.contains(CollectionSchema.images_urlstub_sxt) && !this.contains(CollectionSchema.images_protocol_sxt)) {
+            e = new Entry(CollectionSchema.images_protocol_sxt.name(), CollectionSchema.images_protocol_sxt.getSolrFieldName(), true);
+            this.put(CollectionSchema.images_protocol_sxt.name(), e);
+        }
+    }
+    
+    /**
+     * Check and update schema configuration with fields strictly needed for proper YaCy operation.
+     */
+    private void checkMandatoryFields() {
+        SchemaConfiguration.Entry entry;
+        for (CollectionSchema field: CollectionSchema.values()) {
+        	if(field.isMandatory()) {
+        		entry = this.get(field.name());
+            	if (entry != null) {
+            		if(!entry.enabled()) {
+            			entry.setEnable(true);
+            			ConcurrentLog.info("SolrCollectionWriter", "Forced activation of mandatory field " + field.name());
+            		}
+            	} else {
+            		this.put(field.name(), new Entry(field.name(), field.getSolrFieldName(), true));
+            		ConcurrentLog.info("SolrCollectionWriter", "Added missing mandatory field " + field.name());
+            	}
+        	}
+        }
     }
 
     public String[] allFields() {
@@ -183,6 +237,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
      */
     @Override
     public void commit() throws IOException {
+    	checkMandatoryFields(); // Check minimum needed fields for proper operation are enabled
+        checkFieldRelationConsistency(); // in case of changes, check related fields are enabled before save
         try {
             super.commit();
             // make sure the enum SolrField.SolrFieldName is current
@@ -214,11 +270,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     /**
-     * add uri attributes to solr document
+     * add uri attributes to solr document and assign the document id
      * @param doc
      * @param allAttr
-     * @param digestURL
-     * @param doctype
+     * @param digestURL used to calc. the document.id and the doc.sku=(in index stored url)
      * @return the normalized url
      */
     public String addURIAttributes(final SolrInputDocument doc, final boolean allAttr, final DigestURL digestURL) {
@@ -273,13 +328,20 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         return us;
     }
-    
+
+    /**
+     * Convert a URIMetadataNode, which has some private fields to a pure
+     * SolrInputDocument with all field values from the input.
+     * This also assigns the document.id with the YaCy url.hash()
+     * @param md
+     * @return
+     */
     public SolrInputDocument metadata2solr(final URIMetadataNode md) {
 
         SolrInputDocument doc = toSolrInputDocument(md); //urimetadatanode stores some values in private fields, add now to sorldocument
 
         boolean allAttr = this.isEmpty();
-        addURIAttributes(doc, allAttr, md.url());
+        addURIAttributes(doc, allAttr, md.url()); // assign doc.id, doc.sku and url attribute fields
 
         String title = md.dc_title();
         if (allAttr || contains(CollectionSchema.title_count_i)) add(doc, CollectionSchema.title_count_i, 1);
@@ -315,6 +377,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         	add(doc, CollectionSchema.keywords, keywords);
         }
 
+        /* Metadata node may contain one favicon url when transmitted as dht chunk */
+        processIcons(doc, allAttr, md.getIcons());
         if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, md.limage());
         if (allAttr || contains(CollectionSchema.linkscount_i)) add(doc, CollectionSchema.linkscount_i, md.llocal() + md.lother());
         if (allAttr || contains(CollectionSchema.inboundlinkscount_i)) add(doc, CollectionSchema.inboundlinkscount_i, md.llocal());
@@ -335,27 +399,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         if (allAttr || contains(CollectionSchema.audiolinkscount_i)) add(doc, CollectionSchema.audiolinkscount_i, md.laudio());
         if (allAttr || contains(CollectionSchema.videolinkscount_i)) add(doc, CollectionSchema.videolinkscount_i, md.lvideo());
         if (allAttr || contains(CollectionSchema.applinkscount_i)) add(doc, CollectionSchema.applinkscount_i, md.lapp());
-        if (allAttr || contains(CollectionSchema.text_t)) {
-        	// construct the text from other metadata parts.
-        	// This is necessary here since that is used to search the link when no other data (parsed text body) is available
-        	StringBuilder sb = new StringBuilder(120);
-        	// accText(sb, md.dc_title()); // default search field via getQueryFields(), not needed for snippet (always displayed)
-        	// accText(sb, md.dc_creator()); // author is in Default ranking/getQueryFields
-        	// accText(sb, md.dc_publisher()); // has it's own metadata field publisher_t (not part of default queryfields) and mostly N/A
-        	// accText(sb, md.snippet()); // above added to description_txt, default search field via getQueryFields(), description_txt incl. in snippet calculation
-        	accText(sb, md.url().toTokens());
-        	// accText(sb, keywords); // default search field via getQueryFields(), keywords not incl. in snippet calculation
-        	add(doc, CollectionSchema.text_t, sb.toString());
-        }
 
         return doc;
-    }
-
-    private static void accText(final StringBuilder sb, String text) {
-    	if (text == null || text.length() == 0) return;
-    	if (sb.length() != 0) sb.append(' ');
-    	text = text.trim();
-    	if (!text.isEmpty() && text.charAt(text.length() - 1) == '.') sb.append(text); else sb.append(text).append('.');
     }
 
     public static class Subgraph {
@@ -442,15 +487,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
             add(doc, CollectionSchema.collection_sxt, cs);
         }
-        char doctype = Response.docType(responseHeader== null ? null : responseHeader.getContentType()); // null returns DT_UNKNOWN
+
         List<String> titles = document.titles();
         if (allAttr || contains(CollectionSchema.title)) {
-            if (doctype == Response.DT_IMAGE || doctype == Response.DT_AUDIO || doctype == Response.DT_MOVIE) {
-                String mediatitle = responseHeader.get(HeaderFramework.X_YACY_MEDIA_TITLE, "");
-                if (mediatitle.length() > 0) {
-                    if (titles.size() == 0) titles.add(mediatitle); else titles.set(0, mediatitle);
-                }
-            }
             add(doc, CollectionSchema.title, titles);
             if ((allAttr || contains(CollectionSchema.title_exact_signature_l)) && titles.size() > 0) {
                 add(doc, CollectionSchema.title_exact_signature_l, EnhancedTextProfileSignature.getSignatureLong(titles.get(0)));
@@ -512,9 +551,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         if (allAttr || contains(CollectionSchema.keywords)) {
             String keywords = document.dc_subject(' ');
-            if (doctype == Response.DT_IMAGE || doctype == Response.DT_AUDIO || doctype == Response.DT_MOVIE) {
-                keywords = responseHeader.get(HeaderFramework.X_YACY_MEDIA_KEYWORDS, keywords);
-            }
             add(doc, CollectionSchema.keywords, keywords);
         }
 
@@ -541,11 +577,14 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
         Subgraph subgraph = new Subgraph(inboundLinks.size(), outboundLinks.size());
         int c = 0;
-        final Object parser = document.getParserObject();
+        final Object scraper = document.getScraperObject();
         boolean containsCanonical = false;
         DigestURL canonical = null;
-        if (parser instanceof ContentScraper) {
-            final ContentScraper html = (ContentScraper) parser;
+        
+        processIcons(doc, allAttr, inboundLinks, outboundLinks, document.getIcons().values());
+
+        if (scraper instanceof ContentScraper) {
+            final ContentScraper html = (ContentScraper) scraper;
             List<ImageEntry> images = html.getImages();
 
             // header tags
@@ -659,7 +698,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
             final List<Date> startDates = html.getStartDates();
             if (startDates.size() > 0) add(doc, CollectionSchema.startDates_dts, startDates.toArray(new Date[startDates.size()]));
-            final List<Date> endDates = html.getStartDates();
+            final List<Date> endDates = html.getEndDates();
             if (endDates.size() > 0) add(doc, CollectionSchema.endDates_dts, endDates.toArray(new Date[endDates.size()]));
             
             final List<String> articles = html.getArticles();
@@ -667,45 +706,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             if (articles.size() > 0) add(doc, CollectionSchema.article_txt, articles);
 
             // images
-            final ArrayList<String> imgprots = new ArrayList<String>(images.size());
-            final Integer[] imgheights = new Integer[images.size()];
-            final Integer[] imgwidths = new Integer[images.size()];
-            final Integer[] imgpixels = new Integer[images.size()];
-            final String[] imgstubs = new String[images.size()];
-            final String[] imgalts  = new String[images.size()];
-            int withalt = 0;
-            int i = 0;
-            LinkedHashSet<String> images_text_map = new LinkedHashSet<String>();
-            for (final ImageEntry ie: images) {
-                final MultiProtocolURL uri = ie.url();
-                inboundLinks.remove(uri);
-                outboundLinks.remove(uri);
-                imgheights[i] = ie.height();
-                imgwidths[i] = ie.width();
-                imgpixels[i] = ie.height() < 0 || ie.width() < 0 ? -1 : ie.height() * ie.width();
-                String protocol = uri.getProtocol();
-                imgprots.add(protocol);
-                imgstubs[i] = uri.toString().substring(protocol.length() + 3);
-                imgalts[i] = ie.alt();
-                for (String it: CommonPattern.SPACE.split(uri.toTokens())) images_text_map.add(it);
-                if (ie.alt() != null && ie.alt().length() > 0) {
-                    SentenceReader sr = new SentenceReader(ie.alt());
-                    while (sr.hasNext()) images_text_map.add(sr.next().toString());
-                    withalt++;
-                }
-                i++;
-            }
-            StringBuilder images_text = new StringBuilder(images_text_map.size() * 6 + 1);
-            for (String s: images_text_map) images_text.append(s.trim()).append(' ');
-            if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, images.size());
-            if (allAttr || contains(CollectionSchema.images_protocol_sxt)) add(doc, CollectionSchema.images_protocol_sxt, protocolList2indexedList(imgprots));
-            if (allAttr || contains(CollectionSchema.images_urlstub_sxt)) add(doc, CollectionSchema.images_urlstub_sxt, imgstubs);
-            if (allAttr || contains(CollectionSchema.images_alt_sxt)) add(doc, CollectionSchema.images_alt_sxt, imgalts);
-            if (allAttr || contains(CollectionSchema.images_height_val)) add(doc, CollectionSchema.images_height_val, imgheights);
-            if (allAttr || contains(CollectionSchema.images_width_val)) add(doc, CollectionSchema.images_width_val, imgwidths);
-            if (allAttr || contains(CollectionSchema.images_pixel_val)) add(doc, CollectionSchema.images_pixel_val, imgpixels);
-            if (allAttr || contains(CollectionSchema.images_withalt_i)) add(doc, CollectionSchema.images_withalt_i, withalt);
-            if (allAttr || contains(CollectionSchema.images_text_t)) add(doc, CollectionSchema.images_text_t, images_text.toString().trim());
+            processImages(doc, allAttr, inboundLinks, outboundLinks, images);
 
             // style sheets
             if (allAttr || contains(CollectionSchema.css_tag_sxt)) {
@@ -885,12 +886,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             }
         }
 
-        if (parser instanceof DCEntry) {
+        if (scraper instanceof DCEntry) {
             // the document was created with a surrogate parsing; overwrite all md: -entries to Solr
-            DCEntry dcentry = (DCEntry) parser;
+            DCEntry dcentry = (DCEntry) scraper;
             for (Map.Entry<String, String[]> entry: dcentry.getMap().entrySet()) {
                 String tag = entry.getKey();
-                if (!tag.startsWith("md:") || tag.length() < 4) continue;
+                if (!tag.startsWith("md:") || tag.length() < 4) continue; // md: is a YaCy internal identifier for metadata in surrugate.xml files ( md:SOLR_FIELDNAME )
                 CollectionSchema solr_field = CollectionSchema.valueOf(tag.substring(3));
                 if (solr_field == null) continue;
                 String[] values = entry.getValue();
@@ -902,18 +903,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         }
         
         String content = document.getTextString();
-        String tokens = digestURL.toTokens();
-        if (content == null || content.length() == 0) {
-            content = tokens;
-        } else {
-            String[] t = CommonPattern.SPACE.split(tokens);
-            for (String r: t) {
-                if (r.length() > 0 &&
-                    content.indexOf(" " + r + " ") < 0 &&
-                    !content.startsWith(r + " ") &&
-                    !content.endsWith(" " + r)) content += " " + r;
-            }
-        }
 
         // handle image source meta data
         if (document.getContentDomain() == ContentDomain.IMAGE) {
@@ -1032,6 +1021,137 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return doc;
     }
     
+	/**
+	 * Add icons metadata to Solr doc when corresponding schema attributes are
+	 * enabled.
+	 * 
+	 * @param doc
+	 *            solr document to fill. Must not be null.
+	 * @param allAttr
+	 *            all attributes are enabled.
+	 * @param icons
+	 *            document icon entries.
+	 */
+	private void processIcons(SolrInputDocument doc, boolean allAttr, Collection<IconEntry> icons) {
+		processIcons(doc, allAttr, null, null, icons);
+	}
+    
+	/**
+	 * Add icons metadata to Solr doc when corresponding schema attributes are
+	 * enabled. Remove icons urls from inboudLinks and outboundLinks.
+	 * 
+	 * @param doc
+	 *            solr document to fill. Must not be null.
+	 * @param allAttr
+	 *            all attributes are enabled.
+	 * @param inboundLinks
+	 *            all document inbound links.
+	 * @param outboundLinks
+	 *            all document outbound links.
+	 * @param icons
+	 *            document icon entries.
+	 */
+	private void processIcons(SolrInputDocument doc, boolean allAttr, LinkedHashMap<DigestURL, String> inboundLinks,
+			LinkedHashMap<DigestURL, String> outboundLinks, Collection<IconEntry> icons) {
+		if (icons != null) {
+			final List<String> protocols = new ArrayList<String>(icons.size());
+			final String[] sizes = new String[icons.size()];
+			final String[] stubs = new String[icons.size()];
+			final String[] rels = new String[icons.size()];
+			int i = 0;
+			/* Prepare solr field values */
+			for (final IconEntry ie : icons) {
+				final DigestURL url = ie.getUrl();
+
+				if(inboundLinks != null) {
+					inboundLinks.remove(url);
+				}
+				if(outboundLinks != null) {
+					outboundLinks.remove(url);
+				}
+
+				String protocol = url.getProtocol();
+				protocols.add(protocol);
+
+				/*
+				 * There may be multiple sizes and multiple rels for one icon :
+				 * we store this as flat string as currently solr doesn't
+				 * support multidimensionnal array fields
+				 */
+				sizes[i] = ie.sizesToString();
+				stubs[i] = url.toString().substring(protocol.length() + 3);
+				rels[i] = ie.relToString();
+
+				i++;
+			}
+			if (allAttr || contains(CollectionSchema.icons_protocol_sxt)) {
+				add(doc, CollectionSchema.icons_protocol_sxt, protocolList2indexedList(protocols));
+			}
+			if (allAttr || contains(CollectionSchema.icons_urlstub_sxt)) {
+				add(doc, CollectionSchema.icons_urlstub_sxt, stubs);
+			}
+			if (allAttr || contains(CollectionSchema.icons_rel_sxt)) {
+				add(doc, CollectionSchema.icons_rel_sxt, rels);
+			}
+			if (allAttr || contains(CollectionSchema.icons_sizes_sxt)) {
+				add(doc, CollectionSchema.icons_sizes_sxt, sizes);
+			}
+		}
+	}
+
+    /**
+     * Add images metadata to Solr doc when corresponding schema attributes are enabled. 
+     * Remove images urls from inboudLinks and outboundLinks.
+     * @param doc solr document to fill
+     * @param allAttr all attributes are enabled
+     * @param inboundLinks all document inbound links
+     * @param outboundLinks all document outbound links
+     * @param images document images
+     */
+	private void processImages(SolrVector doc, boolean allAttr, LinkedHashMap<DigestURL, String> inboundLinks,
+			LinkedHashMap<DigestURL, String> outboundLinks, List<ImageEntry> images) {
+		final ArrayList<String> imgprots = new ArrayList<String>(images.size());
+		final Integer[] imgheights = new Integer[images.size()];
+		final Integer[] imgwidths = new Integer[images.size()];
+		final Integer[] imgpixels = new Integer[images.size()];
+		final String[] imgstubs = new String[images.size()];
+		final String[] imgalts  = new String[images.size()];
+		int withalt = 0;
+		int i = 0;
+		LinkedHashSet<String> images_text_map = new LinkedHashSet<String>();
+		/* Prepare flat solr field values */
+		for (final ImageEntry ie: images) {
+		    final MultiProtocolURL uri = ie.url();
+		    inboundLinks.remove(uri);
+		    outboundLinks.remove(uri);
+		    imgheights[i] = ie.height();
+		    imgwidths[i] = ie.width();
+		    imgpixels[i] = ie.height() < 0 || ie.width() < 0 ? -1 : ie.height() * ie.width();
+		    String protocol = uri.getProtocol();
+		    imgprots.add(protocol);
+		    imgstubs[i] = uri.toString().substring(protocol.length() + 3);
+		    imgalts[i] = ie.alt();
+		    for (String it: CommonPattern.SPACE.split(uri.toTokens())) images_text_map.add(it);
+		    if (ie.alt() != null && ie.alt().length() > 0) {
+		        SentenceReader sr = new SentenceReader(ie.alt());
+		        while (sr.hasNext()) images_text_map.add(sr.next().toString());
+		        withalt++;
+		    }
+		    i++;
+		}
+		StringBuilder images_text = new StringBuilder(images_text_map.size() * 6 + 1);
+		for (String s: images_text_map) images_text.append(s.trim()).append(' ');
+		if (allAttr || contains(CollectionSchema.imagescount_i)) add(doc, CollectionSchema.imagescount_i, images.size());
+		if (allAttr || contains(CollectionSchema.images_protocol_sxt)) add(doc, CollectionSchema.images_protocol_sxt, protocolList2indexedList(imgprots));
+		if (allAttr || contains(CollectionSchema.images_urlstub_sxt)) add(doc, CollectionSchema.images_urlstub_sxt, imgstubs);
+		if (allAttr || contains(CollectionSchema.images_alt_sxt)) add(doc, CollectionSchema.images_alt_sxt, imgalts);
+		if (allAttr || contains(CollectionSchema.images_height_val)) add(doc, CollectionSchema.images_height_val, imgheights);
+		if (allAttr || contains(CollectionSchema.images_width_val)) add(doc, CollectionSchema.images_width_val, imgwidths);
+		if (allAttr || contains(CollectionSchema.images_pixel_val)) add(doc, CollectionSchema.images_pixel_val, imgpixels);
+		if (allAttr || contains(CollectionSchema.images_withalt_i)) add(doc, CollectionSchema.images_withalt_i, withalt);
+		if (allAttr || contains(CollectionSchema.images_text_t)) add(doc, CollectionSchema.images_text_t, images_text.toString().trim());
+	}
+    
     /**
      * attach additional information to the document to enable navigation features
      * @param doc the document to be enriched
@@ -1100,10 +1220,12 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
     }
     
     /**
-     * post-processing steps for all entries that have a process tag assigned
-     * @param connector
-     * @param urlCitation
-     * @return
+     * Performs post-processing steps for all entries that have a process tag assigned
+     * @param segment Solr segment. Must not be null.
+     * @param rrCache reference report cache for the segment.
+     * @param harvestkey key from a harvest process, used to mark documents needing post-processing
+     * @param byPartialUpdate when true, perform partial updates on documents
+     * @return the number of post processed documents
      */
     public int postprocessing(final Segment segment, final ReferenceReportCache rrCache, final String harvestkey, final boolean byPartialUpdate) {
         if (!this.contains(CollectionSchema.process_sxt)) return 0;
@@ -1128,18 +1250,6 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             postprocessingCollection1Count = -1;
             postprocessingWebgraphCount = -1;
         }
-        
-        // collect hosts from index which shall take part in citation computation
-        postprocessingActivity = "collecting host facets for collection";
-        ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
-        ReversibleScoreMap<String> collection1hosts;
-        try {
-            Map<String, ReversibleScoreMap<String>> hostfacet = collectionConnector.getFacets("{!cache=false}" + collection1query, 10000000, CollectionSchema.host_s.getSolrFieldName());
-            collection1hosts = hostfacet.get(CollectionSchema.host_s.getSolrFieldName());
-        } catch (final IOException e2) {
-            ConcurrentLog.logException(e2);
-            collection1hosts = new ClusteredScoreMap<String>(true);
-        }
 
         postprocessingActivity = "create ranking map";
         ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
@@ -1150,8 +1260,384 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                        collection.contains(CollectionSchema.cr_host_chance_d) &&
                        collection.contains(CollectionSchema.cr_host_norm_i)));
         // create the ranking map
-        final Map<String, CRV> rankings = new ConcurrentHashMap<String, CRV>();
-        if (shallComputeCR) try {
+        final Map<String, CRV> rankings;
+        if(shallComputeCR) {
+            // collect hosts from index which shall take part in citation computation
+            postprocessingActivity = "collecting host facets for collection";
+            ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+            ReversibleScoreMap<String> collection1hosts;
+            try {
+                Map<String, ReversibleScoreMap<String>> hostfacet = collectionConnector.getFacets("{!cache=false}" + collection1query, 10000000, CollectionSchema.host_s.getSolrFieldName());
+                collection1hosts = hostfacet.get(CollectionSchema.host_s.getSolrFieldName());
+            } catch (final IOException e2) {
+                ConcurrentLog.logException(e2);
+                collection1hosts = new ClusteredScoreMap<String>(true);
+            }
+        	
+        	rankings = createRankingMap(segment, rrCache, collectionConnector, collection1hosts);
+        } else {
+        	rankings = new ConcurrentHashMap<String, CRV>();
+        }
+        
+        // process all documents at the webgraph for the outgoing links of this document
+        final AtomicInteger allcount = new AtomicInteger(0);
+        if (segment.fulltext().useWebgraph() && shallComputeCR) {
+            postprocessWebgraph(segment, webgraph, webgraphquery, rankings, allcount);
+        }
+        
+        // process all documents in collection
+        postprocessDocuments(segment, rrCache, harvestkey, byPartialUpdate, collectionConnector, collection,
+				collection1query, rankings, allcount);
+        
+        
+        postprocessingCollection1Count = 0;
+        postprocessingWebgraphCount = 0;
+        postprocessingActivity = "postprocessing terminated";
+        ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+        postprocessingRunning = false;
+        return allcount.get();
+    }
+
+    /**
+     * Performs postprocessing steps on the main documents dollection.
+     * @param segment Solr segment.
+     * @param rrCache reference report cache for the segment.
+     * @param harvestkey key from a harvest process, used to mark documents needing post-processing
+     * @param byPartialUpdate when true, perform partial updates on documents
+     * @param collectionConnector connector to the main Solr collection
+     * @param collection schema configuration for the collection
+     * @param collection1query query used to harvest items to postprocess in the main collection
+     * @param rankings postprocessed rankings
+     * @param allcount global postprocessed documents count
+     */
+	private void postprocessDocuments(final Segment segment, final ReferenceReportCache rrCache,
+			final String harvestkey, final boolean byPartialUpdate, final SolrConnector collectionConnector,
+			final CollectionConfiguration collection, final String collection1query, final Map<String, CRV> rankings,
+			final AtomicInteger allcount) {
+		final Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
+        final Set<String> uniqueURLs = new ConcurrentHashSet<String>(); // will be used in a concurrent environment
+        final Set<String> localOmitFields = new HashSet<String>();
+        localOmitFields.add(CollectionSchema.process_sxt.getSolrFieldName());
+        localOmitFields.add(CollectionSchema.harvestkey_s.getSolrFieldName());
+        final Collection<String> failids = new ConcurrentHashSet<String>();
+        final AtomicInteger countcheck = new AtomicInteger(0);
+        final AtomicInteger proccount = new AtomicInteger();
+        final AtomicInteger proccount_referencechange = new AtomicInteger();
+        final AtomicInteger proccount_citationchange = new AtomicInteger();
+        try {
+            // partitioning of the index, get a facet for a partitioning key
+            final long count = collectionConnector.getCountByQuery("{!cache=false}" + collection1query);
+            String partitioningKey = CollectionSchema.responsetime_i.getSolrFieldName();
+            postprocessingActivity = "collecting " + count + " documents from the collection for harvestkey " + harvestkey + ", partitioned by " + partitioningKey;
+            if (count > 0) {
+                Map<String, ReversibleScoreMap<String>> partitioningFacet = collectionConnector.getFacets("{!cache=false}" + collection1query, 100000, partitioningKey);
+                ReversibleScoreMap<String> partitioning = partitioningFacet.get(partitioningKey);
+                long emptyCount = collectionConnector.getCountByQuery("{!cache=false}" + "-" + partitioningKey + AbstractSolrConnector.CATCHALL_DTERM + " AND (" + collection1query + ")");
+                if (emptyCount > 0) partitioning.inc("", (int) emptyCount);
+                final long start = System.currentTimeMillis();
+                List<String> querystrings = new ArrayList<>(partitioning.size());
+                for (String partitioningValue: partitioning) {
+                    String partitioningQuery = "{!cache=false}" + ((partitioningValue.length() == 0) ?
+                            "-" + partitioningKey + AbstractSolrConnector.CATCHALL_DTERM + " AND (" + collection1query + ")" :
+                            partitioningKey + ":" + partitioningValue + " AND (" + collection1query + ")");
+                    querystrings.add(partitioningQuery);
+                }
+                // start collection of documents 
+                final int concurrency = Math.max(1, Math.min((int) (MemoryControl.available() / (100L * 1024L * 1024L)), Runtime.getRuntime().availableProcessors()));
+                //final int concurrency = 1;
+                final boolean reference_computation = this.contains(CollectionSchema.references_i) &&
+                        this.contains(CollectionSchema.references_internal_i) &&
+                        this.contains(CollectionSchema.references_external_i) &&
+                        this.contains(CollectionSchema.references_exthosts_i);
+                ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+                final BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQueries(
+                        querystrings,
+                        (this.contains(CollectionSchema.http_unique_b) || this.contains(CollectionSchema.www_unique_b)) ?
+                        CollectionSchema.host_subdomain_s.getSolrFieldName() + " asc," + // sort on subdomain to get hosts without subdomain first; that gives an opportunity to set www_unique_b flag to false
+                        CollectionSchema.url_protocol_s.getSolrFieldName() + " asc" // sort on protocol to get http before https; that gives an opportunity to set http_unique_b flag to false
+                        : null, // null sort is faster!
+                        0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency, true,
+                        byPartialUpdate ? 
+                        new String[]{
+                        // the following fields are needed to perform the postprocessing
+                        // and should only be used for partial updates; for full updates use a
+                        // full list of fields to avoid LazyInstantiation which has poor performace
+                        CollectionSchema.id.getSolrFieldName(),
+                        CollectionSchema.sku.getSolrFieldName(),
+                        CollectionSchema.harvestkey_s.getSolrFieldName(),
+                        CollectionSchema.process_sxt.getSolrFieldName(),
+                        CollectionSchema.canonical_equal_sku_b.getSolrFieldName(),
+                        CollectionSchema.canonical_s.getSolrFieldName(),
+                        CollectionSchema.exact_signature_l.getSolrFieldName(),
+                        CollectionSchema.fuzzy_signature_l.getSolrFieldName(),
+                        CollectionSchema.title_exact_signature_l.getSolrFieldName(),
+                        CollectionSchema.description_exact_signature_l.getSolrFieldName(),
+                        CollectionSchema.host_id_s.getSolrFieldName(),
+                        CollectionSchema.host_s.getSolrFieldName(),
+                        CollectionSchema.host_subdomain_s.getSolrFieldName(),
+                        CollectionSchema.url_chars_i.getSolrFieldName(),
+                        CollectionSchema.url_protocol_s.getSolrFieldName(),
+                        CollectionSchema.httpstatus_i.getSolrFieldName(),
+                        CollectionSchema.inboundlinkscount_i.getSolrFieldName(),
+                        CollectionSchema.robots_i.getSolrFieldName()} :
+                        this.allFields());
+                final Thread rewriteThread[] = new Thread[concurrency];
+                for (int rewrite_start = 0; rewrite_start < concurrency; rewrite_start++) {
+                    rewriteThread[rewrite_start] = new Thread("CollectionConfiguration.postprocessing.rewriteThread-" + rewrite_start) {
+                        @Override
+                        public void run() {
+                            SolrDocument doc;
+                            try {
+                                while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+                                    // for each to-be-processed entry work on the process tag
+                                    Collection<Object> proctags = doc.getFieldValues(CollectionSchema.process_sxt.getSolrFieldName());
+                                    final String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                                    final String i = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                                    if (proctags == null || proctags.size() == 0) {
+                                        // this should not happen since we collected the documents using a process_sxt:[* TO *] term
+                                        ConcurrentLog.warn("CollectionConfiguration", "no process_sxt entry for url " + u + ", id=" + i);
+                                        continue;
+                                    }
+                                    try {
+                                        DigestURL url = new DigestURL(u, ASCII.getBytes(i));
+                                        byte[] id = url.hash();
+                                        SolrInputDocument sid = byPartialUpdate ? new SolrInputDocument() : collection.toSolrInputDocument(doc, localOmitFields);
+                                        sid.setField(CollectionSchema.id.getSolrFieldName(), i);
+                                        for (Object tag: proctags) try {
+                                            
+                                            // switch over tag types
+                                            ProcessType tagtype = ProcessType.valueOf((String) tag);
+        
+                                            if (tagtype == ProcessType.CITATION &&
+                                                collection.contains(CollectionSchema.cr_host_count_i) &&
+                                                collection.contains(CollectionSchema.cr_host_chance_d) &&
+                                                collection.contains(CollectionSchema.cr_host_norm_i)) {
+                                                CRV crv = rankings.remove(ASCII.String(id)); // instead of 'get'ting the CRV, we also remove it because we will not need it again and free some memory here
+                                                if (crv != null) {
+                                                    sid.setField(CollectionSchema.cr_host_count_i.getSolrFieldName(), crv.count);
+                                                    sid.setField(CollectionSchema.cr_host_chance_d.getSolrFieldName(), crv.cr);
+                                                    sid.setField(CollectionSchema.cr_host_norm_i.getSolrFieldName(), crv.crn);
+                                                    proccount_citationchange.incrementAndGet();
+                                                }
+                                            }
+        
+                                            if (tagtype == ProcessType.UNIQUE) {
+                                                postprocessing_http_unique(segment, doc, sid, url);
+                                                postprocessing_www_unique(segment, doc, sid, url);
+                                                postprocessing_doublecontent(segment, uniqueURLs, doc, sid, url);
+                                            }
+                                            
+                                        } catch (IllegalArgumentException e) {}
+                                        
+                                        // compute references
+                                        if (reference_computation) {
+                                            String hosthash = url.hosthash();
+                                            if (!hostExtentCache.containsKey(hosthash)) {
+                                                StringBuilder q = new StringBuilder();
+                                                q.append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(hosthash).append("\" AND ").append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
+                                                long hostExtentCount = segment.fulltext().getDefaultConnector().getCountByQuery(q.toString());
+                                                hostExtentCache.put(hosthash, hostExtentCount);
+                                            }
+                                            if (postprocessing_references(rrCache, sid, url, hostExtentCache)) proccount_referencechange.incrementAndGet();
+                                        }
+                                        
+                                        // all processing steps checked, remove the processing and harvesting key
+                                        if (byPartialUpdate) {
+                                            sid.setField(CollectionSchema.process_sxt.getSolrFieldName(), null); // setting this to null will cause a removal when doing a partial update
+                                            sid.setField(CollectionSchema.harvestkey_s.getSolrFieldName(), null);
+                                        } /*else { // fields are omitted on sid creation
+                                            sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
+                                            sid.removeField(CollectionSchema.harvestkey_s.getSolrFieldName());
+                                        }*/
+                                        // with standard solr fields selected, the sid now contains the fields
+                                        // id, http_unique_b, www_unique_b, references_i, references_internal_i, references_external_i, references_exthosts_i, host_extent_i
+                                        // and the value for host_extent_i is by default 2147483647
+                                        
+                                        // send back to index
+                                        //collectionConnector.deleteById(i);
+                                        if (byPartialUpdate) {
+                                            collectionConnector.update(sid);
+                                        } else {
+                                            collectionConnector.add(sid);
+                                        }
+                                        long thiscount = proccount.incrementAndGet(); allcount.incrementAndGet();
+                                        if (thiscount % 100 == 0) {
+                                            postprocessingActivity = "postprocessed " + thiscount + " from " + count + " collection documents; " +
+                                                (thiscount * 60000L / (System.currentTimeMillis() - start)) + " ppm; " +
+                                                ((System.currentTimeMillis() - start) * (count - thiscount) / thiscount / 60000) + " minutes remaining";
+                                            ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+                                        }
+                                    } catch (final Throwable e1) {
+                                        ConcurrentLog.logException(e1);
+                                        failids.add(i);
+                                    }
+                                    countcheck.incrementAndGet();
+                                }
+                            } catch (InterruptedException e) {
+                                ConcurrentLog.logException(e);
+                            }
+                        }
+                    };
+                    rewriteThread[rewrite_start].start();
+                }
+                // wait for termination
+                for (int rewrite_start = 0; rewrite_start < concurrency; rewrite_start++) rewriteThread[rewrite_start].join();
+                
+                if (failids.size() > 0) {
+                    ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: deleting " + failids.size() + " documents which have permanent execution fails");
+                    collectionConnector.deleteByIds(failids);
+                }
+                if (count != countcheck.get()) ConcurrentLog.warn("CollectionConfiguration", "ambiguous collection document count for harvestkey " + harvestkey + ": expected=" + count + ", counted=" + countcheck + "; countquery=" + collection1query); // big gap for harvestkey = null
+                ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount + " new documents, " +
+                            proccount_referencechange + " reference-count changes, " +
+                            proccount_citationchange + " citation ranking changes.");
+            }
+            
+        } catch (final InterruptedException e2) {
+            ConcurrentLog.warn("CollectionConfiguration", e2.getMessage(), e2);
+        } catch (IOException e3) {
+            ConcurrentLog.warn("CollectionConfiguration", e3.getMessage(), e3);
+        }
+        collectionConnector.commit(true); // make changes available directly to prevent that the process repeats again
+	}
+
+	/**
+	 * Perform postprocessing steps on the webgraph core.
+	 * @param segment Solr segment.
+	 * @param webgraph webgraph schema configuration
+	 * @param webgraphquery query used to harvest items to postprocess in the webgraph collection
+	 * @param rankings postprocessed rankings
+	 * @param allcount global postprocessed documents count
+	 */
+	private void postprocessWebgraph(final Segment segment, final WebgraphConfiguration webgraph, String webgraphquery,
+			final Map<String, CRV> rankings, final AtomicInteger allcount) {
+		postprocessingActivity = "collecting host facets for webgraph cr calculation";
+		ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+		final Set<String> omitFields = new HashSet<String>();
+		omitFields.add(WebgraphSchema.process_sxt.getSolrFieldName());
+		omitFields.add(WebgraphSchema.harvestkey_s.getSolrFieldName());
+		
+		// collect hosts from index which shall take part in citation computation
+		ReversibleScoreMap<String> webgraphhosts;
+		try {
+		    Map<String, ReversibleScoreMap<String>> hostfacet = segment.fulltext().getWebgraphConnector().getFacets(webgraphquery, 10000000, WebgraphSchema.source_host_s.getSolrFieldName());
+		    webgraphhosts = hostfacet.get(WebgraphSchema.source_host_s.getSolrFieldName());
+		} catch (final IOException e2) {
+		    ConcurrentLog.logException(e2);
+		    webgraphhosts = new ClusteredScoreMap<String>(true);
+		}
+		try {
+		    final long start = System.currentTimeMillis();
+		    for (String host: webgraphhosts.keyList(true)) {
+		        if (webgraphhosts.get(host) <= 0) continue;
+		        final String hostfinal = host;
+		        // select all webgraph edges and modify their cr value
+		        postprocessingActivity = "writing cr values to webgraph for host " + host;
+		        ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+		        String patchquery = WebgraphSchema.source_host_s.getSolrFieldName() + ":\"" + host + "\" AND " + WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
+		        final long count = segment.fulltext().getWebgraphConnector().getCountByQuery("{!cache=false}" + patchquery);
+		        int concurrency = Math.min((int) count, Math.max(1, Runtime.getRuntime().availableProcessors() / 4));
+		        ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the webgraph, concurrency = " + concurrency);
+		        final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(
+		                patchquery,
+		                WebgraphSchema.source_chars_i.getSolrFieldName() + " asc",
+		                0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency, true
+		                // TODO: add field list and do partial updates
+		                );
+		        final AtomicInteger proccount = new AtomicInteger(0);
+		        Thread[] t = new Thread[concurrency];
+		        for (int i = 0; i < t.length; i++) {
+		            t[i] = new Thread("CollectionConfiguration.postprocessing.webgraph-" + i) {
+		                @Override
+		                public void run() {
+		                    SolrDocument doc; String id;
+		                    try {
+		                        processloop: while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
+		                            try {
+		                                SolrInputDocument sid = webgraph.toSolrInputDocument(doc, omitFields);
+		                                Collection<Object> proctags = doc.getFieldValues(WebgraphSchema.process_sxt.getSolrFieldName());
+   
+		                                for (Object tag: proctags) try {
+		                                    
+		                                    // switch over tag types
+		                                    ProcessType tagtype = ProcessType.valueOf((String) tag);
+		                                        
+		                                    // set cr values
+		                                    if (tagtype == ProcessType.CITATION) {
+		                                        if (segment.fulltext().useWebgraph() && webgraph.contains(WebgraphSchema.source_id_s) && webgraph.contains(WebgraphSchema.source_cr_host_norm_i)) {
+		                                            id = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
+		                                            CRV crv = rankings.get(id);
+		                                            if (crv != null) {
+		                                                sid.setField(WebgraphSchema.source_cr_host_norm_i.getSolrFieldName(), crv.crn);
+		                                            }
+		                                        }
+		                                        if (webgraph.contains(WebgraphSchema.target_id_s) && webgraph.contains(WebgraphSchema.target_cr_host_norm_i)) {
+		                                            id = (String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());
+		                                            CRV crv = rankings.get(id);
+		                                            if (crv != null) {
+		                                                sid.setField(WebgraphSchema.target_cr_host_norm_i.getSolrFieldName(), crv.crn);
+		                                            }
+		                                        }
+		                                    }
+		                                } catch (IllegalArgumentException e) {
+		                                    ConcurrentLog.logException(e);
+		                                }
+		                                
+		                                // write document back to index
+		                                try {
+		                                    sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
+		                                    sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
+		                                    //segment.fulltext().getWebgraphConnector().deleteById((String) sid.getFieldValue(WebgraphSchema.id.getSolrFieldName()));
+		                                    segment.fulltext().getWebgraphConnector().add(sid);
+		                                } catch (SolrException e) {
+		                                    ConcurrentLog.logException(e);
+		                                } catch (IOException e) {
+		                                    ConcurrentLog.logException(e);
+		                                }
+		                                proccount.incrementAndGet();
+		                                allcount.incrementAndGet();
+		                                if (proccount.get() % 1000 == 0) {
+		                                    postprocessingActivity = "writing cr values to webgraph for host " + hostfinal + "postprocessed " + proccount + " from " + count + " documents; " +
+		                                        (proccount.get() * 1000 / (System.currentTimeMillis() - start)) + " docs/second; " +
+		                                        ((System.currentTimeMillis() - start) * (count - proccount.get()) / proccount.get() / 60000) + " minutes remaining";
+		                                    ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
+		                                }
+		                            } catch (Throwable e) {
+		                                ConcurrentLog.logException(e);
+		                                continue processloop;
+		                            }
+		                        }
+		                    } catch (InterruptedException e) {
+		                        ConcurrentLog.warn("CollectionConfiguration", e.getMessage(), e);
+		                    }
+		                }
+		            };
+		            t[i].start();
+		        }
+		        for (int i = 0; i < t.length; i++) try {
+		            t[i].join(10000);
+		            if (t[i].isAlive()) t[i].interrupt();
+		        } catch (InterruptedException e) {}
+		        
+		        if (count != proccount.get()) ConcurrentLog.warn("CollectionConfiguration", "ambiguous webgraph document count for host " + host + ": expected=" + count + ", counted=" + proccount);
+		    }
+		} catch (final IOException e2) {
+		    ConcurrentLog.warn("CollectionConfiguration", e2.getMessage(), e2);
+		}
+	}
+
+	/**
+	 * Patches the citation index for links with canonical tags and perform the citation rank computation
+	 * @param segment Solr segment
+	 * @param rrCache reference report cache for the segment
+	 * @param collectionConnector default connector to the Solr segment
+	 * @param collection1hosts hosts from index which shall take part in citation computation
+	 * @return the ranking map 
+	 */
+	private Map<String, CRV> createRankingMap(final Segment segment, final ReferenceReportCache rrCache,
+			final SolrConnector collectionConnector, ReversibleScoreMap<String> collection1hosts) {
+		final Map<String, CRV> rankings = new ConcurrentHashMap<String, CRV>();
+        try {
             int concurrency = Math.min(collection1hosts.size(), Runtime.getRuntime().availableProcessors());
             postprocessingActivity = "collecting cr for " + collection1hosts.size() + " hosts, concurrency = " + concurrency;
             ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
@@ -1228,321 +1714,17 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             ConcurrentLog.logException(e2);
             collection1hosts = new ClusteredScoreMap<String>(true);
         }
-        
-        // process all documents at the webgraph for the outgoing links of this document
-        final AtomicInteger allcount = new AtomicInteger(0);
-        if (segment.fulltext().useWebgraph() && shallComputeCR) {
-            postprocessingActivity = "collecting host facets for webgraph cr calculation";
-            ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
-            final Set<String> omitFields = new HashSet<String>();
-            omitFields.add(WebgraphSchema.process_sxt.getSolrFieldName());
-            omitFields.add(WebgraphSchema.harvestkey_s.getSolrFieldName());
-            
-            // collect hosts from index which shall take part in citation computation
-            ReversibleScoreMap<String> webgraphhosts;
-            try {
-                Map<String, ReversibleScoreMap<String>> hostfacet = segment.fulltext().getWebgraphConnector().getFacets(webgraphquery, 10000000, WebgraphSchema.source_host_s.getSolrFieldName());
-                webgraphhosts = hostfacet.get(WebgraphSchema.source_host_s.getSolrFieldName());
-            } catch (final IOException e2) {
-                ConcurrentLog.logException(e2);
-                webgraphhosts = new ClusteredScoreMap<String>(true);
-            }
-            try {
-                final long start = System.currentTimeMillis();
-                for (String host: webgraphhosts.keyList(true)) {
-                    if (webgraphhosts.get(host) <= 0) continue;
-                    final String hostfinal = host;
-                    // select all webgraph edges and modify their cr value
-                    postprocessingActivity = "writing cr values to webgraph for host " + host;
-                    ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
-                    String patchquery = WebgraphSchema.source_host_s.getSolrFieldName() + ":\"" + host + "\" AND " + WebgraphSchema.process_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM;
-                    final long count = segment.fulltext().getWebgraphConnector().getCountByQuery("{!cache=false}" + patchquery);
-                    int concurrency = Math.min((int) count, Math.max(1, Runtime.getRuntime().availableProcessors() / 4));
-                    ConcurrentLog.info("CollectionConfiguration", "collecting " + count + " documents from the webgraph, concurrency = " + concurrency);
-                    final BlockingQueue<SolrDocument> docs = segment.fulltext().getWebgraphConnector().concurrentDocumentsByQuery(
-                            patchquery,
-                            WebgraphSchema.source_chars_i.getSolrFieldName() + " asc",
-                            0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency, true
-                            // TODO: add field list and do partial updates
-                            );
-                    final AtomicInteger proccount = new AtomicInteger(0);
-                    Thread[] t = new Thread[concurrency];
-                    for (final AtomicInteger i = new AtomicInteger(0); i.get() < t.length; i.incrementAndGet()) {
-                        t[i.get()] = new Thread() {
-                            private String name = "CollectionConfiguration.postprocessing.webgraph-" + i.get();
-                            @Override
-                            public void run() {
-                                Thread.currentThread().setName(name);
-                                SolrDocument doc; String id;
-                                try {
-                                    processloop: while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                                        try {
-                                            SolrInputDocument sid = webgraph.toSolrInputDocument(doc, omitFields);
-                                            Collection<Object> proctags = doc.getFieldValues(WebgraphSchema.process_sxt.getSolrFieldName());
-    
-                                            for (Object tag: proctags) try {
-                                                
-                                                // switch over tag types
-                                                ProcessType tagtype = ProcessType.valueOf((String) tag);
-                                                    
-                                                // set cr values
-                                                if (tagtype == ProcessType.CITATION) {
-                                                    if (segment.fulltext().useWebgraph() && webgraph.contains(WebgraphSchema.source_id_s) && webgraph.contains(WebgraphSchema.source_cr_host_norm_i)) {
-                                                        id = (String) doc.getFieldValue(WebgraphSchema.source_id_s.getSolrFieldName());
-                                                        CRV crv = rankings.get(id);
-                                                        if (crv != null) {
-                                                            sid.setField(WebgraphSchema.source_cr_host_norm_i.getSolrFieldName(), crv.crn);
-                                                        }
-                                                    }
-                                                    if (webgraph.contains(WebgraphSchema.target_id_s) && webgraph.contains(WebgraphSchema.target_cr_host_norm_i)) {
-                                                        id = (String) doc.getFieldValue(WebgraphSchema.target_id_s.getSolrFieldName());
-                                                        CRV crv = rankings.get(id);
-                                                        if (crv != null) {
-                                                            sid.setField(WebgraphSchema.target_cr_host_norm_i.getSolrFieldName(), crv.crn);
-                                                        }
-                                                    }
-                                                }
-                                            } catch (IllegalArgumentException e) {
-                                                ConcurrentLog.logException(e);
-                                            }
-                                            
-                                            // write document back to index
-                                            try {
-                                                sid.removeField(WebgraphSchema.process_sxt.getSolrFieldName());
-                                                sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
-                                                //segment.fulltext().getWebgraphConnector().deleteById((String) sid.getFieldValue(WebgraphSchema.id.getSolrFieldName()));
-                                                segment.fulltext().getWebgraphConnector().add(sid);
-                                            } catch (SolrException e) {
-                                                ConcurrentLog.logException(e);
-                                            } catch (IOException e) {
-                                                ConcurrentLog.logException(e);
-                                            }
-                                            proccount.incrementAndGet();
-                                            allcount.incrementAndGet();
-                                            if (proccount.get() % 1000 == 0) {
-                                                postprocessingActivity = "writing cr values to webgraph for host " + hostfinal + "postprocessed " + proccount + " from " + count + " documents; " +
-                                                    (proccount.get() * 1000 / (System.currentTimeMillis() - start)) + " docs/second; " +
-                                                    ((System.currentTimeMillis() - start) * (count - proccount.get()) / proccount.get() / 60000) + " minutes remaining";
-                                                ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
-                                            }
-                                        } catch (Throwable e) {
-                                            ConcurrentLog.logException(e);
-                                            continue processloop;
-                                        }
-                                    }
-                                } catch (InterruptedException e) {
-                                    ConcurrentLog.warn("CollectionConfiguration", e.getMessage(), e);
-                                }
-                            }
-                        };
-                        t[i.get()].start();
-                    }
-                    for (int i = 0; i < t.length; i++) try {
-                        t[i].join(10000);
-                        if (t[i].isAlive()) t[i].interrupt();
-                    } catch (InterruptedException e) {}
-                    
-                    if (count != proccount.get()) ConcurrentLog.warn("CollectionConfiguration", "ambiguous webgraph document count for host " + host + ": expected=" + count + ", counted=" + proccount);
-                }
-            } catch (final IOException e2) {
-                ConcurrentLog.warn("CollectionConfiguration", e2.getMessage(), e2);
-            }
-        }
-        
-        // process all documents in collection
-        final Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
-        final Set<String> uniqueURLs = new ConcurrentHashSet<String>(); // will be used in a concurrent environment
-        final Set<String> omitFields = new HashSet<String>();
-        omitFields.add(CollectionSchema.process_sxt.getSolrFieldName());
-        omitFields.add(CollectionSchema.harvestkey_s.getSolrFieldName());
-        final Collection<String> failids = new ArrayList<String>();
-        final AtomicInteger countcheck = new AtomicInteger(0);
-        final AtomicInteger proccount = new AtomicInteger();
-        final AtomicInteger proccount_referencechange = new AtomicInteger();
-        final AtomicInteger proccount_citationchange = new AtomicInteger();
-        try {
-            // partitioning of the index, get a facet for a partitioning key
-            final long count = collectionConnector.getCountByQuery("{!cache=false}" + collection1query);
-            String partitioningKey = CollectionSchema.responsetime_i.getSolrFieldName();
-            postprocessingActivity = "collecting " + count + " documents from the collection for harvestkey " + harvestkey + ", partitioned by " + partitioningKey;
-            if (count > 0) {
-                Map<String, ReversibleScoreMap<String>> partitioningFacet = collectionConnector.getFacets("{!cache=false}" + collection1query, 100000, partitioningKey);
-                ReversibleScoreMap<String> partitioning = partitioningFacet.get(partitioningKey);
-                long emptyCount = collectionConnector.getCountByQuery("{!cache=false}" + "-" + partitioningKey + AbstractSolrConnector.CATCHALL_DTERM + " AND (" + collection1query + ")");
-                if (emptyCount > 0) partitioning.inc("", (int) emptyCount);
-                final long start = System.currentTimeMillis();
-                List<String> querystrings = new ArrayList<>(partitioning.size());
-                for (String partitioningValue: partitioning) {
-                    String partitioningQuery = "{!cache=false}" + ((partitioningValue.length() == 0) ?
-                            "-" + partitioningKey + AbstractSolrConnector.CATCHALL_DTERM + " AND (" + collection1query + ")" :
-                            partitioningKey + ":" + partitioningValue + " AND (" + collection1query + ")");
-                    querystrings.add(partitioningQuery);
-                }
-                // start collection of documents 
-                final int concurrency = Math.max(1, Math.min((int) (MemoryControl.available() / (100L * 1024L * 1024L)), Runtime.getRuntime().availableProcessors()));
-                //final int concurrency = 1;
-                final boolean reference_computation = this.contains(CollectionSchema.references_i) &&
-                        this.contains(CollectionSchema.references_internal_i) &&
-                        this.contains(CollectionSchema.references_external_i) &&
-                        this.contains(CollectionSchema.references_exthosts_i);
-                ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
-                final BlockingQueue<SolrDocument> docs = collectionConnector.concurrentDocumentsByQueries(
-                        querystrings,
-                        (this.contains(CollectionSchema.http_unique_b) || this.contains(CollectionSchema.www_unique_b)) ?
-                        CollectionSchema.host_subdomain_s.getSolrFieldName() + " asc," + // sort on subdomain to get hosts without subdomain first; that gives an opportunity to set www_unique_b flag to false
-                        CollectionSchema.url_protocol_s.getSolrFieldName() + " asc" // sort on protocol to get http before https; that gives an opportunity to set http_unique_b flag to false
-                        : null, // null sort is faster!
-                        0, 100000000, Long.MAX_VALUE, concurrency + 1, concurrency, true,
-                        byPartialUpdate ? 
-                        new String[]{
-                        // the following fields are needed to perform the postprocessing
-                        // and should only be used for partial updates; for full updates use a
-                        // full list of fields to avoid LazyInstantiation which has poor performace
-                        CollectionSchema.id.getSolrFieldName(),
-                        CollectionSchema.sku.getSolrFieldName(),
-                        CollectionSchema.harvestkey_s.getSolrFieldName(),
-                        CollectionSchema.process_sxt.getSolrFieldName(),
-                        CollectionSchema.canonical_equal_sku_b.getSolrFieldName(),
-                        CollectionSchema.canonical_s.getSolrFieldName(),
-                        CollectionSchema.exact_signature_l.getSolrFieldName(),
-                        CollectionSchema.fuzzy_signature_l.getSolrFieldName(),
-                        CollectionSchema.title_exact_signature_l.getSolrFieldName(),
-                        CollectionSchema.description_exact_signature_l.getSolrFieldName(),
-                        CollectionSchema.host_id_s.getSolrFieldName(),
-                        CollectionSchema.host_s.getSolrFieldName(),
-                        CollectionSchema.host_subdomain_s.getSolrFieldName(),
-                        CollectionSchema.url_chars_i.getSolrFieldName(),
-                        CollectionSchema.url_protocol_s.getSolrFieldName(),
-                        CollectionSchema.httpstatus_i.getSolrFieldName(),
-                        CollectionSchema.inboundlinkscount_i.getSolrFieldName(),
-                        CollectionSchema.robots_i.getSolrFieldName()} :
-                        this.allFields());
-                final Thread rewriteThread[] = new Thread[concurrency];
-                for (int rewrite_start = 0; rewrite_start < concurrency; rewrite_start++) {
-                    rewriteThread[rewrite_start] = new Thread() {
-                        @Override
-                        public void run() {
-                            SolrDocument doc;
-                            try {
-                                while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                                    // for each to-be-processed entry work on the process tag
-                                    Collection<Object> proctags = doc.getFieldValues(CollectionSchema.process_sxt.getSolrFieldName());
-                                    final String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                                    final String i = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                                    if (proctags == null || proctags.size() == 0) {
-                                        // this should not happen since we collected the documents using a process_sxt:[* TO *] term
-                                        ConcurrentLog.warn("CollectionConfiguration", "no process_sxt entry for url " + u + ", id=" + i);
-                                        continue;
-                                    }
-                                    try {
-                                        DigestURL url = new DigestURL(u, ASCII.getBytes(i));
-                                        byte[] id = url.hash();
-                                        SolrInputDocument sid = byPartialUpdate ? new SolrInputDocument() : collection.toSolrInputDocument(doc, omitFields);
-                                        sid.setField(CollectionSchema.id.getSolrFieldName(), i);
-                                        for (Object tag: proctags) try {
-                                            
-                                            // switch over tag types
-                                            ProcessType tagtype = ProcessType.valueOf((String) tag);
-        
-                                            if (tagtype == ProcessType.CITATION &&
-                                                collection.contains(CollectionSchema.cr_host_count_i) &&
-                                                collection.contains(CollectionSchema.cr_host_chance_d) &&
-                                                collection.contains(CollectionSchema.cr_host_norm_i)) {
-                                                CRV crv = rankings.remove(ASCII.String(id)); // instead of 'get'ting the CRV, we also remove it because we will not need it again and free some memory here
-                                                if (crv != null) {
-                                                    sid.setField(CollectionSchema.cr_host_count_i.getSolrFieldName(), crv.count);
-                                                    sid.setField(CollectionSchema.cr_host_chance_d.getSolrFieldName(), crv.cr);
-                                                    sid.setField(CollectionSchema.cr_host_norm_i.getSolrFieldName(), crv.crn);
-                                                    proccount_citationchange.incrementAndGet();
-                                                }
-                                            }
-        
-                                            if (tagtype == ProcessType.UNIQUE) {
-                                                postprocessing_http_unique(segment, doc, sid, url);
-                                                postprocessing_www_unique(segment, doc, sid, url);
-                                                postprocessing_doublecontent(segment, uniqueURLs, doc, sid, url);
-                                            }
-                                            
-                                        } catch (IllegalArgumentException e) {}
-                                        
-                                        // compute references
-                                        if (reference_computation) {
-                                            String hosthash = url.hosthash();
-                                            if (!hostExtentCache.containsKey(hosthash)) {
-                                                StringBuilder q = new StringBuilder();
-                                                q.append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(hosthash).append("\" AND ").append(CollectionSchema.httpstatus_i.getSolrFieldName()).append(":200");
-                                                long hostExtentCount = segment.fulltext().getDefaultConnector().getCountByQuery(q.toString());
-                                                hostExtentCache.put(hosthash, hostExtentCount);
-                                            }
-                                            if (postprocessing_references(rrCache, sid, url, hostExtentCache)) proccount_referencechange.incrementAndGet();
-                                        }
-                                        
-                                        // all processing steps checked, remove the processing and harvesting key
-                                        if (byPartialUpdate) {
-                                            sid.setField(CollectionSchema.process_sxt.getSolrFieldName(), null); // setting this to null will cause a removal when doing a partial update
-                                            sid.setField(CollectionSchema.harvestkey_s.getSolrFieldName(), null);
-                                        } else {
-                                            sid.removeField(CollectionSchema.process_sxt.getSolrFieldName());
-                                            sid.removeField(CollectionSchema.harvestkey_s.getSolrFieldName());
-                                        }
-                                        // with standard solr fields selected, the sid now contains the fields
-                                        // id, http_unique_b, www_unique_b, references_i, references_internal_i, references_external_i, references_exthosts_i, host_extent_i
-                                        // and the value for host_extent_i is by default 2147483647
-                                        
-                                        // send back to index
-                                        //collectionConnector.deleteById(i);
-                                        if (byPartialUpdate) {
-                                            collectionConnector.update(sid);
-                                        } else {
-                                            collectionConnector.add(sid);
-                                        }
-                                        long thiscount = proccount.incrementAndGet(); allcount.incrementAndGet();
-                                        if (thiscount % 100 == 0) {
-                                            postprocessingActivity = "postprocessed " + thiscount + " from " + count + " collection documents; " +
-                                                (thiscount * 60000L / (System.currentTimeMillis() - start)) + " ppm; " +
-                                                ((System.currentTimeMillis() - start) * (count - thiscount) / thiscount / 60000) + " minutes remaining";
-                                            ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
-                                        }
-                                    } catch (final Throwable e1) {
-                                        ConcurrentLog.logException(e1);
-                                        failids.add(i);
-                                    }
-                                    countcheck.incrementAndGet();
-                                }
-                            } catch (InterruptedException e) {
-                                ConcurrentLog.logException(e);
-                            }
-                        }
-                    };
-                    rewriteThread[rewrite_start].start();
-                }
-                // wait for termination
-                for (int rewrite_start = 0; rewrite_start < concurrency; rewrite_start++) rewriteThread[rewrite_start].join();
-                
-                if (failids.size() > 0) {
-                    ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: deleting " + failids.size() + " documents which have permanent execution fails");
-                    collectionConnector.deleteByIds(failids);
-                }
-                if (count != countcheck.get()) ConcurrentLog.warn("CollectionConfiguration", "ambiguous collection document count for harvestkey " + harvestkey + ": expected=" + count + ", counted=" + countcheck + "; countquery=" + collection1query); // big gap for harvestkey = null
-                ConcurrentLog.info("CollectionConfiguration", "cleanup_processing: re-calculated " + proccount + " new documents, " +
-                            proccount_referencechange + " reference-count changes, " +
-                            proccount_citationchange + " citation ranking changes.");
-            }
-            
-        } catch (final InterruptedException e2) {
-            ConcurrentLog.warn("CollectionConfiguration", e2.getMessage(), e2);
-        } catch (IOException e3) {
-            ConcurrentLog.warn("CollectionConfiguration", e3.getMessage(), e3);
-        }
-        collectionConnector.commit(true); // make changes available directly to prevent that the process repeats again
-        postprocessingCollection1Count = 0;
-        postprocessingWebgraphCount = 0;
-        postprocessingActivity = "postprocessing terminated";
-        ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
-        postprocessingRunning = false;
-        return allcount.get();
-    }
+		return rankings;
+	}
 
+	/**
+	 * Search in the segment any document having the same url as doc but with the opposite secure/unsecure (https or http) version of the protocol.
+	 * Then updates accordingly the document http_unique_b field.
+	 * @param segment Solr segment
+	 * @param doc document to process
+	 * @param sid updatable version of the document
+	 * @param url document's url
+	 */
     public void postprocessing_http_unique(final Segment segment, final SolrDocument doc, final SolrInputDocument sid, final DigestURL url) {
         if (!this.contains(CollectionSchema.http_unique_b)) return;
         if (!url.isHTTPS() && !url.isHTTP()) return;
@@ -1550,9 +1732,19 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             DigestURL u = new DigestURL((url.isHTTP() ? "https://" : "http://") + url.urlstub(true, true));
             SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.http_unique_b.getSolrFieldName());
             set_unique_flag(CollectionSchema.http_unique_b, doc, sid, d);
-        } catch (final IOException e) {}
+        } catch (final IOException e) {
+        	ConcurrentLog.warn("CollectionConfiguration", "Failed to postProcess http_unique_b field" + e.getMessage() != null ? " : " + e.getMessage() : ".");
+        }
     }
     
+	/**
+	 * Search in the segment any document having the same url as doc but with or without the www prefix.
+	 * Then updates accordingly the document www_unique_b field.
+	 * @param segment Solr segment
+	 * @param doc document to process
+	 * @param sid updatable version of the document
+	 * @param url document's url
+	 */
     public void postprocessing_www_unique(final Segment segment, final SolrDocument doc, final SolrInputDocument sid, final DigestURL url) {
         if (!this.contains(CollectionSchema.www_unique_b)) return;
         final String us = url.urlstub(true, true);
@@ -1560,7 +1752,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             DigestURL u = new DigestURL(url.getProtocol() + (us.startsWith("www.") ? "://" + us.substring(4) : "://www." + us));
             SolrDocument d = segment.fulltext().getDefaultConnector().getDocumentById(ASCII.String(u.hash()), CollectionSchema.www_unique_b.getSolrFieldName());
             set_unique_flag(CollectionSchema.www_unique_b, doc, sid, d);
-        } catch (final IOException e) {}
+        } catch (final IOException e) {
+        	ConcurrentLog.warn("CollectionConfiguration", "Failed to postProcess www_unique_b field" + e.getMessage() != null ? " : " + e.getMessage() : ".");
+        }
     }
     
     private void set_unique_flag(CollectionSchema field, final SolrDocument doc, final SolrInputDocument sid, final SolrDocument d) {
@@ -1938,25 +2132,35 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         return a;
     }
     
+    /**
+     * Uncompress indexed iplist of protocol names to a list of specified dimension.
+     * @param iplist indexed list typically produced by protocolList2indexedList
+     * @param dimension size of target list
+     * @return a list of protocol names
+     */
     public static List<String> indexedList2protocolList(Collection<Object> iplist, int dimension) {
         List<String> a = new ArrayList<String>(dimension);
         for (int i = 0; i < dimension; i++) a.add("http");
         if (iplist == null) return a;
         for (Object ip : iplist) {
             // ip format is 001-https but can be 4 digits  1011-https
-            int i = ((String) ip).indexOf('-');
-            a.set(Integer.parseInt(((String) ip).substring(0, i)), ((String) ip).substring(i+1));
+        	String indexedProtocol = ((String) ip); 
+            int i = indexedProtocol.indexOf('-');
+            /* Silently ignore badly formatted entry */
+            if(i > 0 && indexedProtocol.length() > (i + 1)) {
+            	a.set(Integer.parseInt(indexedProtocol.substring(0, i)), indexedProtocol.substring(i+1));
+            }
         }
         return a;
     }
     
-    /**
-     * encode a string containing attributes from anchor rel properties binary:
-     * bit 0: "me" contained in rel
-     * bit 1: "nofollow" contained in rel
-     * @param rel
-     * @return binary encoded information about rel
-     */
+//    /**
+//     * encode a string containing attributes from anchor rel properties binary:
+//     * bit 0: "me" contained in rel
+//     * bit 1: "nofollow" contained in rel
+//     * @param rel
+//     * @return binary encoded information about rel
+//     */
     /*
     private static List<Integer> relEval(final List<String> rel) {
         List<Integer> il = new ArrayList<Integer>(rel.size());

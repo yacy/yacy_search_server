@@ -81,6 +81,7 @@ public class Switchboard {
     public static class InfoUpdater extends Thread {
         long steptime;
         public InfoUpdater(long steptime) {
+        	super("Switchboard.InfoUpdater");
             this.steptime = steptime;
         }
         @Override
@@ -105,7 +106,7 @@ public class Switchboard {
         private final Semaphore shutdownSemaphore;
 
         public shutdownHookThread(final Thread mainThread, Semaphore semaphore) {
-            super();
+            super("Switchboard.shutdownHookThread");
             this.mainThread = mainThread;
             this.shutdownSemaphore = semaphore;
         }
@@ -209,9 +210,9 @@ public class Switchboard {
     
     /**
      * convenience access to boolean values in properties
-     * @param key
-     * @param dflt
-     * @return
+     * @param key property key
+     * @param dflt default value
+     * @return the boolean value from properties or dflt when it is not defined
      */
     public static boolean getBool(String key, boolean dflt) {
         if (!properties.containsKey(key)) return dflt;

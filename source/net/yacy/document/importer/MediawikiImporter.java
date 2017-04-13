@@ -64,6 +64,7 @@ import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.content.SurrogateReader;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
@@ -95,6 +96,7 @@ public class MediawikiImporter extends Thread implements Importer {
 
 
     public MediawikiImporter(final File sourcefile, final File targetdir) {
+    	super("MediawikiImporter(" + sourcefile != null ? sourcefile.getAbsolutePath() : "null sourcefile" +")");
     	this.sourcefile = sourcefile;
     	this.docsize = sourcefile.length();
     	this.approxdocs = (int) (this.docsize * docspermbinxmlbz2 / 1024L / 1024L);
@@ -121,8 +123,7 @@ public class MediawikiImporter extends Thread implements Importer {
     }
 
     /**
-     * return the number of articles per second
-     * @return
+     * @return the number of articles per second
      */
     @Override
     public int speed() {
@@ -131,8 +132,7 @@ public class MediawikiImporter extends Thread implements Importer {
     }
 
     /**
-     * return the remaining seconds for the completion of all records in milliseconds
-     * @return
+     * @return the remaining seconds for the completion of all records in milliseconds
      */
     @Override
     public long remainingTime() {
@@ -168,7 +168,8 @@ public class MediawikiImporter extends Thread implements Importer {
             boolean page = false, text = false;
             String title = null;
             final BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
-            final ExecutorService service = Executors.newCachedThreadPool();
+			final ExecutorService service = Executors.newCachedThreadPool(
+					new NamePrefixThreadFactory(MediawikiImporter.class.getSimpleName() + ".convertConsumer"));
             final convertConsumer[] consumers = new convertConsumer[threads];
             final Future<?>[] consumerResults = (Future<?>[]) Array.newInstance(Future.class, threads);
             for (int i = 0; i < threads; i++) {
@@ -296,7 +297,9 @@ public class MediawikiImporter extends Thread implements Importer {
     public static class indexMaker extends Thread {
 
         File mediawikixml;
+        
         public indexMaker(final File mediawikixml) {
+        	super("MediawikiImporter.indexMaker " + mediawikixml != null ? mediawikixml.getName() : "");
             this.mediawikixml = mediawikixml;
         }
 
@@ -323,7 +326,8 @@ public class MediawikiImporter extends Thread implements Importer {
         final PositionAwareReader in = new PositionAwareReader(dumpFile);
         final indexProducer producer = new indexProducer(100, idxFromMediawikiXML(dumpFile));
         final wikiConsumer consumer = new wikiConsumer(100, producer);
-        final ExecutorService service = Executors.newCachedThreadPool();
+		final ExecutorService service = Executors.newCachedThreadPool(
+				new NamePrefixThreadFactory(MediawikiImporter.class.getSimpleName() + ".createIndex"));
         final Future<Integer> producerResult = service.submit(consumer);
         final Future<Integer> consumerResult = service.submit(producer);
         service.shutdown();

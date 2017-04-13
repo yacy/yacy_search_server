@@ -79,7 +79,6 @@ public class push_p {
                 if ((data == null || data.length == 0) && data64.length() > 0) data = UTF8.getBytes(data64); // for test cases
     
                 // create response header
-                final RequestHeader requestHeader = new RequestHeader();
                 final ResponseHeader responseHeader = new ResponseHeader(200);
                 responseHeader.put(HeaderFramework.LAST_MODIFIED, lastModified);
                 responseHeader.put(HeaderFramework.CONTENT_TYPE, contentType);
@@ -107,7 +106,7 @@ public class push_p {
                         profile.timezoneOffset());
                 Response response = new Response(
                         request,
-                        requestHeader,
+                        null,
                         responseHeader,
                         profile,
                         false,            // from cache?

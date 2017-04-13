@@ -84,7 +84,12 @@
     <delete file="${libbuild}/GitRevTask.jar" failonerror="false" />
     <javac srcdir="${libbuild}/GitRevTask" includeantruntime="true" encoding="UTF-8">
     	<classpath>
-    		<pathelement location="${libbuild}/org.eclipse.jgit-1.1.0.201109151100-r.jar" />
+    		<pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
+    		<!-- Next are the jgit dependencies -->
+    		<pathelement location="${libbuild}/httpclient-4.3.6.jar" />
+    		<pathelement location="${libbuild}/JavaEWAH-0.7.9.jar" />
+    		<pathelement location="${libbuild}/jsch-0.1.53.jar" />
+    		<pathelement location="${libbuild}/slf4j-api-1.7.2.jar" />
     	</classpath>
     </javac>
     <jar destfile="${libbuild}/GitRevTask.jar" basedir="${libbuild}/GitRevTask">
@@ -98,7 +103,12 @@
   	<taskdef resource="GitRevTask.properties">
 		<classpath>
 			<pathelement location="${libbuild}/GitRevTask.jar" />
-			<pathelement location="${libbuild}/org.eclipse.jgit-1.1.0.201109151100-r.jar" />
+    		<pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
+    		<!-- Next are the jgit dependencies -->
+    		<pathelement location="${libbuild}/httpclient-4.3.6.jar" />
+    		<pathelement location="${libbuild}/JavaEWAH-0.7.9.jar" />
+    		<pathelement location="${libbuild}/jsch-0.1.53.jar" />
+    		<pathelement location="${libbuild}/slf4j-api-1.7.2.jar" />
 		</classpath>
   	</taskdef>
   	<gitRev repoPath="${yacyroot}" branchprop="branch" revprop="releaseNr" dateprop="DSTAMP" />
@@ -163,88 +173,90 @@
     	<pathelement location="${lib}/bcmail-jdk15-1.46.jar" />
     	<pathelement location="${lib}/bcprov-jdk15-1.46.jar" />
     	<pathelement location="${lib}/chardet.jar" />
-    	<pathelement location="${lib}/common-image-3.2.1.jar" />
-    	<pathelement location="${lib}/common-io-3.2.1.jar" />
-    	<pathelement location="${lib}/common-lang-3.2.1.jar" />
+    	<pathelement location="${lib}/common-image-3.3.1.jar" />
+    	<pathelement location="${lib}/common-io-3.3.1.jar" />
+    	<pathelement location="${lib}/common-lang-3.3.1.jar" />
     	<pathelement location="${lib}/commons-codec-1.10.jar" />
-    	<pathelement location="${lib}/commons-compress-1.11.jar" />
+    	<pathelement location="${lib}/commons-compress-1.13.jar" />
     	<pathelement location="${lib}/commons-fileupload-1.3.2.jar" />
     	<pathelement location="${lib}/commons-io-2.5.jar" />
     	<pathelement location="${lib}/commons-jxpath-1.3.jar" />
     	<pathelement location="${lib}/commons-lang-2.6.jar" />
     	<pathelement location="${lib}/commons-logging-1.2.jar" />
-    	<pathelement location="${lib}/fontbox-2.0.2.jar" />
+    	<pathelement location="${lib}/fontbox-2.0.5.jar" />
         <pathelement location="${lib}/guava-18.0.jar" />
         <pathelement location="${lib}/htmllexer.jar" />
-        <pathelement location="${lib}/httpclient-4.5.2.jar" />
-        <pathelement location="${lib}/httpcore-4.4.5.jar" />
-        <pathelement location="${lib}/httpmime-4.5.2.jar" />
-        <pathelement location="${lib}/icu4j-57_1.jar" />
-    	<pathelement location="${lib}/imageio-bmp-3.2.1.jar" />
-    	<pathelement location="${lib}/imageio-core-3.2.1.jar" />
-    	<pathelement location="${lib}/imageio-metadata-3.2.1.jar" />
-    	<pathelement location="${lib}/imageio-tiff-3.2.1.jar" />
+        <pathelement location="${lib}/httpclient-4.5.3.jar" />
+        <pathelement location="${lib}/httpcore-4.4.6.jar" />
+        <pathelement location="${lib}/httpmime-4.5.3.jar" />
+        <pathelement location="${lib}/icu4j-58_2.jar" />
+    	<pathelement location="${lib}/imageio-bmp-3.3.1.jar" />
+    	<pathelement location="${lib}/imageio-core-3.3.1.jar" />
+    	<pathelement location="${lib}/imageio-metadata-3.3.1.jar" />
+    	<pathelement location="${lib}/imageio-tiff-3.3.1.jar" />
         <pathelement location="${lib}/J7Zip-modified.jar" />
         <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
     	<pathelement location="${lib}/jaudiotagger-2.0.4-20111207.115108-15.jar" />
         <pathelement location="${lib}/javax.servlet-api-3.1.0.jar" />
     	<pathelement location="${lib}/jcifs-1.3.17.jar" />
-    	<pathelement location="${lib}/jcl-over-slf4j-1.7.21.jar" />
-        <pathelement location="${lib}/jetty-client-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-continuation-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-deploy-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-http-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-io-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-jmx-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-proxy-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-security-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-server-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-servlet-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-servlets-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-util-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-webapp-9.2.17.v20160517.jar" />
-        <pathelement location="${lib}/jetty-xml-9.2.17.v20160517.jar" />
-    	<pathelement location="${lib}/jsch-0.1.53.jar" />
+    	<pathelement location="${lib}/jcl-over-slf4j-1.7.24.jar" />
+        <pathelement location="${lib}/jetty-client-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-continuation-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-deploy-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-http-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-io-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-jmx-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-proxy-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-security-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-server-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-servlet-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-servlets-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-util-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-webapp-9.2.21.v20170120.jar" />
+        <pathelement location="${lib}/jetty-xml-9.2.21.v20170120.jar" />
+    	<pathelement location="${lib}/jsch-0.1.54.jar" />
     	<pathelement location="${lib}/json-simple-1.1.1.jar" />
-    	<pathelement location="${lib}/jsoup-1.9.2.jar" />
-    	<pathelement location="${lib}/log4j-over-slf4j-1.7.21.jar" />
-    	<pathelement location="${lib}/lucene-analyzers-common-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-analyzers-phonetic-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-backward-codecs-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-classification-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-codecs-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-core-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-facet-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-grouping-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-highlighter-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-join-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-memory-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-misc-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-queries-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-queryparser-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-spatial-5.5.1.jar" />
-    	<pathelement location="${lib}/lucene-suggest-5.5.1.jar" />
+    	<pathelement location="${lib}/jsoup-1.10.2.jar" />
+        <pathelement location="${lib}/jwat-common-1.0.4.jar" />
+        <pathelement location="${lib}/jwat-gzip-1.0.4.jar" />
+        <pathelement location="${lib}/jwat-archive-common-1.0.4.jar" />
+        <pathelement location="${lib}/jwat-warc-1.0.4.jar" />
+    	<pathelement location="${lib}/log4j-over-slf4j-1.7.24.jar" />
+    	<pathelement location="${lib}/lucene-analyzers-common-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-analyzers-phonetic-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-backward-codecs-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-classification-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-codecs-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-core-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-facet-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-grouping-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-highlighter-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-join-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-memory-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-misc-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-queries-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-queryparser-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-spatial-5.5.4.jar" />
+    	<pathelement location="${lib}/lucene-suggest-5.5.4.jar" />
 	<pathelement location="${lib}/jsonic-1.2.0.jar" />
 	<pathelement location="${lib}/langdetect.jar" />
-    	<pathelement location="${lib}/metadata-extractor-2.9.1.jar" />
-    	<pathelement location="${lib}/noggit-0.5.jar" />
+    	<pathelement location="${lib}/metadata-extractor-2.10.1.jar" />
+    	<pathelement location="${lib}/noggit-0.6.jar" />
     	<pathelement location="${lib}/org.restlet.jar" />
-        <pathelement location="${lib}/pdfbox-2.0.2.jar" />
-    	<pathelement location="${lib}/poi-3.14-20160307.jar" />
-    	<pathelement location="${lib}/poi-scratchpad-3.14-20160307.jar" />
-        <pathelement location="${lib}/slf4j-api-1.7.21.jar" />
-        <pathelement location="${lib}/slf4j-jdk14-1.7.21.jar" />
-        <pathelement location="${lib}/solr-core-5.5.1.jar" />
-        <pathelement location="${lib}/solr-solrj-5.5.1.jar" />
+        <pathelement location="${lib}/pdfbox-2.0.5.jar" />
+    	<pathelement location="${lib}/poi-3.15.jar" />
+    	<pathelement location="${lib}/poi-scratchpad-3.15.jar" />
+        <pathelement location="${lib}/slf4j-api-1.7.24.jar" />
+        <pathelement location="${lib}/slf4j-jdk14-1.7.24.jar" />
+        <pathelement location="${lib}/solr-core-5.5.4.jar" />
+        <pathelement location="${lib}/solr-solrj-5.5.4.jar" />
     	<pathelement location="${lib}/spatial4j-0.5.jar" />
         <pathelement location="${lib}/stax2-api_3.1.4.jar" />        
-    	<pathelement location="${lib}/webcat-swf-0.1.jar" />
     	<pathelement location="${lib}/weupnp-0.1.4.jar" />
     	<pathelement location="${lib}/woodstox-core-asl-4.4.1.jar" />
     	<pathelement location="${lib}/xercesImpl.jar" />
-        <pathelement location="${lib}/xliff-core-1.2-1.1.jar" />
     	<pathelement location="${lib}/xml-apis.jar" />
-        <pathelement location="${lib}/xmpcore-5.1.2.jar" />
+        <pathelement location="${lib}/xmpcore-5.1.3.jar" />
     	<pathelement location="${lib}/zookeeper-3.4.6.jar" />
     </path>
 
@@ -764,9 +776,10 @@
   		<fileset dir="${addon}/YaCy.app"></fileset>
   	</copy>
   	<copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="true" overwrite="true" />
-  	<move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/Resources/Java" verbose="false" />
-    <chmod file="${release_mac}/YaCy.app/Contents/MacOS/JavaAppLauncher" perm="755"/>
-  	<chmod file="${release_mac}/YaCy.app/Contents/Resources/Java/startYACY.sh" perm="755"/>
+  	<move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/MacOS" verbose="false" />
+  	<!-- startYACY.sh and startYACYMacOS.sh will be the main entry points : we set permissions to make it executable files -->
+  	<chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACYMacOS.sh" perm="755"/>
+  	<chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACY.sh" perm="755"/>
   	<exec executable="hdiutil">
   	  	<arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.dmg"/>
   	</exec>

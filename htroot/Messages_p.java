@@ -26,16 +26,16 @@
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.TreeMap;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.MessageBoard;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -47,21 +47,20 @@ import com.google.common.io.Files;
 
 public class Messages_p {
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     private static final String PEERSKNOWN = "peersKnown_";
 
     public static String dateString(final Date date) {
-        return SimpleFormatter.format(date);
+        return GenericFormatter.SIMPLE_FORMATTER.format(date);
     }
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-        // set peer address / name
-        final String peerAddress = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
+        /* Peer URL base : used by Messages_p.rss to render absolute URL links to this peer */
+        final String context = YaCyDefaultServlet.getContext(header, sb);
         final String peerName = sb.peers.mySeed().getName();
-        prop.put("peerAddress", peerAddress);
+        prop.put("context", context);
         prop.putXML("peerName", peerName);
 
         // List known hosts for message sending (from Blacklist_p.java)
@@ -130,9 +129,9 @@ public class Messages_p {
                     prop.putXML("mode_messages_"+count+"_key", key);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
 
-                    if ((header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".rss")) {
+                    if (header.getPathInfo().endsWith(".rss")) {
                     	// set the peer address
-                    	prop.put("mode_messages_"+count+"_peerAddress", peerAddress);
+                    	prop.put("mode_messages_"+count+"_context", context);
 
                     	// set the rfc822 date
                     	prop.put("mode_messages_"+count+"_rfc822Date", HeaderFramework.formatRFC1123(message.date()));
@@ -162,7 +161,7 @@ public class Messages_p {
             prop.putXML("mode_subject", message.subject());
             String theMessage = null;
             theMessage = UTF8.String(message.message());
-            prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()), "mode_message", theMessage);
+            prop.putWiki("mode_message", theMessage);
             prop.put("mode_hash", message.authorHash());
             prop.putXML("mode_key", key);
         }

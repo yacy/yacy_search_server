@@ -43,37 +43,37 @@ import java.util.zip.ZipFile;
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.StringBuilderComparator;
 
+/**
+ * The main 'geoname' table has the following fields :
+ * <ul>
+ * <li>geonameid         : integer id of record in geonames database</li>
+ * <li>name              : name of geographical point (utf8) varchar(200)</li>
+ * <li>asciiname         : name of geographical point in plain ascii characters, varchar(200)</li>
+ * <li>alternatenames    : alternatenames, comma separated varchar(5000)</li>
+ * <li>latitude          : latitude in decimal degrees (wgs84)</li>
+ * <li>longitude         : longitude in decimal degrees (wgs84)</li>
+ * <li>feature class     : see http://www.geonames.org/export/codes.html, char(1)</li>
+ * <li>feature code      : see http://www.geonames.org/export/codes.html, varchar(10)</li>
+ * <li>country code      : ISO-3166 2-letter country code, 2 characters</li>
+ * <li>cc2               : alternate country codes, comma separated, ISO-3166 2-letter country code, 60 characters</li>
+ * <li>admin1 code       : fipscode (subject to change to iso code), see exceptions below, see file admin1Codes.txt for display names of this code; varchar(20)</li>
+ * <li>admin2 code       : code for the second administrative division, a county in the US, see file admin2Codes.txt; varchar(80)</li>
+ * <li>admin3 code       : code for third level administrative division, varchar(20)</li>
+ * <li>admin4 code       : code for fourth level administrative division, varchar(20)</li>
+ * <li>population        : bigint (8 byte int)</li>
+ * <li>elevation         : in meters, integer</li>
+ * <li>gtopo30           : average elevation of 30'x30' (ca 900mx900m) area in meters, integer</li>
+ * <li>timezone          : the timezone id (see file timeZone.txt)</li>
+ * <li>modification date : date of last modification in yyyy-MM-dd format</li>
+ * </ul>
+*/
 public class GeonamesLocation implements Locations {
 
-    /*
-        The main 'geoname' table has the following fields :
-        ---------------------------------------------------
-        geonameid         : integer id of record in geonames database
-        name              : name of geographical point (utf8) varchar(200)
-        asciiname         : name of geographical point in plain ascii characters, varchar(200)
-        alternatenames    : alternatenames, comma separated varchar(5000)
-        latitude          : latitude in decimal degrees (wgs84)
-        longitude         : longitude in decimal degrees (wgs84)
-        feature class     : see http://www.geonames.org/export/codes.html, char(1)
-        feature code      : see http://www.geonames.org/export/codes.html, varchar(10)
-        country code      : ISO-3166 2-letter country code, 2 characters
-        cc2               : alternate country codes, comma separated, ISO-3166 2-letter country code, 60 characters
-        admin1 code       : fipscode (subject to change to iso code), see exceptions below, see file admin1Codes.txt for display names of this code; varchar(20)
-        admin2 code       : code for the second administrative division, a county in the US, see file admin2Codes.txt; varchar(80)
-        admin3 code       : code for third level administrative division, varchar(20)
-        admin4 code       : code for fourth level administrative division, varchar(20)
-        population        : bigint (8 byte int)
-        elevation         : in meters, integer
-        gtopo30           : average elevation of 30'x30' (ca 900mx900m) area in meters, integer
-        timezone          : the timezone id (see file timeZone.txt)
-        modification date : date of last modification in yyyy-MM-dd format
-     */
     private final static ConcurrentLog log = new ConcurrentLog(GeonamesLocation.class.getName());
     
     private final Map<Integer, GeoLocation> id2loc;
-    private final TreeMap<StringBuilder, List<Integer>> name2ids;
+    private final TreeMap<String, List<Integer>> name2ids;
     private final File file;
     public GeonamesLocation(final File file, WordCache dymLib, long minPopulation) {
         // this is a processing of the cities1000.zip file from http://download.geonames.org/export/dump/
@@ -81,7 +81,7 @@ public class GeonamesLocation implements Locations {
         this.file = file;
         this.id2loc = new HashMap<Integer, GeoLocation>();
         this.name2ids =
-            new TreeMap<StringBuilder, List<Integer>>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
+            new TreeMap<String, List<Integer>>(String.CASE_INSENSITIVE_ORDER);
 
         if ( file == null || !file.exists() ) {
             return;
@@ -125,7 +125,7 @@ public class GeonamesLocation implements Locations {
         try {
             String line;
             String[] fields;
-            Set<StringBuilder> locnames;
+            Set<String> locnames;
             while ( (line = reader.readLine()) != null ) {
                 if ( line.isEmpty() ) {
                     continue;
@@ -133,19 +133,19 @@ public class GeonamesLocation implements Locations {
                 fields = CommonPattern.TAB.split(line);
                 final long population = Long.parseLong(fields[14]);
                 if (minPopulation > 0 && population < minPopulation) continue;
-                final int geonameid = Integer.parseInt(fields[0]);
-                locnames = new HashSet<StringBuilder>();
-                locnames.add(new StringBuilder(fields[1]));
-                locnames.add(new StringBuilder(fields[2]));
+                final Integer geonameid = Integer.valueOf(fields[0]);
+                locnames = new HashSet<String>();
+                locnames.add(fields[1]);
+                locnames.add(fields[2]);
                 for ( final String s : CommonPattern.COMMA.split(fields[3]) ) {
-                    locnames.add(new StringBuilder(s));
+                    locnames.add(s);
                 }
                 final GeoLocation c =
                     new GeoLocation(Float.parseFloat(fields[4]), Float.parseFloat(fields[5]), fields[1]);
                 c.setPopulation((int) Long.parseLong(fields[14]));
                 this.id2loc.put(geonameid, c);
-                for ( final StringBuilder name : locnames ) {
-                    if (dymLib != null && dymLib.contains(name)) continue;
+                for ( final String name : locnames ) {
+                    if (dymLib != null && dymLib.contains(new StringBuilder(name))) continue;
                     if (name.length() < OverarchingLocation.MINIMUM_NAME_LENGTH) continue;
                     List<Integer> locs = this.name2ids.get(name);
                     if ( locs == null ) {
@@ -169,21 +169,34 @@ public class GeonamesLocation implements Locations {
 	public boolean isEmpty() {
 		return this.id2loc.isEmpty();
 	}
+	
+	/**
+	 * @param s0 complete string
+	 * @param s1 string part candidate
+	 * @return true when s0 starts with s1
+	 * @throws NullPointerException when a parameter is null
+	 */
+	private boolean caseIncensitiveStartsWith(final String s0, final String s1) {
+        final int l1 = s1.length();
+        if (s0.length() < l1) {
+        	return false;
+        }
+        return s0.substring(0, l1).equalsIgnoreCase(s1);
+	}
 
     @Override
     public TreeSet<GeoLocation> find(final String anyname, final boolean locationexact) {
         final Set<Integer> r = new HashSet<Integer>();
         List<Integer> c;
-        final StringBuilder an = new StringBuilder(anyname);
         if ( locationexact ) {
-            c = this.name2ids.get(an);
+            c = this.name2ids.get(anyname);
             if ( c != null ) {
                 r.addAll(c);
             }
         } else {
-            final SortedMap<StringBuilder, List<Integer>> cities = this.name2ids.tailMap(an);
-            for ( final Map.Entry<StringBuilder, List<Integer>> e : cities.entrySet() ) {
-                if ( StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(e.getKey(), an) ) {
+            final SortedMap<String, List<Integer>> cities = this.name2ids.tailMap(anyname);
+            for ( final Map.Entry<String, List<Integer>> e : cities.entrySet() ) {
+                if (this.caseIncensitiveStartsWith(e.getKey(), anyname) ) {
                     r.addAll(e.getValue());
                 } else {
                     break;
@@ -207,24 +220,20 @@ public class GeonamesLocation implements Locations {
     @Override
     public Set<String> locationNames() {
         Set<String> locations = new HashSet<String>();
-        Set<StringBuilder> l = this.name2ids.keySet();
-        for (StringBuilder s: l) {
-            locations.add(s.toString());
-        }
+        locations.addAll(this.name2ids.keySet());
         return locations;
     }
 
     @Override
     public Set<String> recommend(final String s) {
         final Set<String> a = new HashSet<String>();
-        final StringBuilder an = new StringBuilder(s);
         if ( s.isEmpty() ) {
             return a;
         }
-        final SortedMap<StringBuilder, List<Integer>> t = this.name2ids.tailMap(an);
-        for ( final StringBuilder r : t.keySet() ) {
-            if ( StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, an) ) {
-                a.add(r.toString());
+        final SortedMap<String, List<Integer>> tail = this.name2ids.tailMap(s);
+        for ( final String name : tail.keySet() ) {
+            if (this.caseIncensitiveStartsWith(name, s) ) {
+                a.add(name);
             } else {
                 break;
             }
@@ -238,10 +247,11 @@ public class GeonamesLocation implements Locations {
         if ( s.length() == 0 ) {
             return a;
         }
-        final SortedMap<StringBuilder, List<Integer>> t = this.name2ids.tailMap(s);
-        for ( final StringBuilder r : t.keySet() ) {
-            if ( StringBuilderComparator.CASE_INSENSITIVE_ORDER.startsWith(r, s) ) {
-                a.add(r);
+        final String sString = s.toString();
+        final SortedMap<String, List<Integer>> tail = this.name2ids.tailMap(sString);
+        for ( final String name : tail.keySet() ) {
+            if (this.caseIncensitiveStartsWith(name, sString) ) {
+                a.add(new StringBuilder(name));
             } else {
                 break;
             }

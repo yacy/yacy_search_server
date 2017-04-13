@@ -54,6 +54,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.UnavailableException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -62,14 +63,18 @@ import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.data.UserDB.AccessRight;
-import net.yacy.data.UserDB.Entry;
+import net.yacy.data.BadTransactionException;
+import net.yacy.data.InvalidURLLicenceException;
+import net.yacy.data.TransactionManager;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.peers.operation.yacyBuildProperties;
@@ -96,6 +101,7 @@ import org.eclipse.jetty.util.MultiPartOutputStream;
 import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 
+import com.google.common.net.HttpHeaders;
 import com.google.common.util.concurrent.SimpleTimeLimiter;
 import com.google.common.util.concurrent.TimeLimiter;
 import com.google.common.util.concurrent.UncheckedTimeoutException;
@@ -125,8 +131,6 @@ import com.google.common.util.concurrent.UncheckedTimeoutException;
  * 
  *  resourceBase      Set to replace the context resource base
  *
- *  pathInfoOnly      If true, only the path info will be applied to the resourceBase
- *
  * </PRE>
  */
 public class YaCyDefaultServlet extends HttpServlet  {
@@ -135,7 +139,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected ServletContext _servletContext;
     protected boolean _acceptRanges = true;
     protected boolean _dirAllowed = true;
-    protected boolean _pathInfoOnly = false;
     protected Resource _resourceBase;
     protected MimeTypes _mimeTypes;
     protected String[] _welcomes;    
@@ -148,7 +151,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
     protected static final int SIZE_FILE_THRESHOLD = 1024 * 1024 * 1024; // 1GB is a lot but appropriate for multi-document pushed using the push_p.json servlet
     protected static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
-    private final static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newCachedThreadPool());
+	private final static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newCachedThreadPool(
+			new NamePrefixThreadFactory(YaCyDefaultServlet.class.getSimpleName() + ".timeLimiter")));
     /* ------------------------------------------------------------ */
     @Override
     public void init() throws UnavailableException {
@@ -167,7 +171,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
         _acceptRanges = getInitBoolean("acceptRanges", _acceptRanges);
         _dirAllowed = getInitBoolean("dirAllowed", _dirAllowed);
-        _pathInfoOnly = getInitBoolean("pathInfoOnly", _pathInfoOnly);
 
         Resource.setDefaultUseCaches(false); // caching is handled internally (prevent double caching)
 
@@ -188,8 +191,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
         templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
     }
-
-
+    
     /* ------------------------------------------------------------ */
     protected boolean getInitBoolean(String name, boolean dft) {
         String value = getInitParameter(name);
@@ -237,23 +239,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return (reqRanges != null && reqRanges.hasMoreElements());
     }
     
-    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */    
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String servletPath;
         String pathInfo; 
         Enumeration<String> reqRanges = null;
-        boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null; 
+        boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
         if (included) {
-            servletPath = (String) request.getAttribute(RequestDispatcher.INCLUDE_SERVLET_PATH);
             pathInfo = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
-            if (servletPath == null) {
-                servletPath = request.getServletPath();
+            if (pathInfo == null) {
                 pathInfo = request.getPathInfo();
             }
         } else {
-            servletPath = _pathInfoOnly ? "/" : request.getServletPath();
             pathInfo = request.getPathInfo();
 
             // Is this a Range request?
@@ -263,8 +261,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         }
         
-        String pathInContext = URIUtil.addPaths(servletPath, pathInfo);
-        boolean endsWithSlash = (pathInfo == null ? request.getServletPath() : pathInfo).endsWith(URIUtil.SLASH);
+        String pathInContext =  pathInfo == null ? "/" : pathInfo; // this is the path of the resource in _resourceBase (= path within htroot respective htDocs)
+        boolean endsWithSlash = pathInContext.endsWith(URIUtil.SLASH);
 
         // Find the resource 
         Resource resource = null;
@@ -290,7 +288,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             if (!hasClass && (resource == null || !resource.exists()) && !pathInContext.contains("..")) {
                 // try to get this in the alternative htDocsPath
-                resource = Resource.newResource(new File(HTTPDFileHandler.htDocsPath, pathInContext));
+                resource = Resource.newResource(new File(_htDocsPath, pathInContext));
             }
             
             if (ConcurrentLog.isFine("FILEHANDLER")) {
@@ -514,8 +512,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
             out = new WriterOutputStream(response.getWriter());
         }
 
-        response.setDateHeader(HeaderFramework.EXPIRES, System.currentTimeMillis() + 600000); // expires ten minutes in the future
-        response.setDateHeader(HeaderFramework.LAST_MODIFIED, resource.lastModified());
+        // remove the last-modified field since caching otherwise does not work
+        /*
+           https://www.ietf.org/rfc/rfc2616.txt
+           "if the response does have a Last-Modified time, the heuristic
+           expiration value SHOULD be no more than some fraction of the interval
+           since that time. A typical setting of this fraction might be 10%."
+        */
+        if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+            response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
+        }
+
+        // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
+        response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
         
         if (reqRanges == null || !reqRanges.hasMoreElements() || content_length < 0) {
             //  if there were no ranges, send entire entity
@@ -637,12 +646,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setContentType(extensionmime);
             }
         }
-
+        /*
+         * DO NOT enable this again, removal of the LAST_MODIFIED field enables caching
         long lml = resource.lastModified();
         if (lml >= 0) {
             response.setDateHeader(HeaderFramework.LAST_MODIFIED, lml);
         }
-
+        */
+        
         if (count != -1) {
             if (count < Integer.MAX_VALUE) {
                 response.setContentLength((int) count);
@@ -660,57 +671,66 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
     }
-
+    
     /**
-     * Convert ServletRequest header to YaCy RequestHeader
-     * @param request ServletRequest
-     * @return RequestHeader created from ServletRequest
+     * Returns the URL base for this peer, determined from request HTTP header "Host" when present. Use this when absolute URL rendering is required, 
+     * otherwise relative URLs should be preferred.<br/>
+     * Note : this implementation lets the responsibility to any eventual Reverse Proxy to eventually rewrite the rendered absolute URL. Example Apache directive :
+     * <code>Substitute "s|http://internal.yacypeer.com:8090/|http://www.example.com/yacy/|in"</code>.
+     * From a security point of view this is preferable than eventually relying blindly here on a X-Forwarded-Host HTTP header that can be forged by an attacker.
+     * @param header request header.
+     * @param sb Switchboard instance.
+     * @return the application context (URL request base) from request header or default configuration. This is
+     * either http://hostname:port or https://hostname:sslport
      */
-    public static RequestHeader convertHeaderFromJetty(HttpServletRequest request) {
-        RequestHeader result = new RequestHeader();
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String headerName = headerNames.nextElement();
-            Enumeration<String> headers = request.getHeaders(headerName);
-            while (headers.hasMoreElements()) {
-                String header = headers.nextElement();
-                result.add(headerName, header);
+    public static String getContext(final RequestHeader header, final Switchboard sb) {
+        String protocol = "http";
+        String hostAndPort = null;
+        if (header != null) {
+            hostAndPort = header.get(HeaderFramework.HOST);
+            protocol = header.getScheme();
+        }
+
+        /* Host and port still null : let's use the default local ones */
+        if (hostAndPort == null) {
+            if (sb != null) {
+                hostAndPort = Domains.LOCALHOST + ":" + sb.getConfigInt(SwitchboardConstants.SERVER_PORT, 8090);
+            } else {
+                hostAndPort = Domains.LOCALHOST + ":8090";
             }
         }
-        return result;
+        
+        if(header != null) {
+        	String protocolHeader = header.getScheme();
+        	
+    		/* Let's check this header has a valid value */
+        	if("http".equals(protocolHeader) || "https".equals(protocolHeader)) {
+        		protocol = protocolHeader.toLowerCase();
+        	} else if(protocolHeader != null && !protocolHeader.isEmpty()) {
+    			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal protocol scheme header value : " + protocolHeader);
+    		}
+        	
+    		/* This peer can also be behind a reverse proxy requested using https, even if the request coming to this YaCy peer is http only
+    		 * Possible scenario (happens for example when YaCy is deployed on Heroku Platform) : User browser -> https://reverseProxy/yacyURL -> http://yacypeer/yacyURL
+    		 * In that case, absolute URLs rendered by this peer (in rss feeds for example) must effectively start with the https scheme */
+        	protocolHeader = header.get(HttpHeaders.X_FORWARDED_PROTO.toString(), "").toLowerCase();
+        	
+    		/* Here we only allow an upgrade from HTTP to HTTPS, not the reverse (we don't want a forged HTTP header by an eventual attacker to force fallback to HTTP) */
+        	if("https".equals(protocolHeader)) {
+        		protocol = protocolHeader;
+        	} else if(!protocolHeader.isEmpty()) {
+    			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal " + HttpHeaders.X_FORWARDED_PROTO.toString() + " header value : " + protocolHeader);
+    		}
+        }
+        
+        return protocol + "://" + hostAndPort;
     }
 
-    protected RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
-        RequestHeader legacyRequestHeader = convertHeaderFromJetty(request);
+    private RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
+        RequestHeader legacyRequestHeader = new RequestHeader(request);
 
-        legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_CLIENTIP, request.getRemoteAddr());
-        legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target);
+        legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target); // target may contain a server side include (SSI)
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
-        Switchboard sb = Switchboard.getSwitchboard();
-        if (legacyRequestHeader.containsKey(RequestHeader.AUTHORIZATION)) {
-            if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(request.getAuthType())) {
-            } else {
-                // handle DIGEST auth for legacyHeader (create username:md5pwdhash
-                if (request.getUserPrincipal() != null) {
-                    String userpassEncoded = request.getHeader(RequestHeader.AUTHORIZATION); // e.g. "Basic AdminMD5hash"
-                    if (userpassEncoded != null) {
-                        if (request.isUserInRole(AccessRight.ADMIN_RIGHT.toString()) && !sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5,"").isEmpty()) {
-                            // fake admin authentication for legacyRequestHeader (as e.g. DIGEST is not supported by legacyRequestHeader)
-                            legacyRequestHeader.put(RequestHeader.AUTHORIZATION, HttpServletRequest.BASIC_AUTH + " "
-                                    + sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
-                        } else {
-                            // fake Basic auth header for Digest auth  (Basic username:md5pwdhash)
-                            String username = request.getRemoteUser();
-                            Entry user = sb.userDB.getEntry(username);
-                            if (user != null) {
-                                legacyRequestHeader.put(RequestHeader.AUTHORIZATION, HttpServletRequest.BASIC_AUTH + " "
-                                        + username + ":" + user.getMD5EncodedUserPwd());
-                            }
-                        }
-                    }
-                }
-            }
-        }
         return legacyRequestHeader;
     }
 
@@ -793,38 +813,55 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return m;
     }
 
+    /**
+     * Handles a YaCy servlet template, reads the template and replaces the template
+     * items with actual values. Because of supported server side includes target 
+     * might not be the same as request.getPathInfo
+     * 
+     * @param target the path to the template
+     * @param request the remote servlet request
+     * @param response
+     * @throws IOException
+     * @throws ServletException
+     */
     protected void handleTemplate(String target,  HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         Switchboard sb = Switchboard.getSwitchboard();
 
-        String localeSelection = sb.getConfig("locale.language", "default");
+        String localeSelection = sb.getConfig("locale.language", "browser");
+        if (localeSelection.endsWith("browser")) {
+            String lng = request.getLocale().getLanguage();
+            if (lng.equalsIgnoreCase("en")) { // because en is handled as "default" in localizer
+                localeSelection = "default";
+            } else {
+                localeSelection = lng;
+            }
+        }
         File targetFile = getLocalizedFile(target, localeSelection);
         File targetClass = rewriteClassFile(_resourceBase.addPath(target).getFile());
         String targetExt = target.substring(target.lastIndexOf('.') + 1);
 
         long now = System.currentTimeMillis();
-        response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
         if (target.endsWith(".css")) {
+            response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
             response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour (which is still often, others use 1 week, month or year)
         } else if (target.endsWith(".png")) {
-            response.setDateHeader(HeaderFramework.EXPIRES, now + 60000); // expires in 1 minute (reduce heavy image creation load)
+            // expires in 1 minute (reduce heavy image creation load)
+            if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+                response.getHeaders(HeaderFramework.LAST_MODIFIED).clear();
+            }
+            response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(60));
         } else {
+            response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
             response.setDateHeader(HeaderFramework.EXPIRES, now); // expires now
         }
         
         if ((targetClass != null)) {
             serverObjects args = new serverObjects();
-            Enumeration<String> argNames = request.getParameterNames();
+            Enumeration<String> argNames = request.getParameterNames(); // on ssi jetty dispatcher merged local ssi query parameters
             while (argNames.hasMoreElements()) {
                 String argName = argNames.nextElement();
                 // standard attributes are just pushed as string
                 args.put(argName, request.getParameter(argName));
-            }
-            //TODO: for SSI request, local parameters are added as attributes, put them back as parameter for the legacy request
-            //      likely this should be implemented via httpservletrequestwrapper to supply complete parameters  
-            Enumeration<String> attNames = request.getAttributeNames();
-            while (attNames.hasMoreElements()) {
-                String argName = attNames.nextElement();
-                args.put(argName, request.getAttribute(argName).toString());
             }
             RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
             // add multipart-form fields to parameter
@@ -845,7 +882,32 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 } else {
                     tmp = invokeServlet(targetClass, legacyRequestHeader, args);
                 }
-            } catch (InvocationTargetException | IllegalArgumentException | IllegalAccessException e) {
+            } catch(InvocationTargetException e) {
+            	if(e.getCause() instanceof InvalidURLLicenceException) {
+                	/* A non authorized user is trying to fetch a image with a bad or already released license code */
+                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
+                	return;
+                }
+            	if(e.getCause() instanceof BadTransactionException) {
+                	/* A request for a protected page with server-side effects failed because the transaction is not valid :
+                	 * for example because missing or invalid transaction token*/
+                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage() 
+                			+ " If you sent this request with a web browser, please refresh the origin page.");
+                	return;
+                }
+            	if(e.getCause() instanceof TemplateMissingParameterException) {
+                	/* A template is used but miss some required parameter */
+                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
+                	return;
+                }
+            	if(e.getCause() instanceof DisallowedMethodException) {
+                	/* The request was sent using an disallowed HTTP method */
+                	response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getCause().getMessage());
+                	return;
+                }
+            	ConcurrentLog.logException(e);
+                throw new ServletException(targetFile.getAbsolutePath());
+            } catch (IllegalArgumentException | IllegalAccessException e) {
                 ConcurrentLog.logException(e);
                 throw new ServletException(targetFile.getAbsolutePath());
             }
@@ -888,6 +950,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     result = RasterPlotter.exportImage(bi, targetExt);
                 }
 
+                updateRespHeadersForImages(target, response);
                 final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
                 response.setContentType(mimeType);
                 response.setContentLength(result.length());
@@ -899,6 +962,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
 
             if (tmp instanceof InputStream) {
+            	/* Images and favicons can also be written directly from an inputStream */
+            	updateRespHeadersForImages(target, response);
+            	
                 writeInputStream(response, targetExt, (InputStream)tmp);
                 return;
             }
@@ -909,10 +975,35 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns = new servletProperties();
             } else if (tmp instanceof servletProperties) {
                 templatePatterns = (servletProperties) tmp;
+
+                if (templatePatterns.getOutgoingHeader() != null) {
+                    // handle responseHeader entries set by servlet
+                    ResponseHeader tmpouthdr = templatePatterns.getOutgoingHeader();
+                    for (String hdrkey : tmpouthdr.keySet()) {
+                        if (!HeaderFramework.STATUS_CODE.equals(hdrkey)) { // skip default init response status value (not std. )
+                            String val = tmpouthdr.get(hdrkey);
+                            if (!response.containsHeader(hdrkey) && val != null) { // to be on the safe side, add only new hdr (mainly used for CORS_ALLOW_ORIGIN)
+                                response.setHeader(hdrkey, tmpouthdr.get(hdrkey));
+                            }
+                        }
+                    }
+                    // handle login cookie
+                    if (tmpouthdr.getCookiesEntries() != null) {
+                        for (Cookie c : tmpouthdr.getCookiesEntries()) {
+                            response.addCookie(c);
+                        }
+                    }
+                }
             } else {
                 templatePatterns = new servletProperties((serverObjects) tmp);
             }
-     
+            
+            if(templatePatterns.containsKey(TransactionManager.TRANSACTION_TOKEN_PARAM)) {
+                /* The response contains a transaction token : we also write the transaction token as a custom header 
+                 * to allow usage by external tools (such as curl or wget) without the need to parse HTML */
+                response.setHeader(HeaderFramework.X_YACY_TRANSACTION_TOKEN, templatePatterns.get(TransactionManager.TRANSACTION_TOKEN_PARAM));
+            }
+
             // handle YaCy http commands
             // handle action auth: check if the servlets requests authentication
             if (templatePatterns.containsKey(serverObjects.ACTION_AUTHENTICATE)) {
@@ -948,11 +1039,13 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, sb.peers.mySeed().getName());
                 templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, sb.peers.myID());
                 templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
+                templatePatterns.put(servletProperties.RELATIVE_BASE, YaCyDefaultServlet.getRelativeBase(target));
+                templatePatterns.put(SwitchboardConstants.REFERRER_META_POLICY, sb.getConfig(SwitchboardConstants.REFERRER_META_POLICY, SwitchboardConstants.REFERRER_META_POLICY_DEFAULT));
                 Seed myPeer = sb.peers.mySeed();
                 templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
                 boolean authorized = sb.adminAuthenticated(legacyRequestHeader) >= 2;
-                templatePatterns.put("authorized", authorized ? 1 : 0);
+                templatePatterns.put("authorized", authorized ? 1 : 0); // used in templates and other html (e.g. to display lock/unlock symbol)
 
                 templatePatterns.put("simpleheadernavbar", sb.getConfig("decoration.simpleheadernavbar", "navbar-default"));
                 
@@ -974,6 +1067,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("navigation-advanced_authorized", authorized ? 1 : 0);
                 templatePatterns.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+                templatePatterns.put(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
+                templatePatterns.put("clientlanguage", localeSelection);
                 
                 String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
 
@@ -991,14 +1086,68 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.setContentType(mimeType);
                 response.setStatus(HttpServletResponse.SC_OK);
                 ByteArrayOutputStream bas = new ByteArrayOutputStream(4096);
-                // apply templates
-                TemplateEngine.writeTemplate(targetFile.getName(), fis, bas, templatePatterns);                
-                fis.close();
-                // handle SSI
-                parseSSI (bas.toByteArray(),request,response);
+                try {
+                	// apply templates
+                	TemplateEngine.writeTemplate(targetFile.getName(), fis, bas, templatePatterns);
+                	
+                    // handle SSI
+                    parseSSI (bas.toByteArray(),request,response);
+                } finally {
+                	try {
+                		fis.close();
+                	} catch(IOException ignored) {
+                		ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: could not close target file " + targetFile.getName());
+                	}
+                	
+                	try {
+                		bas.close();
+                	} catch(IOException ignored) {
+                		/* Should never happen with a ByteArrayOutputStream */
+                	}
+                }
             }
         }
     }
+    
+    /**
+     * Returns the relative path prefix necessary to reach htroot from the deepest level of targetPath.<br>
+     * Example : targetPath="api/citation.html" returns "../"
+     * targetPath is supposed to have been cleaned earlier from special chars such as "?", spaces, "//".
+     * @param targetPath target path relative to htroot
+     * @return the relative path prefix, eventually empty
+     */
+    protected static String getRelativeBase(String targetPath) {
+    	StringBuilder relativeBase = new StringBuilder();
+    	if(targetPath != null) {
+    		/* Normalize target path : it is relative to htroot, starting with a slash or not */
+    		if(targetPath.startsWith("/")) {
+    			targetPath = targetPath.substring(1, targetPath.length());
+    		}
+    		
+    		int slashIndex = targetPath.indexOf('/', 0);
+    		while(slashIndex >= 0) {
+    			relativeBase.append("../");
+    			slashIndex = targetPath.indexOf('/', slashIndex + 1);
+    		}
+    	}
+    	return relativeBase.toString();
+    }
+
+    /**
+     * Eventually update response headers for image resources
+     * @param target the query target
+     * @param response servlet response to eventually update
+     */
+	private void updateRespHeadersForImages(String target, HttpServletResponse response) {
+		if (target.equals("/ViewImage.png") || target.equals("/ViewFavicon.png")) {
+		    if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+		        response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
+		    }
+
+		    // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
+		    response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
+		}
+	}
 
 
     /**
@@ -1033,8 +1182,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
 			}
 		}
 	}
-    
-    private static String appendPath(String proplist, String path) {
+
+    /**
+     * Append a path string to comma separated string of pathes if not already
+     * contained in the proplist string
+     * @param proplist comma separated string of pathes
+     * @param path path to be appended
+     * @return comma separated string of pathes including param path
+     */
+    private String appendPath(String proplist, String path) {
         if (proplist.length() == 0) return path;
         if (proplist.contains(path)) return proplist;
         return proplist + "," + path;
@@ -1152,7 +1308,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 Thread[] p = new Thread[t];
                 for (int j = 0; j < t; j++) {
                     files.put(POISON);
-                    p[j] = new Thread() {
+                    p[j] = new Thread("YaCyDefaultServlet.parseMultipart-" + j) {
                         @Override
                         public void run() {
                             Map.Entry<String, byte[]> job;

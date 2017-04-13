@@ -54,6 +54,7 @@ import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.storage.HandleMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 
 
@@ -390,7 +391,7 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
      */
     public final static initDataConsumer asynchronusInitializer(final String name, final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace) {
         final initDataConsumer initializer = new initDataConsumer(new RowHandleMap(keylength, objectOrder, idxbytes, expectedspace, name));
-        final ExecutorService service = Executors.newSingleThreadExecutor();
+        final ExecutorService service = Executors.newSingleThreadExecutor(new NamePrefixThreadFactory("RowHandleMap.initDataConsumer"));
         initializer.setResult(service.submit(initializer));
         service.shutdown();
         return initializer;

@@ -54,6 +54,7 @@ import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.BookmarksDB.Tag;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.peers.NewsPool;
@@ -106,8 +107,8 @@ public class Bookmarks {
         prop.put("LOCATION", "/Bookmarks.html?user="+username);
     	*/
 
-    	// set peer address
-    	prop.put("address", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()));
+    	// set peer base URL : used by Bookmars.rss to render an absolute URL
+    	prop.put("address", YaCyDefaultServlet.getContext(header, sb));
 
     	//defaultvalues
     	if(isAdmin) {

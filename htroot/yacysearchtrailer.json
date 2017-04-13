@@ -34,9 +34,9 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-protocols)##(nav-domains)#::{
-      "facetname": "domains",
-      "displayname": "Domains",
+    },#(/nav-protocols)##{navs}#{
+      "facetname": "#[name]#",
+      "displayname": "#[displayname]#",
       "type": "String",
       "min": "0",
       "max": "0",
@@ -46,43 +46,7 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-domains)##(nav-namespace)#::{
-      "facetname": "namespace",
-      "displayname": "Name Space",
-      "type": "String",
-      "min": "0",
-      "max": "0",
-      "mean": "0",
-      "elements": [
-#{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
-#{/element}#
-      ]
-    },#(/nav-namespace)##(nav-authors)#::{
-      "facetname": "authors",
-      "displayname": "Authors",
-      "type": "String",
-      "min": "0",
-      "max": "0",
-      "mean": "0",
-      "elements": [
-#{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
-#{/element}#
-      ]
-    },#(/nav-authors)##(nav-collections)#::{
-      "facetname": "collections",
-      "displayname": "Collections",
-      "type": "String",
-      "min": "0",
-      "max": "0",
-      "mean": "0",
-      "elements": [
-#{element}#
-        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url]#"}#(nl)#::,#(/nl)#
-#{/element}#
-      ]
-    },#(/nav-collections)##{nav-vocabulary}#{
+    },#{/navs}##{nav-vocabulary}#{
       "facetname": "#[navname]#",
       "displayname": "#[navname]#",
       "type": "String",

@@ -26,7 +26,7 @@
 
 package net.yacy.search;
 
-import net.yacy.kelondro.util.MapTools;
+import net.yacy.cora.order.Digest;
 import net.yacy.server.http.RobotsTxtConfig;
 
 /**
@@ -39,17 +39,27 @@ public final class SwitchboardConstants {
     /**
      * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
      * <p>Name of the setting holding the authentication hash for the static <code>admin</code>-account. It is calculated
-     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link MapTools#encodeMD5Hex(String)}.</p>
+     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link Digest#encodeMD5Hex(String)}.</p>
      * With introduction of DIGEST authentication all passwords are MD5 encoded and calculatd as <code>username:adminrealm:password</code>
      * To differentiate old and new admin passwords, use the new calculated passwords a "MD5:" prefix.
      */
-    public static final String ADMIN_ACCOUNT                = "adminAccount";
+
+    public static final String ADMIN_ACCOUNT                = "adminAccount"; // not used anymore (did hold clear text  username:pwd)
+
+    // this holds the credential "MD5:" + Digest.encodeMD5Hex(adminAccountUserName + ":" + adminRealm + ":" + password)
+    // or the depreciated old style MapTools.encodeMD5Hex( Base64Order.standardCoder.encode(adminAccountUserName + ":" + password) )
     public static final String ADMIN_ACCOUNT_B64MD5         = "adminAccountBase64MD5";
     public static final String ADMIN_ACCOUNT_USER_NAME      = "adminAccountUserName"; // by default 'admin'
     public static final String ADMIN_ACCOUNT_FOR_LOCALHOST  = "adminAccountForLocalhost";
     public static final String ADMIN_ACCOUNT_All_PAGES      = "adminAccountAllPages";
     public static final String ADMIN_REALM                  = "adminRealm";
-    
+
+    // server settings
+    public static final String SERVER_PORT                  = "port"; // port for the http server
+    public static final String SERVER_SSLPORT               = "port.ssl"; // port for https
+    public static final String SERVER_SHUTDOWNPORT          = "port.shutdown"; // local port to listen for a shutdown signal (0 <= disabled)
+    public static final String SERVER_STATICIP              = "staticIP"; // static IP of http server
+
     public static final String PUBLIC_SEARCHPAGE            = "publicSearchpage";
     
     public static final int   CRAWLJOB_SYNC = 0;
@@ -97,7 +107,6 @@ public final class SwitchboardConstants {
      * <p>Name of the local crawler thread, popping one entry off the Local Crawl Queue, and passing it to the
      * proxy cache enqueue thread to download and further process it</p>
      *
-     * @see Switchboard#PROXY_CACHE_ENQUEUE
      */
     public static final String CRAWLJOB_LOCAL_CRAWL                             = "50_localcrawl";
     public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_START                = "coreCrawlJob";
@@ -122,7 +131,7 @@ public final class SwitchboardConstants {
      * <p><code>public static final String <strong>CRAWLJOB_REMOTE_CRAWL_LOADER</strong> = "60_remotecrawlloader"</code></p>
      * <p>Name of the remote crawl list loading thread</p>
      *
-     * @see Switchboard#CRAWLJOB_REMOTE_CRAWL_LOADER
+     * @see #CRAWLJOB_REMOTE_CRAWL_LOADER
      */
     public static final String CRAWLJOB_REMOTE                                 = "crawlResponse"; // enable/disable response to remote crawl requests
     public static final String CRAWLJOB_REMOTE_CRAWL_LOADER                    = "60_remotecrawlloader";
@@ -207,7 +216,7 @@ public final class SwitchboardConstants {
      * <p><code>public static final String <strong>INDEX_DIST_ALLOW</strong> = "allowDistributeIndex"</code></p>
      * <p>Name of the setting whether Index Distribution shall be allowed (and the DHT-thread therefore started) or not</p>
      *
-     * @see Switchboard#INDEX_DIST_ALLOW_WHILE_CRAWLING
+     * @see #INDEX_DIST_ALLOW_WHILE_CRAWLING
      */
     public static final String INDEX_DIST_ALLOW                 = "allowDistributeIndex";
     public static final String INDEX_RECEIVE_ALLOW              = "allowReceiveIndex";
@@ -220,7 +229,7 @@ public final class SwitchboardConstants {
      * the Local Crawler Queue is filled.</p>
      * <p>This setting only has effect if {@link #INDEX_DIST_ALLOW} is enabled</p>
      *
-     * @see Switchboard#INDEX_DIST_ALLOW
+     * @see #INDEX_DIST_ALLOW
      */
     public static final String INDEX_DIST_ALLOW_WHILE_CRAWLING  = "allowDistributeIndexWhileCrawling";
     public static final String INDEX_DIST_ALLOW_WHILE_INDEXING  = "allowDistributeIndexWhileIndexing";
@@ -247,14 +256,6 @@ public final class SwitchboardConstants {
     public static final String PROXY_INDEXING_LOCAL_TEXT        = "proxyIndexingLocalText";
     public static final String PROXY_INDEXING_LOCAL_MEDIA       = "proxyIndexingLocalMedia";
     public static final String PROXY_CACHE_SIZE                 = "proxyCacheSize";
-    /**
-     * <p><code>public static final String <strong>PROXY_CACHE_LAYOUT</strong> = "proxyCacheLayout"</code></p>
-     * <p>Name of the setting which file-/folder-layout the proxy cache shall use. Possible values are {@link #PROXY_CACHE_LAYOUT_TREE}
-     * and {@link #PROXY_CACHE_LAYOUT_HASH}</p>
-     *
-     * @see Switchboard#PROXY_CACHE_LAYOUT_TREE
-     * @see Switchboard#PROXY_CACHE_LAYOUT_HASH
-     */
     public static final String PROXY_YACY_ONLY                 = "proxyYacyOnly";
     public static final String PROXY_TRANSPARENT_PROXY         = "isTransparentProxy";
 
@@ -280,6 +281,12 @@ public final class SwitchboardConstants {
     public static final String CLUSTER_MODE_PUBLIC_PEER         = "publicpeer";
     public static final String CLUSTER_MODE_PRIVATE_PEER        = "privatepeer";
     public static final String CLUSTER_PEERS_IPPORT             = "cluster.peers.ipport";
+    
+    /** Key of the global HTTP Referrer policy delivered by meta tag */
+    public static final String REFERRER_META_POLICY = "referrer.meta.policy";
+    
+    /** Default value for the global HTTP Referrer policy delivered by meta tag */
+    public static final String REFERRER_META_POLICY_DEFAULT = "origin-when-cross-origin";
 
     
     public static final String DHT_ENABLED                      = "network.unit.dht";
@@ -293,6 +300,20 @@ public final class SwitchboardConstants {
     public static final String REMOTESEARCH_RESULT_STORE_MAXSIZE= "remotesearch.result.store.maxsize";
     public static final String REMOTESEARCH_MAXLOAD_RWI         = "remotesearch.maxload.rwi";
     public static final String REMOTESEARCH_MAXLOAD_SOLR        = "remotesearch.maxload.solr";
+    
+	/**
+	 * Setting key to configure whether responses from remote Solr instances
+	 * should be binary encoded :
+	 * <ul>
+	 * <li>true : more efficient, uses the solrj binary response parser</li>
+	 * <li>false : responses are transferred as XML, which can be captured and
+	 * parsed by any external XML aware tool for debug/analysis</li>
+	 * </ul>
+	 */
+    public static final String REMOTE_SOLR_BINARY_RESPONSE_ENABLED = "remote.solr.binaryResponse.enabled";
+    
+    /** Default configuration setting for remote Solr responses binary encoding */
+    public static final boolean REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT            = true;
 
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED      = "federated.service.solr.indexing.enabled";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL          = "federated.service.solr.indexing.url";
@@ -321,15 +342,25 @@ public final class SwitchboardConstants {
     public static final String CRAWLER_USER_AGENT_MINIMUMDELTA  = "crawler.userAgent.minimumdelta";
     public static final String CRAWLER_USER_AGENT_CLIENTTIMEOUT = "crawler.userAgent.clienttimeout";
     
-    /**
-     * debug flags
-     */
-    public static final String DEBUG_SEARCH_LOCAL_DHT_OFF       = "debug.search.local.dht.off"; // =true: do not use the local dht/rwi index (which is not done if we do remote searches)
-    public static final String DEBUG_SEARCH_LOCAL_SOLR_OFF      = "debug.search.local.solr.off"; // =true: do not use solr
-    public static final String DEBUG_SEARCH_REMOTE_DHT_OFF      = "debug.search.remote.dht.off"; // =true: do not use dht/rwi
-    public static final String DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL= "debug.search.remote.dht.testlocal"; // =true: do not use dht, search local peer in a shortcut to the own server
-    public static final String DEBUG_SEARCH_REMOTE_SOLR_OFF     = "debug.search.remote.solr.off"; // =true: do not use solr
-    public static final String DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL= "debug.search.remote.solr.testlocal"; // =true: do not use dht, search local peer in a shortcut to the own server
+    /* --- debug flags ---  */
+    
+    /** when set to true : do not use the local dht/rwi index (which is not done if we do remote searches) */
+    public static final String DEBUG_SEARCH_LOCAL_DHT_OFF       = "debug.search.local.dht.off";
+    
+    /** when set to true : do not use local solr index */
+    public static final String DEBUG_SEARCH_LOCAL_SOLR_OFF      = "debug.search.local.solr.off";
+    
+    /** when set to true : do not use remote dht/rwi */
+    public static final String DEBUG_SEARCH_REMOTE_DHT_OFF      = "debug.search.remote.dht.off";
+    
+    /** when set to true : do not use remote solr indexes */
+    public static final String DEBUG_SEARCH_REMOTE_SOLR_OFF     = "debug.search.remote.solr.off";
+    
+    /** when set to true : do not use dht, search local peer in a shortcut to the own server */
+    public static final String DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL= "debug.search.remote.dht.testlocal";
+    
+    /** when set to true : do not use dht, search local peer in a shortcut to the own server */
+    public static final String DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL= "debug.search.remote.solr.testlocal";
     
     /**
      * <p><code>public static final String <strong>WORDCACHE_MAX_COUNT</strong> = "wordCacheMaxCount"</code></p>
@@ -340,14 +371,15 @@ public final class SwitchboardConstants {
     public static final String HTTPC_NAME_CACHE_CACHING_PATTERNS_NO = "httpc.nameCacheNoCachingPatterns";
     public static final String ROBOTS_TXT                       = "httpd.robots.txt";
     public static final String ROBOTS_TXT_DEFAULT               = RobotsTxtConfig.LOCKED + "," + RobotsTxtConfig.DIRS;
+    /** Key of the setting configuring how many active robots.txt loading threads may be running on the same time at max */
+    public static final String ROBOTS_TXT_THREADS_ACTIVE_MAX       = "robots.txt.MaxActiveThreads";
+    /** Default value of the setting configuring how many active robots.txt loading threads may be running on the same time at max */
+    public static final int ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT       = 200;
 
-    /**
-     * <p><code>public static final String <strong>BLACKLIST_CLASS_DEFAULT</strong> = "de.anomic.plasma.urlPattern.defaultURLPattern"</code></p>
-     * <p>Package and name of YaCy's {@link DefaultBlacklist default} blacklist implementation</p>
-     *
-     * @see DefaultBlacklist for a detailed overview about the syntax of the default implementation
-     */
+    /** Key of the setting configuring the bluelist file name */
     public static final String LIST_BLUE                = "plasmaBlueList";
+    
+    /** Default bluelist file name */
     public static final String LIST_BLUE_DEFAULT        = null;
     public static final String LIST_BADWORDS_DEFAULT    = "yacy.badwords";
     public static final String LIST_STOPWORDS_DEFAULT   = "yacy.stopwords";
@@ -357,8 +389,6 @@ public final class SwitchboardConstants {
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
      * downloaded webpages and their respective ressources and HTTP-headers are stored. It is the location containing
      * the proxy-cache</p>
-     *
-     * @see Switchboard#PROXY_CACHE_LAYOUT for details on the file-layout in this path
      */
     public static final String HTCACHE_PATH             = "proxyCache";
     public static final String HTCACHE_PATH_DEFAULT     = "DATA/HTCACHE";
@@ -412,31 +442,53 @@ public final class SwitchboardConstants {
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
      * DBs containing "work" of the user are saved. Such include bookmarks, messages, wiki, blog</p>
      *
-     * @see Switchboard#DBFILE_BLOG
-     * @see Switchboard#DBFILE_BOOKMARKS
-     * @see Switchboard#DBFILE_BOOKMARKS_DATES
-     * @see Switchboard#DBFILE_BOOKMARKS_TAGS
-     * @see Switchboard#DBFILE_MESSAGE
-     * @see Switchboard#DBFILE_WIKI
-     * @see Switchboard#DBFILE_WIKI_BKP
      */
     public static final String WORK_PATH                = "workPath";
     public static final String WORK_PATH_DEFAULT        = "DATA/WORK";
 
 
-    /**
+    /*
      * ResourceObserver
      * We apply the naming of control circuit states to resources observer limit values (steady-state value, over/undershot)
      * under/overshot states in the system are supposed to be regulated to match the steady-state value
      * ATTENTION: be aware that using the autoregulate-option causes that the search index data is DELETED as soon as threshold-values are reached!
      */
-    public static final String RESOURCE_DISK_FREE_AUTOREGULATE    = "resource.disk.free.autoregulate";
-    public static final String RESOURCE_DISK_FREE_MIN_STEADYSTATE = "resource.disk.free.min.steadystate"; // the target steady-state of minimum disk space left
-    public static final String RESOURCE_DISK_FREE_MIN_UNDERSHOT   = "resource.disk.free.min.undershot"; // the undershot below the steady-state of minimum disk free as absolute size
     
+    /** Setting key to enable auto-regulation on disk free threshold values */
+    public static final String RESOURCE_DISK_FREE_AUTOREGULATE    = "resource.disk.free.autoregulate";
+    
+    /** Default disk free auto-regulation activation setting */
+    public static final boolean RESOURCE_DISK_FREE_AUTOREGULATE_DEFAULT    = false;
+    
+    /** Setting key for the target steady-state of minimum disk space left */
+    public static final String RESOURCE_DISK_FREE_MIN_STEADYSTATE = "resource.disk.free.min.steadystate";
+    
+    /** Default value for target steady-state of minimum disk space left */
+    public static final long RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT = 2048L;
+    
+    /** Setting key for the undershot below the steady-state of minimum disk free as absolute size */
+    public static final String RESOURCE_DISK_FREE_MIN_UNDERSHOT   = "resource.disk.free.min.undershot";
+    
+    /** Default value for undershot below the steady-state of minimum disk free as absolute size */
+    public static final long RESOURCE_DISK_FREE_MIN_UNDERSHOT_DEFAULT   = 1024L;
+    
+    /** Setting key to enable auto-regulation on disk used threshold values */
     public static final String RESOURCE_DISK_USED_AUTOREGULATE    = "resource.disk.used.autoregulate";
+    
+    /** Default disk used auto-regulation activation setting */
+    public static final boolean RESOURCE_DISK_USED_AUTOREGULATE_DEFAULT    = false;
+    
+    /** Setting key for the disk used maximum steady state value */
     public static final String RESOURCE_DISK_USED_MAX_STEADYSTATE = "resource.disk.used.max.steadystate";
-    public static final String RESOURCE_DISK_USED_MAX_OVERSHOT    = "resource.disk.used.max.overshot";    
+    
+    /** Default disk used maximum steady state value (in mebibyte)*/
+    public static final long RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT = 524288L;
+    
+    /** Setting key for the disk used hard upper limit value */
+    public static final String RESOURCE_DISK_USED_MAX_OVERSHOT    = "resource.disk.used.max.overshot";
+    
+    /** Default disk used hard upper limit value (in mebibyte) */
+    public static final long RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT    = 1048576L;
     
     public static final String MEMORY_ACCEPTDHT = "memory.acceptDHTabove"; // minimum memory to accept dht-in (MiB)
     public static final String INDEX_RECEIVE_AUTODISABLED = "memory.disabledDHT"; // set if DHT was disabled by ResourceObserver
@@ -469,6 +521,7 @@ public final class SwitchboardConstants {
     public static final String GREETING_HOMEPAGE     = "promoteSearchPageGreeting.homepage";
     public static final String GREETING_LARGE_IMAGE  = "promoteSearchPageGreeting.largeImage";
     public static final String GREETING_SMALL_IMAGE  = "promoteSearchPageGreeting.smallImage";
+    public static final String GREETING_IMAGE_ALT    = "promoteSearchPageGreeting.imageAlt";
 
     /**
      * browser pop up
@@ -491,6 +544,14 @@ public final class SwitchboardConstants {
     public static final String SEARCH_TARGET_SPECIAL_PATTERN  = "search.target.special.pattern"; // ie 'own' addresses in topframe, 'other' in iframe
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
+
+    public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount"; // max lines displayed in standard search navigators/facets
+    
+    /** Key of the setting controlling whether a noreferrer link type should be added to search result links */
+    public static final String SEARCH_RESULT_NOREFERRER = "search.result.noreferrer";
+    
+    /** Default setting value controlling whether a noreferrer link type should be added to search result links */
+    public static final boolean SEARCH_RESULT_NOREFERRER_DEFAULT = false;
 
     /**
      * ranking+evaluation

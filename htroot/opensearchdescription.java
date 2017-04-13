@@ -24,8 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -39,16 +39,12 @@ public class opensearchdescription {
         String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
         if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
 
-        String thisaddress = header.get("Host", Domains.LOCALHOST);
-        if (thisaddress.indexOf(':',0) == -1) thisaddress += ":" + env.getLocalPort();
-        String thisprotocol = env.getConfigBool("server.https", false) ? "https" : "http";
+        final String thisContext = YaCyDefaultServlet.getContext(header, sb);
         
         final serverObjects prop = new serverObjects();
         prop.put("compareyacy", post != null && post.getBoolean("compare_yacy") ? 1 : 0);
-        prop.putXML("thisaddress", thisaddress);
-        prop.putXML("compareyacy_thisaddress", thisaddress);
-        prop.putXML("thisprotocol", thisprotocol);
-        prop.putXML("compareyacy_thisprotocol", thisprotocol);
+        prop.putXML("thisContext", thisContext);
+        prop.putXML("compareyacy_thisContext", thisContext);
         prop.putXML("SearchPageGreeting", promoteSearchPageGreeting);
         prop.putXML("clientname", sb.peers.mySeed().getName());
         prop.putXML("compareyacy_search_left", post == null ? compare_yacy.defaultsearchL : post.get("left", compare_yacy.defaultsearchL));

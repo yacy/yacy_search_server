@@ -2,7 +2,9 @@
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
@@ -10,12 +12,12 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevTag;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 
@@ -61,29 +63,40 @@ public class GitRevMavenTask extends AbstractMojo {
         String lastTag = null;
         String commitDate = null;
 
+        Repository repo = null;
+        Git git = null;
+        RevWalk walk = null;
         try {
 
             final File src = project.getBasedir(); // set Git root path to project root
-            final Repository repo = new FileRepositoryBuilder().readEnvironment()
+            repo = new FileRepositoryBuilder().readEnvironment()
                     .findGitDir(src).build();
             branch = repo.getBranch();
             branch = "master".equals(branch) ? "" : "_" + branch;
             final ObjectId head = repo.resolve("HEAD");
 		
-            final Git git = new Git(repo);
+            git = new Git(repo);
 
-            final List<RevTag> tags = git.tagList().call();
+            final List<Ref> tags = git.tagList().call();
 
-            final RevWalk walk = new RevWalk(repo);
+            walk = new RevWalk(repo);
             final RevCommit headCommit = walk.parseCommit(head);
             final SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
             commitDate = df.format(headCommit.getAuthorIdent().getWhen());
             walk.markStart(headCommit);
             int distance = 0;
-            for (final RevCommit commit : walk) {
-                for (final RevTag tag : tags) {
-                    if (commit.equals(tag.getObject())) {
-                        lastTag = tag.getShortMessage();
+			
+			/* Peel known tags */
+			final List<Ref> peeledTags = new ArrayList<>();
+                for (final Ref tag : tags) {
+				peeledTags.add(repo.peel(tag));
+			}
+			
+			/* Look for the last tag commit and calculate distance with the HEAD commit */
+			for (final RevCommit commit : walk) {
+				for (final Ref tag : peeledTags) {
+					if (commit.equals(tag.getPeeledObjectId()) || commit.equals(tag.getObjectId())) {
+                        lastTag = commit.getShortMessage();
                         break;
                     }
                 }
@@ -99,7 +112,21 @@ public class GitRevMavenTask extends AbstractMojo {
             }
         } catch (final IOException e) {
             e.printStackTrace();
-        }
+        } catch (GitAPIException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			/* In all cases, properly release resources */
+			if(walk != null) {
+				walk.close();
+			}
+			if(git != null) {
+				git.close();
+			}
+			if(repo != null) {
+				repo.close();
+			}
+		}
         if (project != null) {
             project.getProperties().put(this.branchPropertyName, branch);
             log.info("GitrevMavenTask: set property " + this.branchPropertyName + "='" + branch + "'");            

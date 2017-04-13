@@ -91,7 +91,7 @@ public class HostBalancer implements Balancer {
      * return immediately (as large unfinished crawls may take longer to load)
      */
     private void init() {
-        Thread t = new Thread() {
+        Thread t = new Thread("HostBalancer.init") {
             @Override
             public void run() {
                 final String[] hostlist = hostsPath.list();
@@ -103,7 +103,7 @@ public class HostBalancer implements Balancer {
                             queue.close();
                             FileUtils.deletedelete(queuePath);
                         } else {
-                            queues.put(DigestURL.hosthash(queue.getHost(), queue.getPort()), queue);
+                            queues.put(queue.getHostHash(), queue);
                         }
                     } catch (MalformedURLException | RuntimeException e) {
                         log.warn("delete queue due to init error for " + hostsPath.getName() + " host=" + hoststr + " " + e.getLocalizedMessage());
@@ -244,11 +244,11 @@ public class HostBalancer implements Balancer {
     public String push(final Request entry, CrawlProfile profile, final RobotsTxt robots) throws IOException, SpaceExceededException {
         if (this.has(entry.url().hash())) return "double occurrence";
         depthCache.put(entry.url().hash(), entry.depth());
-        String hosthash = ASCII.String(entry.url().hash(), 6, 6);
+        String hosthash = entry.url().hosthash();
         synchronized (this) {
             HostQueue queue = this.queues.get(hosthash);
             if (queue == null) {
-                queue = new HostQueue(this.hostsPath, entry.url().getHost(), entry.url().getPort(), this.queues.size() > this.onDemandLimit, this.exceed134217727);
+                queue = new HostQueue(this.hostsPath, entry.url(), this.queues.size() > this.onDemandLimit, this.exceed134217727);
                 this.queues.put(hosthash, queue);
                 // profile might be null when continue crawls after YaCy restart
                 robots.ensureExist(entry.url(), profile == null ? ClientIdentification.yacyInternetCrawlerAgent : profile.getAgent(), true); // concurrently load all robots.txt
@@ -376,7 +376,7 @@ public class HostBalancer implements Balancer {
                         for (String h: lastEntries) this.roundRobinHostHashes.remove(h);
                     }
                 }
-                
+
                 /*
                 // first strategy: get one entry which does not need sleep time
                 Iterator<String> nhhi = this.roundRobinHostHashes.iterator();
@@ -386,7 +386,7 @@ public class HostBalancer implements Balancer {
                     if (rhq == null) {
                         nhhi.remove();
                         continue nosleep;
-                    }
+            }
                     int delta = Latency.waitingRemainingGuessed(rhq.getHost(), rhh, robots, ClientIdentification.yacyInternetCrawlerAgent);
                     if (delta <= 10 || this.roundRobinHostHashes.size() == 1 || rhq.size() == 1) {
                         nhhi.remove();
@@ -484,16 +484,14 @@ public class HostBalancer implements Balancer {
 
     /**
      * get a list of domains that are currently maintained as domain stacks
-     * @return a map of clear text strings of host names to an integer array: {the size of the domain stack, guessed delta waiting time}
+     * @return a map of clear text strings of host names + ports to an integer array: {the size of the domain stack, guessed delta waiting time}
      */
     @Override
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots) {
         Map<String, Integer[]> map = new TreeMap<String, Integer[]>(); // we use a tree map to get a stable ordering
-        for (HostQueue hq: this.queues.values()) try {
-            int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), DigestURL.hosthash(hq.getHost(), hq.getPort()), robots, ClientIdentification.yacyInternetCrawlerAgent);
+        for (HostQueue hq: this.queues.values()) {
+            int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hq.getHostHash(), robots, ClientIdentification.yacyInternetCrawlerAgent);
             map.put(hq.getHost() + ":" + hq.getPort(), new Integer[]{hq.size(), delta});
-        } catch (MalformedURLException e) {
-            ConcurrentLog.logException(e);
         }
         return map;
     }

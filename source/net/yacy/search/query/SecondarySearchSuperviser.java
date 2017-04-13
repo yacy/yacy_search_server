@@ -27,6 +27,7 @@ public class SecondarySearchSuperviser extends Thread {
     private final SearchEvent searchEvent;
 
     protected SecondarySearchSuperviser(SearchEvent searchEvent) {
+    	super("SecondarySearchSuperviser");
         this.abstractsCache = Collections.synchronizedSortedMap(new TreeMap<String, SortedMap<String, Set<String>>>());
         this.checkedPeers = Collections.synchronizedSortedSet(new TreeSet<String>());
         this.trigger = new Semaphore(0);
@@ -50,7 +51,7 @@ public class SecondarySearchSuperviser extends Thread {
         new Thread() {
             @Override
             public void run() {
-                Thread.currentThread().setName("SearchEvent.addAbstract:" + wordhash);
+                Thread.currentThread().setName("SecondarySearch.addAbstract:" + wordhash);
                 for ( final Map.Entry<String, Set<String>> oneref : singleAbstract.entrySet() ) {
                     final String urlhash = oneref.getKey();
                     final Set<String> peerlistNew = oneref.getValue();

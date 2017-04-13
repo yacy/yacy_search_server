@@ -51,8 +51,9 @@ public class rssParser extends AbstractParser implements Parser {
         super("RSS Parser");
         this.SUPPORTED_EXTENSIONS.add("rss");
         this.SUPPORTED_EXTENSIONS.add("xml");
-        this.SUPPORTED_MIME_TYPES.add("XML");
+        this.SUPPORTED_MIME_TYPES.add("xml");
         this.SUPPORTED_MIME_TYPES.add("text/rss");
+        this.SUPPORTED_MIME_TYPES.add("text/xml");
         this.SUPPORTED_MIME_TYPES.add("application/rss+xml");
         this.SUPPORTED_MIME_TYPES.add("application/atom+xml");
     }
@@ -106,7 +107,7 @@ public class rssParser extends AbstractParser implements Parser {
             docs.add(doc);
         } catch (final MalformedURLException e) {
             continue;
-        }
+            }
 
         final Document[] da = new Document[docs.size()];
         docs.toArray(da);

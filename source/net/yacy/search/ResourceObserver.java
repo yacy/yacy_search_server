@@ -45,11 +45,14 @@ public class ResourceObserver {
 
     public static final ConcurrentLog log = new ConcurrentLog("RESOURCE OBSERVER");
 
-    // status type for which shows where in the control-circuit model a memory state can be categorized
+    /** status type for which shows where in the control-circuit model a memory state can be categorized */
     public enum Space implements Comparable<Space> {
-        EXHAUSTED, // smallest space state, outside of over/undershot
-        NOMINAL,   // wanted-space state between steady-state and under/overshot 
-        AMPLE;     // largest space state, below steady-state
+    	/** smallest space state, outside of over/undershot */
+        EXHAUSTED,
+        /** wanted-space state between steady-state and under/overshot */
+        NOMINAL,
+        /** largest space state, below steady-state */
+        AMPLE;
     }
 
     private final Switchboard sb;
@@ -103,8 +106,8 @@ public class ResourceObserver {
     	}
 
         // shrink resources if space is EXHAUSTED
-        if ((this.normalizedDiskFree == Space.EXHAUSTED && this.sb.getConfigBool(SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE, false)) ||
-            (this.normalizedDiskUsed == Space.EXHAUSTED && this.sb.getConfigBool(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE, false))) {
+        if ((this.normalizedDiskFree == Space.EXHAUSTED && this.sb.getConfigBool(SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE, SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE_DEFAULT)) ||
+            (this.normalizedDiskUsed == Space.EXHAUSTED && this.sb.getConfigBool(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE, SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE_DEFAULT))) {
             shrinkmethods: while (true /*this is not a loop, just a construct that we can leave with a break*/) {
                 // delete old releases
                 if (yacyRelease.deleteOldDownloads(sb.releasePath, 1)) log.warn("DISK SPACE EXHAUSTED - deleting downloaded releases files");
@@ -164,7 +167,7 @@ public class ResourceObserver {
                 
                 // run a solr optimize
                 this.sb.index.fulltext().commit(false);
-                this.sb.index.fulltext().optimize(1);
+                //this.sb.index.fulltext().optimize(1);
                 if (getNormalizedDiskFree() == Space.AMPLE && getNormalizedDiskUsed(false) == Space.AMPLE) break shrinkmethods;
                 
                 /*
@@ -316,31 +319,35 @@ public class ResourceObserver {
     }
 
     /**
-     * @return amount of space (bytes) that should be used in steady state
+     * @return the maximum amount of space (bytes) that should be used as steady state
      */
     public long getMaxUsedDiskSteadystate() {
-        return this.sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE, 524288) /* MB */ * 1024L * 1024L;
+		return this.sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE,
+				SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT) /* MB */ * 1024L * 1024L;
     }
 
     /**
-     * @return amount of space (bytes) that should at least be kept free as hard limit; the limit when autoregulation to steady state should start
+     * @return the maximum amount of space (bytes) that should be used as hard limit; the limit when autoregulation to steady state should start
      */
     public long getMaxUsedDiskOvershot() {
-        return this.sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT, 1048576) /* MB */ * 1024L * 1024L;
+		return this.sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT,
+				SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT) /* MB */ * 1024L * 1024L;
     }
     
     /**
      * @return amount of space (bytes) that should be kept free as steady state
      */
     public long getMinFreeDiskSteadystate() {
-        return this.sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, 2048) /* MB */ * 1024L * 1024L;
+		return this.sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE,
+				SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT) /* MB */ * 1024L * 1024L;
     }
 
     /**
      * @return amount of space (bytes) that should at least be kept free as hard limit; the limit when autoregulation to steady state should start
      */
     public long getMinFreeDiskUndershot() {
-        return this.sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, 1024) /* MB */ * 1024L * 1024L;
+		return this.sb.getConfigLong(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT,
+				SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT_DEFAULT) /* MB */ * 1024L * 1024L;
     }
 
     /**

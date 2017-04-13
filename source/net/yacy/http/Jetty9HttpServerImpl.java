@@ -83,7 +83,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             final SSLContext sslContext = initSslContext(sb);
             if (sslContext != null) {
 
-                int sslport = sb.getConfigInt("port.ssl", 8443);
+                int sslport = sb.getConfigInt(SwitchboardConstants.SERVER_SSLPORT, 8443);
                 sslContextFactory.setSslContext(sslContext);
 
                 // SSL HTTP Configuration
@@ -205,12 +205,16 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             int i=0;
             while (st.hasMoreTokens()) {
                 String ip = st.nextToken();
-                iphandler.addWhite(ip);
+                try {
+                    iphandler.addWhite(ip); // accepts only ipv4
+                } catch (IllegalArgumentException nex) { // catch number format exception on non ipv4 input
+                    ConcurrentLog.severe("SERVER", "Server Access Settings - IP filter: " + nex.getMessage());
+                    continue;
+                }
                 i++;
             }          
             if (i > 0) {
                 iphandler.addWhite("127.0.0.1"); // allow localhost (loopback addr)
-                iphandler.setServer(server);
                 iphandler.setHandler(crashHandler);
                 server.setHandler(iphandler);
                 ConcurrentLog.info("SERVER","activated IP access restriction to: [127.0.0.1," + white +"] (this works only correct with start parameter -Djava.net.preferIPv4Stack=true)");
@@ -294,7 +298,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                 try { // reconnect with new settings (instead to stop/start server, just manipulate connectors
                     final Connector[] cons = server.getConnectors();
                     final int port = Switchboard.getSwitchboard().getLocalPort();
-                    final int sslport = Switchboard.getSwitchboard().getConfigInt("port.ssl", 8443);
+                    final int sslport = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.SERVER_SSLPORT, 8443);
                     for (Connector con : cons) {
                         // check http connector
                         if (con.getName().startsWith("httpd") && ((ServerConnector)con).getPort() != port) {

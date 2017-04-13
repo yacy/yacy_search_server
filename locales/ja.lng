@@ -66,7 +66,7 @@ Access Dates==アクセスの日時
 This is a list of searches that had been requested from remote peer search interface==これはリモート ピアの検索インターフェースからリクエストされた検索の一覧です. 
 #-----------------------------
 
-#File: AugmentedBrowsing_p.html
+#File: Settings_UrlProxyAccess.inc
 #---------------------------
 Augmented Browsing<==増強されたブラウジング<
 URL Proxy Settings<==URL プロキシ設定<
@@ -153,9 +153,9 @@ Add new pattern:==新規のパターンを追加する:
 The right '*', after the '/', can be replaced by a=='/' の後の '*' は次のもので置き換える事ができます
 >regular expression<==>正規表現<
 domain.net/fullpath<==domain.net/フルパス<
->domain.net/*<==>domain.net/*<
-*.domain.net/*<==*.domain.net/*<
-*.sub.domain.net/*<==*.sub.domain.net/*<
+#>domain.net/*<==>domain.net/*<
+#*.domain.net/*<==*.domain.net/*<
+#*.sub.domain.net/*<==*.sub.domain.net/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
 a complete <==完全な <
@@ -403,7 +403,7 @@ Appearance and Integration==外観と統合
 You can change the appearance of the YaCy interface with skins.==あなたはスキンによってYaCyのインターフェースの外観を変更する事ができます.
 #You can change the appearance of YaCy with skins==あなたはスキンによってYaCyのインターフェースの外観を変更する事ができます
 The selected skin and language also affects the appearance of the search page.==選択されたスキンと言語は検索ページの外観にも影響を与えます.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==もしあなたが<a href="ConfigPortal.html">YaCyで検索ポータルを作成</a>するならば
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==もしあなたが<a href="ConfigPortal_p.html">YaCyで検索ポータルを作成</a>するならば
 change the appearance of the search page here.==ここで検索ページの外観を変更できます.
 #and the default icons and links on the search page can be replaced with you own.==そして検索ページの既定のアイコンとリンクを自分のもので置き換える事ができます.
 Skin Selection==スキンの選択
@@ -543,7 +543,7 @@ Indexing Domain==索引付けのドメイン
 "Save"=="保存する"
 #-----------------------------
 
-#File: ConfigParser.html
+#File: ConfigParser_p.html
 #---------------------------
 Parser Configuration==構文解析器の構成
 Content Parser Settings==コンテントの構文解析器の構成
@@ -554,7 +554,7 @@ Content Parser Settings==コンテントの構文解析器の構成
 "Submit"=="確定"
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
 Integration of a Search Portal==検索ポータルの統合
 #-----------------------------
@@ -619,7 +619,7 @@ Search Page<==検索ページ<
 >Search Result Page Layout Configuration<==>検索結果のページのレイアウトの構成<
 >Appearance<==>外観<
  menu for different skins.== 別のスキンの為のメニュー.
-Other portal settings can be adjusted in <a href="ConfigPortal.html">Generic Search Portal</a> menu.==他のポータルの設定は<a href="ConfigPortal.html">一般的な検索ポータル</a> メニューで調整できます
+Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.==他のポータルの設定は<a href="ConfigPortal_p.html">一般的な検索ポータル</a> メニューで調整できます
 >Page Template<==>ページのテンプレート<
 #>Administration<==>管理<
 >Web Search<==>ウェブ検索<
@@ -665,7 +665,7 @@ Manual System Update==手動でのシステムの更新
 Current installed Release==現在のインストールされているリリース
 Available Releases==利用可能なリリース
 >changelog<==>変更ログ<
-> and <==> and <
+#> and <==> and <
 > RSS feed<==> RSS フィード<
 (unsigned)==(署名無し)
 (signed)==(署名有り)
@@ -979,12 +979,12 @@ Configuration of a RSS Search==RSS検索の構成
 #---------------------------
 >Messages==>メッセージ
 Date</td>==日時</td>
-From</td>==From</td>
-To</td>==To</td>
+#From</td>==From</td>
+#To</td>==To</td>
 >Subject==>件名
 Action==動作
-From:==From:
-To:==To:
+#From:==From:
+#To:==To:
 Date:==日時:
 #Subject:==件名:
 >view==>見る
@@ -1442,7 +1442,7 @@ e="Search"==e="検索"
 Search Page==検索ページ
 This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.==この検索結果はRSS/<a href="http://www.opensearch.org">opensearch</a>の出力として取得する事もできます.
 The query format is similar to==クエリーの形式は次に似ています
-SRU==SRU
+#SRU==SRU
 Click the API icon to see an example call to the search rss API.==rss APIを検索する為のエグザンプル コールを見る為にはAPI アイコンをクリックして下さい.
 To see a list of all APIs, please visit the==全てのAPIの一覧を見る為には, どうぞ次を訪問して下さい
 API wiki page==API ウィキページ

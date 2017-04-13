@@ -18,7 +18,6 @@
 
     <modules>
         <module>GitRevMavenTask</module>
-        <module>WebCat-swf</module>
         <module>J7Zip-modified</module>
         <!-- hack to include YaCy search server (main project) as module -->
         <module>..</module>

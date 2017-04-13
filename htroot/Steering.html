@@ -159,6 +159,23 @@ XDtoU7vQ/wIAAP//AwBb7ktEXQ4nqQAAAABJRU5ErkJggg==" width="128" height="64" alt="K
       #(info)#
       <p><b>No action submitted</b><br />
       Go back to the <a href="Settings_p.html">Settings</a> page.</p>
+      <!-- Restart and Shutdown buttons available here as classical HTML submit buttons for those who eventually disabled JavaScript -->
+      <form action="Steering.html" method="post">
+		<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+        <input type="hidden" name="restart" value="" />
+        <button type="submit" class="btn label-warning" onclick="return confirm('Confirm Re-Start')" title="Restart">
+        	<span class="glyphicon glyphicon-fire"/>
+            <span>Re-Start</span>
+        </button>
+      </form>
+      <form action="Steering.html" method="post">
+		<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+        <input type="hidden" name="shutdown" value="" />
+        <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="return confirm('Confirm Shutdown')" title="Shutdown">
+        	<span class="glyphicon glyphicon-off"/>
+            <span>Shutdown</span>
+        </button>
+      </form>
 ::
       <p><b>Your system is not protected by a password</b><br />
       Please go to the <a href="ConfigAccounts_p.html">User Administration</a> page and set an administration password.</p>
@@ -195,6 +212,12 @@ XDtoU7vQ/wIAAP//AwBb7ktEXQ4nqQAAAABJRU5ErkJggg==" width="128" height="64" alt="K
       <div id="status"></div>
 ::
       <p><b>The file you are trying to install is not located in the release directory.<br />
+      Go back to the <a href="ConfigUpdate_p.html">System Update</a> page.</p>
+::
+      <p><b>An error occurred when trying to install release #[release]#</b><br/>
+      Please check your <a href="ViewLog_p.html">log</a> or go back to the <a href="ConfigUpdate_p.html">System Update</a> page.</p>
+::
+      <p><b>You are in a development environment or the file you are trying to install is empty.</b><br/>
       Go back to the <a href="ConfigUpdate_p.html">System Update</a> page.</p>
 #(/info)#
   </body>

@@ -26,6 +26,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -44,6 +46,7 @@ import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
+import net.yacy.data.TransactionManager;
 import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
@@ -59,6 +62,7 @@ import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
+import net.yacy.repository.BlacklistHostAndPath;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -77,7 +81,7 @@ public class IndexControlRWIs_p {
 
     private final static String errmsg = "not possible to compute word from hash";
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -86,7 +90,12 @@ public class IndexControlRWIs_p {
         prop.putHTML("keystring", "");
         prop.put("keyhash", "");
         prop.put("result", "");
-        prop.put("limitations", post == null || post.containsKey("maxReferencesLimit") ? 1 : 0);
+        final boolean limitationsEnabled = (post == null || post.containsKey("maxReferencesLimit"));
+        prop.put("limitations", limitationsEnabled ? 1 : 0);
+        if(limitationsEnabled) {
+            /* Acquire a transaction token for the next available POST form submission */
+            prop.put("limitations_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        }
 
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
@@ -149,6 +158,9 @@ public class IndexControlRWIs_p {
 
             // set reference limitation
             if ( post.containsKey("maxReferencesLimit") ) {
+            	/* Check the transaction is valid */
+            	TransactionManager.checkPostTransaction(header, post);
+            	
                 if ( post.get("maxReferencesRadio", "").equals("on") ) {
                     ReferenceContainer.maxReferences = post.getInt("maxReferences", 0);
                 } else {
@@ -159,6 +171,9 @@ public class IndexControlRWIs_p {
 
             // delete word
             if ( post.containsKey("keyhashdeleteall") ) {
+            	/* Check the transaction is valid */
+            	TransactionManager.checkPostTransaction(header, post);
+            	
                 try {
                     if ( delurl || delurlref ) {
                         // generate urlx: an array of url hashes to be deleted
@@ -242,6 +257,9 @@ public class IndexControlRWIs_p {
 
             // transfer to other peer
             if ( post.containsKey("keyhashtransfer") ) {
+            	/* Check the transaction is valid */
+            	TransactionManager.checkPostTransaction(header, post);
+            	
                 try {
                     if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
                         prop.put("keystring", "&lt;" + errmsg + "&gt;");
@@ -374,8 +392,9 @@ public class IndexControlRWIs_p {
                         Word.commonHashOrder,
                         urlb.size());
                 if ( post.containsKey("blacklisturls") ) {
-                    final String[] supportedBlacklistTypes = env.getConfigArray("BlackLists.types", "");
 					DigestURL url;
+					/* Prepare the new blacklist items list to add then them in one operation for better performance */
+					final Collection<BlacklistHostAndPath> items = new ArrayList<>();
 					for ( final byte[] b : urlb ) {
 					    try {
 					        urlHashes.put(b);
@@ -386,29 +405,27 @@ public class IndexControlRWIs_p {
                             url = segment.fulltext().getURL(ASCII.String(b));
                             segment.fulltext().remove(b);
                             if ( url != null ) {
-                                for ( final String supportedBlacklistType : supportedBlacklistTypes ) {
-                                    if ( ListManager.listSetContains(
-                                        supportedBlacklistType + ".BlackLists",
-                                        blacklist) ) {
-                                        try {
-                                            Switchboard.urlBlacklist.add(
-                                                BlacklistType.valueOf(supportedBlacklistType),
-                                                blacklist,
-                                                url.getHost(),
-                                                url.getFile());
-                                        } catch (PunycodeException e) {
-                                            ConcurrentLog.warn(APP_NAME,
-                                                            "Unable to add blacklist entry to blacklist "
-                                                                            + supportedBlacklistType, e);
-                                        }
-                                    }
-                                }
-                                SearchEventCache.cleanupEvents(true);
+                            	items.add(new BlacklistHostAndPath(url.getHost(), url.getFile()));
                             }
                         } catch (IOException e1) {
                             ConcurrentLog.logException(e1);
                         }
 					}
+                    for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
+                        if ( ListManager.listSetContains(
+                            supportedBlacklistType + ".BlackLists",
+                            blacklist) ) {
+                            try {
+                                Switchboard.urlBlacklist.add(supportedBlacklistType,
+                                    blacklist, items);
+                            } catch (PunycodeException e) {
+                                ConcurrentLog.warn(APP_NAME,
+                                                "Unable to add blacklist entries to blacklist "
+                                                                + supportedBlacklistType, e);
+                            }
+                        }
+                    }
+                    SearchEventCache.cleanupEvents(true);
                 }
 
                 if ( post.containsKey("blacklistdomains") ) {
@@ -452,6 +469,9 @@ public class IndexControlRWIs_p {
             }
 
             if ( prop.getInt("searchresult", 0) == 3 ) {
+                /* Acquire a transaction token for the next available POST form submissions */
+                prop.put("searchresult_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+                
                 listHosts(prop, keyhash, sb);
             }
         }
@@ -489,14 +509,14 @@ public class IndexControlRWIs_p {
             DigestURL url;
             URIMetadataNode entry;
             String us;
-            float rn = Float.MIN_VALUE;
+            long rn = Long.MIN_VALUE;
             while (!theSearch.rwiIsEmpty() && (entry = theSearch.pullOneFilteredFromRWI(false)) != null) {
                 url = entry.url();
                 if ( url == null ) {
                     continue;
                 }
                 us = url.toNormalform(true);
-                if ( rn == Float.MIN_VALUE ) {
+                if ( rn == Long.MIN_VALUE ) {
                     rn = entry.score();
                 }
                 prop.put("genUrlList_urlList_" + i + "_urlExists", "1");
@@ -507,7 +527,7 @@ public class IndexControlRWIs_p {
                 prop.putHTML("genUrlList_urlList_" + i + "_urlExists_urlString", us);
                 prop.put("genUrlList_urlList_" + i + "_urlExists_urlStringShort",
                     (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20, 40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_ranking", Float.toString(entry.score() - rn));
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_ranking", entry.score() - rn);
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_domlength", DigestURL.domLengthEstimation(entry.hash()));
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_tf", 1000.0 * entry.word().termFrequency());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_authority", (theSearch.getOrder() == null) ? -1 : theSearch.getOrder().authority(ASCII.String(entry.hash(), 6, 6)));
@@ -518,8 +538,7 @@ public class IndexControlRWIs_p {
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_llocal", entry.word().llocal());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_lother", entry.word().lother());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_hitcount", entry.word().hitcount());
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_worddistance", 0);
-                prop.putNum("genUrlList_urlList_" + i + "_urlExists_pos", entry.word().minposition());
+                prop.putNum("genUrlList_urlList_" + i + "_urlExists_pos", entry.word().posintext());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_phrase", entry.word().posofphrase());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_posinphrase", entry.word().posinphrase());
                 prop.putNum("genUrlList_urlList_" + i + "_urlExists_urlcomps", entry.word().urlcomps());

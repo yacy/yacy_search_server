@@ -104,18 +104,12 @@ public final class CrawlSwitchboard {
     private final File queuesRoot;
     private Switchboard switchboard;
 
-    public CrawlSwitchboard(final String networkName, Switchboard switchboard) {
+    public CrawlSwitchboard(Switchboard switchboard) {
 
         this.switchboard = switchboard;
         this.log = this.switchboard.log;
         this.queuesRoot = this.switchboard.queuesRoot;
         this.defaultPushProfiles = new ConcurrentHashMap<>();
-        this.log.info("Initializing Word Index for the network '" + networkName + "'.");
-
-        if ( networkName == null || networkName.isEmpty() ) {
-            log.severe("no network name given - shutting down");
-            System.exit(0);
-        }
         this.profilesActiveCrawlsCache = Collections.synchronizedMap(new TreeMap<byte[], CrawlProfile>(Base64Order.enhancedCoder));
         this.profilesActiveCrawlsCounter = new ConcurrentHashMap<String, RowHandleSet>();
 

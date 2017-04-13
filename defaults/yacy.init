@@ -13,6 +13,9 @@ port = 8090
 # optinal ssl port (https port) the server should bind to
 port.ssl = 8443
 
+# port to listen for a shutdown signal ( -1 = disable use of a shutdown port, 8005 = recommended default )
+port.shutdown = -1
+
 # prefix for new default peer names
 peernameprefix=_anon
 
@@ -88,6 +91,12 @@ server.maxTrackingCount = 1000
 
 # maximum number of hosts that are tracked
 server.maxTrackingHostCount = 100
+
+# Global HTTP Referrer policy delivered by meta tag (see https://www.w3.org/TR/referrer-policy/ for available policies)
+# Can be left empty : the browser should then fallback to the default "no-referrer-when-downgrade" policy
+# Be careful, some policies will also affect YaCy internal links : "no-referrer", "same-origin", "origin" and "strict-origin". This can be useful 
+# for example when proxyURL.useforresults is set to true, to control the referrer information initially sent by YaCy proxy when visiting search results
+referrer.meta.policy=origin-when-cross-origin
 
 # maximum file sizes: since some users experience problems with too large files
 # the file size of database files can be limited. Larger files can be used to get a
@@ -286,10 +295,11 @@ parser.pdf.individualpages.key=page
 promoteSearchPageGreeting = Web Search by the People, for the People
 # if the following property is set to true, the network name is used as greeting
 promoteSearchPageGreeting.useNetworkName = false
-# the following attributes can be used to define a custom image and home page on the search page
+# the following attributes can be used to define a custom image, alternative text and home page on the search page
 promoteSearchPageGreeting.homepage = http://yacy.net
-promoteSearchPageGreeting.largeImage = /env/grafics/YaCyLogo_120ppi.png
-promoteSearchPageGreeting.smallImage = /env/grafics/YaCyLogo_60ppi.png
+promoteSearchPageGreeting.imageAlt = YaCy project web site
+promoteSearchPageGreeting.largeImage = env/grafics/YaCyLogo_120ppi.png
+promoteSearchPageGreeting.smallImage = env/grafics/YaCyLogo_60ppi.png
 
 # the path to the public reverse word index for text files (web pages)
 # the primary path is relative to the data root, the secondary path is an absolute path
@@ -384,13 +394,12 @@ serverClient=*
 #use User_p.html to create some Users.
 use_proxyAccounts=true
 
-# adminAccount: a user:password - pair for administration of
+# adminAccountBase64MD5: a encoded user:password - pair for administration of
 # settings through the web interface
 # should be set to a secret. By default it is without a password
 # but you are encouraged to set it to another value on the page
 # http://localhost:8090/ConfigAccounts_p.html
-#adminAccount=admin:mysecretpassword
-adminAccount=
+#adminAccountBase64=MD5:{admin:realm:mysecretpassword}
 adminAccountBase64MD5=
 adminAccountUserName=admin
 
@@ -834,6 +843,12 @@ search.target = _self
 search.target.special = _self
 search.target.special.pattern =
 
+# When true, override the global referrer.meta.policy value and add the standard noreferrer link type to search results links : 
+# this instructs the browser that it should not send any referrer information at all when visiting them
+# Be careful : some websites might reject requests with no referrer
+# Supported by more browsers than the meta referrer tag
+search.result.noreferrer=false
+
 # search result lines may show additional information for each search hit
 # these information pieces may be switched on or off
 search.result.show.date = true
@@ -854,7 +869,10 @@ search.result.show.snapshots = false
 # can be temporary different if search string is given with differen navigation values
 # assigning no value(s) means that no navigation is shown
 search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language
-#search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language,collections,date
+#search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language,collections,date,year,year:dates_in_content_dts:Event
+
+# max number of items displayed in search navigators
+search.navigation.maxcount=100
 
 # search result verification and snippet fetch caching rules
 # each search result can be verified byloading the link from the web
@@ -886,6 +904,9 @@ remotesearch.result.store=true
 remotesearch.result.store.maxsize=-1
 remotesearch.maxload.rwi=8.0
 remotesearch.maxload.solr=4.0
+
+# Control whether remote Solr instances responses should be binary encoded. Responses are transferred as XML when set to false. 
+remote.solr.binaryResponse.enabled=true
 
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.
@@ -1006,7 +1027,7 @@ svnRevision=0
 currentSkin=pdbootstrap
 
 # flag to show if pages shall be usable for non-admin users
-# this can be applied to the Surftips.html and yacysearch.html page
+# this can be applied to the Surftips.html, yacysearch.html and HostBrowser.html pages
 publicSurftips = true
 publicSearchpage = true
 
@@ -1084,6 +1105,9 @@ thumbnailProgram =
 # - wiki      : the wiki-page
 httpd.robots.txt = locked,dirs,bookmarks,network,news,status,profile
 
+# maximum number of robots.txt loading threads
+robots.txt.MaxActiveThreads = 200
+
 # class to use for parsing wikicode
 wikiParser.class = de.anomic.data.wikiCode
 
@@ -1130,10 +1154,6 @@ memory.disabledDHT = false
 # wether using standard memory strategy - or try generation memory strategy
 memory.standardStrategy = true
 
-# setting if execution of CGI files is allowed or not
-cgi.allow = false
-cgi.suffixes = cgi,pl
-
 # content integration settings
 content.phpbb3.urlstub = http://<mydomain>/
 content.phpbb3.dbtype = mysql
@@ -1149,7 +1169,7 @@ content.phpbb3.dumpfile =
 # search engine teaser: an about box in search results
 # this is only shown, if the about.body is filled
 about.headline=Please support YaCy!
-about.body=<iframe src="/env/donate.html" width="100%" height="90" border="0" frameborder="0" scrolling="no" hspace="0" vspace="0" name="donate"></iframe><br/><div style="padding:8px;">If you run a YaCy server, feel free to replace our donation plea with your own support message, use the <a href="/ConfigPortal.html">Portal Configuration</a> servlet.</div>
+about.body=<iframe src="env/donate.html" width="100%" height="90" border="0" frameborder="0" scrolling="no" hspace="0" vspace="0" name="donate"></iframe><br/><div style="padding:8px;">If you run a YaCy server, feel free to replace our donation plea with your own support message, use the <a href="ConfigPortal_p.html">Portal Configuration</a> servlet.</div>
 
 donation.iframesource=http://yacy.net/include/donate.html
 donation.iframetarget=env/donate.html
@@ -1242,7 +1262,9 @@ contentcontrol.smwimport.targetlist = contentcontrol
 contentcontrol.smwimport.defaultcategory = yacy
 
 # host browser settings
+# Allow the administrator to stack URLs to the local crawl queue from the host browser page, automatically (when a path is unknown) or manually through a "load and index" link
 browser.autoload = false
+# Allow everyone to stack URLs to the local crawl queue. "browser.autoload" has also to be set to true to enable automatic loading on an unknown path.
 browser.load4everyone = false
 
 # greedy learning: fast information acquisition heuristic for new peers 

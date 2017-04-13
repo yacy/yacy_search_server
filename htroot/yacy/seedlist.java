@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.JSONObject;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverCore;
@@ -70,7 +72,7 @@ public final class seedlist {
         final serverObjects prop = new serverObjects();
         
         // write simple-encoded seed lines or json
-        String EXT = header.get("EXT");
+        String EXT = header.get(HeaderFramework.CONNECTION_PROP_EXT);
         boolean json = EXT != null && EXT.equals("json");
         boolean xml = EXT != null && EXT.equals("xml");
         
@@ -91,14 +93,14 @@ public final class seedlist {
                 Set<String> ips = seed.getIPs();
                 if (ips == null || ips.size() == 0) continue;
                 prop.putJSON("peers_" + count + "_map_0_k", Seed.HASH);
-                prop.put("peers_" + count + "_map_0_v", '"' + serverObjects.toJSON(seed.hash) + '"');
+                prop.put("peers_" + count + "_map_0_v", JSONObject.quote(seed.hash));
                 prop.put("peers_" + count + "_map_0_c", 1);
                 Map<String, String> map = seed.getMap();
                 int c = 1;
                 if (!addressonly) {
                     for (Map.Entry<String, String> m: map.entrySet()) {
                         prop.putJSON("peers_" + count + "_map_" + c + "_k", m.getKey());
-                        prop.put("peers_" + count + "_map_" + c + "_v", '"' + serverObjects.toJSON(m.getValue()) + '"');
+                        prop.put("peers_" + count + "_map_" + c + "_v", JSONObject.quote(m.getValue()));
                         prop.put("peers_" + count + "_map_" + c + "_c", 1);
                         c++;
                     }
@@ -106,7 +108,7 @@ public final class seedlist {
                 // construct a list of ips
                 StringBuilder a = new StringBuilder();
                 a.append('[');
-                for (String ip: ips) a.append('"').append(serverObjects.toJSON(seed.getPublicAddress(ip))).append('"').append(',');
+                for (String ip: ips) a.append(JSONObject.quote(seed.getPublicAddress(ip))).append(',');
                 a.setCharAt(a.length()-1, ']');
                 prop.putJSON("peers_" + count + "_map_" + c + "_k", "Address");
                 prop.put("peers_" + count + "_map_" + c + "_v", a.toString());

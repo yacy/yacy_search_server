@@ -259,6 +259,10 @@ public final class Protocol {
             mySeed.setIPs(Switchboard.getSwitchboard().myPublicIPs());
         } else {
             final String myIP = result.get("yourip");
+            if (myIP == null) {
+                Network.log.info("yacyClient.hello result error: Peer sent incompleet hello message (key yourip is missing)");
+                return null; // no success
+            }
             // with the IPv6 extension, this may contain several ips, separated by comma ','
             HashSet<String> h = new HashSet<>();
             for (String s: CommonPattern.COMMA.split(myIP)) {
@@ -817,6 +821,7 @@ public final class Protocol {
     	 * @param storeDocs solr documents collection to put to segment
     	 */
     	public WriteMetadataNodeToLocalIndexThread(Segment segment, Collection<URIMetadataNode> storeDocs) {
+    		super("WriteMetadataNodeToLocalIndexThread");
     		this.segment = segment;
     		this.storeDocs = storeDocs;
     	}
@@ -991,6 +996,140 @@ public final class Protocol {
     private final static CollectionSchema[] snippetFields = new CollectionSchema[]{CollectionSchema.description_txt, CollectionSchema.h4_txt, CollectionSchema.h3_txt, CollectionSchema.h2_txt, CollectionSchema.h1_txt, CollectionSchema.text_t};
     
     /**
+     * A task dedicated to requesting a Solr instance
+     */
+    protected static class SolrRequestTask extends Thread {
+    	
+    	/** Maximum length of detailed log error message */
+    	private final static int MAX_ERROR_MESSAGE_LENGTH = 500;
+    	
+    	/** Logger */
+    	private final static ConcurrentLog log = new ConcurrentLog(SolrRequestTask.class.getSimpleName());
+    	
+    	/** The solr to request */
+    	private RemoteInstance instance;
+    	
+    	/** Connector to the Solr instance */
+    	private SolrConnector solrConnector;
+    	
+    	/** The solr query to run */
+    	private final SolrQuery solrQuery;
+    	
+    	/** The instance address */
+    	private final String address;
+    	
+    	/** The target seed information */
+    	private final Seed target;
+    	
+    	/** Set to true when the target is this local peer */
+    	private final boolean mySeed;
+    	
+    	/** The request timeout in milliseconds */
+    	private final int timeout;
+    	
+    	/** The query response array to fill */
+    	private final QueryResponse[] rsp;
+    	
+    	/** The result documents list to fill */
+    	private final SolrDocumentList[] docList;
+    	
+    	/** Indicates wether this task has been closed */
+    	private volatile boolean closed;
+    	
+    	/**
+    	 * Constructor. All parameters are required to not be null.
+    	 * @param solrQuery the Solr query to run
+    	 * @param address the instance address : host name or IP + the eventual port
+    	 * @param target the remote target seed information
+    	 * @param timeout the request timeout in milliseconds
+    	 */
+		protected SolrRequestTask(final SolrQuery solrQuery, final String address, final Seed target,
+				final boolean mySeed, final int timeout, final QueryResponse[] rsp, final SolrDocumentList[] docList) {
+			super("Protocol.solrQuery(" + solrQuery.getQuery() + " to " + target.hash + ")");
+			this.solrQuery = solrQuery;
+			this.address = address;
+			this.target = target;
+			this.mySeed = mySeed;
+			this.timeout = timeout;
+			this.rsp = rsp;
+			this.docList = docList;
+			this.closed = false;
+		}
+		
+		/**
+		 * Logs the exception detailed message if any, at fine level because errors on remote solr queries to other peers occurs quite frequently.
+		 * @param messageBegin beginning of the log message
+		 * @param ex exception to log
+		 */
+		private void logError(String messageBegin, Exception ex) {
+			String message = ex.getMessage();
+			if(message == null) {
+				message = "no details";
+			} else if(message.length() > MAX_ERROR_MESSAGE_LENGTH){
+				/* Strip too large details to avoid polluting this log with complete remote stack traces */
+				message = message.substring(0, MAX_ERROR_MESSAGE_LENGTH) + "...";
+			}
+			log.fine(messageBegin + " at " + this.address + " : " + message);
+		}
+    	
+        @Override
+        public void run() {
+            try {
+                this.instance = new RemoteInstance("http://" + this.address, null, "solr", this.timeout); // this is a 'patch configuration' which considers 'solr' as default collection
+                try {
+					boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
+					if (Switchboard.getSwitchboard() != null) {
+						useBinaryResponseWriter = Switchboard.getSwitchboard().getConfigBool(
+								SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
+								SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT);
+					}
+                    this.solrConnector = new RemoteSolrConnector(this.instance, useBinaryResponseWriter && (this.mySeed ? true : this.target.getVersion() >= 1.63), "solr");
+					if (!solrConnector.isClosed() && !this.closed) {
+						try {
+							this.rsp[0] = this.solrConnector.getResponseByParams(solrQuery);
+							this.docList[0] = this.rsp[0].getResults();
+						} catch (Exception e) {
+							logError("Could not get result from solr", e);
+						}
+					}
+                } catch (Exception ee) {
+					logError("Could not connect to solr instance", ee);
+                }
+            } catch (Exception eee) {
+				logError("Could not set up remote solr instance", eee);
+            } finally {
+            	this.close();
+            }
+        }
+        
+        /**
+         * Stop the eventually running Solr request, and close the eventually opened connector and instance to the target Solr.
+         */
+		protected synchronized void close() {
+			if (!this.closed) {
+				try {
+					if (this.solrConnector != null) {
+						this.solrConnector.close();
+					}
+				} catch (Exception e) {
+					logError("Could not close solr connector", e);
+				} finally {
+					try {
+						if (this.instance != null) {
+							this.instance.close();
+						}
+					} catch (Exception e) {
+						logError("Could not close solr instance", e);
+					} finally {
+						this.closed = true;
+					}
+				}
+			}
+		}
+		
+    }
+    
+    /**
      * Execute solr query against specified target.
      * @param event search event ot feed with results
      * @param solrQuery solr query
@@ -1062,35 +1201,24 @@ public final class Protocol {
                     }
                     final String address = myseed ? "localhost:" + target.getPort() : target.getPublicAddress(ip);
                     final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 6000);
-                    Thread remoteRequest = new Thread() {
-                        @Override
-                        public void run() {
-                            this.setName("Protocol.solrQuery(" + solrQuery.getQuery() + " to " + target.hash + ")");
-                            try {
-                                RemoteInstance instance = new RemoteInstance("http://" + address, null, "solr", solrtimeout); // this is a 'patch configuration' which considers 'solr' as default collection
-                                try {
-                                    SolrConnector solrConnector = new RemoteSolrConnector(instance, myseed ? true : target.getVersion() >= 1.63, "solr");
-                                    if (!solrConnector.isClosed()) try {
-                                        rsp[0] = solrConnector.getResponseByParams(solrQuery);
-                                        docList[0] = rsp[0].getResults();
-                                    } catch (Throwable e) {} finally {
-                                        solrConnector.close();
-                                    }
-                                } catch (Throwable ee) {} finally {
-                                    instance.close();
-                                }
-                            } catch (Throwable eee) {}
-                        }
-                    };
+                    SolrRequestTask remoteRequest = new SolrRequestTask(solrQuery, address, target, myseed, solrtimeout, rsp, docList);
                     remoteRequest.start();
                     remoteRequest.join(solrtimeout); // just wait until timeout appears
                     if (remoteRequest.isAlive()) {
-                        try {remoteRequest.interrupt();} catch (Throwable e) {}
+                    	/* Try to free the request thread resources properly */
+                    	remoteRequest.close();
+                    	if(remoteRequest.isAlive()) {
+                    		/* Thread still running : try also with interrupt*/
+                    		remoteRequest.interrupt();
+                    	}
                         Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress(ip) + " does not answer (time-out)");
                         target.setFlagSolrAvailable(false || myseed);
                         return -1; // give up, leave remoteRequest abandoned.
                     }
-                    // no need to close this here because that sends a commit to remote solr which is not wanted here
+                } catch(InterruptedException e) {
+                	/* Current thread might be interrupted by SearchEvent.cleanup() : 
+                	 * we must not in that case mark the target as not available but rather transmit the exception to the caller (likely RemoteSearch.solrRemoteSearch) */
+                    throw e;
                 } catch (final Throwable e) {
                     Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress(ip) + " (" + e.getMessage() + ")");
                     target.setFlagSolrAvailable(false || localsearch);
@@ -1278,6 +1406,7 @@ public final class Protocol {
     	 * @param docs solr documents collection to put to segment
     	 */
     	public WriteToLocalIndexThread(Segment segment, Collection<SolrInputDocument> docs) {
+    		super("WriteToLocalIndexThread");
     		this.segment = segment;
     		this.docs = docs;
     	}

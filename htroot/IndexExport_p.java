@@ -102,6 +102,7 @@ public class IndexExport_p {
             if (fname.endsWith("html")) format = Fulltext.ExportFormat.html;
             if (fname.endsWith("rss")) format = Fulltext.ExportFormat.rss;
             if (fname.endsWith("solr")) format = Fulltext.ExportFormat.solr;
+            if (fname.endsWith("elasticsearch")) format = Fulltext.ExportFormat.elasticsearch;
 
             final String filter = post.get("exportfilter", ".*");
             final String query = post.get("exportquery", "*:*");

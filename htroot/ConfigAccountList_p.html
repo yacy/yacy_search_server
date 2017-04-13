@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': User Accounts</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript" src="js/sorttable.js"></script>
+  </head>
+<body>
+    #%env/templates/header.template%#
+    #%env/templates/submenuUseCaseAccount.template%#
+    <h2>User List</h2>
+
+    <fieldset><legend>User Accounts</legend>
+      <table class="sortable">
+        <tr class="TableHeader">
+          <th>User</th><th>First name</th><th>Last name</th><th>Address</th><th>Last Access</th><th>Rights</th><th>Time</th><th>Traffic</th>
+        </tr> 
+        #{userlist}#
+        <tr>
+          <td><a href="ConfigUser_p.html?user=#[username]#">#[username]#</a></td><td>#[firstname]#</td><td>#[lastname]#</td><td>#[address]#</td><td>#[lastaccess]#</td><td>#[rights]#</td><td>#[time]#</td><td>#[traffic]#</td>
+        </tr>
+        #{/userlist}#
+      </table>
+
+    </fieldset>
+    
+#%env/templates/footer.template%#
+</body>
+</html>

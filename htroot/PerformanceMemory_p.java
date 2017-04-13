@@ -63,7 +63,7 @@ public class PerformanceMemory_p {
                 System.gc();
                 prop.put("gc", "1");
                 prop.put("autoreload.checked", "1");
-            } else {
+            } else if (post.containsKey("dummy")) {
                 boolean simulatedshortmemory = post.containsKey("simulatedshortmemory");
                 MemoryControl.setSimulatedShortStatus(simulatedshortmemory);
                 if (simulatedshortmemory) prop.put("autoreload.checked", "1");

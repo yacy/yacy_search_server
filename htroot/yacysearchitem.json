@@ -9,7 +9,7 @@
       "size": "#[size]#",
       "sizename": "#[sizename]#",
       "guid": "#[urlhash]#",
-      "faviconCode": "#[faviconCode]#",
+      #(favicon)#::"faviconUrl": "#[faviconUrl]#",#(/favicon)#
       "host": "#[host]#",
       "path": "#[path]#",
       "file": "#[file]#",

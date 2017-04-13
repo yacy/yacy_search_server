@@ -62,7 +62,7 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
 
         // Add some other known local host names
         // The remote DNS sometimes takes very long when it is waiting for timeout, therefore we do this concurrently
-        new Thread() {
+        new Thread(AbstractRemoteHandler.class.getSimpleName() + ".doStart") {
             @Override
             public void run() {
                 for (InetAddress localInetAddress : Domains.myPublicIPv4()) {

@@ -95,14 +95,14 @@ Move selected pattern(s) to==移动选中规则
 #You can select them here for deletion==您可以从这里选择要删除的项
 Add new pattern:==添加新规则:
 "Add URL pattern"=="添加URL规则"
-The right '*', after the '/', can be replaced by a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a>.== 在 '/' 后边的 '*' ,可用<a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">正则表达式</a>表示.
+The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.== 在 '/' 后边的 '*' ,可用<a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">正则表达式</a>表示.
 domain.net/fullpath<==domain.net/绝对路径<
->domain.net/*<==>domain.net/*<
-*.domain.net/*<==*.domain.net/*<
-*.sub.domain.net/*<==*.sub.domain.net/*<
+#>domain.net/*<==>domain.net/*<
+#*.domain.net/*<==*.domain.net/*<
+#*.sub.domain.net/*<==*.sub.domain.net/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
-a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a> (slow)==一个完整的<a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">正则表达式</a> (慢)
+a complete <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a> (slow)==一个完整的<a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">正则表达式</a> (慢)
 #was removed from blacklist==wurde aus Blacklist entfernt
 #was added to the blacklist==wurde zur Blacklist hinzugefügt
 Activate this list for==为以下条目激活此名单
@@ -342,8 +342,8 @@ Appearance and Integration==外观界面
 You can change the appearance of the YaCy interface with skins.==您可以在这里修改YaCy的外观界面.
 #You can change the appearance of YaCy with skins==Sie können hier das Erscheinungsbild von YaCy mit Skins ändern
 The selected skin and language also affects the appearance of the search page.==选择的皮肤和语言也会影响到搜索页面的外观.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==如果您<a href="ConfigPortal.html">创建YaCy门户</a>,
-change the appearance of the search page here.==那么您能在<a href="ConfigPortal.html">这里</a> 改变搜索页面的外观.
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==如果您<a href="ConfigPortal_p.html">创建YaCy门户</a>,
+change the appearance of the search page here.==那么您能在<a href="ConfigPortal_p.html">这里</a> 改变搜索页面的外观.
 #and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
 Skin Selection==选择皮肤
 Select one of the default skins, download new skins, or create your own skin.==选择一个默认皮肤, 下载新皮肤或者创建属于您自己的皮肤.
@@ -584,7 +584,7 @@ If you leave the field empty, no peer asks your peer. If you fill in a '*', your
 "Save"=="保存"
 #-----------------------------
 
-#File: ConfigParser.html
+#File: ConfigParser_p.html
 #---------------------------
 Parser Configuration==解析配置
 Content Parser Settings==内容解析设置
@@ -619,7 +619,7 @@ enable/disable Parser==Parser 开启 / 关闭
 "Submit"=="提交"
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
 Integration of a Search Portal==搜索门户设置
 If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==如果您想将YaCy作为您的网站搜索门户, 您可能需要在这改变搜索页面的图标和信息.
@@ -641,7 +641,7 @@ Show Information Links for each Search Result Entry==显示搜索结果的链接
 >Date&==>日期&
 >Size&==>大小&
 >Metadata&==>元数据&
->Parser&==>Parser&
+#>Parser&==>Parser&
 >Pictures==>图像
 Default Pop-Up Page<==默认弹出页面<
 >Status Page==>状态页面
@@ -982,7 +982,7 @@ Use filter==使用过滤器
 Restrict to start domain==限制为起始域
 Restrict to sub-path==限制为子路经
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Dieser Filter ist ein emacs-ähnlicher regulärer Ausdruck, der mit den zu crawlenden URLs übereinstimmen muss;
-The filter is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regular expression</a>==过滤是一组<a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">正则表达式</a>
+The filter is a <b><a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>==过滤是一组<b><a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">正则表达式</a></b>
 that must match with the URLs which are used to be crawled; default is 'catch all'.==, 它们表示了要抓取的链接规则; 默认是'抓取所有'.
 Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'.==比如: 如果仅抓取包含'科学'的链接, 可将过滤器设置为 '.*.*'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==您也可以使用域限制来抓取整个域.
@@ -1563,7 +1563,7 @@ Delete==删除
 
 #File: IndexImport_p.html
 #---------------------------
-YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': Index Import
+#YaCy '#[clientname]#': Index Import==YaCy '#[clientname]#': Index Import
 #Crawling Queue Import==Crawling Puffer Import
 Index DB Import==导入索引数据
 The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==本地索引当前至少有 #[wcount]# 个关键字索引和 #[ucount]# 个URL关联.
@@ -1580,7 +1580,7 @@ Always do a backup of your source and destination database before starting to us
 Currently running jobs==当前运行任务
 Job Type==任务类型
 >Path==>路径
-Status==Status
+#Status==Status
 Elapsed<br />Time==已用<br />时间
 Time<br />Left==剩余<br />时间
 Abort Import==停止
@@ -1607,7 +1607,7 @@ The assortment directory containing parts of the word index.==分类目录中含
 The words directory containing parts of the word index.==关键字目录中含有部分关键字索引.
 The assortment file that should be imported.==需要导入分类文件.
 The assortment file must have the postfix==分类文件一定要有后缀名
-.db".==.db".
+#.db".==.db".
 If you would like to import an assortment file from the <tt>PLASMADBACLUSTERABKP</tt>==如果您想从 <tt>PLASMADBACLUSTERABKP</tt> 中导入分类文件,
 you have to rename it first.==则须先重命名.
 >Notes:==>注意:
@@ -1869,7 +1869,7 @@ Search for a peername (RegExp allowed)==搜索peer名称(允许正则表达式)
 "Search"=="搜索"
 Name==名称
 Address==地址
-Hash==Hash
+#Hash==Hash
 Type==类型
 Release/<br/>SVN==YaCy版本/<br/>SVN
 Last<br/>Seen==最后<br/>上线
@@ -1996,20 +1996,16 @@ Attributes==属性
 
 #File: Performance_p.html
 #---------------------------
+<html lang="en">==<html lang="cn">
 Performance Settings==性能设置
 Memory Settings==内存设置
-Memory reserved for JVM==JVM内存设置
+Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==<abbr title="Java Virtual Machine">JVM</abbr>内存设置
 "Set"=="设置"
 Resource Observer==资源查看
-DHT-Trigger==DHT-触发
-not triggered:==未触发:
->triggered==>已触发
 reset state==重置
-HDD==硬盘
-disable crawls below==停止crawl当低于
-free space==空闲空间
-disable DHT-in below==停止接收DHT当低于
-RAM==内存
+> free space==> 空闲空间
+disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==停止接收<abbr title="Distributed Hash Table">DHT</abbr>当低于
+<abbr title="Random Access Memory">RAM</abbr>==内存
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==已接受改变. 在YaCy<strong>重启</strong>后生效
 restart now</a>==立即重启</a>
 Confirm Restart==确定重启
@@ -2068,7 +2064,7 @@ Table RAM Index:==Table使用内存:
 >Key==>关键字
 >Value==>值
 #FlexTable RAM Index:==FlexTabelle RAM Index:
-Table</td>==Table</td>
+#Table</td>==Table</td>
 Chunk Size<==块大小<
 #Count</td>==Anzahl</td>
 Used Memory<==已用内存<
@@ -2755,7 +2751,7 @@ Please go to the <a href="ConfigAccounts_p.html">User Administration</a> page an
 You don't have the correct access right to perform this task.==无执行此任务权限.
 Please log in.==请登录.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==您现在可以返回<a href="Settings_p.html">设置</a>页面进行详细设置.
-See you soon!==See you soon!
+#See you soon!==See you soon!
 Just a moment, please!==请稍候.
 Application will terminate after working off all scheduled tasks.==程序在所有任务完成后将停止,
 Then YaCy will restart.==然后YaCy会重新启动.
@@ -3136,7 +3132,7 @@ This table contains a short description of the tags that can be used in the Wiki
 of YaCy. For a more detailed description visit the==详情请见
 #YaCy Wiki==YaCy Wiki
 Description==描述
-=headline===headline
+#=headline===headline
 These tags create headlines. If a page has three or more headlines, a table of content will be created automatically.==此标记标识标题内容. 如果页面有多于三个标题, 则会自动创建一个表格.
 Headlines of level 1 will be ignored in the table of content.==一级标题.
 #text==Text
@@ -3144,19 +3140,19 @@ These tags create stressed texts. The first pair emphasizes the text (most brows
 the second one emphazises it more strongly (i.e. bold) and the last tags create a combination of both.==第二对用粗体表示, 第三对为两者的联合.
 Text will be displayed <span class="strike">stricken through</span>.==文本内容以<span class="strike">删除线</span>表示.
 Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==缩进内容, 此标记主要用于引用, 也能用于标识样式.
-point==point
+#point==point
 These tags create a numbered list.==此标记用于有序列表.
-something<==something<
-another thing==another thing
-and yet another==and yet another
-something else==something else
+#something<==something<
+#another thing==another thing
+#and yet another==and yet another
+#something else==something else
 These tags create an unnumbered list.==用于创建无序列表.
-word==word
-:definition==:definition
+#word==word
+#:definition==:definition
 These tags create a definition list.==用于创建定义列表.
 This tag creates a horizontal line.==创建水平线.
-pagename==pagename
-description]]==description]]
+#pagename==pagename
+#description]]==description]]
 This tag creates links to other pages of the wiki.==创建到其他wiki页面的链接.
 This tag displays an image, it can be aligned left, right or center.==显示图片, 可设置左对齐, 右对齐和居中.
 These tags create a table, whereas the first marks the beginning of the table, the second starts==用于创建表格, 第一个标记为表格开头, 第二个为换行,

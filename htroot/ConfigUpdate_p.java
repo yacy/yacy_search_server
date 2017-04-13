@@ -35,6 +35,7 @@ import java.util.TreeSet;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
 import net.yacy.peers.operation.yacyBuildProperties;
@@ -46,7 +47,7 @@ import net.yacy.server.serverSwitch;
 
 public class ConfigUpdate_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
@@ -70,37 +71,34 @@ public class ConfigUpdate_p {
         prop.put("candeploy_configCommit", "0");
         prop.put("candeploy_autoUpdate", "0");
         prop.put("candeploy_downloadsAvailable", "0");
+        prop.put("candeploy_downloadError", "0");
 
         if (post != null) {
-            // check if update is supposed to be installed and a release is defined
-            if (post.containsKey("update") && !post.get("releaseinstall", "").isEmpty()) {
-                prop.put("forwardToSteering", "1");
-                prop.putHTML("forwardToSteering_release",post.get("releaseinstall", ""));
-                prop.put("deploys", "1");
-                prop.put("candeploy", "2"); // display nothing else
-                return prop;
-            }
-
             if (post.containsKey("downloadRelease")) {
                 // download a release
                 final String release = post.get("releasedownload", "");
                 if (!release.isEmpty()) {
                     try {
-                	yacyRelease versionToDownload = new yacyRelease(new DigestURL(release));
+                    	yacyRelease versionToDownload = new yacyRelease(new DigestURL(release));
 
-                	// replace this version with version which contains public key
-                	final yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);
-                	final Set<yacyRelease> mostReleases = versionToDownload.isMainRelease() ? allReleases.main : allReleases.dev;
-                	for (final yacyRelease rel : mostReleases) {
-                	    if (rel.equals(versionToDownload)) {
-                		versionToDownload = rel;
-                		break;
-                	    }
-                	}
-                	versionToDownload.downloadRelease();
+                    	// replace this version with version which contains public key
+                    	final yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);
+                    	final Set<yacyRelease> mostReleases = versionToDownload.isMainRelease() ? allReleases.main : allReleases.dev;
+                    	for (final yacyRelease rel : mostReleases) {
+                    		if (rel.equals(versionToDownload)) {
+                    			versionToDownload = rel;
+                    			break;
+                    		}
+                    	}
+                    	File downloadedRelease = versionToDownload.downloadRelease();
+                    	if(downloadedRelease == null) {
+                    		prop.put("candeploy_downloadError", "1");
+                    		prop.putHTML("candeploy_downloadError_releasedownload", release);
+                    	}
                     } catch (final IOException e) {
-                	// TODO Auto-generated catch block
-                        ConcurrentLog.logException(e);
+                    	ConcurrentLog.logException(e);
+                    	prop.put("candeploy_downloadError", "1");
+                    	prop.putHTML("candeploy_downloadError_releasedownload", release);
                     }
                 }
             }
@@ -143,10 +141,14 @@ public class ConfigUpdate_p {
                         sb.getLog().info("AUTO-UPDATE: omitting update because download failed (file cannot be found, is too small or signature was bad)");
                         prop.put("candeploy_autoUpdate", "4");
                     } else {
-                        yacyRelease.deployRelease(downloaded);
-                        sb.terminate(10, "manual release update to " + downloaded.getName());
-                        sb.getLog().info("AUTO-UPDATE: deploy and restart initiated");
-                        prop.put("candeploy_autoUpdate", "1");
+                        if(yacyRelease.deployRelease(downloaded)) {
+                        	sb.terminate(10, "manual release update to " + downloaded.getName());
+                        	sb.getLog().info("AUTO-UPDATE: deploy and restart initiated");
+                        	prop.put("candeploy_autoUpdate", "1");
+                        } else {
+                            sb.getLog().info("AUTO-UPDATE: omitting update because an error occurred while trying to deploy the release..");
+                            prop.put("candeploy_autoUpdate", "5");
+                        }
                     }
                 }
             }
@@ -198,6 +200,8 @@ public class ConfigUpdate_p {
         // check if there are any downloaded releases and if there are enable the update buttons
         prop.put("candeploy_downloadsAvailable", (downloadedReleases.isEmpty()) ? "0" : "1");
         prop.put("candeploy_deployenabled_buttonsActive", (downloadedReleases.isEmpty() || devenvironment) ? "0" : "1");
+        /* Acquire a transaction token for the update operation */
+        prop.put("candeploy_deployenabled_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header, "/Steering.html"));
 
         int relcount = 0;
         for(final yacyRelease release : downloadedReleases) {

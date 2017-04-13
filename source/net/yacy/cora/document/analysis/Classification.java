@@ -218,11 +218,11 @@ public class Classification {
     }
 
     public static String ext2mime(final String ext, final String dfltMime) {
-        return ext == null ? "application/octet-stream" : mimeTable.getProperty(ext.toLowerCase(), dfltMime);
+        return ext == null ? dfltMime : mimeTable.getProperty(ext.toLowerCase(), dfltMime);
     }
 
     public static String url2mime(final MultiProtocolURL url, final String dfltMime) {
-        return url == null ? "application/octet-stream" : ext2mime(MultiProtocolURL.getFileExtension(url.getFileName()), dfltMime);
+        return url == null ? dfltMime : ext2mime(MultiProtocolURL.getFileExtension(url.getFileName()), dfltMime);
     }
 
     public static String url2mime(final MultiProtocolURL url) {

@@ -32,7 +32,6 @@ import java.util.Date;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -213,7 +212,7 @@ public class Response {
     public Response(final Request request, final CrawlProfile profile) {
         this.request = request;
         // request and response headers may be zero in case that we process surrogates
-        this.requestHeader = new RequestHeader();
+        this.requestHeader = null;
         this.responseHeader = new ResponseHeader(200);
         this.responseHeader.put(HeaderFramework.CONTENT_TYPE, Classification.ext2mime(MultiProtocolURL.getFileExtension(request.url().getFileName()), "text/plain")); // tell parser how to handle the content
         this.profile = profile;
@@ -792,24 +791,14 @@ public class Response {
 
     public DigestURL referrerURL() {
         if (this.requestHeader == null) return null;
-        try {
-            final String r = this.requestHeader.get(RequestHeader.REFERER, null);
-            if (r == null) return null;
-            return new DigestURL(r);
-        } catch (final Exception e) {
-            return null;
-        }
+        return this.requestHeader.referer();
     }
 
     public byte[] referrerHash() {
         if (this.requestHeader == null) return null;
-        final String u = this.requestHeader.get(RequestHeader.REFERER, "");
-        if (u == null || u.isEmpty()) return null;
-        try {
-            return new DigestURL(u).hash();
-        } catch (final Exception e) {
-            return null;
-        }
+        final DigestURL url = this.requestHeader.referer();
+        if (url == null) return null;
+        return url.hash();
     }
 
     public boolean validResponseStatus() {

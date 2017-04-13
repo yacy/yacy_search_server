@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
   <title>YaCy '#[clientname]#': Search Page</title>
   #%env/templates/metas.template%#
@@ -17,7 +17,7 @@
   <p>
     Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.
     To change colors and styles use the <a href="ConfigAppearance_p.html">Appearance</a> menu for different skins.
-    Other portal settings can be adjusted in <a href="ConfigPortal.html">Generic Search Portal</a> menu.
+    Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.
   </p>
   <h4>Page Template</h4>
 
@@ -40,7 +40,7 @@
                         <span class="icon-bar"></span>
                       </button>
                       <div class="forceNoExternalIcon navbar-brand" id="navbar-brand" href="#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
-                                  <img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle">&nbsp;<span id="greeting"></span>
+                                  <img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle"/>&nbsp;<span id="greeting"></span>
                       </div>
                     </div>
                     <div class="navbar-collapse collapse">
@@ -49,7 +49,7 @@
                           <a href="#" data-toggle="dropdown" class="dropdown-toggle">Search Interfaces<b class="caret"></b></a>
                         </li>
                         <li id="header_help" class="dropdown">
-                                      <a href="#" data-toggle="dropdown" class="dropdown-toggle"><span class="glyphicon glyphicon-question-sign"></span></a>
+                          <a href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button"><span class="glyphicon glyphicon-question-sign"></span></a>
                         </li>
                         <li id="header_administration">
                           <button class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-cog"></span> Administration &raquo;</button>
@@ -67,22 +67,36 @@
                 <!-- the sidebar navigation -->
                 <div>
                   <fieldset>
-                      <table>
+                    <table>
+                      <tr>
+                        <td><input type="checkbox" name="search.navigation.protocol" value="true" #(search.navigation.protocol)#::checked="checked" #(/search.navigation.protocol)# /></td>
+                        <td>
+                          <p class="navbutton"></p>
+                          <div class="btn-group">
+                            <span><button class="btn btn-default btn-xs">http</button><button class="btn btn-default btn-xs">https</button><button class="btn btn-default btn-xs">&nbsp;ftp&nbsp;</button><button class="btn btn-default btn-xs">&nbsp;smb&nbsp;</button><button class="btn btn-default btn-xs">file</button>
+                          </div>
+                        </td>
+                      </tr>                       
                       <tr>
                         <td><input type="checkbox" name="search.navigation.topics" value="true" #(search.navigation.topics)#::checked="checked" #(/search.navigation.topics)# /></td>
                         <td>
                           <div style="padding-left:15px;  padding-bottom:10px; width: 100%;">
                             <div id="tagcloud" style="text-align:justify">
-                              <a href="#" target="LayouTest" rel="1" style="text-decoration: none;">Tag</a>
-                              <a href="#" target="LayouTest" rel="2" style="text-decoration: none;">Topics</a>
-                              <a href="#" target="LayouTest" rel="3" style="text-decoration: none;">Cloud</a>
-                              <a href="#" target="LayouTest" rel="4" style="text-decoration: none;">Topics</a>
-                              <a href="#" target="LayouTest" rel="6" style="text-decoration: none;">Cloud</a>
-                              <a href="#" target="LayouTest" rel="5" style="text-decoration: none;">Tag</a>
-                              <a href="#" target="LayouTest" rel="4" style="text-decoration: none;">Cloud</a>
-                              <a href="#" target="LayouTest" rel="3" style="text-decoration: none;">Topics</a>
-                              <a href="#" target="LayouTest" rel="2" style="text-decoration: none;">Tag</a>
-                              <a href="#" target="LayouTest" rel="1" style="text-decoration: none;">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 10px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 9px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 10px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 8px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 11px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 12px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 13px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 15px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 14px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 12px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 8px">Tag</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 10px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 9px">Topics</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 8px">Cloud</a>
+                              <a href="#" target="LayouTest" style="text-decoration: none; font-size: 11px">Tag</a>                              
                             </div>
                             <script type="text/javascript" charset="utf-8">
           $.fn.tagcloud.defaults = {
@@ -99,51 +113,29 @@
                       <tr>
                           <td><input type="checkbox" name="search.navigation.location" value="true" #(search.navigation.location)#::checked="checked" #(/search.navigation.location)# /></td>
                           <td><ul class="nav nav-sidebar menugroup" id="sidebarLocation" style="padding-left:15px; padding-right:10px;">
-                                <li><h3>Location</h3></li>
+                            <li><h3>Location</h3></li>  
+                            #(search.navigation.location)#::
+                            <li>
+                              <img src="env/grafics/earthsearch.png" width="100%" height="86" alt="earthsearchlogo" /><br/>
+                              show search results on map
+                            </li>#(/search.navigation.location)#                                
                           </ul></td>
                       </tr>                          
-                      <tr>
-                        <td><input type="checkbox" name="search.navigation.protocol" value="true" #(search.navigation.protocol)#::checked="checked" #(/search.navigation.protocol)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarProtocols" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Protocol</h3></li>
-                          </ul></td>
-                      </tr>
-                      <tr>
-                        <td><input type="checkbox" name="search.navigation.filetype" value="true" #(search.navigation.filetype)#::checked="checked" #(/search.navigation.filetype)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarFiletypes" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Filetype</h3></li>
-                          </ul></td>
-                      </tr>
-                      <tr>
-                        <td><input type="checkbox" name="search.navigation.hosts" value="true" #(search.navigation.hosts)#::checked="checked" #(/search.navigation.hosts)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarDomains" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Provider</h3></li>
-                          </ul></td>
-                      </tr>
-                      <tr>
-                        <td><input type="checkbox" name="search.navigation.namespace" value="true" #(search.navigation.namespace)#::checked="checked" #(/search.navigation.namespace)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarNameSpace" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Wiki Name Space</h3></li>
-                          </ul></td>
-                      </tr>
                       <tr>
                         <td><input type="checkbox" name="search.navigation.language" value="true" #(search.navigation.language)#::checked="checked" #(/search.navigation.language)# /></td>
                         <td><ul class="nav nav-sidebar menugroup" id="sidebarLanguages" style="padding-left:15px; padding-right:10px;">
                           <li><h3>Language</h3></li>
                           </ul></td>
                       </tr>
+                      #{search.navigation.plugin}#
                       <tr>
-                        <td><input type="checkbox" name="search.navigation.authors" value="true" #(search.navigation.authors)#::checked="checked" #(/search.navigation.authors)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarAuthors" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Author</h3></li>
-                          </ul></td>
+                        <td><button class="btn btn-xs" name="del.nav" value="#[name]#"><span class="glyphicon glyphicon-remove" style="color: red"/></button></td>
+                        <td><ul class="nav nav-sidebar menugroup"  style="padding-left:15px; padding-right:10px;">
+                          <li><h3>#[displayname]#</h3></li>
+                          </ul><input type="hidden" name="search.navigation.active" value="#[name]#" />
+                        </td>
                       </tr>
-                      <tr>
-                        <td><input type="checkbox" name="search.navigation.collections" value="true" #(search.navigation.collections)#::checked="checked" #(/search.navigation.collections)# /></td>
-                        <td><ul class="nav nav-sidebar menugroup" id="sidebarCollections" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Collection</h3></li>
-                          </ul></td>
-                      </tr>
+                      #{/search.navigation.plugin}#
                       <tr>
                         <td></td>
                         <td><ul class="nav nav-sidebar menugroup" id="vocabulary" style="padding-left:15px; padding-right:10px;">
@@ -153,13 +145,13 @@
                       <tr>    
                         <td></td>
                         <td><div id="sidebarAbout" style="padding-left:15px; padding-right:10px; margin-top: 5px;">
-                          <h3>about#[about.headline]#</h3>
+                          <h3>#[about.headline]#</h3>
                           <div>#[about.body]#</div>
                           </div></td>
                       </tr>
                     </table>
                   </fieldset>
-                </div>                        
+                </div>    
               </td>
               <td valign="top">
                 <div style="float: left;">
@@ -187,12 +179,12 @@
                 
                 
                 <input type="checkbox" name="search.navigation.date" value="true" #(search.navigation.date)#::checked="checked" #(/search.navigation.date)# /> Date Navigation
-<link rel="stylesheet" href="/env/morris.css">
-<script src="/js/raphael-min.js"></script>
-<script src="/js/morris.js"></script>
+<link rel="stylesheet" href="env/morris.css">
+<script src="js/raphael-min.js"></script>
+<script src="js/morris.js"></script>
 <div id="graph" style="height:200px"></div>
 <script>
-var solr= $.getJSON("/solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index", function(data) {
+var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index", function(data) {
 	dates_in_content_dts = data.facet_counts.facet_fields.dates_in_content_dts;
 	var parsed = [];
     for (var i = 0; i < dates_in_content_dts.length; i = i + 2) {
@@ -238,13 +230,13 @@ var solr= $.getJSON("/solr/collection1/select?q=*:*&defType=edismax&start=0&rows
                           <td width="15px"></td>
                           <td>#[content_showDate_date]#</td>
                           <td>&nbsp;|&nbsp;42 kbyte</td>
-                          <td>&nbsp;|&nbsp;<a href="solr/select?q=*:*&defType=edismax&start=0&rows=3&core=collection1&wt=html" target="LayouTest" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a></td>
+                          <td>&nbsp;|&nbsp;<a href="solr/select?q=*:*&defType=edismax&start=0&rows=3&core=collection1&wt=html" target="LayouTest">Metadata</a></td>
                           <td>&nbsp;|&nbsp;<a href="ViewFile.html" target="LayouTest">Parser</a></td>
                           <td>&nbsp;|&nbsp;<a href="api/citation.html?url=yacy.net" target="LayouTest">Citation</a></td>
                           <td>&nbsp;|&nbsp;<a href="yacysearch.html" target="LayouTest">Pictures</a></td>
                           <td>&nbsp;|&nbsp;<a href="CacheResource_p.html" target="LayouTest">Cache</a></td>
-                          <td>&nbsp;|&nbsp;<a href="proxy.html" target="LayouTest">Augmented Browsing</a></td>
-                          <td>&nbsp;|&nbsp;<a href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" /></a></td>
+                          <td>&nbsp;|&nbsp;<a href="proxy.html" target="LayouTest">View via Proxy</a></td>
+                          <td>&nbsp;|&nbsp;<a href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
                           <td>&nbsp;|&nbsp;<a href="yacysearch.html" target="LayouTest">Snapshots</a></td>
                         </tr>
                         <tr>
@@ -259,8 +251,8 @@ var solr= $.getJSON("/solr/collection1/select?q=*:*&defType=edismax&start=0&rows
                           <td align="center"><input type="checkbox" name="search.result.show.proxy" value="true" #(search.result.show.proxy)#::checked="checked" #(/search.result.show.proxy)# />
                             <span class="info" style="padding-left: 10px"><img src="env/grafics/i16.gif" alt="info"/><span>
                               For this option URL proxy must be enabled.<br>
-                              see <a href="AugmentedBrowsing_p.html">AugmentedBrowsing_p.html</a><br>
-                              menu: Content Semantic > Augmented Browsing
+                              see <a href="Settings_p.html?page=UrlProxyAccess">Settings_p.html</a><br>
+                              menu: System Administration > Advanced Settings
                             </span></span>
                           </td>
                           <td align="center"><input type="checkbox" name="search.result.show.hostbrowser" value="true" #(search.result.show.hostbrowser)#::checked="checked" #(/search.result.show.hostbrowser)# /></td>
@@ -276,15 +268,27 @@ var solr= $.getJSON("/solr/collection1/select?q=*:*&defType=edismax&start=0&rows
         </table>
       </td>
     </tr>
+  </table>
+  <table>
     <tr>
       <td>
-        <fieldset>
-          <dt>&nbsp;</dt>
-          <dd>
-            <input type="submit" name="searchpage_set" value="Save Settings" class="btn btn-primary" />&nbsp;&nbsp;
-            <input type="submit" name="searchpage_default" value="Set Default Values" class="btn btn-primary" />
-          </dd>
+        <fieldset><legend>Add Navigators</legend>
+          <label for="search.navigation.navname">append</label>
+          <select type="text" name="search.navigation.navname">
+            #{search.navigation.list}#
+            <option value="#[name]#">#[displayname]#</option>
+            #{/search.navigation.list}#
+          </select>
+          <button type="submit" name="add.nav" class="btn btn-xs btn-default" ><span class="glyphicon glyphicon-plus-sign" style="color: green"/></button><br>
+          <label for="search.navigation.maxcount">max. items</label>
+          <input type="text" id="search.navigation.maxcount" name="search.navigation.maxcount" size="3" value="#[search.navigation.maxcount]#">
         </fieldset>
+      </td>
+      <td>
+        <div style="padding-left:25px;">
+          <input type="submit" name="searchpage_set" value="Save Settings" class="btn btn-primary" />&nbsp;&nbsp;
+          <input type="submit" name="searchpage_default" value="Set Default Values" class="btn btn-primary" />
+        </div>
       </td>
     </tr>
   </table>

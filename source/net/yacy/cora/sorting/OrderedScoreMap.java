@@ -227,10 +227,26 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         int minScore = Integer.MAX_VALUE;
         synchronized (this.map) {
             for (final Map.Entry<E, AtomicInteger> entry: this.map.entrySet()) if (entry.getValue().intValue() < minScore) {
-                minScore = entry.getValue().intValue();
+                    minScore = entry.getValue().intValue();
+                }
+            }
+        return minScore;
+    }
+
+    /**
+     * @return largest score value
+     */
+    public int getMaxScore() {
+        if (this.map.isEmpty()) {
+            return -1;
+        }
+        int maxScore = Integer.MIN_VALUE;
+        for (final Map.Entry<E, AtomicInteger> entry : this.map.entrySet()) {
+            if (entry.getValue().intValue() > maxScore) {
+                maxScore = entry.getValue().intValue();
             }
         }
-        return minScore;
+        return maxScore;
     }
 
     @Override

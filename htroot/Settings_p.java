@@ -25,8 +25,8 @@
 import java.util.HashMap;
 import java.util.Iterator;
 
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.http.ReferrerPolicy;
 import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
 import net.yacy.peers.operation.yacySeedUploader;
@@ -53,8 +53,13 @@ public final class Settings_p {
         else if (page.equals("proxy")) {
             prop.put("settingsTables", "Settings_Proxy.inc");
         }
+        else if (page.equals("UrlProxyAccess")) {
+            prop.put("settingsTables", "Settings_UrlProxyAccess.inc");
+        }
         else if (page.equals("ServerAccess")) {	
             prop.put("settingsTables", "Settings_ServerAccess.inc");
+        } else if (page.equals("referrer")) {	
+            prop.put("settingsTables", "Settings_Referrer.inc");
         }
         else if (page.equals("SystemBehaviour")) {
             prop.put("settingsTables", "Settings_SystemBehaviour.inc");
@@ -70,6 +75,8 @@ public final class Settings_p {
         }
         else if (page.equals("crawler")) {
             prop.put("settingsTables", "Settings_Crawler.inc");
+        } else if (page.equals("debug")) {
+            prop.put("settingsTables", "Settings_Debug.inc");
         } else {
             prop.put("settingsTables", "");
         }
@@ -118,7 +125,13 @@ public final class Settings_p {
                 prop.put("proxyuser",s.substring(0, pos));
             }*/
         }
-        
+
+        // Url proxy settings
+        prop.putHTML("urlproxyfilter", env.getConfig("proxyURL.access", "127.0.0.1,0:0:0:0:0:0:0:1"));
+        prop.putHTML("urlproxydomains", env.getConfig("proxyURL.rewriteURLs", "domainlist"));
+        prop.put("urlproxyenabled_checked", env.getConfigBool("proxyURL", false) ? "1" : "0");
+        prop.put("urlproxyuseforresults_checked", env.getConfigBool("proxyURL.useforresults", false) ? "1" : "0");
+
         // server access filter
         prop.putHTML("serverfilter", env.getConfig("serverClient", "*"));
         
@@ -126,8 +139,7 @@ public final class Settings_p {
         prop.put("serveruser","server");
         
         // clientIP
-        prop.putXML("clientIP", header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>")); // read an artificial header addendum
-        
+        prop.putXML("clientIP", header.getRemoteAddr() == null ? "<unknown>" : header.getRemoteAddr());
         /* 
          * seed upload settings
          */
@@ -186,8 +198,46 @@ public final class Settings_p {
         prop.putHTML("crawler.file.maxFileSize",sb.getConfig("crawler.file.maxFileSize", "-1"));
 
         // http server info
-        prop.put("server.https",sb.getConfigBool("server.https", false));
-        prop.put("server.https_port.ssl", sb.getConfig("port.ssl","8443"));
+        prop.put("server.https", sb.getConfigBool("server.https", false));
+        prop.put("server.https_port.ssl", sb.getConfig(SwitchboardConstants.SERVER_SSLPORT,"8443"));
+        prop.put("port.shutdown", sb.getConfig(SwitchboardConstants.SERVER_SHUTDOWNPORT, "-1"));
+        
+        // debug/analysis
+        prop.put("solrBinaryResponseChecked", env.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED, 
+        		SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT) ? 1 : 0);
+        
+        // Referrer Policy
+        final String metaPolicy = env.getConfig(SwitchboardConstants.REFERRER_META_POLICY, 
+        		SwitchboardConstants.REFERRER_META_POLICY_DEFAULT);
+        prop.put("metaPolicyNoReferrerChecked", ReferrerPolicy.NO_REFERRER.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicySameOriginChecked", ReferrerPolicy.SAME_ORIGIN.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyStrictOriginChecked", ReferrerPolicy.STRICT_ORIGIN.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyOriginChecked", ReferrerPolicy.ORIGIN.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyStrictOriginWhenCrossOriginChecked", ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyOriginWhenCrossOriginChecked", ReferrerPolicy.ORIGIN_WHEN_CROSS_ORIGIN.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyNoReferrerWhenDowngradeChecked", ReferrerPolicy.NO_REFERRER_WHEN_DOWNGRADE.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyEmptyChecked", ReferrerPolicy.EMPTY.getValue().equals(metaPolicy) ? 1 : 0);
+        prop.put("metaPolicyUnsafeUrlChecked", ReferrerPolicy.UNSAFE_URL.getValue().equals(metaPolicy) ? 1 : 0);
+        if(ReferrerPolicy.contains(metaPolicy)) {
+        	prop.put("metaPolicyCustom", 0);
+        } else {
+        	prop.put("metaPolicyCustom", 1);
+        	prop.put("metaPolicyCustom_checked", 1);
+        	prop.put("metaPolicyCustom_value", metaPolicy);
+        }
+        
+        prop.put("searchResultNoReferrerChecked", env.getConfigBool(SwitchboardConstants.SEARCH_RESULT_NOREFERRER, 
+        		SwitchboardConstants.SEARCH_RESULT_NOREFERRER_DEFAULT) ? 1 : 0);
+        
+        /* For easier user understanding, the following flags controlling data sources selection 
+         * are rendered in the UI as checkboxes corresponding to enabled value when ticked */
+        prop.put("searchLocalDHTChecked", !env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_OFF, false) ? 1 : 0);
+        prop.put("searchLocalSolrChecked", !env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false) ? 1 : 0);
+        prop.put("searchRemoteDHTChecked", !env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false) ? 1 : 0);
+        prop.put("searchRemoteSolrChecked", !env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false) ? 1 : 0);
+        
+        prop.put("searchTestLocalDHTChecked", env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false) ? 1 : 0);
+        prop.put("searchTestLocalSolrChecked", env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false) ? 1 : 0);
         
         // return rewrite properties
         return prop;

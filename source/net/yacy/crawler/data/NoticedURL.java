@@ -249,7 +249,7 @@ public class NoticedURL {
 
     /**
      * get a list of domains that are currently maintained as domain stacks
-     * @return a map of clear text strings of host names to two integers: the size of the domain stacks and the access delta time
+     * @return a map of clear text strings of host names (each host name eventually concatenated with a port, depending on the stack) to two integers: the size of the domain stacks and the access delta time
      */
     public Map<String, Integer[]> getDomainStackHosts(final StackType stackType, RobotsTxt robots) {
         switch (stackType) {

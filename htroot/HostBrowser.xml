@@ -11,7 +11,7 @@
  <files>
   #(root)#<up>#[path]#</up>::<root />#(/root)#
   #{list}#
-  #(type)#<file path="#[url]#" stored="#(stored)#false::true#(/stored)#" />::<dir path="#[url]#" count="#[count]#" />#(/type)#
+  #(type)#<file path="#[url]#" stored="#(stored)#false::true#(/stored)#" />::<dir path="#[url]#" stored="#[stored]#" linked="#[linked]#" pending="#[pending]#" excluded="#[excluded]#" failed="#[failed]#" />#(/type)#
   #{/list}#
  </files>
  #(/files)#

@@ -80,7 +80,7 @@ public class Status
             }
             boolean redirect = false;
             if ( post.containsKey("login") ) {
-                prop.put(serverObjects.ACTION_LOCATION, "");
+                prop.put(serverObjects.ACTION_LOCATION, "Status.html");
                 return prop;
             } else if ( post.containsKey("pauseCrawlJob") ) {
                 final String jobType = post.get("jobType");
@@ -112,7 +112,7 @@ public class Status
             }
 
             if ( redirect ) {
-                prop.put(serverObjects.ACTION_LOCATION, "");
+                prop.put(serverObjects.ACTION_LOCATION, "Status.html");
                 return prop;
             }
         }

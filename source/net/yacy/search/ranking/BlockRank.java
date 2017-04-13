@@ -89,6 +89,7 @@ public class BlockRank {
         Seed seed;
 
         public IndexRetrieval(final ReferenceContainerCache<HostReference> index, final Seed seed) {
+        	super("BlockRank.IndexRetrieval");
             this.index = index;
             this.seed = seed;
         }

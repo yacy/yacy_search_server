@@ -250,7 +250,10 @@ public class AutoSearch extends AbstractBusyThread {
             try {
                 RemoteInstance instance = new RemoteInstance("http://" + seed.getPublicAddress(seed.getIP()) + "/solr/", null, null, 10000); // this is a 'patch configuration' which considers 'solr' as default collection
                 try {
-                    SolrConnector solrConnector = new RemoteSolrConnector(instance, true, null);
+					SolrConnector solrConnector = new RemoteSolrConnector(instance,
+							sb.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
+									SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT),
+							null);
                     if (!solrConnector.isClosed()) {
                         try {
                             QueryResponse rsp = solrConnector.getResponseByParams(solrQuery);

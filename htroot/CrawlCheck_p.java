@@ -71,8 +71,7 @@ public class CrawlCheck_p {
                 
                 // mass check
                 final ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
-                final int concurrency = Math.min(rootURLs.size(), 20);
-                Collection<CheckEntry> out = sb.robots.massCrawlCheck(rootURLs, agent, concurrency);
+                Collection<CheckEntry> out = sb.robots.massCrawlCheck(rootURLs, agent);
                 // evaluate the result from the concurrent computation
                 
                 // make a string that is used to fill the starturls field again

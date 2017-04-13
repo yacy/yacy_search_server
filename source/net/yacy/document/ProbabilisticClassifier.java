@@ -105,7 +105,7 @@ public class ProbabilisticClassifier {
         
      }
     
-    private static Map<String, Context> contexts;
+    private static Map<String, Context> contexts = new HashMap<>();
 
     public static Set<String> getContextNames() {
         return contexts.keySet();
@@ -120,7 +120,7 @@ public class ProbabilisticClassifier {
      * @param path_to_context_directory directory containing contexts wich are directories containing .txt files. One of them must be named 'negative.txt'
      */
     public static void initialize(File path_to_context_directory) {
-        contexts = new HashMap<>();
+        contexts.clear();
         String[] context_candidates = path_to_context_directory.list();
         for (String context_candidate: context_candidates) {
             File ccf = new File(path_to_context_directory, context_candidate);

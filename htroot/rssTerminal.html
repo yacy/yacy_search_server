@@ -136,9 +136,9 @@ function load() {
   /* Problem is described in the forums and should be fixed by changing the MIME-Type for .rss files in the YaCy HTTPd */
   if (navigator.appName=="Microsoft Internet Explorer")
   {
-	getRSS("/api/feed.xml?count=80&set=" + set + "&requestCount=" + requestCount + "&time=" + (new Date()).getTime());
+	getRSS("api/feed.xml?count=80&set=" + set + "&requestCount=" + requestCount + "&time=" + (new Date()).getTime());
   } else {
-    getRSS("/api/feed.rss?count=80&set=" + set + "&requestCount=" + requestCount + "&time=" + (new Date()).getTime());
+    getRSS("api/feed.rss?count=80&set=" + set + "&requestCount=" + requestCount + "&time=" + (new Date()).getTime());
   }
   requestCount++;
 }

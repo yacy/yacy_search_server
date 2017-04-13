@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.UserDB.AccessRight;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -63,15 +64,15 @@ public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
 
         String refererHost;
         // update AccessTracker
-        refererHost = request.getRemoteAddr();
-        serverAccessTracker.track(refererHost, pathInContext);
+        final String remoteip = request.getRemoteAddr();
+        serverAccessTracker.track(remoteip, pathInContext);
         
         try {
-            refererHost = new MultiProtocolURL(request.getHeader("Referer")).getHost();
+            refererHost = new MultiProtocolURL(request.getHeader(RequestHeader.REFERER)).getHost();
         } catch (MalformedURLException e) {
             refererHost = null;
         }                          
-        final boolean accessFromLocalhost = Domains.isLocalhost(request.getRemoteHost()) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
+        final boolean accessFromLocalhost = Domains.isLocalhost(remoteip) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
         // ! note : accessFromLocalhost compares localhost ip pattern
         final boolean grantedForLocalhost = adminAccountGrantedForLocalhost && accessFromLocalhost;
         boolean protectedPage = adminAccountNeededForAllPages || (pathInContext.indexOf("_p.") > 0);
@@ -85,11 +86,11 @@ public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
                 return null; // quick return for local admin
             } else if (accessFromLocalhost) {
                 // last chance to authentify using the admin from localhost
-                final String credentials = request.getHeader("Authorization");
-                if (credentials != null && credentials.length() > 60 && credentials.startsWith("Basic ")) {
+                final String credentials = request.getHeader(RequestHeader.AUTHORIZATION);
+                if (credentials != null && credentials.length() < 60 && credentials.startsWith("Basic ")) { // Basic credentials are short "Basic " + b64(user:pwd)
                     final String foruser = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
                     final String adminAccountBase64MD5 = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
-                    final String b64 = Base64Order.standardCoder.encodeString(foruser + ":" + adminAccountBase64MD5);
+                    final String b64 = Base64Order.standardCoder.encodeString(foruser + ":" + adminAccountBase64MD5); // TODO: is this valid? ; consider "MD5:" prefixed config
                     if ((credentials.substring(6)).equals(b64)) return null; // lazy authentification for local access with credential from config (only a user with read access to DATA can do that)
                 }
             }

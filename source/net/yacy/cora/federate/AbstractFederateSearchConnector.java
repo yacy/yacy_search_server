@@ -109,9 +109,11 @@ abstract public class AbstractFederateSearchConnector implements FederateSearchC
             @Override
             public void run() {
                 Thread.currentThread().setName("heuristic:" + instancename);
+                ConcurrentLog.info("YACY SEARCH (federated)", "Send search query to " +  instancename);
                 theSearch.oneFeederStarted();
                 List<URIMetadataNode> doclist = query(theSearch.getQuery());
                 if (doclist != null) {
+                    ConcurrentLog.info("YACY SEARCH (federated)", "Got " + doclist.size() + " documents from " +  instancename);
                     Map<String, LinkedHashSet<String>> snippets = new HashMap<String, LinkedHashSet<String>>(); // add nodes doesn't allow null
                     Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(); // add nodes doesn't allow null
                     theSearch.addNodes(doclist, facets, snippets, false, instancename, doclist.size());
@@ -119,6 +121,8 @@ abstract public class AbstractFederateSearchConnector implements FederateSearchC
                     for (URIMetadataNode doc : doclist) {
                         theSearch.addHeuristic(doc.hash(), instancename, false);
                     }
+                } else {
+                	ConcurrentLog.info("YACY SEARCH (federated)", "Got no results from " +  instancename);
                 }
                 // that's all we need to display serach result
                 theSearch.oneFeederTerminated();

@@ -74,8 +74,7 @@ public interface Parser {
 
     /**
      * check equivalence of parsers; this simply tests equality of parser names
-     * @param o
-     * @return
+     * @return true when this parser is equivalent to o
      */
     @Override
     public boolean equals(Object o);

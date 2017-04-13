@@ -9,6 +9,7 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.query.QueryGoal;
+import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
 import org.apache.solr.common.SolrDocument;
 import static org.junit.Assert.*;
@@ -21,7 +22,7 @@ public class TextSnippetTest {
     // declare some required parameter
     final CacheStrategy cacheStrategy = CacheStrategy.CACHEONLY;
     final boolean pre = true;
-    final int snippetMaxLength = 220;
+    final int snippetMaxLength = SearchEvent.SNIPPET_MAX_LENGTH;
     final boolean reindexing = false;
 
     SolrDocument doc;

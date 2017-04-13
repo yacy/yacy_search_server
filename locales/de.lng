@@ -80,11 +80,10 @@ Access Dates==Zugriffszeiten
 This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
 #-----------------------------
 
-#File: AugmentedBrowsing_p.html
+#File: Settings_UrlProxyAccess.inc
 #---------------------------
-Augmented Browsing<==Angereichertes Browsen<
 URL Proxy Settings<==URL Proxy Einstellungen<
-With this settings you can activate or deactivate URL proxy which is the method used for augmentation.==Mit diesen Einstellungen können Sie den URL Proxy an- oder abschalten der als Methode zum Anreichern verwendet wird.
+With this settings you can activate or deactivate URL proxy.==Mit diesen Einstellungen können Sie den URL Proxy an- oder abschalten.
 Service call: ==Serviceaufruf: 
 , where parameter is the url of an external web page.==, wobei der parameter für die URL der externen Webseite steht.
 #URL proxy:==URL Proxy:
@@ -97,11 +96,12 @@ Define client filter. Default: ==Definiere den Client Filter. Standardeinstellun
 URL substitution:==Ersetzen von URLs:
 Define URL substitution rules which allow navigating in proxy environment. Possible values: all, domainlist. Default: domainlist.==Definiere die Regeln zum Ersetzen von URLs die Navigation in der Proxy Umgebung erlauben. Mögliche Werte: all, domainlist. Standardeinstellung: domainlist.
 "Submit"=="Absenden"
-Augmented Browsing Settings==Angereicherte Browser Einstellungen
-With this settings you can activate or deactivate augmented browsing which happens usually via the URL proxy.==Mit diesen Einstellungen können Sie das angereicherte Browsing an- oder abschalten das normalerweise über den URL Proxy passiert.
-Augmented Browsing:==Angereichertes Browsing:
 #>Enabled<==>Aktiviert<
-Enables or disables augmented browsing. If enabled, all websites will be modified during loading.==Schaltet angereichertes Browsing an oder ab. Wenn aktiviert werden alle Webseite während des Ladens modifiziert.
+#-----------------------------
+
+#File: Autocrawl_p.html
+#---------------------------
+"Save"=="Speichern"
 #-----------------------------
 
 #File: Blacklist_p.html
@@ -383,8 +383,8 @@ Save User==Benutzer speichern
 Appearance and Integration==Erscheinungsbild und Integration
 You can change the appearance of the YaCy interface with skins.==Sie können hier das Aussehen der YaCy Oberfläche mit Skins verändern,
 The selected skin and language also affects the appearance of the search page.==das ausgewählte Design und die gewählte Sprache wirken sich auch auf das Erscheinungsbild der Suchseite aus.
-If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Wenn Sie <a href="ConfigPortal.html">ein Such-Portal mit Yacy erstellen möchten</a> können Sie
-change the appearance of the search page here.==das Erscheinungsbild der Suchseite <a href="ConfigPortal.html">hier</a> weitgehend ändern und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
+If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can==Wenn Sie <a href="ConfigPortal_p.html">ein Such-Portal mit Yacy erstellen möchten</a> können Sie
+change the appearance of the search page here.==das Erscheinungsbild der Suchseite <a href="ConfigPortal_p.html">hier</a> weitgehend ändern und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
 #and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
 Skin Selection==Skinauswahl
 Select one of the default skins, download new skins, or create your own skin.==Wählen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder erstellen Sie selbst einen neuen Skin.
@@ -425,6 +425,13 @@ Access Configuration==Zugangseinstellungen
 Basic Configuration==Grundkonfiguration
 Your YaCy Peer needs some basic information to operate properly==Ihr YaCy-Peer benötigt einige Grundinformationen, um korrekt zu funktionieren
 Select a language for the interface==Wählen Sie eine Sprache für das Interface
+English==Englisch
+Fran&ccedil;ais==Französisch
+&#27721;&#35821;/&#28450;&#35486==Chinesisch
+&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;==Russisch
+&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;==Ukrainisch
+&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;==Hindi
+&#26085;&#26412;&#35486;==Japanisch
 Use Case: what do you want to do with YaCy:==Anwendungsfall: Was Sie mit YaCy tun wollen:
 Community-based web search==Gemeinschafts-basierte Web Suche
 Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==Treten Sie dem globalen Netzwerk 'freeworld' bei und unterstützen Sie es, durchsuchen Sie das Internet mit einem unzensierten, von den Benutzern gestalteten Suchnetzwerk
@@ -435,7 +442,7 @@ This path can be accessed at ==Der Pfad ist erreichbar unter
 Use that path as crawl start point.==Verwenden Sie diesen Pfad als den Startpunkt für den Crawl.
 Intranet Indexing==Intranet Indexierung
 Create a search portal for your intranet or web pages or your (shared) file system.==Ein Suchportal für Ihre Intranet oder öffentlichen Webseiten oder ihr (verteiltes) Dateisystem.
-URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URLs mit folgenden Protokollen (HTTP/HTPPS/FTP) und einem lokalen Domainnamen oder einer IP oder folgende URLs können verwendet werden
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URLs mit folgenden Protokollen (HTTP/HTTPS/FTP) und einem lokalen Domainnamen oder einer IP oder folgende URLs können verwendet werden
 or smb:==oder smb:
 Your peer name has not been customized; please set your own peer name==Ihr Peername wurde noch nicht angepasst; bitte setzen Sie einen eigenen Peernamen ein
 You may change your peer name==Sie können Ihren Peernamen ändern
@@ -637,11 +644,13 @@ Long Description==Lange Beschreibung
 Indexing Domain==Indexierungs Domain
 #DHT==DHT
 "Change Network"=="Netzwerk wechseln"
+
 Distributed Computing Network for Domain==Verteiltes Rechnen Netzwerk für die Domain
-You can configure if you want to participate at the global YaCy network or if you want to have your==Sie können einstellen, ob Sie am globalen YaCy-Netzwerk teilnehmen wollen oder ob Sie einen eigenen
-own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben möchten. Sie können auch
-a completely independent search engine instance, without any data exchange between your peer and other==eine vollkommen unabhängige Instanz einer Suchmaschine, ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers, definieren.
-peers, which we call a 'Robinson' peer.==Dies nennen wir einen 'Robinson'-Peer.
+Enable Peer-to-Peer Mode to participate in the global YaCy network,==Aktiviere Peer-to-Peer Modus um am globalen YaCy-Netzwerk teilzunehmen,
+or if you want your own separate search cluster with or without connection to the global network.==oder wenn sie ein separates Such-Cluster, mit oder ohne Verbindung zum globalen Netzwerk einrichten wollen.
+Enable 'Robinson Mode' for a completely independent search engine instance,==Aktiviere 'Robinson Mode' um eine vollkommen unabhängige Instanz einer Suchmaschine,
+without any data exchange between your peer and other peers.==ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers einzurichten.
+
 Peer-to-Peer Mode==Peer-to-Peer Modus
 >Index Distribution==>Index-Verteilung
 This enables automated, DHT-ruled Index Transmission to other peers==Dies aktiviert den automatischen, DHT-basierten Versand an andere Peers
@@ -684,7 +693,7 @@ If you leave the field empty, no peer asks your peer. If you fill in a '*', your
 "Save"=="Speichern"
 #-----------------------------
 
-#File: ConfigParser.html
+#File: ConfigParser_p.html
 #---------------------------
 Parser Configuration==Parser Einstellungen
 Content Parser Settings==Inhalt Parser Einstellungen
@@ -699,7 +708,7 @@ If you want to test a specific parser you can do so using the==Wenn Sie einen be
 "Submit"=="Speichern"
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
 Integration of a Search Portal==Integration eines Suchportals
 If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==Wenn Sie YaCy als Suchportal für Ihre Webseiten integrieren wollen, können Sie auch die Icons und Nachrichten auf den Suchseiten verändern.
@@ -871,7 +880,6 @@ http://url-of-the-search-result.net==http://URL-des-Suchergebnisses.de
 #>Citation<==>Citation<
 >Pictures<==>Bilder<
 #>Cache<==>Cache<
->Augmented Browsing<==>Angereichertes Browsen<
 "Save Settings"=="Einstellungen Speichern"
 "Set Default Values"=="Setze Standardwerte"
 #-----------------------------
@@ -1198,7 +1206,6 @@ Use filter==Filter nutzen
 Restrict to start domain==Auf Startdomain beschränken
 Restrict to sub-path==Auf Sub-Pfad beschränken
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Dieser Filter ist ein emacs-ähnlicher regulärer Ausdruck, der mit den zu crawlenden URLs übereinstimmen muss;
-#The filter is a <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regular expression</a>==Dieser Filter ist ein <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Regulärer Ausdruck</a>
 #that must match with the URLs which are used to be crawled; default is 'catch all'.==der auf die zum Crawlen verwendeten URLs zutreffen muss. Die Standard Einstellung ist 'alle zulassen'.
 #Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'.==Beispiel: Um nur URLs zuzulassen, die das Wort 'Wissenschaft' beeinhalten, setzen Sie den Filter auf '.*Wissenschaft.*'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==Sie können aber auch eine automatische Domain-Beschränkung benutzen, um eine einzelne Domain komplett zu crawlen.
@@ -1460,6 +1467,7 @@ Inbound Links, incoming to #[host]# - Host List==Eingehende Links, eingehend auf
 #browse #[host]#==Durchsuche #[host]#
 ##[count]# URLs==#[count]# URL(s)
 #Administration Options==Administration Optionen
+<html lang="en">==<html lang="de">
 #-----------------------------
 
 #File: HostBrowserAdmin_p.html
@@ -1586,7 +1594,7 @@ Index Reference Size==Index Referenzgröße
 No reference size limitation (this may cause strong CPU load when words are searched that appear very often)==Kein Referenzgrößen Limit (Dies kann sehr hohe CPU Auslastung erzeigen wenn Wörter gesucht werden die sehr häufig vorkommen)
 Limitation of number of references per word:==Limitierung der Anzahl der Referenzen pro Wort:
 (this causes that old references are deleted if that limit is reached)==(sorgt dafür dass alte References gelöscht werden wenn das Limit erreicht ist)
-"Set References Limit"=="Setze das Referenz Limit"
+>Set References Limit<==>Setze das Referenz Limit<
 #Cleanup==Aufräumen
 #>Index Deletion<==>Index Löschung<
 #>Delete Search Index<==>Lösche Suchindex<
@@ -2421,20 +2429,16 @@ Attributes==Attribute
 
 #File: Performance_p.html
 #---------------------------
+<html lang="en">==<html lang="de">
 Performance Settings==Leistungseinstellungen
 Memory Settings==Speicher Einstellungen
-Memory reserved for JVM==Für JVM reservierter Speicher
+Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Für <abbr title="Java Virtual Machine">JVM</abbr> reservierter Speicher
 "Set"=="Setzen"
 Resource Observer==Ressourcen Beobachter
-DHT-Trigger==DHT-Umschalter
-not triggered:==nicht ausgelöst:
->triggered==>ausgelöst
 reset state==Status zurücksetzen
-HDD==Festplattenspeicher
-disable crawls below==Deaktivere Crawls unter
-free space==freiem Speicher
-disable DHT-in below==Deaktivere eingehende DHT Transfers unter
-RAM==Arbeitsspeicher
+> free space==> freiem Speicher
+disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Deaktivere eingehende <abbr title="Distributed Hash Table">DHT</abbr> Transfers unter
+<abbr title="Random Access Memory">RAM</abbr>==Arbeitsspeicher
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Änderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
 restart now</a>==jetzt neustarten</a>
 Confirm Restart==Bestätige Neustart
@@ -4033,10 +4037,6 @@ Content Semantic==Inhalt Semantik
 >Automated Annotation<==>Automatische Annotation<
 Auto-Annotation Vocabulary Editor==Auto-Annotation Vokabellisten Editor
 Knowledge Loader==Wissensdatenbank-Lader
-# Submenu Augmented Content
->Augmented Content<==>Angereicherter Inhalt<
-Augmented Browsing==Angereichertes Browsing
-Filters and Modules==Filter und Module
 #-----------------------------
 
 #File: env/templates/submenuTargetAnalysis.template

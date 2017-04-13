@@ -26,7 +26,22 @@ package net.yacy.document.parser.html;
 
 import java.util.Properties;
 
+/**
+ * Listener interface to Scraper events
+ */
 public interface ScraperListener extends java.util.EventListener {
+	/**
+	 * Triggered by {@link Scraper#scrapeTag0(net.yacy.document.parser.html.ContentScraper.Tag)} implementations
+	 * @param tagname tag name
+	 * @param tagopts tag attributes
+	 */
     public void scrapeTag0(String tagname, Properties tagopts);
+    
+	/**
+	 * Triggered by {@link Scraper#scrapeTag1(net.yacy.document.parser.html.ContentScraper.Tag)} implementations
+	 * @param tagname tag name
+	 * @param tagopts tag attributes
+	 * @param text tag content text
+	 */
     public void scrapeTag1(String tagname, Properties tagopts, char[] text);
 }

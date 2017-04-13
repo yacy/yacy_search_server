@@ -34,7 +34,8 @@
         <dd>
         <dl>
         <dt>Full Data Records:</dt>
-        <dd><input type="radio" name="format" value="full-solr" checked="checked" /> XML (Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/SURROGATE/in/)<br />
+        <dd><input type="radio" name="format" value="full-solr" /> XML (Rich and full-text Solr data, one document per line in one large xml file, can be processed with shell tools, can be imported with DATA/SURROGATE/in/)<br />
+            <input type="radio" name="format" value="full-elasticsearch" checked="checked" /> JSON (Rich and full-text Elasticsearch data, one document per line in one flat JSON file, can be bulk-imported to elasticsearch with the command "curl -XPOST localhost:9200/collection1/yacy/_bulk --data-binary @yacy_dump_XXX.flatjson")<br />
             <input type="radio" name="format" value="full-rss" /> XML (RSS)</dd>
         <dt>Full URL List:</dt>
         <dd><input type="radio" name="format" value="url-text" /> Plain Text List (URLs only)<br />

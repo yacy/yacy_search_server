@@ -49,6 +49,9 @@ public class SynonymLibrary {
         lib.clear();
         if (!path.exists() || !path.isDirectory()) return;
         final String[] files = path.list();
+        /* Global map of all known distinct words : thus enable reuse of the same word String instance
+         * appearing multiple times in different synonyms sets */
+        final Map<String, String> distinctWords = new HashMap<>();
         for (final String f: files) {
             File ff = new File(path, f);
             String line;
@@ -60,14 +63,22 @@ public class SynonymLibrary {
                     if (line.charAt(line.length() - 1) == '}') line = line.substring(0, line.length() - 1);
                     if (line.charAt(0) == '{') line = line.substring(1);
                     String[] words = CommonPattern.COMMA.split(line);
-                    Set<String> synonyms = new HashSet<String>();
-                    Set<String> keys = new HashSet<String>();
-                    for (String s: words) {
-                        s = s.trim();
-                        if (s.length() < 2) continue;
-                        String t = s.toLowerCase();
-                        synonyms.add(t);
-                        keys.add(t.substring(0, 2));
+                    Set<String> synonyms = new HashSet<String>(words.length);
+                    Set<String> keys = new HashSet<String>(words.length);
+                    for (String word: words) {
+                        word = word.trim();
+                        if (word.length() < 2) continue;
+                        String lowCaseWord = word.toLowerCase();
+                        String kownWord = distinctWords.get(lowCaseWord);
+                        if(kownWord != null) {
+                        	/* This word is already known : let's use the existing String instance from the synonyms map to gain memory space */
+                        	lowCaseWord = kownWord;
+                        } else {
+                        	/* First encounter of this word : let's add it to the global map of known words */
+                        	distinctWords.put(lowCaseWord, lowCaseWord);
+                        }
+                        synonyms.add(lowCaseWord);
+                        keys.add(lowCaseWord.substring(0, 2));
                     }
                     for (String key: keys) {
                         List<Set<String>> symsetlist = lib.get(key);
@@ -91,7 +102,7 @@ public class SynonymLibrary {
     /**
      * for a given word, return a list of synonym words
      * @param word
-     * @return a list of synonyms bot without the requested word
+     * @return a list of synonyms but without the requested word
      */
     public static Set<String> getSynonyms(String word) {
         if (word == null) return null;

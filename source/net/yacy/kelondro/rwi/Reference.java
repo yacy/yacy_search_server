@@ -51,14 +51,33 @@ public interface Reference {
     @Override
     public boolean equals(Object other);
 
+    /**
+     * Joins a Reference into this one, setting the values appropriate for ranking
+     * @param joined reference
+     */
     public void join(final Reference oe);
-    
+
+    /**
+     * First positon of word in text.
+     * Word position is not calculated for titles, for all title words it defaults to 0.
+     * @return min word position starting at 1 (0 if undefined)
+     */
+    public int posintext();
+
+    /**
+     * Positions of search query words for the referenced result url
+     * This is only valid for multi word search queries.
+     * The positions contain the first word position for every joined search query word
+     * which has been joined (by join() )
+     * @return list with word position (excl. the posintext of this reference) or null
+     */
     public Collection<Integer> positions();
-    
-    public int maxposition();
-    
-    public int minposition();
-    
+
+    /**
+     * The average distance (in words) between search query terms for multi word searches.
+     * The distance is calculated from posintext() and positions()
+     * @return word distance
+     */
     public int distance();
         
 }

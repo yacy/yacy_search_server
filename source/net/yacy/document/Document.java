@@ -32,7 +32,6 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,6 +61,7 @@ import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.IconEntry;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -87,18 +87,21 @@ public class Document {
     private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks; // TODO: check if redundant value (set to key.getNameProperty()) is needed
     private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
     private Set<AnchorURL> emaillinks; // mailto: links
-    private MultiProtocolURL favicon;
+    /** links to icons that belongs to the document (mapped by absolute URL) */
+    private Map<DigestURL, IconEntry> icons;
     private boolean resorted;
     private final Set<String> languages;
     private boolean indexingDenied;
     private final double lon, lat;
-    private final Object parserObject; // the source object that was used to create the Document
+    private final Parser parserObject; // the parser object that was used to create the Document
+    // TODO: to allow to use scraper during indexing (for some parsers) it has to be remembered here, but it holds redundant information.
+    private  Object scraperObject; // remember the source object that was used to create the Document (used during indexing)
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
-    private final Date lastModified;
+    private final Date lastModified; // creation or last modification date of the source document
     private int crawldepth;
 
     public Document(final DigestURL location, final String mimeType, final String charset,
-                    final Object parserObject,
+                    final Parser parserObject,
                     final Set<String> languages,
                     final String[] keywords,
                     final List<String> titles,
@@ -139,6 +142,7 @@ public class Document {
         this.videolinks = null;
         this.applinks = null;
         this.emaillinks = null;
+        this.icons = new HashMap<>();
         this.resorted = false;
         this.inboundlinks = null;
         this.outboundlinks = null;
@@ -148,8 +152,9 @@ public class Document {
         this.generic_facets = new HashMap<String, Set<String>>();
         this.lastModified = lastModified == null ? new Date() : lastModified;
         this.crawldepth = 999; // unknown yet
+        this.scraperObject = null; // will be set by setScraperObject()
     }
-    
+
     /**
      * Get the content domain of a document. This tries to get the content domain from the mime type
      * and if this fails it uses alternatively the content domain from the file extension.
@@ -160,9 +165,40 @@ public class Document {
         if (contentDomain != ContentDomain.ALL) return contentDomain;
         return this.dc_source().getContentDomainFromExt();
     }
-    
-    public Object getParserObject() {
+
+    /**
+     * The parser used to generate the document
+     * @return Parser
+     */
+    public Parser getParserObject() {
         return this.parserObject;
+    }
+
+    /**
+     * Convenient call to get the source/scraper object of the underlaying parser
+     * if the parser uses a scraper, like htmlParser
+     * @return scraper object typically of type ContentScraper but may also of type DCEntry
+     */
+    public Object getScraperObject() {
+        return this.scraperObject;
+    }
+
+    /**
+     * Remember the scraper object used, to be able to access used scraper by
+     * getScraperObject().
+     * This is used for surrogate parsers to set a other source/scraper then ContentScraper
+     * used e.g. by htmlParser.
+     * @param scraper 
+     */
+    public void setScraperObject(Object scraper) {
+        if (this.scraperObject != null) {
+            if (this.scraperObject instanceof ContentScraper) {
+                // support garbage collection
+                ((ContentScraper) this.scraperObject).close();
+            }
+            this.scraperObject = null;
+        }
+        this.scraperObject = scraper;
     }
 
     public Set<String> getContentLanguages() {
@@ -493,6 +529,9 @@ dc_rights
         return this.emaillinks;
     }
 
+    /**
+     * @return last modification date of the source document
+     */
     public Date getLastModified() {
         return this.lastModified;
     }
@@ -574,6 +613,14 @@ dc_rights
             // expand the hyperlinks:
             // we add artificial hyperlinks to the hyperlink set
             // that can be calculated from given hyperlinks and imagelinks
+            
+			/*
+			 * Should we also include icons ? with
+			 * this.hyperlinks.putAll(allReflinks(this.icons.keySet())); It is
+			 * problematic as allReflinks will modify icons set set, removing those whose URL is
+			 * starting with "/www" but it is not desired for icons such as
+			 * www.wikipedia.org/static/favicon/wikipedia.ico
+			 */
 
             this.hyperlinks.putAll(allReflinks(this.images.values()));
             this.hyperlinks.putAll(allReflinks(this.audiolinks.keySet()));
@@ -638,10 +685,13 @@ dc_rights
         return v;
     }
 
+    /**
+     * We find all links that are part of a reference inside a url
+     *
+     * @param links links is either a Set of AnchorURL, Strings (with urls) or htmlFilterImageEntries
+     * @return map with contained urls as key and "ref" as value
+     */
     private static Map<AnchorURL, String> allReflinks(final Collection<?> links) {
-        // links is either a Set of Strings (with urls) or
-        // htmlFilterImageEntries
-        // we find all links that are part of a reference inside a url
         final Map<AnchorURL, String> v = new HashMap<AnchorURL, String>();
         final Iterator<?> i = links.iterator();
         Object o;
@@ -658,12 +708,16 @@ dc_rights
                     url = new AnchorURL((String) o);
                 else if (o instanceof ImageEntry)
                     url = new AnchorURL(((ImageEntry) o).url());
+                else if (o instanceof IconEntry)
+                    url = new AnchorURL(((IconEntry) o).getUrl());
                 else {
                     assert false;
                     continue loop;
                 }
                 u = url.toNormalform(true);
-                if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) {
+
+                // find start of a referenced http url
+                if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) { // 7 = skip the protocol part of the source url
                     i.remove();
                     u = u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
@@ -673,14 +727,28 @@ dc_rights
                         v.put(url, "ref");
                     continue loop;
                 }
-                if ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0) {
+
+                // find start of a referenced https url
+                if ((pos = u.toLowerCase().indexOf("https://", 7)) > 0) { // 7 = skip the protocol part of the source url
                     i.remove();
-                    u = "http:/" + u.substring(pos);
-                    while ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0)
-                        u = "http:/" + u.substring(pos);
+                    u = u.substring(pos);
+                    while ((pos = u.toLowerCase().indexOf("https://", 7)) > 0)
+                        u = u.substring(pos);
                     url = new AnchorURL(u);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
+                    continue loop;
+                }
+                
+                if ((pos = u.toLowerCase().indexOf("/www.", 11)) > 0) { // 11 = skip protocol part + www of source url "http://www."
+                    i.remove();
+                    u = url.getProtocol()+":/" + u.substring(pos);
+                    while ((pos = u.toLowerCase().indexOf("/www.", 11)) > 0)
+                        u = url.getProtocol()+":/" + u.substring(pos);
+
+                    AnchorURL addurl = new AnchorURL(u);
+                    if (!(v.containsKey(addurl)))
+                        v.put(addurl, "ref");
                     continue loop;
                 }
             } catch (final MalformedURLException e) {
@@ -697,7 +765,7 @@ dc_rights
      * This is similar to mergeDocuments but directly joins internal content variables,
      * uses less parsed details and keeps this documents crawl data (like crawldepth, lastmodified)
      *
-     * @see mergeDocuments()
+     * @see #mergeDocuments(DigestURL, String, Document[])
      * @param docs to be included
      * @throws IOException
      */
@@ -718,20 +786,26 @@ dc_rights
             this.images.putAll(doc.getImages());
         }
     }
-
+    
     /**
-     * @return the {@link URL} to the favicon that belongs to the document
+     * @return links to icons that belongs to the document (mapped by absolute URL)
      */
-    public MultiProtocolURL getFavicon() {
-    	return this.favicon;
-    }
-
+    public Map<DigestURL, IconEntry> getIcons() {
+		return icons;
+	}
+    
     /**
-     * @param faviconURL the {@link URL} to the favicon that belongs to the document
+     * Set links to icons that belongs to the document (mapped by absolute URL)
+     * @param icons
      */
-    public void setFavicon(final MultiProtocolURL faviconURL) {
-    	this.favicon = faviconURL;
-    }
+    public void setIcons(Map<DigestURL, IconEntry> icons) {
+    	/* Better to ensure now icons property will not be null */
+    	if(icons != null) {
+    		this.icons = icons;	
+    	} else {
+    		this.icons = new HashMap<>();
+    	}
+	}
 
     public int inboundLinkNofollowCount() {
         if (this.inboundlinks == null) resortLinks();
@@ -836,9 +910,13 @@ dc_rights
     }
 
     /**
-     * merge documents: a helper method for all parsers that return multiple documents
-     * @param docs
-     * @return
+     * merge documents: a helper method for all parsers that return multiple documents.
+     * Note : when docs contains more than one item, eventual icons in each docs are not merged in result doc, 
+     * as their scope is limited to only one document.
+     * @param location url of merged document
+     * @param globalMime Mime type of merged document
+     * @param docs documents to merge
+     * @return document resulting of merge, or original document when docs contains only one item.
      */
     public static Document mergeDocuments(final DigestURL location, final String globalMime, final Document[] docs) {
         if (docs == null || docs.length == 0) return null;
@@ -912,10 +990,11 @@ dc_rights
 
         // clean up parser data
         for (final Document doc: docs) {
-            Object parserObject = doc.getParserObject();
-            if (parserObject instanceof ContentScraper) {
-                final ContentScraper html = (ContentScraper) parserObject;
+            Object scraper = doc.getScraperObject();
+            if (scraper instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) scraper;
                 html.close();
+                doc.scraperObject = null;
             }
         }
 
@@ -960,9 +1039,9 @@ dc_rights
                     if (!entry.getKey().attachedNofollow()) result.put(entry.getKey(), entry.getValue());
                 }
             }
-            final Object parser = d.getParserObject();
-            if (parser instanceof ContentScraper) {
-                final ContentScraper html = (ContentScraper) parser;
+            final Object scraper = d.getScraperObject();
+            if (scraper instanceof ContentScraper) {
+                final ContentScraper html = (ContentScraper) scraper;
                 String refresh = html.getRefreshPath();
                 if (refresh != null && refresh.length() > 0) try {result.put(new AnchorURL(refresh), "refresh");} catch (final MalformedURLException e) {}
                 AnchorURL canonical = html.getCanonical();

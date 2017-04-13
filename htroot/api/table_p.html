@@ -7,10 +7,10 @@
     #(/showtable)#
     #%env/templates/metas.template%#
   </head>
-  <script type="text/javascript" src="/js/sorttable.js"></script>
+  <script type="text/javascript" src="../js/sorttable.js"></script>
   <body id="Table">
     #(showtable)#::
-    <form action="/Tables_p.html" method="post" target="_parent" enctype="multipart/form-data" accept-charset="UTF-8" name="tablelisting">
+    <form action="../Tables_p.html" method="post" target="_parent" enctype="multipart/form-data" accept-charset="UTF-8" name="tablelisting">
       <fieldset>
       <legend><label for="table">Table: '#[table]#'</label></legend>
       <table class="sortable" border="0">

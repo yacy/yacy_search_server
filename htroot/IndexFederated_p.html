@@ -14,6 +14,7 @@
     </p>
     
     <form id="config" action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
       <fieldset>
       <legend>Solr Search Index</legend>
       Solr stores the main search index. It is the home of two cores, the default 'collection1' core for documents and the 'webgraph' core for a web structure graph. Detailed information about the used Solr fields can be edited in the <a href="IndexSchema_p.html">Schema Editor</a>.
@@ -81,7 +82,8 @@
       </fieldset>
     </form>
     
-    <form id="config" action="IndexFederated_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form id="config" action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	  <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
       <fieldset>
       <legend>
         Web Structure Index
@@ -100,7 +102,8 @@
       </fieldset>
     </form>
       
-    <form id="config" action="IndexFederated_p.html" method="get" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form id="config" action="IndexFederated_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
       <fieldset>
       <legend>
         Peer-to-Peer Operation

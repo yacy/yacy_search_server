@@ -39,6 +39,7 @@ import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.ResultURLs;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
@@ -51,11 +52,15 @@ import net.yacy.server.serverSwitch;
 
 public class IndexControlURLs_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
 
         final serverObjects prop = new serverObjects();
+        
+        /* Acquire a transaction token for the next possible POST form submissions */
+        final String nextTransactionToken = TransactionManager.getTransactionToken(header);
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, nextTransactionToken);
 
         Segment segment = sb.index;
         long ucount = segment.fulltext().collectionSize();
@@ -72,6 +77,7 @@ public class IndexControlURLs_p {
         prop.put("reload", 0);
         prop.put("reload", 0);
         prop.put("dumprestore", 1);
+        prop.put("dumprestore_" + TransactionManager.TRANSACTION_TOKEN_PARAM, nextTransactionToken);
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
         prop.put("dumprestore_optimizemax", 10);
@@ -107,6 +113,9 @@ public class IndexControlURLs_p {
 
         // delete everything
         if ( post.containsKey("deletecomplete") ) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             if ( post.get("deleteIndex", "").equals("on") ) {
                 try {segment.fulltext().clearLocalSolr();} catch (final IOException e) {}
             }
@@ -137,12 +146,18 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdeleteall")) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
             int i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, agent, CacheStrategy.IFEXIST);
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
         }
 
         if (post.containsKey("urlhashdelete")) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             DigestURL url;
             try {
                 url = segment.fulltext().getURL(urlhash);
@@ -160,6 +175,9 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urldelete")) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             try {
                 urlhash = ASCII.String((new DigestURL(urlstring)).hash());
             } catch (final MalformedURLException e) {
@@ -184,7 +202,7 @@ public class IndexControlURLs_p {
                     prop.putHTML("urlstring", urlstring);
                     prop.put("urlhash", "");
                 } else {
-                    prop.putAll(genUrlProfile(segment, entry, urlhash));
+                    prop.putAll(genUrlProfile(segment, entry, urlhash, nextTransactionToken));
                     prop.put("statistics", 0);
                 }
             } catch (final MalformedURLException e) {
@@ -199,23 +217,32 @@ public class IndexControlURLs_p {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
                 prop.putHTML("urlstring", entry.url().toNormalform(true));
-                prop.putAll(genUrlProfile(segment, entry, urlhash));
+                prop.putAll(genUrlProfile(segment, entry, urlhash, nextTransactionToken));
                 prop.put("statistics", 0);
             }
         }
         
         if (post.containsKey("optimizesolr")) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
         	final int size = post.getInt("optimizemax", 10);
         	segment.fulltext().optimize(size);
             sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr optimize " + size);
         }
 
         if (post.containsKey("rebootsolr")) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             segment.fulltext().rebootSolr();
             sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr reboot");
         }
 
         if (post.containsKey("deletedomain")) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             final String domain = post.get("domain");
             Set<String> hostnames = new HashSet<String>();
             hostnames.add(domain);
@@ -238,6 +265,7 @@ public class IndexControlURLs_p {
                 prop.put("statisticslines_domains_" + cnt + "lines", count);
                 while (statsiter.hasNext() && cnt < count) {
                     hostname = statsiter.next();
+                    prop.put("statisticslines_domains_" + cnt + "_" + TransactionManager.TRANSACTION_TOKEN_PARAM, nextTransactionToken);
                     prop.put("statisticslines_domains_" + cnt + "_dark", (dark) ? "1" : "0");
                     prop.put("statisticslines_domains_" + cnt + "_domain", hostname);
                     prop.put("statisticslines_domains_" + cnt + "_count", stats.get(hostname));
@@ -257,7 +285,7 @@ public class IndexControlURLs_p {
         return prop;
     }
 
-    private static serverObjects genUrlProfile(final Segment segment, final URIMetadataNode entry, final String urlhash) {
+    private static serverObjects genUrlProfile(final Segment segment, final URIMetadataNode entry, final String urlhash, final String nextTransactionToken) {
         final serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", "1");
@@ -271,6 +299,7 @@ public class IndexControlURLs_p {
             return prop;
         }
         prop.put("genUrlProfile", "2");
+        prop.put("genUrlProfile_" + TransactionManager.TRANSACTION_TOKEN_PARAM, nextTransactionToken);
         prop.putHTML("genUrlProfile_urlNormalform", entry.url().toNormalform(true));
         prop.put("genUrlProfile_urlhash", urlhash);
         prop.put("genUrlProfile_urlDescr", entry.dc_title());

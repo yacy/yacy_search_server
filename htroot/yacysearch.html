@@ -1,10 +1,10 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 <head>
   <title>#[former]# - YaCy '#[clientname]#': Search Page</title>
   #%env/templates/metas.template%#
-  <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?query=#[former]#" />
-  <link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="http://#[thisaddress]#/opensearchdescription.xml" />
+  <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?query=#[formerEncoded]#" />
+  <link rel="search" type="application/opensearchdescription+xml" title="YaCy '#[clientname]#'" href="#[thisaddress]#/opensearchdescription.xml" />
   <link rel="stylesheet" type="text/css" media="screen" href="env/highslide.css" />
   <script type="text/javascript" src="js/ajax.js"></script>
   <script type="text/javascript" src="js/xml.js"></script>
@@ -30,7 +30,7 @@
   }
   document.onkeydown = handleArrowKeys;
   </script>
-  <script type="text/javascript" src="/env/bootstrap/js/typeahead.jquery.min.js"></script>
+  <script type="text/javascript" src="env/bootstrap/js/typeahead.jquery.min.js"></script>
   <script type="text/javascript">
      var suggestMatcher = function() {
        return function opensearch(q, cb) {
@@ -63,9 +63,9 @@
 <body id="yacysearch" #(focus)#::onLoad="document.searchform.query.focus();"#(/focus)#>
 
     #(topmenu)#
-    #%env/templates/embeddedheader.template%#
+    #%env/templates/embeddedSearchHeader.template%#
     ::
-    #%env/templates/simpleheader.template%#
+    #%env/templates/simpleSearchHeader.template%#
     <script type="text/javascript">
       document.getElementById("header_websearch").className += " active";
     </script>
@@ -88,11 +88,15 @@ Use the RSS search result format to add static searches to your RSS reader, if y
 
   <div class="row">
     <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
+#(topmenu)#
+<form class="search small" name="searchform" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;">
+::
+<form class="search small col-xs-9 col-sm-5 col-lg-5" name="searchform" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;">
+#(/topmenu)#
 
-<form class="search small" name="searchform" action="" method="get" accept-charset="UTF-8" style="position:fixed;top:8px;z-index:1052;max-width:500px;">
-
-  <div class="input-group">
-    <input name="query" id="search" type="text" class="form-control searchinput typeahead" size="40" maxlength="200" placeholder="#[promoteSearchPageGreeting]#" value="#[former]#" #(focus)#::autofocus="autofocus"#(/focus)# onFocus="this.select()" onclick="document.getElementById('Enter').innerHTML = 'search'"/>
+  <div class="input-group" style="max-width:445px;">
+    <input name="query" id="search" type="text" class="form-control searchinput typeahead" size="40" maxlength="200" 
+    	placeholder="#[promoteSearchPageGreeting]#" value="#[former]#" #(focus)#::autofocus="autofocus"#(/focus)# onFocus="this.select()" onclick="document.getElementById('Enter').innerHTML = 'search'"/>
     <div class="input-group-btn">
        <button id="Enter" name="Enter" class="btn btn-default" type="submit">search</button>
     </div>
@@ -159,7 +163,7 @@ document.getElementById("Enter").innerHTML = "search again";
     ::
   <div class="searchresults">
   <h4 class="linktitle">
-  <img src="http://www.openstreetmap.org/favicon.ico" class="favicon" style="width:16px; height:16px;" alt="" />
+  <img src="https://www.openstreetmap.org/favicon.ico" class="favicon" style="width:16px; height:16px;" alt="" />
   Location -- click on map to enlarge</h4>
   <p class="url">
   #{loc}#
@@ -218,7 +222,8 @@ function latestinfo() {
   self.xmlHttpReq.onreadystatechange = function() {
     if (self.xmlHttpReq.readyState == 4) {
       var rsp = eval("(" + self.xmlHttpReq.responseText + ")");
-      statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase);
+      
+      statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#);
     }
   };
   self.xmlHttpReq.send(null);

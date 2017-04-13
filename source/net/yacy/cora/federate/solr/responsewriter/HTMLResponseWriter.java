@@ -22,15 +22,18 @@ package net.yacy.cora.federate.solr.responsewriter;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.federate.solr.SolrType;
+import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
@@ -52,7 +55,6 @@ import org.apache.solr.util.DateFormatUtil;
 
 public class HTMLResponseWriter implements QueryResponseWriter {
 
-    private static final Set<String> DEFAULT_FIELD_LIST = null;
     public static final Pattern dqp = Pattern.compile("\"");
     
     public HTMLResponseWriter() {
@@ -67,6 +69,39 @@ public class HTMLResponseWriter implements QueryResponseWriter {
     @Override
     public void init(@SuppressWarnings("rawtypes") NamedList n) {
     }
+    
+    /**
+     * Append YaCy JavaScript license information to writer
+     * @param writer must be non null
+     * @throws IOException when a write error occurred
+     */
+	private void writeJSLicence(final Writer writer) throws IOException {
+		writer.write("<script>");
+		writer.write("/*");
+		writer.write("@licstart  The following is the entire license notice for the");
+		writer.write("JavaScript code in this page.");
+		writer.write("");
+		writer.write("Copyright (C) 2013-2015 by Michael Peter Christen and reger");
+		writer.write("");
+		writer.write("The JavaScript code in this page is free software: you can redistribute it and/or");
+		writer.write("modify it under the terms of the GNU General Public License");
+		writer.write("as published by the Free Software Foundation; either version 2");
+		writer.write("of the License, or (at your option) any later version.");
+		writer.write("");
+		writer.write("This program is distributed in the hope that it will be useful,");
+		writer.write("but WITHOUT ANY WARRANTY; without even the implied warranty of");
+		writer.write("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the");
+		writer.write("GNU General Public License for more details.");
+		writer.write("");
+		writer.write("You should have received a copy of the GNU General Public License");
+		writer.write("along with this program; if not, write to the Free Software");
+		writer.write("Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.");
+		writer.write("");
+		writer.write("@licend  The above is the entire license notice");
+		writer.write("for the JavaScript code in this page.");
+		writer.write("*/");
+		writer.write("</script>");
+	}
 
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
@@ -81,42 +116,46 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         //writer.write("-->\n");
         writer.write("<html xmlns=\"http://www.w3.org/1999/xhtml\"\n");
         writer.write("      xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n");
-        writer.write("      xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n");
+        writer.write("      xmlns:dc=\"" + DublinCore.NAMESPACE + "\"\n");
         writer.write("      xmlns:foaf=\"http://xmlns.com/foaf/0.1/\">\n");
         writer.write("<head profile=\"http://www.w3.org/2003/g/data-view\">\n");
+        writer.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
+        this.writeJSLicence(writer);
         //writer.write("<link rel=\"transformation\" href=\"http://www-sop.inria.fr/acacia/soft/RDFa2RDFXML.xsl\"/>\n");
 
         writer.write("<!-- Bootstrap core CSS -->\n");
-        writer.write("<link href=\"/env/bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n");
-        writer.write("<link href=\"/env/bootstrap/css/bootstrap-switch.min.css\" rel=\"stylesheet\">\n");
-        //writer.write("<script src=\"/env/bootstrap/js/jquery.min.js\"></script>\n");
-        //writer.write("<script src=\"/env/bootstrap/js/bootstrap.min.js\"></script>\n");
-        //writer.write("<script src=\"/env/bootstrap/js/docs.min.js\"></script>\n");
-        //writer.write("<script src=\"/env/bootstrap/js/bootstrap-switch.min.js\"></script>\n");
+        writer.write("<link href=\"../env/bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n");
+        writer.write("<link href=\"../env/bootstrap/css/bootstrap-switch.min.css\" rel=\"stylesheet\">\n");
+        //writer.write("<script src=\"../env/bootstrap/js/jquery.min.js\"></script>\n");
+        //writer.write("<script src=\"../env/bootstrap/js/bootstrap.min.js\"></script>\n");
+        //writer.write("<script src=\"../env/bootstrap/js/bootstrap-switch.min.js\"></script>\n");
         writer.write("<!-- Custom styles for this template, i.e. navigation (move this to base.css) -->\n");
-        writer.write("<link href=\"/env/bootstrap-base.css\" rel=\"stylesheet\">\n");
+        writer.write("<link href=\"../env/bootstrap-base.css\" rel=\"stylesheet\">\n");
         //writer.write("<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->\n");
         //writer.write("<!--[if lt IE 9]>\n");
-        //writer.write("  <script src=\"/env/bootstrap/js/html5shiv.js\"></script>\n");
-        //writer.write("  <script src=\"/env/bootstrap/js/respond.min.js\"></script>\n");
+        //writer.write("  <script src=\"../env/bootstrap/js/html5shiv.js\"></script>\n");
+        //writer.write("  <script src=\"../env/bootstrap/js/respond.min.js\"></script>\n");
         //writer.write("<![endif]-->\n");
         writer.write("<!-- old css styles -->\n");
-        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"/env/base.css\" />\n");
-        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/style.css\" />\n");
+        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"../env/base.css\" />\n");
+        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/style.css\" />\n");
         writer.write("<!--[if lt IE 6]>\n");
-        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/oldie.css\" />\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/oldie.css\" />\n");
         writer.write("<![endif]-->\n");
         writer.write("<!--[if lte IE 6.0]>\n");
-        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/ie6.css\" />\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/ie6.css\" />\n");
         writer.write("<![endif]-->\n");
         writer.write("<!--[if lte IE 7.0]>\n");
-        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/env/ie7.css\" />\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/ie7.css\" />\n");
         writer.write("<![endif]-->\n");
         writer.write("<!-- (C), Architecture: Michael Peter Christen; Contact: mc <at> yacy.net -->\n");
 
         NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
         paramsList.remove("wt");
-        String xmlquery = dqp.matcher("/solr/select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
+        
+        final String coreName = request.getCore().getName();
+        
+        String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName).replaceAll("%22");
 
         DocList response = ((ResultContext) values.get("response")).docs;
         final int sz = response.size();
@@ -126,26 +165,42 @@ public class HTMLResponseWriter implements QueryResponseWriter {
             IndexSchema schema = request.getSchema();
 
             int id = iterator.nextDoc();
-            Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
+            Document doc = searcher.doc(id);
             LinkedHashMap<String, String> tdoc = translateDoc(schema, doc);
 
-            String title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc           
-            if (sz == 1) {
-                writer.write("<title>" + title + "</title>\n</head><body>\n");
+            
+            String title;
+            if(CollectionSchema.CORE_NAME.equals(coreName)) {
+            	title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc
+            	if (title == null) title = "";
+            	if (sz == 1) {
+            		writer.write("<title>" + title + "</title>\n</head><body>\n");
+            	} else {
+            		writer.write("<title>Documents List</title>\n</head><body>\n");
+            	}
+            } else if(WebgraphSchema.CORE_NAME.equals(coreName)) {
+            	title = "";
+            	writer.write("<title>Links list</title>\n</head><body>\n");
             } else {
-                writer.write("<title>Document List</title>\n</head><body>\n");
+            	title = "";
+            	writer.write("<title>Solr documents List</title>\n</head><body>\n");
             }
             writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
             writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
 
-            writeDoc(writer, tdoc, title);
+            writeDoc(writer, tdoc, title, coreName);
 
             while (iterator.hasNext()) {
                 id = iterator.nextDoc();
-                doc = searcher.doc(id, DEFAULT_FIELD_LIST);
+                doc = searcher.doc(id);
                 tdoc = translateDoc(schema, doc);
-                title = tdoc.get(CollectionSchema.title.getSolrFieldName());
-                writeDoc(writer, tdoc, title);
+                if(CollectionSchema.CORE_NAME.equals(coreName)) {
+                	title = tdoc.get(CollectionSchema.title.getSolrFieldName());
+                    if (title == null) title = "";
+                } else {
+                	title = "";
+                }
+                writeDoc(writer, tdoc, title, coreName);
             }
         } else {
             writer.write("<title>No Document Found</title>\n</head><body>\n");
@@ -155,16 +210,21 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("</body></html>\n");
     }
 
-    private static final void writeDoc(Writer writer, LinkedHashMap<String, String> tdoc, String title) throws IOException {
+    private static final void writeDoc(final Writer writer, final LinkedHashMap<String, String> tdoc, final String title, final String coreName) throws IOException {
         writer.write("<form name=\"yacydoc" + title + "\" method=\"post\" action=\"#\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\">\n");
         writer.write("<fieldset>\n");
         
         // add a link to re-crawl this url (in case it is a remote metadata only entry)
-        String sku = tdoc.get(CollectionSchema.sku.getSolrFieldName());
-        final String jsc= "javascript:w = window.open('/QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&followFrames=on&obeyHtmlRobotsNoindex=on&obeyHtmlRobotsNofollow=off&xdstopw=on&title='+escape('"+title+"')+'&url='+escape('"+sku+"'),'_blank','height=250,width=600,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();";
-        writer.write("<div class='btn btn-default btn-sm' style='float:right' onclick=\""+jsc+"\">re-crawl url</div>\n");
+        if(CollectionSchema.CORE_NAME.equals(coreName)) {
+        	String sku = tdoc.get(CollectionSchema.sku.getSolrFieldName());
+        	if(sku != null) {
+        		final String jsc= "javascript:w = window.open('../QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&followFrames=on&obeyHtmlRobotsNoindex=on&obeyHtmlRobotsNofollow=off&xdstopw=on&title=" + URLEncoder.encode(title, StandardCharsets.UTF_8.name()) + "&url='+escape('"+sku+"'),'_blank','height=250,width=600,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();";
+        		writer.write("<div class='btn btn-default btn-sm' style='float:right' onclick=\""+jsc+"\">re-crawl url</div>\n");
+        	}
+        	
+            writer.write("<h1 property=\"" + DublinCore.Title.getURIref()+ "\">" + title + "</h1>\n");
+        }
 
-        writer.write("<h1 property=\"dc:Title\">" + title + "</h1>\n");
         writer.write("<dl>\n");
         for (Map.Entry<String, String> entry: tdoc.entrySet()) {
             writer.write("<dt>");

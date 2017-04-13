@@ -59,6 +59,7 @@ import net.yacy.cora.federate.solr.instance.InstanceMirror;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.solr.instance.ShardInstance;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.FlatJSONResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
@@ -71,6 +72,7 @@ import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
@@ -86,8 +88,8 @@ import org.apache.lucene.util.Version;
 
 public final class Fulltext {
 
-    private static final String SOLR_PATH = "solr_5_2"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
-    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10"};
+    private static final String SOLR_PATH = "solr_5_5"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2"};
     
     // class objects
     private final File                    segmentPath;
@@ -178,7 +180,13 @@ public final class Fulltext {
 
     public RemoteSolrConnector getDefaultRemoteSolrConnector() {
         try {
-            return this.solrInstances.getDefaultRemoteConnector(true);
+    		boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
+    		if (Switchboard.getSwitchboard() != null) {
+    			useBinaryResponseWriter = Switchboard.getSwitchboard().getConfigBool(
+    					SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
+    					SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT);
+    		}
+            return this.solrInstances.getDefaultRemoteConnector(useBinaryResponseWriter);
         } catch (IOException e) {
             return null;
         }
@@ -226,8 +234,8 @@ public final class Fulltext {
                 for (String name: instance.getCoreNames()) {
                     this.solrInstances.getEmbeddedConnector(name).clear();
                 }
+                this.commit(false);
             }
-            this.commit(false);
             this.solrInstances.clearCaches();
         }
     }
@@ -262,8 +270,7 @@ public final class Fulltext {
     }
     
     /**
-     * get the size of the webgraph index
-     * @return
+     * @return the size of the webgraph index
      */
     public long webgraphSize() {
         return this.writeWebgraph ? this.getWebgraphConnector().getSize() : 0;
@@ -272,7 +279,9 @@ public final class Fulltext {
     public void close() {
         try {
             this.solrInstances.close();
-        } catch (Throwable e) {}
+        } catch (Throwable e) {
+        	ConcurrentLog.logException(e);
+        }
     }
     
     private long lastCommit = 0;
@@ -283,22 +292,33 @@ public final class Fulltext {
         getDefaultConnector().commit(softCommit);
         if (this.writeWebgraph) getWebgraphConnector().commit(softCommit);
     }
-    
+
+    /**
+     * Loads the meta data stored in the embedded solr index for the url referenced
+     * by the WordReference.
+     * The WordReference and the YaCy score (element.weight()) become part (and
+     * are accessible) of the returned document.
+     * If the no document with url.hash = solrdocument.id is found in the embedded
+     * Solr index null is return.
+     * 
+     * @param element rwi wordreference
+     * @return URIMetadataNode (solrdocument) with all fields stored in embedded solr index
+     */
     public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
         if (element == null) return null;
         WordReferenceVars wre = element.getElement();        
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
-        float score = element.getWeight();
+        long score = element.getWeight();
         URIMetadataNode node = getMetadata(wre.urlhash(), wre, score);
         return node;
     }
 
     public URIMetadataNode getMetadata(final byte[] urlHash) {
         if (urlHash == null) return null;
-        return getMetadata(urlHash, null, 0.0f);
+        return getMetadata(urlHash, null, 0L);
     }
     
-    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final float score) {
+    private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long score) {
         String u = ASCII.String(urlHash);
         
         // get the metadata from Solr
@@ -377,7 +397,7 @@ public final class Fulltext {
     /**
      * using a fragment of the url hash (6 bytes: bytes 6 to 11) it is possible to address all urls from a specific domain
      * here such a fragment can be used to delete all these domains at once
-     * @param hosthash the hash of the host to be deleted
+     * @param hosthashes the hashes of the hosts to be deleted
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
      * @throws IOException
      */
@@ -447,9 +467,8 @@ public final class Fulltext {
     
     /**
      * remove a full subpath from the index
-     * @param subpath the left path of the url; at least until the end of the host
+     * @param basepath the left path of the url; at least until the end of the host
      * @param freshdate either NULL or a date in the past which is the limit for deletion. Only documents older than this date are deleted
-     * @param concurrently if true, then the method returnes immediately and runs concurrently
      */
     public int remove(final String basepath, Date freshdate) {
         DigestURL uri;
@@ -476,26 +495,37 @@ public final class Fulltext {
     }
     
     /**
-     * remove a list of id's from the index
+     * remove a list of id's from the index (matching fulltext.id and webgraph.source_id_s
      * @param deleteIDs a list of urlhashes; each denoting a document
-     * @param concurrently if true, then the method returnes immediately and runs concurrently
      */
     public void remove(final Collection<String> deleteIDs) {
         if (deleteIDs == null || deleteIDs.size() == 0) return;
         try {
             this.getDefaultConnector().deleteByIds(deleteIDs);
-            if (this.writeWebgraph) this.getWebgraphConnector().deleteByIds(deleteIDs);
+            if (this.writeWebgraph) { // Webgraph.id is combination of sourceHash+targetHash+hexCounter, to be successful use source_id_s and/or target_id_s
+                for (String id : deleteIDs) {
+                    this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.name() + ":" + id);
+                }
+            }
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
     }
-    
+
+    /**
+     * Deletes document with id=urlHash from fulltext index and document with
+     * source_id_s=urlHash from webgraph index
+     * @param urlHash the document id
+     * @return false
+     */
     public boolean remove(final byte[] urlHash) {
         if (urlHash == null) return false;
         try {
             String id = ASCII.String(urlHash);
             this.getDefaultConnector().deleteById(id);
-            if (this.writeWebgraph) this.getWebgraphConnector().deleteById(id);
+            if (this.writeWebgraph) { // Webgraph.id is combination of sourceHash+targetHash+hexCounter, to be successful use source_id_s and/or target_id_s
+                this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s + ":" + id);
+            }
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
@@ -546,7 +576,7 @@ public final class Fulltext {
     
     /**
      * create a dump file from the current solr directory
-     * @return
+     * @return file reference to the dump
      */
     public File dumpSolr() {
         EmbeddedInstance esc = this.solrInstances.getEmbedded();
@@ -577,7 +607,7 @@ public final class Fulltext {
         EmbeddedInstance esc = this.solrInstances.getEmbedded();
         File storagePath = esc.getContainerPath();
         synchronized (this.solrInstances) {
-            this.disconnectLocalSolr();
+            // this.disconnectLocalSolr(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances.close();
             try {
                 ZIPReader.unzip(solrDumpZipFile, storagePath);
@@ -610,7 +640,7 @@ public final class Fulltext {
     public void rebootSolr() {
         synchronized (this.solrInstances) {
             this.disconnectLocalSolr();
-            this.solrInstances.close();
+            // this.solrInstances.close(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances = new InstanceMirror();
             try {
                 this.connectLocalSolr();
@@ -621,7 +651,7 @@ public final class Fulltext {
     }
 
     public static enum ExportFormat {
-        text("txt"), html("html"), rss("rss"), solr("xml");
+        text("txt"), html("html"), rss("rss"), solr("xml"), elasticsearch("flatjson");
         private final String ext;
         private ExportFormat(String ext) {this.ext = ext;}
         public String getExt() {return this.ext;}
@@ -661,8 +691,26 @@ public final class Fulltext {
         SolrDocument lastdoc = lastdoclist.get(0);
         Object firstdateobject = firstdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
         Object lastdateobject = lastdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-        Date firstdate = (Date) firstdateobject;
-        Date lastdate = (Date) lastdateobject;
+        
+    	/* When firstdate or lastdate is null, we use a default one just to generate a proper dump file path 
+    	 * This should not happen because load_date_dt field is mandatory in the main Solr schema, 
+    	 * but for some reason some documents might end up here with an empty load_date_dt field value */
+        final Date firstdate;
+        if(firstdateobject instanceof Date) {
+        	firstdate = (Date) firstdateobject;
+        } else {
+			ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
+					+ firstdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+        	firstdate = new Date(0);
+        }
+        final Date lastdate;
+        if(lastdateobject instanceof Date) {
+        	lastdate = (Date) lastdateobject;
+        } else {
+			ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
+					+ lastdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+        	lastdate = new Date(0);
+        }
         String s = new File(path, yacy_dump_prefix +
                 "f" + GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate) + "_" +
                 "l" + GenericFormatter.FORMAT_SHORT_MINUTE.format(lastdate) + "_" +
@@ -687,6 +735,11 @@ public final class Fulltext {
         this.exportthread.start();
         return this.exportthread;
     }
+    
+    public static void main(String args[]) {
+    	Date firstdate = null;
+    	System.out.println(GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate));
+    }
 
     public Export export() {
         return this.exportthread;
@@ -701,6 +754,7 @@ public final class Fulltext {
         private final boolean dom, text;
 
         private Export(final File f, final String filter, final String query, final ExportFormat format, final boolean dom, final boolean text) {
+        	super("Fulltext.Export");
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
             this.pattern = filter == null ? null : Pattern.compile(filter);
@@ -748,15 +802,18 @@ public final class Fulltext {
                         this.count++;
                     }
                 } else {
-                    if (this.format == ExportFormat.solr || (this.text && this.format == ExportFormat.text)) {
+                    if (this.format == ExportFormat.solr || this.format == ExportFormat.elasticsearch || (this.text && this.format == ExportFormat.text)) {
                         BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true);
                         SolrDocument doc;
                         while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                             String url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
                             if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
                             CRIgnoreWriter sw = new CRIgnoreWriter();
-                            if (this.text) sw.write((String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName())); else EnhancedXMLResponseWriter.writeDoc(sw, doc);
+                            if (this.text) sw.write((String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName()));
+                            if (this.format == ExportFormat.solr) EnhancedXMLResponseWriter.writeDoc(sw, doc);
+                            if (this.format == ExportFormat.elasticsearch) FlatJSONResponseWriter.writeDoc(sw, doc);
                             sw.close();
+                            if (this.format == ExportFormat.elasticsearch) pw.println("{\"index\":{}}");
                             String d = sw.toString();
                             pw.println(d);
                             this.count++;

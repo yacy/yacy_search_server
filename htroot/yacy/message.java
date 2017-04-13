@@ -31,13 +31,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
@@ -56,9 +54,8 @@ import com.google.common.io.Files;
 
 public final class message {
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     public static String dateString(final Date date) {
-        return SimpleFormatter.format(date);
+        return GenericFormatter.SIMPLE_FORMATTER.format(date);
     }
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -71,8 +68,8 @@ public final class message {
         if (!Protocol.authentifyRequest(post, env)) return prop;
 
         final String process = post.get("process", "permission");
-        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
-        final InetAddress ias = Domains.dnsResolve(clientip);
+        final String clientip = header.getRemoteAddr();
+        final InetAddress ias = clientip != null ? Domains.dnsResolve(clientip) : null;
 
         final int messagesize = 10240;
         final int attachmentsize = 0;
@@ -90,7 +87,7 @@ public final class message {
 
         if ((sb.isRobinsonMode()) &&
         	 (!((sb.isPublicRobinson()) ||
-        	    (sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))))) {
+        	    (sb.isInMyCluster(header.getRemoteAddr()))))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("response", "-1"); // request rejected
             return prop;
@@ -116,7 +113,7 @@ public final class message {
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
             Seed otherSeed;
             try {
-                otherSeed = Seed.genRemoteSeed(otherSeedString, false, ias.getHostAddress());
+                otherSeed = Seed.genRemoteSeed(otherSeedString, false, ias == null ? null : ias.getHostAddress());
             } catch (final IOException e) {
                 prop.put("response", "-1"); // don't accept messages for bad seeds
                 return prop;

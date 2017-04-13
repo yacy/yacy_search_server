@@ -11,7 +11,7 @@
 
 ## YaCy solrconnector specific settings
 ## the basic url to acces the system
-_baseurl = http://search.datacite.org/
+_baseurl = https://search.datacite.org/
 ## Solr core, is appended to the _baseurl
 _corename = api
 ## some systems store a identifier instead of a url for the resource, the prefix is prepended the identifier in _skufieldname

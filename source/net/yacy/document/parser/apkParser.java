@@ -376,9 +376,9 @@ public class apkParser extends AbstractParser implements Parser  {
          * Return the string stored in StringTable format at offset strOff.
          * This offset points to the 16 bit string length, which
          * is followed by that number of 16 bit (Unicode) chars.
-         * @param arr
-         * @param strOff
-         * @return
+         * @param arr source byte array
+         * @param strOff offset position
+         * @return the computed string
          */
         public String compXmlStringAt(byte[] arr, int strOff) {
             int strLen = arr[strOff + 1] << 8 & 0xff00 | arr[strOff] & 0xff;
@@ -392,10 +392,9 @@ public class apkParser extends AbstractParser implements Parser  {
         }
     
         /**
-         * Return value of a Little Endian 32 bit word from the byte array at offset off.
-         * @param arr
-         * @param off
-         * @return
+         * @param arr source byte array
+         * @param off byte array offset position
+         * @return value of a Little Endian 32 bit word from the byte array at offset off.
          */
         public int LEW(byte[] arr, int off) {
             return arr[off + 3] << 24 & 0xff000000 | arr[off + 2] << 16 & 0xff0000 | arr[off + 1] << 8 & 0xff00 | arr[off] & 0xFF;

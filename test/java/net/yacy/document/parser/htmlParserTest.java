@@ -3,6 +3,7 @@ package net.yacy.document.parser;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -139,6 +140,35 @@ public class htmlParserTest extends TestCase {
 
         String txt = scraper.getText();
         System.out.println("ScraperTagTest: [" + textSource + "] = [" + txt + "]");
+        assertEquals(txt, textSource);
+    }
+
+    /**
+     * Test for parseToScraper of class htmlParser for scraping html with a
+     * <script> tag which contains code with similar to other opening tag
+     * like "<a " see https://github.com/yacy/yacy_search_server/issues/109
+     */
+    @Test
+    public void testParteToScraper_ScriptTag() throws MalformedURLException, IOException {
+        final AnchorURL url = new AnchorURL("http://localhost/");
+        final String charset = StandardCharsets.UTF_8.name();
+        final String textSource = "test text";
+        // extract from test case provided by https://github.com/yacy/yacy_search_server/issues/109
+        String testhtml = "<!doctype html>"
+                + "<html class=\"a-no-js\" data-19ax5a9jf=\"dingo\">"
+                + "<head><script>var aPageStart = (new Date()).getTime();</script><meta charset=\"utf-8\"><!--  emit CSM JS -->\n"
+                + "<script>\n"
+                + "function D(){if(E){var a=f.innerWidth?{w:f.innerWidth,h:f.innerHeight}:{w:k.clientWidth,h:k.clientHeight};5<Math.abs(a.w-\n"
+                //  the  50<a  is a possible error case
+                + "P.w)||50<a.h-P.h?(P=a,Q=4,(a=l.mobile||l.tablet?450<a.w&&a.w>a.h:1250==a.w)?C(k,\"a-ws\"):ca(k,\"a-ws\")):Q--&&(ea=setTimeout(D,16))}}function na(a){(E=void 0===a?!E:!!a)&&D()}"
+                + "</script>\n"
+                + "</head>\n"
+                + "<body>" + textSource + "</body>\n"
+                + "</html>";
+        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10);
+
+        String txt = scraper.getText();
+        System.out.println("ScraperScriptTagTest: [" + textSource + "] = [" + txt + "]");
         assertEquals(txt, textSource);
     }
 }

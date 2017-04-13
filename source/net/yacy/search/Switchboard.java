@@ -47,9 +47,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -64,6 +68,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -81,6 +86,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -100,7 +106,6 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.Ranking;
-import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
@@ -112,11 +117,8 @@ import net.yacy.cora.order.NaturalOrder;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.TimeoutRequest;
-import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.util.CommonPattern;
@@ -144,6 +146,7 @@ import net.yacy.data.BookmarksDB;
 import net.yacy.data.ListManager;
 import net.yacy.data.MessageBoard;
 import net.yacy.data.UserDB;
+import net.yacy.data.UserDB.AccessRight;
 import net.yacy.data.WorkTables;
 import net.yacy.data.wiki.WikiBoard;
 import net.yacy.data.wiki.WikiCode;
@@ -161,6 +164,7 @@ import net.yacy.document.Tokenizer;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
+import net.yacy.document.importer.WarcImporter;
 import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.html.Evaluation;
@@ -202,12 +206,14 @@ import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReportCache;
 import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
+import net.yacy.server.serverCore;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.RobotsTxtConfig;
 import net.yacy.utils.CryptoLib;
@@ -215,6 +221,8 @@ import net.yacy.utils.crypt;
 import net.yacy.utils.upnp.UPnP;
 import net.yacy.visualization.CircleTool;
 
+import com.cybozu.labs.langdetect.DetectorFactory;
+import com.cybozu.labs.langdetect.LangDetectException;
 import com.google.common.io.Files;
 
 
@@ -408,6 +416,14 @@ public final class Switchboard extends serverSwitch {
                 ProbabilisticClassifier.initialize(Switchboard.this.classificationPath);
             }
         }.start();
+        
+        // init the language detector
+        this.log.config("Loading language profiles");
+        try {
+			DetectorFactory.loadProfile(new File(appPath, "langdetect").toString());
+		} catch (LangDetectException e) {
+			ConcurrentLog.logException(e);
+		}
 
         // init global host name cache
         Domains.init(new File(this.workPath, "globalhosts.list"));
@@ -477,29 +493,6 @@ public final class Switchboard extends serverSwitch {
             // update the working scheme with the backup scheme. This is necessary to include new features.
             // new features are always activated by default (if activated in input-backupScheme)
             solrCollectionConfigurationWork.fill(solrCollectionConfigurationInit, true);
-            // switch on some fields which are necessary for ranking and faceting
-            SchemaConfiguration.Entry entry;
-            for (CollectionSchema field: new CollectionSchema[]{
-                    CollectionSchema.host_s, CollectionSchema.load_date_dt,
-                    CollectionSchema.url_file_ext_s, CollectionSchema.last_modified,                      // needed for media search and /date operator
-                    /*YaCySchema.url_paths_sxt,*/ CollectionSchema.host_organization_s,                   // needed to search in the url
-                    /*YaCySchema.inboundlinks_protocol_sxt,*/ CollectionSchema.inboundlinks_urlstub_sxt,  // needed for HostBrowser
-                    /*YaCySchema.outboundlinks_protocol_sxt,*/ CollectionSchema.outboundlinks_urlstub_sxt,// needed to enhance the crawler
-                    CollectionSchema.httpstatus_i                                                         // used in all search queries to filter out error documents
-                }) {
-                entry = solrCollectionConfigurationWork.get(field.name());
-                if (entry != null) {
-                    entry.setEnable(true);
-                    solrCollectionConfigurationWork.put(field.name(), entry);
-                }
-            }
-            
-            // activate some fields that are necessary here
-            entry = solrCollectionConfigurationWork.get(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
-            if (entry != null) {
-                entry.setEnable(true);
-                solrCollectionConfigurationWork.put(CollectionSchema.images_urlstub_sxt.getSolrFieldName(), entry);
-            }
             solrCollectionConfigurationWork.commit();
         } catch (final IOException e) {ConcurrentLog.logException(e);}
         
@@ -607,7 +600,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // create a crawler
-        this.crawler = new CrawlSwitchboard(networkName, this);
+        this.crawler = new CrawlSwitchboard(this);
 
         // start yacy core
         this.log.config("Starting YaCy Protocol Core");
@@ -630,7 +623,7 @@ public final class Switchboard extends serverSwitch {
         this.proxyLastAccess = System.currentTimeMillis() - 10000;
         this.localSearchLastAccess = System.currentTimeMillis() - 10000;
         this.remoteSearchLastAccess = System.currentTimeMillis() - 10000;
-        this.adminAuthenticationLastAccess = System.currentTimeMillis();
+        this.adminAuthenticationLastAccess = 0; // timestamp last admin authentication (as not autenticated here, stamp with 0)
         this.optimizeLastRun = System.currentTimeMillis();
         this.webStructure = new WebStructureGraph(new File(this.queuesRoot, "webStructure.map"));
 
@@ -667,6 +660,14 @@ public final class Switchboard extends serverSwitch {
         ListManager.listsPath = blacklistsPath;
         ListManager.reloadBlacklists();
 
+        // Set jvm default locale to match UI language (
+        String lng = this.getConfig("locale.language", "en");
+        if (!"browser".equals(lng) && !"default".equals(lng)) {
+            Locale.setDefault(new Locale(lng));
+        } else {
+            lng = "en"; // default = English
+        }
+
         // load badwords (to filter the topwords)
         if ( badwords == null || badwords.isEmpty() ) {
             File badwordsFile = new File(appPath, "DATA/SETTINGS/" + SwitchboardConstants.LIST_BADWORDS_DEFAULT);
@@ -690,8 +691,7 @@ public final class Switchboard extends serverSwitch {
             }
             stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
             // append locale language stopwords using setting of interface language (file yacy.stopwords.xx)
-            String lng = this.getConfig("locale.language", "en");
-            if ("default".equals(lng)) lng="en"; // english is stored as default (needed for locale html file overlay)
+            // english is stored as default (needed for locale html file overlay)
             File stopwordsFilelocale = new File (dataPath, "DATA/SETTINGS/"+stopwordsFile.getName()+"."+lng);
             if (!stopwordsFilelocale.exists()) stopwordsFilelocale = new File (appPath, "defaults/"+stopwordsFile.getName()+"."+lng);
             if (stopwordsFilelocale.exists()) {
@@ -863,7 +863,8 @@ public final class Switchboard extends serverSwitch {
         
         // load the robots.txt db
         this.log.config("Initializing robots.txt DB");
-        this.robots = new RobotsTxt(this.tables, this.loader);
+		this.robots = new RobotsTxt(this.tables, this.loader,
+				this.getConfigInt(SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX, SwitchboardConstants.ROBOTS_TXT_THREADS_ACTIVE_MAX_DEFAULT));
         try {
             this.log.config("Loaded robots.txt DB: " + this.robots.size() + " entries");
         } catch (final IOException e) {
@@ -1166,6 +1167,9 @@ public final class Switchboard extends serverSwitch {
 
         this.trail = new LinkedBlockingQueue<String>();
 
+        // set configurable ui defaults
+        QueryParams.FACETS_STANDARD_MAXCOUNT = sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT); // max number of navigator/facet lines
+        
         this.log.config("Finished Switchboard Initialization");
     }
 
@@ -1300,6 +1304,12 @@ public final class Switchboard extends serverSwitch {
         ClientIdentification.generateYaCyBot(sysinfo);
     }
 
+    /**
+     * Switch network configuration to the new specified one
+     * @param networkDefinition YaCy network definition file path (relative to the app path) or absolute URL
+     * @throws FileNotFoundException when the file was not found
+     * @throws IOException when an error occured
+     */
     public void switchNetwork(final String networkDefinition) throws FileNotFoundException, IOException {
         this.log.info("SWITCH NETWORK: switching to '" + networkDefinition + "'");
         // pause crawls
@@ -1329,11 +1339,13 @@ public final class Switchboard extends serverSwitch {
             if ( this.dhtDispatcher != null ) {
                 this.dhtDispatcher.close();
             }
+            /* Crawlstacker is eventually triggering write operations on this.index : we must therefore close it before closing this.index */
+            this.crawlStacker.announceClose();
+            this.crawlStacker.close();
+            
             synchronized ( this.index ) {
                 this.index.close();
             }
-            this.crawlStacker.announceClose();
-            this.crawlStacker.close();
             this.webStructure.close();
 
             this.log.info("SWITCH NETWORK: START UP OF NEW INDEX DATABASE...");
@@ -1398,7 +1410,7 @@ public final class Switchboard extends serverSwitch {
 
             // create a crawler
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
-            this.crawler = new CrawlSwitchboard(networkName, this);
+            this.crawler = new CrawlSwitchboard(this);
 
             // init a DHT transmission dispatcher
             this.dhtDispatcher =
@@ -1657,9 +1669,9 @@ public final class Switchboard extends serverSwitch {
     }
 
     /**
-     * in nocheck mode the isLocal property is not checked to omit DNS lookup. Can only be done in allip mode
+     * In nocheck mode the isLocal property is not checked to omit DNS lookup. Can only be done in allip mode
      *
-     * @return
+     * @return true when in nocheck mode
      */
     public boolean isIPNoCheckMode() {
         return isAllIPMode() && getConfigBool(SwitchboardConstants.NETWORK_DOMAIN_NOCHECK, false);
@@ -1759,7 +1771,7 @@ public final class Switchboard extends serverSwitch {
      * exceeded, null is returned. If a limit is exceeded, then the name of the service that caused the
      * caution is returned
      *
-     * @return
+     * @return null or a service name
      */
     public String onlineCaution() {
         if ( System.currentTimeMillis() - this.proxyLastAccess < Integer.parseInt(getConfig(
@@ -1805,12 +1817,12 @@ public final class Switchboard extends serverSwitch {
     }
 
     /**
-     * {@link CrawlProfiles Crawl Profiles} are saved independently from the queues themselves and therefore
+     * {@link CrawlProfile Crawl Profiles} are saved independently from the queues themselves and therefore
      * have to be cleaned up from time to time. This method only performs the clean-up if - and only if - the
-     * {@link IndexingStack switchboard}, {@link LoaderDispatcher loader} and {@link plasmaCrawlNURL local
+     * {@link Switchboard switchboard}, {@link LoaderDispatcher loader} and {@link CrawlQueues local
      * crawl} queues are all empty.
      * <p>
-     * Then it iterates through all existing {@link CrawlProfiles crawl profiles} and removes all profiles
+     * Then it iterates through all existing {@link CrawlProfile crawl profiles} and removes all profiles
      * which are not hard-coded.
      * </p>
      * <p>
@@ -1818,10 +1830,6 @@ public final class Switchboard extends serverSwitch {
      * will be returned</i>
      * </p>
      *
-     * @see #CRAWL_PROFILE_PROXY hardcoded
-     * @see #CRAWL_PROFILE_REMOTE hardcoded
-     * @see #CRAWL_PROFILE_SNIPPET_TEXT hardcoded
-     * @see #CRAWL_PROFILE_SNIPPET_MEDIA hardcoded
      * @return whether this method has done something or not (i.e. because the queues have been filled or
      *         there are no profiles left to clean up)
      * @throws <b>InterruptedException</b> if the current thread has been interrupted, i.e. by the shutdown
@@ -1843,6 +1851,10 @@ public final class Switchboard extends serverSwitch {
     
     public synchronized void close() {
         this.log.config("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
+        /* Print also to the standard output : when this method is triggered by the shutdown hook thread, the LogManager is likely to have
+         * been concurrently reset by its own shutdown hook thread */
+        System.out.println("SWITCHBOARD Performing shutdown steps...");
+        
         MemoryTracker.stopSystemProfiling();
         terminateAllThreads(true);
         net.yacy.gui.framework.Switchboard.shutdown();
@@ -1851,6 +1863,7 @@ public final class Switchboard extends serverSwitch {
         this.crawlStacker.announceClose();
         this.crawlStacker.close();
         this.crawlQueues.close();
+        this.robots.close();
         this.indexingDocumentProcessor.shutdown();
         this.indexingCondensementProcessor.shutdown();
         this.indexingAnalysisProcessor.shutdown();
@@ -1885,6 +1898,9 @@ public final class Switchboard extends serverSwitch {
             ConcurrentLog.logException(e);
         }
         this.log.config("SWITCHBOARD SHUTDOWN TERMINATED");
+        /* Print also to the standard output : when this method is triggered by the shutdown hook thread, the LogManager is likely to have
+         * been concurrently reset by its own shutdown hook thread */
+        System.out.println("SWITCHBOARD Shutdown steps terminated.");
     }
 
     /**
@@ -1988,6 +2004,20 @@ public final class Switchboard extends serverSwitch {
                 if (zis != null) try {zis.close();} catch (final IOException e) {}
             }
             return moved;
+        } else if (s.endsWith(".warc") || s.endsWith(".warc.gz")) {
+            try {
+                WarcImporter wri = new WarcImporter(infile);
+                wri.start();
+                try {
+                    wri.join();
+                } catch (InterruptedException ex) {
+                    return moved;
+                }
+                moved = infile.renameTo(outfile);
+            } catch (IOException ex) {
+                log.warn("IO Error processing warc file " + infile);
+            }
+            return moved;
         }
         InputStream is = null;
         try {
@@ -2040,7 +2070,7 @@ public final class Switchboard extends serverSwitch {
         assert this.crawlStacker != null;
         Thread[] indexer = new Thread[concurrency];
         for (int t = 0; t < concurrency; t++) {
-            indexer[t] = new Thread() {
+            indexer[t] = new Thread("Switchboard.processSurrogate-" + t) {
                 @Override
                 public void run() {
                     VocabularyScraper scraper = new VocabularyScraper();
@@ -2148,7 +2178,9 @@ public final class Switchboard extends serverSwitch {
 
                     if ( surrogate.endsWith(".xml")
                         || surrogate.endsWith(".xml.gz")
-                        || surrogate.endsWith(".xml.zip") ) {
+                        || surrogate.endsWith(".xml.zip")
+                        || surrogate.endsWith(".warc")
+                        || surrogate.endsWith(".warc.gz") ) {
                         // read the surrogate file and store entry in index
                         if ( processSurrogate(surrogate) ) {
                             return true;
@@ -2193,6 +2225,10 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
+    /**
+     * Check scheduled api calls scheduled execution time and execute all jobs due
+     * @return true if calls have been executed
+     */
     public boolean schedulerJob() {
 
         // execute scheduled API actions
@@ -2201,15 +2237,22 @@ public final class Switchboard extends serverSwitch {
         final Date now = new Date();
         try {
             final Iterator<Tables.Row> plainIterator = this.tables.iterator(WorkTables.TABLE_API_NAME);
-            final Iterator<Tables.Row> mapIterator = Tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING).iterator();
+            final Iterator<Tables.Row> mapIterator = Tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_LAST_EXEC).iterator();
             while (mapIterator.hasNext()) {
                 row = mapIterator.next();
                 if (row == null) continue;
                 
                 // select api calls according to scheduler settings
-                final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
-                if (date_next_exec != null && now.after(date_next_exec)) pks.add(UTF8.String(row.getPK()));
-                
+                final int stime = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
+                if (stime > 0) { // has scheduled repeat
+                    final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
+                    if (date_next_exec != null) { // has been executed before
+                        if (now.after(date_next_exec)) pks.add(UTF8.String(row.getPK()));
+                    } else { // was never executed before
+                        pks.add(UTF8.String(row.getPK()));
+                    }
+                }
+
                 // select api calls according to event settings
                 final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
                 if (!"off".equals(kind)) {
@@ -2239,16 +2282,6 @@ public final class Switchboard extends serverSwitch {
             }
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
-        }
-        for (final String pk : pks) {
-            try {
-                row = this.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
-                WorkTables.calculateAPIScheduler(row, true); // calculate next update time
-                this.tables.update(WorkTables.TABLE_API_NAME, row);
-            } catch (final Throwable e ) {
-                ConcurrentLog.logException(e);
-                continue;
-            }
         }
         startupAction = false;
         
@@ -2295,7 +2328,6 @@ public final class Switchboard extends serverSwitch {
                 && getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty() ) {
                 // make a 'random' password, this will keep the ability to log in from localhost without password
                 setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + this.genRandomPassword());
-                setConfig(SwitchboardConstants.ADMIN_ACCOUNT, "");
             }
 
             // stop greedylearning if limit is reached
@@ -2467,9 +2499,13 @@ public final class Switchboard extends serverSwitch {
                     this.log
                         .info("AUTO-UPDATE: omitting update because download failed (file cannot be found, is too small or signature is bad)");
                 } else {
-                    yacyRelease.deployRelease(downloaded);
-                    terminate(10, "auto-update to install " + downloaded.getName());
-                    this.log.info("AUTO-UPDATE: deploy and restart initiated");
+                    if(yacyRelease.deployRelease(downloaded)) {
+                    	terminate(10, "auto-update to install " + downloaded.getName());
+                    	this.log.info("AUTO-UPDATE: deploy and restart initiated");
+                    } else {
+                        this.log
+                        .info("AUTO-UPDATE: omitting update because an error occurred while trying to deploy the release.");
+                    }
                 }
             }
 
@@ -2516,12 +2552,12 @@ public final class Switchboard extends serverSwitch {
             checkInterruption();
 
             // execute the (post-) processing steps for all entries that have a process tag assigned
-            Fulltext fulltext = index.fulltext();
-            CollectionConfiguration collection1Configuration = fulltext.getDefaultConfiguration();
             boolean allCrawlsFinished = this.crawler.allCrawlsFinished(this.crawlQueues);
             int proccount = 0;
     
             if (!this.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+                Fulltext fulltext = index.fulltext();
+                CollectionConfiguration collection1Configuration = fulltext.getDefaultConfiguration();
 
                 boolean process_key_exist = collection1Configuration.contains(CollectionSchema.process_sxt);
                 if (!process_key_exist) log.info("postprocessing deactivated: field process_sxt is not enabled");
@@ -2570,6 +2606,7 @@ public final class Switchboard extends serverSwitch {
                 this.crawlQueues.noticeURL.clear();
                 
                 // do solr optimization
+                /*
                 long idleSearch = System.currentTimeMillis() - this.localSearchLastAccess;
                 long idleAdmin  = System.currentTimeMillis() - this.adminAuthenticationLastAccess;
                 long deltaOptimize = System.currentTimeMillis() - this.optimizeLastRun;
@@ -2579,7 +2616,6 @@ public final class Switchboard extends serverSwitch {
                     opts++; // have postprocessings will force optimazion with one more Segment which is small an quick
                     optimizeRequired = true;
                 }
-                
                 log.info("Solr auto-optimization: idleSearch=" + idleSearch + ", idleAdmin=" + idleAdmin + ", deltaOptimize=" + deltaOptimize + ", proccount=" + proccount);
                 if (optimizeRequired) {
                     if (idleSearch < 600000) opts++; // < 10 minutes idle time will cause a optimization with one more Segment which is small an quick
@@ -2587,6 +2623,7 @@ public final class Switchboard extends serverSwitch {
                     fulltext.optimize(opts);
                     this.optimizeLastRun = System.currentTimeMillis();
                 }
+                */
             }
             
             // write statistics
@@ -3002,7 +3039,7 @@ public final class Switchboard extends serverSwitch {
                 searchEvent,
                 sourceName,
                 getConfigBool(SwitchboardConstants.DHT_ENABLED, false),
-                this.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null,
+                this.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt(SwitchboardConstants.SERVER_PORT, 8090) : null,
                 this.getConfig("crawler.http.acceptLanguage", null));
         final RSSFeed feed =
             EventChannel.channels(queueEntry.initiator() == null
@@ -3138,6 +3175,7 @@ public final class Switchboard extends serverSwitch {
             Thread t = new Thread() {
                 @Override
                 public void run() {
+                	this.setName("Switchboard.stackURLs");
                     String failreason;
                     if ((failreason = Switchboard.this.stackUrl(profile, turl)) == null) successurls.add(turl); else failurls.put(turl, failreason);
                 }
@@ -3186,17 +3224,12 @@ public final class Switchboard extends serverSwitch {
         if (url.isFTP()) {
             try {
                 this.crawler.putActive(handle, profile);
-                String userInfo = url.getUserInfo();
-                int p = userInfo == null ? -1 : userInfo.indexOf(':');
-                String user = userInfo == null ? FTPClient.ANONYMOUS : userInfo.substring(0, p);
-                String pw = userInfo == null || p == -1 ? "anomic" : userInfo.substring(p + 1);
+                /* put ftp site entries on the crawl stack, 
+                 * using the crawl profile depth to control how many children folders of the url are stacked */
                 this.crawlStacker.enqueueEntriesFTP(
                         this.peers.mySeed().hash.getBytes(),
-                        profile.handle(),
-                        url.getHost(),
-                        url.getPort(),
-                        user,
-                        pw,
+                        profile,
+                        url,
                         false,
                         profile.timezoneOffset());
                 return null;
@@ -3208,9 +3241,8 @@ public final class Switchboard extends serverSwitch {
         }
         
         // remove the document from the error-db
-        byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
         Set<String> hosthashes = new HashSet<String>();
-        hosthashes.add(ASCII.String(hosthash));
+        hosthashes.add(url.hosthash());
         this.crawlQueues.errorURL.removeHosts(hosthashes);
         this.index.fulltext().remove(urlhash);
 
@@ -3281,12 +3313,12 @@ public final class Switchboard extends serverSwitch {
     }
     
     /**
-     * load the content of a URL, parse the content and add the content to the index This process is started
+     * load the content of some URLs, parse the content and add the content to the index This process is started
      * concurrently. The method returns immediately after the call.
      * Loaded/indexed pages are added to the given SearchEvent. If this is not required prefer addToCrawler
      * to spare concurrent processes, bandwidth and intransparent crawl/load activity
      *
-     * @param url the url that shall be indexed
+     * @param urls the urls that shall be indexed
      * @param searchEvent (optional) a search event that shall get results from the indexed pages directly
      *        feeded. If object is null then it is ignored
      * @throws IOException
@@ -3375,11 +3407,11 @@ public final class Switchboard extends serverSwitch {
     }
 
      /**
-     * add url to Crawler - which itself loads the URL, parses the content and adds it to the index
+     * add urls to Crawler - which itself loads the URL, parses the content and adds it to the index
      * transparent alternative to "addToIndex" including, double in crawler check, display in crawl monitor
      * but doesn't return results for a ongoing search
      *
-     * @param url the url that shall be indexed
+     * @param urls the urls that shall be indexed
      * @param asglobal true adds the url to global crawl queue (for remote crawling), false to the local crawler
      */
     public void addToCrawler(final Collection<DigestURL> urls, final boolean asglobal) {
@@ -3408,7 +3440,7 @@ public final class Switchboard extends serverSwitch {
             }
     
             if (s != null) {
-                Switchboard.this.log.info("addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
+                this.log.info("addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
             }
         }
     }
@@ -3470,12 +3502,20 @@ public final class Switchboard extends serverSwitch {
      * http-authentify: auth-level 4
      *
      * @param requestHeader
-     *  - requestHeader..AUTHORIZATION = B64encode("adminname:password") or = B64encode("adminname:valueOf_Base64MD5cft")
+     *  - requestHeader.AUTHORIZATION = B64encode("adminname:password") or = B64encode("adminname:valueOf_Base64MD5cft")
      *  - adminAccountBase64MD5 = MD5(B64encode("adminname:password") or = "MD5:"+MD5("adminname:peername:password")
      * @return the auth-level as described above or 1 which means 'not authorized'. a 0 is returned in case of
      *         fraud attempts
      */
     public int adminAuthenticated(final RequestHeader requestHeader) {
+
+        // authorization (earlier) by servlet container with username/password
+        // as this stays true as long as authenticated browser is open (even after restart of YaCy) add a timeout check to look at credentials again
+        // TODO: same is true for credential checks below (at least with BASIC auth -> login should expire at least on restart
+        if (requestHeader.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString())) {
+            if (adminAuthenticationLastAccess + 60000 > System.currentTimeMillis()) // 1 minute
+            return 4; // hard-authenticated, quick return
+        }
 
         // authorization in case that there is no account stored
         final String adminAccountUserName = getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
@@ -3501,9 +3541,23 @@ public final class Switchboard extends serverSwitch {
             return 1;
         }
 
-        // security check against too long authorization strings
-        if ( realmValue.length() > 256 ) {
-            return 0;
+        if (HttpServletRequest.BASIC_AUTH.equalsIgnoreCase(requestHeader.getAuthType())) {
+            // security check against too long authorization strings (for BASIC auth)
+            if (realmValue.length() > 256) {
+                return 0;
+            }
+        } else {
+            // handle DIGEST auth by servlet container
+            if (requestHeader.getUserPrincipal() != null) { // user is authenticated (by Servlet container)
+                if (requestHeader.isUserInRole(AccessRight.ADMIN_RIGHT.toString())) {
+                    // we could double check admin right (but we trust embedded container)
+                    // String username = requestHeader.getUserPrincipal().getName();
+                    // if ((username.equalsIgnoreCase(sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin")))
+                    //        || (sb.userDB.getEntry(username).hasRight(AccessRight.ADMIN_RIGHT)))
+                    adminAuthenticationLastAccess = System.currentTimeMillis();
+                    return 4; // has admin right
+                }
+            }
         }
 
         // authorization by encoded password, only for localhost access
@@ -3513,8 +3567,8 @@ public final class Switchboard extends serverSwitch {
             return 3; // soft-authenticated for localhost
         }
 
-        // authorization by hit in userDB (realm username:encodedpassword - handed over by DefaultServlet)
-        if ( this.userDB.hasAdminRight(realmValue, requestHeader.getHeaderCookies()) ) {
+        // authorization by hit in userDB (authtype username:encodedpassword - handed over by DefaultServlet)
+        if ( this.userDB.hasAdminRight(realmProp, requestHeader.getCookies()) ) {
             adminAuthenticationLastAccess = System.currentTimeMillis();
             return 4; //return, because 4=max
         }
@@ -3534,9 +3588,9 @@ public final class Switchboard extends serverSwitch {
             } else {
                 // handle DIGEST auth (realmValue = adminAccountBase (set for lecacyHeader in DefaultServlet for authenticated requests)
                 if (adminAccountBase64MD5.equals(realmValue)) {
-            adminAuthenticationLastAccess = System.currentTimeMillis();
-            return 4; // hard-authenticated, all ok
-        }
+                    adminAuthenticationLastAccess = System.currentTimeMillis();
+                    return 4; // hard-authenticated, all ok
+                }
             }
         } else {
             // handle old option  adminAccountBase64MD5="xxxxxxx" = encodeMD55Hex(encodeB64("adminname:password")
@@ -3738,7 +3792,7 @@ public final class Switchboard extends serverSwitch {
      * @param resulturl the result doc which outbound links to add to crawler
      */
     public final void heuristicSearchResults(final URIMetadataNode resulturl) {
-        new Thread() {
+        new Thread("Switchboard.heuristicSearchResults") {
 
             @Override
             public void run() {
@@ -3876,7 +3930,7 @@ public final class Switchboard extends serverSwitch {
     private static long indeSizeCache = 0;
     private static long indexSizeTime = 0;
     public void updateMySeed() {
-        this.peers.mySeed().put(Seed.PORT, Integer.toString(getPublicPort("port", 8090)));
+        this.peers.mySeed().put(Seed.PORT, Integer.toString(getPublicPort(SwitchboardConstants.SERVER_PORT, 8090)));
 
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - this.startupTime) / 1000;
@@ -3902,12 +3956,12 @@ public final class Switchboard extends serverSwitch {
         mySeed.setLastSeenUTC();
         mySeed.put(Seed.UTC, GenericFormatter.UTCDiffString());
         mySeed.setFlagAcceptRemoteCrawl(getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
-        mySeed.setFlagAcceptRemoteIndex(getConfigBool("allowReceiveIndex", true));
+        mySeed.setFlagAcceptRemoteIndex(getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true));
         mySeed.setFlagSSLAvailable(this.getHttpServer() != null && this.getHttpServer().withSSL() && getConfigBool("server.https", false));
-        if (mySeed.getFlagSSLAvailable()) mySeed.put(Seed.PORTSSL, Integer.toString(getPublicPort("port.ssl", 8443)));
+        if (mySeed.getFlagSSLAvailable()) mySeed.put(Seed.PORTSSL, Integer.toString(getPublicPort(SwitchboardConstants.SERVER_SSLPORT, 8443)));
 
         // set local ips
-        String staticIP = this.getConfig("staticIP", "");
+        String staticIP = this.getConfig(SwitchboardConstants.SERVER_STATICIP, "");
         if (staticIP.length() > 0) mySeed.setIP(staticIP);
         Set<String> publicips = myPublicIPs();
         if (!mySeed.clash(publicips)) mySeed.setIPs(publicips);
@@ -3933,85 +3987,9 @@ public final class Switchboard extends serverSwitch {
             }
             c++;
             if ( seedListFileURL.startsWith("http://") || seedListFileURL.startsWith("https://") ) {
-                loadSeedListConcurrently(this.peers, seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000), c > 0);
+                this.peers.loadSeedListConcurrently(seedListFileURL, scc, (int) getConfigLong("bootstrapLoadTimeout", 20000), c > 0);
             }
         }
-    }
-
-    private static void loadSeedListConcurrently(final SeedDB peers, final String seedListFileURL, final AtomicInteger scc, final int timeout, final boolean checkAge) {
-        // uses the superseed to initialize the database with known seeds
-
-        Thread seedLoader = new Thread() {
-            @Override
-            public void run() {
-                // load the seed list
-                try {
-                    DigestURL url = new DigestURL(seedListFileURL);
-                    //final long start = System.currentTimeMillis();
-                    final RequestHeader reqHeader = new RequestHeader();
-                    reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
-                    reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
-                    final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
-                    client.setHeader(reqHeader.entrySet());
-
-                    client.HEADResponse(url.toNormalform(false), false);
-                    int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
-                    ResponseHeader header = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
-                    if (checkAge) {
-                        if ( header.lastModified() == null ) {
-                            Network.log.warn("BOOTSTRAP: seed-list URL "
-                                + seedListFileURL
-                                + " not usable, last-modified is missing");
-                            return;
-                        } else if ( (header.age() > 86400000) && (scc.get() > 0) ) {
-                            Network.log.info("BOOTSTRAP: seed-list URL "
-                                + seedListFileURL
-                                + " too old ("
-                                + (header.age() / 86400000)
-                                + " days)");
-                            return;
-                        }
-                    }
-                    scc.incrementAndGet();
-                    final byte[] content = client.GETbytes(url, null, null, false);
-                    Iterator<String> enu = FileUtils.strings(content);
-                    int lc = 0;
-                    while ( enu.hasNext() ) {
-                        try {
-                            Seed ys = Seed.genRemoteSeed(enu.next(), false, null);
-                            if ( (ys != null)
-                                && (!peers.mySeedIsDefined() || !peers.mySeed().hash.equals(ys.hash)) ) {
-                                final long lastseen = Math.abs((System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60);
-                                if ( lastseen < 1440 || lc < 10 ) {
-                                    if ( peers.peerActions.connectPeer(ys, false) ) {
-                                        lc++;
-                                    }
-                                }
-                            }
-                        } catch (final Throwable e ) {
-                            Network.log.info("BOOTSTRAP: bad seed from " + seedListFileURL + ": " + e.getMessage());
-                        }
-                    }
-                    Network.log.info("BOOTSTRAP: "
-                        + lc
-                        + " seeds from seed-list URL "
-                        + seedListFileURL
-                        + ", AGE="
-                        + (header.age() / 3600000)
-                        + "h");
-
-                } catch (final IOException e ) {
-                    // this is when wget fails, commonly because of timeout
-                    Network.log.info("BOOTSTRAP: failed (1) to load seeds from seed-list URL "
-                        + seedListFileURL + ": " + e.getMessage());
-                } catch (final Exception e ) {
-                    // this is when wget fails; may be because of missing internet connection
-                    Network.log.severe("BOOTSTRAP: failed (2) to load seeds from seed-list URL "
-                        + seedListFileURL + ": " + e.getMessage(), e);
-                }
-            }
-        };
-        seedLoader.start();
     }
 
     public void initRemoteProxy() {
@@ -4053,6 +4031,11 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
+    /**
+     * Triggers asynchronous shutdown occurring after a given delay
+     * @param delay delay time in milliseconds
+     * @param reason shutdown reason for log information
+     */
     public void terminate(final long delay, final String reason) {
         if ( delay <= 0 ) {
             throw new IllegalArgumentException("The shutdown delay must be greater than 0.");
@@ -4076,7 +4059,71 @@ public final class Switchboard extends serverSwitch {
         return this.terminate;
     }
 
+    /**
+     * Wait until the shutdown semaphore is released.
+     * Optionally if config defines a shutdown port a thread is initalized, to
+     * listen on a defined shutdown port on the local loopback address. If a
+     * connection is made to the shutdown port an a text containig "shutdown"
+     * command, a shutdown is initiated.
+     * @return
+     * @throws InterruptedException
+     */
     public boolean waitForShutdown() throws InterruptedException {
+        final int shutdownPort;
+        if ((shutdownPort = this.getConfigInt(SwitchboardConstants.SERVER_SHUTDOWNPORT, 0)) > 0) {
+            // init thread to listen to a shutdown port - to receive a shutdown signal
+            Thread shutdownThread = new Thread() {
+                @Override
+                public void run() {
+                    ServerSocket ss = null;
+                    try {
+                        
+                        shutdownloop: while (true) {
+                            ss = new ServerSocket(shutdownPort, 0, InetAddress.getLoopbackAddress());
+                            Socket shSocket = ss.accept();
+
+                            InputStream in = shSocket.getInputStream();
+                            BufferedReader inreader = new BufferedReader(new InputStreamReader(in));
+                            String cmd = inreader.readLine(); // read a input line to check for command shutdown
+
+                            // check for shutdown command, accept e.g. http://localhost:8009/shutdown connect with input line "GET /shutdown HTTP/1.1"
+                            if (cmd != null && !cmd.isEmpty()) {
+                                if (cmd.contains("shutdown")) {
+                                    if (cmd.contains("HTTP")) { // write a min. http response
+                                        OutputStream out = shSocket.getOutputStream();
+                                        out.write(UTF8.getBytes("HTTP/1.1 200 OK"));
+                                        out.write(serverCore.CRLF);
+                                        out.close();
+                                    }
+                                    ss.close();
+                                    terminate("shutdown signal received on shutdown port");
+                                } else if (cmd.contains("restart")) {
+                                    if (cmd.contains("HTTP")) { // write a min. http response
+                                        OutputStream out = shSocket.getOutputStream();
+                                        out.write(UTF8.getBytes("HTTP/1.1 200 OK"));
+                                        out.write(serverCore.CRLF);
+                                        out.close();
+                                    }
+                                    ss.close();
+                                    yacyRelease.restart();
+                                }
+                                break shutdownloop; // important to get out of the loop
+                            }
+                            ss.close(); // we don't want to accept any additional input (abort/disconnect if not expected input)
+                        }
+                    } catch (IOException ex) {
+                    } finally {
+                        if (ss != null) {
+                            try {
+                                ss.close();
+                            } catch (IOException ex) { }
+                        }
+                    }
+                }
+            };
+            shutdownThread.start();
+        }
+
         this.shutdownSync.acquire();
         return this.terminate;
     }

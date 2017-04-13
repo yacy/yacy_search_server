@@ -206,6 +206,18 @@ public class NewsPool {
 	 */
 	private static final String CATEGORY_BLOG_DEL = "blog_del";
 
+    /* ------------------------------------------------------------------------
+     * TRANSLATION related CATEGORIES
+     * ------------------------------------------------------------------------ */
+        /**
+        * a translation was added
+        */
+        public static final String CATEGORY_TRANSLATION_ADD = "transadd";
+        /**
+        * a vote on a translation
+        */
+        public static final String CATEGORY_TRANSLATION_VOTE_ADD = "transavt";
+
     /* ========================================================================
      * ARRAY of valid CATEGORIES
      * ======================================================================== */
@@ -250,7 +262,11 @@ public class NewsPool {
 
     	// BLOG related CATEGORIES
     	CATEGORY_BLOG_ADD,
-    	CATEGORY_BLOG_DEL
+    	CATEGORY_BLOG_DEL,
+
+        // TRANSLATION related CATEGORIES
+        CATEGORY_TRANSLATION_ADD,
+        CATEGORY_TRANSLATION_VOTE_ADD
     };
     private static final Set<String> categories = new HashSet<String>();
     static {
@@ -309,12 +325,24 @@ public class NewsPool {
             if (this.newsDB.get(record.id()) == null) {
                 this.incomingNews.push(record); // we want to see our own news..
                 this.outgoingNews.push(record); // .. and put it on the publishing list
+            } else {
+                ConcurrentLog.info("NewsPool", "publishing of news aborted, news with same id (time + originator) exists id=" + record.id());
             }
         } catch (final Exception e) {
             ConcurrentLog.logException(e);
         }
     }
 
+    /**
+     * Gets the last news in the outgoing queue, increases the distribution
+     * counter of the message and put's it back into the outgoingNews queue or
+     * if distribution count is above maxDistribution (default = 30) into the
+     * publishedNews queue.
+     *
+     * @return current news Record or null if outgoingNews queue is empty
+     * @throws IOException
+     * @throws SpaceExceededException
+     */
     public NewsDB.Record myPublication() throws IOException, SpaceExceededException {
         // generate a record for next peer-ping
         if (this.outgoingNews.isEmpty()) return null;
@@ -398,35 +426,56 @@ public class NewsPool {
         return pc;
     }
 
+    /**
+     * Check max keep duration depending on news category and return true if duration
+     * is exceeded
+     *
+     * @param seedDB
+     * @param record
+     * @return true if news should be removed
+     */
     private static boolean automaticProcessP(final SeedDB seedDB, final NewsDB.Record record) {
-        if (record == null) return false;
-        if (record.category() == null) return true;
-        final long created = record.created().getTime();
-        if ((System.currentTimeMillis() - created) > (6L * MILLISECONDS_PER_HOUR)) {
-            // remove everything after 1 day
+        if (record == null) {
+            return false;
+        }
+        if (record.category() == null) {
             return true;
         }
-        if ((record.category().equals(CATEGORY_WIKI_UPDATE)) &&
-                ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
-                return true;
-            }
-        if ((record.category().equals(CATEGORY_BLOG_ADD)) &&
-                ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
-                return true;
-            }
-        if ((record.category().equals(CATEGORY_PROFILE_UPDATE)) &&
-                ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
-                return true;
-            }
-        if ((record.category().equals(CATEGORY_CRAWL_START)) &&
-            ((System.currentTimeMillis() - created) > (3L * MILLISECONDS_PER_DAY))) {
-            final Seed seed = seedDB.get(record.originator());
-            if (seed == null) return true;
-            try {
-                return (Integer.parseInt(seed.get(Seed.ISPEED, "-")) < 10);
-            } catch (final NumberFormatException ee) {
-                return true;
-            }
+
+        final long created = record.created().getTime();
+        final long duration = System.currentTimeMillis() - created;
+
+        String cat = record.category();
+        switch (cat) {
+            case CATEGORY_WIKI_UPDATE:
+            case CATEGORY_BLOG_ADD:
+            case CATEGORY_PROFILE_UPDATE:
+                if (duration > (3L * MILLISECONDS_PER_DAY)) {
+                    return true;
+                }
+                break;
+            case CATEGORY_CRAWL_START:
+                if (duration > (3L * MILLISECONDS_PER_DAY)) {
+                    final Seed seed = seedDB.get(record.originator());
+                    if (seed == null) return true; // TODO: shall we keep for 3 days without sender ?
+                    try {
+                        return (Integer.parseInt(seed.get(Seed.ISPEED, "-")) < 10); // TODO: should we keep longer as 3 days if peer is still/currently crawling (after 3 days) ?
+                    } catch (final NumberFormatException ee) {
+                        return true;
+                    }
+                }
+                break;
+            case CATEGORY_TRANSLATION_ADD:
+            case CATEGORY_TRANSLATION_VOTE_ADD:
+                if (duration > (7L * MILLISECONDS_PER_DAY)) {
+                    return true;
+                }
+                break;
+            default:
+                if (duration > MILLISECONDS_PER_DAY) {
+                    // remove everything else after 1 day
+                    return true;
+                }
         }
         return false;
     }

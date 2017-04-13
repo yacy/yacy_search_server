@@ -24,10 +24,10 @@ public class yacysearchlatestinfo {
             prop.put("itemsperpage", 10);
             prop.put("totalcount", 0);
             prop.put("localResourceSize", 0);
-            prop.put("localMissCount", 0);
             prop.put("remoteResourceSize", 0);
             prop.put("remoteIndexCount", 0);
             prop.put("remotePeerCount", 0);
+            prop.putJSON("navurlBase", "#");
             return prop;
         }
 

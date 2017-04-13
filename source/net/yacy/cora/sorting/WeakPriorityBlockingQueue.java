@@ -120,10 +120,14 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
      */
     public synchronized void put(final Element<E> element) {
         // put the element on the stack
-        if (this.drained != null && this.drained.contains(element)) return;
+        if (this.drained != null && this.drained.contains(element)) {
+        	return;
+        }
         if (this.queue.size() == this.maxsize) {
             // remove last elements if stack is too large
-            if (this.queue.add(element)) this.queue.remove(this.queue.last());
+            if (this.queue.add(element)) {
+            	this.queue.remove(this.queue.last());
+            }
         } else {
             // just add entry but only release semaphore if entry was not double
             if (this.queue.add(element)) this.enqueued.release();

@@ -33,6 +33,8 @@ import net.yacy.cora.federate.solr.connector.MirrorSolrConnector;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 
 public class InstanceMirror {
 
@@ -96,11 +98,18 @@ public class InstanceMirror {
         this.remoteSolrInstance = null;
     }
 
+    /**
+     * Close this instance and it's connectors and cores
+     */
     public synchronized void close() {
         Set<SolrConnector> connectors = new HashSet<SolrConnector>();
         connectors.addAll(this.mirrorConnectorCache.values());
         for (SolrConnector connector: connectors) connector.close();
         this.mirrorConnectorCache.clear();
+        // solr core of embedded instance only closed by explicite closing the instance.
+        // on mode switches a reopen of a core fails if instance did not close the core  see http://mantis.tokeek.de/view.php?id=686 which this change solves.
+        // (and a other alternative to deal with the issue)
+        disconnectEmbedded();
     }
 
     public String getDefaultCoreName() {
@@ -150,7 +159,13 @@ public class InstanceMirror {
         if (this.remoteSolrInstance == null) return null;
         RemoteSolrConnector rsc = this.remoteConnectorCache.get(corename);
         if (rsc != null) return rsc;
-        rsc = new RemoteSolrConnector(this.remoteSolrInstance, true, corename);
+		boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
+		if (Switchboard.getSwitchboard() != null) {
+			useBinaryResponseWriter = Switchboard.getSwitchboard().getConfigBool(
+					SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
+					SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT);
+		}
+        rsc = new RemoteSolrConnector(this.remoteSolrInstance, useBinaryResponseWriter, corename);
         this.remoteConnectorCache.put(corename, rsc);
         return rsc;
     }

@@ -44,8 +44,8 @@
       </tr>
       #{schema}#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-        <td align="center"><input type="checkbox" name="schema_#[key]#" value="checked" #(checked)#::checked="checked"#(/checked)#/></td>
-        <td align="left">#[key]#</td>
+        <td align="center"><input type="checkbox" id="schema_#[key]#" name="schema_#[key]#" value="checked" #(checked)#::checked="checked"#(/checked)# #(required)#::required="required"#(/required)#/></td>
+        <td align="left"><label for="schema_#[key]#" #(required)#::title="Required for proper operation"#(/required)#>#(required)#::<strong>#(/required)##[key]##(required)#::</strong>#(/required)#</label></td>
         <td align="left"><input type="text" name="schema_solrfieldname_#[key]#" value="#[solrfieldname]#"/></td>
         <td align="left">#[comment]#</td>
       </tr>

@@ -21,10 +21,10 @@ function search(query) {
     else if (window.ActiveXObject) { // IE
         self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
     }
-    self.xmlHttpReq.open('GET', "/solr/select?q=sku:\"" + query + "\" OR host_s:\"" + query + "\" OR host_dnc_s:\"" + query + "\" OR host_organization_s:\"" + query + "\" OR host_organizationdnc_s:\"" + query + "\" OR host_subdomain_s:\"" + query + "\" OR url_paths_sxt:\"" + query + "\" OR url_file_name_s:\"" + query + "\"&start=0&rows=100&wt=yjson", true);
+    self.xmlHttpReq.open('GET', "solr/select?q=sku:\"" + query + "\" OR host_s:\"" + query + "\" OR host_dnc_s:\"" + query + "\" OR host_organization_s:\"" + query + "\" OR host_organizationdnc_s:\"" + query + "\" OR host_subdomain_s:\"" + query + "\" OR url_paths_sxt:\"" + query + "\" OR url_file_name_s:\"" + query + "\"&start=0&rows=100&wt=yjson", true);
     self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     self.xmlHttpReq.onreadystatechange = function() {
-        if (self.xmlHttpReq.readyState == 4) {
+        if (self.xmlHttpReq.readyState == 4 && self.xmlHttpReq.status == 200) {
             updatepage(self.xmlHttpReq.responseText);
         }
     }
@@ -94,6 +94,7 @@ function updatepage(str) {
     </form>
     
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset#(cleanup)# disabled="disabled"::#(/cleanup)#><legend>Cleanup</legend>
       <dl>
         <dt class="TableCellDark">Index Deletion</dt>
@@ -115,6 +116,7 @@ function updatepage(str) {
     
     #(dumprestore)#::
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset><legend>Optimize Solr</legend>
       <dl>
         <dt>&nbsp;</dt>
@@ -125,6 +127,7 @@ function updatepage(str) {
     </fieldset>
     </form>
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset><legend>Reboot Solr Core</legend>
       <dl>
         <dt>&nbsp;</dt>
@@ -160,6 +163,7 @@ function updatepage(str) {
       <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
         <td>
           <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+            <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
             <div>
               <input type="hidden" name="domain" value="#[domain]#" />
               <input type="hidden" name="lines" value="#[lines]#" />
@@ -176,24 +180,29 @@ function updatepage(str) {
     
     #(genUrlProfile)#
     ::No entry found for URL-hash #[urlhash]#
-    ::<iframe src="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[urlhash]#%22" width="100%" height="420" frameborder="0" scrolling="no"></iframe><br />
-
-    <form action="ViewFile.html" method="get" accept-charset="UTF-8">
-		<input type="hidden" name="viewMode" value="parsed" />
-		<input type="hidden" name="show" value="Show" />
-		<input type="hidden" name="urlHash" value="#[urlhash]#" />
-		<input type="submit" value="Show Content" name="showcontent" class="btn btn-primary" style="width:240px;"/><br />
-	</form>
-	<form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-		<input type="hidden" name="keystring" value="" />
-		<input type="hidden" name="keyhash" value="" />
-		<input type="hidden" name="urlstring" value="" />
-		<input type="hidden" name="urlhash" value="#[urlhash]#" />
-		<input type="submit" value="Delete URL" name="urlhashdelete" class="btn btn-primary" style="width:240px;"/><br />
-		<span class="small">&nbsp;this may produce unresolved references at other word indexes but they do not harm</span><br /><br />
-		<input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" class="btn btn-primary" style="width:240px;"/><br />
-		<span class="small">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br />
-	</form>
+    ::<iframe src="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[urlhash]#%22" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
+    <br />
+    <p>
+      <form action="ViewFile.html" method="get" accept-charset="UTF-8">
+        <input type="hidden" name="viewMode" value="parsed" />
+        <input type="hidden" name="show" value="Show" />
+        <input type="hidden" name="urlHash" value="#[urlhash]#" />
+        <input type="submit" value="Show Content" name="showcontent" class="btn btn-primary" style="width:240px;"/><br />
+      </form>
+    </p>
+    <p>
+      <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+        <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+        <input type="hidden" name="keystring" value="" />
+        <input type="hidden" name="keyhash" value="" />
+        <input type="hidden" name="urlstring" value="" />
+        <input type="hidden" name="urlhash" value="#[urlhash]#" />
+        <input type="submit" value="Delete URL" name="urlhashdelete" class="btn btn-danger" style="width:240px;"/><br />
+        <span class="small">&nbsp;this may produce unresolved references at other word indexes but they do not harm</span><br /><br />
+        <input type="submit" value="Delete URL and remove all references from words" name="urlhashdeleteall" class="btn btn-danger" /><br />
+        <span class="small">&nbsp;delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)</span><br />
+      </form>
+    </p>
     #(/genUrlProfile)#
     
     #[result]#

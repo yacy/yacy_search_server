@@ -29,6 +29,8 @@ import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.QueryParams;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.common.SolrDocument;
@@ -96,7 +98,13 @@ public class SolrFederateSearchConnector extends AbstractFederateSearchConnector
         try {
             RemoteInstance instance = new RemoteInstance(baseurl, remotecorename, corename, 20000);
             try {
-                SolrConnector solrConnector = new RemoteSolrConnector(instance, false, null);
+				boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
+				if (Switchboard.getSwitchboard() != null) {
+					useBinaryResponseWriter = Switchboard.getSwitchboard().getConfigBool(
+							SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
+							SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT);
+				}
+                SolrConnector solrConnector = new RemoteSolrConnector(instance,  useBinaryResponseWriter);
                 try {
                     this.lastaccesstime = System.currentTimeMillis();
                     SolrDocumentList docList = solrConnector.getDocumentListByParams(msp);

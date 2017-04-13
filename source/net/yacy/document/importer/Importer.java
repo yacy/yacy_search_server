@@ -30,21 +30,18 @@ public interface Importer extends Runnable {
     public int count();
     
     /**
-     * return the number of articles per second
-     * @return
+     * @return the number of articles per second
      */
     public int speed();
     
     /**
-     * return the time this import is already running
-     * @return
+     * @return the time this import is already running
      */
     public long runningTime();
     
     
     /**
-     * return the remaining seconds for the completion of all records in milliseconds
-     * @return
+     * @return the remaining seconds for the completion of all records in milliseconds
      */
     public long remainingTime();
 

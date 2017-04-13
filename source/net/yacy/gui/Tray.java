@@ -125,6 +125,11 @@ public final class Tray {
 	}
 	
 	private class TrayAnimation extends Thread {
+		
+		public TrayAnimation() {
+			super(TrayAnimation.class.getSimpleName());
+		}
+		
 	    int ic = 0;
 	    @Override
         public void run() {
@@ -233,18 +238,22 @@ public final class Tray {
         if (deutsch)
             return "YaCy startet, bitte warten...";
         else if (french)
-            return "S'il vous pla��t attendre jusqu'�� YaCy est d��marr��.";
+            return "YaCy est en cours de démarrage, veuillez patienter...";
         else
             return "YaCy is starting, please wait...";
     }
 
     private String readyMessage() {
         if (deutsch) return "YaCy laeuft unter http://localhost:" + sb.getLocalPort();
+        else if(french)
+        	return "YaCy est en cours d'exécution à l'adresse http://localhost:" + sb.getLocalPort();
         return "YaCy is running at http://localhost:" + sb.getLocalPort();
     }
 
     private String shutdownMessage() {
         if (deutsch) return "YaCy wird beendet, bitte warten...";
+        else if(french)
+        	return "YaCy est en cours d'arrêt, veuillez patienter...";
         return "YaCy will shut down, please wait...";
     }
     
@@ -264,7 +273,7 @@ public final class Tray {
 	private void openBrowserPage(final String browserPopUpPage) {
 		if(!menuEnabled) return;
 		// no need for https, because we are on localhost
-		Browser.openBrowser("http://localhost:" + sb.getConfig("port", "8090") + "/" + browserPopUpPage);
+		Browser.openBrowser("http://localhost:" + sb.getConfig(SwitchboardConstants.SERVER_PORT, "8090") + "/" + browserPopUpPage);
 	}
 
 	private PopupMenu getPopupMenu() {
@@ -285,7 +294,7 @@ public final class Tray {
 		if (deutsch)
 			label = "YaCy Suche";
 		else if (french)
-			label = "YaCy Recherche";
+			label = "Recherche YaCy";
 		else
 			label = "YaCy Search";
 		this.menuItemSearch = new MenuItem(label);
@@ -323,7 +332,7 @@ public final class Tray {
 		if(deutsch) 
 			label = "YaCy Beenden";
 		else if(french)
-			label = "Arr��t YaCy";
+			label = "Arrêter YaCy";
 		else
 			label = "Shutdown YaCy";
 		this.menuItemTerminate = new MenuItem(label);

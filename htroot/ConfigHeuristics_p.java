@@ -28,14 +28,19 @@
 
 import java.io.File;
 
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.robots.RobotsTxtEntry;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Iterator;
+
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.FederateSearchManager;
 
 import net.yacy.cora.federate.solr.SchemaConfiguration;
@@ -97,11 +102,31 @@ public class ConfigHeuristics_p {
                 final String tmpname = post.get("ossys_newtitle");
                 if (tmpname != null && tmpurl !=null) {
                     if (!tmpname.isEmpty() && !tmpurl.isEmpty() && tmpurl.toLowerCase().contains("{searchterms}")) {
-                        final String tmpcomment = post.get("ossys_newcomment");
-                        FederateSearchManager.getManager().addOpenSearchTarget(tmpname,tmpurl,false,tmpcomment);
-                    } else osderrmsg = "Url template must contain '{searchTerms}'";
+                     	/* Check eventual robots.txt policy */
+                      	RobotsTxtEntry robotsEntry = null;
+						try {
+							MultiProtocolURL templateURL = new MultiProtocolURL(tmpurl);
+
+							if (sb.robots != null) {
+								robotsEntry = sb.robots.getEntry(templateURL,
+										ClientIdentification.yacyInternetCrawlerAgent);
+							}
+
+							if (robotsEntry != null && robotsEntry.isDisallowed(templateURL)) {
+								osderrmsg = "URL template is disallowed by the host robots.xt";
+							} else {
+								final String tmpcomment = post.get("ossys_newcomment");
+								FederateSearchManager.getManager().addOpenSearchTarget(tmpname, tmpurl, false,
+										tmpcomment);
+							}
+						} catch (final MalformedURLException ex) {
+							osderrmsg = "URL template is malformed.";
+						}
+                    } else {
+                    	osderrmsg = "Url template must contain '{searchTerms}'";
                     }
                 }
+            }
 
             if (post.containsKey("setopensearch")) {
                 // read index schema table flags

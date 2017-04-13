@@ -170,7 +170,7 @@ public class XMLBlacklistImporter extends DefaultHandler {
      * Writes characters to a String which might be used by endElement() later.
      * @param ch The characters.
      * @param start The start position in the character array.
-     * @param lengthThe number of characters to use from the character array.
+     * @param length The number of characters to use from the character array.
      * @throws org.xml.sax.SAXException
      */
     @Override

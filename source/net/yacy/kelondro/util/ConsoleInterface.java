@@ -43,6 +43,7 @@ public class ConsoleInterface extends Thread {
     
 
     private ConsoleInterface(final InputStream stream, final ConcurrentLog log) {
+    	super("ConsoleInterface");
         this.log = log;
         this.stream = stream;
         // block reading {@see getOutput()}

@@ -132,9 +132,15 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         }
     }
 
+    /** URL hash of this snippet */
     private byte[] urlhash;
-    private String line; // the raw (unmodified) line from source ( use getDescriptionLine() to get the html encoded version for display)
+    
+    /** The raw (unmodified) line from source ( use getDescriptionLine() to get the html encoded version for display) */
+    private String line;
+    
+    /** Set to true when query words are already marked in the input text */
     private boolean isMarked;
+    
     private String error;
     private ResultClass resultStatus;
 
@@ -254,7 +260,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     // get first the h1 tag
                     List<String> h1 = row.h1();
                     if (h1 != null && h1.size() > 0 && sentences.size() > 2) {
-                        // find first appearance of first h1 in sencences and then take the next sentence
+                        // find first appearance of first h1 in sentences and then take the next sentence
                         String h1s = h1.get(0);
                         if (h1s.length() > 0) {
                             solrsearch: for (int i = 0; i < sentences.size() - 2; i++) {
@@ -268,8 +274,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     if (textline == null) {
                         final StringBuilder s = new StringBuilder(snippetMaxLength);
                         for (final StringBuilder t: sentences) {
-                        s.append(t).append(' ');
-                        if (s.length() >= snippetMaxLength / 4 * 3) break;
+                        	s.append(t).append(' ');
+                        	if (s.length() >= snippetMaxLength / 4 * 3) break;
                         }
                         if (s.length() > snippetMaxLength) { s.setLength(snippetMaxLength); s.trimToSize(); }
                         textline = s.toString();
@@ -372,14 +378,23 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         this.error = errortext;
     }
 
+    /**
+     * @return true when a snippet text is available for the document corresponding to this.urlhash
+     */
     public boolean exists() {
         return this.line != null;
     }
 
+    /**
+     * @return true when query words are already marked in the raw snippet text
+     */
     public boolean isMarked() {
         return this.isMarked;
     }
     
+    /**
+     * @return the raw snippet text line, with query words eventually already marked
+     */
     public String getLineRaw() {
         return (this.line == null) ? "" : this.line;
     }
@@ -397,7 +412,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     /**
      * Marks all words in current line which have the same
      * hash values as the ones contained in argument.
-     * @param queryHashes hashes of search words
+     * @param queryGoal the query goal
      * @return line with marked words
      */
     public String getLineMarked(final QueryGoal queryGoal) {
@@ -488,7 +503,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
      * @param queryHashes hashes of the words to mark
      * @return the marked word if one of the hashes matches,
      * else the unmarked word
-     * @see #getLineMarked(Set)
+     * @see #getLineMarked(QueryGoal)
      */
     private static String getWordMarked(
             final String word, final Set<byte[]> queryHashes) {

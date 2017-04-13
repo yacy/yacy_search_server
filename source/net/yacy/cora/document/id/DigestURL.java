@@ -28,7 +28,6 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.order.Base64Order;
@@ -69,7 +68,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
             else h = "http://" + h;
         }
         DigestURL url = new DigestURL(h);
-        return (url == null) ? null : ASCII.String(url.hash(), 6, 6);
+        return (url == null) ? null : url.hosthash();
     }
 
     /**
@@ -210,8 +209,13 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         return this.hash;
     }
 
+    /**
+     * <p>Extract a fragment of the url hash that can be used as a hash for the host name part of this url.</p>
+     * <p><strong>WARNING : two URLs with the same host name but different protocols or ports will produce two different host hashes with this method!</strong></p> 
+     * @return a 6-byte hash fragment
+     */
     public String hosthash() {
-        return ASCII.String(this.hash(), 6, 6);
+    	return ASCII.String(this.hash(), 6, 6);
     }
     
     /**
@@ -242,16 +246,24 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         }
 
         // find rootpath
+        final String normalizedPath;
+        if (this.isFile() && this.path.indexOf('\\') >= 0) // for file protocol normalize path to java notation
+            normalizedPath = this.path.replace('\\','/'); // replace possible Windows pathseparator
+        else
+            normalizedPath = this.path;
+
         int rootpathStart = 0;
-        int rootpathEnd = this.path.length() - 1;
-        if (!this.path.isEmpty() && this.path.charAt(0) == '/')
+        int rootpathEnd = normalizedPath.length() - 1;
+        if (!normalizedPath.isEmpty() && (normalizedPath.charAt(0) == '/'))
             rootpathStart = 1;
-        if (this.path.endsWith("/"))
-            rootpathEnd = this.path.length() - 2;
-        p = this.path.indexOf('/', rootpathStart);
+        if (normalizedPath.endsWith("/"))
+            rootpathEnd = normalizedPath.length() - 2;
+        p = normalizedPath.indexOf('/', rootpathStart);
+        // following doesn't recognize mixed notation e.g. c:\\tmp/test.html correct -> solved by using normalized path
+        //if (this.isFile() && p < 0) p = this.path.indexOf('\\', rootpathStart); // double-check for windows path (if it's a file url)
         String rootpath = "";
         if (p > 0 && p < rootpathEnd) {
-            rootpath = this.path.substring(rootpathStart, p);
+            rootpath = normalizedPath.substring(rootpathStart, p);
         }
 
         // we collected enough information to compute the fragments that are
@@ -264,7 +276,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         final StringBuilder hashs = new StringBuilder(12);
         assert hashs.length() == 0;
         // form the 'local' part of the hash
-        final String normalform = toNormalform(true, true);
+        final String normalform = toNormalform(true, true); // normalizes also Windows backslash in path to '/' for file url
         final String b64l = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(normalform));
         if (b64l.length() < 5) return null;
         hashs.append(b64l.substring(0, 5)); // 5 chars
@@ -289,7 +301,6 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(sb.toString())).charAt(0);
     }
 
-    public final static Pattern rootPattern = Pattern.compile("/|/\\?|/index.htm(l?)|/index.php|/home.htm(l?)|/home.php|/default.htm(l?)|/default.php");
 
     private static final String hosthash5(final String protocol, final String host, final int port) {
         if (host == null) {
@@ -327,10 +338,15 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
         return hash.toString();
     }
 
+    /**
+     * Compute a 6-byte hash fragment that can be used to identify the domain name of an url.
+     * @param host host name. Must not be null.
+     * @return 6 bytes base64 encoded String
+     */
     public static final String hosthash6(final String host) {
         return hosthash6("http", host, 80);
     }
-
+    
     //private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
     public static final int domLengthEstimation(final byte[] urlHashBytes) {

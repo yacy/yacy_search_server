@@ -76,7 +76,7 @@ public class FTPClient {
     public static final String ANONYMOUS = "anonymous";
     private static final ConcurrentLog log = new ConcurrentLog("FTPClient");
 
-    private static final String vDATE = "20100823";
+    private static final String vDATE = "20161222";
 
     private boolean glob = true; // glob = false -> filenames are taken
     // literally for mget, ..
@@ -2535,12 +2535,17 @@ public class FTPClient {
     }
 
     /**
-     * generate a list of all files on a ftp server using the anonymous account
-     * @param host
-     * @return a list of entryInfo from all files of the ftp server
-     * @throws IOException
+     * Asynchronously generate a list of all files on a ftp server using the anonymous account.
+     * @param host host name or address
+     * @param port ftp port
+     * @param user user name
+     * @param pw user password
+     * @param path path on the ftp site
+     * @param depth the maximum depth of the sub folders exploration.
+     * @return a queue asynchronously filled with entryInfo from all files of the ftp server
+     * @throws IOException when a error occurred
      */
-    public static BlockingQueue<entryInfo> sitelist(final String host, final int port, final String user, final String pw) throws IOException {
+    public static BlockingQueue<entryInfo> sitelist(final String host, final int port, final String user, final String pw, final String path, final int depth) throws IOException {
         final FTPClient ftpClient = new FTPClient();
         ftpClient.open(host, port);
         ftpClient.login(user, pw);
@@ -2550,7 +2555,7 @@ public class FTPClient {
             public void run() {
                 try {
                     Thread.currentThread().setName("FTP.sitelist(" + host + ":" + port + ")");
-                    sitelist(ftpClient, "/", queue);
+                    sitelist(ftpClient, path, queue, depth);
                     ftpClient.quit();
                 } catch (final Exception e) {} finally {
                     queue.add(POISON_entryInfo);
@@ -2559,12 +2564,43 @@ public class FTPClient {
         }.start();
         return queue;
     }
-    private static void sitelist(final FTPClient ftpClient, String path, final LinkedBlockingQueue<entryInfo> queue) {
+    
+	/**
+	 * Feed the queue with files under a given path on a ftp server using
+	 * the anonymous account. When path is a file path, only one entry is added
+	 * to the queue.
+	 * 
+	 * @param ftpClient
+	 *            fptClient initialized with a host and login information
+	 * @param path
+	 *            path on the host
+	 * @param queue
+	 *            the entries queue to feed
+	 * @param depth
+	 *            the maximum depth of the sub folders exploration.
+	 * @throws IOException
+	 *             when a error occurred
+	 */
+    private static void sitelist(final FTPClient ftpClient, String path, final LinkedBlockingQueue<entryInfo> queue, int depth) {
         List<String> list;
         try {
             list = ftpClient.list(path, true);
         } catch (final IOException e) {
-            ConcurrentLog.logException(e);
+        	/* path might be a file path */
+        	if (!path.endsWith("/")) {
+				entryInfo info = ftpClient.fileInfo(path);
+				if (info != null) {
+					queue.add(info);
+				} else {
+					/* We could not get file information, but this doesn't mean the file does not exist : 
+					 * we add it anyway to the queue */
+					info = new entryInfo();
+					info.name = path;
+					queue.add(info);
+				}
+        	} else {
+        		ConcurrentLog.logException(e);
+        	}
             return;
         }
         if (!path.endsWith("/")) path += "/";
@@ -2577,24 +2613,25 @@ public class FTPClient {
                 queue.add(info);
             }
         }
-        // then find all directories and add them recursively
-        for (final String line : list) {
-            //System.out.println("LIST:" + line);
-            info = parseListData(line);
-            if (info != null && !info.name.endsWith(".") && !info.name.startsWith(".")) {
-                if (info.type == filetype.directory) {
-                    sitelist(ftpClient, path + info.name, queue);
-                }
-                if (info.type == filetype.link) {
-                    final int q = info.name.indexOf("->",0);
-                    if (q >= 0 && info.name.indexOf("..", q) < 0) {
-                        //System.out.println("*** LINK:" + line);
-                        info.name = info.name.substring(0, q).trim();
-                        sitelist(ftpClient, path + info.name, queue);
-                    }
+        // then find all directories and add them recursively if depth is over zero
+        if(depth > 0) {
+        	for (final String line : list) {
+        		//System.out.println("LIST:" + line);
+        		info = parseListData(line);
+        		if (info != null && !info.name.endsWith(".") && !info.name.startsWith(".")) {
+        			if (info.type == filetype.directory) {
+        				sitelist(ftpClient, path + info.name, queue, depth - 1);
+        			} else if (info.type == filetype.link) {
+        				final int q = info.name.indexOf("->",0);
+        				if (q >= 0 && info.name.indexOf("..", q) < 0) {
+        					//System.out.println("*** LINK:" + line);
+        					info.name = info.name.substring(0, q).trim();
+        					sitelist(ftpClient, path + info.name, queue, depth - 1);
+        				}
 
-                }
-            }
+        			}
+        		}
+        	}
         }
     }
 
@@ -2788,103 +2825,94 @@ public class FTPClient {
     }
 
     private static void printHelp() {
-        System.out.println("ftp help");
+        System.out.println("FTPClient help");
         System.out.println("----------");
         System.out.println();
         System.out.println("The following commands are supported");
-        System.out.println("java ftp  -- (without arguments) starts the shell. Thy 'help' then for shell commands.");
-        System.out.println("java ftp <host>[':'<port>]  -- starts shell and connects to specified host");
-        System.out.println("java ftp -h  -- prints this help");
-        System.out.println("java ftp -dir <host>[':'<port>] <path> [<account> <password>]");
-        System.out.println("java ftp -get <host>[':'<port>] <remoteFile> <localPath> [<account> <password>]");
-        System.out.println("java ftp -put <host>[':'<port>] <localFile> <remotePath> <account> <password>");
+        System.out.println("java net.yacy.cora.protocol.ftp.FTPClient -h  -- prints this help");
+        System.out.println("java net.yacy.cora.protocol.ftp.FTPClient -dir <host>[':'<port>] <path> [<account> <password>]");
+        System.out.println("java net.yacy.cora.protocol.ftp.FTPClient -htmldir <host> <path>");
+        System.out.println("java net.yacy.cora.protocol.ftp.FTPClient -get <host>[':'<port>] <remoteFile> <localPath> [<account> <password>]");
+        System.out.println("java net.yacy.cora.protocol.ftp.FTPClient -put <host>[':'<port>] <localFile> <remotePath> <account> <password>");
+        System.out.println("java net.yacy.cora.protocol.ftp.FTPClient -sitelist <host> <port> <depth>");
         System.out.println();
     }
 
     public static void main(final String[] args) {
-        System.out.println("WELCOME TO THE ANOMIC FTP CLIENT v" + vDATE);
-        System.out.println("Visit http://www.anomic.de and support shareware!");
-        System.out.println("try -h for command line options");
-        System.out.println();
-        if (args.length == 1) {
-            if (args[0].equals("-h")) {
-                printHelp();
-            }
-            if (args[0].equals("-test")) {
-                // test for file URL: ftp://192.168.1.90/Movie/ATest%20Ordner/Unterordner/test%20file.txt
-                final FTPClient ftpClient = new FTPClient();
-                try {
-                    ftpClient.open("192.168.1.90", 21);
-                    ftpClient.login(ANONYMOUS, "anomic@");
-                    final byte[] b = ftpClient.get("/Movie/ATest Ordner/Unterordner/test file.txt");
-                    System.out.println(UTF8.String(b));
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        } else if (args.length == 2) {
-            printHelp();
-        } else if (args.length == 3) {
-            if (args[0].equals("-dir")) {
-                dir(args[1], args[2], ANONYMOUS, "anomic@");
-            } else if (args[0].equals("-htmldir")) {
-                try {
-                    final StringBuilder page = dirhtml(args[1], 21, args[2], ANONYMOUS, "anomic@");
-                    final File file = new File("dirindex.html");
-                    FileOutputStream fos;
-                    fos = new FileOutputStream(file);
-                    fos.write(UTF8.getBytes(page.toString()));
-                    fos.close();
-                } catch (final FileNotFoundException e) {
-                    log.warn(e);
-                } catch (final IOException e) {
-                    log.warn(e);
-                }
-            } else if (args[0].equals("-sitelist")) {
-                try {
-                    final BlockingQueue<entryInfo> q = sitelist(args[1], Integer.parseInt(args[2]), ANONYMOUS, "anomic");
-                    entryInfo entry;
-                    while ((entry = q.take()) != FTPClient.POISON_entryInfo) {
-                        System.out.println(entry.toString());
-                    }
-                } catch (final FileNotFoundException e) {
-                    log.warn(e);
-                } catch (final IOException e) {
-                    log.warn(e);
-                } catch (final InterruptedException e) {
-                    log.warn(e);
-                }
-            } else {
-                printHelp();
-            }
-        } else if (args.length == 4) {
-            if (args[0].equals("-get")) {
-                getAnonymous(args[1], args[2], new File(args[3]));
-            } else {
-                printHelp();
-            }
-        } else if (args.length == 5) {
-            if (args[0].equals("-dir")) {
-                dir(args[1], args[2], args[3], args[4]);
-            } else {
-                printHelp();
-            }
-        } else if (args.length == 6) {
-            if (args[0].equals("-get")) {
-                get(args[1], args[2], new File(args[3]), args[4], args[5]);
-            } else if (args[0].equals("-put")) {
-                try {
-                    put(args[1], new File(args[2]), args[3], "", args[4], args[5]);
-                } catch (final IOException e) {
-                    // TODO Auto-generated catch block
-                    log.warn(e.getMessage(), e);
-                }
-            } else {
-                printHelp();
-            }
-        } else {
-            printHelp();
-        }
+    	try {
+    		System.out.println("WELCOME TO THE ANOMIC FTP CLIENT v" + vDATE);
+    		System.out.println("Visit http://www.anomic.de and support shareware!");
+    		System.out.println("try -h for command line options");
+    		System.out.println();
+    		if (args.length == 1) {
+    			if (args[0].equals("-h")) {
+    				printHelp();
+    			}
+    		} else if (args.length == 2) {
+    			printHelp();
+    		} else if (args.length == 3) {
+    			if (args[0].equals("-dir")) {
+    				dir(args[1], args[2], ANONYMOUS, "anomic@");
+    			} else if (args[0].equals("-htmldir")) {
+    				try {
+    					final StringBuilder page = dirhtml(args[1], 21, args[2], ANONYMOUS, "anomic@");
+    					final File file = new File("dirindex.html");
+    					FileOutputStream fos;
+    					fos = new FileOutputStream(file);
+    					fos.write(UTF8.getBytes(page.toString()));
+    					fos.close();
+    				} catch (final FileNotFoundException e) {
+    					log.warn(e);
+    				} catch (final IOException e) {
+    					log.warn(e);
+    				}
+    			} else {
+    				printHelp();
+    			}
+    		} else if (args.length == 4) {
+    			if (args[0].equals("-get")) {
+    				getAnonymous(args[1], args[2], new File(args[3]));
+    			} else if (args[0].equals("-sitelist")) {
+    				try {
+    					final BlockingQueue<entryInfo> q = sitelist(args[1], Integer.parseInt(args[2]), ANONYMOUS, "anomic", "/", Integer.parseInt(args[3]));
+    					entryInfo entry;
+    					while ((entry = q.take()) != FTPClient.POISON_entryInfo) {
+    						System.out.println(entry.toString());
+    					}
+    				} catch (final FileNotFoundException e) {
+    					log.warn(e);
+    				} catch (final IOException e) {
+    					log.warn(e);
+    				} catch (final InterruptedException e) {
+    					log.warn(e);
+    				}
+    			} else {
+    				printHelp();
+    			}
+    		} else if (args.length == 5) {
+    			if (args[0].equals("-dir")) {
+    				dir(args[1], args[2], args[3], args[4]);
+    			} else {
+    				printHelp();
+    			}
+    		} else if (args.length == 6) {
+    			if (args[0].equals("-get")) {
+    				get(args[1], args[2], new File(args[3]), args[4], args[5]);
+    			} else if (args[0].equals("-put")) {
+    				try {
+    					put(args[1], new File(args[2]), args[3], "", args[4], args[5]);
+    				} catch (final IOException e) {
+    					log.warn(e.getMessage(), e);
+    				}
+    			} else {
+    				printHelp();
+    			}
+    		} else {
+    			printHelp();
+    		}
+   		} finally {
+    		ConcurrentLog.shutdown();
+    	}
     }
 
 }

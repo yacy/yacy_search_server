@@ -97,8 +97,18 @@ public class NetworkHistory {
                 if (v != null && v.longValue() > 0) minpeers = Math.min(minpeers, (int) v.longValue());
             }
         }
-        maxpeers = 10 * ((maxpeers / 9 * 10) / 10);
-        minpeers = 10 * ((minpeers * 9 / 10) / 10);
+        if (minpeers == Integer.MAX_VALUE) minpeers=0; // no values
+        if (minpeers < 0) {
+        	ConcurrentLog.warn("NetworkHistory", "Negative value in plot. columns:"+columns);
+        	minpeers=0;
+        }
+        if (maxpeers-minpeers > 2*minpeers) minpeers=0; // if we are close enough to zero, use zero as minimum
+        int order=(int)Math.log10(maxpeers-minpeers);
+        if (order<1) order=1;
+        int scale=(int)Math.pow(10, order);
+        minpeers=(minpeers/scale)*scale;
+        maxpeers=((maxpeers/scale)+1)*scale;
+        if ((maxpeers-minpeers)/scale < 3) scale=Math.max(5,scale/2);
         final int leftborder = 30;
         final int rightborder = 10;
         final int width = post.getInt("width", 768 + leftborder + rightborder);
@@ -107,7 +117,7 @@ public class NetworkHistory {
         final int topborder = 20;
         final int bottomborder = 20;
         final int vspace = height - topborder - bottomborder;
-        final int leftscale = 10 * (maxpeers / 100);
+        final int leftscale = scale;
         String timestr = maxtime + " HOURS";
         if (maxtime > 24 && maxtime % 24 == 0) timestr = (maxtime / 24) + " DAYS";
         if (maxtime == 168) timestr = "WEEK";
@@ -120,12 +130,14 @@ public class NetworkHistory {
         if (columns.contains("cC")) headline += ", ACTIVE SENIOR PEERS";
         if (columns.contains("cD")) headline += ", PASSIVE SENIOR PEERS";
         if (columns.contains("cP")) headline += ", POTENTIAL JUNIOR PEERS";
-        if (columns.contains("cI")) headline = "YACY PEER '" + sb.peers.myName() + "' INDEX SIZE HISTORY: NUMBER OF DOCUMENTS";
-        if (columns.contains("cR")) headline = "YACY PEER '" + sb.peers.myName() + "' INDEX SIZE HISTORY: NUMBER OF RWI ENTRIES";
+        if (columns.contains("cI")) headline = "YACY PEER '" + sb.peers.myName().toUpperCase() + "' INDEX SIZE HISTORY: NUMBER OF DOCUMENTS";
+        if (columns.contains("cR")) headline = "YACY PEER '" + sb.peers.myName().toUpperCase() + "' INDEX SIZE HISTORY: NUMBER OF RWI ENTRIES";
         ChartPlotter chart = new ChartPlotter(width, height, 0xFFFFFFl, 0x000000l, 0xAAAAAAl, leftborder, rightborder, topborder, bottomborder, headline, "IN THE LAST " + timestr);
-        int pixelperscale = Math.max(16, hspace / (maxtime / bottomscale));
+        long pps = (long)hspace * (long)bottomscale / maxtime;
+        int pixelperscale = Math.max(8, (int)pps );
         chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, pixelperscale, -maxtime, 0x000000l, 0xCCCCCCl, "TIME/HOURS");
-        pixelperscale = Math.max(16, 10 * ((vspace * leftscale / (maxpeers - minpeers)) / 10));
+        pps = (long)vspace * (long)leftscale / (maxpeers-minpeers);
+        pixelperscale = Math.max(8, (int)pps );
         chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, pixelperscale, minpeers, 0x008800l, null , columns.contains("cI") ? "DOCUMENTS" : columns.contains("cR") ? "RWIs" : "PEERS");
         
         // write the data

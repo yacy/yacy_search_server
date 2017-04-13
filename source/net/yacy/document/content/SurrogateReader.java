@@ -29,10 +29,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PushbackInputStream;
-import java.io.Reader;
 import java.io.StringReader;
 import java.net.MalformedURLException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -53,6 +51,8 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.CrawlStacker;
 import net.yacy.search.schema.CollectionConfiguration;
@@ -65,9 +65,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         "surrogates";
     public final static String SURROGATES_MAIN_ELEMENT_OPEN =
         "<" + SURROGATES_MAIN_ELEMENT_NAME +
-        " xmlns:dc=\"http://purl.org/dc/elements/1.1/\"" +
+        " xmlns:dc=\"" + DublinCore.NAMESPACE + "\"" +
         " xmlns:yacy=\"http://yacy.net/\"" +
-        " xmlns:geo=\"http://www.w3.org/2003/01/geo/wgs84_pos#\">";
+        " xmlns:geo=\"" + Geo.NAMESPACE + "\">";
     public final static String SURROGATES_MAIN_ELEMENT_CLOSE =
         "</" + SURROGATES_MAIN_ELEMENT_NAME + ">";
     public final static SolrInputDocument POISON_DOCUMENT = new SolrInputDocument();
@@ -80,12 +80,10 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     /** Surrogates are either SolrInputDocument or DCEntry instances*/
     private final BlockingQueue<Object> surrogates;
     private SAXParser saxParser;
-    private final InputSource inputSource;
     private final PushbackInputStream inputStream;
     private final CrawlStacker crawlStacker;
     private final CollectionConfiguration configuration;
     private final int concurrency;
-    private Charset charset = StandardCharsets.UTF_8;
 
     private static final ThreadLocal<SAXParser> tlSax = new ThreadLocal<SAXParser>();
     private static SAXParser getParser() throws SAXException {
@@ -114,10 +112,6 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         this.dcEntry = null;
         this.elementName = null;
         this.surrogates = new ArrayBlockingQueue<>(queueSize);
-        
-        Reader reader = new BufferedReader(new InputStreamReader(stream, this.charset));
-        this.inputSource = new InputSource(reader);
-        this.inputSource.setEncoding(this.charset.name());
         this.inputStream = stream;
         
         try {
@@ -132,8 +126,8 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     public void run() {
         // test the syntax of the stream by reading parts of the beginning
         try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(this.inputStream, StandardCharsets.UTF_8));
             if (isSolrDump()) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(this.inputStream, this.charset));
                 String line;
                 while ((line = br.readLine()) != null) {
                     if (!line.startsWith("<doc>")) continue;
@@ -159,7 +153,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
                     }
                 }
             } else {
-                this.saxParser.parse(this.inputSource, this);
+                final InputSource inputSource = new InputSource(br);
+                inputSource.setEncoding(StandardCharsets.UTF_8.name());
+                this.saxParser.parse(inputSource, this);
             }
         } catch (final SAXParseException e) {
             ConcurrentLog.logException(e);
@@ -169,17 +165,17 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             ConcurrentLog.logException(e);
         } finally {
             for (int i = 0; i < this.concurrency; i++) {
-            	try {
-    				this.surrogates.put(POISON_DOCUMENT);
-    			} catch (final InterruptedException e1) {
-    			    ConcurrentLog.logException(e1);
-    			}
+                try {
+                    this.surrogates.put(POISON_DOCUMENT);
+                } catch (final InterruptedException e1) {
+                    ConcurrentLog.logException(e1);
+                }
             }
-			try {
-        		this.inputStream.close();
-			} catch (final IOException e) {
-			    ConcurrentLog.logException(e);
-			}
+            try {
+                this.inputStream.close();
+            } catch (final IOException e) {
+                ConcurrentLog.logException(e);
+            }
         }
     }
     
@@ -191,13 +187,13 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
 		byte[] b = new byte[100];
 		int nbRead = -1;
 		try {
-			nbRead = this.inputStream.read(b);
-			if(nbRead > 0) {
-				String s = new String(b, 0, nbRead, this.charset);
-				if ((s.contains("<response>") && s.contains("<result>")) || s.startsWith("<doc>")) {
-					res = true;
-				}
-			}
+                    nbRead = this.inputStream.read(b);
+                    if (nbRead > 0) {
+                        String s = new String(b, 0, nbRead, StandardCharsets.UTF_8);
+                        if ((s.contains("<response>") && s.contains("<result>")) || s.startsWith("<doc>")) {
+                            res = true;
+                        }
+                    }
 		} catch (IOException e) {
 			ConcurrentLog.logException(e);
 		} finally {
@@ -236,7 +232,6 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         if (tag == null) return;
         tag = tag.toLowerCase();
         if ("record".equals(tag) || "document".equals(tag) || "doc".equals(tag)) {
-            //System.out.println("A Title: " + this.surrogate.title());
             try {
                 // check if url is in accepted domain
                 final String urlRejectReason = this.crawlStacker.urlInAcceptedDomain(this.dcEntry.getIdentifier(true));
@@ -247,7 +242,6 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             } catch (final InterruptedException e) {
                 ConcurrentLog.logException(e);
             } finally {
-                //System.out.println("B Title: " + this.surrogate.title());
                 this.dcEntry = null;
                 this.buffer.setLength(0);
                 this.parsingValue = false;
@@ -263,7 +257,6 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             this.buffer.setLength(0);
             this.parsingValue = false;
         } else if ("value".equals(tag)) {
-            //System.out.println("BUFFER-SIZE=" + buffer.length());
             final String value = buffer.toString().trim();
             if (this.elementName != null) {
                 this.dcEntry.getMap().put(this.elementName, new String[]{value});

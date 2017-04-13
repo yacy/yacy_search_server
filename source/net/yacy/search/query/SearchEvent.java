@@ -73,7 +73,6 @@ import net.yacy.data.WorkTables;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.ProbabilisticClassifier;
-import net.yacy.document.TextParser;
 import net.yacy.document.Tokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
@@ -97,6 +96,8 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
+import net.yacy.search.navigator.Navigator;
+import net.yacy.search.navigator.NavigatorPlugins;
 import net.yacy.search.ranking.ReferenceOrder;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -140,19 +141,18 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     public Thread rwiProcess;
     public Thread localsolrsearch;
+    /** Offset of the next local Solr index request
+     * Example : last local request with offset=10 and itemsPerPage=20, sets this attribute to 30. */
     private int localsolroffset;
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
     public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
-    public final ScoreMap<String> hostNavigator; // a counter for the appearance of host names
-    public final ScoreMap<String> authorNavigator; // a counter for the appearances of authors
-    public final ScoreMap<String> collectionNavigator; // a counter for the appearances of collections
-    public final ScoreMap<String> namespaceNavigator; // a counter for name spaces
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
-    public final ScoreMap<String> filetypeNavigator; // a counter for file types
     public final ScoreMap<String> dateNavigator; // a counter for file types
     public final ScoreMap<String> languageNavigator; // a counter for appearance of languages
     public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
     private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
+    // map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms)
+    public final Map<String, Navigator> navigatorPlugins; // map of active search navigators key=internal navigator name
     private final LoaderDispatcher                        loader;
     private final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     private final boolean                                 deleteIfSnippetFail;
@@ -249,6 +249,10 @@ public final class SearchEvent {
         this.peers = peers;
         this.workTables = workTables;
         this.query = query;
+        if(query != null) {
+        	/* Image counter will eventually grow up faster than offset, but must start first with the same value as query offset */
+        	this.imagePageCounter = query.offset;
+        }
         this.loader = loader;
         this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(max_results_node, false);
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
@@ -257,16 +261,14 @@ public final class SearchEvent {
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
         this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
-        this.authorNavigator = navcfg.contains("authors") ? new ConcurrentScoreMap<String>() : null;
-        this.collectionNavigator = navcfg.contains("collections") ? new ConcurrentScoreMap<String>() : null;
-        this.namespaceNavigator = navcfg.contains("namespace") ? new ConcurrentScoreMap<String>() : null;
-        this.hostNavigator = navcfg.contains("hosts") ? new ConcurrentScoreMap<String>() : null;
         this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
-        this.filetypeNavigator = navcfg.contains("filetype") ? new ConcurrentScoreMap<String>() : null;
         this.dateNavigator = navcfg.contains("date") ? new ClusteredScoreMap<String>(true) : null;
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
         this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
+        // prepare configured search navigation (plugins)
+        this.navigatorPlugins = NavigatorPlugins.initFromCfgString(navcfg);
+
         this.snippets = new ConcurrentHashMap<String, LinkedHashSet<String>>(); 
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
         if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
@@ -322,9 +324,9 @@ public final class SearchEvent {
 
         // start a local solr search
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, true, this.excludeintext_image), 0, this.query.itemsPerPage, null /*this peer*/, 0, Switchboard.urlBlacklist);
+            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, true, this.excludeintext_image), this.query.offset, this.query.itemsPerPage, null /*this peer*/, 0, Switchboard.urlBlacklist);
         }
-        this.localsolroffset = this.query.itemsPerPage;
+        this.localsolroffset = this.query.offset + this.query.itemsPerPage;
         
         // start a local RWI search concurrently
         this.rwiProcess = null;
@@ -462,7 +464,7 @@ public final class SearchEvent {
         final Thread waitForThread;
         
         public RWIProcess(final Thread waitForThread) {
-            super();
+            super("SearchEvent.RWIProcess(" + (waitForThread != null ? waitForThread.getName() : "") + ")");
             this.waitForThread = waitForThread;
         }
         
@@ -813,6 +815,19 @@ public final class SearchEvent {
         timer = System.currentTimeMillis();
 
         // collect navigation information
+
+        // iterate over active navigator plugins to let them update the counters
+        for (String s : this.navigatorPlugins.keySet()) {
+            Navigator navi = this.navigatorPlugins.get(s);
+            if (navi != null) {
+                if (facets == null || facets.isEmpty() || !facets.containsKey(navi.getIndexFieldName())) { // just in case we got no solr facet
+                    navi.incDocList(nodeList);
+                } else {
+                    navi.incFacet(facets);
+                }
+            }
+        }
+
         ReversibleScoreMap<String> fcts;
         if (this.locationNavigator != null) {
             fcts = facets.get(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
@@ -825,40 +840,6 @@ public final class SearchEvent {
             }
         }
         
-        if (this.hostNavigator != null) {
-            fcts = facets.get(CollectionSchema.host_s.getSolrFieldName());
-            if (fcts != null) {
-                for (String host: fcts) {
-                    int hc = fcts.get(host);
-                    if (hc == 0) continue;
-                    if (host.startsWith("www.")) host = host.substring(4);
-                    this.hostNavigator.inc(host, hc);
-                }
-                //this.hostNavigator.inc(fcts);
-            }
-        }
-
-        if (this.filetypeNavigator != null) {
-            fcts = facets.get(CollectionSchema.url_file_ext_s.getSolrFieldName());
-            if (fcts != null) {
-                // remove all filetypes that we don't know
-                Iterator<String> i = fcts.iterator();
-                while (i.hasNext()) {
-                    String ext = i.next();
-                    if (this.query.contentdom == ContentDomain.TEXT) {
-                        if ((Classification.isImageExtension(ext) && this.excludeintext_image) ||
-                            (TextParser.supportsExtension(ext) != null && !Classification.isAnyKnownExtension(ext))) {
-                            //Log.logInfo("SearchEvent", "removed unknown extension " + ext + " from navigation.");
-                            i.remove();
-                        }
-                    } else { // for image and media search also limit to known extension
-                        if (!Classification.isAnyKnownExtension(ext)) i.remove();
-                    }
-                }
-                this.filetypeNavigator.inc(fcts);
-            }
-        }
-
         if (this.dateNavigator != null) {
             fcts = facets.get(CollectionSchema.dates_in_content_dts.getSolrFieldName());
             if (fcts != null) this.dateNavigator.inc(fcts);
@@ -877,16 +858,6 @@ public final class SearchEvent {
                 }
                 this.languageNavigator.inc(fcts);
             }
-        }
-
-        if (this.authorNavigator != null) {
-            fcts = facets.get(CollectionSchema.author_sxt.getSolrFieldName());
-            if (fcts != null) this.authorNavigator.inc(fcts);
-        }
-
-        if (this.collectionNavigator != null) {
-            fcts = facets.get(CollectionSchema.collection_sxt.getSolrFieldName());
-            if (fcts != null) this.collectionNavigator.inc(fcts);
         }
 
         if (this.protocolNavigator != null) {
@@ -1303,17 +1274,13 @@ public final class SearchEvent {
             }
             
             // from here: collect navigation information
+            // TODO: it may be a little bit late here, to update navigator counters
 
-            // namespace navigation
-            if (this.namespaceNavigator != null) {
-                String pagepath = page.url().getPath();
-                if ((p = pagepath.indexOf(':')) >= 0) {
-                    pagepath = pagepath.substring(0, p);
-                    p = pagepath.lastIndexOf('/');
-                    if (p >= 0) {
-                        pagepath = pagepath.substring(p + 1);
-                        this.namespaceNavigator.inc(pagepath);
-                    }
+            // iterate over active navigator plugins (the rwi metadata may contain the field the plugin counts)
+            for (String s : this.navigatorPlugins.keySet()) {
+                Navigator navi = this.navigatorPlugins.get(s);
+                if (navi != null) {
+                    navi.incDoc(page);
                 }
             }
 
@@ -1329,14 +1296,41 @@ public final class SearchEvent {
     public long getSnippetComputationTime() {
         return this.snippetComputationAllTime;
     }
-    
-    public ScoreMap<String> getTopicNavigator(final int count ) {
+
+    /**
+     * Get topics in a ScoreMap if config allows topic navigator
+     * (the topics are filtered by badwords, stopwords and words included in the query)
+     *
+     * @param count max number of topics returned
+     * @return ScoreMap with max number of topics or null if
+     */
+    public ScoreMap<String> getTopicNavigator(final int count) {
         if (this.topicNavigatorCount > 0 && count >= 0) { //topicNavigatorCount set during init, 0=no nav
-            return this.getTopics(count != 0 ? count : this.topicNavigatorCount, 500);
+            if (!this.ref.sizeSmaller(2)) {
+                ScoreMap<String> result;
+                int ic = count != 0 ? count : this.topicNavigatorCount;
+
+                if (this.ref.size() <= ic) { // size matches return map directly
+                    result = this.getTopics(/*ic, 500*/);
+                } else { // collect top most count topics
+                    result = new ConcurrentScoreMap<String>();
+                    Iterator<String> it = this.getTopics(/*ic, 500*/).keys(false);
+                    while (ic-- > 0 && it.hasNext()) {
+                        String word = it.next();
+                        result.set(word, this.ref.get(word));
+                    }
+                }
+                return result;
+            }
         }
         return null;
     }
 
+    /**
+     * Adds the retrieved results (fulltext & rwi) to the result list and
+     * computes the text snippets
+     * @return true on adding entries to resultlist otherwise false
+     */
     public boolean drainStacksToResult() {
         // we take one entry from both stacks at the same time
         boolean success = false;
@@ -1367,7 +1361,7 @@ public final class SearchEvent {
                     success = true;
                 } else {
 
-                    new Thread() {
+                    new Thread("SearchEvent.drainStacksToResult.getSnippet") {
                         @Override
                         public void run() {
                             SearchEvent.this.oneFeederStarted();
@@ -1394,7 +1388,7 @@ public final class SearchEvent {
                 success = true;
             }
         } else {
-            Thread t = new Thread() {
+            Thread t = new Thread("SearchEvent.drainStacksToResult.oneFilteredFromRWI") {
                 @Override
                 public void run() {
                     SearchEvent.this.oneFeederStarted();
@@ -1426,9 +1420,13 @@ public final class SearchEvent {
      * @param resultEntry to add
      * @param score current ranking
      */
-    public void addResult(URIMetadataNode resultEntry, final float score) {
+    public void addResult(URIMetadataNode resultEntry, final long score) {
         if (resultEntry == null) return;
-        final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, new ConcurrentScoreMap<String>() /*this.snippetProcess.rankingProcess.getTopicNavigator(10)*/);
+        final long ranking = (score * 128) + postRanking(resultEntry, this.ref /*this.getTopicNavigator(MAX_TOPWORDS)*/);
+        // TODO: above was originally using (see below), but getTopicNavigator returns this.ref and possibliy alters this.ref on first call (this.ref.size < 2 -> this.ref.clear)
+        // TODO: verify and straighten the use of addTopic, getTopic and getTopicNavigator and related score calculation
+        // final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, this.getTopicNavigator(MAX_TOPWORDS));
+
         resultEntry.setScore(ranking); // update the score of resultEntry for access by search interface / api
         this.resultList.put(new ReverseElement<URIMetadataNode>(resultEntry, ranking)); // remove smallest in case of overflow
         if (pollImmediately) this.resultList.poll(); // prevent re-ranking in case there is only a single index source which has already ranked entries.
@@ -1439,43 +1437,55 @@ public final class SearchEvent {
         long r = 0;
 
         // for media search: prefer pages with many links
-        r += rentry.limage() << this.query.ranking.coeff_cathasimage;
-        r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
-        r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
-        r += rentry.lapp()   << this.query.ranking.coeff_cathasapp;
+        switch (this.query.contentdom) {
+            case IMAGE:
+                r += rentry.limage() << this.query.ranking.coeff_cathasimage;
+                break;
+            case AUDIO:
+                r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
+                break;
+            case VIDEO:
+                r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
+                break;
+            case APP:
+                r += rentry.lapp() << this.query.ranking.coeff_cathasapp;
+        }
 
         // apply citation count
         //System.out.println("POSTRANKING CITATION: references = " + rentry.referencesCount() + ", inbound = " + rentry.llocal() + ", outbound = " + rentry.lother());
         if (this.query.getSegment().connectedCitation()) {
             int referencesCount = this.query.getSegment().urlCitation().count(rentry.hash());
             r += (128 * referencesCount / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
-        } /* else r += 0; */
+        }
         // prefer hit with 'prefer' pattern
-        if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) r += 256 << this.query.ranking.coeff_prefer;
-        if (this.query.prefer.matcher(rentry.title()).matches()) r += 256 << this.query.ranking.coeff_prefer;
+        if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) r += 255 << this.query.ranking.coeff_prefer;
+        if (this.query.prefer.matcher(rentry.title()).matches()) r += 255 << this.query.ranking.coeff_prefer;
 
         // apply 'common-sense' heuristic using references
         final String urlstring = rentry.url().toNormalform(true);
         final String[] urlcomps = MultiProtocolURL.urlComps(urlstring);
         final String[] descrcomps = MultiProtocolURL.splitpattern.split(rentry.title().toLowerCase());
-        for (final String urlcomp : urlcomps) {
-            int tc = topwords.get(urlcomp);
-            if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_urlcompintoplist;
-        }
-        for (final String descrcomp : descrcomps) {
-            int tc = topwords.get(descrcomp);
-            if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_descrcompintoplist;
-        }
 
         // apply query-in-result matching
-        final QueryGoal.NormalizedWords urlcomph = new QueryGoal.NormalizedWords(urlcomps);
-        final QueryGoal.NormalizedWords descrcomph = new QueryGoal.NormalizedWords(descrcomps);
+        final QueryGoal.NormalizedWords urlcompmap = new QueryGoal.NormalizedWords(urlcomps);
+        final QueryGoal.NormalizedWords descrcompmap = new QueryGoal.NormalizedWords(descrcomps);
+        // the token map is used (instead of urlcomps/descrcomps) to determine appearance in url/title and eliminate double occurances
+        // (example Title="News News News News News News - today is party -- News News News News News News" to add one score instead of 12 * score !)
+        for (final String urlcomp : urlcompmap) {
+            int tc = topwords.get(urlcomp);
+            if (tc > 0) r += tc << this.query.ranking.coeff_urlcompintoplist;
+        }
+        for (final String descrcomp : descrcompmap) {
+            int tc = topwords.get(descrcomp);
+            if (tc > 0) r += tc << this.query.ranking.coeff_descrcompintoplist;
+        }
+
         final Iterator<String> shi = this.query.getQueryGoal().getIncludeWords();
         String queryword;
         while (shi.hasNext()) {
             queryword = shi.next();
-            if (urlcomph.contains(queryword)) r += 256 << this.query.ranking.coeff_appurl;
-            if (descrcomph.contains(queryword)) r += 256 << this.query.ranking.coeff_app_dc_title;
+            if (urlcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_appurl;
+            if (descrcompmap.contains(queryword)) r += 255 << this.query.ranking.coeff_app_dc_title;
         }
         return r;
     }
@@ -1534,36 +1544,81 @@ public final class SearchEvent {
         return page.makeResultEntry(this.query.getSegment(), this.peers, null); // result without snippet
     }
     
+    /**
+     * This is the access point for the search interface to retrive ranked results.
+     * for display.
+     *
+     * @param item requested result counting number (starting at 0)
+     * @param timeout
+     * @return
+     */
     public URIMetadataNode oneResult(final int item, final long timeout) {
         // check if we already retrieved this item
         // (happens if a search pages is accessed a second time)
         final long finishTime = timeout == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + timeout;
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.getResultCount(), 0, 0), false);
+		
         // wait until a local solr is finished, we must do that to be able to check if we need more
-        if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join(100);} catch (final InterruptedException e) {}}
-        if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
-        if (item >= this.localsolroffset && this.local_solr_stored.get() >= item) {
-            // load remaining solr results now
+		if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {
+			try {
+				this.localsolrsearch.join(100);
+			} catch (final InterruptedException e) {
+				log.warn("Wait for local solr search was interrupted.");
+			}
+		}
+		if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && (this.localsolrsearch != null && this.localsolrsearch.isAlive())) {
+			try {
+				this.localsolrsearch.join();
+			} catch (final InterruptedException e) {
+				log.warn("Wait for local solr search was interrupted.");
+			}
+		}
+        if (this.remote && item >= this.localsolroffset && this.local_solr_stored.get() >= item) {
+			/* Request mixing remote and local Solr results : load remaining local solr results now. 
+			 * For local only search, a new SearchEvent should be created, starting directly at the requested offset,
+			 * thus allowing to handle last pages of large resultsets
+			 */
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
             if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
-            if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image), this.localsolroffset, nextitems, null /*this peer*/, 0, Switchboard.urlBlacklist);
-            }
-            this.localsolroffset += nextitems;
+			if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
+				this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
+						this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image),
+						this.localsolroffset, nextitems, null /* this peer */, 0, Switchboard.urlBlacklist);
+			}
+			this.localsolroffset += nextitems;
         }
         
         // now pull results as long as needed and as long as possible
-        if (this.remote && item < 10 && this.resultList.sizeAvailable() <= item) try {Thread.sleep(100);} catch (final InterruptedException e) {ConcurrentLog.logException(e);}
-        while ( this.resultList.sizeAvailable() <= item &&
+		if (this.remote && item < 10 && this.resultList.sizeAvailable() <= item) {
+			try {
+				Thread.sleep(100);
+			} catch (final InterruptedException e) {
+				log.warn("Remote search results wait was interrupted.");
+			}
+		}
+		
+        final int resultListIndex;
+        if (this.remote) {
+        	resultListIndex = item;
+        } else {
+        	resultListIndex = item - (this.localsolroffset - this.query.itemsPerPage);
+        }
+        while ( this.resultList.sizeAvailable() <= resultListIndex &&
                 (this.rwiQueueSize() > 0 || this.nodeStack.sizeQueue() > 0 ||
                 (!this.feedingIsFinished() && System.currentTimeMillis() < finishTime))) {
-            if (!drainStacksToResult()) try {Thread.sleep(10);} catch (final InterruptedException e) {ConcurrentLog.logException(e);}
+			if (!drainStacksToResult()) {
+				try {
+					Thread.sleep(10);
+				} catch (final InterruptedException e) {
+					log.warn("Search results wait was interrupted.");
+				}
+			}
         }
         
         // check if we have a success
-        if (this.resultList.sizeAvailable() > item) {
+        if (this.resultList.sizeAvailable() > resultListIndex) {
             // we have the wanted result already in the result array .. return that
-            final URIMetadataNode re = this.resultList.element(item).getElement();
+            final URIMetadataNode re = this.resultList.element(resultListIndex).getElement();
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "fetched, item = " + item + ", available = " + this.getResultCount() + ": " + re.urlstring(), 0, 0), false);
             
             /*
@@ -1583,6 +1638,7 @@ public final class SearchEvent {
         return null;
     }
 
+    /** Image results counter */
     private int imagePageCounter = 0;
     private LinkedHashMap<String, ImageResult> imageViewed = new LinkedHashMap<String, ImageResult>();
     private LinkedHashMap<String, ImageResult> imageSpareGood = new LinkedHashMap<String, ImageResult>();
@@ -1633,6 +1689,8 @@ public final class SearchEvent {
         // boolean fakeImageHost = ms.url().getHost() != null && ms.url().getHost().indexOf("wikipedia") > 0; // pages with image extension from wikipedia do not contain image files but html files... I know this is a bad hack, but many results come from wikipedia and we must handle that
         // generalize above hack (regarding url with file extension but beeing a html (with html mime)
         if (doc.doctype() == Response.DT_IMAGE) {
+        	/* Icons are not always .ico files and should now be indexed in icons_urlstub_sxt. But this test still makes sense for older indexed documents, 
+        	 * or documents coming from previous versions peers */
             if (!doc.url().getFileName().endsWith(".ico")) { // we don't want favicons
                 final String id = ASCII.String(doc.hash());
                 // check image size
@@ -1657,6 +1715,8 @@ public final class SearchEvent {
                 List<Object> width = widthO == null ? null : (List<Object>) widthO;
                 for (int c = 0; c < img.size(); c++) {
                     String image_urlstub =  (String) img.get(c);
+                	/* Icons are not always .ico files and should now be indexed in icons_urlstub_sxt. But this test still makes sense for older indexed documents, 
+                	 * or documents coming from previous versions peers */
                     if (image_urlstub.endsWith(".ico")) continue; // we don't want favicons, makes the result look idiotic
                     try {
                         int h = height == null ? 0 : (Integer) height.get(c);
@@ -1818,14 +1878,23 @@ public final class SearchEvent {
         // this is only available if execQuery() was called before
         return this.localSearchInclusion;
     }
-    
-    public ScoreMap<String> getTopics(final int maxcount, final long maxtime) {
-        // create a list of words that had been computed by statistics over all
-        // words that appeared in the url or the description of all urls
+
+    /**
+     * Return the list of words that had been computed by statistics over all
+     * words that appeared in the url or the description of all urls
+     *
+     * @return ScoreMap
+     */
+    public ScoreMap<String> getTopics(/* final int maxcount, final long maxtime */) {
+        /* ---------------------------------- start of rem (2016-09-03)
+        // TODO: result map is not used currently, verify if it should and use or delete this code block
+        // TODO: as it is not used now - in favour of performance this code block is rem'ed (2016-09-03)
+
         final ScoreMap<String> result = new ConcurrentScoreMap<String>();
         if ( this.ref.sizeSmaller(2) ) {
             this.ref.clear(); // navigators with one entry are not useful
         }
+
         final Map<String, Float> counts = new HashMap<String, Float>();
         final Iterator<String> i = this.ref.keys(false);
         String word;
@@ -1851,11 +1920,17 @@ public final class SearchEvent {
                 result.set(ce.getKey(), (int) (((double) maxcount) * (ce.getValue() - min) / (max - min)));
             }
         }
+        /* ------------------------------------ end of rem (2016-09-03) */
         return this.ref;
     }
 
     private final static Pattern lettermatch = Pattern.compile("[a-z]+");
 
+    /**
+     * Collects topics in a ScoreMap for words not included in the query words.
+     * Words are also filtered by badword blacklist and stopword list.
+     * @param words
+     */
     public void addTopic(final String[] words) {
         String word;
         for ( final String w : words ) {
@@ -1872,6 +1947,10 @@ public final class SearchEvent {
         }
     }
 
+    /**
+     * Ad title words to this searchEvent's topic score map
+     * @param resultEntry
+     */
     protected void addTopics(final URIMetadataNode resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;

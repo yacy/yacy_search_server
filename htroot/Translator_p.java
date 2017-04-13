@@ -24,37 +24,38 @@ import java.util.Iterator;
 import java.util.Map;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
-import net.yacy.utils.translation.CreateTranslationMasters;
+import net.yacy.utils.translation.TranslationManager;
 
 public class Translator_p {
 
-    public static servletProperties respond(@SuppressWarnings("unused") final RequestHeader requestHeader, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+    public static servletProperties respond(final RequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
         try {
             final servletProperties prop = new servletProperties();
             final Switchboard sb = (Switchboard) env;
 
-            String langcfg = env.getConfig("locale.language", "default");
+            String langcfg = sb.getConfig("locale.language", "default");
             prop.put("targetlang", langcfg);
-            if ("default".equals(langcfg)) {
-                prop.put("errmsg", "activate a different language");
+            if ("default".equals(langcfg) || "browser".equals(langcfg)) {
+                prop.put("errmsg", 1); // msg: activate diff lng
                 return prop;
             } else {
-                prop.put("errmsg", "");
+                prop.put("errmsg", 0);
             }
 
-            File lngfile = new File("locales", langcfg + ".lng");
-            CreateTranslationMasters ctm = new CreateTranslationMasters(/*new File ("locales","master.lng.xlf")*/);
+            File lngfile = new File(sb.getAppPath("locale.source", "locales"), langcfg + ".lng");
+            TranslationManager localTransMgr = new TranslationManager(/*new File ("locales","master.lng.xlf")*/);
 
-            File masterxlf = new File("locales", "master.lng.xlf");
-            if (!masterxlf.exists()) ctm.createMasterTranslationLists(masterxlf);
-            Map<String, Map<String, String>> origTrans = ctm.joinMasterTranslationLists(masterxlf, lngfile);
-            final File locallngfile = ctm.getScratchFile(lngfile);
-            Map<String, Map<String, String>> localTrans = ctm.loadTranslationsLists(locallngfile); // TODO: this will read file twice
+            File masterxlf = new File(sb.getAppPath("locale.source", "locales"), "master.lng.xlf");
+            if (!masterxlf.exists()) localTransMgr.createMasterTranslationLists(masterxlf);
+            Map<String, Map<String, String>> origTrans = localTransMgr.joinMasterTranslationLists(masterxlf, lngfile);
+            final File locallngfile = localTransMgr.getScratchFile(lngfile);
+            Map<String, Map<String, String>> localTrans = localTransMgr.loadTranslationsLists(locallngfile); // TODO: this will read file twice
             int i = 0;
             if (origTrans.size() > 0) {
                 String filename = origTrans.keySet().iterator().next();
@@ -112,9 +113,12 @@ public class Translator_p {
                     }
                     // handle (modified) input text
                     if (i == textlistid && post != null) {
+                    	/* Check this is a valid transaction */
+                    	TransactionManager.checkPostTransaction(requestHeader, post);
+                    	
                         if (editapproved) { // switch already translated in edit mode by copying to local translation
                             // not saved here as not yet modified/approved
-                            ctm.addTranslation(localTrans, filename, sourcetext, targettxt);
+                            localTransMgr.addTranslation(localTrans, filename, sourcetext, targettxt);
                         } else {
                             String t = post.get("targettxt" + Integer.toString(textlistid));
                             // correct common partial html markup (part of text identification for words also used as html parameter)
@@ -125,7 +129,7 @@ public class Translator_p {
                             targettxt = t;
                             // add changes to original (for display) and local (for save)
                             origTextList.put(sourcetext, targettxt);
-                            changed = ctm.addTranslation(localTrans, filename, sourcetext, targettxt);
+                            changed = localTransMgr.addTranslation(localTrans, filename, sourcetext, targettxt);
                         }
                     }
                     prop.putHTML("textlist_" + i + "_sourcetxt", sourcetext);
@@ -138,7 +142,10 @@ public class Translator_p {
                     changed = true;
                 }
                 if (changed) {
-                    ctm.saveAsLngFile(langcfg, locallngfile, localTrans);
+                	/* Check this is a valid transaction */
+                	TransactionManager.checkPostTransaction(requestHeader, post);
+                	
+                    localTransMgr.saveAsLngFile(langcfg, locallngfile, localTrans);
                     // adhoc translate this file
                     // 1. get/calc the path
                     final String htRootPath = env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
@@ -147,9 +154,13 @@ public class Translator_p {
                     // get absolute file by adding relative filename from translationlist
                     final File sourceFile = new File(sourceDir, filename);
                     final File destFile = new File(destDir, filename);
-                    ctm.translateFile(sourceFile, destFile, origTextList); // do the translation
+                    localTransMgr.translateFile(sourceFile, destFile, origTextList); // do the translation
                 }
             }
+            
+            /* Acquire a transaction token for the next POST form submission */
+            prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(requestHeader));
+            
             prop.put("textlist", i);
             return prop;
         } catch (IOException ex) {

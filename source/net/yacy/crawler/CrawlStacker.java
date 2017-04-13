@@ -36,6 +36,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
@@ -151,34 +152,55 @@ public final class CrawlStacker {
         if (CrawlStacker.log.isFinest()) CrawlStacker.log.finest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
         this.requestQueue.enQueue(entry);
     }
+    
     public void enqueueEntriesAsynchronous(
             final byte[] initiator,
             final String profileHandle,
             final List<AnchorURL> hyperlinks,
             final int timezoneOffset) {
-        new Thread() {
+        new Thread("enqueueEntriesAsynchronous") {
             @Override
             public void run() {
-                Thread.currentThread().setName("enqueueEntriesAsynchronous");
                 enqueueEntries(initiator, profileHandle, hyperlinks, true, timezoneOffset);
             }
         }.start();
     }
-
-    private void enqueueEntries(
+    
+    /**
+     * Enqueue crawl start entries
+     * @param initiator Hash of the peer initiating the crawl
+     * @param profileHandle name of the active crawl profile
+     * @param hyperlinks crawl starting points links to stack
+     * @param replace Specify whether old indexed entries should be replaced
+     * @param timezoneOffset local time-zone offset
+     * @throws IllegalCrawlProfileException when the crawl profile is not active
+     */
+    public void enqueueEntries(
             final byte[] initiator,
             final String profileHandle,
             final List<AnchorURL> hyperlinks,
             final boolean replace,
             final int timezoneOffset) {
+    	/* Let's check if the profile is still active before removing any existing entry */
+        byte[] handle = UTF8.getBytes(profileHandle);
+        final CrawlProfile profile = this.crawler.get(handle);
+        if (profile == null) {
+            String error;
+            if(hyperlinks.size() == 1) {
+            	error = "Rejected URL : " + hyperlinks.get(0).toNormalform(false) + ". Reason : LOST STACKER PROFILE HANDLE '" + profileHandle + "'";  
+            } else {
+            	error = "Rejected " + hyperlinks.size() + " crawl entries. Reason : LOST STACKER PROFILE HANDLE '" + profileHandle + "'";            	
+            }
+            CrawlStacker.log.info(error); // this is NOT an error but a normal behavior when terminating a crawl queue
+            /* Throw an exception to signal caller it can stop stacking URLs using this crawl profile */
+            throw new IllegalCrawlProfileException("Profile " + profileHandle + " is no more active");
+        }
         if (replace) {
             // delete old entries, if exists to force a re-load of the url (thats wanted here)
             Set<String> hosthashes = new HashSet<String>();
             for (final AnchorURL url: hyperlinks) {
                 if (url == null) continue;
-                final byte[] urlhash = url.hash();
-                byte[] hosthash = new byte[6]; System.arraycopy(urlhash, 6, hosthash, 0, 6);
-                hosthashes.add(ASCII.String(hosthash));
+                hosthashes.add(url.hosthash());
             }
             this.nextQueue.errorURL.removeHosts(hosthashes);
         }
@@ -203,12 +225,9 @@ public final class CrawlStacker {
             }
 
             if (url.getProtocol().equals("ftp")) {
-                // put the whole ftp site on the crawl stack
-                String userInfo = url.getUserInfo();
-                int p = userInfo == null ? -1 : userInfo.indexOf(':');
-                String user = userInfo == null ? FTPClient.ANONYMOUS : userInfo.substring(0, p);
-                String pw = userInfo == null || p == -1 ? "anomic" : userInfo.substring(p + 1);
-                enqueueEntriesFTP(initiator, profileHandle, url.getHost(), url.getPort(), user, pw, replace, timezoneOffset);
+                /* put ftp site entries on the crawl stack, 
+                 * using the crawl profile depth to control how many children folders of the url are stacked */
+                enqueueEntriesFTP(initiator, profile, url, replace, timezoneOffset);
             } else {
                 // put entry on crawl stack
                 enqueueEntry(new Request(
@@ -224,24 +243,36 @@ public final class CrawlStacker {
             }
         }
     }
-
+    
+    /**
+     * Asynchronously enqueue crawl start entries for a ftp url.
+     * @param initiator Hash of the peer initiating the crawl
+     * @param profile the active crawl profile
+     * @param ftpURL crawl start point URL : protocol must be ftp
+     * @param replace Specify whether old indexed entries should be replaced
+     * @param timezoneOffset local time-zone offset
+     */
     public void enqueueEntriesFTP(
             final byte[] initiator,
-            final String profileHandle,
-            final String host,
-            final int port,
-            final String user,
-            final String pw,
+            final CrawlProfile profile,
+            final DigestURL ftpURL,
             final boolean replace,
             final int timezoneOffset) {
         final CrawlQueues cq = this.nextQueue;
+        final String userInfo = ftpURL.getUserInfo();
+        final int p = userInfo == null ? -1 : userInfo.indexOf(':');
+        final String user = userInfo == null ? FTPClient.ANONYMOUS : userInfo.substring(0, p);
+        final String pw = userInfo == null || p == -1 ? "anomic" : userInfo.substring(p + 1);
+        final String host = ftpURL.getHost();
+        final int port = ftpURL.getPort();
+        final int pathParts = ftpURL.getPaths().length;
         new Thread() {
             @Override
             public void run() {
                 Thread.currentThread().setName("enqueueEntriesFTP");
                 BlockingQueue<FTPClient.entryInfo> queue;
                 try {
-                    queue = FTPClient.sitelist(host, port, user, pw);
+                    queue = FTPClient.sitelist(host, port, user, pw, ftpURL.getPath(), profile.depth());
                     FTPClient.entryInfo entry;
                     while ((entry = queue.take()) != FTPClient.POISON_entryInfo) {
 
@@ -257,6 +288,10 @@ public final class CrawlStacker {
                             CrawlStacker.this.indexSegment.fulltext().remove(urlhash);
                             cq.noticeURL.removeByURLHash(urlhash);
                         }
+                        
+                        /* Each entry is a children resource of the starting ftp URL : 
+                         * take into account the sub folder depth in the crawl depth control */
+                        int nextDepth = Math.max(0, url.getPaths().length - pathParts);
 
                         // put entry on crawl stack
                         enqueueEntry(new Request(
@@ -265,8 +300,8 @@ public final class CrawlStacker {
                                 null,
                                 MultiProtocolURL.unescape(entry.name),
                                 entry.date,
-                                profileHandle,
-                                0,
+                                profile.handle(),
+                                nextDepth,
                                 timezoneOffset));
                     }
                 } catch (final IOException e1) {
@@ -417,7 +452,7 @@ public final class CrawlStacker {
                 CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                     ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
         } else {
-            return "double in: LURL-DB, oldDate = " + oldDate.toString();
+            return "double in: local index, oldDate = " + ISO8601Formatter.FORMATTER.format(new Date(oldDate));
         }
 
         return null;
@@ -561,7 +596,7 @@ public final class CrawlStacker {
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
         final InetAddress ia = Domains.dnsResolve(host);
         return (local) ?
-            ("the host '" + host + "' is local, but local addresses are not accepted: " + ((ia == null) ? "null" : ia.getHostAddress())) :
+            ("the host '" + host + "' is local, but local addresses are not accepted: " + ((ia == null) ? "DNS lookup resulted in null (unknown host name)" : ia.getHostAddress())) :
             ("the host '" + host + "' is global, but global addresses are not accepted: " + ((ia == null) ? "null" : ia.getHostAddress()));
     }
 

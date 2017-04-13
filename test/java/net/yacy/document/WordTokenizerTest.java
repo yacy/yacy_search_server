@@ -22,8 +22,12 @@ public class WordTokenizerTest {
             int cnt = 0;
             while (wt.hasMoreElements()) {
                 StringBuilder sb = wt.nextElement();
-                assertEquals("word", sb.toString());
-                cnt++;
+                if (sb.length() > 1) { // skip punktuation
+                    assertEquals("word", sb.toString());
+                    cnt++;
+                } else {
+                    assertTrue("punktuation", SentenceReader.punctuation(sb.charAt(0)));
+                }
             }
             wt.close();
             assertEquals(10, cnt);

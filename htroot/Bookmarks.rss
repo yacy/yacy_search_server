@@ -2,7 +2,7 @@
 <rss version="2.0">
     <channel>
         <title><![CDATA[YaCy '#[clientname]#': Bookmarks]]></title>
-        <link>http://#[address]#/Bookmarks.html</link>
+        <link>#[address]#/Bookmarks.html</link>
         <description><![CDATA[#[user]#'s Bookmark-Feed]]></description>
         #{display_bookmarks}#<item>
             <title><![CDATA[#[title]#]]></title>

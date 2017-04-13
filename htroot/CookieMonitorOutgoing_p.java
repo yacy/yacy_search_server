@@ -30,6 +30,7 @@
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
+import javax.servlet.http.Cookie;
 
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -65,17 +66,17 @@ public class CookieMonitorOutgoing_p {
         final Iterator<Map.Entry<String, Object[]>> i = switchboard.outgoingCookies.entrySet().iterator();
         Map.Entry<String, Object[]> entry;
         String host, client;
-        Object[] cookies;
+        Cookie[] cookies;
         Date date;
         Object[] oa;
         while ((entCount < maxCount) && (i.hasNext())) {
             // get out values
             entry = i.next();
             host = entry.getKey();
-            oa = entry.getValue();
+            oa = entry.getValue(); // entry structure -> { date, client, Cookie[] }
             date = (Date) oa[0];
             client = (String) oa[1];
-            cookies = (Object[]) oa[2];
+            cookies = (Cookie[]) oa[2];
 
             // put values in template
             prop.put("list_" + entCount + "_dark", dark ? "1" : "0" );
@@ -84,7 +85,7 @@ public class CookieMonitorOutgoing_p {
             prop.put("list_" + entCount + "_date", HeaderFramework.formatRFC1123(date));
             prop.put("list_" + entCount + "_client", client);
             while (tmpCount < cookies.length){
-                prop.putHTML("list_" + entCount + "_cookies_" + tmpCount + "_item", ((String) cookies[tmpCount]));
+                prop.putHTML("list_" + entCount + "_cookies_" + tmpCount + "_item", cookies[tmpCount].getName() + "=" + cookies[tmpCount].getValue());
                 tmpCount++;
             }
             prop.put("list_" + entCount + "_cookies", tmpCount);

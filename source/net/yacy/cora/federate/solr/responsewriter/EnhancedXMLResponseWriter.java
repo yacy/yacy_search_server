@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import net.yacy.cora.federate.solr.SolrType;
 
@@ -58,7 +57,6 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
     private static final char lb = '\n';
     private static final char[] XML_START = "<?xml version = \"1.0\" encoding = \"UTF-8\"?>\n<response>\n".toCharArray();
     private static final char[] XML_STOP = "\n</response>\n".toCharArray();
-    private static final Set<String> DEFAULT_FIELD_LIST = null;
 
     public EnhancedXMLResponseWriter() {
         super();
@@ -137,7 +135,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         IndexSchema schema = request.getSchema();
         for (int i = 0; i < sz; i++) {
             int id = iterator.nextDoc();
-            Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
+            Document doc = searcher.doc(id);
             writeDoc(writer, schema, null, doc.getFields(), (includeScore ? iterator.score() : 0.0f), includeScore);
         }
         writer.write("</result>");
@@ -172,7 +170,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         startTagOpen(writer, "doc", name);
 
         if (includeScore) {
-            writeTag(writer, "float", "score", Float.toString(score), false);
+            writeTag(writer, "float", "score", Float.toString(score), false); // this is the special Solr "score" pseudo-field
         }
 
         int sz = fields.size();

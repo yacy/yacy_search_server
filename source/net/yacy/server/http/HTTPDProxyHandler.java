@@ -66,6 +66,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -170,7 +171,7 @@ public final class HTTPDProxyHandler {
             yellowList = FileUtils.loadList(new File(f));
             log.config("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
         } else {
-            yellowList = new HashSet<String>();
+            yellowList = null;
         }
 
         final String redirectorPath = sb.getConfig("externalRedirector", "");
@@ -220,7 +221,7 @@ public final class HTTPDProxyHandler {
          */
         if (sb.getConfigBool("proxy.monitorCookies", false)) {
             if (requestHeader.containsKey(RequestHeader.COOKIE)) {
-                final Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getMultiple(RequestHeader.COOKIE)};
+                final Object[] entry = new Object[]{new Date(), clienthost, requestHeader.getCookies()};
                 synchronized(sb.outgoingCookies) {
                     sb.outgoingCookies.put(targethost, entry);
                 }
@@ -255,6 +256,9 @@ public final class HTTPDProxyHandler {
     }
 
     /**
+     * Get a page from the remote server as proxy request for the client.
+     * The target url is expected in the conProp CONNECTION_PROP_DIGESTURL
+     *
      * @param conProp a collection of properties about the connection, like URL
      * @param requestHeader The header lines of the connection from the request
      * @param respond the OutputStream to the client
@@ -274,41 +278,29 @@ public final class HTTPDProxyHandler {
 
             final String ip   = (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
 
-            DigestURL url = null;
-            try {
-                url = HeaderFramework.getRequestURL(conProp);
-                if (log.isFine()) log.fine(reqID +" GET "+ url);
-                if (log.isFinest()) log.finest(reqID +"    header: "+ requestHeader);
+            DigestURL url = (DigestURL) conProp.get(HeaderFramework.CONNECTION_PROP_DIGESTURL);
+            if (log.isFine()) log.fine(reqID +" GET "+ url.toString());
+            if (log.isFinest()) log.finest(reqID +"    header: "+ requestHeader);
 
-                //redirector
-                if (redirectorEnabled){
-                    synchronized(redirectorProcess){
-                        redirectorWriter.println(url.toNormalform(true));
-                        redirectorWriter.flush();
-                    }
-                    final String newUrl = redirectorReader.readLine();
-                    if (!newUrl.equals("")) {
-                        try {
-                            url = new DigestURL(newUrl);
-                        } catch(final MalformedURLException e){}//just keep the old one
-                    }
-                    if (log.isFinest()) log.finest(reqID +"    using redirector to "+ url);
-                    conProp.put(HeaderFramework.CONNECTION_PROP_HOST, url.getHost()+":"+url.getPort());
-                    conProp.put(HeaderFramework.CONNECTION_PROP_PATH, url.getPath());
-                    requestHeader.put(HeaderFramework.HOST, url.getHost()+":"+url.getPort());
-                    requestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, url.getPath());
+            //redirector
+            if (redirectorEnabled) {
+                synchronized (redirectorProcess) {
+                    redirectorWriter.println(url.toNormalform(true));
+                    redirectorWriter.flush();
                 }
-            } catch (final MalformedURLException e) {
-                // get header info for error logging
-                final String host = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
-                final String path = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH); // always starts with leading '/'
-                final String args = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS); // may be null if no args were given
-                final String errorMsg = "ERROR: internal error with url generation: host=" +
-                                  host + ", path=" + path + ", args=" + args;
-                log.severe(errorMsg);
-                HTTPDemon.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
-                return;
+                final String newUrl = redirectorReader.readLine();
+                if (!newUrl.equals("")) {
+                    try {
+                        url = new DigestURL(newUrl);
+                    } catch (final MalformedURLException e) {
+                    }//just keep the old one
+                }
+                if (log.isFinest()) {
+                    log.finest(reqID + "    using redirector to " + url);
+                }
+                conProp.put(HeaderFramework.CONNECTION_PROP_DIGESTURL, url);
             }
+
 
             // check the blacklist
             // blacklist idea inspired by [AS]:
@@ -404,6 +396,16 @@ public final class HTTPDProxyHandler {
         }
     }
 
+    /**
+     * Get requested proxied page from the web
+     *
+     * @param conProp
+     * @param url requested target url
+     * @param requestHeader
+     * @param cachedResponseHeader
+     * @param respond
+     * @param agent
+     */
     private static void fulfillRequestFromWeb(final HashMap<String, Object> conProp, final DigestURL url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond, final ClientIdentification.Agent agent) {
         try {
             final int reqID = requestHeader.hashCode();
@@ -412,7 +414,14 @@ public final class HTTPDProxyHandler {
             final String path = url.getPath(); // conProp.get(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
             final String args = url.getSearchpart(); // conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
             final String ip =      (String) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
-            final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); // the ip from the connecting peer
+            final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER); // the http version for the request
+            final String clienthttpVer; // the http version of the client connection
+            final HttpServletRequest clientservletrequest = (HttpServletRequest) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST);
+            if (clientservletrequest != null) {
+                clienthttpVer = clientservletrequest.getProtocol();
+            } else {
+                clienthttpVer = null;
+            }
             final int port = url.getPort();
 
             // resolve yacy and yacyh domains
@@ -434,13 +443,12 @@ public final class HTTPDProxyHandler {
 
             requestHeader.remove(HeaderFramework.HOST);
 
-            final HTTPClient client = setupHttpClient(requestHeader, agent, connectHost);
+            final HTTPClient client = setupHttpClient(requestHeader, agent);
 
             // send request
             try {
             	client.GET(getUrl, false);
                 if (log.isFinest()) log.finest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
-                conProp.put(HeaderFramework.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
 
                 int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
                 final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
@@ -490,7 +498,7 @@ public final class HTTPDProxyHandler {
                 HTTPDemon.sendRespondHeader(
                         conProp,
                         respond,
-                        httpVer,
+                        clienthttpVer,
                         statusCode,
                         client.getHttpResponse().getStatusLine().toString(), // status text
                         responseHeader);
@@ -634,7 +642,13 @@ public final class HTTPDProxyHandler {
     ) throws IOException {
 
         final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
-
+        final String clienthttpVer; // the http version of the client connection
+        final HttpServletRequest clientservletrequest = (HttpServletRequest) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST);
+        if (clientservletrequest != null) {
+            clienthttpVer = clientservletrequest.getProtocol();
+        } else {
+            clienthttpVer = null;
+        }
         // we respond on the request by using the cache, the cache is fresh
         try {
             prepareResponseHeader(cachedResponseHeader, httpVer);
@@ -653,7 +667,7 @@ public final class HTTPDProxyHandler {
                 cachedResponseHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(0));
 
                 // send cached header with replaced date and added length
-                HTTPDemon.sendRespondHeader(conProp,respond,httpVer,304,cachedResponseHeader);
+                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,304,cachedResponseHeader);
                 //respondHeader(respond, "304 OK", cachedResponseHeader); // respond with 'not modified'
             } else {
                 // unconditional request: send content of cache
@@ -664,7 +678,7 @@ public final class HTTPDProxyHandler {
                 cachedResponseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(cacheEntry.length));
 
                 // send cached header with replaced date and added length
-                HTTPDemon.sendRespondHeader(conProp,respond,httpVer,203,cachedResponseHeader);
+                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,203,cachedResponseHeader);
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
 
                 // send also the complete body now from the cache
@@ -748,10 +762,9 @@ public final class HTTPDProxyHandler {
      * creates a new HttpClient and sets parameters according to proxy needs
      *
      * @param requestHeader
-     * @param connectHost may be 'host:port' or 'host:port/path'
      * @return
      */
-    private static HTTPClient setupHttpClient(final RequestHeader requestHeader, final ClientIdentification.Agent agent, final String connectHost) {
+    private static HTTPClient setupHttpClient(final RequestHeader requestHeader, final ClientIdentification.Agent agent) {
         // setup HTTP-client
     	final HTTPClient client = new HTTPClient(agent, timeout);
     	client.setHeader(requestHeader.entrySet());
@@ -795,7 +808,7 @@ public final class HTTPDProxyHandler {
                 if (httpVer.equals(HeaderFramework.HTTP_VERSION_0_9) || httpVer.equals(HeaderFramework.HTTP_VERSION_1_0)) {
                     forceConnectionClose(conProp);
                 } else {
-                    chunkedOut = new ChunkedOutputStream(respond);
+                chunkedOut = new ChunkedOutputStream(respond);
                 }
                 responseHeader.remove(HeaderFramework.CONTENT_LENGTH);
             }
@@ -866,10 +879,6 @@ public final class HTTPDProxyHandler {
 
         // remove transfer encoding header
         headers.remove(HeaderFramework.TRANSFER_ENCODING);
-
-        //removing yacy status headers
-        headers.remove(HeaderFramework.X_YACY_KEEP_ALIVE_REQUEST_COUNT);
-        headers.remove(HeaderFramework.X_YACY_ORIGINAL_REQUEST_LINE);
     }
 
     private static void setViaHeader(final HeaderFramework header, final String httpVer) {
@@ -1029,14 +1038,13 @@ public final class HTTPDProxyHandler {
         }));
 
         // getting some connection properties
-        String orgHostPort = "80";
-        String orgHostName = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
+        DigestURL orgurl = (DigestURL) conProp.get(HeaderFramework.CONNECTION_PROP_DIGESTURL);
+        int orgHostPort = orgurl.getPort();
+        String orgHostName = orgurl.getHost();
         if (orgHostName == null) orgHostName = "unknown";
         orgHostName = orgHostName.toLowerCase();
-        orgHostPort = Integer.toString(Domains.stripToPort(orgHostName));
-        orgHostName = Domains.stripToHostName(orgHostName);
-        String orgHostPath = (String) conProp.get(HeaderFramework.CONNECTION_PROP_PATH); if (orgHostPath == null) orgHostPath = "";
-        String orgHostArgs = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS); if (orgHostArgs == null) orgHostArgs = "";
+        String orgHostPath = orgurl.getPath(); if (orgHostPath == null) orgHostPath = "";
+        String orgHostArgs = orgurl.getSearchpart();; if (orgHostArgs == null) orgHostArgs = "";
         if (orgHostArgs.length() > 0) orgHostArgs = "?" + orgHostArgs;
         detailedErrorMsgMap.put("hostName", orgHostName);
 
@@ -1158,18 +1166,14 @@ public final class HTTPDProxyHandler {
         logMessage.append(' ');
 
         // Method
-        final String requestMethod = (String) conProp.get(HeaderFramework.CONNECTION_PROP_METHOD);
+        HttpServletRequest origrequest = (HttpServletRequest) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST);
+        final String requestMethod = origrequest.getMethod();
         logMessage.append(requestMethod);
         logMessage.append(' ');
 
         // URL
-        final String requestURL = (String) conProp.get(HeaderFramework.CONNECTION_PROP_URL);
-        final String requestArgs = (String) conProp.get(HeaderFramework.CONNECTION_PROP_ARGS);
-        logMessage.append(requestURL);
-        if (requestArgs != null) {
-            logMessage.append("?")
-                           .append(requestArgs);
-        }
+        final DigestURL requestURL = (DigestURL) conProp.get(HeaderFramework.CONNECTION_PROP_DIGESTURL);
+        logMessage.append(requestURL.toString());
         logMessage.append(' ');
 
         // Rfc931
@@ -1177,9 +1181,8 @@ public final class HTTPDProxyHandler {
         logMessage.append(' ');
 
         //  Peerstatus/Peerhost
-        final String host = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HOST);
         logMessage.append("DIRECT/");
-        logMessage.append(host);
+        logMessage.append(requestURL.getHost());
         logMessage.append(' ');
 
         // Type

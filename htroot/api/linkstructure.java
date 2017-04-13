@@ -41,7 +41,7 @@ public class linkstructure {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         
-        final String ext = header.get("EXT", "");
+        final String ext = header.get(HeaderFramework.CONNECTION_PROP_EXT, "");
         //final boolean json = ext.equals("json");
         final boolean xml = ext.equals("xml");
         

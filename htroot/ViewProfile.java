@@ -169,8 +169,7 @@ public class ViewProfile {
                     prop.put("success_" + key, "1");
                     // only comments get "wikified"
                     if(key.equals("comment")){
-                        prop.putWiki(sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()),
-                                "success_" + key + "_value",
+                        prop.putWiki("success_" + key + "_value",
                                 entry.getValue().replaceAll("\r", "").replaceAll("\\\\n", "\n"));
                         prop.put("success_" + key + "_b64value", Base64Order.standardCoder.encodeString(entry.getValue()));
                     }else{

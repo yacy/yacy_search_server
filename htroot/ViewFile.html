@@ -2,6 +2,7 @@
 <!-- This page is only XHTML 1.0 Transitional and not Strict because iframes are in use -->
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    #%env/templates/metas.template%#
   <script type="text/javascript">
 //<![CDATA[
 function xmlhttpPost() {
@@ -18,7 +19,7 @@ function search(query) {
     else if (window.ActiveXObject) { // IE
         self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
     }
-    self.xmlHttpReq.open('GET', "/solr/select?q=sku:\"" + query + "\" OR host_s:\"" + query + "\" OR host_dnc_s:\"" + query + "\" OR host_organization_s:\"" + query + "\" OR host_organizationdnc_s:\"" + query + "\" OR host_subdomain_s:\"" + query + "\"&start=0&rows=100&wt=yjson", true);
+    self.xmlHttpReq.open('GET', "solr/select?q=sku:\"" + query + "\" OR host_s:\"" + query + "\" OR host_dnc_s:\"" + query + "\" OR host_organization_s:\"" + query + "\" OR host_organizationdnc_s:\"" + query + "\" OR host_subdomain_s:\"" + query + "\"&start=0&rows=100&wt=yjson", true);
     self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     self.xmlHttpReq.onreadystatechange = function() {
         if (self.xmlHttpReq.readyState == 4) {
@@ -53,7 +54,6 @@ function updatepage(str) {
 //]]>
 </script>
     <title>YaCy '#[clientname]#': View URL Content</title>
-    #%env/templates/metas.template%#
   <script type="text/javascript" src="js/highslide/highslide.js"></script>
   </head>
   <body>
@@ -83,7 +83,7 @@ function updatepage(str) {
           <dd>
             <input type="text" size="60" name="url" id="url" value="#[url]#" />
             <input type="submit" name="show" class="btn btn-primary" value="Show Metadata" />
-            #(moar)#::<input type="button" value="Browse Host" class="btn btn-default" onClick="location.href='/HostBrowser.html?path=' + document.getElementById('url').value" />#(/moar)#
+            #(moar)#::<input type="button" value="Browse Host" class="btn btn-default" onClick="location.href='HostBrowser.html?path=' + document.getElementById('url').value" />#(/moar)#
             <div id="searchresults"></div>
           </dd>
           #(moar)#::
@@ -103,7 +103,7 @@ function updatepage(str) {
       <fieldset><legend>URL Metadata</legend>
         <dl>
           <dt>URL:</dt><dd><a href="#[url]#">#[url]#</a></dd>
-          <dt>Hash:</dt><dd><a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[hash]#%22">#[hash]#</a> (click this for full metadata)</dd>
+          <dt>Hash:</dt><dd>#(inurldb)##[hash]#::<a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[hash]#%22">#[hash]#</a> (click this for full metadata)#(/inurldb)#</dd>
           <dt>In Metadata:</dt><dd>#(inurldb)#no::yes#(/inurldb)#</dd>
           <dt>In Cache:</dt><dd>#(incache)#no::yes#(/incache)#</dd>
           <dt>First Seen:</dt><dd>#[firstSeen]#</dd>

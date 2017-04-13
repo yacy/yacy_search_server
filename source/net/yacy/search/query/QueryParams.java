@@ -26,6 +26,9 @@
 
 package net.yacy.search.query;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -77,7 +80,7 @@ import org.apache.solr.util.DateFormatUtil;
 
 public final class QueryParams {
 
-    public static int FACETS_STANDARD_MAXCOUNT = 10000;
+    public static int FACETS_STANDARD_MAXCOUNT = 100; // max count of item lines in navigator
     public static int FACETS_DATE_MAXCOUNT = 640;
     
     public enum Searchdom {
@@ -184,7 +187,13 @@ public final class QueryParams {
         this.contentdom = contentdom;
         this.timezoneOffset = timezoneOffset;
         this.itemsPerPage = Math.min((specialRights) ? 10000 : 1000, itemsPerPage);
-        this.offset = Math.max(0, Math.min((specialRights) ? 10000 - this.itemsPerPage : 1000 - this.itemsPerPage, offset));
+        if(domType == Searchdom.LOCAL) {
+        	/* No offset restriction on local index only requests, as only itemsPerPage will be loaded */
+        	this.offset = Math.max(0, offset);
+        } else {
+        	/* Offset has to be limited on requests mixing local and remote results, because all results before offset are loaded */
+        	this.offset = Math.max(0, Math.min((specialRights) ? 10000 - this.itemsPerPage : 1000 - this.itemsPerPage, offset));
+        }
         try {
             this.urlMaskString = urlMask;
             // solr doesn't like slashes, backslashes or doublepoints; remove them // urlmask = ".*\\." + ft + "(\\?.*)?";
@@ -221,7 +230,6 @@ public final class QueryParams {
         } catch (final PatternSyntaxException ex) {
             throw new IllegalArgumentException("Not a valid regular expression: " + prefer, ex);
         }
-        this.prefer.toString().equals(matchnothing_pattern.toString());
         assert language != null;
         this.targetlang = language;
         this.metatags = metatags;
@@ -661,11 +669,7 @@ public final class QueryParams {
 
     /**
      * make a query anchor tag
-     * @param page
-     * @param theQuery
-     * @param originalUrlMask
-     * @param addToQuery
-     * @return
+     * @return the anchor url builder
      */
     public static StringBuilder navurl(final RequestHeader.FileType ext, final int page, final QueryParams theQuery, final String newQueryString, boolean newModifierReplacesOld) {
 
@@ -691,7 +695,7 @@ public final class QueryParams {
     public static StringBuilder navurlBase(final RequestHeader.FileType ext, final QueryParams theQuery, final String newModifier, boolean newModifierReplacesOld) {
 
         StringBuilder sb = new StringBuilder(120);
-        sb.append("/yacysearch.");
+        sb.append("yacysearch.");
         sb.append(ext.name().toLowerCase());
         sb.append("?query=");
 
@@ -702,7 +706,7 @@ public final class QueryParams {
             if (!newModifier.isEmpty()) {
                 if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
                 if (newModifierReplacesOld) {
-                    int nmpi = newModifier.indexOf("%3A");
+                    int nmpi = newModifier.indexOf(":");
                     if (nmpi > 0) {
                         String nmp = newModifier.substring(0, nmpi) + ":";
                         int i = sb.indexOf(nmp);
@@ -710,7 +714,11 @@ public final class QueryParams {
                         if (sb.charAt(sb.length() - 1) == '+') sb.setLength(sb.length() - 1);
                     }
                 }
-                sb.append("+" + newModifier);
+                try {
+                	sb.append("+" + URLEncoder.encode(newModifier, StandardCharsets.UTF_8.name()));
+                } catch (final UnsupportedEncodingException e) {
+                	sb.append("+" + newModifier);
+                }
             }
         }
 

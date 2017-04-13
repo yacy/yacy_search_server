@@ -27,6 +27,7 @@ import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionConfiguration;
@@ -138,9 +139,13 @@ import org.apache.solr.common.SolrInputDocument;
                             start = start + chunksize;
                             querylist.set(currentquery, docstoreindex);
                             for (SolrDocument doc : xdocs) {
-                                SolrInputDocument idoc = colcfg.toSolrInputDocument(doc);
+                                URIMetadataNode pdoc = new URIMetadataNode(doc); // use Metadata as it verifies correct/current Doc.ID
+                                SolrInputDocument idoc = colcfg.toSolrInputDocument(pdoc);
                                 Switchboard.getSwitchboard().index.putDocument(idoc);
                                 processed++;
+                            }
+                            if (xdocs.size() >= docstoreindex) { // number processed docs >= found docs -> end condition for this query as no more docs avail-
+                                querylist.delete(currentquery);  // 2017-02-27 added on occurence of 21 docs found 21 processed but somehow on next call 21 docs again found (some commit issue ??)
                             }
                         }                        
                     } catch (final IOException ex) {

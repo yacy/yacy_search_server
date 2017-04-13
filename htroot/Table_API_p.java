@@ -18,7 +18,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -30,11 +29,13 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.date.AbstractFormatter;
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
@@ -46,10 +47,10 @@ import net.yacy.server.serverSwitch;
 
 public class Table_API_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-
+        
         prop.put("showexec", 0);
         prop.put("showtable", 0);
 
@@ -85,6 +86,10 @@ public class Table_API_p {
             current_pk = post.get("current_pk", "");
         }
         if (post != null && scheduleeventaction && !current_pk.isEmpty()) {
+        	
+        	/* Check this is a valid transaction */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             try {
                 Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, current_pk.getBytes());
                 if (row != null) {
@@ -150,6 +155,10 @@ public class Table_API_p {
         }
         
         if (post != null && !post.get("deleterows", "").isEmpty()) {
+        	
+        	/* Check this is a valid transaction */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             for (final Map.Entry<String, String> entry : post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) {
                     try {
@@ -162,6 +171,10 @@ public class Table_API_p {
         }
         
         if (post != null && !post.get("deleteold", "").isEmpty()) {
+        	
+        	/* Check this is a valid transaction */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             int days = post.getInt("deleteoldtime", 365);
             try {
                 Iterator<Row> ri = sb.tables.iterator(WorkTables.TABLE_API_NAME);
@@ -199,6 +212,10 @@ public class Table_API_p {
         }
 
         if (post != null && !post.get("execrows", "").isEmpty()) {
+        	
+        	/* Check this is a valid transaction */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             // create a time-ordered list of events to execute
             final Set<String> pks = new TreeSet<String>();
             for (final Map.Entry<String, String> entry : post.entrySet()) {
@@ -234,6 +251,11 @@ public class Table_API_p {
         // generate table
         prop.put("showtable", 1);
         prop.put("showtable_inline", inline ? 1 : 0);
+        
+        /* Acquire a transaction token for the next POST form submission */
+        final String nextTransactionToken = TransactionManager.getTransactionToken(header);
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, nextTransactionToken);
+        prop.put("showtable_" + TransactionManager.TRANSACTION_TOKEN_PARAM, nextTransactionToken);
 
         // insert rows
         final List<Tables.Row> table = new ArrayList<Tables.Row>(maximumRecords);
@@ -283,11 +305,11 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_pk", UTF8.String(row.getPK()));
                 prop.put("showtable_list_" + count + "_count", count);
                 prop.put("showtable_list_" + count + "_callcount", callcount);
-                prop.put("showtable_list_" + count + "_dateRecording", date_recording == null ? "-" : DateFormat.getDateTimeInstance().format(date_recording));
-                prop.put("showtable_list_" + count + "_dateLastExec", date_last_exec == null ? "-" : DateFormat.getDateTimeInstance().format(date_last_exec));
-                prop.put("showtable_list_" + count + "_dateNextExec", date_next_exec == null ? "-" : DateFormat.getDateTimeInstance().format(date_next_exec));
+                prop.put("showtable_list_" + count + "_dateRecording", date_recording == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_recording));
+                prop.put("showtable_list_" + count + "_dateLastExec", date_last_exec == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_last_exec));
+                prop.put("showtable_list_" + count + "_dateNextExec", date_next_exec == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_next_exec));
                 prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
-                prop.put("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
+                prop.putHTML("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
                 // check type & action to link crawl start URLs back to CrawlStartExpert.html
                 if (prop.get("showtable_list_" + count + "_type", "").equals(WorkTables.TABLE_API_TYPE_CRAWLER)
                         && prop.get("showtable_list_" + count + "_comment", "").startsWith("crawl start for")) {
@@ -296,7 +318,7 @@ public class Table_API_p {
                         final MultiProtocolURL u = new MultiProtocolURL("http://localhost:8090" + editUrl);                       
                         prop.put("showtable_list_" + count + "_isCrawlerStart", 2);
                         prop.put("showtable_list_" + count + "_isCrawlerStart_pk", UTF8.String(row.getPK()));
-                        prop.put("showtable_list_" + count + "_isCrawlerStart_servlet", "/CrawlStartExpert.html");
+                        prop.put("showtable_list_" + count + "_isCrawlerStart_servlet", "CrawlStartExpert.html");
                         Map<String, String> attr = u.getAttributes();
                         int ac = 0;
                         for (Map.Entry<String, String> entry: attr.entrySet()) {
@@ -308,12 +330,15 @@ public class Table_API_p {
                     } else {
                         // short calls
                         prop.put("showtable_list_" + count + "_isCrawlerStart", 1);
-                        prop.put("showtable_list_" + count + "_isCrawlerStart_url", editUrl);
+                        /* For better integration of YaCy peers behind a reverse proxy subfolder, 
+                         * ensure a path relative to this servlet (with no starting slash) is used for clone links.
+                         * We keep the paths starting with a slash for other URL displays. */
+                        prop.put("showtable_list_" + count + "_isCrawlerStart_url", editUrl.startsWith("/") ? editUrl.substring(1, editUrl.length()) : editUrl);
                     }
                 } else {
                     prop.put("showtable_list_" + count + "_isCrawlerStart", 0);
                 }
-                prop.putHTML("showtable_list_" + count + "_inline_url", "http://" + sb.myPublicIP() + ":" + sb.getPublicPort("port", 8090) + UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)));
+                prop.putHTML("showtable_list_" + count + "_inline_url", UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)));
                 prop.put("showtable_list_" + count + "_scheduler_inline", inline ? "true" : "false");
                 prop.put("showtable_list_" + count + "_scheduler_filter", typefilter.pattern());
                 prop.put("showtable_list_" + count + "_scheduler_query", query.pattern());

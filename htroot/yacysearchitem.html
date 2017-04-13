@@ -1,8 +1,10 @@
 #(content)#::
   <div class="searchresults">
   <h4 class="linktitle">
-  <img width="16" height="16" src="ViewImage.png?width=16&amp;height=16&amp;code=#[faviconCode]#&amp;isStatic=true" id="f#[urlhash]#" class="favicon" style="width:16px; height:16px;" alt="" />  
-  <a href="#[link]#" target="#[target]#">#[title]#</a></h4>
+  #(favicon)#::
+  <img width="16" height="16" src="#[faviconUrl]#" id="f#[urlhash]#" class="favicon" style="width:16px; height:16px;" alt="" />
+  #(/favicon)#  
+  <a href="#[link]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[title]#</a></h4>
   <div class="urlactions">
     #(heuristic)#::
     <img width="16" height="9" src="env/grafics/heuristic_redundant.gif" title="heuristic:#[name]# (redundant)" style="width:16px; height:9px;" alt="heuristic:#[name]# (redundant)"/>::
@@ -22,18 +24,18 @@
     #(/authorized)#
   </div>
   <p class="snippet"><span class="snippetLoaded" id="h#[urlhash]#">#[description]#</span></p>
-  <p class="url"><a href="#[link]#" id="url#[urlhash]#" target="#[target]#">#[urlname]#</a></p>
+  <p class="url"><a href="#[link]#" id="url#[urlhash]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[urlname]#</a></p>
   <p class="urlinfo">
   #(showDate)#::#[date]##(/showDate)#
   #(showEvent)#::on #[date]##(/showEvent)#
   #(showSize)#::&nbsp;|&nbsp;#[sizename]##(/showSize)#
-  #(showMetadata)#::&nbsp;|&nbsp;<a href="solr/select?q=id:%22#[urlhash]#%22&defType=edismax&start=0&rows=1&core=collection1&wt=html" target="_blank" onclick="return hs.htmlExpand(this, { objectType: 'ajax'} )">Metadata</a>#(/showMetadata)#
+  #(showMetadata)#::&nbsp;|&nbsp;<a href="solr/select?q=id:%22#[urlhash]#%22&defType=edismax&start=0&rows=1&core=collection1&wt=html" target="_blank">Metadata</a>#(/showMetadata)#
   #(showParser)#::&nbsp;|&nbsp;<a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#" target="_blank">Parser</a>#(/showParser)#
   #(showCitation)#::&nbsp;|&nbsp;<a href="api/citation.html?hash=#[urlhash]#&filter=true" target="_blank">Citations</a>#(/showCitation)#
-  #(showPictures)#::&nbsp;|&nbsp;<a href="yacysearch.html?contentdom=image&amp;url=#[link]#&amp;query=#[former]# inurl:#[link]#" target="_blank">Pictures</a>#(/showPictures)#
+  #(showPictures)#::&nbsp;|&nbsp;<a href="yacysearch.html?contentdom=image&url=#[link]#&query=#[former]#+inurl:#[link]#" target="_blank">Pictures</a>#(/showPictures)#
   #(showCache)#::&nbsp;|&nbsp;<a href="CacheResource_p.html?url=#[link]#" target="_blank">Cache</a>#(/showCache)#
-  #(showProxy)#::&nbsp;|&nbsp;<a href="proxy.html?url=#[link]#" target="_blank">Augmented Browsing</a>#(/showProxy)#
-  #(showHostBrowser)#::&nbsp;|&nbsp;<a href="HostBrowser.html?path=#[link]#"><img src="env/grafics/minitree.png" width="15" height="8"/></a>#(/showHostBrowser)#
+  #(showProxy)#::&nbsp;|&nbsp;<a href="proxy.html?url=#[link]#" target="_blank">View via proxy</a>#(/showProxy)#
+  #(showHostBrowser)#::&nbsp;|&nbsp;<a href="HostBrowser.html?path=#[link]#"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a>#(/showHostBrowser)#
   #(showVocabulary)#::<br/>#{vocabulary}##[name]#:#[terms]# #{/vocabulary}##(/showVocabulary)#
   #(showSnapshots)#::<a href="#[link]#">Snapshots</a>#(/showSnapshots)#
   </p>
@@ -43,17 +45,18 @@
     <a href="#[hrefFullPreview]#" target="#[target]#" class="thumblink" onclick="return hs.expand(this)">
       <img src="#[hrefCache]#" width="#[width]#" height="#[height]#" style="#[style]#" alt="#[name]#" />
     </a>
-    <div class="highslide-caption"><a href="#[href]#" target="#[target]#">#[name]#</a><br /><a href="#[source]#" target="#[target]#">#[sourcedom]#</a></div>
+    <div class="highslide-caption"><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[name]#</a><br /><a href="#[source]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[sourcedom]#</a></div>
   </div>#(/item)#
   ::
-  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>#(/item)#
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a></tr>#(/item)#
   ::
-  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>#(/item)#
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a></tr>#(/item)#
   ::
-  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#">#[hrefshort]#</a></tr>#(/item)#
+  #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a></tr>#(/item)#
 #(/content)#
 
-<script type="text/javascript">
-statistics("#[offset]#", "#[itemscount]#", "#[itemsperpage]#", "#[totalcount]#", "#[localResourceSize]#", "#[remoteResourceSize]#", "#[remoteIndexCount]#", "#[remotePeerCount]#", "#[navurlBase]#");
-</script>
-
+#(statistics)#::
+  <script type="text/javascript">
+	statistics("#[offset]#", "#[itemscount]#", "#[itemsperpage]#", "#[totalcount]#", "#[localResourceSize]#", "#[remoteResourceSize]#", "#[remoteIndexCount]#", "#[remotePeerCount]#", "#[navurlBase]#", #[localQuery]#);
+  </script>
+#(/statistics)#

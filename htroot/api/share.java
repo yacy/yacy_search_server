@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 import net.yacy.yacy;
@@ -30,7 +29,6 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.search.Switchboard;
 import net.yacy.search.index.Fulltext;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -63,12 +61,19 @@ public class share {
         
         // push mode: this does a document upload
         prop.put("mode", 1);
-        prop.put("success", 0);
+        prop.put("mode_success", 0);
         if (post == null) return prop;
         
         // check file name
         String filename = post.get("data", "");
-        if (!filename.startsWith(Fulltext.yacy_dump_prefix) || !filename.endsWith(".xml.gz")) return prop;
+        if (filename.isEmpty()) {
+            prop.put("mode_success_message", "file name is empty");
+            return prop;
+        }
+        if (!filename.startsWith(Fulltext.yacy_dump_prefix) || !filename.endsWith(".xml.gz")) {
+            prop.put("mode_success_message", "no index dump file (" + Fulltext.yacy_dump_prefix + "*.xml.gz)");
+            return prop;
+        }
         
         // check data
         String dataString = post.get("data$file", "");
@@ -99,7 +104,7 @@ public class share {
             return prop;
         }
 
-        prop.put("success", 1);
+        prop.put("mode_success", 1);
         return prop;
     }
     

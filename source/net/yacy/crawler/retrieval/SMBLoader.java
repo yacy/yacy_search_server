@@ -73,10 +73,13 @@ public class SMBLoader {
         DigestURL url = request.url();
         if (!url.getProtocol().equals("smb")) throw new IOException("wrong loader for SMBLoader: " + url.getProtocol());
 
-        RequestHeader requestHeader = new RequestHeader();
+        RequestHeader requestHeader = null;
         if (request.referrerhash() != null) {
             DigestURL ur = this.sb.getURL(request.referrerhash());
-            if (ur != null) requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true));
+            if (ur != null) {
+                requestHeader = new RequestHeader();
+                requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true));
+            }
         }
 
         // process directories: transform them to html with meta robots=noindex (using the ftpc lib)
@@ -99,7 +102,7 @@ public class SMBLoader {
             StringBuilder content = FTPClient.dirhtml(u, null, null, null, list, true);
 
             ResponseHeader responseHeader = new ResponseHeader(200);
-            responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date()));
+            responseHeader.put(HeaderFramework.LAST_MODIFIED, HeaderFramework.formatRFC1123(new Date(url.lastModified())));
             responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
             final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
             Response response = new Response(

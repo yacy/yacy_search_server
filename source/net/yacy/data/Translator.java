@@ -40,6 +40,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,6 +54,7 @@ import net.yacy.document.SentenceReader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.Seed;
+import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.translation.ExtensionsFileFilter;
@@ -274,6 +276,7 @@ public class Translator {
 
     public static Map<String, String> langMap(@SuppressWarnings("unused") final serverSwitch env) {
         final String[] ms = CommonPattern.COMMA.split(
+            "browser/Browser Language," +
             "default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk," +
             "gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky,cn/&#27721;&#35821;/&#28450;&#35486;," +
             "ru/&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;,uk/&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;," + 
@@ -293,6 +296,9 @@ public class Translator {
 
         if ("default".equals(lang) || "default.lng".equals(lang)) {
             env.setConfig("locale.language", "default");
+            ret = true;
+        } else if ("browser".equals(lang) || "browser.lng".equals(lang)) {
+            env.setConfig("locale.language", "browser");
             ret = true;
         } else {
             final String htRootPath = env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
@@ -318,5 +324,25 @@ public class Translator {
 
     public static List<String> langFiles(File langPath) {
         return FileUtils.getDirListing(langPath, Translator.LANG_FILENAME_FILTER);
+    }
+
+    /**
+     * Helper to collect a list of available translations
+     * This looks in the locale directory for the subdirectories created on translation
+     * @return list of language-codes of available/active translations
+     */
+    public static List<String> activeTranslations() {
+        Switchboard sb = Switchboard.getSwitchboard();
+        File localePath;
+        if (sb != null)
+            localePath = sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
+        else
+            localePath = new File ("DATA/LOCALE/htroot");
+        List<String> dirlist = new ArrayList<String>(); // get list of language subdirectories
+        File[] list = localePath.listFiles();
+        for (File f : list) {
+            if (f.isDirectory()) dirlist.add(f.getName()); // filter directories to add to result
+        }
+        return dirlist;
     }
 }

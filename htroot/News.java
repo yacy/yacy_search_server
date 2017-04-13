@@ -26,12 +26,14 @@
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.peers.NewsDB;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
@@ -157,11 +159,29 @@ public class News {
                     	title = record.attribute("title", "");
                     	description = record.attribute("url", "");
                     } else if (category.equals(NewsPool.CATEGORY_WIKI_UPDATE)) {
-                    	link = (seed == null)? "" : "http://" + seed.getPublicAddress(seed.getIP()) + "/Wiki.html?page=" + record.attribute("page", "");
+                    	if(seed == null) {
+                    		link = "";
+                    	} else {
+                    		Set<String> ips = seed.getIPs();
+                    		if(!ips.isEmpty()) {
+                            	link = "http://" + seed.getPublicAddress(ips.iterator().next()) + "/Wiki.html?page=" + record.attribute("page", "");		
+                    		} else {
+                    			link = "";
+                    		}
+                    	}
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Wiki Update: " + record.attribute("description", "");
                     } else if (category.equals(NewsPool.CATEGORY_BLOG_ADD)) {
-                    	link = (seed == null)? "" : "http://" + seed.getPublicAddress(seed.getIP()) + "/Blog.html?page=" + record.attribute("page", "");
+                    	if(seed == null) {
+                    		link = "";
+                    	} else {
+                    		Set<String> ips = seed.getIPs();
+                    		if(!ips.isEmpty()) {
+                            	link = "http://" + seed.getPublicAddress(ips.iterator().next()) + "/Blog.html?page=" + record.attribute("page", "");
+                    		} else {
+                    			link = "";
+                    		}
+                    	}
                     	title = record.attribute("author", "Anonymous") + ": " + record.attribute("page", "");
                     	description = "Blog Entry: " + record.attribute("subject", "");
                     } else {
@@ -179,8 +199,8 @@ public class News {
             }
         }
 
-        // adding the peer address
-        prop.put("address", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()));
+        // add the peer web context (used by News.rss)
+        prop.put("context", YaCyDefaultServlet.getContext(header, sb));
 
         // return rewrite properties
         return prop;

@@ -2,5 +2,6 @@ yacy:
   image: 'luccioman/yacy:latest'
   ports:
     - '8090:8090'
+    - '8443:8443'
   restart: on-failure
   autoredeploy: true

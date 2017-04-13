@@ -34,6 +34,7 @@ import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.solr.instance.ShardInstance;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.kelondro.util.OS;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -42,12 +43,15 @@ import net.yacy.server.serverSwitch;
 
 public class IndexFederated_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-
+        
         if (post != null && post.containsKey("setrwi")) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             //yacy
             boolean post_core_rwi = post.getBoolean("core.service.rwi");
             final boolean previous_core_rwi = sb.index.connectedRWI() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false);
@@ -61,6 +65,9 @@ public class IndexFederated_p {
         }
 
         if (post != null && post.containsKey("setcitation")) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             boolean post_core_citation = post.getBoolean(SwitchboardConstants.CORE_SERVICE_CITATION);
             final boolean previous_core_citation = sb.index.connectedCitation() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_CITATION, post_core_citation);
@@ -76,6 +83,9 @@ public class IndexFederated_p {
         }
         
         if (post != null && post.containsKey("setsolr")) {
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             boolean post_core_fulltext = post.getBoolean(SwitchboardConstants.CORE_SERVICE_FULLTEXT);
             final boolean previous_core_fulltext = sb.index.fulltext().connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_FULLTEXT, post_core_fulltext);
@@ -155,6 +165,9 @@ public class IndexFederated_p {
             boolean lazy = post.getBoolean("solr.indexing.lazy");
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_LAZY, lazy);
         }
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
 
         // show solr host table
         if (!sb.index.fulltext().connectedRemoteSolr()) {

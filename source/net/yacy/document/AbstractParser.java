@@ -39,7 +39,7 @@ public abstract class AbstractParser implements Parser {
     protected final Set<String> SUPPORTED_MIME_TYPES = new LinkedHashSet<String>(); 
     protected final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     private   final String name;
-
+    
     /**
      * initialize a parser with a name
      * @param name
@@ -76,8 +76,8 @@ public abstract class AbstractParser implements Parser {
 
     /**
      * check equivalence of parsers; this simply tests equality of parser names
-     * @param o
-     * @return
+     * @param o the object to check. Must be a {@link Parser} implementation.
+     * @return true when this parser is equivalent to o
      */
     @Override
     public boolean equals(final Object o) {

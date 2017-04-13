@@ -30,9 +30,24 @@ import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
+/**
+ * Import of MediaWiki dump files in the local index.
+ */
 public class IndexImportMediawiki_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+	/**
+	 * Run conditions :
+	 * - no MediaWiki import thread is running : allow to start a new import by filling the "file" parameter
+	 * - the MediaWiki import thread is running : returns monitoring information.
+	 * @param header servlet request header
+	 * @param post request parameters. Supported keys :
+	 *            <ul>
+	 *            <li>file : a dump file path on this YaCy server local file system</li>
+	 *            </ul>
+	 * @param env server environment
+	 * @return the servlet answer object
+	 */
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
@@ -56,21 +71,26 @@ public class IndexImportMediawiki_p {
                     String file = post.get("file");
                     if (file.startsWith("file://")) file = file.substring(7);
                     if (file.startsWith("http")) {
-                        prop.put("import_dump", "");
-                        prop.put("import_thread", "Error: file argument must be a path to a document in the local file system");
+                    	prop.put("import_status", 1);
                     } else {
                         final File sourcefile = new File(file);
-                        if (sourcefile.exists()) {
+                        if (!sourcefile.exists()) {
+                        	prop.put("import_status", 2);
+                            prop.put("import_status_sourceFile", sourcefile.getAbsolutePath());
+                        } else if(!sourcefile.canRead()) {
+                        	prop.put("import_status", 3);
+                            prop.put("import_status_sourceFile", sourcefile.getAbsolutePath());
+                        } else if(sourcefile.isDirectory()) {
+                        	prop.put("import_status", 4);
+                        	prop.put("import_status_sourceFile", sourcefile.getAbsolutePath());
+                        } else {
                             MediawikiImporter.job = new MediawikiImporter(sourcefile, sb.surrogatesInPath);
                             MediawikiImporter.job.start();
                             prop.put("import_dump", MediawikiImporter.job.source());
                             prop.put("import_thread", "started");
-                        } else {
-                            prop.put("import_dump", "");
-                            prop.put("import_thread", "Error: file not found ["+sourcefile+"]");
+                            prop.put("import", 1);
                         }
                     }
-                    prop.put("import", 1);
                     prop.put("import_count", 0);
                     prop.put("import_speed", 0);
                     prop.put("import_runningHours", 0);

@@ -21,7 +21,7 @@
 		</image>
 		<opensearch:startIndex>#[num-results_offset]#</opensearch:startIndex>
 		<opensearch:itemsPerPage>#[num-results_itemsPerPage]#</opensearch:itemsPerPage>
-		<atom:link rel="search" href="http://#[thisaddress]#/opensearchdescription.xml" type="application/opensearchdescription+xml"/>
+		<atom:link rel="search" href="#[thisaddress]#/opensearchdescription.xml" type="application/opensearchdescription+xml"/>
 		<opensearch:Query role="request" searchTerms="#[rss_queryenc]#" />
 #{results}#
 <!--#include virtual="yacysearchitem.xml?item=#[item]#&eventID=#[eventID]#" -->

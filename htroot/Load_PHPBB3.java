@@ -41,7 +41,7 @@ public class Load_PHPBB3 {
         String a = sb.peers.mySeed().getIP() == null ? null : sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
         if (a == null) a = "localhost:" + sb.getLocalPort();
         final boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
-        final String repository = "http://" + a + "/repository/";
+        final String repository = "http://" + a + "/";
         prop.put("starturl", (intranet) ? repository : "http://");
         prop.put("address", a);
 

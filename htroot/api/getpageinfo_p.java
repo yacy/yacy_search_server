@@ -35,6 +35,11 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -46,11 +51,6 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 
 public class getpageinfo_p {
@@ -66,7 +66,7 @@ public class getpageinfo_p {
         prop.put("robots-allowed", "3"); //unknown
         prop.put("robotsInfo", ""); //unknown
         prop.put("sitemap", "");
-        prop.put("favicon","");
+        prop.put("icons","0");
         prop.put("sitelist", "");
         prop.put("filter", ".*");
         prop.put("oai", 0);
@@ -110,8 +110,16 @@ public class getpageinfo_p {
                     // put the document title
                     prop.putXML("title", scraper.dc_title());
 
-                    // put the favicon that belongs to the document
-                    prop.put("favicon", (scraper.getFavicon()==null) ? "" : scraper.getFavicon().toString());
+                    // put the icons that belongs to the document
+                    Set<DigestURL> iconURLs = scraper.getIcons().keySet();
+                    int i = 0;
+                    for (DigestURL iconURL : iconURLs) {
+                        prop.putXML("icons_" + i + "_icon", iconURL.toNormalform(false));
+						prop.put("icons_" + i + "_eol", 1);
+                        i++;
+                    }
+                    prop.put("icons_" + (i - 1) + "_eol", 0);
+                    prop.put("icons", iconURLs.size());
 
                     // put keywords
                     final Set<String> list = scraper.dc_subject();

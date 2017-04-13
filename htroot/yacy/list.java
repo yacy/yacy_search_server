@@ -28,7 +28,6 @@
 
 import java.io.File;
 
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.util.FileUtils;
@@ -51,6 +50,7 @@ public final class list {
 
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
+        prop.put("list", ""); // init a empty return (error case)
         if ((post == null) || (env == null)) return prop;
         if (!Protocol.authentifyRequest(post, env)) return prop;
 
@@ -62,11 +62,11 @@ public final class list {
             final Seed bla = sb.peers.get(post.get("iam", ""));
             if (bla != null) otherPeerName = bla.getName();
         }
-        if (otherPeerName == null) otherPeerName = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
+        if (otherPeerName == null) otherPeerName = header.getRemoteAddr();
 
         if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(otherPeerName))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition
-            return null;
+            return prop;
         }
 
         if (col.equals("black")) {
@@ -85,8 +85,6 @@ public final class list {
             }
 
             prop.put("list",out.toString());
-        } else {
-            prop.put("list","");
         }
 
         return prop;

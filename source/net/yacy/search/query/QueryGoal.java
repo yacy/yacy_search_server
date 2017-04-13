@@ -203,7 +203,7 @@ public class QueryGoal {
      * the modifier are held separately in a search paramter modifier
      *
      * @param encodeHTML
-     * @return
+     * @return the search query string
      */
     public String getQueryString(final boolean encodeHTML) {
         if (this.query_original == null) return null;
@@ -416,12 +416,12 @@ public class QueryGoal {
         for (String s: include_strings) {
             if (Segment.catchallString.equals(s)) continue;
             if (wc > 0) w.append(" AND ");
-            w.append(dq).append(s).append(dq);
+            if (s.indexOf('~') >= 0 || s.indexOf('*') >= 0 || s.indexOf('?') >= 0) w.append(s); else w.append(dq).append(s).append(dq);
             wc++;
         }
         for (String s: exclude_strings){
             if (wc > 0) w.append(" AND -");
-            w.append(dq).append(s).append(dq);
+            if (s.indexOf('~') >= 0 || s.indexOf('*') >= 0 || s.indexOf('?') >= 0) w.append(s); else w.append(dq).append(s).append(dq);
             wc++;
         }
         if (wc > 1) {w.insert(0, '('); w.append(')');}

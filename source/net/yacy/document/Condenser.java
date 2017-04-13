@@ -71,7 +71,9 @@ public final class Condenser extends Tokenizer {
             ) {
         super(document.dc_source(), indexText ? document.getTextString() : "", meaningLib, doAutotagging, scraper);
         
+        final String initialThreadName = Thread.currentThread().getName();
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
+        
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
         this.dates_in_content = new LinkedHashSet<Date>();
@@ -208,6 +210,9 @@ public final class Condenser extends Tokenizer {
         this.fuzzy_signature = EnhancedTextProfileSignature.getSignatureLong(fuzzySignatureFactory);
         this.fuzzy_signature_text = fuzzySignatureFactory.getSignatureText().toString();
         this.exact_signature = EnhancedTextProfileSignature.getSignatureLong(text);
+
+        /* Restore the current thread initial name */
+        Thread.currentThread().setName(initialThreadName);
     }
 
     private void insertTextToWords(
@@ -224,18 +229,19 @@ public final class Condenser extends Tokenizer {
         try {
 	        int pip = 0;
 	        while (wordenum.hasMoreElements()) {
-	            word = (wordenum.nextElement().toString()).toLowerCase(Locale.ENGLISH);
-	            if (useForLanguageIdentification) this.languageIdentificator.add(word);
-	            if (word.length() < 2) continue;
+	            word = wordenum.nextElement().toString();
+	            if (useForLanguageIdentification) this.languageIdentificator.add(word); // langdetect is case sensitive
+                    if (word.length() < 2) continue;
+                    word = word.toLowerCase(Locale.ENGLISH);
 	            wprop = this.words.get(word);
 	            if (wprop == null) wprop = new Word(0, pip, phrase);
 	            if (wprop.flags == null) wprop.flags = flagstemplate.clone();
 	            wprop.flags.set(flagpos, true);
-	            this.words.put(word.toLowerCase(), wprop);
+	            this.words.put(word, wprop);
 	            pip++;
 	            this.RESULT_NUMB_WORDS++;
 	            //this.RESULT_DIFF_WORDS++;
-	        }
+                }
         } finally {
         	wordenum.close();
         	wordenum = null;

@@ -52,12 +52,10 @@ import net.yacy.document.parser.ooxmlParser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.pptParser;
 import net.yacy.document.parser.psParser;
-import net.yacy.document.parser.rdfParser;
 import net.yacy.document.parser.rssParser;
 import net.yacy.document.parser.rtfParser;
 import net.yacy.document.parser.sevenzipParser;
 import net.yacy.document.parser.sidAudioParser;
-import net.yacy.document.parser.swfParser;
 import net.yacy.document.parser.tarParser;
 import net.yacy.document.parser.torrentParser;
 import net.yacy.document.parser.vcfParser;
@@ -107,7 +105,6 @@ public final class TextParser {
         initParser(new sevenzipParser());
         initParser(new sidAudioParser());
         initParser(new svgParser());
-        initParser(new swfParser());
         initParser(new tarParser());
         initParser(new torrentParser());
         initParser(new vcfParser());
@@ -436,7 +433,7 @@ public final class TextParser {
     /**
      * checks if the parser supports the given extension. It is not only checked if the parser can parse such files,
      * it is also checked if the extension is not included in the extension-deny list.
-     * @param extention
+     * @param ext extension name
      * @return an error if the extension is not supported, null otherwise
      */
     public static String supportsExtension(final String ext) {
@@ -451,9 +448,9 @@ public final class TextParser {
     }
 
     /**
-     * checks if the parser supports the given extension. It is not only checked if the parser can parse such files,
+     * checks if the parser supports the given extension or the file at the specified url. It is not only checked if the parser can parse such files,
      * it is also checked if the extension is not included in the extension-deny list.
-     * @param extention
+     * @param url url to check
      * @return an error if the extension is not supported, null otherwise
      */
     public static String supportsExtension(final MultiProtocolURL url) {

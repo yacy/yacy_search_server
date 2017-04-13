@@ -1,8 +1,13 @@
 package net.yacy.cora.document.id;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -38,15 +43,17 @@ public class MultiProtocolURLTest {
         String[][] testStrings = new String[][]{
             new String[]{"/..home", "/..home"},
             new String[]{"/test/..home/test.html", "/test/..home/test.html"},
-            new String[]{"/../", "/../"},
-            new String[]{"/..", "/.."},
             new String[]{"/test/..", "/"},
             new String[]{"/test/../", "/"},
             new String[]{"/test/test2/..", "/test"},
             new String[]{"/test/test2/../", "/test/"},
             new String[]{"/test/test2/../hallo", "/test/hallo"},
             new String[]{"/test/test2/../hallo/", "/test/hallo/"},
-            new String[]{"/home/..test/../hallo/../", "/home/"}
+            new String[]{"/home/..test/../hallo/../", "/home/"},
+            /* No path segments prior to the '..' segment : '..' still has to be removed (See https://tools.ietf.org/html/rfc3986#section-5.2.4 -> parts 2.C and 2.D )*/
+            new String[]{"/../", "/"},
+            new String[]{"/..", "/"},
+            new String[]{"/../../../image.jpg", "/image.jpg"}
         };
         String testhost = "http://localhost";
         for (int i = 0; i < testStrings.length; i++) {
@@ -127,6 +134,16 @@ public class MultiProtocolURLTest {
             new String[]{"http://www.yacy.net?query=test", "www.yacy.net"},
             new String[]{"http://www.yacy.net:?query=test", "www.yacy.net"},
             new String[]{"//www.yacy.net:?query=test", "www.yacy.net"},
+            
+            new String[]{"http://www.yacy.net?data=1/2/3", "www.yacy.net"},
+            new String[]{"http://www.yacy.net?url=http://test.com", "www.yacy.net"},
+            /* Punycode encoded internationalized domain name : Algeria TLD */
+            new String[]{"http://xn--ggbdmbaav3cjl1c9heugfv.xn--lgbbat1ad8j/", "xn--ggbdmbaav3cjl1c9heugfv.xn--lgbbat1ad8j"},
+            /* Internationalized domain name : Algeria TLD */
+            new String[]{"http://مركزأسماءالنطاقات.الجزائر/", "xn--ggbdmbaav3cjl1c9heugfv.xn--lgbbat1ad8j"},
+            /* Internationalized domain name : Chinese Ministry of education */
+            new String[]{"http://教育部.中国/", "xn--wcvs22dzol.xn--fiqs8s"},
+            /*http://教育部.中国/ */
         };
 
         for (int i = 0; i < testStrings.length; i++) {
@@ -177,7 +194,9 @@ public class MultiProtocolURLTest {
             new String[]{"http://www.heise.de/newsticker/thema/%23saukontrovers", "http://www.heise.de/newsticker/thema/%23saukontrovers"}, // http://mantis.tokeek.de/view.php?id=519
             new String[]{"http://www.heise.de/newsticker/thema/#saukontrovers", "http://www.heise.de/newsticker/thema/"}, // anchor fragment
             new String[]{"http://www.liferay.com/community/wiki/-/wiki/Main/Wiki+Portlet", "http://www.liferay.com/community/wiki/-/wiki/Main/Wiki+Portlet"}, // http://mantis.tokeek.de/view.php?id=559
-            new String[]{"http://de.wikipedia.org/wiki/Philippe_Ariès", "http://de.wikipedia.org/wiki/Philippe_Ari%C3%A8s"} // UTF-8 2 byte char
+            new String[]{"http://de.wikipedia.org/wiki/Philippe_Ariès", "http://de.wikipedia.org/wiki/Philippe_Ari%C3%A8s"}, // UTF-8 2 byte char
+            new String[] {"https://zh.wikipedia.org/wiki/Wikipedia:方針與指引", "https://zh.wikipedia.org/wiki/Wikipedia:%E6%96%B9%E9%87%9D%E8%88%87%E6%8C%87%E5%BC%95"}, // UTF-8 3 bytes chars
+            new String[] {"http://教育部.中国/jyb_xwfb/", "http://xn--wcvs22dzol.xn--fiqs8s/jyb_xwfb/"} // Internationalized Domain Name
         };
 
         for (String[] testString : testStrings) {
@@ -199,8 +218,23 @@ public class MultiProtocolURLTest {
     public void testGetAttribute() throws Exception {
         // some test url/uri with problems in the past
         String[][] testStrings = new String[][]{
-            // teststring , expectedresult
-            new String[]{"http://yacy.net?&test", "test"}
+            // teststring , expectedresultkey, expectedresultvalue
+            new String[]{"http://yacy.net?&test", "test", ""},
+            /* Encoded UTF-8 2 bytes characters parameter value */
+            new String[]{"https://zh.wikipedia.org/w/index.php?search=encodedlatinchars%C3%A0%C3%A4%C3%A2%C3%A9%C3%A8%C3%AF%C3%AE%C3%B4%C3%B6%C3%B9", "search", "encodedlatincharsàäâéèïîôöù"},
+            /* Non encoded UTF-8 2 bytes characters parameter value */
+            new String[]{"http://yacy.net?query=unencodedlatincharsàäâéèïîôöù", "query", "unencodedlatincharsàäâéèïîôöù"},
+            /* Encoded UTF-8 3 bytes characters parameter value */
+            new String[]{"https://zh.wikipedia.org/w/index.php?query=%E6%96%B9%E9%87%9D%E8%88%87%E6%8C%87%E5%BC%95", "query", "方針與指引"},
+            /* Non encoded UTF-8 3 bytes characters parameter value */
+            new String[]{"https://zh.wikipedia.org/w/index.php?query=方針與指引", "query", "方針與指引"},
+            /* Non encoded rfc3986 unreserved ascii chars parameter value */
+            new String[]{"https://example.net?query=-.~_", "query", "-.~_"},
+            /* Encoded rfc3986 reserved ascii chars parameter value */
+            new String[]{"https://example.net?query=%3A%2F%3F%23%40%24%26%2B%2C%3B%3D", "query", ":/?#@$&+,;="},
+            /* Non-Encoded rfc3986 reserved ascii chars parameter value 
+             * (some reserved characters have a meaning here and can not be passed as non-encoded without breaking the parameter value : #, &, +) */
+            new String[]{"https://example.net?query=:/?[]@!$'()*,;=", "query", ":/?[]@!$'()*,;="},
         };
 
         for (String[] testString : testStrings) {
@@ -209,10 +243,10 @@ public class MultiProtocolURLTest {
             String shouldBe = testString[1];
 
             MultiProtocolURL resultUrl = new MultiProtocolURL(testString[0]);
+            System.out.println(" -> " + resultUrl.toNormalform(false));
             Map<String, String> attr = resultUrl.getAttributes();
 
-            assertEquals("", attr.get(shouldBe));
-            System.out.println(" -> " + resultUrl.toNormalform(false));
+            assertEquals(testString[2], attr.get(shouldBe));
         }
     }
 
@@ -220,7 +254,7 @@ public class MultiProtocolURLTest {
      * Test of getFileExtension method, of class MultiProtocolURL.
      */
     @Test
-    public void testGetFileExtension() throws MalformedURLException {
+    public void testGetFileExtension() {
         Map<String, String> testurls = new HashMap<String, String>();
         //  key=testurl, value=result
         testurls.put("path/file.xml","xml"); // easiest
@@ -237,10 +271,10 @@ public class MultiProtocolURLTest {
     }
 
      /**
-     * Test of toTokens method, of class MultiProtocolURL.
+     * Test of toTokens static method, of class MultiProtocolURL.
      */
     @Test
-    public void testToTokens() {
+    public void testStaticToTokens() {
         // test string pairs which should generate equal results
         String[][] testString = new String[][]{
             {"abc", "abc "},
@@ -256,6 +290,117 @@ public class MultiProtocolURLTest {
             assertEquals("input: "+s[0]+"="+s[1],result1, result2);
         }
     }
+    
+	/**
+	 * Unit tests for {@link MultiProtocolURL#toTokens()}
+	 * @throws MalformedURLException when 
+	 */
+	@Test
+	public void testToTokens() throws MalformedURLException {
+        String[][] testStrings = new String[][]{
+            // test string , "expected tokens"
+            new String[]{"http://yacy.net?&test", "yacy net test"},
+            new String[]{"http://example.net/camelCased/subpath1/PATH_EXAMPLE", "example net camelCased subpath1 PATH EXAMPLE camel Cased subpath 1"},
+            /* Encoded UTF-8 2 bytes characters parameter value */
+            new String[]{"https://zh.wikipedia.org/w/index.php?search=encodedlatinchars%C3%A0%C3%A4%C3%A2%C3%A9%C3%A8%C3%AF%C3%AE%C3%B4%C3%B6%C3%B9", "zh wikipedia org w index php search encodedlatincharsàäâéèïîôöù"},
+            /* Non encoded UTF-8 2 bytes characters parameter value */
+            new String[]{"http://yacy.net?query=unencodedlatincharsàäâéèïîôöù", "yacy net query unencodedlatincharsàäâéèïîôöù"},
+            /* Encoded UTF-8 3 bytes characters parameter value */
+            new String[]{"https://zh.wikipedia.org/w/index.php?query=%E6%96%B9%E9%87%9D%E8%88%87%E6%8C%87%E5%BC%95", "zh wikipedia org w index php query 方針與指引"},
+            /* Non encoded UTF-8 3 bytes characters parameter value */
+            new String[]{"https://zh.wikipedia.org/w/index.php?query=方針與指引", "zh wikipedia org w index php query 方針與指引"},
+            /* Non encoded rfc3986 unreserved ascii chars parameter value */
+            new String[]{"https://example.net?query=-.~_", "example net query"},
+            /* Encoded rfc3986 reserved ascii chars parameter value */
+            new String[]{"https://example.net?query=%3A%2F%3F%23%40%24%26%2B%2C%3B%3D", "example net query"},
+            /* Non-Encoded rfc3986 reserved ascii chars parameter value 
+             * (some reserved characters have a meaning here and can not be passed as non-encoded without breaking the parameter value : #, &, +) */
+            new String[]{"https://example.net?query=:/?[]@!$'()*,;=", "example net query"}
+        };
+
+        for (int i = 0; i < testStrings.length; i++) {
+        	String[] testString = testStrings[i];
+            MultiProtocolURL resultUrl = new MultiProtocolURL(testString[0]);
+            String tokens = resultUrl.toTokens();
+            assertEquals("Test toTokens : " + i, testString[1], tokens);
+        }
+	}
+    
+	/**
+	 * Unit tests for {@link MultiProtocolURL#escape(String)}
+	 */
+	@Test
+	public void testEscape() {
+		String[] testStrings = { 
+				"", 
+				"asciiString", 
+				"latin chars:àäâéèïîôöù", 
+				"logograms:正體字/繁體字",
+				"with spaces and\ttab", 
+				"rfc3986 unreserved ascii chars:-.~_",
+				"rfc3986 reserved ascii chars::/?#[]@!$&'()*+,;=", 
+				"http://simpleurl.com/",
+				"http://urlwithqueryandanchor.net/path?q=asciiquery&p1=param1&p2=pâräm2&p3=简化字#anchor" };
+		for (String testString : testStrings) {
+			String encoded = MultiProtocolURL.escape(testString).toString();
+			assertTrue("Encoded string contains only ascii chars",
+					StandardCharsets.US_ASCII.newEncoder().canEncode(encoded));
+			assertEquals("escape/unescape consistency", testString,
+					MultiProtocolURL.unescape(encoded));
+		}
+	}
+	
+	/**
+	 * Unit tests for {@link MultiProtocolURL#unescape(String)}
+	 */
+	@Test
+	public void testUnescape() {
+		String[][] testStrings = new String[][] {
+				// test string , "expected unencoded result"
+				new String[] { "", "" }, new String[] { "asciiString", "asciiString" },
+				new String[] { "encoded latinchars : %C3%A0%C3%A4%C3%A2%C3%A9%C3%A8%C3%AF%C3%AE%C3%B4%C3%B6%C3%B9",
+						"encoded latinchars : àäâéèïîôöù" },
+				new String[] { "unencoded latin chars : àäâéèïîôöù", "unencoded latin chars : àäâéèïîôöù" },
+				new String[] { "encoded logograms : %E6%96%B9%E9%87%9D%E8%88%87%E6%8C%87%E5%BC%95",
+						"encoded logograms : 方針與指引" },
+				new String[] { "unencoded logograms : 方針與指引", "unencoded logograms : 方針與指引" },
+				new String[] { "with spaces and\ttab", "with spaces and\ttab" },
+				new String[] { "unencoded rfc3986 unreserved ascii chars:-.~_",
+						"unencoded rfc3986 unreserved ascii chars:-.~_" },
+				new String[] { "http://simpleurl.com/", "http://simpleurl.com/" },
+				new String[] {
+						"http://url-with-unencoded-query-and-anchor.net/path?q=asciiquery&p1=param1&p2=pâräm2&p3=简化字#anchor",
+						"http://url-with-unencoded-query-and-anchor.net/path?q=asciiquery&p1=param1&p2=pâräm2&p3=简化字#anchor" }, };
+		for (int i = 0; i < testStrings.length; i++) {
+			String[] testString = testStrings[i];
+			String unescaped = MultiProtocolURL.unescape(testString[0]);
+			assertEquals(testString[1], unescaped);
+		}
+	}
+	
+	/**
+	 * Unit tests for {@link MultiProtocolURL#MultiProtocolURL(java.io.File)}
+	 * @throws MalformedURLException when an error occurred
+	 * @throws URISyntaxException 
+	 */
+	@Test
+	public void testFileConstructor() throws MalformedURLException, URISyntaxException {
+		File[] files = new File[] {
+			/* Simple file name */
+			new File(File.separator + "textFile.txt"),
+			/* File name with space */
+			new File(File.separator + "text file.txt"),
+			/* File name with non ASCII latin chars */
+			new File(File.separator + "fileéàè.txt"),
+		};
+		for(int i = 0; i < files.length; i++) {
+			MultiProtocolURL url = new MultiProtocolURL(files[i]);
+			assertTrue(url.isFile());
+			/* Check consistency when retrieving a File object with getFSFile() */
+			assertEquals(files[i], url.getFSFile());
+		}
+	}
+    
 }
 
 

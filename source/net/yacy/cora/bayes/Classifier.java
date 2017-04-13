@@ -299,9 +299,6 @@ public abstract class Classifier<T, K> {
         return (count == null) ? 0 : count.intValue();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public float featureProbability(T feature, K category) {
         if (this.categoryCount(category) == 0)
             return 0;

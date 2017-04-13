@@ -15,23 +15,6 @@
            <a href="http://download.eclipse.org/jetty/stable-9/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">IPAccessHandler</a> docu.
     </td>
   </tr>
-  <!--
-  <tr valign="top">
-    <td><input name="serveruser" type="text" size="16" maxlength="16" value="#[serveruser]#" /></td>
-    <td></td>
-    <td></td>
-  </tr>
-  <tr valign="top">
-    <td>Password:</td>
-    <td><input name="serverpw1" type="password" size="16" maxlength="16" value="" /></td>
-    <td></td>
-  </tr>
-  <tr valign="top">
-    <td>Password (repeat same as above):</td>
-    <td><input name="serverpw2" type="password" size="16" maxlength="16" value="" /></td>
-    <td></td>
-  </tr>
-  -->
   <tr valign="top">
     <td>staticIP (optional):</td>
     <td><input name="staticIP" type="text" size="32" maxlength="80" value="#[staticIP]#" /></td>
@@ -59,4 +42,28 @@
   </tr>
 </table>
 </fieldset>
+
+<fieldset><legend id="serverports">Server Port Settings</legend>
+<table border="0" cellspacing="5">
+  <tr valign="top">
+    <td>Server port:</td>
+    <td><input name="port" type="text" size="7" maxlength="6" value="#[port]#" /></td>
+    <td>This is the main port for all http communication (default is 8090). A change requires a restart.</td>
+  </tr>
+  <tr valign="top">
+    <td>Server ssl port:</td>
+    <td><input name="port.ssl" type="text" size="7" maxlength="6" value="#[server.https_port.ssl]#" /></td>
+    <td>This is the port to connect via https (default is 8443). A change requires a restart.</td>
+  </tr>
+  <tr valign="top">
+    <td>Shutdown port:</td>
+    <td><input name="port.shutdown" type="text" size="7" maxlength="6" value="#[port.shutdown]#" /></td>
+    <td>This is the local port on the loopback address (127.0.0.1 or :1) to listen for a shutdown signal to stop the YaCy server (-1 disables the shutdown port, recommended default is 8005). A change requires a restart.</td>
+  </tr>
+  <tr valign="top">
+    <td colspan="3"><input type="submit" name="serverports" class="btn btn-primary" value="Submit" /></td>
+  </tr>
+</table>
+</fieldset>
+
 </form>

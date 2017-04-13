@@ -126,10 +126,9 @@ public class Segment {
 
     /**
      * create a new Segment
-     * @param log
-     * @param segmentPath that should be the path ponting to the directory "SEGMENT"
-     * @param collectionSchema
-     * @throws IOException 
+     * @param log logger instance
+     * @param segmentPath that should be the path pointing to the directory "SEGMENT"
+     * @throws IOException when an error occurs
      */
     public Segment(final ConcurrentLog log, final File segmentPath, final File archivePath,
             final CollectionConfiguration collectionConfiguration, final WebgraphConfiguration webgraphConfiguration) throws IOException {
@@ -138,7 +137,6 @@ public class Segment {
         this.segmentPath = segmentPath;
         archivePath.mkdirs();
         
-        // create LURL-db
         this.fulltext = new Fulltext(segmentPath, archivePath, collectionConfiguration, webgraphConfiguration);
         this.termIndex = null;
         this.urlCitationIndex = null;
@@ -400,7 +398,7 @@ public class Segment {
 
     /**
      * get the load time of a resource.
-     * @param urlHash
+     * @param urlhash the resource hash
      * @return the time in milliseconds since epoch for the load time or -1 if the document does not exist
      */
     public long getLoadTime(final String urlhash) throws IOException {
@@ -583,12 +581,14 @@ public class Segment {
         final String urlNormalform = url.toNormalform(true);
         final String language = votedLanguage(url, urlNormalform, document, condenser); // identification of the language
 
-        // STORE URL TO LOADED-URL-DB
-        Date modDate = responseHeader == null ? new Date() : responseHeader.lastModified();
+        // get last modified date of the document to be used for the rwi index
+        // (the lastmodified document propery should be the same in rwi and fulltext (calculated in yacy2solr))
+        Date modDate = responseHeader == null ? document.getLastModified() : responseHeader.lastModified();
         if (modDate == null) modDate = new Date();
+        if (document.getLastModified().before(modDate)) modDate = document.getLastModified();
         if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
         char docType = Response.docType(document.dc_format());
-        
+
         // CREATE SOLR DOCUMENT
         final CollectionConfiguration collectionConfig = this.fulltext.getDefaultConfiguration();
         final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(this, collections, responseHeader, document, condenser, referrerURL, language, crawlProfile.isPushCrawlProfile(), this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
@@ -601,11 +601,14 @@ public class Segment {
                 crawlProfile != null && document.getDepth() <= crawlProfile.snapshotMaxdepth() &&
                 !crawlProfile.snapshotsMustnotmatch().matcher(urlNormalform).matches()) {
             // load pdf in case that is wanted. This can later be used to compute a web page preview in the search results
-            String ext = MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase();
-            if (ext.length() == 0 || url.getFile().length() <= 1 || htmlParser.htmlExtensionsSet.contains(ext)) {
+            Parser p = document.getParserObject();
+            boolean mimesupported = false;
+            if (p instanceof htmlParser)
+                    mimesupported = ((htmlParser)p).supportedMimeTypes().contains(document.dc_format());
+
+            if (mimesupported)
                 // STORE IMAGE AND METADATA
                 Transactions.store(vector, true, crawlProfile.snapshotLoadImage(), crawlProfile.snapshotReplaceold(), proxy, acceptLanguage);
-            }
         }
         
         // STORE TO SOLR

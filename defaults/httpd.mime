@@ -136,6 +136,6 @@ xltx    = application/vnd.openxmlformats-officedocument.spreadsheetml.template
 xpi     = application/x-xpinstall
 xsl     = text/xml
 xml     = text/xml
-Z       = application/x-compress
+z       = application/x-compress
 zip     = application/zip
 default = application/octet-stream

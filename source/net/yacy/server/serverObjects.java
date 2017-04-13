@@ -63,6 +63,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
+import net.yacy.cora.util.JSONObject;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.Switchboard;
@@ -77,16 +78,14 @@ public class serverObjects implements Serializable, Cloneable {
     
     private static final long serialVersionUID = 3999165204849858546L;
     public static final String ACTION_AUTHENTICATE = "AUTHENTICATE";
+    
+    /** Key for an URL redirection : should be associated with the redirected location. 
+     * The main servlet handles this to produce an HTTP 302 status. */
     public static final String ACTION_LOCATION = "LOCATION";
+    
 	public final static String ADMIN_AUTHENTICATE_MSG = "admin log-in. If you don't know the password, set it with {yacyhome}/bin/passwd.sh {newpassword}";
 
     private final static Pattern patternNewline = Pattern.compile("\n");
-    private final static Pattern patternDoublequote = Pattern.compile("\"");
-    private final static Pattern patternSlash = Pattern.compile("/");
-    private final static Pattern patternB = Pattern.compile("\b");
-    private final static Pattern patternF = Pattern.compile("\f");
-    private final static Pattern patternR = Pattern.compile("\r");
-    private final static Pattern patternT = Pattern.compile("\t");
 
     private boolean localized = true;
 
@@ -284,20 +283,10 @@ public class serverObjects implements Serializable, Cloneable {
      * @param key   key name as String.
      * @param value a String that will be reencoded for JSON output.
      */
-    public void putJSON(final String key, final String value) {
-        put(key, toJSON(value));
-    }
-
-    public static String toJSON(String value) {
-        // value = value.replaceAll("\\", "\\\\");
-        value = patternDoublequote.matcher(value).replaceAll("'");
-        value = patternSlash.matcher(value).replaceAll("\\/");
-        value = patternB.matcher(value).replaceAll("\\b");
-        value = patternF.matcher(value).replaceAll("\\f");
-        value = patternNewline.matcher(value).replaceAll("\\r");
-        value = patternR.matcher(value).replaceAll("\\r");
-        value = patternT.matcher(value).replaceAll("\\t");
-        return value;
+    public void putJSON(final String key, String value) {
+        value = JSONObject.quote(value);
+        value = value.substring(1, value.length() - 1);
+        put(key, value);
     }
 
     /**
@@ -367,16 +356,46 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
 
+    /**
+     * Add a String to the map. The content of the String is first parsed and interpreted as Wiki code.
+     * @param hostport (optional) peer host and port, added when not empty as the base of relative Wiki link URLs.
+     * @param key key name as String.
+     * @param wikiCode wiki code content as String.
+     */
     public void putWiki(final String hostport, final String key, final String wikiCode){
         this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
     }
+    
+    /**
+     * Add a String to the map. The content of the String is first parsed and interpreted as Wiki code.
+     * @param key key name as String.
+     * @param wikiCode wiki code content as String.
+     */
+    public void putWiki(final String key, final String wikiCode){
+        this.putWiki(null, key, wikiCode);
+    }
 
+    /**
+     * Add a byte array to the map. The content of the array is first parsed and interpreted as Wiki code.
+     * @param hostport (optional) peer host and port, added when not empty as the base of relative Wiki link URLs.
+     * @param key key name as String.
+     * @param wikiCode wiki code content as byte array.
+     */
     public void putWiki(final String hostport, final String key, final byte[] wikiCode) {
         try {
             this.put(key, Switchboard.wikiParser.transform(hostport, wikiCode));
         } catch (final UnsupportedEncodingException e) {
             this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }
+    }
+    
+    /**
+     * Add a byte array to the map. The content of the array is first parsed and interpreted as Wiki code.
+     * @param key key name as String.
+     * @param wikiCode wiki code content as byte array.
+     */
+    public void putWiki(final String key, final byte[] wikiCode) {
+    	this.putWiki(null, key, wikiCode);
     }
 
     // inc variant: for counters
@@ -556,11 +575,6 @@ public class serverObjects implements Serializable, Cloneable {
             for (int i = 0; i < facets.length; i++) this.add(FacetParams.FACET_FIELD, facets[i].getSolrFieldName());
         }
         return this.map;
-    }
-
-    public static void main(final String[] args) {
-        final String v = "ein \"zitat\"";
-        System.out.println(toJSON(v));
     }
 
 }

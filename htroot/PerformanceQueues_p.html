@@ -11,6 +11,7 @@
   <h2>Performance Settings of Queues and Processes</h2>
   
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
 	<fieldset><legend>Scheduled tasks overview and waiting time settings:</legend>
 	    <table border="0">
 	      <tr class="TableHeader" valign="bottom">
@@ -70,6 +71,7 @@
   </form>
   
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
 	  <fieldset><legend>Cache Settings:</legend>
 	    <table border="0">
 	      <tr valign="top" class="TableHeader">
@@ -129,6 +131,7 @@
   </form>
   
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="ThreadPoolSettings">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
 	  <fieldset><legend>Thread Pool Settings:</legend>
 	    <table border="0">
 	      <tr class="TableHeader" valign="bottom">

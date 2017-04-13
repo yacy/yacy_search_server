@@ -393,6 +393,12 @@ public final class CharBuffer extends Writer {
         return new String(this.buffer, this.offset + left, rightbound - left);
     }
 
+    /**
+     * Parses tag properties for key=value pairs.
+     * Single attributes w/o value (e.g. itemscope) are added as key with value empty String.
+     *
+     * @return
+     */
     public Properties propParser() {
         // extract a=b or a="b" - relations from the buffer
         int pos = this.offset;
@@ -404,10 +410,13 @@ public final class CharBuffer extends Writer {
         while (pos < this.length) {
             // pos is at start of next key
             start = pos;
-            while ((pos < this.length) && (this.buffer[pos] != equal)) pos++;
-            if (pos >= this.length) break; // this is the case if we found no equal
-            key = new String(this.buffer, start, pos - start).trim().toLowerCase();
-            // we have a key
+            while ((pos < this.length) && (this.buffer[pos] != equal && this.buffer[pos] > 32) ) pos++; // find = or whitespace
+            key = new String(this.buffer, start, pos - start).trim().toLowerCase(); // we have a key
+            while ((pos < this.length) && (this.buffer[pos] != equal && this.buffer[pos] <= 32)) pos++; // eat up whitespace until = or next char found
+            if (pos >= this.length || this.buffer[pos] != equal) { // no = found, this is the case for attributes w/o value
+                p.setProperty(key, "");
+                continue;
+            }
             pos++;
             // find start of value
             while ((pos < this.length) && (this.buffer[pos] <= 32)) pos++;

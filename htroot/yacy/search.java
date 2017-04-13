@@ -45,7 +45,6 @@ import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.HandleSet;
@@ -102,7 +101,7 @@ public final class search {
 
         if (post == null || env == null) return prop;
         if (!Protocol.authentifyRequest(post, env)) return prop;
-        final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
+        final String client = header.getRemoteAddr();
 
         //System.out.println("yacy: search received request = " + post.toString());
 
@@ -380,7 +379,9 @@ public final class search {
 
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopics(5, 100) : new ConcurrentScoreMap<String>();
+            //final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopics(5, 100) : new ConcurrentScoreMap<String>();
+            final ScoreMap<String> topicNavigator = theSearch.getTopics(); // as there is currently no index interaction in getTopics(), we can use it by default
+            
             final StringBuilder refstr = new StringBuilder(6000);
             final Iterator<String> navigatorIterator = topicNavigator.keys(false);
             int i = 0;

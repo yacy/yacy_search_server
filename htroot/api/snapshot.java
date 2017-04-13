@@ -38,6 +38,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Html2Image;
@@ -67,7 +68,7 @@ public class snapshot {
         final Switchboard sb = (Switchboard) env;
 
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        final String ext = header.get("EXT", "");
+        final String ext = header.get(HeaderFramework.CONNECTION_PROP_EXT, "");
         
         
         if (ext.equals("rss")) {
@@ -258,10 +259,10 @@ public class snapshot {
                 SolrDocument sd = sb.index.fulltext().getMetadata(durl.hash());
                 boolean success = false;
                 if (sd == null) {
-                    success = Transactions.store(durl, new Date(), 99, false, true, sb.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, sb.getConfig("crawler.http.acceptLanguage", null));
+                    success = Transactions.store(durl, new Date(), 99, false, true, sb.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt(SwitchboardConstants.SERVER_PORT, 8090) : null, sb.getConfig("crawler.http.acceptLanguage", null));
                 } else {
                     SolrInputDocument sid = sb.index.fulltext().getDefaultConfiguration().toSolrInputDocument(sd);
-                    success = Transactions.store(sid, false, true, true, sb.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt("port", 8090) : null, sb.getConfig("crawler.http.acceptLanguage", null));
+                    success = Transactions.store(sid, false, true, true, sb.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt(SwitchboardConstants.SERVER_PORT, 8090) : null, sb.getConfig("crawler.http.acceptLanguage", null));
                 }
                 if (success) {
                     pdfSnapshots = Transactions.findPaths(durl, "pdf", Transactions.State.ANY);

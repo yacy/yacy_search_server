@@ -32,19 +32,20 @@ public final class BlacklistHelper {
 	        final RequestHeader header) {
     	String newEntry = entry;
 
+    	String location = null;
         if (blacklistToUse == null || blacklistToUse.isEmpty()) {
-            return "";
+        	location = header.getPathInfo();
+        } else if (newEntry == null || newEntry.isEmpty()) {
+        	location = header.getPathInfo() + "?selectList=&selectedListName=" + blacklistToUse;
         }
-
-        if (newEntry == null || newEntry.isEmpty()) {
-            return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
-        }
-
-        // ignore empty entries
-        if(newEntry == null || newEntry.isEmpty()) {
-            ConcurrentLog.warn(APP_NAME, "skipped adding an empty entry");
-            return "";
-        }
+        
+    	if(location != null) {
+    		if(location.startsWith("/")) {
+    	    	/* Remove the starting "/" to redirect to a relative location for easier reverse proxy integration */
+    			location = location.substring(1, location.length() -1 );
+    		}
+            return location;
+    	}
 
         if (newEntry.startsWith("http://") ){
             newEntry = newEntry.substring(7);
@@ -99,13 +100,20 @@ public final class BlacklistHelper {
             final RequestHeader header) {
     	String oldEntry = entry;
 
+    	String location = null;
         if (blacklistToUse == null || blacklistToUse.isEmpty()) {
-            return "";
+        	location = header.getPathInfo();
+        } else if (oldEntry == null || oldEntry.isEmpty()) {
+            location =  header.getPathInfo() + "?selectList=&selectedListName=" + blacklistToUse;
         }
-
-        if (oldEntry == null || oldEntry.isEmpty()) {
-            return header.get(HeaderFramework.CONNECTION_PROP_PATH) + "?selectList=&selectedListName=" + blacklistToUse;
-        }
+        
+    	if(location != null) {
+    		if(location.startsWith("/")) {
+    	    	/* Remove the starting "/" to redirect to a relative location for easier reverse proxy integration */
+    			location = location.substring(1, location.length() -1 );
+    		}
+            return location;
+    	}
 
 
         // remove the entry from the running blacklist engine

@@ -13,11 +13,12 @@
 
     <p>Translate untranslated text of the user interface (current language). The modified translation file is stored in DATA/LOCALE directory.</p>
     <form id="Translation" method="post" action="Translator_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
       <fieldset>
         <legend>
           <label>UI Translation</label>
         </legend>
-        <p>Target Language: <b>#[targetlang]#</b></p><p class="error">#[errmsg]#</p>
+        <p>Target Language: <b>#[targetlang]#</b></p> #(errmsg)#::<p class="error">activate a different language <a href='ConfigBasic.html'>here</a></p>#(/errmsg)#
         <label for="sourcefile">Source File</label>
         <select name="sourcefile" onchange="submit();">
           #{filelist}#
@@ -36,7 +37,7 @@
                 <label for="targettxt#[tokenid]#"  >#[sourcetxt]#</label>
               </td>
               <td style="border-bottom: solid gray;  border-bottom-width: 1px;" valign="top" nowrap>
-                <input type="text" name="targettxt#[tokenid]#" id="targettxt#[tokenid]#" size="80" value="#[targettxt]#" #(filteruntranslated)#disabled::#(/filteruntranslated)#/>#(filteruntranslated)#<button name="editapproved" type="submit" value="#[tokenid]#" class="btn btn-sm"><span class="glyphicon glyphicon-pencil"/></button>::<button name="approve" type="submit" value="#[tokenid]#" class="btn btn-sm"><span class="glyphicon glyphicon-ok-sign" style="color: green"/></button>#(/filteruntranslated)#
+                <input type="text" name="targettxt#[tokenid]#" id="targettxt#[tokenid]#" size="80" value="#[targettxt]#" title="#[targettxt]#" #(filteruntranslated)#disabled::#(/filteruntranslated)#/>#(filteruntranslated)#<button name="editapproved" type="submit" value="#[tokenid]#" class="btn btn-sm"><span class="glyphicon glyphicon-pencil"/></button>::<button name="approve" type="submit" value="#[tokenid]#" class="btn btn-sm"><span class="glyphicon glyphicon-ok-sign" style="color: green"/></button>#(/filteruntranslated)#
               </td>
             </tr>
             #{/textlist}#
@@ -46,7 +47,7 @@
      
       </fieldset>
     </form>
-
+    <p>Check for remote translation proposals and/or share your own added translations <a href="TransNews_p.html">Translation News</a></p>
     #%env/templates/footer.template%#
   </body>
 </html>
