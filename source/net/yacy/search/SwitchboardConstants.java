@@ -263,10 +263,12 @@ public final class SwitchboardConstants {
     public static final String AUTOCRAWL_INDEX_MEDIA           = "autocrawl.index.media";
     public static final String AUTOCRAWL_RATIO                 = "autocrawl.ratio";
     public static final String AUTOCRAWL_ROWS                  = "autocrawl.rows";
+    public static final String AUTOCRAWL_REMOTE                = "autocrawl.remote";
     public static final String AUTOCRAWL_DAYS                  = "autocrawl.days";
     public static final String AUTOCRAWL_QUERY                 = "autocrawl.query";
     public static final String AUTOCRAWL_DEEP_DEPTH            = "autocrawl.deep.depth";
     public static final String AUTOCRAWL_SHALLOW_DEPTH         = "autocrawl.shallow.depth";
+    public static final String AUTOCRAWL_STORE_CACHE           = "autocrawl.store.cache";
     
 
     //////////////////////////////////////////////////////////////////////////////////////////////

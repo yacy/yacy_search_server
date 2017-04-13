@@ -29,6 +29,7 @@ package net.yacy.crawler.data;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -54,6 +55,7 @@ import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.HarvestProcess;
@@ -562,17 +564,31 @@ public class CrawlQueues {
         }
         
         if (isPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+        	if (CrawlQueues.log.isFine()) {
+                CrawlQueues.log.fine("autocrawlJob: crawling paused, omitting processing");
+            }
             return false;
         }
         
         if (coreCrawlJobSize() > 200) {
+        	if (CrawlQueues.log.isFine()) {
+                CrawlQueues.log.fine("autocrawlJob: local crawl queue full, omitting processing");
+            }
             return false;
+        }
+        
+        if (limitCrawlJobSize() > 200) {
+        	if (CrawlQueues.log.isFine()) {
+                CrawlQueues.log.fine("autocrawlJob: limit crawl queue full, omitting processing");
+            }
+        	return false;
         }
         
         String rows = this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_ROWS, "100");
         
         String dateQuery = String.format("load_date_dt:[* TO NOW-%sDAY]", this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_DAYS, "1"));
         
+        // Use grouping with a limit of 1 document per host, as faceting doesn't support arbitrary sorting
         final SolrQuery query = new SolrQuery();
         query.add("group", "true");
         query.add("group.field", "host_s");
@@ -587,9 +603,89 @@ public class CrawlQueues {
         try {
             QueryResponse resp = sb.index.fulltext().getDefaultConnector().getResponseByParams(query);
             
+            CrawlProfile autocrawlDeepProfile = null, autocrawlShallowProfile = null;
+            
+            // Use current time in profile names
+            Date date = new Date();
+            DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            
+            String autocrawlDeep = "autocrawlDeep_" + dateFormat.format(date);
+            String autocrawlShallow = "autocrawlShallow_" + dateFormat.format(date);
+            
             int i = 0;
             int deepRatio = Integer.parseInt(this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_RATIO, "50"));
+            
             for (SolrDocument doc: resp.getResults()) {
+            	// Create crawl profiles only if they do not exist and if there is anything to do
+            	if(autocrawlDeepProfile == null) {
+            		autocrawlDeepProfile =
+                	    new CrawlProfile(
+                	        autocrawlDeep,
+                	        CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                            CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //crawlerCountryMustMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                            CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                            CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
+                            Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DEEP_DEPTH, "3")),
+                            true,
+                            CrawlProfile.getRecrawlDate(Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DAYS, "1"))*1440),
+                            -1,
+                            true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
+                            sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_TEXT, true),
+                            sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_MEDIA, true),
+                            sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_STORE_CACHE, true),
+                            sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_REMOTE, false),
+                            -1,
+                            false, true, CrawlProfile.MATCH_NEVER_STRING,
+                            CacheStrategy.IFFRESH,
+                            autocrawlDeep,
+                            ClientIdentification.yacyInternetCrawlerAgentName,
+                            null,
+                            0);
+                	this.sb.crawler.putActive(
+                	    UTF8.getBytes(autocrawlDeepProfile.handle()),
+                	    autocrawlDeepProfile);
+            	}
+            	if(autocrawlShallowProfile == null) {
+            		autocrawlShallowProfile =
+                        new CrawlProfile(
+                        	autocrawlShallow,
+                            CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
+                            CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //crawlerCountryMustMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //crawlerNoDepthLimitMatch
+                            CrawlProfile.MATCH_ALL_STRING,   //indexUrlMustMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
+                            CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
+                            CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
+                            Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_SHALLOW_DEPTH, "1")),
+                            true,
+                            CrawlProfile.getRecrawlDate(Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DAYS, "1"))*1440),
+                            -1,
+                            true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
+                            sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_TEXT, true),
+                            sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_MEDIA, true),
+                            sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_STORE_CACHE, true),
+                            sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_REMOTE, false),
+                            -1,
+                            false, true, CrawlProfile.MATCH_NEVER_STRING,
+                            CacheStrategy.IFFRESH,
+                            autocrawlShallow,
+                            ClientIdentification.yacyInternetCrawlerAgentName,
+                            null,
+                            0);
+                    this.sb.crawler.putActive(
+                        UTF8.getBytes(autocrawlShallowProfile.handle()),
+                        autocrawlShallowProfile);
+            	}
+            	
                 boolean deep = false;
                 i++;
                 if( i % deepRatio == 0 ){
@@ -610,9 +706,9 @@ public class CrawlQueues {
                             null,
                             "CRAWLING-ROOT",
                             new Date(),
-                            deep ? this.sb.crawler.defaultAutocrawlDeepProfile.handle() : this.sb.crawler.defaultAutocrawlShallowProfile.handle(),
+                            deep ? autocrawlDeepProfile.handle() : autocrawlShallowProfile.handle(),
                             0,
-                            deep ? this.sb.crawler.defaultAutocrawlDeepProfile.timezoneOffset() : this.sb.crawler.defaultAutocrawlShallowProfile.timezoneOffset()
+                            deep ? autocrawlDeepProfile.timezoneOffset() : autocrawlShallowProfile.timezoneOffset()
                     ));
                 } else {
                     CrawlQueues.log.warn("autocrawl: Rejected URL '" + urlToString(url) + "': " + urlRejectReason);

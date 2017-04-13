@@ -1563,9 +1563,10 @@ public final class Switchboard extends serverSwitch {
                 
                 acr = getThread(SwitchboardConstants.CRAWLJOB_AUTOCRAWL);
             }
-            
             acr.setBusySleep(getConfigLong(SwitchboardConstants.CRAWLJOB_AUTOCRAWL_BUSYSLEEP, 10000));
             acr.setIdleSleep(getConfigLong(SwitchboardConstants.CRAWLJOB_AUTOCRAWL_IDLESLEEP, 10000));
+        } else {
+        	terminateThread(SwitchboardConstants.CRAWLJOB_AUTOCRAWL, true);
         }
     }
 

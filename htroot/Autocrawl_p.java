@@ -20,6 +20,8 @@ public class Autocrawl_p {
         int autocrawlDeep = Integer.parseInt(sb.getConfig(SwitchboardConstants.AUTOCRAWL_DEEP_DEPTH, "3"));
         boolean autocrawlText = sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_TEXT, true);
         boolean autocrawlMedia = sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_INDEX_MEDIA, true);
+        boolean autocrawlStoreCache = sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_STORE_CACHE, true);
+        boolean autocrawlRemote = sb.getConfigBool(SwitchboardConstants.AUTOCRAWL_REMOTE, false);
         
         if (post != null) {
             autocrawlEnable = post.getBoolean("autocrawlEnable");
@@ -27,7 +29,7 @@ public class Autocrawl_p {
                 autocrawlRatio = post.getInt("autocrawlRatio", 50);
             }
             if (post.containsKey("autocrawlRows")) {
-                autocrawlRows = post.getInt("autocralwRows", 100);
+                autocrawlRows = post.getInt("autocrawlRows", 100);
             }
             if (post.containsKey("autocrawlDays")) {
                 autocrawlDays = post.getInt("autocrawlDays", 1);
@@ -43,6 +45,8 @@ public class Autocrawl_p {
             }
             autocrawlText = post.getBoolean("autocrawlText");
             autocrawlMedia = post.getBoolean("autocrawlMedia");
+            autocrawlStoreCache = post.getBoolean("autocrawlStoreCache");
+            autocrawlRemote = post.getBoolean("autocrawlStoreCache");
         }
         
         if (autocrawlRatio > 500) {
@@ -81,10 +85,10 @@ public class Autocrawl_p {
             sb.setConfig(SwitchboardConstants.AUTOCRAWL_DEEP_DEPTH, autocrawlDeep);
             sb.setConfig(SwitchboardConstants.AUTOCRAWL_INDEX_TEXT, autocrawlText);
             sb.setConfig(SwitchboardConstants.AUTOCRAWL_INDEX_MEDIA, autocrawlMedia);
+            sb.setConfig(SwitchboardConstants.AUTOCRAWL_STORE_CACHE, autocrawlStoreCache);
+            sb.setConfig(SwitchboardConstants.AUTOCRAWL_REMOTE, autocrawlRemote);
             
             sb.initAutocrawl(autocrawlEnable);
-            
-            prop.put("changed", true);
         }
         
         prop.put("autocrawlEnable", autocrawlEnable);
@@ -96,6 +100,8 @@ public class Autocrawl_p {
         prop.put("autocrawlDeep", autocrawlDeep);
         prop.put("autocrawlText", autocrawlText);
         prop.put("autocrawlMedia", autocrawlMedia);
+        prop.put("autocrawlStoreCache", autocrawlStoreCache);
+        prop.put("autocrawlRemote", autocrawlRemote);
         
         return prop;
     }

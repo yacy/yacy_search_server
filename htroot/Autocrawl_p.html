@@ -17,7 +17,6 @@
     	
     	<form id="ConfigForm" method="post" action="Autocrawl_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
     		<dl>
-    			#(changed)#::<dt></dt><dd><span class="error">You need to restart for some settings to be applied</span></dd>#(/changed)#
     			<dt>Enable Autocrawler:</dt>
     			<dd><input id="autocrawlEnable" name="autocrawlEnable" type="checkbox" #(autocrawlEnable)#::checked="checked"#(/autocrawlEnable)# /></dd>
     			<dt>Deep crawl every:</dt>
@@ -42,6 +41,10 @@
     			<dd><input id="autocrawlText" name="autocrawlText" type="checkbox" #(autocrawlText)#::checked="checked"#(/autocrawlText)# /></dd>
     			<dt>Index media:</dt>
     			<dd><input id="autocrawlMedia" name="autocrawlMedia" type="checkbox" #(autocrawlMedia)#::checked="checked"#(/autocrawlMedia)# /></dd>
+    			<dt>Store HTCache:</dt>
+                <dd><input id="autocrawlStoreCache" name="autocrawlStoreCache" type="checkbox" #(autocrawlStoreCache)#::checked="checked"#(/autocrawlStoreCache)# /></dd>
+                <dt>Add to remote queue:</dt>
+                <dd><input id="autocrawlRemote" name="autocrawlRemote" type="checkbox" #(autocrawlRemote)#::checked="checked"#(/autocrawlRemote)# /></dd>
     			
     			<dt><input type="submit" name="save" class="btn btn-primary" value="Save" /></dt>
     		</dl>
