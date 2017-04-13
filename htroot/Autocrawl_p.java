@@ -46,7 +46,7 @@ public class Autocrawl_p {
             autocrawlText = post.getBoolean("autocrawlText");
             autocrawlMedia = post.getBoolean("autocrawlMedia");
             autocrawlStoreCache = post.getBoolean("autocrawlStoreCache");
-            autocrawlRemote = post.getBoolean("autocrawlStoreCache");
+            autocrawlRemote = post.getBoolean("autocrawlRemote");
         }
         
         if (autocrawlRatio > 500) {
