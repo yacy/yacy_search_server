@@ -23,8 +23,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
+import java.net.MalformedURLException;
 
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.TransactionManager;
 import net.yacy.document.importer.MediawikiImporter;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -54,6 +57,11 @@ public class IndexImportMediawiki_p {
         if (MediawikiImporter.job != null && MediawikiImporter.job.isAlive()) {
             // one import is running, no option to insert anything
             prop.put("import", 1);
+            final String jobErrorMessage = MediawikiImporter.job.status();
+            if( jobErrorMessage != null && !jobErrorMessage.isEmpty()) {
+            	prop.put("import_status", 1);
+            	prop.put("import_status_message", jobErrorMessage);
+            }
             prop.put("import_thread", "running");
             prop.put("import_dump", MediawikiImporter.job.source());
             prop.put("import_count", MediawikiImporter.job.count());
@@ -64,33 +72,63 @@ public class IndexImportMediawiki_p {
             prop.put("import_remainingMinutes", (MediawikiImporter.job.remainingTime() / 60) % 60);
         } else {
             prop.put("import", 0);
+            if(MediawikiImporter.job != null) {
+				/* Report eventual fail report from the last terminated import (for example an HTTP 404 status) 
+				 * that else could be missed by the user because of page refresh */
+	            final String jobErrorMessage = MediawikiImporter.job.status();
+	            if( jobErrorMessage != null && !jobErrorMessage.isEmpty()) {
+	            	prop.put("import_prevStatus", 1);
+	            	prop.put("import_prevStatus_message", jobErrorMessage);
+	            }
+            }
             if (post == null) {
                 prop.put("import_status", 0);
+                
+                /* Acquire a transaction token for the next POST form submission */
+                final String token = TransactionManager.getTransactionToken(header);
+                prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, token);
+                prop.put("import_" + TransactionManager.TRANSACTION_TOKEN_PARAM, token);
+                
             } else {
                 if (post.containsKey("file")) {
+                	/* Check the transaction is valid */
+                	TransactionManager.checkPostTransaction(header, post);
+                	
                     String file = post.get("file");
-                    if (file.startsWith("file://")) file = file.substring(7);
-                    if (file.startsWith("http")) {
-                    	prop.put("import_status", 1);
-                    } else {
-                        final File sourcefile = new File(file);
-                        if (!sourcefile.exists()) {
-                        	prop.put("import_status", 2);
-                            prop.put("import_status_sourceFile", sourcefile.getAbsolutePath());
-                        } else if(!sourcefile.canRead()) {
-                        	prop.put("import_status", 3);
-                            prop.put("import_status_sourceFile", sourcefile.getAbsolutePath());
-                        } else if(sourcefile.isDirectory()) {
-                        	prop.put("import_status", 4);
-                        	prop.put("import_status_sourceFile", sourcefile.getAbsolutePath());
-                        } else {
-                            MediawikiImporter.job = new MediawikiImporter(sourcefile, sb.surrogatesInPath);
-                            MediawikiImporter.job.start();
-                            prop.put("import_dump", MediawikiImporter.job.source());
-                            prop.put("import_thread", "started");
-                            prop.put("import", 1);
-                        }
-                    }
+					MultiProtocolURL sourceURL = null;
+					int status = 0;
+					String sourceFilePath = "";
+					try {
+						sourceURL = new MultiProtocolURL(file);
+						if(sourceURL.isFile()) {
+							final File sourcefile = sourceURL.getFSFile();
+							sourceFilePath = sourcefile.getAbsolutePath();
+							if (!sourcefile.exists()) {
+								status = 2;
+							} else if (!sourcefile.canRead()) {
+								status = 3;
+							} else if (sourcefile.isDirectory()) {
+								status = 4;
+							}
+						}
+					} catch (MalformedURLException e) {
+						status = 1;
+					}
+					if (status == 0) {
+						MediawikiImporter.job = new MediawikiImporter(sourceURL, sb.surrogatesInPath);
+						MediawikiImporter.job.start();
+						prop.put("import_dump", MediawikiImporter.job.source());
+						prop.put("import_thread", "started");
+						prop.put("import", 1);
+					} else {
+						prop.put("import_status", status);
+						prop.put("import_status_sourceFile", sourceFilePath);
+						
+		                /* Acquire a transaction token for the next POST form submission */
+		                final String token = TransactionManager.getTransactionToken(header);
+		                prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, token);
+		                prop.put("import_" + TransactionManager.TRANSACTION_TOKEN_PARAM, token);
+					}
                     prop.put("import_count", 0);
                     prop.put("import_speed", 0);
                     prop.put("import_runningHours", 0);

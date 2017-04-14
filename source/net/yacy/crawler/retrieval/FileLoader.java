@@ -138,7 +138,7 @@ public class FileLoader {
         }
 
         // load the resource
-        InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null);
+        InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
         byte[] b = FileUtils.read(is);
 
         // create response with loaded content

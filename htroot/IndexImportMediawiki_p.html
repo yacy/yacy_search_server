@@ -13,29 +13,33 @@
     <h2>MediaWiki Dump Import</h2>
     
     #(import)#
+    <p>#(prevStatus)#
+    ::<div class="alert alert-danger" role="alert">Error on last import : #[message]#</div>
+    #(/prevStatus)#</p>
     <p>#(status)#<div class="alert alert-info" role="alert">No import thread is running, you can start a new thread here</div>
-    ::<div class="alert alert-danger" role="alert">Error : file argument must be a path to a document in the local file system</div>
+    ::<div class="alert alert-danger" role="alert">Error : dump <abbr title="Uniform Resource Locator">URL</abbr> is malformed.</div>
     ::<div class="alert alert-danger" role="alert">Error : file not found "#[sourceFile]#"</div>
     ::<div class="alert alert-danger" role="alert">Error : can not read file "#[sourceFile]#"</div>
     ::<div class="alert alert-danger" role="alert">Error : you selected a directory ("#[sourceFile]#")</div>
     #(/status)#</p>
     <form action="IndexImportMediawiki_p.html" method="post" accept-charset="UTF-8" class="form-horizontal">
+    	<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
         <fieldset>
-          <legend>MediaWiki Dump File Selection: select an XML file (which may be bz2- or gz-encoded)</legend>
+          <legend>MediaWiki Dump File Selection</legend>
           <p>
           You can import MediaWiki dumps here. An example is the file
-          <a href="http://dumps.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2">
-          http://dumps.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2</a>.
+          <a href="https://dumps.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2">
+          https://dumps.wikimedia.org/dewiki/latest/dewiki-latest-pages-articles.xml.bz2</a>.
           </p>
           <p>
-          Dumps must be stored in the local file system in XML format and may be compressed in gz or bz2.
+          Dumps can be stored in the local file system or on a remote server in XML format and may be compressed in gz or bz2.
           </p>
           <div class="form-group">
           	<div class="col-sm-3 col-md-2 col-lg-2">
-          		<label for="file" class="control-label" >Dump file path</label>
+          		<label for="file" class="control-label" >Dump file path or <abbr title="Uniform Resource Locator">URL</abbr></label>
            	</div>
            	<div class="col-sm-9 col-md-8 col-lg-8">
-           		<input id="file" class="form-control" name="file" type="text" title="Dump file path on this YaCy server file system" required="required"/>
+           		<input id="file" class="form-control" name="file" type="text" title="Dump file path on this YaCy server file system, or any remote URL" required="required"/>
            	</div>
           </div>
           <input name="submit" class="btn btn-primary" type="submit" value="Import MediaWiki Dump" />
@@ -69,6 +73,8 @@
     </ul>
     <br />
     ::
+    <p>#(status)#::<div class="alert alert-danger" role="alert">Error encountered : #[message]#</div>
+    #(/status)#</p>
     <form><fieldset><legend>Import Process</legend>
       <dl>
         <dt>Thread:</dt><dd>#[thread]#</dd>

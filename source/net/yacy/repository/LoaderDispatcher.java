@@ -394,7 +394,7 @@ public final class LoaderDispatcher {
         	inStream = this.httpLoader.openInputStream(request, crawlProfile, 1, maxFileSize, blacklistType, agent);
         } else if (protocol.equals("ftp") || protocol.equals("smb") || protocol.equals("file")) {
         	// may also open directly stream with ftp loader
-        	inStream = url.getInputStream(agent, null, null);
+        	inStream = url.getInputStream(agent);
         } else {
             throw new IOException("Unsupported protocol '" + protocol + "' in url " + url);
         }
