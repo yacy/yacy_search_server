@@ -59,11 +59,15 @@ public final class message {
     }
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        if (post == null || env == null) { return null; }
 
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+
+        prop.put("messagesize", "0");
+        prop.put("attachmentsize", "0");
+        prop.put("response", "-1"); // request rejected
+        
         if ((post == null) || (env == null)) return prop;
         if (!Protocol.authentifyRequest(post, env)) return prop;
 
@@ -74,22 +78,17 @@ public final class message {
         final int messagesize = 10240;
         final int attachmentsize = 0;
 
-        prop.put("messagesize", "0");
-        prop.put("attachmentsize", "0");
-
         final String youare = post.get("youare", ""); // seed hash of the target peer, needed for network stability
         // check if we are the right target and requester has correct information about this peer
         if ((sb.peers.mySeed() == null) || (!(sb.peers.mySeed().hash.equals(youare)))) {
             // this request has a wrong target
-            prop.put("response", "-1"); // request rejected
             return prop;
         }
 
-        if ((sb.isRobinsonMode()) &&
-        	 (!((sb.isPublicRobinson()) ||
-        	    (sb.isInMyCluster(header.getRemoteAddr()))))) {
+        if ((sb.isRobinsonMode())
+                && (!((sb.isPublicRobinson())
+                || (sb.isInMyCluster(header.getRemoteAddr()))))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition
-        	prop.put("response", "-1"); // request rejected
             return prop;
         }
 
@@ -107,7 +106,7 @@ public final class message {
             // post: post message to message board
             final String otherSeedString = post.get("myseed", "");
             if (otherSeedString.isEmpty()) {
-                prop.put("response", "-1"); // request rejected
+                // request rejected
                 return prop;
             }
             //Date remoteTime = yacyCore.parseUniversalDate((String) post.get(yacySeed.MYTIME)); // read remote time
@@ -115,20 +114,20 @@ public final class message {
             try {
                 otherSeed = Seed.genRemoteSeed(otherSeedString, false, ias == null ? null : ias.getHostAddress());
             } catch (final IOException e) {
-                prop.put("response", "-1"); // don't accept messages for bad seeds
+                // don't accept messages for bad seeds
                 return prop;
             }
 
             String subject = crypt.simpleDecode(post.get("subject", "")); // message's subject
             String message = crypt.simpleDecode(post.get("message", "")); // message body
             if (subject == null || message == null) {
-                prop.put("response", "-1"); // don't accept empty messages
+                // don't accept empty messages
                 return prop;
             }
             message = message.trim();
             subject = subject.trim();
             if (subject.isEmpty() || message.isEmpty()) {
-                prop.put("response", "-1"); // don't accept empty messages
+                // don't accept empty messages
                 return prop;
             }
 
@@ -156,7 +155,6 @@ public final class message {
 
             }
         }
-//      System.out.println("respond = " + prop.toString());
 
         // return rewrite properties
         return prop;
