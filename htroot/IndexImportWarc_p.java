@@ -18,6 +18,10 @@
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.protocol.ClientIdentification;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.WarcImporter;
@@ -45,23 +49,42 @@ public class IndexImportWarc_p {
         } else {
             prop.put("import", 0);
             if (post != null) {
-                if (post.containsKey("file")) {
-                    String file = post.get("file");
-                    final File sourcefile = new File(file);
-                    if (sourcefile.exists()) {
-                        try {
-                            WarcImporter wi = new WarcImporter(sourcefile);
-                            wi.start();
-                            prop.put("import_thread", "started");
-                        } catch (FileNotFoundException ex) {
-                            prop.put("import_thread", "Error: file not found [" + file + "]");
+                if (post.containsKey("file") || post.containsKey("url")) {
+                    String filename = post.get("file");
+                    if (filename != null && filename.length() > 0) {
+                        final File sourcefile = new File(filename);
+                        if (sourcefile.exists()) {
+                            try {
+                                WarcImporter wi = new WarcImporter(sourcefile);
+                                wi.start();
+                                prop.put("import_thread", "started");
+                            } catch (FileNotFoundException ex) {
+                                prop.put("import_thread", "Error: file not found [" + filename + "]");
+                            }
+                            prop.put("import", 1);
+                            prop.put("import_warcfile", filename);
+                        } else {
+                            prop.put("import_warcfile", "");
+                            prop.put("import_thread", "Error: file not found [" + filename + "]");
                         }
-                        prop.put("import_warcfile", file);
                     } else {
-                        prop.put("import_warcfile", "");
-                        prop.put("import_thread", "Error: file not found [" + file + "]");
+                        String urlstr = post.get("url");
+                        if (urlstr != null && urlstr.length() > 0) {
+                            try {
+                                MultiProtocolURL url = new MultiProtocolURL(urlstr);
+                                WarcImporter wi = new WarcImporter(url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent), urlstr);
+                                wi.start();
+                                prop.put("import_thread", "started");
+                            } catch (MalformedURLException ex) {
+                                prop.put("import_thread", ex.getMessage());
+                            } catch (IOException ex) {
+                                prop.put("import_thread", ex.getMessage());
+                            }
+                            prop.put("import", 1);
+                            prop.put("import_warcfile", urlstr);
+                        }
                     }
-                    prop.put("import", 1);
+
                     prop.put("import_count", 0);
                     prop.put("import_speed", 0);
                     prop.put("import_runningHours", 0);

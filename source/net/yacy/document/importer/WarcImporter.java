@@ -73,6 +73,18 @@ public class WarcImporter extends Thread implements Importer {
         sourceSize = -1;
     }
 
+    /**
+     * Init the WarcImporter with input stream with a informational filename or
+     * url als info for calls to the importer methode source() which returns
+     * the urlinfo. Otherwise this methode is equivalent to WarchImporter(inputstream)
+     * @param f the input stream to read the warc archive from
+     * @param urlinfo a info like the url or the filename
+     */
+    public WarcImporter (InputStream f, String urlinfo) {
+        this(f);
+        name = urlinfo;
+    }
+
     public WarcImporter(File f) throws FileNotFoundException{
        name = f.getName();
        sourceSize = f.length();

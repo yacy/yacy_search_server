@@ -22,13 +22,16 @@
           You can download warc archives for example here 
           <a href="https://archive.org/search.php?query=subject%3A%22warcarchives%22&and[]=subject%3A%22warcarchives%22" target="_blank">Internet Archive</a>.
         </p>
-        <div class="input-group">
-          <span style="display: inline-block">
-            <input name="file" type="file" value="" size="75" /></span>
-          <div class="btn-group">
-            <input name="submit" class="btn btn-primary" type="submit" value="Import Warc File" />
-          </div>
-        </div>       
+        <dl>
+          <dt class="TableCellDark"><label for="file">File:</label></dt>
+          <dd><input name="file" id="file" type="file" value="" size="75" /></dd>
+          <dt></dt>
+          <dd>or</dd>
+          <dt class="TableCellDark"><label for="url">Url:</label></dt>
+          <dd><input name="url" id="url" value="" size="75"/></dd>
+          <dt></dt>
+          <dd><input name="submit" class="btn btn-primary" type="submit" value="Import Warc File" /></dd>
+        </dl>
       </fieldset>
     </form>
 
