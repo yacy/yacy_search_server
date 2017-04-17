@@ -146,7 +146,6 @@ public final class SearchEvent {
     private int localsolroffset;
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
     public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
-    public final ScoreMap<String> hostNavigator; // a counter for the appearance of host names
     public final ScoreMap<String> protocolNavigator; // a counter for protocol types
     public final ScoreMap<String> dateNavigator; // a counter for file types
     public final ScoreMap<String> languageNavigator; // a counter for appearance of languages
@@ -262,7 +261,6 @@ public final class SearchEvent {
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
         this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
-        this.hostNavigator = navcfg.contains("hosts") ? new ConcurrentScoreMap<String>() : null;
         this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
         this.dateNavigator = navcfg.contains("date") ? new ClusteredScoreMap<String>(true) : null;
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
@@ -842,18 +840,6 @@ public final class SearchEvent {
             }
         }
         
-        if (this.hostNavigator != null) {
-            fcts = facets.get(CollectionSchema.host_s.getSolrFieldName());
-            if (fcts != null) {
-                for (String host: fcts) {
-                    int hc = fcts.get(host);
-                    if (hc == 0) continue;
-                    if (host.startsWith("www.")) host = host.substring(4);
-                    this.hostNavigator.inc(host, hc);
-                }
-            }
-        }
-
         if (this.dateNavigator != null) {
             fcts = facets.get(CollectionSchema.dates_in_content_dts.getSolrFieldName());
             if (fcts != null) this.dateNavigator.inc(fcts);
@@ -1340,6 +1326,11 @@ public final class SearchEvent {
         return null;
     }
 
+    /**
+     * Adds the retrieved results (fulltext & rwi) to the result list and
+     * computes the text snippets
+     * @return true on adding entries to resultlist otherwise false
+     */
     public boolean drainStacksToResult() {
         // we take one entry from both stacks at the same time
         boolean success = false;
@@ -1465,7 +1456,7 @@ public final class SearchEvent {
         if (this.query.getSegment().connectedCitation()) {
             int referencesCount = this.query.getSegment().urlCitation().count(rentry.hash());
             r += (128 * referencesCount / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
-        } /* else r += 0; */
+        }
         // prefer hit with 'prefer' pattern
         if (this.query.prefer.matcher(rentry.url().toNormalform(true)).matches()) r += 255 << this.query.ranking.coeff_prefer;
         if (this.query.prefer.matcher(rentry.title()).matches()) r += 255 << this.query.ranking.coeff_prefer;
@@ -1482,11 +1473,11 @@ public final class SearchEvent {
         // (example Title="News News News News News News - today is party -- News News News News News News" to add one score instead of 12 * score !)
         for (final String urlcomp : urlcompmap) {
             int tc = topwords.get(urlcomp);
-            if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_urlcompintoplist;
+            if (tc > 0) r += tc << this.query.ranking.coeff_urlcompintoplist;
         }
         for (final String descrcomp : descrcompmap) {
             int tc = topwords.get(descrcomp);
-            if (tc > 0) r += Math.max(1, tc) << this.query.ranking.coeff_descrcompintoplist;
+            if (tc > 0) r += tc << this.query.ranking.coeff_descrcompintoplist;
         }
 
         final Iterator<String> shi = this.query.getQueryGoal().getIncludeWords();
@@ -1553,6 +1544,14 @@ public final class SearchEvent {
         return page.makeResultEntry(this.query.getSegment(), this.peers, null); // result without snippet
     }
     
+    /**
+     * This is the access point for the search interface to retrive ranked results.
+     * for display.
+     *
+     * @param item requested result counting number (starting at 0)
+     * @param timeout
+     * @return
+     */
     public URIMetadataNode oneResult(final int item, final long timeout) {
         // check if we already retrieved this item
         // (happens if a search pages is accessed a second time)

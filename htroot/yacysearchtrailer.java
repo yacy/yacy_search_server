@@ -103,47 +103,6 @@ public class yacysearchtrailer {
         int count;
         Iterator<String> navigatorIterator;
 
-        // domain navigators
-        final ScoreMap<String> hostNavigator = theSearch.hostNavigator;
-        if (hostNavigator == null || hostNavigator.isEmpty()) {
-            prop.put("nav-domains", 0);
-        } else {
-            prop.put("nav-domains", 1);
-            navigatorIterator = hostNavigator.keys(false);
-            int i = 0, pos = 0, neg = 0;
-            String nav, rawNav;
-            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
-                name = navigatorIterator.next();
-                count = hostNavigator.get(name);
-                if (count == 0) break;
-                nav = "site%3A" + name;
-                /* Avoid double percent encoding in QueryParams.navurl */
-                rawNav = "site:" + name;
-                if (theSearch.query.modifier.sitehost == null || !theSearch.query.modifier.sitehost.contains(name)) {
-                    pos++;                    
-                    prop.put("nav-domains_element_" + i + "_on", 1);
-                    prop.put(fileType, "nav-domains_element_" + i + "_modifier", nav);
-                } else {
-                    neg++;                    
-                    prop.put("nav-domains_element_" + i + "_on", 0);
-                    prop.put(fileType, "nav-domains_element_" + i + "_modifier", "-" + nav);
-                    nav="";
-                    rawNav = "";
-                }
-                prop.put(fileType, "nav-domains_element_" + i + "_name", name);
-                prop.put(fileType, "nav-domains_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
-                prop.put(fileType, "nav-domains_element_" + i + "_id", "domains_" + i);
-                prop.put("nav-domains_element_" + i + "_count", count);
-                prop.put("nav-domains_element_" + i + "_nl", 1);
-                i++;
-            }
-            prop.put("nav-domains_element", i);
-            prop.put("nav-domains_count", i);
-            i--;
-            prop.put("nav-domains_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0) prop.put("nav-domains", 0); // this navigation is not useful
-        }
-
         // language navigators
         final ScoreMap<String> languageNavigator = theSearch.languageNavigator;
         if (languageNavigator == null || languageNavigator.isEmpty()) {
@@ -213,7 +172,6 @@ public class yacysearchtrailer {
             for (Map.Entry<String, Integer> entry: cloud) {
                 name = entry.getKey();
                 count = entry.getValue();
-                prop.put("nav-topics_element_" + i + "_on", 1);
                 prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, name, false).toString());

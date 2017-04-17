@@ -28,6 +28,7 @@ package net.yacy.search.index;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -158,10 +159,20 @@ public class DocumentIndex extends Segment {
         } catch (final Exception e ) {
             length = -1;
         }
+        InputStream sourceStream = null;
         try {
-            documents = TextParser.parseSource(url, null, null, new VocabularyScraper(), timezoneOffset, 0, length, url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null));
+        	sourceStream = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
+            documents = TextParser.parseSource(url, null, null, new VocabularyScraper(), timezoneOffset, 0, length, sourceStream);
         } catch (final Exception e ) {
             throw new IOException("cannot parse " + url.toNormalform(false) + ": " + e.getMessage());
+        } finally {
+        	if(sourceStream != null) {
+        		try {
+        			sourceStream.close();
+        		} catch(IOException e) {
+        			ConcurrentLog.warn("DocumentIndex", "Could not close source stream : " + e.getMessage());
+        		}
+        	}
         }
         //Document document = Document.mergeDocuments(url, null, documents);
         final SolrInputDocument[] rows = new SolrInputDocument[documents.length];

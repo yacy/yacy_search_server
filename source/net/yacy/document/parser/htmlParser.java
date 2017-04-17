@@ -380,8 +380,20 @@ public class htmlParser extends AbstractParser implements Parser {
                 locationSnapshot = new DigestURL(location.toNormalform(true) + "?_escaped_fragment_=");
             }
             Charset[] detectedcharsetcontainer = new Charset[]{null};
-            ContentScraper scraperSnapshot = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, locationSnapshot.getInputStream(ClientIdentification.yacyInternetCrawlerAgent, null, null), maxLinks);
-            documentSnapshot = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot);
+            InputStream snapshotStream = null;
+            try {
+            	snapshotStream = locationSnapshot.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
+            	ContentScraper scraperSnapshot = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, snapshotStream, maxLinks);
+                documentSnapshot = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot);
+            } finally {
+            	if(snapshotStream != null) {
+            		try {
+            			snapshotStream.close();
+            		} catch(IOException e) {
+            			AbstractParser.log.warn("Could not close snapshot stream : " + e.getMessage());
+            		}
+            	}
+            }
             AbstractParser.log.info("parse snapshot "+locationSnapshot.toString() + " additional to " + location.toString());
         } catch (IOException | Failure ex) { }
         return documentSnapshot;

@@ -378,8 +378,8 @@ public class QueryModifier {
         Date toDate = to == null || to.equals("*") ? null : DateDetection.parseLine(to, timezoneOffset);
         StringBuilder filterQuery = new StringBuilder(20);
         if (fromDate != null && toDate != null) {
-            String dstrFrom = fromDate == null ? "*" : DateFormatUtil.formatExternal(fromDate);
-            String dstrTo = toDate == null ? "*" : DateFormatUtil.formatExternal(toDate);
+            String dstrFrom = DateFormatUtil.formatExternal(fromDate);
+            String dstrTo = DateFormatUtil.formatExternal(toDate);
             filterQuery.append(CollectionSchema.dates_in_content_dts.getSolrFieldName()).append(":[").append(dstrFrom).append(" TO ").append(dstrTo).append(']'); 
         }
         return filterQuery.toString();

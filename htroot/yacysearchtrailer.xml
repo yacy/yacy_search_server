@@ -1,11 +1,4 @@
 <yacy:navigation>
-#(nav-domains)#::
-<yacy:facet name="domains" displayname="Domains" type="String" min="0" max="0" mean="0">
-#{element}#
-<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" url="#[url]#"/>
-#{/element}#
-</yacy:facet>
-#(/nav-domains)#
 #{navs}#
 <yacy:facet name="#[name]#" displayname="#[displayname]#" type="String" min="0" max="0" mean="0">
 #{element}#

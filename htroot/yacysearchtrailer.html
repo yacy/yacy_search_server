@@ -156,14 +156,6 @@ function toggleVisibility(name, count) {
 	}
 }
 </script>
-#(nav-domains)#::
-<ul class="nav nav-sidebar menugroup">
-<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('domains', #[count]#);">Provider [#[count]#] <span style="float:right" id="chevron-domains" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
-#{element}#
-<li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
-#{/element}#</ul>
-<script>if (#[count]# <= 8) toggleVisibility('domains', #[count]#);</script>
-#(/nav-domains)#
 
 #(nav-languages)#::
 <ul class="nav nav-sidebar menugroup">

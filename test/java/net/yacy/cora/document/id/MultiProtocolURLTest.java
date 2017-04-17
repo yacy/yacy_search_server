@@ -1,8 +1,12 @@
 package net.yacy.cora.document.id;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -371,6 +375,29 @@ public class MultiProtocolURLTest {
 			String[] testString = testStrings[i];
 			String unescaped = MultiProtocolURL.unescape(testString[0]);
 			assertEquals(testString[1], unescaped);
+		}
+	}
+	
+	/**
+	 * Unit tests for {@link MultiProtocolURL#MultiProtocolURL(java.io.File)}
+	 * @throws MalformedURLException when an error occurred
+	 * @throws URISyntaxException 
+	 */
+	@Test
+	public void testFileConstructor() throws MalformedURLException, URISyntaxException {
+		File[] files = new File[] {
+			/* Simple file name */
+			new File(File.separator + "textFile.txt"),
+			/* File name with space */
+			new File(File.separator + "text file.txt"),
+			/* File name with non ASCII latin chars */
+			new File(File.separator + "fileéàè.txt"),
+		};
+		for(int i = 0; i < files.length; i++) {
+			MultiProtocolURL url = new MultiProtocolURL(files[i]);
+			assertTrue(url.isFile());
+			/* Check consistency when retrieving a File object with getFSFile() */
+			assertEquals(files[i], url.getFSFile());
 		}
 	}
     

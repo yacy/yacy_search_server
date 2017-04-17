@@ -54,4 +54,51 @@ public class WikiCodeTest {
             assertFalse("no header tag expected:"+erg, erg.contains("<h1>"));
         }
     }
+    
+    /**
+     * Test internal link markup processing
+     */
+    @Test
+    public void testInternalLink() {
+        WikiCode wc = new WikiCode();
+        
+        /* Link to another wiki article */
+        String result = wc.transform("http://wiki:8080", "[[article]]");
+        assertTrue(result.contains("<a"));
+        assertTrue(result.contains("href=\"Wiki.html?page=article\""));
+        
+        /* Renamed link */
+        result = wc.transform("http://wiki:8080", "[[article|renamed article]]");
+        assertTrue(result.contains("<a"));
+        assertTrue(result.contains("href=\"Wiki.html?page=article\""));
+        assertTrue(result.contains(">renamed article<"));
+        
+        /* Multiple links on the same line */
+        result = wc.transform("http://wiki:8080", "[[article1]] [[article2]]");
+        assertTrue(result.contains("<a"));
+        assertTrue(result.contains("href=\"Wiki.html?page=article1\""));
+        assertTrue(result.contains("href=\"Wiki.html?page=article2\""));
+    }
+    
+    /**
+     * Test external link markup processing
+     */
+    @Test
+    public void testExternalLink() {
+        WikiCode wc = new WikiCode();
+        
+        /* Unamed link */
+        String result = wc.transform("http://wiki:8080", "[http://yacy.net]");
+        assertTrue(result.contains("<a"));
+        assertTrue(result.contains("href=\"http://yacy.net\""));
+        
+        /* Named link */
+        result = wc.transform("http://wiki:8080", "[http://yacy.net YaCy]");
+        assertTrue(result.contains("<a"));
+        assertTrue(result.contains("href=\"http://yacy.net\""));
+        assertTrue(result.contains(">YaCy<"));
+        
+        /* Lua Script array parameter : should not crash the transform process */
+        result = wc.transform("http://wiki:8080", "'[[[[2,1],[4,3],[6,5],[2,1]],[[12,11],[14,13],[16,15],[12,11]]]]'");
+    }
 }

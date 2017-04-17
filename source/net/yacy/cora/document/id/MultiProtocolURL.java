@@ -48,6 +48,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.HttpStatus;
+
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import jcifs.smb.SmbFileInputStream;
@@ -62,6 +64,7 @@ import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.HTTPInputStream;
 import net.yacy.crawler.retrieval.Response;
 
 /**
@@ -2147,7 +2150,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      */
     public java.io.File getFSFile() throws MalformedURLException {
         if (!isFile()) throw new MalformedURLException();
-        return new java.io.File(this.toNormalform(true).substring(5));
+        return new java.io.File(unescape(this.toNormalform(true)).substring("file://".length()));
     }
 
     /**
@@ -2290,7 +2293,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return null;
     }
 
-    public InputStream getInputStream(final ClientIdentification.Agent agent, final String username, final String pass) throws IOException {
+    /**
+     * Open an input stream on the resource described by this URL.
+     * <strong>Please don't forget to release resources by closing the returned stream.</strong>
+     * @param agent user agent identifier to use when the protocul is HTTP
+     * @return an open input stream
+     * @throws IOException when the stream can not be opened
+     */
+    public InputStream getInputStream(final ClientIdentification.Agent agent) throws IOException {
         if (isFile()) return new BufferedInputStream(new FileInputStream(getFSFile()));
         if (isSMB()) return new BufferedInputStream(new SmbFileInputStream(getSmbFile()));
         if (isFTP()) {
@@ -2303,7 +2313,12 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (isHTTP() || isHTTPS()) {
                 final HTTPClient client = new HTTPClient(agent);
                 client.setHost(getHost());
-                return new ByteArrayInputStream(client.GETbytes(this, username, pass, false));
+                client.GET(this, false);
+                if (client.getStatusCode() != HttpStatus.SC_OK) {
+                    throw new IOException("Unable to open http stream on " + this.toString() +
+                            "\nServer returned status: " + client.getHttpResponse().getStatusLine());
+                }
+                return new HTTPInputStream(client);
         }
 
         return null;

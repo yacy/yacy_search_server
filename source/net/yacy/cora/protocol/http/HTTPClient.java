@@ -774,21 +774,57 @@ public class HTTPClient {
      *
      * @throws IOException
      */
-    public void finish() throws IOException {
-        if (this.httpResponse != null) {
-                final HttpEntity httpEntity = this.httpResponse.getEntity();
-	        if (httpEntity != null && httpEntity.isStreaming()) {
-	            // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-	            EntityUtils.consumeQuietly(httpEntity);
-	        }
-	        this.httpResponse.close();
-        }
-        if (this.currentRequest != null) {
-                ConnectionInfo.removeConnection(this.currentRequest.hashCode());
-                this.currentRequest.abort();
-                this.currentRequest = null;
-        }
-    }
+	public void finish() throws IOException {
+		try {
+			if (this.httpResponse != null) {
+				final HttpEntity httpEntity = this.httpResponse.getEntity();
+				if (httpEntity != null && httpEntity.isStreaming()) {
+					/*
+					 * Try to fully consume the eventual remaining of the
+					 * content stream : if too long abort the request. Not using
+					 * EntityUtils.consumeQuietly(httpEntity) because too long
+					 * to perform on large resources when calling this before
+					 * full stream processing end : for example on caller
+					 * exception handling .
+					 */
+					InputStream contentStream = null;
+					try {
+						contentStream = httpEntity.getContent();
+						if (contentStream != null) {
+							byte[] buffer = new byte[2048];
+							int count = 0;
+							int readNb = contentStream.read(buffer);
+							while (readNb >= 0 && count < 10) {
+								readNb = contentStream.read(buffer);
+								count++;
+							}
+							if (readNb >= 0) {
+								if (this.currentRequest != null) {
+									this.currentRequest.abort();
+								}
+							}
+						}
+					} catch(IOException e){
+						/* Silently ignore here IOException (for example caused by stream already closed) as in EntityUtils.consumeQuietly() */
+					} finally {
+						if (contentStream != null) {
+							try {
+								contentStream.close();
+							} catch(IOException ignored) {}
+						}
+						this.httpResponse.close();
+					}
+
+				}
+
+			}
+		} finally {
+			if (this.currentRequest != null) {
+				ConnectionInfo.removeConnection(this.currentRequest.hashCode());
+				this.currentRequest = null;
+			}
+		}
+	}
 
     private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final int maxBytes, final boolean concurrent) throws IOException {
         byte[] content = null;

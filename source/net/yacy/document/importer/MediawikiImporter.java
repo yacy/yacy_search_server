@@ -54,6 +54,9 @@ import java.util.zip.GZIPInputStream;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.NumberTools;
@@ -86,17 +89,18 @@ public class MediawikiImporter extends Thread implements Importer {
 
     public static Importer job; // if started from a servlet, this object is used to store the thread
 
-    public    File sourcefile;
+    public    MultiProtocolURL sourcefile;
     public    File targetdir;
     public    int count;
     private   long start;
     private   final long docsize;
     private   final int approxdocs;
     private   String hostport, urlStub;
+    private   String errorMessage;
 
 
-    public MediawikiImporter(final File sourcefile, final File targetdir) {
-    	super("MediawikiImporter(" + sourcefile != null ? sourcefile.getAbsolutePath() : "null sourcefile" +")");
+    public MediawikiImporter(final MultiProtocolURL sourcefile, final File targetdir) {
+    	super("MediawikiImporter(" + sourcefile != null ? sourcefile.toNormalform(true) : "null sourcefile" +")");
     	this.sourcefile = sourcefile;
     	this.docsize = sourcefile.length();
     	this.approxdocs = (int) (this.docsize * docspermbinxmlbz2 / 1024L / 1024L);
@@ -105,6 +109,7 @@ public class MediawikiImporter extends Thread implements Importer {
         this.start = 0;
         this.hostport = null;
         this.urlStub = null;
+        this.errorMessage = null;
     }
 
     @Override
@@ -114,12 +119,15 @@ public class MediawikiImporter extends Thread implements Importer {
 
     @Override
     public String source() {
-        return this.sourcefile.getAbsolutePath();
+        return this.sourcefile.toNormalform(true);
     }
 
+    /**
+     * @return an empty string or the error message when an exception occurred
+     */
     @Override
     public String status() {
-        return "";
+        return this.errorMessage != null ? this.errorMessage : "";
     }
 
     /**
@@ -152,17 +160,18 @@ public class MediawikiImporter extends Thread implements Importer {
         // regardless of any exception (e.g. eof memory) a add(poison) is added to the most outer final block
         final BlockingQueue<wikiparserrecord> out = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
         final wikiparserrecord poison = newRecord();
+        BufferedReader reader = null;
         try {
-            String targetstub = this.sourcefile.getName();
+            String targetstub = this.sourcefile.getFileName();
             int p = targetstub.lastIndexOf("\\.");
             if (p > 0) targetstub = targetstub.substring(0, p);
-            InputStream is = new BufferedInputStream(new FileInputStream(this.sourcefile), 1024 * 1024);
-            if (this.sourcefile.getName().endsWith(".bz2")) {
+            InputStream is = new BufferedInputStream(this.sourcefile.getInputStream(ClientIdentification.yacyInternetCrawlerAgent), 1024 * 1024);
+            if (this.sourcefile.getFileName().endsWith(".bz2")) {
                 is = new BZip2CompressorInputStream(is);
-            } else if (this.sourcefile.getName().endsWith(".gz")) {
+            } else if (this.sourcefile.getFileName().endsWith(".gz")) {
                 is = new GZIPInputStream(is);
             }
-            final BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, StandardCharsets.UTF_8), 4 * 1024 * 1024);
+            reader = new BufferedReader(new java.io.InputStreamReader(is, StandardCharsets.UTF_8), 4 * 1024 * 1024);
             String t;
             StringBuilder sb = new StringBuilder();
             boolean page = false, text = false;
@@ -181,7 +190,7 @@ public class MediawikiImporter extends Thread implements Importer {
 
             wikiparserrecord record;
             int q;
-            while ((t = r.readLine()) != null) {
+            while ((t = reader.readLine()) != null) {
                 if ((p = t.indexOf("<base>",0)) >= 0 && (q = t.indexOf("</base>", p)) > 0) {
                     //urlStub = "http://" + lang + ".wikipedia.org/wiki/";
                     this.urlStub = t.substring(p + 6, q);
@@ -256,7 +265,6 @@ public class MediawikiImporter extends Thread implements Importer {
                     sb.append('\n');
                 }
             }
-            r.close();
 
             try {
                 for (int i = 0; i < threads; i++) {
@@ -265,23 +273,24 @@ public class MediawikiImporter extends Thread implements Importer {
                 for (int i = 0; i < threads; i++) {
                     consumerResults[i].get(10000, TimeUnit.MILLISECONDS);
                 }
-            } catch (final InterruptedException e) {
-                ConcurrentLog.logException(e);
-            } catch (final ExecutionException e) {
-                ConcurrentLog.logException(e);
-            } catch (final TimeoutException e) {
-                ConcurrentLog.logException(e);
             } catch (final Exception e) {
+            	this.errorMessage = e.getMessage();
                 ConcurrentLog.logException(e);
             } finally {
                 out.put(poison); // output thread condition (for file.close)
                 writerResult.get(10000, TimeUnit.MILLISECONDS);
             }
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
         } catch (final Exception e) {
+        	this.errorMessage = e.getMessage();
             ConcurrentLog.logException(e);
         } finally {
+        	if(reader != null) {
+                try {
+					reader.close();
+				} catch (IOException e) {
+					ConcurrentLog.warn("WIKITRANSLATION", "Could not close dump reader : " + e.getMessage());
+				}
+        	}
             try {
                 out.put(poison); // out keeps output file open until poisened, to close file if exception happend in this block
             } catch (InterruptedException ex) { }
@@ -767,7 +776,7 @@ public class MediawikiImporter extends Thread implements Importer {
 			System.out.println(" -index <wikipedia-dump>");
 			System.out.println(" -read  <start> <len> <idx-file>");
 			System.out.println(" -find  <title> <wikipedia-dump>");
-			System.out.println(" -convert <wikipedia-dump-xml.bz2> <convert-target-dir> <url-stub>");
+			System.out.println(" -convert <wikipedia-dump-xml.bz2> <convert-target-dir>");
 			ConcurrentLog.shutdown();
 			return;
 		}
@@ -779,16 +788,21 @@ public class MediawikiImporter extends Thread implements Importer {
 			// DATA/HTCACHE/dewiki-20090311-pages-articles.xml.bz2
 			// DATA/SURROGATES/in/ http://de.wikipedia.org/wiki/
 
-			if (s[0].equals("-convert") && s.length > 2) {
-				final File sourcefile = new File(s[1]);
+			if (s[0].equals("-convert")) {
+				if(s.length < 3) {
+					System.out.println("usage:");
+					System.out.println(" -convert <wikipedia-dump-xml.bz2> <convert-target-dir>");
+					ConcurrentLog.shutdown();
+					return;
+				}
 				final File targetdir = new File(s[2]);
-				// String urlStub = s[3]; // i.e. http://de.wikipedia.org/wiki/
-				// String language = urlStub.substring(7,9);
 				try {
-					final MediawikiImporter mi = new MediawikiImporter(sourcefile, targetdir);
+					final MediawikiImporter mi = new MediawikiImporter(new MultiProtocolURL(s[1]), targetdir);
 					mi.start();
 					mi.join();
 				} catch (final InterruptedException e) {
+					ConcurrentLog.logException(e);
+				} catch (MalformedURLException e) {
 					ConcurrentLog.logException(e);
 				}
 			}
@@ -821,6 +835,11 @@ public class MediawikiImporter extends Thread implements Importer {
 
 			}
 		} finally {
+			try {
+				HTTPClient.closeConnectionManager();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			ConcurrentLog.shutdown();
 		}
 	}
