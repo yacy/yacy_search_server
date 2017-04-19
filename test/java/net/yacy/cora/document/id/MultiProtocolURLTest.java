@@ -397,7 +397,7 @@ public class MultiProtocolURLTest {
 			MultiProtocolURL url = new MultiProtocolURL(files[i]);
 			assertTrue(url.isFile());
 			/* Check consistency when retrieving a File object with getFSFile() */
-			assertEquals(files[i], url.getFSFile());
+			assertEquals(files[i].getAbsoluteFile(), url.getFSFile()); // url uses absolute file (on Windows includes drive letter)
 		}
 	}
     
