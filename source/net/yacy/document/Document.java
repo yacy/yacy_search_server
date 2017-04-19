@@ -86,7 +86,6 @@ public class Document {
     // text in image tags.
     private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks; // TODO: check if redundant value (set to key.getNameProperty()) is needed
     private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
-    private Set<AnchorURL> emaillinks; // mailto: links
     /** links to icons that belongs to the document (mapped by absolute URL) */
     private Map<DigestURL, IconEntry> icons;
     private boolean resorted;
@@ -141,7 +140,6 @@ public class Document {
         this.audiolinks = null;
         this.videolinks = null;
         this.applinks = null;
-        this.emaillinks = null;
         this.icons = new HashMap<>();
         this.resorted = false;
         this.inboundlinks = null;
@@ -520,17 +518,9 @@ dc_rights
         return this.applinks;
     }
 
-    /**
-     * @return mailto links
-     */
-    public Set<AnchorURL> getEmaillinks() {
-        // this is part of the getAnchor-set: only links to email addresses
-        if (!this.resorted) resortLinks();
-        return this.emaillinks;
-    }
 
     /**
-     * @return last modification date of the source document
+     * @return last modification date of the source document. (The date is initialized with last modification date or received date)
      */
     public Date getLastModified() {
         return this.lastModified;
@@ -551,7 +541,7 @@ dc_rights
         if (this.resorted) return;
         synchronized (this) {
             if (this.resorted) return;
-            // extract hyperlinks, medialinks and emaillinks from anchorlinks
+            // extract hyperlinks, medialinks from anchorlinks
             String u;
             int extpos, qpos;
             String ext = null;
@@ -562,7 +552,6 @@ dc_rights
             this.videolinks = new LinkedHashMap<AnchorURL, String>();
             this.audiolinks = new LinkedHashMap<AnchorURL, String>();
             this.applinks   = new LinkedHashMap<AnchorURL, String>();
-            this.emaillinks = new LinkedHashSet<AnchorURL>();
             final Map<AnchorURL, ImageEntry> collectedImages = new HashMap<AnchorURL, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
             for (final Map.Entry<DigestURL, ImageEntry> entry: this.images.entrySet()) {
                 if (entry.getKey() != null && entry.getKey().getHost() != null && entry.getKey().getHost().equals(thishost)) this.inboundlinks.put(entry.getKey(), "image"); else this.outboundlinks.put(entry.getKey(), "image");
@@ -571,11 +560,6 @@ dc_rights
                 if (url == null) continue;
                 u = url.toNormalform(true);
                 final String name = url.getNameProperty();
-                // check mailto scheme first (not suppose to get into in/outboundlinks or hyperlinks -> crawler can't process)
-                if (url.getProtocol().equals("mailto")) {
-                    this.emaillinks.add(url);
-                    continue;
-                }
 
                 final boolean noindex = url.getRelProperty().toLowerCase().indexOf("noindex",0) >= 0;
                 final boolean nofollow = url.getRelProperty().toLowerCase().indexOf("nofollow",0) >= 0;
