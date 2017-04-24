@@ -146,11 +146,10 @@ public class pdfParser extends AbstractParser implements Parser {
             docKeywords = docKeywordStr.split(" |,");
         }
         
-        Collection<AnchorURL>[] pdflinks = null;
         Document[] result = null;
         try {
             // get the links
-            pdflinks = extractPdfLinks(pdfDoc);
+        	final List<Collection<AnchorURL>> pdflinks = extractPdfLinks(pdfDoc);
             
             // get the fulltext (either per document or for each page)
             final PDFTextStripper stripper = new PDFTextStripper(/*StandardCharsets.UTF_8.name()*/);
@@ -170,8 +169,8 @@ public class pdfParser extends AbstractParser implements Parser {
                 }
                 
                 // create individual documents for each page
-                assert pages.length == pdflinks.length : "pages.length = " + pages.length + ", pdflinks.length = " + pdflinks.length;
-                result = new Document[Math.min(pages.length, pdflinks.length)];
+                assert pages.length == pdflinks.size() : "pages.length = " + pages.length + ", pdflinks.length = " + pdflinks.size();
+                result = new Document[Math.min(pages.length, pdflinks.size())];
                 String loc = location.toNormalform(true);
                 for (int page = 0; page < result.length; page++) {                    
                     result[page] = new Document(
@@ -188,7 +187,7 @@ public class pdfParser extends AbstractParser implements Parser {
                             null,
                             0.0d, 0.0d,
                             pages == null || page > pages.length ? new byte[0] : UTF8.getBytes(pages[page]),
-                            pdflinks == null || page >= pdflinks.length ? null : pdflinks[page],
+                            pdflinks == null || page >= pdflinks.size() ? null : pdflinks.get(page),
                             null,
                             null,
                             false,
@@ -272,9 +271,8 @@ public class pdfParser extends AbstractParser implements Parser {
      * @param pdf the document to parse
      * @return all detected links
      */
-    private Collection<AnchorURL>[] extractPdfLinks(final PDDocument pdf) {
-        Collection<AnchorURL>[] linkCollections = (Collection<AnchorURL>[]) new Collection<?>[pdf.getNumberOfPages()];
-        int pagecount = 0;
+    private List<Collection<AnchorURL>> extractPdfLinks(final PDDocument pdf) {
+        List<Collection<AnchorURL>> linkCollections = new ArrayList<>(pdf.getNumberOfPages());
         for (PDPage page : pdf.getPages()) {
             final Collection<AnchorURL> pdflinks = new ArrayList<AnchorURL>();
             try {
@@ -293,7 +291,7 @@ public class pdfParser extends AbstractParser implements Parser {
                     }
                 }
             } catch (IOException ex) {}
-            linkCollections[pagecount++] = pdflinks;
+            linkCollections.add(pdflinks);
         }
         return linkCollections;
     }

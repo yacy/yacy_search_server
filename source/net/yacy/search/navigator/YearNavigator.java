@@ -100,7 +100,7 @@ public class YearNavigator extends StringNavigator implements Navigator {
                 if (val != null) {
                     Calendar cal = Calendar.getInstance();
                     if (val instanceof Collection) {
-                        Collection<Object> ll = (Collection) val;
+                        Collection<?> ll = (Collection<?>) val;
                         for (Object o : ll) {
                             if (o instanceof String) {
                                 this.inc((String) o);

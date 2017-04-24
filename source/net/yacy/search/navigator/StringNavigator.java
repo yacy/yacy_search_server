@@ -114,7 +114,7 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
     /**
      * Increase the score for the key value contained in the defined field in
      * the doc.
-     * @param doc Solrdocument with field for the key content
+     * @param doc URIMetadataNode with field for the key content
      */
     @Override
     public void incDoc(URIMetadataNode doc) {
@@ -122,11 +122,14 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
             Object val = doc.getFieldValue(field.getSolrFieldName());
             if (val != null) {
                 if (val instanceof Collection) {
-                    Collection<String> ll = (Collection) val;
-                    for (String s : ll) {
-                        if (!s.isEmpty()) {
-                            this.inc(s);
-                        }
+                    Collection<?> ll = (Collection<?>) val;
+                    for (Object obj : ll) {
+                    	if(obj instanceof String) {
+                    		final String s = (String)obj;
+                    		if (!s.isEmpty()) {
+                    			this.inc(s);
+                    		}
+                    	}
                     }
                 } else {
                     this.inc((String) val);

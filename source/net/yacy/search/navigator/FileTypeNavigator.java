@@ -66,12 +66,15 @@ public class FileTypeNavigator extends StringNavigator implements Navigator {
         if (field != null) {
             Object val = doc.getFieldValue(field.getSolrFieldName());
             if (val instanceof Collection) {
-                Collection<String> ll = (Collection) val;
-                for (String s : ll) {
-                    // remove all filetypes that we don't know
-                    if (Classification.isAnyKnownExtension(s)) {
-                        this.inc(s);
-                    }
+                Collection<?> ll = (Collection<?>) val;
+                for (Object obj : ll) {
+                	if(obj instanceof String) {
+                		final String s = (String)obj;
+                		// remove all filetypes that we don't know
+                		if (Classification.isAnyKnownExtension(s)) {
+                			this.inc(s);
+                		}
+                	}
                 }
             } else {
                 if (val != null) {

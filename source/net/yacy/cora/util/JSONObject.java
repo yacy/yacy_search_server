@@ -249,15 +249,15 @@ public class JSONObject {
      *            the JSONObject.
      * @throws JSONException
      */
-    public JSONObject(Map<String, Object> map) {
+    public<KEY_TYPE, VALUE_TYPE>  JSONObject(Map<KEY_TYPE, VALUE_TYPE> map) {
         this.map = new LinkedHashMap<String, Object>();
         if (map != null) {
-            Iterator<Entry<String, Object>> i = map.entrySet().iterator();
+            Iterator<Entry<KEY_TYPE, VALUE_TYPE>> i = map.entrySet().iterator();
             while (i.hasNext()) {
-                Entry<String, Object> entry = i.next();
+                Entry<KEY_TYPE, VALUE_TYPE> entry = i.next();
                 Object value = entry.getValue();
-                if (value != null) {
-                    this.map.put(entry.getKey(), wrap(value));
+                if (value != null && entry.getKey() instanceof String) {
+                    this.map.put((String)entry.getKey(), wrap(value));
                 }
             }
         }
@@ -1063,7 +1063,7 @@ public class JSONObject {
      * @return this.
      * @throws JSONException
      */
-    public JSONObject put(String key, Collection<Object> value) throws JSONException {
+    public JSONObject put(String key, Collection<?> value) throws JSONException {
         this.put(key, new JSONArray(value));
         return this;
     }
@@ -1127,7 +1127,7 @@ public class JSONObject {
      * @return this.
      * @throws JSONException
      */
-    public JSONObject put(String key, Map<String, Object> value) throws JSONException {
+    public JSONObject put(String key, Map<String, ?> value) throws JSONException {
         this.put(key, new JSONObject(value));
         return this;
     }
@@ -1498,7 +1498,6 @@ public class JSONObject {
      * @throws JSONException
      *             If the value is or contains an invalid number.
      */
-    @SuppressWarnings("unchecked")
     public static String valueToString(Object value) throws JSONException {
         if (value == null || value.equals(null)) {
             return "null";
@@ -1523,10 +1522,10 @@ public class JSONObject {
             return value.toString();
         }
         if (value instanceof Map) {
-            return new JSONObject((Map<String, Object>)value).toString();
+            return new JSONObject((Map<?, ?>)value).toString();
         }
         if (value instanceof Collection) {
-            return new JSONArray((Collection<Object>) value).toString();
+            return new JSONArray((Collection<?>) value).toString();
         }
         if (value.getClass().isArray()) {
             return new JSONArray(value).toString();
@@ -1546,7 +1545,6 @@ public class JSONObject {
      *            The object to wrap
      * @return The wrapped value
      */
-    @SuppressWarnings("unchecked")
     public static Object wrap(Object object) {
         try {
             if (object == null) {
@@ -1563,13 +1561,13 @@ public class JSONObject {
             }
 
             if (object instanceof Collection) {
-                return new JSONArray((Collection<Object>) object);
+                return new JSONArray((Collection<?>) object);
             }
             if (object.getClass().isArray()) {
                 return new JSONArray(object);
             }
             if (object instanceof Map) {
-                return new JSONObject((Map<String, Object>) object);
+                return new JSONObject((Map<?, ?>) object);
             }
             Package objectPackage = object.getClass().getPackage();
             String objectPackageName = objectPackage != null ? objectPackage
@@ -1598,7 +1596,6 @@ public class JSONObject {
         return this.write(writer, 0, 0);
     }
 
-    @SuppressWarnings("unchecked")
     static final Writer writeValue(Writer writer, Object value,
             int indentFactor, int indent) throws JSONException, IOException {
         if (value == null || value.equals(null)) {
@@ -1608,9 +1605,9 @@ public class JSONObject {
         } else if (value instanceof JSONArray) {
             ((JSONArray) value).write(writer, indentFactor, indent);
         } else if (value instanceof Map) {
-            new JSONObject((Map<String, Object>) value).write(writer, indentFactor, indent);
+            new JSONObject((Map<?, ?>) value).write(writer, indentFactor, indent);
         } else if (value instanceof Collection) {
-            new JSONArray((Collection<Object>) value).write(writer, indentFactor,
+            new JSONArray((Collection<?>) value).write(writer, indentFactor,
                     indent);
         } else if (value.getClass().isArray()) {
             new JSONArray(value).write(writer, indentFactor, indent);

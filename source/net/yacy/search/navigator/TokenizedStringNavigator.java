@@ -50,17 +50,20 @@ public class TokenizedStringNavigator  extends StringNavigator implements Naviga
             Object val = doc.getFieldValue(field.getSolrFieldName());
             if (val != null) {
                 if (val instanceof Collection) {
-                    Collection<String> ll = (Collection) val;
-                    for (String s : ll) {
-                        if (!s.isEmpty()) {
-                            StringTokenizer token = new StringTokenizer(s.toLowerCase()," ,;"); // StringTokenizer faster than regex pattern
-                            while (token.hasMoreTokens()) {
-                                String word = token.nextToken();
-                                if (word.length() > 1 && !Switchboard.stopwords.contains(word)) {
-                                    this.inc(word);
-                                }
-                            }
-                        }
+                    Collection<?> ll = (Collection<?>) val;
+                    for (Object obj : ll) {
+                    	if(obj instanceof String) {
+                    		final String s = (String)obj;
+                    		if (!s.isEmpty()) {
+                    			StringTokenizer token = new StringTokenizer(s.toLowerCase()," ,;"); // StringTokenizer faster than regex pattern
+                    			while (token.hasMoreTokens()) {
+                    				String word = token.nextToken();
+                    				if (word.length() > 1 && !Switchboard.stopwords.contains(word)) {
+                    					this.inc(word);
+                    				}
+                    			}
+                    		}
+                    	}
                     }
                 } else {
                     StringTokenizer token = new StringTokenizer((String) val, " ,;");

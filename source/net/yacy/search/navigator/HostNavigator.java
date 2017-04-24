@@ -64,12 +64,15 @@ public class HostNavigator extends StringNavigator implements Navigator {
             Object val = doc.getFieldValue(field.getSolrFieldName());
             if (val != null) {
                 if (val instanceof Collection) {
-                    Collection<String> ll = (Collection) val;
-                    for (String s : ll) {
-                        if (s.startsWith("www.")) {
-                            s = s.substring(4);
-                        }
-                        this.inc(s);
+                    Collection<?> ll = (Collection<?>) val;
+                    for (Object obj : ll) {
+                    	if(obj instanceof String) {
+                    		String s = (String)obj;
+                    		if (s.startsWith("www.")) {
+                    			s = s.substring(4);
+                    		}
+                    		this.inc(s);
+                    	}
                     }
                 } else {
                     String host = (String) val;
