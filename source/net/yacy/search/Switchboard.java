@@ -2114,14 +2114,23 @@ public final class Switchboard extends serverSwitch {
                         		// enrich the surrogate
                         		final String id = (String) surrogate.getFieldValue(CollectionSchema.id.getSolrFieldName());
                         		final String text = (String) surrogate.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
+                        		final DigestURL rootURL = new DigestURL((String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes(id));
                         		if (text != null && text.length() > 0 && id != null ) {
-                            		final DigestURL root = new DigestURL((String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes(id));
                         			// run the tokenizer on the text to get vocabularies and synonyms
-                        			final Tokenizer tokenizer = new Tokenizer(root, text, LibraryProvider.dymLib, true, scraper);
+                        			final Tokenizer tokenizer = new Tokenizer(rootURL, text, LibraryProvider.dymLib, true, scraper);
                         			final Map<String, Set<String>> facets = Document.computeGenericFacets(tokenizer.tags());
                         			// overwrite the given vocabularies and synonyms with new computed ones
                         			Switchboard.this.index.fulltext().getDefaultConfiguration().enrich(surrogate, tokenizer.synonyms(), facets);
                         		}
+                        		
+                            	/* Update the ResultURLS stack for monitoring */
+                        		final byte[] myPeerHash = ASCII.getBytes(peers.mySeed().hash);
+                                ResultURLs.stack(
+                                        ASCII.String(rootURL.hash()),
+                                        rootURL.getHost(),
+                                        myPeerHash,
+                                        myPeerHash,
+                                        EventOrigin.SURROGATES);
                         	} catch (MalformedURLException e) {
                         		ConcurrentLog.logException(e);
                         	}
@@ -3034,6 +3043,12 @@ public final class Switchboard extends serverSwitch {
         final DigestURL url = document.dc_source();
         final DigestURL referrerURL = queueEntry.referrerURL();
         EventOrigin processCase = queueEntry.processCase(this.peers.mySeed().hash);
+        
+        /* This entry may have been locally created by the MediaWiki dump reader : 
+         * we can distinguish the case here from a regular local crawl with the crawl profile used */
+        if(this.crawler != null && queueEntry.profile() == this.crawler.defaultSurrogateProfile) {
+        	processCase = EventOrigin.SURROGATES;
+        }
         CrawlProfile profile = queueEntry.profile();
 
         if (condenser == null || (document.indexingDenied() && profile.obeyHtmlRobotsNoindex())) {

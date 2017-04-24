@@ -828,7 +828,8 @@ public class Response {
         // 3) result of index transfer, some of them are here (not possible here)
         // 4) proxy-load (initiator is "------------")
         // 5) local prefetch/crawling (initiator is own seedHash)
-        // 6) local fetching for global crawling (other known or unknwon initiator)
+        // 6) local fetching for global crawling (other known or unknown initiator)
+    	// 7) local surrogates processing (can not be known here : crawl profile is required)
         EventOrigin processCase = EventOrigin.UNKNOWN;
         // FIXME the equals seems to be incorrect: String.equals(boolean)
         if (initiator() == null || initiator().length == 0 || ASCII.String(initiator()).equals("------------")) {
