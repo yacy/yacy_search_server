@@ -2022,7 +2022,9 @@ public final class Switchboard extends serverSwitch {
                 log.warn("IO Error processing warc file " + infile);
             }
             return moved;
-        } else if (s.endsWith(".flatjson")) {
+        } else if (s.endsWith(".jsonlist") || s.endsWith(".flatjson")) {
+            // parse a file that can be generated with yacy_grid_parser
+            // see https://github.com/yacy/yacy_grid_parser/blob/master/README.md
             try {
                 InputStream is = new BufferedInputStream(new FileInputStream(infile));
                 BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
@@ -2035,9 +2037,27 @@ public final class Switchboard extends serverSwitch {
                     for (String key: json.keySet()) {
                         Object o = json.get(key);
                         if (o instanceof JSONArray) {
-                            // todo: ass array
+                            // transform this into a list
+                            JSONArray a = (JSONArray) o;
+                            List<Object> list = new ArrayList<>();
+                            for (int i = 0; i < a.length(); i++) list.add(a.get(i));
+                            CollectionSchema schema = CollectionSchema.valueOf(key);
+                            schema.add(surrogate, list);
                         } else {
-                            surrogate.put(key, new SolrInputField(o.toString()));
+                            // patch yacy grid altered schema (yacy grid does not have IDs any more, but they can be re-computed here)
+                            if (key.equals("url_s")) {
+                                DigestURL durl = new DigestURL(o.toString());
+                                String id = ASCII.String(durl.hash());
+                                surrogate.setField(CollectionSchema.sku.getSolrFieldName(), durl.toNormalform(true));
+                                surrogate.setField(CollectionSchema.id.getSolrFieldName(), id);
+                                surrogate.setField(CollectionSchema.host_id_s.getSolrFieldName(), id.substring(6));
+                            } else if (key.equals("referrer_url_s")) {
+                                DigestURL durl = new DigestURL(o.toString());
+                                String id = ASCII.String(durl.hash());
+                                surrogate.setField(CollectionSchema.referrer_id_s.getSolrFieldName(), id);
+                            } else {
+                                surrogate.setField(key, o.toString());
+                            }
                         }
                     }
                     Switchboard.this.index.putDocument(surrogate);
@@ -2219,7 +2239,9 @@ public final class Switchboard extends serverSwitch {
                         || surrogate.endsWith(".xml.gz")
                         || surrogate.endsWith(".xml.zip")
                         || surrogate.endsWith(".warc")
-                        || surrogate.endsWith(".warc.gz") ) {
+                        || surrogate.endsWith(".warc.gz")
+                        || surrogate.endsWith(".jsonlist")
+                        || surrogate.endsWith(".flatjson") ) {
                         // read the surrogate file and store entry in index
                         if ( processSurrogate(surrogate) ) {
                             return true;

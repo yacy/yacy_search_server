@@ -26,6 +26,8 @@ import java.util.List;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.SolrType;
 
+import org.apache.poi.ss.formula.atp.DateParser;
+import org.apache.poi.ss.formula.eval.EvaluationException;
 import org.apache.solr.common.SolrInputDocument;
 
 public enum CollectionSchema implements SchemaDeclaration {
@@ -424,6 +426,8 @@ public enum CollectionSchema implements SchemaDeclaration {
                 doc.setField(this.getSolrFieldName(), new Integer[0]);
             } else if (this.type == SolrType.string || this.type == SolrType.text_general) {
                 doc.setField(this.getSolrFieldName(), new String[0]);
+            } else if (this.type == SolrType.date) {
+                doc.setField(this.getSolrFieldName(), new Date[0]);
             } else {
                 assert false : "ADD(1): type is " + this.type.name();
                 doc.setField(this.getSolrFieldName(), new Object[0]);
@@ -436,6 +440,21 @@ public enum CollectionSchema implements SchemaDeclaration {
         } else if (this.type == SolrType.string || this.type == SolrType.text_general) {
             assert (value.iterator().next() instanceof String);
             doc.setField(this.getSolrFieldName(), value.toArray(new String[value.size()]));
+        } else if (this.type == SolrType.date) {
+            assert (value.iterator().next() instanceof String) || (value.iterator().next() instanceof Date);
+            if (value.iterator().next() instanceof String) {
+                Date[] da = new Date[value.size()];
+                for (int i = 0; i < value.size(); i++) {
+                    try {
+                        da[i] = DateParser.parseDate((String) value.get(i)).getTime();
+                    } catch (EvaluationException e) {
+                        da[i] = null;
+                    }
+                }
+                doc.setField(this.getSolrFieldName(), da);
+            } else {
+                doc.setField(this.getSolrFieldName(), value.toArray(new Date[value.size()]));
+            }
         } else {
             assert false : "ADD(2): type is " + this.type.name();
             doc.setField(this.getSolrFieldName(), value.toArray(new Object[value.size()]));
