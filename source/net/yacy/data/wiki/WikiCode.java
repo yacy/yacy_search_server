@@ -107,7 +107,9 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
     private static final String WIKI_CLOSE_LINK = "]]";
     private static final String WIKI_OPEN_LINK = "[[";
+    /** Wiki template inclusion closing tag */
     private static final String WIKI_CLOSE_METADATA = "}}";
+    /** Wiki template inclusion opening tag */
     private static final String WIKI_OPEN_METADATA = "{{";
     private static final String WIKI_CLOSE_EXTERNAL_LINK = "]";
     private static final String WIKI_OPEN_EXTERNAL_LINK = "[";
@@ -127,6 +129,8 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private static final char SIX = '6';
     private static final char WIKI_FORMATTED = ' ';
     private static final char WIKI_INDENTION = ':';
+    /** Wiki template parameter separator */
+    private static final char WIKI_METADATA_PARAMETER_SEPARATOR = '|';
 
     private static final int LEN_WIKI_CLOSE_PRE_ESCAPED = WIKI_CLOSE_PRE_ESCAPED.length();
     private static final int LEN_WIKI_OPEN_PRE_ESCAPED = WIKI_OPEN_PRE_ESCAPED.length();
@@ -140,6 +144,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
     private static final int LEN_WIKI_HR_LINE = WIKI_HR_LINE.length();
     private static final int LEN_PIPE_ESCAPED = PIPE_ESCAPED.length();
     private static final int LEN_WIKI_OPEN_METADATA = WIKI_OPEN_METADATA.length();
+    private static final int LEN_WIKI_CLOSE_METADATA = WIKI_CLOSE_METADATA.length();
 
     /** List of properties which can be used in tables. */
     private final static String[] TABLE_PROPERTIES = {"rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border"};
@@ -1042,70 +1047,137 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
 
 
     /**
-     * Process line with geo coordinate metadata
-     * @param line of wiki text
-     * @return line with geo coordinate formatted to be recogizeable by parser
+     * Process template inclusions in line, eventually with geo coordinate metadata
+     * @param line line of wiki text
+     * @return cleaned text with eventual geo coordinates formatted to be recognizable by parser
+     * @see https://en.wikipedia.org/wiki/Wikipedia:Transclusion
      */
-    private static String processMetadata(String line) {
-        int p, q, s = 0;
-        while ((p = line.indexOf(WIKI_OPEN_METADATA, s)) >= 0 && (q = line.indexOf(WIKI_CLOSE_METADATA, p + 1)) >= 0) {
-            s = q; // continue with next position
-            final String a = line.substring(p + LEN_WIKI_OPEN_METADATA, q);
-            if (a.toLowerCase().startsWith("coordinate")) {
-                // parse Geographical Coordinates as described in
-                // http://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style_%28dates_and_numbers%29#Geographical_coordinates
-                // looks like:
-                // {{Coord|57|18|22.5|N|4|27|32.7|W|display=title}}
-                // however, such information does not appear as defined above but as:
-                // {{coordinate|NS=52.205944|EW=0.117593|region=GB-CAM|type=landmark}}
-                // {{coordinate|NS=43/50/29/N|EW=73/23/17/W|type=landmark|region=US-NY}}
-                // and if passed through this parser:
-                // {{Coordinate |NS 45/37/43.0/N |EW. 07/58/41.0/E |type=landmark |region=IT-BI}} ## means: degree/minute/second
-                // {{Coordinate |NS 51.48994 |EW. 7.33249 |type=landmark |region=DE-NW}}
-                final String b[] = a.split("\\|");
-                float lon = Float.NaN, lat = Float.NaN; // degree
-                float lonm = 0.0f, latm = 0.0f; // minutes (including sec as fraction)
-                String lono = "E", lato = "N";
-                String name = "";
-                try {
-                    for (final String c : b) {
-                        if (c.toLowerCase().startsWith("name=")) {
-                            name = c.substring(5);
-                        }
-                        if (c.toUpperCase().startsWith("NS=")) {
-                            final String d[] = c.substring(3).split("/");
-                            if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lato = "S"; l = -l;} lat = (float) Math.floor(l); latm = 60.0f * (l - lat);}
-                            else if (d.length > 1) { //format: NS deg/min/sec/N
-                                lat = Float.parseFloat(d[0]); // degree
-                                if (!d[1].isEmpty()) latm = Float.parseFloat(d[1]); // minutes
-                                if (d.length >= 3 && !d[2].isEmpty()) {latm += (Float.parseFloat(d[2]) / 60.0f);} // sec (check empty because format found "45/10//N" )
-                                if (d[d.length - 1].toUpperCase().equals("S")) lato = "S";
-                            }
-                        }
-                        if (c.toUpperCase().startsWith("EW=")) {
-                            final String d[] = c.substring(3).split("/");
-                            if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lono = "W"; l = -l;} lon = (float) Math.floor(l); lonm = 60.0f * (l - lon);}
-                            else if (d.length > 1) {
-                                lon = Float.parseFloat(d[0]);
-                                if (!d[1].isEmpty()) lonm = Float.parseFloat(d[1]);
-                                if (d.length >= 3 && !d[2].isEmpty()) {lonm += (Float.parseFloat(d[2]) / 60.0f);}
-                                if (d[d.length-1].toUpperCase().equals("W")) {lono = "W";}
-                            }
-                        }
-                    }
-                } catch (NumberFormatException nsExcept) {
-                    // catch parseFloat exception (may still happen if wiki code contains expressions)
-                    continue;
-                }
-                if (!Float.isNaN(lon) && !Float.isNaN(lat)) {
-                    // replace this with a format that the html parser can understand
-                    line = line.substring(0, p) + (name.length() > 0 ? (" " + name) : "") + " <nobr> " + lato + " " + lat + "\u00B0 " + latm + "'</nobr><nobr>" + lono + " " + lon + "\u00B0 " + lonm + "'</nobr> " + line.substring(q + WIKI_CLOSE_METADATA.length());
-                    s = p;
-                    continue;
-                }
+    protected static String processMetadata(final String line) {
+    	StringBuilder processedLine = new StringBuilder(line);
+        int openIndex, closeIndex, fromIndex = 0;
+        while ((openIndex = processedLine.indexOf(WIKI_OPEN_METADATA, fromIndex)) >= 0) {
+        	closeIndex = processedLine.indexOf(WIKI_CLOSE_METADATA, openIndex + LEN_WIKI_OPEN_METADATA);
+            /* Closing tag position : handle eventually nested tags */
+            int nextOpenIndex = processedLine.indexOf(WIKI_OPEN_METADATA, openIndex + LEN_WIKI_OPEN_METADATA);
+            while(nextOpenIndex >= 0 && nextOpenIndex < closeIndex) {
+            	closeIndex = processedLine.indexOf(WIKI_CLOSE_METADATA, closeIndex + LEN_WIKI_CLOSE_METADATA);
+            	if(closeIndex < 0) {
+            		/* Parent closing mark is missing: likely a multi-line template inclusion */
+            		break;
+            	}
+            	nextOpenIndex = processedLine.indexOf(WIKI_OPEN_METADATA, nextOpenIndex + LEN_WIKI_OPEN_METADATA);
             }
+            if(closeIndex > 0) {
+            	final String content = processedLine.substring(openIndex + LEN_WIKI_OPEN_METADATA, closeIndex);
+            	if (content.toLowerCase().startsWith("coordinate")) {
+            		// parse Geographical Coordinates as described in
+            		// http://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style_%28dates_and_numbers%29#Geographical_coordinates
+            		// looks like:
+            		// {{Coord|57|18|22.5|N|4|27|32.7|W|display=title}}
+            		// however, such information does not appear as defined above but as:
+            		// {{coordinate|NS=52.205944|EW=0.117593|region=GB-CAM|type=landmark}}
+            		// {{coordinate|NS=43/50/29/N|EW=73/23/17/W|type=landmark|region=US-NY}}
+            		// and if passed through this parser:
+            		// {{Coordinate |NS 45/37/43.0/N |EW. 07/58/41.0/E |type=landmark |region=IT-BI}} ## means: degree/minute/second
+            		// {{Coordinate |NS 51.48994 |EW. 7.33249 |type=landmark |region=DE-NW}}
+            		final String b[] = content.split("\\|");
+            		float lon = Float.NaN, lat = Float.NaN; // degree
+            		float lonm = 0.0f, latm = 0.0f; // minutes (including sec as fraction)
+            		String lono = "E", lato = "N";
+            		String name = "";
+            		try {
+            			for (final String c : b) {
+            				if (c.toLowerCase().startsWith("name=")) {
+            					name = c.substring(5);
+            				}
+            				if (c.toUpperCase().startsWith("NS=")) {
+            					final String d[] = c.substring(3).split("/");
+            					if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lato = "S"; l = -l;} lat = (float) Math.floor(l); latm = 60.0f * (l - lat);}
+            					else if (d.length > 1) { //format: NS deg/min/sec/N
+            						lat = Float.parseFloat(d[0]); // degree
+            						if (!d[1].isEmpty()) latm = Float.parseFloat(d[1]); // minutes
+            						if (d.length >= 3 && !d[2].isEmpty()) {latm += (Float.parseFloat(d[2]) / 60.0f);} // sec (check empty because format found "45/10//N" )
+            						if (d[d.length - 1].toUpperCase().equals("S")) lato = "S";
+            					}
+            				}
+            				if (c.toUpperCase().startsWith("EW=")) {
+            					final String d[] = c.substring(3).split("/");
+            					if (d.length == 1) {float l = Float.parseFloat(d[0]); if (l < 0) {lono = "W"; l = -l;} lon = (float) Math.floor(l); lonm = 60.0f * (l - lon);}
+            					else if (d.length > 1) {
+            						lon = Float.parseFloat(d[0]);
+            						if (!d[1].isEmpty()) lonm = Float.parseFloat(d[1]);
+            						if (d.length >= 3 && !d[2].isEmpty()) {lonm += (Float.parseFloat(d[2]) / 60.0f);}
+            						if (d[d.length-1].toUpperCase().equals("W")) {lono = "W";}
+            					}
+            				}
+            			}
+            		} catch (NumberFormatException nsExcept) {
+            			// catch parseFloat exception (may still happen if wiki code contains expressions)
+            			processedLine.delete(closeIndex, closeIndex + LEN_WIKI_CLOSE_METADATA);
+            			processedLine.delete(openIndex, openIndex + LEN_WIKI_OPEN_METADATA);
+            			fromIndex = openIndex;
+            			continue;
+            		}
+            		if (!Float.isNaN(lon) && !Float.isNaN(lat)) {
+            			// replace this with a format that the html parser can understand
+            			final String htmlCoord = (name.length() > 0 ? (" " + name) : "") + 
+            					WIKI_FORMATTED +"<nobr> " + lato + " " + lat + "\u00B0 " + latm + "'</nobr><nobr>" + lono + " " + lon + "\u00B0 " + lonm + "'</nobr>" + WIKI_FORMATTED;
+            			processedLine.replace(openIndex, closeIndex + LEN_WIKI_CLOSE_METADATA, htmlCoord);
+            			
+            			/* Set next position to openIndex as some parameters can still contain nested template inclusion tags */
+            			fromIndex = openIndex;
+            			continue;
+            		}
+            		fromIndex = closeIndex; // continue with next position
+            	} else {
+            		String processedContent;
+            		/* Any other template inclusion : only remove opening and closing tag and parameter separators */
+            		int nestedOpenTagIndex = content.indexOf(WIKI_OPEN_METADATA);
+            		int lastNestedCloseTagIndex = content.lastIndexOf(WIKI_CLOSE_METADATA);
+            		if(nestedOpenTagIndex >= 0 && lastNestedCloseTagIndex > 0) {
+            			processedContent = WIKI_FORMATTED + content.substring(0, nestedOpenTagIndex).replace(WIKI_METADATA_PARAMETER_SEPARATOR, ' ').replace('=', ' ')
+            					+ content.substring(nestedOpenTagIndex, lastNestedCloseTagIndex) 
+            					+ content.substring(lastNestedCloseTagIndex).replace(WIKI_METADATA_PARAMETER_SEPARATOR, ' ').replace('=', ' ') + WIKI_FORMATTED;
+            			fromIndex = openIndex; // continue with next nested position
+            		} else {
+            			/* No nested tag : we can now replace parameter separators with spaces in all remaining content */
+            			processedContent = WIKI_FORMATTED + content.replace(WIKI_METADATA_PARAMETER_SEPARATOR, ' ').replace('=', ' ') + WIKI_FORMATTED;
+            			fromIndex = openIndex + processedContent.length(); // continue with next position
+            		}
+            		processedLine.replace(openIndex, closeIndex + LEN_WIKI_CLOSE_METADATA, processedContent);
+            	}
+           	} else {
+        		/* Multi-line template inclusion : only remove opening tag and parameter separators until eventually first nested tag */
+        		int nestedOpenTagIndex = processedLine.indexOf(WIKI_OPEN_METADATA, openIndex + LEN_WIKI_OPEN_METADATA);
+        		if(nestedOpenTagIndex >= 0) {
+					processedLine.replace(openIndex, nestedOpenTagIndex,
+							WIKI_FORMATTED
+									+ processedLine.substring(openIndex + LEN_WIKI_OPEN_METADATA, nestedOpenTagIndex)
+											.replace(WIKI_METADATA_PARAMETER_SEPARATOR, ' ').replace('=', ' '));
+        			fromIndex = openIndex;
+        		} else {
+        			processedLine.replace(openIndex, processedLine.length(), WIKI_FORMATTED
+							+ processedLine.substring(openIndex + LEN_WIKI_OPEN_METADATA).replace(WIKI_METADATA_PARAMETER_SEPARATOR, ' ').replace('=', ' '));
+        			break;
+        		}
+           	}
+           	
         }
-        return line;
+        
+        /* Handle any eventual multi-line template remaining closing tags */
+        fromIndex = 0;
+        while ((closeIndex = processedLine.indexOf(WIKI_CLOSE_METADATA, fromIndex)) >= 0) {
+        	processedLine.replace(fromIndex, closeIndex, processedLine.substring(fromIndex, closeIndex).replace(WIKI_METADATA_PARAMETER_SEPARATOR, ' ').replace('=', ' '));
+        	processedLine.delete(closeIndex, closeIndex + LEN_WIKI_CLOSE_METADATA);
+        	fromIndex = closeIndex;
+        }
+        
+        /* Handle any eventual multi-line template remaining parameter lines */
+        String result = processedLine.toString();
+        if(result.matches("^\\s*\\" + WIKI_METADATA_PARAMETER_SEPARATOR + "\\s*[^\\-\\}\\|].*")) {
+        	result = result.replace(WIKI_METADATA_PARAMETER_SEPARATOR, ' ').replace('=', ' ');
+        }
+        return result;
     }
 
     private class TableOfContent {
