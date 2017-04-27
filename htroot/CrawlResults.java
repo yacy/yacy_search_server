@@ -58,12 +58,15 @@ public class CrawlResults {
     /** Used for logging. */
     private static final String APP_NAME = "PLASMA";
     
+    /** Default maximum lines number of the indexed table */
+    private static final int DEFAULT_MAXIMUM_LINES = 500;
+    
     public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-        int lines = 500;
+        int lines = DEFAULT_MAXIMUM_LINES;
         boolean showCollection = sb.index.fulltext().getDefaultConfiguration().isEmpty() || sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.collection_sxt);
         boolean showInit    = env.getConfigBool("IndexMonitorInit", false);
         boolean showExec    = env.getConfigBool("IndexMonitorExec", false);
@@ -118,7 +121,7 @@ public class CrawlResults {
         if (post != null) {
             // custom number of lines
             if (post.containsKey("count")) {
-                lines = post.getInt("count", 500);
+                lines = post.getInt("count", DEFAULT_MAXIMUM_LINES);
             }
 
             // do the commands
@@ -154,7 +157,7 @@ public class CrawlResults {
             }
 
             if (post.containsKey("moreIndexed")) {
-                lines = post.getInt("showIndexed", 500);
+                lines = post.getInt("showIndexed", DEFAULT_MAXIMUM_LINES);
             }
 
             if (post.get("si") != null) showInit    = !("0".equals(post.get("si")));
@@ -180,6 +183,7 @@ public class CrawlResults {
             } else {
                 prop.put("table_size", "1");
                 prop.put("table_size_count", lines);
+                prop.put("table_size_tabletype", tabletype.getCode());
             }
             prop.put("table_size_all", ResultURLs.getStackSize(tabletype));
 
@@ -203,7 +207,7 @@ public class CrawlResults {
             int cnt = 0;
             final Iterator<Map.Entry<String, InitExecEntry>> i = ResultURLs.results(tabletype);
             Map.Entry<String, InitExecEntry> entry;
-            while (i.hasNext()) {
+            while (i.hasNext() && cnt < lines) {
                 entry = i.next();
                 try {
                     byte[] urlhash = UTF8.getBytes(entry.getKey());
