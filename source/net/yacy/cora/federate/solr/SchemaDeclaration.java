@@ -50,6 +50,10 @@ public interface SchemaDeclaration {
 
     public boolean isOmitNorms();
     
+    /**
+     * @return true when this field is stored as a column-oriented field optimized for sorting, faceting and grouping
+     * @see https://cwiki.apache.org/confluence/display/solr/DocValues
+     */
     public boolean isDocValue();
 
     public String getComment();
