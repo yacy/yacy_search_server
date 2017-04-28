@@ -674,43 +674,56 @@ public final class Fulltext {
         
         // check the oldest and latest entry in the index for this query
         SolrDocumentList firstdoclist, lastdoclist;
+        Object firstdateobject, lastdateobject;
         firstdoclist = this.getDefaultConnector().getDocumentListByQuery(
                query, CollectionSchema.load_date_dt.getSolrFieldName() + " asc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
         lastdoclist = this.getDefaultConnector().getDocumentListByQuery(
                query, CollectionSchema.load_date_dt.getSolrFieldName() + " desc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
 
+        final long doccount;
+        final Date firstdate, lastdate;
         if (firstdoclist.size() == 0 || lastdoclist.size() == 0) {
-            assert firstdoclist.size() == 0 && lastdoclist.size() == 0;
-            throw new IOException("number of exported documents == 0");
-        }
-        assert firstdoclist.size() == 1 && lastdoclist.size() == 1;
-        long doccount = firstdoclist.getNumFound();
-        
-        // create the export name
-        SolrDocument firstdoc = firstdoclist.get(0);
-        SolrDocument lastdoc = lastdoclist.get(0);
-        Object firstdateobject = firstdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-        Object lastdateobject = lastdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
-        
-    	/* When firstdate or lastdate is null, we use a default one just to generate a proper dump file path 
-    	 * This should not happen because load_date_dt field is mandatory in the main Solr schema, 
-    	 * but for some reason some documents might end up here with an empty load_date_dt field value */
-        final Date firstdate;
-        if(firstdateobject instanceof Date) {
-        	firstdate = (Date) firstdateobject;
+        	/* Now check again the number of documents without sorting, for compatibility with old fields indexed without DocValues fields (prior to YaCy 1.90)
+        	 * When the local Solr index contains such old documents, requests with sort query return nothing and trace in logs 
+        	 * "java.lang.IllegalStateException: unexpected docvalues type NONE for field..." */
+        	doccount = this.getDefaultConnector().getCountByQuery(query);
+        	if(doccount == 0) {
+        		/* Finally no document to export was found */
+        		throw new IOException("number of exported documents == 0");
+        	}
+       		/* we use default date values just to generate a proper dump file path */
+       		firstdate = new Date(0);
+       		lastdate = new Date(0);
+        		
         } else {
-			ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
-					+ firstdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-        	firstdate = new Date(0);
+        	doccount = firstdoclist.getNumFound();
+        
+        	// create the export name
+        	SolrDocument firstdoc = firstdoclist.get(0);
+        	SolrDocument lastdoc = lastdoclist.get(0);
+        	firstdateobject = firstdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+        	lastdateobject = lastdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
+        	
+        	/* When firstdate or lastdate is null, we use a default one just to generate a proper dump file path 
+        	 * This should not happen because load_date_dt field is mandatory in the main Solr schema, 
+        	 * but for some reason some documents might end up here with an empty load_date_dt field value */
+            if(firstdateobject instanceof Date) {
+            	firstdate = (Date) firstdateobject;
+            } else {
+    			ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
+    					+ firstdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+            	firstdate = new Date(0);
+            }
+            if(lastdateobject instanceof Date) {
+            	lastdate = (Date) lastdateobject;
+            } else {
+    			ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
+    					+ lastdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+            	lastdate = new Date(0);
+            }
         }
-        final Date lastdate;
-        if(lastdateobject instanceof Date) {
-        	lastdate = (Date) lastdateobject;
-        } else {
-			ConcurrentLog.warn("Fulltext", "The required field " + CollectionSchema.load_date_dt.getSolrFieldName() + " is empty on document with id : "
-					+ lastdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-        	lastdate = new Date(0);
-        }
+        
+
         String s = new File(path, yacy_dump_prefix +
                 "f" + GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate) + "_" +
                 "l" + GenericFormatter.FORMAT_SHORT_MINUTE.format(lastdate) + "_" +
