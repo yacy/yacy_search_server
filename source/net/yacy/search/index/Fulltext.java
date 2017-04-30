@@ -803,6 +803,12 @@ public final class Fulltext {
                 if (this.format == ExportFormat.solr) {
                     pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
                     pw.println("<response>");
+                    pw.println("<lst name=\"responseHeader\">");
+                    pw.println(" <str format=\"yacy.index.export.solr.xml\"/>");
+                    pw.println(" <lst name=\"params\"");
+                    pw.println("  <str name=\"q\">" + this.query + "</str>");
+                    pw.println(" </lst>");
+                    pw.println("</lst>");
                     pw.println("<result>");
                 }
                 if (this.dom) {

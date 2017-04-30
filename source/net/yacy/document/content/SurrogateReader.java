@@ -180,17 +180,23 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     }
     
     /**
+     * Check for format string in responseHeader "yacy.index.export.solr.xml"
+     * (introduced v1.92/9188 2017-04-30) or guess format by existing "<respons>"
+     * and "<result>" or "<doc>" tag in the first 1024 characters.
+     *
      * @return true when inputStream is likely to contain a rich and full-text Solr xml data dump (see IndexExport_p.html)
      */
 	private boolean isSolrDump() {
 		boolean res = false;
-		byte[] b = new byte[100];
+		byte[] b = new byte[1024];
 		int nbRead = -1;
 		try {
                     nbRead = this.inputStream.read(b);
                     if (nbRead > 0) {
                         String s = new String(b, 0, nbRead, StandardCharsets.UTF_8);
-                        if ((s.contains("<response>") && s.contains("<result>")) || s.startsWith("<doc>")) {
+                        if (s.contains("format=\"yacy.index.export.solr.xml\"")) {
+                            res = true;
+                        } else if ((s.contains("<response>") && s.contains("<result>")) || s.startsWith("<doc>")) {
                             res = true;
                         }
                     }

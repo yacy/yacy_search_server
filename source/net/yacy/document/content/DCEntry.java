@@ -176,7 +176,13 @@ public class DCEntry extends MultiMapSolrParams {
         }
     }
 
-    private static String bestU(String[] urls) {
+    /**
+     * From the given list of urls selects the best to access the resource,
+     * possibly expanding short identifier for doi nbn or itef with resolved url
+     * @param urls list of identifier / url
+     * @return best/resolved url
+     */
+    private String bestU(String[] urls) {
         if (urls.length > 1) { // with only one ... no choice
             for (String uu: urls) {
                 if (uu.startsWith("http://") && (uu.endsWith(".html") || uu.endsWith(".htm") || uu.endsWith(".pdf") || uu.endsWith(".doc") || uu.endsWith(".rss") || uu.endsWith(".xml"))) return uu;
