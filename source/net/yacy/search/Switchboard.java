@@ -2039,10 +2039,46 @@ public final class Switchboard extends serverSwitch {
                         if (o instanceof JSONArray) {
                             // transform this into a list
                             JSONArray a = (JSONArray) o;
-                            List<Object> list = new ArrayList<>();
-                            for (int i = 0; i < a.length(); i++) list.add(a.get(i));
-                            CollectionSchema schema = CollectionSchema.valueOf(key);
-                            schema.add(surrogate, list);
+                            // patch altered yacy grid schema (yacy grid does not split url lists into protocol and urlstub)
+                            if (key.equals("inboundlinks_sxt")) {
+                                // compute inboundlinks_urlstub_sxt and inboundlinks_protocol_sxt
+                                List<Object> urlstub = new ArrayList<>();
+                                List<Object> protocol = new ArrayList<>();
+                                for (int i = 0; i < a.length(); i++) {
+                                    AnchorURL b = new AnchorURL((String) a.get(i));
+                                    urlstub.add(b.urlstub(true, true));
+                                    protocol.add(b.getProtocol());
+                                }
+                                CollectionSchema.inboundlinks_urlstub_sxt.add(surrogate, urlstub);
+                                CollectionSchema.inboundlinks_protocol_sxt.add(surrogate, protocol);
+                            } else if (key.equals("outboundlinks_sxt")) {
+                                // compute outboundlinks_urlstub_sxt and outboundlinks_protocol_sxt
+                                List<Object> urlstub = new ArrayList<>();
+                                List<Object> protocol = new ArrayList<>();
+                                for (int i = 0; i < a.length(); i++) {
+                                    AnchorURL b = new AnchorURL((String) a.get(i));
+                                    urlstub.add(b.urlstub(true, true));
+                                    protocol.add(b.getProtocol());
+                                }
+                                CollectionSchema.outboundlinks_urlstub_sxt.add(surrogate, urlstub);
+                                CollectionSchema.outboundlinks_protocol_sxt.add(surrogate, protocol);
+                            } else if (key.equals("images_sxt")) {
+                                // compute images_urlstub_sxt and images_protocol_sxt
+                                List<Object> urlstub = new ArrayList<>();
+                                List<Object> protocol = new ArrayList<>();
+                                for (int i = 0; i < a.length(); i++) {
+                                    AnchorURL b = new AnchorURL((String) a.get(i));
+                                    urlstub.add(b.urlstub(true, true));
+                                    protocol.add(b.getProtocol());
+                                }
+                                CollectionSchema.images_urlstub_sxt.add(surrogate, urlstub);
+                                CollectionSchema.images_protocol_sxt.add(surrogate, protocol);
+                            } else {
+                                List<Object> list = new ArrayList<>();
+                                for (int i = 0; i < a.length(); i++) list.add(a.get(i));
+                                CollectionSchema schema = CollectionSchema.valueOf(key);
+                                schema.add(surrogate, list);
+                            }
                         } else {
                             // patch yacy grid altered schema (yacy grid does not have IDs any more, but they can be re-computed here)
                             if (key.equals("url_s")) {
