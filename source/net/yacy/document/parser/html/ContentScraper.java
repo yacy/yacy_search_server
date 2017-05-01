@@ -854,9 +854,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return a.toArray(new String[a.size()]);
     }
 
-    public String[] getBoldCount(final String[] a) {
-        final String[] counter = new String[a.length];
-        for (int i = 0; i < a.length; i++) counter[i] = Integer.toString(this.bold.get(a[i]));
+    public Integer[] getBoldCount(final String[] a) {
+        final Integer[] counter = new Integer[a.length];
+        for (int i = 0; i < a.length; i++) counter[i] = this.bold.get(a[i]);
         return counter;
     }
 
@@ -867,9 +867,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return a.toArray(new String[a.size()]);
     }
 
-    public String[] getItalicCount(final String[] a) {
-        final String[] counter = new String[a.length];
-        for (int i = 0; i < a.length; i++) counter[i] = Integer.toString(this.italic.get(a[i]));
+    public Integer[] getItalicCount(final String[] a) {
+        final Integer[] counter = new Integer[a.length];
+        for (int i = 0; i < a.length; i++) counter[i] = this.italic.get(a[i]);
         return counter;
     }
 
@@ -880,9 +880,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return a.toArray(new String[a.size()]);
     }
 
-    public String[] getUnderlineCount(final String[] a) {
-        final String[] counter = new String[a.length];
-        for (int i = 0; i < a.length; i++) counter[i] = Integer.toString(this.underline.get(a[i]));
+    public Integer[] getUnderlineCount(final String[] a) {
+        final Integer[] counter = new Integer[a.length];
+        for (int i = 0; i < a.length; i++) counter[i] = this.underline.get(a[i]);
         return counter;
     }
 
@@ -1206,11 +1206,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return a.toArray(new String[a.size()]);
     }
 
-    public String[] getEvaluationModelScoreCounts(final String modelName, final String[] a) {
+    public Integer[] getEvaluationModelScoreCounts(final String modelName, final String[] a) {
         final ClusteredScoreMap<String> scores = this.evaluationScores.getScores(modelName);
-        final String[] counter = new String[a.length];
+        final Integer[] counter = new Integer[a.length];
         if (scores != null) {
-            for (int i = 0; i < a.length; i++) counter[i] = Integer.toString(scores.get(a[i]));
+            for (int i = 0; i < a.length; i++) counter[i] = scores.get(a[i]);
         }
         return counter;
     }
