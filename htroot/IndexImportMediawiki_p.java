@@ -45,7 +45,9 @@ public class IndexImportMediawiki_p {
 	 * @param header servlet request header
 	 * @param post request parameters. Supported keys :
 	 *            <ul>
-	 *            <li>file : a dump file path on this YaCy server local file system</li>
+	 *            <li>file : a dump URL or file path on this YaCy server local file system</li>
+	 *            <li>report : when set, display the currently running thread monitoring info, or the last import report when no one is running.
+	 *            Ignored when no import thread is known.</li>
 	 *            </ul>
 	 * @param env server environment
 	 * @return the servlet answer object
@@ -54,15 +56,17 @@ public class IndexImportMediawiki_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        if (MediawikiImporter.job != null && MediawikiImporter.job.isAlive()) {
-            // one import is running, no option to insert anything
+        if (MediawikiImporter.job != null && (MediawikiImporter.job.isAlive() || (post != null && post.containsKey("report")))) {
+            /* one import is running, or report was explicitly requested : no option to insert anything */
             prop.put("import", 1);
+            /* Only refresh automatically when the job is running */
+            prop.put("refresh", MediawikiImporter.job.isAlive() ? 1 : 0);
             final String jobErrorMessage = MediawikiImporter.job.status();
             if( jobErrorMessage != null && !jobErrorMessage.isEmpty()) {
             	prop.put("import_status", 1);
             	prop.put("import_status_message", jobErrorMessage);
             }
-            prop.put("import_thread", "running");
+            prop.put("import_thread", MediawikiImporter.job.isAlive() ? 2 : 0);
             prop.put("import_dump", MediawikiImporter.job.source());
             prop.put("import_count", MediawikiImporter.job.count());
             prop.put("import_speed", MediawikiImporter.job.speed());
@@ -72,15 +76,8 @@ public class IndexImportMediawiki_p {
             prop.put("import_remainingMinutes", (MediawikiImporter.job.remainingTime() / 60) % 60);
         } else {
             prop.put("import", 0);
-            if(MediawikiImporter.job != null) {
-				/* Report eventual fail report from the last terminated import (for example an HTTP 404 status) 
-				 * that else could be missed by the user because of page refresh */
-	            final String jobErrorMessage = MediawikiImporter.job.status();
-	            if( jobErrorMessage != null && !jobErrorMessage.isEmpty()) {
-	            	prop.put("import_prevStatus", 1);
-	            	prop.put("import_prevStatus_message", jobErrorMessage);
-	            }
-            }
+            prop.put("refresh", 0);
+           	prop.put("import_prevReport", MediawikiImporter.job != null ? 1 : 0);
             if (post == null) {
                 prop.put("import_status", 0);
                 
@@ -118,8 +115,9 @@ public class IndexImportMediawiki_p {
 						MediawikiImporter.job = new MediawikiImporter(sourceURL, sb.surrogatesInPath);
 						MediawikiImporter.job.start();
 						prop.put("import_dump", MediawikiImporter.job.source());
-						prop.put("import_thread", "started");
+						prop.put("import_thread", 1);
 						prop.put("import", 1);
+						prop.put("refresh", 1);
 					} else {
 						prop.put("import_status", status);
 						prop.put("import_status_sourceFile", sourceFilePath);

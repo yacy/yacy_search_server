@@ -3,9 +3,9 @@
   <head>
     <title>YaCy '#[clientname]#': MediaWiki Dump Import</title>
     #%env/templates/metas.template%#    
-    #(import)#::<meta http-equiv="REFRESH" content="10;url=IndexImportMediawiki_p.html" />
+    #(refresh)#::<meta http-equiv="REFRESH" content="10;url=IndexImportMediawiki_p.html?report=" />
                 <!-- the url= removes http get parameters on refresh, preventing restart of import -->
-    #(/import)#
+    #(/refresh)#
   </head>
   <body id="IndexImportMediawiki">
     #%env/templates/header.template%#
@@ -13,9 +13,7 @@
     <h2>MediaWiki Dump Import</h2>
     
     #(import)#
-    <p>#(prevStatus)#
-    ::<div class="alert alert-danger" role="alert">Error on last import : #[message]#</div>
-    #(/prevStatus)#</p>
+    <p>#(prevReport)#::<a href="IndexImportMediawiki_p.html?report=">Check</a> the last import report.#(/prevReport)#</p>
     <p>#(status)#<div class="alert alert-info" role="alert">No import thread is running, you can start a new thread here</div>
     ::<div class="alert alert-danger" role="alert">Error : dump <abbr title="Uniform Resource Locator">URL</abbr> is malformed.</div>
     ::<div class="alert alert-danger" role="alert">Error : file not found "#[sourceFile]#"</div>
@@ -77,7 +75,8 @@
     #(/status)#</p>
     <form><fieldset><legend>Import Process</legend>
       <dl>
-        <dt>Thread:</dt><dd>#[thread]#</dd>
+        <dt>Thread:</dt><dd>#(thread)#terminated. You can check the next step in the <a href="CrawlResults.html?process=7">Crawl Results page</a> 
+        or start a <a href="IndexImportMediawiki_p.html">new import</a>.::started::running#(/thread)#</dd>
         <dt>Dump:</dt><dd>#[dump]#</dd>
         <dt>Processed:</dt><dd>#[count]# Wiki Entries</dd>
         <dt>Speed:</dt><dd>#[speed]# articles per second</dd>
