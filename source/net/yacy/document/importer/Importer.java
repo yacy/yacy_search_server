@@ -24,9 +24,14 @@ package net.yacy.document.importer;
 
 public interface Importer extends Runnable {
 
-    
+    /**
+     * @return the import source information (URL or file name)
+     */
     public String source();
     
+    /**
+     * @return the total number of processed articles
+     */
     public int count();
     
     /**
@@ -47,6 +52,9 @@ public interface Importer extends Runnable {
 
     public String status();
     
+    /**
+     * @return true when the import thread is alive
+     */
     public boolean isAlive();
     
     public void start();
