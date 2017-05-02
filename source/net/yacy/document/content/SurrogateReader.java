@@ -71,6 +71,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     public final static String SURROGATES_MAIN_ELEMENT_CLOSE =
         "</" + SURROGATES_MAIN_ELEMENT_NAME + ">";
     public final static SolrInputDocument POISON_DOCUMENT = new SolrInputDocument();
+    
+    /** Maximum bytes number that can be unread on the underlying input stream */
+    private static final int PUSHBACK_SIZE = 1024;
 
     // class variables
     private final StringBuilder buffer;
@@ -100,7 +103,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     }
 
     public SurrogateReader(final InputStream stream, int queueSize, CrawlStacker crawlStacker, CollectionConfiguration configuration, int concurrency) throws IOException {
-        this(new PushbackInputStream(stream, 200), queueSize, crawlStacker, configuration, concurrency);
+        this(new PushbackInputStream(stream, PUSHBACK_SIZE), queueSize, crawlStacker, configuration, concurrency);
     }
     
     public SurrogateReader(final PushbackInputStream stream, int queueSize, CrawlStacker crawlStacker, CollectionConfiguration configuration, int concurrency) throws IOException {
@@ -181,14 +184,14 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     
     /**
      * Check for format string in responseHeader "yacy.index.export.solr.xml"
-     * (introduced v1.92/9188 2017-04-30) or guess format by existing "<respons>"
-     * and "<result>" or "<doc>" tag in the first 1024 characters.
+     * (introduced v1.92/9188 2017-04-30) or guess format by existing "<response>"
+     * and "<result>" or "<doc>" tag in the first {@value #PUSHBACK_SIZE} characters.
      *
      * @return true when inputStream is likely to contain a rich and full-text Solr xml data dump (see IndexExport_p.html)
      */
 	private boolean isSolrDump() {
 		boolean res = false;
-		byte[] b = new byte[1024];
+		byte[] b = new byte[PUSHBACK_SIZE];
 		int nbRead = -1;
 		try {
                     nbRead = this.inputStream.read(b);
