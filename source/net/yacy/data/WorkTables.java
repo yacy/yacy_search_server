@@ -97,22 +97,14 @@ public class WorkTables extends Tables {
         super(workPath, 12);
         this.bookmarks = new YMarkTables(this);
     }
-
+    
     /**
-     * recording of a api call. stores the call parameters into the API database table
-     * @param post the post arguments of the api call
+     * 
+     * @param post the api call request parameters. Must not be null.
      * @param servletName the name of the servlet
-     * @param type name of the servlet category
-     * @param comment visual description of the process
-     * @return the pk of the new entry in the api table
+     * @return the API URL to be recorded
      */
-    public byte[] recordAPICall(final serverObjects post, final String servletName, final String type, final String comment) {
-        // remove the apicall attributes from the post object
-        String[] pks = post.remove(TABLE_API_COL_APICALL_PK);
-        
-        byte[] pk = pks == null ? null : UTF8.getBytes(pks[0]);
-
-        
+    public static String generateRecordedURL(final serverObjects post, final String servletName) {
         /* Before API URL serialization, we set any eventual transaction token value to empty : 
          * this will later help identify a new valid transaction token will be necessary, 
          * but without revealing it in the URL displayed in the process scheduler and storing an invalid value */
@@ -130,6 +122,26 @@ public class WorkTables extends Tables {
         } else {
         	post.remove(TransactionManager.TRANSACTION_TOKEN_PARAM);
         }
+        
+        return apiurl;
+    }
+
+    /**
+     * recording of a api call. stores the call parameters into the API database table
+     * @param post the post arguments of the api call. Must not be null.
+     * @param servletName the name of the servlet
+     * @param type name of the servlet category
+     * @param comment visual description of the process
+     * @return the pk of the new entry in the api table
+     */
+    public byte[] recordAPICall(final serverObjects post, final String servletName, final String type, final String comment) {
+        // remove the apicall attributes from the post object
+        String[] pks = post.remove(TABLE_API_COL_APICALL_PK);
+        
+        byte[] pk = pks == null ? null : UTF8.getBytes(pks[0]);
+
+        // generate the apicall url - without the apicall attributes
+        final String apiurl = generateRecordedURL(post, servletName);
 
         // read old entry from the apicall table (if exists)
         Row row = null;

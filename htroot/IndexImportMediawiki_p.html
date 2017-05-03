@@ -19,6 +19,7 @@
     ::<div class="alert alert-danger" role="alert">Error : file not found "#[sourceFile]#"</div>
     ::<div class="alert alert-danger" role="alert">Error : can not read file "#[sourceFile]#"</div>
     ::<div class="alert alert-danger" role="alert">Error : you selected a directory ("#[sourceFile]#")</div>
+    ::<div class="alert alert-danger" role="alert">Error : dump file ("#[sourceFile]#") was not modified since last import (#[lastImportDate]#).</div>
     #(/status)#</p>
     <form action="IndexImportMediawiki_p.html" method="post" accept-charset="UTF-8" class="form-horizontal">
     	<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
@@ -40,6 +41,22 @@
            		<input id="file" class="form-control" name="file" type="text" title="Dump file path on this YaCy server file system, or any remote URL" required="required"/>
            	</div>
           </div>
+		  <div class="form-group">
+			<div class="col-sm-3">
+				<div class="checkbox">
+					<label>
+						<input name="iffresh" id="iffresh" 
+							type="checkbox" checked="checked" 
+							aria-describedby="iffreshInfo"/>
+						Import only when modified since last import
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-5" id="iffreshInfo">
+	 			When checked, the dump file is imported only if its last modified date is unknown or is after the last import execution date on this same file 
+	 			(see <a href="Table_API_p.html?filter=mediawikidump">recorded API calls</a> with the "dump" type).  
+            </div>
+		  </div>
           <input name="submit" class="btn btn-primary" type="submit" value="Import MediaWiki Dump" />
         </fieldset>
     </form>

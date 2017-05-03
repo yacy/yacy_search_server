@@ -23,12 +23,28 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Date;
+import java.util.Iterator;
 
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+
+import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.http.HTTPClient;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.TransactionManager;
+import net.yacy.data.WorkTables;
 import net.yacy.document.importer.MediawikiImporter;
+import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -46,6 +62,7 @@ public class IndexImportMediawiki_p {
 	 * @param post request parameters. Supported keys :
 	 *            <ul>
 	 *            <li>file : a dump URL or file path on this YaCy server local file system</li>
+	 *            <li>iffresh : when set to true, the dump file is imported only if its last modified date is unknown or after the last import trial date on this same file.  </li>
 	 *            <li>report : when set, display the currently running thread monitoring info, or the last import report when no one is running.
 	 *            Ignored when no import thread is known.</li>
 	 *            </ul>
@@ -95,6 +112,11 @@ public class IndexImportMediawiki_p {
 					MultiProtocolURL sourceURL = null;
 					int status = 0;
 					String sourceFilePath = "";
+					final Row lastExecutedCall = selectLastExecutedCall(post, sb);
+					Date lastExecutionDate = null;
+					if (lastExecutedCall != null) {
+						lastExecutionDate = lastExecutedCall.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, (Date) null);
+					}
 					try {
 						sourceURL = new MultiProtocolURL(file);
 						if(sourceURL.isFile()) {
@@ -108,10 +130,41 @@ public class IndexImportMediawiki_p {
 								status = 4;
 							}
 						}
+						
+						if (status == 0 && post.getBoolean("iffresh")) {
+							long lastModified = getLastModified(sourceURL);
+							if (lastExecutionDate != null && lastModified != 0L
+									&& lastModified <= lastExecutionDate.getTime()) {
+								status = 5;
+								prop.put("import_status_lastImportDate",
+										GenericFormatter.FORMAT_SIMPLE.format(lastExecutionDate));
+								
+				                /* the import is not performed, but we increase here the api call count */
+								if(sb.tables != null) {
+									byte[] lastExecutedCallPk = lastExecutedCall.getPK();
+									if(lastExecutedCallPk != null && !post.containsKey(WorkTables.TABLE_API_COL_APICALL_PK)) {
+										post.add(WorkTables.TABLE_API_COL_APICALL_PK, UTF8.String(lastExecutedCallPk));
+									}
+									sb.tables.recordAPICall(post, "IndexImportMediawiki_p.html", WorkTables.TABLE_API_TYPE_DUMP, "MediaWiki Dump Import for " + sourceURL);
+								}
+							}
+						}
 					} catch (MalformedURLException e) {
 						status = 1;
 					}
 					if (status == 0) {
+		                /* store this call as an api call */
+						if(sb.tables != null) {
+							/* We avoid creating a duplicate of any already recorded API call with the same parameters */
+							if(lastExecutedCall != null && !post.containsKey(WorkTables.TABLE_API_COL_APICALL_PK)) {
+								byte[] lastExecutedCallPk = lastExecutedCall.getPK();
+								if(lastExecutedCallPk != null) {
+									post.add(WorkTables.TABLE_API_COL_APICALL_PK, UTF8.String(lastExecutedCallPk));
+								}
+							}
+							sb.tables.recordAPICall(post, "IndexImportMediawiki_p.html", WorkTables.TABLE_API_TYPE_DUMP, "MediaWiki Dump Import for " + sourceURL);
+						}
+						
 						MediawikiImporter.job = new MediawikiImporter(sourceURL, sb.surrogatesInPath);
 						MediawikiImporter.job.start();
 						prop.put("import_dump", MediawikiImporter.job.source());
@@ -138,4 +191,76 @@ public class IndexImportMediawiki_p {
         }
         return prop;
     }
+    
+    /**
+     * @param post Servlet request parameters. Must not be null.
+     * @param sb the {@link Switchboard} instance. Must not be null.
+     * @return the most recently recorded call to this API with the same parameters
+     */
+	private static Row selectLastExecutedCall(final serverObjects post, final Switchboard sb) {
+		Row lastRecordedCall = null;
+		if (sb.tables != null) {
+			try {
+				if(post.containsKey(WorkTables.TABLE_API_COL_APICALL_PK)) {
+					/* Search the table on the primary key when when present (re-execution of a recorded call) */
+					lastRecordedCall = sb.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(post.get(WorkTables.TABLE_API_COL_APICALL_PK)));
+				} else {
+					/* Else search the table on the API URL as recorded (including parameters) */
+					final String apiURL = WorkTables.generateRecordedURL(post, "IndexImportMediawiki_p.html");
+					Iterator<Row> rowsIt = sb.tables.iterator(WorkTables.TABLE_API_NAME, WorkTables.TABLE_API_COL_URL,
+							UTF8.getBytes(apiURL));
+					while (rowsIt.hasNext()) {
+						Row currentRow = rowsIt.next();
+						if (currentRow != null) {
+							Date currentLastExec = currentRow.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, (Date) null);
+							if(currentLastExec != null) {
+								if(lastRecordedCall == null) {
+									lastRecordedCall = currentRow;
+								} else if(lastRecordedCall.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, (Date) null).before(currentLastExec)) {
+									lastRecordedCall = currentRow;
+								}
+							}
+						}
+					}
+				}
+
+			} catch (final IOException e) {
+				ConcurrentLog.logException(e);
+			} catch(final SpaceExceededException e) {
+				ConcurrentLog.logException(e);
+			}
+		}
+		return lastRecordedCall;
+	}
+	
+    /**
+     * @param fileURL the file URL. Must not be null.
+     * @return the last modified date for the file at fileURL, or 0L when unknown or when an error occurred
+     */
+	private static long getLastModified(MultiProtocolURL fileURL) {
+		long lastModified = 0l;
+		try {
+			if (fileURL.isHTTP() || fileURL.isHTTPS()) {
+				/* http(s) : we do not use MultiprotocolURL.lastModified() which always returns 0L for these protocols */
+				HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
+				HttpResponse headResponse = httpClient.HEADResponse(fileURL, false);
+				if (headResponse != null && headResponse.getStatusLine() != null
+						&& headResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+					Header lastModifiedHeader = headResponse
+							.getFirstHeader(HeaderFramework.LAST_MODIFIED);
+					if (lastModifiedHeader != null) {
+						Date lastModifiedDate = HeaderFramework.parseHTTPDate(lastModifiedHeader.getValue());
+						if(lastModifiedDate != null) {
+							lastModified = lastModifiedDate.getTime();
+						}
+					}
+				}
+			} else {
+				lastModified = fileURL.lastModified();
+			}
+		} catch (IOException ignored) {
+			ConcurrentLog.warn("IndexImportMediawiki_p", "Could not retrieve last modified date for dump file at " + fileURL);
+		}
+		return lastModified;
+	}
 }
