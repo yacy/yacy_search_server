@@ -1,5 +1,8 @@
 package net.yacy.repository;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -12,9 +15,42 @@ public final class BlacklistHelper {
 
 	/** Used for logging. */
     public static final String APP_NAME = "Blacklist";
-	
+    
+    /** Pattern to identify the eventual URL scheme (protocol) part. 
+     * Examples that will be recognized : "http://", "https://", "ftp://", "^https?://", "anyprotocol://" */
+    private static final Pattern URL_SCHEME_PATTERN = Pattern.compile("(^\\^?[a-z\\?]+://).+");
+    
 	/** Private constructor to avoid instantiation of static helper class. */
 	private BlacklistHelper() {
+	}
+	
+	/**
+	 * @param entry a blacklist entry. Must not be null.
+	 * @return the entry eventually modified to be ready to use by the Blacklist engine
+	 */
+	protected static String prepareEntry(final String entry) {
+		String newEntry = entry;
+    	/* Remove the eventual unnecessary Regex line beginning char '^' and URL scheme (protocol) part */
+    	Matcher schemeMatcher = URL_SCHEME_PATTERN.matcher(newEntry);
+    	if(schemeMatcher.matches()) {
+    		newEntry = newEntry.substring(schemeMatcher.end(1));
+    	}
+
+        if (newEntry.indexOf("*") < 0 && newEntry.indexOf("?") < 0 && newEntry.indexOf("+") < 0) {
+            // user did not use any wild cards and just submitted a word
+
+            newEntry = ".*" + newEntry + ".*/.*";
+            newEntry =  ".*.*/.*" + newEntry + ".*";
+
+        } else {
+
+            int pos = newEntry.indexOf('/',0);
+            if (pos < 0) {
+                // add default empty path pattern
+                newEntry = newEntry + "/.*";
+            }
+        }
+        return newEntry;
 	}
 
     /**
@@ -45,27 +81,8 @@ public final class BlacklistHelper {
     		}
             return location;
     	}
-
-        if (newEntry.startsWith("http://") ){
-            newEntry = newEntry.substring(7);
-        } else if (newEntry.startsWith("https://")) {
-            newEntry = newEntry.substring(8);
-        }
-
-        if (newEntry.indexOf("*") < 0 && newEntry.indexOf("?") < 0 && newEntry.indexOf("+") < 0) {
-            // user did not use any wild cards and just submitted a word
-
-            newEntry = ".*" + newEntry + ".*/.*";
-            newEntry =  ".*.*/.*" + newEntry + ".*";
-
-        } else {
-
-            int pos = newEntry.indexOf('/',0);
-            if (pos < 0) {
-                // add default empty path pattern
-                newEntry = newEntry + "/.*";
-            }
-        }
+    	
+    	newEntry = prepareEntry(newEntry);
 
         int pos = newEntry.indexOf('/',0);
         String host = newEntry.substring(0, pos);
