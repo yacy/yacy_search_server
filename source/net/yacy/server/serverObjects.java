@@ -290,10 +290,10 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
     /**
-     * Add a String to the map. The content of the String is escaped to be usable in HTML output.
+     * Add a String to the map. The content of the string is first decoded to removed any URL encoding (application/x-www-form-urlencoded).
+     * Then the content of the String is escaped to be usable in HTML output. 
      * @param key   key name as String.
      * @param value a String that will be reencoded for HTML output.
-     * @return      the modified String that was added to the map.
      * @see CharacterCoding#encodeUnicode2html(String, boolean)
      */
     public void putHTML(final String key, final String value) {
