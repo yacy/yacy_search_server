@@ -38,6 +38,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
 import net.yacy.data.WorkTables;
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -332,7 +333,8 @@ public class Blacklist_p {
                     final String[] selectedEntries = post.getAll("selectedEntry.*");
                     if (selectedEntries != null && selectedEntries.length > 0 && blacklistToUse != null) {
                         for (int i = 0; i < selectedEntries.length; i++) {
-                            prop.putHTML(DISABLED + EDIT + "editList_" + i + "_item", selectedEntries[i]);
+                            /* We do not use here putHTML as we don't want '+' characters to be interpreted as application/x-www-form-urlencoded encoding */
+                            prop.put(DISABLED + EDIT + "editList_" + i + "_item", CharacterCoding.unicode2html(selectedEntries[i], true));
                             prop.put(DISABLED + EDIT + "editList_" + i + "_count", i);
                         }
                         prop.putHTML(DISABLED + EDIT + "currentBlacklist", blacklistToUse);
@@ -384,7 +386,8 @@ public class Blacklist_p {
                 if (nextEntry.charAt(0) == '#') continue;
                 prop.put(DISABLED + EDIT + "Itemlist_" + entryCount + "_dark", dark ? "1" : "0");
                 dark = !dark;
-                prop.putHTML(DISABLED + EDIT + "Itemlist_" + entryCount + "_item", nextEntry);
+                /* We do not use here putHTML as we don't want '+' characters to be interpreted as application/x-www-form-urlencoded encoding */
+                prop.put(DISABLED + EDIT + "Itemlist_" + entryCount + "_item", CharacterCoding.unicode2html(nextEntry, true));
                 prop.put(DISABLED + EDIT + "Itemlist_" + entryCount + "_count", entryCount);
                 entryCount++;
             }
