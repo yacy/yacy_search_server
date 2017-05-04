@@ -1,7 +1,6 @@
 package net.yacy.repository;
 
 import net.yacy.cora.document.id.Punycode.PunycodeException;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
@@ -53,7 +52,7 @@ public final class BlacklistHelper {
             newEntry = newEntry.substring(8);
         }
 
-        if (newEntry.indexOf("*") < 0) {
+        if (newEntry.indexOf("*") < 0 && newEntry.indexOf("?") < 0 && newEntry.indexOf("+") < 0) {
             // user did not use any wild cards and just submitted a word
 
             newEntry = ".*" + newEntry + ".*/.*";
