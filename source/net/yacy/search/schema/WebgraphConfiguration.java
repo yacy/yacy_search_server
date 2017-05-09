@@ -157,9 +157,8 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
 
         // add the source attributes
         add(edge, WebgraphSchema.source_id_s, source_id);
-        int pr_source = source_url_string.indexOf("://",0);
-        if (allAttr || contains(WebgraphSchema.source_protocol_s)) add(edge, WebgraphSchema.source_protocol_s, source_url_string.substring(0, pr_source));
-        if (allAttr || contains(WebgraphSchema.source_urlstub_s)) add(edge, WebgraphSchema.source_urlstub_s, source_url_string.substring(pr_source + 3));
+        if (allAttr || contains(WebgraphSchema.source_protocol_s)) add(edge, WebgraphSchema.source_protocol_s, source_url.getProtocol());
+        if (allAttr || contains(WebgraphSchema.source_urlstub_s)) add(edge, WebgraphSchema.source_urlstub_s, source_url.urlstub(true, true));
         Map<String, String> source_searchpart = source_url.getSearchpartMap();
         if (source_searchpart == null) {
             if (allAttr || contains(WebgraphSchema.source_parameter_count_i)) add(edge, WebgraphSchema.source_parameter_count_i, 0);
@@ -217,9 +216,8 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         // add the target attributes
         add(edge, WebgraphSchema.target_id_s, target_id);
         final String target_url_string = target_url.toNormalform(false);
-        int pr_target = target_url_string.indexOf("://",0);
-        if (allAttr || contains(WebgraphSchema.target_protocol_s)) add(edge, WebgraphSchema.target_protocol_s, target_url_string.substring(0, pr_target));
-        if (allAttr || contains(WebgraphSchema.target_urlstub_s)) add(edge, WebgraphSchema.target_urlstub_s, target_url_string.substring(pr_target + 3));
+        if (allAttr || contains(WebgraphSchema.target_protocol_s)) add(edge, WebgraphSchema.target_protocol_s, target_url.getProtocol());
+        if (allAttr || contains(WebgraphSchema.target_urlstub_s)) add(edge, WebgraphSchema.target_urlstub_s, target_url.urlstub(true, true));
         Map<String, String> target_searchpart = target_url.getSearchpartMap();
         if (target_searchpart == null) {
             if (allAttr || contains(WebgraphSchema.target_parameter_count_i)) add(edge, WebgraphSchema.target_parameter_count_i, 0);

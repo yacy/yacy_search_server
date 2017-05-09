@@ -560,6 +560,10 @@ dc_rights
                 if (url == null) continue;
                 u = url.toNormalform(true);
                 final String name = url.getNameProperty();
+                // check mailto scheme first (not supposed to get into in/outboundlinks or hyperlinks -> crawler can't process)
+                if (url.getProtocol().equals("mailto")) {
+                    continue;
+                }
 
                 final boolean noindex = url.getRelProperty().toLowerCase().indexOf("noindex",0) >= 0;
                 final boolean nofollow = url.getRelProperty().toLowerCase().indexOf("nofollow",0) >= 0;
