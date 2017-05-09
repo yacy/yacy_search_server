@@ -44,16 +44,20 @@ CONFIGFILE=/var/lib/yacy/SETTINGS/yacy.conf
 
 . /usr/share/debconf/confmodule
 
-# Generate config file, if it doesn't exist.
-if [ ! -e $CONFIGFILE ]; then
-    mkdir -p /var/lib/yacy/SETTINGS
-    echo "# Initial configfile from debconf" > $CONFIGFILE
-    echo "peerName=$HOSTNAME" >> $CONFIGFILE
-    echo "adminAccountBase64MD5=" >> $CONFIGFILE
-    echo "network.unit.definition=defaults/yacy.network.freeworld.unit" >> $CONFIGFILE
-    echo "adminAccountForLocalhost=false" >> $CONFIGFILE
-    echo "javastart_Xmx=Xmx600m" >> $CONFIGFILE
-    echo "javastart_Xms=Xmx600m" >> $CONFIGFILE
+if [ -e $CONFIGFILE ]; then
+	ADMIN_LOGIN=$(grep ^adminAccountUserName= "$CONFIGFILE" | cut -d= -f2 | tr -d '\r\n')
+    ADMIN_REALM=$(grep "^adminRealm=" "$CONFIGFILE" | cut -d= -f2 | tr -d '\r\n')
+else
+    ADMIN_LOGIN=$(grep ^adminAccountUserName= /usr/share/yacy/defaults/yacy.init | cut -d= -f2 | tr -d '\r\n')
+    ADMIN_REALM=$(grep "^adminRealm=" /usr/share/yacy/defaults/yacy.init | cut -d= -f2 | tr -d '\r\n')
+fi
+
+# admin user name and realm should not be empty : by the way, in that case use the same default values as in YaCy application
+if [ -z "$ADMIN_LOGIN" ]; then
+    ADMIN_LOGIN="admin"
+fi
+if [ -z "$ADMIN_REALM" ]; then
+    ADMIN_REALM="YaCy"
 fi
 
 # Substitute in the values from the debconf db.
@@ -65,13 +69,33 @@ PEERNAME="$RET"
 db_get yacy/password
 PASSWORD="$RET"
 if [ "$PASSWORD" != "" ]; then
-  BASE64=$(java -cp /usr/share/java/yacy/yacycore.jar net.yacy.cora.order.Base64Order -es "admin:$PASSWORD")
-  B64MD5=$(java -cp /usr/share/java/yacy/yacycore.jar net.yacy.cora.order.Digest  -strfhex "$BASE64")
-  PASSWORD_HASH=$(echo $B64MD5 | sed "s/\(\S\) .*/\1/")
+  B64MD5=$(java -cp /usr/share/java/yacy/yacycore.jar net.yacy.cora.order.Digest -strfhex "$ADMIN_LOGIN:$ADMIN_REALM:$PASSWORD" | head -n 1)
+  PASSWORD_HASH="MD5:$B64MD5"
+  # When entered password is not empty always disable unauthenticated admin access from localhost
+  ADMIN_ACCOUNT_LOCALHOST="false"
   db_set yacy/password ""
 else
-  PASSWORD_HASH=$(grep "^adminAccountBase64MD5=" $CONFIGFILE | sed -e "s/^adminAccountBase64MD5=\(.*\)/\1/")
+  if [ -e $CONFIGFILE ]; then
+    PASSWORD_HASH=$(grep "^adminAccountBase64MD5=" $CONFIGFILE | sed -e "s/^adminAccountBase64MD5=\(.*\)/\1/" | tr -d '\r\n')
+    ADMIN_ACCOUNT_LOCALHOST=$(grep "^adminAccountForLocalhost=" "$CONFIGFILE" | cut -d= -f2 | tr -d '\r\n')
+  else
+    PASSWORD_HASH=""
+    ADMIN_ACCOUNT_LOCALHOST="true"
+  fi
 fi
+
+# Generate config file, if it doesn't exist.
+if [ ! -e $CONFIGFILE ]; then
+    mkdir -p /var/lib/yacy/SETTINGS
+    echo "# Initial configfile from debconf" > $CONFIGFILE
+    echo "peerName=$HOSTNAME" >> $CONFIGFILE
+    echo "adminAccountBase64MD5=" >> $CONFIGFILE
+    echo "adminAccountForLocalhost=$ADMIN_ACCOUNT_LOCALHOST" >> $CONFIGFILE
+    echo "network.unit.definition=defaults/yacy.network.freeworld.unit" >> $CONFIGFILE
+    echo "javastart_Xmx=Xmx600m" >> $CONFIGFILE
+    echo "javastart_Xms=Xmx600m" >> $CONFIGFILE
+fi
+
 db_get yacy/network
 NETWORK="$RET"
 
@@ -97,6 +121,7 @@ cp -a -f $CONFIGFILE $CONFIGFILE.tmp
 
 sed -e "s,^ *peerName=.*,peerName=$PEERNAME," \
     -e "s,^ *adminAccountBase64MD5=.*,adminAccountBase64MD5=$PASSWORD_HASH," \
+    -e "s,^ *adminAccountForLocalhost=.*,adminAccountForLocalhost=$ADMIN_ACCOUNT_LOCALHOST," \
     -e "s,^ *network\.unit\.definition=.*,network\.unit\.definition=$NETWORK," \
     -e "s,^ *javastart_Xms=.*,javastart_Xms=Xms${MEMORY_START}m," \
     -e "s,^ *javastart_Xmx=.*,javastart_Xmx=Xmx${MEMORY_MAX}m," \
