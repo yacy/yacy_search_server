@@ -7,7 +7,7 @@ Type: password
 Description: Admin password
  Please choose an admin password for YaCy
  .
- If you leave this blank, YaCy's admin interface is accessable
+ If you leave this blank, YaCy's admin interface is accessible
  from localhost without password. If you already set
  a password, the old password won't be changed.
 
