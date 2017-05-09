@@ -924,7 +924,7 @@ dc_rights
         final Set<String> languages = new HashSet<>();
         double lon = 0.0d, lat = 0.0d;
         boolean indexingDenied = false;
-        Date date = new Date();
+        Date date = null;
         String charset = null;
 
         int mindepth = 999;
@@ -968,7 +968,7 @@ dc_rights
             rss.putAll(doc.getRSS());
             images.putAll(doc.getImages());
             if (doc.lon() != 0.0 && doc.lat() != 0.0) { lon = doc.lon(); lat = doc.lat(); }
-            if (doc.lastModified.before(date)) date = doc.lastModified;
+            if (date == null || doc.lastModified.after(date)) date = doc.lastModified; // set youngest lastModified date from doc collection
             
             if (doc.getDepth() < mindepth) mindepth = doc.getDepth();
             if (doc.dc_language() != null) languages.add(doc.dc_language());
