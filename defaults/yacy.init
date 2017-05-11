@@ -863,6 +863,7 @@ search.result.show.hostbrowser = true
 search.result.show.vocabulary = false
 search.result.show.vocabulary.omit = 
 search.result.show.snapshots = false
+# when true, display the raw ranking score value
 search.result.show.ranking = false
 
 

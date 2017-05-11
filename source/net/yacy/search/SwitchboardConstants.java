@@ -550,6 +550,12 @@ public final class SwitchboardConstants {
     
     /** Default setting value controlling whether a noreferrer link type should be added to search result links */
     public static final boolean SEARCH_RESULT_NOREFERRER_DEFAULT = false;
+    
+    /** Key of the setting controlling whether the ranking score value should be displayed for each search result in the HTML results page */
+    public static final String SEARCH_RESULT_SHOW_RANKING = "search.result.show.ranking";
+    
+    /** Default setting value controlling whether the ranking score value should be displayed for each search result in the HTML results page */
+    public static final boolean SEARCH_RESULT_SHOW_RANKING_DEFAULT = false;
 
     /**
      * ranking+evaluation

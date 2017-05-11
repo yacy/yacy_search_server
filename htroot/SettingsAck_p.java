@@ -576,6 +576,9 @@ public class SettingsAck_p {
             tickedCheckbox = post.containsKey("searchTestLocalSolr");
             env.setConfig(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, tickedCheckbox);
             
+            tickedCheckbox = post.containsKey("searchShowRanking");
+            env.setConfig(SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING, tickedCheckbox);
+            
             /* For easier user understanding, the following flags controlling data sources selection 
              * are rendered in the UI as checkboxes corresponding to enabled value when ticked */
             tickedCheckbox = post.containsKey("searchLocalDHT");

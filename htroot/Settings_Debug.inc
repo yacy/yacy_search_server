@@ -118,6 +118,26 @@
   
 	</fieldset>
 	
+	<fieldset>
+		<legend>Ranking information</legend>
+		
+		<div class="form-group">
+			<div class="col-sm-4">
+				<div class="checkbox">
+					<label>
+						<input name="searchShowRanking" id="searchShowRanking" 
+							type="checkbox" #(searchShowRankingChecked)#::checked#(/searchShowRankingChecked)#
+							aria-describedby="searchShowRankingInfo"/>
+						Show search results scores
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-8" id="searchShowRankingInfo">
+	 			When checked, the raw ranking score value is displayed for each text search result in the HTML results page.
+            </div>
+		</div>
+	</fieldset>
+	
     <div class="col-sm-6">
     	<input type="submit" class="btn btn-primary" name="debugAnalysisSettings" value="Submit" aria-describedby="submitInfo"/>
 		<em id="submitInfo">Changes will take effect immediately.</em>

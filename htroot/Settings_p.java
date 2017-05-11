@@ -202,10 +202,6 @@ public final class Settings_p {
         prop.put("server.https_port.ssl", sb.getConfig(SwitchboardConstants.SERVER_SSLPORT,"8443"));
         prop.put("port.shutdown", sb.getConfig(SwitchboardConstants.SERVER_SHUTDOWNPORT, "-1"));
         
-        // debug/analysis
-        prop.put("solrBinaryResponseChecked", env.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED, 
-        		SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT) ? 1 : 0);
-        
         // Referrer Policy
         final String metaPolicy = env.getConfig(SwitchboardConstants.REFERRER_META_POLICY, 
         		SwitchboardConstants.REFERRER_META_POLICY_DEFAULT);
@@ -229,6 +225,10 @@ public final class Settings_p {
         prop.put("searchResultNoReferrerChecked", env.getConfigBool(SwitchboardConstants.SEARCH_RESULT_NOREFERRER, 
         		SwitchboardConstants.SEARCH_RESULT_NOREFERRER_DEFAULT) ? 1 : 0);
         
+        // debug/analysis
+        prop.put("solrBinaryResponseChecked", env.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED, 
+        		SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT) ? 1 : 0);
+        
         /* For easier user understanding, the following flags controlling data sources selection 
          * are rendered in the UI as checkboxes corresponding to enabled value when ticked */
         prop.put("searchLocalDHTChecked", !env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_OFF, false) ? 1 : 0);
@@ -238,6 +238,8 @@ public final class Settings_p {
         
         prop.put("searchTestLocalDHTChecked", env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false) ? 1 : 0);
         prop.put("searchTestLocalSolrChecked", env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false) ? 1 : 0);
+        
+        prop.put("searchShowRankingChecked", env.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING, SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING_DEFAULT) ? 1 : 0);
         
         // return rewrite properties
         return prop;

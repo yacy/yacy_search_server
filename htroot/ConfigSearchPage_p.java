@@ -194,6 +194,7 @@ public class ConfigSearchPage_p {
         prop.put("search.result.show.proxy", sb.getConfigBool("search.result.show.proxy", false) ? 1 : 0);
         prop.put("search.result.show.hostbrowser", sb.getConfigBool("search.result.show.hostbrowser", false) ? 1 : 0);
         prop.put("search.result.show.snapshots", sb.getConfigBool("search.result.show.snapshots", false) ? 1 : 0);
+        prop.put("search.result.show.ranking", sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING, SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING_DEFAULT) ? 1 : 0);
 
         prop.put("search.navigation.location", sb.getConfig("search.navigation", "").indexOf("location",0) >= 0 ? 1 : 0);
         // prop.put("search.navigation.filetype", sb.getConfig("search.navigation", "").indexOf("filetype",0) >= 0 ? 1 : 0);

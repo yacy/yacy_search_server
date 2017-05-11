@@ -238,6 +238,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                           <td>&nbsp;|&nbsp;<a href="proxy.html" target="LayouTest">View via Proxy</a></td>
                           <td>&nbsp;|&nbsp;<a href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
                           <td>&nbsp;|&nbsp;<a href="yacysearch.html" target="LayouTest">Snapshots</a></td>
+                          #(search.result.show.ranking)#::<td>&nbsp;|&nbsp;<span title="Raw ranking score value">Ranking: 1.12195955E9</span>#(/search.result.show.ranking)#
                         </tr>
                         <tr>
                           <td></td>
@@ -257,6 +258,13 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                           </td>
                           <td align="center"><input type="checkbox" name="search.result.show.hostbrowser" value="true" #(search.result.show.hostbrowser)#::checked="checked" #(/search.result.show.hostbrowser)# /></td>
                           <td align="center"><input type="checkbox" name="search.result.show.snapshots" value="true" #(search.result.show.snapshots)#::checked="checked" #(/search.result.show.snapshots)# /></td>
+                          #(search.result.show.ranking)#::<td align="center">
+                            <span class="info" style="padding-left: 10px"><img src="env/grafics/i16.gif" alt="info"/><span>
+                              Ranking score value, mainly for debug/analysis purpose, configured in <a href="Settings_p.html?page=debug">Debug/Analysis Settings</a><br>
+                              Menu: System Administration > Advanced Settings > Debug/Analysis Settings
+                            </span></span>
+                          </td>
+                          #(/search.result.show.ranking)#
                         </tr>
                       </table>
                     </p>
