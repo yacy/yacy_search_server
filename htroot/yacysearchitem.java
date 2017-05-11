@@ -215,6 +215,7 @@ public class yacysearchitem {
                 prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
                 prop.put("content_showSnapshots", snapshotPaths != null && snapshotPaths.size() > 0 && sb.getConfigBool("search.result.show.snapshots", true) ? 1 : 0);
                 prop.put("content_showVocabulary", sb.getConfigBool("search.result.show.vocabulary", true) ? 1 : 0);
+                prop.put("content_showRanking", sb.getConfigBool("search.result.show.ranking", false) ? 1 : 0);
 
                 if (showEvent) prop.put("content_showEvent_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(events[0]));
                 prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.moddate()));
@@ -245,6 +246,7 @@ public class yacysearchitem {
                 if (snapshotPaths != null && snapshotPaths.size() > 0) {
                     prop.put("content_showSnapshots_link", snapshotPaths.iterator().next().getAbsolutePath());
                 }
+                prop.put("content_showRanking_ranking", Float.toString(result.score()));
             }
             prop.put("content_urlhexhash", Seed.b64Hash2hexHash(urlhash));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), MAX_URL_LENGTH));
