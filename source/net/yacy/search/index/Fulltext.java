@@ -805,7 +805,7 @@ public final class Fulltext {
                     pw.println("<response>");
                     pw.println("<lst name=\"responseHeader\">");
                     pw.println(" <str format=\"yacy.index.export.solr.xml\"/>");
-                    pw.println(" <lst name=\"params\"");
+                    pw.println(" <lst name=\"params\">");
                     pw.println("  <str name=\"q\">" + this.query + "</str>");
                     pw.println(" </lst>");
                     pw.println("</lst>");
