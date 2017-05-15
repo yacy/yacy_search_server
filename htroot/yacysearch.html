@@ -125,7 +125,7 @@ Use the RSS search result format to add static searches to your RSS reader, if y
 	<div id="results"></div>
     <div class="progress">
       <div class="progress-bar progress-bar-info" id="progressbar" role="progressbar" style="width:0%;">
-        <span style="position:absolute;display:block;text-align:left;width:100%;color:black;">&nbsp;&nbsp;&nbsp;<strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)#</span>
+        <span style="position:absolute;display:block;text-align:left;width:100%;color:black;">&nbsp;&nbsp;&nbsp;<strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)# <span id="feedingStatus" style="visibility: hidden;" class="glyphicon glyphicon-transfer" title="YaCy server is fetching results from available data sources."></span></span>
       </div>
     </div>
 	::
@@ -221,28 +221,28 @@ function latestinfo() {
   self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   self.xmlHttpReq.onreadystatechange = function() {
     if (self.xmlHttpReq.readyState == 4) {
-      var rsp = eval("(" + self.xmlHttpReq.responseText + ")");
+    	var rsp = null;
+    	if(self.xmlHttpReq.responseText) {
+      		if(window.JSON && window.JSON.parse) {
+	    		/* Prefer use of JSON parser when available instead of discouraged eval() function */
+   				rsp = window.JSON.parse(self.xmlHttpReq.responseText);
+      		} else {
+	      		rsp = eval("(" + self.xmlHttpReq.responseText + ")");
+      		}
+    	}
       
-      statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#);
+    	if(rsp && rsp.offset != null) {
+			statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning);
+			if(rsp.feedRunning) {
+				/* Refresh statistics while server feeders are still running */
+				window.setTimeout(latestinfo, 1000);
+			}
+    	}
     }
   };
   self.xmlHttpReq.send(null);
 }
-window.setTimeout('latestinfo();',500); // we need that to get a correct pagination bar at the end of the page
-window.setTimeout('latestinfo();',1000);
-// TODO: resets statistic on navigating to next page in Jetty implementation
-/*
-window.setTimeout('latestinfo();',500);
-window.setTimeout('latestinfo();',1000);
-window.setTimeout('latestinfo();',1500);
-window.setTimeout('latestinfo();',2000);
-window.setTimeout('latestinfo();',3000);
-window.setTimeout('latestinfo();',4000);
-window.setTimeout('latestinfo();',5000);
-window.setTimeout('latestinfo();',6000);
-window.setTimeout('latestinfo();',8000);
-window.setTimeout('latestinfo();',10000);
-*/
+window.setTimeout(latestinfo, 500); // we need that to get a correct pagination bar at the end of the page
 </script>
 
 #%env/templates/footer.template%#

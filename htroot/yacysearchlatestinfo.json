@@ -7,5 +7,6 @@
 "remoteResourceSize": "#[remoteResourceSize]#",
 "remoteIndexCount": "#[remoteIndexCount]#",
 "remotePeerCount": "#[remotePeerCount]#",
-"navurlBase": "#[navurlBase]#"
+"navurlBase": "#[navurlBase]#",
+"feedRunning": #[feedRunning]#
 }

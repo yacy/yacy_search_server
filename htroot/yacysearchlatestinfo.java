@@ -28,6 +28,7 @@ public class yacysearchlatestinfo {
             prop.put("remoteIndexCount", 0);
             prop.put("remotePeerCount", 0);
             prop.putJSON("navurlBase", "#");
+            prop.put("feedRunning", Boolean.FALSE.toString());
             return prop;
         }
 
@@ -42,6 +43,7 @@ public class yacysearchlatestinfo {
         prop.put("remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
         prop.putJSON("navurlBase", QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false).toString());
+        prop.put("feedRunning", Boolean.toString(!theSearch.isFeedingFinished()));
 
         return prop;
     }

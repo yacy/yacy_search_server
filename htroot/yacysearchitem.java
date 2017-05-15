@@ -123,6 +123,7 @@ public class yacysearchitem {
         prop.put("statistics_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
         prop.put("statistics_navurlBase", QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false).toString());
         prop.put("statistics_localQuery", theSearch.query.isLocal() ? "1" : "0");
+        prop.put("statistics_feedRunning", Boolean.toString(!theSearch.isFeedingFinished()));
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
         final boolean noreferrer = sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_NOREFERRER, SwitchboardConstants.SEARCH_RESULT_NOREFERRER_DEFAULT);
 

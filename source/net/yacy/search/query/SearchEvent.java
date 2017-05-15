@@ -1605,7 +1605,7 @@ public final class SearchEvent {
         }
         while ( this.resultList.sizeAvailable() <= resultListIndex &&
                 (this.rwiQueueSize() > 0 || this.nodeStack.sizeQueue() > 0 ||
-                (!this.feedingIsFinished() && System.currentTimeMillis() < finishTime))) {
+                (!this.isFeedingFinished() && System.currentTimeMillis() < finishTime))) {
 			if (!drainStacksToResult()) {
 				try {
 					Thread.sleep(10);
@@ -1797,7 +1797,13 @@ public final class SearchEvent {
         return this.order;
     }
     
-    protected boolean feedingIsFinished() {
+	/**
+	 * Check whether feeding from all available data sources is finished (remote
+	 *         RWI and Solr requests, local RWI and Solr requests, Heuristics
+	 *         requests...) 
+	 * @return true when all available feeders on this search event are terminated 
+	 */
+    public boolean isFeedingFinished() {
         return
             this.feedersTerminated.intValue() > (this.remote ? 1 : 0) &&
             this.feedersAlive.get() == 0;

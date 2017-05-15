@@ -93,11 +93,20 @@ function parseFormattedInt(strIntValue) {
 	return intValue;
 }
 
-function statistics(offset, itemscount, itemsperpage, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount, navurlbase, localQuery) {
+function statistics(offset, itemscount, itemsperpage, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount, navurlbase, localQuery, feedRunning) {
   var totalcountIntValue = parseFormattedInt(totalcount);
   var offsetIntValue = parseFormattedInt(offset);
   var itemscountIntValue = parseFormattedInt(itemscount);
   var itemsperpageIntValue = parseFormattedInt(itemsperpage);
+  
+  var feedingStatusElement = document.getElementById("feedingStatus");
+  if(feedingStatusElement != null) {
+	  if(feedRunning) {
+		  feedingStatusElement.style.visibility = "visible";
+	  } else {
+		  feedingStatusElement.style.visibility = "hidden";
+	  }
+  }
   
   if (totalcountIntValue == 0) {
 	  return;
