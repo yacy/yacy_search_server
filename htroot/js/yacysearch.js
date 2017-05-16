@@ -37,6 +37,8 @@ function addHover() {
 
 function fadeOutBar() {
 	document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;-webkit-transition:-webkit-transform 0s;backgroundColor:transparent;");
+	/* Also ensure the accessibility property for progress current value is set to 100% */
+	document.getElementById("progressbar").setAttribute("aria-valuenow", 100);
 }
 
 /**
@@ -111,6 +113,7 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   if (totalcountIntValue == 0) {
 	  return;
   }
+  var progresseBarElement = document.getElementById("progressbar");
   if (offsetIntValue >= 0) document.getElementById("offset").innerHTML = offset;
   if (offsetIntValue >= 0) document.getElementById("startRecord").setAttribute('value', offsetIntValue - 1);
   if (itemscountIntValue >= 0) document.getElementById("itemscount").firstChild.nodeValue = itemscount;
@@ -121,14 +124,16 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   if (document.getElementById("remotePeerCount") != null) document.getElementById("remotePeerCount").firstChild.nodeValue = remotePeerCount;
   // compose page navigation
 
-  if (document.getElementById("progressbar").getAttribute('class') != "progress-bar progress-bar-success") {
+  if (progresseBarElement.getAttribute('class') != "progress-bar progress-bar-success") {
 	  var percent = 100 * (itemscountIntValue - offsetIntValue + 1) / itemsperpageIntValue;
 	  if (percent == 100) {
-		  document.getElementById("progressbar").setAttribute('style',"transition:transform 0s;-webkit-transition:-webkit-transform 0s;");
-		  document.getElementById("progressbar").setAttribute('class',"progress-bar progress-bar-success");
+		  progresseBarElement.setAttribute('style',"transition:transform 0s;-webkit-transition:-webkit-transform 0s;");
+		  progresseBarElement.setAttribute('class',"progress-bar progress-bar-success");
 		  window.setTimeout(fadeOutBar, 500);
+	  } else {
+		  progresseBarElement.setAttribute('aria-valuenow', percent);
 	  }
-	  document.getElementById("progressbar").setAttribute('style',"width:" + percent + "%");
+	  progresseBarElement.setAttribute('style',"width:" + percent + "%");
   }
   var resnavElement = document.getElementById("resNav");
   if (resnavElement != null) {
