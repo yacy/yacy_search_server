@@ -75,7 +75,15 @@ public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
         final boolean accessFromLocalhost = Domains.isLocalhost(remoteip) && (refererHost == null || refererHost.length() == 0 || Domains.isLocalhost(refererHost));
         // ! note : accessFromLocalhost compares localhost ip pattern
         final boolean grantedForLocalhost = adminAccountGrantedForLocalhost && accessFromLocalhost;
-        boolean protectedPage = adminAccountNeededForAllPages || (pathInContext.indexOf("_p.") > 0);
+        
+		/* Even when all pages are protected, we don't want to block those used for peer-to-peer or cluster communication (except in private robinson mode) 
+		 * (examples : /yacy/hello.html is required for p2p and cluster network presence and /solr/select for remote Solr search requests) */
+		boolean protectedPage = (adminAccountNeededForAllPages && ((sb.isRobinsonMode() && !sb.isPublicRobinson()) ||
+				!(pathInContext.startsWith("/yacy/") || pathInContext.startsWith("/solr/"))));
+		
+		/* Pages suffixed with "_p" are by the way always considered protected */
+		protectedPage = protectedPage || (pathInContext.indexOf("_p.") > 0);
+		
         // check "/gsa" and "/solr" if not publicSearchpage
         if (!protectedPage && !sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true)) { 
             protectedPage = pathInContext.startsWith("/solr/") || pathInContext.startsWith("/gsa/");                        
