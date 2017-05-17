@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -224,6 +225,16 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     private final ConcurrentMap<String, String> dna;
     private long birthdate; // keep this value in ram since it is often used and may cause lockings in concurrent situations.
     Bitfield bitfield = null;
+    
+    private static ConcurrentMap<String, String> map2concurrentMap(Map<String, String> dna0) {
+        ConcurrentMap<String, String> dna = new ConcurrentHashMap<String, String>();
+        dna.putAll(dna0);
+        return dna;
+    }
+    
+    public Seed(Map.Entry<byte[], Map<String, String>> dna0) {
+        this(UTF8.String(dna0.getKey()), dna0.getValue() instanceof ConcurrentMap ? (ConcurrentMap<String, String>) dna0.getValue() : map2concurrentMap(dna0.getValue()));
+    }
     
     public Seed(final String theHash, final ConcurrentMap<String, String> theDna) {
         // create a seed with a pre-defined hash map

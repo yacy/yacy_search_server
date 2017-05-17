@@ -42,7 +42,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.yacy.cora.document.encoding.ASCII;
-import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
@@ -414,12 +413,30 @@ public final class SeedDB implements AlternativeDomainNames {
         return e.next();
     }
 
+
+    private final Map<Long, Integer> sizeActiveSince_result = new ConcurrentHashMap<>();
+    private final Map<Long, Long> sizeActiveSince_time = new ConcurrentHashMap<>();
+    
     /**
      * count the number of peers that had been seen within the given time limit
      * @param limitMinutes the time limit in minutes. 1440 minutes is a day
      * @return the number of peers seen in the given time
      */
     public int sizeActiveSince(final long limitMinutes) {
+        // buffering because that iteration takes a long time
+        long now = System.currentTimeMillis();
+        Integer s0 = sizeActiveSince_result.get(limitMinutes);
+        Long t0    = sizeActiveSince_time.get(limitMinutes);
+        if (s0 == null || t0 == null || now - t0 > 60000) {
+            int s1 = sizeActiveSinceInt(limitMinutes);
+            sizeActiveSince_result.put(limitMinutes, s1);
+            sizeActiveSince_time.put(limitMinutes, now);
+            return s1;
+        }
+        return s0;        
+    }
+    
+    private int sizeActiveSinceInt(final long limitMinutes) {
         int c = this.seedActiveDB.size();
         Seed seed;
         Iterator<Seed> i = seedsSortedDisconnected(false, Seed.LASTSEEN);
@@ -1039,26 +1056,18 @@ public final class SeedDB implements AlternativeDomainNames {
         private Seed internalNext() {
             if (this.it == null || !(this.it.hasNext())) return null;
             try {
-                Map.Entry<byte[], Map<String, String>> dna0;
-                ConcurrentHashMap<String, String> dna;
+                Map.Entry<byte[], Map<String, String>> dna;
                 while (this.it.hasNext()) {
                     try {
-                        dna0 = this.it.next();
+                        dna = this.it.next();
                     } catch (final OutOfMemoryError e) {
                         ConcurrentLog.logException(e);
-                        dna0 = null;
+                        dna = null;
                     }
-                    assert dna0 != null;
-                    if (dna0 == null) continue;
-                    if (dna0.getValue() instanceof ConcurrentHashMap) {
-                        dna = (ConcurrentHashMap<String, String>) dna0.getValue();
-                    } else {
-                        dna = new ConcurrentHashMap<String, String>();
-                        dna.putAll(dna0.getValue());
-                    }
-                    if (dna0.getKey() == null) continue; // bad seed
-                    final String hash = UTF8.String(dna0.getKey());
-                    return new Seed(hash, dna);
+                    assert dna != null;
+                    if (dna == null) continue;
+                    if (dna.getKey() == null) continue; // bad seed
+                    return new Seed(dna);
                 }
                 return null;
             } catch (final Exception e) {
