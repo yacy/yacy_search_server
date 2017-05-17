@@ -435,13 +435,13 @@ public enum CollectionSchema implements SchemaDeclaration {
             return;
         }
         if (this.type == SolrType.num_integer) {
-            assert (value.iterator().next() instanceof Integer);
+            assert (value.iterator().next() instanceof Integer) : "type: " + value.iterator().next().getClass().getName();
             doc.setField(this.getSolrFieldName(), value.toArray(new Integer[value.size()]));
         } else if (this.type == SolrType.string || this.type == SolrType.text_general) {
-            assert (value.iterator().next() instanceof String);
+            assert (value.iterator().next() instanceof String) : "type: " + value.iterator().next().getClass().getName();
             doc.setField(this.getSolrFieldName(), value.toArray(new String[value.size()]));
         } else if (this.type == SolrType.date) {
-            assert (value.iterator().next() instanceof String) || (value.iterator().next() instanceof Date);
+            assert (value.iterator().next() instanceof String) || (value.iterator().next() instanceof Date) : "type: " + value.iterator().next().getClass().getName();
             if (value.iterator().next() instanceof String) {
                 Date[] da = new Date[value.size()];
                 for (int i = 0; i < value.size(); i++) {
