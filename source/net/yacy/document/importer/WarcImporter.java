@@ -150,15 +150,15 @@ public class WarcImporter extends Thread implements Importer {
                                 requestHeader.referer() == null ? null : requestHeader.referer().hash(),
                                 "warc",
                                 responseHeader.lastModified(),
-                                Switchboard.getSwitchboard().crawler.defaultRemoteProfile.handle(), // use remote profile (to index text & media, without writing to cache
+                                Switchboard.getSwitchboard().crawler.defaultSurrogateProfile.handle(),
                                 0,
-                                Switchboard.getSwitchboard().crawler.defaultRemoteProfile.timezoneOffset());
+                                Switchboard.getSwitchboard().crawler.defaultSurrogateProfile.timezoneOffset());
 
                         final Response response = new Response(
                                 request,
                                 requestHeader,
                                 responseHeader,
-                                Switchboard.getSwitchboard().crawler.defaultRemoteProfile,
+                                Switchboard.getSwitchboard().crawler.defaultSurrogateProfile,
                                 false,
                                 content
                         );
