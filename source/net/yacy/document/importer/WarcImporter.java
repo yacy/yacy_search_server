@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -145,7 +146,7 @@ public class WarcImporter extends Thread implements Importer {
                         }
 
                         final Request request = new Request(
-                                null,
+                                ASCII.getBytes(Switchboard.getSwitchboard().peers.mySeed().hash),
                                 location,
                                 requestHeader.referer() == null ? null : requestHeader.referer().hash(),
                                 "warc",
