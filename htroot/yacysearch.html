@@ -11,25 +11,6 @@
   <script type="text/javascript" src="js/yacysearch.js"></script>
   <script type="text/javascript" src="js/highslide/highslide.js"></script>
   <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
-
-  <script type="text/javascript">
-  function handleArrowKeys(evt) {
-    evt = (evt) ? evt : ((window.event) ? event : null);
-    if (evt) {
-        switch (evt.keyCode) {
-            case 9:
-            case 33:
-                window.location.href = document.getElementById("nextpage").href;
-                break;
-            case 34:
-                window.location.href = document.getElementById("prevpage").href;
-                break;
-            case 40:
-         }
-    }
-  }
-  document.onkeydown = handleArrowKeys;
-  </script>
   <script type="text/javascript" src="env/bootstrap/js/typeahead.jquery.min.js"></script>
   <script type="text/javascript">
      var suggestMatcher = function() {
