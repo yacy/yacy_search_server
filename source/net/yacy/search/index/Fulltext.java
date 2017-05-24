@@ -504,7 +504,8 @@ public final class Fulltext {
             this.getDefaultConnector().deleteByIds(deleteIDs);
             if (this.writeWebgraph) { // Webgraph.id is combination of sourceHash+targetHash+hexCounter, to be successful use source_id_s and/or target_id_s
                 for (String id : deleteIDs) {
-                    this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.name() + ":" + id);
+                	/* Add quotes around the url hash to prevent Solr logging a ParseException stack trace when the hash start with a '-' character */
+                    this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.name() + ":\"" + id  + "\"");
                 }
             }
         } catch (final Throwable e) {
@@ -524,7 +525,8 @@ public final class Fulltext {
             String id = ASCII.String(urlHash);
             this.getDefaultConnector().deleteById(id);
             if (this.writeWebgraph) { // Webgraph.id is combination of sourceHash+targetHash+hexCounter, to be successful use source_id_s and/or target_id_s
-                this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s + ":" + id);
+            	/* Add quotes around the url hash to prevent Solr logging a ParseException stack trace when the hash start with a '-' character */
+                this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s + ":\"" + id + "\"");
             }
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);
