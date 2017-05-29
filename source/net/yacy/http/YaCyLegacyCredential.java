@@ -65,8 +65,11 @@ public class YaCyLegacyCredential extends Credential {
     public boolean check(Object credentials) {
 
         if (credentials instanceof Credential) { // for DIGEST auth
-            return ((Credential) credentials).check(c);
-
+        	if(this.c == null) {
+        		/* credential may be null after switching from BASIC to DIGEST authentication without re-encoding the password */
+        		return false;
+        	}
+        	return ((Credential) credentials).check(this.c);
         }
         if (credentials instanceof String) { // for BASIC auth
             final String pw = (String) credentials;
