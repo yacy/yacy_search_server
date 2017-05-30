@@ -368,6 +368,7 @@ public class MultiProtocolURLTest {
 				new String[] { "unencoded rfc3986 unreserved ascii chars:-.~_",
 						"unencoded rfc3986 unreserved ascii chars:-.~_" },
 				new String[] { "http://simpleurl.com/", "http://simpleurl.com/" },
+				new String[] { "http://not-a-x-www-form-urlencoded.com/example.php?params=a|b&paramwithpercent=%param%", "http://not-a-x-www-form-urlencoded.com/example.php?params=a|b&paramwithpercent=%param%" },
 				new String[] {
 						"http://url-with-unencoded-query-and-anchor.net/path?q=asciiquery&p1=param1&p2=pâräm2&p3=简化字#anchor",
 						"http://url-with-unencoded-query-and-anchor.net/path?q=asciiquery&p1=param1&p2=pâräm2&p3=简化字#anchor" }, };

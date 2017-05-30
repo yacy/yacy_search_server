@@ -688,7 +688,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      * Decodes a <code>application/x-www-form-urlencoded</code> string using UTF-8 encoding.
      *
      * @param s the string to decode
-     * @return the newly decoded string
+     * @return the newly decoded string, or the original string when it doesn't match the <code>application/x-www-form-urlencoded</code> format
      */
     public static String unescape(final String s) {
     	try {
@@ -696,6 +696,15 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 		} catch (UnsupportedEncodingException e) {
 			/* This should not happen */
 			ConcurrentLog.logException(e);
+			return s;
+		} catch(Exception e) {
+			/*
+			 * URLDecode may throw an IllegalArgumentException (or any other
+			 * Exception in future implementations) when the string doesn't
+			 * match the application/x-www-form-urlencoded format: in that case
+			 * return the original string. 
+			 * Example case : when the valid '%' character is used in a URL but without percent encoding purpose.
+			 */
 			return s;
 		}
     }
