@@ -52,10 +52,45 @@ import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
-
+/**
+ * Remote resource analyzer
+ */
 public class getpageinfo_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+	/**
+	 * <p>Scrape and parse a resource at a specified URL to provide some information, depending on the requested actions.</p>
+	 * 
+	 * <p>
+	 * Example API calls :
+	 * <ul>
+	 * <li>With the minimum required parameters : http://localhost:8090/api/getpageinfo_p.xml?url=http://yacy.net</li>
+	 * <li>Only check the robots.txt policy and sitemap presence : http://localhost:8090/api/getpageinfo_p.xml?url=https://en.wikipedia.org/wiki/Main_Page&actions=robots</li>
+	 * <li>Only check for an OAI Repository at CiteSeerX : http://localhost:8090/api/getpageinfo_p.xml?url=http://citeseerx.ist.psu.edu/oai2&actions=oai</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * 
+	 * @param header
+	 *            servlet request header
+	 * @param post
+	 *            request parameters. Supported keys :
+	 *            <ul>
+	 *            <li>url (required) : the URL of the resource to analyze. HTTP protocol is assumed if not present at the beginning of the URL.</li>
+	 *            <li>actions (optional) : a list of comma separated actions to perform (default to "title,robots"). Supported actions :
+	 *            	<ul>
+	 *            		<li>title : look for the resource title, description, language, icons, keywords, and links</li>
+	 *            		<li>robots : check if crawling the resource is allowed by the eventual robots.txt policy file, and also if this file exposes sitemap(s) URLs.</li>
+	 *            		<li>oai : send an "Identify" OAI-PMH request (http://www.openarchives.org/OAI/openarchivesprotocol.html#Identify) 
+	 *            			at the URL to check for a OAI-PMH response from an Open Archive Initiative Repository</li>
+	 *            	</ul>
+	 *            </li>
+	 *            <li>agentName (optional) : the string identifying the agent used to fetch the resource. Example : "YaCy Internet (cautious)"</li>
+	 *            </ul>
+	 * @param env
+	 *            server environment
+	 * @return the servlet answer object
+	 */
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -197,6 +232,10 @@ public class getpageinfo_p {
         return prop;
     }
 
+    /**
+     * @param url an OIA-PHM "Identify" request URL (http://www.openarchives.org/OAI/openarchivesprotocol.html#Identify). Must not be null.
+     * @return the OAI Repository name or an empty String when the response could not be parsed as an OAI-PMH response
+     */
     private static String checkOAI(final String url) {
 		final DocumentBuilderFactory factory = DocumentBuilderFactory
 				.newInstance();
@@ -214,6 +253,11 @@ public class getpageinfo_p {
 		return "";
 	}
 
+    /**
+     * Extract the OAI repository name from an OAI-PMH "Identify" response
+     * @param doc an XML document to parse. Must not be null.
+     * @return the repository name or an empty String when the XML document is not an OAI-PMH "Identify" response
+     */
 	private static String parseXML(final Document doc) {
 
 		String repositoryName = null;
