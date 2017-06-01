@@ -851,6 +851,7 @@ search.result.noreferrer=false
 
 # search result lines may show additional information for each search hit
 # these information pieces may be switched on or off
+search.result.show.keywords = false
 search.result.show.date = true
 search.result.show.size = false
 search.result.show.metadata = false

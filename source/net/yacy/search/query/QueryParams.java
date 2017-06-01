@@ -527,6 +527,11 @@ public final class QueryParams {
             fqs.add(CollectionSchema.author_sxt.getSolrFieldName() + ":\"" + this.modifier.author + '\"');
         }
 
+        // add keyword filter
+        if (this.modifier.keyword != null && this.modifier.keyword.length() > 0 && this.solrSchema.contains(CollectionSchema.keywords)) {
+            fqs.add(CollectionSchema.keywords.getSolrFieldName() + ":\"" + this.modifier.keyword + '\"');
+        }
+
         // add collection facets
         if (this.modifier.collection != null && this.modifier.collection.length() > 0 && this.solrSchema.contains(CollectionSchema.collection_sxt)) {
             fqs.add(QueryModifier.parseCollectionExpression(this.modifier.collection));

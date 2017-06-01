@@ -72,6 +72,7 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.video", post.getBoolean("search.video"));
                 sb.setConfig("search.app", post.getBoolean("search.app"));
 
+                sb.setConfig("search.result.show.keywords", post.getBoolean("search.result.show.keywords"));
                 sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date"));
                 sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size"));
                 sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata"));
@@ -156,6 +157,7 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.audio", config.getProperty("search.audio","false"));
                 sb.setConfig("search.video", config.getProperty("search.video","false"));
                 sb.setConfig("search.app", config.getProperty("search.app","false"));
+                sb.setConfig("search.result.show.keywords", config.getProperty("search.result.show.keywords","false"));
                 sb.setConfig("search.result.show.date", config.getProperty("search.result.show.date","true"));
                 sb.setConfig("search.result.show.size", config.getProperty("search.result.show.size","false"));
                 sb.setConfig("search.result.show.metadata", config.getProperty("search.result.show.metadata","false"));
@@ -184,6 +186,7 @@ public class ConfigSearchPage_p {
         prop.put("search.video", sb.getConfigBool("search.video", false) ? 1 : 0);
         prop.put("search.app", sb.getConfigBool("search.app", false) ? 1 : 0);
 
+        prop.put("search.result.show.keywords", sb.getConfigBool("search.result.show.keywords", false) ? 1 : 0);
         prop.put("search.result.show.date", sb.getConfigBool("search.result.show.date", false) ? 1 : 0);
         prop.put("search.result.show.size", sb.getConfigBool("search.result.show.size", false) ? 1 : 0);
         prop.put("search.result.show.metadata", sb.getConfigBool("search.result.show.metadata", false) ? 1 : 0);

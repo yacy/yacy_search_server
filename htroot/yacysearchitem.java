@@ -205,6 +205,7 @@ public class yacysearchitem {
             prop.put("content_showEvent", showEvent ? 1 : 0);
             Collection<File> snapshotPaths = sb.getConfigBool("search.result.show.snapshots", true) ? Transactions.findPaths(result.url(), null, State.ANY) : null;
             if (fileType == FileType.HTML) { // html template specific settings
+                prop.put("content_showKeywords", (sb.getConfigBool("search.result.show.keywords", false) && !result.dc_subject().isEmpty()) ? 1 : 0);
                 prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) && !showEvent ? 1 : 0);
                 prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);
                 prop.put("content_showMetadata", sb.getConfigBool("search.result.show.metadata", true) ? 1 : 0);
@@ -219,6 +220,7 @@ public class yacysearchitem {
                 prop.put("content_showRanking", sb.getConfigBool("search.result.show.ranking", false) ? 1 : 0);
 
                 if (showEvent) prop.put("content_showEvent_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(events[0]));
+                prop.putHTML("content_showKeywords_subject", result.dc_subject());
                 prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.moddate()));
                 prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));
                 prop.put("content_showMetadata_urlhash", urlhash);

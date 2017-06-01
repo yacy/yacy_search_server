@@ -964,6 +964,14 @@ public final class SearchEvent {
                         continue pollloop;
                     }
                 }
+
+                if (this.query.modifier.keyword != null) {
+                    if (iEntry.dc_subject().indexOf(this.query.modifier.keyword) < 0) {
+                        if (log.isFine()) log.fine ("dropped Node: keyword");
+                        continue pollloop;
+                    }
+                }
+
                 // finally extend the double-check and insert result to stack
                 this.urlhashes.putUnique(iEntry.hash());
                 rankingtryloop: while (true) {

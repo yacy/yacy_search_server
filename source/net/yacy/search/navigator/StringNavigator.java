@@ -68,6 +68,9 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
                         mod = "author:" + key;
                     }
                     break;
+                case keywords:
+                    mod = "keyword:" + key;
+                    break;
                 case url_protocol_s:
                     mod = "/" + key;
                     break;
