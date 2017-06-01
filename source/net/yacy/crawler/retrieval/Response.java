@@ -225,10 +225,21 @@ public class Response {
     public void updateStatus(final int newStatus) {
         this.status = newStatus;
     }
+    
+    /**
+     * @return the original request that produced this response
+     */
+    public Request getRequest() {
+		return request;
+	}
 
     public ResponseHeader getResponseHeader() {
         return this.responseHeader;
     }
+    
+    public RequestHeader getRequestHeader() {
+		return this.requestHeader;
+	}
 
     public boolean fromCache() {
         return this.fromCache;

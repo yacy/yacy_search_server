@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -82,18 +83,19 @@ public final class HTTPLoader {
         return doc;
     }
     
-    /**
-     * Open input stream on a requested HTTP resource. When resource is small, fully load it and returns a ByteArrayInputStream instance.
+	/**
+     * Open an input stream on a requested HTTP resource. When the resource content size is small 
+     * (lower than {@link Response#CRAWLER_MAX_SIZE_TO_CACHE}, fully load it and use a ByteArrayInputStream instance.
      * @param request
      * @param profile crawl profile
      * @param retryCount remaining redirect retries count
      * @param maxFileSize max file size to load. -1 means no limit.
      * @param blacklistType blacklist type to use
      * @param agent agent identifier
-     * @return an open input stream. Don't forget to close it.
-     * @throws IOException when an error occured
+     * @return a response with full meta data and embedding on open input stream on content. Don't forget to close the stream.
+     * @throws IOException when an error occurred
      */
-	public InputStream openInputStream(final Request request, CrawlProfile profile, final int retryCount,
+	public StreamResponse openInputStream(final Request request, CrawlProfile profile, final int retryCount,
 			final int maxFileSize, final BlacklistType blacklistType, final ClientIdentification.Agent agent)
 					throws IOException {
 		if (retryCount < 0) {
@@ -200,13 +202,14 @@ public final class HTTPLoader {
 					FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
 			throw new IOException("REJECTED UNWANTED REDIRECTION '" + statusline
 					+ "' for URL '" + requestURLString + "'$");
-		} else if (statusCode == 200 || statusCode == 203) {
+		} else if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_NON_AUTHORITATIVE_INFORMATION) {
 			// the transfer is ok
 
 			/*
-			 * When content is not large (less than 1MB), we have better cache it if cache is enabled and url is not local
+			 * When content is not large (less than Response.CRAWLER_MAX_SIZE_TO_CACHE), we have better cache it if cache is enabled and url is not local
 			 */
 			long contentLength = client.getHttpResponse().getEntity().getContentLength();
+			final InputStream contentStream;
 			if (profile != null && profile.storeHTCache() && contentLength > 0 && contentLength < (Response.CRAWLER_MAX_SIZE_TO_CACHE) && !url.isLocal()) {
 				byte[] content = null;
 				try {
@@ -218,14 +221,17 @@ public final class HTTPLoader {
 					client.finish();
 				}
 
-				return new ByteArrayInputStream(content);
+				contentStream = new ByteArrayInputStream(content);
+			} else {
+				/*
+				 * Create a HTTPInputStream delegating to
+				 * client.getContentstream(). Close method will ensure client is
+				 * properly closed.
+				 */
+				contentStream = new HTTPInputStream(client);
 			}
-			/*
-			 * Returns a HTTPInputStream delegating to
-			 * client.getContentstream(). Close method will ensure client is
-			 * properly closed.
-			 */
-			return new HTTPInputStream(client);
+
+			return new StreamResponse(new Response(request, requestHeader, responseHeader, profile, false, null), contentStream);
 		} else {
 			client.finish();
 			// if the response has not the right response type then reject file

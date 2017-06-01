@@ -24,6 +24,7 @@
 
 package net.yacy.crawler.retrieval;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -58,7 +59,31 @@ public class FileLoader {
         this.maxFileSize = (int) sb.getConfigLong("crawler.file.maxFileSize", -1l);
     }
 
+    /**
+     * Load fully the requested file in a byte buffer
+     *
+     * @param request the request to process
+     * @param acceptOnlyParseable when true and no parser can be found to handle the detected MIME type, the response content buffer contains only URL tokens
+     * @return a response with full meta data and embedding the content as a byte buffer
+     */
     public Response load(final Request request, boolean acceptOnlyParseable) throws IOException {
+        StreamResponse streamResponse = openInputStream(request, acceptOnlyParseable);
+        
+        /* Read fully the stream and update the response */
+        byte[] content = FileUtils.read(streamResponse.getContentStream());
+        Response response = streamResponse.getResponse();
+        response.setContent(content);
+        return response;
+    }
+    
+    /**
+     * Open a stream on the requested file
+     *
+     * @param request the request to process
+     * @param acceptOnlyParseable when true and no parser can be found to handle the detected MIME type, open a stream on the URL tokens
+     * @return a response with full meta data and embedding on open input stream on content. Don't forget to close the stream.
+     */
+    public StreamResponse openInputStream(final Request request, final boolean acceptOnlyParseable) throws IOException {
         DigestURL url = request.url();
         if (!url.getProtocol().equals("file")) throw new IOException("wrong protocol for FileLoader: " + url.getProtocol());
 
@@ -93,9 +118,9 @@ public class FileLoader {
                     responseHeader,
                     profile,
                     false,
-                    UTF8.getBytes(content.toString()));
+                    null);
 
-            return response;
+            return new StreamResponse(response, new ByteArrayInputStream(UTF8.getBytes(content.toString())));
         }
 
         // create response header
@@ -133,13 +158,12 @@ public class FileLoader {
                     responseHeader,
                     profile,
                     false,
-                    UTF8.getBytes(url.toTokens()));
-            return response;
+                    null);
+            return new StreamResponse(response, new ByteArrayInputStream(UTF8.getBytes(url.toTokens())));
         }
 
         // load the resource
-        InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
-        byte[] b = FileUtils.read(is);
+        final InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
 
         // create response with loaded content
         final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
@@ -149,7 +173,7 @@ public class FileLoader {
                 responseHeader,
                 profile,
                 false,
-                b);
-        return response;
+                null);
+        return new StreamResponse(response, is);
     }
 }

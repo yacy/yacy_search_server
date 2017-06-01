@@ -44,6 +44,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.retrieval.StreamResponse;
 import net.yacy.data.InvalidURLLicenceException;
 import net.yacy.data.URLLicense;
 import net.yacy.http.servlets.TemplateMissingParameterException;
@@ -122,8 +123,9 @@ public class ImageViewer {
 				String agentName = post.get("agentName", auth ? ClientIdentification.yacyIntranetCrawlerAgentName
 						: ClientIdentification.yacyInternetCrawlerAgentName);
 				ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
-				inStream = loader.openInputStream(loader.request(url, false, true), CacheStrategy.IFEXIST,
+				final StreamResponse response = loader.openInputStream(loader.request(url, false, true), CacheStrategy.IFEXIST,
 						BlacklistType.SEARCH, agent);
+				inStream = response.getContentStream();
 			} catch (final IOException e) {
 				/** No need to log full stack trace (in most cases resource is not available because of a network error) */
 				ConcurrentLog.fine("ImageViewer", "cannot load image. URL : " + url.toNormalform(true));

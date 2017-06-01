@@ -27,6 +27,7 @@
 
 package net.yacy.crawler.retrieval;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -165,6 +166,29 @@ public class FTPLoader {
 
         Latency.updateAfterLoad(request.url(), System.currentTimeMillis() - start);
         return response;
+    }
+    
+    /**
+     * Open a stream on the entry content from a FTP server
+     *
+     * @param request the request to process
+     * @param acceptOnlyParseable when true and no parser can be found to handle the detected MIME type, open a stream on the URL tokens
+     * @return a response with full meta data and embedding on open input stream on content. Don't forget to close the stream.
+     */
+    public StreamResponse openInputStream(final Request request, final boolean acceptOnlyParseable) throws IOException {
+
+        final Response response = load(request, acceptOnlyParseable);
+        // TODO implement a true ftp content stream instead of a simple ByteArrayInputStream encapsulation
+        final StreamResponse streamResponse;
+        if(response.getContent() != null) {
+        	streamResponse = new StreamResponse(response,
+				new ByteArrayInputStream(response.getContent()));
+        } else {
+        	/* content can be null when no parser can handle it : then return the URL tokens as content */
+        	streamResponse = new StreamResponse(response,
+        			new ByteArrayInputStream(UTF8.getBytes(request.url().toTokens())));        	
+        }
+		return streamResponse;
     }
 
     /**

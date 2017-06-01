@@ -27,6 +27,7 @@
 
 package net.yacy.crawler.retrieval;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -69,7 +70,31 @@ public class SMBLoader {
     }
 
 
+    /**
+     * Load fully the requested file in a byte buffer
+     *
+     * @param request the request to process
+     * @param acceptOnlyParseable when true and no parser can be found to handle the detected MIME type, the response content buffer contains only URL tokens
+     * @return a response with full meta data and embedding the content as a byte buffer
+     */
     public Response load(final Request request, boolean acceptOnlyParseable) throws IOException {
+        StreamResponse streamResponse = openInputStream(request, acceptOnlyParseable);
+        
+        /* Read fully the stream and update the response */
+        byte[] content = FileUtils.read(streamResponse.getContentStream());
+        Response response = streamResponse.getResponse();
+        response.setContent(content);
+        return response;
+    }
+    
+    /**
+     * Open a stream on the requested file
+     *
+     * @param request the request to process
+     * @param acceptOnlyParseable when true, do not open a stream on content when no parser can be found to handle the detected MIME type
+     * @return a response with full meta data and embedding on open input stream on content. Don't forget to close the stream.
+     */
+    public StreamResponse openInputStream(final Request request, final boolean acceptOnlyParseable) throws IOException {
         DigestURL url = request.url();
         if (!url.getProtocol().equals("smb")) throw new IOException("wrong loader for SMBLoader: " + url.getProtocol());
 
@@ -111,9 +136,9 @@ public class SMBLoader {
                     responseHeader,
                     profile,
                     false,
-                    UTF8.getBytes(content.toString()));
+                    null);
 
-            return response;
+            return new StreamResponse(response, new ByteArrayInputStream(UTF8.getBytes(content.toString())));
         }
 
         // create response header
@@ -151,13 +176,12 @@ public class SMBLoader {
                     responseHeader,
                     profile,
                     false,
-                    url.toTokens().getBytes());
-            return response;
+                    null);
+            return new StreamResponse(response, new ByteArrayInputStream(url.toTokens().getBytes()));
         }
 
         // load the resource
         InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
-        byte[] b = FileUtils.read(is);
 
         // create response with loaded content
         final CrawlProfile profile = this.sb.crawler.get(request.profileHandle().getBytes());
@@ -167,8 +191,8 @@ public class SMBLoader {
                 responseHeader,
                 profile,
                 false,
-                b);
-        return response;
+                null);
+        return new StreamResponse(response, is);
     }
 
     public static void main(String[] args) {

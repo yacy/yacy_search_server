@@ -29,7 +29,6 @@ package net.yacy.repository;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Arrays;
 import java.util.Date;
@@ -59,6 +58,7 @@ import net.yacy.crawler.retrieval.HTTPLoader;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.retrieval.SMBLoader;
+import net.yacy.crawler.retrieval.StreamResponse;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
@@ -347,7 +347,7 @@ public final class LoaderDispatcher {
      * @return an open ImageInputStream. Don't forget to close it once used!
      * @throws IOException when url is malformed, blacklisted, or CacheStrategy is CACHEONLY and content is unavailable
      */
-    private InputStream openInputStreamInternal(final Request request, CacheStrategy cacheStrategy, final int maxFileSize, final BlacklistType blacklistType, ClientIdentification.Agent agent) throws IOException {
+    private StreamResponse openInputStreamInternal(final Request request, CacheStrategy cacheStrategy, final int maxFileSize, final BlacklistType blacklistType, ClientIdentification.Agent agent) throws IOException {
         // get the protocol of the next URL
         final DigestURL url = request.url();
 		if (url.isFile() || url.isSMB()) {
@@ -366,9 +366,9 @@ public final class LoaderDispatcher {
         
         // check if we have the page in the cache
         Response cachedResponse = loadFromCache(request, cacheStrategy, agent, url, crawlProfile);
-        if(cachedResponse != null) {
-        	return new ByteArrayInputStream(cachedResponse.getContent());
-        }
+		if (cachedResponse != null) {
+			return new StreamResponse(cachedResponse, new ByteArrayInputStream(cachedResponse.getContent()));
+		}
 
         // check case where we want results from the cache exclusively, and never from the Internet (offline mode)
         if (cacheStrategy == CacheStrategy.CACHEONLY) {
@@ -389,20 +389,20 @@ public final class LoaderDispatcher {
         }
 
         // load resource from the internet
-        InputStream inStream = null;
+        StreamResponse response;
         if (protocol.equals("http") || protocol.equals("https")) {
-        	inStream = this.httpLoader.openInputStream(request, crawlProfile, 1, maxFileSize, blacklistType, agent);
-        } else if (protocol.equals("ftp") || protocol.equals("smb") || protocol.equals("file")) {
-        	// may also open directly stream with ftp loader
-        	inStream = url.getInputStream(agent);
+        	response = this.httpLoader.openInputStream(request, crawlProfile, 1, maxFileSize, blacklistType, agent);
+        } else if (protocol.equals("ftp")) {
+        	response = this.ftpLoader.openInputStream(request, true);
+        } else if (protocol.equals("smb")) {
+            response = this.smbLoader.openInputStream(request, true);
+        } else if (protocol.equals("file")) {
+            response = this.fileLoader.openInputStream(request, true);
         } else {
             throw new IOException("Unsupported protocol '" + protocol + "' in url " + url);
         }
-        if (inStream == null) {
-            throw new IOException("Unable to open content stream");
-        }
 
-        return inStream;
+        return response;
     }
     
 
@@ -464,18 +464,18 @@ public final class LoaderDispatcher {
     }
     
     /**
-     * Open url as InputStream from the web or the cache
+     * Open the URL as an InputStream from the web or the cache
      * @param request must be not null
      * @param cacheStrategy cache strategy to use
      * @param blacklistType black list
      * @param agent agent identification for HTTP requests
-     * @return an open InputStream on content. Don't forget to close it once used.
+     * @return a response with full meta data and embedding on open input stream on content. Don't forget to close the stream.
      * @throws IOException when url is malformed or blacklisted
      */
-	public InputStream openInputStream(final Request request, final CacheStrategy cacheStrategy,
+	public StreamResponse openInputStream(final Request request, final CacheStrategy cacheStrategy,
 			BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
 		final int maxFileSize = protocolMaxFileSize(request.url());
-		InputStream stream = null;
+		StreamResponse response;
 
 		Semaphore check = this.loaderSteering.get(request.url());
 		if (check != null && cacheStrategy != CacheStrategy.NOCACHE) {
@@ -493,9 +493,9 @@ public final class LoaderDispatcher {
 
 		this.loaderSteering.put(request.url(), new Semaphore(0));
 		try {
-			stream = openInputStreamInternal(request, cacheStrategy, maxFileSize, blacklistType, agent);
+			response = openInputStreamInternal(request, cacheStrategy, maxFileSize, blacklistType, agent);
 		} catch(IOException ioe) {
-			/* Do not re encapsulate eventual IOException in an IOException */
+			/* Do not re encapsulate any eventual IOException in an IOException */
 			throw ioe;
 		} catch (final Throwable e) {
 			throw new IOException(e);
@@ -507,7 +507,7 @@ public final class LoaderDispatcher {
 			}
 		}
 
-		return stream;
+		return response;
 	}
 
     public Document[] loadDocuments(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException, Parser.Failure {
@@ -548,6 +548,44 @@ public final class LoaderDispatcher {
             
             String x_robots_tag = response.getResponseHeader().getXRobotsTag();
             if (x_robots_tag.indexOf("noindex",0) >= 0) merged.setIndexingDenied(true);
+            
+            return merged;
+        } catch(final Parser.Failure e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+    
+    /**
+     * Similar to the loadDocument method, but streaming the resource content when possible instead of fully loading it in memory.
+     * @param location URL of the resource to load
+     * @param cachePolicy cache policy strategy
+     * @param blacklistType blacklist to use
+     * @param agent user agent identifier
+     * @return on parsed document or null when an error occurred while parsing
+     * @throws IOException when the content can not be fetched or no parser support it
+     */
+    public Document loadDocumentAsStream(final DigestURL location, final CacheStrategy cachePolicy, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
+        // load resource
+        Request request = request(location, true, false);
+        final StreamResponse streamResponse = this.openInputStream(request, cachePolicy, blacklistType, agent);
+        final Response response = streamResponse.getResponse();
+        final DigestURL url = request.url();
+        if (response == null) throw new IOException("no Response for url " + url);
+
+        // if it is still not available, report an error
+        if (streamResponse.getContentStream() == null || response.getResponseHeader() == null) {
+        	throw new IOException("no Content available for url " + url);
+        }
+
+        // parse resource
+        try {
+            Document[] documents = streamResponse.parse();
+            Document merged = Document.mergeDocuments(location, response.getMimeType(), documents);
+            
+            String x_robots_tag = response.getResponseHeader().getXRobotsTag();
+            if (x_robots_tag.indexOf("noindex",0) >= 0) {
+            	merged.setIndexingDenied(true);
+            }
             
             return merged;
         } catch(final Parser.Failure e) {
