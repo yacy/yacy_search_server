@@ -40,7 +40,7 @@ import net.yacy.server.serverObjects;
 public class QueryModifier {
 
     private final StringBuilder modifier;
-    public String sitehost, sitehash, filetype, protocol, language, author, collection, on, from, to;
+    public String sitehost, sitehash, filetype, protocol, language, author, keyword, collection, on, from, to;
     public int timezoneOffset;
     
     public QueryModifier(final int timezoneOffset) {
@@ -51,6 +51,7 @@ public class QueryModifier {
         this.protocol = null;
         this.language = null;
         this.author = null;
+        this.keyword = null;
         this.collection = null;
         this.on = null;
         this.from = null;
@@ -145,7 +146,17 @@ public class QueryModifier {
                 add("author:" + author);
             }
         }
-        
+
+        // parse keyword
+        final int keywordi = querystring.indexOf("keyword:", 0);
+        if (keywordi >= 0) {
+            // TODO: should we handle quoted keywords (to allow space) and comma separated list ?
+            int ftb = querystring.indexOf(' ', keywordi);
+            this.keyword = querystring.substring(keywordi + 8, ftb == -1 ? querystring.length() : ftb);
+            querystring = querystring.replace("keyword:" + this.keyword, "").replace("  ", " ").trim();
+            add("keyword:" + this.keyword);
+        }
+
         // parse collection
         int collectioni = querystring.indexOf("collection:", 0);
         while (collectioni >= 0) { // due to possible collision with "on:" modifier make sure no "collection:" remains
@@ -281,7 +292,11 @@ public class QueryModifier {
         if (this.author != null && this.author.length() > 0 && fq.indexOf(CollectionSchema.author_sxt.getSolrFieldName()) < 0) {
             fq.append(" AND ").append(CollectionSchema.author_sxt.getSolrFieldName()).append(":\"").append(this.author).append('\"');
         }
-        
+
+        if (this.keyword != null && this.keyword.length() > 0 && fq.indexOf(CollectionSchema.keywords.getSolrFieldName()) < 0) {
+            fq.append(" AND ").append(CollectionSchema.keywords.getSolrFieldName()).append(":\"").append(this.keyword).append('\"');
+        }
+
         if (this.collection != null && this.collection.length() > 0 && fq.indexOf(CollectionSchema.collection_sxt.getSolrFieldName()) < 0) {
             fq.append(" AND ").append(QueryModifier.parseCollectionExpression(this.collection));
         }

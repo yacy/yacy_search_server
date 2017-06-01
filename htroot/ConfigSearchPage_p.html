@@ -6,7 +6,7 @@
   <link rel="stylesheet" type="text/css" media="screen" href="env/highslide.css" />
   <script type="text/javascript" src="js/yacysearch.js"></script>
   <script type="text/javascript" src="js/highslide/highslide.js"></script>
-  <script src="yacy/ui/js/jquery.tagcloud.js" type="text/javascript"></script>
+  <script type="text/javascript" src="yacy/ui/js/jquery.tagcloud.js"></script>
 </head>
 
 <body id="ConfigSearchPage" >
@@ -223,6 +223,9 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                     </p>
                     <p class="url">
                       <a href="yacysearch.html" id="urlhash" target="LayouTest">http://url-of-the-search-result.net</a>
+                    </p>
+                    <p>
+                      <input type="checkbox" name="search.result.show.keywords" value="true" #(search.result.show.keywords)#::checked="checked" #(/search.result.show.keywords)# /> Tags: keyword subject keyword2 keyword3
                     </p>
                     <p class="urlinfo">
                       <table border="0">
