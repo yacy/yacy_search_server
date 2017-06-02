@@ -158,42 +158,77 @@ public class Table implements Index, Iterable<Row.Entry> {
             int i = 0;
             byte[] key;
             if (this.table == null) {
-                final Iterator<byte[]> ki = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.primaryKeyLength);
-                while (ki.hasNext()) {
-                    key = ki.next();
-                    // write the key into the index table
-                    assert key != null;
-                    if (key == null) {i++; continue;}
-                    if (rowdef.objectOrder.wellformed(key)) {
-                        this.index.putUnique(key, i++);
-                    } else {
-                        errors.putUnique(key, i++);
-                    }
+                final ChunkIterator ki = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.primaryKeyLength);
+                try {
+                	while (ki.hasNext()) {
+                		key = ki.next();
+                		// write the key into the index table
+                		assert key != null;
+                		if (key == null) {i++; continue;}
+                		if (rowdef.objectOrder.wellformed(key)) {
+                			this.index.putUnique(key, i++);
+                		} else {
+                			errors.putUnique(key, i++);
+                		}
+                	}
+                } finally {
+					/* If any error occurred while looping over the iterator, we
+					 * must ensure the underlying stream is closed before
+					 * transmitting the exception to the upper layer
+					 */
+                	if(ki.hasNext()) {
+                		try {
+                			ki.close();
+                		} catch(IOException ioe) {
+                			/* Do not block if closing is not possible but anyway keep a trace in log */
+                			log.warn("Could not close input stream on the file " + tablefile);
+                		}
+                	}
                 }
             } else {
                 byte[] record;
                 key = new byte[rowdef.primaryKeyLength];
                 final ChunkIterator ri = new ChunkIterator(tablefile, rowdef.objectsize, rowdef.objectsize);
-                while (ri.hasNext()) {
-                    record = ri.next();
-                    assert record != null;
-                    if (record == null) {i++; continue;}
-                    System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
+                try {
+                	while (ri.hasNext()) {
+                		record = ri.next();
+                		assert record != null;
+                		if (record == null) {i++; continue;}
+                		System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
 
-                    // write the key into the index table
-                    if (rowdef.objectOrder.wellformed(key)) {
-                        this.index.putUnique(key, i++);
-                        // write the tail into the table
-                        try {
-                            this.table.addUnique(this.taildef.newEntry(record, rowdef.primaryKeyLength, true));
-                        } catch (final SpaceExceededException e) {
-                            this.table = null;
-                            ri.close(); // close inputstream of chunkiterator
-                            break;
-                        }
-                    } else {
-                        errors.putUnique(key, i++);
-                    }
+                		// write the key into the index table
+                		if (rowdef.objectOrder.wellformed(key)) {
+                			this.index.putUnique(key, i++);
+                			// write the tail into the table
+                			try {
+                				this.table.addUnique(this.taildef.newEntry(record, rowdef.primaryKeyLength, true));
+                			} catch (final SpaceExceededException e) {
+                				this.table = null;
+                				try {
+                					ri.close(); // close inputstream of chunkiterator
+                				} finally {
+                					/* Do not block if closing is not possible but anyway keep a trace in log */
+                        			log.warn("Could not close input stream on the file " + tablefile);
+                        		}
+                				break;
+                			}
+                		} else {
+                			errors.putUnique(key, i++);
+                		}
+                	}
+                } finally {
+					/* If any error occurred while looping over the iterator, we
+					 * must ensure the underlying stream is closed before
+					 * transmitting the exception to the upper layer
+					 */
+                	if(ri.hasNext()) {
+                		try {
+                			ri.close();
+                		} catch(IOException ioe) {
+                			/* Do not block if closing is not possible but anyway keep a trace in log */
+                			log.warn("Could not close input stream on the file " + tablefile);
+                		}
+                	}
                 }
                 Runtime.getRuntime().gc();
                 if (abandonTable()) {

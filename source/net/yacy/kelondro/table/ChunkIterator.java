@@ -48,7 +48,7 @@ public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator
      * ATTENTION: if the iterator is not read to the end or interrupted, close() must be called to release the InputStream
      * @param file: the file
      * @param recordsize: the size of the elements in the file
-     * @param chunksize: the size of the chunks that are returned by next(). remaining bytes until the lenght of recordsize are skipped
+     * @param chunksize: the size of the chunks that are returned by next(). remaining bytes until the length of recordsize are skipped
      * @throws FileNotFoundException
      */
 
@@ -66,9 +66,10 @@ public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator
     }
 
     /**
-     * Special close methode to release the used InputStream
+     * Special close method to release the used InputStream
      * stream is automatically closed on last next(),
-     * close() needs only be called if iterator not read to the end ( hasNext() or next() has not returned null)
+     * close() needs only to be called if iterator did not read to the end ( hasNext() or next() has not returned null)
+     * @throws IOException when the stream could not be closed
     */
     public void close() throws IOException {
         this.stream.close();
@@ -78,29 +79,43 @@ public class ChunkIterator extends LookAheadIterator<byte[]> implements Iterator
     public byte[] next0() {
         final byte[] chunk = new byte[chunksize];
         int r, s;
+        byte[] result = null;
         try {
             // read the chunk
             this.stream.readFully(chunk);
             // skip remaining bytes
             r = chunksize;
+            boolean skipError = false;
             while (r < recordsize) {
                 s = (int) this.stream.skip(recordsize - r);
                 assert s > 0;
-                if (s <= 0) return null;
+                if (s <= 0) {
+                	skipError = true;
+                	break;
+                }
                 r += s;
             }
-            return chunk;
+            if(!skipError) {
+            	result = chunk;
+            }
         } catch (final EOFException e) {
             // no real exception, this is the normal termination
-            try {
-                this.stream.close(); // close the underlaying inputstream
-            } catch (IOException ex) {
-                ConcurrentLog.logException(ex);
-            }
-            return null;
+            result = null;
         } catch (final IOException e) {
+        	/* Return normally but trace the exception in log */
             ConcurrentLog.logException(e);
-            return null;
+            result = null;
+        } finally {
+        	if(result == null) {
+        		/* when result is null (normal termination or not), 
+        		 * we must ensure the underlying input stream is closed as we must not keep system file handlers open */
+                try {
+                    this.stream.close();
+                } catch (IOException ex) {
+                    ConcurrentLog.logException(ex);
+                }
+        	}
         }
+        return result;
     }
 }
