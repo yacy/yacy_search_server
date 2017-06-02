@@ -104,25 +104,32 @@ public class CryptoLib {
     }
 
     public byte[] getSignature(PrivateKey privKey, InputStream dataStream) throws InvalidKeyException, SignatureException, IOException {
-	this.sign.initSign(privKey);
-	byte[] buffer = new byte[1024];
-	int count = 0;
-	while((count = dataStream.read(buffer)) != -1) {
-	    this.sign.update(buffer, 0, count);
-	}
-	dataStream.close();
-	return this.sign.sign();
+    	try {
+    		this.sign.initSign(privKey);
+    		byte[] buffer = new byte[1024];
+    		int count = 0;
+    		while((count = dataStream.read(buffer)) != -1) {
+    			this.sign.update(buffer, 0, count);
+    		}
+    	} finally {
+    		dataStream.close();
+    	}
+
+    	return this.sign.sign();
     }
 
     public boolean verifySignature(PublicKey pubKey, InputStream dataStream, byte[] signBuffer) throws InvalidKeyException, SignatureException, IOException {
-	this.sign.initVerify(pubKey);
+    	try {
+    		this.sign.initVerify(pubKey);
 
-	byte[] buffer = new byte[1024];
-	int count = 0;
-	while((count = dataStream.read(buffer)) != -1) {
-	    this.sign.update(buffer, 0, count);
-	}
-	dataStream.close();
+    		byte[] buffer = new byte[1024];
+    		int count = 0;
+    		while((count = dataStream.read(buffer)) != -1) {
+    			this.sign.update(buffer, 0, count);
+    		}
+    	} finally {
+    		dataStream.close();
+    	}
 
 	return this.sign.verify(signBuffer);
     }

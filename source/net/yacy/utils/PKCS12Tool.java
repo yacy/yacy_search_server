@@ -53,12 +53,21 @@ public class PKCS12Tool {
         // creating PKCS12 keystore
         this.kspkcs12 = KeyStore.getInstance("PKCS12");
         
-        // load pkcs12 file into keystore object
-        final FileInputStream fileIn = new FileInputStream(pkcs12FileName);
-        this.kspkcs12.load(fileIn,(pkcs12Pwd!=null)?pkcs12Pwd.toCharArray():null);
-        
-        // close stream
-        fileIn.close();
+        FileInputStream fileIn = null;
+        try {
+        	// load pkcs12 file into keystore object
+        	fileIn = new FileInputStream(pkcs12FileName);
+        	this.kspkcs12.load(fileIn,(pkcs12Pwd!=null)?pkcs12Pwd.toCharArray():null);
+        } finally {
+        	if(fileIn != null) {
+        		try {
+        			// close stream
+        			fileIn.close();
+        		} catch(IOException ioe) {
+        			System.err.println("Could not close file " + pkcs12FileName);
+        		}
+        	}
+        }
     }
     
     public Enumeration<String> aliases() throws KeyStoreException {
@@ -108,9 +117,19 @@ public class PKCS12Tool {
         
         // storing jdk into file
         System.err.print("Storing java keystore");
-        final FileOutputStream jksFileOut = new FileOutputStream(jksName);
-        jks.store(jksFileOut,(jksPassword!=null)?jksPassword.toCharArray():null);
-        jksFileOut.close();
+        FileOutputStream jksFileOut = null;
+        try {
+        	jksFileOut = new FileOutputStream(jksName);
+        	jks.store(jksFileOut,(jksPassword!=null)?jksPassword.toCharArray():null);
+        } finally {
+        	if(jksFileOut != null) {
+        		try {
+        			jksFileOut.close();
+        		} catch(IOException ioe) {
+        			System.err.println("Could not close file " + jksFileOut);
+        		}
+        	}
+        }
         System.err.print("Import finished.");
     }
     

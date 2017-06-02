@@ -345,12 +345,18 @@ public final class yacy {
                 for (String tmplang : langlist) {
                     if (!tmplang.equals("") && !tmplang.equals("default") && !tmplang.equals("browser")) { //locale is used
                         String currentRev = null;
+                        BufferedReader br = null;
                         try {
-                            final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), tmplang + "/version"))));
+                            br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot"), tmplang + "/version"))));
                             currentRev = br.readLine(); // may return null
-                            br.close();
                         } catch (final IOException e) {
                             //Error
+                        } finally {
+                        	try {
+                        		br.close();
+                        	} catch(IOException ioe) {
+                        		ConcurrentLog.warn("STARTUP", "Could not close " + tmplang + " version file");
+                        	}
                         }
 
                         if (currentRev == null || !currentRev.equals(sb.getConfig(Seed.VERSION, ""))) {
@@ -696,10 +702,10 @@ public final class yacy {
         
         if (configFile.exists()) {
             Properties p = new Properties();
+            FileInputStream fis = null;
             try {
-                FileInputStream fis = new FileInputStream(configFile);
+                fis = new FileInputStream(configFile);
                 p.load(fis);
-                fis.close();
                 // Test for server access restriction (is implemented using Jetty IPaccessHandler which does not support IPv6
                 // try to disable IPv6 
                 String teststr = p.getProperty("serverClient", "*");
@@ -736,6 +742,12 @@ public final class yacy {
                 System.err.println(configFile.getAbsolutePath());
                 ConcurrentLog.logException(ex);
                 ConcurrentLog.severe("Startup", "cannot read " + configFile.toString() + ", please delete the corrupted file if problem persits");
+            } finally {
+            	try {
+					fis.close();
+				} catch (IOException e) {
+					ConcurrentLog.warn("Startup", "Could not close file " + configFile);
+				}
             }
         }
     }     

@@ -361,8 +361,10 @@ public class pdfParser extends AbstractParser implements Parser {
                 // parse
                 final AbstractParser parser = new pdfParser();
                 Document document = null;
+                FileInputStream inStream = null; 
                 try {
-                    document = Document.mergeDocuments(null, "application/pdf", parser.parse(null, "application/pdf", null, new VocabularyScraper(), 0, new FileInputStream(pdfFile)));
+                	inStream = new FileInputStream(pdfFile);
+                    document = Document.mergeDocuments(null, "application/pdf", parser.parse(null, "application/pdf", null, new VocabularyScraper(), 0, inStream));
                 } catch (final Parser.Failure e) {
                     System.err.println("Cannot parse file " + pdfFile.getAbsolutePath());
                     ConcurrentLog.logException(e);
@@ -373,6 +375,14 @@ public class pdfParser extends AbstractParser implements Parser {
                     System.err.println("class not found: " + e.getMessage());
                 } catch (final FileNotFoundException e) {
                     ConcurrentLog.logException(e);
+                } finally {
+                	if(inStream != null) {
+                		try {
+                			inStream.close();
+                		} catch(IOException e) {
+                			System.err.println("Could not close input stream on file " + pdfFile);
+                		}
+                	}
                 }
 
                 // statistics
@@ -383,12 +393,22 @@ public class pdfParser extends AbstractParser implements Parser {
                     System.out.println("\t!!!Parsing without result!!!");
                 } else {
                     System.out.println("\tParsed text with " + document.getTextLength() + " chars of text and " + document.getAnchors().size() + " anchors");
+                    InputStream textStream = document.getTextStream();
                     try {
                         // write file
-                        FileUtils.copy(document.getTextStream(), new File("parsedPdf.txt"));
+                        FileUtils.copy(textStream, new File("parsedPdf.txt"));
                     } catch (final IOException e) {
                         System.err.println("error saving parsed document");
                         ConcurrentLog.logException(e);
+                    } finally {
+                    	try {
+                        	if(textStream != null) {
+                        		/* textStream can be a FileInputStream : we must close it to ensure releasing system resource */
+                        		textStream.close();
+                        	}
+						} catch (IOException e) {
+							ConcurrentLog.warn("PDFPARSER", "Could not close text input stream");
+						}
                     }
                 }
             } else {

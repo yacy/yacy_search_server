@@ -442,8 +442,15 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             // loading keystore data from file
             if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER","Loading keystore file " + keyStoreFileName);
             final FileInputStream stream = new FileInputStream(keyStoreFileName);
-            ks.load(stream, keyStorePwd.toCharArray());
-            stream.close();
+            try {
+            	ks.load(stream, keyStorePwd.toCharArray());
+            } finally {
+            	try {
+            		stream.close();
+            	} catch(IOException ioe) {
+            		ConcurrentLog.warn("SERVER", "Could not close input stream on file " + keyStoreFileName);
+            	}
+            }
  
             // creating a keystore factory
             if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER","Initializing key manager factory ...");

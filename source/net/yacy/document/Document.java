@@ -767,7 +767,19 @@ dc_rights
             if (!(this.text instanceof ByteArrayOutputStream)) {
                 this.text = new ByteArrayOutputStream();
             }
-            FileUtils.copy(doc.getTextStream(), (ByteArrayOutputStream) this.text);
+            InputStream textStream = doc.getTextStream();
+            try {
+            	FileUtils.copy(textStream, (ByteArrayOutputStream) this.text);
+            } finally {
+            	try {
+                	if(textStream != null) {
+                		/* textStream can be a FileInputStream : we must close it to ensure releasing system resource */
+                		textStream.close();
+                	}
+            	} catch(IOException e) {
+            		ConcurrentLog.warn("DOCUMENT", "Could not close text input stream");
+            	}
+            }
 
             this.anchors.addAll(doc.getAnchors());
             this.rss.putAll(doc.getRSS());
@@ -958,10 +970,20 @@ dc_rights
 
             if (doc.getTextLength() > 0) {
                 if (docTextLength > 0) content.write('\n');
+                InputStream textStream = doc.getTextStream();
                 try {
-                    docTextLength += FileUtils.copy(doc.getTextStream(), content);
+                    docTextLength += FileUtils.copy(textStream, content);
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
+                } finally {
+                	try {
+                    	if(textStream != null) {
+                    		/* textStream can be a FileInputStream : we must close it to ensure releasing system resource */
+                    		textStream.close();
+                    	}
+					} catch (IOException e) {
+						ConcurrentLog.warn("DOCUMENT", "Could not close text input stream");
+					}
                 }
             }
             anchors.addAll(doc.getAnchors());

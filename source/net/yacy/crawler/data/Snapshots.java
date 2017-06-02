@@ -43,6 +43,7 @@ import org.apache.solr.common.SolrDocument;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.schema.CollectionSchema;
 
@@ -148,8 +149,9 @@ public class Snapshots {
             this.pathtoxml[0] = new File(pathToShard(hostport, urlhash, depth), this.urlhash + "." + datestring + ".xml");
             String u = null;
             if (this.pathtoxml[0].exists()) {
+            	BufferedReader reader = null;
                 try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(this.pathtoxml[0])));
+                    reader = new BufferedReader(new InputStreamReader(new FileInputStream(this.pathtoxml[0])));
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (line.startsWith("<str name=\"sku\">")) {
@@ -157,8 +159,17 @@ public class Snapshots {
                             break;
                         }
                     }
-                    reader.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                	ConcurrentLog.warn("SNAPSHOTS", "Error while reading file " + this.pathtoxml[0]);
+                } finally {
+                	if(reader != null) {
+                		try {
+							reader.close();
+						} catch (IOException ignored) {
+							ConcurrentLog.warn("SNAPSHOTS", "Could not close input stream on file " + this.pathtoxml[0]);
+						}
+                	}
+                }
             }
             this.url = u; 
         }

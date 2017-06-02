@@ -139,13 +139,25 @@ public class Files {
             if (to.exists()) to.delete();
             final byte[] buffer = new byte[4096];
             int bytesRead;
-            final InputStream in =  new BufferedInputStream(new FileInputStream(from));
-            final OutputStream out = new BufferedOutputStream(new FileOutputStream (to));
-            while ((bytesRead = in.read(buffer)) >= 0) {
-                out.write(buffer,0,bytesRead);
+            InputStream in = null;
+            OutputStream out = null;
+            try {
+            	in =  new BufferedInputStream(new FileInputStream(from));
+            	out = new BufferedOutputStream(new FileOutputStream (to));
+            	while ((bytesRead = in.read(buffer)) >= 0) {
+            		out.write(buffer,0,bytesRead);
+            	}
+            } finally {
+            	if(in != null) {
+            		try {
+            			in.close();
+            		} catch(IOException ignored) {
+            		}
+            	}
+            	if(out != null) {
+            		out.close();
+            	}
             }
-            in.close();
-            out.close();
         }
     }
 }

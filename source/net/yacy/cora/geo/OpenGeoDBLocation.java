@@ -74,9 +74,10 @@ public class OpenGeoDBLocation implements Locations
         if ( file == null || !file.exists() ) {
             return;
         }
+        InputStream is = null;
         BufferedReader reader = null;
         try {
-            InputStream is = new FileInputStream(file);
+            is = new FileInputStream(file);
             if ( file.getName().endsWith(".gz") ) {
                 is = new GZIPInputStream(is);
             }
@@ -162,14 +163,18 @@ public class OpenGeoDBLocation implements Locations
                 }
                 continue;
             }
-            reader.close();
         } catch (final IOException e ) {
             ConcurrentLog.logException(e);
         } finally {
             if ( reader != null ) {
                 try {
                     reader.close();
-                } catch (final Exception e ) {
+                } catch (final Exception ignored ) {
+                }
+            } else if(is != null) {
+                try {
+                	is.close();
+                } catch (final IOException ignored ) {
                 }
             }
         }

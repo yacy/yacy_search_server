@@ -29,28 +29,51 @@ public class ParserTest {
 		};
 
 		for (final String[] testFile : testFiles) {
+					FileInputStream inStream = null;
+                    final String filename = "test/parsertest/" + testFile[0];
                     try {
-                        final String filename = "test/parsertest/" + testFile[0];
                         final File file = new File(filename);
                         final String mimetype = testFile[1];
                         final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new ooxmlParser();
-                        final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, new FileInputStream(file));
+                        inStream = new FileInputStream(file);
+                        final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, inStream);
                         for (final Document doc: docs) {
-                            final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
-                            final StringBuilder str = new StringBuilder();
-                            int c;
-                            while( (c = content.read()) != -1 )
-                                    str.append((char)c);
+                        	Reader content = null;
+                        	try {
+                        		content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
+                        		final StringBuilder str = new StringBuilder();
+                        		int c;
+                        		while( (c = content.read()) != -1 )
+                        			str.append((char)c);
 
-                            System.out.println("Parsed " + filename + ": " + str);
-                            assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
-                            assertThat(doc.dc_title(), containsString(testFile[2]));
-                            assertThat(doc.dc_creator(), containsString(testFile[3]));
-                            if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                        		System.out.println("Parsed " + filename + ": " + str);
+                        		assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
+                        		assertThat(doc.dc_title(), containsString(testFile[2]));
+                        		assertThat(doc.dc_creator(), containsString(testFile[3]));
+                        		if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                        	}  finally {
+                            	if(content != null) {
+                            		try {
+                            			content.close();
+                            		} catch(IOException ioe) {
+                            			System.out.println("Could not close text input stream");
+                            		}
+                            	}
+                            }
                         }
-                    } catch (final InterruptedException ex) {}
+                    } catch (final InterruptedException ex) {
+                    	
+                    } finally {
+                    	if(inStream != null) {
+                    		try {
+                    			inStream.close();
+                    		} catch(IOException ioe) {
+                    			System.out.println("Could not close input stream on file " + filename);
+                    		}
+                    	}
+                    }
                     }
 		}
         
@@ -63,28 +86,50 @@ public class ParserTest {
 		};
 
 		for (final String[] testFile : testFiles) {
+					FileInputStream inStream = null;
+                    final String filename = "test/parsertest/" + testFile[0];
                     try {
-                        final String filename = "test/parsertest/" + testFile[0];
                         final File file = new File(filename);
                         final String mimetype = testFile[1];
                         final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new odtParser();
-                        final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, new FileInputStream(file));
+                        inStream = new FileInputStream(file);
+                        final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, inStream);
                         for (final Document doc: docs) {
-                            final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
-                            final StringBuilder str = new StringBuilder();
-                            int c;
-                            while( (c = content.read()) != -1 )
+                        	Reader content = null;
+                        	try {
+                        		content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
+                        		final StringBuilder str = new StringBuilder();
+                        		int c;
+                        		while( (c = content.read()) != -1 )
                                     str.append((char)c);
 
-                            System.out.println("Parsed " + filename + ": " + str);
-                            assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
-                            assertThat(doc.dc_title(), containsString(testFile[2]));
-                            assertThat(doc.dc_creator(), containsString(testFile[3]));
-                            if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                        		System.out.println("Parsed " + filename + ": " + str);
+                        		assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
+                        		assertThat(doc.dc_title(), containsString(testFile[2]));
+                        		assertThat(doc.dc_creator(), containsString(testFile[3]));
+                        		if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                        	} finally {
+                            	if(content != null) {
+                            		try {
+                            			content.close();
+                            		} catch(IOException ioe) {
+                            			System.out.println("Could not close text input stream");
+                            		}
+                            	}
+                            }
                         }
-                    } catch (final InterruptedException ex) {}
+                    } catch (final InterruptedException ex) {
+                    } finally {
+                    	if(inStream != null) {
+                    		try {
+                    			inStream.close();
+                    		} catch(IOException ioe) {
+                    			System.out.println("Could not close input stream on file " + filename);
+                    		}
+                    	}
+                    }
                     }
 		}
 
@@ -95,28 +140,50 @@ public class ParserTest {
 		};
 
 		for (final String[] testFile : testFiles) {
+            		final String filename = "test/parsertest/" + testFile[0];
+					FileInputStream inStream = null;
                     try {
-                        final String filename = "test/parsertest/" + testFile[0];
                         final File file = new File(filename);
                         final String mimetype = testFile[1];
                         final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new pdfParser();
-                        final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, new FileInputStream(file));
+                        inStream = new FileInputStream(file);
+                        final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, inStream);
                         for (final Document doc: docs) {
-                            final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
-                            final StringBuilder str = new StringBuilder();
-                            int c;
-                            while( (c = content.read()) != -1 )
+                        	Reader content = null;
+                        	try {
+                        		content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
+                        		final StringBuilder str = new StringBuilder();
+                        		int c;
+                        		while( (c = content.read()) != -1 )
                                     str.append((char)c);
                              
-                            System.out.println("Parsed " + filename + ": " + str);
-                            assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
-                            assertThat(doc.dc_title(), containsString(testFile[2]));
-                            assertThat(doc.dc_creator(), containsString(testFile[3]));
-                            if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                        		System.out.println("Parsed " + filename + ": " + str);
+                        		assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
+                        		assertThat(doc.dc_title(), containsString(testFile[2]));
+                        		assertThat(doc.dc_creator(), containsString(testFile[3]));
+                        		if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                            } finally {
+                            	if(content != null) {
+                            		try {
+                            			content.close();
+                            		} catch(IOException ioe) {
+                            			System.out.println("Could not close text input stream");
+                            		}
+                            	}
+                            }
                         }
-                    } catch (final InterruptedException ex) {}
+                    } catch (final InterruptedException ex) {
+                    } finally {
+                    	if(inStream != null) {
+                    		try {
+                    			inStream.close();
+                    		} catch(IOException ioe) {
+                    			System.out.println("Could not close input stream on file " + filename);
+                    		}
+                    	}
+                    }
                     }
 		}                
                 
@@ -127,29 +194,51 @@ public class ParserTest {
 		};
 
 		for (final String[] testFile : testFiles) {
+            		final String filename = "test/parsertest/" + testFile[0];
+					FileInputStream inStream = null;
                     try {
-                        final String filename = "test/parsertest/" + testFile[0];
                         final File file = new File(filename);
                         final String mimetype = testFile[1];
                         final AnchorURL url = new AnchorURL("http://localhost/"+filename);
 
                         AbstractParser p = new docParser();
-                        final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, new FileInputStream(file));
+                        inStream = new FileInputStream(file);
+                        final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, inStream);
                         for (final Document doc: docs) {
-                            final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
-                            final StringBuilder str = new StringBuilder();
-                            int c;
-                            while( (c = content.read()) != -1 )
+                            Reader content = null;
+                            try {
+                            	content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
+                            	final StringBuilder str = new StringBuilder();
+                            	int c;
+                            	while( (c = content.read()) != -1 )
                                     str.append((char)c);
 
-                            System.out.println("Parsed " + filename + ": " + str);
-                            assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
-                            assertThat(doc.dc_title(), containsString(testFile[2]));
-                            assertThat(doc.dc_creator(), containsString(testFile[3]));
-                            if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                            	System.out.println("Parsed " + filename + ": " + str);
+                            	assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
+                            	assertThat(doc.dc_title(), containsString(testFile[2]));
+                            	assertThat(doc.dc_creator(), containsString(testFile[3]));
+                            	if (testFile[4].length() > 0) assertThat(doc.dc_description()[0], containsString(testFile[4]));
+                            } finally {
+                            	if(content != null) {
+                            		try {
+                            			content.close();
+                            		} catch(IOException ioe) {
+                            			System.out.println("Could not close text input stream");
+                            		}
+                            	}
+                            }
                         }
-                    } catch (final InterruptedException ex) {}
+                    } catch (final InterruptedException ex) {
+                    } finally {
+                    	if(inStream != null) {
+                    		try {
+                    			inStream.close();
+                    		} catch(IOException ioe) {
+                    			System.out.println("Could not close input stream on file " + filename);
+                    		}
+                    	}
                     }
+		}
 		}
 
     /**
@@ -172,22 +261,46 @@ public class ParserTest {
             final AnchorURL url = new AnchorURL("http://localhost/" + filename);
 
             AbstractParser p = new pptParser();
-            final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, new FileInputStream(file));
-            for (final Document doc : docs) {
-                final Reader content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
-                final StringBuilder str = new StringBuilder();
-                int c;
-                while ((c = content.read()) != -1) {
-                    str.append((char) c);
-                }
+            FileInputStream inStream = null;
+            try {
+            	inStream = new FileInputStream(file);
+            	final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, inStream);
+            	for (final Document doc : docs) {
+            		Reader content = null;
+            		try {
+            			content = new InputStreamReader(doc.getTextStream(), doc.getCharset());
+            			final StringBuilder str = new StringBuilder();
+            			int c;
+            			while ((c = content.read()) != -1) {
+            				str.append((char) c);
+            			}
 
-                System.out.println("Parsed " + filename + ": " + str);
-                assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
-                assertThat(doc.dc_title(), containsString(testFile[2]));
-                assertThat(doc.dc_creator(), containsString(testFile[3]));
-                if (testFile[4].length() > 0) {
-                    assertThat(doc.dc_description()[0], containsString(testFile[4]));
-                }
+            			System.out.println("Parsed " + filename + ": " + str);
+            			assertThat(str.toString(), containsString("In München steht ein Hofbräuhaus, dort gibt es Bier in Maßkrügen"));
+            			assertThat(doc.dc_title(), containsString(testFile[2]));
+            			assertThat(doc.dc_creator(), containsString(testFile[3]));
+            			if (testFile[4].length() > 0) {
+            				assertThat(doc.dc_description()[0], containsString(testFile[4]));
+            			}
+            		} finally {
+                    	if(content != null) {
+                    		try {
+                    			content.close();
+                    		} catch(IOException ioe) {
+                    			System.out.println("Could not close text input stream");
+                    		}
+                    	}
+            		}
+            		
+            	}
+            } finally {
+            	if(inStream != null) {
+            		try {
+            			inStream.close();
+            		} catch(IOException ioe) {
+            			System.out.println("Could not close input stream on file " + filename);
+            		}
+            	}
             }
         }
     }

@@ -327,10 +327,6 @@ public class cryptbig {
 	    // read and decrypt the file
 	    copy(fout, fin, 512);
 
-	    // close the files
-	    fin.close();
-	    fout.close();
-
 	    // do postprocessing
 	} catch (final BadPaddingException e) {
 	    System.err.println("ERROR: decryption of '" + inFileName + "' not possible: " + e.getMessage());
@@ -340,6 +336,7 @@ public class cryptbig {
 	    System.err.println("ERROR: file '" + inFileName + "' not found");
 	} catch (final IOException e) {
 	    System.err.println("ERROR: IO trouble");
+	} finally {
 	    try { if(fin != null) {
 	        fin.close();
 	    }} catch (final Exception ee) {}

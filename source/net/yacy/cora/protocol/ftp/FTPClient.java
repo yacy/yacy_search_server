@@ -247,15 +247,21 @@ public class FTPClient {
                     final File f = new File(System.getProperty("user.dir"), classname + ".class");
                     final int length = (int) f.length();
                     final byte[] classbytes = new byte[length];
+                    DataInputStream in = null;
                     try {
-                        final DataInputStream in = new DataInputStream(new FileInputStream(f));
+                        in = new DataInputStream(new FileInputStream(f));
                         in.readFully(classbytes);
-                        in.close();
                         c = defineClass(classname, classbytes, 0, classbytes.length);
                     } catch (final FileNotFoundException ee) {
                         throw new ClassNotFoundException();
                     } catch (final IOException ee) {
                         throw new ClassNotFoundException();
+                    } finally {
+                        try {
+							in.close();
+						} catch (IOException ioe) {
+							log.warn("Could not close input stream on file " + f);
+						}
                     }
                 }
             }

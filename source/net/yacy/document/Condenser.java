@@ -282,10 +282,12 @@ public final class Condenser extends Tokenizer {
 
     public static void main(final String[] args) {
         // read a property file and convert them into configuration lines
+    	FileInputStream inStream = null;
         try {
             final File f = new File(args[0]);
             final Properties p = new Properties();
-            p.load(new FileInputStream(f));
+            inStream = new FileInputStream(f);
+            p.load(inStream);
             final StringBuilder sb = new StringBuilder();
             sb.append("{\n");
             for (int i = 0; i <= 15; i++) {
@@ -303,6 +305,14 @@ public final class Condenser extends Tokenizer {
             ConcurrentLog.logException(e);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
+        } finally {
+        	if(inStream != null) {
+        		try {
+					inStream.close();
+				} catch (IOException e) {
+					ConcurrentLog.logException(e);
+				}
+        	}
         }
 
     }

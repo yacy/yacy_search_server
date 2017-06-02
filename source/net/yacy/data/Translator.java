@@ -180,7 +180,6 @@ public class Translator {
             while( (line = br.readLine()) != null){
                 content.append(line).append(net.yacy.server.serverCore.CRLF_STRING);
             }
-            br.close();
         } catch(final IOException e) {
             return false;
         } finally {

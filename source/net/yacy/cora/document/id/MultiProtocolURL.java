@@ -2352,14 +2352,27 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return null;
     }
 
+    /**
+     * Read fully the source, close it and return its content as a bytes array.
+     * @param source the source to read
+     * @return return the content of the source stream
+     * @throws IOException when an erro occured
+     */
     public static byte[] read(final InputStream source) throws IOException {
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final byte[] buffer = new byte[2048];
-        int c;
-        while ((c = source.read(buffer, 0, 2048)) > 0) baos.write(buffer, 0, c);
-        baos.flush();
-        baos.close();
-        return baos.toByteArray();
+    	try {
+    		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    		final byte[] buffer = new byte[2048];
+    		int c;
+    		while ((c = source.read(buffer, 0, 2048)) > 0) baos.write(buffer, 0, c);
+    		baos.flush();
+    		baos.close();
+    		return baos.toByteArray();
+    	} finally {
+    		try {
+    			source.close();
+    		} catch(IOException ignored) {
+    		}
+    	}
     }
 
     public Locale getLocale() {

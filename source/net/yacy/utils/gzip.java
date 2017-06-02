@@ -48,17 +48,33 @@ public class gzip {
     private final static ConcurrentLog logger = new ConcurrentLog("GZIP");
 
     public static void gzipFile(final String inFile, final String outFile) {
-	try {
-	    final InputStream  fin  = new BufferedInputStream(new FileInputStream(inFile));
-	    final OutputStream fout = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)), 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
-	    copy(fout, fin, 1024);
-	    fin.close();
-	    fout.close();
-	} catch (final FileNotFoundException e) {
-	    logger.warn("ERROR: file '" + inFile + "' not found", e);
-	} catch (final IOException e) {
+    	InputStream fin = null;
+    	OutputStream fout = null;
+    	try {
+    		fin  = new BufferedInputStream(new FileInputStream(inFile));
+    		fout = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(outFile)), 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
+    		copy(fout, fin, 1024);
+
+    	} catch (final FileNotFoundException e) {
+    		logger.warn("ERROR: file '" + inFile + "' not found", e);
+    	} catch (final IOException e) {
             logger.warn("ERROR: IO trouble ",e);
-	}
+    	} finally {
+    		if(fin != null) {
+    			try {
+    				fin.close();
+    			} catch(IOException e) {
+    				logger.warn("ERROR: Could not close file " + inFile);
+    			}
+    		}
+    		if(fout != null) {
+    			try {
+    				fout.close();
+    			} catch(IOException e) {
+    				logger.warn("ERROR: Could not close file " + outFile);
+    			}
+    		}
+    	}
     }
 
     public static File gunzipFile(final File in) {
