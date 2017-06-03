@@ -192,13 +192,13 @@ public class TranslationManager extends TranslatorXliff {
                         while ((line = br.readLine()) != null) {
                             content.append(line).append(net.yacy.server.serverCore.CRLF_STRING);
                         }
-                        br.close();
                     } catch (final IOException e) {
                     } finally {
                         if (br != null) {
                             try {
                                 br.close();
                             } catch (final Exception e) {
+                            	ConcurrentLog.fine("TRANSLATOR", "Could not close buffered reader on file " + checkfile);
                             }
                         }
                     }

@@ -795,14 +795,32 @@ public class Blacklist {
     private final void loadDHTCache(final BlacklistType type) {
         File cachefile = DHTCacheFile(type);
         if (cachefile.exists()) {
+        	FileInputStream fileInStream = null;
+        	ObjectInputStream in = null;
             try {
-                ObjectInputStream in = new ObjectInputStream(new FileInputStream(cachefile));
-                RowHandleSet rhs = (RowHandleSet) in.readObject();
-                this.cachedUrlHashs.put(type, rhs == null ? new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0) : rhs);
-                in.close();
+            	fileInStream = new FileInputStream(cachefile);
+                in = new ObjectInputStream(fileInStream);
+              	RowHandleSet rhs = (RowHandleSet) in.readObject();
+               	this.cachedUrlHashs.put(type, rhs == null ? new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0) : rhs);
                 return;
             } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
+            }  finally {
+            	if(in != null) {
+            		try {
+            			in.close();
+            		} catch(IOException ioe) {
+            			log.warn("Could not close object input stream on file " + cachefile);
+            		}
+            	} else if(fileInStream != null){
+            		/* An error may have been thrown while constructing the ObjectInputStream : 
+            		 * by the way the file input stream still has to be closed properly */
+            		try {
+            			fileInStream.close();
+            		} catch(IOException ioe) {
+            			log.warn("Could not close input stream on file " + cachefile);
+            		}
+            	}
             }
         }
         this.cachedUrlHashs.put(type, new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0));

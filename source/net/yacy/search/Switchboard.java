@@ -87,11 +87,15 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.SolrInputField;
+
+import com.cybozu.labs.langdetect.DetectorFactory;
+import com.cybozu.labs.langdetect.LangDetectException;
+import com.google.common.io.Files;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.contentcontrol.SMWListSyncThread;
@@ -136,9 +140,9 @@ import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.NoticedURL;
+import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.data.ResultImages;
 import net.yacy.crawler.data.ResultURLs;
-import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
 import net.yacy.crawler.data.Transactions;
 import net.yacy.crawler.retrieval.Request;
@@ -161,11 +165,11 @@ import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
+import net.yacy.document.Parser.Failure;
 import net.yacy.document.ProbabilisticClassifier;
 import net.yacy.document.TextParser;
-import net.yacy.document.VocabularyScraper;
-import net.yacy.document.Parser.Failure;
 import net.yacy.document.Tokenizer;
+import net.yacy.document.VocabularyScraper;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.importer.OAIListFriendsLoader;
@@ -190,11 +194,11 @@ import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.kelondro.workflow.WorkflowThread;
+import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Dispatcher;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.Network;
 import net.yacy.peers.NewsPool;
-import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
@@ -225,10 +229,6 @@ import net.yacy.utils.CryptoLib;
 import net.yacy.utils.crypt;
 import net.yacy.utils.upnp.UPnP;
 import net.yacy.visualization.CircleTool;
-
-import com.cybozu.labs.langdetect.DetectorFactory;
-import com.cybozu.labs.langdetect.LangDetectException;
-import com.google.common.io.Files;
 
 
 
@@ -2005,7 +2005,9 @@ public final class Switchboard extends serverSwitch {
                 ConcurrentLog.logException(e);
             } finally {
                 moved = infile.renameTo(outfile);
-                if (zis != null) try {zis.close();} catch (final IOException e) {}
+                if (zis != null) try {zis.close();} catch (final IOException e) {
+                	log.warn("Could not close zip input stream on file " + infile);
+                }
             }
             return moved;
         } else if (s.endsWith(".warc") || s.endsWith(".warc.gz")) {
@@ -2025,9 +2027,12 @@ public final class Switchboard extends serverSwitch {
         } else if (s.endsWith(".jsonlist") || s.endsWith(".flatjson")) {
             // parse a file that can be generated with yacy_grid_parser
             // see https://github.com/yacy/yacy_grid_parser/blob/master/README.md
+        	FileInputStream fis = null;
+        	BufferedReader br = null;
             try {
-                InputStream is = new BufferedInputStream(new FileInputStream(infile));
-                BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            	fis = new FileInputStream(infile);
+                InputStream is = new BufferedInputStream(fis);
+                br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
                 String line;
                 while ((line = br.readLine()) != null) {
                     JSONTokener jt = new JSONTokener(line);
@@ -2098,10 +2103,29 @@ public final class Switchboard extends serverSwitch {
                     }
                     Switchboard.this.index.putDocument(surrogate);
                 }
-                is.close();
+                br.close();
+                br = null;
+                fis = null;
                 moved = infile.renameTo(outfile);
             } catch (IOException ex) {
                 log.warn("IO Error processing flatjson file " + infile);
+            } finally {
+            	/* Properly release file system resources even in failure cases */
+            	if(br != null) {
+            		/* buffered reader was successfully created : close it and its underlying streams */
+            		try {
+						br.close();
+					} catch (IOException e) {
+						log.warn("Could not close reader on file " + infile);
+					}
+            	} else if(fis != null) {
+            		/* no buffered reader : maybe a case of exhausted memory. Anyway file input stream has to be closed. */
+            		try {
+						fis.close();
+					} catch (IOException e) {
+						log.warn("Could not close input stream on file " + infile);
+					}
+            	}
             }
             return moved;
         }
@@ -2123,9 +2147,19 @@ public final class Switchboard extends serverSwitch {
                         try {
                             final OutputStream os = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile), 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}});
                             BufferedInputStream bis = new BufferedInputStream(new FileInputStream(outfile)); 
-                            FileUtils.copy(bis, os);
-                            os.close();
-                            bis.close();
+                            try {
+                            	FileUtils.copy(bis, os);
+                            } finally {
+                            	try {
+                            		os.close();
+                            	} finally {
+                            		try {
+                            			bis.close();
+                            		} catch(IOException ignored) {
+                            			log.warn("Could not close input stream on file " + outfile);
+                            		}
+                            	}
+                            }
                             if ( gzfile.exists() ) {
                                 FileUtils.deletedelete(outfile);
                             }
@@ -2138,7 +2172,9 @@ public final class Switchboard extends serverSwitch {
                     log.info("processed surrogate " + infile);
                 }
             }
-            if (is != null) try {is.close();} catch (IOException e) {}
+            if (is != null) try {is.close();} catch (IOException e) {
+            	log.warn("Could not close input stream on file " + infile);
+            }
         }
         return moved;
     }
@@ -2610,9 +2646,10 @@ public final class Switchboard extends serverSwitch {
             if ( !isRobinsonMode() && this.peers.newsPool.size(NewsPool.OUTGOING_DB) == 0 ) {
                 // read profile
                 final Properties profile = new Properties();
+                final File profileFile = new File(this.dataPath, "DATA/SETTINGS/profile.txt");
                 FileInputStream fileIn = null;
                 try {
-                    fileIn = new FileInputStream(new File(this.dataPath, "DATA/SETTINGS/profile.txt"));
+                    fileIn = new FileInputStream(profileFile);
                     profile.load(fileIn);
                 } catch (final IOException e ) {
                 } finally {
@@ -2620,6 +2657,7 @@ public final class Switchboard extends serverSwitch {
                         try {
                             fileIn.close();
                         } catch (final Exception e ) {
+                        	log.warn("Could not close input stream on file " + profileFile);
                         }
                     }
                 }

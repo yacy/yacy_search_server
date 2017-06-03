@@ -62,23 +62,36 @@ public class Gap extends TreeMap<Long, Integer> {
         super();
         // read the index dump and fill the index
         DataInputStream is;
+        FileInputStream fis = null;
         try {
-            is = new DataInputStream(new BufferedInputStream(new FileInputStream(file), (Integer.SIZE + Long.SIZE) * 1024)); // equals 16*1024*recordsize
+        	fis = new FileInputStream(file);
+            is = new DataInputStream(new BufferedInputStream(fis, (Integer.SIZE + Long.SIZE) * 1024)); // equals 16*1024*recordsize
         } catch (final OutOfMemoryError e) {
-            is = new DataInputStream(new FileInputStream(file));
+        	if(fis != null) {
+        		/* Reuse if possible the already created FileInputStream */
+                is = new DataInputStream(fis);
+        	} else {
+        		is = new DataInputStream(new FileInputStream(file));
+        	}
+
         }
-        long p;
-        int l;
-        while (true) {
-            try {
-                p = is.readLong();
-                l = is.readInt();
-                this.put(Long.valueOf(p), Integer.valueOf(l));
-            } catch (final IOException e) {
-                break;
-            }
+        try {
+        	long p;
+        	int l;
+        	while (true) {
+        		try {
+        			p = is.readLong();
+        			l = is.readInt();
+        			this.put(Long.valueOf(p), Integer.valueOf(l));
+        		} catch (final IOException e) {
+        			break;
+        		}
+        	}
+        } finally {
+        	if(is != null) {
+        		is.close();
+        	}
         }
-        is.close();
         is = null;
     }
     

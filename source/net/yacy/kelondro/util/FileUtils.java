@@ -292,6 +292,7 @@ public final class FileUtils {
                 try {
                     fis.close();
                 } catch (final Exception e ) {
+                	ConcurrentLog.warn("FileUtils", "Could not close input stream on file " + source);
                 }
             }
         }
@@ -319,6 +320,7 @@ public final class FileUtils {
                 try {
                     fis.close();
                 } catch (final Exception e ) {
+                	ConcurrentLog.warn("FileUtils", "Could not close input stream on file " + source);
                 }
             }
         }
@@ -411,6 +413,7 @@ public final class FileUtils {
                 try {
                     fis.close();
                 } catch (final Exception e ) {
+                	ConcurrentLog.warn("FileUtils", "Could not close input stream on file " + source);
                 }
             }
             fis = null;
@@ -478,13 +481,13 @@ public final class FileUtils {
                     set.add(line.trim().toLowerCase());
                 }
             }
-            br.close();
         } catch (final IOException e ) {
         } finally {
             if ( br != null ) {
                 try {
                     br.close();
                 } catch (final Exception e ) {
+                	ConcurrentLog.warn("FileUtils", "Could not close input stream on file " + file);
                 }
             }
         }
@@ -622,7 +625,6 @@ public final class FileUtils {
             while ( (line = br.readLine()) != null ) {
                 if (!line.isEmpty()) list.add(line);
             }
-            br.close();
         } catch (final IOException e ) {
             // list is empty
         } finally {
@@ -630,6 +632,7 @@ public final class FileUtils {
                 try {
                     br.close();
                 } catch (final Exception e ) {
+                	ConcurrentLog.warn("FileUtils", "Could not close input stream on file " + listFile);
                 }
             }
         }
@@ -692,13 +695,13 @@ public final class FileUtils {
                     temp.append(line).append(CR).append(LF);
                 }
             }
-            br.close();
         } catch (final IOException e ) {
         } finally {
             if ( br != null ) {
                 try {
                     br.close();
                 } catch (final Exception e ) {
+                	ConcurrentLog.warn("FileUtils", "Could not close input stream on file " + listFile);
                 }
             }
         }

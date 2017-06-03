@@ -57,8 +57,11 @@ public class XMLTables {
         this.timestamp = System.currentTimeMillis();
         if (propFile.exists()) {
             final XMLDecoder xmldec = new XMLDecoder(new FileInputStream(propFile));
-            tables = (HashMap<String, Map<String, String>>) xmldec.readObject();
-            xmldec.close();
+            try {
+            	tables = (HashMap<String, Map<String, String>>) xmldec.readObject();
+            } finally {
+            	xmldec.close();
+            }
         } else {
             tables = new HashMap<String, Map<String, String>>();
         }

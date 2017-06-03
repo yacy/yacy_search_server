@@ -268,6 +268,14 @@ public class bmpParser {
             ConcurrentLog.logException(e);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
+        } finally {
+        	if(fis != null) {
+        		try {
+        			fis.close();
+        		} catch(IOException ioe) {
+        			ConcurrentLog.logException(ioe);		
+        		}
+        	}
         }
 
         try {

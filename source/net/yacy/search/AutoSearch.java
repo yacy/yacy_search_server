@@ -88,7 +88,15 @@ public class AutoSearch extends AbstractBusyThread {
                     ConcurrentLog.info(AutoSearch.class.getName(), "read queries from file " + pfile.getAbsolutePath());
                     Properties prop = new Properties();
                     FileInputStream fileIn = new FileInputStream(pfile);
-                    prop.load(fileIn);
+                    try {
+                    	prop.load(fileIn);
+                    } finally {
+                    	try {
+                    		fileIn.close();
+                    	} catch(IOException ioe) {
+                    		ConcurrentLog.warn(AutoSearch.class.getName(), "Could not close input stream on file " + pfile);    		
+                    	}
+                    }
                     if (prop.size() > 0) {
                         Set<Object> all = prop.keySet();
                         for (Object s : all) {
@@ -98,7 +106,6 @@ public class AutoSearch extends AbstractBusyThread {
                             }
                         }
                     }
-                    fileIn.close();
                 }
             } catch (final IOException e) {
                 ConcurrentLog.warn(AutoSearch.class.getName(), "Error reading config file");

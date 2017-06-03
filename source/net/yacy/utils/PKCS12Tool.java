@@ -95,8 +95,17 @@ public class PKCS12Tool {
         } else{
             System.err.println("Creating new java keystore '" + jksFile + "'");
         }
-        jks.load(jksFileIn,(jksPassword!=null)?jksPassword.toCharArray():null);
-        if (jksFileIn != null) jksFileIn.close();
+        try {
+        	jks.load(jksFileIn,(jksPassword!=null)?jksPassword.toCharArray():null);
+        } finally {
+        	if (jksFileIn != null) {
+        		try {
+        			jksFileIn.close();
+        		} catch(IOException ioe) {
+        			System.err.println("Error while closing input stream on file " + jksFile);
+        		}
+        	}
+        }
          
         final Enumeration<String> pkcs12Aliases = aliases();
         while (pkcs12Aliases.hasMoreElements()) {

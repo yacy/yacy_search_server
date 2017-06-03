@@ -59,8 +59,10 @@ public class tarTools {
 	 */
 	public static InputStream getInputStream(final String tarPath) throws FileNotFoundException {
 		if (tarPath.endsWith(".gz")) {
+			FileInputStream fileInStream = null;
 			try {
-				return new GZIPInputStream(new FileInputStream(new File(tarPath)));
+				fileInStream = new FileInputStream(new File(tarPath));
+				return new GZIPInputStream(fileInStream);
 			} catch (FileNotFoundException e) {
 				/*
 				 * FileNotFoundException is is a subClass of IOException but the
@@ -68,6 +70,15 @@ public class tarTools {
 				 */
 				throw e;
 			} catch (final IOException e) {
+				if(fileInStream != null) {
+					try {
+						/* release the now useless firstly opened file input stream 
+						 * (we can not reuse it as the header has been read by the GZIPInputStream) */
+						fileInStream.close();
+					} catch (IOException e1) {
+						ConcurrentLog.warn("UNTAR", "Could not close input stream on file " + tarPath);
+					}
+				}
 		        // this might happen if the stream is not in gzip format.
 		        // there may be a 'gz' extension, but it may still be a raw tar file
 		        // this can be caused by 'one too much gzip-content header' that was attached

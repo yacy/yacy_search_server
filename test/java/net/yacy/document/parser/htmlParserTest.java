@@ -77,12 +77,22 @@ public class htmlParserTest extends TestCase {
             System.out.println("parse file: " + filename);
 
             htmlParser p = new htmlParser();
-            final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, new FileInputStream(file));
+            FileInputStream inStream = null;
+            try {
+            	inStream = new FileInputStream(file);
+            	
+                final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, inStream);
 
-            Document doc = docs[0];
-            String txt = doc.getCharset();
-            assertTrue("get Charset", txt != null);
-            System.out.println("detected charset = " + txt);
+                Document doc = docs[0];
+                String txt = doc.getCharset();
+                assertTrue("get Charset", txt != null);
+                System.out.println("detected charset = " + txt);
+            } finally {
+            	if(inStream != null) {
+            		System.out.println("Could not close input stream on file " + file);	
+            	}
+            }
+
 
         }
     }

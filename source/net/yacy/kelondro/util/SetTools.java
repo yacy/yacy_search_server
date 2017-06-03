@@ -529,7 +529,9 @@ public final class SetTools {
             }
         } catch (final IOException e) {
         } finally {
-            if (br != null) try{br.close();}catch(final Exception e){}
+            if (br != null) try{br.close();}catch(final Exception e){
+            	ConcurrentLog.warn("SetTools", "Could not close input stream on file " + file);
+            }
         }
         return list;
     }

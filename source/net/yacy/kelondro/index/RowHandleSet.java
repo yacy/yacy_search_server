@@ -107,15 +107,24 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
     public RowHandleSet(final int keylength, final ByteOrder objectOrder, final File file) throws IOException, SpaceExceededException {
         this(keylength, objectOrder, (int) (file.length() / (keylength + 8)));
         // read the index dump and fill the index
-        final InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
-        final byte[] a = new byte[keylength];
-        int c;
-        while (true) {
-            c = is.read(a);
-            if (c <= 0) break;
-            this.index.addUnique(this.rowdef.newEntry(a));
+        FileInputStream fis = new FileInputStream(file);
+        InputStream is = null;
+        try {
+        	is = new BufferedInputStream(fis, 1024 * 1024);
+        	final byte[] a = new byte[keylength];
+        	int c;
+        	while (true) {
+        		c = is.read(a);
+        		if (c <= 0) break;
+        		this.index.addUnique(this.rowdef.newEntry(a));
+        	}
+        } finally {
+        	if(is != null) {
+        		is.close();
+        	} else if(fis != null) {
+        		fis.close();
+        	}
         }
-        is.close();
         assert this.index.size() == file.length() / keylength;
     }
 
@@ -388,13 +397,15 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
 
                 // read from file
                 ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));
-                RowHandleSet s1 = (RowHandleSet) in.readObject();
-                in.close();
-
-                for (byte[] b: s1) {
-                    System.out.println(UTF8.String(b));
+                try {
+                	RowHandleSet s1 = (RowHandleSet) in.readObject();
+                    for (byte[] b: s1) {
+                        System.out.println(UTF8.String(b));
+                    }
+                    s1.close();
+                } finally {
+                	in.close();
                 }
-                s1.close();
             } catch(IOException e) {
                 e.printStackTrace();
             } catch (final ClassNotFoundException e) {

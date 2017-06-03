@@ -174,7 +174,11 @@ public class Switchboard {
             log.info("error: file dispatcher.properties cannot be readed. Exit");
             System.exit(-1);
         } finally {
-            if (fis != null) try { fis.close(); } catch (IOException ex) { }
+            if (fis != null) try { 
+            	fis.close(); 
+            } catch (IOException ex) { 
+            	log.warn("Could not close input stream on file " + propFile);
+            }
         }
     }
     

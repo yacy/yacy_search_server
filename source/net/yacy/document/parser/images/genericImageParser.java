@@ -301,9 +301,11 @@ public class genericImageParser extends AbstractParser implements Parser {
         final File image = new File(args[0]);
         final genericImageParser parser = new genericImageParser();
         AnchorURL uri;
+        FileInputStream inStream = null;
         try {
             uri = new AnchorURL("http://localhost/" + image.getName());
-            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURL.getFileExtension(uri.getFileName()), StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, new FileInputStream(image));
+            inStream = new FileInputStream(image);
+            final Document[] document = parser.parse(uri, "image/" + MultiProtocolURL.getFileExtension(uri.getFileName()), StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, inStream);
             System.out.println(document[0].toString());
         } catch (final MalformedURLException e) {
             e.printStackTrace();
@@ -313,6 +315,15 @@ public class genericImageParser extends AbstractParser implements Parser {
             e.printStackTrace();
         } catch (final InterruptedException e) {
             e.printStackTrace();
+        } finally {
+        	if(inStream != null) {
+        		try {
+					inStream.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+        	}
+        	ConcurrentLog.shutdown();
         }
     }
 

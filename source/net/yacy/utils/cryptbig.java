@@ -231,6 +231,8 @@ public class cryptbig {
 	  <compressed-after-encryption-flag>
 	  <binary>
 	*/
+    InputStream  fin = null;
+    OutputStream fout = null;
 	try {
 	    final File   inFile           = new File(inFileName);
 	    final String inFileDate       = dateFormatter.format(new Date(inFile.lastModified())); // 17 byte
@@ -248,8 +250,8 @@ public class cryptbig {
 	    System.out.println("TEST: preserving X-String      : " + X);
 
 	    // start encryption
-	    final InputStream  fin  = new CipherInputStream(new FileInputStream(inFile), this.ecipher);
-	    final OutputStream fout = new FileOutputStream(outFileName);
+	    fin  = new CipherInputStream(new FileInputStream(inFile), this.ecipher);
+	    fout = new FileOutputStream(outFileName);
 
 	    // write magic and properties of original file
 	    // - we encrypt the original date, the encryption date, the file size, the flag
@@ -272,13 +274,23 @@ public class cryptbig {
 	    }
 	    catch (final javax.crypto.IllegalBlockSizeException e) {System.err.println("ERROR:" + e.getMessage());}
 	    catch (final javax.crypto.BadPaddingException e) {System.err.println("ERROR:" + e.getMessage());}
-	    // finished files
-	    fin.close();
-	    fout.close();
 	} catch (final FileNotFoundException e) {
 	    System.err.println("ERROR: file '" + inFileName + "' not found");
 	} catch (final IOException e) {
 	    System.err.println("ERROR: IO trouble");
+	} finally {
+		try {
+			if(fin != null) {
+				fin.close();
+			}
+		} catch (IOException ignored) {
+		}
+		try {
+			if(fout != null) {
+				fout.close();
+			}
+		} catch(IOException ignored) {
+		}
 	}
     }
 

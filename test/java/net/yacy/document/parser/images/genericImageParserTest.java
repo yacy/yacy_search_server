@@ -29,11 +29,15 @@ public class genericImageParserTest {
         System.out.println("parse file: " + filename);
 
         genericImageParser p = new genericImageParser();
-        final Document[] docs = p.parse(url, mimetype, charset, new VocabularyScraper(), 0, new FileInputStream(file));
-
-        Document doc = docs[0];
-        assertEquals("YaCy Logo",doc.dc_title());
-        System.out.println(doc.toString());
+        FileInputStream inStream = new FileInputStream(file);
+        try {
+        	final Document[] docs = p.parse(url, mimetype, charset, new VocabularyScraper(), 0, inStream);
+            Document doc = docs[0];
+            assertEquals("YaCy Logo",doc.dc_title());
+            System.out.println(doc.toString());
+        } finally {
+        	inStream.close();
+        }
     }
 
 }

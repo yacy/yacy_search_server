@@ -88,22 +88,32 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         this(keylength, objectOrder, idxbytes, (int) (file.length() / (keylength + idxbytes)), file.getAbsolutePath());
         // read the index dump and fill the index
         InputStream is;
+        FileInputStream fis = null;
         try {
-            is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
+        	fis = new FileInputStream(file);
+            is = new BufferedInputStream(fis, 1024 * 1024);
         } catch (final OutOfMemoryError e) {
-            is = new FileInputStream(file);
+        	if(fis != null) {
+        		/* Reuse if possible the already created FileInputStream */
+        		is = fis;
+        	} else {
+        		is = new FileInputStream(file);
+        	}
         }
-        if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
-        final byte[] a = new byte[keylength + idxbytes];
-        int c;
-        Row.Entry entry;
-        while (true) {
-            c = is.read(a);
-            if (c <= 0) break;
-            entry = this.rowdef.newEntry(a); // may be null if a is not well-formed
-            if (entry != null) this.index.addUnique(entry);
+        try {
+        	if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
+        	final byte[] a = new byte[keylength + idxbytes];
+        	int c;
+        	Row.Entry entry;
+        	while (true) {
+        		c = is.read(a);
+        		if (c <= 0) break;
+        		entry = this.rowdef.newEntry(a); // may be null if a is not well-formed
+        		if (entry != null) this.index.addUnique(entry);
+        	}
+        } finally {
+        	is.close();
         }
-        is.close();
         is = null;
         assert this.index.size() == file.length() / (keylength + idxbytes);
         optimize();

@@ -104,29 +104,41 @@ public class icoParser {
     }
     
     public static void main(final String[] args) {
-        // read a ICO and write it as png
-        System.setProperty("java.awt.headless", "true");
-        final File in = new File(args[0]);
-        final File out = new File(args[1]);
+    	try {
+    		// read a ICO and write it as png
+    		System.setProperty("java.awt.headless", "true");
+    		final File in = new File(args[0]);
+    		final File out = new File(args[1]);
         
-        final byte[] file = new byte[(int) in.length()];
-        FileInputStream fis = null;
-        try {
-            fis = new FileInputStream(in);
-            fis.read(file);
-        } catch (final FileNotFoundException e) {
-            ConcurrentLog.logException(e);
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
+    		final byte[] file = new byte[(int) in.length()];
+    		FileInputStream fis = null;
+    		try {
+    			fis = new FileInputStream(in);
+    			fis.read(file);
+    		} catch (final FileNotFoundException e) {
+    			ConcurrentLog.logException(e);
+    		} catch (final IOException e) {
+    			ConcurrentLog.logException(e);
+    		} finally {
+    			if(fis != null) {
+    				try {
+    					fis.close();
+    				} catch (IOException e) {
+    					ConcurrentLog.logException(e);
+    				}
+    			}
+    		}
         
-        final icoParser parser = new icoParser(file);
+    		final icoParser parser = new icoParser(file);
         
-        try {
-            ImageIO.write(parser.getImage(0), "PNG", out);
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        }
+    		try {
+    			ImageIO.write(parser.getImage(0), "PNG", out);
+    		} catch (final IOException e) {
+    			ConcurrentLog.logException(e);
+    		}
+    	} finally {
+    		ConcurrentLog.shutdown();
+    	}
     }
     
 }

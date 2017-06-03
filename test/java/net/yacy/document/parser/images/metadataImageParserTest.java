@@ -30,11 +30,16 @@ public class metadataImageParserTest {
         System.out.println("parse file: " + filename);
 
         metadataImageParser p = new metadataImageParser();
-        final Document[] docs = p.parse(url, mimetype, charset, new VocabularyScraper(), 0, new FileInputStream(file));
+        FileInputStream inStream = new FileInputStream(file);
+        try {
+        	final Document[] docs = p.parse(url, mimetype, charset, new VocabularyScraper(), 0, inStream);
 
-        Document doc = docs[0];
-        assertEquals("YaCy Logo",doc.dc_title());
-        System.out.println(doc.toString());
+        	Document doc = docs[0];
+        	assertEquals("YaCy Logo",doc.dc_title());
+        	System.out.println(doc.toString());
+        } finally {
+        	inStream.close();
+        }
     }
 
 }

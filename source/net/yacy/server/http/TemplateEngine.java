@@ -427,7 +427,9 @@ public final class TemplateEngine {
                             //file not found?
                             ConcurrentLog.severe("FILEHANDLER","Include Error with file " + UTF8.String(filename) + ": " + e.getMessage());
                         } finally {
-                            if (br != null) try { br.close(); br=null; } catch (final Exception e) {}
+                            if (br != null) try { br.close(); br=null; } catch (final Exception e) {
+                            	ConcurrentLog.warn("FILEHANDLER","Could not close buffered reader on file " + UTF8.String(filename));
+                            }
                         }
                         final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(include.getBytes()));
                         structure.append(ASCII.getBytes("<fileinclude file=\"")).append(filename).append(close_tagn);
