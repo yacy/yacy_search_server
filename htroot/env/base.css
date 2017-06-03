@@ -419,6 +419,10 @@ p.info {
   text-align:center;
 }
 
+p.tags {
+  line-height: 1.4;
+}
+
 div.bookmark p {
   margin:1px;
 }
