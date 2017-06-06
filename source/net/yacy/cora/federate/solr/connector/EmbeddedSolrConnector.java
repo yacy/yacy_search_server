@@ -377,7 +377,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
 
     
-    private class DocListSearcher {
+    private class DocListSearcher implements AutoCloseable {
         private SolrQueryRequest request;
         private DocList response;
 
@@ -393,14 +393,12 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             if (resultContext == null) log.warn("DocListSearcher: no response for query '" + querystring + "'");
             this.response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.docs;
         }
+        
+        @Override
         public void close() {
             if (this.request != null) this.request.close();
             this.request = null;
             this.response = null;
-        }
-        @Override
-        protected void finalize() throws Throwable {
-            try {close();} finally {super.finalize();}
         }
     }
     
