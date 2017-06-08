@@ -407,9 +407,12 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                     // creating an empty java keystore
                     final KeyStore ks = KeyStore.getInstance("JKS");
                     ks.load(null,keyStorePwd.toCharArray());
-                    final FileOutputStream ksOut = new FileOutputStream(keyStoreFileName);
-                    ks.store(ksOut, keyStorePwd.toCharArray());
-                    ksOut.close();
+                    try (
+                    	/* Automatically closed by this try-with-resources statement */	
+                    	final FileOutputStream ksOut = new FileOutputStream(keyStoreFileName);
+                    ) {
+                    	ks.store(ksOut, keyStorePwd.toCharArray());
+                    }
  
                     // storing path to keystore into config file
                     sb.setConfig("keyStore", keyStoreFileName);

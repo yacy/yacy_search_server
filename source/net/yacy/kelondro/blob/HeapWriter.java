@@ -83,11 +83,21 @@ public final class HeapWriter {
         this.heapFileREADY = readyHeapFile;
         this.keylength = keylength;
         this.index = new RowHandleMap(keylength, ordering, 8, 100000, readyHeapFile.getAbsolutePath());
+        final FileOutputStream fileStream = new FileOutputStream(temporaryHeapFile);
         try {
-            this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryHeapFile), outBuffer));
-        } catch (final OutOfMemoryError e) {
-            // try this again without buffer
-            this.os = new DataOutputStream(new FileOutputStream(temporaryHeapFile));
+        	try {
+        		this.os = new DataOutputStream(new BufferedOutputStream(fileStream, outBuffer));
+        	} catch (final OutOfMemoryError e) {
+        		// try this again without buffer
+        		this.os = new DataOutputStream(fileStream);
+        	}
+        } catch(Exception e) {
+        	try {
+        		fileStream.close();
+        	} catch(IOException ignored) {
+        		log.warn("Could not close output stream on file " + temporaryHeapFile);
+        	}
+        	throw e;
         }
         this.seek = 0;
     }
@@ -122,8 +132,16 @@ public final class HeapWriter {
      */
     public synchronized void close(boolean writeIDX) throws IOException {
         // close the file
-        this.os.flush();
-        this.os.close();
+    	try {
+    		this.os.flush();
+    	} catch(Exception e) {
+    		// on flush error, free ram index resources before transmitting the exception
+    		this.index.close();
+    		this.index = null;
+    		throw e;
+    	} finally {
+    		this.os.close();
+    	}
         this.os = null;
 
         // rename the file into final name

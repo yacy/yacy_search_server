@@ -204,9 +204,12 @@ public class AnimationGIF {
             for (int i = 0; i < framescount; i++) {
                 generator.addImage(generateTestImage(320, 160, r, i * 2 * Math.PI / framescount), 10, 0);
             }
-            FileOutputStream fos = new FileOutputStream(new File("/tmp/giftest.gif"));
-            fos.write(generator.get());
-            fos.close();
+            try (
+            	/* Automatically closed by this try-with-resources statement */
+            	FileOutputStream fos = new FileOutputStream(new File(System.getProperty("java.io.tmpdir") + File.separator + "giftest.gif"));
+            ) {
+            	fos.write(generator.get());
+            }
         } catch (final IOException e) {
             e.printStackTrace();
         }

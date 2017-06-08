@@ -698,9 +698,11 @@ public class serverSwitch {
 					}
 					// save locally in case next fetch fails
 					if (file != null) {
-						FileOutputStream f = new FileOutputStream(file);
-						f.write(data);
-						f.close();
+						try(/* Automatically closed by this try-with-resource statement */
+							FileOutputStream f = new FileOutputStream(file);
+						) {
+							f.write(data);
+						}
 					}
 					return new InputStreamReader(new BufferedInputStream(
 							new ByteArrayInputStream(data)));

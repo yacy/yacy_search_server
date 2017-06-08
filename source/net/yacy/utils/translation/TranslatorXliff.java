@@ -217,10 +217,12 @@ public class TranslatorXliff extends Translator {
     public boolean saveAsXliff(final String targetLanguageCode, File xliffFile, Map<String, Map<String, String>> lng) {
 
         final String sourceLanguage = "en"; // source language is always English
-        OutputStreamWriter output;
 
-        try {
-            output = new OutputStreamWriter(new FileOutputStream(xliffFile), StandardCharsets.UTF_8.name());
+        try (
+        	/* Resources automatically closed by this try-with-resources statement */
+        	final FileOutputStream fileOutStream = new FileOutputStream(xliffFile);
+            final OutputStreamWriter output = new OutputStreamWriter(fileOutStream, StandardCharsets.UTF_8.name());
+        ) {
             output.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
             output.write("<xliff version='1.2' xmlns='urn:oasis:names:tc:xliff:document:1.2'> \n");
             for (String afilemap : lng.keySet()) {
@@ -252,7 +254,6 @@ public class TranslatorXliff extends Translator {
             }
 
             output.write("</xliff>\n");
-            output.close();
         } catch (Exception e) {
             return false;
         }
@@ -302,10 +303,11 @@ public class TranslatorXliff extends Translator {
      */
     public boolean saveAsLngFile(final String targetLanguageCode, File lngFile, Map<String, Map<String, String>> lng) {
 
-        OutputStreamWriter output;
-
-        try {
-            output = new OutputStreamWriter(new FileOutputStream(lngFile), StandardCharsets.UTF_8.name());
+        try (
+        	/* Resources automatically closed by this try-with-resources statement */
+        	final FileOutputStream fileOutStream = new FileOutputStream(lngFile);
+            final OutputStreamWriter output = new OutputStreamWriter(fileOutStream, StandardCharsets.UTF_8.name());
+        ) {
             output.write("# " + (targetLanguageCode == null ? "master" : targetLanguageCode) + ".lng\n");
             output.write("# -----------------------\n");
             output.write("# This is a part of YaCy, a peer-to-peer based web search engine\n\n");
@@ -325,7 +327,6 @@ public class TranslatorXliff extends Translator {
                 }
             }
             output.write("# EOF");
-            output.close();
         } catch (Exception e) {
             return false;
         }

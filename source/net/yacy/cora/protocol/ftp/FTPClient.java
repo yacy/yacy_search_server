@@ -2860,13 +2860,10 @@ public class FTPClient {
     			if (args[0].equals("-dir")) {
     				dir(args[1], args[2], ANONYMOUS, "anomic@");
     			} else if (args[0].equals("-htmldir")) {
-    				try {
+					final File file = new File("dirindex.html");
+    				try (FileOutputStream fos = new FileOutputStream(file);) {
     					final StringBuilder page = dirhtml(args[1], 21, args[2], ANONYMOUS, "anomic@");
-    					final File file = new File("dirindex.html");
-    					FileOutputStream fos;
-    					fos = new FileOutputStream(file);
     					fos.write(UTF8.getBytes(page.toString()));
-    					fos.close();
     				} catch (final FileNotFoundException e) {
     					log.warn(e);
     				} catch (final IOException e) {

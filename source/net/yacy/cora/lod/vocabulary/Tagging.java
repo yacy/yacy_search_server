@@ -165,15 +165,18 @@ public class Tagging {
 			    synonyms.add(synonym);
 			}
         } else {
-            //
-            BufferedWriter w = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(propFile), StandardCharsets.UTF_8.name()));
-	        if (objectspace != null && objectspace.length() > 0) w.write("#objectspace:" + objectspace + "\n");
-	        for (Map.Entry<String, SOTuple> e: table.entrySet()) {
-	            String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
-	            String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
-	            w.write(e.getKey() + (s == null || s.isEmpty() ? "" : ":" + e.getValue().getSynonymsCSV()) + (o == null || o.isEmpty() || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
-	        }
-	        w.close();
+            try (
+            	/* Resources automatically closed by this try-with-resources statement */
+            	final FileOutputStream outStream = new FileOutputStream(propFile);
+            	final BufferedWriter w = new BufferedWriter(new OutputStreamWriter(outStream, StandardCharsets.UTF_8.name()));
+            ) {
+            	if (objectspace != null && objectspace.length() > 0) w.write("#objectspace:" + objectspace + "\n");
+            	for (Map.Entry<String, SOTuple> e: table.entrySet()) {
+            		String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
+            		String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
+            		w.write(e.getKey() + (s == null || s.isEmpty() ? "" : ":" + e.getValue().getSynonymsCSV()) + (o == null || o.isEmpty() || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
+            	}
+            }
 	        init();
         }
     }

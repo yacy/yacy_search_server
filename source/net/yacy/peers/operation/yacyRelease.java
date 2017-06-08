@@ -32,7 +32,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -331,20 +330,19 @@ public final class yacyRelease extends yacyVersion {
             }
             if (this.publicKey != null && signatureBytes != null) {
                 // copy to file and check signature
-                SignatureOutputStream verifyOutput = null;
-                try {
-                    verifyOutput = new SignatureOutputStream(new FileOutputStream(download), CryptoLib.signAlgorithm, this.publicKey);
-                    FileUtils.copy(response.getContent(), new BufferedOutputStream(verifyOutput));
+                try (
+                	/* Resources automatically closed by this try-with-resources statement */
+                	final FileOutputStream fileOutStream = new FileOutputStream(download);
+                	final SignatureOutputStream verifyOutput = new SignatureOutputStream(fileOutStream, CryptoLib.signAlgorithm, this.publicKey);
+                	final BufferedOutputStream bufferedStream = new BufferedOutputStream(verifyOutput);
+                ) {
+                    FileUtils.copy(response.getContent(), bufferedStream);
 
                     if (!verifyOutput.verify(signatureBytes)) throw new IOException("Bad Signature!");
                 } catch (final NoSuchAlgorithmException e) {
                     throw new IOException("No such algorithm");
                 } catch (final SignatureException e) {
                     throw new IOException("Signature exception");
-                } finally {
-                    if (verifyOutput != null) {
-                    	verifyOutput.close();
-                    }
                 }
                 // Save signature
                 final File signatureFile = new File(download.getAbsoluteFile() + ".sig");
@@ -352,14 +350,12 @@ public final class yacyRelease extends yacyVersion {
                 if ((!signatureFile.exists()) || (signatureFile.length() == 0)) throw new IOException("create signature file failed");
             } else {
                 // just copy into file
-                OutputStream downloadOutStream = null;
-                try {
-                	downloadOutStream = new BufferedOutputStream(new FileOutputStream(download));
+                try (
+                	/* Resources automatically closed by this try-with-resources statement */
+                	final FileOutputStream fileOutStream = new FileOutputStream(download);
+                	final BufferedOutputStream downloadOutStream = new BufferedOutputStream(fileOutStream);
+                ) {
                 	FileUtils.copy(response.getContent(), downloadOutStream);
-                } finally {
-                	if(downloadOutStream != null) {
-                		downloadOutStream.close();
-                	}
                 }
             }
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + getUrl() + " failed");

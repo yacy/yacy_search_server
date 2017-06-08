@@ -141,19 +141,32 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
         // otherwise we could just write the byte[] from the in kelondroRowSet which would make
         // everything much faster, but this is not an option here.
         final Iterator<Row.Entry> i = this.index.rows(true, null);
-        OutputStream os;
+    	int c = 0;
+        final FileOutputStream fileStream = new FileOutputStream(file);
+    	OutputStream os = null;
         try {
-            os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
-        } catch (final OutOfMemoryError e) {
-            os = new FileOutputStream(file);
+
+        	try {
+        		os = new BufferedOutputStream(fileStream, 1024 * 1024);
+        	} catch (final OutOfMemoryError e) {
+        		os = fileStream;
+        	}
+        	while (i.hasNext()) {
+        		os.write(i.next().bytes());
+        		c++;
+        	}
+        	os.flush();
+        } finally {
+        	try {
+        		if(os != null) {
+        			os.close();
+        		}
+        	} finally {
+        		if(fileStream != os) {
+        			fileStream.close();
+        		}
+        	}
         }
-        int c = 0;
-        while (i.hasNext()) {
-            os.write(i.next().bytes());
-            c++;
-        }
-        os.flush();
-        os.close();
         return c;
     }
 
@@ -391,9 +404,11 @@ public final class RowHandleSet implements HandleSet, Iterable<byte[]>, Cloneabl
             try {
                 // write to file
                 File f = File.createTempFile("HandleSet", "stream");
-                ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f));
-                out.writeObject(s);
-                out.close();
+                try(/* Resource automatically closed by thus try-with-resource statement */
+                		ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(f));
+                ) {
+                	out.writeObject(s);
+                }
 
                 // read from file
                 ObjectInputStream in = new ObjectInputStream(new FileInputStream(f));

@@ -105,21 +105,28 @@ public class Gap extends TreeMap<Long, Integer> {
         File tmp = new File(file.getParentFile(), file.getName() + ".prt");
         Iterator<Map.Entry<Long, Integer>> i = this.entrySet().iterator();
         DataOutputStream os;
-        try {
-            os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(tmp), (Integer.SIZE + Long.SIZE) * 1024)); // = 16*1024*recordsize
-        } catch (final OutOfMemoryError e) {
-            os = new DataOutputStream(new FileOutputStream(tmp));
-        }
         int c = 0;
-        Map.Entry<Long, Integer> e;
-        while (i.hasNext()) {
-            e = i.next();
-            os.writeLong(e.getKey().longValue());
-            os.writeInt(e.getValue().intValue());
-            c++;
+        try (/* Resource automatically closed by this try-with-resources statement */
+        		final FileOutputStream fileStream = new FileOutputStream(tmp);
+        ) {
+        	try {
+        		os = new DataOutputStream(new BufferedOutputStream(fileStream, (Integer.SIZE + Long.SIZE) * 1024)); // = 16*1024*recordsize
+        	} catch (final OutOfMemoryError e) {
+        		os = new DataOutputStream(fileStream);
+        	}
+        	try {
+        		Map.Entry<Long, Integer> e;
+        		while (i.hasNext()) {
+        			e = i.next();
+        			os.writeLong(e.getKey().longValue());
+        			os.writeInt(e.getValue().intValue());
+        			c++;
+        		}
+        		os.flush();
+        	} finally {
+        		os.close();
+        	}
         }
-        os.flush();
-        os.close();
         tmp.renameTo(file);
         assert file.exists() : file.toString();
         assert !tmp.exists() : tmp.toString();

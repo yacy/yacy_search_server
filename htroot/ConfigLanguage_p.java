@@ -105,15 +105,18 @@ public class ConfigLanguage_p {
                 try {
                     final DigestURL u = new DigestURL(url);
                     it = FileUtils.strings(u.get(ClientIdentification.yacyInternetCrawlerAgent, null, null));
+                    TranslatorXliff tx = new TranslatorXliff();
+                    File langFile = tx.getScratchFile(new File(langPath, u.getFileName()));
                     try {
-                        TranslatorXliff tx = new TranslatorXliff();
-                        File langFile = tx.getScratchFile(new File(langPath, u.getFileName()));
-                        final OutputStreamWriter bw = new OutputStreamWriter(new FileOutputStream(langFile), StandardCharsets.UTF_8.name());
-
-                        while (it.hasNext()) {
-                            bw.write(it.next() + "\n");
+                        try (
+                        	/* Automatically closed by this try-with-resources statement */
+                        	final OutputStreamWriter bw = new OutputStreamWriter(new FileOutputStream(langFile), StandardCharsets.UTF_8.name());
+                        ) {
+                        	while (it.hasNext()) {
+                        		bw.write(it.next() + "\n");
+                        	}
                         }
-                        bw.close();
+                        
                         
                         // convert downloaded xliff to internal lng file
                         final String ext = Files.getFileExtension(langFile.getName());

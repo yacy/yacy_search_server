@@ -86,12 +86,14 @@ public class gzip {
     }
 
     public static void gunzipFile(final File inFile, final File outFile) {
-	try {
-	    final InputStream  fin  = new GZIPInputStream(new BufferedInputStream(new FileInputStream(inFile)));
-	    final OutputStream fout = new BufferedOutputStream(new FileOutputStream(outFile));
+	try (
+		/* Resources automatically closed by this try-with-resources statement */
+		final FileInputStream fileInStream = new FileInputStream(inFile);
+	    final InputStream  fin  = new GZIPInputStream(new BufferedInputStream(fileInStream));
+		final FileOutputStream fileOutStream = new FileOutputStream(outFile);
+	    final OutputStream fout = new BufferedOutputStream(fileOutStream);
+	) {
 	    copy(fout, fin, 1024);
-	    fin.close();
-	    fout.close();
 	} catch (final FileNotFoundException e) {
 	    logger.warn("ERROR: file '" + inFile + "' not found", e);
 	} catch (final IOException e) {
@@ -145,13 +147,14 @@ public class gzip {
 
     // some static helper methods
     public static void saveGzip(final File f, final byte[] content) throws IOException {
-        java.util.zip.GZIPOutputStream gzipout = null;
-        try {
-            f.getParentFile().mkdirs();
-            gzipout = new java.util.zip.GZIPOutputStream(new FileOutputStream(f), 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
+        f.getParentFile().mkdirs();
+        
+        try (
+        	/* Resources automatically closed by this try-with-resources statement */
+        	final FileOutputStream fileOutStream = new FileOutputStream(f);
+            final java.util.zip.GZIPOutputStream gzipout = new java.util.zip.GZIPOutputStream(fileOutStream, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
+        ) {
             gzipout.write(content, 0, content.length);
-        } finally {
-            if (gzipout!=null)try{gzipout.close();}catch(final Exception e){}
         }
     }
 

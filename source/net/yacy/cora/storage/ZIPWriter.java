@@ -95,12 +95,12 @@ public class ZIPWriter extends AbstractMap<String, ZipEntry> implements Map<Stri
         URI base = inputDir.toURI();
         Deque<File> queue = new LinkedList<File>();
         queue.push(inputDir);
-        OutputStream out = new FileOutputStream(zipOut);
-        ZipOutputStream zout = null;
+        
         byte[] buffer = new byte[1024];
         int readCount;
-        try {
-            zout = new ZipOutputStream(out);
+        try (/* Resources automatically closed by this try-with-resources statement */
+        		final OutputStream out = new FileOutputStream(zipOut);
+        		final ZipOutputStream zout = new ZipOutputStream(out)) {
             while (!queue.isEmpty()) {
                 inputDir = queue.pop();
                 for (File lf : inputDir.listFiles()) {
@@ -117,9 +117,6 @@ public class ZIPWriter extends AbstractMap<String, ZipEntry> implements Map<Stri
                     }
                 }
             }
-        } finally {
-            zout.close();
-            out.close();
         }
     }
 

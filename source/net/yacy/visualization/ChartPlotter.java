@@ -201,13 +201,17 @@ public class ChartPlotter extends RasterPlotter {
         //ip.print(100, 100, 0, "1234", false);
         //ip.print(100, 100, 90, "TEXT", true);
         //ip.print(100, 100, 90, "1234", false);
-        final File file = new File("/Users/admin/Desktop/testimage.png");
-        try {
+        final File file = new File(System.getProperty("java.io.tmpdir") + File.separator + "testimage.png");
+        try (
+        	/* Automatically closed by this try-with-resources statement */
             final FileOutputStream fos = new FileOutputStream(file);
+        ) {
+            System.out.println("Writing file " + file);
             fos.write(RasterPlotter.exportImage(ip.getImage(), "png").getBytes());
             //ImageIO.write(ip.getImage(), "png", fos);
-            fos.close();
-        } catch (final IOException e) {}
+        } catch (final IOException e) {
+        	e.printStackTrace();
+        }
         ConcurrentLog.shutdown();
     }
 

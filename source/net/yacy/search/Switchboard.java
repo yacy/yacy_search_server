@@ -2144,28 +2144,21 @@ public final class Switchboard extends serverSwitch {
                     if ( !outfile.getName().endsWith(".gz") ) {
                         final String gzname = outfile.getName() + ".gz";
                         final File gzfile = new File(outfile.getParentFile(), gzname);
-                        try {
-                            final OutputStream os = new BufferedOutputStream(new GZIPOutputStream(new FileOutputStream(gzfile), 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}});
-                            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(outfile)); 
-                            try {
-                            	FileUtils.copy(bis, os);
-                            } finally {
-                            	try {
-                            		os.close();
-                            	} finally {
-                            		try {
-                            			bis.close();
-                            		} catch(IOException ignored) {
-                            			log.warn("Could not close input stream on file " + outfile);
-                            		}
-                            	}
-                            }
+                        try (
+                        	/* Resources automatically closed by this try-with-resources statement */
+                        	final FileOutputStream fileOutStream = new FileOutputStream(gzfile);
+                            final OutputStream os = new BufferedOutputStream(new GZIPOutputStream(fileOutStream, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}});
+                            final FileInputStream fileInStream = new FileInputStream(outfile);
+                            final BufferedInputStream bis = new BufferedInputStream(fileInStream);
+                        ) {
+                            FileUtils.copy(bis, os);
                             if ( gzfile.exists() ) {
                                 FileUtils.deletedelete(outfile);
                             }
                         } catch (final FileNotFoundException e ) {
                             ConcurrentLog.logException(e);
                         } catch (final IOException e ) {
+                        	/* Catch but log any IO exception that can occur on copy, automatic closing or streams creation */
                             ConcurrentLog.logException(e);
                         }
                     }

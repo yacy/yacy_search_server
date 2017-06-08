@@ -124,14 +124,14 @@ public class AutoSearch extends AbstractBusyThread {
                 pfile.delete();
             }
         } else {
-            try {
+            try (/* Resource automatically closed by this try-with-resources statement */
+            	final OutputStream fileOut = new FileOutputStream(pfile);
+            ) {
                 Properties prop = new Properties();
                 for (String s : querystack) {
                     prop.put("query" + s.hashCode(), s);
                 }
-                OutputStream fileOut = new FileOutputStream(pfile);
                 prop.store(fileOut, "AutoSearch query list");
-                fileOut.close();
             } catch (FileNotFoundException ex) {
                 ConcurrentLog.warn(AutoSearch.class.getName(), "can not create file " + pfile.getAbsolutePath());
             } catch (IOException ex) {

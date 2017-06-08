@@ -88,9 +88,12 @@ public class XMLTables {
             final File tmpFile = new File(this.propFile.toString() + ".prt");
 
             // write file
-            final XMLEncoder xmlenc = new XMLEncoder(new FileOutputStream(tmpFile));
-            xmlenc.writeObject(tables);
-            xmlenc.close();
+            try(/* Resource automatically closed by this try-with-resources statement */
+            	final XMLEncoder xmlenc = new XMLEncoder(new FileOutputStream(tmpFile));
+            ) {
+            	xmlenc.writeObject(tables);
+            }
+
             
             // delete old file and rename tmp-file to old file's name
             FileUtils.deletedelete(this.propFile);

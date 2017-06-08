@@ -98,10 +98,12 @@ public final class BinSearch {
     }
     
     public final void write(File f) throws IOException {
-        FileOutputStream os = new FileOutputStream(f);
-        os.write(this.chunks);
-        os.flush();
-        os.close();
+    	try ( /* Resource automatically closed by this try-with-resources statement */
+    			FileOutputStream os = new FileOutputStream(f);
+    	) {
+    		os.write(this.chunks);
+    		os.flush();
+    	}
     }
     
     public static void main(final String[] args) {

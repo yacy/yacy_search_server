@@ -191,19 +191,14 @@ public class Translator {
         }
 
         String processedContent = translate(content, translationList);
-        BufferedWriter bw = null;
-        try{
-            bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(destFile), StandardCharsets.UTF_8));
+        try (
+        	/* Resources automatically closed by this try-with-resources statement */
+        	final FileOutputStream outStream = new FileOutputStream(destFile);
+        	BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(outStream, StandardCharsets.UTF_8));
+        ) {
             bw.write(processedContent);
-            bw.close();
-        }catch(final IOException e){
+        } catch(final Exception e){
             return false;
-        } finally {
-            if (bw != null) {
-                try {
-                    bw.close();
-                } catch (final Exception e) {}
-            }
         }
 
 	return true;

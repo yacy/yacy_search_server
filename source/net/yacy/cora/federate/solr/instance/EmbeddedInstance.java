@@ -120,15 +120,16 @@ public class EmbeddedInstance implements SolrInstance {
         File core_properties = new File(corePath, "core.properties");
         if (!core_properties.exists()) {
             // create the file
-            try {
+            try (
+            	/* Automatically closed by this try-with-resources statement */
                 FileOutputStream fos = new FileOutputStream(core_properties);
+            ) {
                 fos.write(ASCII.getBytes("name=" + coreName + "\n"));
                 fos.write(ASCII.getBytes("shard=${shard:}\n"));
                 fos.write(ASCII.getBytes("collection=${collection:" + coreName + "}\n"));
                 fos.write(ASCII.getBytes("config=${solrconfig:solrconfig.xml}\n"));
                 fos.write(ASCII.getBytes("schema=${schema:schema.xml}\n"));
                 fos.write(ASCII.getBytes("coreNodeName=${coreNodeName:}\n"));
-                fos.close();
             } catch (IOException e) {
                 ConcurrentLog.logException(e);
             }

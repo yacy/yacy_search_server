@@ -74,20 +74,36 @@ public class apkParser extends AbstractParser implements Parser  {
          * - strings from resources
          */
         Document[] docs = null;
+        File tempFile = null;
+        FileOutputStream out = null;
         try {
-            File tempFile = File.createTempFile("apk" + System.currentTimeMillis(), "jar");
-            final FileOutputStream out = new FileOutputStream(tempFile);
+            tempFile = File.createTempFile("apk" + System.currentTimeMillis(), "jar");
+            out = new FileOutputStream(tempFile);
             int read = 0;
             final byte[] data = new byte[1024];
             while((read = source.read(data, 0, 1024)) != -1) {
                 out.write(data, 0, read);
             }
             out.close();
+            out = null;
             JarFile jf = new JarFile(tempFile);
             docs = parse(location, mimeType, charset, jf);
-            tempFile.delete();
         } catch (IOException e) {
             ConcurrentLog.logException(e);
+        } finally {
+			try {
+				if (out != null) {
+					out.close();
+				}
+			} catch (IOException e) {
+				ConcurrentLog.logException(e);
+			} finally {
+				if (tempFile != null) {
+					if (!tempFile.delete()) {
+						log.warn("Could not delete temporary file " + tempFile);
+					}
+				}
+			}
         }
         return docs;
     }

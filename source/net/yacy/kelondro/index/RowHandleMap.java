@@ -195,20 +195,32 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
         // everything much faster, but this is not an option here.
         final File tmp = new File(file.getParentFile(), file.getName() + ".prt");
         final Iterator<Row.Entry> i = this.index.rows(true, null);
-        OutputStream os;
+    	int c = 0;
+    	final FileOutputStream fileStream = new FileOutputStream(tmp);
+    	OutputStream os = null;
         try {
-            os = new BufferedOutputStream(new FileOutputStream(tmp), 4 * 1024 * 1024);
-        } catch (final OutOfMemoryError e) {
-            os = new FileOutputStream(tmp);
+        	try {
+        		os = new BufferedOutputStream(fileStream, 4 * 1024 * 1024);
+        	} catch (final OutOfMemoryError e) {
+        		os = fileStream;
+        	}
+        	if (file.getName().endsWith(".gz")) os = new GZIPOutputStream(os, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
+        	while (i.hasNext()) {
+        		os.write(i.next().bytes());
+        		c++;
+        	}
+        	os.flush();
+        } finally {
+        	try {
+        		if(os != null) {
+        			os.close();
+        		}
+        	} finally {
+        		if(fileStream != os) {
+        			fileStream.close();
+        		}
+        	}
         }
-        if (file.getName().endsWith(".gz")) os = new GZIPOutputStream(os, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
-        int c = 0;
-        while (i.hasNext()) {
-            os.write(i.next().bytes());
-            c++;
-        }
-        os.flush();
-        os.close();
         tmp.renameTo(file);
         assert file.exists() : file.toString();
         assert !tmp.exists() : tmp.toString();

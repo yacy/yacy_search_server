@@ -270,6 +270,8 @@ public class PhpBB3Dao implements Dao {
         String versioninfo,
         int maxEntriesInFile
     ) {
+    	FileOutputStream outStream = null;
+        OutputStreamWriter osw = null;
         try {
             // generate output file name and attributes
             String targethost = new DigestURL(this.urlstub).getHost();
@@ -277,7 +279,6 @@ public class PhpBB3Dao implements Dao {
             File outputfiletmp = null, outputfile = null;
 
             // write the result from the query concurrently in a file
-            OutputStreamWriter osw = null;
             DCEntry e;
             int c = 0;
             while ((e = queue.take()) != DCEntry.poison) {
@@ -286,7 +287,8 @@ public class PhpBB3Dao implements Dao {
                     outputfile = new File(targetdir, targethost + "." + versioninfo + "." + fc + ".xml");
                     if (outputfiletmp.exists()) outputfiletmp.delete();
                     if (outputfile.exists()) outputfile.delete();
-                    osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(outputfiletmp)), StandardCharsets.UTF_8);
+                    outStream = new FileOutputStream(outputfiletmp);
+                    osw = new OutputStreamWriter(new BufferedOutputStream(outStream), StandardCharsets.UTF_8);
                     osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" + SurrogateReader.SURROGATES_MAIN_ELEMENT_OPEN + "\n");
                 }
                 e.writeXML(osw);
@@ -294,14 +296,18 @@ public class PhpBB3Dao implements Dao {
                 if (c >= maxEntriesInFile) {
                     osw.write("</surrogates>\n");
                     osw.close();
+                    outStream.close();
                     outputfiletmp.renameTo(outputfile);
                     osw = null;
+                    outStream = null;
                     c = 0;
                     fc++;
                 }
             }
             osw.write(SurrogateReader.SURROGATES_MAIN_ELEMENT_CLOSE + "\n");
             osw.close();
+            outStream.close();
+            osw = null;
             outputfiletmp.renameTo(outputfile);
             return fc + 1;
         } catch (final MalformedURLException e) {
@@ -312,6 +318,21 @@ public class PhpBB3Dao implements Dao {
             ConcurrentLog.logException(e);
         } catch (final InterruptedException e) {
             ConcurrentLog.logException(e);
+        } finally {
+        	if(osw != null) {
+        		try {
+					osw.close();
+				} catch (IOException e) {
+					ConcurrentLog.logException(e);
+				}
+        	}
+        	if(outStream != null) {
+        		try {
+        			outStream.close();
+				} catch (IOException e) {
+					ConcurrentLog.logException(e);
+				}
+        	}
         }
         return 0;
     }

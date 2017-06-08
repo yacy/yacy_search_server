@@ -779,15 +779,17 @@ public class Blacklist {
     }
 
     private final void saveDHTCache(final BlacklistType type) {
-        try {
-            final ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(DHTCacheFile(type)));
+        try (
+        	/* Resources automatically closed by this try-with-resources statement */
+        	final FileOutputStream fileOutStream =new FileOutputStream(DHTCacheFile(type));
+            final ObjectOutputStream out = new ObjectOutputStream(fileOutStream);
+        ) {
             HandleSet s = getCacheUrlHashsSet(type);
             if (s != null) {
                 out.writeObject(getCacheUrlHashsSet(type));
-                out.close();
             }
-
         } catch (final IOException e) {
+        	/* Catch but trace in log any IO exception occurring in write or automatic closing */
             ConcurrentLog.logException(e);
         }
     }

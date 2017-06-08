@@ -60,9 +60,12 @@ public class AnimationPlotter {
         for (int i = 0; i < this.frames.size(); i++) {
             Frame frame = this.frames.get(i);
             File file = new File(path, filestub + "_" + intformat(i) + '.' + type);
-            final FileOutputStream fos = new FileOutputStream(file);
-            ImageIO.write(frame.image, type, fos);
-            fos.close();
+            try (
+            	/* Automatically closed by this try-with-resources statement */
+            	final FileOutputStream fos = new FileOutputStream(file);
+            ) {
+            	ImageIO.write(frame.image, type, fos);
+            }
         }
     }
     

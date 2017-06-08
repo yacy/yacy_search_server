@@ -134,9 +134,12 @@ public class tarTools {
 					final File destPath = new File(untarDir + File.separator + tarEntry.getName());
 					if (!tarEntry.isDirectory()) {
 						new File(destPath.getParent()).mkdirs(); // create missing subdirectories
-						final FileOutputStream fout = new FileOutputStream(destPath);
-	                                        IOUtils.copyLarge(tin,fout,0,tarEntry.getSize());
-						fout.close();
+						try (
+							/* Automatically closed by this try-with-resources statement */
+							final FileOutputStream fout = new FileOutputStream(destPath);
+						) {
+							IOUtils.copyLarge(tin, fout, 0, tarEntry.getSize());
+						}
 					} else {
 						destPath.mkdir();
 					}

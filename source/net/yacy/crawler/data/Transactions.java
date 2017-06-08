@@ -167,24 +167,27 @@ public class Transactions {
             // STORE METADATA FOR THE IMAGE
             File metadataPath = Transactions.definePath(url, depth, date, "xml", Transactions.State.INVENTORY);
             metadataPath.getParentFile().mkdirs();
-            try {
-                if (doc != null) {
-                    FileOutputStream fos = new FileOutputStream(metadataPath);
-                    OutputStreamWriter osw = new OutputStreamWriter(fos);
+            if (doc != null) {
+            	try (
+            		/* Resources automatically closed by this try-with-resources statement */
+                    final FileOutputStream fos = new FileOutputStream(metadataPath);
+                    final OutputStreamWriter osw = new OutputStreamWriter(fos);
+            	) {
                     osw.write(XML_PREFIX);
                     osw.write(WHITESPACE); osw.write("\n-->\n"); // placeholder for transaction information properties (a hack to attach metadata to metadata)
                     osw.write("<result name=\"response\" numFound=\"1\" start=\"0\">\n");
                     EnhancedXMLResponseWriter.writeDoc(osw, doc);
                     osw.write("</result>\n");
                     osw.write("</response>\n");
-                    osw.close();
-                    fos.close();
-                    Transactions.announceStorage(url, depth, date, State.INVENTORY);
-                }
-            } catch (IOException e) {
-                ConcurrentLog.logException(e);
-                success = false;
+            	} catch (IOException e) {
+            		ConcurrentLog.logException(e);
+            		success = false;
+            	}
+            	if(success) {
+            		Transactions.announceStorage(url, depth, date, State.INVENTORY);            		
+            	}
             }
+            
         }
         
         return success;

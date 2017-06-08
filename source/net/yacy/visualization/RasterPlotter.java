@@ -950,9 +950,12 @@ public class RasterPlotter {
      * @throws IOException
      */
     public void save(File file, String type) throws IOException {
-        final FileOutputStream fos = new FileOutputStream(file);
-        ImageIO.write(this.image, type, fos);
-        fos.close();
+    	try (
+    		/* Automatically closed by this try-with-resources statement */	
+    		final FileOutputStream fos = new FileOutputStream(file);
+    	) {
+    		ImageIO.write(this.image, type, fos);
+    	}
     }
 
     /**
@@ -1054,12 +1057,15 @@ public class RasterPlotter {
 
         final RasterPlotter m = new RasterPlotter(200, 300, DrawMode.MODE_SUB, "FFFFFF");
         demoPaint(m);
-        final File file = new File("/Users/admin/Desktop/testimage.png");
-        try {
+        final File file = new File(System.getProperty("java.io.tmpdir") + File.separator + "testimage.png");
+        try ( /* Automatically closed by this try-with-resources statement */
             final FileOutputStream fos = new FileOutputStream(file);
+     	) {
+        	System.out.println("Writing file " + file);
             ImageIO.write(m.getImage(), "png", fos);
-            fos.close();
-        } catch (final IOException e) {}
+        } catch (final IOException e) {
+        	e.printStackTrace();
+        }
         ConcurrentLog.shutdown();
         
         // open file automatically, works only on Mac OS X

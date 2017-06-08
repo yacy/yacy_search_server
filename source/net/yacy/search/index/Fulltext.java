@@ -784,12 +784,22 @@ public final class Fulltext {
 
         @Override
         public void run() {
-            try {
+        	try {
                 final File parentf = this.f.getParentFile();
-                if (parentf != null) parentf.mkdirs();
-                OutputStream os = new FileOutputStream(this.format == ExportFormat.solr ? new File(this.f.getAbsolutePath() + ".gz") : this.f);
-                if (this.format == ExportFormat.solr) os = new GZIPOutputStream(os, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
-                final PrintWriter pw = new PrintWriter(new BufferedOutputStream(os));
+                if (parentf != null) {
+                	parentf.mkdirs();
+                }
+        	} catch(Exception e) {
+                ConcurrentLog.logException(e);
+                this.failure = e.getMessage();
+                return;
+        	}
+        	
+            try (/* Resources automatically closed by this try-with-resources statement */
+                final OutputStream os = new FileOutputStream(this.format == ExportFormat.solr ? new File(this.f.getAbsolutePath() + ".gz") : this.f);
+            	final OutputStream wrappedStream = ((this.format == ExportFormat.solr)) ? new GZIPOutputStream(os, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}} : os;
+                final PrintWriter pw =  new PrintWriter(new BufferedOutputStream(wrappedStream));
+            ) {
                 if (this.format == ExportFormat.html) {
                     pw.println("<html><head></head><body>");
                 }
@@ -888,11 +898,8 @@ public final class Fulltext {
                     pw.println("</result>");
                     pw.println("</response>");
                 }
-                pw.close();
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-                this.failure = e.getMessage();
             } catch (final Exception e) {
+            	/* Catch but log any IO exception that can occur on copy, automatic closing or streams creation */
                 ConcurrentLog.logException(e);
                 this.failure = e.getMessage();
             }
