@@ -343,7 +343,16 @@ public final class TextParser {
             throw new Parser.Failure("All parser failed: " + failedParsers, location);
         }
         for (final Document d: docs) {
-            assert d.getTextStream() != null : "mimeType = " + mimeType;
+        	InputStream textStream = d.getTextStream();
+            assert textStream != null : "mimeType = " + mimeType;
+            try {
+            	if(textStream != null) {
+            		/* this textStream can wrap a FileInputStream : as it won't be used anymore, we must close it to ensure the system resource is released */
+            		textStream.close();
+            	}
+			} catch (IOException e) {
+				AbstractParser.log.warn("Could not close text input stream");
+			}
             d.setDepth(depth);
         } // verify docs
 
