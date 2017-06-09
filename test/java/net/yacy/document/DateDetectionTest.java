@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.TimeZone;
-import org.apache.solr.util.DateFormatUtil;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -35,8 +34,8 @@ public class DateDetectionTest {
             Date d = DateDetection.parseLine(text, 0);
 
             // this formatter is used to create Solr search queries, use it to compare equality
-            String cs = DateFormatUtil.formatExternal(cal.getTime());
-            String ds = DateFormatUtil.formatExternal(d);
+            String cs = cal.getTime().toInstant().toString();
+            String ds = d.toInstant().toString();
 
             assertEquals(text, cs, ds);
         }
@@ -55,8 +54,8 @@ public class DateDetectionTest {
             Date d = DateDetection.parseLine(text, 0);
 
             // this formatter is used to create Solr search queries, use it to compare equality
-            String cs = DateFormatUtil.formatExternal(cal.getTime());
-            String ds = DateFormatUtil.formatExternal(d);
+            String cs = cal.getTime().toInstant().toString();
+            String ds = d.toInstant().toString();
 
             assertEquals(text, cs, ds);
         }
@@ -79,8 +78,8 @@ public class DateDetectionTest {
             Date d = DateDetection.parseLine(text, 0);
 
             // this formatter is used to create Solr search queries, use it to compare equality
-            String cs = DateFormatUtil.formatExternal(cal.getTime());
-            String ds = DateFormatUtil.formatExternal(d);
+            String cs = cal.getTime().toInstant().toString();
+            String ds = d.toInstant().toString();
 
             assertEquals(text, cs, ds);
         }

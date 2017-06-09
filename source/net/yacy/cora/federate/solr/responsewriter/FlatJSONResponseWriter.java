@@ -42,7 +42,6 @@ import org.apache.solr.schema.TextField;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
-import org.apache.solr.util.DateFormatUtil;
 import org.json.simple.JSONArray;
 
 import net.yacy.cora.federate.solr.SolrType;
@@ -70,7 +69,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter {
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
         NamedList<?> values = rsp.getValues();
-        DocList response = ((ResultContext) values.get("response")).docs;
+        DocList response = ((ResultContext) values.get("response")).getDocList();
         writeDocs(writer, request, response);
     }
 
@@ -144,7 +143,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter {
         } else if (typeName.equals(SolrType.num_long.printName())) {
             json.put(name, Long.parseLong(value));
         } else if (typeName.equals(SolrType.date.printName())) {
-            json.put(name, DateFormatUtil.formatExternal(new Date(Long.parseLong(value))));
+            json.put(name, new Date(Long.parseLong(value)).toInstant().toString());
         } else if (typeName.equals(SolrType.num_float.printName())) {
             json.put(name, Double.parseDouble(value));
         } else if (typeName.equals(SolrType.num_double.printName())) {

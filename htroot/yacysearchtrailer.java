@@ -22,14 +22,12 @@
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
+import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
-
-import org.apache.solr.util.DateFormatUtil;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -260,15 +258,14 @@ public class yacysearchtrailer {
                 if (name.length() < 10) continue;
                 count = theSearch.dateNavigator.get(name);
                 String shortname = name.substring(0, 10);
-                long d;
-                Date dd;
-                try {dd = DateFormatUtil.parseDate(name); d = dd.getTime();} catch (ParseException e) {continue;}
+                long d = Instant.parse(name).toEpochMilli();
+                Date dd = new Date(d);
                 if (fromconstraint != null && dd.before(fromconstraint)) continue;
                 if (toconstraint != null && dd.after(toconstraint)) break;
                 if (dx > 0) {
                     while (d - dx > AbstractFormatter.dayMillis) {
                         dx += AbstractFormatter.dayMillis;
-                        String sn = DateFormatUtil.formatExternal(new Date(dx)).substring(0, 10);
+                        String sn = new Date(dx).toInstant().toString().substring(0, 10);
                         prop.put("nav-dates_element_" + i + "_on", 0);
                         prop.put(fileType, "nav-dates_element_" + i + "_name", sn);
                         prop.put("nav-dates_element_" + i + "_count", 0);

@@ -241,7 +241,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         SolrDocumentList sdl = new SolrDocumentList();
         NamedList<?> nl = rsp.getValues();
         ResultContext resultContext = (ResultContext) nl.get("response");
-        DocList response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.docs;
+        DocList response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.getDocList();
         sdl.setNumFound(response == null ? 0 : response.matches());
         sdl.setStart(response == null ? 0 : response.offset());
         String originalName = Thread.currentThread().getName();
@@ -391,7 +391,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             NamedList<?> nl = rsp.getValues();
             ResultContext resultContext = (ResultContext) nl.get("response");
             if (resultContext == null) log.warn("DocListSearcher: no response for query '" + querystring + "'");
-            this.response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.docs;
+            this.response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.getDocList();
         }
         
         @Override

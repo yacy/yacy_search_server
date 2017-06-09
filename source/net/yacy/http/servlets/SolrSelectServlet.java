@@ -263,7 +263,7 @@ public class SolrSelectServlet extends HttpServlet {
                 
 
                 NamedList<?> values = rsp.getValues();
-                DocList r = ((ResultContext) values.get("response")).docs;
+                DocList r = ((ResultContext) values.get("response")).getDocList();
                 int numFound = r.matches();
                 AccessTracker.addToDump(querystring, numFound, new Date(), "sq");
                 

@@ -76,7 +76,6 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.common.params.DisMaxParams;
 import org.apache.solr.common.params.FacetParams;
-import org.apache.solr.util.DateFormatUtil;
 
 public final class QueryParams {
 
@@ -468,8 +467,8 @@ public final class QueryParams {
             for (String field: this.facetfields) params.addFacetField("{!ex=" + field + "}" + field); // params.addFacetField("{!ex=" + field + "}" + field);
             if (this.facetfields.contains(CollectionSchema.dates_in_content_dts.name())) {
             	params.setParam(FacetParams.FACET_RANGE, CollectionSchema.dates_in_content_dts.name());
-                String start = DateFormatUtil.formatExternal(new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L * 3));
-                String end = DateFormatUtil.formatExternal(new Date(System.currentTimeMillis() + 1000L * 60L * 60L * 24L * 3));
+                String start = new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L * 3).toInstant().toString();
+                String end = new Date(System.currentTimeMillis() + 1000L * 60L * 60L * 24L * 3).toInstant().toString();
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.start", start);
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.end", end);
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.gap", "+1DAY");

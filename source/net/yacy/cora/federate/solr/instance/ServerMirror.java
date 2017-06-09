@@ -429,9 +429,9 @@ public class ServerMirror extends SolrClient {
         if (this.solr1 != null) return this.solr1.getBinder();
         return null;
     }
-    
+
     @Override
-    public void shutdown() {
+    public void close() throws IOException {
         if (this.solr0 != null)
             try {
                 this.solr0.close();

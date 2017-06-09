@@ -83,13 +83,12 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.SolrInfoMBean;
-import org.apache.solr.util.DateFormatUtil;
 import org.apache.lucene.util.Version;
 
 public final class Fulltext {
 
-    private static final String SOLR_PATH = "solr_5_5"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
-    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2"};
+    private static final String SOLR_PATH = "solr_6_6"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2", "solr_5_5"};
     
     // class objects
     private final File                    segmentPath;
@@ -666,8 +665,8 @@ public final class Fulltext {
         long now = System.currentTimeMillis();
         if (maxseconds > 0) {
             long from = now - maxseconds * 1000L;
-            String nowstr = DateFormatUtil.formatExternal(new Date(now));
-            String fromstr = DateFormatUtil.formatExternal(new Date(from));
+            String nowstr = new Date(now).toInstant().toString();
+            String fromstr = new Date(from).toInstant().toString();
             String dateq = CollectionSchema.load_date_dt.getSolrFieldName() + ":[" + fromstr + " TO " + nowstr + "]";
             query = query == null || AbstractSolrConnector.CATCHALL_QUERY.equals(query) ? dateq : query + " AND " + dateq; 
         } else {

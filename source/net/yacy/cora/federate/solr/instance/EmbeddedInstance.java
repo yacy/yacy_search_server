@@ -177,7 +177,7 @@ public class EmbeddedInstance implements SolrInstance {
                 source = new File(solr_config, "solrcore.properties");
             }
         }
-        // solr alwasy reads the solrcore.properties file if exists in core/conf directory
+        // solr always reads the solrcore.properties file if exists in core/conf directory
         target = new File(conf, "solrcore.properties");
 
         if (source.exists()) {
@@ -206,7 +206,7 @@ public class EmbeddedInstance implements SolrInstance {
 
     @Override
     public Collection<String> getCoreNames() {
-        return this.coreContainer.getCoreNames();
+        return this.coreContainer.getAllCoreNames();
     }
 
     @Override

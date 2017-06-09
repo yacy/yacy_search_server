@@ -30,7 +30,6 @@ import net.yacy.cora.federate.solr.instance.ServerShard;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 
-import org.apache.lucene.analysis.NumericTokenStream;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -51,12 +50,7 @@ import org.apache.solr.common.params.CommonParams;
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
     protected final static ConcurrentLog log = new ConcurrentLog(SolrServerConnector.class.getName());
-    public final static NumericTokenStream classLoaderSynchro = new NumericTokenStream();
-    // pre-instantiate this object to prevent sun.misc.Launcher$AppClassLoader deadlocks
-    // this is a very nasty problem; solr instantiates objects dynamically which can cause deadlocks
-    static {
-        assert classLoaderSynchro != null;
-    }
+
     protected SolrClient server;
 
     protected SolrServerConnector() {

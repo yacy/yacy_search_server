@@ -53,7 +53,7 @@ public class SnapshotImagesReponseWriter implements QueryResponseWriter  {
             NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
             paramsList.remove("wt");
             
-            DocList response = ((ResultContext) values.get("response")).docs;
+            DocList response = ((ResultContext) values.get("response")).getDocList();
             final int sz = response.size();
             if (sz > 0) {
                 SolrIndexSearcher searcher = request.getSearcher();

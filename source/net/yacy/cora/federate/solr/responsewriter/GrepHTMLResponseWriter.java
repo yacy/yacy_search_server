@@ -109,7 +109,7 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter {
         paramsList.remove("wt");
         String xmlquery = dqp.matcher("select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
         
-        DocList response = ((ResultContext) values.get("response")).docs;
+        DocList response = ((ResultContext) values.get("response")).getDocList();
         final int sz = response.size();
         if (sz > 0) {
             SolrIndexSearcher searcher = request.getSearcher();

@@ -50,7 +50,6 @@ import org.apache.solr.schema.TextField;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
-import org.apache.solr.util.DateFormatUtil;
 
 public class EnhancedXMLResponseWriter implements QueryResponseWriter {
 
@@ -80,7 +79,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         assert values.get("response") != null;
 
         SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocList response = ((ResultContext) values.get("response")).docs;
+        DocList response = ((ResultContext) values.get("response")).getDocList();
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
         writeProps(writer, "responseHeader", responseHeader); // this.writeVal("responseHeader", responseHeader);
@@ -268,7 +267,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         } else if (typeName.equals(SolrType.num_long.printName())) {
             writeTag(writer, "long", name, value, true);
         } else if (typeName.equals(SolrType.date.printName())) {
-            writeTag(writer, "date", name, DateFormatUtil.formatExternal(new Date(Long.parseLong(value))), true);
+            writeTag(writer, "date", name, new Date(Long.parseLong(value)).toInstant().toString(), true);
         } else if (typeName.equals(SolrType.num_float.printName())) {
             writeTag(writer, "float", name, value, true);
         } else if (typeName.equals(SolrType.num_double.printName())) {
@@ -286,7 +285,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         } else if (value instanceof Long) {
             writeTag(writer, "long", name, ((Long) value).toString(), true);
         } else if (value instanceof Date) {
-            writeTag(writer, "date", name, DateFormatUtil.formatExternal((Date) value), true);
+            writeTag(writer, "date", name, ((Date) value).toInstant().toString(), true);
         } else if (value instanceof Float) {
             writeTag(writer, "float", name, ((Float) value).toString(), true);
         } else if (value instanceof Double) {

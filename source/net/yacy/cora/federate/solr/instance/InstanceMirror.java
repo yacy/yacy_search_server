@@ -27,12 +27,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.federate.solr.connector.ConcurrentUpdateSolrConnector;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.MirrorSolrConnector;
 import net.yacy.cora.federate.solr.connector.RemoteSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
-import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
@@ -181,9 +179,7 @@ public class InstanceMirror {
         if (msc != null) return msc;
         EmbeddedSolrConnector esc = getEmbeddedConnector(corename);
         RemoteSolrConnector rsc = getRemoteConnector(corename);
-        int cacheSize = (int) (MemoryControl.available() / 30000); // will return about 10000 for standard ram size
-        msc = new ConcurrentUpdateSolrConnector(new MirrorSolrConnector(esc, rsc), RemoteInstance.queueSizeByMemory(), cacheSize, Runtime.getRuntime().availableProcessors());
-        //msc = new MirrorSolrConnector(esc, rsc);
+        msc = new MirrorSolrConnector(esc, rsc);
         this.mirrorConnectorCache.put(corename, msc);
         return msc;
     }

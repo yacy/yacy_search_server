@@ -51,7 +51,6 @@ import org.apache.solr.schema.TextField;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
-import org.apache.solr.util.DateFormatUtil;
 
 public class HTMLResponseWriter implements QueryResponseWriter {
 
@@ -157,7 +156,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         
         String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName).replaceAll("%22");
 
-        DocList response = ((ResultContext) values.get("response")).docs;
+        DocList response = ((ResultContext) values.get("response")).getDocList();
         final int sz = response.size();
         if (sz > 0) {
             SolrIndexSearcher searcher = request.getSearcher();
@@ -283,7 +282,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         if (typeName.equals(SolrType.bool.printName())) {
             return "F".equals(value) ? "false" : "true";
         } else if (typeName.equals(SolrType.date.printName())) {
-            return DateFormatUtil.formatExternal(new Date(Long.parseLong(value)));
+            return new Date(Long.parseLong(value)).toInstant().toString();
         }
         return value;
     }

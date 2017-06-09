@@ -257,7 +257,7 @@ public class GSAsearchServlet extends HttpServlet {
         Object rv = response.getValues().get("response");
         int matches = 0;
         if (rv != null && rv instanceof ResultContext) {
-            matches = ((ResultContext) rv).docs.matches();
+            matches = ((ResultContext) rv).getDocList().matches();
         } else if (rv != null && rv instanceof SolrDocumentList) {
             matches = (int) ((SolrDocumentList) rv).getNumFound();
         }

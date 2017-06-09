@@ -485,9 +485,9 @@ public class ServerShard extends SolrClient {
         }
         return null;
     }
-    
+
     @Override
-    public void shutdown() {
+    public void close() throws IOException {
         for (SolrClient s: this.shards) {
             try {
                 s.close();
