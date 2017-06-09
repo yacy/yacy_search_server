@@ -50,7 +50,12 @@ import org.apache.solr.common.params.CommonParams;
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
     protected final static ConcurrentLog log = new ConcurrentLog(SolrServerConnector.class.getName());
-
+    public final static org.apache.lucene.analysis.CharArrayMap<Byte> classLoaderSynchro = new org.apache.lucene.analysis.CharArrayMap<Byte>(0, true);
+    // pre-instantiate this object to prevent sun.misc.Launcher$AppClassLoader deadlocks
+    // this is a very nasty problem; solr instantiates objects dynamically which can cause deadlocks
+    static {
+        assert classLoaderSynchro != null;
+    }
     protected SolrClient server;
 
     protected SolrServerConnector() {
