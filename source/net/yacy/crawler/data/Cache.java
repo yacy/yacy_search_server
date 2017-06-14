@@ -57,6 +57,16 @@ import net.yacy.kelondro.index.RowHandleSet;
 
 public final class Cache {
 
+	/** Default size in bytes of the backend buffer (buffered bytes before writing to the the file system) */
+	protected static final int DEFAULT_BACKEND_BUFFER_SIZE = 1024 * 1024 * 2;
+	
+	/** Default size in bytes of the compressor buffer (buffered bytes before compressing and sending to the backend ) */
+	protected static final int DEFAULT_COMPRESSOR_BUFFER_SIZE = 6 * 1024 * 1024;
+	
+	/** Default size in bytes of the response header data base buffer (buffered bytes before writing to the file system) */
+	protected static final int DEFAULT_RESPONSE_HEADER_BUFFER_SIZE = 2048;
+	
+	
     private static final String RESPONSE_HEADER_DB_NAME = "responseHeader.heap";
     private static final String FILE_DB_NAME = "file.array";
 
@@ -69,10 +79,16 @@ public final class Cache {
     private static String prefix;
     public static final ConcurrentLog log = new ConcurrentLog("HTCACHE");
 
-    public static void init(final File htCachePath, final String peerSalt, final long CacheSizeMax) {
+    /**
+     * @param htCachePath folder path for the cache
+     * @param peerSalt peer identifier
+     * @param cacheSizeMax maximum cache size in bytes
+     * @param lockTimeout maximum time (in milliseconds) to acquire a synchronization lock on store() and getContent()
+     */
+    public static void init(final File htCachePath, final String peerSalt, final long cacheSizeMax, final long lockTimeout) {
 
         cachePath = htCachePath;
-        maxCacheSize = CacheSizeMax;
+        maxCacheSize = cacheSizeMax;
         prefix = peerSalt;
 
         // set/make cache path
@@ -83,14 +99,14 @@ public final class Cache {
         // open the response header database
         final File dbfile = new File(cachePath, RESPONSE_HEADER_DB_NAME);
         try {
-            responseHeaderDB = new MapHeap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 2048, 100, ' ');
+            responseHeaderDB = new MapHeap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, DEFAULT_RESPONSE_HEADER_BUFFER_SIZE, 100, ' ');
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
             // try a healing
             if (dbfile.exists()) {
                 dbfile.delete();
                 try {
-                    responseHeaderDB = new MapHeap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 2048, 100, ' ');
+                    responseHeaderDB = new MapHeap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, DEFAULT_RESPONSE_HEADER_BUFFER_SIZE, 100, ' ');
                 } catch (final IOException ee) {
                     ConcurrentLog.logException(e);
                 }
@@ -98,18 +114,18 @@ public final class Cache {
         }
         // open the cache file
         try {
-            fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, 1024 * 1024 * 2, false, true);
+            fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, DEFAULT_BACKEND_BUFFER_SIZE, false, true);
             fileDBunbuffered.setMaxSize(maxCacheSize);
-            fileDB = new Compressor(fileDBunbuffered, 6 * 1024 * 1024);
+            fileDB = new Compressor(fileDBunbuffered, DEFAULT_COMPRESSOR_BUFFER_SIZE, lockTimeout);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
             // try a healing
             if (cachePath.exists()) {
                 cachePath.delete();
                 try {
-                    fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, 1024 * 1024 * 2, false, true);
+                    fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, DEFAULT_BACKEND_BUFFER_SIZE, false, true);
                     fileDBunbuffered.setMaxSize(maxCacheSize);
-                    fileDB = new Compressor(fileDBunbuffered, 6 * 1024 * 1024);
+                    fileDB = new Compressor(fileDBunbuffered, DEFAULT_COMPRESSOR_BUFFER_SIZE, lockTimeout);
                 } catch (final IOException ee) {
                     ConcurrentLog.logException(e);
                 }
@@ -196,16 +212,16 @@ public final class Cache {
     }
 
     /**
-     * get the current actual cache size
-     * @return
+     * Warning : even when the cache is empty, 
+     * the actual cache size may not be zero because heap files still containing zeros after deletions
+     * @return the current actual cache size stored on disk
      */
     public static long getActualCacheSize() {
         return fileDBunbuffered.length();
     }
     
     /**
-     * get the current actual cache size
-     * @return
+     * @return the current actual number of cached documents stored on disk
      */
     public static long getActualCacheDocCount() {
         return fileDBunbuffered.size();

@@ -180,6 +180,7 @@ import net.yacy.document.parser.html.Evaluation;
 import net.yacy.gui.Audio;
 import net.yacy.gui.Tray;
 import net.yacy.http.YaCyHttpServer;
+import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -722,7 +723,7 @@ public final class Switchboard extends serverSwitch {
         this.log.info("HTCACHE Path = " + this.htCachePath.getAbsolutePath());
         final long maxCacheSize =
             1024L * 1024L * Long.parseLong(getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
-        Cache.init(this.htCachePath, this.peers.mySeed().hash, maxCacheSize);
+        Cache.init(this.htCachePath, this.peers.mySeed().hash, maxCacheSize, 2000);
         final File transactiondir = new File(this.htCachePath, "snapshots");
         Transactions.init(transactiondir);
 
@@ -1894,6 +1895,7 @@ public final class Switchboard extends serverSwitch {
         Domains.close();
         AccessTracker.dumpLog();
         Switchboard.urlBlacklist.close();
+        ArrayStack.shutdownDeleteService();
         UPnP.deletePortMappings();
         this.tray.remove();
         try {

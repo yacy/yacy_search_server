@@ -99,7 +99,7 @@ public class ArrayStack implements BLOB {
     private final int            buffersize;
     private final boolean        trimall;
 
-    // the thread pool for the keeperOf executor service
+    /** the thread pool for the keeperOf executor service */
     private final ExecutorService executor;
 
     // use our own formatter to prevent concurrency locks with other processes
@@ -881,6 +881,22 @@ public class ArrayStack implements BLOB {
 
 	private static final ExecutorService DELETE_EXECUTOR = Executors
 			.newCachedThreadPool(new NamePrefixThreadFactory(ArrayStack.class.getSimpleName() + ".DELETE_EXECUTOR"));
+	
+	/**
+	 * Shutdown the delete executor service used to run asynchronously deletions on any ArrayStack instance
+	 */
+	public static void shutdownDeleteService() {
+		DELETE_EXECUTOR.shutdown();
+		final long timeout = 1; 
+		try {
+			final boolean terminated = DELETE_EXECUTOR.awaitTermination(timeout, TimeUnit.SECONDS);
+			if(!terminated) {
+				ConcurrentLog.warn("ArrayStack", "Delete executor service could not terminated within " + timeout + " second");
+			}
+		} catch (InterruptedException e) {
+			ConcurrentLog.warn("ArrayStack", "Interrupted before termination of the delete executor service");
+		}
+	}
 
     /**
      * close the BLOB
@@ -890,6 +906,7 @@ public class ArrayStack implements BLOB {
         for (final blobItem bi: this.blobs) bi.blob.close(writeIDX);
         this.blobs.clear();
         this.blobs = null;
+        this.executor.shutdown();
     }
 
     /**

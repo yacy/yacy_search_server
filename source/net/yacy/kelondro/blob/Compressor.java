@@ -35,6 +35,8 @@ import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -53,13 +55,25 @@ public class Compressor implements BLOB, Iterable<byte[]> {
     private static byte[] plainMagic = {(byte) 'p', (byte) '|'}; // magic for plain content (no encoding)
 
     private final BLOB backend;
-    private TreeMap<byte[], byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
+    
+    /** entries which are not yet compressed, format is RAW (without magic) */
+    private TreeMap<byte[], byte[]> buffer;
+    
+    /** Total size (in bytes) of uncompressed entries in buffer */
     private long bufferlength;
     private final long maxbufferlength;
+    
+    /** Maximum time (in milliseconds) to acquire a synchronization lock on get() and insert() */
+    private final long lockTimeout;
+    
+    /** Synchronization lock */
+    private final ReentrantLock lock;
 
-    public Compressor(final BLOB backend, final long buffersize) {
+    public Compressor(final BLOB backend, final long buffersize, final long lockTimeout) {
         this.backend = backend;
         this.maxbufferlength = buffersize;
+        this.lockTimeout = lockTimeout;
+        this.lock = new ReentrantLock();
         initBuffer();
     }
 
@@ -79,9 +93,14 @@ public class Compressor implements BLOB, Iterable<byte[]> {
     }
 
     @Override
-    public synchronized void clear() throws IOException {
-        initBuffer();
-        this.backend.clear();
+    public void clear() throws IOException {
+    	this.lock.lock();
+    	try {
+    		initBuffer();
+    		this.backend.clear();
+    	} finally {
+    		this.lock.unlock();
+    	}
     }
 
     private void initBuffer() {
@@ -95,10 +114,15 @@ public class Compressor implements BLOB, Iterable<byte[]> {
     }
 
     @Override
-    public synchronized void close(final boolean writeIDX) {
-        // no more thread is running, flush all queues
-        flushAll();
-        this.backend.close(writeIDX);
+    public void close(final boolean writeIDX) {
+    	this.lock.lock();
+    	try {
+    		// no more thread is running, flush all queues
+    		flushAll();
+    		this.backend.close(writeIDX);
+    	} finally {
+    		this.lock.unlock();
+    	}
     }
 
     private static byte[] compress(final byte[] b) {
@@ -177,22 +201,35 @@ public class Compressor implements BLOB, Iterable<byte[]> {
         // depending on the source of the result, we additionally do entry compression
         // because if a document was read once, we think that it will not be retrieved another time again soon
         byte[] b = null;
-        synchronized (this) {
-            b = this.buffer.remove(key);
-            if (b != null) {
-                this.backend.insert(key, compress(b));
-                this.bufferlength = this.bufferlength - b.length;
-                return b;
+        boolean locked = false;
+        try {
+			locked = this.lock.tryLock(this.lockTimeout, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException ignored) {
+			/* When interrupted, simply return null */
+			ConcurrentLog.fine("Compressor", "Interrupted while acquiring a synchronzation lock on get()");
+		}
+        if(locked) {
+        	try {
+        		b = this.buffer.remove(key);
+        		if (b != null) {
+        			this.bufferlength = this.bufferlength - b.length;
+           			this.backend.insert(key, compress(b));
+        			return b;
+        		}
+        	} finally {
+        		this.lock.unlock();
+        	}
+        	
+            // return from the backend
+            b = this.backend.get(key);
+            if (b == null) return null;
+            if (!MemoryControl.request(b.length * 2, true)) {
+                throw new SpaceExceededException(b.length * 2, "decompress needs 2 * " + b.length + " bytes");
             }
+            return decompress(b);
         }
-
-        // return from the backend
-        b = this.backend.get(key);
-        if (b == null) return null;
-        if (!MemoryControl.request(b.length * 2, true)) {
-            throw new SpaceExceededException(b.length * 2, "decompress needs 2 * " + b.length + " bytes");
-        }
-        return decompress(b);
+       	ConcurrentLog.fine("Compressor", "Could not acquire a synchronization lock for retrieval within " + this.lockTimeout + " milliseconds");
+        return b;
     }
 
     @Override
@@ -210,8 +247,11 @@ public class Compressor implements BLOB, Iterable<byte[]> {
 
     @Override
     public boolean containsKey(final byte[] key) {
-        synchronized (this) {
+        this.lock.lock();
+        try {
             return this.buffer.containsKey(key) || this.backend.containsKey(key);
+        } finally {
+        	this.lock.unlock();
         }
     }
 
@@ -221,18 +261,22 @@ public class Compressor implements BLOB, Iterable<byte[]> {
     }
 
     @Override
-    public synchronized long length() {
+    public long length() {
+        this.lock.lock();
         try {
             return this.backend.length() + this.bufferlength;
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
             return 0;
+        } finally {
+        	this.lock.unlock();
         }
     }
 
     @Override
     public long length(final byte[] key) throws IOException {
-        synchronized (this) {
+        this.lock.lock();
+        try {
             byte[] b = this.buffer.get(key);
             if (b != null) return b.length;
             try {
@@ -243,6 +287,8 @@ public class Compressor implements BLOB, Iterable<byte[]> {
             } catch (final SpaceExceededException e) {
                 throw new IOException(e.getMessage());
             }
+        } finally {
+        	this.lock.unlock();
         }
     }
 
@@ -254,61 +300,100 @@ public class Compressor implements BLOB, Iterable<byte[]> {
 
     @Override
     public void insert(final byte[] key, final byte[] b) throws IOException {
+    	boolean locked = false;
+    	try {
+			locked = this.lock.tryLock(this.lockTimeout, TimeUnit.MILLISECONDS);
+		} catch (InterruptedException ignored) {
+			/* When interrupted, simply nothing is inserted */
+			ConcurrentLog.fine("Compressor", "Interrupted while acquiring a synchronzation lock on insert()");
+		}
+    	if(locked) {
+    		try {
+    			// first ensure that the files do not exist anywhere
+    			delete(key);
 
-        // first ensure that the files do not exist anywhere
-        delete(key);
+    			// check if the buffer is full or could be full after this write
+    			if (this.bufferlength + b.length * 2 > this.maxbufferlength) {
+    				// in case that we compress, just compress as much as is necessary to get enough room
+    				while (this.bufferlength + b.length * 2 > this.maxbufferlength) {
+    					if (this.buffer.isEmpty()) break;
+    					flushOne();
+    				}
+    				// in case that this was not enough, just flush all
+    				if (this.bufferlength + b.length * 2 > this.maxbufferlength) flushAll();
+    			}
 
-        // check if the buffer is full or could be full after this write
-        if (this.bufferlength + b.length * 2 > this.maxbufferlength) synchronized (this) {
-            // in case that we compress, just compress as much as is necessary to get enough room
-            while (this.bufferlength + b.length * 2 > this.maxbufferlength) {
-                if (this.buffer.isEmpty()) break;
-                flushOne();
-            }
-            // in case that this was not enough, just flush all
-            if (this.bufferlength + b.length * 2 > this.maxbufferlength) flushAll();
-        }
-
-        // files are written uncompressed to the uncompressed-queue
-        // they are either written uncompressed to the database
-        // or compressed later
-        synchronized (this) {
-            this.buffer.put(key, b);
-            this.bufferlength += b.length;
-        }
-
-        if (MemoryControl.shortStatus()) flushAll();
+    			// files are written uncompressed to the uncompressed-queue
+    			// they are either written uncompressed to the database
+    			// or compressed later
+   				this.buffer.put(key, b);
+   				this.bufferlength += b.length;
+    		} finally {
+    			this.lock.unlock();
+    		}
+    		
+    		if (MemoryControl.shortStatus()) {
+    			flushAll();
+    		}
+    	} else {
+    		ConcurrentLog.fine("Compressor", "Could not acquire a synchronization lock for insertion within " + this.lockTimeout + " milliseconds");
+    	}
     }
 
     @Override
-    public synchronized void delete(final byte[] key) throws IOException {
-        this.backend.delete(key);
-        final long rx = removeFromQueues(key);
-        if (rx > 0) this.bufferlength -= rx;
+    public void delete(final byte[] key) throws IOException {
+    	this.lock.lock();
+    	try {
+    		this.backend.delete(key);
+    		final long rx = removeFromQueues(key);
+    		if (rx > 0) this.bufferlength -= rx;
+    	} finally {
+    		this.lock.unlock();
+    	}
     }
 
     @Override
-    public synchronized int size() {
-        return this.backend.size() + this.buffer.size();
+    public int size() {
+    	this.lock.lock();
+    	try {
+    		return this.backend.size() + this.buffer.size();
+    	} finally {
+    		this.lock.unlock();
+    	}
     }
 
     @Override
-    public synchronized boolean isEmpty() {
-        if (!this.backend.isEmpty()) return false;
-        if (!this.buffer.isEmpty()) return false;
-        return true;
+    public boolean isEmpty() {
+    	this.lock.lock();
+    	try {
+    		if (!this.backend.isEmpty()) return false;
+    		if (!this.buffer.isEmpty()) return false;
+    		return true;
+    	} finally {
+    		this.lock.unlock();
+    	}
     }
 
     @Override
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
-        flushAll();
-        return this.backend.keys(up, rotating);
+    public CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
+    	this.lock.lock();
+    	try {
+    		flushAll();
+    		return this.backend.keys(up, rotating);
+    	} finally {
+    		this.lock.unlock();
+    	}
     }
 
     @Override
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        flushAll();
-        return this.backend.keys(up, firstKey);
+    public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
+    	this.lock.lock();
+    	try {
+    		flushAll();
+    		return this.backend.keys(up, firstKey);
+    	} finally {
+    		this.lock.unlock();
+    	}
     }
 
     @Override
@@ -337,9 +422,16 @@ public class Compressor implements BLOB, Iterable<byte[]> {
     }
 
     public void flushAll() {
-        while (!this.buffer.isEmpty()) {
-            if (!flushOne()) break;
-        }
+    	this.lock.lock();
+    	try {
+    		while (!this.buffer.isEmpty()) {
+    			if (!flushOne()) {
+    				break;
+    			}
+    		}
+    	} finally {
+    		this.lock.unlock();
+    	}
     }
 
     @Override
