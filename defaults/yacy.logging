@@ -99,6 +99,7 @@ org.apache.solr.rest.ManagedResource.level = SEVERE
 org.apache.solr.util.plugin.AbstractPluginLoader.level = INFO
 org.apache.solr.schema.IndexSchema.level = INFO
 org.apache.solr.schema.FieldTypePluginLoader.level = INFO
+org.apache.solr.handler.admin.LukeRequestHandler.level = SEVERE
 org.apache.solr.handler.component.HttpShardHandlerFactory.level = SEVERE
 org.apache.solr.handler.component.QueryElevationComponent.level = SEVERE
 org.apache.solr.handler.component.SearchHandler.level = SEVERE
