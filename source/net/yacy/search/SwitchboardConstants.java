@@ -26,6 +26,8 @@
 
 package net.yacy.search;
 
+import java.util.zip.Deflater;
+
 import net.yacy.cora.order.Digest;
 import net.yacy.server.http.RobotsTxtConfig;
 
@@ -390,6 +392,19 @@ public final class SwitchboardConstants {
      */
     public static final String HTCACHE_PATH             = "proxyCache";
     public static final String HTCACHE_PATH_DEFAULT     = "DATA/HTCACHE";
+    
+    /** Key of the setting configuring the cache synchronization  */
+    public static final String HTCACHE_COMPRESSION_LEVEL   = "proxyCache.compressionLevel";
+    
+    /** Default compression level for cached content */
+    public static final int HTCACHE_COMPRESSION_LEVEL_DEFAULT = Deflater.BEST_COMPRESSION;
+    
+    /** Key of the setting configuring Cache synchronization lock timeout on getContent/store operations*/
+    public static final String HTCACHE_SYNC_LOCK_TIMEOUT   = "proxyCache.sync.lockTimeout";
+    
+    /** Default timeout value (in milliseconds) for acquiring a synchronization lock on getContent/store Cache operations */
+    public static final long HTCACHE_SYNC_LOCK_TIMEOUT_DEFAULT = 2000;
+    
     public static final String RELEASE_PATH             = "releases";
     public static final String RELEASE_PATH_DEFAULT     = "DATA/RELEASE";
 

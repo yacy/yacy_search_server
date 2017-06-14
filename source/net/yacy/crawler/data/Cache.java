@@ -84,8 +84,9 @@ public final class Cache {
      * @param peerSalt peer identifier
      * @param cacheSizeMax maximum cache size in bytes
      * @param lockTimeout maximum time (in milliseconds) to acquire a synchronization lock on store() and getContent()
+     * @param compressionLevel the compression level : supported values ranging from 0 - no compression, to 9 - best compression
      */
-    public static void init(final File htCachePath, final String peerSalt, final long cacheSizeMax, final long lockTimeout) {
+    public static void init(final File htCachePath, final String peerSalt, final long cacheSizeMax, final long lockTimeout, final int compressionLevel) {
 
         cachePath = htCachePath;
         maxCacheSize = cacheSizeMax;
@@ -116,7 +117,7 @@ public final class Cache {
         try {
             fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, DEFAULT_BACKEND_BUFFER_SIZE, false, true);
             fileDBunbuffered.setMaxSize(maxCacheSize);
-            fileDB = new Compressor(fileDBunbuffered, DEFAULT_COMPRESSOR_BUFFER_SIZE, lockTimeout);
+            fileDB = new Compressor(fileDBunbuffered, DEFAULT_COMPRESSOR_BUFFER_SIZE, lockTimeout, compressionLevel);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
             // try a healing
@@ -125,7 +126,7 @@ public final class Cache {
                 try {
                     fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, Base64Order.enhancedCoder, 12, DEFAULT_BACKEND_BUFFER_SIZE, false, true);
                     fileDBunbuffered.setMaxSize(maxCacheSize);
-                    fileDB = new Compressor(fileDBunbuffered, DEFAULT_COMPRESSOR_BUFFER_SIZE, lockTimeout);
+                    fileDB = new Compressor(fileDBunbuffered, DEFAULT_COMPRESSOR_BUFFER_SIZE, lockTimeout, compressionLevel);
                 } catch (final IOException ee) {
                     ConcurrentLog.logException(e);
                 }
@@ -225,6 +226,22 @@ public final class Cache {
      */
     public static long getActualCacheDocCount() {
         return fileDBunbuffered.size();
+    }
+    
+    /**
+     * Set the new content compression level 
+     * @param newCompressionLevel the new compression level. Supported values between 0 (no compression) and 9 (best compression)
+     */
+    public static void setCompressionLevel(final int newCompressionLevel) {
+    	fileDB.setCompressionLevel(newCompressionLevel);
+    }
+    
+    /**
+     * Set the new synchronization lock timeout.
+     * @param lockTimeout the new synchronization lock timeout (in milliseconds).
+     */
+    public static void setLockTimeout(final long lockTimeout) {
+    	fileDB.setLockTimeout(lockTimeout);
     }
 
     /**

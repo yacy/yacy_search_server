@@ -254,6 +254,14 @@ proxyCache = DATA/HTCACHE
 # default: 4 Gigabyte
 proxyCacheSize = 4096
 
+# The compression level for cached content
+# Supported values ranging from 0 - no compression (lower CPU, higher disk usage), to 9 - best compression (higher CPU, lower disk use)
+proxyCache.compressionLevel = 9
+
+# Timeout value (in milliseconds) for acquiring a synchronization lock on getContent/store Cache operations
+# When timeout occurs, loader should fall back to regular remote resource loading
+proxyCache.sync.lockTimeout = 2000
+
 # you can use the proxy with fresh/stale rules or in a always-fresh mode
 proxyAlwaysFresh = false
 

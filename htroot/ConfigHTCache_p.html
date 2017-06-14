@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>YaCy '#[clientname]#': Hypertext Cache Configuration</title>
     #%env/templates/metas.template%#
@@ -18,10 +18,24 @@
         <dl>
           <dt><label for="HTCachePath">The path where the cache is stored</label></dt>
           <dd><input name="HTCachePath" id="HTCachePath" type="text" size="20" maxlength="300" value="#[HTCachePath]#" /></dd>
-          <dt><label for="actualCacheSize">The current size of the cache</label></dt>
+          <dt><label>The current size of the cache</label></dt>
           <dd><span id="actualCacheSize">#[actualCacheSize]# MB for #[actualCacheDocCount]# files, #[docSizeAverage]# KB / file in average </span></dd>
           <dt><label for="maxCacheSize">The maximum size of the cache</label></dt>
           <dd><input name="maxCacheSize" id="maxCacheSize" type="text" size="8" maxlength="24" value="#[maxCacheSize]#" /> MB</dd>
+          <dt><label for="compressionLevel">Compression level</label></dt>
+          <dd><select id="compressionLevel" name="compressionLevel">
+            #{compressionLevels}#
+          	<option value="#[value]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+          	#{/compressionLevels}#
+          </select></dd>
+          <dt><label for="lockTimeout" aria-describedby="timeoutInfo">Concurrent access timeout</label>
+          	<span class="info">
+        		<img src="env/grafics/i16.gif" width="16" height="16" alt="Concurrent access timeout info"/>
+        		<span class="infobox" id="timeoutInfo">The maximum time to wait for acquiring a synchronization lock on concurrent get/store cache operations. 
+        		Beyond this limit, the crawler or proxy falls back to regular remote resource loading.</span>
+        	</span>
+          </dt>
+          <dd><input name="lockTimeout" id="lockTimeout" type="number" min="10" max="600000" value="#[lockTimeout]#"/> milliseconds</dd>
           <dt>&nbsp;</dt>
           <dd><input type="submit" name="set" value="Set" class="btn btn-primary"/></dd>
         </dl>

@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.LogManager;
+import java.util.zip.Deflater;
 
 import org.apache.http.HttpStatus;
 import org.junit.After;
@@ -68,7 +69,7 @@ public class CacheTest {
 		Cache.init(new File(System.getProperty("java.io.tmpdir") + File.separator + "testCache"), "peerSalt",
 				Math.max(Math.max(TEXT_CONTENT.getBytes(StandardCharsets.UTF_8).length * 10,
 						Cache.DEFAULT_COMPRESSOR_BUFFER_SIZE * 2), Cache.DEFAULT_BACKEND_BUFFER_SIZE * 2),
-				2000);
+				2000, Deflater.BEST_COMPRESSION);
 		Cache.clear();
 	}
 
@@ -497,9 +498,11 @@ public class CacheTest {
 		final long sleepTime = 0;
 		/* Maximum waiting time (in ms) for acquiring a synchronization lock */
 		final long lockTimeout = 2000;
+		/* The backend compression level */
+		final int compressionLevel = Deflater.BEST_COMPRESSION;
 
 		Cache.init(new File(System.getProperty("java.io.tmpdir") + File.separator + "yacyTestCache"), "peerSalt",
-				cacheMaxSize, lockTimeout);
+				cacheMaxSize, lockTimeout, compressionLevel);
 		Cache.clear();
 		System.out.println("Cache initialized with a maximum size of " + cacheMaxSize + " bytes.");
 

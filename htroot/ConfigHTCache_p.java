@@ -28,6 +28,7 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.util.zip.Deflater;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.Cache;
@@ -61,6 +62,19 @@ public class ConfigHTCache_p {
             final int newProxyCacheSize = Math.max(post.getInt("maxCacheSize", 64), 0);
             env.setConfig(SwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
             Cache.setMaxCacheSize(newProxyCacheSize * 1024L * 1024L);
+            
+            /* Compression level*/
+            /* Ensure a value within the range supported by the Deflater class */
+			final int newCompressionLevel = Math.max(Deflater.NO_COMPRESSION, Math.min(Deflater.BEST_COMPRESSION,
+					post.getInt("compressionLevel", SwitchboardConstants.HTCACHE_COMPRESSION_LEVEL_DEFAULT)));
+			env.setConfig(SwitchboardConstants.HTCACHE_COMPRESSION_LEVEL, newCompressionLevel);
+			Cache.setCompressionLevel(newCompressionLevel);
+			
+            /* Synchronization lock timeout */
+			final long newLockTimeout = Math.max(10, Math.min(60000,
+					post.getLong("lockTimeout", SwitchboardConstants.HTCACHE_SYNC_LOCK_TIMEOUT_DEFAULT)));
+			env.setConfig(SwitchboardConstants.HTCACHE_SYNC_LOCK_TIMEOUT, newLockTimeout);
+			Cache.setLockTimeout(newLockTimeout);
         }
 
         if (post != null && post.containsKey("deletecomplete")) {
@@ -73,6 +87,32 @@ public class ConfigHTCache_p {
         }
 
         prop.put("HTCachePath", env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT));
+        
+        /* Compression levels */
+		final int configuredCompressionLevel = env.getConfigInt(SwitchboardConstants.HTCACHE_COMPRESSION_LEVEL,
+				SwitchboardConstants.HTCACHE_COMPRESSION_LEVEL_DEFAULT);
+		int levelsCount = 0;
+        for(int level = Deflater.NO_COMPRESSION; level <= Deflater.BEST_COMPRESSION; level++) {
+        	if(level == configuredCompressionLevel) {
+        		prop.put("compressionLevels_" + levelsCount + "_selected", "1");		
+        	} else {
+        		prop.put("compressionLevels_" + levelsCount + "_selected", "0");
+        	}
+        	prop.put("compressionLevels_" + levelsCount + "_value", level);
+        	prop.put("compressionLevels_" + levelsCount + "_name", level);
+        	if(level == Deflater.NO_COMPRESSION) {
+        		prop.put("compressionLevels_" + levelsCount + "_name", "0 - No compression");	
+        	} else if(level == Deflater.BEST_SPEED) {
+        		prop.put("compressionLevels_" + levelsCount + "_name", Deflater.BEST_SPEED + " - Best speed");
+        	} else if(level == Deflater.BEST_COMPRESSION) {
+        		prop.put("compressionLevels_" + levelsCount + "_name", Deflater.BEST_COMPRESSION + " - Best compression");
+        	}
+        	levelsCount++;
+        }
+        prop.put("compressionLevels", levelsCount);
+        
+		prop.put("lockTimeout", env.getConfigLong(SwitchboardConstants.HTCACHE_SYNC_LOCK_TIMEOUT,
+				SwitchboardConstants.HTCACHE_SYNC_LOCK_TIMEOUT_DEFAULT));
         prop.put("actualCacheSize", Cache.getActualCacheSize() / 1024 / 1024);
         prop.put("actualCacheDocCount", Cache.getActualCacheDocCount());
         prop.put("docSizeAverage", Cache.getActualCacheDocCount() == 0 ? 0 : Cache.getActualCacheSize() / Cache.getActualCacheDocCount() / 1024);

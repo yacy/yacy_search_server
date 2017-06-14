@@ -723,7 +723,11 @@ public final class Switchboard extends serverSwitch {
         this.log.info("HTCACHE Path = " + this.htCachePath.getAbsolutePath());
         final long maxCacheSize =
             1024L * 1024L * Long.parseLong(getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
-        Cache.init(this.htCachePath, this.peers.mySeed().hash, maxCacheSize, 2000);
+		Cache.init(this.htCachePath, this.peers.mySeed().hash, maxCacheSize,
+				getConfigLong(SwitchboardConstants.HTCACHE_SYNC_LOCK_TIMEOUT,
+						SwitchboardConstants.HTCACHE_SYNC_LOCK_TIMEOUT_DEFAULT),
+				getConfigInt(SwitchboardConstants.HTCACHE_COMPRESSION_LEVEL,
+						SwitchboardConstants.HTCACHE_COMPRESSION_LEVEL_DEFAULT));
         final File transactiondir = new File(this.htCachePath, "snapshots");
         Transactions.init(transactiondir);
 

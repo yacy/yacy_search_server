@@ -61,19 +61,32 @@ public class Compressor implements BLOB, Iterable<byte[]> {
     
     /** Total size (in bytes) of uncompressed entries in buffer */
     private long bufferlength;
+    
+    /** Maximum {@link #bufferlength} value before compressing and flushing to the backend */
     private final long maxbufferlength;
     
     /** Maximum time (in milliseconds) to acquire a synchronization lock on get() and insert() */
-    private final long lockTimeout;
+    private long lockTimeout;
     
     /** Synchronization lock */
     private final ReentrantLock lock;
+    
+    /** The compression level */
+    private int compressionLevel;
 
-    public Compressor(final BLOB backend, final long buffersize, final long lockTimeout) {
+    /**
+     * @param backend the backend storage
+     * @param buffersize the maximum total size (in bytes) of uncompressed in-memory entries before compressing and flushing to the backend
+     * @param lockTimeout maximum time to acquire a synchronization lock on get() and insert() operations
+     * @param compressionLevel the compression level : supported values ranging from 0 - no compression, to 9 - best compression
+     */
+    public Compressor(final BLOB backend, final long buffersize, final long lockTimeout, final int compressionLevel) {
         this.backend = backend;
         this.maxbufferlength = buffersize;
         this.lockTimeout = lockTimeout;
         this.lock = new ReentrantLock();
+        /* Ensure a value within the range supported by the Deflater class */
+        this.compressionLevel = Math.max(Deflater.NO_COMPRESSION, Math.min(Deflater.BEST_COMPRESSION, compressionLevel));
         initBuffer();
     }
 
@@ -125,21 +138,21 @@ public class Compressor implements BLOB, Iterable<byte[]> {
     	}
     }
 
-    private static byte[] compress(final byte[] b) {
+    private static byte[] compress(final byte[] b, final int compressionLevel) {
         final int l = b.length;
         if (l < 100) return markWithPlainMagic(b);
-        final byte[] bb = compressAddMagic(b);
+        final byte[] bb = compressAddMagic(b, compressionLevel);
         if (bb.length >= l) return markWithPlainMagic(b);
         return bb;
     }
 
-    private static byte[] compressAddMagic(final byte[] b) {
+    private static byte[] compressAddMagic(final byte[] b, final int compressionLevel) {
         // compress a byte array and add a leading magic for the compression
         try {
             //System.out.print("/(" + cdr + ")"); // DEBUG
             final ByteArrayOutputStream baos = new ByteArrayOutputStream(b.length / 5);
             baos.write(gzipMagic);
-            final OutputStream os = new GZIPOutputStream(baos, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}};
+            final OutputStream os = new GZIPOutputStream(baos, 65536){{def.setLevel(compressionLevel);}};
             os.write(b);
             os.close();
             baos.close();
@@ -213,7 +226,7 @@ public class Compressor implements BLOB, Iterable<byte[]> {
         		b = this.buffer.remove(key);
         		if (b != null) {
         			this.bufferlength = this.bufferlength - b.length;
-           			this.backend.insert(key, compress(b));
+           			this.backend.insert(key, compress(b, this.compressionLevel));
         			return b;
         		}
         	} finally {
@@ -412,7 +425,7 @@ public class Compressor implements BLOB, Iterable<byte[]> {
         final Map.Entry<byte[], byte[]> entry = this.buffer.entrySet().iterator().next();
         this.buffer.remove(entry.getKey());
         try {
-            this.backend.insert(entry.getKey(), compress(entry.getValue()));
+            this.backend.insert(entry.getKey(), compress(entry.getValue(), this.compressionLevel));
             this.bufferlength -= entry.getValue().length;
             return true;
         } catch (final IOException e) {
@@ -456,6 +469,23 @@ public class Compressor implements BLOB, Iterable<byte[]> {
         if (reduction == 0) return 0;
         insert(key, c);
         return reduction;
+    }
+    
+    /**
+     * Set the new content compression level.
+     * @param compressionLevel the new compression level. Supported values between 0 (no compression) and 9 (best compression).
+     */
+    public void setCompressionLevel(final int compressionLevel) {
+        /* Ensure a value within the range supported by the Deflater class */
+        this.compressionLevel = Math.max(Deflater.NO_COMPRESSION, Math.min(Deflater.BEST_COMPRESSION, compressionLevel));
+    }
+    
+    /**
+     * Set the new synchronization lock timeout.
+     * @param lockTimeout the new synchronization lock timeout (in milliseconds).
+     */
+    public void setLockTimeout(final long lockTimeout) {
+        this.lockTimeout = lockTimeout;
     }
 
 
