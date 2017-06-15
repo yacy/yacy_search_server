@@ -72,6 +72,8 @@
        The examples below can be used to load some solr-contribs along 
        with their external dependencies.
     -->
+    
+  <!-- YaCy-setting: excluded, not valid in YaCy
   <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-dataimporthandler-.*\.jar" />
 
   <lib dir="${solr.install.dir:../../../..}/contrib/extraction/lib" regex=".*\.jar" />
@@ -82,7 +84,7 @@
 
   <lib dir="${solr.install.dir:../../../..}/contrib/velocity/lib" regex=".*\.jar" />
   <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-velocity-\d.*\.jar" />
-
+  -->
   <!-- an exact 'path' can be used instead of a 'dir' to specify a 
        specific jar file.  This will cause a serious error to be logged 
        if it can't be loaded.
@@ -713,13 +715,13 @@
        not be initialized until the first request that uses it.
 
     -->
-
+<!-- YaCy-setting: not used in YaCy 
   <requestHandler name="/dataimport" class="solr.DataImportHandler">
     <lst name="defaults">
       <str name="config">solr-data-config.xml</str>
     </lst>
   </requestHandler>
-
+-->
   <!-- SearchHandler
 
        http://wiki.apache.org/solr/SearchHandler
