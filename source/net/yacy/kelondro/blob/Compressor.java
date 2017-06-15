@@ -60,19 +60,19 @@ public class Compressor implements BLOB, Iterable<byte[]> {
     private TreeMap<byte[], byte[]> buffer;
     
     /** Total size (in bytes) of uncompressed entries in buffer */
-    private long bufferlength;
+    private volatile long bufferlength;
     
     /** Maximum {@link #bufferlength} value before compressing and flushing to the backend */
     private final long maxbufferlength;
     
     /** Maximum time (in milliseconds) to acquire a synchronization lock on get() and insert() */
-    private long lockTimeout;
+    private volatile long lockTimeout;
     
     /** Synchronization lock */
     private final ReentrantLock lock;
     
     /** The compression level */
-    private int compressionLevel;
+    private volatile int compressionLevel;
 
     /**
      * @param backend the backend storage
