@@ -738,7 +738,7 @@
      <lst name="defaults">
        <str name="echoParams">explicit</str>
        <int name="rows">10</int>
-       <str name="df">text</str>
+       <str name="df">text_t</str>
      </lst>
     <!-- In addition to defaults, "appends" params can be specified
          to identify values which should be appended to the list of
@@ -804,37 +804,7 @@
      </lst>
   </requestHandler>
 
-  <!-- A Robust Example
-
-       This example SearchHandler declaration shows off usage of the
-       SearchHandler with many defaults declared
-
-       Note that multiple instances of the same Request Handler
-       (SearchHandler) can be registered multiple times with different
-       names (and different init parameters)
-    -->
-  <requestHandler name="/browse" class="solr.SearchHandler">
-    <lst name="defaults">
-      <str name="echoParams">explicit</str>
-
-      <!-- VelocityResponseWriter settings -->
-      <str name="wt">velocity</str>
-      <str name="v.template">browse</str>
-      <str name="v.layout">layout</str>
-
-      <!-- Query settings -->
-      <str name="defType">edismax</str>
-      <str name="q.alt">*:*</str>
-      <str name="rows">10</str>
-      <str name="fl">*,score</str>
-
-      <!-- Faceting defaults -->
-      <str name="facet">on</str>
-      <str name="facet.mincount">1</str>
-    </lst>
-  </requestHandler>
-
-  <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell,/browse">
+  <initParams path="/update/**,/query,/select,/tvrh,/elevate,/spell">
     <lst name="defaults">
       <str name="df">text</str>
     </lst>
@@ -1327,13 +1297,6 @@
       If you expect a MIME type of "application/json" just remove this override.
      -->
     <str name="content-type">text/plain; charset=UTF-8</str>
-  </queryResponseWriter>
-  
-  <!--
-     Custom response writers can be declared as needed...
-    -->
-  <queryResponseWriter name="velocity" class="solr.VelocityResponseWriter" startup="lazy">
-    <str name="template.base.dir">${velocity.template.base.dir:}</str>
   </queryResponseWriter>
 
   <!-- XSLT response writer transforms the XML output by any xslt file found
