@@ -16,6 +16,8 @@
     <form action="ConfigHTCache_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <fieldset><legend>HTCache Configuration</legend>
         <dl>
+          <dt title="A cache hit occurs when the requested data can be found in a cache.">Cache hits</dt>
+          <dd>#[hitRate]# ( #[hits]# hits for a total of #[requests]# requests )</dd>
           <dt><label for="HTCachePath">The path where the cache is stored</label></dt>
           <dd><input name="HTCachePath" id="HTCachePath" type="text" size="20" maxlength="300" value="#[HTCachePath]#" /></dd>
           <dt><label>The current size of the cache</label></dt>

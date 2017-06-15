@@ -40,6 +40,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicLong;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
@@ -74,7 +75,14 @@ public final class Cache {
     private static Compressor fileDB = null;
     private static ArrayStack fileDBunbuffered = null;
 
-    private static long maxCacheSize = Long.MAX_VALUE;
+    private static volatile long maxCacheSize = Long.MAX_VALUE;
+    
+    /** Total number of requests for cached response since last start/initialization or cache clear */
+    private static AtomicLong totalRequests = new AtomicLong(0);
+    
+    /** Total number of cache hits since last start/initialization or cache clear */
+    private static AtomicLong hits = new AtomicLong(0);
+    
     private static File cachePath = null;
     private static String prefix;
     public static final ConcurrentLog log = new ConcurrentLog("HTCACHE");
@@ -91,6 +99,8 @@ public final class Cache {
         cachePath = htCachePath;
         maxCacheSize = cacheSizeMax;
         prefix = peerSalt;
+        totalRequests.set(0);
+        hits.set(0);
 
         // set/make cache path
         if (!htCachePath.exists()) {
@@ -201,6 +211,9 @@ public final class Cache {
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
+        /* Clear statistics */
+        totalRequests.set(0);
+        hits.set(0);
     }
 
     /**
@@ -287,13 +300,17 @@ public final class Cache {
      * @return true if the content of the url is in the cache, false otherwise
      */
     public static boolean has(final byte[] urlhash) {
+    	totalRequests.incrementAndGet();
         boolean headerExists;
         boolean fileExists;
         //synchronized (responseHeaderDB) {
             headerExists = responseHeaderDB.containsKey(urlhash);
             fileExists = fileDB.containsKey(urlhash);
         //}
-        if (headerExists && fileExists) return true;
+        if (headerExists && fileExists) {
+        	hits.incrementAndGet();
+        	return true;
+        }
         if (!headerExists && !fileExists) return false;
         // if not both is there then we do a clean-up
         if (headerExists) try {
@@ -317,7 +334,7 @@ public final class Cache {
      * info object couldn't be created
      */
     public static ResponseHeader getResponseHeader(final byte[] hash) {
-
+    	totalRequests.incrementAndGet();
         // loading data from database
         Map<String, String> hdb = null;
         try {
@@ -327,8 +344,11 @@ public final class Cache {
         } catch (final SpaceExceededException e) {
             return null;
         }
-        if (hdb == null) return null;
+        if (hdb == null) {
+        	return null;
+        }
 
+        hits.incrementAndGet();
         return new ResponseHeader(hdb);
     }
 
@@ -341,10 +361,14 @@ public final class Cache {
      * is returned.
      */
     public static byte[] getContent(final byte[] hash) {
+    	totalRequests.incrementAndGet();
         // load the url as resource from the cache
         try {
             final byte[] b = fileDB.get(hash);
-            if (b == null) return null;
+            if (b == null) {
+            	return null;
+            }
+            hits.incrementAndGet();
             return b;
         } catch (final UnsupportedEncodingException e) {
             ConcurrentLog.logException(e);
@@ -362,9 +386,14 @@ public final class Cache {
     }
 
     public static boolean hasContent(final byte[] hash) {
+    	totalRequests.incrementAndGet();
         // load the url as resource from the cache
         try {
-            return fileDB.containsKey(hash);
+            boolean result = fileDB.containsKey(hash);
+            if(result) {
+            	hits.incrementAndGet();
+            }
+            return result;
         } catch (final OutOfMemoryError e) {
             ConcurrentLog.logException(e);
             return false;
@@ -379,5 +408,27 @@ public final class Cache {
     public static void delete(final byte[] hash) throws IOException {
         responseHeaderDB.delete(hash);
         fileDB.delete(hash);
+    }
+    
+    /**
+     * @return the total number of requests for cache content since last start/initialization or cache clear
+     */
+    public static long getTotalRequests() {
+		return totalRequests.get();
+	}
+    
+    /**
+     * @return the total number of cache hits (cached response found) since last start/initialization or cache clear
+     */
+    public static long getHits() {
+		return hits.get();
+	}
+    
+    /**
+     * @return the hit rate (proportion of hits over total requests)
+     */
+    public static double getHitRate() {
+    	final long total = totalRequests.get();
+    	return total > 0 ? ((Cache.getHits() / ((double) total))) : 0.0 ;
     }
 }

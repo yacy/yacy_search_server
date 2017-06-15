@@ -28,6 +28,7 @@
 
 import java.io.File;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.zip.Deflater;
 
 import net.yacy.cora.protocol.RequestHeader;
@@ -117,6 +118,13 @@ public class ConfigHTCache_p {
         prop.put("actualCacheDocCount", Cache.getActualCacheDocCount());
         prop.put("docSizeAverage", Cache.getActualCacheDocCount() == 0 ? 0 : Cache.getActualCacheSize() / Cache.getActualCacheDocCount() / 1024);
         prop.put("maxCacheSize", env.getConfigLong(SwitchboardConstants.PROXY_CACHE_SIZE, 64));
+        /* Statistics */
+        final long hits = Cache.getHits();
+        final long totalRequests = Cache.getTotalRequests();
+        prop.put("hits", hits);
+        prop.put("requests", totalRequests);
+        prop.put("hitRate", NumberFormat.getPercentInstance().format(Cache.getHitRate()));
+        
         // return rewrite properties
         return prop;
     }

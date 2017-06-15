@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -266,12 +267,6 @@ public class CacheTest {
 		/** Sleep time (in milliseconds) between each cache operations */
 		private final long sleepTime;
 
-		/** Number of Cache.getContent() successes (not null returned) */
-		private int getContentSuccesses;
-
-		/** Number of Cache.getContent() misses (null returned) */
-		private int getContentMisses;
-
 		/** Number of Cache.store() failures */
 		private int storeFailures;
 
@@ -333,8 +328,6 @@ public class CacheTest {
 
 				this.storeTime = 0;
 				this.maxStoreTime = 0;
-				this.getContentMisses = 0;
-				this.getContentSuccesses = 0;
 				this.storeFailures = 0;
 				this.getContentTime = 0;
 				this.maxGetContentTime = 0;
@@ -366,11 +359,7 @@ public class CacheTest {
 
 						/* Measure content retrieval */
 						time = System.nanoTime();
-						if (Cache.getContent(urlHash) == null) {
-							this.getContentMisses++;
-						} else {
-							this.getContentSuccesses++;
-						}
+						Cache.getContent(urlHash);
 						time = (System.nanoTime() - time);
 						this.getContentTime += time;
 						this.maxGetContentTime = Math.max(time, this.maxGetContentTime);
@@ -447,14 +436,6 @@ public class CacheTest {
 
 		public long getMaxDeleteTime() {
 			return this.maxDeleteTime;
-		}
-
-		public int getGetContentMisses() {
-			return this.getContentMisses;
-		}
-
-		public int getGetContentSuccesses() {
-			return this.getContentSuccesses;
 		}
 
 		public int getStoreFailures() {
@@ -543,8 +524,6 @@ public class CacheTest {
 			long maxStoreTime = 0;
 			long getContentTime = 0;
 			long maxGetContentTime = 0;
-			int getContentMisses = 0;
-			int getContentSuccesses = 0;
 			int storeFailures = 0;
 			long deleteTime = 0;
 			long maxDeleteTime = 0;
@@ -554,8 +533,6 @@ public class CacheTest {
 				maxStoreTime = Math.max(task.getMaxStoreTime(), maxStoreTime);
 				getContentTime += task.getGetContentTime();
 				maxGetContentTime = Math.max(task.getMaxGetContentTime(), maxGetContentTime);
-				getContentMisses += task.getGetContentMisses();
-				getContentSuccesses += task.getGetContentSuccesses();
 				storeFailures += task.getStoreFailures();
 				deleteTime += task.getDeleteTime();
 				maxDeleteTime = Math.max(task.getMaxDeleteTime(), maxDeleteTime);
@@ -573,9 +550,9 @@ public class CacheTest {
 					"Cache.getContent() maximum time (ms) : " + TimeUnit.NANOSECONDS.toMillis(maxGetContentTime));
 			System.out.println("Cache.getContent() mean time (ms) : "
 					+ TimeUnit.NANOSECONDS.toMillis(getContentTime / totalSteps));
-			System.out.println("Cache.getContent() :  misses " + getContentMisses + " successes : "
-					+ getContentSuccesses + " ( miss rate : "
-					+ ((getContentMisses / ((double) getContentSuccesses + (double) getContentMisses)) * 100) + "% )");
+			System.out.println("Cache hits : " + Cache.getHits() + " total requests : "
+					+ Cache.getTotalRequests() + " ( hit rate : "
+					+ NumberFormat.getPercentInstance().format(Cache.getHitRate()) + " )");
 			System.out.println("");
 			System.out.println("Cache.delete() total time (ms) : " + TimeUnit.NANOSECONDS.toMillis(deleteTime));
 			System.out.println("Cache.delete() maximum time (ms) : " + TimeUnit.NANOSECONDS.toMillis(maxDeleteTime));
