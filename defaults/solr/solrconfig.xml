@@ -1032,6 +1032,7 @@
       <str name="field">cat</str>
       <str name="weightField">price</str>
       <str name="suggestAnalyzerFieldType">string</str>
+      <str name="buildOnStartup">false</str> <!-- When unset or set to true, may cause high CPU load at startup or on first requests -->
     </lst>
   </searchComponent>
 
