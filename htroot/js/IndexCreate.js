@@ -34,7 +34,7 @@ function handleResponse(){
         var response = http.responseXML;
 
 		// get the document title
-        doctitle="";		
+        var doctitle="";		
         if (response.getElementsByTagName("title")[0].firstChild!=null){
 	        doctitle=response.getElementsByTagName("title")[0].firstChild.nodeValue;
 	    }
@@ -42,23 +42,23 @@ function handleResponse(){
 		document.getElementById("bookmarkTitle").value=doctitle;
 		
 		// determine if crawling is allowed by the robots.txt
-        docrobotsOK="";		
+        var docrobotsOK="";		
         if(response.getElementsByTagName("robots")[0].firstChild!=null){
 	        docrobotsOK=response.getElementsByTagName("robots")[0].firstChild.nodeValue;
 	    }
-        robotsOKspan=document.getElementById("robotsOK");
+        var robotsOKspan=document.getElementById("robotsOK");
         if(robotsOKspan.firstChild){
 	        robotsOKspan.removeChild(robotsOKspan.firstChild);
         }
         if (docrobotsOK==1){
-        	img=document.createElement("img");
+        	var img=document.createElement("img");
         	img.setAttribute("src", "env/grafics/ok.png");
         	img.setAttribute("width", "32px");
         	img.setAttribute("height", "32px");
 			img.setAttribute("alt", "robots.txt - OK");
         	robotsOKspan.appendChild(img);
         } else if(docrobotsOK==0){
-			img=document.createElement("img");
+			var img=document.createElement("img");
         	img.setAttribute("src", "env/grafics/bad.png");
         	img.setAttribute("width", "32px");
         	img.setAttribute("height", "32px");
@@ -72,9 +72,9 @@ function handleResponse(){
 		
 		// get the sitemap URL contained in the robots.txt
 		if (document.getElementsByName("sitemapURL").length > 0) {
-			sitemap="";
+			var sitemap="";
 			// there can be zero, one or many sitemaps
-			sitemapElement = response.getElementsByTagName("sitemap");
+			var sitemapElement = response.getElementsByTagName("sitemap");
 	        if (sitemapElement != null && sitemapElement.length > 0 && sitemapElement[0].firstChild != null) {
 	        	// if there are several, we take only the first
 		        sitemap = sitemapElement[0].firstChild.nodeValue;
@@ -82,12 +82,12 @@ function handleResponse(){
 			document.getElementsByName("sitemapURL")[0].value = sitemap;
 			if (sitemap) document.getElementById("sitemap").disabled = false;
 		}
-			sitelist="";		
-	        if (response.getElementsByTagName("sitelist")[0].firstChild!=null){
-		        sitelist=response.getElementsByTagName("sitelist")[0].firstChild.nodeValue;
-		    }
-			document.getElementById("sitelistURLs").innerHTML = sitelist;
-			if (sitelist) document.getElementById("sitelist").disabled=false;
+		var sitelist="";		
+	    if (response.getElementsByTagName("sitelist")[0].firstChild!=null){
+	    	sitelist=response.getElementsByTagName("sitelist")[0].firstChild.nodeValue;
+		}
+		document.getElementById("sitelistURLs").innerHTML = sitelist;
+		if (sitelist) document.getElementById("sitelist").disabled=false;
         
 		// clear the ajax image
 		document.getElementById("ajax").setAttribute("src", AJAX_OFF);
@@ -103,7 +103,7 @@ function loadInfos() {
 	// displaying ajax image
 	document.getElementById("ajax").setAttribute("src",AJAX_ON);	
 	
-	url=document.getElementById("crawlingURL").value;
+	var url=document.getElementById("crawlingURL").value;
 	if (url.indexOf("ftp") == 0 || url.indexOf("smb") == 0) document.getElementById("crawlingQ").checked = true; // since the pdf parser update for page separation, we need to set this
 	sndReq('api/getpageinfo_p.xml?actions=title,robots&url='+url);
 	document.getElementById("api").innerHTML = "<a href='api/getpageinfo_p.xml?actions=title,robots&url=" + url + "' id='apilink'><img src='env/grafics/api.png' width='60' height='40' alt='API'/></a><span>See the page info about the start url.</span>";
