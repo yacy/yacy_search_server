@@ -60,8 +60,8 @@ SetCompressor /SOLID LZMA
 ; http://www.java.com/de/download/manual.jsp BundleId +1 / +2
 ; User-Agent to see the 64bit link: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Win64; x64; Trident/4.0)
 
-; at least we need Java 7
-!define JRE_VERSION7 "1.7"
+; at least we need Java 8
+!define JRE_VERSION8 "1.8"
 
 ; download link Oracle Java 8 Update 131
 ; 32 bit / jre-8u131-windows-i586.exe
@@ -269,7 +269,7 @@ Function .onInit
 	${EndIf}
 	ReadRegStr $InstalledJREVersion HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
 	; if right JRE already installed hide and deselect JRE section
-	${If} $InstalledJREVersion = ${JRE_VERSION7}
+	${If} $InstalledJREVersion = ${JRE_VERSION8}
 		SectionSetText ${Sec_Java_id} ""
 		SectionSetFlags ${Sec_Java_id} 0
 	${EndIf}
