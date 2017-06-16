@@ -1,0 +1,6 @@
+#[jsonp-start]#
+{
+  "success": "true",
+  "comment": "#(info)#::Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db and restart. ::Error: #[errmsg]# ::Application not yet initialized. Sorry. Please wait some seconds and repeat the request. ::ERROR: Crawl filter '#[newcrawlingfilter]#' does not match with crawl root '#[crawlingStart]#'.Please try again with different filter.::Crawling of '#[crawlingURL]#' failed. Reason: #[reasonString]#::Error with URL input '#[crawlingStart]#': #[error]#::Error with file input '#[crawlingStart]#': #[error]# ::Crawling of '#[crawlingURL]#' started.#(/info)#"
+}
+#[jsonp-end]#
