@@ -47,7 +47,12 @@
             </td>
           </tr><tr>
             <td><input type="radio" name="crawlingMode" id="sitelist" value="sitelist" disabled="disabled" />Link-List of URL</td>
-            <td><div id="sitelistURLs"></div></td>
+            <td>
+            	<div id="sitelistURLs"></div>
+            	<button id="expandSiteListBtn" style="visibility:hidden" type="button" onclick="this.disabled = true;loadInfos(true);" class="btn btn-default btn-xs" title="Show all links">
+            		<span class="glyphicon glyphicon-option-horizontal"/>
+            	</button>
+            </td>
           </tr><tr>
             <td><input type="radio" name="crawlingMode" id="sitemap" value="sitemap" disabled="disabled"
             onmousedown="document.getElementById('rangeDomain').disabled=true;document.getElementById('rangeSubpath').disabled=true;document.getElementById('crawlingDomMaxCheck').disabled=true;document.getElementById('crawlingDomMaxPages').disabled=true;"/>Sitemap URL</td>

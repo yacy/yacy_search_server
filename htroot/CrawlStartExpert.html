@@ -246,6 +246,9 @@
 	        <dd>
 	          <input type="radio" name="crawlingMode" id="sitelist" value="sitelist" #(has_url)#disabled="disabled"::#(/has_url)# #(crawlingMode_sitelist)#::checked="checked"#(/crawlingMode_sitelist)#/><br />
               <div id="sitelistURLs"></div>
+              <button id="expandSiteListBtn" style="visibility:hidden" type="button" onclick="this.disabled = true;loadInfos(true);" class="btn btn-default btn-xs" title="Show all links">
+              	<span class="glyphicon glyphicon-option-horizontal"/>
+              </button>
 	        </dd>
 	        <dt>From Sitemap</dt>
 	        <dd>

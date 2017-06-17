@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -85,6 +86,7 @@ public class getpageinfo_p {
 	 *            	</ul>
 	 *            </li>
 	 *            <li>agentName (optional) : the string identifying the agent used to fetch the resource. Example : "YaCy Internet (cautious)"</li>
+	 *            <li>maxLinks (optional) : the maximum number of links, sitemap URLs or icons to return</li>
 	 *            </ul>
 	 * @param env
 	 *            server environment
@@ -110,6 +112,7 @@ public class getpageinfo_p {
         String actions = "title,robots";
 
         if (post != null && post.containsKey("url")) {
+        	final int maxLinks = post.getInt("maxLinks", Integer.MAX_VALUE);
             if (post.containsKey("actions"))
                 actions=post.get("actions");
             String url=post.get("url");
@@ -135,7 +138,7 @@ public class getpageinfo_p {
                 net.yacy.document.Document scraper = null;
                 if (u != null) try {
                     ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
-                    scraper = sb.loader.loadDocument(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, agent);
+                    scraper = sb.loader.loadDocumentAsStream(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, agent);
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                     // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"
@@ -145,20 +148,25 @@ public class getpageinfo_p {
                     // put the document title
                     prop.putXML("title", scraper.dc_title());
 
-                    // put the icons that belongs to the document
+                    // put the icons that belong to the document
                     Set<DigestURL> iconURLs = scraper.getIcons().keySet();
-                    int i = 0;
+                    int count = 0;
                     for (DigestURL iconURL : iconURLs) {
-                        prop.putXML("icons_" + i + "_icon", iconURL.toNormalform(false));
-						prop.put("icons_" + i + "_eol", 1);
-                        i++;
+                        if(count >= maxLinks) {
+                        	break;
+                        }
+                        prop.putXML("icons_" + count + "_icon", iconURL.toNormalform(false));
+						prop.put("icons_" + count + "_eol", 1);
+						count++;
                     }
-                    prop.put("icons_" + (i - 1) + "_eol", 0);
-                    prop.put("icons", iconURLs.size());
+                    if(count > 0) {
+                    	prop.put("icons_" + (count - 1) + "_eol", 0);
+                    }
+                    prop.put("icons", count);
 
                     // put keywords
                     final Set<String> list = scraper.dc_subject();
-                    int count = 0;
+                    count = 0;
                     for (final String element: list) {
                         if (!element.equals("")) {
                             prop.putXML("tags_"+count+"_tag", element);
@@ -177,14 +185,20 @@ public class getpageinfo_p {
                     final StringBuilder links = new StringBuilder(uris.size() * 80);
                     final StringBuilder filter = new StringBuilder(uris.size() * 40);
                     count = 0;
-                    for (final DigestURL uri: uris) {
+                    final Iterator<AnchorURL> urisIt = uris.iterator();
+                    while (urisIt.hasNext()) {
+                    	AnchorURL uri = urisIt.next();
                         if (uri == null) continue;
+                        if(count >= maxLinks) {
+                        	break;
+                        }
                         links.append(';').append(uri.toNormalform(true));
                         filter.append('|').append(uri.getProtocol()).append("://").append(uri.getHost()).append(".*");
                         prop.putXML("links_" + count + "_link", uri.toNormalform(true));
                         count++;
                     }
                     prop.put("links", count);
+                   	prop.put("hasMoreLinks", (count >= maxLinks && urisIt.hasNext()) ? "1" : "0");
                     prop.putXML("sitelist", links.length() > 0 ? links.substring(1) : "");
                     prop.putXML("filter", filter.length() > 0 ? filter.substring(1) : ".*");
                 }
@@ -200,12 +214,17 @@ public class getpageinfo_p {
                 	prop.put("robots-allowed", robotsEntry == null ? 1 : robotsEntry.isDisallowed(theURL) ? 0 : 1);
                     prop.putHTML("robotsInfo", robotsEntry == null ? "" : robotsEntry.getInfo());
 
-                    // get the sitemap URL of the domain
+                    // get the sitemap URL(s) of the domain
                     final List<String> sitemaps = robotsEntry == null ? new ArrayList<String>(0) : robotsEntry.getSitemaps();
-                    for (int i = 0; i < sitemaps.size(); i++) {
-                        prop.putXML("sitemaps_" + i + "_sitemap", sitemaps.get(i));
+                    int count = 0;
+                    for (String sitemap : sitemaps) {
+                        if(count >= maxLinks) {
+                        	break;
+                        }
+                        prop.putXML("sitemaps_" + count + "_sitemap", sitemap);
+                        count++;
                     }
-                    prop.put("sitemaps", sitemaps.size());
+                    prop.put("sitemaps", count);
                 } catch (final MalformedURLException e) {
                     ConcurrentLog.logException(e);
                 }

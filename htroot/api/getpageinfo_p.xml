@@ -25,5 +25,6 @@
     <link name="#[link]#" />
     #{/links}#
   </links>
+  <hasMoreLinks>#(hasMoreLinks)#false::true#(/hasMoreLinks)#</hasMoreLinks>
   <oai>#[oai]#</oai>
 </pageinfo>

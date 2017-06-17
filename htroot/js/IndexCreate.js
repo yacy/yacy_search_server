@@ -87,7 +87,29 @@ function handleResponse(){
 	    	sitelist=response.getElementsByTagName("sitelist")[0].firstChild.nodeValue;
 		}
 		document.getElementById("sitelistURLs").innerHTML = sitelist;
-		if (sitelist) document.getElementById("sitelist").disabled=false;
+		var expandButton = document.getElementById("expandSiteListBtn");
+		var siteListRadio = document.getElementById("sitelist");
+		if (sitelist) {
+			siteListRadio.disabled = false;
+			var hasMoreLinksElement = response.getElementsByTagName("hasMoreLinks");
+			if(hasMoreLinksElement != null && hasMoreLinksElement.length > 0 
+					&& hasMoreLinksElement[0].firstChild != null && hasMoreLinksElement[0].firstChild.nodeValue == "true") {
+				expandButton.style.visibility = "visible";
+				expandButton.disabled = false;
+			} else {
+				expandButton.style.visibility = "hidden";
+			}
+		} else {
+			siteListRadio.disabled = true;
+			siteListRadio.checked = false;
+			var urlModeRadio = document.getElementById("url");
+			if(urlModeRadio != null) {
+				urlModeRadio.checked = true;	
+			}
+			if(expandButton != null) {
+				expandButton.style.visibility = "hidden";
+			}
+		}
         
 		// clear the ajax image
 		document.getElementById("ajax").setAttribute("src", AJAX_OFF);
@@ -96,15 +118,18 @@ function handleResponse(){
 
 function changed() {
 	window.clearTimeout(timeout);
-	timeout=window.setTimeout("loadInfos()", 1500);
+	timeout=window.setTimeout(loadInfos, 1500);
 }
 
-function loadInfos() {
+/**
+ * @param loadAll {Boolean} when true, load all links, else limit to the 100 first
+ */
+function loadInfos(loadAll) {
 	// displaying ajax image
 	document.getElementById("ajax").setAttribute("src",AJAX_ON);	
 	
 	var url=document.getElementById("crawlingURL").value;
 	if (url.indexOf("ftp") == 0 || url.indexOf("smb") == 0) document.getElementById("crawlingQ").checked = true; // since the pdf parser update for page separation, we need to set this
-	sndReq('api/getpageinfo_p.xml?actions=title,robots&url='+url);
+	sndReq('api/getpageinfo_p.xml?actions=title,robots' + (loadAll ? '' : '&maxLinks=50') + '&url='+url);
 	document.getElementById("api").innerHTML = "<a href='api/getpageinfo_p.xml?actions=title,robots&url=" + url + "' id='apilink'><img src='env/grafics/api.png' width='60' height='40' alt='API'/></a><span>See the page info about the start url.</span>";
 }
