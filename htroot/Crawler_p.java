@@ -90,6 +90,16 @@ public class Crawler_p {
         // inital values for AJAX Elements (without JavaScript)
         final serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
+        
+        // check for JSONP
+        if (post != null && post.containsKey("callback") ) {
+            final String jsonp = post.get("callback") + "([";
+            prop.put("jsonp-start", jsonp);
+            prop.put("jsonp-end", "])");
+        } else {
+            prop.put("jsonp-start", "");
+            prop.put("jsonp-end", "");
+        }
 
         Segment segment = sb.index;
         Fulltext fulltext = segment.fulltext();
