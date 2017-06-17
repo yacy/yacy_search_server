@@ -238,11 +238,35 @@ public final class TextParser {
         }
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
 
-        // if we do not have more than one parser or the content size is over MaxInt
+        boolean canStream = false;
+        Parser streamParser = idioms.iterator().next();
+        if(idioms.size() == 1) {
+        	canStream = true;
+        } else if(idioms.size() == 2) {
+        	/* When there are only 2 available parsers, stream oriented parsing can still be applied when one of the 2 parsers is the generic one*/
+        	for(Parser idiom : idioms) {
+        		if(idiom instanceof genericParser) {
+        			canStream = true;
+        		} else {
+        			/* stream oriented parsing will be performed by the non generic parser */
+        			streamParser = idiom;
+        		}
+        	}
+        } else if(idioms.size() > 2) {
+			/* Prefer the first available non generic parser */
+        	for(Parser idiom : idioms) {
+        		if(!(idiom instanceof genericParser)) {
+        			streamParser = idiom;
+        			break;
+        		}
+        	}
+        }
+        
+        // if we do not have more than one non generic parser or the content size is over MaxInt (2GB) or is over the totally available memory
         // then we use only one stream-oriented parser.
-        if (idioms.size() == 1 || contentLength > Integer.MAX_VALUE) {
+        if (canStream || contentLength > Integer.MAX_VALUE || contentLength > MemoryControl.available()) {
             // use a specific stream-oriented parser
-            return parseSource(location, mimeType, idioms.iterator().next(), charset, scraper, timezoneOffset, sourceStream);
+            return parseSource(location, mimeType, streamParser, charset, scraper, timezoneOffset, sourceStream);
         }
 
         // in case that we know more parsers we first transform the content into a byte[] and use that as base
@@ -347,7 +371,7 @@ public final class TextParser {
             assert textStream != null : "mimeType = " + mimeType;
             try {
             	if(textStream != null) {
-            		/* this textStream can wrap a FileInputStream : as it won't be used anymore, we must close it to ensure the system resource is released */
+            		/* textStream can be a FileInputStream : we must close it to ensure releasing system resource */
             		textStream.close();
             	}
 			} catch (IOException e) {
