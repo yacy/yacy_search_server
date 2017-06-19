@@ -38,6 +38,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.index.RAMIndex;
 import net.yacy.kelondro.table.Table;
+import net.yacy.kelondro.table.Table.TableStatistics;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.Switchboard;
@@ -124,27 +125,23 @@ public class PerformanceMemory_p {
         // write table for Table index sizes
         Iterator<String> i = Table.filenames();
         String filename;
-        Map<Table.StatKeys, String> mapx;
+        TableStatistics stats;
         int p;
         c = 0;
-        long mem, totalmem = 0;
+        long totalmem = 0;
         while (i.hasNext()) {
             filename = i.next();
-            mapx = Table.memoryStats(filename);
+            stats = Table.memoryStats(filename);
+        	totalmem += stats.getTotalMem();
+        	
             prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
-            prop.putNum("EcoList_" + c + "_tableSize", mapx.get(Table.StatKeys.tableSize));
+            prop.putNum("EcoList_" + c + "_tableSize", stats.getTableSize());
 
-            String v = mapx.get(Table.StatKeys.tableKeyMem);
-            mem = v == null ? 0 : Long.parseLong(v);
-            totalmem += mem;
-            prop.put("EcoList_" + c + "_tableKeyMem", Formatter.bytesToString(mem));
-            prop.put("EcoList_" + c + "_tableKeyChunkSize", mapx.get(Table.StatKeys.tableKeyChunkSize));
+            prop.put("EcoList_" + c + "_tableKeyMem", Formatter.bytesToString(stats.getKeyMem()));
+            prop.put("EcoList_" + c + "_tableKeyChunkSize", Formatter.bytesToString(stats.getKeyChunkSize()));
 
-            v = mapx.get(Table.StatKeys.tableValueMem);
-            mem = v == null ? 0 : Long.parseLong(v);
-            totalmem += mem;
-            prop.put("EcoList_" + c + "_tableValueMem", Formatter.bytesToString(mem));
-            prop.put("EcoList_" + c + "_tableValueChunkSize", mapx.get(Table.StatKeys.tableValueChunkSize));
+            prop.put("EcoList_" + c + "_tableValueMem", Formatter.bytesToString(stats.getValueMem()));
+            prop.put("EcoList_" + c + "_tableValueChunkSize",  Formatter.bytesToString(stats.getValueChunkSize()));
 
             c++;
         }
@@ -154,7 +151,6 @@ public class PerformanceMemory_p {
         // write object cache table
         final Iterator<Map.Entry<String, RAMIndex>> oi = RAMIndex.objects();
         c = 0;
-        mem = 0;
         Map.Entry<String, RAMIndex> oie;
         RAMIndex cache;
         long hitmem, totalhitmem = 0;

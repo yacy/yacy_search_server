@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +71,8 @@ public class Table implements Index, Iterable<Row.Entry> {
 
     // static tracker objects
     private final static ConcurrentLog log = new ConcurrentLog("TABLE");
+    
+    /** Map all active table instances by file name */
     private final static TreeMap<String, Table> tableTracker = new TreeMap<String, Table>();
     private final static long maxarraylength = 134217727L; // (2^27-1) that may be the maximum size of array length in some JVMs
 
@@ -363,7 +364,7 @@ public class Table implements Index, Iterable<Row.Entry> {
         return tableTracker.keySet().iterator();
     }
 
-    public static final Map<StatKeys, String> memoryStats(final String filename) {
+    public static final TableStatistics memoryStats(final String filename) {
         // returns a map for each file in the tracker;
         // the map represents properties for each record objects,
         // i.e. for cache memory allocation
@@ -371,23 +372,89 @@ public class Table implements Index, Iterable<Row.Entry> {
         return theTABLE.memoryStats();
     }
 
-    public enum StatKeys {
-        tableSize, tableKeyChunkSize, tableKeyMem, tableValueChunkSize, tableValueMem
+    /**
+     * Table memory usage statistics
+     */
+    public class TableStatistics {
+    	/** The table entries number */
+    	private int tableSize = 0;
+    	
+    	/** Size of a key chunk in bytes */
+    	private int keyChunkSize = 0;
+    	
+    	/** Total size of keys in bytes */
+    	private long keyMem = 0;
+    	
+    	/** Size of a value chunk in bytes */
+    	private int valueChunkSize = 0;
+    	
+    	/** Total size of values in bytes */
+    	private long valueMem = 0;
+    	
+    	/**
+    	 * @return the size of a key chunk in bytes
+    	 */
+    	public int getKeyChunkSize() {
+			return this.keyChunkSize;
+		}
+    	
+    	/**
+    	 * @return the total size of the table in-memory keys in bytes
+    	 */
+    	public long getKeyMem() {
+			return this.keyMem;
+		}
+    	
+    	/**
+    	 * @return the table entries number
+    	 */
+    	public int getTableSize() {
+			return this.tableSize;
+		}
+    	
+    	/**
+    	 * @return the size of a value chunk in bytes
+    	 */
+    	public int getValueChunkSize() {
+			return this.valueChunkSize;
+		}
+    	
+    	/**
+    	 * @return the total size of the table in-memory values in bytes
+    	 */
+    	public long getValueMem() {
+			return this.valueMem;
+		}
+    	
+    	/**
+    	 * @return the total memory used by the table in bytes
+    	 */
+    	public long getTotalMem() {
+    		return this.keyMem + this.valueMem;
+    	}
     }
 
-    private final Map<StatKeys, String> memoryStats() {
+    /**
+     * @return computed table current memory usage statistics
+     */
+    private final TableStatistics memoryStats() {
         // returns statistical data about this object
         synchronized (this) {
             assert this.table == null || this.table.size() == this.index.size() : "table.size() = " + this.table.size() + ", index.size() = " + this.index.size();
         }
-        final HashMap<StatKeys, String> map = new HashMap<StatKeys, String>(8);
-        if (this.index == null) return map; // possibly closed or beeing closed
-        map.put(StatKeys.tableSize, Integer.toString(this.index.size()));
-        map.put(StatKeys.tableKeyChunkSize, (this.index instanceof RowHandleMap) ? Integer.toString(((RowHandleMap) this.index).row().objectsize) : "-1");
-        map.put(StatKeys.tableKeyMem, (this.index instanceof RowHandleMap) ? Integer.toString(((RowHandleMap) this.index).row().objectsize * this.index.size()) : "-1");
-        map.put(StatKeys.tableValueChunkSize, (this.table == null) ? "0" : Integer.toString(this.table.row().objectsize));
-        map.put(StatKeys.tableValueMem, (this.table == null) ? "0" : Integer.toString(this.table.row().objectsize * this.table.size()));
-        return map;
+        TableStatistics stats = new TableStatistics();
+        if (this.index == null) return stats; // possibly closed or being closed
+        stats.tableSize = this.index.size();
+        if(this.index instanceof RowHandleMap) {
+        	stats.keyChunkSize = (((RowHandleMap) this.index).row().objectsize);
+            stats.keyMem = (long)((RowHandleMap) this.index).row().objectsize * (long)this.index.size();
+        }
+        if(table != null) {
+        	stats.valueChunkSize = this.table.row().objectsize;
+        	stats.valueMem = (long)this.table.row().objectsize * (long)this.table.size();
+        }
+
+        return stats;
     }
 
     public boolean usesFullCopy() {
