@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>YaCy '#[clientname]#': Performance Settings for Memory</title>
     #%env/templates/metas.template%#
@@ -19,7 +19,7 @@
     <h2>Performance Settings for Memory</h2>
     
     <p><img src="PerformanceGraph.png?nopeers=" id="graph" alt="PerformanceGraph"/></p>
-    <form id="optionreloadGraph" action="" method="get"><p>
+    <form id="optionreloadGraph" method="get"><p>
     	<input type="checkbox" name="option" id="autoreload" #(autoreload.checked)#::checked="checked"#(/autoreload.checked)#/>
     	<label for="autoreload">refresh graph</label>
     </p></form>
@@ -33,201 +33,169 @@
 		<label for="dfltmem">use Standard Memory Strategy</label> (current: #[memoryStrategy]#)
 	</p></form>
     
-    <p><strong>Memory Usage:</strong></p>
-    <table border="0">
-      <tr class="TableHeader" valign="bottom">
-        <td>&nbsp;<br />Type</td>
-        <td>After Startup<br />&nbsp;</td>
-        <td>After Initializations<br />before GC</td>
-        <td>After Initializations<br />after GC</td>
-        <td>Now<br />#(gc)#before <a href="PerformanceMemory_p.html?gc=">GC</a>::after GC#(/gc)#</td>
-        <td>Description<br />&nbsp;</td>
+    <table style="border-width:0px;">
+     <caption><strong>Memory Usage</strong></caption>
+     <thead>
+      <tr class="TableHeader" style="vertical-align:bottom;">
+        <th>&nbsp;<br />Type</th>
+        <th>After Startup<br />&nbsp;</th>
+        <th>After Initializations<br />before GC</th>
+        <th>After Initializations<br />after GC</th>
+        <th>Now<br />#(gc)#before <a href="PerformanceMemory_p.html?gc=">GC</a>::after GC#(/gc)#</th>
+        <th>Description<br />&nbsp;</th>
+      </tr>
+     </thead>
+     <tbody>
+      <tr class="TableCellLight">
+        <th scope="row" class="TableCellDark" style="text-align:left;">Max</th>
+        <td style="text-align:center;" colspan="4">#[memoryMax]# MByte</td>
+        <td style="text-align:left;">maximum memory that the JVM will attempt to use</td>
       </tr>
       <tr class="TableCellLight">
-        <td class="TableCellDark" align="left">Max</td>
-        <td align="center" colspan="4">#[memoryMax]# MByte</td>
-        <td align="left">maximum memory that the JVM will attempt to use</td>
+        <th scope="row" class="TableCellDark" style="text-align:left;">Available</th>
+        <td style="text-align:right;">#[memoryAvailAfterStartup]# MByte</td>
+        <td style="text-align:right;">#[memoryAvailAfterInitBGC]# MByte</td>
+        <td style="text-align:right;">#[memoryAvailAfterInitAGC]# MByte</td>
+        <td style="text-align:right;">#[memoryAvailNow]# MByte</td>
+        <td style="text-align:left;">total available memory including free for the JVM within maximum</td>
       </tr>
       <tr class="TableCellLight">
-        <td class="TableCellDark" align="left">Available</td>
-        <td align="right">#[memoryAvailAfterStartup]# MByte</td>
-        <td align="right">#[memoryAvailAfterInitBGC]# MByte</td>
-        <td align="right">#[memoryAvailAfterInitAGC]# MByte</td>
-        <td align="right">#[memoryAvailNow]# MByte</td>
-        <td align="left">total available memory including free for the JVM within maximum</td>
+        <th scope="row" class="TableCellDark" style="text-align:left;">Total</th>
+        <td style="text-align:right;">#[memoryTotalAfterStartup]# KByte</td>
+        <td style="text-align:right;">#[memoryTotalAfterInitBGC]# KByte</td>
+        <td style="text-align:right;">#[memoryTotalAfterInitAGC]# KByte</td>
+        <td style="text-align:right;">#[memoryTotalNow]# MByte</td>
+        <td style="text-align:left;">total memory taken from the OS</td>
       </tr>
       <tr class="TableCellLight">
-        <td class="TableCellDark" align="left">Total</td>
-        <td align="right">#[memoryTotalAfterStartup]# KByte</td>
-        <td align="right">#[memoryTotalAfterInitBGC]# KByte</td>
-        <td align="right">#[memoryTotalAfterInitAGC]# KByte</td>
-        <td align="right">#[memoryTotalNow]# MByte</td>
-        <td align="left">total memory taken from the OS</td>
+        <th scope="row" class="TableCellDark" style="text-align:left;">Free</th>
+        <td style="text-align:right;">#[memoryFreeAfterStartup]# KByte</td>
+        <td style="text-align:right;">#[memoryFreeAfterInitBGC]# KByte</td>
+        <td style="text-align:right;">#[memoryFreeAfterInitAGC]# KByte</td>
+        <td style="text-align:right;">#[memoryFreeNow]# MByte</td>
+        <td style="text-align:left;">free memory in the JVM within total amount</td>
       </tr>
       <tr class="TableCellLight">
-        <td class="TableCellDark" align="left">Free</td>
-        <td align="right">#[memoryFreeAfterStartup]# KByte</td>
-        <td align="right">#[memoryFreeAfterInitBGC]# KByte</td>
-        <td align="right">#[memoryFreeAfterInitAGC]# KByte</td>
-        <td align="right">#[memoryFreeNow]# MByte</td>
-        <td align="left">free memory in the JVM within total amount</td>
+        <th scope="row" class="TableCellDark" style="text-align:left;">Used</th>
+        <td style="text-align:right;">#[memoryUsedAfterStartup]# KByte</td>
+        <td style="text-align:right;">#[memoryUsedAfterInitBGC]# KByte</td>
+        <td style="text-align:right;">#[memoryUsedAfterInitAGC]# KByte</td>
+        <td style="text-align:right;">#[memoryUsedNow]# MByte</td>
+        <td style="text-align:left;">used memory in the JVM within total amount</td>
       </tr>
-      <tr class="TableCellLight">
-        <td class="TableCellDark" align="left">Used</td>
-        <td align="right">#[memoryUsedAfterStartup]# KByte</td>
-        <td align="right">#[memoryUsedAfterInitBGC]# KByte</td>
-        <td align="right">#[memoryUsedAfterInitAGC]# KByte</td>
-        <td align="right">#[memoryUsedNow]# MByte</td>
-        <td align="left">used memory in the JVM within total amount</td>
-      </tr>
+     </tbody>
     </table>
     
-    <p><strong>Solr Resources:</strong></p>
-    <table border="0">
-      <tr class="TableHeader" valign="bottom">
-        <td>Class</td>
-        <td>Type</td>
-        <td>Description</td>
-        <td>Statistics</td>
-        <td>Size</td>
+    <table style="border-width:0px;">
+     <caption><strong>Solr Resources</strong></caption>
+     <thead>
+      <tr class="TableHeader" style="vertical-align:bottom;">
+        <th>Class</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Statistics</th>
+        <th>Size</th>
       </tr>
+     </thead>
+     <tbody>
       #{SolrList}#
       <tr class="TableCellLight">
-        <td align="left" class="TableCellDark">#[class]#</td>
-        <td align="left" class="TableCellDark">#[type]#</td>
-        <td align="left">#[description]#</td>
-        <td align="left">#[statistics]#</td>
-        <td align="right">#[size]#</td>
+        <td style="text-align:left;" class="TableCellDark">#[class]#</td>
+        <td style="text-align:left;" class="TableCellDark">#[type]#</td>
+        <td style="text-align:left;">#[description]#</td>
+        <td style="text-align:left;">#[statistics]#</td>
+        <td style="text-align:right;">#[size]#</td>
       </tr>
       #{/SolrList}#
+     </tbody>
+     <tfoot>
       <tr class="TableCellDark">
-        <td colspan="6">Total Cache Count = #[SolrCacheCount]#</td>
+        <td colspan="5">Total Cache Count = #[SolrCacheCount]#</td>
       </tr>
+     </tfoot>
     </table>
     
-    <p><strong>Table RAM Index:</strong></p>
-    <table border="0">
-      <tr class="TableHeader" valign="bottom">
-        <td rowspan="2">Table</td>
-        <td rowspan="2">Size</td>
-        <td colspan="2">Key</td>
-        <td colspan="2">Value</td>
+    <table style="border-width:0px;">
+     <caption><strong>Table RAM Index</strong></caption>
+     <thead>
+      <tr class="TableHeader" style="vertical-align:bottom;">
+        <th rowspan="2">Table</th>
+        <th rowspan="2">Size</th>
+        <th colspan="2">Key</th>
+        <th colspan="2">Value</th>
       </tr>
-      <tr class="TableHeader" valign="bottom">
-        <td>Chunk Size</td>
-        <td>Used Memory</td>
-        <td>Chunk Size</td>
-        <td>Used Memory</td>
+      <tr class="TableHeader" style="vertical-align:bottom;">
+        <th>Chunk Size</th>
+        <th>Used Memory</th>
+        <th>Chunk Size</th>
+        <th>Used Memory</th>
       </tr>
+     </thead>
+     <tbody>
       #{EcoList}#
       <tr class="TableCellLight">
-        <td align="left" class="TableCellDark">#[tableIndexPath]#</td>
-        <td align="right">#[tableSize]#</td>
-        <td align="right">#[tableKeyChunkSize]#</td>
-        <td align="right">#[tableKeyMem]#</td>
-        <td align="right">#[tableValueChunkSize]#</td>
-        <td align="right">#[tableValueMem]#</td>
+        <td style="text-align:left;" class="TableCellDark">#[tableIndexPath]#</td>
+        <td style="text-align:right;">#[tableSize]#</td>
+        <td style="text-align:right;">#[tableKeyChunkSize]#</td>
+        <td style="text-align:right;">#[tableKeyMem]#</td>
+        <td style="text-align:right;">#[tableValueChunkSize]#</td>
+        <td style="text-align:right;">#[tableValueMem]#</td>
       </tr>
       #{/EcoList}#
+     </tbody>
+     <tfoot>
       <tr class="TableCellDark">
-        <td colspan="9">Total Mem = #[EcoIndexTotalMem]# MB</td>
+        <td colspan="6">Total Mem = #[EcoIndexTotalMem]# MB</td>
       </tr>
+     </tfoot>
     </table>
     
-    <p><strong>Object Index Caches:</strong></p>
-    <table border="0">
-      <tr class="TableHeader" valign="bottom">
-        <td>Table</td>
-        <td>Size</td>
-        <td>Chunk Size</td>
-        <td>Needed Memory</td>
-        <td>Used Memory</td>
-        <!-- <td>Flushes</td> -->
+    <table style="border-width:0px;">
+     <caption><strong>Object Index Caches</strong></caption>
+     <thead>
+      <tr class="TableHeader" style="vertical-align:bottom;">
+        <th>Table</th>
+        <th>Size</th>
+        <th>Chunk Size</th>
+        <th>Needed Memory</th>
+        <th>Used Memory</th>
+        <!-- <th>Flushes</th> -->
       </tr>
+     </thead>
+     <tbody>
       #{indexcache}#
       <tr class="TableCellLight">
-        <td align="left" class="TableCellDark">#[Name]#</td>
-        <td align="right">#[Count]#</td>
-        <td align="right">#[ChunkSize]#</td>
-        <td align="right">#[NeededMem]#</td>
-        <td align="right">#[UsedMem]#</td>
+        <td style="text-align:left;" class="TableCellDark">#[Name]#</td>
+        <td style="text-align:right;">#[Count]#</td>
+        <td style="text-align:right;">#[ChunkSize]#</td>
+        <td style="text-align:right;">#[NeededMem]#</td>
+        <td style="text-align:right;">#[UsedMem]#</td>
       </tr>
       #{/indexcache}#
+     </tbody>
+     <tfoot>
       <tr class="TableCellDark">
-        <td colspan="9">Total Mem: #[indexcacheTotalMem]# MB</td>
+        <td colspan="5">Total Mem: #[indexcacheTotalMem]# MB</td>
       </tr>
+     </tfoot>
     </table>
     
-    <!-- this cache table wasn't used for years
-    <p><strong>Object Read Caches:</strong></p>
-    <table border="0">
-      <tr class="TableHeader" valign="bottom">
-        <td></td>
-        <td colspan="9">Read Hit Cache</td>
-        <td colspan="8">Read Miss Cache</td>
-      </tr>
-      <tr class="TableHeader" valign="bottom">
-        <td>Table</td>
-        <td>Size</td>
-        <td>Chunk Size</td>
-        <td>Used Memory</td>
-        <td>Read Hit</td>
-        <td>Read Miss</td>
-        <td>Write Unique</td>
-        <td>Write Double</td>
-        <td>Deletes</td>
-        <td>Flushes</td>
-        <td>Size</td>
-        <td>Chunk Size</td>
-        <td>Used Memory</td>
-        <td>Read Hit</td>
-        <td>Read Miss</td>
-        <td>Write Unique</td>
-        <td>Write Double</td>
-        <td>Deletes</td>
-        <td>Flushes</td>
-      </tr>
-      #{ObjectList}#
-      <tr class="TableCellLight">
-        <td align="left" class="TableCellDark">#[objectCachePath]#</td>
-        <td align="right">#[objectHitCacheCount]#</td>
-        <td align="right">#[objectHitChunkSize]#</td>
-        <td align="right">#[objectHitCacheMem]#</td>
-        <td align="right">#[objectHitCacheReadHit]#</td>
-        <td align="right">#[objectHitCacheReadMiss]#</td>
-        <td align="right">#[objectHitCacheWriteUnique]#</td>
-        <td align="right">#[objectHitCacheWriteDouble]#</td>
-        <td align="right">#[objectHitCacheDeletes]#</td>
-        <td align="right">#[objectHitCacheFlushes]#</td>
-        <td align="right">#[objectMissCacheCount]#</td>
-        <td align="right">#[objectMissChunkSize]#</td>
-        <td align="right">#[objectMissCacheMem]#</td>
-        <td align="right">#[objectMissCacheReadHit]#</td>
-        <td align="right">#[objectMissCacheReadMiss]#</td>
-        <td align="right">#[objectMissCacheWriteUnique]#</td>
-        <td align="right">#[objectMissCacheWriteDouble]#</td>
-        <td align="right">#[objectMissCacheDeletes]#</td>
-        <td align="right">#[objectMissCacheFlushes]#</td>
-      </tr>
-      #{/ObjectList}#
-      <tr class="TableCellDark">
-        <td colspan="19">Total Mem: #[objectHitCacheTotalMem]# MB (hit), #[objectMissCacheTotalMem]# MB (miss); Stop Grow when less than #[objectCacheStopGrow]# MB available left; Start Shrink when less than #[objectCacheStartShrink]# MB availabe left</td>
-      </tr>
-    </table> -->
-    
     <!-- other cache sizes -->
-    <p><strong>Other Caching Structures:</strong></p>
-    <table border="0">
-      <tr class="TableHeader" valign="bottom">
-        <td>Type</td>
-        <td>Size</td>
-        <td>Hit</td>
-        <td>Miss</td>
-        <td>Insert</td>
-        <td>Delete</td>
+    <table style="border-width:0px;">
+     <caption><strong>Other Caching Structures</strong></caption>
+     <thead>
+      <tr class="TableHeader" style="vertical-align:bottom;">
+        <th>Type</th>
+        <th>Size</th>
+        <th>Hit</th>
+        <th>Miss</th>
+        <th>Insert</th>
+        <th>Delete</th>
       </tr>
+     </thead>
+     <tbody>
       <tr class="TableCellLight">
-        <td>DNSCache/Hit</td>
+        <th scope="row">DNSCache/Hit</th>
         <td>#[namecacheHit.size]#</td>
         <td>#[namecacheHit.Hit]#</td>
         <td>#[namecacheHit.Miss]#</td>
@@ -235,7 +203,7 @@
         <td>(ARC)</td>
       </tr>
       <tr class="TableCellLight">
-        <td>DNSCache/Miss</td>
+        <th scope="row">DNSCache/Miss</th>
         <td>#[namecacheMiss.size]#</td>
         <td>#[namecacheMiss.Hit]#</td>
         <td>#[namecacheMiss.Miss]#</td>
@@ -243,7 +211,7 @@
         <td>(ARC)</td>
       </tr>
       <tr class="TableCellDark">
-        <td>DNSNoCache</td>
+        <th scope="row">DNSNoCache</th>
         <td>#[namecache.noCache]#</td>
         <td></td>
         <td></td>
@@ -251,7 +219,7 @@
         <td></td>
       </tr>
       <tr class="TableCellLight">
-        <td>HashBlacklistedCache</td>
+        <th scope="row">HashBlacklistedCache</th>
         <td>#[blacklistcache.size]#</td>
         <td></td>
         <td></td>
@@ -259,13 +227,14 @@
         <td></td>
       </tr>
       <tr class="TableCellLight">
-        <td>Search Event Cache</td>
+        <th scope="row">Search Event Cache</th>
         <td>#[searchevent.size]#</td>
         <td>#[searchevent.hit]#</td>
         <td>#[searchevent.miss]#</td>
         <td>#[searchevent.insert]#</td>
         <td>#[searchevent.delete]#</td>
       </tr>
+     </tbody>
     </table>
     
     #%env/templates/footer.template%#

@@ -1996,7 +1996,7 @@ Attributes==属性
 
 #File: Performance_p.html
 #---------------------------
-<html lang="en">==<html lang="cn">
+<html lang="en">==<html lang="zh">
 Performance Settings==性能设置
 Memory Settings==内存设置
 Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==<abbr title="Java Virtual Machine">JVM</abbr>内存设置
@@ -2039,9 +2039,10 @@ Remote Search:==远端搜索:
 
 #File: PerformanceMemory_p.html
 #---------------------------
+<html lang="en">==<html lang="zh">
 Performance Settings for Memory==内存性能设置
 refresh graph==刷新图表
-Memory Usage:==内存使用:
+Memory Usage==内存使用
 After Startup==启动后
 After Initializations==初始化后
 before GC==GC前
@@ -2058,18 +2059,13 @@ total memory taken from the OS==操作系统分配内存
 free memory in the JVM within total amount==JVM空闲内存
 >Used<==>已用<
 used memory in the JVM within total amount==JVM已用内存
-#EcoTable RAM Index:==EcoTabelle RAM Index:
-Table RAM Index:==Table使用内存:
+Table RAM Index==Table使用内存
 >Size==>大小
 >Key==>关键字
 >Value==>值
-#FlexTable RAM Index:==FlexTabelle RAM Index:
-#Table</td>==Table</td>
 Chunk Size<==块大小<
-#Count</td>==Anzahl</td>
 Used Memory<==已用内存<
-#Node Caches:==Knoten Cache:
-Object Index Caches:==Object索引缓存:
+Object Index Caches==Object索引缓存
 Needed Memory==所需内存大小
 
 Object Read Caches==Object读缓存
@@ -2087,7 +2083,7 @@ MB (miss)==MB (丢失)
 Stop Grow when less than #[objectCacheStopGrow]# MB available left==可用内存低于 #[objectCacheStopGrow]# MB时停止增长
 Start Shrink when less than #[objectCacheStartShrink]# MB availabe left==可用内存低于 #[objectCacheStartShrink]# MB开始减少
 
-Other Caching Structures:==其他缓存结构:
+Other Caching Structures==其他缓存结构
 Type</td>==类型</td>
 >Hit<==>命中<
 >Miss<==>丢失<

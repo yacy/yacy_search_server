@@ -1543,8 +1543,9 @@ milliseconds==millisecondes
 
 #File: PerformanceMemory_p.html
 #---------------------------
+<html lang="en">==<html lang="fr">
 Performance Settings for Memory==Param&egrave;tre de performance pour la m&eacute;moire
-Memory Usage:==Utilisation m&eacute;moire
+Memory Usage==Utilisation m&eacute;moire
 After Startup==Apr&egrave;s d&eacute;marrage
 After Initializations==Apr&egrave;s initialisation
 before GC==avant GC
@@ -1566,7 +1567,6 @@ Re-Configuration of Startup Paramenters:==Reconfiguration des param&egrave;tres 
 Changes take effect after <strong>re-start</strong> of YaCy==Les modifications prendront effet apr&egrave;s le <strong>red&eacute;marrage</strong> de YaCy
 RAM Cache for Database Files:==Cache RAM pour les fichiers de base de donn&eacute;es:
 Chunk Size==Taille de bloc
-#Slots==
 Memory Occupation==Occupation m&eacute;moire
 Needed<br />==N&eacute;cessaire<br />
  DB Size==Taille de la DB 

@@ -1174,8 +1174,9 @@ Maximum URLs currently assigned==Maximalny pocet prave priradenych URL adries
 
 #File: PerformanceMemory_p.html
 #---------------------------
+<html lang="en">==<html lang="sk">
 Performance Settings for Memory==Nastavenia vykonu pamate
-Memory Usage:==Vyuzitie pamate:
+Memory Usage==Vyuzitie pamate
 After Startup==Po starte
 After Initializations==Po inicializacii
 before GC==pred GC

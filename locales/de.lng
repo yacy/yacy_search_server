@@ -2471,11 +2471,12 @@ Remote Search:==Remote Suche:
 
 #File: PerformanceMemory_p.html
 #---------------------------
+<html lang="en">==<html lang="de">
 Performance Settings for Memory==Performanceeinstellungen für Speicher
 refresh graph==Aktualisiere Diagramm
 simulate short memory status==Simuliere kurzen Speicherstatus
 use Standard Memory Strategy</label> (current: #[memoryStrategy]#)==Verwende Standard Speicher-Strategie</label> (Aktuell: #[memoryStrategy]#)
-Memory Usage:==Speichernutzung:
+Memory Usage==Speichernutzung
 After Startup==Nach Start
 After Initializations==Nach Initialisierungen
 before GC==vor GC
@@ -2492,22 +2493,19 @@ total memory taken from the OS==gesamter vom Betriebssystem zugewiesener Speiche
 free memory in the JVM within total amount==freier Speicher in der JVM innerhalb des Gesamten Speichers
 >Used<==>Belegt<
 used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
-Solr Resources:==Solr Resourcen:
+Solr Resources==Solr Resourcen
 >Class<==>Klasse<
 >Type<==>Typ<
 >Statistics<==>Statistiken<
 >Size<==>Größe<
-#EcoTable RAM Index:==EcoTabelle RAM Index:
-Table RAM Index:==Tabelle RAM Speicher Index:
+Table RAM Index==Tabelle RAM Speicher Index
 >Key==>Schlüssel
 >Value==>Wert
-#FlexTable RAM Index:==FlexTabelle RAM Index:
 Table</td>==Tabelle</td>
 Chunk Size<==Chunk Größe<
 #Count</td>==Anzahl</td>
 Used Memory<==Benutzter Speicher<
-#Node Caches:==Knoten Cache:
-Object Index Caches:==Objekt Index Caches:
+Object Index Caches==Objekt Index Caches
 Needed Memory==Benötigter Speicher
 
 Object Read Caches==Objekt Lese Caches
@@ -2525,7 +2523,7 @@ MB (miss)==MB (Verfehler)
 Stop Grow when less than #[objectCacheStopGrow]# MB available left==Beende Erweiterung wenn weniger als #[objectCacheStopGrow]# MB verfügbar sind
 Start Shrink when less than #[objectCacheStartShrink]# MB availabe left==Starte Verkleinerung wenn weniger als #[objectCacheStartShrink]# MB verfügbar sind
 
-Other Caching Structures:==Andere Zwischenspeicher Strukturen:
+Other Caching Structures==Andere Zwischenspeicher Strukturen
 >Hit<==>Treffer<
 >Miss<==>Verfehler<
 Insert<==Einfügen<

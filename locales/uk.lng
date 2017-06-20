@@ -2212,9 +2212,10 @@ MByte==МБайт
 
 #File: PerformanceMemory_p.html
 #---------------------------
+<html lang="en">==<html lang="uk">
 Performance Settings for Memory==Налаштування швидкодії для пам’яті
 <label for="autoreload">refresh graph==<label for="autoreload">оновлювати графік
-Memory Usage:==Використання пам’яті:
+Memory Usage==Використання пам’яті
 After Startup==Після запуску
 After Initializations==Після підготовки
 before GC==перед GC
@@ -2231,18 +2232,15 @@ total memory taken from the OS==вся пам’ять, що береться з
 free memory in the JVM within total amount==вільна пам’ять в JVM з загального об’єму
 >Used<==>Використано<
 used memory in the JVM within total amount==використана пам’ять в JVM з загального об’єму
-#EcoTable RAM Index:==Індекс RAM ЕкоТаблиці:
-Table RAM Index:==Пам’ять RAM індексу таблиць:
+Table RAM Index==Пам’ять RAM індексу таблиць
 >Size==>Розмір
 >Key==>Ключі
 >Value==>Значення
-#FlexTable RAM Index:==RAM-індекс Flex-таблиці:
 Table</td>==Таблиця</td>
 Chunk Size<==Розмір шматка<
 #Count</td>==Кількість</td>
 Used Memory<==Використано пам’яті<
-#Node Caches:==Кеші вузла:
-Object Index Caches:==Кеші індексу об’єктів:
+Object Index Caches==Кеші індексу об’єктів
 Needed Memory==Потрібна пам’ять
 
 Object Read Caches==Кеші читання об’єктів
@@ -2260,7 +2258,7 @@ MB (miss)==MБ (невдача)
 Stop Grow when less than #[objectCacheStopGrow]# MB available left==Зупинити зростання, коли доступно менше #[objectCacheStopGrow]# MБ
 Start Shrink when less than #[objectCacheStartShrink]# MB availabe left==Запустити скорочення, коли доступно менше #[objectCacheStartShrink]#  MБ
 
-Other Caching Structures:==Інші кешувальні структури:
+Other Caching Structures==Інші кешувальні структури
 Type</td>==Тип</td>
 >Hit<==>Успіх<
 >Miss<==>Невдача<

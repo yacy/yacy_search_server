@@ -2577,11 +2577,12 @@ Remote Search:==Удалённый поиск:
 
 #File: PerformanceMemory_p.html
 #---------------------------
+<html lang="en">==<html lang="ru">
 Performance Settings for Memory==Настройки производительности памяти
 refresh graph==Обновлять диаграмму
 simulate short memory status==Имитация состояния малого размера памяти 
 use Standard Memory Strategy</label> (current: #[memoryStrategy]#)==Использовать стратегию стандартного размера памяти</label> (Текущая: #[memoryStrategy]#)
-Memory Usage:==Использование памяти:
+Memory Usage==Использование памяти
 After Startup==После запуска
 After Initializations==После инициализации
 before GC==до GC
@@ -2599,22 +2600,19 @@ total memory taken from the OS==всего памяти, выделенной о
 free memory in the JVM within total amount==свободная память в Java без учёта всей памяти
 >Used<==>Используется<
 used memory in the JVM within total amount==используемая память в Java без учёта всей памяти
-Solr Resources:==Ресурсы базы данных Solr:
+Solr Resources==Ресурсы базы данных Solr
 >Class<==>Класс<
 >Type<==>Тип<
 >Statistics<==>Статистика<
 >Size<==>Размер<
-#EcoTable RAM Index:==EcoTabelle RAM Index:
-Table RAM Index:==Таблица индекса RAM:
+Table RAM Index==Таблица индекса RAM
 >Key==>Ключ
 >Value==>Значение
-#FlexTable RAM Index:==FlexTabelle RAM Index:
 Table</td>==Таблица</td>
 Chunk Size<==Размер части<
 #Count</td>==Счёт</td>
 Used Memory<==Использовано памяти<
-#Node Caches:==Кэш нода:
-Object Index Caches:==Кэш индекса объектов:
+Object Index Caches==Кэш индекса объектов
 Needed Memory==Необходимо памяти
 
 Object Read Caches==Чтение кэшированных объектов
@@ -2632,7 +2630,7 @@ MB (miss)==MB (попадания)
 Stop Grow when less than #[objectCacheStopGrow]# MB available left==Остановить рост при сокращении до #[objectCacheStopGrow]# MB из доступной
 Start Shrink when less than #[objectCacheStartShrink]# MB availabe left==Начать сжатие при сокращении до #[objectCacheStartShrink]# MB из доступной
 
-Other Caching Structures:==Другие структуры кэша:
+Other Caching Structures==Другие структуры кэша
 >Hit<==>Удары<
 >Miss<==>Попадания<
 Insert<==Вставлено<

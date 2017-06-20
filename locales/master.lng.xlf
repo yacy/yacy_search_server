@@ -6230,7 +6230,7 @@
        <source>use Standard Memory Strategy&lt;/label&gt; (current: #[memoryStrategy]#)</source>
     </trans-unit>
     <trans-unit id="6bf48ab8" xml:space="preserve" approved="no" translate="yes">
-       <source>Memory Usage:</source>
+       <source>Memory Usage</source>
     </trans-unit>
     <trans-unit id="6d6a0ff9" xml:space="preserve" approved="no" translate="yes">
        <source>After Startup</source>
@@ -6284,7 +6284,7 @@
        <source>used memory in the JVM within total amount</source>
     </trans-unit>
     <trans-unit id="e0e37cb3" xml:space="preserve" approved="no" translate="yes">
-       <source>Solr Resources:</source>
+       <source>Solr Resources</source>
     </trans-unit>
     <trans-unit id="4836cba2" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Class&lt;</source>
@@ -6299,7 +6299,7 @@
        <source>&gt;Size&lt;</source>
     </trans-unit>
     <trans-unit id="f11c3dc" xml:space="preserve" approved="no" translate="yes">
-       <source>Table RAM Index:</source>
+       <source>Table RAM Index</source>
     </trans-unit>
     <trans-unit id="1d5541" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Key</source>
@@ -6317,7 +6317,7 @@
        <source>Used Memory&lt;</source>
     </trans-unit>
     <trans-unit id="77cb709a" xml:space="preserve" approved="no" translate="yes">
-       <source>Object Index Caches:</source>
+       <source>Object Index Caches</source>
     </trans-unit>
     <trans-unit id="18d153cc" xml:space="preserve" approved="no" translate="yes">
        <source>Needed Memory</source>
@@ -6365,7 +6365,7 @@
        <source>Start Shrink when less than #[objectCacheStartShrink]# MB availabe left</source>
     </trans-unit>
     <trans-unit id="75579689" xml:space="preserve" approved="no" translate="yes">
-       <source>Other Caching Structures:</source>
+       <source>Other Caching Structures</source>
     </trans-unit>
     <trans-unit id="38c0467" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Hit&lt;</source>
