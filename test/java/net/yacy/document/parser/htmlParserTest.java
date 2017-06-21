@@ -56,9 +56,10 @@ public class htmlParserTest extends TestCase {
     /**
      * Test of parse method, of class htmlParser.
      * - test getCharset
+     * @throws IOException 
      */
     @Test
-    public void testParse() throws MalformedURLException, Parser.Failure, InterruptedException, FileNotFoundException {
+    public void testParse() throws Parser.Failure, InterruptedException, IOException {
         System.out.println("htmlParser.parse");
 
         String[] testFiles = {
@@ -89,7 +90,7 @@ public class htmlParserTest extends TestCase {
                 System.out.println("detected charset = " + txt);
             } finally {
             	if(inStream != null) {
-            		System.out.println("Could not close input stream on file " + file);	
+            		inStream.close();
             	}
             }
 
