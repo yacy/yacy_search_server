@@ -377,8 +377,11 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     */
 
     /**
-     * Get mime type from header field content-type
-     * stripps any parameter (denoted by ';' see RFC 2616)
+     * Get mime type from header field Content-Type.
+     * Strips any parameter denoted by ';'.
+     * References : RFC 7231 on HTTP/1.1 and RFC 2045 on Multipurpose Internet Mail Extensions (MIME)
+     * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">RFC 7231 (HTTP/1.1) - "Media Type" section</a>
+     * @see <a href="https://tools.ietf.org/html/rfc2045#section-5">RFC 2045 (MIME) - "Content-Type Header Field" section</a>
      * @return mime or on missing header field "application/octet-stream"
      */
     public String mime() {
@@ -386,9 +389,8 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         final int pos = tmpstr.indexOf(';');
         if (pos > 0) {
             return tmpstr.substring(0, pos).trim();
-        } else {
-            return tmpstr;
         }
+        return tmpstr;
     }
 
     /*
@@ -398,15 +400,25 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      * org.apache.commons.fileupload.RequestContext#getCharacterEncoding()
      */
     public String getCharacterEncoding() {
-        final String mimeType = getContentType();
-        if (mimeType == null) return null;
+        return getCharacterEncoding(getContentType());
+    }
+    
+    /**
+     * References : RFC 7231 on HTTP/1.1 and RFC 2045 on Multipurpose Internet Mail Extensions (MIME)
+     * @param contentType a Content-Type header value
+     * @return the characters set name extracted from the header, or null when not in the header
+     * @see <a href="https://tools.ietf.org/html/rfc7231#section-3.1.1.1">RFC 7231 (HTTP/1.1) - "Media Type" section</a>
+     * @see <a href="https://tools.ietf.org/html/rfc2045#section-5">RFC 2045 (MIME) - "Content-Type Header Field" section</a>
+     */
+    public static final String getCharacterEncoding(final String contentType) {
+        if (contentType == null) return null;
 
-        final String[] parts = CommonPattern.SEMICOLON.split(mimeType);
+        final String[] parts = CommonPattern.SEMICOLON.split(contentType);
         if (parts == null || parts.length <= 1) return null;
 
         for (int i=1; i < parts.length; i++) {
             final String param = parts[i].trim();
-            if (param.startsWith("charset=")) {
+            if (param.toLowerCase(Locale.ROOT).startsWith("charset=")) {
                 String charset = param.substring("charset=".length()).trim();
                 if (charset.length() > 0 && (charset.charAt(0) == '\"' || charset.charAt(0) == '\'')) charset = charset.substring(1);
                 if (charset.endsWith("\"") || charset.endsWith("'")) charset = charset.substring(0,charset.length()-1);
@@ -453,7 +465,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 
     /**
      * Get header field content-type (unmodified)
-     * which may include additional parameter (RFC 2616)
+     * which may include additional parameter (RFC 2616, obsoleted by RFC 7231)
      * see also mime()
      * @see org.apache.commons.fileupload.RequestContext#getContentType()
      */
