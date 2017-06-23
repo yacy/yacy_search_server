@@ -423,7 +423,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
  
                 // removing entries from config file
                 sb.setConfig("pkcs12ImportFile", "");
-                sb.setConfig("keyStorePassword", "");
+                sb.setConfig("pkcs12ImportPwd", "");
  
                 // deleting original import file
                 // TODO: should we do this
