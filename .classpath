@@ -86,7 +86,6 @@
 	<classpathentry kind="lib" path="lib/solr-solrj-6.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/zookeeper-3.4.10.jar"/>
 	<classpathentry kind="lib" path="lib/metrics-core-3.2.2.jar"/>
-	<classpathentry kind="lib" path="lib/solr-dataimporthandler-6.6.0.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-58_2.jar"/>
