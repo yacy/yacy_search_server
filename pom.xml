@@ -479,7 +479,7 @@
         <dependency>
             <groupId>org.jwat</groupId>
             <artifactId>jwat-warc</artifactId>
-            <version>1.0.5</version>
+            <version>1.0.6</version>
             <type>jar</type>
         </dependency>        
         <dependency>
