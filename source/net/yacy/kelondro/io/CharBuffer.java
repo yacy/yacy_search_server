@@ -43,12 +43,16 @@ public final class CharBuffer extends Writer {
     private int offset;
     private int length;
     private final int maximumLength;
+    
+    /** Set to true when write attempts beyond the maximumLength have been tried */
+    private boolean overflow;
 
     public CharBuffer(final int maximumLength) {
         this.buffer = new char[10];
         this.length = 0;
         this.offset = 0;
         this.maximumLength = maximumLength;
+        this.overflow = false;
     }
 
     public CharBuffer(final int maximumLength, final int initLength) {
@@ -56,6 +60,7 @@ public final class CharBuffer extends Writer {
         this.length = 0;
         this.offset = 0;
         this.maximumLength = maximumLength;
+        this.overflow = false;
     }
 
     public CharBuffer(final int maximumLength, final char[] bb) {
@@ -63,6 +68,7 @@ public final class CharBuffer extends Writer {
         this.length = bb.length;
         this.offset = 0;
         this.maximumLength = maximumLength;
+        this.overflow = false;
     }
 
     public CharBuffer(final int maximumLength, final char[] bb, final int initLength) {
@@ -71,6 +77,7 @@ public final class CharBuffer extends Writer {
         this.length = bb.length;
         this.offset = 0;
         this.maximumLength = maximumLength;
+        this.overflow = false;
     }
 
     public CharBuffer(final File f) throws IOException {
@@ -81,6 +88,7 @@ public final class CharBuffer extends Writer {
         this.length = 0;
         this.buffer = new char[(int) f.length()*2];
         this.offset = 0;
+        this.overflow = false;
 
         FileReader fr = null;
         try {
@@ -102,6 +110,7 @@ public final class CharBuffer extends Writer {
         this.buffer = new char[0];
         this.length = 0;
         this.offset = 0;
+        this.overflow = false;
     }
 
     public int length() {
@@ -111,6 +120,13 @@ public final class CharBuffer extends Writer {
     public boolean isEmpty() {
         return this.length == 0;
     }
+    
+    /**
+     * @return true when write attempts beyond the maximumLength have been tried
+     */
+    public boolean isOverflow() {
+		return this.overflow;
+	}
 
     private void grow(int minSize) {
         int newsize = 12 * Math.max(this.buffer.length, minSize) / 10; // grow by 20%
@@ -126,7 +142,10 @@ public final class CharBuffer extends Writer {
     }
 
     public void write(final char b) {
-        if (this.buffer.length > this.maximumLength) return;
+        if (this.buffer.length > this.maximumLength) {
+        	this.overflow = true;
+        	return;
+        }
         if (this.offset + this.length + 1 > this.buffer.length) grow(this.offset + this.length + 1);
         this.buffer[this.offset + this.length++] = b;
     }
@@ -138,7 +157,10 @@ public final class CharBuffer extends Writer {
 
     @Override
     public void write(final char[] bb, final int of, final int le) {
-        if (this.buffer.length > this.maximumLength) return;
+        if (this.buffer.length > this.maximumLength) {
+        	this.overflow = true;
+        	return;
+        }
         if (this.offset + this.length + le > this.buffer.length) grow(this.offset + this.length + le);
         System.arraycopy(bb, of, this.buffer, this.offset + this.length, le);
         this.length += le;

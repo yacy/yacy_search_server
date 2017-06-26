@@ -37,6 +37,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.document.parser.GenericXMLParser;
 import net.yacy.document.parser.apkParser;
 import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.bzipParser;
@@ -73,6 +74,10 @@ public final class TextParser {
     private static final Object v = new Object();
 
     private static final Parser genericIdiom = new genericParser();
+    
+    /** A generic XML parser instance */
+    private static final Parser genericXMLIdiom = new GenericXMLParser();
+    
     //use LinkedHashSet for parser collection to use (init) order to prefered parser for same ext or mime
     private static final Map<String, LinkedHashSet<Parser>> mime2parser = new ConcurrentHashMap<String, LinkedHashSet<Parser>>();
     private static final ConcurrentHashMap<String, LinkedHashSet<Parser>> ext2parser = new ConcurrentHashMap<String, LinkedHashSet<Parser>>();
@@ -112,7 +117,9 @@ public final class TextParser {
         initParser(new xlsParser());
         initParser(new zipParser());
         initParser(new audioTagParser());
-        
+        /* Order is important : the generic XML parser must be initialized in last, so it will be effectively used only as a fallback one
+         * when a specialized parser exists for any XML based format (examples : rssParser or ooxmlParser must be tried first) */
+        initParser(genericXMLIdiom);
     }
 
     public static Set<Parser> parsers() {
@@ -426,7 +433,7 @@ public final class TextParser {
             if (idiom != null) idioms.addAll(idiom);
         }
 
-        // check extension and add as backup (in case no, wrong or unknown/unsupported mime was suppied)
+        // check extension and add as backup (in case no, wrong or unknown/unsupported mime was supplied)
         String ext = MultiProtocolURL.getFileExtension(url.getFileName());
         if (ext != null && ext.length() > 0) {
             if (denyExtensionx.containsKey(ext)) throw new Parser.Failure("file extension '" + ext + "' is denied (1)", url);
@@ -440,6 +447,12 @@ public final class TextParser {
         final String mimeType2 = ext2mime.get(ext);
         if (mimeType2 != null && (idiom = mime2parser.get(mimeType2)) != null && !idioms.containsAll(idiom)) { // use containsAll -> idiom is a Set of parser
             idioms.addAll(idiom);
+        }
+        
+        /* No matching idiom has been found : let's check if the media type ends with the "+xml" suffix so we can handle it with a generic XML parser 
+         * (see RFC 7303 - Using '+xml' when Registering XML-Based Media Types : https://tools.ietf.org/html/rfc7303#section-4.2) */
+        if(idioms.isEmpty() && mimeType1 != null && mimeType1.endsWith("+xml")) {
+        	idioms.add(genericXMLIdiom);
         }
 
         // always add the generic parser (make sure it is the last in access order)
@@ -456,10 +469,20 @@ public final class TextParser {
      * @return an error if the mime type is not supported, null otherwise
      */
     public static String supportsMime(String mimeType) {
-        if (mimeType == null) return null;
+        if (mimeType == null) {
+        	return null;
+        }
         mimeType = normalizeMimeType(mimeType);
-        if (denyMime.containsKey(mimeType)) return "mime type '" + mimeType + "' is denied (2)";
-        if (mime2parser.get(mimeType) == null) return "no parser for mime '" + mimeType + "' available";
+        if (denyMime.containsKey(mimeType)) {
+        	return "mime type '" + mimeType + "' is denied (2)";
+        }
+        if (mime2parser.get(mimeType) == null) {
+            /* No matching idiom has been found : let's check if the media type ends with the "+xml" suffix as can handle it with a generic XML parser 
+             * (see RFC 7303 - Using '+xml' when Registering XML-Based Media Types : https://tools.ietf.org/html/rfc7303#section-4.2) */
+        	if(!mimeType.endsWith("+xml")) {
+        		return "no parser for mime '" + mimeType + "' available";
+        	}
+        }
         return null;
     }
 

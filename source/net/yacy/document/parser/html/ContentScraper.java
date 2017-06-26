@@ -344,24 +344,17 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if ((b.length() != 0) && (!(SentenceReader.punctuation(b.charAt(b.length() - 1))))) b = b + '.';
             //System.out.println("*** Appended dot: " + b.toString());
         }
-        // find http links inside text
-        s = 0;
-        String u;
-        while (s < b.length()) {
-            p = find(b, dpssp, s);
-            if (p == Integer.MAX_VALUE) break;
-            s = Math.max(0, p - 5);
-            p = find(b, protp, s);
-            if (p == Integer.MAX_VALUE) break;
-            q = b.indexOf(" ", p + 1);
-            u = b.substring(p, q < 0 ? b.length() : q);
-            if (u.endsWith(".")) u = u.substring(0, u.length() - 1); // remove the '.' that was appended above
-            s = p + 6;
-            try {
-                this.addAnchor(new AnchorURL(u));
-                continue;
-            } catch (final MalformedURLException e) {}
+        // find absolute URLs inside text
+        final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
+        List<ContentScraperListener> anchorListeners = new ArrayList<>();
+        for (int i = 0; i < listeners.length; i += 2) {
+            if (listeners[i] == ContentScraperListener.class) {
+            	anchorListeners.add((ContentScraperListener)listeners[i+1]);
+            }
         }
+        
+        findAbsoluteURLs(b, this.anchors, anchorListeners);
+        
         // append string to content
         if (!b.isEmpty()) {
             this.content.append(b);
@@ -371,6 +364,47 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     private final static Pattern dpssp = Pattern.compile("://");
     private final static Pattern protp = Pattern.compile("smb://|ftp://|http://|https://");
+    
+    /**
+     * Try to detect and parse absolute URLs in text, then update the urls collection and fire anchorAdded event on listeners. Any parameter are can be null. 
+     * @param text the text to parse
+     * @param urls a mutable collection of URLs to fill.
+     * @param listeners a collection of listeners to trigger.
+     */
+    public static void findAbsoluteURLs(final String text, final Collection<AnchorURL> urls, final Collection<ContentScraperListener> listeners) {
+        if(text == null) {
+        	return;
+        }
+        int schemePosition, spacePosition, offset = 0;
+        String urlString;
+        AnchorURL url;
+        while (offset < text.length()) {
+            schemePosition = find(text, dpssp, offset);
+            if (schemePosition == Integer.MAX_VALUE) {
+            	break;
+            }
+            offset = Math.max(0, schemePosition - 5);
+            schemePosition = find(text, protp, offset);
+            if (schemePosition == Integer.MAX_VALUE) {
+            	break;
+            }
+            spacePosition = text.indexOf(" ", schemePosition + 1);
+            urlString = text.substring(schemePosition, spacePosition < 0 ? text.length() : spacePosition);
+            if (urlString.endsWith(".")) urlString = urlString.substring(0, urlString.length() - 1); // remove the '.' that was appended above
+            offset = schemePosition + 6;
+            try {
+            	url = new AnchorURL(urlString);
+            	if(urls != null) {
+            		urls.add(url);
+            	}
+            	if(listeners != null) {
+            		for(ContentScraperListener listener : listeners) {
+            			listener.anchorAdded(url.toNormalform(false));
+            		}
+            	}
+            } catch (final MalformedURLException ignored) {}
+        }
+    }
 
     private static final int find(final String s, final Pattern m, final int start) {
         final Matcher mm = m.matcher(s.subSequence(start, s.length()));
