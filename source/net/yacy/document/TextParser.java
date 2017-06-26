@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -128,6 +129,15 @@ public final class TextParser {
         for (Set<Parser> pl: mime2parser.values()) c.addAll(pl);
         return c;
     }
+    
+    /**
+     * @return the set of all supported mime types
+     */
+    public static Set<String> supportedMimeTypes() {
+    	final Set<String> mimeTypes = new HashSet<>();
+    	mimeTypes.addAll(mime2parser.keySet());
+    	return mimeTypes;
+    }
 
     private static void initParser(final Parser parser) {
         String prototypeMime = null;
@@ -145,7 +155,7 @@ public final class TextParser {
         }
 
         if (prototypeMime != null) for (String ext: parser.supportedExtensions()) {
-            ext = ext.toLowerCase();
+            ext = ext.toLowerCase(Locale.ROOT);
             final String s = ext2mime.get(ext);
             if (s != null && !s.equals(prototypeMime)) AbstractParser.log.info("Parser for extension '" + ext + "' was set to mime '" + s + "', overwriting with new mime '" + prototypeMime + "'.");
             ext2mime.put(ext, prototypeMime);
@@ -153,7 +163,7 @@ public final class TextParser {
 
         for (String ext: parser.supportedExtensions()) {
             // process the extensions
-            ext = ext.toLowerCase();
+            ext = ext.toLowerCase(Locale.ROOT);
             LinkedHashSet<Parser> p0 = ext2parser.get(ext);
             if (p0 == null) {
                 p0 = new LinkedHashSet<Parser>();
@@ -518,12 +528,12 @@ public final class TextParser {
     }
 
     public static String mimeOf(final String ext) {
-        return ext2mime.get(ext.toLowerCase());
+        return ext2mime.get(ext.toLowerCase(Locale.ROOT));
     }
 
     private static String normalizeMimeType(String mimeType) {
         if (mimeType == null) return "application/octet-stream";
-        mimeType = mimeType.toLowerCase();
+        mimeType = mimeType.toLowerCase(Locale.ROOT);
         final int pos = mimeType.indexOf(';');
         return ((pos < 0) ? mimeType.trim() : mimeType.substring(0, pos).trim());
     }
