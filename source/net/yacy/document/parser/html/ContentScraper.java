@@ -362,8 +362,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
 
-    private final static Pattern dpssp = Pattern.compile("://");
     private final static Pattern protp = Pattern.compile("smb://|ftp://|http://|https://");
+    
+    /** A regular expression pattern matching any whitespace character */
+    private final static Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
     
     /**
      * Try to detect and parse absolute URLs in text, then update the urls collection and fire anchorAdded event on listeners. Any parameter are can be null. 
@@ -375,23 +377,33 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if(text == null) {
         	return;
         }
-        int schemePosition, spacePosition, offset = 0;
+        int schemePosition, offset = 0;
+        boolean hasWhiteSpace;
         String urlString;
         AnchorURL url;
+        final Matcher urlSchemeMatcher = protp.matcher(text);
+        final Matcher whiteSpaceMatcher = WHITESPACE_PATTERN.matcher(text);
+        
+        
         while (offset < text.length()) {
-            schemePosition = find(text, dpssp, offset);
-            if (schemePosition == Integer.MAX_VALUE) {
+            if(!urlSchemeMatcher.find(offset)) {
             	break;
             }
-            offset = Math.max(0, schemePosition - 5);
-            schemePosition = find(text, protp, offset);
-            if (schemePosition == Integer.MAX_VALUE) {
-            	break;
+            schemePosition = urlSchemeMatcher.start();
+            
+            hasWhiteSpace = whiteSpaceMatcher.find(urlSchemeMatcher.end());
+            urlString = text.substring(schemePosition, hasWhiteSpace ? whiteSpaceMatcher.start() : text.length());
+            
+            if (urlString.endsWith(".")) {
+            	urlString = urlString.substring(0, urlString.length() - 1); // remove the '.' that was appended above
             }
-            spacePosition = text.indexOf(" ", schemePosition + 1);
-            urlString = text.substring(schemePosition, spacePosition < 0 ? text.length() : spacePosition);
-            if (urlString.endsWith(".")) urlString = urlString.substring(0, urlString.length() - 1); // remove the '.' that was appended above
-            offset = schemePosition + 6;
+            /* URLs can contain brackets, furthermore as they can even be reserved characters in the URI syntax (see https://tools.ietf.org/html/rfc3986#section-2.2)
+             * But when unpaired, in most cases this is that the unpaired bracket is not part of the URL, but rather used to wrap it in the text*/
+            urlString = removeUnpairedBrackets(urlString, '(', ')');
+            urlString = removeUnpairedBrackets(urlString, '{', '}');
+           	urlString = removeUnpairedBrackets(urlString, '[', ']');
+            
+            offset = schemePosition + urlString.length();
             try {
             	url = new AnchorURL(urlString);
             	if(urls != null) {
@@ -406,13 +418,59 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
 
-    private static final int find(final String s, final Pattern m, final int start) {
-        final Matcher mm = m.matcher(s.subSequence(start, s.length()));
-        if (!mm.find()) return Integer.MAX_VALUE;
-        final int p = mm.start() + start;
-        //final int p = s.indexOf(m, start);
-        return (p < 0) ? Integer.MAX_VALUE : p;
-    }
+	/**
+	 * Analyze bracket pairs found in the string and eventually
+	 * return a truncated version of that string when one or more pairs are incomplete
+	 * 
+	 * @param str
+	 *            the string to analyze
+	 * @param openingMark
+	 *            the opening bracket character (example : '{')
+	 * @param closingMark
+	 *            the closing bracket character (example : '}')
+	 * @return the original string or a truncated copy
+	 */
+	protected static String removeUnpairedBrackets(final String str, final char openingMark,
+			final char closingMark) {
+		if(str == null) {
+			return null;
+		}
+		String result = str;
+		char ch;
+		int depth = 0, index = 0, lastUnpairedOpeningIndex = -1;
+		/* Loop on all characters of the string */
+		for(; index < str.length(); index++) {
+			ch = str.charAt(index);
+			if(ch == openingMark) {
+				if(depth == 0) {
+					lastUnpairedOpeningIndex = index;
+				}
+				depth++;
+			} else if(ch == closingMark) {
+				depth--;
+				if(depth == 0) {
+					lastUnpairedOpeningIndex = -1;
+				}
+			}
+			if(depth < 0) {
+				/* Unpaired closing mark : stop the loop here */
+				break;
+			}
+		}
+		
+		if (depth > 0) {
+			/* One or more unpaired opening marks : truncate at the first opening level */
+			if(lastUnpairedOpeningIndex >= 0) {
+				result = str.substring(0, lastUnpairedOpeningIndex);
+			}
+		} else if (depth < 0) {
+			/* One or more unpaired closing marks : truncate at the current index as the loop should have been exited with a break */
+			if(index >= 0) {
+				result = str.substring(0, index);
+			}
+		}
+		return result;
+	}
 
     /**
      * @param relativePath relative path to this document base URL
