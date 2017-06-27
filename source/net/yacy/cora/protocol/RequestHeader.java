@@ -129,7 +129,7 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public FileType fileType() {
         String path = this.getPathInfo();
         if (path == null) return FileType.HTML;
-        path = path.toLowerCase();
+        path = path.toLowerCase(Locale.ROOT);
         if (path.endsWith(".json")) return FileType.JSON;
         if (path.endsWith(".xml")) return FileType.XML;
         if (path.endsWith(".rdf")) return FileType.XML;

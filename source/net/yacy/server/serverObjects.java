@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -480,7 +481,7 @@ public class serverObjects implements Serializable, Cloneable {
     public boolean getBoolean(final String key) {
         String s = removeByteOrderMark(get(key));
         if (s == null) return false;
-        s = s.toLowerCase();
+        s = s.toLowerCase(Locale.ROOT);
         return s.equals("true") || s.equals("on") || s.equals("1");
     }
 

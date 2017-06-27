@@ -34,6 +34,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -664,7 +665,7 @@ public class HTTPClient {
 				mimeType = contentType.getValue();
 
 				if (mimeType != null) {
-					mimeType = mimeType.trim().toLowerCase();
+					mimeType = mimeType.trim().toLowerCase(Locale.ROOT);
 
 					final int pos = mimeType.indexOf(';');
 					if(pos >= 0) {

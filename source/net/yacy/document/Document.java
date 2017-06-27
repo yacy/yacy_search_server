@@ -44,6 +44,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -565,8 +566,8 @@ dc_rights
                     continue;
                 }
 
-                final boolean noindex = url.getRelProperty().toLowerCase().indexOf("noindex",0) >= 0;
-                final boolean nofollow = url.getRelProperty().toLowerCase().indexOf("nofollow",0) >= 0;
+                final boolean noindex = url.getRelProperty().toLowerCase(Locale.ROOT).indexOf("noindex",0) >= 0;
+                final boolean nofollow = url.getRelProperty().toLowerCase(Locale.ROOT).indexOf("nofollow",0) >= 0;
                 if ((thishost == null && url.getHost() == null) ||
                     ((thishost != null && url.getHost() != null) &&
                      (url.getHost().endsWith(thishost) ||
@@ -578,9 +579,9 @@ dc_rights
                 extpos = u.lastIndexOf('.');
                 if (extpos > 0) {
                     if (((qpos = u.indexOf('?')) >= 0) && (qpos > extpos)) {
-                        ext = u.substring(extpos + 1, qpos).toLowerCase();
+                        ext = u.substring(extpos + 1, qpos).toLowerCase(Locale.ROOT);
                     } else {
-                        ext = u.substring(extpos + 1).toLowerCase();
+                        ext = u.substring(extpos + 1).toLowerCase(Locale.ROOT);
                     }
                     if (Classification.isMediaExtension(ext)) {
                         // this is not a normal anchor, its a media link
@@ -705,10 +706,10 @@ dc_rights
                 u = url.toNormalform(true);
 
                 // find start of a referenced http url
-                if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) { // 7 = skip the protocol part of the source url
+                if ((pos = u.toLowerCase(Locale.ROOT).indexOf("http://", 7)) > 0) { // 7 = skip the protocol part of the source url
                     i.remove();
                     u = u.substring(pos);
-                    while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
+                    while ((pos = u.toLowerCase(Locale.ROOT).indexOf("http://", 7)) > 0)
                         u = u.substring(pos);
                     url = new AnchorURL(u);
                     if (!(v.containsKey(url)))
@@ -717,10 +718,10 @@ dc_rights
                 }
 
                 // find start of a referenced https url
-                if ((pos = u.toLowerCase().indexOf("https://", 7)) > 0) { // 7 = skip the protocol part of the source url
+                if ((pos = u.toLowerCase(Locale.ROOT).indexOf("https://", 7)) > 0) { // 7 = skip the protocol part of the source url
                     i.remove();
                     u = u.substring(pos);
-                    while ((pos = u.toLowerCase().indexOf("https://", 7)) > 0)
+                    while ((pos = u.toLowerCase(Locale.ROOT).indexOf("https://", 7)) > 0)
                         u = u.substring(pos);
                     url = new AnchorURL(u);
                     if (!(v.containsKey(url)))
@@ -728,10 +729,10 @@ dc_rights
                     continue loop;
                 }
                 
-                if ((pos = u.toLowerCase().indexOf("/www.", 11)) > 0) { // 11 = skip protocol part + www of source url "http://www."
+                if ((pos = u.toLowerCase(Locale.ROOT).indexOf("/www.", 11)) > 0) { // 11 = skip protocol part + www of source url "http://www."
                     i.remove();
                     u = url.getProtocol()+":/" + u.substring(pos);
-                    while ((pos = u.toLowerCase().indexOf("/www.", 11)) > 0)
+                    while ((pos = u.toLowerCase(Locale.ROOT).indexOf("/www.", 11)) > 0)
                         u = url.getProtocol()+":/" + u.substring(pos);
 
                     AnchorURL addurl = new AnchorURL(u);

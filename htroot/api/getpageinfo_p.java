@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -116,7 +117,7 @@ public class getpageinfo_p {
             if (post.containsKey("actions"))
                 actions=post.get("actions");
             String url=post.get("url");
-			if (url.toLowerCase().startsWith("ftp://")) {
+			if (url.toLowerCase(Locale.ROOT).startsWith("ftp://")) {
 				prop.put("robots-allowed", "1"); // ok to crawl
 		        prop.put("robotsInfo", "ftp does not follow robots.txt");
 				prop.putXML("title", "FTP: " + url);

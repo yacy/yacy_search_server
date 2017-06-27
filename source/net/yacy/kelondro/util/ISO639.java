@@ -26,6 +26,7 @@
 
 package net.yacy.kelondro.util;
 
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -183,7 +184,7 @@ public class ISO639 {
      * @return the name of the country
      */
     public static final String country(String code) {
-        return mapping.get(code.toLowerCase());
+        return mapping.get(code.toLowerCase(Locale.ROOT));
     }
     
     /**
@@ -192,7 +193,7 @@ public class ISO639 {
      * @return true if the code exists
      */
     public static final boolean exists(String code) {
-        return mapping.containsKey(code.toLowerCase());
+        return mapping.containsKey(code.toLowerCase(Locale.ROOT));
     }
     
     /**
@@ -202,7 +203,7 @@ public class ISO639 {
      */
     public static final String userAgentLanguageDetection(String userAgent) {
         if (userAgent == null || userAgent.length() < 2) return null;
-        userAgent = userAgent.toLowerCase();
+        userAgent = userAgent.toLowerCase(Locale.ROOT);
         if (mapping.containsKey(userAgent.substring(0, 2))) return userAgent.substring(0, 2);
         if (userAgent.length() == 2 && mapping.containsKey(userAgent)) return userAgent;
         if (userAgent.length() == 5 && mapping.containsKey(userAgent.substring(0, 2))) return userAgent.substring(0, 2);

@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -683,8 +684,8 @@ public class Crawler_p {
             try {
                 wantedPPM = post.getInt("customPPM", wantedPPM);
             } catch (final NumberFormatException e) {}
-            if ("minimum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 10;
-            if ("maximum".equals(crawlingPerformance.toLowerCase())) wantedPPM = 30000;
+            if ("minimum".equals(crawlingPerformance.toLowerCase(Locale.ROOT))) wantedPPM = 10;
+            if ("maximum".equals(crawlingPerformance.toLowerCase(Locale.ROOT))) wantedPPM = 30000;
             
             int wPPM = wantedPPM;
             if ( wPPM <= 0 ) {

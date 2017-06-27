@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import javax.xml.stream.XMLInputFactory;
@@ -163,7 +164,7 @@ public class TranslatorXliff extends Translator {
     @Override
     public Map<String, Map<String, String>> loadTranslationsLists(final File xliffFile) {
         File locallng = getScratchFile(xliffFile);
-        if (xliffFile.getName().toLowerCase().endsWith(".xlf") || xliffFile.getName().toLowerCase().endsWith(".xliff")) {
+        if (xliffFile.getName().toLowerCase(Locale.ROOT).endsWith(".xlf") || xliffFile.getName().toLowerCase(Locale.ROOT).endsWith(".xliff")) {
             if (locallng.exists()) {
                 Map<String, Map<String, String>> mergedList = loadTranslationsListsFromXliff(xliffFile);
                 Map<String, Map<String, String>> tmplist = loadTranslationsListsFromXliff(locallng);

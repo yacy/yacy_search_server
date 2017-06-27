@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -700,7 +701,7 @@ public final class QueryParams {
 
         StringBuilder sb = new StringBuilder(120);
         sb.append("yacysearch.");
-        sb.append(ext.name().toLowerCase());
+        sb.append(ext.name().toLowerCase(Locale.ROOT));
         sb.append("?query=");
 
         sb.append(theQuery.getQueryGoal().getQueryString(true));

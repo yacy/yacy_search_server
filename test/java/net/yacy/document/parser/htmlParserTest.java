@@ -8,6 +8,8 @@ import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
+
 import junit.framework.TestCase;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.Document;
@@ -40,13 +42,13 @@ public class htmlParserTest extends TestCase {
 		for (int i=0; i < testStrings.length; i++) {
 			// desired conversion result
 			String shouldBe = testStrings[i][1];
-			shouldBe = shouldBe!=null ? shouldBe.toLowerCase() : null;
+			shouldBe = shouldBe!=null ? shouldBe.toLowerCase(Locale.ROOT) : null;
 			
 			// conversion result
 			String charset = htmlParser.patchCharsetEncoding(testStrings[i][0]);
 			
 			// test if equal
-			assertEquals(shouldBe, charset!=null ? charset.toLowerCase() : null);
+			assertEquals(shouldBe, charset!=null ? charset.toLowerCase(Locale.ROOT) : null);
 			System.out.println("testGetRealCharsetEncoding: " + (testStrings[i][0]!=null?testStrings[i][0]:"null") + " -> " + (charset!=null?charset:"null") + " | Supported: " + (charset!=null?Charset.isSupported(charset):false));
 			
 		}

@@ -40,6 +40,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -302,7 +303,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         // path elements of link
         String filename = digestURL.getFileName();
         String extension = MultiProtocolURL.getFileExtension(filename);
-        String filenameStub = filename.toLowerCase().endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename;
+        String filenameStub = filename.toLowerCase(Locale.ROOT).endsWith("." + extension) ? filename.substring(0, filename.length() - extension.length() - 1) : filename;
         // remove possible jsession (or other url parm like "img.jpg;jsession=123") 
         // TODO: consider to implement ";jsession=123" check in getFileExtension()
         if (extension.indexOf(';') >= 0) extension = extension.substring(0,extension.indexOf(';'));
@@ -632,7 +633,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             String robots_meta = html.getMetas().get("robots");
             // this tag may have values: all, index, noindex, nofollow; see http://www.robotstxt.org/meta.html
             if (robots_meta != null) {
-                robots_meta = robots_meta.toLowerCase();
+                robots_meta = robots_meta.toLowerCase(Locale.ROOT);
                 if (robots_meta.indexOf("all",0) >= 0) b += 1;      // set bit 0
                 if (robots_meta.indexOf("index",0) == 0 || robots_meta.indexOf(" index",0) >= 0 || robots_meta.indexOf(",index",0) >= 0 ) b += 2; // set bit 1
                 if (robots_meta.indexOf("follow",0) == 0 || robots_meta.indexOf(" follow",0) >= 0 || robots_meta.indexOf(",follow",0) >= 0 ) b += 4; // set bit 2
@@ -2166,7 +2167,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
         List<Integer> il = new ArrayList<Integer>(rel.size());
         for (final String s: rel) {
             int i = 0;
-            final String s0 = s.toLowerCase().trim();
+            final String s0 = s.toLowerCase(Locale.ROOT).trim();
             if ("me".equals(s0)) i += 1;
             if ("nofollow".equals(s0)) i += 2;
             il.add(i);

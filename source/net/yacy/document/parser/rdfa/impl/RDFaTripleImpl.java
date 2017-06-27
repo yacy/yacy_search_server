@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Locale;
+
 import javax.xml.transform.Templates;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -38,7 +40,7 @@ public class RDFaTripleImpl{
 		BufferedReader bufReader = new BufferedReader(in);
                 bufReader.mark(2048); // mark position for following reset
 		String readLine = bufReader.readLine();
-		if (!readLine.toLowerCase().contains("<!doctype")){
+		if (!readLine.toLowerCase(Locale.ROOT).contains("<!doctype")){
 			bufReader.reset();
 		}
 

@@ -77,7 +77,7 @@ public final class Formatter {
      * @param lang an ISO 639 language code which is used to generate a {@link Locale}
      */
     public static void setLocale(final String lang) {
-        final String l = (lang.equalsIgnoreCase("default") ? "en" : lang.toLowerCase());
+        final String l = (lang.equalsIgnoreCase("default") ? "en" : lang.toLowerCase(Locale.ROOT));
         setLocale(l.equals("none") ? null : new Locale(l));
     }
 

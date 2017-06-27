@@ -39,6 +39,7 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -322,7 +323,7 @@ public final class yacyRelease extends yacyVersion {
             }
             final ResponseHeader header = response.getResponseHeader();
 
-            final boolean unzipped = header.gzip() && (header.mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
+            final boolean unzipped = header.gzip() && (header.mime().toLowerCase(Locale.ROOT).equals("application/x-tar")); // if true, then the httpc has unzipped the file
             if (unzipped && name.endsWith(".tar.gz")) {
                 download = new File(storagePath, name.substring(0, name.length() - 3));
             } else {

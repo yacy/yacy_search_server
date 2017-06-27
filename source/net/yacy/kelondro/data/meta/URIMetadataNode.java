@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -264,7 +265,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     public boolean matches(Pattern pattern) {
         return pattern.matcher(this.url.toNormalform(true)).matches();
         //CharacterRunAutomaton automaton = new CharacterRunAutomaton(matcher);
-        //boolean match = automaton.run(this.url.toNormalform(true).toLowerCase());
+        //boolean match = automaton.run(this.url.toNormalform(true).toLowerCase(Locale.ROOT));
         //return match;
     }
 
@@ -930,7 +931,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         if (this.alternative_urlstring != null) return this.alternative_urlstring;
         
         if (!pdfParser.individualPages) return this.url().toNormalform(true);
-        if (!"pdf".equals(MultiProtocolURL.getFileExtension(this.url().getFileName()).toLowerCase())) return this.url().toNormalform(true);
+        if (!"pdf".equals(MultiProtocolURL.getFileExtension(this.url().getFileName()).toLowerCase(Locale.ROOT))) return this.url().toNormalform(true);
         // for pdf links we rewrite the url
         // this is a special treatment of pdf files which can be splitted into subpages
         String pageprop = pdfParser.individualPagePropertyname;

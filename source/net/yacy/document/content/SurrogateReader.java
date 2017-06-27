@@ -32,6 +32,7 @@ import java.io.PushbackInputStream;
 import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -220,7 +221,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     @Override
     public void startElement(final String uri, final String name, String tag, final Attributes atts) throws SAXException {
         if (tag == null) return;
-        tag = tag.toLowerCase();
+        tag = tag.toLowerCase(Locale.ROOT);
         if ("record".equals(tag) || "document".equals(tag) || "doc".equals(tag)) {
             this.dcEntry = new DCEntry();
         } else if ("element".equals(tag) || "str".equals(tag) || "int".equals(tag) || "bool".equals(tag) || "long".equals(tag)) {
@@ -239,7 +240,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     @Override
     public void endElement(final String uri, final String name, String tag) {
         if (tag == null) return;
-        tag = tag.toLowerCase();
+        tag = tag.toLowerCase(Locale.ROOT);
         if ("record".equals(tag) || "document".equals(tag) || "doc".equals(tag)) {
             try {
                 // check if url is in accepted domain

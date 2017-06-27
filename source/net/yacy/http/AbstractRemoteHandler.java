@@ -27,6 +27,7 @@ package net.yacy.http;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
 
@@ -143,7 +144,7 @@ abstract public class AbstractRemoteHandler extends ConnectHandler implements Ha
         }
         
         // check the blacklist
-        if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, hostOnly.toLowerCase(), request.getPathInfo())) {
+        if (Switchboard.urlBlacklist.isListed(BlacklistType.PROXY, hostOnly.toLowerCase(Locale.ROOT), request.getPathInfo())) {
         	response.sendError(HttpServletResponse.SC_FORBIDDEN,
         			"URL '" + hostOnly + "' blocked by yacy proxy (blacklisted)");
             baseRequest.setHandled(true);

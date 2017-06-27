@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -1069,7 +1070,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             }
             if(closeIndex > 0) {
             	final String content = processedLine.substring(openIndex + LEN_WIKI_OPEN_METADATA, closeIndex);
-            	if (content.toLowerCase().startsWith("coordinate")) {
+            	if (content.toLowerCase(Locale.ROOT).startsWith("coordinate")) {
             		// parse Geographical Coordinates as described in
             		// http://en.wikipedia.org/wiki/Wikipedia:Manual_of_Style_%28dates_and_numbers%29#Geographical_coordinates
             		// looks like:
@@ -1087,7 +1088,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
             		String name = "";
             		try {
             			for (final String c : b) {
-            				if (c.toLowerCase().startsWith("name=")) {
+            				if (c.toLowerCase(Locale.ROOT).startsWith("name=")) {
             					name = c.substring(5);
             				}
             				if (c.toUpperCase().startsWith("NS=")) {

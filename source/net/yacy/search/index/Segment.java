@@ -33,6 +33,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -504,10 +505,10 @@ public class Segment {
                     // two possible results: compare and report conflicts
                     if (!language.equals(url.language())) {
                         // see if we have a hint in the url that the statistic was right
-                        final String u = urlNormalform.toLowerCase();
+                        final String u = urlNormalform.toLowerCase(Locale.ROOT);
                         String ISO639_country = ISO639.country(language);
                         if (u.contains("/" + language + "/") ||
-                            (ISO639_country != null && u.contains("/" + ISO639.country(language).toLowerCase() + "/"))) {
+                            (ISO639_country != null && u.contains("/" + ISO639.country(language).toLowerCase(Locale.ROOT) + "/"))) {
                             // this is a strong hint that the statistics was in fact correct
                         } else {
                             // no confirmation using the url, use the TLD

@@ -1,3 +1,5 @@
+import java.util.Locale;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.ListManager;
 import net.yacy.data.WorkTables;
@@ -25,7 +27,7 @@ public class add_entry_p {
 
             ListManager.switchboard.tables.recordAPICall(
             		post,
-            		"add_entry_p." + header.fileType().toString().toLowerCase(),
+            		"add_entry_p." + header.fileType().toString().toLowerCase(Locale.ROOT),
             		WorkTables.TABLE_API_TYPE_CONFIGURATION,
 					"add to blacklist '" + blacklistToUse + "': " + entry);
             

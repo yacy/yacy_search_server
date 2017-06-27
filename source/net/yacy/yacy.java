@@ -40,6 +40,7 @@ import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Semaphore;
@@ -780,7 +781,7 @@ public final class yacy {
 	        // exception : if the -gui option is used then do not go into headless mode since that uses a gui
 	        boolean headless = true;
 	        if (OS.isWindows) headless = false;
-	        if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) headless = false;
+	        if (args.length >= 1 && args[0].toLowerCase(Locale.ROOT).equals("-gui")) headless = false;
 	        System.setProperty("java.awt.headless", headless ? "true" : "false");
 
 	        String s = ""; for (final String a: args) s += a + " ";
@@ -790,32 +791,32 @@ public final class yacy {
 	        File dataRoot = applicationRoot;
 	        //System.out.println("args.length=" + args.length);
 	        //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
-	        if ((args.length >= 1) && (args[0].toLowerCase().equals("-startup") || args[0].equals("-start"))) {
+	        if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-startup") || args[0].equals("-start"))) {
 	            // normal start-up of yacy
 	            if (args.length > 1) {
 	            	dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
 	            }
                 preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
-	        } else if (args.length >= 1 && args[0].toLowerCase().equals("-gui")) {
+	        } else if (args.length >= 1 && args[0].toLowerCase(Locale.ROOT).equals("-gui")) {
 	            // start-up of yacy with gui
 	            if (args.length > 1) {
 	            	dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
 	            }
                 preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);
-	        } else if ((args.length >= 1) && ((args[0].toLowerCase().equals("-shutdown")) || (args[0].equals("-stop")))) {
+	        } else if ((args.length >= 1) && ((args[0].toLowerCase(Locale.ROOT).equals("-shutdown")) || (args[0].equals("-stop")))) {
 	            // normal shutdown of yacy
 	            if (args.length == 2) applicationRoot= new File(args[1]);
 	            shutdown(applicationRoot);
-	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-update"))) {
+	        } else if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-update"))) {
 	            // aut-update yacy
 	            if (args.length == 2) applicationRoot= new File(args[1]);
 	            update(applicationRoot);
-	        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-version"))) {
+	        } else if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-version"))) {
 	            // show yacy version
 	            System.out.println(copyright);
-            } else if ((args.length > 1) && (args[0].toLowerCase().equals("-config"))) {
+            } else if ((args.length > 1) && (args[0].toLowerCase(Locale.ROOT).equals("-config"))) {
                     // set config parameter. Special handling of adminAccount=user:pwd (generates md5 encoded password)
                     // on Windows parameter should be enclosed in doublequotes to accept = sign (e.g. -config "port=8090" "port.ssl=8043")
                     File f = new File (dataRoot,"DATA/SETTINGS/");

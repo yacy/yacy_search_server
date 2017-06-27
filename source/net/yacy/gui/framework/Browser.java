@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Locale;
 import java.util.Properties;
 
 import net.yacy.cora.util.ConcurrentLog;
@@ -61,7 +62,7 @@ public class Browser {
     static {
         // check operation system type
         final Properties sysprop = System.getProperties();
-        final String sysname = sysprop.getProperty("os.name","").toLowerCase();
+        final String sysname = sysprop.getProperty("os.name","").toLowerCase(Locale.ROOT);
         if (sysname.startsWith("mac os x")) {
             systemOS = systemMacOSX;
         } else if (sysname.startsWith("mac os")) {

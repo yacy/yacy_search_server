@@ -28,6 +28,7 @@ package net.yacy.crawler.retrieval;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.Locale;
 
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.encoding.ASCII;
@@ -787,7 +788,7 @@ public class Response {
 
         String mimeType = this.responseHeader.getContentType();
         if (mimeType != null) {
-            mimeType = mimeType.trim().toLowerCase();
+            mimeType = mimeType.trim().toLowerCase(Locale.ROOT);
 
             final int pos = mimeType.indexOf(';');
             return ((pos < 0) ? mimeType : mimeType.substring(0, pos));

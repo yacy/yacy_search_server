@@ -39,6 +39,7 @@ import net.yacy.search.Switchboard;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
+import java.util.Locale;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.FederateSearchManager;
@@ -101,7 +102,7 @@ public class ConfigHeuristics_p {
                 // add new entry to config file
                 final String tmpname = post.get("ossys_newtitle");
                 if (tmpname != null && tmpurl !=null) {
-                    if (!tmpname.isEmpty() && !tmpurl.isEmpty() && tmpurl.toLowerCase().contains("{searchterms}")) {
+                    if (!tmpname.isEmpty() && !tmpurl.isEmpty() && tmpurl.toLowerCase(Locale.ROOT).contains("{searchterms}")) {
                      	/* Check eventual robots.txt policy */
                       	RobotsTxtEntry robotsEntry = null;
 						try {

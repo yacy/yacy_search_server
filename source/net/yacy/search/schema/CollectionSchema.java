@@ -22,6 +22,7 @@ package net.yacy.search.schema;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.SolrType;
@@ -322,7 +323,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     public final void setSolrFieldName(String theValue) {
         // make sure no empty string is assigned
         if ( (theValue != null) && (!theValue.isEmpty()) ) {
-            this.solrFieldName = theValue.toLowerCase();
+            this.solrFieldName = theValue.toLowerCase(Locale.ROOT);
         } else {
             this.solrFieldName = null;
         }

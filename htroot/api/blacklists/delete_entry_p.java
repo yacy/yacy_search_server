@@ -1,3 +1,5 @@
+import java.util.Locale;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.ListManager;
 import net.yacy.data.WorkTables;
@@ -26,7 +28,7 @@ public class delete_entry_p {
             // store this call as api call
             ListManager.switchboard.tables.recordAPICall(
             		post,
-            		"delete_entry_p." + header.fileType().toString().toLowerCase(),
+            		"delete_entry_p." + header.fileType().toString().toLowerCase(Locale.ROOT),
             		WorkTables.TABLE_API_TYPE_CONFIGURATION,
 					"delete from blacklist '" + blacklistToUse + "': " + entry);
 

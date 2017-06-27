@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -601,7 +602,7 @@ public class Network
                 if ( seedURLStr.isEmpty() ) {
                     throw new MalformedURLException("The seed-file url must not be empty.");
                 }
-                if ( !(seedURLStr.toLowerCase().startsWith("http://") || seedURLStr.toLowerCase().startsWith(
+                if ( !(seedURLStr.toLowerCase(Locale.ROOT).startsWith("http://") || seedURLStr.toLowerCase(Locale.ROOT).startsWith(
                     "https://")) ) {
                     throw new MalformedURLException("Unsupported protocol.");
                 }

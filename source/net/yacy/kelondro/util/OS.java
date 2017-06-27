@@ -29,6 +29,7 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -71,7 +72,7 @@ public final class OS {
 	static {
 		// check operation system type
 		final Properties sysprop = java.lang.System.getProperties();
-		final String sysname = sysprop.getProperty("os.name","").toLowerCase();
+		final String sysname = sysprop.getProperty("os.name","").toLowerCase(Locale.ROOT);
 		if (sysname.startsWith("mac os x")) systemOS = System.MacOSX;
 		else if (sysname.startsWith("mac os")) systemOS = System.MacOSC;
 		else if (sysname.startsWith("windows")) systemOS = System.Windows;

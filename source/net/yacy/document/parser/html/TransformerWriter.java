@@ -37,6 +37,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Stack;
 import net.yacy.document.parser.html.ContentScraper.TagName;
@@ -194,7 +195,7 @@ public final class TransformerWriter extends Writer {
         if (in[1] == '/') {
             // a closing tag
             tagend = tagEnd(in, 2);
-            tag = new String(in, 2, tagend - 2).toLowerCase();
+            tag = new String(in, 2, tagend - 2).toLowerCase(Locale.ROOT);
             final char[] text = new char[in.length - tagend - 1];
             System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
             return filterTag(text, quotechar, tag, false);
@@ -207,7 +208,7 @@ public final class TransformerWriter extends Writer {
 
         // an opening tag
         tagend = tagEnd(in, 1);
-        tag = new String(in, 1, tagend - 1).toLowerCase();
+        tag = new String(in, 1, tagend - 1).toLowerCase(Locale.ROOT);
         final char[] text = new char[in.length - tagend - 1];
         System.arraycopy(in, tagend, text, 0, in.length - tagend - 1);
         return filterTag(text, quotechar, tag, true);

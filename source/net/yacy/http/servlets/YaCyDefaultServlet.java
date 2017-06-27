@@ -39,6 +39,7 @@ import java.util.AbstractMap;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -705,7 +706,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         	
     		/* Let's check this header has a valid value */
         	if("http".equals(protocolHeader) || "https".equals(protocolHeader)) {
-        		protocol = protocolHeader.toLowerCase();
+        		protocol = protocolHeader.toLowerCase(Locale.ROOT);
         	} else if(protocolHeader != null && !protocolHeader.isEmpty()) {
     			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal protocol scheme header value : " + protocolHeader);
     		}
@@ -713,7 +714,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     		/* This peer can also be behind a reverse proxy requested using https, even if the request coming to this YaCy peer is http only
     		 * Possible scenario (happens for example when YaCy is deployed on Heroku Platform) : User browser -> https://reverseProxy/yacyURL -> http://yacypeer/yacyURL
     		 * In that case, absolute URLs rendered by this peer (in rss feeds for example) must effectively start with the https scheme */
-        	protocolHeader = header.get(HttpHeaders.X_FORWARDED_PROTO.toString(), "").toLowerCase();
+        	protocolHeader = header.get(HttpHeaders.X_FORWARDED_PROTO.toString(), "").toLowerCase(Locale.ROOT);
         	
     		/* Here we only allow an upgrade from HTTP to HTTPS, not the reverse (we don't want a forged HTTP header by an eventual attacker to force fallback to HTTP) */
         	if("https".equals(protocolHeader)) {

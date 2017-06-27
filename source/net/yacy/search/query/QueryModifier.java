@@ -23,6 +23,7 @@ package net.yacy.search.query;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
@@ -200,7 +201,7 @@ public class QueryModifier {
                 this.language = querystring.substring(langi + 10, langi + 12);
                 querystring = querystring.replace("/language/" + this.language, "");
                 if (this.language.length() == 2 && ISO639.exists(this.language)) { // only 2-digit codes valid
-                    this.language = this.language.toLowerCase();
+                    this.language = this.language.toLowerCase(Locale.ROOT);
                     add("/language/" + this.language);
                 } else {
                     this.language = null;
