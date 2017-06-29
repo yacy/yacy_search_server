@@ -180,6 +180,9 @@ public final class LoaderDispatcher {
             final Response response = loadInternal(request, cacheStrategy, maxFileSize, blacklistType, agent);
             // finally block cleans up loaderSteering and semaphore
             return response;
+        } catch (final IOException e) {
+        	/* Do not wrap an IOException in an unnecessary supplementary IOException */
+            throw e;
         } catch (final Throwable e) {
             throw new IOException(e);
         } finally {
