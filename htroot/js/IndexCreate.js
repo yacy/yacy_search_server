@@ -29,35 +29,48 @@ var AJAX_OFF="env/grafics/empty.gif";
 var AJAX_ON="env/grafics/ajax.gif";
 var timeout="";
 
+/**
+ * @param xmlDoc {XMLDocument} the xml document to use 
+ * @param tagName {string} a XML tag name
+ * @returns {string} the first XML tag node value with the specified tag name, if exist. Else the empty string.
+ */
+function getXMLTagNodeValue(xmlDoc, tagName) {
+	var nodeValue = "";
+	if(xmlDoc != null && tagName != null) {
+        var xmlElements = xmlDoc.getElementsByTagName(tagName);
+        if (xmlElements != null && xmlElements.length > 0 && xmlElements[0].firstChild != null){
+        	nodeValue = xmlElements[0].firstChild.nodeValue;
+	    }
+	}
+	return nodeValue;
+}
+
 function handleResponse(){
     if (http.readyState == 4){
+    	/* Clean the robots status */
+        var robotsOKspan = document.getElementById("robotsOK");
+        if(robotsOKspan != null && robotsOKspan.firstChild){
+	        robotsOKspan.removeChild(robotsOKspan.firstChild);
+        }
+        
         var response = http.responseXML;
 
 		// get the document title
-        var doctitle="";		
-        if (response.getElementsByTagName("title")[0].firstChild!=null){
-	        doctitle=response.getElementsByTagName("title")[0].firstChild.nodeValue;
-	    }
-		//document.getElementById("title").innerHTML=doctitle;
+        var doctitle = getXMLTagNodeValue(response, "title");
+		
 		document.getElementById("bookmarkTitle").value=doctitle;
 		
 		// determine if crawling is allowed by the robots.txt
-        var docrobotsOK="";		
-        if(response.getElementsByTagName("robots")[0].firstChild!=null){
-	        docrobotsOK=response.getElementsByTagName("robots")[0].firstChild.nodeValue;
-	    }
-        var robotsOKspan=document.getElementById("robotsOK");
-        if(robotsOKspan.firstChild){
-	        robotsOKspan.removeChild(robotsOKspan.firstChild);
-        }
-        if (docrobotsOK==1){
+        var docrobotsOK = getXMLTagNodeValue(response, "robots");
+
+        if (docrobotsOK == "1"){
         	var img=document.createElement("img");
         	img.setAttribute("src", "env/grafics/ok.png");
         	img.setAttribute("width", "32px");
         	img.setAttribute("height", "32px");
 			img.setAttribute("alt", "robots.txt - OK");
         	robotsOKspan.appendChild(img);
-        } else if(docrobotsOK==0){
+        } else if(docrobotsOK == "0"){
 			var img=document.createElement("img");
         	img.setAttribute("src", "env/grafics/bad.png");
         	img.setAttribute("width", "32px");
@@ -72,28 +85,18 @@ function handleResponse(){
 		
 		// get the sitemap URL contained in the robots.txt
 		if (document.getElementsByName("sitemapURL").length > 0) {
-			var sitemap="";
-			// there can be zero, one or many sitemaps
-			var sitemapElement = response.getElementsByTagName("sitemap");
-	        if (sitemapElement != null && sitemapElement.length > 0 && sitemapElement[0].firstChild != null) {
-	        	// if there are several, we take only the first
-		        sitemap = sitemapElement[0].firstChild.nodeValue;
-		    }
+			var sitemap = getXMLTagNodeValue(response, "sitemap");
 			document.getElementsByName("sitemapURL")[0].value = sitemap;
 			if (sitemap) document.getElementById("sitemap").disabled = false;
 		}
-		var sitelist="";		
-	    if (response.getElementsByTagName("sitelist")[0].firstChild!=null){
-	    	sitelist=response.getElementsByTagName("sitelist")[0].firstChild.nodeValue;
-		}
+		var sitelist = getXMLTagNodeValue(response, "sitelist");
 		document.getElementById("sitelistURLs").innerHTML = sitelist;
 		var expandButton = document.getElementById("expandSiteListBtn");
 		var siteListRadio = document.getElementById("sitelist");
 		if (sitelist) {
 			siteListRadio.disabled = false;
-			var hasMoreLinksElement = response.getElementsByTagName("hasMoreLinks");
-			if(hasMoreLinksElement != null && hasMoreLinksElement.length > 0 
-					&& hasMoreLinksElement[0].firstChild != null && hasMoreLinksElement[0].firstChild.nodeValue == "true") {
+			var hasMoreLinks = getXMLTagNodeValue(response, "hasMoreLinks");
+			if(hasMoreLinks == "true") {
 				expandButton.style.visibility = "visible";
 				expandButton.disabled = false;
 			} else {
