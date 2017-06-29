@@ -66,6 +66,7 @@ function handleResponse(){
         if (docrobotsOK == "1"){
         	var img=document.createElement("img");
         	img.setAttribute("src", "env/grafics/ok.png");
+        	img.setAttribute("title", "Crawl is allowed by the website robots.txt rules (or no robots.txt file is provided).");
         	img.setAttribute("width", "32px");
         	img.setAttribute("height", "32px");
 			img.setAttribute("alt", "robots.txt - OK");
@@ -73,6 +74,7 @@ function handleResponse(){
         } else if(docrobotsOK == "0"){
 			var img=document.createElement("img");
         	img.setAttribute("src", "env/grafics/bad.png");
+        	img.setAttribute("title", "Crawl is disallowed by the website robots.txt rules.");
         	img.setAttribute("width", "32px");
         	img.setAttribute("height", "32px");
 			img.setAttribute("alt", "robots.txt - Bad");
