@@ -105,6 +105,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.http.auth.YaCyDigestSchemeFactory;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.Memory;
+import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
@@ -392,12 +393,21 @@ public class HTTPClient {
             try {
                 HttpEntity httpEntity = this.httpResponse.getEntity();
                 if (httpEntity != null) {
-                    if (getStatusCode() == 200 && (maxBytes < 0 || httpEntity.getContentLength() < maxBytes)) {
+                    if (getStatusCode() == HttpStatus.SC_OK) {
+            			if (maxBytes >= 0 && httpEntity.getContentLength() > maxBytes) {
+            				/* When anticipated content length is already known and exceed the specified limit : 
+            				 * throw an exception and abort the connection, consistently with getByteArray() implementation 
+            				 * Otherwise returning null and consuming fully the entity can be very long on large resources */
+            				throw new IOException("Content to download exceed maximum value of " + Formatter.bytesToString(maxBytes));
+            			}
                         content = getByteArray(httpEntity, maxBytes);
                     }
                     // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
                     EntityUtils.consume(httpEntity);
                 }
+            } catch (final IOException e) {
+            	httpGet.abort();
+                throw e;
             } finally {
                 this.httpResponse.close();
             }
@@ -835,7 +845,13 @@ public class HTTPClient {
             // get the response body
             final HttpEntity httpEntity = this.httpResponse.getEntity();
             if (httpEntity != null) {
-                if (getStatusCode() == 200 && (maxBytes < 0 || httpEntity.getContentLength() < maxBytes)) {
+                if (getStatusCode() == HttpStatus.SC_OK) {
+        			if (maxBytes >= 0 && httpEntity.getContentLength() > maxBytes) {
+        				/* When anticipated content length is already known and exceed the specified limit : 
+        				 * throw an exception and abort the connection, consistently with getByteArray() implementation 
+        				 * Otherwise returning null and consuming fully the entity can be very long on large resources */
+        				throw new IOException("Content to download exceed maximum value of " + Formatter.bytesToString(maxBytes));
+        			}
                     content = getByteArray(httpEntity, maxBytes);
                 }
                 // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
@@ -937,7 +953,7 @@ public class HTTPClient {
 			 * downloading
 			 */
 			if (contentLength > maxBytes) {
-				throw new IOException("Content to download exceed maximum value of " + maxBytes + " bytes");
+				throw new IOException("Content to download exceed maximum value of " + Formatter.bytesToString(maxBytes));
 			}
 			int initialSize = Math.min(maxBytes, (int) contentLength);
 			/* ContentLenght may be negative because unknown for now */
@@ -952,11 +968,11 @@ public class HTTPClient {
 			while ((l = instream.read(tmp)) != -1) {
 				sum += l;
 				/*
-				 * Check total length while downloading as content lenght might
+				 * Check total length while downloading as content length might
 				 * not be known at beginning
 				 */
 				if (sum > maxBytes) {
-					throw new IOException("Download exceeded maximum value of " + maxBytes + " bytes");
+					throw new IOException("Download exceeded maximum value of " + Formatter.bytesToString(maxBytes));
 				}
 				buffer.append(tmp, 0, l);
 			}
