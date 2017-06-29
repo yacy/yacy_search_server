@@ -113,7 +113,7 @@ public class ImageViewer {
 	 *            image url.
 	 * @return an open input stream instance (don't forget to close it).
 	 * @throws IOException
-	 *             when a read/write error occured. 
+	 *             when a read/write error occurred. 
 	 */
 	public InputStream openInputStream(final serverObjects post, final LoaderDispatcher loader,
 			final boolean auth, DigestURL url) throws IOException {
@@ -123,8 +123,10 @@ public class ImageViewer {
 				String agentName = post.get("agentName", auth ? ClientIdentification.yacyIntranetCrawlerAgentName
 						: ClientIdentification.yacyInternetCrawlerAgentName);
 				ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
+				/* We do not apply here the crawler max file size limit, 
+				 * as the purpose of this stream is not to be parsed and indexed but to be directly rendered */
 				final StreamResponse response = loader.openInputStream(loader.request(url, false, true), CacheStrategy.IFEXIST,
-						BlacklistType.SEARCH, agent);
+						BlacklistType.SEARCH, agent, -1);
 				inStream = response.getContentStream();
 			} catch (final IOException e) {
 				/** No need to log full stack trace (in most cases resource is not available because of a network error) */

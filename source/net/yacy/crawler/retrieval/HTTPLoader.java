@@ -28,6 +28,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.apache.commons.fileupload.util.LimitedInputStream;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 
@@ -45,6 +46,7 @@ import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.Latency;
 import net.yacy.kelondro.io.ByteCount;
+import net.yacy.kelondro.util.Formatter;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -209,7 +211,7 @@ public final class HTTPLoader {
 			 * When content is not large (less than Response.CRAWLER_MAX_SIZE_TO_CACHE), we have better cache it if cache is enabled and url is not local
 			 */
 			long contentLength = client.getHttpResponse().getEntity().getContentLength();
-			final InputStream contentStream;
+			InputStream contentStream;
 			if (profile != null && profile.storeHTCache() && contentLength > 0 && contentLength < (Response.CRAWLER_MAX_SIZE_TO_CACHE) && !url.isLocal()) {
 				byte[] content = null;
 				try {
@@ -224,11 +226,28 @@ public final class HTTPLoader {
 				contentStream = new ByteArrayInputStream(content);
 			} else {
 				/*
+				 * Content length may already be known now : check it before opening a stream
+				 */
+				if (maxFileSize >= 0 && contentLength > maxFileSize) {
+					throw new IOException("Content to download exceed maximum value of " + maxFileSize + " bytes");
+				}
+				/*
 				 * Create a HTTPInputStream delegating to
 				 * client.getContentstream(). Close method will ensure client is
 				 * properly closed.
 				 */
 				contentStream = new HTTPInputStream(client);
+				/* Anticipated content length may not be already known or incorrect : let's apply now the same eventual content size restriction as when loading in a byte array */
+				if(maxFileSize >= 0) {
+					contentStream = new LimitedInputStream(contentStream, maxFileSize) {
+
+						@Override
+						protected void raiseError(long pSizeMax, long pCount) throws IOException {
+							throw new IOException(
+									"Content to download exceed maximum value of " + Formatter.bytesToString(pSizeMax));
+						}
+					};
+				}
 			}
 
 			return new StreamResponse(new Response(request, requestHeader, responseHeader, profile, false, null), contentStream);

@@ -469,12 +469,12 @@ public final class LoaderDispatcher {
      * @param cacheStrategy cache strategy to use
      * @param blacklistType black list
      * @param agent agent identification for HTTP requests
+     * @param maxFileSize max file size to load. -1 means no limit.
      * @return a response with full meta data and embedding on open input stream on content. Don't forget to close the stream.
      * @throws IOException when url is malformed or blacklisted
      */
 	public StreamResponse openInputStream(final Request request, final CacheStrategy cacheStrategy,
-			BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
-		final int maxFileSize = protocolMaxFileSize(request.url());
+			BlacklistType blacklistType, final ClientIdentification.Agent agent, final int maxFileSize) throws IOException {
 		StreamResponse response;
 
 		Semaphore check = this.loaderSteering.get(request.url());
@@ -508,6 +508,21 @@ public final class LoaderDispatcher {
 		}
 
 		return response;
+	}
+    
+    /**
+     * Open the URL as an InputStream from the web or the cache. Apply the default per protocol configured maximum file size limit.
+     * @param request must be not null
+     * @param cacheStrategy cache strategy to use
+     * @param blacklistType black list
+     * @param agent agent identification for HTTP requests
+     * @return a response with full meta data and embedding on open input stream on content. Don't forget to close the stream.
+     * @throws IOException when url is malformed or blacklisted
+     */
+	public StreamResponse openInputStream(final Request request, final CacheStrategy cacheStrategy,
+			BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
+		final int maxFileSize = protocolMaxFileSize(request.url());
+		return this.openInputStream(request, cacheStrategy, blacklistType, agent, maxFileSize);
 	}
 
     public Document[] loadDocuments(final Request request, final CacheStrategy cacheStrategy, final int maxFileSize, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException, Parser.Failure {
@@ -564,7 +579,8 @@ public final class LoaderDispatcher {
      * @return on parsed document or null when an error occurred while parsing
      * @throws IOException when the content can not be fetched or no parser support it
      */
-    public Document loadDocumentAsStream(final DigestURL location, final CacheStrategy cachePolicy, BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
+    public Document loadDocumentAsStream(final DigestURL location, final CacheStrategy cachePolicy, 
+    		BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
         // load resource
         Request request = request(location, true, false);
         final StreamResponse streamResponse = this.openInputStream(request, cachePolicy, blacklistType, agent);
