@@ -21,10 +21,14 @@
 	        <delayIdleLoop>#[idlesleep]#</delayIdleLoop>
 	        <delayBusyLoop>#[busysleep]#</delayBusyLoop>
 	        <minMemory>#[memprereq]#</minMemory>
-	        <minMemory>#[loadprereq]#</minMemory>
+	        <maxLoad>#[loadprereq]#</maxLoad>
 	        <description><![CDATA[#[longdescr]##(recommendation)#::<br/>recommended: #[value]##(/recommendation)#]]></description>
         </Task>
 	#{/table}#</Tasks>
+	<RemoteSearch>
+		<rwiMaxLoad>#[remoteSearchRWIMaxLoad]#</rwiMaxLoad>
+		<solrMaxLoad>#[remoteSearchSolrMaxLoad]#</solrMaxLoad>
+	</RemoteSearch>
 	<Cache>
 		<wordCacheSize>#[wordCacheSize]#</wordCacheSize>
 		<maxURLinCache>#[maxURLinCache]#</maxURLinCache>
