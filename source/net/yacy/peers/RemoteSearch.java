@@ -259,7 +259,11 @@ public class RemoteSearch extends Thread {
         if (!sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
             final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom, start == 0, event.excludeintext_image);
             for (Seed s: robinsonPeers) {
-                if (MemoryControl.shortStatus() || Memory.load() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR, 4.0f)) continue;
+				if (MemoryControl.shortStatus()
+						|| Memory.load() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR,
+								SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR_DEFAULT)) {
+					continue;
+				}
                 Thread t = solrRemoteSearch(event, solrQuery, start, count, s, targets, blacklist);
                 event.nodeSearchThreads.add(t);
             }
@@ -269,7 +273,11 @@ public class RemoteSearch extends Thread {
         if (!sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_OFF, false)) {
             for (Seed dhtPeer: dhtPeers) {
                 if (dhtPeer == null || dhtPeer.hash == null) continue;
-                if (MemoryControl.shortStatus() || Memory.load() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI, 8.0f)) continue;
+				if (MemoryControl.shortStatus()
+						|| Memory.load() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI,
+								SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI_DEFAULT)) {
+					continue;
+				}
                 try {
                     RemoteSearch rs = new RemoteSearch(
                         event,

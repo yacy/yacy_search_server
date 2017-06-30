@@ -251,6 +251,24 @@ public class PerformanceQueues_p {
             sb.setConfig(SwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
             if (rwi != null) rwi.setBufferMaxWordCount(wordCacheMaxCount);
         }
+        
+        /* Setting remote searches max loads */
+        if (post != null) {
+        	if(post.containsKey("setRemoteSearchLoads")) {
+				float loadValue = post.getFloat("remoteSearchRWIMaxLoad",
+						sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI,
+								SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI_DEFAULT));
+				sb.setConfig(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI, loadValue);
+
+				loadValue = post.getFloat("remoteSearchSolrMaxLoad",
+						sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR,
+								SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR_DEFAULT));
+				sb.setConfig(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR, loadValue);
+        	} else if(post.containsKey("defaultRemoteSearchLoads")) {
+        		sb.setConfig(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI, SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI_DEFAULT);
+        		sb.setConfig(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR, SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR_DEFAULT);
+        	}
+        }
 
         if ((post != null) && (post.containsKey("poolConfig"))) {
 
@@ -323,6 +341,12 @@ public class PerformanceQueues_p {
         prop.put("pool_2_numActive", ConnectionInfo.getServerCount());
 
         prop.put("pool", "3");
+        
+        /* Remote searches max loads settings */
+		prop.put("remoteSearchRWIMaxLoad", sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI,
+				SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI_DEFAULT));
+		prop.put("remoteSearchSolrMaxLoad", sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR,
+				SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR_DEFAULT));
 
         // parse initialization memory settings
         final String Xmx = sb.getConfig("javastart_Xmx", "Xmx600m").substring(3);

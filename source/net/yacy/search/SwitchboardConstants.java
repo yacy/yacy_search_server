@@ -298,8 +298,18 @@ public final class SwitchboardConstants {
     public static final String REMOTESEARCH_RESULT_STORE        = "remotesearch.result.store"; // add remote results to local index
     /** Maximum size allowed (in kbytes) for a remote document result to be stored to local index */
     public static final String REMOTESEARCH_RESULT_STORE_MAXSIZE= "remotesearch.result.store.maxsize";
+    
+    /** Setting key to configure the maximum system load allowing remote RWI searches */
     public static final String REMOTESEARCH_MAXLOAD_RWI         = "remotesearch.maxload.rwi";
+    
+    /** Default maximum system load allowing remote RWI searches */
+    public static final float REMOTESEARCH_MAXLOAD_RWI_DEFAULT  = 8.0f;
+    
+    /** Setting key to configure the maximum system load allowing remote Solr searches */
     public static final String REMOTESEARCH_MAXLOAD_SOLR        = "remotesearch.maxload.solr";
+    
+    /** Default maximum system load allowing remote Solr searches */
+    public static final float REMOTESEARCH_MAXLOAD_SOLR_DEFAULT = 4.0f;
     
 	/**
 	 * Setting key to configure whether responses from remote Solr instances

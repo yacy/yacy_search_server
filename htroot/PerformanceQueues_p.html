@@ -71,6 +71,36 @@
   </form>
   
   <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+	<fieldset><legend>Remote search requests:</legend>
+	    <table style="border-width:0px;">
+	      <tr class="TableHeader" style="vertical-align:bottom;">
+	        <th style="padding:0.4em;">Type</th>
+	        <th style="padding:0.4em;" title="When the system load average is over the specified value, that type of remote search request is not used to fill search results.">Maximum system load</th>
+	        <th style="padding:0.4em;">Full Description</th>
+	      </tr>
+	      <tr class="TableCellDark">
+	        <td align="left"><abbr title="Reverse Word Index">RWI</abbr></td>
+	        <td align="right"><input name="remoteSearchRWIMaxLoad" size="7" maxlength="7" value="#[remoteSearchRWIMaxLoad]#"/> load</td>
+	        <td align="left">Search requests performed on remote peers distributed Reverse Word Index</td>
+	      </tr>
+	      <tr class="TableCellDark">
+	        <td align="left">Solr</td>
+	        <td align="right"><input name="remoteSearchSolrMaxLoad" size="7" maxlength="7" value="#[remoteSearchSolrMaxLoad]#"/> load</td>
+	        <td align="left">Search requests performed on remote peers Solr indexes</td>
+	      </tr>
+	      <tr class="TableCellLight">
+	        <td align="left" colspan="19">
+              <input type="submit" name="setRemoteSearchLoads" class="btn btn-sm btn-primary" value="Submit New Values" />
+	          <input type="submit" name="defaultRemoteSearchLoads" class="btn btn-sm btn-primary" value="Re-set to default" />
+	          Changes take effect immediately
+	        </td>
+	      </tr>
+	    </table>
+    </fieldset>
+  </form>
+  
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
       <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
 	  <fieldset><legend>Cache Settings:</legend>
 	    <table border="0">
