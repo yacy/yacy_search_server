@@ -1200,6 +1200,13 @@ public final class SearchEvent {
                 }
             }
 
+            // check modifier constraint (keyword)
+            if (this.query.modifier.keyword != null && !page.dc_subject().toLowerCase().contains(this.query.modifier.keyword.toLowerCase())) {
+                if (log.isFine()) log.fine("dropped RWI: keyword  constraint = " + this.query.modifier.keyword);
+                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                continue;
+            }
+
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page.url())) {
                 if (log.isFine()) log.fine("dropped RWI: url is blacklisted in url blacklist");
