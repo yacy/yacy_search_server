@@ -340,7 +340,9 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         Jetty9YaCySecurityHandler hx = this.server.getChildHandlerByClass(Jetty9YaCySecurityHandler.class);
         if (hx != null) {
             YaCyLoginService loginservice = (YaCyLoginService) hx.getLoginService();
-            loginservice.loadUser(username);
+            if (loginservice.removeUser(username)) { // remove old credential from cache
+                loginservice.loadUserInfo(username);
+            }
         }
     }
 

@@ -25,6 +25,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.data.UserDB.AccessRight;
+import net.yacy.http.Jetty9HttpServerImpl;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
@@ -153,7 +154,8 @@ public class ConfigUser_p {
                 } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                 }
-
+                Jetty9HttpServerImpl jhttpserver = (Jetty9HttpServerImpl) sb.getHttpServer();
+                jhttpserver.resetUser(entry.getUserName());
             } else {
                 prop.put("error", "1");
             }
@@ -163,6 +165,8 @@ public class ConfigUser_p {
             prop.putHTML("username", username);
         } else if (post.containsKey("delete")) {
             sb.userDB.removeEntry(post.get("username"));
+            Jetty9HttpServerImpl jhttpserver = (Jetty9HttpServerImpl) sb.getHttpServer();
+            jhttpserver.removeUser(post.get("username"));
             prop.put(serverObjects.ACTION_LOCATION, "ConfigAccountList_p.html"); // jump back to user list
         }
 

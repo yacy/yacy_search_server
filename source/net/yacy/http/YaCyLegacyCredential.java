@@ -87,7 +87,7 @@ public class YaCyLegacyCredential extends Credential {
             }
 
             // normal users (and new admin pwd) for BASIC auth
-            if (hash.startsWith(MD5.__TYPE) && hash != null) {
+            if (hash.startsWith("MD5:") && hash != null) {
                 boolean success = (Digest.encodeMD5Hex(foruser + ":" + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":" + pw).equals(hash.substring(4)));
                 // exception: allow the hash as pwd (used  in bin/apicall.sh)
                 if (!success && foruser.equals(Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"))) {
