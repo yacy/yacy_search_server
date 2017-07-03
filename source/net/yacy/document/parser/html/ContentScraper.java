@@ -22,7 +22,6 @@ package net.yacy.document.parser.html;
 
 import java.awt.Dimension;
 import java.io.ByteArrayInputStream;
-import java.io.CharArrayReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -78,13 +77,21 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final char[] minuteCharsHTML = "&#039;".toCharArray();
 
     // statics: for initialization of the HTMLFilterAbstractScraper
+    /** Set of tag names processed as singletons (no end tag, or not processing the eventual end tag) */
     private static final Set<String> linkTags0 = new HashSet<String>(12,0.99f);
+    
+    /** Set of tag names processed by pairs of start and end tag */
     private static final Set<String> linkTags1 = new HashSet<String>(15,0.99f);
 
     private static final Pattern LB = Pattern.compile("\n");
 
     public enum TagType {
-        singleton, pair;
+    	/** Tag with no end tag (see https://www.w3.org/TR/html51/syntax.html#void-elements),
+    	 * optional end tag (see https://www.w3.org/TR/html51/syntax.html#optional-tags),
+    	 * or where processing directly only the start tag is desired. */
+        singleton,
+        /** Paired tag : has a start tag and an end tag (https://www.w3.org/TR/html51/syntax.html#normal-elements) */
+        pair;
     }
 
     public enum TagName {
@@ -764,7 +771,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 tag.opts.put("text", stripAllTags(tag.content.getChars())); // strip any inline html in tag text like  "<a ...> <span>test</span> </a>"
                 tag.opts.put("href", url.toNormalform(true)); // we must assign this because the url may have resolved backpaths and may not be absolute
                 url.setAll(tag.opts);
-                recursiveParse(url, tag.content.getChars());
                 this.addAnchor(url);
             }
             this.evaluationScores.match(Element.apath, href);
@@ -864,54 +870,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     @Override
     public void scrapeComment(final char[] comment) {
         this.evaluationScores.match(Element.comment, LB.matcher(new String(comment)).replaceAll(" "));
-    }
-
-    private String recursiveParse(final AnchorURL linkurl, final char[] inlineHtml) {
-        if (inlineHtml.length < 14) return cleanLine(CharacterCoding.html2unicode(stripAllTags(inlineHtml)));
-
-        // start a new scraper to parse links inside this text
-        // parsing the content
-        final ContentScraper scraper = new ContentScraper(this.root, this.maxLinks, this.vocabularyScraper, this.timezoneOffset);
-        final TransformerWriter writer = new TransformerWriter(null, null, scraper, null, false);
-        try {
-            FileUtils.copy(new CharArrayReader(inlineHtml), writer);
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-            return cleanLine(CharacterCoding.html2unicode(stripAllTags(inlineHtml)));
-        } finally {
-            try {
-                writer.close();
-            } catch (final IOException e) {
-            }
-        }
-        for (final AnchorURL entry: scraper.getAnchors()) {
-            this.addAnchor(entry);
-        }
-        String line = cleanLine(CharacterCoding.html2unicode(stripAllTags(scraper.content.getChars())));
-        StringBuilder altakk = new StringBuilder();
-        for (ImageEntry ie: scraper.images) {
-            if (linkurl != null) {
-                if (ie.alt() != null) altakk.append(ie.alt().trim()).append(' ');
-                linkurl.setImageURL(ie.url());
-                AnchorURL a = new AnchorURL(linkurl);
-                a.setTextProperty(line);
-                a.setImageAlt(ie.alt());
-                a.setImageURL(ie.url());
-                ie.setLinkurl(a);
-            }
-            // this image may have been added recently from the same location (as this is a recursive parse)
-            // we want to keep only one of them, check if they are equal
-            if (this.images.size() > 0 && this.images.get(this.images.size() - 1).url().equals(ie.url())) {
-                this.images.remove(this.images.size() - 1);
-            }
-            this.images.add(ie);
-        }
-        if (linkurl != null) {
-            linkurl.setImageAlt(altakk.toString().trim());
-        }
-
-        scraper.close();
-        return line;
     }
 
     public List<String> getTitles() {

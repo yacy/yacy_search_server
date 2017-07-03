@@ -1,5 +1,6 @@
 package net.yacy.document.parser;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -12,8 +13,12 @@ import java.util.Locale;
 
 import junit.framework.TestCase;
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.Parser.Failure;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
@@ -133,6 +138,36 @@ public class htmlParserTest extends TestCase {
         ImageEntry img = scraper.getImages().get(1);
         assertEquals(550,img.width());
     }
+    
+    /**
+     * Test parser resistance against nested anchors pattern 
+     * (<a> tag embedding other <a> tags : invalid HTML, but occasionally encountered in some real-world Internet resources. 
+     * See case reported at http://forum.yacy-websuche.de/viewtopic.php?f=23&t=6005). 
+     * The parser must be able to terminate in a finite time.
+     * @throws IOException when an unexpected error occurred
+     */
+    @Test
+    public void testParseToScraperNestedAnchors() throws IOException {
+        final AnchorURL url = new AnchorURL("http://localhost/");
+        final String charset = StandardCharsets.UTF_8.name();
+        final StringBuilder testHtml = new StringBuilder("<!DOCTYPE html><html><body><p>");
+        /* With prior recursive processing implementation and an average 2017 desktop computer, 
+         * computing time started to be problematic over a nesting depth of 21 */
+        final int nestingDepth = 30;
+        for (int count = 0; count < nestingDepth; count++) {
+        	testHtml.append("<a href=\"http://localhost/doc" + count + ".html\">");
+        }
+        testHtml.append("<img src=\"./img/my_image.png\">");
+        for (int count = 0; count < nestingDepth; count++) {
+        	testHtml.append("</a>");
+        }
+        testHtml.append("</p></body></html>");
+        
+        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testHtml.toString(), 10);
+        assertEquals(nestingDepth, scraper.getAnchors().size());
+        assertEquals(1, scraper.getImages().size());
+
+    }
 
     /**
      * Test of parseToScraper method, of class htmlParser
@@ -162,7 +197,7 @@ public class htmlParserTest extends TestCase {
      * like "<a " see https://github.com/yacy/yacy_search_server/issues/109
      */
     @Test
-    public void testParteToScraper_ScriptTag() throws MalformedURLException, IOException {
+    public void testParseToScraper_ScriptTag() throws MalformedURLException, IOException {
         final AnchorURL url = new AnchorURL("http://localhost/");
         final String charset = StandardCharsets.UTF_8.name();
         final String textSource = "test text";
@@ -184,4 +219,21 @@ public class htmlParserTest extends TestCase {
         System.out.println("ScraperScriptTagTest: [" + textSource + "] = [" + txt + "]");
         assertEquals(txt, textSource);
     }
+    
+	public static void main(String args[]) throws FileNotFoundException, IOException, Failure, InterruptedException {
+		try (BufferedInputStream sourceStream = new BufferedInputStream(new FileInputStream(new File("/home/luc/dev/documents/endless_loop_htmlparser/test.html")));) {
+			Document[] docs = new htmlParser().parse(
+					new DigestURL("http://www.prawo.vulcan.edu.pl/przegdok.asp?qdatprz=12-09-2016&qplikid=2"),
+					"text/html", HeaderFramework.getCharacterEncoding("text/html"), new VocabularyScraper(), 0,
+					sourceStream);
+			if(docs == null || docs.length == 0) {
+				System.out.println("No result");
+				return;
+			}
+			System.out.println("text : " + docs[0].getTextString());
+			System.out.println("anchors.size : " + docs[0].getAnchors().size());
+		} finally {
+			ConcurrentLog.shutdown();
+		}
+	}
 }
