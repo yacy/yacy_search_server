@@ -1,9 +1,7 @@
 package net.yacy.document.parser;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
@@ -13,12 +11,8 @@ import java.util.Locale;
 
 import junit.framework.TestCase;
 import net.yacy.cora.document.id.AnchorURL;
-import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
-import net.yacy.document.Parser.Failure;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
@@ -219,21 +213,4 @@ public class htmlParserTest extends TestCase {
         System.out.println("ScraperScriptTagTest: [" + textSource + "] = [" + txt + "]");
         assertEquals(txt, textSource);
     }
-    
-	public static void main(String args[]) throws FileNotFoundException, IOException, Failure, InterruptedException {
-		try (BufferedInputStream sourceStream = new BufferedInputStream(new FileInputStream(new File("/home/luc/dev/documents/endless_loop_htmlparser/test.html")));) {
-			Document[] docs = new htmlParser().parse(
-					new DigestURL("http://www.prawo.vulcan.edu.pl/przegdok.asp?qdatprz=12-09-2016&qplikid=2"),
-					"text/html", HeaderFramework.getCharacterEncoding("text/html"), new VocabularyScraper(), 0,
-					sourceStream);
-			if(docs == null || docs.length == 0) {
-				System.out.println("No result");
-				return;
-			}
-			System.out.println("text : " + docs[0].getTextString());
-			System.out.println("anchors.size : " + docs[0].getAnchors().size());
-		} finally {
-			ConcurrentLog.shutdown();
-		}
-	}
 }
