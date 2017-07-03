@@ -29,6 +29,9 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -202,7 +205,20 @@ public class ViewFile {
             // TODO: how to handle very large files here ?
             String content;
             try {
-                content = UTF8.String(response.getContent());
+            	String charsetName = response.getCharacterEncoding();
+            	try {
+            		if(charsetName == null) {
+            			/* Encoding is unknown from response headers : default decode using UTF-8 */
+            			charsetName = StandardCharsets.UTF_8.name();
+            		} else if(!Charset.isSupported(charsetName)) {
+            			/* Encoding is known but not supported on this system : default decode using UTF-8 */
+            			charsetName = StandardCharsets.UTF_8.name();
+            		}
+            	} catch(IllegalCharsetNameException e) {
+        			/* Encoding is known but charset name is not valid : default decode using UTF-8 */
+        			charsetName = StandardCharsets.UTF_8.name();        		
+            	}
+            	content = new String(response.getContent(), charsetName);
             } catch (final Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());
