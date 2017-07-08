@@ -374,7 +374,7 @@
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>1.3.2</version>
+            <version>1.3.3</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -492,11 +492,6 @@
             <artifactId>log4j-over-slf4j</artifactId>
             <version>1.7.24</version>
             <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>${solr.version}</version>
         </dependency>        
         <dependency>
             <groupId>com.drewnoakes</groupId>
