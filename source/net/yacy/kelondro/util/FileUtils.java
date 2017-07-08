@@ -377,6 +377,7 @@ public final class FileUtils {
      * Read the specified amount of bytes from a source stream.
      * Important : it is the responsibility of the caller to close the stream.
      * @param source InputStream instance. Must not be null
+     * @param count maximum amount of bytes to read. A negative value means no limit.
      * @return source content as a byte array.
      * @throws IOException when a read/write error occurred
      * @throws NullPointerException when source parameter is null

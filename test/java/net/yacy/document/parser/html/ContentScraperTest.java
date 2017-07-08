@@ -268,6 +268,32 @@ public class ContentScraperTest {
     }
     
     /**
+     * Test absolute URLs detection in plain text with maxURLs parameter
+     * @throws MalformedURLException should not happen
+     */
+    @Test
+    public void testFindAbsoluteURLsMaxURLs() throws MalformedURLException {
+    	final String text = "Some test URLS : http://yacy.net - http://forum.yacy.de - https://en.wikipedia.org";
+    	
+    	/* No limit */
+    	ArrayList<AnchorURL> detectedURLs = new ArrayList<>();
+    	ContentScraper.findAbsoluteURLs(text, detectedURLs, null, Long.MAX_VALUE);
+    	Assert.assertEquals(3, detectedURLs.size());
+    	
+    	/* Test from zero limit, to limit value equals to the total number of URLs in text */
+    	for(int limit = 0; limit <=3; limit++) {
+    		detectedURLs = new ArrayList<>();
+    		ContentScraper.findAbsoluteURLs(text, detectedURLs, null, limit);
+    		Assert.assertEquals(limit, detectedURLs.size());
+    	}
+    	
+    	/* Limit greater than total number of URLs in text */
+    	detectedURLs = new ArrayList<>();
+    	ContentScraper.findAbsoluteURLs(text, detectedURLs, null, 4);
+    	Assert.assertEquals(3, detectedURLs.size());
+    }
+    
+    /**
      * Test unpaired brackets cleaning
      */
     @Test

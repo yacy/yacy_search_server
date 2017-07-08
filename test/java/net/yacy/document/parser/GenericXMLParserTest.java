@@ -25,6 +25,7 @@ package net.yacy.document.parser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -357,6 +358,104 @@ public class GenericXMLParserTest {
 		} finally {
 			inStream.close();
 		}		
+	}
+	
+	/**
+	 * Test URLs detection when applying limits.
+	 * 
+	 * @throws Exception
+	 *             when an unexpected error occurred
+	 */
+	@Test
+	public void testParseWithLimits() throws Exception {
+		String xhtml = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+				+ "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
+				+ "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + "<head>"
+				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"
+				+ "<title>XHTML content URLs test</title>" + "</head>" + "<body>" + "<p>Here are some YaCy URLs: "
+				+ "Home page : http://yacy.net - International Forum : "
+				+ "http://forum.yacy.de "
+				+ "and this is a mention to a relative URL : /document.html</p>"
+				+ "<p>Here are YaCy<a href=\"http://mantis.tokeek.de\">bug tracker</a> and <a href=\"http://www.yacy-websearch.net/wiki/\">Wiki</a>."
+				+ "And this is a relative link to another <a href=\"/document2.html\">sub document</a></p>"
+				+ "</body>" + "</html>";
+
+		/* Content within limits */
+		InputStream inStream = new ByteArrayInputStream(xhtml.getBytes(StandardCharsets.UTF_8.name()));
+		final String contentTypeHeader = "text/xhtml";
+		String charsetFromHttpHeader = HeaderFramework.getCharacterEncoding(contentTypeHeader);
+		DigestURL location = new DigestURL("http://localhost/testfile.xml");
+		try {
+			Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader, new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, Long.MAX_VALUE);
+			assertEquals(1, documents.length);
+			assertFalse(documents[0].isPartiallyParsed());
+			
+			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
+			assertNotNull(detectedAnchors);
+			assertEquals(5, detectedAnchors.size());
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://yacy.net")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://forum.yacy.de")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://mantis.tokeek.de")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.yacy-websearch.net/wiki/")));
+		} finally {
+			inStream.close();
+		}
+		
+		/* Links limit exceeded */
+		inStream = new ByteArrayInputStream(xhtml.getBytes(StandardCharsets.UTF_8.name()));
+		try {
+			Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader,
+					new VocabularyScraper(), 0, inStream, 2, Long.MAX_VALUE);
+			assertEquals(1, documents.length);
+			assertTrue(documents[0].isPartiallyParsed());
+			
+			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
+			assertNotNull(detectedAnchors);
+			assertEquals(2, detectedAnchors.size());
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://yacy.net")));
+		} finally {
+			inStream.close();
+		}
+		
+		/* Bytes limit exceeded */
+		StringBuilder xhtmlBuilder = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>")
+				.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">")
+				.append("<html xmlns=\"http://www.w3.org/1999/xhtml\">")
+				.append("<head>")
+				.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />")
+				.append("<title>XHTML content URLs test</title>")
+				.append("</head>")
+				.append("<body><p>Here are some YaCy URLs: ")
+				.append("Home page : http://yacy.net - International Forum : ")
+				.append("http://forum.yacy.de ")
+				.append("and this is a mention to a relative URL : /document.html</p>");
+		
+		/* Add some filler text to reach a total size beyond SAX parser internal input stream buffers */
+		while(xhtmlBuilder.length() < 1024 * 10) {
+			xhtmlBuilder.append("<p>Some text to parse</p>");
+		}
+		
+		int firstBytes = xhtmlBuilder.toString().getBytes(StandardCharsets.UTF_8.name()).length;
+		xhtmlBuilder.append("<p>Here are YaCy<a href=\"http://mantis.tokeek.de\">bug tracker</a> and <a href=\"http://www.yacy-websearch.net/wiki/\">Wiki</a>.")
+			.append("And this is a relative link to another <a href=\"/document2.html\">sub document</a></p>")
+			.append("</body></html>");
+		inStream = new ByteArrayInputStream(xhtmlBuilder.toString().getBytes(StandardCharsets.UTF_8.name()));
+		try {
+			Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader, new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, firstBytes);
+			assertEquals(1, documents.length);
+			assertTrue(documents[0].isPartiallyParsed());
+			
+			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
+			assertNotNull(detectedAnchors);
+			assertEquals(3, detectedAnchors.size());
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://yacy.net")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("http://forum.yacy.de")));
+		} finally {
+			inStream.close();
+		}
 	}
 
 }

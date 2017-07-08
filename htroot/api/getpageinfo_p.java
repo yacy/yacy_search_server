@@ -87,7 +87,8 @@ public class getpageinfo_p {
 	 *            	</ul>
 	 *            </li>
 	 *            <li>agentName (optional) : the string identifying the agent used to fetch the resource. Example : "YaCy Internet (cautious)"</li>
-	 *            <li>maxLinks (optional) : the maximum number of links, sitemap URLs or icons to return</li>
+	 *            <li>maxLinks (optional integer value) : the maximum number of links, sitemap URLs or icons to return on 'title' action</li>
+	 *            <li>maxBytes (optional long integer value) : the maximum number of bytes to load and parse from the url on 'title' action</li>
 	 *            </ul>
 	 * @param env
 	 *            server environment
@@ -139,7 +140,17 @@ public class getpageinfo_p {
                 net.yacy.document.Document scraper = null;
                 if (u != null) try {
                     ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
-                    scraper = sb.loader.loadDocumentAsStream(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, agent);
+                	
+                	if(post.containsKey("maxBytes")) {
+                		/* A maxBytes limit is specified : let's try to parse only the amount of bytes given */
+                    	final long maxBytes = post.getLong("maxBytes", sb.loader.protocolMaxFileSize(u));
+                        scraper = sb.loader.loadDocumentAsLimitedStream(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, agent, maxLinks, maxBytes);
+                	} else {
+                		/* No maxBytes limit : apply regular parsing with default crawler limits. 
+                		 * Eventual maxLinks limit will apply after loading and parsing the document. */
+                		scraper = sb.loader.loadDocumentAsStream(u, CacheStrategy.IFEXIST, BlacklistType.CRAWLER, agent);
+                	}
+
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                     // bad things are possible, i.e. that the Server responds with "403 Bad Behavior"
@@ -151,7 +162,7 @@ public class getpageinfo_p {
 
                     // put the icons that belong to the document
                     Set<DigestURL> iconURLs = scraper.getIcons().keySet();
-                    int count = 0;
+                    long count = 0;
                     for (DigestURL iconURL : iconURLs) {
                         if(count >= maxLinks) {
                         	break;
@@ -199,7 +210,7 @@ public class getpageinfo_p {
                         count++;
                     }
                     prop.put("links", count);
-                   	prop.put("hasMoreLinks", (count >= maxLinks && urisIt.hasNext()) ? "1" : "0");
+                   	prop.put("hasMoreLinks", scraper.isPartiallyParsed() || (count >= maxLinks && urisIt.hasNext()) ? "1" : "0");
                     prop.putXML("sitelist", links.length() > 0 ? links.substring(1) : "");
                     prop.putXML("filter", filter.length() > 0 ? filter.substring(1) : ".*");
                 }

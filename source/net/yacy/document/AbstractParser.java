@@ -23,12 +23,14 @@
 
 package net.yacy.document;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 
 public abstract class AbstractParser implements Parser {
@@ -98,5 +100,20 @@ public abstract class AbstractParser implements Parser {
         if (t != null) c.add(t);
         return c;
     }
+    
+    @Override
+    public Document[] parseWithLimits(DigestURL url, String mimeType, String charset, VocabularyScraper scraper,
+    		int timezoneOffset, InputStream source, int maxLinks, long maxBytes)
+    		throws Failure, InterruptedException, UnsupportedOperationException {
+    	/* Please override on subclasses when implementation is possible */
+    	throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public boolean isParseWithLimitsSupported() {
+    	/* Please override on subclasses when parseWithLimits is supported */
+    	return false;
+    }
+    
 
 }

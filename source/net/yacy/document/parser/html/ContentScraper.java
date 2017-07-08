@@ -375,14 +375,16 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final static Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
     
     /**
-     * Try to detect and parse absolute URLs in text, then update the urls collection and fire anchorAdded event on listeners. Any parameter are can be null. 
+     * Try to detect and parse absolute URLs in text (at most maxURLs) , then update the urls collection and fire anchorAdded event on listeners. Any parameter can be null. 
      * @param text the text to parse
      * @param urls a mutable collection of URLs to fill.
      * @param listeners a collection of listeners to trigger.
+     * @param maxURLs maximum URLs number to add to the urls collection. Be careful with urls collection capacity when this collection is not null and maxURLs value is beyond Integer.MAX_VALUE.
+     * @return the number of well formed URLs detected
      */
-    public static void findAbsoluteURLs(final String text, final Collection<AnchorURL> urls, final Collection<ContentScraperListener> listeners) {
+    public static long findAbsoluteURLs(final String text, final Collection<AnchorURL> urls, final Collection<ContentScraperListener> listeners, final long maxURLs) {
         if(text == null) {
-        	return;
+        	return 0;
         }
         int schemePosition, offset = 0;
         boolean hasWhiteSpace;
@@ -391,8 +393,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         final Matcher urlSchemeMatcher = protp.matcher(text);
         final Matcher whiteSpaceMatcher = WHITESPACE_PATTERN.matcher(text);
         
-        
-        while (offset < text.length()) {
+        long detectedURLsCount = 0;
+        while (offset < text.length() && detectedURLsCount < maxURLs) {
             if(!urlSchemeMatcher.find(offset)) {
             	break;
             }
@@ -413,6 +415,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             offset = schemePosition + urlString.length();
             try {
             	url = new AnchorURL(urlString);
+            	detectedURLsCount++;
             	if(urls != null) {
             		urls.add(url);
             	}
@@ -423,6 +426,17 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             	}
             } catch (final MalformedURLException ignored) {}
         }
+        return detectedURLsCount;
+    }
+    
+    /**
+     * Try to detect and parse absolute URLs in text, then update the urls collection and fire anchorAdded event on listeners. Any parameter can be null. 
+     * @param text the text to parse
+     * @param urls a mutable collection of URLs to fill.
+     * @param listeners a collection of listeners to trigger.
+     */
+    public static void findAbsoluteURLs(final String text, final Collection<AnchorURL> urls, final Collection<ContentScraperListener> listeners) {
+    	findAbsoluteURLs(text, urls, listeners, Long.MAX_VALUE);
     }
 
 	/**

@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.fileupload.util.LimitedInputStream;
+
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -228,12 +230,12 @@ public final class TextParser {
         }
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
 
-        Document[] docs = parseSource(location, mimeType, idioms, charset, scraper, timezoneOffset, depth, content);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE);
 
         return docs;
     }
-
-    public static Document[] parseSource(
+    
+    private static Document[] parseSource(
             final DigestURL location,
             String mimeType,
             final String charset,
@@ -241,7 +243,9 @@ public final class TextParser {
             final int timezoneOffset,
             final int depth,
             final long contentLength,
-            final InputStream sourceStream
+            final InputStream sourceStream,
+            final int maxLinks,
+            final long maxBytes
         ) throws Parser.Failure {
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing '" + location + "' from stream");
         mimeType = normalizeMimeType(mimeType);
@@ -283,22 +287,79 @@ public final class TextParser {
         // then we use only one stream-oriented parser.
         if (canStream || contentLength > Integer.MAX_VALUE || contentLength > MemoryControl.available()) {
             // use a specific stream-oriented parser
-            return parseSource(location, mimeType, streamParser, charset, scraper, timezoneOffset, sourceStream);
+            return parseSource(location, mimeType, streamParser, charset, scraper, timezoneOffset, sourceStream, maxLinks, maxBytes);
         }
 
         // in case that we know more parsers we first transform the content into a byte[] and use that as base
         // for a number of different parse attempts.
+        
+        /* Content length may be known from headers : check it now */
+        if(contentLength >= 0 && contentLength > maxBytes) {
+        	throw new Parser.Failure("Content size is over maximum size of " + maxBytes + "", location);
+        }
         byte[] b = null;
         try {
             b = FileUtils.read(sourceStream, (int) contentLength);
+            
+            /* Check content size now if contentLength was unknown */
+            if(contentLength < 0) {
+            	if(b.length > maxBytes) {
+            		throw new Parser.Failure("Content size is over maximum size of " + maxBytes + "", location);		
+            	}
+            }
         } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
-        Document[] docs = parseSource(location, mimeType, idioms, charset, scraper, timezoneOffset, depth, b);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, scraper, timezoneOffset, depth, b, maxLinks, maxBytes);
 
         return docs;
     }
 
+	public static Document[] parseSource(final DigestURL location, String mimeType, final String charset,
+			final VocabularyScraper scraper, final int timezoneOffset, final int depth, final long contentLength,
+			final InputStream sourceStream) throws Parser.Failure {
+		return parseSource(location, mimeType, charset, scraper, timezoneOffset, depth, contentLength, sourceStream,
+				Integer.MAX_VALUE, Long.MAX_VALUE);
+	}
+    
+    /**
+     * Try to limit the parser processing with a maximum total number of links detection (anchors, images links, media links...) 
+     * or a maximum amount of content bytes to parse. Limits apply only when the available parsers for the resource media type support parsing within limits
+     * (see {@link Parser#isParseWithLimitsSupported()}. When available parsers do
+	 * not support parsing within limits, an exception is thrown when
+	 * content size is beyond maxBytes.
+     * @param location the URL of the source
+     * @param mimeType the mime type of the source, if known
+     * @param charset the charset name of the source, if known
+     * @param timezoneOffset the local time zone offset
+     * @param contentLength the length of the source, if known (else -1 should be used)
+     * @param source a input stream
+     * @param maxLinks the maximum total number of links to parse and add to the result documents
+     * @param maxBytes the maximum number of content bytes to process
+     * @return a list of documents that result from parsing the source, with empty or null text.
+     * @throws Parser.Failure when the parser processing failed
+     */
+	public static Document[] parseWithLimits(final DigestURL location, String mimeType, final String charset,
+			final int timezoneOffset, final long contentLength, final InputStream sourceStream, int maxLinks,
+			long maxBytes) throws Parser.Failure{
+		return parseSource(location, mimeType, charset, new VocabularyScraper(), timezoneOffset, 0, contentLength,
+				sourceStream, maxLinks, maxBytes);
+	}
+    
+    /**
+     * 
+     * @param location the URL of the source
+     * @param mimeType the mime type of the source, if known
+     * @param parser a parser supporting the resource at location
+     * @param charset the charset name of the source, if known
+     * @param scraper a vocabulary scraper
+     * @param timezoneOffset the local time zone offset
+     * @param sourceStream an open input stream on the source
+     * @param maxLinks the maximum total number of links to parse and add to the result documents
+     * @param maxBytes the maximum number of content bytes to process
+     * @return a list of documents that result from parsing the source
+     * @throws Parser.Failure when the source could not be parsed
+     */
     private static Document[] parseSource(
             final DigestURL location,
             final String mimeType,
@@ -306,7 +367,9 @@ public final class TextParser {
             final String charset,
             final VocabularyScraper scraper,
             final int timezoneOffset,
-            final InputStream sourceStream
+            final InputStream sourceStream,
+            final int maxLinks,
+            final long maxBytes
         ) throws Parser.Failure {
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing '" + location + "' from stream");
         final String fileExt = MultiProtocolURL.getFileExtension(location.getFileName());
@@ -315,13 +378,41 @@ public final class TextParser {
 
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
         try {
-            final Document[] docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, sourceStream);
+            final Document[] docs;
+            if(parser.isParseWithLimitsSupported()) {
+            	docs = parser.parseWithLimits(location, mimeType, documentCharset, scraper, timezoneOffset, sourceStream, maxLinks, maxBytes);
+            } else {
+            	/* Parser do not support partial parsing within limits : let's control it here*/
+    			InputStream limitedSource = new LimitedInputStream(sourceStream, maxBytes) {
+    				
+    				@Override
+    				protected void raiseError(long pSizeMax, long pCount) throws IOException {
+    					throw new IOException("Reached maximum bytes to parse : " + maxBytes);
+    					
+    				}
+    			};
+            	docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, limitedSource);
+            }
             return docs;
         } catch (final Exception e) {
             throw new Parser.Failure("parser failed: " + parser.getName(), location);
         }
     }
 
+    /**
+     * @param location the URL of the source
+     * @param mimeType the mime type of the source, if known
+     * @param parsers a set of parsers supporting the resource at location
+     * @param charset the charset name of the source, if known
+     * @param scraper a vocabulary scraper
+     * @param timezoneOffset the local time zone offset
+     * @param depth the current crawling depth
+     * @param sourceArray the resource content bytes
+     * @param maxLinks the maximum total number of links to parse and add to the result documents
+     * @param maxBytes the maximum number of content bytes to process
+     * @return a list of documents that result from parsing the source
+     * @throws Parser.Failure when the source could not be parsed
+     */
     private static Document[] parseSource(
             final DigestURL location,
             final String mimeType,
@@ -330,7 +421,9 @@ public final class TextParser {
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
-            final byte[] sourceArray
+            final byte[] sourceArray,
+            final int maxLinks,
+            final long maxBytes
         ) throws Parser.Failure {
         final String fileExt = MultiProtocolURL.getFileExtension(location.getFileName());
         if (AbstractParser.log.isFine()) AbstractParser.log.fine("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "' from byte[]");
@@ -351,7 +444,11 @@ public final class TextParser {
             	    bis = new ByteArrayInputStream(sourceArray);
             	}
                 try {
-                    docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, bis);
+                	if(parser.isParseWithLimitsSupported()) {
+                		docs = parser.parseWithLimits(location, mimeType, documentCharset, scraper, timezoneOffset, bis, maxLinks, maxBytes);
+                	} else {
+                		docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, bis);
+                	}
                 } catch (final Parser.Failure e) {
                     failedParser.put(parser, e);
                     //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);

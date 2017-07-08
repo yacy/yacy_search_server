@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
 
+import javax.naming.SizeLimitExceededException;
+
 import org.apache.commons.io.input.ClosedInputStream;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -51,6 +53,12 @@ public class GenericXMLContentHandler extends DefaultHandler {
 	/** Detected URLs */
 	private final Collection<AnchorURL> urls;
 	
+	/** Maximum number of URLs to parse */
+	private final int maxURLs;
+	
+	/** Number of parsed URLs in the document */
+	private long detectedURLs;
+	
 	/** Text of the currently parsed element. May not contain the whole text when the element has nested elements embedded in its own text */
 	private StringBuilder currentElementText;
 	
@@ -62,7 +70,7 @@ public class GenericXMLContentHandler extends DefaultHandler {
 	
 	/** Set to false until some text is detected in at least one element of the document */
 	private boolean documentHasText;
-
+	
 	/**
 	 * @param out
 	 *            the output writer to write extracted text. Must not be null.
@@ -71,6 +79,18 @@ public class GenericXMLContentHandler extends DefaultHandler {
 	 *             when out is null
 	 */
 	public GenericXMLContentHandler(final Writer out, final Collection<AnchorURL> urls) throws IllegalArgumentException {
+		this(out, urls, Integer.MAX_VALUE);
+	}
+	
+	/**
+	 * @param out
+	 *            the output writer to write extracted text. Must not be null.
+	 * @param urls the mutable collection of URLs to fill with detected URLs
+	 * @param maxURLs the maximum number of urls to parse
+	 * @throws IllegalArgumentException
+	 *             when out is null
+	 */
+	public GenericXMLContentHandler(final Writer out, final Collection<AnchorURL> urls, final int maxURLs) throws IllegalArgumentException {
 		if (out == null) {
 			throw new IllegalArgumentException("out writer must not be null");
 		}
@@ -79,6 +99,8 @@ public class GenericXMLContentHandler extends DefaultHandler {
 		}
 		this.out = out;
 		this.urls = urls;
+		this.maxURLs = maxURLs;
+		this.detectedURLs = 0;
 	}
 
 	/**
@@ -96,10 +118,12 @@ public class GenericXMLContentHandler extends DefaultHandler {
 		this.lastAppendedIsSpace = false;
 		this.currentElementTextChunks = 0;
 		this.documentHasText = false;
+		this.detectedURLs = 0;
 	}
 
 	/**
 	 * Try to detect URLs eventually contained in attributes
+	 * @throws SAXException when the calling parser reached the maximum bytes limit on the input source
 	 */
 	@Override
 	public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
@@ -109,19 +133,25 @@ public class GenericXMLContentHandler extends DefaultHandler {
 		if (attributes != null) {
 			for (int i = 0; i < attributes.getLength(); i++) {
 				String attribute = attributes.getValue(i);
-				ContentScraper.findAbsoluteURLs(attribute, this.urls, null);
+				this.detectedURLs += ContentScraper.findAbsoluteURLs(attribute, this.urls, null, this.maxURLs - this.detectedURLs);
+				if (this.detectedURLs >= this.maxURLs) {
+					throw new SAXException(
+							new SizeLimitExceededException("Reached maximum URLs to parse : " + this.maxURLs));
+				}
 			}
 		}
 	}
-
+	
 	/**
 	 * Write characters to the output writer
+	 * @throws SAXException when the calling parser reached the maximum bytes limit on the input source
 	 */
 	@Override
-	public void characters(final char ch[], final int start, final int length) {
+	public void characters(final char ch[], final int start, final int length) throws SAXException {
 		try {
 			if(this.currentElementTextChunks == 0 && this.documentHasText) {
-				/* We are on the first text chunk of the element, or the first text chunk after processing nested elements : 
+				/* We are but on the first text chunk of the element (not on the first text chunk of the whole document), 
+				 * or on the first text chunk after processing nested elements : 
 				 * if necessary we add a space to separate text content of different elements */
 				if(length > 0 && !this.lastAppendedIsSpace && !Character.isWhitespace(ch[0])) {
 					this.out.write(" ");
@@ -137,8 +167,8 @@ public class GenericXMLContentHandler extends DefaultHandler {
 				this.documentHasText = true;
 				this.lastAppendedIsSpace = Character.isWhitespace(ch[length - 1]);
 			}
-		} catch (final IOException e) {
-			ConcurrentLog.logException(e);
+		} catch (final IOException ignored) {
+			ConcurrentLog.logException(ignored);
 		}
 	}
 
@@ -148,7 +178,10 @@ public class GenericXMLContentHandler extends DefaultHandler {
 	 */
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
-		ContentScraper.findAbsoluteURLs(this.currentElementText.toString(), urls, null);
+		this.detectedURLs += ContentScraper.findAbsoluteURLs(this.currentElementText.toString(), this.urls, null, this.maxURLs - this.detectedURLs);
+		if (this.detectedURLs >= this.maxURLs) {
+			throw new SAXException(new SizeLimitExceededException("Reached maximum URLs to parse : " + this.maxURLs));
+		}
 		this.currentElementText.setLength(0);
 		this.currentElementTextChunks = 0;
 	}
@@ -158,5 +191,5 @@ public class GenericXMLContentHandler extends DefaultHandler {
 		/* Release the StringBuilder now useless */
 		this.currentElementText = null;
 	}
-
+	
 }

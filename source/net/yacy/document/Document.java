@@ -99,6 +99,9 @@ public class Document {
     private final Map<String, Set<String>> generic_facets; // a map from vocabulary names to the set of tags for that vocabulary which apply for this document
     private final Date lastModified; // creation or last modification date of the source document
     private int crawldepth;
+    
+    /** True when this document is the result of a partially parsed resource, for example due to resource content size exceeding a given limit */
+    private boolean partiallyParsed;
 
     public Document(final DigestURL location, final String mimeType, final String charset,
                     final Parser parserObject,
@@ -152,6 +155,7 @@ public class Document {
         this.lastModified = lastModified == null ? new Date() : lastModified;
         this.crawldepth = 999; // unknown yet
         this.scraperObject = null; // will be set by setScraperObject()
+        this.partiallyParsed = false;
     }
 
     /**
@@ -211,6 +215,20 @@ public class Document {
     public Map<String, Set<String>> getGenericFacets() {
         return this.generic_facets;
     }
+    
+    /**
+     * @return true when this document is the result of a partially parsed resource, for example due to resource content size exceeding a given limit
+     */
+    public boolean isPartiallyParsed() {
+		return this.partiallyParsed;
+	}
+    
+    /**
+     * @param partiallyParsed set to true to indicates this document is the result of a partially parsed resource, for example due to resource content size exceeding a given limit
+     */
+    public void setPartiallyParsed(final boolean partiallyParsed) {
+		this.partiallyParsed = partiallyParsed;
+	}
     
     /**
      * compute a set of languages that this document contains

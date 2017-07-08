@@ -116,5 +116,55 @@ public class StreamResponse {
 		}
 
 	}
+	
+	/**
+	 * Parse and close the content stream and return the parsed documents when
+	 * possible.<br>
+	 * Try to limit the parser processing with a maximum total number of links
+	 * detection (anchors, images links, media links...) or a maximum amount of
+	 * content bytes to parse.<br>
+	 * Limits apply only when the available parsers for the resource media type
+	 * support parsing within limits (see
+	 * {@link Parser#isParseWithLimitsSupported()}. When available parsers do
+	 * not support parsing within limits, an exception is thrown when
+	 * content size is beyond maxBytes.
+	 * 
+	 * @param maxLinks
+	 *            the maximum total number of links to parse and add to the
+	 *            result documents
+	 * @param maxBytes
+	 *            the maximum number of content bytes to process
+	 * @return the parsed documents or null when an error occurred
+	 * @throws Parser.Failure
+	 *             when no parser support the content, or an error occurred while parsing
+	 */
+	public Document[] parseWithLimits(final int maxLinks, final long maxBytes) throws Parser.Failure {
+		final String supportError = TextParser.supports(this.response.url(),
+				this.response.getResponseHeader() == null ? null : this.response.getResponseHeader().getContentType());
+		if (supportError != null) {
+			throw new Parser.Failure("no parser support:" + supportError, this.response.url());
+		}
+		try {
+			final String mimeType = this.response.getResponseHeader() == null ? null
+					: this.response.getResponseHeader().getContentType();
+			final String charsetName = this.response.getResponseHeader() == null ? StandardCharsets.UTF_8.name()
+					: this.response.getResponseHeader().getCharacterEncoding();
+			
+			return TextParser.parseWithLimits(this.response.url(), mimeType, charsetName,
+					this.response.getRequest().timezoneOffset(), this.response.size(), this.contentStream, maxLinks,
+					maxBytes);
+		} catch (final Exception e) {
+			return null;
+		} finally {
+			if (this.contentStream != null) {
+				try {
+					this.contentStream.close();
+				} catch (IOException ignored) {
+					log.warn("Could not close content stream on url " + this.response.url());
+				}
+			}
+		}
+
+	}
 
 }

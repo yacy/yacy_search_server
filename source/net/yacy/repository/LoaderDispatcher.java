@@ -439,7 +439,11 @@ public final class LoaderDispatcher {
 		}
 	}
 
-    private int protocolMaxFileSize(final DigestURL url) {
+	/**
+	 * @param url the URL of a resource to load
+	 * @return the crawler configured maximum size allowed to load for the protocol of the URL 
+	 */
+    public int protocolMaxFileSize(final DigestURL url) {
     	if (url.isHTTP() || url.isHTTPS())
     		return this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
     	if (url.isFTP())
@@ -583,7 +587,7 @@ public final class LoaderDispatcher {
      * @throws IOException when the content can not be fetched or no parser support it
      */
     public Document loadDocumentAsStream(final DigestURL location, final CacheStrategy cachePolicy, 
-    		BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
+    		final BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
         // load resource
         Request request = request(location, true, false);
         final StreamResponse streamResponse = this.openInputStream(request, cachePolicy, blacklistType, agent);
@@ -599,6 +603,65 @@ public final class LoaderDispatcher {
         // parse resource
         try {
             Document[] documents = streamResponse.parse();
+            Document merged = Document.mergeDocuments(location, response.getMimeType(), documents);
+            
+            String x_robots_tag = response.getResponseHeader().getXRobotsTag();
+            if (x_robots_tag.indexOf("noindex",0) >= 0) {
+            	merged.setIndexingDenied(true);
+            }
+            
+            return merged;
+        } catch(final Parser.Failure e) {
+            throw new IOException(e.getMessage());
+        }
+    }
+    
+    /**
+	 * Similar to the loadDocument method, but streaming the resource content
+	 * when possible instead of fully loading it in memory.<br>
+	 * Also try to limit the parser processing with a maximum total number of
+	 * links detection (anchors, images links, media links...) or a maximum
+	 * amount of content bytes to parse.<br>
+	 * Limits apply only when the available parsers for the resource media type
+	 * support parsing within limits (see
+	 * {@link Parser#isParseWithLimitsSupported()}. When available parsers do
+	 * not support parsing within limits, an exception is thrown when
+	 * content size is beyond maxBytes.
+	 * 
+	 * @param location
+	 *            URL of the resource to load
+	 * @param cachePolicy
+	 *            cache policy strategy
+	 * @param blacklistType
+	 *            blacklist to use
+	 * @param agent
+	 *            user agent identifier
+	 * @param maxLinks
+	 *            the maximum total number of links to parse and add to the
+	 *            result document
+	 * @param maxBytes
+	 *            the maximum number of content bytes to process
+	 * @return on parsed document or null when an error occurred while parsing
+	 * @throws IOException
+	 *             when the content can not be fetched or no parser support it
+	 */
+    public Document loadDocumentAsLimitedStream(final DigestURL location, final CacheStrategy cachePolicy, 
+    		final BlacklistType blacklistType, final ClientIdentification.Agent agent, final int maxLinks, final long maxBytes) throws IOException {
+        // load resource
+        Request request = request(location, true, false);
+        final StreamResponse streamResponse = this.openInputStream(request, cachePolicy, blacklistType, agent, -1);
+        final Response response = streamResponse.getResponse();
+        final DigestURL url = request.url();
+        if (response == null) throw new IOException("no Response for url " + url);
+
+        // if it is still not available, report an error
+        if (streamResponse.getContentStream() == null || response.getResponseHeader() == null) {
+        	throw new IOException("no Content available for url " + url);
+        }
+
+        // parse resource
+        try {
+            Document[] documents = streamResponse.parseWithLimits(maxLinks, maxBytes);
             Document merged = Document.mergeDocuments(location, response.getMimeType(), documents);
             
             String x_robots_tag = response.getResponseHeader().getXRobotsTag();
