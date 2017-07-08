@@ -62,6 +62,11 @@ public class share {
         // push mode: this does a document upload
         prop.put("mode", 1);
         prop.put("mode_success", 0);
+        // init display variable for mode=1
+        prop.put("mode_countsuccess", 0);
+        prop.put("mode_countfail", 0);
+        prop.put("mode_item", "");
+        
         if (post == null) return prop;
         
         // check file name
