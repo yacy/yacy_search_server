@@ -9,7 +9,7 @@
 }
 
 /* Sidebar */ 
-#ymarks_body div.sidebar {     
+#ymarks_body div.ymark-sidebar {     
   width:250px;
   float:right; 
   margin-right: 10px;
