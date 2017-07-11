@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.fileupload.util.LimitedInputStream;
+
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -48,6 +50,9 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 
 public class FileLoader {
+	
+	/** Default maximum file size allowed for the crawler */
+    public static final int DEFAULT_MAXFILESIZE = 100000000;
 
     private final Switchboard sb;
     private final ConcurrentLog log;
@@ -56,7 +61,7 @@ public class FileLoader {
     public FileLoader(final Switchboard sb, final ConcurrentLog log) {
         this.sb = sb;
         this.log = log;
-        this.maxFileSize = (int) sb.getConfigLong("crawler.file.maxFileSize", -1l);
+        this.maxFileSize = sb.getConfigInt("crawler.file.maxFileSize", DEFAULT_MAXFILESIZE);
     }
 
     /**
@@ -77,13 +82,14 @@ public class FileLoader {
     }
     
     /**
-     * Open a stream on the requested file
+     * Open a stream on the requested file. When actual file size is over maxBytes, return a stream on metadata only (URL tokens).
      *
      * @param request the request to process
      * @param acceptOnlyParseable when true and no parser can be found to handle the detected MIME type, open a stream on the URL tokens
+     * @param maxBytes max file size to load. -1 means no limit.
      * @return a response with full meta data and embedding on open input stream on content. Don't forget to close the stream.
      */
-    public StreamResponse openInputStream(final Request request, final boolean acceptOnlyParseable) throws IOException {
+    public StreamResponse openInputStream(final Request request, final boolean acceptOnlyParseable, final int maxBytes) throws IOException {
         DigestURL url = request.url();
         if (!url.getProtocol().equals("file")) throw new IOException("wrong protocol for FileLoader: " + url.getProtocol());
 
@@ -134,12 +140,13 @@ public class FileLoader {
         long size;
         try {
             size = url.length();
+            responseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(size));
         } catch (final Exception e) {
             size = -1;
         }
         String parserError = null;
         if ((acceptOnlyParseable && (parserError = TextParser.supports(url, mime)) != null) ||
-            (size > this.maxFileSize && this.maxFileSize >= 0)) {
+            (size > maxBytes && maxBytes >= 0)) {
             // we know that we cannot process that file before loading
             // only the metadata is returned
 
@@ -163,9 +170,21 @@ public class FileLoader {
         }
 
         // load the resource
-        final InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
+        InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
+        
+        if(size < 0 && maxBytes >= 0) {
+			/* If content length is unknown for some reason, let's apply now the eventual size restriction */
+        	is = new LimitedInputStream(is, maxBytes) {
 
-        // create response with loaded content
+			@Override
+			protected void raiseError(long pSizeMax, long pCount) throws IOException {
+				throw new IOException(
+						"Too big file in File crawler for URL " + request.url().toString());
+				}
+			};
+        }
+
+        // create response with stream open on content
         final CrawlProfile profile = this.sb.crawler.get(ASCII.getBytes(request.profileHandle()));
         Response response = new Response(
                 request,
@@ -175,5 +194,16 @@ public class FileLoader {
                 false,
                 null);
         return new StreamResponse(response, is);
+    }
+    
+    /**
+     * Open a stream on the requested file
+     *
+     * @param request the request to process
+     * @param acceptOnlyParseable when true and no parser can be found to handle the detected MIME type, open a stream on the URL tokens
+     * @return a response with full meta data and embedding on open input stream on content. Don't forget to close the stream.
+     */
+    public StreamResponse openInputStream(final Request request, final boolean acceptOnlyParseable) throws IOException {
+    	return openInputStream(request, acceptOnlyParseable,  this.maxFileSize);
     }
 }

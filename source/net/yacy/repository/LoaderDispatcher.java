@@ -400,7 +400,7 @@ public final class LoaderDispatcher {
         } else if (protocol.equals("smb")) {
             response = this.smbLoader.openInputStream(request, true);
         } else if (protocol.equals("file")) {
-            response = this.fileLoader.openInputStream(request, true);
+            response = this.fileLoader.openInputStream(request, true, maxFileSize);
         } else {
             throw new IOException("Unsupported protocol '" + protocol + "' in url " + url);
         }
@@ -444,12 +444,18 @@ public final class LoaderDispatcher {
 	 * @return the crawler configured maximum size allowed to load for the protocol of the URL 
 	 */
     public int protocolMaxFileSize(final DigestURL url) {
-    	if (url.isHTTP() || url.isHTTPS())
+    	if (url.isHTTP() || url.isHTTPS()) {
     		return this.sb.getConfigInt("crawler.http.maxFileSize", HTTPLoader.DEFAULT_MAXFILESIZE);
-    	if (url.isFTP())
+    	}
+    	if (url.isFTP()) {
     		return this.sb.getConfigInt("crawler.ftp.maxFileSize", (int) FTPLoader.DEFAULT_MAXFILESIZE);
-    	if (url.isSMB())
+    	}
+    	if (url.isSMB()) {
     		return this.sb.getConfigInt("crawler.smb.maxFileSize", (int) SMBLoader.DEFAULT_MAXFILESIZE);
+    	}
+    	if(url.isFile()) {
+    		return this.sb.getConfigInt("crawler.file.maxFileSize", FileLoader.DEFAULT_MAXFILESIZE);
+    	}
     	return Integer.MAX_VALUE;
     }
 
