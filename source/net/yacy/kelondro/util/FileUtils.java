@@ -110,10 +110,17 @@ public final class FileUtils {
 
         int c;
         long total = 0;
-        while ( (c = source.read(buffer, 0, chunkSize)) > 0 ) {
+        long remaining;
+        if(count > 0) {
+        	remaining = count;
+        } else {
+        	remaining = Long.MAX_VALUE;
+        }
+        while ( (c = source.read(buffer, 0, remaining < chunkSize ? (int)remaining : chunkSize)) > 0 ) {
             dest.write(buffer, 0, c);
             dest.flush();
             total += c;
+            remaining -= c;
 
             if ( count > 0 && count == total) {
                 break;
@@ -383,19 +390,11 @@ public final class FileUtils {
      * @throws NullPointerException when source parameter is null
      */
     public static byte[] read(final InputStream source, final int count) throws IOException {
-        if ( count > 0 ) {
-            final byte[] b = new byte[count];
-            final int c = source.read(b, 0, count);
-            assert c == count : "count = " + count + ", c = " + c;
-            if ( c != count ) {
-                final byte[] bb = new byte[c];
-                System.arraycopy(b, 0, bb, 0, c);
-                return bb;
-            }
-            return b;
+        if(count == 0) {
+        	return new byte[0];
         }
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-        copy(source, baos);
+        copy(source, baos, count);
         baos.close();
         return baos.toByteArray();
     }

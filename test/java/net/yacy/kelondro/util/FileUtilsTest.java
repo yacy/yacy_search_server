@@ -23,11 +23,13 @@ package net.yacy.kelondro.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -35,6 +37,37 @@ import org.junit.Test;
  *
  */
 public class FileUtilsTest {
+	
+	@BeforeClass
+	public static void beforeAll() {
+		/* Disable assertions here : success/failure of these tests should not rely on assertions that are likely to be disabled at runtime */
+		FileUtilsTest.class.getClassLoader().setDefaultAssertionStatus(false);
+	}
+	
+	/**
+	 * A test stream reading each time less than desired bytes.
+	 * Simulates what can occur for example on real-world HTTP streams.
+	 */
+	private class LowerReadThanExpectedInputStream extends FilterInputStream {
+		
+		protected LowerReadThanExpectedInputStream(InputStream in) {
+			super(in);
+		}
+
+		/**
+		 * Reads less than specified len bytes
+		 */
+		@Override
+		public int read(byte[] b, int off, int len) throws IOException {
+			if(len > 10 ) {
+				return super.read(b, off, len - 10);
+			}
+			return super.read(b, off, len);
+		}
+		
+	}
+	
+	
 
 	/**
 	 * Copy stream : normal case
@@ -102,16 +135,71 @@ public class FileUtilsTest {
 		for(int i = 0; i < sourceBytes.length; i++) {
 			sourceBytes[i] = (byte)(i % Byte.MAX_VALUE);
 		}
-		InputStream source = new ByteArrayInputStream(sourceBytes);
-		ByteArrayOutputStream dest = new ByteArrayOutputStream();
-		final int COUNT = 8;
-		try {
-			FileUtils.copy(source, dest, COUNT);
-		} finally {
-			source.close();
-			dest.close();
-		}
-		Assert.assertEquals(COUNT, dest.size());
-	}
 
+		final int COUNT = 1200;
+		try (InputStream source = new ByteArrayInputStream(sourceBytes);
+				ByteArrayOutputStream dest = new ByteArrayOutputStream();) {
+			FileUtils.copy(source, dest, COUNT);
+			Assert.assertEquals(COUNT, dest.size());
+		}
+		
+		/* Copy from a stream reading less than desired bytes (can occurs for example on real-world HTTP streams) */
+		try (InputStream bufferedSource = new ByteArrayInputStream(sourceBytes);
+				InputStream source = new LowerReadThanExpectedInputStream(bufferedSource);
+				ByteArrayOutputStream dest = new ByteArrayOutputStream();) {
+			FileUtils.copy(source, dest, COUNT);
+			Assert.assertEquals(COUNT, dest.size());
+		}
+	}
+	
+	/**
+	 * Test reading n bytes in a stream
+	 * @throws IOException when a read/write error occurred
+	 */
+	@Test
+	public void testReadInputStream() throws IOException {
+
+
+		/* Fill an input stream with more bytes than FileUtils.DEFAULT_BUFFER_SIZE */
+		byte[] sourceBytes = new byte[2000];
+		for(int i = 0; i < sourceBytes.length; i++) {
+			sourceBytes[i] = (byte)(i % Byte.MAX_VALUE);
+		}
+		
+		/* Read all*/
+		try(InputStream source = new ByteArrayInputStream(sourceBytes);) {
+			Assert.assertEquals(sourceBytes.length, FileUtils.read(source, -1).length);
+		}
+		
+		/* Read zero */
+		try(InputStream source = new ByteArrayInputStream(sourceBytes);) {
+			Assert.assertEquals(0, FileUtils.read(source, 0).length);
+		}
+		
+		/* Read only one */
+		try(InputStream source = new ByteArrayInputStream(sourceBytes);) {
+			Assert.assertEquals(1, FileUtils.read(source, 1).length);
+		}
+		
+		/* Read half */
+		try(InputStream source = new ByteArrayInputStream(sourceBytes);) {
+			Assert.assertEquals(sourceBytes.length / 2, FileUtils.read(source, sourceBytes.length / 2).length);
+		}
+		
+		/* Read half on a stream reading each time less than desired bytes (can occurs for example on real-world HTTP streams) */
+		try(InputStream bufferedStream = new ByteArrayInputStream(sourceBytes);
+			InputStream source = new LowerReadThanExpectedInputStream(bufferedStream);) {
+			Assert.assertEquals(sourceBytes.length / 2, FileUtils.read(source, sourceBytes.length / 2).length);
+		}
+		
+		/* Read exactly source bytes count */
+		try(InputStream source = new ByteArrayInputStream(sourceBytes);) {
+			Assert.assertEquals(sourceBytes.length, FileUtils.read(source, sourceBytes.length).length);
+		}
+		
+		/* Trying to read more than source bytes count */
+		try(InputStream source = new ByteArrayInputStream(sourceBytes);) {
+			Assert.assertEquals(sourceBytes.length, FileUtils.read(source, sourceBytes.length + 10).length);
+		}
+	}
 }
