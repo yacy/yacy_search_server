@@ -53,6 +53,19 @@ public class genericParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream source)
             throws Parser.Failure, InterruptedException {
+    	/* Exactly the same implementation when applying limits as only tokens in the location URL are parsed */
+        return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, Integer.MAX_VALUE, Long.MAX_VALUE);
+    }
+    
+    @Override
+    public boolean isParseWithLimitsSupported() {
+    	return true;
+    }
+    
+	@Override
+	public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String charset,
+			final VocabularyScraper scraper, final int timezoneOffset, final InputStream source, final int maxLinks,
+			final long maxBytes) throws Failure, InterruptedException, UnsupportedOperationException {
         String filename = location.getFileName();
         final Document[] docs = new Document[]{new Document(
                 location,
