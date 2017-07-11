@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.fileupload.util.LimitedInputStream;
+import org.apache.commons.io.input.CloseShieldInputStream;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
@@ -260,53 +261,65 @@ public final class TextParser {
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
 
         boolean canStream = false;
-        Parser streamParser = idioms.iterator().next();
         if(idioms.size() == 1) {
         	canStream = true;
         } else if(idioms.size() == 2) {
-        	/* When there are only 2 available parsers, stream oriented parsing can still be applied when one of the 2 parsers is the generic one*/
+        	/* When there are only 2 available parsers, stream oriented parsing can still be applied when one of the 2 parsers is the generic one */
         	for(Parser idiom : idioms) {
         		if(idiom instanceof genericParser) {
         			canStream = true;
-        		} else {
-        			/* stream oriented parsing will be performed by the non generic parser */
-        			streamParser = idiom;
-        		}
-        	}
-        } else if(idioms.size() > 2) {
-			/* Prefer the first available non generic parser */
-        	for(Parser idiom : idioms) {
-        		if(!(idiom instanceof genericParser)) {
-        			streamParser = idiom;
-        			break;
         		}
         	}
         }
         
         // if we do not have more than one non generic parser or the content size is over MaxInt (2GB) or is over the totally available memory
-        // then we use only one stream-oriented parser.
-        if (canStream || contentLength > Integer.MAX_VALUE || contentLength > MemoryControl.available()) {
-            // use a specific stream-oriented parser
-            return parseSource(location, mimeType, streamParser, charset, scraper, timezoneOffset, sourceStream, maxLinks, maxBytes);
-        }
+        // then we use only stream-oriented parser.
+		if (canStream || contentLength > Integer.MAX_VALUE || contentLength > MemoryControl.available()) {
+			try {
+				/* The size of the buffer on the stream must be large enough to allow parser implementations to start parsing the resource
+				 * and eventually fail, but must also be larger than eventual parsers internal buffers such as BufferedInputStream.DEFAULT_BUFFER_SIZE (8192 bytes) */
+				int rewindSize = 10 * 1024;
+				final BufferedInputStream bufferedStream = new BufferedInputStream(sourceStream, rewindSize);
+				/* Mark now to allow resetting the buffered stream to the beginning of the stream */
+				bufferedStream.mark(rewindSize);
+				
+				/* Loop on parser : they are supposed to be sorted in order to start with the most specific and end with the most generic */
+				for(Parser parser : idioms) {
+					/* Wrap in a CloseShieldInputStream to prevent SAX parsers closing the sourceStream 
+					 * and so let us eventually reuse the same opened stream with other parsers on parser failure */
+					CloseShieldInputStream nonCloseInputStream = new CloseShieldInputStream(bufferedStream);
+					
+					try {
+						return parseSource(location, mimeType, parser, charset, scraper, timezoneOffset,
+								nonCloseInputStream, maxLinks, maxBytes);
+					} catch (Parser.Failure e) {
+						/* Try to reset the marked stream. If the failed parser has consumed too many bytes : 
+						 * too bad, the marks is invalid and process fails now with an IOException */
+						bufferedStream.reset();
+					}
+				}
+			} catch (IOException e) {
+				throw new Parser.Failure("Error reading source", location);
+			}
+		}
 
         // in case that we know more parsers we first transform the content into a byte[] and use that as base
         // for a number of different parse attempts.
+		
+		int maxBytesToRead = -1;
+		if(maxBytes < Integer.MAX_VALUE) {
+			/* Load at most maxBytes + 1 :
+		       - to let parsers not supporting Parser.parseWithLimits detect the maxBytes size is exceeded and end with a Parser.Failure
+		       - but let parsers supporting Parser.parseWithLimits perform partial parsing of maxBytes content */
+			maxBytesToRead = (int)maxBytes + 1;
+		}
+		if(contentLength >= 0 && contentLength < maxBytesToRead) {
+			maxBytesToRead = (int)contentLength;
+		}
         
-        /* Content length may be known from headers : check it now */
-        if(contentLength >= 0 && contentLength > maxBytes) {
-        	throw new Parser.Failure("Content size is over maximum size of " + maxBytes + "", location);
-        }
         byte[] b = null;
         try {
-            b = FileUtils.read(sourceStream, (int) contentLength);
-            
-            /* Check content size now if contentLength was unknown */
-            if(contentLength < 0) {
-            	if(b.length > maxBytes) {
-            		throw new Parser.Failure("Content size is over maximum size of " + maxBytes + "", location);		
-            	}
-            }
+            b = FileUtils.read(sourceStream, maxBytesToRead);
         } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
@@ -447,6 +460,10 @@ public final class TextParser {
                 	if(parser.isParseWithLimitsSupported()) {
                 		docs = parser.parseWithLimits(location, mimeType, documentCharset, scraper, timezoneOffset, bis, maxLinks, maxBytes);
                 	} else {
+                        /* Partial parsing is not supported by this parser : check content length now */
+                       	if(sourceArray.length > maxBytes) {
+                       		throw new Parser.Failure("Content size is over maximum size of " + maxBytes + "", location);		
+                       	}
                 		docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, bis);
                 	}
                 } catch (final Parser.Failure e) {
