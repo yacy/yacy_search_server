@@ -955,6 +955,7 @@ dc_rights
         final Set<String> languages = new HashSet<>();
         double lon = 0.0d, lat = 0.0d;
         boolean indexingDenied = false;
+        boolean partiallyParsed = false;
         Date date = null;
         String charset = null;
 
@@ -1015,6 +1016,7 @@ dc_rights
             if (doc.dc_language() != null) languages.add(doc.dc_language());
             
             indexingDenied |= doc.indexingDenied;
+            partiallyParsed |= doc.isPartiallyParsed();
         }
 
         // clean up parser data
@@ -1050,6 +1052,7 @@ dc_rights
                 indexingDenied,
                 date);
         newDoc.setDepth(mindepth);
+        newDoc.setPartiallyParsed(partiallyParsed);
         return newDoc;
     }
 

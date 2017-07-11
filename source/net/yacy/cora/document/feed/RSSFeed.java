@@ -36,9 +36,16 @@ public class RSSFeed implements Iterable<RSSMessage> {
     public static final int DEFAULT_MAXSIZE = 10000;
 
     // class variables
-    private RSSMessage channel = null; // single required element  see http://www.rssboard.org/rss-profile#element-channel
-    private final Map<String, RSSMessage> messages; // a guid:Item map
+    
+    /** Single required element  see http://www.rssboard.org/rss-profile#element-channel */
+    private RSSMessage channel = null;
+    
+    /** A guid:Item map */
+    private final Map<String, RSSMessage> messages;
     private final int maxsize;
+    
+    /** Set to true when maxsize messages limit has been exceeded and exceeding messages have been discarded */
+    private boolean maxSizeExceeded;
 
     
 
@@ -67,6 +74,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
         this.messages = Collections.synchronizedMap(new LinkedHashMap<String, RSSMessage>());
         this.channel = null;
         this.maxsize = maxsize;
+        this.maxSizeExceeded = false;
     }
 
     /**
@@ -115,7 +123,10 @@ public class RSSFeed implements Iterable<RSSMessage> {
         final String guid = item.getGuid();
         this.messages.put(guid, item);
         // in case that the feed is full (size > maxsize) flush the oldest element
-        while (this.messages.size() > this.maxsize) pollMessage();
+        while (this.messages.size() > this.maxsize) {
+        	this.maxSizeExceeded = true;
+        	pollMessage();
+        }
     }
 
     public RSSMessage getMessage(final String guid) {
@@ -130,6 +141,13 @@ public class RSSFeed implements Iterable<RSSMessage> {
     public int size() {
         return this.messages.size();
     }
+    
+    /**
+     * @return true when maxsize messages limit has been exceeded and exceeding messages have been discarded
+     */
+    public boolean isMaxSizeExceeded() {
+		return this.maxSizeExceeded;
+	}
 
     @Override
     public Iterator<RSSMessage> iterator() {

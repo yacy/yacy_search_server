@@ -74,17 +74,27 @@ public class rssParser extends AbstractParser implements Parser {
             throw new Parser.Failure("Load error:" + e.getMessage(), location, e);
         }
 
-        final RSSFeed feed = rssReader.getFeed();
+        return rssFeedToDocuments(charset, rssReader.getFeed());
+    }
+
+    /**
+     * Create parsed documents from the given feed.
+     * @param charset the charset name of the feed, if known
+     * @param feed the feed instance 
+     * @return an array of documents : a document per feed item
+     */
+	private Document[] rssFeedToDocuments(final String charset, final RSSFeed feed) {
         //RSSMessage channel = feed.getChannel();
         final List<Document> docs = new ArrayList<Document>();
         DigestURL itemuri;
         Set<String> languages;
         Document doc;
-        for (final Hit item: feed) try {
-            itemuri = new DigestURL(item.getLink());
-            languages = new HashSet<String>();
-            languages.add(item.getLanguage());
-            doc = new Document(
+        for (final Hit item: feed) {
+        	try {
+        		itemuri = new DigestURL(item.getLink());
+        		languages = new HashSet<String>();
+        		languages.add(item.getLanguage());
+        		doc = new Document(
                     itemuri,
                     TextParser.mimeOf(itemuri),
                     charset,
@@ -104,14 +114,40 @@ public class rssParser extends AbstractParser implements Parser {
                     new LinkedHashMap<DigestURL, ImageEntry>(),
                     false,
                     item.getPubDate());
-            docs.add(doc);
-        } catch (final MalformedURLException e) {
-            continue;
-            }
+        		docs.add(doc);
+        	} catch (final MalformedURLException e) {
+        		continue;
+        	}
+        }
 
         final Document[] da = new Document[docs.size()];
         docs.toArray(da);
         return da;
+	}
+    
+    @Override
+    public boolean isParseWithLimitsSupported() {
+    	return true;
+    }
+    
+    @Override
+    public Document[] parseWithLimits(final DigestURL url, final String mimeType, final String charset, final VocabularyScraper scraper,
+    		final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes)
+    		throws Failure, InterruptedException, UnsupportedOperationException {
+        RSSReader rssReader;
+        try {
+            rssReader = new RSSReader(maxLinks, maxBytes, source);
+        } catch (final IOException e) {
+            throw new Parser.Failure("Load error:" + e.getMessage(), url, e);
+        }
+
+        Document[] documents =  rssFeedToDocuments(charset, rssReader.getFeed());
+		if (documents != null && documents.length > 0
+				&& (rssReader.isMaxBytesExceeded() || rssReader.getFeed().isMaxSizeExceeded())) {
+			/* A limit has been exceeded : mark the last document as partially parsed for information of the caller */
+			documents[documents.length - 1].setPartiallyParsed(true);
+		}
+        return documents;
     }
 
 }
