@@ -31,8 +31,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.fileupload.util.LimitedInputStream;
-
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -44,6 +42,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.ftp.FTPClient;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.StrictLimitInputStream;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.util.FileUtils;
@@ -174,14 +173,8 @@ public class FileLoader {
         
         if(size < 0 && maxBytes >= 0) {
 			/* If content length is unknown for some reason, let's apply now the eventual size restriction */
-        	is = new LimitedInputStream(is, maxBytes) {
-
-			@Override
-			protected void raiseError(long pSizeMax, long pCount) throws IOException {
-				throw new IOException(
-						"Too big file in File crawler for URL " + request.url().toString());
-				}
-			};
+			is = new StrictLimitInputStream(is, maxBytes,
+					"Too big file in File crawler for URL " + request.url().toString());
         }
 
         // create response with stream open on content

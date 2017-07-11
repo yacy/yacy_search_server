@@ -34,13 +34,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.apache.commons.fileupload.util.LimitedInputStream;
 import org.apache.commons.io.input.CloseShieldInputStream;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.StrictLimitInputStream;
 import net.yacy.document.parser.GenericXMLParser;
 import net.yacy.document.parser.apkParser;
 import net.yacy.document.parser.audioTagParser;
@@ -396,14 +396,7 @@ public final class TextParser {
             	docs = parser.parseWithLimits(location, mimeType, documentCharset, scraper, timezoneOffset, sourceStream, maxLinks, maxBytes);
             } else {
             	/* Parser do not support partial parsing within limits : let's control it here*/
-    			InputStream limitedSource = new LimitedInputStream(sourceStream, maxBytes) {
-    				
-    				@Override
-    				protected void raiseError(long pSizeMax, long pCount) throws IOException {
-    					throw new IOException("Reached maximum bytes to parse : " + maxBytes);
-    					
-    				}
-    			};
+    			InputStream limitedSource = new StrictLimitInputStream(sourceStream, maxBytes);
             	docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, limitedSource);
             }
             return docs;

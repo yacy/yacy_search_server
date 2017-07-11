@@ -28,7 +28,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.commons.fileupload.util.LimitedInputStream;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 
@@ -41,6 +40,7 @@ import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.HTTPInputStream;
+import net.yacy.cora.util.StrictLimitInputStream;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
@@ -239,14 +239,8 @@ public final class HTTPLoader {
 				contentStream = new HTTPInputStream(client);
 				/* Anticipated content length may not be already known or incorrect : let's apply now the same eventual content size restriction as when loading in a byte array */
 				if(maxFileSize >= 0) {
-					contentStream = new LimitedInputStream(contentStream, maxFileSize) {
-
-						@Override
-						protected void raiseError(long pSizeMax, long pCount) throws IOException {
-							throw new IOException(
-									"Content to download exceed maximum value of " + Formatter.bytesToString(pSizeMax));
-						}
-					};
+					contentStream = new StrictLimitInputStream(contentStream, maxFileSize,
+							"Content to download exceed maximum value of " + Formatter.bytesToString(maxFileSize));
 				}
 			}
 

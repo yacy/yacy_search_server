@@ -22,7 +22,6 @@
 
 package net.yacy.document.parser;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,7 +34,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.fileupload.util.LimitedInputStream;
 import org.apache.commons.io.input.XmlStreamReader;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -43,6 +41,8 @@ import org.xml.sax.SAXException;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.util.StreamLimitException;
+import net.yacy.cora.util.StrictLimitInputStream;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -172,14 +172,7 @@ public class GenericXMLParser extends AbstractParser implements Parser {
 			final Set<AnchorURL> detectedURLs = new HashSet<>();
 			final GenericXMLContentHandler saxHandler = new GenericXMLContentHandler(writer, detectedURLs, maxLinks);
 			
-			InputStream limitedSource = new LimitedInputStream(source, maxBytes) {
-				
-				@Override
-				protected void raiseError(long pSizeMax, long pCount) throws IOException {
-					throw new IOException(new SizeLimitExceededException("Reached maximum bytes to parse : " + maxBytes));
-					
-				}
-			};
+			StrictLimitInputStream limitedSource = new StrictLimitInputStream(source, maxBytes);
         	
         	/* Use commons-io XmlStreamReader advanced rules to help with charset detection when source contains no BOM or XML declaration
         	 * (detection algorithm notably also include ContentType transmitted by HTTP headers, here eventually present as mimeType and charset parameters),  */
@@ -191,11 +184,13 @@ public class GenericXMLParser extends AbstractParser implements Parser {
 			boolean limitExceeded = false;
 			try {
 				saxParser.parse(saxSource, saxHandler);
-			} catch(SAXException | IOException e) {
+			} catch(SAXException e) {
 				if(!(e.getCause() instanceof SizeLimitExceededException)) {
-					/* Only transmit to upper layer exceptions that are not caused by the maxLinks or maxBytes limits being reached */
+					/* Only transmit to upper layer exceptions that are not caused by the maxLinks limit being reached */
 					throw e;
 				}
+				limitExceeded = true;
+			} catch(StreamLimitException e) {
 				limitExceeded = true;
 			}
 
