@@ -67,7 +67,9 @@ import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.ISO639;
 
-
+/**
+ * A content scraper supporting HTML tags.
+ */
 public class ContentScraper extends AbstractScraper implements Scraper {
 
     private final static int MAX_TAGSIZE = 1024 * 1024;
@@ -220,7 +222,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * evaluation scores: count appearance of specific attributes
      */
     private final Evaluation evaluationScores;
-
+    
+    /** Set to true when a limit on content size scraped has been exceeded */
+    private boolean contentSizeLimitExceeded;
+    
     /**
      * scrape a document
      * @param root the document root url
@@ -271,6 +276,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.canonical = null;
         this.publisher = null;
         this.breadcrumbs = 0;
+        this.contentSizeLimitExceeded = false;
     }
 
     @Override
@@ -608,8 +614,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     	return iconRels;
     }
 
+    /**
+     * Process a tag processed as a singleton (no end tag, or not processing the eventual end tag)
+     * @param tag the tag to parse. Must not be null.
+     */
     @Override
-    public void scrapeTag0(Tag tag) {
+    public void scrapeTag0(final Tag tag) {
         checkOpts(tag);
         if (tag.name.equalsIgnoreCase("img")) {
             final String src = tag.opts.getProperty("src", EMPTY_STRING);
@@ -768,8 +778,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.fireScrapeTag0(tag.name, tag.opts);
     }
 
+    /**
+     * Process a paired tag (has a start and an end tag)
+     * @param tag the tag to process. Must not be null.
+     */
     @Override
-    public void scrapeTag1(Tag tag) {
+    public void scrapeTag1(final Tag tag) {
         checkOpts(tag);
         // System.out.println("ScrapeTag1: tag.tagname=" + tag.tagname + ", opts=" + tag.opts.toString() + ", text=" + UTF8.String(text));
         if (tag.name.equalsIgnoreCase("a") && tag.content.length() < 2048) {
@@ -1079,7 +1093,21 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public Map<DigestURL, IconEntry> getIcons() {
         return this.icons;
     }
-
+    
+    /**
+     * @return true when a limit on content size scraped has been exceeded
+     */
+    public boolean isContentSizeLimitExceeded() {
+		return this.contentSizeLimitExceeded;
+	}
+    
+    /**
+     * @param contentSizeLimitExceeded set to true when a limit on content size scraped has been exceeded
+     */
+    public void setContentSizeLimitExceeded(final boolean contentSizeLimitExceeded) {
+		this.contentSizeLimitExceeded = contentSizeLimitExceeded;
+	}
+    
     /*
     DC in html example:
     <meta name="DC.title" lang="en" content="Expressing Dublin Core in HTML/XHTML meta and link elements" />
