@@ -862,6 +862,8 @@ public class Response {
         if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, url());
         try {
             return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.getContentType(), this.responseHeader == null ? StandardCharsets.UTF_8.name() : this.responseHeader.getCharacterEncoding(), new VocabularyScraper(), this.request.timezoneOffset(), this.request.depth(), this.content);
+        } catch(Parser.Failure e) {
+        	throw e;
         } catch (final Exception e) {
             return null;
         }
