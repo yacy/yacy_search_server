@@ -30,7 +30,6 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
-import net.yacy.document.VocabularyScraper;
 
 /**
  * A crawler load response, holding content as a stream.
@@ -90,31 +89,7 @@ public class StreamResponse {
 	 *             when no parser support the content
 	 */
 	public Document[] parse() throws Parser.Failure {
-		final String supportError = TextParser.supports(this.response.url(),
-				this.response.getResponseHeader() == null ? null : this.response.getResponseHeader().getContentType());
-		if (supportError != null) {
-			throw new Parser.Failure("no parser support:" + supportError, this.response.url());
-		}
-		try {
-			return TextParser.parseSource(this.response.url(),
-					this.response.getResponseHeader() == null ? null
-							: this.response.getResponseHeader().getContentType(),
-					this.response.getResponseHeader() == null ? StandardCharsets.UTF_8.name()
-							: this.response.getResponseHeader().getCharacterEncoding(),
-					new VocabularyScraper(), this.response.getRequest().timezoneOffset(),
-					this.response.getRequest().depth(), this.response.size(), this.contentStream);
-		} catch (final Exception e) {
-			return null;
-		} finally {
-			if (this.contentStream != null) {
-				try {
-					this.contentStream.close();
-				} catch (IOException ignored) {
-					log.warn("Could not close content stream on url " + this.response.url());
-				}
-			}
-		}
-
+		return parseWithLimits(Integer.MAX_VALUE, Long.MAX_VALUE);
 	}
 	
 	/**
@@ -151,9 +126,11 @@ public class StreamResponse {
 					: this.response.getResponseHeader().getCharacterEncoding();
 			
 			return TextParser.parseWithLimits(this.response.url(), mimeType, charsetName,
-					this.response.getRequest().timezoneOffset(), this.response.size(), this.contentStream, maxLinks,
-					maxBytes);
-		} catch (final Exception e) {
+						this.response.getRequest().timezoneOffset(), this.response.getRequest().depth(),
+						this.response.size(), this.contentStream, maxLinks, maxBytes);
+		} catch(Parser.Failure e) {
+			throw e;
+		}catch (final Exception e) {
 			return null;
 		} finally {
 			if (this.contentStream != null) {

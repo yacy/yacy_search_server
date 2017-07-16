@@ -49,6 +49,7 @@ import net.yacy.document.parser.csvParser;
 import net.yacy.document.parser.docParser;
 import net.yacy.document.parser.genericParser;
 import net.yacy.document.parser.gzipParser;
+import net.yacy.document.parser.gzipParser.GZIPOpeningStreamException;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.linkScraperParser;
 import net.yacy.document.parser.mmParser;
@@ -296,6 +297,35 @@ public final class TextParser {
 						/* Try to reset the marked stream. If the failed parser has consumed too many bytes : 
 						 * too bad, the marks is invalid and process fails now with an IOException */
 						bufferedStream.reset();
+						
+						if(parser instanceof gzipParser && e.getCause() instanceof GZIPOpeningStreamException 
+								&& (idioms.size() == 1 || (idioms.size() == 2 && idioms.contains(genericIdiom)))) {
+							/* The gzip parser failed directly when opening the content stream : before falling back to the generic parser,
+							 * let's have a chance to parse the stream as uncompressed. */
+							 /* Indeed, this can be a case of misconfigured web server, providing both headers "Content-Encoding" with value "gzip", 
+							  * and "Content-type" with value such as "application/gzip".
+							 * In that case our HTTP client (see GzipResponseInterceptor) is already uncompressing the stream on the fly,
+							 * that's why the gzipparser fails opening the stream. 
+							 * (see RFC 7231 section 3.1.2.2 for "Content-Encoding" header specification https://tools.ietf.org/html/rfc7231#section-3.1.2.2)*/
+							gzipParser gzParser = (gzipParser)parser; 
+						
+							nonCloseInputStream = new CloseShieldInputStream(bufferedStream);
+							
+							Document maindoc = gzipParser.createMainDocument(location, mimeType, charset, gzParser);
+
+							try {
+								Document[] docs = gzParser.parseCompressedInputStream(location,
+										charset, timezoneOffset, depth,
+										nonCloseInputStream, maxLinks, maxBytes);
+								if (docs != null) {
+									maindoc.addSubDocuments(docs);
+								}
+								return new Document[] { maindoc };
+							} catch(Exception e1) {
+								/* Try again to reset the marked stream if the failed parser has not consumed too many bytes */
+								bufferedStream.reset();
+							}
+						}
 					}
 				}
 			} catch (IOException e) {
@@ -345,6 +375,7 @@ public final class TextParser {
      * @param mimeType the mime type of the source, if known
      * @param charset the charset name of the source, if known
      * @param timezoneOffset the local time zone offset
+     * @param depth the current depth of the crawl
      * @param contentLength the length of the source, if known (else -1 should be used)
      * @param source a input stream
      * @param maxLinks the maximum total number of links to parse and add to the result documents
@@ -353,9 +384,9 @@ public final class TextParser {
      * @throws Parser.Failure when the parser processing failed
      */
 	public static Document[] parseWithLimits(final DigestURL location, String mimeType, final String charset,
-			final int timezoneOffset, final long contentLength, final InputStream sourceStream, int maxLinks,
+			final int timezoneOffset, final int depth, final long contentLength, final InputStream sourceStream, int maxLinks,
 			long maxBytes) throws Parser.Failure{
-		return parseSource(location, mimeType, charset, new VocabularyScraper(), timezoneOffset, 0, contentLength,
+		return parseSource(location, mimeType, charset, new VocabularyScraper(), timezoneOffset, depth, contentLength,
 				sourceStream, maxLinks, maxBytes);
 	}
     
@@ -400,6 +431,8 @@ public final class TextParser {
             	docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, limitedSource);
             }
             return docs;
+        } catch(Parser.Failure e) {
+        	throw e;
         } catch (final Exception e) {
             throw new Parser.Failure("parser failed: " + parser.getName(), location);
         }
@@ -460,8 +493,38 @@ public final class TextParser {
                 		docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, bis);
                 	}
                 } catch (final Parser.Failure e) {
-                    failedParser.put(parser, e);
-                    //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
+					if(parser instanceof gzipParser && e.getCause() instanceof GZIPOpeningStreamException && 
+							(parsers.size() == 1 || (parsers.size() == 2 && parsers.contains(genericIdiom)))) {
+						/* The gzip parser failed directly when opening the content stream : before falling back to the generic parser,
+						 * let's have a chance to parse the stream as uncompressed. */
+						 /* Indeed, this can be a case of misconfigured web server, providing both headers "Content-Encoding" with value "gzip", 
+						  * and "Content-type" with value such as "application/gzip".
+						 * In that case our HTTP client (see GzipResponseInterceptor) is already uncompressing the stream on the fly,
+						 * that's why the gzipparser fails opening the stream. 
+						 * (see RFC 7231 section 3.1.2.2 for "Content-Encoding" header specification https://tools.ietf.org/html/rfc7231#section-3.1.2.2)*/
+						gzipParser gzParser = (gzipParser)parser;
+						
+						bis = new ByteArrayInputStream(sourceArray);
+					
+						Document maindoc = gzipParser.createMainDocument(location, mimeType, charset, gzParser);
+
+						try {
+							docs = gzParser.parseCompressedInputStream(location,
+									charset, timezoneOffset, depth,
+									bis, maxLinks, maxBytes);
+							if (docs != null) {
+								maindoc.addSubDocuments(docs);
+							}
+							docs = new Document[] { maindoc };
+							break;
+						} catch(Parser.Failure e1) {
+							failedParser.put(parser, e1);
+						} catch(Exception e2) {
+							failedParser.put(parser, new Parser.Failure(e2.getMessage(), location));
+						}
+					} else {
+						failedParser.put(parser, e);
+					}
                 } catch (final Exception e) {
                     failedParser.put(parser, new Parser.Failure(e.getMessage(), location));
                     //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
@@ -638,8 +701,21 @@ public final class TextParser {
         return ext2mime.get(ext.toLowerCase(Locale.ROOT));
     }
 
-    private static String normalizeMimeType(String mimeType) {
-        if (mimeType == null) return "application/octet-stream";
+	/**
+	 * Normalize a media type information string (can be a HTTP "Content-Type"
+	 * response header) : convert to lower case, remove any supplementary
+	 * parameters such as the encoding (charset name), and provide a default
+	 * value when null.
+	 * 
+	 * @param mimeType
+	 *            raw information about media type, eventually provided by a
+	 *            HTTP "Content-Type" response header
+	 * @return a non null media type in lower case
+	 */
+    public static String normalizeMimeType(String mimeType) {
+        if (mimeType == null) {
+        	return "application/octet-stream";
+        }
         mimeType = mimeType.toLowerCase(Locale.ROOT);
         final int pos = mimeType.indexOf(';');
         return ((pos < 0) ? mimeType.trim() : mimeType.substring(0, pos).trim());
