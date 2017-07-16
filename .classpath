@@ -102,9 +102,9 @@
 	<classpathentry kind="lib" path="lib/imageio-bmp-3.3.1.jar"/>
 	<classpathentry kind="lib" path="lib/jsonic-1.2.0.jar"/>
 	<classpathentry kind="lib" path="lib/langdetect.jar"/>
-	<classpathentry kind="lib" path="lib/jwat-common-1.0.6.jar"/>
-	<classpathentry kind="lib" path="lib/jwat-gzip-1.0.6.jar"/>
-	<classpathentry kind="lib" path="lib/jwat-archive-common-1.0.6.jar"/>
-	<classpathentry kind="lib" path="lib/jwat-warc-1.0.6.jar"/>
+	<classpathentry kind="lib" path="lib/jwat-common-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jwat-gzip-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jwat-archive-common-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jwat-warc-1.1.0.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
