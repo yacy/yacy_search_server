@@ -363,10 +363,15 @@ public class ViewFile {
                 prop.put("showSnippet_teasertext", desc);
                 prop.put("showSnippet", 1);
             }
-            // update index with parsed resouce if index entry is older or missing
-            if (urlEntry == null || urlEntry.loaddate().before(response.lastModified())) {
-                Switchboard.getSwitchboard().toIndexer(response);
-            }
+            // update index with parsed resource if index entry is older or missing
+			final long responseSize = response.size();
+			if (urlEntry == null || urlEntry.loaddate().before(response.lastModified())) {
+				/* Also check resource size is lower than configured crawler limits */
+				if (responseSize >= 0
+						&& responseSize <= Switchboard.getSwitchboard().loader.protocolMaxFileSize(response.url())) {
+					Switchboard.getSwitchboard().toIndexer(response);
+				}
+			}
             if (document != null) document.close();
         }
         prop.put("error", "0");
