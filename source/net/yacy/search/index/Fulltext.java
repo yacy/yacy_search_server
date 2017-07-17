@@ -135,7 +135,12 @@ public final class Fulltext {
         // migrate old solr to new
         for (String oldVersion: SOLR_OLD_PATH) {
             File oldLocation = new File(this.segmentPath, oldVersion);
-            if (oldLocation.exists()) oldLocation.renameTo(solrLocation);
+            if (oldLocation.exists()) {
+            	if(!oldLocation.renameTo(solrLocation)) {
+					ConcurrentLog.severe("Fulltext", "Failed renaming old Solr location ("
+							+ oldLocation.getAbsolutePath() + ") to new location : " + solrLocation.getAbsolutePath());
+            	}
+            }
         }
         
         EmbeddedInstance localCollectionInstance = new EmbeddedInstance(new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"), solrLocation, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
