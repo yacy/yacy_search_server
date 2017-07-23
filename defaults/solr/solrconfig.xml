@@ -120,6 +120,18 @@
   <directoryFactory name="DirectoryFactory" 
                     class="${solr.directoryFactory:solr.NRTCachingDirectoryFactory}"/>
 
+  <!-- An alternative to using a managed schema is to explicitly configure a ClassicIndexSchemaFactory.  
+       ClassicIndexSchemaFactory requires the use of a schema.xml configuration file, 
+       and disallows any programatic changes to the Schema at run time.  
+       The schema.xml file must be edited manually and is only loaded only when the collection is loaded.
+       When a <schemaFactory/> is not explicitly declared in a solrconfig.xml file, 
+       Solr implicitly uses a ManagedIndexSchemaFactory, which is by default "mutable" and 
+       keeps schema information in a managed-schema file.
+       
+       YaCy specific setting, overrideing Solr default (introduced YaCy v1.921)
+  -->
+  <schemaFactory class="ClassicIndexSchemaFactory"/>
+    
   <!-- The CodecFactory for defining the format of the inverted index.
        The default implementation is SchemaCodecFactory, which is the official Lucene
        index format, but hooks into the schema to provide per-field customization of
