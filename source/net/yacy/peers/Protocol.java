@@ -1603,8 +1603,8 @@ public final class Protocol {
         Map<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout);
 
         if ( in == null ) {
+            // targetSeed interface departure is already handled within transferRWI() for no response situation
             String errorCause = "no connection from transferRWI";
-            seeds.peerActions.peerDeparture(targetSeed, errorCause); // disconnect unavailable peer
             return errorCause;
         }
 
@@ -1665,73 +1665,87 @@ public final class Protocol {
         return null;
     }
 
+    /**
+     * Transfer Reverse Word Index entries to remote peer.
+     * If the used IP is not responding, this IP (interface) is removed from
+     * targtSeed IP list.
+     * Remote peer responds with list of unknown url hashes
+     *
+     * @param targetSeed
+     * @param indexes
+     * @param gzipBody
+     * @param timeout
+     * @return peer response or null if transfer failed
+     */
     private static Map<String, String> transferRWI(
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
         boolean gzipBody,
         final int timeout) {
-        String ip = targetSeed.getIP();
-        if ( ip == null ) {
-            Network.log.warn("no address for transferRWI");
-            return null;
-        }
-        final String address = targetSeed.getPublicAddress(ip);
+        for (String ip : targetSeed.getIPs()) {
+            if (ip == null) {
+                Network.log.warn("no address for transferRWI");
+                return null;
+            }
+            final String address = targetSeed.getPublicAddress(ip);
 
-        // prepare post values
-        final String salt = crypt.randomSalt();
+            // prepare post values
+            final String salt = crypt.randomSalt();
 
-        // enabling gzip compression for post request body
-        if ( gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED) ) {
-            gzipBody = false;
-        }
+            // enabling gzip compression for post request body
+            if ( gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED) ) {
+                gzipBody = false;
+            }
 
-        int indexcount = 0;
-        final StringBuilder entrypost = new StringBuilder(indexes.size() * 73);
-        Iterator<WordReference> eenum;
-        Reference entry;
-        for ( final ReferenceContainer<WordReference> ic : indexes ) {
-            eenum = ic.entries();
-            while ( eenum.hasNext() ) {
-                entry = eenum.next();
-                entrypost
-                    .append(ASCII.String(ic.getTermHash()))
-                    .append(entry.toPropertyForm())
-                    .append(serverCore.CRLF_STRING);
-                indexcount++;
+            int indexcount = 0;
+            final StringBuilder entrypost = new StringBuilder(indexes.size() * 73);
+            Iterator<WordReference> eenum;
+            Reference entry;
+            for ( final ReferenceContainer<WordReference> ic : indexes ) {
+                eenum = ic.entries();
+                while ( eenum.hasNext() ) {
+                    entry = eenum.next();
+                    entrypost
+                            .append(ASCII.String(ic.getTermHash()))
+                            .append(entry.toPropertyForm())
+                            .append(serverCore.CRLF_STRING);
+                    indexcount++;
+                }
+            }
+
+            if ( indexcount == 0 ) {
+                // nothing to do but everything ok
+                final Map<String, String> result = new HashMap<String, String>(2);
+                result.put("result", "ok");
+                result.put("unknownURL", "");
+                return result;
+            }
+            try {
+                final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
+                parts.put("wordc", UTF8.StringBody(Integer.toString(indexes.size())));
+                parts.put("entryc", UTF8.StringBody(Integer.toString(indexcount)));
+                parts.put("indexes", UTF8.StringBody(entrypost.toString()));
+                final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
+                final byte[] content =
+                        httpClient.POSTbytes(
+                                new MultiProtocolURL("http://" + address + "/yacy/transferRWI.html"),
+                                targetSeed.getHexHash() + ".yacyh",
+                                parts,
+                                gzipBody, true);
+                final Iterator<String> v = FileUtils.strings(content);
+                // this should return a list of urlhashes that are unknown
+
+                final Map<String, String> result = FileUtils.table(v);
+                // return the transfered index data in bytes (for debugging only)
+                result.put("indexPayloadSize", Integer.toString(entrypost.length()));
+                return result;
+            } catch (final Exception e ) {
+                Network.log.info("yacyClient.transferRWI to " + address + " error: " + e.getMessage());
+                // disconnect unavailable peer ip
+                Switchboard.getSwitchboard().peers.peerActions.interfaceDeparture(targetSeed, ip);
             }
         }
-
-        if ( indexcount == 0 ) {
-            // nothing to do but everything ok
-            final Map<String, String> result = new HashMap<String, String>(2);
-            result.put("result", "ok");
-            result.put("unknownURL", "");
-            return result;
-        }
-        try {
-            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
-            parts.put("wordc", UTF8.StringBody(Integer.toString(indexes.size())));
-            parts.put("entryc", UTF8.StringBody(Integer.toString(indexcount)));
-            parts.put("indexes", UTF8.StringBody(entrypost.toString()));
-            // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
-            final byte[] content =
-                httpClient.POSTbytes(
-                    new MultiProtocolURL("http://" + address + "/yacy/transferRWI.html"),
-                    targetSeed.getHexHash() + ".yacyh",
-                    parts,
-                    gzipBody, true);
-            final Iterator<String> v = FileUtils.strings(content);
-            // this should return a list of urlhashes that are unknown
-
-            final Map<String, String> result = FileUtils.table(v);
-            // return the transfered index data in bytes (for debugging only)
-            result.put("indexPayloadSize", Integer.toString(entrypost.length()));
-            return result;
-        } catch (final Exception e ) {
-            Network.log.info("yacyClient.transferRWI to " + address + " error: " + e.getMessage());
-            return null;
-        }
+        return null;
     }
 
     private static Map<String, String> transferURL(
