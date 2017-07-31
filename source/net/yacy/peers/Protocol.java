@@ -364,31 +364,6 @@ public final class Protocol {
         return result;
     }
 
-    public static Seed querySeed(final Seed target, final String seedHash) {
-        // prepare request
-        final String salt = crypt.randomSalt();
-
-        // send request
-        try {
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
-            parts.put("object", UTF8.StringBody("seed"));
-            parts.put("env", UTF8.StringBody(seedHash));
-            String ip = target.getIP();
-            final Post post = new Post(target.getPublicAddress(ip), target.hash, "/yacy/query.html", parts, 10000);
-            final Map<String, String> result = FileUtils.table(post.result);
-
-            if ( result == null || result.isEmpty() ) {
-                return null;
-            }
-            //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return Seed.genRemoteSeed(result.get("response"), false, ip);
-        } catch (final Exception e ) {
-            Network.log.warn("yacyClient.querySeed error:" + e.getMessage());
-            return null;
-        }
-    }
-
     public static long[] queryRWICount(final String targetAddress, final String targetHash, int timeout) {        
         // prepare request
         final String salt = crypt.randomSalt();
@@ -397,7 +372,6 @@ public final class Protocol {
         try {
             final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
             parts.put("object", UTF8.StringBody("rwicount"));
-            parts.put("ttl", UTF8.StringBody("0"));
             parts.put("env", UTF8.StringBody(""));
             //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "posting request to " + targetAddress);
             final Post post = new Post(targetAddress, targetHash, "/yacy/query.html", parts, timeout);
@@ -910,7 +884,6 @@ public final class Protocol {
             parts.put("partitions", UTF8.StringBody(Integer.toString(partitions)));
             parts.put("query", UTF8.StringBody(wordhashes));
             parts.put("exclude", UTF8.StringBody(excludehashes));
-            // parts.put("duetime", UTF8.StringBody("1000")); // not used or red by receiver, max wait time given by praram "time" (2016-04-25 v1.83/9772)
             parts.put("urls", UTF8.StringBody(urlhashes));
             parts.put("prefer", UTF8.StringBody(event.query.prefer.pattern()));
             parts.put("filter", UTF8.StringBody(event.query.urlMaskString));
@@ -920,7 +893,6 @@ public final class Protocol {
             //parts.put("sitehost", UTF8.StringBody(event.query.modifier.sitehost));
             parts.put("author", UTF8.StringBody(event.query.modifier.author));
             parts.put("contentdom", UTF8.StringBody(contentdom == null ? ContentDomain.ALL.toString() : contentdom.toString()));
-            parts.put("ttl", UTF8.StringBody("0"));
             parts.put("maxdist", UTF8.StringBody(Integer.toString(maxDistance)));
             parts.put("profile", UTF8.StringBody(crypt.simpleEncode(event.query.ranking.toExternalString())));
             parts.put("constraint", UTF8.StringBody((event.query.constraint == null) ? "" : event.query.constraint.exportB64()));
