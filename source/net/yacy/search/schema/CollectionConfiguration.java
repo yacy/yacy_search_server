@@ -534,11 +534,18 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.author, author);
         }
         if (allAttr || contains(CollectionSchema.last_modified)) {
-            Date lastModified = responseHeader == null ? new Date() : responseHeader.lastModified();
-            if (lastModified == null) lastModified = new Date();
-            if (document.getLastModified().before(lastModified)) lastModified = document.getLastModified();
-            long firstSeen = segment.getFirstSeenTime(digestURL.hash());
-            if (firstSeen > 0 && firstSeen < lastModified.getTime()) lastModified = new Date(firstSeen); // patch the date if we have seen the document earlier
+            Date lastModified = responseHeader == null ? document.getLastModified() : responseHeader.lastModified();
+            if (lastModified == null) {
+                long firstSeen = segment.getFirstSeenTime(digestURL.hash());
+                if (firstSeen > 0) {
+                    lastModified = new Date(firstSeen); // patch the date if we have seen the document earlier
+                } else {
+                    lastModified = new Date();
+                }
+            }
+            if (document.getLastModified().before(lastModified)) {
+                lastModified = document.getLastModified();
+            }
             add(doc, CollectionSchema.last_modified, lastModified);
         }
         if (allAttr || contains(CollectionSchema.dates_in_content_dts) || contains(CollectionSchema.dates_in_content_count_i)) {
