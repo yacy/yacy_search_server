@@ -257,7 +257,6 @@
         <pathelement location="${lib}/stax2-api_3.1.4.jar" />        
     	<pathelement location="${lib}/weupnp-0.1.4.jar" />
     	<pathelement location="${lib}/woodstox-core-asl-4.4.1.jar" />
-    	<pathelement location="${lib}/xercesImpl.jar" />
     	<pathelement location="${lib}/xml-apis.jar" />
         <pathelement location="${lib}/xmpcore-5.1.3.jar" />
     	<pathelement location="${lib}/zookeeper-3.4.10.jar" />

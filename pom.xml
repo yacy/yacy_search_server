@@ -612,12 +612,7 @@
             <groupId>org.bitlet</groupId>
             <artifactId>weupnp</artifactId>
             <version>0.1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>2.11.0</version>
-        </dependency>        
+        </dependency>       
 
         <!-- special setup for dependencies not found in maven repository
         to installed in local repository -->
