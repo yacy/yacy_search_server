@@ -2,12 +2,12 @@ Source: yacy
 Section: network
 Priority: extra
 Maintainer: Michael Peter Christen <mc@yacy.net>
-Build-Depends: ant, openjdk-7-jdk, debhelper (>= 5), m4
+Build-Depends: ant, openjdk-8-jdk, debhelper (>= 5), m4
 Standards-Version: 3.7.2
 
 Package: yacy
 Architecture: all
-Depends: java7-runtime-headless | java8-runtime-headless, sudo, debconf
+Depends: java8-runtime-headless, sudo, debconf
 Suggests: curl | wget
 Description: Peer-to-Peer Web Search Engine
  YaCy is a Java-based peer-to-peer search engine.
