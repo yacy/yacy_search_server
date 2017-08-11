@@ -105,5 +105,6 @@
 	<classpathentry kind="lib" path="lib/jwat-gzip-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-archive-common-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-warc-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections4-4.1.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
