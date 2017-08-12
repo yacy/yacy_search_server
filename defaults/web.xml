@@ -56,13 +56,9 @@
         <servlet-class>net.yacy.http.servlets.GSAsearchServlet</servlet-class>
     </servlet>
     
-    <!-- servlet to provide searchresults via proxy and needed for Augmented Browsing -->
+    <!-- servlet to provide searchresults via proxy -->
     <servlet>
         <servlet-name>URLProxyServlet</servlet-name>
-        <!-- replaced with alternative servlet with new url rewrite rules
-             you may replace the new with YaCyProxyServlet here, to switch back
-        <servlet-class>net.yacy.http.servlets.YaCyProxyServlet</servlet-class>
-        -->
         <servlet-class>net.yacy.http.servlets.UrlProxyServlet</servlet-class>
         <init-param> 
             <description>Link text on top of proxied page to stop use of proxy</description> 
