@@ -271,24 +271,35 @@ public final class TextParser {
         			canStream = true;
         		}
         	}
+        } else if(sourceStream instanceof ByteArrayInputStream) {
+			/* Also check if we have a ByteArrayInputStream as source to prevent useless bytes duplication in a new byte array */
+        	canStream = true;
         }
         
-        // if we do not have more than one non generic parser or the content size is over MaxInt (2GB) or is over the totally available memory
+        // if we do not have more than one non generic parser, or the content size is over MaxInt (2GB), or is over the totally available memory,
+        // or stream is already in memory as a ByteArrayInputStream
         // then we use only stream-oriented parser.
 		if (canStream || contentLength > Integer.MAX_VALUE || contentLength > MemoryControl.available()) {
 			try {
 				/* The size of the buffer on the stream must be large enough to allow parser implementations to start parsing the resource
 				 * and eventually fail, but must also be larger than eventual parsers internal buffers such as BufferedInputStream.DEFAULT_BUFFER_SIZE (8192 bytes) */
 				int rewindSize = 10 * 1024;
-				final BufferedInputStream bufferedStream = new BufferedInputStream(sourceStream, rewindSize);
+				final InputStream markableStream;
+				if(sourceStream instanceof ByteArrayInputStream) {
+					/* No nead to use a wrapping buffered stream when the source is already entirely in memory. 
+					 * What's more, ByteArrayInputStream has no read limit when marking.*/
+					markableStream = sourceStream;
+				} else {
+					markableStream = new BufferedInputStream(sourceStream, rewindSize);
+				}
 				/* Mark now to allow resetting the buffered stream to the beginning of the stream */
-				bufferedStream.mark(rewindSize);
+				markableStream.mark(rewindSize);
 				
 				/* Loop on parser : they are supposed to be sorted in order to start with the most specific and end with the most generic */
 				for(Parser parser : idioms) {
 					/* Wrap in a CloseShieldInputStream to prevent SAX parsers closing the sourceStream 
 					 * and so let us eventually reuse the same opened stream with other parsers on parser failure */
-					CloseShieldInputStream nonCloseInputStream = new CloseShieldInputStream(bufferedStream);
+					CloseShieldInputStream nonCloseInputStream = new CloseShieldInputStream(markableStream);
 					
 					try {
 						return parseSource(location, mimeType, parser, charset, scraper, timezoneOffset,
@@ -296,7 +307,7 @@ public final class TextParser {
 					} catch (Parser.Failure e) {
 						/* Try to reset the marked stream. If the failed parser has consumed too many bytes : 
 						 * too bad, the marks is invalid and process fails now with an IOException */
-						bufferedStream.reset();
+						markableStream.reset();
 						
 						if(parser instanceof gzipParser && e.getCause() instanceof GZIPOpeningStreamException 
 								&& (idioms.size() == 1 || (idioms.size() == 2 && idioms.contains(genericIdiom)))) {
@@ -309,7 +320,7 @@ public final class TextParser {
 							 * (see RFC 7231 section 3.1.2.2 for "Content-Encoding" header specification https://tools.ietf.org/html/rfc7231#section-3.1.2.2)*/
 							gzipParser gzParser = (gzipParser)parser; 
 						
-							nonCloseInputStream = new CloseShieldInputStream(bufferedStream);
+							nonCloseInputStream = new CloseShieldInputStream(markableStream);
 							
 							Document maindoc = gzipParser.createMainDocument(location, mimeType, charset, gzParser);
 
@@ -323,7 +334,7 @@ public final class TextParser {
 								return new Document[] { maindoc };
 							} catch(Exception e1) {
 								/* Try again to reset the marked stream if the failed parser has not consumed too many bytes */
-								bufferedStream.reset();
+								markableStream.reset();
 							}
 						}
 					}
