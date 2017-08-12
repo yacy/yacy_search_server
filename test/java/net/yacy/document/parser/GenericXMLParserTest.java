@@ -433,7 +433,7 @@ public class GenericXMLParserTest {
 				.append("and this is a mention to a relative URL : /document.html</p>");
 		
 		/* Add some filler text to reach a total size beyond SAX parser internal input stream buffers */
-		while(xhtmlBuilder.length() < 1024 * 10) {
+		while(xhtmlBuilder.length() < 1024 * 20) {
 			xhtmlBuilder.append("<p>Some text to parse</p>");
 		}
 		
