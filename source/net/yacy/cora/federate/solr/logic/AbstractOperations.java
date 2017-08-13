@@ -19,10 +19,17 @@ public abstract class AbstractOperations extends AbstractTerm implements Operati
         for (Term t: this.terms) h += t.hashCode();
         return h;
     }
-    
+
+    /**
+     * Add the term with the defined logical operator.
+     * If length of term is empty nothing is changed
+     * @param term
+     */
     @Override
     public void addOperand(Term term) {
-        this.terms.add(term);
+        if (term.toString().isEmpty()) {
+            this.terms.add(term);
+        }
     }
     
     /**
