@@ -27,7 +27,7 @@ public abstract class AbstractOperations extends AbstractTerm implements Operati
      */
     @Override
     public void addOperand(Term term) {
-        if (term.toString().isEmpty()) {
+        if (!term.toString().isEmpty()) {
             this.terms.add(term);
         }
     }
