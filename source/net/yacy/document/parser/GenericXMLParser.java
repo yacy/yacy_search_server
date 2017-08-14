@@ -193,11 +193,17 @@ public class GenericXMLParser extends AbstractParser implements Parser {
 			} catch(StreamLimitException e) {
 				limitExceeded = true;
 			}
+			
+			if (writer.isOverflow()) {
+				throw new Parser.Failure("Not enough Memory available for generic the XML parser : "
+						+ Formatter.bytesToString(availableMemory), location);
+			}
 
 
-			/* create the parsed document with empty text content */
+			/* Create the parsed document with eventually only partial part of the text and links */
+			final byte[] contentBytes = UTF8.getBytes(writer.toString());
 			Document[] docs = new Document[] { new Document(location, mimeType, detectedCharset, this, null, null, null, null, "",
-					null, null, 0.0d, 0.0d, new byte[0], detectedURLs, null, null, false, new Date()) };
+					null, null, 0.0d, 0.0d, contentBytes, detectedURLs, null, null, false, new Date()) };
 			docs[0].setPartiallyParsed(limitExceeded);
 			return docs;
 		} catch (final Exception e) {
