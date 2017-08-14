@@ -390,6 +390,8 @@ public class GenericXMLParserTest {
 			assertEquals(1, documents.length);
 			assertFalse(documents[0].isPartiallyParsed());
 			
+			assertTrue(documents[0].getTextString().contains("And this is a relative link"));
+			
 			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
 			assertEquals(5, detectedAnchors.size());
@@ -409,6 +411,9 @@ public class GenericXMLParserTest {
 					new VocabularyScraper(), 0, inStream, 2, Long.MAX_VALUE);
 			assertEquals(1, documents.length);
 			assertTrue(documents[0].isPartiallyParsed());
+			
+			assertTrue(documents[0].getTextString().contains("Home page"));
+			assertFalse(documents[0].getTextString().contains("And this is a relative link"));
 			
 			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
@@ -446,6 +451,9 @@ public class GenericXMLParserTest {
 			Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader, new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, firstBytes);
 			assertEquals(1, documents.length);
 			assertTrue(documents[0].isPartiallyParsed());
+			
+			assertTrue(documents[0].getTextString().contains("and this is a mention to a relative URL"));
+			assertFalse(documents[0].getTextString().contains("And this is a relative link to another"));
 			
 			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
