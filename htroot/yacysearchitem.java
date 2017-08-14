@@ -153,7 +153,7 @@ public class yacysearchitem {
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_showPictures_link", resultUrlstring);
             //prop.putHTML("content_link", resultUrlstring);
-
+            
 // START interaction
             if (sb.getConfigBool("proxyURL.useforresults", false) && sb.getConfigBool("proxyURL", false)) {
                 String modifyURL = resultUrlstring;
@@ -199,6 +199,19 @@ public class yacysearchitem {
             	prop.put("content_favicon", 1);
             }
             prop.putHTML("content_favicon_faviconUrl", processFaviconURL(ImageViewer.hasFullViewingRights(header, sb), faviconURL));
+            
+            if (result.limage() == 0) {
+            	if (faviconURL == null) {
+            		prop.put("content_image", 0);
+            	} else {
+            		prop.put("content_image", 1);
+                	prop.putXML("content_image_url", faviconURL.toNormalform(true));
+            	}
+            } else {
+            	prop.put("content_image", 1);
+            	prop.putXML("content_image_url", result.imageURL());
+            }
+            
             prop.put("content_urlhash", urlhash);
             prop.put("content_ranking", Float.toString(result.score()));
             Date[] events = result.events();

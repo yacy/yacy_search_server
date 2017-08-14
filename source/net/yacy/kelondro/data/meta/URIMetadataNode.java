@@ -451,6 +451,20 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         return getInt(CollectionSchema.wordcount_i);
     }
 
+    /**
+     * in case that images are embedded in the document, get one image which can be used as thumbnail
+     * @return
+     */
+    public String imageURL() {
+    	if (limage() == 0) throw new UnsupportedOperationException();
+    	List<String> images_protocol = CollectionConfiguration.indexedList2protocolList(getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName()), limage());
+    	List<String> images_stub = getStringList(CollectionSchema.images_urlstub_sxt);
+    	int c = Math.min(images_protocol.size(), images_stub.size());
+    	if (c == 0) throw new UnsupportedOperationException();
+    	String url = images_protocol.get(0) + "://" + images_stub.get(0);
+    	return url;
+    }
+    
     public int llocal() {
         return getInt(CollectionSchema.inboundlinkscount_i);
     }
