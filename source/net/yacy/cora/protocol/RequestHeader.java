@@ -76,6 +76,7 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
 
     public static final String X_CACHE = "X-Cache";
     public static final String X_CACHE_LOOKUP = "X-Cache-Lookup";
+    public static final String X_Real_IP = "X-Real-IP";
 
     public static final String COOKIE = "Cookie";
 
@@ -147,7 +148,7 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         if (refererHost == null || refererHost.isEmpty() || Domains.isLocalhost(refererHost)) return true;
         return false;
     }
-
+    
     /**
      * Gets the header entry "Cookie" as on string containing all cookies
      *
@@ -706,12 +707,21 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     @Override
     public String getRemoteAddr() {
         if (this._request != null) {
-            return _request.getRemoteAddr();
+        	return client(_request);
         } else {
             return super.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
         }
     }
 
+    public static String client(final ServletRequest request) {
+        String clientHost = request.getRemoteAddr();
+        if (request instanceof HttpServletRequest) {
+        	String XRealIP = ((HttpServletRequest) request).getHeader(X_Real_IP);
+        	if (XRealIP != null && XRealIP.length() > 0) clientHost = XRealIP; // get IP through nginx config "proxy_set_header X-Real-IP $remote_addr;"
+        }
+		return clientHost;
+    }
+    
     @Override
     public String getRemoteHost() {
         if (_request != null) {
