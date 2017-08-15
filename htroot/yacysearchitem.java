@@ -209,7 +209,12 @@ public class yacysearchitem {
             	}
             } else {
             	prop.put("content_image", 1);
-            	prop.putXML("content_image_url", result.imageURL());
+            	try {
+            		prop.putXML("content_image_url", result.imageURL());
+            	} catch(UnsupportedOperationException e) {
+            		/* May occur when the document embedded images information is incomplete to retrieve at least an valid image url*/
+            		prop.put("content_image", 0);
+            	}
             }
             
             prop.put("content_urlhash", urlhash);

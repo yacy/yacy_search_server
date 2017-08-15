@@ -453,9 +453,10 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 
     /**
      * in case that images are embedded in the document, get one image which can be used as thumbnail
-     * @return
+     * @return the first embedded image url
+     * @throws UnsupportedOperationException when there is no image URL referenced on this document
      */
-    public String imageURL() {
+    public String imageURL() throws UnsupportedOperationException {
     	if (limage() == 0) throw new UnsupportedOperationException();
     	List<String> images_protocol = CollectionConfiguration.indexedList2protocolList(getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName()), limage());
     	List<String> images_stub = getStringList(CollectionSchema.images_urlstub_sxt);
