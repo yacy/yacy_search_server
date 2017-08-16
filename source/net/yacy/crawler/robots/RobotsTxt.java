@@ -198,7 +198,7 @@ public class RobotsTxt {
                 if (response == null) {
                     processOldEntry(robotsTxt4Host, robotsURL, robotsTable);
                 } else {
-                	robotsTxt4Host = processNewEntry(response, agent.robotIDs);
+                	robotsTxt4Host = processNewEntry(robotsURL, response, agent.robotIDs);
                 }
             }
         }
@@ -266,7 +266,7 @@ public class RobotsTxt {
                     if (response == null) {
                         processOldEntry(null, robotsURL, robotsTable);
                     } else {
-                        processNewEntry(response, agent.robotIDs);
+                        processNewEntry(robotsURL, response, agent.robotIDs);
                     }
                 }
             }
@@ -316,11 +316,12 @@ public class RobotsTxt {
     
     /**
      * Process a response to a robots.txt request, create a new robots entry, add it to the robots table then return it.
+     * @param robotsURL the initial robots.txt URL (before any eventual redirection). Must not be null.
      * @param response the response to the requested robots.txt URL. Must not be null.
      * @param thisAgents the agent identifier(s) used to request the robots.txt URL
      * @return the new robots entry
      */
-    private RobotsTxtEntry processNewEntry(final Response response, final String[] thisAgents) {
+    private RobotsTxtEntry processNewEntry(final DigestURL robotsURL, final Response response, final String[] thisAgents) {
         final byte[] robotsTxt = response.getContent();
         //Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + ((robotsTxt == null) ? "null" : UTF8.String(robotsTxt))); // debug TODO remove
         RobotsTxtParser parserResult;
@@ -338,9 +339,14 @@ public class RobotsTxt {
         // store the data into the robots DB
         String etag = response.getResponseHeader().containsKey(HeaderFramework.ETAG) ? (response.getResponseHeader().get(HeaderFramework.ETAG)).trim() : null;
         boolean isBrowserAgent = thisAgents.length == 1 && thisAgents[0].equals("Mozilla");
-        if (isBrowserAgent) denyPath.clear();
+        if (isBrowserAgent) {
+        	denyPath.clear();
+        }
+        /* The robotsURL may eventually be redirected (from http to https is common), 
+         * but we store here the url before any redirection. If would not process this way, the unredirected URL would later
+         * never found in the robots table thus needing each time a http load.*/
         final RobotsTxtEntry robotsTxt4Host = new RobotsTxtEntry(
-                    response.getRequest().url(),
+                    robotsURL,
                     parserResult.allowList(),
                     denyPath,
                     new Date(),
