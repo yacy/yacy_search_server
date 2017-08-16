@@ -198,7 +198,7 @@ public class RobotsTxt {
                 if (response == null) {
                     processOldEntry(robotsTxt4Host, robotsURL, robotsTable);
                 } else {
-                    processNewEntry(robotsURL, response, agent.robotIDs);
+                	robotsTxt4Host = processNewEntry(response, agent.robotIDs);
                 }
             }
         }
@@ -266,7 +266,7 @@ public class RobotsTxt {
                     if (response == null) {
                         processOldEntry(null, robotsURL, robotsTable);
                     } else {
-                        processNewEntry(robotsURL, response, agent.robotIDs);
+                        processNewEntry(response, agent.robotIDs);
                     }
                 }
             }
@@ -314,7 +314,13 @@ public class RobotsTxt {
         }
     }
     
-    private void processNewEntry(DigestURL robotsURL, Response response, final String[] thisAgents) {
+    /**
+     * Process a response to a robots.txt request, create a new robots entry, add it to the robots table then return it.
+     * @param response the response to the requested robots.txt URL. Must not be null.
+     * @param thisAgents the agent identifier(s) used to request the robots.txt URL
+     * @return the new robots entry
+     */
+    private RobotsTxtEntry processNewEntry(final Response response, final String[] thisAgents) {
         final byte[] robotsTxt = response.getContent();
         //Log.logInfo("RobotsTxt", "robots of " + robotsURL.toNormalform(true, true) + ":\n" + ((robotsTxt == null) ? "null" : UTF8.String(robotsTxt))); // debug TODO remove
         RobotsTxtParser parserResult;
@@ -334,7 +340,7 @@ public class RobotsTxt {
         boolean isBrowserAgent = thisAgents.length == 1 && thisAgents[0].equals("Mozilla");
         if (isBrowserAgent) denyPath.clear();
         final RobotsTxtEntry robotsTxt4Host = new RobotsTxtEntry(
-                    robotsURL,
+                    response.getRequest().url(),
                     parserResult.allowList(),
                     denyPath,
                     new Date(),
@@ -344,6 +350,7 @@ public class RobotsTxt {
                     parserResult.crawlDelayMillis(),
                     parserResult.agentName());
         addEntry(robotsTxt4Host);
+        return robotsTxt4Host;
     }
     
     private String addEntry(final RobotsTxtEntry entry) {

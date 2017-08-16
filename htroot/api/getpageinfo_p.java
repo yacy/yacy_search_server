@@ -221,7 +221,6 @@ public class getpageinfo_p {
 
                 	// determine if crawling of the current URL is allowed
                     ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
-                    sb.robots.ensureExist(theURL, agent, true);
                     RobotsTxtEntry robotsEntry = sb.robots.getEntry(theURL, agent);
                 	prop.put("robots-allowed", robotsEntry == null ? 1 : robotsEntry.isDisallowed(theURL) ? 0 : 1);
                     prop.putHTML("robotsInfo", robotsEntry == null ? "" : robotsEntry.getInfo());
