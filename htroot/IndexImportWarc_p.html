@@ -37,16 +37,19 @@
 
     <br />
     ::
-    <form><fieldset><legend>Import Process</legend>
-      <dl>
-        <dt>Thread:</dt><dd>#[thread]#</dd>
-        <dt>Warc File:</dt><dd>#[warcfile]#</dd>
-        <dt>Processed:</dt><dd>#[count]# Entries</dd>
-        <dt>Speed:</dt><dd>#[speed]# pages per second</dd>
-        <dt>Running Time:</dt><dd>#[runningHours]# hours, #[runningMinutes]# minutes</dd>
-        <dt>Remaining Time:</dt><dd>#[remainingHours]# hours, #[remainingMinutes]# minutes</dd>
-      </dl>    
-    </fieldset></form>
+    <form>
+      <fieldset><legend>Import Process</legend>
+        <dl>
+          <dt>Thread:</dt><dd>#[thread]#</dd>
+          <dt>Warc File:</dt><dd>#[warcfile]#</dd>
+          <dt>Processed:</dt><dd>#[count]# Entries</dd>
+          <dt>Speed:</dt><dd>#[speed]# pages per second</dd>
+          <dt>Running Time:</dt><dd>#[runningHours]# hours, #[runningMinutes]# minutes</dd>
+          <dt>Remaining Time:</dt><dd>#[remainingHours]# hours, #[remainingMinutes]# minutes</dd>
+        </dl>    
+      </fieldset>
+      <input name="abort" type="submit" class="btn btn-danger" value="Stop"/>
+    </form>
     #(/import)#
     
     #%env/templates/footer.template%#

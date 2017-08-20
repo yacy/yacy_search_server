@@ -46,6 +46,9 @@ public class IndexImportWarc_p {
             prop.put("import_runningMinutes", (WarcImporter.job.runningTime() / 60) % 60);
             prop.put("import_remainingHours", (WarcImporter.job.remainingTime() / 60) / 60);
             prop.put("import_remainingMinutes", (WarcImporter.job.remainingTime() / 60) % 60);
+            if (post != null && post.containsKey("abort")) {
+                WarcImporter.job.quit();
+            }
         } else {
             prop.put("import", 0);
             if (post != null) {
