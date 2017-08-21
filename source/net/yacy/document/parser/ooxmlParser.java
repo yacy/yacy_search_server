@@ -44,6 +44,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
@@ -52,6 +53,8 @@ import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.xml.ODContentHandler;
 import net.yacy.document.parser.xml.ODMetaHandler;
+import net.yacy.document.parser.xml.OOXMLSharedStringsHandler;
+import net.yacy.document.parser.xml.OOXMLSpreeadsheetHandler;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -108,21 +111,53 @@ public class ooxmlParser extends AbstractParser implements Parser {
             // opening the file as zip file
             final ZipFile zipFile= new ZipFile(dest);
             final Enumeration<? extends ZipEntry> zipEnum = zipFile.entries();
+            
+        	final Set<AnchorURL> detectedURLs = new HashSet<>();
 
+			/* Handle first any eventual spreadsheet shared strings table
+			 * As stated by the standard : "A package shall contain exactly one Shared String Table part," */
+			final ZipEntry sharedStringsEntry = zipFile.getEntry(OOXMLSharedStringsHandler.ENTRY_NAME);
+			final List<String> sharedStrings = new ArrayList<>();
+			
+			if (sharedStringsEntry != null) {
+				// extract data
+				try (final InputStream zipFileEntryStream = zipFile.getInputStream(sharedStringsEntry)) {
+					final SAXParser saxParser = getParser();
+					saxParser.parse(zipFileEntryStream, new OOXMLSharedStringsHandler(sharedStrings));
+				}
+			}
+                    
+                    
             // looping through all containing files
             while (zipEnum.hasMoreElements()) {
-
                 // get next zip file entry
                 final ZipEntry zipEntry= zipEnum.nextElement();
                 final String entryName = zipEntry.getName();
+                
+                if(entryName.startsWith("xl/worksheets/sheet")) {
+                	if(writer == null) {
+                        // create a writer for output
+                		writer = new CharBuffer(odtParser.MAX_DOCSIZE, (int) zipEntry.getSize());
+                	}
 
-                // content.xml contains the document content in xml format
-                if (entryName.equals("word/document.xml")
-                	|| entryName.startsWith("ppt/slides/slide")
-                	|| entryName.startsWith("xl/worksheets/sheet")) {
+                    // extract data
+                    final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
+                    try {
+                        final SAXParser saxParser = getParser();
+                        saxParser.parse(zipFileEntryStream, new OOXMLSpreeadsheetHandler(sharedStrings, writer, detectedURLs));
 
-                    // create a writer for output
-                    writer = new CharBuffer(odtParser.MAX_DOCSIZE, (int) zipEntry.getSize());
+                        // close readers and writers
+                    } finally {
+                        zipFileEntryStream.close();
+                    }
+                	
+                } else if (entryName.equals("word/document.xml")
+                	|| entryName.startsWith("ppt/slides/slide")) {
+
+                	if(writer == null) {
+                        // create a writer for output
+                		writer = new CharBuffer(odtParser.MAX_DOCSIZE, (int) zipEntry.getSize());
+                	}
 
                     // extract data
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
@@ -186,7 +221,7 @@ public class ooxmlParser extends AbstractParser implements Parser {
                     descriptions,
                     0.0d, 0.0d,
                     contentBytes,
-                    null,
+                    detectedURLs,
                     null,
                     null,
                     false,
