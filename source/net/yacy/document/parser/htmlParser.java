@@ -28,6 +28,8 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
@@ -36,13 +38,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.LinkedHashMap;
 
+import org.apache.commons.io.IOUtils;
+
+import com.ibm.icu.text.CharsetDetector;
+
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.CommonPattern;
-import net.yacy.cora.util.StreamLimitException;
-import net.yacy.cora.util.StrictLimitInputStream;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -51,14 +55,11 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.html.ScraperInputStream;
 import net.yacy.document.parser.html.TransformerWriter;
-import net.yacy.kelondro.util.FileUtils;
-
-import com.ibm.icu.text.CharsetDetector;
 
 
 public class htmlParser extends AbstractParser implements Parser {
 
-	/** The default maximum number of links to add to a parsed document */
+	/** The default maximum number of links (other than a, area, and canonical and stylesheet links) to add to a parsed document */
     private static final int DEFAULT_MAX_LINKS = 10000;
 
     public htmlParser() {
@@ -103,7 +104,7 @@ public class htmlParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream sourceStream) throws Parser.Failure, InterruptedException {
 
-        return parseWithLimits(location, mimeType, documentCharset, vocscraper, timezoneOffset, sourceStream, DEFAULT_MAX_LINKS, Long.MAX_VALUE);
+        return parseWithLimits(location, mimeType, documentCharset, vocscraper, timezoneOffset, sourceStream, Integer.MAX_VALUE, DEFAULT_MAX_LINKS, Long.MAX_VALUE);
     }
     
     @Override
@@ -115,10 +116,16 @@ public class htmlParser extends AbstractParser implements Parser {
     public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String documentCharset, final VocabularyScraper vocscraper,
     		final int timezoneOffset, final InputStream sourceStream, final int maxLinks, final long maxBytes)
     		throws Failure {
+        return parseWithLimits(location, mimeType, documentCharset, vocscraper, timezoneOffset, sourceStream, maxLinks, maxLinks, maxBytes);
+    }
+    
+    private Document[] parseWithLimits(final DigestURL location, final String mimeType, final String documentCharset, final VocabularyScraper vocscraper,
+    		final int timezoneOffset, final InputStream sourceStream, final int maxAnchors, final int maxLinks, final long maxBytes)
+    		throws Failure {
         try {
             // first get a document from the parsed html
             Charset[] detectedcharsetcontainer = new Charset[]{null};
-            ContentScraper scraper = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxLinks, maxBytes);
+            ContentScraper scraper = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxAnchors, maxLinks, maxBytes);
             // parseToScraper also detects/corrects/sets charset from html content tag
             final Document document = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraper);
             Document documentSnapshot = null;
@@ -127,10 +134,10 @@ public class htmlParser extends AbstractParser implements Parser {
                 // and create a sub-document for snapshot page (which will be merged by loader)
                 // TODO: as a crawl request removes anchor part from original url getRef() is never successful - considere other handling as removeRef() in crawler
                 if (location.getRef() != null && location.getRef().startsWith("!")) {
-                    documentSnapshot = parseAlternativeSnapshot(location, mimeType, documentCharset, vocscraper, timezoneOffset, maxLinks, maxBytes);
+                    documentSnapshot = parseAlternativeSnapshot(location, mimeType, documentCharset, vocscraper, timezoneOffset, maxAnchors, maxLinks, maxBytes);
                 } else { // head tag fragment only allowed on url without anchor hashfragment, but there are discussions that existence of hashfragment anchor takes preference (means allow both)
                     if (scraper.getMetas().containsKey("fragment") && scraper.getMetas().get("fragment").equals("!")) {
-                        documentSnapshot = parseAlternativeSnapshot(location, mimeType, documentCharset, vocscraper, timezoneOffset, maxLinks, maxBytes);
+                        documentSnapshot = parseAlternativeSnapshot(location, mimeType, documentCharset, vocscraper, timezoneOffset, maxAnchors, maxLinks, maxBytes);
                     }
                 }
             } catch (Exception ex1) { // ignore any exception for any issue with snapshot
@@ -190,12 +197,12 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.getDate());
         ppd.setScraperObject(scraper);
         ppd.setIcons(scraper.getIcons());
-        ppd.setPartiallyParsed(scraper.isContentSizeLimitExceeded());
+        ppd.setPartiallyParsed(scraper.isLimitsExceeded());
         
         return ppd;
     }
 
-    public static ContentScraper parseToScraper(final DigestURL location, final String documentCharset, final VocabularyScraper vocabularyScraper, final int timezoneOffset, final String input, final int maxLinks) throws IOException {
+    public static ContentScraper parseToScraper(final DigestURL location, final String documentCharset, final VocabularyScraper vocabularyScraper, final int timezoneOffset, final String input, final int maxAnchors, final int maxLinks) throws IOException {
         Charset[] detectedcharsetcontainer = new Charset[]{null};
         InputStream sourceStream;
         try {
@@ -205,7 +212,7 @@ public class htmlParser extends AbstractParser implements Parser {
         }
         ContentScraper scraper; // for this static methode no need to init local this.scraperObject
         try {
-            scraper = parseToScraper(location, documentCharset, vocabularyScraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxLinks, Long.MAX_VALUE);
+            scraper = parseToScraper(location, documentCharset, vocabularyScraper, detectedcharsetcontainer, timezoneOffset, sourceStream, maxAnchors, maxLinks, Long.MAX_VALUE);
         } catch (Failure e) {
             throw new IOException(e.getMessage());
         }
@@ -220,7 +227,8 @@ public class htmlParser extends AbstractParser implements Parser {
      * @param detectedcharsetcontainer a mutable array of Charsets : filled with the charset detected when parsing
      * @param timezoneOffset the local time zone offset
      * @param sourceStream an open stream on the resource to parse
-     * @param maxLinks the maximum number of links to store in the scraper
+     * @param maxAnchors the maximum number of URLs to process and store in the in the scraper's anchors property
+     * @param maxLinks the maximum number of links (other than a, area, and canonical and stylesheet links) to store in the scraper
      * @param maxBytes the maximum number of content bytes to process
      * @return a scraper containing parsed information
      * @throws Parser.Failure when an error occurred while parsing
@@ -233,13 +241,10 @@ public class htmlParser extends AbstractParser implements Parser {
             final Charset[] detectedcharsetcontainer,
             final int timezoneOffset,
             InputStream sourceStream,
+            final int maxAnchors,
             final int maxLinks,
             final long maxBytes) throws Parser.Failure, IOException {
     	
-    	if(maxBytes >= 0 && maxBytes < Long.MAX_VALUE) {
-    		sourceStream = new StrictLimitInputStream(sourceStream, maxBytes);
-    	}
-
         // make a scraper
         String charset = null;
 
@@ -286,22 +291,24 @@ public class htmlParser extends AbstractParser implements Parser {
         }
         
         // parsing the content
-        // for this static methode no need to init local this.scraperObject here
-        final ContentScraper scraper = new ContentScraper(location, maxLinks, vocabularyScraper, timezoneOffset);
+        // for this static method no need to init local this.scraperObject here
+        final ContentScraper scraper = new ContentScraper(location, maxAnchors, maxLinks, vocabularyScraper, timezoneOffset);
         final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false, Math.max(64, Math.min(4096, sourceStream.available())));
         try {
-            FileUtils.copy(sourceStream, writer, detectedcharsetcontainer[0]);
-        } catch(StreamLimitException e) {
-        	/* maxBytes limit has been reached : do not fail here as we want to use the partially obtained results. */
-        	scraper.setContentSizeLimitExceeded(true);
-        } catch (final IOException e) {
-    		/* A StreamLimitException may be itself wrapped in an IOException by a InputStreamReader */
-        	if(e.getCause() instanceof StreamLimitException) {
-            	/* maxBytes limit has been reached : do not fail here as we want to use the partially obtained results. */
+        	final long maxChars = (long)(maxBytes * detectedcharsetcontainer[0].newDecoder().averageCharsPerByte());
+        	final Reader sourceReader = new InputStreamReader(sourceStream, detectedcharsetcontainer[0]);
+			final long copiedChars = IOUtils.copyLarge(sourceReader, writer, 0, maxChars);
+            if(copiedChars > maxChars) {
+            	/* maxChars limit has been exceeded : do not fail here as we want to use the partially obtained results. */
             	scraper.setContentSizeLimitExceeded(true);
-        	} else {
-        		throw new Parser.Failure("IO error:" + e.getMessage(), location);
-        	}
+            } else if(copiedChars == maxChars) {
+            	/* Exactly maxChars limit reached : let's check if more to read remain. */
+            	if(sourceReader.read() >= 0) {
+            		scraper.setContentSizeLimitExceeded(true);
+            	}
+            }
+        } catch (final IOException e) {
+       		throw new Parser.Failure("IO error:" + e.getMessage(), location);
         } finally {
             writer.flush();
             //sourceStream.close(); keep open for multipe parsing (close done by caller)
@@ -407,12 +414,13 @@ public class htmlParser extends AbstractParser implements Parser {
      * @param documentCharset
      * @param vocscraper
      * @param timezoneOffset
+     * @param maxAnchors the maximum number of URLs to process and store in the in the scraper's anchors property
      * @param maxLinks the maximum number of links to store in the document
      * @param maxBytes the maximum number of content bytes to process
      * @return document as result of parsed snapshot or null if not exist or on any other issue with snapshot
      */
     private Document parseAlternativeSnapshot(final DigestURL location, final String mimeType, final String documentCharset,
-            final VocabularyScraper vocscraper, final int timezoneOffset, final int maxLinks, final long maxBytes) {
+            final VocabularyScraper vocscraper, final int timezoneOffset, final int maxAnchors, final int maxLinks, final long maxBytes) {
         Document documentSnapshot = null;
         try {
             // construct url for case (1) with anchor
@@ -431,7 +439,7 @@ public class htmlParser extends AbstractParser implements Parser {
             InputStream snapshotStream = null;
             try {
             	snapshotStream = locationSnapshot.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
-            	ContentScraper scraperSnapshot = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, snapshotStream, maxLinks, maxBytes);
+            	ContentScraper scraperSnapshot = parseToScraper(location, documentCharset, vocscraper, detectedcharsetcontainer, timezoneOffset, snapshotStream, maxAnchors, maxLinks, maxBytes);
                 documentSnapshot = transformScraper(location, mimeType, detectedcharsetcontainer[0].name(), scraperSnapshot);
             } finally {
             	if(snapshotStream != null) {
