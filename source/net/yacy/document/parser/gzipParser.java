@@ -234,6 +234,9 @@ public class gzipParser extends AbstractParser implements Parser {
             Document[] docs = parseCompressedInputStream(location, charset, timezoneOffset, DEFAULT_DEPTH, zippedContent, maxLinks, maxBytes);
             if (docs != null) {
             	maindoc.addSubDocuments(docs);
+            	if(docs.length > 0 && docs[0].isPartiallyParsed()) {
+            		maindoc.setPartiallyParsed(true);
+            	}
             }
         } catch (final Exception e) {
             throw new Parser.Failure("Unexpected error while parsing gzip file. " + e.getMessage(),location);
