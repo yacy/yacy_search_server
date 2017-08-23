@@ -124,7 +124,9 @@ public final class SearchEvent {
     public final static ConcurrentLog log = new ConcurrentLog("SEARCH");
 
     public static final int SNIPPET_MAX_LENGTH = 220;
-    private static final int MAX_TOPWORDS = 12; // default count of words for topicnavigagtor
+    
+    /** Default count of words for topicnavigagtor */
+    private static final int MAX_TOPWORDS = 12;
 
     private long eventTime;
     public QueryParams query;
@@ -141,56 +143,116 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     public Thread rwiProcess;
     public Thread localsolrsearch;
+    
     /** Offset of the next local Solr index request
      * Example : last local request with offset=10 and itemsPerPage=20, sets this attribute to 30. */
     private int localsolroffset;
-    private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
-    public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
-    public final ScoreMap<String> protocolNavigator; // a counter for protocol types
-    public final ScoreMap<String> dateNavigator; // a counter for file types
-    public final ScoreMap<String> languageNavigator; // a counter for appearance of languages
-    public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
-    private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
-    // map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms)
-    public final Map<String, Navigator> navigatorPlugins; // map of active search navigators key=internal navigator name
+    
+    /** counter for referenced that had been sorted out for other reasons */
+    private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences;
+    
+    /** a counter for the appearance of location coordinates */
+    public final ScoreMap<String> locationNavigator;
+    
+    /** a counter for protocol types */
+    public final ScoreMap<String> protocolNavigator;
+    
+    /** a counter for file types */
+    public final ScoreMap<String> dateNavigator;
+    
+    /** a counter for appearance of languages */
+    public final ScoreMap<String> languageNavigator;
+    
+    /** counters for Vocabularies; key is metatag.getVocabularyName() */
+    public final Map<String, ScoreMap<String>> vocabularyNavigator;
+    
+    /** if 0 no topicNavigator, holds expected number of terms for the topicNavigator */
+    private final int topicNavigatorCount;
+    
+    /** map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms) */
+    public final Map<String, Navigator> navigatorPlugins;
+    
     private final LoaderDispatcher                        loader;
-    private final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    
+    /** a set of word hashes that are used to match with the snippets */
+    private final HandleSet                               snippetFetchWordHashes;
     private final boolean                                 deleteIfSnippetFail;
     private long                                          urlRetrievalAllTime;
     private long                                          snippetComputationAllTime;
     private ConcurrentHashMap<String, LinkedHashSet<String>> snippets;
     private final boolean remote;
-    public final boolean addResultsToLocalIndex; // add received results to local index (defult=true)
+    
+    /** add received results to local index (defult=true) */
+    public final boolean addResultsToLocalIndex;
+    
     /** Maximum size allowed (in kbytes) for a remote document result to be stored to local index */
     private long remoteStoredDocMaxSize;
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
-    private final ScoreMap<String> ref; // reference score computation for the commonSense heuristic
+    
+    /** reference score computation for the commonSense heuristic */
+    private final ScoreMap<String> ref;
     private final long maxtime;
-    private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
-    private final int[] flagcount; // flag counter
+    
+    /** key = domhash (6 bytes); value = like stack */
+    private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache;
+    
+    /** flag counter */
+    private final int[] flagcount;
     private final AtomicInteger feedersAlive, feedersTerminated, snippetFetchAlive;
     private boolean addRunning;
     private final AtomicInteger receivedRemoteReferences;
     private final ReferenceOrder order;
-    private final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
-    private final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
-    private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack; // thats the bag where the RWI search process writes to
-    private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack; // thats the bag where the solr results are written to
-    private final WeakPriorityBlockingQueue<URIMetadataNode>  resultList; // thats the result list where the actual search result is waiting to be displayed
-    private final boolean pollImmediately; // if this is true, then every entry in result List is polled immediately to prevent a re-ranking in the resultList. This is usefull if there is only one index source.
+    
+    /** map for double-check; String/Long relation, addresses ranking number (backreference for deletion) */
+    private final HandleSet urlhashes;
+    
+    /** a map from tagging vocabulary names to tagging predicate uris */
+    private final Map<String, String> taggingPredicates;
+    
+    /** thats the bag where the RWI search process writes to. Contains both references from both local and remote RWIs. */
+    private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack;
+    
+    /** thats the bag where the solr results are written to */
+    private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
+    
+    /** thats the result list where the actual search result is waiting to be displayed */
+    private final WeakPriorityBlockingQueue<URIMetadataNode>  resultList;
+    
+    /** if this is true, then every entry in result List is polled immediately to prevent a re-ranking in the resultList. This is usefull if there is only one index source. */
+    private final boolean pollImmediately;
     public  final boolean excludeintext_image;
     
     // the following values are filled during the search process as statistics for the search
-    public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
-    public final AtomicInteger local_rwi_stored;     // the number of existing hits by the local search in rwi index
-    public final AtomicInteger remote_rwi_available; // the number of hits imported from remote peers (rwi/solr mixed)
-    public final AtomicInteger remote_rwi_stored;    // the number of existing hits at remote site
-    public final AtomicInteger remote_rwi_peerCount; // the number of peers which contributed to the remote search result
-    public final AtomicInteger local_solr_available; // the number of hits generated/ranked by the local search in solr
-    public final AtomicInteger local_solr_stored;    // the number of existing hits by the local search in solr
-    public final AtomicInteger remote_solr_available;// the number of hits imported from remote peers (rwi/solr mixed)
-    public final AtomicInteger remote_solr_stored;   // the number of existing hits at remote site
-    public final AtomicInteger remote_solr_peerCount;// the number of peers which contributed to the remote search result
+    
+    /** the number of hits generated/ranked by the local search in rwi index */
+    public final AtomicInteger local_rwi_available;
+    
+    /** the number of existing hits by the local search in rwi index */
+    public final AtomicInteger local_rwi_stored;
+    
+    /** the number of hits imported from remote peers (rwi/solr mixed) */
+    public final AtomicInteger remote_rwi_available;
+    
+    /** the number of existing hits at remote site */
+    public final AtomicInteger remote_rwi_stored;
+    
+    /** the number of peers which contributed to the remote search result */
+    public final AtomicInteger remote_rwi_peerCount;
+    
+    /** the number of hits generated/ranked by the local search in solr */
+    public final AtomicInteger local_solr_available;
+    
+    /** the number of existing hits by the local search in solr */
+    public final AtomicInteger local_solr_stored;
+    
+    /** the number of hits imported from remote peers (rwi/solr mixed) */
+    public final AtomicInteger remote_solr_available;
+    
+    /** the number of existing hits at remote site */
+    public final AtomicInteger remote_solr_stored;
+    
+    /** the number of peers which contributed to the remote search result */
+    public final AtomicInteger remote_solr_peerCount;
     
     public int getResultCount() {
         return Math.max(
