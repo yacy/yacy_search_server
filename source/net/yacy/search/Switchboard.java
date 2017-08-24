@@ -193,6 +193,7 @@ import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.InstantBusyThread;
+import net.yacy.kelondro.workflow.OneTimeBusyThread;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.peers.DHTSelection;
@@ -337,7 +338,14 @@ public final class Switchboard extends serverSwitch {
         
         // UPnP port mapping
         if ( getConfigBool(SwitchboardConstants.UPNP_ENABLED, false) ) {
-            InstantBusyThread.oneTimeJob(UPnP.class, "addPortMappings", 0);
+        	new OneTimeBusyThread("UPnP.addPortMappings") {
+				
+				@Override
+				public boolean jobImpl() throws Exception {
+					UPnP.addPortMappings();
+					return true;
+				}
+			}.start();
         }
 
         // init TrayIcon if possible
@@ -611,7 +619,14 @@ public final class Switchboard extends serverSwitch {
         // start yacy core
         this.log.config("Starting YaCy Protocol Core");
         this.yc = new Network(this);
-        InstantBusyThread.oneTimeJob(this, "loadSeedLists", 0);
+        new OneTimeBusyThread("Switchboard.loadSeedLists") {
+			
+			@Override
+			public boolean jobImpl() throws Exception {
+				loadSeedLists();
+				return true;
+			}
+		}.start();
         //final long startedSeedListAquisition = System.currentTimeMillis();
 
         // init a DHT transmission dispatcher
@@ -941,7 +956,17 @@ public final class Switchboard extends serverSwitch {
 
         // initializing the resourceObserver
         this.observer = new ResourceObserver(this);
-        InstantBusyThread.oneTimeJob(this.observer, "resourceObserverJob", 0);
+        
+        final ResourceObserver resourceObserver = this.observer;
+    	new OneTimeBusyThread("ResourceObserver.resourceObserverJob") {
+			
+			@Override
+			public boolean jobImpl() throws Exception {
+				resourceObserver.resourceObserverJob();
+				return true;
+			}
+		}.start();
+		
 
         // initializing the stackCrawlThread
         this.crawlStacker =
@@ -1032,101 +1057,142 @@ public final class Switchboard extends serverSwitch {
         // deploy busy threads
         this.log.config("Starting Threads");
         MemoryControl.gc(10000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
-
+        
         deployThread(
                 SwitchboardConstants.CLEANUP,
                 "Cleanup",
                 "cleaning process",
                 null,
-                new InstantBusyThread(
-                    this,
-                    SwitchboardConstants.CLEANUP_METHOD_START,
-                    SwitchboardConstants.CLEANUP_METHOD_JOBCOUNT,
-                    SwitchboardConstants.CLEANUP_METHOD_FREEMEM,
-                    30000,
-                    10000),
+				new InstantBusyThread("Switchboard.cleanupJob", 30000, 10000) {
+
+					@Override
+					public boolean jobImpl() throws Exception {
+						return cleanupJob();
+					}
+
+					@Override
+					public int getJobCount() {
+						return cleanupJobSize();
+					}
+
+					@Override
+					public void freememImpl() {
+					}
+
+				},
                 60000); // all 10 minutes, wait 1 minute until first run
+        
         deployThread(
                 SwitchboardConstants.SCHEDULER,
                 "Scheduler",
                 "starts scheduled processes from the API Processing table",
                 null,
-                new InstantBusyThread(
-                    this,
-                    SwitchboardConstants.SCHEDULER_METHOD_START,
-                    SwitchboardConstants.SCHEDULER_METHOD_JOBCOUNT,
-                    SwitchboardConstants.SCHEDULER_METHOD_FREEMEM,
-                    30000,
-                    10000),
+				new InstantBusyThread("Switchboard.schedulerJob", 30000, 10000) {
+					@Override
+					public boolean jobImpl() throws Exception {
+						return schedulerJob();
+					}
+
+					@Override
+					public int getJobCount() {
+						return schedulerJobSize();
+					}
+
+					@Override
+					public void freememImpl() {
+					}
+				},
                 60000); // all 10 minutes, wait 1 minute until first run
+        
         deployThread(
             SwitchboardConstants.SURROGATES,
             "Surrogates",
             "A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.",
             null,
-            new InstantBusyThread(
-                this,
-                SwitchboardConstants.SURROGATES_METHOD_START,
-                SwitchboardConstants.SURROGATES_METHOD_JOBCOUNT,
-                SwitchboardConstants.SURROGATES_METHOD_FREEMEM,
-                20000,
-                0),
+				new InstantBusyThread("Switchboard.surrogateProcess", 20000, 0) {
+					@Override
+					public boolean jobImpl() throws Exception {
+						return surrogateProcess();
+					}
+
+					@Override
+					public int getJobCount() {
+						return surrogateQueueSize();
+					}
+
+					@Override
+					public void freememImpl() {
+						surrogateFreeMem();
+					}
+				},
             10000);
 
         this.initRemoteCrawler(this.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
         this.initAutocrawl(this.getConfigBool(SwitchboardConstants.AUTOCRAWL, false));
 
+        final CrawlQueues crawlQueue = this.crawlQueues;
         deployThread(
             SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL,
             "Local Crawl",
             "thread that performes a single crawl step from the local crawl queue",
             "/IndexCreateQueues_p.html?stack=LOCAL",
-            new InstantBusyThread(
-                this.crawlQueues,
-                SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_START,
-                SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT,
-                SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM,
-                0,
-                0),
+            new InstantBusyThread("CrawlQueues.coreCrawlJob", 0, 0) {
+        		@Override
+        		public boolean jobImpl() throws Exception {
+        			return crawlQueue.coreCrawlJob();
+        		}
+        	
+        		@Override
+        		public int getJobCount() {
+        			return crawlQueue.coreCrawlJobSize();
+        		}
+        	
+        		@Override
+        		public void freememImpl() {
+        			crawlQueue.freemem();
+        		}
+            },
             10000);
+        
+        final Network net = this.yc;
         deployThread(
             SwitchboardConstants.SEED_UPLOAD,
             "Seed-List Upload",
             "task that a principal peer performes to generate and upload a seed-list to a ftp account",
             null,
-            new InstantBusyThread(
-                this.yc,
-                SwitchboardConstants.SEED_UPLOAD_METHOD_START,
-                SwitchboardConstants.SEED_UPLOAD_METHOD_JOBCOUNT,
-                SwitchboardConstants.SEED_UPLOAD_METHOD_FREEMEM,
-                600000,
-                300000),
+            new InstantBusyThread("Network.publishSeedList", 600000, 300000) {
+        		@Override
+        		public boolean jobImpl() throws Exception {
+        			net.publishSeedList();
+        			return true;
+        		}
+            },
             180000);
+        
         deployThread(
             SwitchboardConstants.PEER_PING,
             "YaCy Core",
             "this is the p2p-control and peer-ping task",
             null,
-            new InstantBusyThread(
-                this.yc,
-                SwitchboardConstants.PEER_PING_METHOD_START,
-                SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
-                SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
-                30000,
-                30000),
+            new InstantBusyThread("Network.peerPing", 30000, 30000) {
+        		@Override
+        		public boolean jobImpl() throws Exception {
+        			net.peerPing();
+        			return true;
+        		}
+            },
             10000);
         deployThread(
             SwitchboardConstants.INDEX_DIST,
             "DHT Distribution",
             "selection, transfer and deletion of index entries that are not searched on your peer, but on others",
             null,
-            new InstantBusyThread(
-                this,
-                SwitchboardConstants.INDEX_DIST_METHOD_START,
-                SwitchboardConstants.INDEX_DIST_METHOD_JOBCOUNT,
-                SwitchboardConstants.INDEX_DIST_METHOD_FREEMEM,
-                10000,
-                1000),
+            new InstantBusyThread("Switchboard.dhtTransferJob", 10000, 1000) {
+        		@Override
+        		public boolean jobImpl() throws Exception {
+        			return dhtTransferJob();
+        		}
+            },
             60000,
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_IDLESLEEP, "5000")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_BUSYSLEEP, "0")),
@@ -1138,28 +1204,20 @@ public final class Switchboard extends serverSwitch {
             "720_ccimport",
             "Content Control Import",
             "this is the content control import thread",
-            null,
-            new InstantBusyThread(
-                new SMWListSyncThread(this, sb.getConfig("contentcontrol.bookmarklist", "contentcontrol"), "Category:Content Source", "/?Url/?Filter/?Category/?Modification date", sb.getConfigBool(
-        				"contentcontrol.smwimport.purgelistoninit", false)),
-                "run",
-                SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
-                SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
-                3000,
-                3000),
+            null, 
+				InstantBusyThread.createFromRunnable(
+						new SMWListSyncThread(this, sb.getConfig("contentcontrol.bookmarklist", "contentcontrol"),
+								"Category:Content Source", "/?Url/?Filter/?Category/?Modification date",
+								sb.getConfigBool("contentcontrol.smwimport.purgelistoninit", false)),
+						3000, 3000),
             2000);
+        
         deployThread(
             "730_ccfilter",
             "Content Control Filter",
             "this is the content control filter update thread",
             null,
-            new InstantBusyThread(
-                new ContentControlFilterUpdateThread(this),
-                "run",
-                SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
-                SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
-                3000,
-                3000),
+            InstantBusyThread.createFromRunnable(new ContentControlFilterUpdateThread(this), 3000, 3000),
             2000);
 
         // set network-specific performance attributes
@@ -1513,6 +1571,8 @@ public final class Switchboard extends serverSwitch {
         this.peers.mySeed().setFlagAcceptRemoteCrawl(activate);
         if (activate) {
             this.crawlQueues.initRemoteCrawlQueues();
+            
+            final CrawlQueues queues = this.crawlQueues;
 
             BusyThread rct = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             if (rct == null) {
@@ -1521,13 +1581,19 @@ public final class Switchboard extends serverSwitch {
                         "Remote Crawl Job",
                         "thread that performes a single crawl/indexing step triggered by a remote peer",
                         "/IndexCreateQueues_p.html?stack=REMOTE",
-                        new InstantBusyThread(
-                                this.crawlQueues,
-                                SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START,
-                                SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT,
-                                SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM,
-                                0,
-                                0),
+						new InstantBusyThread("CrawlQueues.remoteTriggeredCrawlJob", 0, 0) {
+
+							@Override
+							public boolean jobImpl() throws Exception {
+								return queues.remoteTriggeredCrawlJob();
+							}
+
+							@Override
+							public int getJobCount() {
+								return queues.remoteTriggeredCrawlJobSize();
+							}
+
+						},
                         10000);
                 rct = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
@@ -1541,13 +1607,12 @@ public final class Switchboard extends serverSwitch {
                         "Remote Crawl URL Loader",
                         "thread that loads remote crawl lists from other peers",
                         null,
-                        new InstantBusyThread(
-                                this.crawlQueues,
-                                SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START,
-                                SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT,
-                                SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM,
-                                10000,
-                                10000),
+						new InstantBusyThread("CrawlQueues.remoteCrawlLoaderJob", 10000, 10000) {
+							@Override
+							public boolean jobImpl() throws Exception {
+								return queues.remoteCrawlLoaderJob();
+							}
+						},
                         10000);
 
                 rcl = getThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER);
@@ -1569,18 +1634,19 @@ public final class Switchboard extends serverSwitch {
         if (activate) {
             BusyThread acr = getThread(SwitchboardConstants.CRAWLJOB_AUTOCRAWL);
             if (acr == null) {
+            	final CrawlQueues queues = this.crawlQueues;
+            	
                 deployThread(
                         SwitchboardConstants.CRAWLJOB_AUTOCRAWL,
                         "Autocrawl",
                         "Thread that selects and automatically adds crawling jobs to the local queue",
                         null,
-                        new InstantBusyThread(
-                                this.crawlQueues,
-                                SwitchboardConstants.CRAWLJOB_AUTOCRAWL_METHOD_START,
-                                SwitchboardConstants.CRAWLJOB_AUTOCRAWL_METHOD_JOBCOUNT,
-                                SwitchboardConstants.CRAWLJOB_AUTOCRAWL_METHOD_FREEMEM,
-                                10000,
-                                10000),
+						new InstantBusyThread("CrawlQueues.autocrawlJob", 10000, 10000) {
+							@Override
+							public boolean jobImpl() throws Exception {
+								return queues.autocrawlJob();
+							}
+						},
                         10000);
                 
                 acr = getThread(SwitchboardConstants.CRAWLJOB_AUTOCRAWL);
@@ -2832,6 +2898,11 @@ public final class Switchboard extends serverSwitch {
         }
     }
 
+    /**
+     * Parse a response to produce a new document to add to the index.
+     * <strong>Important :</strong> this method is called using reflection as a Workflow process and must therefore remain public.
+     * @param in an indexing workflow entry containing a response to parse
+     */
     public IndexingQueueEntry parseDocument(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_PARSING);
         Document[] documents = null;
@@ -3009,6 +3080,10 @@ public final class Switchboard extends serverSwitch {
         return documents;
     }
 
+    /**
+     * <strong>Important :</strong> this method is called using reflection as a Workflow process and must therefore remain public.
+     * @param in an indexing workflow entry containing a response and the related parsed document(s)
+     */
     public IndexingQueueEntry condenseDocument(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
         CrawlProfile profile = in.queueEntry.profile();
@@ -3083,6 +3158,11 @@ public final class Switchboard extends serverSwitch {
         return new IndexingQueueEntry(in.queueEntry, in.documents, condenser);
     }
 
+    /**
+     * Perform web structure analysis on parsed documents and update the web structure graph. 
+     * <strong>Important :</strong> this method is called using reflection as a Workflow process and must therefore remain public.
+     * @param in an indexing workflow entry containing parsed document(s)
+     */
     public IndexingQueueEntry webStructureAnalysis(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_STRUCTUREANALYSIS);
         for (Document document : in.documents) {
@@ -3096,6 +3176,11 @@ public final class Switchboard extends serverSwitch {
         return in;
     }
 
+    /**
+     * Store a new entry to the local index.
+     * <strong>Important :</strong> this method is called using reflection as a Workflow process and must therefore remain public.
+     * @param in an indexing workflow entry containing parsed document(s) and a condenser instance
+     */
     public void storeDocumentIndex(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_INDEXSTORAGE);
         // the condenser may be null in case that an indexing is not wanted (there may be a no-indexing flag in the file)

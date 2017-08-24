@@ -521,6 +521,9 @@ public final class SearchEvent {
         SearchEventCache.put(this.query.id(false), this);
     }
 
+    /**
+     * A concurrent task to perform the current search query on the local RWI.
+     */
     private class RWIProcess extends Thread {
     
         final Thread waitForThread;
@@ -530,6 +533,9 @@ public final class SearchEvent {
             this.waitForThread = waitForThread;
         }
         
+        /**
+         * Query the local RWI and feed the search event with the obtained results.
+         */
         @Override
         public void run() {
     

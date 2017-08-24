@@ -87,9 +87,6 @@ public final class SwitchboardConstants {
      * connected to the YaCy-network</p>
      */
     public static final String PEER_PING                    = "30_peerping";
-    public static final String PEER_PING_METHOD_START       = "peerPing";
-    public static final String PEER_PING_METHOD_JOBCOUNT    = null;
-    public static final String PEER_PING_METHOD_FREEMEM     = null;
     public static final String PEER_PING_IDLESLEEP          = "30_peerping_idlesleep";
     public static final String PEER_PING_BUSYSLEEP          = "30_peerping_busysleep";
     // 40_peerseedcycle
@@ -98,9 +95,6 @@ public final class SwitchboardConstants {
      * <p>Name of the seed upload thread, providing the so-called seed-lists needed during bootstrapping</p>
      */
     public static final String SEED_UPLOAD                  = "40_peerseedcycle";
-    public static final String SEED_UPLOAD_METHOD_START     = "publishSeedList";
-    public static final String SEED_UPLOAD_METHOD_JOBCOUNT  = null;
-    public static final String SEED_UPLOAD_METHOD_FREEMEM   = null;
     public static final String SEED_UPLOAD_IDLESLEEP        = "40_peerseedcycle_idlesleep";
     public static final String SEED_UPLOAD_BUSYSLEEP        = "40_peerseedcycle_busysleep";
     // 50_localcrawl
@@ -111,9 +105,6 @@ public final class SwitchboardConstants {
      *
      */
     public static final String CRAWLJOB_LOCAL_CRAWL                             = "50_localcrawl";
-    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_START                = "coreCrawlJob";
-    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT             = "coreCrawlJobSize";
-    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM              = "freemem";
     public static final String CRAWLJOB_LOCAL_CRAWL_IDLESLEEP                   = "50_localcrawl_idlesleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP                   = "50_localcrawl_busysleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_LOADPREREQ                  = "50_localcrawl_loadprereq";    
@@ -148,9 +139,6 @@ public final class SwitchboardConstants {
      * <p>Name of the remote triggered crawl thread, responsible for processing a remote crawl received from another peer</p>
      */
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL                  = "62_remotetriggeredcrawl";
-    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START     = "remoteTriggeredCrawlJob";
-    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT  = "remoteTriggeredCrawlJobSize";
-    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM   = null;
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP        = "62_remotetriggeredcrawl_idlesleep";
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP        = "62_remotetriggeredcrawl_busysleep";
  // 70_surrogates
@@ -163,18 +151,12 @@ public final class SwitchboardConstants {
     public static final String SURROGATES_LOADPREREQ           = "70_surrogates_loadprereq";
     public static final String SURROGATES_IDLESLEEP            = "70_surrogates_idlesleep";
     public static final String SURROGATES_BUSYSLEEP            = "70_surrogates_busysleep";
-    public static final String SURROGATES_METHOD_START         = "surrogateProcess";
-    public static final String SURROGATES_METHOD_JOBCOUNT      = "surrogateQueueSize";
-    public static final String SURROGATES_METHOD_FREEMEM       = "surrogateFreeMem";
     // 85_scheduler
     /**
      * <p><code>public static final String <strong>SCHEDULER</strong> = "85_scheduler"</code></p>
      * <p>The cleanup thread which is responsible for the start of scheduled processes from the API table</p>
      */
     public static final String SCHEDULER                    = "85_scheduler";
-    public static final String SCHEDULER_METHOD_START       = "schedulerJob";
-    public static final String SCHEDULER_METHOD_JOBCOUNT    = "schedulerJobSize";
-    public static final String SCHEDULER_METHOD_FREEMEM     = null;
     public static final String SCHEDULER_IDLESLEEP          = "85_scheduler_idlesleep";
     public static final String SCHEDULER_BUSYSLEEP          = "85_scheduler_busysleep";
     // 90_cleanup
@@ -183,9 +165,6 @@ public final class SwitchboardConstants {
      * <p>The cleanup thread which is responsible for pendant cleanup-jobs, news/ranking distribution, etc.</p>
      */
     public static final String CLEANUP                      = "90_cleanup";
-    public static final String CLEANUP_METHOD_START         = "cleanupJob";
-    public static final String CLEANUP_METHOD_JOBCOUNT      = "cleanupJobSize";
-    public static final String CLEANUP_METHOD_FREEMEM       = null;
     public static final String CLEANUP_IDLESLEEP            = "90_cleanup_idlesleep";
     public static final String CLEANUP_BUSYSLEEP            = "90_cleanup_busysleep";
     /**

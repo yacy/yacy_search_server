@@ -35,12 +35,11 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.Translator;
 import net.yacy.data.WorkTables;
 import net.yacy.http.YaCyHttpServer;
-import net.yacy.kelondro.workflow.InstantBusyThread;
+import net.yacy.peers.OnePeerPingBusyThread;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -48,8 +47,8 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.HTTPDFileHandler;
 import net.yacy.utils.translation.TranslatorXliff;
-import net.yacy.utils.upnp.UPnPMappingType;
 import net.yacy.utils.upnp.UPnP;
+import net.yacy.utils.upnp.UPnPMappingType;
 
 public class ConfigBasic {
 
@@ -58,7 +57,7 @@ public class ConfigBasic {
     private static final int NEXTSTEP_PEERNAME  = 2;
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
-
+    
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws FileNotFoundException, IOException {
 
         // return variable that accumulates replacements
@@ -81,7 +80,7 @@ public class ConfigBasic {
 
         //boolean doPeerPing = false;
         if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {
-            InstantBusyThread.oneTimeJob(sb.yc, "peerPing", 0);
+        	new OnePeerPingBusyThread(sb.yc).start();
             //doPeerPing = true;
         }
 
