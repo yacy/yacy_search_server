@@ -7071,6 +7071,9 @@
     <trans-unit id="1ba97b50" xml:space="preserve" approved="no" translate="yes">
        <source>"Re-Set to default"</source>
     </trans-unit>
+    <trans-unit id="8f29d4ba" xml:space="preserve" approved="no" translate="yes">
+        <source>You can boost with vocabularies, use the occurrence counters</source>
+    </trans-unit>
     <trans-unit id="8410369e" xml:space="preserve" approved="no"  translate="yes">
        <source>&gt;Filter Query&lt;</source>
     </trans-unit>
