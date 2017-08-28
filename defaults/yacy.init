@@ -1246,6 +1246,7 @@ federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.lazy = true
 federated.service.solr.indexing.timeout = 60000
 federated.service.solr.indexing.writeEnabled = true
+federated.service.solr.indexing.binaryResponseEnabled = true
 
 # temporary definition of backend services to use.
 # After the migration a rwi+solr combination is used, the solr contains the content of the previously used metadata-db.
