@@ -199,6 +199,7 @@ public class yacysearchitem {
             	prop.put("content_favicon", 1);
             }
             prop.putHTML("content_favicon_faviconUrl", processFaviconURL(ImageViewer.hasFullViewingRights(header, sb), faviconURL));
+            prop.putHTML("content_favicon_urlhash", urlhash);
             
             if (result.limage() == 0) {
             	if (faviconURL == null) {
