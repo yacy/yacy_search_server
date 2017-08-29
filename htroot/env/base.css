@@ -565,15 +565,15 @@ div.urlactions a {
   margin: 0px 0px 0px 3px;
 }
 
-a.bookmarklink:hover, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
+a.bookmarklink:hover, a.bookmarklink:focus, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
   background:url(grafics/bookmark.gif) center center no-repeat;
 }
 
-a.recommendlink:hover, div.searchresults:hover a.recommendlink, div.searchresults.hover a.recommendlink {
+a.recommendlink:hover, a.recommendlink:focus, div.searchresults:hover a.recommendlink, div.searchresults.hover a.recommendlink {
   background:url(grafics/plus.gif) center center no-repeat;
 }
 
-a.deletelink:hover, div.searchresults:hover a.deletelink, div.searchresults.hover a.deletelink {
+a.deletelink:hover, a.deletelink:focus, div.searchresults:hover a.deletelink, div.searchresults.hover a.deletelink {
   background:url(grafics/minus.gif) center center no-repeat;
 }
 
