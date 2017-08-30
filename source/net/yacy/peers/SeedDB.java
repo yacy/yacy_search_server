@@ -213,9 +213,6 @@ public final class SeedDB implements AlternativeDomainNames {
         }
         this.mySeed.setIPs(Switchboard.getSwitchboard().myPublicIPs());
         this.mySeed.put(Seed.PEERTYPE, Seed.PEERTYPE_VIRGIN); // markup startup condition
-
-        String jre = System.getProperty("java.version");
-        this.mySeed.put(Seed.JRE, jre);
     }
 
     public int redundancy() {

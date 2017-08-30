@@ -110,6 +110,17 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
 	  }
   }
   
+  /* Display the eventual button allowing to refresh the sort of cached results 
+   * only when all feeds are terminated and when there is more than one result */
+  var resortCachedElement = document.getElementById("resortCached");
+  if(resortCachedElement != null) {
+	  if(feedRunning) {
+		  resortCachedElement.style.visibility = "hidden";
+	  } else if(totalcountIntValue > 1){
+		  resortCachedElement.style.visibility = "visible";
+	  }
+  }
+  
   if (totalcountIntValue == 0) {
 	  return;
   }

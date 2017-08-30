@@ -1,13 +1,19 @@
 package net.yacy.document.parser;
 
+import static net.yacy.document.parser.htmlParser.parseToScraper;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+
+import org.junit.Test;
 
 import junit.framework.TestCase;
 import net.yacy.cora.document.id.AnchorURL;
@@ -16,8 +22,6 @@ import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
-import static net.yacy.document.parser.htmlParser.parseToScraper;
-import org.junit.Test;
 
 public class htmlParserTest extends TestCase {
 
@@ -98,7 +102,118 @@ public class htmlParserTest extends TestCase {
 
         }
     }
+    
+    /**
+     * Test the htmlParser.parseWithLimits() method with test content within bounds.
+     * @throws Exception when an unexpected error occurred
+     */
+    @Test
+    public void testParseWithLimitsUnreached() throws Exception {
+        System.out.println("htmlParser.parse");
 
+        String[] testFiles = {
+            "umlaute_html_iso.html",
+            "umlaute_html_utf8.html",
+            "umlaute_html_namedentities.html"};
+
+        final String mimetype = "text/html";
+        //final String resulttxt = "In München steht ein Hofbräuhaus. Dort gibt es Bier aus Maßkrügen.";
+
+        htmlParser parser = new htmlParser();
+        for (final String testfile : testFiles) {
+            final String fileName = "test" + File.separator + "parsertest" + File.separator + testfile;
+            final File file = new File(fileName);
+
+            final AnchorURL url = new AnchorURL("http://localhost/" + fileName);
+
+            try (final FileInputStream inStream = new FileInputStream(file);) {
+            	
+                final Document[] docs = parser.parseWithLimits(url, mimetype, null, new VocabularyScraper(), 0, inStream, 1000, 10000);
+                final Document doc = docs[0];
+                assertNotNull("Parser result must not be null for file " + fileName, docs);
+                final String parsedText = doc.getTextString();
+				assertNotNull("Parsed text must not be empty for file " + fileName, parsedText);
+				assertTrue("Parsed text must contain test word with umlaut char in file " + fileName,
+						parsedText.contains("Maßkrügen"));
+				assertEquals("Test anchor must have been parsed for file " + fileName, 1, doc.getAnchors().size());
+				assertFalse("Parsed document should not be marked as partially parsed for file " + fileName, doc.isPartiallyParsed());
+                
+            }
+        }
+    }
+    
+	/**
+	 * Test the htmlParser.parseWithLimits() method, with various maxLinks values
+	 * ranging from zero to the exact anchors number contained in the test content.
+	 * 
+	 * @throws Exception
+	 *             when an unexpected error occurred
+	 */
+	@Test
+	public void testParseWithLimitsOnAnchors() throws Exception {
+		final AnchorURL url = new AnchorURL("http://localhost/test.html");
+		final String mimetype = "text/html";
+		final String charset = StandardCharsets.UTF_8.name();
+		final StringBuilder testHtml = new StringBuilder("<!DOCTYPE html><html><body><p>");
+		testHtml.append("<a href=\"http://localhost/doc1.html\">First link</a>");
+		testHtml.append("<a href=\"http://localhost/doc2.html\">Second link</a>");
+		testHtml.append("<a href=\"http://localhost/doc3.html\">Third link</a>");
+		testHtml.append("</p></body></html>");
+
+		final htmlParser parser = new htmlParser();
+
+		for (int maxLinks = 0; maxLinks <= 3; maxLinks++) {
+			try (InputStream sourceStream = new ByteArrayInputStream(
+					testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
+				final Document[] docs = parser.parseWithLimits(url, mimetype, charset, new VocabularyScraper(), 0,
+						sourceStream, maxLinks, Long.MAX_VALUE);
+				final Document doc = docs[0];
+				assertEquals(maxLinks, doc.getAnchors().size());
+				assertEquals("The parsed document should be marked as partially parsed only when the limit is exceeded",
+						maxLinks < 3, doc.isPartiallyParsed());
+			}
+		}
+	}
+    
+	/**
+	 * Test the htmlParser.parseWithLimits() method, with various maxLinks values
+	 * ranging from zero the exact RSS feed links number contained in the test
+	 * content.
+	 * 
+	 * @throws Exception
+	 *             when an unexpected error occurred
+	 */
+	@Test
+	public void testParseWithLimitsOnRSSFeeds() throws Exception {
+		final AnchorURL url = new AnchorURL("http://localhost/test.html");
+		final String mimetype = "text/html";
+		final String charset = StandardCharsets.UTF_8.name();
+		final StringBuilder testHtml = new StringBuilder("<!DOCTYPE html><html>");
+		testHtml.append("<head>");
+		testHtml.append(
+				"<link rel=\"alternate\" type=\"application/rss+xml\" title=\"Feed1\" href=\"http://localhost/rss1.xml\" />");
+		testHtml.append(
+				"<link rel=\"alternate\" type=\"application/rss+xml\" title=\"Feed2\" href=\"http://localhost/rss2.xml\" />");
+		testHtml.append(
+				"<link rel=\"alternate\" type=\"application/rss+xml\" title=\"Feed3\" href=\"http://localhost/rss3.xml\" />");
+		testHtml.append("</head>");
+		testHtml.append("<body><p>HTML test content</p></body></html>");
+
+		final htmlParser parser = new htmlParser();
+
+		for (int maxLinks = 0; maxLinks <= 3; maxLinks++) {
+			try (InputStream sourceStream = new ByteArrayInputStream(
+					testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
+				final Document[] docs = parser.parseWithLimits(url, mimetype, charset, new VocabularyScraper(), 0,
+						sourceStream, maxLinks, Long.MAX_VALUE);
+				final Document doc = docs[0];
+				assertEquals(maxLinks, doc.getRSS().size());
+				assertEquals("The parsed document should be marked as partially parsed only when the limit is exceeded",
+						maxLinks < 3, doc.isPartiallyParsed());
+			}
+		}
+    }
+    
     /**
      * Test of parseToScraper method, of class htmlParser.
      */
@@ -115,7 +230,7 @@ public class htmlParserTest extends TestCase {
                 + "<figure><img width=\"550px\" title=\"image as exemple\" alt=\"image as exemple\" src=\"./img/my_image.png\"></figrue>" // + img width 550 (+html5 figure)
                 + "</body></html>";
 
-        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10);
+        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10, 10);
         List<AnchorURL> anchorlist = scraper.getAnchors();
 
         String linktxt = anchorlist.get(0).getTextProperty();
@@ -157,7 +272,7 @@ public class htmlParserTest extends TestCase {
         }
         testHtml.append("</p></body></html>");
         
-        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testHtml.toString(), 10);
+        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testHtml.toString(), Integer.MAX_VALUE, Integer.MAX_VALUE);
         assertEquals(nestingDepth, scraper.getAnchors().size());
         assertEquals(1, scraper.getImages().size());
 
@@ -178,7 +293,7 @@ public class htmlParserTest extends TestCase {
                 + "<p>" + textSource + "</p>"
                 + "</body></html>";
 
-        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10);
+        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10, 10);
 
         String txt = scraper.getText();
         System.out.println("ScraperTagTest: [" + textSource + "] = [" + txt + "]");
@@ -207,7 +322,7 @@ public class htmlParserTest extends TestCase {
                 + "</head>\n"
                 + "<body>" + textSource + "</body>\n"
                 + "</html>";
-        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10);
+        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10, 10);
 
         String txt = scraper.getText();
         System.out.println("ScraperScriptTagTest: [" + textSource + "] = [" + txt + "]");

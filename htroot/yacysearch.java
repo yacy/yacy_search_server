@@ -684,7 +684,8 @@ public class yacysearch {
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event
-            if ( SearchEventCache.getEvent(theQuery.id(false)) == null ) {
+            final SearchEvent cachedEvent = SearchEventCache.getEvent(theQuery.id(false));
+            if (cachedEvent == null) {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset
                 startRecord = 0;
             }
@@ -702,6 +703,10 @@ public class yacysearch {
                     sb.getConfigLong(
                         SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
                         sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)));
+            
+            if(post.getBoolean("resortCachedResults") && cachedEvent == theSearch) {
+            	theSearch.resortCachedResults();
+            }
 
             if ( startRecord == 0 && authenticated && !stealthmode ) {
                 if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) ) {
@@ -822,6 +827,13 @@ public class yacysearch {
             prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
+            
+			/* In p2p mode only, add a link allowing user to resort already drained results,
+			 * eventually including fetched results with higher ranks from the Solr and RWI stacks */
+			prop.put("resortEnabled", global && !stealthmode && theSearch.resortCacheAllowed.availablePermits() > 0 ? 1 : 0);
+			prop.put("resortEnabled_url",
+					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true).append("&startRecord=")
+							.append(startRecord).append("&resortCachedResults=true").toString());
 
             // generate the search result lines; the content will be produced by another servlet
             for ( int i = 0; i < theQuery.itemsPerPage(); i++ ) {

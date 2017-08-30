@@ -42,9 +42,12 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
+
+import org.apache.solr.common.SolrDocument;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.cora.document.analysis.Classification;
@@ -89,9 +92,9 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.RemoteSearch;
 import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
-import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -103,8 +106,6 @@ import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.search.snippet.TextSnippet.ResultClass;
-
-import org.apache.solr.common.SolrDocument;
 
 public final class SearchEvent {
 
@@ -124,7 +125,9 @@ public final class SearchEvent {
     public final static ConcurrentLog log = new ConcurrentLog("SEARCH");
 
     public static final int SNIPPET_MAX_LENGTH = 220;
-    private static final int MAX_TOPWORDS = 12; // default count of words for topicnavigagtor
+    
+    /** Default count of words for topicnavigagtor */
+    private static final int MAX_TOPWORDS = 12;
 
     private long eventTime;
     public QueryParams query;
@@ -141,61 +144,128 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     public Thread rwiProcess;
     public Thread localsolrsearch;
+    
     /** Offset of the next local Solr index request
      * Example : last local request with offset=10 and itemsPerPage=20, sets this attribute to 30. */
     private int localsolroffset;
-    private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
-    public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
-    public final ScoreMap<String> protocolNavigator; // a counter for protocol types
-    public final ScoreMap<String> dateNavigator; // a counter for file types
-    public final ScoreMap<String> languageNavigator; // a counter for appearance of languages
-    public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
-    private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
-    // map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms)
-    public final Map<String, Navigator> navigatorPlugins; // map of active search navigators key=internal navigator name
+    
+    /** counter for referenced that had been sorted out for other reasons */
+    private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences;
+    
+    /** a counter for the appearance of location coordinates */
+    public final ScoreMap<String> locationNavigator;
+    
+    /** a counter for protocol types */
+    public final ScoreMap<String> protocolNavigator;
+    
+    /** a counter for file types */
+    public final ScoreMap<String> dateNavigator;
+    
+    /** a counter for appearance of languages */
+    public final ScoreMap<String> languageNavigator;
+    
+    /** counters for Vocabularies; key is metatag.getVocabularyName() */
+    public final Map<String, ScoreMap<String>> vocabularyNavigator;
+    
+    /** if 0 no topicNavigator, holds expected number of terms for the topicNavigator */
+    private final int topicNavigatorCount;
+    
+    /** map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms) */
+    public final Map<String, Navigator> navigatorPlugins;
+    
     private final LoaderDispatcher                        loader;
-    private final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    
+    /** a set of word hashes that are used to match with the snippets */
+    private final HandleSet                               snippetFetchWordHashes;
     private final boolean                                 deleteIfSnippetFail;
     private long                                          urlRetrievalAllTime;
     private long                                          snippetComputationAllTime;
     private ConcurrentHashMap<String, LinkedHashSet<String>> snippets;
     private final boolean remote;
-    public final boolean addResultsToLocalIndex; // add received results to local index (defult=true)
+    
+    /** add received results to local index (defult=true) */
+    public final boolean addResultsToLocalIndex;
+    
     /** Maximum size allowed (in kbytes) for a remote document result to be stored to local index */
     private long remoteStoredDocMaxSize;
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
-    private final ScoreMap<String> ref; // reference score computation for the commonSense heuristic
+    
+    /** reference score computation for the commonSense heuristic */
+    private final ScoreMap<String> ref;
     private final long maxtime;
-    private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
-    private final int[] flagcount; // flag counter
+    
+    /** key = domhash (6 bytes); value = like stack */
+    private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache;
+    
+    /** flag counter */
+    private final int[] flagcount;
     private final AtomicInteger feedersAlive, feedersTerminated, snippetFetchAlive;
     private boolean addRunning;
     private final AtomicInteger receivedRemoteReferences;
     private final ReferenceOrder order;
-    private final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
-    private final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
-    private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack; // thats the bag where the RWI search process writes to
-    private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack; // thats the bag where the solr results are written to
-    private final WeakPriorityBlockingQueue<URIMetadataNode>  resultList; // thats the result list where the actual search result is waiting to be displayed
-    private final boolean pollImmediately; // if this is true, then every entry in result List is polled immediately to prevent a re-ranking in the resultList. This is usefull if there is only one index source.
+    
+    /** map for double-check; String/Long relation, addresses ranking number (backreference for deletion) */
+    private final HandleSet urlhashes;
+    
+    /** a map from tagging vocabulary names to tagging predicate uris */
+    private final Map<String, String> taggingPredicates;
+    
+    /** thats the bag where the RWI search process writes to. Contains both references from both local and remote RWIs. */
+    private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack;
+    
+    /** thats the bag where the solr results are written to */
+    private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
+    
+    /** thats the result list where the actual search result is waiting to be displayed */
+    private final WeakPriorityBlockingQueue<URIMetadataNode>  resultList;
+    
+    /** if this is true, then every entry in result List is polled immediately to prevent a re-ranking in the resultList. This is usefull if there is only one index source. */
+    private final boolean pollImmediately;
     public  final boolean excludeintext_image;
     
     // the following values are filled during the search process as statistics for the search
-    public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
-    public final AtomicInteger local_rwi_stored;     // the number of existing hits by the local search in rwi index
-    public final AtomicInteger remote_rwi_available; // the number of hits imported from remote peers (rwi/solr mixed)
-    public final AtomicInteger remote_rwi_stored;    // the number of existing hits at remote site
-    public final AtomicInteger remote_rwi_peerCount; // the number of peers which contributed to the remote search result
-    public final AtomicInteger local_solr_available; // the number of hits generated/ranked by the local search in solr
-    public final AtomicInteger local_solr_stored;    // the number of existing hits by the local search in solr
-    public final AtomicInteger remote_solr_available;// the number of hits imported from remote peers (rwi/solr mixed)
-    public final AtomicInteger remote_solr_stored;   // the number of existing hits at remote site
-    public final AtomicInteger remote_solr_peerCount;// the number of peers which contributed to the remote search result
+    // In the next comments "filtering" is doubles checking and applying eventual search query constraints/modifiers
     
+    /** the number of hits generated/ranked by the local search in rwi index, after filtering */
+    public final AtomicInteger local_rwi_available;
+    
+    /** the number of existing hits by the local search in rwi index, before any supplementary filtering */
+    public final AtomicInteger local_rwi_stored;
+    
+    /** the number of hits imported from remote peers (rwi/solr mixed + eventual site heuristics), after filtering */
+    public final AtomicInteger remote_rwi_available;
+    
+    /** the number of existing hits at remote sites, before any filtering */
+    public final AtomicInteger remote_rwi_stored;
+    
+    /** the number of peers which contributed to the remote search result */
+    public final AtomicInteger remote_rwi_peerCount;
+    
+    /** the number of hits generated/ranked by the local search in solr, after filtering */
+    public final AtomicInteger local_solr_available;
+    
+    /** the number of existing hits by the local search in solr, before any supplementary filtering */
+    public final AtomicInteger local_solr_stored;
+    
+    /** the number of hits imported from remote peers (rwi/solr mixed), after filtering */
+    public final AtomicInteger remote_solr_available;
+    
+    /** the number of existing hits at remote site (rwi/solr mixed)*/
+    public final AtomicInteger remote_solr_stored;
+    
+    /** the number of peers which contributed to the remote search result */
+    public final AtomicInteger remote_solr_peerCount;
+    
+    /** Ensure only one {@link #resortCachedResults()} operation to be performed on this search event */
+    public final Semaphore resortCacheAllowed;
+    
+    /**
+     * @return the total number of results currently available and filtered (checking doubles and eventual query constraints/modifiers) from the different data sources 
+     */
     public int getResultCount() {
         return Math.max(
                 this.local_rwi_available.get() + this.remote_rwi_available.get() +
-                this.remote_solr_available.get() + this.local_solr_stored.get(),
+                this.remote_solr_available.get() + this.local_solr_available.get(),
                 imageViewed.size() + sizeSpare()
                );
     }
@@ -293,6 +363,7 @@ public final class SearchEvent {
         this.remote_solr_stored   = new AtomicInteger(0);
         this.remote_solr_available= new AtomicInteger(0); // the number of result contributions from all the remote solr peers
         this.remote_solr_peerCount= new AtomicInteger(0); // the number of remote solr peers that have contributed
+        this.resortCacheAllowed = new Semaphore(1);
         final long start = System.currentTimeMillis();
 
         // do a soft commit for fresh results
@@ -459,6 +530,9 @@ public final class SearchEvent {
         SearchEventCache.put(this.query.id(false), this);
     }
 
+    /**
+     * A concurrent task to perform the current search query on the local RWI.
+     */
     private class RWIProcess extends Thread {
     
         final Thread waitForThread;
@@ -468,6 +542,9 @@ public final class SearchEvent {
             this.waitForThread = waitForThread;
         }
         
+        /**
+         * Query the local RWI and feed the search event with the obtained results.
+         */
         @Override
         public void run() {
     
@@ -1344,58 +1421,25 @@ public final class SearchEvent {
     /**
      * Adds the retrieved results (fulltext & rwi) to the result list and
      * computes the text snippets
+     * @param concurrentSnippetFetch when true, allow starting concurrent tasks to fetch snippets when no one are already available
      * @return true on adding entries to resultlist otherwise false
      */
-    public boolean drainStacksToResult() {
+    public boolean drainStacksToResult(boolean concurrentSnippetFetch) {
         // we take one entry from both stacks at the same time
-        boolean success = false;
-        final Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
-        final URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
-        if (node != null) {
-            LinkedHashSet<String> solrsnippetlines = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
-            if (solrsnippetlines != null && solrsnippetlines.size() > 0) {
-                OpensearchResponseWriter.removeSubsumedTitle(solrsnippetlines, node.dc_title());
-                final TextSnippet solrsnippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_CACHE, "");
-                final TextSnippet yacysnippet = new TextSnippet(this.loader,
-                        node,
-                        this.query.getQueryGoal().getIncludeHashes(),
-                        CacheStrategy.CACHEONLY,
-                        false,
-                        180,
-                        false);
-                final String solrsnippetline = solrsnippet.descriptionline(this.getQuery().getQueryGoal());
-                final String yacysnippetline = yacysnippet.descriptionline(this.getQuery().getQueryGoal());
-                URIMetadataNode re = node.makeResultEntry(this.query.getSegment(), this.peers, solrsnippetline.length() >  yacysnippetline.length() ? solrsnippet : yacysnippet);
-                addResult(re, localEntryElement.getWeight());
-                success = true;
-            } else {
-                // we don't have a snippet from solr, try to get it in our way (by reloading, if necessary)
-                if (SearchEvent.this.snippetFetchAlive.get() >= 10) {
-                    // too many concurrent processes
-                    addResult(getSnippet(node, null), localEntryElement.getWeight());
-                    success = true;
-                } else {
+        boolean solrSuccess = drainSolrStackToResult(concurrentSnippetFetch);
+        boolean rwiSuccess = drainRWIStackToResult(concurrentSnippetFetch);
+        return solrSuccess || rwiSuccess;
+    }
 
-                    new Thread("SearchEvent.drainStacksToResult.getSnippet") {
-                        @Override
-                        public void run() {
-                            SearchEvent.this.oneFeederStarted();
-                            try {
-                                SearchEvent.this.snippetFetchAlive.incrementAndGet();
-                                try {
-                                    addResult(getSnippet(node, SearchEvent.this.query.snippetCacheStrategy), localEntryElement.getWeight());
-                                } catch (final Throwable e) {} finally {
-                                    SearchEvent.this.snippetFetchAlive.decrementAndGet();
-                                }
-                            } catch (final Throwable e) {} finally {
-                                SearchEvent.this.oneFeederTerminated();
-                            }
-                        }
-                    }.start();
-                }
-            }
-        }
-        if (SearchEvent.this.snippetFetchAlive.get() >= 10 || MemoryControl.shortStatus()) {
+    /**
+     * Adds the retrieved results from local and remotes RWI to the result list and
+     * computes the text snippets
+     * @param concurrentSnippetFetch when true, allow starting a concurrent task to fetch a snippet when no one is already available 
+     * @return true when an entry has been effectively added to resultlist otherwise false
+     */
+	private boolean drainRWIStackToResult(boolean concurrentSnippetFetch) {
+		boolean success = false;
+		if (SearchEvent.this.snippetFetchAlive.get() >= 10 || MemoryControl.shortStatus() || !concurrentSnippetFetch) {
             // too many concurrent processes
             final URIMetadataNode noderwi = pullOneFilteredFromRWI(true);
             if (noderwi != null) {
@@ -1427,7 +1471,64 @@ public final class SearchEvent {
             if (SearchEvent.this.query.snippetCacheStrategy == null) t.run(); else t.start(); //no need for concurrency if there is no latency
         }
         return success;
-    }
+	}
+
+    /**
+     * Adds the retrieved full text results from local and remotes Solr to the result list and
+     * computes the text snippets
+     * @param concurrentSnippetFetch when true, allow starting a concurrent task to fetch a snippet when no one is already available 
+     * @return true when an entry has been effectively added to resultlist otherwise false
+     */
+	private boolean drainSolrStackToResult(boolean concurrentSnippetFetch) {
+		boolean success = false;
+		final Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
+        final URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
+        if (node != null) {
+            LinkedHashSet<String> solrsnippetlines = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
+            if (solrsnippetlines != null && solrsnippetlines.size() > 0) {
+                OpensearchResponseWriter.removeSubsumedTitle(solrsnippetlines, node.dc_title());
+                final TextSnippet solrsnippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_CACHE, "");
+                final TextSnippet yacysnippet = new TextSnippet(this.loader,
+                        node,
+                        this.query.getQueryGoal().getIncludeHashes(),
+                        CacheStrategy.CACHEONLY,
+                        false,
+                        180,
+                        false);
+                final String solrsnippetline = solrsnippet.descriptionline(this.getQuery().getQueryGoal());
+                final String yacysnippetline = yacysnippet.descriptionline(this.getQuery().getQueryGoal());
+                URIMetadataNode re = node.makeResultEntry(this.query.getSegment(), this.peers, solrsnippetline.length() >  yacysnippetline.length() ? solrsnippet : yacysnippet);
+                addResult(re, localEntryElement.getWeight());
+                success = true;
+            } else {
+                // we don't have a snippet from solr, try to get it in our way (by reloading, if necessary)
+                if (SearchEvent.this.snippetFetchAlive.get() >= 10 || !concurrentSnippetFetch) {
+                    // too many concurrent processes
+                    addResult(getSnippet(node, null), localEntryElement.getWeight());
+                    success = true;
+                } else {
+
+                    new Thread("SearchEvent.drainStacksToResult.getSnippet") {
+                        @Override
+                        public void run() {
+                            SearchEvent.this.oneFeederStarted();
+                            try {
+                                SearchEvent.this.snippetFetchAlive.incrementAndGet();
+                                try {
+                                    addResult(getSnippet(node, SearchEvent.this.query.snippetCacheStrategy), localEntryElement.getWeight());
+                                } catch (final Throwable e) {} finally {
+                                    SearchEvent.this.snippetFetchAlive.decrementAndGet();
+                                }
+                            } catch (final Throwable e) {} finally {
+                                SearchEvent.this.oneFeederTerminated();
+                            }
+                        }
+                    }.start();
+                }
+            }
+        }
+		return success;
+	}
     
     /**
      * place the result to the result vector and apply post-ranking
@@ -1621,7 +1722,7 @@ public final class SearchEvent {
         while ( this.resultList.sizeAvailable() <= resultListIndex &&
                 (this.rwiQueueSize() > 0 || this.nodeStack.sizeQueue() > 0 ||
                 (!this.isFeedingFinished() && System.currentTimeMillis() < finishTime))) {
-			if (!drainStacksToResult()) {
+			if (!drainStacksToResult(true)) {
 				try {
 					Thread.sleep(10);
 				} catch (final InterruptedException e) {
@@ -1788,6 +1889,65 @@ public final class SearchEvent {
         }
         return this.resultList.list(Math.min(this.query.neededResults(), this.resultList.sizeAvailable()));
     }
+    
+	/**
+	 * Re-sort results cached in the resultList and eventually include in that list
+	 * elements with higher ranks from the Solr and RWI stacks.
+	 */
+	public void resortCachedResults() {
+		/*
+		 * If stacks feeding is finished, drain as much as possible elements from stacks
+		 * while their ranking is higher than the last element in the result list
+		 */
+		if (isFeedingFinished() && this.resortCacheAllowed.tryAcquire()) {
+			/*
+			 * First put all elements of the resultList in its own sorted queue to have a
+			 * consistent sorting on the whole set
+			 */
+			this.resultList.requeueDrainedElements();
+
+			/*
+			 * Note : if the resultList is full (its maxSize has been reached) some elements
+			 * with the lowest ranking may be lost in this next step. Not really a problem
+			 * because they were not supposed to be here. If really necessary to keep them,
+			 * growing the maxSize of the resultList should be considered here.
+			 */
+			WeakPriorityBlockingQueue.Element<URIMetadataNode> initialLastResult = this.resultList.getLastInQueue();
+
+			/*
+			 * Drain stacks in two steps (Solr, then RWI), because one stack might still
+			 * contains higher ranked results when only lower ranked remain in the other
+			 */
+
+			/*
+			 * Here we do not fetch snippets concurrently as we want to know immediately the
+			 * drained element position in the final result list
+			 */
+			boolean drained = drainSolrStackToResult(false);
+			WeakPriorityBlockingQueue.Element<URIMetadataNode> newLastResult = this.resultList.getLastInQueue();
+
+			/*
+			 * Loop while at least one element has been added to the results list and is not
+			 * the last considering its final rank
+			 */
+			while (drained && newLastResult == initialLastResult) {
+				drained = drainSolrStackToResult(false);
+				newLastResult = this.resultList.getLastInQueue();
+			}
+
+			drained = drainRWIStackToResult(false);
+			newLastResult = this.resultList.getLastInQueue();
+
+			/*
+			 * Loop while at least one element has been added to the results list and is not
+			 * the last considering its final rank
+			 */
+			while (drained && newLastResult == initialLastResult) {
+				drained = drainRWIStackToResult(false);
+				newLastResult = this.resultList.getLastInQueue();
+			}
+		}
+	}
 
     /**
      * delete a specific entry from the search results

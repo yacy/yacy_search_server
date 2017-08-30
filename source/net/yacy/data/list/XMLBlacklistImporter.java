@@ -28,12 +28,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
-import org.apache.xerces.parsers.SAXParser;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * This class provides methods to import blacklists from an XML file (see
@@ -56,7 +56,7 @@ public class XMLBlacklistImporter extends DefaultHandler {
      */
     public synchronized ListAccumulator parse(InputSource input) throws IOException, SAXException {
 
-        XMLReader reader = new SAXParser();
+        XMLReader reader = XMLReaderFactory.createXMLReader();
         reader.setContentHandler(this);
         reader.parse(input);
 

@@ -8,7 +8,7 @@ import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
 
-public class ContentControlFilterUpdateThread {
+public class ContentControlFilterUpdateThread implements Runnable {
 
 	private final Switchboard sb;
 
@@ -22,6 +22,7 @@ public class ContentControlFilterUpdateThread {
 
     }
 
+	@Override
 	public final void run() {
 
 		if (!this.locked) {

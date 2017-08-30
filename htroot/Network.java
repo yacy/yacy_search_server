@@ -503,7 +503,6 @@ public class Network {
                             prop.putNum(STR_TABLE_LIST + conCount + "_rU", seed.getLong(Seed.URL_IN, 0));
                             prop.putNum(STR_TABLE_LIST + conCount + "_ppm", PPM);
                             prop.putNum(STR_TABLE_LIST + conCount + "_qph", Math.round(6000d * QPM) / 100d);
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_jre", seed.get(Seed.JRE, ""));
                             conCount++;
                         } // seed != null
                     } // while

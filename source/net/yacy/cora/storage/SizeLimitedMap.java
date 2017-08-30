@@ -28,13 +28,28 @@ public class SizeLimitedMap<K, V> extends LinkedHashMap<K, V> implements Map<K, 
 
 	private static final long serialVersionUID = 6088727126150060068L;
 
-	final int sizeLimit;
+	private final int sizeLimit;
+	
+	/** Set to true when at least one eldest entry has been removed because the map size exceeded the size limit. */
+	private boolean limitExceeded;
 	
 	public SizeLimitedMap(int sizeLimit) {
 		this.sizeLimit = sizeLimit;
+		this.limitExceeded = false;
 	}
 
     @Override protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
-        return size() > this.sizeLimit;
+        boolean res = size() > this.sizeLimit;
+        if(res) {
+        	this.limitExceeded = true;
+        }
+        return res;
     }
+    
+    /**
+     * @return true when the size limit has been exceeded at least one time
+     */
+    public boolean isLimitExceeded() {
+		return this.limitExceeded;
+	}
 }

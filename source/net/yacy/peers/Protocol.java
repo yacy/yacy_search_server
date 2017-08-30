@@ -364,31 +364,6 @@ public final class Protocol {
         return result;
     }
 
-    public static Seed querySeed(final Seed target, final String seedHash) {
-        // prepare request
-        final String salt = crypt.randomSalt();
-
-        // send request
-        try {
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
-            parts.put("object", UTF8.StringBody("seed"));
-            parts.put("env", UTF8.StringBody(seedHash));
-            String ip = target.getIP();
-            final Post post = new Post(target.getPublicAddress(ip), target.hash, "/yacy/query.html", parts, 10000);
-            final Map<String, String> result = FileUtils.table(post.result);
-
-            if ( result == null || result.isEmpty() ) {
-                return null;
-            }
-            //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
-            return Seed.genRemoteSeed(result.get("response"), false, ip);
-        } catch (final Exception e ) {
-            Network.log.warn("yacyClient.querySeed error:" + e.getMessage());
-            return null;
-        }
-    }
-
     public static long[] queryRWICount(final String targetAddress, final String targetHash, int timeout) {        
         // prepare request
         final String salt = crypt.randomSalt();
@@ -397,7 +372,6 @@ public final class Protocol {
         try {
             final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
             parts.put("object", UTF8.StringBody("rwicount"));
-            parts.put("ttl", UTF8.StringBody("0"));
             parts.put("env", UTF8.StringBody(""));
             //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "posting request to " + targetAddress);
             final Post post = new Post(targetAddress, targetHash, "/yacy/query.html", parts, timeout);
@@ -910,7 +884,6 @@ public final class Protocol {
             parts.put("partitions", UTF8.StringBody(Integer.toString(partitions)));
             parts.put("query", UTF8.StringBody(wordhashes));
             parts.put("exclude", UTF8.StringBody(excludehashes));
-            // parts.put("duetime", UTF8.StringBody("1000")); // not used or red by receiver, max wait time given by praram "time" (2016-04-25 v1.83/9772)
             parts.put("urls", UTF8.StringBody(urlhashes));
             parts.put("prefer", UTF8.StringBody(event.query.prefer.pattern()));
             parts.put("filter", UTF8.StringBody(event.query.urlMaskString));
@@ -920,7 +893,6 @@ public final class Protocol {
             //parts.put("sitehost", UTF8.StringBody(event.query.modifier.sitehost));
             parts.put("author", UTF8.StringBody(event.query.modifier.author));
             parts.put("contentdom", UTF8.StringBody(contentdom == null ? ContentDomain.ALL.toString() : contentdom.toString()));
-            parts.put("ttl", UTF8.StringBody("0"));
             parts.put("maxdist", UTF8.StringBody(Integer.toString(maxDistance)));
             parts.put("profile", UTF8.StringBody(crypt.simpleEncode(event.query.ranking.toExternalString())));
             parts.put("constraint", UTF8.StringBody((event.query.constraint == null) ? "" : event.query.constraint.exportB64()));
@@ -1603,15 +1575,16 @@ public final class Protocol {
         Map<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout);
 
         if ( in == null ) {
+            // targetSeed interface departure is already handled within transferRWI() for no response situation
             String errorCause = "no connection from transferRWI";
-            seeds.peerActions.peerDeparture(targetSeed, errorCause); // disconnect unavailable peer
             return errorCause;
         }
 
         String result = in.get("result");
         if ( result == null ) {
             String errorCause = "no result from transferRWI";
-            seeds.peerActions.peerDeparture(targetSeed, errorCause); // disconnect unavailable peer
+            String usedIP = in.get(Seed.IP);
+            seeds.peerActions.interfaceDeparture(targetSeed, usedIP); // disconnect unavailable peer
             return errorCause;
         }
 
@@ -1647,7 +1620,8 @@ public final class Protocol {
         result = in.get("result");
         if ( result == null ) {
             String errorCause = "no result from transferURL";
-            seeds.peerActions.peerDeparture(targetSeed, errorCause); // disconnect unavailable peer
+            String usedIP = in.get(Seed.IP);
+            seeds.peerActions.interfaceDeparture(targetSeed, usedIP); // disconnect unavailable peer ip
             return errorCause;
         }
 
@@ -1665,75 +1639,101 @@ public final class Protocol {
         return null;
     }
 
+    /**
+     * Transfer Reverse Word Index entries to remote peer.
+     * If the used IP is not responding, this IP (interface) is removed from
+     * targtSeed IP list.
+     * Remote peer responds with list of unknown url hashes
+     *
+     * @param targetSeed
+     * @param indexes
+     * @param gzipBody
+     * @param timeout
+     * @return peer response or null if transfer failed
+     */
     private static Map<String, String> transferRWI(
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
         boolean gzipBody,
         final int timeout) {
-        String ip = targetSeed.getIP();
-        if ( ip == null ) {
-            Network.log.warn("no address for transferRWI");
-            return null;
-        }
-        final String address = targetSeed.getPublicAddress(ip);
+        for (String ip : targetSeed.getIPs()) {
+            if (ip == null) {
+                Network.log.warn("no address for transferRWI");
+                return null;
+            }
+            final String address = targetSeed.getPublicAddress(ip);
 
-        // prepare post values
-        final String salt = crypt.randomSalt();
+            // prepare post values
+            final String salt = crypt.randomSalt();
 
-        // enabling gzip compression for post request body
-        if ( gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED) ) {
-            gzipBody = false;
-        }
+            // enabling gzip compression for post request body
+            if ( gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED) ) {
+                gzipBody = false;
+            }
 
-        int indexcount = 0;
-        final StringBuilder entrypost = new StringBuilder(indexes.size() * 73);
-        Iterator<WordReference> eenum;
-        Reference entry;
-        for ( final ReferenceContainer<WordReference> ic : indexes ) {
-            eenum = ic.entries();
-            while ( eenum.hasNext() ) {
-                entry = eenum.next();
-                entrypost
-                    .append(ASCII.String(ic.getTermHash()))
-                    .append(entry.toPropertyForm())
-                    .append(serverCore.CRLF_STRING);
-                indexcount++;
+            int indexcount = 0;
+            final StringBuilder entrypost = new StringBuilder(indexes.size() * 73);
+            Iterator<WordReference> eenum;
+            Reference entry;
+            for ( final ReferenceContainer<WordReference> ic : indexes ) {
+                eenum = ic.entries();
+                while ( eenum.hasNext() ) {
+                    entry = eenum.next();
+                    entrypost
+                            .append(ASCII.String(ic.getTermHash()))
+                            .append(entry.toPropertyForm())
+                            .append(serverCore.CRLF_STRING);
+                    indexcount++;
+                }
+            }
+
+            if ( indexcount == 0 ) {
+                // nothing to do but everything ok
+                final Map<String, String> result = new HashMap<String, String>(2);
+                result.put("result", "ok");
+                result.put("unknownURL", "");
+                return result;
+            }
+            try {
+                final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
+                parts.put("wordc", UTF8.StringBody(Integer.toString(indexes.size())));
+                parts.put("entryc", UTF8.StringBody(Integer.toString(indexcount)));
+                parts.put("indexes", UTF8.StringBody(entrypost.toString()));
+                final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
+                final byte[] content =
+                        httpClient.POSTbytes(
+                                new MultiProtocolURL("http://" + address + "/yacy/transferRWI.html"),
+                                targetSeed.getHexHash() + ".yacyh",
+                                parts,
+                                gzipBody, true);
+                final Iterator<String> v = FileUtils.strings(content);
+                // this should return a list of urlhashes that are unknown
+
+                final Map<String, String> result = FileUtils.table(v);
+                // return the transfered index data in bytes (for debugging only)
+                result.put("indexPayloadSize", Integer.toString(entrypost.length()));
+                result.put(Seed.IP, ip); // add used ip to result for error handling (in case no "result" key was received)
+                return result;
+            } catch (final Exception e ) {
+                Network.log.info("yacyClient.transferRWI to " + address + " error: " + e.getMessage());
+                // disconnect unavailable peer ip
+                Switchboard.getSwitchboard().peers.peerActions.interfaceDeparture(targetSeed, ip);
             }
         }
-
-        if ( indexcount == 0 ) {
-            // nothing to do but everything ok
-            final Map<String, String> result = new HashMap<String, String>(2);
-            result.put("result", "ok");
-            result.put("unknownURL", "");
-            return result;
-        }
-        try {
-            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
-            parts.put("wordc", UTF8.StringBody(Integer.toString(indexes.size())));
-            parts.put("entryc", UTF8.StringBody(Integer.toString(indexcount)));
-            parts.put("indexes", UTF8.StringBody(entrypost.toString()));
-            // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferRWI.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
-            final byte[] content =
-                httpClient.POSTbytes(
-                    new MultiProtocolURL("http://" + address + "/yacy/transferRWI.html"),
-                    targetSeed.getHexHash() + ".yacyh",
-                    parts,
-                    gzipBody, true);
-            final Iterator<String> v = FileUtils.strings(content);
-            // this should return a list of urlhashes that are unknown
-
-            final Map<String, String> result = FileUtils.table(v);
-            // return the transfered index data in bytes (for debugging only)
-            result.put("indexPayloadSize", Integer.toString(entrypost.length()));
-            return result;
-        } catch (final Exception e ) {
-            Network.log.info("yacyClient.transferRWI to " + address + " error: " + e.getMessage());
-            return null;
-        }
+        return null;
     }
 
+    /**
+     * Transfer URL entries to remote peer
+     *
+     * @param targetSeed
+     * @param uhs
+     * @param urlRefs
+     * @param segment
+     * @param gzipBody
+     * @param timeout
+     * @return remote peer response
+     */
     private static Map<String, String> transferURL(
         final Seed targetSeed,
         final String[] uhs,
@@ -1742,97 +1742,104 @@ public final class Protocol {
         boolean gzipBody,
         final int timeout) {
         // this post a message to the remote message board
-        String ip = targetSeed.getIP();
-        final String address = targetSeed.getPublicAddress(ip);
-        if ( address == null ) {
-            return null;
-        }
+        for (String ip : targetSeed.getIPs()) {
+            final String address = targetSeed.getPublicAddress(ip);
+            if ( address == null ) {
+                return null;
+            }
 
-        // prepare post values
-        final String salt = crypt.randomSalt();
-        final Map<String, ContentBody> parts =
-            basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
+            // prepare post values
+            final String salt = crypt.randomSalt();
+            final Map<String, ContentBody> parts =
+                basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
 
-        // enabling gzip compression for post request body
-        if ( gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED) ) {
-            gzipBody = false;
-        }
+            // enabling gzip compression for post request body
+            if ( gzipBody && (targetSeed.getVersion() < yacyVersion.YACY_SUPPORTS_GZIP_POST_REQUESTS_CHUNKED) ) {
+                gzipBody = false;
+            }
 
-        // extract the urlCache from the result; this is io-intensive;
-        // other transmissions should not be started as long as this is running
-        byte[] key;
-        URIMetadataNode url;
-        String resource;
-        int urlc = 0;
-        int urlPayloadSize = 0;
-        metadataRetrievalRunning.incrementAndGet();
-        for (int i = 0; i < uhs.length; i++) {
-        	key = ASCII.getBytes(uhs[i]);
+            // extract the urlCache from the result; this is io-intensive;
+            // other transmissions should not be started as long as this is running
+            byte[] key;
+            URIMetadataNode url;
+            String resource;
+            int urlc = 0;
+            int urlPayloadSize = 0;
+            metadataRetrievalRunning.incrementAndGet();
+            for (int i = 0; i < uhs.length; i++) {
+                key = ASCII.getBytes(uhs[i]);
         	if (urlRefs.has(key)) {
-        		url = segment.fulltext().getMetadata(key);
-                if (url == null) {
-                    if (Network.log.isFine()) Network.log.fine("DEBUG transferIndex: requested url hash '" + uhs[i] + "'");
-                    continue;
-                }
-                resource = url.toString();
-                //System.out.println("*** DEBUG resource = " + resource);
-                if ( resource != null && resource.indexOf(0) == -1 ) {
-                    parts.put("url" + urlc, UTF8.StringBody(resource));
-                    urlPayloadSize += resource.length();
-                    urlc++;
-                }
+                    url = segment.fulltext().getMetadata(key);
+                    if (url == null) {
+                        if (Network.log.isFine()) Network.log.fine("DEBUG transferIndex: requested url hash '" + uhs[i] + "'");
+                        continue;
+                    }
+                    resource = url.toString();
+                    //System.out.println("*** DEBUG resource = " + resource);
+                    if ( resource != null && resource.indexOf(0) == -1 ) {
+                        parts.put("url" + urlc, UTF8.StringBody(resource));
+                        urlPayloadSize += resource.length();
+                        urlc++;
+                    }
         	}
-        }
-        metadataRetrievalRunning.decrementAndGet();
+            }
+            metadataRetrievalRunning.decrementAndGet();
         
-        try {
-            parts.put("urlc", UTF8.StringBody(Integer.toString(urlc)));
-            // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/transferURL.html"), timeout, targetSeed.getHexHash() + ".yacyh", parts, gzipBody);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
-            final byte[] content =
-                httpClient.POSTbytes(
-                    new MultiProtocolURL("http://" + address + "/yacy/transferURL.html"),
-                    targetSeed.getHexHash() + ".yacyh",
-                    parts,
-                    gzipBody, true);
-            final Iterator<String> v = FileUtils.strings(content);
+            try {
+                parts.put("urlc", UTF8.StringBody(Integer.toString(urlc)));
+                final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
+                final byte[] content =
+                    httpClient.POSTbytes(
+                        new MultiProtocolURL("http://" + address + "/yacy/transferURL.html"),
+                        targetSeed.getHexHash() + ".yacyh",
+                        parts,
+                        gzipBody, true);
+                final Iterator<String> v = FileUtils.strings(content);
 
-            final Map<String, String> result = FileUtils.table(v);
-            // return the transfered url data in bytes (for debugging only)
-            result.put("urlPayloadSize", Integer.toString(urlPayloadSize));
-            return result;
-        } catch (final Exception e ) {
-            Network.log.warn("yacyClient.transferURL to " + address + " error: " + e.getMessage());
-            return null;
+                final Map<String, String> result = FileUtils.table(v);
+                // return the transfered url data in bytes (for debugging only)
+                result.put("urlPayloadSize", Integer.toString(urlPayloadSize));
+                result.put(Seed.IP, ip); // add used ip to result for error handling (in case no "result" key was received)
+                return result;
+            } catch (final Exception e ) {
+                Network.log.warn("yacyClient.transferURL to " + address + " error: " + e.getMessage());
+            }
         }
+        return null;
     }
 
+    /**
+     * Receive remote peers profile data
+     *
+     * @param targetSeed
+     * @return profile or null
+     */
     public static Map<String, String> getProfile(final Seed targetSeed) {
-        // ReferenceContainerCache<HostReference> ref = loadIDXHosts(targetSeed);
 
         // this post a message to the remote message board
         final String salt = crypt.randomSalt();
 
-        String address = targetSeed.getPublicAddress(targetSeed.getIP());
-        if ( address == null ) {
-            address = "localhost:8090";
+        for (String ip : targetSeed.getIPs()) {
+            String address = targetSeed.getPublicAddress(ip);
+            if ( address == null ) {
+                break;
+            }
+            try {
+                final Map<String, ContentBody> parts =
+                    basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
+                final HTTPClient httpclient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 15000);
+                final byte[] content =
+                    httpclient.POSTbytes(
+                        new MultiProtocolURL("http://" + address + "/yacy/profile.html"),
+                        targetSeed.getHexHash() + ".yacyh",
+                        parts,
+                        false, true);
+                return FileUtils.table(content);
+            } catch (final Exception e ) {
+                Network.log.warn("yacyClient.getProfile error:" + e.getMessage());
+            }
         }
-        try {
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), targetSeed.hash, salt);
-            // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/profile.html"), 5000, targetSeed.getHexHash() + ".yacyh", parts);
-            final HTTPClient httpclient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 15000);
-            final byte[] content =
-                httpclient.POSTbytes(
-                    new MultiProtocolURL("http://" + address + "/yacy/profile.html"),
-                    targetSeed.getHexHash() + ".yacyh",
-                    parts,
-                    false, true);
-            return FileUtils.table(content);
-        } catch (final Exception e ) {
-            Network.log.warn("yacyClient.getProfile error:" + e.getMessage());
-            return null;
-        }
+        return null;
     }
 
     public static ReferenceContainerCache<HostReference> loadIDXHosts(final Seed target) {

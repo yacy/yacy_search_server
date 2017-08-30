@@ -40,6 +40,8 @@ import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.cora.lod.vocabulary.Geo;
 import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.crawler.retrieval.Response;
+import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
@@ -159,6 +161,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         SolrIndexSearcher searcher = request.getSearcher();
         DocIterator iterator = response.iterator();
         String urlhash = null;
+        MultiProtocolURL url = null;
         for (int i = 0; i < responseCount; i++) {
             openTag(writer, "item");
             int id = iterator.nextDoc();
@@ -168,6 +171,8 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
             List<String> texts = new ArrayList<String>();
             List<String> descriptions = new ArrayList<String>();
             String title = "";
+            List<Object> images_protocol_obj = new ArrayList<>();
+        	List<String> images_stub = new ArrayList<>();
             for (int j = 0; j < fieldc; j++) {
                 IndexableField value = fields.get(j);
                 String fieldName = value.name();
@@ -184,7 +189,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     String u = value.stringValue();
                     solitaireTag(writer, RSSMessage.Token.link.name(), u);
                     try {
-                        MultiProtocolURL url = new MultiProtocolURL(u);
+                        url = new MultiProtocolURL(u);
                         solitaireTag(writer, YaCyMetadata.host.getURIref(), url.getHost());
                         solitaireTag(writer, YaCyMetadata.path.getURIref(), url.getPath());
                         solitaireTag(writer, YaCyMetadata.file.getURIref(), url.getFileName());
@@ -232,6 +237,26 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                     texts.add(value.stringValue());
                     continue;
                 }
+                if (CollectionSchema.images_protocol_sxt.getSolrFieldName().equals(fieldName)) {
+                	images_protocol_obj.add(value.stringValue());
+                    continue;
+                }
+                if (CollectionSchema.images_urlstub_sxt.getSolrFieldName().equals(fieldName)) {
+                	images_stub.add(value.stringValue());
+                    continue;
+                }
+            }
+            
+            if (Math.min(images_protocol_obj.size(), images_stub.size()) > 0) {
+            	List<String> images_protocol = CollectionConfiguration.indexedList2protocolList(images_protocol_obj, images_protocol_obj.size());
+            	String imageurl = images_protocol.get(0) + "://" + images_stub.get(0);
+                 writer.write("<media:content medium=\"image\" url=\"");
+                 XML.escapeCharData(imageurl, writer); writer.write("\"/>\n");
+            } else {
+            	if (url != null && Response.docTypeExt(MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase()) == Response.DT_IMAGE) {
+            		writer.write("<media:content medium=\"image\" url=\"");
+                    XML.escapeCharData(url.toNormalform(true), writer); writer.write("\"/>\n");
+            	}
             }
             
             // compute snippet from texts

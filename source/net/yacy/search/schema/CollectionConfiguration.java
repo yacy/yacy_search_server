@@ -54,7 +54,6 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -534,11 +533,18 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             add(doc, CollectionSchema.author, author);
         }
         if (allAttr || contains(CollectionSchema.last_modified)) {
-            Date lastModified = responseHeader == null ? new Date() : responseHeader.lastModified();
-            if (lastModified == null) lastModified = new Date();
-            if (document.getLastModified().before(lastModified)) lastModified = document.getLastModified();
-            long firstSeen = segment.getFirstSeenTime(digestURL.hash());
-            if (firstSeen > 0 && firstSeen < lastModified.getTime()) lastModified = new Date(firstSeen); // patch the date if we have seen the document earlier
+            Date lastModified = responseHeader == null ? document.getLastModified() : responseHeader.lastModified();
+            if (lastModified == null) {
+                long firstSeen = segment.getFirstSeenTime(digestURL.hash());
+                if (firstSeen > 0) {
+                    lastModified = new Date(firstSeen); // patch the date if we have seen the document earlier
+                } else {
+                    lastModified = new Date();
+                }
+            }
+            if (document.getLastModified().before(lastModified)) {
+                lastModified = document.getLastModified();
+            }
             add(doc, CollectionSchema.last_modified, lastModified);
         }
         if (allAttr || contains(CollectionSchema.dates_in_content_dts) || contains(CollectionSchema.dates_in_content_count_i)) {
@@ -1316,11 +1322,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 			final CollectionConfiguration collection, final String collection1query, final Map<String, CRV> rankings,
 			final AtomicInteger allcount) {
 		final Map<String, Long> hostExtentCache = new HashMap<String, Long>(); // a mapping from the host id to the number of documents which contain this host-id
-        final Set<String> uniqueURLs = new ConcurrentHashSet<String>(); // will be used in a concurrent environment
+        final Set<String> uniqueURLs = ConcurrentHashMap.newKeySet(); // will be used in a concurrent environment
         final Set<String> localOmitFields = new HashSet<String>();
         localOmitFields.add(CollectionSchema.process_sxt.getSolrFieldName());
         localOmitFields.add(CollectionSchema.harvestkey_s.getSolrFieldName());
-        final Collection<String> failids = new ConcurrentHashSet<String>();
+        final Collection<String> failids = ConcurrentHashMap.newKeySet();
         final AtomicInteger countcheck = new AtomicInteger(0);
         final AtomicInteger proccount = new AtomicInteger();
         final AtomicInteger proccount_referencechange = new AtomicInteger();

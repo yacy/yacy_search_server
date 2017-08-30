@@ -115,8 +115,6 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
      * elements that had been on the stack cannot be put in again,
      * they are checked against the drained list
      * @param element the element (must have a equals() method)
-     * @param weight the weight of the element
-     * @param remove - the rating of the element that shall be removed in case that the stack has an size overflow
      */
     public synchronized void put(final Element<E> element) {
         // put the element on the stack
@@ -171,6 +169,19 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
     }
     
     /**
+     * Enqueue again all drained elements. Do nothing when there is no internal drained list.
+     */
+    public synchronized void requeueDrainedElements() {
+    	if(this.drained != null) {
+    		final int initialDrainedSize = this.drained.size();
+    		for(int step = 0; step < initialDrainedSize; step++) {
+    			Element<E> element = this.drained.remove(this.drained.size() - 1);
+    			put(element);
+    		}
+    	}
+    }
+    
+    /**
      * remove a drained element
      * @param element
      */
@@ -189,12 +200,23 @@ public class WeakPriorityBlockingQueue<E> implements Serializable {
     */
     
     /**
-     * return the element with the smallest weight, but do not remove it
+     * Return the element with the smallest weight from the internal queue, but do not remove it
      * @return null if no element is on the queue or the head of the queue
      */
     public synchronized Element<E> peek() {
         if (this.queue.isEmpty()) return null;
         return this.queue.first();
+    }
+    
+    /**
+     * Return the element with the highest weight, but do not remove it
+     * @return null if no element is on the queue or the tail of the queue
+     */
+    public synchronized Element<E> getLastInQueue() {
+        if (this.queue.isEmpty()) {
+        	return null;
+        }
+        return this.queue.last();
     }
 
     /**

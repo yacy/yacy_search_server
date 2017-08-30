@@ -47,6 +47,8 @@ import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.SnapshotImagesReponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -162,6 +164,8 @@ public class SolrSelectServlet extends HttpServlet {
                 */
             }
             String q = mmsp.get(CommonParams.Q, "");
+            ConcurrentLog.info("SolrSelect", "client=" + RequestHeader.client(request) + " q=" + q); // to detect bots and dos
+
             if (querystring.length() == 0) querystring = q;
             if (!mmsp.getMap().containsKey(CommonParams.START)) {
                 int startRecord = mmsp.getFieldInt("startRecord", null, CommonParams.START_DEFAULT);

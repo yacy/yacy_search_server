@@ -35,6 +35,8 @@ import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHe
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.JSONObject;
+import net.yacy.crawler.retrieval.Response;
+import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
@@ -141,6 +143,9 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             List<String> descriptions = new ArrayList<String>();
             String title = "";
             StringBuilder path = new StringBuilder(80);
+            List<Object> images_protocol_obj = new ArrayList<>();
+        	List<String> images_stub = new ArrayList<>();
+        	
             for (int j = 0; j < fieldc; j++) {
                 IndexableField value = fields.get(j);
                 String fieldName = value.name();
@@ -193,8 +198,31 @@ public class YJsonResponseWriter implements QueryResponseWriter {
                     solitaireTag(writer, "sizename", sizemb > 0 ? (Integer.toString(sizemb) + " mbyte") : sizekb > 0 ? (Integer.toString(sizekb) + " kbyte") : (Integer.toString(size) + " byte"));
                     continue;
                 }
+                if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
+                    Date d = new Date(Long.parseLong(value.stringValue()));
+                    solitaireTag(writer, "pubDate", HeaderFramework.formatRFC1123(d));
+                    continue;
+                }
+                if (CollectionSchema.images_protocol_sxt.getSolrFieldName().equals(fieldName)) {
+                	images_protocol_obj.add(value.stringValue());
+                    continue;
+                }
+                if (CollectionSchema.images_urlstub_sxt.getSolrFieldName().equals(fieldName)) {
+                	images_stub.add(value.stringValue());
+                    continue;
+                }
 
                 //missing: "code","faviconCode"
+            }
+
+            if (Math.min(images_protocol_obj.size(), images_stub.size()) > 0) {
+            	List<String> images_protocol = CollectionConfiguration.indexedList2protocolList(images_protocol_obj, images_protocol_obj.size());
+            	String imageurl = images_protocol.get(0) + "://" + images_stub.get(0);
+            	solitaireTag(writer, "image", imageurl);
+            } else {
+            	if (url != null && Response.docTypeExt(MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase()) == Response.DT_IMAGE) {
+            		solitaireTag(writer, "image", url.toNormalform(true));
+            	}
             }
             
             // compute snippet from texts            

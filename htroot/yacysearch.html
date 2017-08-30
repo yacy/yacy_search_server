@@ -80,6 +80,12 @@ Use the RSS search result format to add static searches to your RSS reader, if y
     	placeholder="#[promoteSearchPageGreeting]#" value="#[former]#" #(focus)#::autofocus="autofocus"#(/focus)# onFocus="this.select()" onclick="document.getElementById('Enter').innerHTML = 'search'"/>
     <div class="input-group-btn">
        <button id="Enter" name="Enter" class="btn btn-default" type="submit">search</button>
+       #(resortEnabled)#::
+       <a id="resortCached" class="btn btn-default" style="visibility: hidden;" role="button" href="#[url]#" 
+       		title="Refresh sorting. Depending on their rank, some results fetched in background may then appear on this page.">
+        	<span  class="glyphicon glyphicon-sort"></span>
+       </a>
+       #(/resortEnabled)#
     </div>
   </div>
     <input type="hidden" name="contentdom" id="contentdom" value="#[contentdom]#" />
@@ -106,7 +112,9 @@ Use the RSS search result format to add static searches to your RSS reader, if y
 	<div id="results"></div>
     <div class="progress">
       <div class="progress-bar progress-bar-info" id="progressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:0%;">
-        <span style="position:absolute;display:block;text-align:left;width:100%;color:black;">&nbsp;&nbsp;&nbsp;<strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)# <span id="feedingStatus" style="visibility: hidden;" class="glyphicon glyphicon-transfer" title="YaCy server is fetching results from available data sources."></span></span>
+        <span style="position:absolute;display:block;text-align:left;width:85%;color:black;">&nbsp;&nbsp;&nbsp;<strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)# 
+        	<span id="feedingStatus" style="visibility: hidden;" class="glyphicon glyphicon-transfer" title="YaCy server is fetching results from available data sources."></span>
+        </span>
       </div>
     </div>
 	::

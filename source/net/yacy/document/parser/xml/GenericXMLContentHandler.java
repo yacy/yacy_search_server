@@ -35,7 +35,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import net.yacy.cora.document.id.AnchorURL;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.parser.html.ContentScraper;
 
 /**
@@ -150,7 +149,7 @@ public class GenericXMLContentHandler extends DefaultHandler {
 	public void characters(final char ch[], final int start, final int length) throws SAXException {
 		try {
 			if(this.currentElementTextChunks == 0 && this.documentHasText) {
-				/* We are but on the first text chunk of the element (not on the first text chunk of the whole document), 
+				/* We are on the first text chunk of the element (not on the first text chunk of the whole document), 
 				 * or on the first text chunk after processing nested elements : 
 				 * if necessary we add a space to separate text content of different elements */
 				if(length > 0 && !this.lastAppendedIsSpace && !Character.isWhitespace(ch[0])) {
@@ -167,14 +166,14 @@ public class GenericXMLContentHandler extends DefaultHandler {
 				this.documentHasText = true;
 				this.lastAppendedIsSpace = Character.isWhitespace(ch[length - 1]);
 			}
-		} catch (final IOException ignored) {
-			ConcurrentLog.logException(ignored);
+		} catch (final IOException ioe) {
+			throw new SAXException("Error while appending characters to the output writer", ioe);
 		}
 	}
 
 	/**
-	 * When the eventual element text doesn't end with a terminal punctuation character,
-	 * add a period ('.' character) to help future SentenceReader work.
+	 * Perform URLs detection on the ending element text
+	 * @throws SAXException when whe maxURLs limit has been reached
 	 */
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {

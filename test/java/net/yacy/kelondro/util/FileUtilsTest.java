@@ -26,6 +26,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.Assert;
@@ -152,6 +154,60 @@ public class FileUtilsTest {
 		}
 	}
 	
+	/**
+	 * Copy reader : normal case
+	 * @throws IOException when a read/write error occurred
+	 */
+	@Test
+	public void testCopyReaderWriter() throws IOException {
+		StringReader source = new StringReader("A test string");
+		StringWriter dest = new StringWriter();
+		
+		try {
+			FileUtils.copy(source, dest);
+		} finally {
+			source.close();
+			dest.close();
+		}
+		Assert.assertEquals("A test string", dest.toString());
+	}
+	
+	/**
+	 * Copy reader : empty input
+	 * @throws IOException when a read/write error occurred
+	 */
+	@Test
+	public void testCopyEmptyReaderWriter() throws IOException {
+		StringReader source = new StringReader("");
+		StringWriter dest = new StringWriter();
+		try {
+			FileUtils.copy(source, dest);
+		} finally {
+			source.close();
+			dest.close();
+		}
+		Assert.assertEquals("", dest.toString());
+	}
+	
+	/**
+	 * Copy reader : writer with existing content
+	 * @throws IOException when a read/write error occurred
+	 */
+	@Test
+	public void testCopyReaderWriterNotEmpty() throws IOException {
+		StringReader source = new StringReader("An input String");
+		StringWriter dest = new StringWriter();
+		
+		try {
+			dest.write("Non empty out stream.");
+			FileUtils.copy(source, dest);
+		} finally {
+			source.close();
+			dest.close();
+		}
+		Assert.assertEquals("Non empty out stream.An input String", dest.toString());
+	}
+		
 	/**
 	 * Test reading n bytes in a stream
 	 * @throws IOException when a read/write error occurred
