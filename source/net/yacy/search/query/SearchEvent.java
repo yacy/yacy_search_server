@@ -224,32 +224,33 @@ public final class SearchEvent {
     public  final boolean excludeintext_image;
     
     // the following values are filled during the search process as statistics for the search
+    // In the next comments "filtering" is doubles checking and applying eventual search query constraints/modifiers
     
-    /** the number of hits generated/ranked by the local search in rwi index */
+    /** the number of hits generated/ranked by the local search in rwi index, after filtering */
     public final AtomicInteger local_rwi_available;
     
-    /** the number of existing hits by the local search in rwi index */
+    /** the number of existing hits by the local search in rwi index, before any supplementary filtering */
     public final AtomicInteger local_rwi_stored;
     
-    /** the number of hits imported from remote peers (rwi/solr mixed) */
+    /** the number of hits imported from remote peers (rwi/solr mixed + eventual site heuristics), after filtering */
     public final AtomicInteger remote_rwi_available;
     
-    /** the number of existing hits at remote site */
+    /** the number of existing hits at remote sites, before any filtering */
     public final AtomicInteger remote_rwi_stored;
     
     /** the number of peers which contributed to the remote search result */
     public final AtomicInteger remote_rwi_peerCount;
     
-    /** the number of hits generated/ranked by the local search in solr */
+    /** the number of hits generated/ranked by the local search in solr, after filtering */
     public final AtomicInteger local_solr_available;
     
-    /** the number of existing hits by the local search in solr */
+    /** the number of existing hits by the local search in solr, before any supplementary filtering */
     public final AtomicInteger local_solr_stored;
     
-    /** the number of hits imported from remote peers (rwi/solr mixed) */
+    /** the number of hits imported from remote peers (rwi/solr mixed), after filtering */
     public final AtomicInteger remote_solr_available;
     
-    /** the number of existing hits at remote site */
+    /** the number of existing hits at remote site (rwi/solr mixed)*/
     public final AtomicInteger remote_solr_stored;
     
     /** the number of peers which contributed to the remote search result */
@@ -258,10 +259,13 @@ public final class SearchEvent {
     /** Ensure only one {@link #resortCachedResults()} operation to be performed on this search event */
     public final Semaphore resortCacheAllowed;
     
+    /**
+     * @return the total number of results currently available and filtered (checking doubles and eventual query constraints/modifiers) from the different data sources 
+     */
     public int getResultCount() {
         return Math.max(
                 this.local_rwi_available.get() + this.remote_rwi_available.get() +
-                this.remote_solr_available.get() + this.local_solr_stored.get(),
+                this.remote_solr_available.get() + this.local_solr_available.get(),
                 imageViewed.size() + sizeSpare()
                );
     }
