@@ -11526,16 +11526,13 @@
        <source>&gt; of</source>
     </trans-unit>
     <trans-unit id="2b6efdaa" xml:space="preserve" approved="no" translate="yes">
-       <source>g&gt; local,</source>
+       <source>&gt; local,</source>
     </trans-unit>
     <trans-unit id="7bc93532" xml:space="preserve" approved="no" translate="yes">
-       <source>g&gt; remote),</source>
-    </trans-unit>
-    <trans-unit id="6bbf7e4c" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt; from</source>
+       <source>remote from</source>
     </trans-unit>
     <trans-unit id="61f1c6c5" xml:space="preserve" approved="no" translate="yes">
-       <source>remote YaCy peers.</source>
+       <source>YaCy peers).</source>
     </trans-unit>
     <trans-unit id="9ddb2d96" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;search&lt;</source>

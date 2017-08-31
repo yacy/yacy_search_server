@@ -1470,10 +1470,9 @@ and contributors, CC-BY-SA==そしてコントリビューター, CC-BY-SA
 >Media<==>メディア<
 #>URL<==>URL<
 > of==> of 
-g> local,==g> ローカル,
-#g> remote),==g> リモート),
-> from==> from
-remote YaCy peers.==リモートのYaCy　ピア.
+> local,==> ローカル,
+remote from==リモート from
+YaCy peers).==のYaCy　ピア).
 #-----------------------------
 
 #File: yacysearchitem.html

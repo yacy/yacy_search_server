@@ -823,7 +823,7 @@ public class yacysearch {
             prop.put("num-results_itemsPerPage", Formatter.number(itemsPerPage));
             prop.put("num-results_totalcount", Formatter.number(theSearch.getResultCount())); // also in yacyserchtrailer (hint: timing in p2p search )
             prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch) ? "1" : "0");
-            prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get(), true));
+            prop.put("num-results_globalresults_localIndexCount", Formatter.number(theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get(), true));
             prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));

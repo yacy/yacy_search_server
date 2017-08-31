@@ -3192,10 +3192,9 @@ The following words are stop-words and had been excluded from the search:==以�
 No Results.==未找到.
 length of search words must be at least 3 characters==搜索关键字至少为3个字符
 > of==> 共
-g> local,==g> 本地,
-#g> remote),==g> remote),
-> from==> 来自
-remote YaCy peers.==远端YaCy peer.
+> local,==> 本地,
+remote from==远端 来自
+YaCy peers).==YaCy peer).
 #-----------------------------
 
 #File: yacysearchitem.html

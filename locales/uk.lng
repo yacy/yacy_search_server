@@ -3408,10 +3408,9 @@ length of search words must be at least==Довжина пошукового з�
 d+ characters==d+ знаків
 
 > of==> з
-g> local,==g> локально,
-g> remote),==g> віддалених),
-> from==> з
-remote YaCy peers.==віддалених вузлів YaCy.
+> local,==> локально,
+remote from==віддалених з
+YaCy peers).==вузлів YaCy).
 #-----------------------------
 
 #File: yacysearchitem.html

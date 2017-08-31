@@ -112,7 +112,8 @@ Use the RSS search result format to add static searches to your RSS reader, if y
 	<div id="results"></div>
     <div class="progress">
       <div class="progress-bar progress-bar-info" id="progressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:0%;">
-        <span style="position:absolute;display:block;text-align:left;width:85%;color:black;">&nbsp;&nbsp;&nbsp;<strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)# 
+        <span style="position:absolute;display:block;text-align:left;width:85%;color:black;">&nbsp;&nbsp;&nbsp;<strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> 
+        #(globalresults)#::; (<strong id="localIndexCount">#[localIndexCount]#</strong> local, <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> remote from <strong id="remotePeerCount">#[remotePeerCount]#</strong> YaCy peers).#(/globalresults)# 
         	<span id="feedingStatus" style="visibility: hidden;" class="glyphicon glyphicon-transfer" title="YaCy server is fetching results from available data sources."></span>
         </span>
       </div>
@@ -221,7 +222,7 @@ function latestinfo() {
     	}
       
     	if(rsp && rsp.offset != null) {
-			statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localResourceSize, rsp.remoteResourceSize, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning);
+			statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning);
 			if(rsp.feedRunning) {
 				/* Refresh statistics while server feeders are still running */
 				window.setTimeout(latestinfo, 1000);

@@ -44,7 +44,7 @@ function fadeOutBar() {
 /**
  * @returns pagination buttons
  */
-function renderPaginationButtons(offset, itemscount, itemsperpage, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount, navurlbase, localQuery) {
+function renderPaginationButtons(offset, itemsperpage, totalcount, navurlbase, localQuery) {
 	var resnav = "<ul class=\"pagination\">";
 	var thispage = Math.floor(offset / itemsperpage);
 	var firstPage = thispage - (thispage % 10);
@@ -95,7 +95,7 @@ function parseFormattedInt(strIntValue) {
 	return intValue;
 }
 
-function statistics(offset, itemscount, itemsperpage, totalcount, localResourceSize, remoteResourceSize, remoteIndexCount, remotePeerCount, navurlbase, localQuery, feedRunning) {
+function statistics(offset, itemscount, itemsperpage, totalcount, localIndexCount, remoteIndexCount, remotePeerCount, navurlbase, localQuery, feedRunning) {
   var totalcountIntValue = parseFormattedInt(totalcount);
   var offsetIntValue = parseFormattedInt(offset);
   var itemscountIntValue = parseFormattedInt(itemscount);
@@ -124,17 +124,43 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   if (totalcountIntValue == 0) {
 	  return;
   }
-  var progresseBarElement = document.getElementById("progressbar");
-  if (offsetIntValue >= 0) document.getElementById("offset").innerHTML = offset;
-  if (offsetIntValue >= 0) document.getElementById("startRecord").setAttribute('value', offsetIntValue - 1);
-  if (itemscountIntValue >= 0) document.getElementById("itemscount").firstChild.nodeValue = itemscount;
-  document.getElementById("totalcount").firstChild.nodeValue = totalcount;
-  if (document.getElementById("localResourceSize") != null) document.getElementById("localResourceSize").firstChild.nodeValue = localResourceSize;
-  if (document.getElementById("remoteResourceSize") != null) document.getElementById("remoteResourceSize").firstChild.nodeValue = remoteResourceSize;
-  if (document.getElementById("remoteIndexCount") != null) document.getElementById("remoteIndexCount").firstChild.nodeValue = remoteIndexCount;
-  if (document.getElementById("remotePeerCount") != null) document.getElementById("remotePeerCount").firstChild.nodeValue = remotePeerCount;
+  var elementToUpdate = document.getElementById("offset");
+  if (offsetIntValue >= 0 && elementToUpdate != null) {
+	  elementToUpdate.innerHTML = offset;
+  }
+  
+  elementToUpdate = document.getElementById("startRecord");
+  if (offsetIntValue >= 0 && elementToUpdate != null) {
+	  elementToUpdate.setAttribute('value', offsetIntValue - 1);
+  }
+  
+  elementToUpdate = document.getElementById("itemscount");
+  if (itemscountIntValue >= 0 && elementToUpdate != null) {
+	  elementToUpdate.firstChild.nodeValue = itemscount;
+  }
+  
+  elementToUpdate = document.getElementById("totalcount");
+  if(elementToUpdate != null) {
+	  elementToUpdate.firstChild.nodeValue = totalcount;
+  }
+  
+  elementToUpdate = document.getElementById("localIndexCount");
+  if (elementToUpdate != null) {
+	  elementToUpdate.firstChild.nodeValue = localIndexCount;
+  }
+  
+  elementToUpdate = document.getElementById("remoteIndexCount");
+  if (elementToUpdate != null) {
+	  elementToUpdate.firstChild.nodeValue = remoteIndexCount;
+  }
+  
+  elementToUpdate = document.getElementById("remotePeerCount");
+  if (elementToUpdate != null) {
+	  elementToUpdate.firstChild.nodeValue = remotePeerCount;
+  }
   // compose page navigation
 
+  var progresseBarElement = document.getElementById("progressbar");
   if (progresseBarElement.getAttribute('class') != "progress-bar progress-bar-success") {
 	  var percent = 100 * (itemscountIntValue - offsetIntValue + 1) / itemsperpageIntValue;
 	  if (percent == 100) {
@@ -148,9 +174,7 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localResourceS
   }
   var resnavElement = document.getElementById("resNav");
   if (resnavElement != null) {
-	  resnavElement.innerHTML = renderPaginationButtons(offsetIntValue, itemscountIntValue, itemsperpageIntValue, 
-			  totalcountIntValue, parseFormattedInt(localResourceSize), parseFormattedInt(remoteResourceSize), parseFormattedInt(remoteIndexCount), 
-			  parseFormattedInt(remotePeerCount), navurlbase, localQuery);
+	  resnavElement.innerHTML = renderPaginationButtons(offsetIntValue, itemsperpageIntValue, totalcountIntValue, navurlbase, localQuery);
   }
 }
 

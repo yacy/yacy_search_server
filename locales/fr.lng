@@ -2464,10 +2464,9 @@ Use the RSS search result format to add static searches to your RSS reader, if y
 No Results.==Pas de r&eacute;sultats.
 length of search words must be at least 1 character==les termes recherch&eacute;s doivent contenir au moins un caract&egrave;re
 > of <==> de <
- local, == locaux, 
- remote), == distants),  
-> from <==> de <
- remote YaCy peers.== noeuds YaCy distants.
+> local,==> locaux,
+remote from== distants de  
+YaCy peers).== noeuds YaCy).
 Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function==La recherche avec ce noeud est d&eacute;sactiv&eacute;e pour les utilisateurs non autoris&eacute;s. Veuillez vous <a href="Status.html?login=">connecter</a> en tant qu'administrateur pour utiliser la fonction de recherche.
 Illegal URL mask:==Masque d'URL incorrect :
 (not a valid regular expression), mask ignored.==(expression r&eacute;guli&egrave;re incorrecte), masque ignor&eacute;.

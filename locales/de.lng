@@ -3757,10 +3757,9 @@ and contributors, CC-BY-SA==und Mitwirkenden, CC-BY-SA Lizenz
 >Media<==>Medium<
 #>URL<==>URL<
 > of==> aus 
-g> local,==g> lokal,
-#g> remote),==g> remote),
-> from==> von
-remote YaCy peers.==remote YaCy Peers.
+> local,==> lokal,
+remote from==remote von
+YaCy peers).==YaCy Peers).
 #-----------------------------
 
 #File: yacysearchitem.html

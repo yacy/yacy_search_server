@@ -4,6 +4,7 @@
 "itemsperpage": "#[itemsperpage]#",
 "totalcount": "#[totalcount]#",
 "localResourceSize": "#[localResourceSize]#",
+"localIndexCount": "#[localIndexCount]#",
 "remoteResourceSize": "#[remoteResourceSize]#",
 "remoteIndexCount": "#[remoteIndexCount]#",
 "remotePeerCount": "#[remotePeerCount]#",

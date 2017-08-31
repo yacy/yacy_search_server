@@ -4087,10 +4087,9 @@ and contributors, CC-BY-SA==и участники, лицензия CC-BY-SA
 >Media<==>Медиа<
 #>URL<==>URL-адрес<
 > of==> из 
-g> local,==g> локально,
-g> remote),==g> удалённо),
-> from==> из
-remote YaCy peers.==удалённых узлов YaCy.
+> local,==> локально,
+remote from==удалённо из
+YaCy peers).==узлов YaCy).
 >search<==>Поиск<
 #-----------------------------
 
