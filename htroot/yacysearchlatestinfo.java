@@ -40,7 +40,7 @@ public class yacysearchlatestinfo {
         prop.put("itemsperpage", theSearch.query.itemsPerPage);
         prop.put("totalcount", Formatter.number(theSearch.getResultCount(), true));
         prop.put("localResourceSize", Formatter.number(theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get(), true));
-        prop.put("localIndexCount", Formatter.number(theSearch.local_rwi_available.get() + theSearch.local_solr_available.get(), true));
+        prop.put("localIndexCount", Formatter.number(theSearch.local_rwi_available.get() + theSearch.local_solr_stored.get() - theSearch.local_solr_evicted.get(), true));
         prop.put("remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
         prop.put("remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));

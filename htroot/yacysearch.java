@@ -726,7 +726,7 @@ public class yacysearch {
                 + "remote_rwi_available(" + theSearch.remote_rwi_available.get() + "), "
                 + "remote_rwi_stored(" + theSearch.remote_rwi_stored.get() + "), "
                 + "remote_rwi_peerCount(" + theSearch.remote_rwi_peerCount.get() + "), "
-                + "local_solr_available(" + theSearch.local_solr_available.get() + "), "
+                + "local_solr_evicted(" + theSearch.local_solr_evicted.get() + "), "
                 + "local_solr_stored(" + theSearch.local_solr_stored.get() + "), "
                 + "remote_solr_available(" + theSearch.remote_solr_available.get() + "), "
                 + "remote_solr_stored(" + theSearch.remote_solr_stored.get() + "), "

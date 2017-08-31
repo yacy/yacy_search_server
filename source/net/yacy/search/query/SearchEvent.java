@@ -241,10 +241,10 @@ public final class SearchEvent {
     /** the number of peers which contributed to the remote search result */
     public final AtomicInteger remote_rwi_peerCount;
     
-    /** the number of hits generated/ranked by the local search in solr, after filtering */
-    public final AtomicInteger local_solr_available;
+    /** The number of results evicted from local solr results after filtering up to the current query offset */
+    public final AtomicInteger local_solr_evicted;
     
-    /** the number of existing hits by the local search in solr, before any supplementary filtering */
+    /** the total number of existing hits by the local search in solr, before any supplementary filtering */
     public final AtomicInteger local_solr_stored;
     
     /** the number of hits imported from remote peers (rwi/solr mixed), after filtering */
@@ -265,7 +265,7 @@ public final class SearchEvent {
     public int getResultCount() {
         return Math.max(
                 this.local_rwi_available.get() + this.remote_rwi_available.get() +
-                this.remote_solr_available.get() + this.local_solr_available.get(),
+                this.remote_solr_available.get() + this.local_solr_stored.get() - this.local_solr_evicted.get(),
                 imageViewed.size() + sizeSpare()
                );
     }
@@ -355,7 +355,7 @@ public final class SearchEvent {
         this.remoteStoredDocMaxSize = -1;
         this.local_rwi_available  = new AtomicInteger(0); // the number of results in the local peer after filtering
         this.local_rwi_stored     = new AtomicInteger(0);
-        this.local_solr_available = new AtomicInteger(0);
+        this.local_solr_evicted   = new AtomicInteger(0);
         this.local_solr_stored    = new AtomicInteger(0);
         this.remote_rwi_stored    = new AtomicInteger(0);
         this.remote_rwi_available = new AtomicInteger(0); // the number of result contributions from all the remote dht peers
@@ -974,6 +974,9 @@ public final class SearchEvent {
                     // check url mask
                     if (!iEntry.matches(this.query.urlMaskPattern)) {
                         if (log.isFine()) log.fine("dropped Node: url mask does not match");
+                        if (local) {
+                        	this.local_solr_evicted.incrementAndGet();
+                        }
                         continue pollloop;
                     }
                 }
@@ -981,6 +984,9 @@ public final class SearchEvent {
                 // doublecheck for urls
                 if (this.urlhashes.has(iEntry.hash())) {
                     if (log.isFine()) log.fine("dropped Node: double check");
+                    if (local) {
+                    	this.local_solr_evicted.incrementAndGet();
+                    }
                     continue pollloop;
                 }
 
@@ -993,6 +999,9 @@ public final class SearchEvent {
                 Bitfield flags = iEntry.flags();
                 if (!this.testFlags(flags)) {
                     if (log.isFine()) log.fine("dropped Node: flag test");
+                    if (local) {
+                    	this.local_solr_evicted.incrementAndGet();
+                    }
                     continue pollloop;
                 }
 
@@ -1003,6 +1012,9 @@ public final class SearchEvent {
                      (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
                      (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp))))) {
                     if (log.isFine()) log.fine("dropped Node: content domain does not match");
+                    if (local) {
+                    	this.local_solr_evicted.incrementAndGet();
+                    }
                     continue pollloop;
                 }
                 
@@ -1010,6 +1022,9 @@ public final class SearchEvent {
                 String ext = MultiProtocolURL.getFileExtension(iEntry.url().getFileName());
                 if (this.query.contentdom == ContentDomain.TEXT && Classification.isImageExtension(ext) && this.excludeintext_image) {
                     if (log.isFine()) log.fine("dropped Node: file name domain does not match");
+                    if (local) {
+                    	this.local_solr_evicted.incrementAndGet();
+                    }
                     continue pollloop;
                 }
 
@@ -1018,12 +1033,18 @@ public final class SearchEvent {
                 if ( this.query.modifier.sitehash == null ) {
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
                         if (log.isFine()) log.fine("dropped Node: siteexclude");
+                        if (local) {
+                        	this.local_solr_evicted.incrementAndGet();
+                        }
                         continue pollloop;
                     }
                 } else {
                     // filter out all domains that do not match with the site constraint
                     if (iEntry.url().getHost().indexOf(this.query.modifier.sitehost) < 0) {
                         if (log.isFine()) log.fine("dropped Node: sitehost");
+                        if (local) {
+                        	this.local_solr_evicted.incrementAndGet();
+                        }
                         continue pollloop;
                     }
                 }
@@ -1031,6 +1052,9 @@ public final class SearchEvent {
                 if (this.query.modifier.language != null) {
                     if (!this.query.modifier.language.equals(iEntry.language())) {
                         if (log.isFine()) log.fine("dropped Node: language");
+                        if (local) {
+                        	this.local_solr_evicted.incrementAndGet();
+                        }
                         continue pollloop;
                     }
                 }
@@ -1038,6 +1062,9 @@ public final class SearchEvent {
                 if (this.query.modifier.author != null) {
                     if (!this.query.modifier.author.equals(iEntry.dc_creator())) {
                         if (log.isFine()) log.fine ("dropped Node: author");
+                        if (local) {
+                        	this.local_solr_evicted.incrementAndGet();
+                        }
                         continue pollloop;
                     }
                 }
@@ -1045,6 +1072,9 @@ public final class SearchEvent {
                 if (this.query.modifier.keyword != null) {
                     if (iEntry.dc_subject().indexOf(this.query.modifier.keyword) < 0) {
                         if (log.isFine()) log.fine ("dropped Node: keyword");
+                        if (local) {
+                        	this.local_solr_evicted.incrementAndGet();
+                        }
                         continue pollloop;
                     }
                 }
@@ -1069,7 +1099,9 @@ public final class SearchEvent {
                     }
                 }
                 // increase counter for statistics
-                if (local) this.local_solr_available.incrementAndGet(); else this.remote_solr_available.incrementAndGet();
+                if (!local) {
+                	this.remote_solr_available.incrementAndGet();
+                }
             }
         } catch (final SpaceExceededException e ) {
         }
