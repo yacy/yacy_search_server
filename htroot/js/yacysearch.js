@@ -42,9 +42,12 @@ function fadeOutBar() {
 }
 
 /**
+ * @param offset item number to start with
+ * @param itemsperpage count of items requested per page
+ * @param totalcount count of items available from YaCy node for this query
  * @returns pagination buttons
  */
-function renderPaginationButtons(offset, itemsperpage, totalcount, navurlbase, localQuery) {
+function renderPaginationButtons(offset, itemsperpage, totalcount, navurlbase, localQuery, jsResort) {
 	var resnav = "<ul class=\"pagination\">";
 	var thispage = Math.floor(offset / itemsperpage);
 	var firstPage = thispage - (thispage % 10);
@@ -52,7 +55,11 @@ function renderPaginationButtons(offset, itemsperpage, totalcount, navurlbase, l
 		resnav += "<li class=\"disabled\"><a title=\"Previous page\" href=\"#\">&laquo;</a></li>";
 	} else {
 	 	resnav += "<li><a id=\"prevpage\" title=\"Previous page\" accesskey=\"p\" href=\"";
-	    resnav += (navurlbase + "&amp;startRecord=" + ((thispage - 1) * itemsperpage));
+	 	if (jsResort) {
+			resnav += ("javascript:numberedPage(" + (thispage - 1) + ");");
+		} else {
+			resnav += (navurlbase + "&amp;startRecord=" + ((thispage - 1) * itemsperpage));
+		}
 	  	resnav += "\">&laquo;</a></li>";
 	}
 	
@@ -66,7 +73,11 @@ function renderPaginationButtons(offset, itemsperpage, totalcount, navurlbase, l
 	       resnav += "</a></li>";
 	    } else {
 	       resnav += "<li><a href=\"";
-	       resnav += (navurlbase + "&amp;startRecord=" + (i * itemsperpage));
+	       if (jsResort) {
+                       resnav += ("javascript:numberedPage(" + (i) + ");");
+	       } else {
+		       resnav += (navurlbase + "&amp;startRecord=" + (i * itemsperpage));
+               }
 	       resnav += "\">" + (i + 1) + "</a></li>";
 	    }
 	}
@@ -74,7 +85,11 @@ function renderPaginationButtons(offset, itemsperpage, totalcount, navurlbase, l
 		resnav += "<li class=\"disabled\"><a href=\"#\" title=\"Next page\">&raquo;</a></li>";
 	} else {
 	    resnav += "<li><a id=\"nextpage\" title=\"Next page\" accesskey=\"n\" href=\"";
-	    resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
+	    if (jsResort) {
+		resnav += ("javascript:numberedPage(" + (thispage + 1) + ");");
+	    } else {
+		resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
+	    }
 	    resnav += "\">&raquo;</a>";
 	}
 	resnav += "</ul>";
@@ -95,7 +110,7 @@ function parseFormattedInt(strIntValue) {
 	return intValue;
 }
 
-function statistics(offset, itemscount, itemsperpage, totalcount, localIndexCount, remoteIndexCount, remotePeerCount, navurlbase, localQuery, feedRunning) {
+function statistics(offset, itemscount, itemsperpage, totalcount, localIndexCount, remoteIndexCount, remotePeerCount, navurlbase, localQuery, feedRunning, jsResort) {
   var totalcountIntValue = parseFormattedInt(totalcount);
   var offsetIntValue = parseFormattedInt(offset);
   var itemscountIntValue = parseFormattedInt(itemscount);
@@ -174,7 +189,7 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localIndexCoun
   }
   var resnavElement = document.getElementById("resNav");
   if (resnavElement != null) {
-	  resnavElement.innerHTML = renderPaginationButtons(offsetIntValue, itemsperpageIntValue, totalcountIntValue, navurlbase, localQuery);
+	  resnavElement.innerHTML = renderPaginationButtons(offsetIntValue, itemsperpageIntValue, totalcountIntValue, navurlbase, localQuery, jsResort);
   }
 }
 

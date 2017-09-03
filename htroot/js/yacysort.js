@@ -28,8 +28,20 @@ var displayPage = function() {
     }
   });
 
-  $("#offset").html($("#resultscontainer .searchresults.earlierpage").length + 1);
-  $("#itemscount").html($("#resultscontainer .searchresults.earlierpage").length + $("#resultscontainer .searchresults.currentpage").length);
+  // TODO: The following statistical displays could maybe be moved to the latestinfo() call.
+
+  var offset = $("#resultscontainer .searchresults.earlierpage").length + 1;
+  var itemscount = $("#resultscontainer .searchresults.earlierpage").length + $("#resultscontainer .searchresults.currentpage").length;
+
+  // TODO: This seems to often be smaller than the "totalcount" that statistics() ends up with.  Why is that?
+  var totalcount = $("#resultscontainer .searchresults").length;
+
+  $("#offset").html(offset);
+  $("#itemscount").html(itemscount);
+
+  $("#resNav").html(renderPaginationButtons(offset, requestedResults, totalcount, null, theLocalQuery, true));
+
+  //latestinfo();
 
   console.log("Showing results " + ($("#resultscontainer .searchresults.earlierpage").length + 1) + " - " + ($("#resultscontainer .searchresults.earlierpage").length + requestedResults) + " out of " + $("#resultscontainer .searchresults").length + "; notEarlierPage = " + $("#resultscontainer .searchresults:not(.earlierpage)").length);
 };

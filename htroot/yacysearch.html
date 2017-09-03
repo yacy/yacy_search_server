@@ -16,6 +16,7 @@
   <script type="text/javascript">
     var requestedResults = #[results]#;
     var theEventID = "#[eventID]#";
+    var theLocalQuery = #[localQuery]#;
   </script>
   <script type="text/javascript" src="js/yacysort.js"></script>
   #(/jsResort)#
@@ -209,11 +210,7 @@ document.getElementById("Enter").innerHTML = "search again";
 	::
 	::
 	::
-	#(jsResort)#
-	  <span id="resNav" class="col-sm-12  col-md-12" style="display: inline;"></span>
-	::
-	  <p><br><br><a href="javascript:earlierPage();">Prev Page</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:laterPage();">Next Page</a></p>
-	#(/jsResort)#
+	<span id="resNav" class="col-sm-12  col-md-12" style="display: inline;"></span>
 	::
 #(/num-results)#
 
@@ -254,9 +251,9 @@ function latestinfo() {
       
     	if(rsp && rsp.offset != null) {
 			#(jsResort)#
-			  statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning);
+			  statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, false);
 			::
-			  statistics($("#resultscontainer .searchresults.earlierpage").length + 1, $("#resultscontainer .searchresults.earlierpage").length + $("#resultscontainer .searchresults.currentpage").length, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning);
+			  statistics($("#resultscontainer .searchresults.earlierpage").length + 1, $("#resultscontainer .searchresults.earlierpage").length + $("#resultscontainer .searchresults.currentpage").length, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, true);
 			#(/jsResort)#
 			if(rsp.feedRunning) {
 				/* Refresh statistics while server feeders are still running */
