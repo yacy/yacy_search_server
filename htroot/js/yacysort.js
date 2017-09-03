@@ -3,20 +3,20 @@ var highestRanking = Infinity;
 
 var displayPage = function() {
   // For every search item that has already been displayed...
-  $("#resultscontainer .searchresults").each( function(i) {
+  $("#resultscontainer").find(".searchresults").each( function(i) {
     // Apply the "earlierpage" class IFF the item is from an earlier page.
     $(this).toggleClass("earlierpage", parseFloat($(this).data("ranking")) > highestRanking);
   });
 
   // For every search item from an earlier page...
-  $("#resultscontainer .searchresults.earlierpage").each( function(i) {
+  $("#resultscontainer").find(".searchresults.earlierpage").each( function(i) {
     // Hide the item
     $(this).removeClass("currentpage");
     $(this).hide(1000);
   });
 
   // For every search item from a current or later page...
-  $("#resultscontainer .searchresults:not(.earlierpage)").each( function(i) {
+  $("#resultscontainer").find(".searchresults:not(.earlierpage)").each( function(i) {
     // If we now have too many results, hide the lowest-ranking ones.
     if (i >= requestedResults) {
       $(this).removeClass("currentpage");
@@ -30,11 +30,11 @@ var displayPage = function() {
 
   // TODO: The following statistical displays could maybe be moved to the latestinfo() call.
 
-  var offset = $("#resultscontainer .searchresults.earlierpage").length + 1;
-  var itemscount = $("#resultscontainer .searchresults.earlierpage").length + $("#resultscontainer .searchresults.currentpage").length;
+  var offset = $("#resultscontainer").find(".searchresults.earlierpage").length + 1;
+  var itemscount = $("#resultscontainer").find(".searchresults.earlierpage").length + $("#resultscontainer").find(".searchresults.currentpage").length;
 
   // TODO: This seems to often be smaller than the "totalcount" that statistics() ends up with.  Why is that?
-  var totalcount = $("#resultscontainer .searchresults").length;
+  var totalcount = $("#resultscontainer").find(".searchresults").length;
 
   $("#offset").html(offset);
   $("#itemscount").html(itemscount);
@@ -43,12 +43,12 @@ var displayPage = function() {
 
   //latestinfo();
 
-  console.log("Showing results " + ($("#resultscontainer .searchresults.earlierpage").length + 1) + " - " + ($("#resultscontainer .searchresults.earlierpage").length + requestedResults) + " out of " + $("#resultscontainer .searchresults").length + "; notEarlierPage = " + $("#resultscontainer .searchresults:not(.earlierpage)").length);
+  console.log("Showing results " + ($("#resultscontainer").find(".searchresults.earlierpage").length + 1) + " - " + ($("#resultscontainer").find(".searchresults.earlierpage").length + requestedResults) + " out of " + $("#resultscontainer").find(".searchresults").length + "; notEarlierPage = " + $("#resultscontainer").find(".searchresults:not(.earlierpage)").length);
 };
 
 var earlierPage = function() {
   // Find all items that are on an earlier page.
-  var allEarlierItems = $("#resultscontainer .searchresults.earlierpage");
+  var allEarlierItems = $("#resultscontainer").find(".searchresults.earlierpage");
 
   // If going back one page would put us at the beginning...
   if (allEarlierItems.length <= requestedResults) {
@@ -67,7 +67,7 @@ var earlierPage = function() {
 
 var laterPage = function() {
   // Find all items that are on a later page.
-  var allCurrentAndLaterItems = $("#resultscontainer .searchresults:not(.earlierpage)");
+  var allCurrentAndLaterItems = $("#resultscontainer").find(".searchresults:not(.earlierpage)");
 
   // If going forward one page would put us past the end...
   if (allCurrentAndLaterItems.length <= requestedResults) {
@@ -87,7 +87,7 @@ var laterPage = function() {
 // pageNumber starts at 0.
 var numberedPage = function(pageNumber) {
   // Find all items.
-  var allItems = $("#resultscontainer .searchresults");
+  var allItems = $("#resultscontainer").find(".searchresults");
 
   var itemNumber = pageNumber * requestedResults;
 
@@ -290,7 +290,7 @@ var processItem = function(data) {
   }
 
   // For every search item that has already been displayed...
-  $("#resultscontainer .searchresults").each( function(i) {
+  $("#resultscontainer").find(".searchresults").each( function(i) {
     // If the existing search item is lower-ranked than the new item...
     if (parseFloat($(this).data("ranking")) <= parseFloat(newItem.data("ranking")) ) {
       // Insert new item before the existing item
@@ -299,7 +299,7 @@ var processItem = function(data) {
       return false;
     }
     // If the new item is lower-ranked than all existing items...
-    else if (i == $("#resultscontainer .searchresults").length - 1) {
+    else if (i == $("#resultscontainer").find(".searchresults").length - 1) {
       // And if the new item (position i + 1) would be ranked 0 to requestedResults - 1...
       if (i + 1 < requestedResults) {
         // Insert new item at the end
@@ -317,7 +317,7 @@ var processItem = function(data) {
   });
 
   // Special case if this is the first search item...
-  if ($("#resultscontainer .searchresults").length === 0) {
+  if ($("#resultscontainer").find(".searchresults").length === 0) {
     // Display the new item
     newItem.appendTo("#resultscontainer");
   }
