@@ -188,7 +188,7 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localIndexCoun
 	  progresseBarElement.setAttribute('style',"width:" + percent + "%");
   }
   var resnavElement = document.getElementById("resNav");
-  if (resnavElement != null) {
+  if (resnavElement != null && !jsResort) {
 	  resnavElement.innerHTML = renderPaginationButtons(offsetIntValue, itemsperpageIntValue, totalcountIntValue, navurlbase, localQuery, jsResort);
   }
 }
