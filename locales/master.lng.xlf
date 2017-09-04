@@ -4742,6 +4742,21 @@
     <trans-unit id="499c7aa0" xml:space="preserve" approved="no" translate="yes">
        <source>Loaded URL Export</source>
     </trans-unit>
+    <trans-unit id="e3058d11" xml:space="preserve" approved="no" translate="yes">
+       <source>Export Path</source>
+    </trans-unit>
+    <trans-unit id="8b5c8f89" xml:space="preserve" approved="no" translate="yes">
+       <source>URL Filter</source>
+    </trans-unit>
+    <trans-unit id="97365a32" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;query&lt;</source>
+    </trans-unit>
+    <trans-unit id="a7c8e5db" xml:space="preserve" approved="no" translate="yes">
+       <source>maximum age (seconds, -1 = unlimited)</source>
+    </trans-unit>
+    <trans-unit id="278a95e3" xml:space="preserve" approved="no" translate="yes">
+       <source>Export Format</source>
+    </trans-unit>    
     <trans-unit id="94b11a3d" xml:space="preserve" approved="no" translate="yes">
        <source>Full Data Records:</source>
     </trans-unit>
