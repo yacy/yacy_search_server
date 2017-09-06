@@ -257,11 +257,14 @@ public class ISO639 {
     }
     
     /**
-     * see if the given country in alpha-2 country code exists
-     * @param code, the mnemonic of the country in alpha-2
-     * @return true if the code exists
+     * Check if the given country in alpha-2 country code is supported.
+     * @param code, the mnemonic of the country in alpha-2 (ISO 639-1)
+     * @return true if the code is not null and is known by this YaCy server
      */
     public static final boolean exists(String code) {
+    	if(code == null) {
+    		return false;
+    	}
         return mapping.containsKey(code.toLowerCase(Locale.ROOT));
     }
     

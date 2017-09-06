@@ -25,12 +25,14 @@
 package net.yacy.cora.sorting;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -245,6 +247,24 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         final List<E> r = new ArrayList<E>(l.size());
         for (int i = l.size() - 1; i >= 0; i--) r.add(l.get(i));
         return r.iterator();
+    }
+    
+    /**
+     * Creates and returns a sorted view of the keys, sorted by their own natural order.
+     * @param up true = asc order, false = reverse order
+     * @return iterator accessing the keys in natural order
+     */
+    public Iterator<E> keysByNaturalOrder(final boolean up) {
+    	TreeSet<E> sortedKeys;
+    	if(up) {
+    		sortedKeys = new TreeSet<>();
+    	} else {
+    		sortedKeys = new TreeSet<>(Collections.reverseOrder());
+    	}
+    	for(E key : this.map.keySet()) {
+    		sortedKeys.add(key);
+    	}
+    	return sortedKeys.iterator();
     }
 
     public static void main(final String[] args) {

@@ -29,19 +29,21 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.solr.common.SolrDocument;
+
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.SolrType;
-import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.storage.Configuration;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.schema.CollectionSchema;
-import org.apache.solr.common.SolrDocument;
 
 /**
  * Base implementation class for Federated Search Connectors providing the basic
@@ -115,8 +117,7 @@ abstract public class AbstractFederateSearchConnector implements FederateSearchC
                 if (doclist != null) {
                     ConcurrentLog.info("YACY SEARCH (federated)", "Got " + doclist.size() + " documents from " +  instancename);
                     Map<String, LinkedHashSet<String>> snippets = new HashMap<String, LinkedHashSet<String>>(); // add nodes doesn't allow null
-                    Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(); // add nodes doesn't allow null
-                    theSearch.addNodes(doclist, facets, snippets, false, instancename, doclist.size());
+                    theSearch.addNodes(doclist, null, snippets, false, instancename, doclist.size(), true);
                     
                     for (URIMetadataNode doc : doclist) {
                         theSearch.addHeuristic(doc.hash(), instancename, false);

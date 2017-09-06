@@ -154,7 +154,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     /**
      * initializer for special poison object
      */
-    public WordReferenceVars() {
+    private WordReferenceVars() {
         this.flags = null;
         this.lastModified = 0;
         this.language = null;
@@ -209,6 +209,13 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     @Override
     public byte[] getLanguage() {
         return ASCII.getBytes(this.language);
+    }
+    
+    /**
+     * @return the ISO 639 language code of the reference
+     */
+    public String getLanguageString() {
+    	return this.language;
     }
 
     @Override

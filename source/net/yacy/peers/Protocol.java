@@ -746,8 +746,7 @@ public final class Protocol {
         } else {
             // feed results as nodes (SolrQuery results) which carry metadata,
             // to prevent a call to getMetaData for RWI results, which would fail (if no metadata in index and no display of these results)
-            Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>();
-            event.addNodes(storeDocs, facets, snip, false, target.getName() + "/" + target.hash, count);
+            event.addNodes(storeDocs, null, snip, false, target.getName() + "/" + target.hash, count, true);
         }
         event.addFinalize();
         event.addExpectedRemoteReferences(-count);
@@ -1110,6 +1109,8 @@ public final class Protocol {
      * @param target target peer to query. May be null : in that case, local peer is queried.
      * @param partitions
      * @param blacklist url list to exclude from results
+     * @param useSolrFacets when true, use Solr computed facets when possible to update the event navigators counters
+     * @param incrementNavigators when true, increment event navigators either with facet counts or with individual results
      * @return the size of results list
      * @throws InterruptedException when interrupt status on calling thread is detected while processing
      */
@@ -1120,7 +1121,9 @@ public final class Protocol {
             final int count,
             final Seed target,
             final int partitions,
-            final Blacklist blacklist) throws InterruptedException {
+            final Blacklist blacklist,
+            final boolean useSolrFacets,
+            final boolean incrementNavigators) throws InterruptedException {
 
         //try {System.out.println("*** debug-query *** " + URLDecoder.decode(solrQuery.toString(), "UTF-8"));} catch (UnsupportedEncodingException e) {}
         
@@ -1205,18 +1208,28 @@ public final class Protocol {
             }
             
             // evaluate facets
-            for (String field: event.query.facetfields) {
-                FacetField facet = rsp[0].getFacetField(field);
-                ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
-                List<Count> values = facet == null ? null : facet.getValues();
-                if (values == null) continue;
-                for (Count ff: values) {
-                    int c = (int) ff.getCount();
-                    if (c == 0) continue;
-                    if (ff.getName().length() == 0) continue; // facet entry without text is not useful
-                    result.set(ff.getName(), c);
-                }
-                if (result.size() > 0) facets.put(field, result);
+            if(useSolrFacets) {
+            	for (String field: event.query.facetfields) {
+            		FacetField facet = rsp[0].getFacetField(field);
+            		ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+            		List<Count> values = facet == null ? null : facet.getValues();
+            		if (values == null) {
+            			continue;
+            		}
+            		for (Count ff: values) {
+            			int c = (int) ff.getCount();
+            			if (c == 0) {
+            				continue;
+            			}
+            			if (ff.getName().length() == 0) {
+            				continue; // facet entry without text is not useful
+            			}
+            			result.set(ff.getName(), c);
+            		}
+            		if (result.size() > 0) {
+            			facets.put(field, result);
+            		}
+            	}
             }
             
             // evaluate snippets
@@ -1331,7 +1344,7 @@ public final class Protocol {
         docList[0].clear();
         docList[0] = null;
         if (localsearch) {
-            event.addNodes(resultContainer, facets, snippets, true, "localpeer", numFound);
+            event.addNodes(resultContainer, facets, snippets, true, "localpeer", numFound, incrementNavigators);
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
             Network.log.info("local search (solr): localpeer sent " + resultContainer.size() + "/" + numFound + " references");
@@ -1347,7 +1360,7 @@ public final class Protocol {
                         docs); // will clear docs on return
                 writeToLocalIndexThread.start();
             }
-            event.addNodes(resultContainer, facets, snippets, false, target.getName() + "/" + target.hash, numFound);
+            event.addNodes(resultContainer, facets, snippets, false, target.getName() + "/" + target.hash, numFound, incrementNavigators);
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
             Network.log.info("remote search (solr): peer " + target.getName() + " sent " + (resultContainer.size()) + "/" + numFound + " references");

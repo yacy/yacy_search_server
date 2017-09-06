@@ -246,7 +246,7 @@ public class yacysearchtrailer {
             prop.put("nav-dates", 0);
         } else {
             prop.put("nav-dates", 1);
-            navigatorIterator = theSearch.dateNavigator.iterator(); // this iterator is different as it iterates by the key order (which is a date order)
+            navigatorIterator = theSearch.dateNavigator.keysByNaturalOrder(true); // this iterator is different as it iterates by the key order (which is a date order)
             int i = 0, pos = 0, neg = 0;
             long dx = -1;
             Date fromconstraint = theSearch.getQuery().modifier.from == null ? null : DateDetection.parseLine(theSearch.getQuery().modifier.from, theSearch.getQuery().timezoneOffset);
@@ -257,6 +257,9 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next().trim();
                 if (name.length() < 10) continue;
                 count = theSearch.dateNavigator.get(name);
+                if(count == 0) {
+                	continue;
+                }
                 String shortname = name.substring(0, 10);
                 long d = Instant.parse(name).toEpochMilli();
                 Date dd = new Date(d);
