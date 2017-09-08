@@ -111,7 +111,6 @@ public final class QueryParams {
     
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
-    private static final Pattern matchnothing_pattern = Pattern.compile("");
 
     private final QueryGoal queryGoal;
     public int itemsPerPage;
@@ -370,11 +369,33 @@ public final class QueryParams {
     }
 
     public SolrQuery solrQuery(final ContentDomain cd, final boolean getFacets, final boolean excludeintext_image) {
-        if (cd == ContentDomain.IMAGE) return solrImageQuery(getFacets);
-        return solrTextQuery(getFacets, excludeintext_image);
+        if (cd == ContentDomain.IMAGE) {
+        	return solrImageQuery(getFacets);
+        }
+        final List<String> filterQueries;
+		switch (cd) {
+		case AUDIO:
+			filterQueries = this.queryGoal.collectionAudioFilterQuery();
+			break;
+		case VIDEO:
+			filterQueries = this.queryGoal.collectionVideoFilterQuery();
+			break;
+		case APP:
+			filterQueries = this.queryGoal.collectionApplicationFilterQuery();
+			break;
+		default:
+			filterQueries = this.queryGoal.collectionTextFilterQuery(excludeintext_image);
+			break;
+		}
+        return solrQuery(getFacets, filterQueries);
     }
     
-    private SolrQuery solrTextQuery(final boolean getFacets, final boolean excludeintext_image) {
+    /**
+     * @param getFacets when true, generate facets for fiels given in this.facetfields
+     * @param filterQueries a mutable list of filter queries, initialized with filters related to content domain. Must not be null.
+     * @return a Solr query instance ready to use
+     */
+    private SolrQuery solrQuery(final boolean getFacets, final List<String> filterQueries) {
         if (this.cachedQuery != null) {
             this.cachedQuery.setStart(this.offset);
             if (!getFacets) this.cachedQuery.setFacet(false);
@@ -382,7 +403,7 @@ public final class QueryParams {
         }
         
         // construct query
-        final SolrQuery params = getBasicParams(getFacets, this.queryGoal.collectionTextFilterQuery(excludeintext_image));
+        final SolrQuery params = getBasicParams(getFacets, filterQueries);
         int rankingProfile = this.ranking.coeff_date == RankingProfile.COEFF_MAX ? 1 : (this.modifier.sitehash != null || this.modifier.sitehost != null) ? 2 : 0;
         params.setQuery(this.queryGoal.collectionTextQuery().toString());
         Ranking actRanking = indexSegment.fulltext().getDefaultConfiguration().getRanking(rankingProfile); // for a by-date ranking select different ranking profile
@@ -438,7 +459,7 @@ public final class QueryParams {
         return params;
     }
     
-    private SolrQuery getBasicParams(boolean getFacets, List<String> fqs) {
+    private SolrQuery getBasicParams(final boolean getFacets, final List<String> fqs) {
         final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");
         params.setParam(DisMaxParams.QF, CollectionSchema.text_t.getSolrFieldName() + "^1.0");
