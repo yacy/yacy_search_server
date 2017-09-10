@@ -1,0 +1,42 @@
+@keyframes show {
+    0% {
+      transform: scale(0);
+      max-height: 0;
+      opacity: 0;
+      display: hidden;
+      padding-top: 0;
+    }
+    50% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      max-height: 500px;
+      display: block;
+      padding-top: 1em;
+    }
+}
+
+@keyframes hide {
+    0% {
+      max-height: 500px;
+      display: block;
+      padding-top: 1em;
+    }
+    50% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0);
+      max-height: 0;
+      opacity: 0;
+      display: hidden;
+      padding-top: 0;
+    }
+}
+
+.searchresults {
+  overflow: hidden;
+  transform-origin: top left;
+}

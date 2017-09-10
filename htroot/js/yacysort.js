@@ -12,7 +12,7 @@ var displayPage = function() {
   $("#resultscontainer").find(".searchresults.earlierpage").each( function(i) {
     // Hide the item
     $(this).removeClass("currentpage");
-    $(this).hide(1000);
+    $(this).css('animation', '1s 1 forwards hide');
   });
 
   // For every search item from a current or later page...
@@ -20,11 +20,12 @@ var displayPage = function() {
     // If we now have too many results, hide the lowest-ranking ones.
     if (i >= requestedResults) {
       $(this).removeClass("currentpage");
-      $(this).hide(1000);
+      $(this).css('animation', '1s 1 forwards hide');
     }
     else {
       $(this).addClass("currentpage");
-      $(this).show(1000);
+      $(this).css('display', '');
+      $(this).css('animation', '1s 1 forwards show');
     }
   });
 
