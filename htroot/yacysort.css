@@ -3,24 +3,24 @@
       transform: scale(0);
       max-height: 0;
       opacity: 0;
-      display: hidden;
       padding-top: 0;
     }
     50% {
       transform: scale(1);
       opacity: 1;
     }
-    100% {
+    99% {
       max-height: 500px;
-      display: block;
       padding-top: 1em;
+    }
+    100% {
+      max-height: none;
     }
 }
 
 @keyframes hide {
     0% {
       max-height: 500px;
-      display: block;
       padding-top: 1em;
     }
     50% {
@@ -31,7 +31,6 @@
       transform: scale(0);
       max-height: 0;
       opacity: 0;
-      display: hidden;
       padding-top: 0;
     }
 }
