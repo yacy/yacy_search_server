@@ -828,15 +828,16 @@ public class yacysearch {
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
             
-			/* In p2p mode only, add a link allowing user to resort already drained results,
+            final boolean jsResort = sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
+			prop.put("jsResort", jsResort);
+            prop.put("num-results_jsResort", jsResort);
+            
+			/* In p2p mode only and if JavaScript resorting is not enabled, add a link allowing user to resort already drained results,
 			 * eventually including fetched results with higher ranks from the Solr and RWI stacks */
-			prop.put("resortEnabled", global && !stealthmode && theSearch.resortCacheAllowed.availablePermits() > 0 ? 1 : 0);
+			prop.put("resortEnabled", !jsResort && global && !stealthmode && theSearch.resortCacheAllowed.availablePermits() > 0 ? 1 : 0);
 			prop.put("resortEnabled_url",
 					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true).append("&startRecord=")
 							.append(startRecord).append("&resortCachedResults=true").toString());
-
-            prop.put("jsResort", sb.getConfigBool("search.jsresort", false) );
-            prop.put("num-results_jsResort", sb.getConfigBool("search.jsresort", false) );
 
             // generate the search result lines; the content will be produced by another servlet
             for ( int i = 0; i < theQuery.itemsPerPage(); i++ ) {

@@ -546,6 +546,12 @@ public final class SwitchboardConstants {
     public static final String SEARCH_TARGET_SPECIAL_PATTERN  = "search.target.special.pattern"; // ie 'own' addresses in topframe, 'other' in iframe
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
+    
+    /** Key of the setting controlling whether search results resorting by browser JavaScript is enabled */
+    public static final String SEARCH_JS_RESORT = "search.jsresort";
+    
+    /** Default setting value controlling whether search results resorting by browser JavaScript is enabled */
+    public static final boolean SEARCH_JS_RESORT_DEFAULT = false;
 
     public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount"; // max lines displayed in standard search navigators/facets
     
