@@ -30,39 +30,37 @@ var logEnabled = false;
 var feedRunning = true;
 
 var displayPage = function() {
-  // For every search item that has already been displayed...
-  $("#resultscontainer").find(".searchresults").each( function(i) {
-    // Apply the "earlierpage" class IFF the item is from an earlier page.
-    $(this).toggleClass("earlierpage", parseFloat($(this).data("ranking")) > highestRanking);
-  });
+	var offset = 1;
+	var totalcount = 0;
+	var itemscount = 0;
+	// For every search item that has already been displayed and sorted ...
+	$("#resultscontainer").find(".searchresults").each(function(i) {
+		totalcount++;
+		var earlierPage = parseFloat($(this).data("ranking")) > highestRanking;
+		// Apply the "earlierpage" class IFF the item is from an earlier page.
+		$(this).toggleClass("earlierpage", earlierPage);
+		if (earlierPage) {
+			$(this).removeClass("currentpage");
+			offset++;
+			itemscount++;
+		} else {
+			var laterPage = ((i - offset + 1) >= requestedResults);
+			$(this).toggleClass("laterpage", laterPage);
+			// If we now have too many results, hide the lowest-ranking ones.
+			if (laterPage) {
+				$(this).removeClass("currentpage");
+			} else {
+				$(this).removeClass("hidden");
+				$(this).addClass("currentpage");
+				itemscount++;
+			}
+		}
+	});
+	
+  // TODO: collected totalcount here seems to often be smaller than the "totalcount" that statistics() ends up with.  Why is that?
 
-  // For every search item from an earlier page...
-  $("#resultscontainer").find(".searchresults.earlierpage").each( function(i) {
-    // Hide the item
-    $(this).removeClass("currentpage");
-  });
-
-  // For every search item from a current or later page...
-  $("#resultscontainer").find(".searchresults:not(.earlierpage)").each( function(i) {
-	var laterPage = (i >= requestedResults);
-	$(this).toggleClass("laterpage", laterPage);
-    // If we now have too many results, hide the lowest-ranking ones.
-    if (laterPage) {
-      $(this).removeClass("currentpage");
-    }
-    else {
-      $(this).removeClass("hidden");
-      $(this).addClass("currentpage");
-    }
-  });
-
-  // TODO: The following statistical displays could maybe be moved to the latestinfo() call.
-
-  var offset = $("#resultscontainer").find(".searchresults.earlierpage").length + 1;
-  var itemscount = $("#resultscontainer").find(".searchresults.earlierpage").length + $("#resultscontainer").find(".searchresults.currentpage").length;
-
-  // TODO: This seems to often be smaller than the "totalcount" that statistics() ends up with.  Why is that?
-  var totalcount = $("#resultscontainer").find(".searchresults").length;
+  // TODO: The following statistical displays could maybe be moved to the
+	// latestinfo() call.
 
   $("#offset").html(offset);
   $("#itemscount").html(itemscount);
@@ -76,48 +74,6 @@ var displayPage = function() {
 			  + " - " + ($("#resultscontainer").find(".searchresults.earlierpage").length + requestedResults) 
 			  + " out of " + $("#resultscontainer").find(".searchresults").length + "; notEarlierPage = " + $("#resultscontainer").find(".searchresults:not(.earlierpage)").length);
   }
-};
-
-var earlierPage = function() {
-  // Find all items that are on an earlier page.
-  var allEarlierItems = $("#resultscontainer").find(".searchresults.earlierpage");
-
-  // If going back one page would put us at the beginning...
-  if (allEarlierItems.length <= requestedResults) {
-    highestRanking = Infinity;
-  }
-  // If going back one page would still be in the middle of the results...
-  else {
-    var earlierItem = allEarlierItems.get().reverse()[ requestedResults - 1 ];
-    highestRanking = parseFloat($(earlierItem).data("ranking"));
-    if(logEnabled) {
-    	console.log("highestRanking is now " + highestRanking);
-    }
-  }
-
-  // Update the display to show the new page.
-  displayPage();
-};
-
-var laterPage = function() {
-  // Find all items that are on a later page.
-  var allCurrentAndLaterItems = $("#resultscontainer").find(".searchresults:not(.earlierpage)");
-
-  // If going forward one page would put us past the end...
-  if (allCurrentAndLaterItems.length <= requestedResults) {
-    return;
-  }
-  // If going forward one page would still be in the middle of the results...
-  else {
-    var laterItem = allCurrentAndLaterItems.get(requestedResults);
-    highestRanking = parseFloat($(laterItem).data("ranking"));
-    if(logEnabled) {
-    	console.log("highestRanking is now " + highestRanking);
-    }
-  }
-
-  // Update the display to show the new page.
-  displayPage();
 };
 
 // pageNumber starts at 0.
@@ -353,38 +309,41 @@ var processItem = function(data) {
   }
 
   // For every search item that has already been displayed...
-  $("#resultscontainer").find(".searchresults").each( function(i) {
-    // If the existing search item is lower-ranked than the new item...
-    if (parseFloat($(this).data("ranking")) <= parseFloat(newItem.data("ranking")) ) {
-      // Insert new item before the existing item
-      newItem.insertBefore(this);
+  var allResults = $("#resultscontainer").find(".searchresults");
+  var allResultsLength = allResults.length;
+  
+  // Special case if this is the first search item.
+  if(allResultsLength === 0) {
+	  // Display the new item
+	  newItem.appendTo("#resultscontainer");
+  } else {
+	  allResults.each( function(i) {
+		  // If the existing search item is lower-ranked than the new item...
+		  if (parseFloat($(this).data("ranking")) <= parseFloat(newItem.data("ranking")) ) {
+			  // Insert new item before the existing item
+			  newItem.insertBefore(this);
 
-      return false;
-    }
-    // If the new item is lower-ranked than all existing items...
-    else if (i == $("#resultscontainer").find(".searchresults").length - 1) {
-      // And if the new item (position i + 1) would be ranked 0 to requestedResults - 1...
-      if (i + 1 < requestedResults) {
-        // Insert new item at the end
-        newItem.appendTo("#resultscontainer");
-        return false;
-      }
-      // If the new item is too irrelevant to be displayed...
-      else {
-        // Insert new item at the end
-        newItem.appendTo("#resultscontainer");
-        if(logEnabled) {
-        	console.log("Hiding search result because ranking " + newItem.data("ranking") + " too low.");
-        }
-        return false;
-      }
-    }
-  });
-
-  // Special case if this is the first search item...
-  if ($("#resultscontainer").find(".searchresults").length === 0) {
-    // Display the new item
-    newItem.appendTo("#resultscontainer");
+			  return false;
+		  }
+		  // If the new item is lower-ranked than all existing items...
+		  else if (i == allResultsLength - 1) {
+			  // And if the new item (position i + 1) would be ranked 0 to requestedResults - 1...
+			  if (i + 1 < requestedResults) {
+				  // Insert new item at the end
+				  newItem.appendTo("#resultscontainer");
+				  return false;
+			  }
+			  // If the new item is too irrelevant to be displayed...
+			  else {
+				  // Insert new item at the end
+				  newItem.appendTo("#resultscontainer");
+				  if(logEnabled) {
+					  console.log("Hiding search result because ranking " + newItem.data("ranking") + " too low.");
+				  }
+				  return false;
+			  }
+		  }
+	  });
   }
 
   displayPage();
