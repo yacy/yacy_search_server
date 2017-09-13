@@ -12,20 +12,19 @@ var displayPage = function() {
   $("#resultscontainer").find(".searchresults.earlierpage").each( function(i) {
     // Hide the item
     $(this).removeClass("currentpage");
-    $(this).css('animation', '1s 1 forwards hide');
   });
 
   // For every search item from a current or later page...
   $("#resultscontainer").find(".searchresults:not(.earlierpage)").each( function(i) {
+	var laterPage = (i >= requestedResults);
+	$(this).toggleClass("laterpage", laterPage);
     // If we now have too many results, hide the lowest-ranking ones.
-    if (i >= requestedResults) {
+    if (laterPage) {
       $(this).removeClass("currentpage");
-      $(this).css('animation', '1s 1 forwards hide');
     }
     else {
+      $(this).removeClass("hidden");
       $(this).addClass("currentpage");
-      $(this).css('display', '');
-      $(this).css('animation', '1s 1 forwards show');
     }
   });
 
@@ -272,7 +271,8 @@ var updateSidebar = function() {
 };
 
 var processItem = function(data) {
-  var newItem = $(data).hide();
+  var newItem = $(data);
+  newItem.addClass("hidden");
 
   // If we didn't get a valid response from YaCy, wait 1 second and try again.
   if( ! newItem.data("ranking") ) {
