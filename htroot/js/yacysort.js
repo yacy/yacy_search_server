@@ -26,6 +26,9 @@ var highestRanking = Infinity;
 /* Set to true to enable browser console log traces */
 var logEnabled = false;
 
+/* Indicates if the results feeders are running on the server */
+var feedRunning = true;
+
 var displayPage = function() {
   // For every search item that has already been displayed...
   $("#resultscontainer").find(".searchresults").each( function(i) {
@@ -300,7 +303,9 @@ var processSidebar = function(data) {
   }
 
   // TODO: figure out if a better timeout strategy is feasible
-  setTimeout(updateSidebar, 500);
+  if(feedRunning) {
+	  setTimeout(updateSidebar, 500);
+  }
 };
 
 var updateSidebar = function() {
@@ -315,20 +320,33 @@ var updateSidebar = function() {
   //$("#sidebar").load("yacysearchtrailer.html", {"eventID": theEventID});
 };
 
+/**
+ * Process result from yacysearchlatestinfo.json and re-launch results fetching
+ * only is the results feeders are not terminated on the server
+ */
+var processLatestInfo = function(latestInfo) {
+	if (latestInfo.feedRunning) {
+		$.get("yacysearchlatestinfo.json", {
+			eventID : theEventID
+		}, processItem);
+	} else {
+		feedRunning = false;
+	}
+}
+
 var processItem = function(data) {
   var newItem = $(data);
   newItem.addClass("hidden");
 
-  // If we didn't get a valid response from YaCy, wait 1 second and try again.
+  /* If we didn't get a valid response from YaCy, wait a bit and check if the results feeders are still running on the server side */
   if( ! newItem.data("ranking") ) {
     setTimeout(function() {
       $.get(
-        "yacysearchitem.html",
+        "yacysearchlatestinfo.json",
         {
-          eventID: theEventID,
-          item: itemCount
+          eventID: theEventID
         },
-        processItem
+        processLatestInfo
       );
     }, 1000);
     return;
