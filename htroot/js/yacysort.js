@@ -23,6 +23,9 @@
 var itemCount = 0;
 var highestRanking = Infinity;
 
+/* Set to true to enable browser console log traces */
+var logEnabled = false;
+
 var displayPage = function() {
   // For every search item that has already been displayed...
   $("#resultscontainer").find(".searchresults").each( function(i) {
@@ -65,7 +68,11 @@ var displayPage = function() {
 
   //latestinfo();
 
-  console.log("Showing results " + ($("#resultscontainer").find(".searchresults.earlierpage").length + 1) + " - " + ($("#resultscontainer").find(".searchresults.earlierpage").length + requestedResults) + " out of " + $("#resultscontainer").find(".searchresults").length + "; notEarlierPage = " + $("#resultscontainer").find(".searchresults:not(.earlierpage)").length);
+  if(logEnabled) {
+	  console.log("Showing results " + ($("#resultscontainer").find(".searchresults.earlierpage").length + 1) 
+			  + " - " + ($("#resultscontainer").find(".searchresults.earlierpage").length + requestedResults) 
+			  + " out of " + $("#resultscontainer").find(".searchresults").length + "; notEarlierPage = " + $("#resultscontainer").find(".searchresults:not(.earlierpage)").length);
+  }
 };
 
 var earlierPage = function() {
@@ -80,7 +87,9 @@ var earlierPage = function() {
   else {
     var earlierItem = allEarlierItems.get().reverse()[ requestedResults - 1 ];
     highestRanking = parseFloat($(earlierItem).data("ranking"));
-    console.log("highestRanking is now " + highestRanking);
+    if(logEnabled) {
+    	console.log("highestRanking is now " + highestRanking);
+    }
   }
 
   // Update the display to show the new page.
@@ -99,7 +108,9 @@ var laterPage = function() {
   else {
     var laterItem = allCurrentAndLaterItems.get(requestedResults);
     highestRanking = parseFloat($(laterItem).data("ranking"));
-    console.log("highestRanking is now " + highestRanking);
+    if(logEnabled) {
+    	console.log("highestRanking is now " + highestRanking);
+    }
   }
 
   // Update the display to show the new page.
@@ -127,7 +138,9 @@ var numberedPage = function(pageNumber) {
     highestRanking = parseFloat($(item).data("ranking"));
   }
 
-  console.log("highestRanking is now " + highestRanking);
+  if(logEnabled) {
+	  console.log("highestRanking is now " + highestRanking);
+  }
 
   // Update the display to show the new page.
   displayPage();
@@ -141,8 +154,10 @@ var processSidebarNavProtocols = function(navProtocolsOld, navProtocolsNew) {
 
     // Check whether the protocol has been removed in the new sidebar.
     if (newProtocol.length === 0) {
-      console.log("Deleting nav-protocol...");
-      $(oldProtocol).hide(1000);
+    	if(logEnabled) {
+    		console.log("Deleting nav-protocol...");
+    	}
+    	$(oldProtocol).hide(1000);
     }
   } );
 
@@ -205,23 +220,31 @@ var processSidebar = function(data) {
 
   /*
   if( old_sidebar.html() == data ) {
-    console.log("Sidebar unchanged.");
+  	if(logEnabled) {
+    	console.log("Sidebar unchanged.");
+    }
     return;
   }
   */
   /*
   if( $.trim(old_sidebar.html()) == $.trim(data) ) {
-    console.log("Sidebar unchanged.");
+  	if(logEnabled) {
+    	console.log("Sidebar unchanged.");
+    }
     return;
   }
   */
   //else if( $.trim(old_sidebar.html()) == $.trim("") ) {
   if( oldSidebar.children().length === 0 ) {
-    console.log("Initializing sidebar...");
+	if(logEnabled) {
+		console.log("Initializing sidebar...");
+	}
     oldSidebar.html(newSidebar.html());
   }
   else {
-    console.log("Sidebar has changed, updating...");
+	if(logEnabled) {
+		console.log("Sidebar has changed, updating...");
+	}
 
     var navProtocolsOld = $("#nav-protocols");
     var navProtocolsNew = newSidebar.find("#nav-protocols");
@@ -298,7 +321,6 @@ var processItem = function(data) {
 
   // If we didn't get a valid response from YaCy, wait 1 second and try again.
   if( ! newItem.data("ranking") ) {
-    //console.log("Got undefined item, waiting 1 second...");
     setTimeout(function() {
       $.get(
         "yacysearchitem.html",
@@ -333,7 +355,9 @@ var processItem = function(data) {
       else {
         // Insert new item at the end
         newItem.appendTo("#resultscontainer");
-        console.log("Hiding search result because ranking " + newItem.data("ranking") + " too low.");
+        if(logEnabled) {
+        	console.log("Hiding search result because ranking " + newItem.data("ranking") + " too low.");
+        }
         return false;
       }
     }
