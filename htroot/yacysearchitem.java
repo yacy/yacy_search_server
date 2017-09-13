@@ -279,6 +279,7 @@ public class yacysearchitem {
                     prop.put("content_showSnapshots_link", snapshotPaths.iterator().next().getAbsolutePath());
                 }
                 prop.put("content_showRanking_ranking", Float.toString(result.score()));
+                prop.put("content_ranking", Float.toString(result.score()));
             }
             prop.put("content_urlhexhash", Seed.b64Hash2hexHash(urlhash));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), MAX_URL_LENGTH));

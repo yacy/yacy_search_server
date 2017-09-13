@@ -835,14 +835,22 @@ public class yacysearch {
 					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true).append("&startRecord=")
 							.append(startRecord).append("&resortCachedResults=true").toString());
 
+            prop.put("jsResort", sb.getConfigBool("search.jsresort", false) );
+            prop.put("num-results_jsResort", sb.getConfigBool("search.jsresort", false) );
+
             // generate the search result lines; the content will be produced by another servlet
             for ( int i = 0; i < theQuery.itemsPerPage(); i++ ) {
                 prop.put("results_" + i + "_item", startRecord + i);
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
+
+                prop.put("jsResort_results_" + i + "_item", startRecord + i);
+                prop.put("jsResort_results_" + i + "_eventID", theQuery.id(false));
             }
             prop.put("results", theQuery.itemsPerPage());
+            prop.put("jsResort_results", theQuery.itemsPerPage());
             prop.put("resultTable", (contentdom == ContentDomain.APP || contentdom == ContentDomain.AUDIO || contentdom == ContentDomain.VIDEO) ? 1 : 0);
             prop.put("eventID", theQuery.id(false)); // for bottomline
+            prop.put("jsResort_eventID", theQuery.id(false));
 
             // process result of search
             if ( !filtered.isEmpty() ) {
@@ -864,6 +872,7 @@ public class yacysearch {
 
             prop.put("depth", "0");
             prop.put("localQuery", theSearch.query.isLocal() ? "1" : "0");
+            prop.put("jsResort_localQuery", theSearch.query.isLocal() ? "1" : "0");
 
         }
         prop.put("focus", focus ? 1 : 0); // focus search field
