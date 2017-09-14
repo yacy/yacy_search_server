@@ -1,13 +1,14 @@
 /* Specific styling for search results resorting with JavaScript (configuration setting search.jsresort=true) */
 
-/* Apply to all search results on the current page, except the last inserted one which doesn't need animation */
-.searchresults.currentpage:not(:last-of-type) {
+/* Apply to all freshly fetched search results on the current page, except the last inserted one which doesn't need animation */
+.searchresults.currentpage.fresh:not(:last-of-type) {
 	/* Animate when a result becomes part of the currently displayed results page */
 	animation: 1s 1 forwards showSearchResult;
 }
 
-.searchresults.earlierpage, .searchresults.laterpage {
-	/* Animate when a result goes out of the currently displayed results page*/
+/* Apply to all freshly fetched search results gone outside the current page */
+.searchresults.earlierpage.fresh, .searchresults.laterpage.fresh {
+	/* Animate when a result goes out of the currently displayed results page */
 	animation: 1s 1 forwards hideSearchResult;
 }
 

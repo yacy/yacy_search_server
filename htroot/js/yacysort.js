@@ -29,29 +29,48 @@ var logEnabled = false;
 /* Indicates if the results feeders are running on the server */
 var feedRunning = true;
 
-var displayPage = function() {
+/**
+ * Refresh the results page, checking each result CSS class depending on its position and ranking.
+ * @param isPageChange when true this refresh is done in response to a page change
+ */
+var displayPage = function(isPageChange) {
 	var offset = 1;
 	var totalcount = 0;
 	var itemscount = 0;
 	// For every search item that has already been displayed and sorted ...
 	$("#resultscontainer").find(".searchresults").each(function(i) {
+		var item = $(this);
+		var isFresh = item.hasClass("fresh");
+		if(isPageChange && isFresh) {
+			/* When changing page, remove the 'fresh' mark from all results, 
+			 * so that the related insertion/removal animations are not performed */
+			item.removeClass("fresh");
+		}
 		totalcount++;
-		var earlierPage = parseFloat($(this).data("ranking")) > highestRanking;
+		var earlierPage = parseFloat(item.data("ranking")) > highestRanking;
 		// Apply the "earlierpage" class IFF the item is from an earlier page.
-		$(this).toggleClass("earlierpage", earlierPage);
+		item.toggleClass("earlierpage", earlierPage);
 		if (earlierPage) {
-			$(this).removeClass("currentpage");
+			item.removeClass("currentpage");
+			if(!isFresh) {
+				/* Use the "hidden" CSS class when this item has not been recently inserted to hide it without unnecessary animation */
+				item.addClass("hidden");
+			}
 			offset++;
 			itemscount++;
 		} else {
 			var laterPage = ((i - offset + 1) >= requestedResults);
-			$(this).toggleClass("laterpage", laterPage);
+			item.toggleClass("laterpage", laterPage);
 			// If we now have too many results, hide the lowest-ranking ones.
 			if (laterPage) {
-				$(this).removeClass("currentpage");
+				item.removeClass("currentpage");
+				if(!isFresh) {
+					/* Use the "hidden" CSS class when this item has not been recently inserted to hide it without unnecessary animation */
+					item.addClass("hidden");
+				}
 			} else {
-				$(this).removeClass("hidden");
-				$(this).addClass("currentpage");
+				item.removeClass("hidden");
+				item.addClass("currentpage");
 				itemscount++;
 			}
 		}
@@ -102,7 +121,7 @@ var numberedPage = function(pageNumber) {
   }
 
   // Update the display to show the new page.
-  displayPage();
+  displayPage(true);
 };
 
 var processSidebarNavProtocols = function(navProtocolsOld, navProtocolsNew) {
@@ -292,7 +311,7 @@ var processLatestInfo = function(latestInfo) {
 
 var processItem = function(data) {
   var newItem = $(data);
-  newItem.addClass("hidden");
+  newItem.addClass("hidden fresh");
 
   /* If we didn't get a valid response from YaCy, wait a bit and check if the results feeders are still running on the server side */
   if( ! newItem.data("ranking") ) {
