@@ -21,7 +21,7 @@
  * See related style sheet env/yacysort.css */
 
 var itemCount = 0;
-var highestRanking = Infinity;
+var currentPageNumber = 0;
 
 /* Set to true to enable browser console log traces */
 var logEnabled = false;
@@ -30,10 +30,12 @@ var logEnabled = false;
 var feedRunning = true;
 
 /**
- * Refresh the results page, checking each result CSS class depending on its position and ranking.
- * @param isPageChange when true this refresh is done in response to a page change
+ * Refresh the results page, checking and eventually updating each result CSS class depending on its position.
+ * Important : resorting based on ranking must have been done before.
+ * @param {Boolean} isPageChange when true this refresh is done in response to a page change
+ * @param {Number} pageNumber the page number to display
  */
-var displayPage = function(isPageChange) {
+var displayPage = function(isPageChange, pageNumber) {
 	var offset = 1;
 	var totalcount = 0;
 	var itemscount = 0;
@@ -47,13 +49,14 @@ var displayPage = function(isPageChange) {
 			item.removeClass("fresh");
 		}
 		totalcount++;
-		var earlierPage = parseFloat(item.data("ranking")) > highestRanking;
+		var earlierPage = i < (pageNumber * requestedResults);
+		
 		// Apply the "earlierpage" class IFF the item is from an earlier page.
 		item.toggleClass("earlierpage", earlierPage);
 		if (earlierPage) {
 			item.removeClass("currentpage");
-			if(!isFresh) {
-				/* Use the "hidden" CSS class when this item has not been recently inserted to hide it without unnecessary animation */
+			if(isPageChange) {
+				/* Use the "hidden" CSS class when changing page to hide it without unnecessary animation */
 				item.addClass("hidden");
 			}
 			offset++;
@@ -64,8 +67,8 @@ var displayPage = function(isPageChange) {
 			// If we now have too many results, hide the lowest-ranking ones.
 			if (laterPage) {
 				item.removeClass("currentpage");
-				if(!isFresh) {
-					/* Use the "hidden" CSS class when this item has not been recently inserted to hide it without unnecessary animation */
+				if(isPageChange) {
+					/* Use the "hidden" CSS class when changing page to hide it without unnecessary animation */
 					item.addClass("hidden");
 				}
 			} else {
@@ -95,33 +98,26 @@ var displayPage = function(isPageChange) {
   }
 };
 
-// pageNumber starts at 0.
+/**
+ * Update the current page to the requested page number
+ * @param {Number} pageNumber the requested page number (starts at 0)
+ */
 var numberedPage = function(pageNumber) {
   // Find all items.
   var allItems = $("#resultscontainer").find(".searchresults");
 
-  var itemNumber = pageNumber * requestedResults;
-
-  // Check if the item number is too high.
-  while ( allItems.length - 1 < itemNumber) {
-    itemNumber = itemNumber - requestedResults;
+  // Check if the pageNumber is too high before updating the currentPage
+  var checkedPageNumber;
+  if(allItems.length > 0) {
+	  checkedPageNumber = Math.min(pageNumber, Math.floor(allItems.length / requestedResults));
+  } else {
+	  checkedPageNumber = 0;
   }
-
-  // If the beginning of results is requested, set highestRanking to Infinity.
-  if ( itemNumber <= 0 ) {
-    highestRanking = Infinity;
-  }
-  else {
-    var item = allItems.get(itemNumber);
-    highestRanking = parseFloat($(item).data("ranking"));
-  }
-
-  if(logEnabled) {
-	  console.log("highestRanking is now " + highestRanking);
-  }
+  var pageChange = currentPageNumber != checkedPageNumber;
+  currentPageNumber = checkedPageNumber;
 
   // Update the display to show the new page.
-  displayPage(true);
+  displayPage(pageChange, checkedPageNumber);
 };
 
 var processSidebarNavProtocols = function(navProtocolsOld, navProtocolsNew) {
@@ -168,8 +164,10 @@ var processSidebarNavProtocols = function(navProtocolsOld, navProtocolsNew) {
 var processSidebarMenuGroup = function(listOld, listNew) {
   if ( $(listNew).length === 1) {
     if ( $(listOld).length < 1) {
-      console.warn("listOld doesn't exist, so can't replace it with listNew.");
-      return;
+    	if(logEnabled) {
+    		console.warn("listOld doesn't exist, so can't replace it with listNew.");
+    	}
+        return;
     }
 
     var childrenOld = $(listOld).children("li");
@@ -365,7 +363,7 @@ var processItem = function(data) {
 	  });
   }
 
-  displayPage();
+  displayPage(false, currentPageNumber);
 
   if (itemCount === 0) {
     updateSidebar();
