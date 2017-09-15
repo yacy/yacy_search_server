@@ -248,25 +248,20 @@ var processSidebar = function(data) {
     // TODO: nav-dates
 
     // domains (AKA providers)
-    // TODO: test domains
-    // TODO: we should assign an "id" attribute to the "domains" <ul>.
-    processSidebarMenuGroup($("#domains_0").parent(), newSidebar.find("#domains_0").parent());
+    // TODO: test hosts
+    processSidebarMenuGroup($("#nav-hosts"), newSidebar.find("#nav-hosts"));
     
     // TODO: test languages
-    // TODO: we should assign an "id" attribute to the "languages" <ul>.
-    processSidebarMenuGroup($("#languages_0").parent(), newSidebar.find("#languages_0").parent());
+    processSidebarMenuGroup($("#nav-languages"), newSidebar.find("#nav-languages"));
 
     // TODO: test authors
-    // TODO: we should assign an "id" attribute to the "authors" <ul>.
-    processSidebarMenuGroup($("#authors_0").parent(), newSidebar.find("#authors_0").parent());
+    processSidebarMenuGroup($("#nav-authors"), newSidebar.find("#nav-authors"));
 
     // TODO: test Wiki Name Space
-    // TODO: we should assign an "id" attribute to the "namespace" <ul>.
-    processSidebarMenuGroup($("#namespace_0").parent(), newSidebar.find("#namespace_0").parent());
+    processSidebarMenuGroup($("#nav-namespace"), newSidebar.find("#nav-namespace"));
 
     // TODO: test filetype
-    // TODO: we should assign an "id" attribute to the "filetype" <ul>.
-    processSidebarMenuGroup($("#filetype_0").parent(), newSidebar.find("#filetype_0").parent());
+    processSidebarMenuGroup($("#nav-filetype"), newSidebar.find("#nav-filetype"));
 
     // TODO: navs
 

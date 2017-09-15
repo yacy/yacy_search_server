@@ -158,7 +158,7 @@ function toggleVisibility(name, count) {
 </script>
 
 #(nav-languages)#::
-<ul class="nav nav-sidebar menugroup">
+<ul id="nav-languages" class="nav nav-sidebar menugroup">
 <li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('languages', #[count]#);">Language [#[count]#] <span style="float:right" id="chevron-languages" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
@@ -167,7 +167,7 @@ function toggleVisibility(name, count) {
 #(/nav-languages)#
 
 #{navs}#
-<ul class="nav nav-sidebar menugroup">
+<ul id="nav-#[name]#" class="nav nav-sidebar menugroup">
 <li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('#[name]#', #[count]#);">#[displayname]# [#[count]#] <span style="float:right" id="chevron-#[name]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
@@ -176,7 +176,7 @@ function toggleVisibility(name, count) {
 #{/navs}#
 
 #{nav-vocabulary}#
-<ul class="nav nav-sidebar menugroup">
+<ul id="nav-vocabulary" class="nav nav-sidebar menugroup">
 <li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('vocabulary_#[navname]#', #[count]#);">#[navname]# [#[count]#] <span style="float:right" id="chevron-vocabulary_#[navname]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
