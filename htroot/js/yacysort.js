@@ -159,13 +159,19 @@ var processSidebarNavProtocols = function(navProtocolsOld, navProtocolsNew) {
   } );
 };
 
-// TODO: test this function
-// This is for sidebar items that are <ul> elements with the "menugroup" class.
-var processSidebarMenuGroup = function(listOld, listNew) {
+/**
+ * Refresh a navigator list element with the "menugroup" class.
+ * @param parentSidebar the parent navigators side bar currently displayed
+ * @param listOld the old navigator list
+ * @param listNew the new navigator list
+ */
+var processSidebarMenuGroup = function(parentSidebar, listOld, listNew) {
   if ( $(listNew).length === 1) {
     if ( $(listOld).length < 1) {
-    	if(logEnabled) {
-    		console.warn("listOld doesn't exist, so can't replace it with listNew.");
+    	/* List old doesn't exist : insert it at the beginning of the list */
+    	var allNavs = parentSidebar.find(".nav.nav-sidebar.menugroup");
+    	if(allNavs.length > 0) {
+    		listNew.insertBefore(allNavs[0]);
     	}
         return;
     }
@@ -194,23 +200,6 @@ var processSidebar = function(data) {
   var oldSidebar = $("#sidebar");
   var newSidebar = $('<div class="col-sm-4 col-md-3 sidebar" id="sidebar">\n\n' + data + '\n\n</div>');
 
-  /*
-  if( old_sidebar.html() == data ) {
-  	if(logEnabled) {
-    	console.log("Sidebar unchanged.");
-    }
-    return;
-  }
-  */
-  /*
-  if( $.trim(old_sidebar.html()) == $.trim(data) ) {
-  	if(logEnabled) {
-    	console.log("Sidebar unchanged.");
-    }
-    return;
-  }
-  */
-  //else if( $.trim(old_sidebar.html()) == $.trim("") ) {
   if( oldSidebar.children().length === 0 ) {
 	if(logEnabled) {
 		console.log("Initializing sidebar...");
@@ -247,21 +236,16 @@ var processSidebar = function(data) {
 
     // TODO: nav-dates
 
-    // domains (AKA providers)
-    // TODO: test hosts
-    processSidebarMenuGroup($("#nav-hosts"), newSidebar.find("#nav-hosts"));
+    // hosts (AKA providers)
+    processSidebarMenuGroup(oldSidebar, $("#nav-hosts"), newSidebar.find("#nav-hosts"));
     
-    // TODO: test languages
-    processSidebarMenuGroup($("#nav-languages"), newSidebar.find("#nav-languages"));
+    processSidebarMenuGroup(oldSidebar, $("#nav-languages"), newSidebar.find("#nav-languages"));
 
-    // TODO: test authors
-    processSidebarMenuGroup($("#nav-authors"), newSidebar.find("#nav-authors"));
+    processSidebarMenuGroup(oldSidebar, $("#nav-authors"), newSidebar.find("#nav-authors"));
 
-    // TODO: test Wiki Name Space
-    processSidebarMenuGroup($("#nav-namespace"), newSidebar.find("#nav-namespace"));
+    processSidebarMenuGroup(oldSidebar, $("#nav-namespace"), newSidebar.find("#nav-namespace"));
 
-    // TODO: test filetype
-    processSidebarMenuGroup($("#nav-filetype"), newSidebar.find("#nav-filetype"));
+    processSidebarMenuGroup(oldSidebar, $("#nav-filetype"), newSidebar.find("#nav-filetype"));
 
     // TODO: navs
 
