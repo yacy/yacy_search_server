@@ -211,7 +211,13 @@ document.getElementById("Enter").innerHTML = "search again";
 	::
 	::
 	::
-	<span id="resNav" class="col-sm-12  col-md-12" style="display: inline;"></span>
+	<span id="resNav" class="col-sm-12  col-md-12" style="display: inline;">
+		<ul id="paginationButtons" class="pagination hidden">
+			<li id="prevpage" class="disabled"><a title="Previous page" href="#">&laquo;</a></li>
+			<li class="active"><a href="#">1</a></li>
+			<li id="nextpage" class="disabled"><a title="Next page" href="#">&raquo;</a></li>
+		</ul>
+	</span>
 	::
 #(/num-results)#
 

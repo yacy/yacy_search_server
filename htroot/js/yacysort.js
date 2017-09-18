@@ -87,7 +87,10 @@ var displayPage = function(isPageChange, pageNumber) {
   $("#offset").html(offset);
   $("#itemscount").html(itemscount);
 
-  $("#resNav").html(renderPaginationButtons(offset, requestedResults, totalcount, null, theLocalQuery, true));
+  var buttonsList = document.getElementById("paginationButtons");
+  if(buttonsList != null) {
+	  renderPaginationButtons(buttonsList, offset, requestedResults, totalcount, null, theLocalQuery, true);
+  }
 
   //latestinfo();
 
