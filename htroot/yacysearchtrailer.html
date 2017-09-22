@@ -97,51 +97,68 @@ show search results for "#[query]#" on map</a>
 <link rel="stylesheet" href="env/morris.css">
 <script src="js/raphael.min.js"></script>
 <script src="js/morris.js"></script>
+<script type="text/javascript" src="js/accessibleHistogram.js" charset="UTF-8"></script>
 <script>
-	document.getElementById("datehistogram").style = "height:200px";
-	dates_in_content_dts = [#{element}#"#[name]#","#[count]#"#(nl)#::,#(/nl)##{/element}#];
-	var parsed = [];
-    for (var i = 0; i < dates_in_content_dts.length; i = i + 2) {
-        var date = dates_in_content_dts[i];
-        var count = dates_in_content_dts[i + 1];
-        if (date && count) {parsed[parsed.length] = {x: date,y: count};};
-    };
-    if (parsed.length > 0) Morris.Bar({
-      element: 'datehistogram',
-      data: parsed,
-      xkey: 'x',
-      ykeys: ['y'],
-      labels: ['number of documents about this date'],
-      yLabelFormat: function (y) { return y.toString() + ' docs'; },
-      barColors: function (row, series, type) {
-    	  var d = new Date(row.label);
-          if (d.getDay() === 6) return '#4aaf46'; //saturday
-          if (d.getDay() === 0) return '#4aaf46'; //sunday
-    	  return '#3574c0';
-      },
-      hideHover: 'false'
-    }).on('click', function(i, row) {
-    	var query = document.getElementsByClassName('searchinput')[0].getAttribute("value");
-    	var onp = -1, fromp = -1, top = -1;
-    	if ((onp = query.indexOf("on:")) >= 0) {
-    		query = query.substring(0, onp - 1);
+	var histogramContainer = document.getElementById("datehistogram");
+	if(histogramContainer != null) {
+		dates_in_content_dts = [#{element}#"#[name]#","#[count]#"#(nl)#::,#(/nl)##{/element}#];
+		var parsed = [];
+    	for (var i = 0; i < dates_in_content_dts.length; i = i + 2) {
+        	var date = dates_in_content_dts[i];
+        	var count = dates_in_content_dts[i + 1];
+        	if (date && count) {parsed[parsed.length] = {x: date,y: count};};
+    	};
+    	if (parsed.length > 0) {
+    		histogramContainer.style = "height:200px; cursor: pointer;";
+    		
+    		var histogramClickhandler = function(row) {
+	    		var query = document.getElementsByClassName('searchinput')[0].getAttribute("value");
+    			var onp = -1, fromp = -1, top = -1;
+	    		if ((onp = query.indexOf("on:")) >= 0) {
+    				query = query.substring(0, onp - 1);
+    			}
+    			if ((fromp = query.indexOf("from:")) < 0) {
+    				query = query + " from:" + row.x;
+    				document.getElementsByClassName('searchinput')[0].value = query;
+    				document.getElementById('Enter').click();
+    			} else if ((top = query.indexOf("to:")) < 0) {
+	    			query = query + " to:" + row.x;
+    				document.getElementsByClassName('searchinput')[0].value = query;
+    				document.getElementById('Enter').click();
+    			} else {
+    				query = query.substring(0, fromp) + " on:" + row.x;
+    				document.getElementsByClassName('searchinput')[0].value = query;
+    				document.getElementById('Enter').click();
+    			}
+    			console.log(i, row, query);
+    		}
+    		
+    		var histogram = Morris.Bar({
+     			element: 'datehistogram',
+      			data: parsed,
+      			xkey: 'x',
+      			ykeys: ['y'],
+      			labels: ['number of documents about this date'],
+      			yLabelFormat: function (y) { return y.toString() + ' docs'; },
+      			barColors: function (row, series, type) {
+    	  			var d = new Date(row.label);
+          			if (d.getDay() === 6) return '#4aaf46'; //saturday
+          			if (d.getDay() === 0) return '#4aaf46'; //sunday
+    	  			return '#3574c0';
+      			},
+      			hideHover: 'false'
+    		}).on('click', function(i, row) {
+    			histogramClickhandler(row);
+    		});
+    		
+    		/* Add keyboard navigation support and accessible attributes */
+    		makeAccessibleMorrisBar(histogram, 
+    				"Number of documents per date histogram", 
+    				function(data) {return data.x + " : " + data.y + " docs"},
+    				"link",
+    				histogramClickhandler); 
     	}
-    	if ((fromp = query.indexOf("from:")) < 0) {
-    		query = query + " from:" + row.x;
-    		document.getElementsByClassName('searchinput')[0].value = query;
-    		document.getElementById('Enter').click();
-    	} else if ((top = query.indexOf("to:")) < 0) {
-    		query = query + " to:" + row.x;
-    		document.getElementsByClassName('searchinput')[0].value = query;
-    		document.getElementById('Enter').click();
-    	} else {
-    		query = query.substring(0, fromp) + " on:" + row.x;
-    		document.getElementsByClassName('searchinput')[0].value = query;
-    		document.getElementById('Enter').click();
-    	}
-    	var date = row.x;
-    	console.log(i, row, query);
-    });
+	}
 </script>
 #(/nav-dates)#
 
