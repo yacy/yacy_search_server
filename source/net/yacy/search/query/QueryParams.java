@@ -80,8 +80,11 @@ import org.apache.solr.common.params.FacetParams;
 
 public final class QueryParams {
 
-    public static int FACETS_STANDARD_MAXCOUNT = 100; // max count of item lines in navigator
-    public static int FACETS_DATE_MAXCOUNT = 640;
+	/** The default max count of item lines in navigator */
+    public static final int FACETS_STANDARD_MAXCOUNT_DEFAULT = 100;
+    
+    /** The default maximum number of date elements in the date navigator */
+    public static final int FACETS_DATE_MAXCOUNT_DEFAULT = 640;
     
     public enum Searchdom {
         LOCAL, CLUSTER, GLOBAL;
@@ -148,6 +151,13 @@ public final class QueryParams {
     private SolrQuery cachedQuery;
     private CollectionConfiguration solrSchema;
     public final int timezoneOffset;
+    
+    /** The max count of item lines in navigator */
+    private int standardFacetsMaxCount;
+    
+    /** The maximum number of date elements in the date navigator */
+    private int dateFacetMaxCount;
+    
 
     public QueryParams(
         final QueryGoal queryGoal,
@@ -269,6 +279,8 @@ public final class QueryParams {
             this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + context + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
         }
         this.cachedQuery = null;
+        this.standardFacetsMaxCount = FACETS_STANDARD_MAXCOUNT_DEFAULT;
+        this.dateFacetMaxCount = FACETS_DATE_MAXCOUNT_DEFAULT;
     }
 
     private double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
@@ -294,6 +306,34 @@ public final class QueryParams {
     public boolean isLocal() {
         return this.domType == Searchdom.LOCAL;
     }
+    
+    /**
+     * @return the max count of item lines in standard navigators
+     */
+    public int getStandardFacetsMaxCount() {
+		return this.standardFacetsMaxCount;
+	}
+    
+    /**
+     * @param standardFacetsMaxCount the max count of item lines in standard navigators
+     */
+    public void setStandardFacetsMaxCount(final int standardFacetsMaxCount) {
+		this.standardFacetsMaxCount = standardFacetsMaxCount;
+	}
+    
+    /**
+     * @return the maximum number of date elements in the date navigator
+     */
+    public int getDateFacetMaxCount() {
+		return this.dateFacetMaxCount;
+	}
+    
+    /**
+     * @param dateFacetMaxCount the maximum number of date elements in the date navigator
+     */
+    public void setDateFacetMaxCount(final int dateFacetMaxCount) {
+		this.dateFacetMaxCount = dateFacetMaxCount;
+	}
 
     public static HandleSet hashes2Set(final String query) {
         final HandleSet keyhashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
@@ -483,7 +523,7 @@ public final class QueryParams {
         if (getFacets && this.facetfields.size() > 0) {
             params.setFacet(true);
             params.setFacetMinCount(1);
-            params.setFacetLimit(FACETS_STANDARD_MAXCOUNT);
+            params.setFacetLimit(this.standardFacetsMaxCount);
             params.setFacetSort(FacetParams.FACET_SORT_COUNT);
             params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_enum); // fight the fieldcache
             for (String field: this.facetfields) params.addFacetField("{!ex=" + field + "}" + field); // params.addFacetField("{!ex=" + field + "}" + field);
@@ -495,7 +535,7 @@ public final class QueryParams {
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.end", end);
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.gap", "+1DAY");
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.sort", "index");
-                params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.limit", Integer.toString(FACETS_DATE_MAXCOUNT)); // the year constraint should cause that limitation already
+                params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.limit", Integer.toString(this.dateFacetMaxCount)); // the year constraint should cause that limitation already
             }
             //for (String k: params.getParameterNames()) {ArrayList<String> al = new ArrayList<>(); for (String s: params.getParams(k)) al.add(s); System.out.println("Parameter: " + k + "=" + al.toString());}
             //http://localhost:8090/solr/collection1/select?q=*:*&rows=0&facet=true&facet.field=dates_in_content_dts&f.dates_in_content_dts.facet.limit=730&f.dates_in_content_dts.facet.sort=index

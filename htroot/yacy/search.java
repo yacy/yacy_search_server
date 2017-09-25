@@ -255,6 +255,10 @@ public final class search {
                     0.0d,
                     new String[0]
                     );
+			theQuery.setStandardFacetsMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
+					QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
+			theQuery.setDateFacetMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
+					QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT));
             Network.log.info("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
 
             final long timer = System.currentTimeMillis();

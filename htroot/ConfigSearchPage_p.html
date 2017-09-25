@@ -179,13 +179,16 @@
                 
                 
                 <input type="checkbox" name="search.navigation.date" value="true" #(search.navigation.date)#::checked="checked" #(/search.navigation.date)# /> Date Navigation
+                <label title="Maximum days number in the histogram. Beware that a large value may trigger high CPU loads both on the server and on the browser with large result sets.">Maximum range (in days)
+                	<input type="number" name="search.navigation.dates.maxcount" value="#[search.navigation.dates.maxcount]#" min="6" max="2147483647"/>
+                </label>
 <link rel="stylesheet" href="env/morris.css">
 <script src="js/raphael.min.js"></script>
 <script src="js/morris.js"></script>
 <script type="text/javascript" src="js/accessibleHistogram.js" charset="UTF-8"></script>
 <div id="graph" style="height:200px"></div>
 <script>
-var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index", function(data) {
+var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index&facet.limit=#[search.navigation.dates.maxcount]#", function(data) {
 	dates_in_content_dts = data.facet_counts.facet_fields.dates_in_content_dts;
 	var parsed = [];
     for (var i = 0; i < dates_in_content_dts.length; i = i + 2) {

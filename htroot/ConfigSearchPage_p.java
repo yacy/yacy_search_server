@@ -104,11 +104,17 @@ public class ConfigSearchPage_p {
                 if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1);
                 sb.setConfig("search.navigation", nav);
                 // maxcount nav entries, default
-                int navmaxcnt = post.getInt("search.navigation.maxcount", QueryParams.FACETS_STANDARD_MAXCOUNT);
+                int navmaxcnt = post.getInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT);
                 if (navmaxcnt > 5) {
                     sb.setConfig(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, navmaxcnt);
-                    if (navmaxcnt != QueryParams.FACETS_STANDARD_MAXCOUNT) QueryParams.FACETS_STANDARD_MAXCOUNT = navmaxcnt;
                 }
+                
+                // maxcount dates navigator entries
+				int datesNavMaxCnt = post.getInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
+						QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT);
+				if (datesNavMaxCnt > 5) {
+					sb.setConfig(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT, datesNavMaxCnt);
+				}
             }
 
             if (post.containsKey("add.nav")) { // button: add navigator plugin to ative list
@@ -168,6 +174,12 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.proxy", config.getProperty("search.result.show.proxy","false"));
                 sb.setConfig("search.result.show.hostbrowser", config.getProperty("search.result.show.hostbrowser","true"));
                 sb.setConfig("search.result.show.snapshots", config.getProperty("search.result.show.snapshots","true"));
+				sb.setConfig(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
+						config.getProperty(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
+								String.valueOf(QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT)));
+				sb.setConfig(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
+						config.getProperty(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
+								String.valueOf(QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT)));
             }
         }
 
@@ -238,7 +250,11 @@ public class ConfigSearchPage_p {
         }
         prop.put("search.navigation.list", i);
 
-        prop.put("search.navigation.maxcount", sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT));
+		prop.put(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, sb.getConfigInt(
+				SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
+		
+		prop.put(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT, sb.getConfigInt(
+				SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT, QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT));
 
         prop.put("about.headline", sb.getConfig("about.headline", "About"));
         prop.put("about.body", sb.getConfig("about.body", ""));

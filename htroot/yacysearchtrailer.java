@@ -110,7 +110,7 @@ public class yacysearchtrailer {
             navigatorIterator = languageNavigator.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav, rawNav;
-            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
+            while (i < theSearch.getQuery().getStandardFacetsMaxCount() && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = languageNavigator.get(name);
                 if (count == 0) break;
@@ -202,7 +202,7 @@ public class yacysearchtrailer {
             if (oldProtocolModifier != null && oldProtocolModifier.length() > 0) {theSearch.query.modifier.remove("/" + oldProtocolModifier); theSearch.query.modifier.remove(oldProtocolModifier);}
             theSearch.query.modifier.protocol = "";
             theSearch.query.getQueryGoal().query_original = oldQuery.replaceAll(" /https", "").replaceAll(" /http", "").replaceAll(" /ftp", "").replaceAll(" /smb", "").replaceAll(" /file", "");
-            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
+            while (i < theSearch.getQuery().getStandardFacetsMaxCount() && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 count = theSearch.protocolNavigator.get(name);
                 if (count == 0) break;
@@ -253,7 +253,7 @@ public class yacysearchtrailer {
             if (fromconstraint == null) fromconstraint = new Date(System.currentTimeMillis() - AbstractFormatter.normalyearMillis);
             Date toconstraint = theSearch.getQuery().modifier.to == null ? null : DateDetection.parseLine(theSearch.getQuery().modifier.to, theSearch.getQuery().timezoneOffset);
             if (toconstraint == null) toconstraint = new Date(System.currentTimeMillis() + AbstractFormatter.normalyearMillis);
-            while (i < QueryParams.FACETS_DATE_MAXCOUNT && navigatorIterator.hasNext()) {
+            while (i < theSearch.getQuery().getDateFacetMaxCount() && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next().trim();
                 if (name.length() < 10) continue;
                 count = theSearch.dateNavigator.get(name);
@@ -266,7 +266,7 @@ public class yacysearchtrailer {
                 if (fromconstraint != null && dd.before(fromconstraint)) continue;
                 if (toconstraint != null && dd.after(toconstraint)) break;
                 if (dx > 0) {
-                    while (d - dx > AbstractFormatter.dayMillis) {
+                    while (d - dx > AbstractFormatter.dayMillis && i < theSearch.getQuery().getDateFacetMaxCount()) {
                         dx += AbstractFormatter.dayMillis;
                         String sn = new Date(dx).toInstant().toString().substring(0, 10);
                         prop.put("nav-dates_element_" + i + "_on", 0);
@@ -359,7 +359,7 @@ public class yacysearchtrailer {
             navigatorIterator = navi.keys(false);
             int i = 0, pos = 0, neg = 0;
             String nav, rawNav;
-            while (i < QueryParams.FACETS_STANDARD_MAXCOUNT && navigatorIterator.hasNext()) {
+            while (i < theSearch.getQuery().getStandardFacetsMaxCount() && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = navi.get(name);
                 if (count == 0) {
