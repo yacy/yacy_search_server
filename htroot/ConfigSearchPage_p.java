@@ -35,6 +35,7 @@ import java.util.Properties;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -51,13 +52,9 @@ public class ConfigSearchPage_p {
         final Switchboard sb = (Switchboard) env;
 
         if (post != null) {
-            // AUTHENTICATE
-            if (!sb.verifyAuthentication(header)) {
-                // force log-in
-            	prop.authenticationRequired();
-                return prop;
-            }
-  
+        	/* Check this is a valid transaction */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             if (post.containsKey("searchpage_set")) {
                 final String newGreeting = post.get(SwitchboardConstants.GREETING, "");
                 // store this call as api call
@@ -182,6 +179,9 @@ public class ConfigSearchPage_p {
 								String.valueOf(QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT)));
             }
         }
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
 
         prop.putHTML(SwitchboardConstants.GREETING, sb.getConfig(SwitchboardConstants.GREETING, ""));
         prop.putHTML(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
