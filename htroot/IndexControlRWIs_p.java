@@ -680,10 +680,6 @@ public class IndexControlRWIs_p {
                 "",//userAgent
                 0.0d, 0.0d, 0.0d,
                 new String[0]);     
-		query.setStandardFacetsMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
-				QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
-		query.setDateFacetMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
-				QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT));
         final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE);       
         if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (final InterruptedException e) {}
         if (theSearch.local_rwi_available.get() == 0) {

@@ -223,10 +223,6 @@ public class FederateSearchManager {
                 "",//userAgent
                 0.0d, 0.0d, 0.0d,
                 new String[0]);
-		query.setStandardFacetsMaxCount(this.switchboard.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
-				QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
-		query.setDateFacetMaxCount(this.switchboard.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
-				QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT));
 
         return query(query);
     }
