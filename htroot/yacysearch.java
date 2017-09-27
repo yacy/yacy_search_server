@@ -653,6 +653,10 @@ public class yacysearch {
                     header.get(HeaderFramework.USER_AGENT, ""),
                     lat, lon, rad,
                     sb.getConfigArray("search.navigation", ""));
+			theQuery.setStandardFacetsMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
+					QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
+			theQuery.setDateFacetMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
+					QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT));
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
                 theQuery.id(true),
@@ -828,9 +832,15 @@ public class yacysearch {
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
             
-			/* In p2p mode only, add a link allowing user to resort already drained results,
+			final boolean jsResort = global && authenticated // for now enable JavaScript resorting only for authenticated users as it requires too much resources per search request  
+					&& (contentdom == ContentDomain.ALL || contentdom == ContentDomain.TEXT) // For now JavaScript resorting can only be applied for text search 
+					&& sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
+			prop.put("jsResort", jsResort);
+            prop.put("num-results_jsResort", jsResort);
+            
+			/* In p2p mode only and if JavaScript resorting is not enabled, add a link allowing user to resort already drained results,
 			 * eventually including fetched results with higher ranks from the Solr and RWI stacks */
-			prop.put("resortEnabled", global && !stealthmode && theSearch.resortCacheAllowed.availablePermits() > 0 ? 1 : 0);
+			prop.put("resortEnabled", !jsResort && global && !stealthmode && theSearch.resortCacheAllowed.availablePermits() > 0 ? 1 : 0);
 			prop.put("resortEnabled_url",
 					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true).append("&startRecord=")
 							.append(startRecord).append("&resortCachedResults=true").toString());
@@ -839,10 +849,15 @@ public class yacysearch {
             for ( int i = 0; i < theQuery.itemsPerPage(); i++ ) {
                 prop.put("results_" + i + "_item", startRecord + i);
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
+
+                prop.put("jsResort_results_" + i + "_item", startRecord + i);
+                prop.put("jsResort_results_" + i + "_eventID", theQuery.id(false));
             }
             prop.put("results", theQuery.itemsPerPage());
+            prop.put("jsResort_results", theQuery.itemsPerPage());
             prop.put("resultTable", (contentdom == ContentDomain.APP || contentdom == ContentDomain.AUDIO || contentdom == ContentDomain.VIDEO) ? 1 : 0);
             prop.put("eventID", theQuery.id(false)); // for bottomline
+            prop.put("jsResort_eventID", theQuery.id(false));
 
             // process result of search
             if ( !filtered.isEmpty() ) {
@@ -864,6 +879,7 @@ public class yacysearch {
 
             prop.put("depth", "0");
             prop.put("localQuery", theSearch.query.isLocal() ? "1" : "0");
+            prop.put("jsResort_localQuery", theSearch.query.isLocal() ? "1" : "0");
 
         }
         prop.put("focus", focus ? 1 : 0); // focus search field

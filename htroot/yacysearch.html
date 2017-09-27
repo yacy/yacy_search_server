@@ -12,6 +12,15 @@
   <script type="text/javascript" src="js/highslide/highslide.js"></script>
   <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
   <script type="text/javascript" src="env/bootstrap/js/typeahead.jquery.min.js"></script>
+  #(jsResort)#::
+  <script type="text/javascript">
+    var requestedResults = #[results]#;
+    var theEventID = "#[eventID]#";
+    var theLocalQuery = #[localQuery]#;
+  </script>
+  <script type="text/javascript" src="js/yacysort.js"></script>
+  <link rel="stylesheet" type="text/css" media="screen" href="env/yacysort.css" />
+  #(/jsResort)#
   <script type="text/javascript">
      var suggestMatcher = function() {
        return function opensearch(q, cb) {
@@ -31,7 +40,19 @@
           });
         };
       };
+
     $(document).ready(function() {
+      #(jsResort)#::
+        $.get(
+          "yacysearchitem.html",
+          {
+            eventID: theEventID,
+            item: itemCount
+          },
+          processItem
+        );
+      #(/jsResort)#
+
       $('#search').typeahead({hint:false,highlight:true,minLength:1}, {
     	name: 'states',
     	displayKey: 'value',
@@ -175,9 +196,14 @@ document.getElementById("Enter").innerHTML = "search again";
 
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td></tr>#(/resultTable)#
-#{results}#
-<!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
-#{/results}#
+#(jsResort)#
+  #{results}#
+  <!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
+  #{/results}#
+::
+  <div id="resultscontainer">
+  </div>
+#(/jsResort)#
 #(resultTable)#::</table>#(/resultTable)#
 <!-- linklist end -->
 
@@ -185,7 +211,13 @@ document.getElementById("Enter").innerHTML = "search again";
 	::
 	::
 	::
-	<span id="resNav" class="col-sm-12  col-md-12" style="display: inline;"></span>
+	<span id="resNav" class="col-sm-12  col-md-12" style="display: inline;">
+		<ul id="paginationButtons" class="pagination hidden">
+			<li id="prevpage" class="disabled"><a title="Previous page" href="#">&laquo;</a></li>
+			<li class="active"><a href="#">1</a></li>
+			<li id="nextpage" class="disabled"><a title="Next page" href="#">&raquo;</a></li>
+		</ul>
+	</span>
 	::
 #(/num-results)#
 
@@ -193,7 +225,10 @@ document.getElementById("Enter").innerHTML = "search again";
 
 <div class="col-sm-4 col-md-3 sidebar" id="sidebar">
 <!-- navigation begin -->
+#(jsResort)#
 <!--#include virtual="yacysearchtrailer.html?eventID=#[eventID]#" -->
+::
+#(/jsResort)#
 <!-- navigation end -->
 
 </div> <!-- close sidebar -->
@@ -222,7 +257,11 @@ function latestinfo() {
     	}
       
     	if(rsp && rsp.offset != null) {
-			statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning);
+			#(jsResort)#
+			  statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, false);
+			::
+			  statistics($("#resultscontainer .searchresults.earlierpage").length + 1, $("#resultscontainer .searchresults.earlierpage").length + $("#resultscontainer .searchresults.currentpage").length, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, true);
+			#(/jsResort)#
 			if(rsp.feedRunning) {
 				/* Refresh statistics while server feeders are still running */
 				window.setTimeout(latestinfo, 1000);

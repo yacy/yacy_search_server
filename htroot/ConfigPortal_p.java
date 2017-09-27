@@ -40,6 +40,7 @@ import net.yacy.data.WorkTables;
 import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.query.SearchEventCache;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.HTTPDFileHandler;
@@ -53,6 +54,8 @@ public class ConfigPortal_p {
         if (post != null) {
         	/* Check this is a valid transaction */
         	TransactionManager.checkPostTransaction(header, post);
+        	
+        	boolean cleanSearchCache = false;
         	
             if (post.containsKey("popup")) {
                 final String popup = post.get("popup", "status");
@@ -87,6 +90,12 @@ public class ConfigPortal_p {
                 sb.setConfig("publicTopmenu", !post.containsKey("publicTopmenu") || post.getBoolean("publicTopmenu"));
                 sb.setConfig(SwitchboardConstants.PUBLIC_SEARCHPAGE, !post.containsKey(SwitchboardConstants.PUBLIC_SEARCHPAGE) || post.getBoolean(SwitchboardConstants.PUBLIC_SEARCHPAGE));
                 sb.setConfig("search.options", post.getBoolean("search.options"));
+                
+                final boolean oldJsResort = sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
+                final boolean newJsResort = post.getBoolean(SwitchboardConstants.SEARCH_JS_RESORT);
+                /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
+                cleanSearchCache = oldJsResort != newJsResort;
+                sb.setConfig(SwitchboardConstants.SEARCH_JS_RESORT, newJsResort);
 
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, post.getBoolean(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
                 
@@ -147,6 +156,14 @@ public class ConfigPortal_p {
                 sb.setConfig(SwitchboardConstants.PUBLIC_SEARCHPAGE, config.getProperty(SwitchboardConstants.PUBLIC_SEARCHPAGE,"true"));
                 sb.setConfig("search.navigation", config.getProperty("search.navigation","hosts,authors,namespace,topics"));
                 sb.setConfig("search.options", config.getProperty("search.options","true"));
+                
+                final boolean oldJsResort = sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
+                final boolean newJsResort = Boolean.parseBoolean(config.getProperty(SwitchboardConstants.SEARCH_JS_RESORT, String.valueOf(SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT)));
+                /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
+                cleanSearchCache = oldJsResort != newJsResort;
+                sb.setConfig(SwitchboardConstants.SEARCH_JS_RESORT, newJsResort);
+                
+                
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, config.getProperty(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
                 sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE));
                 sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE));
@@ -156,6 +173,10 @@ public class ConfigPortal_p {
                 sb.setConfig("about.body", config.getProperty("about.body",""));
                 sb.setConfig("search.excludehosts", config.getProperty("search.excludehosts",""));
                 sb.setConfig("search.excludehosth", config.getProperty("search.excludehosth",""));
+            }
+            
+            if(cleanSearchCache) {
+                SearchEventCache.cleanupEvents(true);
             }
         }
         
@@ -171,6 +192,7 @@ public class ConfigPortal_p {
         prop.put("publicTopmenu", sb.getConfigBool("publicTopmenu", false) ? 1 : 0);
         prop.put(SwitchboardConstants.PUBLIC_SEARCHPAGE, sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, false) ? 1 : 0);
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
+        prop.put(SwitchboardConstants.SEARCH_JS_RESORT, sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT) ? 1 : 0);
 
         prop.put(SwitchboardConstants.GREEDYLEARNING_ACTIVE, sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) ? 1 : 0);
         prop.put(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, sb.getConfig(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, "0"));

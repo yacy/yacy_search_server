@@ -35,6 +35,7 @@ import java.util.Properties;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -51,13 +52,9 @@ public class ConfigSearchPage_p {
         final Switchboard sb = (Switchboard) env;
 
         if (post != null) {
-            // AUTHENTICATE
-            if (!sb.verifyAuthentication(header)) {
-                // force log-in
-            	prop.authenticationRequired();
-                return prop;
-            }
-  
+        	/* Check this is a valid transaction */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
             if (post.containsKey("searchpage_set")) {
                 final String newGreeting = post.get(SwitchboardConstants.GREETING, "");
                 // store this call as api call
@@ -104,11 +101,17 @@ public class ConfigSearchPage_p {
                 if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1);
                 sb.setConfig("search.navigation", nav);
                 // maxcount nav entries, default
-                int navmaxcnt = post.getInt("search.navigation.maxcount", QueryParams.FACETS_STANDARD_MAXCOUNT);
+                int navmaxcnt = post.getInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT);
                 if (navmaxcnt > 5) {
                     sb.setConfig(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, navmaxcnt);
-                    if (navmaxcnt != QueryParams.FACETS_STANDARD_MAXCOUNT) QueryParams.FACETS_STANDARD_MAXCOUNT = navmaxcnt;
                 }
+                
+                // maxcount dates navigator entries
+				int datesNavMaxCnt = post.getInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
+						QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT);
+				if (datesNavMaxCnt > 5) {
+					sb.setConfig(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT, datesNavMaxCnt);
+				}
             }
 
             if (post.containsKey("add.nav")) { // button: add navigator plugin to ative list
@@ -168,8 +171,17 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.proxy", config.getProperty("search.result.show.proxy","false"));
                 sb.setConfig("search.result.show.hostbrowser", config.getProperty("search.result.show.hostbrowser","true"));
                 sb.setConfig("search.result.show.snapshots", config.getProperty("search.result.show.snapshots","true"));
+				sb.setConfig(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
+						config.getProperty(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
+								String.valueOf(QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT)));
+				sb.setConfig(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
+						config.getProperty(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
+								String.valueOf(QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT)));
             }
         }
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
 
         prop.putHTML(SwitchboardConstants.GREETING, sb.getConfig(SwitchboardConstants.GREETING, ""));
         prop.putHTML(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
@@ -238,7 +250,11 @@ public class ConfigSearchPage_p {
         }
         prop.put("search.navigation.list", i);
 
-        prop.put("search.navigation.maxcount", sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT));
+		prop.put(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, sb.getConfigInt(
+				SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
+		
+		prop.put(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT, sb.getConfigInt(
+				SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT, QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT));
 
         prop.put("about.headline", sb.getConfig("about.headline", "About"));
         prop.put("about.body", sb.getConfig("about.body", ""));

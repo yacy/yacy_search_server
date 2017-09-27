@@ -42,49 +42,135 @@ function fadeOutBar() {
 }
 
 /**
- * @returns pagination buttons
+ * @param buttonsList the DOM list element containing the pagination buttons
+ * @param offset item number to start with
+ * @param itemsperpage count of items requested per page
+ * @param totalcount count of items available from YaCy node for this query
+ * @param navurlbase the search url without pagination parameters
+ * @param localQuery when true the search query is limited to the YaCy peer local data
+ * @param jsResort when true results resorting with JavaScript is enabled
  */
-function renderPaginationButtons(offset, itemsperpage, totalcount, navurlbase, localQuery) {
-	var resnav = "<ul class=\"pagination\">";
-	var thispage = Math.floor(offset / itemsperpage);
-	var firstPage = thispage - (thispage % 10);
-	if (thispage == 0) {
-		resnav += "<li class=\"disabled\"><a title=\"Previous page\" href=\"#\">&laquo;</a></li>";
-	} else {
-	 	resnav += "<li><a id=\"prevpage\" title=\"Previous page\" accesskey=\"p\" href=\"";
-	    resnav += (navurlbase + "&amp;startRecord=" + ((thispage - 1) * itemsperpage));
-	  	resnav += "\">&laquo;</a></li>";
+function renderPaginationButtons(buttonsList, offset, itemsperpage, totalcount,
+		navurlbase, localQuery, jsResort) {
+	var buttons = buttonsList.getElementsByTagName("li");
+	if (buttons.length < 2) {
+		/* At least prev and next page buttons are expected to be here */
+		return;
 	}
 	
+	var thispage = Math.floor(offset / itemsperpage);
+	var firstPage = thispage - (thispage % 10);
+	
+	var prevPageElement = buttons[0];
+	var prevPageLink = prevPageElement.firstChild;
+	if (thispage == 0) {
+		/* First page : the prev page button is disabled */
+		prevPageElement.className = "disabled";
+		if (prevPageLink != null) {
+			prevPageLink.accessKey = null;
+			prevPageLink.href = "#";
+		}
+	} else {
+		prevPageElement.className = "";
+		if (prevPageLink != null) {
+			prevPageLink.accessKey = "p";
+			if (jsResort) {
+				prevPageLink.href = "javascript:numberedPage(" + (thispage - 1)
+						+ ");";
+			} else {
+				prevPageLink.href = (navurlbase + "&startRecord=" + ((thispage - 1) * itemsperpage));
+			}
+		}
+	}
+	
+	var nextPageElement = buttons[buttons.length - 1];
+
 	var totalPagesNb = Math.floor(1 + ((totalcount - 1) / itemsperpage));
 	var numberofpages = Math.min(10, totalPagesNb - firstPage);
-	if (!numberofpages) numberofpages = 10;
-	for (i = firstPage; i < (firstPage + numberofpages); i++) {
-	    if (i == thispage) {
-	       resnav += "<li class=\"active\"><a href=\"#\">";
-	       resnav += (i + 1);
-	       resnav += "</a></li>";
-	    } else {
-	       resnav += "<li><a href=\"";
-	       resnav += (navurlbase + "&amp;startRecord=" + (i * itemsperpage));
-	       resnav += "\">" + (i + 1) + "</a></li>";
-	    }
+	if (!numberofpages) {
+		numberofpages = 10;
 	}
-	if ((localQuery && thispage >= (totalPagesNb - 1)) || (!localQuery && thispage >= (numberofpages - 1))) {
-		resnav += "<li class=\"disabled\"><a href=\"#\" title=\"Next page\">&raquo;</a></li>";
+	if(numberofpages > 1) {
+		buttonsList.className = "pagination";
 	} else {
-	    resnav += "<li><a id=\"nextpage\" title=\"Next page\" accesskey=\"n\" href=\"";
-	    resnav += (navurlbase + "&amp;startRecord=" + ((thispage + 1) * itemsperpage));
-	    resnav += "\">&raquo;</a>";
+		/* Hide the pagination buttons when there is less than one page of results */
+		buttonsList.className = "pagination hidden";
 	}
-	resnav += "</ul>";
-	return resnav;
+	var btnIndex = 1;
+	var btnElement, pageLink;
+	/* Update existing buttons or add new ones according to the new pagination */
+	for (var i = firstPage; i < (firstPage + numberofpages); i++) {
+		if (btnIndex < (buttons.length - 1)) {
+			btnElement = buttons[btnIndex];
+			pageLink = btnElement.firstChild;
+		} else {
+			btnElement = document.createElement("li");
+			btnElement.id = "pageBtn" + btnIndex;
+			pageLink = document.createElement("a");
+			btnElement.appendChild(pageLink);
+		}
+		if (pageLink != null) {
+			if (i == thispage) {
+				btnElement.className = "active";
+				pageLink.href = "#";
+			} else {
+				btnElement.className = "";
+				if (jsResort) {
+					pageLink.href = "javascript:numberedPage(" + (i) + ");";
+				} else {
+					pageLink.href = navurlbase + "&startRecord=" + (i * itemsperpage);
+				}
+			}
+			pageLink.innerText = (i + 1);
+		}
+
+		if (btnIndex >= (buttons.length - 1)) {
+			/*
+			 * Insert the newly created button now that all its modifications
+			 * are done
+			 */
+			buttonsList.insertBefore(btnElement, buttons[buttons.length - 1]);
+		}
+
+		btnIndex++;
+	}
+
+	/* Remove existing buttons now in excess */
+	while (btnIndex < (buttons.length - 1)) {
+		buttonsList.removeChild(buttons[buttons.length - 2]);
+	}
+
+	var nextPageLink = nextPageElement.firstChild;
+	if ((localQuery && thispage >= (totalPagesNb - 1))
+			|| (!localQuery && thispage >= (numberofpages - 1))) {
+		/* Last page on a local query, or last fetchable page in p2p mode : the next page button is disabled */
+		nextPageElement.className = "disabled";
+		if (nextPageLink != null) {
+			nextPageLink.accessKey = null;
+			nextPageLink.href = "#";
+		}
+	} else {
+		nextPageElement.className = "";
+		if (nextPageLink != null) {
+			nextPageLink.accessKey = "n";
+			if (jsResort) {
+				nextPageLink.href = "javascript:numberedPage(" + (thispage + 1)
+						+ ");";
+			} else {
+				nextPageLink.href = navurlbase + "&startRecord="
+						+ ((thispage + 1) * itemsperpage);
+			}
+		}
+	}
 }
 
 /**
  * Parses a string representing an integer value
- * @param strIntValue formatted string
- * @returns the number value or undefined when the string is undefined, or NaN when the string is not a number
+ * 
+ * @param strIntValue
+ *            formatted string
+ * @returns the number value or undefined when the string is undefined, or NaN
+ *          when the string is not a number
  */
 function parseFormattedInt(strIntValue) {
 	var inValue;
@@ -95,7 +181,7 @@ function parseFormattedInt(strIntValue) {
 	return intValue;
 }
 
-function statistics(offset, itemscount, itemsperpage, totalcount, localIndexCount, remoteIndexCount, remotePeerCount, navurlbase, localQuery, feedRunning) {
+function statistics(offset, itemscount, itemsperpage, totalcount, localIndexCount, remoteIndexCount, remotePeerCount, navurlbase, localQuery, feedRunning, jsResort) {
   var totalcountIntValue = parseFormattedInt(totalcount);
   var offsetIntValue = parseFormattedInt(offset);
   var itemscountIntValue = parseFormattedInt(itemscount);
@@ -172,9 +258,9 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localIndexCoun
 	  }
 	  progresseBarElement.setAttribute('style',"width:" + percent + "%");
   }
-  var resnavElement = document.getElementById("resNav");
-  if (resnavElement != null) {
-	  resnavElement.innerHTML = renderPaginationButtons(offsetIntValue, itemsperpageIntValue, totalcountIntValue, navurlbase, localQuery);
+  var buttonsList = document.getElementById("paginationButtons");
+  if (buttonsList != null && !jsResort) {
+	  renderPaginationButtons(buttonsList, offsetIntValue, itemsperpageIntValue, totalcountIntValue, navurlbase, localQuery, jsResort);
   }
 }
 

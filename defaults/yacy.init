@@ -885,6 +885,9 @@ search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,lang
 # max number of items displayed in search navigators
 search.navigation.maxcount=100
 
+# max number of items displayed in the dates navigator
+search.navigation.dates.maxcount=640
+
 # search result verification and snippet fetch caching rules
 # each search result can be verified byloading the link from the web
 # this can be enhanced using a cache. In some cases it may be appropriate
@@ -906,6 +909,11 @@ search.excludehosth=
 # deleted to clean up the index. If this property is set then failed index verification in
 # the cases of nocache, iffresh and ifexist causes an index deletion
 search.verify.delete = true
+
+# If enabled, the results are sorted in the browser using Javascript.
+# This usually improves ranking accuracy, but doesn't work well for users
+# who have Javascript disabled, are using screen readers, or are on slow computers.
+search.jsresort = false
 
 # remote search details
 remotesearch.maxcount = 10
