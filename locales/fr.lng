@@ -545,6 +545,41 @@ For explanation please look into defaults/yacy.init==Pour des explications, rega
 "Save"=="Sauvegarder"
 #-----------------------------
 
+#File: ConfigSearchPage_p.html
+#---------------------------
+Search Page<==Page de recherche<
+>Search Result Page Layout Configuration<==>Agencement de la page de résultats de recherche<
+Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==Ci-dessous se trouve un modèle générique de page de résultats de recherche. Cocher les cases des éléments que vous souhaitez voir s'afficher.
+To change colors and styles use the ==Pour modifier les couleurs et le style, utilisez le menu 
+>Appearance<==>Apparence graphique<
+ menu for different skins.== pour avoir accès à différentes présélections de styles.
+Other portal settings can be adjusted in==Les autres éléments de configuration du portail peuvent être définis dans
+>Page Template<==>Modèle de page<
+>Text<==>Texte<
+>Video<==>Vidéo<
+>more options<==>plus d'options<
+>Topics<==>Sujets<
+>Cloud<==>Nuage<
+>Protocol<==>Protocole<
+>Filetype<==>Type de fichier<
+>Wiki Name Space<==>Espace de nommage Wiki<
+>Language<==>Langue<
+>Author<==>Auteur<
+>Vocabulary<==>Ontologie<
+>Provider<==>Hôte<
+>Title of Result<==>Titre du résultat<
+Description and text snippet of the search result==Description et extrait de texte du résultat de recherche
+42 kbyte<==42 ko<
+>Metadata<==>Méta-données<
+>Parser<==>Analyseur d'URL<
+>Citation<==>Citations<
+>Pictures<==>Images<
+For this option URL proxy must be enabled.==Pour cette option le proxy doit être activé.
+max. items==nb. max. d'éléments
+"Save Settings"=="Enregistrer"
+"Set Default Values"=="Valeurs par défaut"
+#-----------------------------
+
 #File: ConfigSkins_p.html
 #---------------------------
 Skin Selection==Choix de th&egrave;me
@@ -2637,8 +2672,9 @@ Parser Configuration==Configuration de l'analyseur syntaxique
 
 #File: env/templates/submenuDesign.template
 #-----------------------------
->Appearance==>Apparence
->Language==>Langue
+>Appearance<==>Apparence graphique<
+>Language<==>Langue<
+Search Page Layout==Agencement de la page de résultats
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template
