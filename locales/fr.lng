@@ -547,13 +547,14 @@ For explanation please look into defaults/yacy.init==Pour des explications, rega
 
 #File: ConfigSearchPage_p.html
 #---------------------------
+<html lang="en">==<html lang="fr">
 Search Page<==Page de recherche<
 >Search Result Page Layout Configuration<==>Agencement de la page de résultats de recherche<
 Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==Ci-dessous se trouve un modèle générique de page de résultats de recherche. Cocher les cases des éléments que vous souhaitez voir s'afficher.
 To change colors and styles use the ==Pour modifier les couleurs et le style, utilisez le menu 
 >Appearance<==>Apparence graphique<
  menu for different skins.== pour avoir accès à différentes présélections de styles.
-Other portal settings can be adjusted in==Les autres éléments de configuration du portail peuvent être définis dans
+Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.==Les autres éléments de configuration du portail peuvent être définis dans le menu <a href="ConfigPortal_p.html">Generic Search Portal</a>.
 >Page Template<==>Modèle de page<
 >Text<==>Texte<
 >Video<==>Vidéo<
@@ -569,15 +570,33 @@ Other portal settings can be adjusted in==Les autres éléments de configuration
 >Provider<==>Hôte<
 >Title of Result<==>Titre du résultat<
 Description and text snippet of the search result==Description et extrait de texte du résultat de recherche
+"Date"=="Date"
 42 kbyte<==42 ko<
+"Size"=="Taille"
 >Metadata<==>Méta-données<
 >Parser<==>Analyseur d'URL<
 >Citation<==>Citations<
 >Pictures<==>Images<
+"Browse index"=="Parcourir l'index"
 For this option URL proxy must be enabled.==Pour cette option le proxy doit être activé.
 max. items==nb. max. d'éléments
 "Save Settings"=="Enregistrer"
 "Set Default Values"=="Valeurs par défaut"
+"Top navigation bar"=="Barre de navigation d'en-tête"
+>Location<==>Lieu<
+show search results on map==Montrer les résultats sur la carte
+Date Navigation==Statistiques par dates
+Maximum range (in days)==Période maximale (en jours)
+Maximum days number in the histogram. Beware that a large value may trigger high CPU loads both on the server and on the browser with large result sets.==Nombre maximum de jours de l'histogramme. Veuillez noter qu'une valeur élevée peut déclencher des charges CPU importantes tant sur le serveur que sur le navigateur lorsqu'il y a un grand nombre de résultats.
+keyword subject keyword2 keyword3==mot-clé sujet mot-clé2 mot-clé3
+View via Proxy==Ouvrir via le proxy
+>Snapshots<==>Captures<
+"Raw ranking score value"=="Score de classement brut"
+Ranking: 1.12195955E9==Score: 1.12195955E9
+"Delete navigator"=="Supprimer le groupe"
+Add Navigators==Ajout de groupes de navigation
+"Add navigator"=="Ajouter le groupe"
+>append==>Ajouter
 #-----------------------------
 
 #File: ConfigSkins_p.html
