@@ -53,7 +53,9 @@ import net.yacy.crawler.data.Transactions;
 import net.yacy.crawler.data.Transactions.State;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.URLLicense;
+import net.yacy.data.UserDB;
 import net.yacy.document.parser.html.IconEntry;
+import net.yacy.http.servlets.TemplateMissingParameterException;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.NewsPool;
@@ -89,13 +91,34 @@ public class yacysearchitem {
     //private static boolean col = true;
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+		if (post == null) {
+			throw new TemplateMissingParameterException("The eventID parameter is required");
+		}
+
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         final String eventID = post.get("eventID", "");
-        final boolean authenticated = sb.verifyAuthentication(header);
+        final boolean adminAuthenticated = sb.verifyAuthentication(header);
+        
+		final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
+		final boolean userAuthenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
+		final boolean authenticated = adminAuthenticated || userAuthenticated;
+        
         final int item = post.getInt("item", -1);
         final RequestHeader.FileType fileType = header.fileType();
+
+		if (post.containsKey("auth") && !authenticated) {
+			/*
+			 * Access to authentication protected features is explicitely requested here
+			 * but no authentication is provided : ask now for authentication.
+             * Wihout this, after timeout of HTTP Digest authentication nonce, browsers no more send authentication information 
+             * and as this page is not private, protected features would simply be hidden without asking browser again for authentication.
+             * (see mantis 766 : http://mantis.tokeek.de/view.php?id=766) *
+			 */
+			prop.authenticationRequired();
+			return prop;
+		}
 
         // default settings for blank item
         prop.put("content", "0");
@@ -122,7 +145,9 @@ public class yacysearchitem {
         prop.put("statistics_localIndexCount", Formatter.number(theSearch.local_rwi_available.get() + theSearch.local_solr_stored.get() - theSearch.local_solr_evicted.get(), true));
         prop.put("statistics_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
         prop.put("statistics_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
-        prop.put("statistics_navurlBase", QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false).toString());
+		prop.put("statistics_navurlBase",
+				QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false, authenticated)
+						.toString());
         prop.put("statistics_localQuery", theSearch.query.isLocal() ? "1" : "0");
         prop.put("statistics_feedRunning", Boolean.toString(!theSearch.isFeedingFinished()));
         final String target_special_pattern = sb.getConfig(SwitchboardConstants.SEARCH_TARGET_SPECIAL_PATTERN, "");
@@ -143,9 +168,9 @@ public class yacysearchitem {
             final String resource = theSearch.query.domType.toString();
             final String origQ = theSearch.query.getQueryGoal().getQueryString(true);
             prop.put("content", 1); // switch on specific content
-            prop.put("content_authorized", authenticated ? "1" : "0");
+            prop.put("content_authorized", adminAuthenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
-            if (authenticated) { // only needed if authorized
+            if (adminAuthenticated) { // only needed if authorized
                 addAuthorizedActions(sb, prop, theSearch, resultUrlstring, resource, origQ, urlhash);
             }
             prop.putHTML("content_title", result.title());
@@ -255,7 +280,8 @@ public class yacysearchitem {
                         } else { // otherwise just use the keyword as additional query word
                             rawNavQueryModifier = word;
                         }
-                        prop.put("content_showKeywords_keywords_" + i + "_tagurl", QueryParams.navurl(fileType, 0, theSearch.query, rawNavQueryModifier, naviAvail).toString());
+						prop.put("content_showKeywords_keywords_" + i + "_tagurl", QueryParams.navurl(fileType, 0,
+								theSearch.query, rawNavQueryModifier, naviAvail, authenticated).toString());
                         i++;
                     }
                     prop.put("content_showKeywords_keywords", i);
@@ -471,10 +497,10 @@ public class yacysearchitem {
 		
 		/* Bookmark, delete and recommend action links share the same URL prefix */
 		StringBuilder linkBuilder = new StringBuilder();
-		String actionLinkPrefix = linkBuilder.append("yacysearch.html?query=").append(origQ.replace(' ', '+'))
+		final String actionLinkPrefix = linkBuilder.append("yacysearch.html?query=").append(origQ.replace(' ', '+'))
 				.append("&Enter=Search&count=").append(theSearch.query.itemsPerPage()).append("&offset=")
 				.append((theSearch.query.neededResults() - theSearch.query.itemsPerPage())).append("&resource=")
-				.append(resource).append("&time=3").toString();
+				.append(resource).append("&time=3").append("auth").toString();
 		linkBuilder.setLength(0);
 		
 		String encodedURLString;
@@ -484,7 +510,7 @@ public class yacysearchitem {
 			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
 			encodedURLString = crypt.simpleEncode(resultUrlstring);
 		}
-		String bookmarkLink = linkBuilder.append(actionLinkPrefix).append("&bookmarkref=").append(urlhash)
+		final String bookmarkLink = linkBuilder.append(actionLinkPrefix).append("&bookmarkref=").append(urlhash)
 				.append("&bookmarkurl=").append(encodedURLString).append("&urlmaskfilter=.*")
 				.toString();
 		linkBuilder.setLength(0);

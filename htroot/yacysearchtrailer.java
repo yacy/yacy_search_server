@@ -35,8 +35,10 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.data.UserDB;
 import net.yacy.document.DateDetection;
 import net.yacy.document.LibraryProvider;
+import net.yacy.http.servlets.TemplateMissingParameterException;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
@@ -59,17 +61,38 @@ public class yacysearchtrailer {
 
     @SuppressWarnings({ })
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+		if (post == null) {
+			throw new TemplateMissingParameterException("The eventID parameter is required");
+		}
+    	
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         final String eventID = post.get("eventID", "");
-
-        final boolean authorized = sb.verifyAuthentication(header);
+        
+        final boolean adminAuthenticated = sb.verifyAuthentication(header);
+        
+        final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
+		final boolean userAuthenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
+		final boolean authenticated = adminAuthenticated || userAuthenticated;
+        
+		if (post.containsKey("auth") && !authenticated) {
+			/*
+			 * Access to authentication protected features is explicitely requested here
+			 * but no authentication is provided : ask now for authentication.
+             * Wihout this, after timeout of HTTP Digest authentication nonce, browsers no more send authentication information 
+             * and as this page is not private, protected features would simply be hidden without asking browser again for authentication.
+             * (see mantis 766 : http://mantis.tokeek.de/view.php?id=766) *
+			 */
+			prop.authenticationRequired();
+			return prop;
+		}
+        
         final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
         final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
         boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
         boolean global = post == null || (!post.get("resource-switch", post.get("resource", "global")).equals("local") && p2pmode);
         boolean stealthmode = p2pmode && !global;
-        prop.put("resource-select", !authorized ? 0 : stealthmode ? 2 : global ? 1 : 0);
+        prop.put("resource-select", !adminAuthenticated ? 0 : stealthmode ? 2 : global ? 1 : 0);
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
         if (theSearch == null) {
@@ -130,7 +153,8 @@ public class yacysearchtrailer {
                 }
                 String longname = ISO639.country(name);
                 prop.put(fileType, "nav-languages_element_" + i + "_name", longname == null ? name : longname);
-                prop.put(fileType, "nav-languages_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
+				prop.put(fileType, "nav-languages_element_" + i + "_url",
+						QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString());
                 prop.put(fileType, "nav-languages_element_" + i + "_id", "languages_" + i);
                 prop.put("nav-languages_element_" + i + "_count", count);
                 prop.put("nav-languages_element_" + i + "_nl", 1);
@@ -172,7 +196,8 @@ public class yacysearchtrailer {
                 count = entry.getValue();
                 prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
-                prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, name, false).toString());
+				prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams
+						.navurl(fileType, 0, theSearch.query, name, false, authenticated).toString());
                 prop.put("nav-topics_element_" + i + "_count", count);
                 int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (1 + maxcount - mincount);
                 fontsize = Math.max(TOPWORDS_MINSIZE, fontsize - (name.length() - 5));
@@ -223,7 +248,8 @@ public class yacysearchtrailer {
                     rawNav = "";
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
-                String url = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString();
+				String url = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated)
+						.toString();
                 prop.put("nav-protocols_element_" + i + "_onclick_url", url);
                 prop.put(fileType, "nav-protocols_element_" + i + "_url", url);
                 prop.put("nav-protocols_element_" + i + "_count", count);
@@ -326,7 +352,8 @@ public class yacysearchtrailer {
                         rawNav = "";
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-                    prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
+					prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams
+							.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString());
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_id", "vocabulary_" + navname + "_" + i);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
@@ -385,7 +412,8 @@ public class yacysearchtrailer {
                     rawNav = "";
                 }
                 prop.put(fileType, "navs_" + ni + "_element_" + i + "_name", navi.getElementDisplayName(name));
-                prop.put(fileType, "navs_" + ni + "_element_" + i + "_url", QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false).toString());
+				prop.put(fileType, "navs_" + ni + "_element_" + i + "_url", QueryParams
+						.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString());
                 prop.put(fileType, "navs_" + ni + "_element_" + i + "_id", naviname + "_" + i);
                 prop.put("navs_" + ni + "_element_" + i + "_count", count);
                 prop.put("navs_" + ni + "_element_" + i + "_nl", 1);
