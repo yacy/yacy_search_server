@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <title>YaCy '#[clientname]#': Search Page</title>
   #%env/templates/metas.template%#
@@ -21,13 +21,14 @@
   </p>
   <h4>Page Template</h4>
 
-  <form action="ConfigSearchPage_p.html" method="post" enctype="multipart/form-data" id="ConfigSearchPage" accept-charset="UTF-8">
-    <table>
+  <form action="ConfigSearchPage_p.html" method="post" enctype="multipart/form-data" id="ConfigSearchPageForm" accept-charset="UTF-8">
+  	<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+    <table role="presentation">
       <tr>
         <td style="border-width: 1px; border-color: grey; border-style: solid; padding: 5px;">
-          <table width="100%">
+          <table style="width:100%" role="presentation">
             <tr>
-              <td valign="middle"><input type="checkbox" name="publicTopmenu" value="true" #(publicTopmenu)#::checked="checked" #(/publicTopmenu)# /></td>
+              <td style="vertical-align: middle;"><input type="checkbox" name="publicTopmenu" title="Top navigation bar" value="true" #(publicTopmenu)#::checked="checked" #(/publicTopmenu)# /></td>
               <td>
                 <!-- top navigation (imported from env/templates/simpleheader.template) -->
                 <div class="navbar navbar-default">
@@ -39,19 +40,19 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                       </button>
-                      <div class="forceNoExternalIcon navbar-brand" id="navbar-brand" href="#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
-                                  <img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle"/>&nbsp;<span id="greeting"></span>
-                      </div>
+      				  <a class="navbar-brand" id="navbar-brand-cfg" href="#[promoteSearchPageGreeting.homepage]#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
+        				<img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">&nbsp;<span id="greeting" style="position:absolute; top:50%;float:left;"></span>
+      				  </a>
                     </div>
                     <div class="navbar-collapse collapse">
                       <ul class="nav navbar-nav navbar-right">
-                        <li id="header_search" class="dropdown">
+                        <li id="header_search-cfg" class="dropdown">
                           <a href="#" data-toggle="dropdown" class="dropdown-toggle">Search Interfaces<b class="caret"></b></a>
                         </li>
-                        <li id="header_help" class="dropdown">
+                        <li id="header_help-cfg" class="dropdown">
                           <a href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button"><span class="glyphicon glyphicon-question-sign"></span></a>
                         </li>
-                        <li id="header_administration">
+                        <li id="header_administration-cfg">
                           <button class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-cog"></span> Administration &raquo;</button>
                         </li>
                       </ul>
@@ -61,24 +62,24 @@
               </td>
             </tr>
           </table>
-          <table>
+          <table role="presentation">
             <tr>
               <td>
                 <!-- the sidebar navigation -->
                 <div>
                   <fieldset>
-                    <table>
+                    <table role="presentation">
                       <tr>
-                        <td><input type="checkbox" name="search.navigation.protocol" value="true" #(search.navigation.protocol)#::checked="checked" #(/search.navigation.protocol)# /></td>
+                        <td><input type="checkbox" aria-label="Protocols" name="search.navigation.protocol" value="true" #(search.navigation.protocol)#::checked="checked" #(/search.navigation.protocol)# /></td>
                         <td>
                           <p class="navbutton"></p>
                           <div class="btn-group">
-                            <span><button class="btn btn-default btn-xs">http</button><button class="btn btn-default btn-xs">https</button><button class="btn btn-default btn-xs">&nbsp;ftp&nbsp;</button><button class="btn btn-default btn-xs">&nbsp;smb&nbsp;</button><button class="btn btn-default btn-xs">file</button>
+                            <span><button class="btn btn-default btn-xs">http</button><button class="btn btn-default btn-xs">https</button><button class="btn btn-default btn-xs">&nbsp;ftp&nbsp;</button><button class="btn btn-default btn-xs">&nbsp;smb&nbsp;</button><button class="btn btn-default btn-xs">file</button></span>
                           </div>
                         </td>
                       </tr>                       
                       <tr>
-                        <td><input type="checkbox" name="search.navigation.topics" value="true" #(search.navigation.topics)#::checked="checked" #(/search.navigation.topics)# /></td>
+                        <td><input type="checkbox" aria-label="Tag cloud" name="search.navigation.topics" value="true" #(search.navigation.topics)#::checked="checked" #(/search.navigation.topics)# /></td>
                         <td>
                           <div style="padding-left:15px;  padding-bottom:10px; width: 100%;">
                             <div id="tagcloud" style="text-align:justify">
@@ -98,7 +99,7 @@
                               <a href="#" target="LayouTest" style="text-decoration: none; font-size: 8px">Cloud</a>
                               <a href="#" target="LayouTest" style="text-decoration: none; font-size: 11px">Tag</a>                              
                             </div>
-                            <script type="text/javascript" charset="utf-8">
+                            <script type="text/javascript">
           $.fn.tagcloud.defaults = {
             size: {start: 8, end: 16, unit: 'pt'},
           };
@@ -111,27 +112,27 @@
                         </td>
                       </tr>
                       <tr>
-                          <td><input type="checkbox" name="search.navigation.location" value="true" #(search.navigation.location)#::checked="checked" #(/search.navigation.location)# /></td>
+                          <td><input type="checkbox" aria-labelledby="locationTitle" name="search.navigation.location" value="true" #(search.navigation.location)#::checked="checked" #(/search.navigation.location)# /></td>
                           <td><ul class="nav nav-sidebar menugroup" id="sidebarLocation" style="padding-left:15px; padding-right:10px;">
-                            <li><h3>Location</h3></li>  
+                            <li><h3 id="locationTitle">Location</h3></li>  
                             #(search.navigation.location)#::
                             <li>
-                              <img src="env/grafics/earthsearch.png" width="100%" height="86" alt="earthsearchlogo" /><br/>
+                              <img src="env/grafics/earthsearch.png" style="width:100%" height="86" alt="earthsearchlogo" /><br/>
                               show search results on map
                             </li>#(/search.navigation.location)#                                
                           </ul></td>
                       </tr>                          
                       <tr>
-                        <td><input type="checkbox" name="search.navigation.language" value="true" #(search.navigation.language)#::checked="checked" #(/search.navigation.language)# /></td>
+                        <td><input type="checkbox" aria-labelledby="languageTitle" name="search.navigation.language" value="true" #(search.navigation.language)#::checked="checked" #(/search.navigation.language)# /></td>
                         <td><ul class="nav nav-sidebar menugroup" id="sidebarLanguages" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Language</h3></li>
+                          <li><h3 id="languageTitle">Language</h3></li>
                           </ul></td>
                       </tr>
                       #{search.navigation.plugin}#
                       <tr>
-                        <td><button class="btn btn-xs" name="del.nav" value="#[name]#"><span class="glyphicon glyphicon-remove" style="color: red"/></button></td>
+                        <td><button class="btn btn-xs" title="Delete navigator" aria-label="Delete navigator" aria-describedby="title-#[name]#" name="del.nav" value="#[name]#"><span class="glyphicon glyphicon-remove" style="color: red"></span></button></td>
                         <td><ul class="nav nav-sidebar menugroup"  style="padding-left:15px; padding-right:10px;">
-                          <li><h3>#[displayname]#</h3></li>
+                          <li><h3 id="title-#[name]#">#[displayname]#</h3></li>
                           </ul><input type="hidden" name="search.navigation.active" value="#[name]#" />
                         </td>
                       </tr>
@@ -153,7 +154,7 @@
                   </fieldset>
                 </div>    
               </td>
-              <td valign="top">
+              <td style="vertical-align: top;">
                 <div style="float: left;">
                   <fieldset class="yacys">
                     <div class="input-group">
@@ -168,7 +169,7 @@
                         &nbsp;&nbsp;<input type="checkbox" id="audio" name="search.audio" value="true" #(search.audio)#::checked="checked" #(/search.audio)# /><label for="audio">Audio</label>
                         &nbsp;&nbsp;<input type="checkbox" id="video" name="search.video" value="true" #(search.video)#::checked="checked" #(/search.video)# /><label for="video">Video</label>
                         &nbsp;&nbsp;<input type="checkbox" id="app" name="search.app" value="true" #(search.app)#::checked="checked" #(/search.app)# /><label for="app">Applications</label>
-                        &nbsp;<input type="checkbox" id="options" name="search.options" value="true" #(search.options)#::checked="checked" #(/search.options)# /><a href="" target="LayouTest">more options</a>
+                        &nbsp;<input type="checkbox" id="options" name="search.options" value="true" #(search.options)#::checked="checked" #(/search.options)# /><label for="options"><a href="#" target="LayouTest">more options</a></label>
                     </div>
                   </fieldset>
                 </div>
@@ -178,14 +179,17 @@
                 <div style="float: left;">
                 
                 
-                <input type="checkbox" name="search.navigation.date" value="true" #(search.navigation.date)#::checked="checked" #(/search.navigation.date)# /> Date Navigation
+                <label><input type="checkbox" name="search.navigation.date" value="true" #(search.navigation.date)#::checked="checked" #(/search.navigation.date)# /> Date Navigation</label>
+                <label title="Maximum days number in the histogram. Beware that a large value may trigger high CPU loads both on the server and on the browser with large result sets.">Maximum range (in days)
+                	<input type="number" name="search.navigation.dates.maxcount" value="#[search.navigation.dates.maxcount]#" min="6" max="2147483647"/>
+                </label>
 <link rel="stylesheet" href="env/morris.css">
 <script src="js/raphael.min.js"></script>
 <script src="js/morris.js"></script>
 <script type="text/javascript" src="js/accessibleHistogram.js" charset="UTF-8"></script>
 <div id="graph" style="height:200px"></div>
 <script>
-var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index", function(data) {
+var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index&facet.limit=#[search.navigation.dates.maxcount]#", function(data) {
 	dates_in_content_dts = data.facet_counts.facet_fields.dates_in_content_dts;
 	var parsed = [];
     for (var i = 0; i < dates_in_content_dts.length; i = i + 2) {
@@ -233,43 +237,43 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                       <a href="yacysearch.html" id="urlhash" target="LayouTest">http://url-of-the-search-result.net</a>
                     </p>
                     <p>
-                      <input type="checkbox" name="search.result.show.keywords" value="true" #(search.result.show.keywords)#::checked="checked" #(/search.result.show.keywords)# /> Tags: keyword subject keyword2 keyword3
+                      <input type="checkbox" name="search.result.show.keywords" aria-labelledby="tagsTitle" value="true" #(search.result.show.keywords)#::checked="checked" #(/search.result.show.keywords)# /> <span id="tagsTitle">Tags</span>: keyword subject keyword2 keyword3
                     </p>
-                    <p class="urlinfo">
-                      <table border="0">
+                    <div class="urlinfo">
+                      <table style="border-width:0">
                         <tr>
-                          <td width="15px"></td>
+                          <td style="width:15px;"></td>
                           <td>#[content_showDate_date]#</td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span>42 kbyte</td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="solr/select?q=*:*&defType=edismax&start=0&rows=3&core=collection1&wt=html" target="LayouTest">Metadata</a></td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="ViewFile.html" target="LayouTest">Parser</a></td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="api/citation.html?url=yacy.net" target="LayouTest">Citation</a></td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="yacysearch.html" target="LayouTest">Pictures</a></td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="CacheResource_p.html" target="LayouTest">Cache</a></td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="proxy.html" target="LayouTest">View via Proxy</a></td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="yacysearch.html" target="LayouTest">Snapshots</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="metadataLink" href="solr/select?q=*:*&defType=edismax&start=0&rows=3&core=collection1&wt=html" target="LayouTest">Metadata</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="parserLink" href="ViewFile.html" target="LayouTest">Parser</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="citationLink" href="api/citation.html?url=yacy.net" target="LayouTest">Citation</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="picturesLink" href="yacysearch.html" target="LayouTest">Pictures</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="cacheLink" href="CacheResource_p.html" target="LayouTest">Cache</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="proxyLink" href="proxy.html" target="LayouTest">View via Proxy</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="browseIndexLink" href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="snapshotsLink" href="yacysearch.html" target="LayouTest">Snapshots</a></td>
                           #(search.result.show.ranking)#::<td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><span title="Raw ranking score value">Ranking: 1.12195955E9</span>#(/search.result.show.ranking)#
                         </tr>
                         <tr>
                           <td></td>
-                          <td align="center"><input type="checkbox" name="search.result.show.date" value="true" #(search.result.show.date)#::checked="checked" #(/search.result.show.date)# /></td>
-                          <td align="center"><input type="checkbox" name="search.result.show.size" value="true" #(search.result.show.size)#::checked="checked" #(/search.result.show.size)# /></td>
-                          <td align="center"><input type="checkbox" name="search.result.show.metadata" value="true" #(search.result.show.metadata)#::checked="checked" #(/search.result.show.metadata)# /></td>
-                          <td align="center"><input type="checkbox" name="search.result.show.parser" value="true" #(search.result.show.parser)#::checked="checked" #(/search.result.show.parser)# /></td>
-                          <td align="center"><input type="checkbox" name="search.result.show.citation" value="true" #(search.result.show.citation)#::checked="checked" #(/search.result.show.citation)# /></td>
-                          <td align="center"><input type="checkbox" name="search.result.show.pictures" value="true" #(search.result.show.pictures)#::checked="checked" #(/search.result.show.pictures)# /></td>
-                          <td align="center"><input type="checkbox" name="search.result.show.cache" value="true" #(search.result.show.cache)#::checked="checked" #(/search.result.show.cache)# /></td>
-                          <td align="center"><input type="checkbox" name="search.result.show.proxy" value="true" #(search.result.show.proxy)#::checked="checked" #(/search.result.show.proxy)# />
-                            <span class="info" style="padding-left: 10px"><img src="env/grafics/i16.gif" alt="info"/><span>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.date" aria-label="Date" value="true" #(search.result.show.date)#::checked="checked" #(/search.result.show.date)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.size" aria-label="Size" value="true" #(search.result.show.size)#::checked="checked" #(/search.result.show.size)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.metadata" aria-labelledby="metadataLink" value="true" #(search.result.show.metadata)#::checked="checked" #(/search.result.show.metadata)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.parser" aria-labelledby="parserLink" value="true" #(search.result.show.parser)#::checked="checked" #(/search.result.show.parser)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.citation" aria-labelledby="citationLink" value="true" #(search.result.show.citation)#::checked="checked" #(/search.result.show.citation)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.pictures" aria-labelledby="picturesLink" value="true" #(search.result.show.pictures)#::checked="checked" #(/search.result.show.pictures)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.cache" aria-labelledby="cacheLink" value="true" #(search.result.show.cache)#::checked="checked" #(/search.result.show.cache)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.proxy" aria-labelledby="proxyLink" aria-describedby="proxyDesc" value="true" #(search.result.show.proxy)#::checked="checked" #(/search.result.show.proxy)# />
+                            <span class="info" style="padding-left: 10px"><img src="env/grafics/i16.gif" alt="info"/><span id="proxyDesc">
                               For this option URL proxy must be enabled.<br>
                               see <a href="Settings_p.html?page=UrlProxyAccess">Settings_p.html</a><br>
                               menu: System Administration > Advanced Settings
                             </span></span>
                           </td>
-                          <td align="center"><input type="checkbox" name="search.result.show.hostbrowser" value="true" #(search.result.show.hostbrowser)#::checked="checked" #(/search.result.show.hostbrowser)# /></td>
-                          <td align="center"><input type="checkbox" name="search.result.show.snapshots" value="true" #(search.result.show.snapshots)#::checked="checked" #(/search.result.show.snapshots)# /></td>
-                          #(search.result.show.ranking)#::<td align="center">
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.hostbrowser" aria-labelledby="browseIndexLink" value="true" #(search.result.show.hostbrowser)#::checked="checked" #(/search.result.show.hostbrowser)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.snapshots" aria-labelledby="snapshotsLink" value="true" #(search.result.show.snapshots)#::checked="checked" #(/search.result.show.snapshots)# /></td>
+                          #(search.result.show.ranking)#::<td style="text-align:center;">
                             <span class="info" style="padding-left: 10px"><img src="env/grafics/i16.gif" alt="info"/><span>
                               Ranking score value, mainly for debug/analysis purpose, configured in <a href="Settings_p.html?page=debug">Debug/Analysis Settings</a><br>
                               Menu: System Administration > Advanced Settings > Debug/Analysis Settings
@@ -278,7 +282,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                           #(/search.result.show.ranking)#
                         </tr>
                       </table>
-                    </p>
+                    </div>
                   </div>
                 </fieldset>
               </div>                        
@@ -288,17 +292,18 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
       </td>
     </tr>
   </table>
-  <table>
+  <table role="presentation">
     <tr>
       <td>
         <fieldset><legend>Add Navigators</legend>
-          <label for="search.navigation.navname">append</label>
-          <select type="text" name="search.navigation.navname">
-            #{search.navigation.list}#
-            <option value="#[name]#">#[displayname]#</option>
-            #{/search.navigation.list}#
-          </select>
-          <button type="submit" name="add.nav" class="btn btn-xs btn-default" ><span class="glyphicon glyphicon-plus-sign" style="color: green"/></button><br>
+          <label>append
+          	<select name="search.navigation.navname">
+            	#{search.navigation.list}#
+            	<option value="#[name]#">#[displayname]#</option>
+            	#{/search.navigation.list}#
+          	</select>
+          </label>
+          <button type="submit" title="Add navigator" name="add.nav" class="btn btn-xs btn-default" ><span class="glyphicon glyphicon-plus-sign" style="color: green"></span></button><br>
           <label for="search.navigation.maxcount">max. items</label>
           <input type="text" id="search.navigation.maxcount" name="search.navigation.maxcount" size="3" value="#[search.navigation.maxcount]#">
         </fieldset>
@@ -312,5 +317,6 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
     </tr>
   </table>
 </form>
+#%env/templates/footer.template%#
 </body>
 </html>

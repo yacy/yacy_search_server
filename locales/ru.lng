@@ -938,14 +938,14 @@ Replace the word "MySearch" with your own message==Заменить слово "
 
 #File: ConfigSearchPage_p.html
 #---------------------------
+<html lang="en">==<html lang="ru">
 Search Page<==Страница поиска<
 >Search Result Page Layout Configuration<==>Конфигурация макета страницы результатов поиска<
 Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==Ниже приведён общий макет страницы результатов поиска. Отметьте компоненты, которые должны быть отображены.
 To change colors and styles use the ==Изменить цвета, стили и скины вы можете 
 >Appearance<==>здесь<
  menu for different skins.==.
-Other portal settings can be adjusted in==Другие настройки портала могут быть изменены на 
->Generic Search Portal<==>странице интеграции поиска<
+Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.==Другие настройки портала могут быть изменены на Меню <a href="ConfigPortal_p.html">странице интеграции поиска</a>.
 >Page Template<==>Макет страницы<
 >Administration<==>Администрирование<
 >Web Search<==>Вэб-поиск<

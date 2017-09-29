@@ -62,6 +62,7 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.navigator.Navigator;
 import net.yacy.search.query.HeuristicResult;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
@@ -242,10 +243,19 @@ public class yacysearchitem {
                 if (showEvent) prop.put("content_showEvent_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(events[0]));
                 if (showKeywords) { // tokenize keywords
                     StringTokenizer stoc = new StringTokenizer(result.dc_subject()," ");
+                    String rawNavQueryModifier;
+                    Navigator navi = theSearch.navigatorPlugins.get("keywords");
+                    boolean naviAvail = navi != null;
                     int i = 0;
                     while (stoc.hasMoreTokens()) {
                         String word = stoc.nextToken();
                         prop.putHTML("content_showKeywords_keywords_" + i + "_tagword", word);
+                        if (naviAvail) { // use query modifier if navigator available
+                            rawNavQueryModifier = navi.getQueryModifier(word);
+                        } else { // otherwise just use the keyword as additional query word
+                            rawNavQueryModifier = word;
+                        }
+                        prop.put("content_showKeywords_keywords_" + i + "_tagurl", QueryParams.navurl(fileType, 0, theSearch.query, rawNavQueryModifier, naviAvail).toString());
                         i++;
                     }
                     prop.put("content_showKeywords_keywords", i);

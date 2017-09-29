@@ -553,7 +553,11 @@ public final class SwitchboardConstants {
     /** Default setting value controlling whether search results resorting by browser JavaScript is enabled */
     public static final boolean SEARCH_JS_RESORT_DEFAULT = false;
 
-    public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount"; // max lines displayed in standard search navigators/facets
+    /** Key of the setting controlling the max lines displayed in standard search navigators/facets */
+    public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount";
+    
+    /** Key of the setting controlling the max lines displayed in the dates navigator */
+    public static final String SEARCH_NAVIGATION_DATES_MAXCOUNT = "search.navigation.dates.maxcount";
     
     /** Key of the setting controlling whether a noreferrer link type should be added to search result links */
     public static final String SEARCH_RESULT_NOREFERRER = "search.result.noreferrer";

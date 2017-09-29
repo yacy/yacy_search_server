@@ -653,6 +653,10 @@ public class yacysearch {
                     header.get(HeaderFramework.USER_AGENT, ""),
                     lat, lon, rad,
                     sb.getConfigArray("search.navigation", ""));
+			theQuery.setStandardFacetsMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
+					QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
+			theQuery.setDateFacetMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
+					QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT));
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
                 theQuery.id(true),

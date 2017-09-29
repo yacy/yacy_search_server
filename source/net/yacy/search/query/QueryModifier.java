@@ -221,6 +221,7 @@ public class QueryModifier {
 
     /**
      * Parse query string for filetype (file extension) parameter
+     * and adjust parameter to lowercase
      * @param querystring
      * @param filetypePrefix "filetype:"
      * @return querystring with filetype parameter removed
@@ -230,8 +231,9 @@ public class QueryModifier {
         if ( ftp >= 0 ) {
             int ftb = querystring.indexOf(' ', ftp);
             if ( ftb < 0 ) ftb = querystring.length();
-            filetype = querystring.substring(ftp + filetypePrefix.length(), ftb);
-            querystring = querystring.replace(filetypePrefix + filetype, "");
+            String tmpqueryparameter = querystring.substring(ftp + filetypePrefix.length(), ftb);
+            querystring = querystring.replace(filetypePrefix + tmpqueryparameter, ""); // replace prefix:Text  as found
+            filetype = tmpqueryparameter.toLowerCase(); // file extension are always compared lowercase, can be converted here for further processing
             while ( !filetype.isEmpty() && filetype.charAt(0) == '.' ) {
                 filetype = filetype.substring(1);
             }

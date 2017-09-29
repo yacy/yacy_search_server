@@ -615,6 +615,7 @@ This would look like:==これは次の様に見えます:
 
 #File: ConfigSearchPage_p.html
 #---------------------------
+<html lang="en">==<html lang="ja">
 Search Page<==検索ページ<
 >Search Result Page Layout Configuration<==>検索結果のページのレイアウトの構成<
 >Appearance<==>外観<

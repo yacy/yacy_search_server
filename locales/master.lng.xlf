@@ -2043,10 +2043,7 @@
        <source> menu for different skins.</source>
     </trans-unit>
     <trans-unit id="40d7aca3" xml:space="preserve" approved="no" translate="yes">
-       <source>Other portal settings can be adjusted in</source>
-    </trans-unit>
-    <trans-unit id="89a2021f" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Generic Search Portal&lt;</source>
+       <source>Other portal settings can be adjusted in &lt;a href="ConfigPortal_p.html"&gt;Generic Search Portal&lt;/a&gt; menu.</source>
     </trans-unit>
     <trans-unit id="58b4a6f" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Page Template&lt;</source>
@@ -2126,9 +2123,21 @@
     <trans-unit id="479c86d8" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Cache&lt;</source>
     </trans-unit>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
+    <trans-unit id="3df0db32" xml:space="preserve" approved="no" translate="yes">
+       <source>"Date"</source>
+    </trans-unit>
+    <trans-unit id="3ec7f53f" xml:space="preserve" approved="no" translate="yes">
+       <source>"Size"</source>
+    </trans-unit>
+    <trans-unit id="f46b1ae4" xml:space="preserve" approved="no" translate="yes">
+       <source>"Browse index"</source>
+    </trans-unit>
     <trans-unit id="37b12af6" xml:space="preserve" approved="no" translate="yes">
        <source>For this option URL proxy must be enabled.</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="a0b7e36a" xml:space="preserve" approved="no"  translate="yes">
        <source>max. items</source>
     </trans-unit>    
@@ -2138,8 +2147,50 @@
     <trans-unit id="637bace1" xml:space="preserve" approved="no" translate="yes">
        <source>"Set Default Values"</source>
     </trans-unit>
-    <trans-unit id="62f96af" xml:space="preserve" approved="no" translate="yes">
-       <source>menu.</source>
+    <trans-unit id="30768cae" xml:space="preserve" approved="no" translate="yes">
+       <source>"Top navigation bar"</source>
+    </trans-unit>
+    <trans-unit id="59dfdc89" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Location&lt;</source>
+    </trans-unit>
+    <trans-unit id="2565239a" xml:space="preserve" approved="no" translate="yes">
+       <source>show search results on map</source>
+    </trans-unit>
+    <trans-unit id="12350dc6" xml:space="preserve" approved="no" translate="yes">
+       <source>Date Navigation</source>
+    </trans-unit>
+    <trans-unit id="57a422dc" xml:space="preserve" approved="no" translate="yes">
+       <source>Maximum range (in days)</source>
+    </trans-unit>
+    <trans-unit id="36b6c646" xml:space="preserve" approved="no" translate="yes">
+       <source>Maximum days number in the histogram. Beware that a large value may trigger high CPU loads both on the server and on the browser with large result sets.</source>
+    </trans-unit>
+    <trans-unit id="cfe1ccd6" xml:space="preserve" approved="no" translate="yes">
+       <source>keyword subject keyword2 keyword3</source>
+    </trans-unit>
+    <trans-unit id="b62dd421" xml:space="preserve" approved="no" translate="yes">
+       <source>View via Proxy</source>
+    </trans-unit>
+    <trans-unit id="43d1a9cb" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Snapshots&lt;</source>
+    </trans-unit>
+    <trans-unit id="f5192903" xml:space="preserve" approved="no" translate="yes">
+       <source>"Raw ranking score value"</source>
+    </trans-unit>
+    <trans-unit id="7450e2ba" xml:space="preserve" approved="no" translate="yes">
+       <source>Ranking: 1.12195955E9</source>
+    </trans-unit>
+    <trans-unit id="b42e923e" xml:space="preserve" approved="no" translate="yes">
+       <source>"Delete navigator"</source>
+    </trans-unit>
+    <trans-unit id="851aa1b" xml:space="preserve" approved="no" translate="yes">
+       <source>Add Navigators</source>
+    </trans-unit>
+    <trans-unit id="80a3ea4c" xml:space="preserve" approved="no" translate="yes">
+       <source>"Add navigator"</source>
+    </trans-unit>
+    <trans-unit id="7ba728d8" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;append</source>
     </trans-unit>
     <trans-unit id="5ebd116f" xml:space="preserve" approved="no" translate="yes">
        <source>http://url-of-the-search-result.net</source>
