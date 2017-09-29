@@ -106,9 +106,9 @@ public class ChartPlotter extends RasterPlotter {
 
     public void chartLine(final int dimension_x, final int dimension_y, final float coord_x1, final int coord_y1, final float coord_x2, final int coord_y2) {
         final int x1 = (int) ((coord_x1 - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x]);
-        final int y1 = (coord_y1 - this.offsets[dimension_y]) * this.pixels[dimension_y] / this.scales[dimension_y];
+        final int y1 = (int)((long)(coord_y1 - this.offsets[dimension_y]) * (long)(this.pixels[dimension_y]) / (long)(this.scales[dimension_y]));
         final int x2 = (int) ((coord_x2 - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x]);
-        final int y2 = (coord_y2 - this.offsets[dimension_y]) * this.pixels[dimension_y] / this.scales[dimension_y];
+        final int y2 = (int)((long)(coord_y2 - this.offsets[dimension_y]) * (long)(this.pixels[dimension_y]) / (long)(this.scales[dimension_y]));
         line(this.leftborder + x1, this.height - this.bottomborder - y1, this.leftborder + x2, this.height - this.bottomborder - y2, 100);
     }
 
