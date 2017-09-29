@@ -840,15 +840,14 @@ Replace the word "MySearch" with your own message==Ersetzen Sie das Wort "Meine 
 
 #File: ConfigSearchPage_p.html
 #---------------------------
+<html lang="en">==<html lang="de">
 Search Page<==Suchseite<
 >Search Result Page Layout Configuration<==>Konfiguration des Seitenlayouts der Seite für Suchergebnisse<
 Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==Im Folgenden wird ein generisches Template einer Suchergebnisseite. Markieren Sie die Checkboxen für alle Features die angezeigt werden sollen.
 To change colors and styles use the ==Um die Farben und Stile zu ändern, verwenden Sie das
 >Appearance<==>Erscheinungsbild<
  menu for different skins.== Menü für verschiedene Skins.
-Other portal settings can be adjusted in==Andere Einstellungen für das Portal können im
->Generic Search Portal<==>Generisches Suchportal<
-menu.==Menü geändert werden.
+Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.==Andere Einstellungen für das Portal können im <a href="ConfigPortal_p.html">Generisches Suchportal</a> Menü geändert werden.
 >Page Template<==>Seiten Template<
 #>Administration<==>Administration<
 >Web Search<==>Websuche<

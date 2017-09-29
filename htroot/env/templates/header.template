@@ -20,6 +20,9 @@
         <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
         <input type="hidden" name="nav" value="all" />
+    	#(authorized)#::
+  		<input type="hidden" name="auth" id="auth" value=""/>
+  		#(/authorized)#
       </form>
     </div>
 	<script type="text/javascript">

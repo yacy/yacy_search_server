@@ -61,6 +61,9 @@
             <button id="Enter" name="Enter" class="btn btn-primary" type="submit">Search</button>
           </div>
         </div>
+    	#(authorized)#::
+  		<input type="hidden" name="auth" id="auth" value=""/>
+  		#(/authorized)#
         <input type="hidden" name="verify" value="#[search.verify]#" />
         #(searchdomswitches)#::
         <div class="yacysearch">

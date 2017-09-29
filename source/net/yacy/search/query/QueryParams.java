@@ -44,6 +44,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.lucene.util.automaton.Automata;
+import org.apache.lucene.util.automaton.Automaton;
+import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.SortClause;
+import org.apache.solr.common.params.DisMaxParams;
+import org.apache.solr.common.params.FacetParams;
+
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
@@ -70,13 +77,6 @@ import net.yacy.search.index.Segment;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
-
-import org.apache.lucene.util.automaton.Automata;
-import org.apache.lucene.util.automaton.Automaton;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.SortClause;
-import org.apache.solr.common.params.DisMaxParams;
-import org.apache.solr.common.params.FacetParams;
 
 public final class QueryParams {
 
@@ -734,12 +734,18 @@ public final class QueryParams {
     }
 
     /**
-     * make a query anchor tag
-     * @return the anchor url builder
-     */
-    public static StringBuilder navurl(final RequestHeader.FileType ext, final int page, final QueryParams theQuery, final String newQueryString, boolean newModifierReplacesOld) {
+	 * make a query anchor tag
+	 * 
+	 * @param authenticatedFeatures
+	 *            when true, access to authentication protected search features is
+	 *            wanted
+	 * @return the anchor url builder
+	 */
+	public static StringBuilder navurl(final RequestHeader.FileType ext, final int page, final QueryParams theQuery,
+			final String newQueryString, boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
 
-        final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, newModifierReplacesOld);
+		final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, newModifierReplacesOld,
+				authenticatedFeatures);
 
         sb.append("&startRecord=");
         sb.append(page * theQuery.itemsPerPage());
@@ -748,17 +754,24 @@ public final class QueryParams {
     }
 
      /**
-     * construct navigator url
-     *
-     * @param ext extension of servlet (e.g. html, rss)
-     * @param theQuery search query
-     * @param newModifier optional new modifier.
-     *      - if null existing modifier of theQuery is appended
-     *      - if not null this new modifier is appended in addition to existing modifier
-     *      - if isEmpty overwrites (clears) existing modifier
-     * @return url to new search result page
-     */
-    public static StringBuilder navurlBase(final RequestHeader.FileType ext, final QueryParams theQuery, final String newModifier, boolean newModifierReplacesOld) {
+	 * construct navigator url
+	 *
+	 * @param ext
+	 *            extension of servlet (e.g. html, rss)
+	 * @param theQuery
+	 *            search query
+	 * @param newModifier
+	 *            optional new modifier. - if null existing modifier of theQuery is
+	 *            appended - if not null this new modifier is appended in addition
+	 *            to existing modifier - if isEmpty overwrites (clears) existing
+	 *            modifier
+	 * @param authenticatedFeatures
+	 *            when true, access to authentication protected search features is
+	 *            wanted
+	 * @return url to new search result page
+	 */
+	public static StringBuilder navurlBase(final RequestHeader.FileType ext, final QueryParams theQuery,
+			final String newModifier, final boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
 
         StringBuilder sb = new StringBuilder(120);
         sb.append("yacysearch.");
@@ -810,6 +823,10 @@ public final class QueryParams {
 
         sb.append("&former=");
         sb.append(theQuery.getQueryGoal().getQueryString(true));
+
+        if(authenticatedFeatures) {
+        	sb.append("&auth");
+        }
 
         return sb;
     }

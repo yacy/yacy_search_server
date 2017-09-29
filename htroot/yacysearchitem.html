@@ -25,7 +25,7 @@
   </div>
   <p class="snippet"><span class="snippetLoaded" id="h#[urlhash]#">#[description]#</span></p>
   <p class="url"><a href="#[link]#" id="url#[urlhash]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[urlname]#</a></p>
-  #(showKeywords)#::<p class="tags">Tags: #{keywords}#<span class="tag label label-default">#[tagword]#</span> #{/keywords}#</p>#(/showKeywords)#
+  #(showKeywords)#::<p class="tags">Tags: #{keywords}#<span class="tag label label-default"><a href="#[tagurl]#" style="color: inherit; text-decoration: inherit;">#[tagword]#</a></span> #{/keywords}#</p>#(/showKeywords)#
   <p class="urlinfo">
   #(showDate)#::#[date]##(/showDate)#
   #(showEvent)#::on #[date]##(/showEvent)#
@@ -33,7 +33,7 @@
   #(showMetadata)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="solr/select?q=id:%22#[urlhash]#%22&defType=edismax&start=0&rows=1&core=collection1&wt=html" target="_blank">Metadata</a>#(/showMetadata)#
   #(showParser)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#" target="_blank">Parser</a>#(/showParser)#
   #(showCitation)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="api/citation.html?hash=#[urlhash]#&filter=true" target="_blank">Citations</a>#(/showCitation)#
-  #(showPictures)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="yacysearch.html?contentdom=image&url=#[link]#&query=#[former]#+inurl:#[link]#" target="_blank">Pictures</a>#(/showPictures)#
+  #(showPictures)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="yacysearch.html?contentdom=image#(authorized)#::&auth#(/authorized)#&url=#[link]#&query=#[former]#+inurl:#[link]#" target="_blank">Pictures</a>#(/showPictures)#
   #(showCache)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="CacheResource_p.html?url=#[link]#" target="_blank">Cache</a>#(/showCache)#
   #(showProxy)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="proxy.html?url=#[link]#" target="_blank">View via proxy</a>#(/showProxy)#
   #(showHostBrowser)#::<span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a href="HostBrowser.html?path=#[link]#"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a>#(/showHostBrowser)#

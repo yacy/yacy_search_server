@@ -1,5 +1,8 @@
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.UserDB;
+import net.yacy.http.servlets.TemplateMissingParameterException;
 import net.yacy.kelondro.util.Formatter;
+import net.yacy.search.Switchboard;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
@@ -10,8 +13,17 @@ import net.yacy.server.serverSwitch;
 public class yacysearchlatestinfo {
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+		if (post == null) {
+			throw new TemplateMissingParameterException("The eventID parameter is required");
+		}
+		
         final serverObjects prop = new serverObjects();
-        //Switchboard sb = (Switchboard) env;
+        Switchboard sb = (Switchboard) env;
+        
+        final boolean adminAuthenticated = sb.verifyAuthentication(header);
+		final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
+		final boolean userAuthenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
+		final boolean authenticated = adminAuthenticated || userAuthenticated;
 
         // find search event
         final String eventID = post.get("eventID", "");
@@ -44,7 +56,7 @@ public class yacysearchlatestinfo {
         prop.put("remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
         prop.put("remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
-        prop.putJSON("navurlBase", QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false).toString());
+        prop.putJSON("navurlBase", QueryParams.navurlBase(RequestHeader.FileType.HTML, theSearch.query, null, false, authenticated).toString());
         prop.put("feedRunning", Boolean.toString(!theSearch.isFeedingFinished()));
 
         return prop;

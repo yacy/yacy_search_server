@@ -106,7 +106,7 @@ public class yacysearch {
 
         boolean authenticated = sb.adminAuthenticated(header) >= 2;
         if ( !authenticated ) {
-            final UserDB.Entry user = sb.userDB.getUser(header);
+        	final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
             authenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
         }
         final boolean localhostAccess = header.accessFromLocalhost();
@@ -197,6 +197,18 @@ public class yacysearch {
             prop.put("eventID",""); // mandatory parameter for yacysearchtrailer/yacysearchitem includes
             return prop;
         }
+
+		if (post.containsKey("auth") && !authenticated) {
+			/*
+			 * Access to authentication protected features is explicitely requested here
+			 * but no authentication is provided : ask now for authentication.
+             * Wihout this, after timeout of HTTP Digest authentication nonce, browsers no more send authentication information 
+             * and as this page is not private, protected features would simply be hidden without asking browser again for authentication.
+             * (see mantis 766 : http://mantis.tokeek.de/view.php?id=766) *
+			 */
+			prop.authenticationRequired();
+			return prop;
+		}
 
         // check for JSONP
         if ( post.containsKey("callback") ) {
@@ -764,7 +776,7 @@ public class yacysearch {
                                     RequestHeader.FileType.HTML,
                                     0,
                                     theQuery,
-                                    suggestion, true).toString());
+                                    suggestion, true, authenticated).toString());
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
                         } catch (final ConcurrentModificationException e) {
@@ -842,8 +854,9 @@ public class yacysearch {
 			 * eventually including fetched results with higher ranks from the Solr and RWI stacks */
 			prop.put("resortEnabled", !jsResort && global && !stealthmode && theSearch.resortCacheAllowed.availablePermits() > 0 ? 1 : 0);
 			prop.put("resortEnabled_url",
-					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true).append("&startRecord=")
-							.append(startRecord).append("&resortCachedResults=true").toString());
+					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true, authenticated)
+							.append("&startRecord=").append(startRecord).append("&resortCachedResults=true")
+							.toString());
 
             // generate the search result lines; the content will be produced by another servlet
             for ( int i = 0; i < theQuery.itemsPerPage(); i++ ) {
