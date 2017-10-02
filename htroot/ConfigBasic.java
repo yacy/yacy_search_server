@@ -284,24 +284,24 @@ public class ConfigBasic {
         // set label class (green background) for active translation
         if (lang.equals("browser")) {
             List<String> l = Translator.activeTranslations();
-            prop.put("active_cn", l.contains("cn") ? "label-success" : "");
-            prop.put("active_de", l.contains("de") ? "label-success" : "");
-            prop.put("active_fr", l.contains("fr") ? "label-success" : "");
-            prop.put("active_hi", l.contains("hi") ? "label-success" : "");
-            prop.put("active_ja", l.contains("ja") ? "label-success" : "");
-            prop.put("active_ru", l.contains("ru") ? "label-success" : "");
-            prop.put("active_uk", l.contains("uk") ? "label-success" : "");
-            prop.put("active_en", "label-success");
+            prop.put("active_cn", l.contains("cn") ? "2" : "1");
+            prop.put("active_de", l.contains("de") ? "2" : "1");
+            prop.put("active_fr", l.contains("fr") ? "2" : "1");
+            prop.put("active_hi", l.contains("hi") ? "2" : "1");
+            prop.put("active_ja", l.contains("ja") ? "2" : "1");
+            prop.put("active_ru", l.contains("ru") ? "2" : "1");
+            prop.put("active_uk", l.contains("uk") ? "2" : "1");
+            prop.put("active_en", "2");
             
         } else {
-            prop.put("active_de", "");
-            prop.put("active_fr", "");
-            prop.put("active_hi", "");
-            prop.put("active_cn", "");
-            prop.put("active_ru", "");
-            prop.put("active_uk", "");
-            prop.put("active_en", "");
-            prop.put("active_ja", "");
+            prop.put("active_de", "0");
+            prop.put("active_fr", "0");
+            prop.put("active_hi", "0");
+            prop.put("active_cn", "0");
+            prop.put("active_ru", "0");
+            prop.put("active_uk", "0");
+            prop.put("active_en", "0");
+            prop.put("active_ja", "0");
         }
         return prop;
     }
