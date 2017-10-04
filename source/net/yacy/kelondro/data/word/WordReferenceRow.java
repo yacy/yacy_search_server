@@ -98,7 +98,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     private static final int col_posintext     = 15; // t  2 first appearance of word in text
     private static final int col_posinphrase   = 16; // r  1 position of word in its phrase
     private static final int col_posofphrase   = 17; // o  1 number of the phrase where word appears
-    private static final int col_reserve1      = 18; // i  1 reserve1
+    private static final int col_worddistance  = 18; // i  avg distance of search query words
     private static final int col_reserve2      = 19; // k  1 reserve2
 
     // appearance flags, used in RWI entry
@@ -130,6 +130,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
             final char     doctype,       // type of document
             final int      outlinksSame,  // outlinks to same domain
             final int      outlinksOther, // outlinks to other domain
+            final int      wordDistance,  // average distance of multi search query words
             final Bitfield flags  // attributes to the url and to the word according the url
     ) {
 
@@ -155,7 +156,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry.setCol(col_posintext, posintext);
         this.entry.setCol(col_posinphrase, posinphrase);
         this.entry.setCol(col_posofphrase, posofphrase);
-        this.entry.setCol(col_reserve1, 0);
+        this.entry.setCol(col_worddistance, wordDistance);
         this.entry.setCol(col_reserve2, 0);
     }
 
@@ -194,7 +195,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_lother, outlinksOther);
                         this.entry.setCol(col_urlLength, urlLength);
                         this.entry.setCol(col_urlComps, urlComps);
-                        this.entry.setCol(col_reserve1, 0);
+                        this.entry.setCol(col_worddistance, 0);
                         this.entry.setCol(col_reserve2, 0);
                     }
 
@@ -270,6 +271,12 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     public int posintext() {
         int pos = (int) this.entry.getColLong(col_posintext);
         return pos;
+    }
+    
+    @Override
+    public int distance() {
+        final int distance = (int) this.entry.getColLong(col_worddistance);
+        return distance;
     }
 
     /**
