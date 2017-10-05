@@ -65,7 +65,7 @@ public class Html2Image {
     private final static File convertMac2 = new File("/opt/ImageMagick/bin/convert");
     
     // debian
-    // to install: apt-get install wkhtmltopdf imagemagick xvfb
+    // to install: apt-get install wkhtmltopdf imagemagick xvfb ghostscript
     private final static File wkhtmltopdfDebian = new File("/usr/bin/wkhtmltopdf"); // there is no wkhtmltoimage, use convert to create images
     private final static File convertDebian = new File("/usr/bin/convert");
 

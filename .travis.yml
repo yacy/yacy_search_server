@@ -10,6 +10,11 @@ jdk:
 # only `sudo: true` allows running tests on Travis CI container infrastructure for faster builds, but testing installation of .deb makes sense
 sudo: true
 
+# Installing ghostcript (optional imagemagick dependency) is required for Html2ImageTest to run
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y ghostcript
+
 install:
 - cd libbuild && MAVEN_OPTS="-Xmx6g -Xms2g" mvn clean install && cd ..
 
