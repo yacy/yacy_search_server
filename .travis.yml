@@ -24,4 +24,4 @@ script:
 - ant
 - ant dist
 - ant deb
-- sudo dpkg -i *.deb
+- sudo dpkg -i ../yacy_*_all.deb
