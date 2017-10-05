@@ -788,7 +788,7 @@
   	<delete dir="${release_mac}" failonerror="false" verbose="false" />
   </target>
 
-  <!-- to use the deb command the following debian packages must be installed: dpkg-dev debhelper m4 -->
+  <!-- to use the deb command the following debian packages must be installed: dpkg-dev debhelper m4 fakeroot -->
   <target name="deb" depends="init" description="Creates a debian package">
     <!-- replacing the old with the new revision number -->
     <replaceregexp file="debian/changelog"

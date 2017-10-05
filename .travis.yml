@@ -11,10 +11,10 @@ jdk:
 sudo: true
 
 # Installing ghostscript (optional imagemagick dependency) is required for Html2ImageTest to run
-# dpkg-dev debhelper m4 packages are required for the 'ant deb' task
+# dpkg-dev,debhelper,m4 and fakeroot packages are required for the 'ant deb' task
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y ghostscript dpkg-dev debhelper m4
+  - sudo apt-get install -y ghostscript dpkg-dev debhelper m4 fakeroot
 
 install:
 - cd libbuild && MAVEN_OPTS="-Xmx6g -Xms2g" mvn clean install && cd ..
