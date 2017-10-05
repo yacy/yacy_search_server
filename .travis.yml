@@ -7,5 +7,16 @@ cache:
 jdk:
   - oraclejdk8
 
-# for running tests on Travis CI container infrastructure for faster builds
-sudo: false
+# only `sudo: true` allows running tests on Travis CI container infrastructure for faster builds, but testing installation of .deb makes sense
+sudo: true
+
+install:
+- cd libbuild && MAVEN_OPTS="-Xmx6g -Xms2g" mvn clean install && cd ..
+
+script:
+- MAVEN_OPTS="-Xmx6g -Xms2g" mvn clean install
+# test build instructions
+- ant
+- ant dist
+- ant deb
+- sudo dpkg -i *.deb
