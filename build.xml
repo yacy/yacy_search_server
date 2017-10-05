@@ -327,7 +327,8 @@
   	<!-- copy build libs -->
   	    <copy todir="${release_main}/libbuild">
   	      <fileset dir="${libbuild}" 
-  	               includes="**/*"/>
+  	               includes="**/*"
+  	      		   excludes="**/target/**"/>
   	    </copy>
 
     <!-- copy configuration files -->
