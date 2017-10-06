@@ -82,7 +82,7 @@ public class SchemaConfiguration extends Configuration implements Serializable {
         SolrInputDocument sid = new SolrInputDocument();
         for (String name: doc.getFieldNames()) {
             if (this.contains(name) && (omitFields == null || !omitFields.contains(name))) { // check each field if enabled in local Solr schema
-                sid.addField(name, doc.getFieldValue(name), 1.0f);
+                sid.addField(name, doc.getFieldValue(name));
             }
         }
         return sid;
@@ -163,12 +163,6 @@ public class SchemaConfiguration extends Configuration implements Serializable {
     public void add(final SolrInputDocument doc, final SchemaDeclaration key, final boolean value) {
         assert !key.isMultiValued() : "key = " + key.getSolrFieldName();
         if (isEmpty() || contains(key)) key.add(doc, value);
-    }
-
-    public static Date getDate(SolrInputDocument doc, final SchemaDeclaration key) {
-        Date x = (Date) doc.getFieldValue(key.getSolrFieldName());
-        Date now = new Date();
-        return (x == null) ? new Date(0) : x.after(now) ? now : x;
     }
 
 }
