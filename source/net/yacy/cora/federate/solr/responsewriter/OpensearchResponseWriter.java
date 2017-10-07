@@ -248,7 +248,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
             }
             
             if (Math.min(images_protocol_obj.size(), images_stub.size()) > 0) {
-            	List<String> images_protocol = CollectionConfiguration.indexedList2protocolList(images_protocol_obj, images_protocol_obj.size());
+            	List<String> images_protocol = CollectionConfiguration.indexedList2protocolList(images_protocol_obj, images_stub.size());
             	String imageurl = images_protocol.get(0) + "://" + images_stub.get(0);
                  writer.write("<media:content medium=\"image\" url=\"");
                  XML.escapeCharData(imageurl, writer); writer.write("\"/>\n");
