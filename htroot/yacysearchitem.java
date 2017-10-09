@@ -250,7 +250,8 @@ public class yacysearchitem {
             prop.put("content_showEvent", showEvent ? 1 : 0);
             Collection<File> snapshotPaths = sb.getConfigBool("search.result.show.snapshots", true) ? Transactions.findPaths(result.url(), null, State.ANY) : null;
             if (fileType == FileType.HTML) { // html template specific settings
-                boolean showKeywords = (sb.getConfigBool("search.result.show.keywords", false) && !result.dc_subject().isEmpty());
+				boolean showKeywords = (sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS,
+						SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS_DEFAULT) && !result.dc_subject().isEmpty());
                 prop.put("content_showKeywords", showKeywords);
                 prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) && !showEvent ? 1 : 0);
                 prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);
@@ -267,13 +268,16 @@ public class yacysearchitem {
 
                 if (showEvent) prop.put("content_showEvent_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(events[0]));
                 if (showKeywords) { // tokenize keywords
-                    StringTokenizer stoc = new StringTokenizer(result.dc_subject()," ");
+                    final StringTokenizer stoc = new StringTokenizer(result.dc_subject()," ");
                     String rawNavQueryModifier;
                     Navigator navi = theSearch.navigatorPlugins.get("keywords");
                     boolean naviAvail = navi != null;
+                    final int firstMaxKeywords = sb.getConfigInt(SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT,
+							SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT_DEFAULT);
                     int i = 0;
-                    while (stoc.hasMoreTokens()) {
-                        String word = stoc.nextToken();
+					while (stoc.hasMoreTokens()
+							&& i < firstMaxKeywords) {
+                        final String word = stoc.nextToken();
                         prop.putHTML("content_showKeywords_keywords_" + i + "_tagword", word);
                         if (naviAvail) { // use query modifier if navigator available
                             rawNavQueryModifier = navi.getQueryModifier(word);
@@ -285,6 +289,24 @@ public class yacysearchitem {
                         i++;
                     }
                     prop.put("content_showKeywords_keywords", i);
+                    if(stoc.hasMoreTokens()) {
+                    	prop.put("content_showKeywords_moreKeywords", "1");
+                    	prop.put("content_showKeywords_moreKeywords_urlhash", urlhash);
+                    	i = 0;
+                        while (stoc.hasMoreTokens()) {
+                            final String word = stoc.nextToken();
+                            prop.putHTML("content_showKeywords_moreKeywords_keywords_" + i + "_tagword", word);
+                            if (naviAvail) { // use query modifier if navigator available
+                                rawNavQueryModifier = navi.getQueryModifier(word);
+                            } else { // otherwise just use the keyword as additional query word
+                                rawNavQueryModifier = word;
+                            }
+    						prop.put("content_showKeywords_moreKeywords_keywords_" + i + "_tagurl", QueryParams.navurl(fileType, 0,
+    								theSearch.query, rawNavQueryModifier, naviAvail, authenticated).toString());
+                            i++;
+                        }
+                        prop.put("content_showKeywords_moreKeywords_keywords", i);
+                    }
                 }
                 prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.moddate()));
                 prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));

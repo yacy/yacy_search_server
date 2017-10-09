@@ -237,7 +237,13 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                       <a href="yacysearch.html" id="urlhash" target="LayouTest">http://url-of-the-search-result.net</a>
                     </p>
                     <p class="tags">
-                      <input type="checkbox" name="search.result.show.keywords" aria-labelledby="tagsTitle" value="true" #(search.result.show.keywords)#::checked="checked" #(/search.result.show.keywords)# /> <span id="tagsTitle">Tags</span>: <span class="tag label label-default">keyword</span> <span class="tag label label-default">subject</span> <span class="tag label label-default">keyword2</span> <span class="tag label label-default">keyword3</span>
+                      <input type="checkbox" name="search.result.show.keywords" aria-labelledby="tagsTitle" value="true" #(search.result.show.keywords)#::checked="checked" #(/search.result.show.keywords)# />
+                      <span id="tagsTitle">Tags</span>: <span class="tag label label-default">keyword</span> <span class="tag label label-default">subject</span> <span class="tag label label-default">keyword2</span> <span class="tag label label-default">keyword3</span>
+                      <label>
+                      	Max. tags initially displayed
+                      	<input type="number" name="search.result.keywords.firstMaxCount" value="#[search.result.keywords.firstMaxCount]#" min="1" max="2147483647"/>
+                      	(remaining can then be expanded)
+                      </label>
                     </p>
                     <div class="urlinfo">
                       <table style="border-width:0">

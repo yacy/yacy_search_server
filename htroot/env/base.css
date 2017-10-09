@@ -423,6 +423,22 @@ p.tags {
   line-height: 1.4;
 }
 
+/* Button to expand/collapse tags beyond the initial number of tags display limit */
+.expandKeywordsBtn {
+	margin-top: 0.2em;
+}
+
+.expandKeywordsBtn[aria-expanded="true"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-left class */
+	content: "\e079\e079";
+}
+
+.expandKeywordsBtn[aria-expanded="false"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-right class */
+	content: "\e080\e080";
+}
+
+
 div.bookmark p {
   margin:1px;
 }

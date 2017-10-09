@@ -264,4 +264,25 @@ function statistics(offset, itemscount, itemsperpage, totalcount, localIndexCoun
   }
 }
 
-
+/**
+ * Toggle visibility on a block of tags (keywords) beyond the initial limit of tags to display.
+ * @param {HTMLButtonElement} button the button used to expand the tags
+ * @param {String} moreTagsId the id of the container of tags which visibility has to be toggled
+ */
+function toggleMoreTags(button, moreTagsId) {
+	var moreTagsContainer = document.getElementById(moreTagsId);
+	if(button != null && moreTagsContainer != null) {
+		if(button.getAttribute("aria-expanded") == "true") {
+			/* Additionnaly we modify the aria-expanded state for improved accessiblity */
+			button.setAttribute("aria-expanded", "false");
+			button.title = "Show all";
+			moreTagsContainer.className = "hidden";
+		} else {
+			/* Additionnaly we modify the aria-expanded state for improved accessiblity */
+			button.setAttribute("aria-expanded", "true");
+			button.title = "Show only the first elements";
+			moreTagsContainer.className = ""; 
+		}
+	}
+	
+}
