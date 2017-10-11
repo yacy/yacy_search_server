@@ -264,11 +264,22 @@ var processSidebar = function(data) {
 };
 
 var updateSidebar = function() {
+  var trailerParams = {
+		  "eventID": theEventID,
+	      "resource": "global"
+  };
+  var searchForm = document.forms.searchform;
+  if(searchForm != null) {
+	  if(searchForm.resource != null && searchForm.resource.value != null) {
+		  trailerParams.resource = searchForm.resource.value;
+	  }
+	  if(searchForm.auth != null && searchForm.auth.value != null) {
+		  trailerParams.auth = searchForm.auth.value;
+	  }
+  }
   $.get(
     "yacysearchtrailer.html",
-    {
-      "eventID": theEventID,
-    },
+    trailerParams,
     processSidebar
   );
   
