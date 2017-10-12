@@ -148,9 +148,9 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
 
     @Override
     public String getIndexFieldName() {
-        if (field != null)
-            return field.getSolrFieldName();
-        else
-            return "";
+        if (this.field != null) {
+            return this.field.getSolrFieldName();
+        }
+        return "";
     }
 }

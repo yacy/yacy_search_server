@@ -46,6 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
@@ -66,6 +67,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.sorting.ScoreMapUpdatesListener;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
@@ -108,7 +110,7 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.search.snippet.TextSnippet.ResultClass;
 
-public final class SearchEvent {
+public final class SearchEvent implements ScoreMapUpdatesListener {
 	
 	/** Supported protocols to be displayed in the protocol navigator.
 	 * (Using here a single String constant is faster than a unmodifiable Set instance) */
@@ -177,6 +179,9 @@ public final class SearchEvent {
     
     /** map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms) */
     public final Map<String, Navigator> navigatorPlugins;
+    
+	/** Holds the total number of successful write operations performed on all the active navigators since their initialization. */
+	private final AtomicLong navGeneration = new AtomicLong();
     
     private final LoaderDispatcher                        loader;
     
@@ -263,6 +268,15 @@ public final class SearchEvent {
     
     /** Ensure only one {@link #resortCachedResults()} operation to be performed on this search event */
     public final Semaphore resortCacheAllowed;
+
+	/**
+	 * Called when a search navigator has been updated : update the overall
+	 * navGeneration counter to help then tracking changes and eventually refresh the yacysearchtrailer.
+	 */
+	@Override
+	public void updatedScoreMap() {
+		this.navGeneration.incrementAndGet();
+	}
     
     /**
      * @return the total number of results currently available and filtered (checking doubles and eventual query constraints/modifiers) from the different data sources 
@@ -274,6 +288,13 @@ public final class SearchEvent {
                 imageViewed.size() + sizeSpare()
                );
     }
+    
+    /**
+     * @return the total number of successful write operations performed on all the active navigators since their initialization.
+     */
+    public long getNavGeneration() {
+		return this.navGeneration.get();
+	}
     
     /**
      * Set maximum size allowed (in kbytes) for a remote document result to be stored to local index.
@@ -335,14 +356,19 @@ public final class SearchEvent {
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
-        this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
-        this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
-        this.dateNavigator = navcfg.contains("date") ? new ConcurrentScoreMap<String>() : null;
+        this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>(this) : null;
+        this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>(this) : null;
+        this.dateNavigator = navcfg.contains("date") ? new ConcurrentScoreMap<String>(this) : null;
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
-        this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
+        this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>(this) : null;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
         // prepare configured search navigation (plugins)
         this.navigatorPlugins = NavigatorPlugins.initFromCfgString(navcfg);
+        if(this.navigatorPlugins != null) {
+        	for(final Navigator nav : this.navigatorPlugins.values()) {
+        		nav.setUpdatesListener(this);
+        	}
+        }
 
         this.snippets = new ConcurrentHashMap<String, LinkedHashSet<String>>(); 
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
@@ -378,7 +404,7 @@ public final class SearchEvent {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchInclusion = null;
-        this.ref = new ConcurrentScoreMap<String>();
+        this.ref = new ConcurrentScoreMap<String>(this);
         this.maxtime = query.maxtime;
         this.rwiStack = new WeakPriorityBlockingQueue<WordReferenceVars>(max_results_rwi, false);
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();

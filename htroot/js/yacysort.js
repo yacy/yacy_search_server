@@ -26,8 +26,11 @@ var currentPageNumber = 0;
 /* Set to true to enable browser console log traces */
 var logEnabled = false;
 
-/* Indicates if the results feeders are running on the server */
-var feedRunning = true;
+/* Indicates if the results fetching from server is running */
+var fetchingResults = true;
+
+/* Holds the last known navigators generation known from the server */
+var lastNavGeneration = null;
 
 /**
  * Refresh the results page, checking and eventually updating each result CSS class depending on its position.
@@ -255,35 +258,67 @@ var processSidebar = function(data) {
     // TODO: nav-vocabulary
 
     // TODO: nav-about
+    
+    /* Store the new nav-generation data attribute if provided */
+    var navGenerationHolder = $("#rankingButtons");
+    if(navGenerationHolder.length > 0) {
+        var newNavGenerationHolder = newSidebar.find("#rankingButtons");
+        
+        if(newNavGenerationHolder.length > 0) {
+        	var navGeneration = newNavGenerationHolder.data("nav-generation");
+        	if(navGeneration != null) {
+        		navGenerationHolder.data("nav-generation", navGeneration);
+        		lastNavGeneration = navGeneration;
+        	}
+        }
+    }
   }
 
-  // TODO: figure out if a better timeout strategy is feasible
-  if(feedRunning) {
+  if(fetchingResults) {
 	  setTimeout(updateSidebar, 500);
   }
 };
 
+/**
+ * Update the search navigators (facets) sidebar if necessary.
+ */
 var updateSidebar = function() {
-  var trailerParams = {
+  var navGenerationHolder = $("#rankingButtons");
+  var shouldUpdateSideBar = true;
+  if(navGenerationHolder.length > 0) {
+	  var oldNavGeneration = navGenerationHolder.data("nav-generation");
+	  if(oldNavGeneration != null && lastNavGeneration != null && oldNavGeneration == lastNavGeneration) {
+		  /* nav-generation has not changed : no need to refresh the navigators side bar*/
+		  shouldUpdateSideBar = false;
+		  
+		  if(logEnabled) {
+			  console.log("Prevented unnecessary sidebar update");
+		  }
+	  }
+ }
+	
+ if(shouldUpdateSideBar) {
+		var trailerParams = {
 		  "eventID": theEventID,
 	      "resource": "global"
-  };
-  var searchForm = document.forms.searchform;
-  if(searchForm != null) {
-	  if(searchForm.resource != null && searchForm.resource.value != null) {
-		  trailerParams.resource = searchForm.resource.value;
-	  }
-	  if(searchForm.auth != null && searchForm.auth.value != null) {
-		  trailerParams.auth = searchForm.auth.value;
-	  }
-  }
-  $.get(
-    "yacysearchtrailer.html",
-    trailerParams,
-    processSidebar
-  );
-  
-  //$("#sidebar").load("yacysearchtrailer.html", {"eventID": theEventID});
+		};
+		var searchForm = document.forms.searchform;
+		if(searchForm != null) {
+			if(searchForm.resource != null && searchForm.resource.value != null) {
+				trailerParams.resource = searchForm.resource.value;
+			}
+			if(searchForm.auth != null && searchForm.auth.value != null) {
+				trailerParams.auth = searchForm.auth.value;
+			}
+		}
+		$.get(
+			"yacysearchtrailer.html",
+			trailerParams,
+			processSidebar
+		);
+ } else if(fetchingResults) {
+	setTimeout(updateSidebar, 500);
+ }
 };
 
 /**
@@ -296,7 +331,7 @@ var processLatestInfo = function(latestInfo) {
 			eventID : theEventID
 		}, processItem);
 	} else {
-		feedRunning = false;
+		fetchingResults = false;
 	}
 }
 
@@ -354,6 +389,12 @@ var processItem = function(data) {
 			  }
 		  }
 	  });
+  }
+  
+  var navGeneration =  newItem.data("nav-generation");
+  if(navGeneration != null) {
+	  /* Store the navigators generation new value when the item provided this info */
+	  lastNavGeneration = navGeneration;
   }
 
   displayPage(false, currentPageNumber);

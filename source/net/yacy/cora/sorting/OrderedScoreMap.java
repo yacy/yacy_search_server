@@ -62,34 +62,35 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         this.map.clear();
     }
 
-    /**
-     * shrink the cluster to a demanded size
-     * @param maxsize
-     */
     @Override
-    public void shrinkToMaxSize(final int maxsize) {
-        if (this.map.size() <= maxsize) return;
+    public int shrinkToMaxSize(final int maxsize) {
+        if (this.map.size() <= maxsize) {
+        	return 0;
+        }
+        int deletedNb = 0;
         int minScore = getMinScore();
         while (this.map.size() > maxsize) {
             minScore++;
-            shrinkToMinScore(minScore);
+            deletedNb += shrinkToMinScore(minScore);
         }
+        return deletedNb;
     }
 
-    /**
-     * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
-     * @param minScore
-     */
     @Override
-    public void shrinkToMinScore(final int minScore) {
+    public int shrinkToMinScore(final int minScore) {
+    	int deletedNb = 0;
         synchronized (this.map) {
             final Iterator<Map.Entry<E, AtomicInteger>> i = this.map.entrySet().iterator();
             Map.Entry<E, AtomicInteger> entry;
             while (i.hasNext()) {
                 entry = i.next();
-                if (entry.getValue().intValue() < minScore) i.remove();
+                if (entry.getValue().intValue() < minScore) {
+                	i.remove();
+                	deletedNb++;
+                }
             }
         }
+        return deletedNb;
     }
 
     @Override

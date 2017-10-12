@@ -100,6 +100,9 @@ public class yacysearchtrailer {
             return prop;
         }
         final RequestHeader.FileType fileType = header.fileType();
+        
+        /* Add information about the current navigators generation (number of updates since their initialization) */
+        prop.put("nav-generation", theSearch.getNavGeneration());
 
         // compose search navigation
         ContentDomain contentdom = theSearch.getQuery().contentdom;
