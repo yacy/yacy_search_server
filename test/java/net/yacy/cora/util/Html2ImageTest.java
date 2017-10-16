@@ -26,7 +26,7 @@ public class Html2ImageTest {
     public void testPdf2image() {
         // collect pdf filenames in test directory
         File pd = new File("test/parsertest");
-        List<String> extensions = new ArrayList();
+        List<String> extensions = new ArrayList<>();
         extensions.add("pdf");
         FilenameFilter fileFilter = new ExtensionsFileFilter(extensions);
         String[] pdffiles = pd.list(fileFilter);
