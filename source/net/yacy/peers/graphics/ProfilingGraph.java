@@ -1,4 +1,4 @@
-// plasmaProfiling.java
+// ProfilingGraph.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 04.12.2007 on http://yacy.net
 //
@@ -28,6 +28,7 @@ package net.yacy.peers.graphics;
 
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 
 import net.yacy.search.EventTracker;
 import net.yacy.search.EventTracker.Event;
@@ -55,7 +56,18 @@ public class ProfilingGraph {
         return max;
     }
 
-    public static RasterPlotter performanceGraph(final int width, final int height, final String subline, final boolean showMemory, final boolean showPeers) {
+    /**
+     * 
+     * @param width width of the graph in pixels
+     * @param height height of the graph in pixels
+     * @param subline the eventual graph subtitle. May be null.
+     * @param maxTime maximum time range
+     * @param timeUnit the time unit for the time range. When null, default to seconds.
+     * @param showMemory draw memory usage when true
+     * @param showPeers draw peer ping when true
+     * @return a RasterPlotter instance drawn from the event tracker
+     */
+    public static RasterPlotter performanceGraph(final int width, final int height, final String subline, final int maxTime, final TimeUnit timeUnit, final boolean showMemory, final boolean showPeers) {
         // find maximum values for automatic graph dimension adoption
         final int maxppm = (int) maxPayload(EventTracker.EClass.PPM, 25);
         final int maxwords = (int) maxPayload(EventTracker.EClass.WORDCACHE, 12000);
@@ -70,19 +82,19 @@ public class ProfilingGraph {
         final int leftscale = (maxwords > 150000) ? maxwords / 150000 * 20000 : 10000;
         final int rightscale = showMemory ? ((maxmbytes > 1500) ? maxmbytes / 1500 * 200 : 100) : Math.max(100, maxppm / 100 * 100);
         final int anotscale = 1000;
-        final int bottomscale = 60;
+        final int bottomscale = Math.max(1, maxTime / 10);
         final int vspace = height - topborder - bottomborder;
         final int hspace = width - leftborder - rightborder;
-        final int maxtime = 600;
         ChartPlotter chart = new ChartPlotter(width, height, 0xFFFFFFl, 0x000000l, 0xAAAAAAl, leftborder, rightborder, topborder, bottomborder, "YACY PEER PERFORMANCE: MAIN MEMORY, WORD CACHE AND PAGES/MINUTE (PPM)", subline);
-        chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, 0x000000l, 0xCCCCCCl, "TIME/SECONDS");
-        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxwords, 0, 0x008800l, null , "WORDS IN INDEXING CACHE");
+		chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxTime / bottomscale), -maxTime,
+				0x000000l, 0xCCCCCCl, "TIME/" + timeUnit != null ? timeUnit.toString() : TimeUnit.SECONDS.toString());
+        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, (int)((long)vspace * (long)leftscale / maxwords), 0, 0x008800l, null , "WORDS IN INDEXING CACHE");
         if (showMemory) {
-            chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, vspace * rightscale / maxmbytes, 0, 0x0000FFl, 0xCCCCCCl, "MEMORY/MEGABYTE");
+            chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, (int)((long)vspace * (long)rightscale / maxmbytes), 0, 0x0000FFl, 0xCCCCCCl, "MEMORY/MEGABYTE");
         } else {
-            chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, vspace * rightscale / Math.max(1, maxppm), 0, 0xFF0000l, 0xCCCCCCl, "INDEXING SPEED/PAGES PER MINUTE");
+            chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, (int)((long)vspace * (long)rightscale / Math.max(1, maxppm)), 0, 0xFF0000l, 0xCCCCCCl, "INDEXING SPEED/PAGES PER MINUTE");
         }
-        chart.declareDimension(ChartPlotter.DIMENSION_ANOT0, anotscale, vspace * anotscale / maxppm, 0, 0x008800l, null , "PPM [PAGES/MINUTE]");
+        chart.declareDimension(ChartPlotter.DIMENSION_ANOT0, anotscale, (int)((long)vspace * (long)anotscale / maxppm), 0, 0x008800l, null , "PPM [PAGES/MINUTE]");
         chart.declareDimension(ChartPlotter.DIMENSION_ANOT1, vspace / 6, vspace / 6, 0, 0x888800l, null , "URL");
         chart.declareDimension(ChartPlotter.DIMENSION_ANOT2, 1, 1, 0, 0x888800l, null , "PING");
 
@@ -120,7 +132,7 @@ public class ProfilingGraph {
                         event = events.next();
                         time = event.getTime() - now;
                         bytes = ((Long) event.payload).longValue();
-                        x1 = time / 1000.0f;
+                        x1 = timeUnit.convert(time, TimeUnit.MILLISECONDS);
                         y1 = (int) (bytes / 1024 / 1024);
 //  the dots don't        chart.setColor(0xAAAAFF);
 //  very nice             chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x1, y1, 2, null, 0);
@@ -141,7 +153,7 @@ public class ProfilingGraph {
                     event = events.next();
                     time = event.getTime() - now;
                     words = (int) ((Long) event.payload).longValue();
-                    x1 = time / 1000.0f;
+                    x1 = timeUnit.convert(time, TimeUnit.MILLISECONDS);
                     y1 = words;
                     chart.setColor(0x228822);
                     chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x1, y1, 2, null, 315);
@@ -161,7 +173,7 @@ public class ProfilingGraph {
                     event = events.next();
                     time = event.getTime() - now;
                     ppm = (int) ((Long) event.payload).longValue();
-                    x1 = time / 1000.0f;
+                    x1 = timeUnit.convert(time, TimeUnit.MILLISECONDS);
                     y1 = ppm;
                     chart.setColor(0xAA8888);
                     if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x0, y0, x1, y1);
@@ -183,7 +195,7 @@ public class ProfilingGraph {
                         event = events.next();
                         time = event.getTime() - now;
                         ping = (EventPing) event.payload;
-                        x1 = time / 1000.0f;
+                        x1 = timeUnit.convert(time, TimeUnit.MILLISECONDS);
                         y1 = Math.abs((ping.outgoing ? ping.toPeer : ping.fromPeer).hashCode()) % vspace;
                         pingPeer = ping.outgoing ? "-> " + ping.toPeer.toUpperCase() : "<- " + ping.fromPeer.toUpperCase();
                         chart.setColor(0x9999AA);
