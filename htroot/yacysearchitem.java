@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -338,7 +339,27 @@ public class yacysearchitem {
                     prop.put("content_showVocabulary", 0);
                 }
                 if (snapshotPaths != null && snapshotPaths.size() > 0) {
-                    prop.put("content_showSnapshots_link", snapshotPaths.iterator().next().getAbsolutePath());
+            		/* Only add a link to the eventual snapshot file in the format it is stored (no resource fetching and conversion here) */
+                	String selectedExt = null, ext;
+                	for(final File snapshot : snapshotPaths) {
+                		ext = MultiProtocolURL.getFileExtension(snapshot.getName());
+                		if("jpg".equals(ext) || "png".equals(ext)) {
+                			/* Prefer snapshots in jpeg or png format */
+                			selectedExt = ext;
+                			break;
+                		} else if("pdf".equals(ext)) {
+                			selectedExt = ext;                			
+                		} else if("xml".equals(ext) && selectedExt == null) {
+                			/* Use the XML metadata snapshot in last resort */
+                			selectedExt = ext;
+                		}
+                	}
+                	if(selectedExt != null) {
+                		prop.putHTML("content_showSnapshots_extension", selectedExt.toUpperCase(Locale.ROOT));
+                		prop.putHTML("content_showSnapshots_link", "api/snapshot." + selectedExt + "?url=" + resultURL);
+                	} else {
+                		prop.put("content_showSnapshots", 0);
+                	}
                 }
                 prop.put("content_showRanking_ranking", Float.toString(result.score()));
                 prop.put("content_ranking", Float.toString(result.score()));

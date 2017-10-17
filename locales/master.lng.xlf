@@ -2172,7 +2172,7 @@
        <source>View via Proxy</source>
     </trans-unit>
     <trans-unit id="43d1a9cb" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Snapshots&lt;</source>
+       <source>&gt;JPG Snapshot&lt;</source>
     </trans-unit>
     <trans-unit id="f5192903" xml:space="preserve" approved="no" translate="yes">
        <source>"Raw ranking score value"</source>
