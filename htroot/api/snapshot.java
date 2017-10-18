@@ -106,7 +106,7 @@ public class snapshot {
         final boolean xml = ext.equals("xml");
         final boolean pdf = ext.equals("pdf");
         if (pdf && !authenticated) return null;
-        final boolean pngjpg = ext.equals("png") || ext.equals("jpg");
+        final boolean pngjpg = ext.equals("png") || ext.equals(DEFAULT_EXT);
         String urlhash = post.get("urlhash", "");
         String url = post.get("url", "");
         DigestURL durl = null;
@@ -286,7 +286,7 @@ public class snapshot {
                 int width = Math.min(post.getInt("width", DEFAULT_WIDTH), DEFAULT_WIDTH);
                 int height = Math.min(post.getInt("height", DEFAULT_HEIGHT), DEFAULT_HEIGHT);
                 String imageFileStub = pdfFile.getAbsolutePath(); imageFileStub = imageFileStub.substring(0, imageFileStub.length() - 3); // cut off extension
-                File imageFile = new File(imageFileStub + DEFAULT_WIDTH + "." + DEFAULT_HEIGHT + "." + DEFAULT_EXT);
+                File imageFile = new File(imageFileStub + DEFAULT_WIDTH + "." + DEFAULT_HEIGHT + "." + ext);
                 if (!imageFile.exists() && authenticated) {
                     Html2Image.pdf2image(pdfFile, imageFile, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_DENSITY, DEFAULT_QUALITY);
                 }

@@ -42,6 +42,7 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.ImageView;
 
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
@@ -140,17 +141,23 @@ public class Html2Image {
     }
     
     /**
-     * convert a pdf (first page) to an image. proper values are i.e. width = 1024, height = 1024, density = 300, quality = 75
+     * Convert a pdf (first page) to an image. Proper values are i.e. width = 1024, height = 1024, density = 300, quality = 75
      * using internal pdf library or external command line tool on linux or mac
-     * @param pdf input pdf file
-     * @param image output jpg file
-     * @param width
-     * @param height
+     * @param pdf input pdf file. Must not be null.
+     * @param image output image file. Must not be null, and should end with ".jpg" or ".png".
+     * @param width output width in pixels
+     * @param height output height in pixels
      * @param density (dpi)
-     * @param quality
-     * @return
+     * @param quality JPEG/PNG compression level
+     * @return true when the ouput image file was successfully written.
      */
-    public static boolean pdf2image(File pdf, File image, int width, int height, int density, int quality) {
+    public static boolean pdf2image(final File pdf, final File image, final int width, final int height, final int density, final int quality) {
+    	/* Deduce the ouput image format from the file extension */
+    	String imageFormat = MultiProtocolURL.getFileExtension(image.getName());
+    	if(imageFormat.isEmpty()) {
+    		/* Use JPEG as a default fallback */
+    		imageFormat = "jpg";
+    	}
         final File convert = convertMac1.exists() ? convertMac1 : convertMac2.exists() ? convertMac2 : convertDebian;
 
         // convert pdf to jpg using internal pdfbox capability
@@ -159,7 +166,7 @@ public class Html2Image {
                 PDDocument pdoc = PDDocument.load(pdf);
                 BufferedImage bi = new PDFRenderer(pdoc).renderImageWithDPI(0, density, ImageType.RGB);
 
-                return ImageIO.write(bi, "jpg", image);
+                return ImageIO.write(bi, imageFormat, image);
 
             } catch (IOException ex) { }
         }
@@ -188,7 +195,7 @@ public class Html2Image {
             //ConcurrentLog.warn("Html2Image", "failed to create image with command: " + commandx);
             message = OS.execSynchronous(commandx);
             for (String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);
-            // now we must read and convert this file to a jpg with the target size 1024x1024
+            // now we must read and convert this file to the target format with the target size 1024x1024
             try {
                 File newPngFile = new File(pngFile.getAbsolutePath() + ".png");
                 pngFile.renameTo(newPngFile);
@@ -200,7 +207,7 @@ public class Html2Image {
                 // finally write the image
                 final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                 bi.createGraphics().drawImage(scaled, 0, 0, width, height, null);
-                ImageIO.write(bi, "jpg", image);
+                ImageIO.write(bi, imageFormat, image);
                 newPngFile.delete();
                 return image.exists();
             } catch (IOException e) {
