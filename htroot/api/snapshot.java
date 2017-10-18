@@ -304,6 +304,10 @@ public class snapshot {
                 Image image;
                 try {
                     image = ImageParser.parse(imageFile.getAbsolutePath(), FileUtils.read(imageFile));
+                    if(image == null) {
+                    	/* Should not happen. If so, ImageParser.parse() should already have logged about the error */
+                    	return null;
+                    }
                     final Image scaled = image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
                     final MediaTracker mediaTracker = new MediaTracker(new Container());
                     mediaTracker.addImage(scaled, 0);
