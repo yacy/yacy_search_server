@@ -62,10 +62,10 @@ all these locations into one search result.
 
 ## Dependencies? What other software do I need?
 
-You need java 1.7 or later to run YaCy, nothing else.
+You need Java 1.8 or later to run YaCy, nothing else (Java 1.7 can still be used to run the main [1.92/9000 release](https://github.com/yacy/yacy_search_server/releases/tag/Release_1.92) )
 Please download it from http://www.java.com
 
-YaCy also runs on IcedTea7.
+YaCy also runs on Iced Tea 3.
 See http://icedtea.classpath.org
 
 NO OTHER SOFTWARE IS REQUIRED!
@@ -177,7 +177,7 @@ Please clone our code and help with development!
 The code is licensed under the GPL v2.
 
 Compiling YaCy:
-- you need Java 1.7 or later and [Apache Ant](http://ant.apache.org/)
+- you need Java 1.8 or later and [Apache Ant](http://ant.apache.org/)
 - just compile: "ant clean all" - then you can "./startYACY.sh" or "./startYACY.bat"
 - create a release tarball: "ant dist"
 - create a Mac OS release: "ant distMacApp" (works only on a Mac)
