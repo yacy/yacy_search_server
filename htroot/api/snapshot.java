@@ -21,6 +21,7 @@
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.MediaTracker;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -312,7 +313,14 @@ public class snapshot {
                     final MediaTracker mediaTracker = new MediaTracker(new Container());
                     mediaTracker.addImage(scaled, 0);
                     try {mediaTracker.waitForID(0);} catch (final InterruptedException e) {}
-                    return new EncodedImage(scaled, ext, true);
+                    
+					/*
+					 * Ensure there is no alpha component on the ouput image, as it is pointless
+					 * here and it is not well supported by the JPEGImageWriter from OpenJDK
+					 */
+					BufferedImage scaledBufferedImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                    scaledBufferedImg.createGraphics().drawImage(scaled, 0, 0, width, height, null);
+                    return new EncodedImage(scaledBufferedImg, ext, true);
                 } catch (IOException e) {
                     ConcurrentLog.logException(e);
                     return null;

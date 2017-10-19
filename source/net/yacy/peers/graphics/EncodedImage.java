@@ -20,7 +20,6 @@
 
 package net.yacy.peers.graphics;
 
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorConvertOp;
 import java.io.ByteArrayOutputStream;
@@ -88,30 +87,6 @@ public class EncodedImage {
         }
         this.isStatic = isStatic;
         
-    }
-    
-    /**
-     * set an encoded image from a buffered image. Image ByteBuffer will be empty when encoding format is not supported.
-     * @param sourceImage the image
-     * @param targetExt the target extension of the image when converted into a file
-     * @param isStatic shall be true if the image will never change, false if not
-     */
-    public EncodedImage(final Image i, final String targetExt, final boolean isStatic) {
-        this.extension = targetExt;
-        this.isStatic = isStatic;
-        
-        // generate an byte array from the generated image
-        int width = i.getWidth(null);
-        if (width < 0) {
-            width = 96; // bad hack
-        }
-        int height = i.getHeight(null);
-        if (height < 0) {
-            height = 96; // bad hack
-        }
-        final BufferedImage sourceImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        sourceImage.createGraphics().drawImage(i, 0, 0, width, height, null);
-        this.image = RasterPlotter.exportImage(sourceImage, targetExt);
     }
     
     /**
