@@ -3823,6 +3823,10 @@ public final class Switchboard extends serverSwitch {
         return 1;
     }
 
+    /**
+     * @param header servlet request headers
+     * @return true when the headers contains valid admin authentication information
+     */
     public boolean verifyAuthentication(final RequestHeader header) {
         // handle access rights
         switch ( adminAuthenticated(header) ) {

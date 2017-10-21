@@ -62,6 +62,10 @@ public class ConfigSearchPage_p {
                 sb.tables.recordAPICall(post, "ConfigPortal_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "new portal design. greeting: " + newGreeting);
 
                 sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu"));
+                
+				sb.setConfig(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+						post.getBoolean(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN));
+                
                 sb.setConfig("search.options", post.getBoolean("search.options"));
 
                 sb.setConfig("search.text", post.getBoolean("search.text"));
@@ -162,6 +166,9 @@ public class ConfigSearchPage_p {
                     }
                 }
                 sb.setConfig("publicTopmenu", config.getProperty("publicTopmenu","true"));
+				sb.setConfig(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+						config.getProperty(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+								Boolean.toString(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT)));
                 sb.setConfig("search.navigation", config.getProperty("search.navigation","hosts,authors,namespace,topics"));
                 sb.setConfig("search.options", config.getProperty("search.options","true"));
                 sb.setConfig("search.text", config.getProperty("search.text","true"));
@@ -204,6 +211,11 @@ public class ConfigSearchPage_p {
         prop.putHTML(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
         prop.putHTML(SwitchboardConstants.INDEX_FORWARD, sb.getConfig(SwitchboardConstants.INDEX_FORWARD, ""));
         prop.put("publicTopmenu", sb.getConfigBool("publicTopmenu", false) ? 1 : 0);
+        
+		prop.put(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+				sb.getConfigBool(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+						SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT) ? 1 : 0);
+        
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
 
         prop.put("search.text", sb.getConfigBool("search.text", false) ? 1 : 0);

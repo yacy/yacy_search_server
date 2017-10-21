@@ -1057,6 +1057,9 @@ publicSearchpage = true
 # to /Status.html to get the main memu bar back
 publicTopmenu = true
 
+# set to true to include a login link/status in the search page public top navigation bar
+search.publicTopNavBar.login = true
+
 # Wiki access rights
 # the built-in wiki system allows by default only that the administrator is allowed to make changes
 # this can be changed. There are three options:

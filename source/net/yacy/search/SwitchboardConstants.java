@@ -552,6 +552,12 @@ public final class SwitchboardConstants {
     
     /** Default setting value controlling whether search results resorting by browser JavaScript is enabled */
     public static final boolean SEARCH_JS_RESORT_DEFAULT = false;
+    
+    /** Key of the setting controlling whether the search public top navigation bar includes a login link/status */
+    public static final String SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN = "search.publicTopNavBar.login";
+    
+    /** Default setting value controlling whether the search public top navigation bar includes a login link/status */
+    public static final boolean SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT = true;
 
     /** Key of the setting controlling the max lines displayed in standard search navigators/facets */
     public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount";

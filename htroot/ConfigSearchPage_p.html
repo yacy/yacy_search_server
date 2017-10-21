@@ -40,11 +40,25 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                       </button>
-      				  <a class="navbar-brand" id="navbar-brand-cfg" href="#[promoteSearchPageGreeting.homepage]#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
-        				<img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">&nbsp;<span id="greeting" style="position:absolute; top:50%;float:left;"></span>
+      				  <a class="navbar-brand" id="navbar-brand-cfg" href="#[promoteSearchPageGreeting.homepage]#" style="margin-top:-6px;white-space:nowrap;">
+        				<img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">&nbsp;
+        				<span id="greeting"></span>
       				  </a>
                     </div>
                     <div class="navbar-collapse collapse">
+                      <input type="checkbox" name="search.publicTopNavBar.login" title="Enable login link/status" value="true" #(search.publicTopNavBar.login)#::checked="checked" #(/search.publicTopNavBar.login)# />
+    				  <ul class="nav navbar-nav">
+       					<li id="header_login">
+        					<a title="Log in to use extended search features" href="#" onclick="document.getElementById('header_login').className='hidden';document.getElementById('header_login_logged').className='navbar-text';return false;">
+	      						<span>Log in</span>
+        						<span class="glyphicon glyphicon-log-in"></span>
+        					</a>
+      					</li>
+      					<li id="header_login_logged" title="You are authenticated as userName" class="navbar-text hidden">
+      						<span class="glyphicon glyphicon-user text-info"></span>
+     						<span>userName</span>
+      					</li>
+    				  </ul>
                       <ul class="nav navbar-nav navbar-right">
                         <li id="header_search-cfg" class="dropdown">
                           <a href="#" data-toggle="dropdown" class="dropdown-toggle">Search Interfaces<b class="caret"></b></a>
