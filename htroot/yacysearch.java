@@ -109,8 +109,7 @@ public class yacysearch {
         
         if(adminAuthenticated) {
 			authenticatedUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
-        }
-        if (!extendedSearchRights) {
+        } else {
         	final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
         	if(user != null) {
                 extendedSearchRights = user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT);
