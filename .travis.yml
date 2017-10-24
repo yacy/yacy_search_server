@@ -5,7 +5,24 @@ cache:
   - $HOME/.m2
 
 jdk:
-  - oraclejdk7
+  - oraclejdk8
 
-# for running tests on Travis CI container infrastructure for faster builds
-sudo: false
+# only `sudo: true` allows running tests on Travis CI container infrastructure for faster builds, but testing installation of .deb makes sense
+sudo: true
+
+# Installing ghostscript (optional imagemagick dependency) is required for Html2ImageTest to run
+# dpkg-dev,debhelper,m4 and fakeroot packages are required for the 'ant deb' task
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y ghostscript dpkg-dev debhelper m4 fakeroot
+
+install:
+- cd libbuild && MAVEN_OPTS="-Xmx6g -Xms2g" mvn clean install && cd ..
+
+script:
+- MAVEN_OPTS="-Xmx6g -Xms2g" mvn clean install
+# test build instructions
+- ant
+- ant dist
+- ant deb
+- sudo dpkg -i ../yacy_*_all.deb

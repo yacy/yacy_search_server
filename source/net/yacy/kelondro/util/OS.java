@@ -178,13 +178,21 @@ public final class OS {
 
     private static List<String> execSynchronousProcess(Process p) throws IOException {
         String line;
-        BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
-        final List<String> output = new ArrayList<String>();
-        while ((line = in.readLine()) != null) output.add(line);
-        in.close();
-        in = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-        while ((line = in.readLine()) != null) output.add(line);
-        in.close();
+		final List<String> output = new ArrayList<String>();
+		
+		try (final InputStreamReader streamReader = new InputStreamReader(p.getInputStream());
+				final BufferedReader in = new BufferedReader(streamReader);) {
+			while ((line = in.readLine()) != null) {
+				output.add(line);
+			}
+		}
+		
+		try (final InputStreamReader streamReader = new InputStreamReader(p.getErrorStream());
+				final BufferedReader in = new BufferedReader(streamReader);) {
+			while ((line = in.readLine()) != null) {
+				output.add(line);
+			}
+		}
         return output;
     }
 

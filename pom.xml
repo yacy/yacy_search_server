@@ -34,9 +34,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- the Solr version used in dependency section for all related dependencies -->
-        <solr.version>6.6.1</solr.version> 
+        <solr.version>6.6.2</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.4.6.v20170531</jetty.version>
+        <jetty.version>9.4.7.v20170914</jetty.version>
                 
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>

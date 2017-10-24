@@ -590,7 +590,7 @@ Maximum range (in days)==Période maximale (en jours)
 Maximum days number in the histogram. Beware that a large value may trigger high CPU loads both on the server and on the browser with large result sets.==Nombre maximum de jours de l'histogramme. Veuillez noter qu'une valeur élevée peut déclencher des charges CPU importantes tant sur le serveur que sur le navigateur lorsqu'il y a un grand nombre de résultats.
 keyword subject keyword2 keyword3==mot-clé sujet mot-clé2 mot-clé3
 View via Proxy==Ouvrir via le proxy
->Snapshots<==>Captures<
+>JPG Snapshot<==>Capture JPG<
 "Raw ranking score value"=="Score de classement brut"
 Ranking: 1.12195955E9==Score: 1.12195955E9
 "Delete navigator"=="Supprimer le groupe"

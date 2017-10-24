@@ -928,7 +928,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
                      * as it is better handled across different browsers */
                     if(result == null || result.length() == 0) {
                     	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    	result.close();
+                    	if(result != null) {
+                    		result.close();
+                    	}
                     	return;
                     }
                     if (yp.isStatic()) { // static image never expires

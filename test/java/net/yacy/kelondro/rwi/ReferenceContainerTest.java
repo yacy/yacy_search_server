@@ -19,8 +19,15 @@
  */
 package net.yacy.kelondro.rwi;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.junit.Test;
+
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.crawler.retrieval.Response;
@@ -29,10 +36,6 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.util.Bitfield;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
 
 /**
  * Unit tests for ReferenceContainer class.
@@ -50,7 +53,7 @@ public class ReferenceContainerTest {
         ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
         byte[] termHash = Word.word2hash("test");
 
-        ReferenceContainer<WordReference> rc = new ReferenceContainer(wordReferenceFactory, termHash);
+		ReferenceContainer<WordReference> rc = new ReferenceContainer<WordReference>(wordReferenceFactory, termHash);
 
         // prepare a WordReference to be added to the container
         DigestURL url = new DigestURL("http://test.org/test.html");
@@ -89,7 +92,6 @@ public class ReferenceContainerTest {
 
         assertNotNull("getReference failed", wc);
 
-        // TODO: ReferenceContainer used for rwi results. As distance doesn't persist after adding ref to container making the distance ranking obsolete -> remove or fix
         System.out.println("-----------------------------------------------------------");
         System.out.println("WordReference (word distance) before add to container:  " + wentry.distance());
         System.out.println("WordReference (word distance) after get from container: " + wc.distance());

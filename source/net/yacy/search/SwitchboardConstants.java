@@ -552,6 +552,12 @@ public final class SwitchboardConstants {
     
     /** Default setting value controlling whether search results resorting by browser JavaScript is enabled */
     public static final boolean SEARCH_JS_RESORT_DEFAULT = false;
+    
+    /** Key of the setting controlling whether the search public top navigation bar includes a login link/status */
+    public static final String SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN = "search.publicTopNavBar.login";
+    
+    /** Default setting value controlling whether the search public top navigation bar includes a login link/status */
+    public static final boolean SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT = true;
 
     /** Key of the setting controlling the max lines displayed in standard search navigators/facets */
     public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount";
@@ -570,6 +576,18 @@ public final class SwitchboardConstants {
     
     /** Default setting value controlling whether the ranking score value should be displayed for each search result in the HTML results page */
     public static final boolean SEARCH_RESULT_SHOW_RANKING_DEFAULT = false;
+    
+    /** Key of the setting controlling whether a tags/keywords list should be displayed for each search result in the HTML results page */
+    public static final String SEARCH_RESULT_SHOW_KEYWORDS = "search.result.show.keywords";
+    
+    /** Default setting value controlling whether the ranking score value should be displayed for each search result in the HTML results page */
+    public static final boolean SEARCH_RESULT_SHOW_KEYWORDS_DEFAULT = false;
+    
+    /** Key of the setting controlling the maximum number of tags/keywords initially displayed for each search result in the HTML results page (the eventual remaining ones can then be expanded) */
+    public static final String SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT = "search.result.keywords.firstMaxCount";
+    
+    /** Default setting value controlling the maximum number of tags/keywords initially displayed for each search result in the HTML results page (the eventual remaining ones can then be expanded) */
+    public static final int SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT_DEFAULT = 100;
 
     /**
      * ranking+evaluation

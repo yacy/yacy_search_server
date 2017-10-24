@@ -331,7 +331,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
         SolrInputDocument sid = new SolrInputDocument();
         for (String name: doc.getFieldNames()) {
             if (this.contains(name)) { // check each field if enabled in local Solr schema
-                sid.addField(name, doc.getFieldValue(name), 1.0f);
+                sid.addField(name, doc.getFieldValue(name));
             }
         }
         return sid;

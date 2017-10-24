@@ -202,20 +202,20 @@
         <pathelement location="${lib}/javax.servlet-api-3.1.0.jar" />
     	<pathelement location="${lib}/jcifs-1.3.17.jar" />
     	<pathelement location="${lib}/jcl-over-slf4j-1.7.24.jar" />
-        <pathelement location="${lib}/jetty-client-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-continuation-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-deploy-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-http-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-io-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-jmx-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-proxy-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-security-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-server-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-servlet-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-servlets-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-util-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-webapp-9.4.6.v20170531.jar" />
-        <pathelement location="${lib}/jetty-xml-9.4.6.v20170531.jar" />
+        <pathelement location="${lib}/jetty-client-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-continuation-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-deploy-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-http-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-io-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-jmx-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-proxy-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-security-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-server-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-servlet-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-servlets-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-util-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-webapp-9.4.7.v20170914.jar" />
+        <pathelement location="${lib}/jetty-xml-9.4.7.v20170914.jar" />
     	<pathelement location="${lib}/jsch-0.1.54.jar" />
     	<pathelement location="${lib}/json-simple-1.1.1.jar" />
     	<pathelement location="${lib}/jsonic-1.3.10.jar" />
@@ -225,21 +225,21 @@
         <pathelement location="${lib}/jwat-gzip-1.1.0.jar" />
         <pathelement location="${lib}/jwat-warc-1.1.0.jar" />
     	<pathelement location="${lib}/log4j-over-slf4j-1.7.24.jar" />
-    	<pathelement location="${lib}/lucene-analyzers-common-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-analyzers-phonetic-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-backward-codecs-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-classification-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-codecs-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-core-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-grouping-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-highlighter-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-join-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-memory-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-misc-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-queries-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-queryparser-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-spatial-extras-6.6.1.jar" />
-    	<pathelement location="${lib}/lucene-suggest-6.6.1.jar" />
+    	<pathelement location="${lib}/lucene-analyzers-common-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-analyzers-phonetic-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-backward-codecs-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-classification-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-codecs-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-core-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-grouping-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-highlighter-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-join-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-memory-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-misc-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-queries-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-queryparser-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-spatial-extras-6.6.2.jar" />
+    	<pathelement location="${lib}/lucene-suggest-6.6.2.jar" />
     	<pathelement location="${lib}/metadata-extractor-2.10.1.jar" />
     	<pathelement location="${lib}/metrics-core-3.2.2.jar" />
     	<pathelement location="${lib}/noggit-0.6.jar" />
@@ -250,8 +250,8 @@
     	<pathelement location="${lib}/poi-scratchpad-3.16.jar" />
         <pathelement location="${lib}/slf4j-api-1.7.24.jar" />
         <pathelement location="${lib}/slf4j-jdk14-1.7.24.jar" />
-        <pathelement location="${lib}/solr-core-6.6.1.jar" />
-        <pathelement location="${lib}/solr-solrj-6.6.1.jar" />
+        <pathelement location="${lib}/solr-core-6.6.2.jar" />
+        <pathelement location="${lib}/solr-solrj-6.6.2.jar" />
     	<pathelement location="${lib}/spatial4j-0.6.jar" />
         <pathelement location="${lib}/stax2-api_3.1.4.jar" />        
     	<pathelement location="${lib}/weupnp-0.1.4.jar" />
@@ -327,7 +327,8 @@
   	<!-- copy build libs -->
   	    <copy todir="${release_main}/libbuild">
   	      <fileset dir="${libbuild}" 
-  	               includes="**/*"/>
+  	               includes="**/*"
+  	      		   excludes="**/target/**"/>
   	    </copy>
 
     <!-- copy configuration files -->
@@ -787,7 +788,7 @@
   	<delete dir="${release_mac}" failonerror="false" verbose="false" />
   </target>
 
-  <!-- to use the deb command the following debian packages must be installed: dpkg-dev debhelper m4 -->
+  <!-- to use the deb command the following debian packages must be installed: dpkg-dev debhelper m4 fakeroot -->
   <target name="deb" depends="init" description="Creates a debian package">
     <!-- replacing the old with the new revision number -->
     <replaceregexp file="debian/changelog"

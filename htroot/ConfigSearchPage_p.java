@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.util.Map;
 import java.util.Properties;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -61,6 +62,10 @@ public class ConfigSearchPage_p {
                 sb.tables.recordAPICall(post, "ConfigPortal_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "new portal design. greeting: " + newGreeting);
 
                 sb.setConfig("publicTopmenu", post.getBoolean("publicTopmenu"));
+                
+				sb.setConfig(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+						post.getBoolean(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN));
+                
                 sb.setConfig("search.options", post.getBoolean("search.options"));
 
                 sb.setConfig("search.text", post.getBoolean("search.text"));
@@ -69,7 +74,15 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.video", post.getBoolean("search.video"));
                 sb.setConfig("search.app", post.getBoolean("search.app"));
 
-                sb.setConfig("search.result.show.keywords", post.getBoolean("search.result.show.keywords"));
+                sb.setConfig(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS, post.getBoolean(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS));
+                
+                // maximum number of initially displayed keywords/tags
+				int keywordsFirstMaxCount = post.getInt(SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT,
+						SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT_DEFAULT);
+				if (keywordsFirstMaxCount > 0) {
+					sb.setConfig(SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT, keywordsFirstMaxCount);
+				}
+                
                 sb.setConfig("search.result.show.date", post.getBoolean("search.result.show.date"));
                 sb.setConfig("search.result.show.size", post.getBoolean("search.result.show.size"));
                 sb.setConfig("search.result.show.metadata", post.getBoolean("search.result.show.metadata"));
@@ -153,6 +166,9 @@ public class ConfigSearchPage_p {
                     }
                 }
                 sb.setConfig("publicTopmenu", config.getProperty("publicTopmenu","true"));
+				sb.setConfig(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+						config.getProperty(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+								Boolean.toString(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT)));
                 sb.setConfig("search.navigation", config.getProperty("search.navigation","hosts,authors,namespace,topics"));
                 sb.setConfig("search.options", config.getProperty("search.options","true"));
                 sb.setConfig("search.text", config.getProperty("search.text","true"));
@@ -160,7 +176,12 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.audio", config.getProperty("search.audio","false"));
                 sb.setConfig("search.video", config.getProperty("search.video","false"));
                 sb.setConfig("search.app", config.getProperty("search.app","false"));
-                sb.setConfig("search.result.show.keywords", config.getProperty("search.result.show.keywords","false"));
+				sb.setConfig(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS,
+						config.getProperty(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS,
+								Boolean.toString(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS_DEFAULT)));
+				sb.setConfig(SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT,
+						config.getProperty(SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT,
+								String.valueOf(SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT_DEFAULT)));
                 sb.setConfig("search.result.show.date", config.getProperty("search.result.show.date","true"));
                 sb.setConfig("search.result.show.size", config.getProperty("search.result.show.size","false"));
                 sb.setConfig("search.result.show.metadata", config.getProperty("search.result.show.metadata","false"));
@@ -190,6 +211,11 @@ public class ConfigSearchPage_p {
         prop.putHTML(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
         prop.putHTML(SwitchboardConstants.INDEX_FORWARD, sb.getConfig(SwitchboardConstants.INDEX_FORWARD, ""));
         prop.put("publicTopmenu", sb.getConfigBool("publicTopmenu", false) ? 1 : 0);
+        
+		prop.put(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+				sb.getConfigBool(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+						SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT) ? 1 : 0);
+        
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
 
         prop.put("search.text", sb.getConfigBool("search.text", false) ? 1 : 0);
@@ -198,7 +224,14 @@ public class ConfigSearchPage_p {
         prop.put("search.video", sb.getConfigBool("search.video", false) ? 1 : 0);
         prop.put("search.app", sb.getConfigBool("search.app", false) ? 1 : 0);
 
-        prop.put("search.result.show.keywords", sb.getConfigBool("search.result.show.keywords", false) ? 1 : 0);
+		prop.put(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS,
+				sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS,
+						SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS_DEFAULT) ? 1 : 0);
+        
+		prop.put(SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT,
+				sb.getConfigInt(SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT,
+						SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT_DEFAULT));
+        
         prop.put("search.result.show.date", sb.getConfigBool("search.result.show.date", false) ? 1 : 0);
         prop.put("search.result.show.size", sb.getConfigBool("search.result.show.size", false) ? 1 : 0);
         prop.put("search.result.show.metadata", sb.getConfigBool("search.result.show.metadata", false) ? 1 : 0);

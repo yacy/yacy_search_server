@@ -40,11 +40,25 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                       </button>
-      				  <a class="navbar-brand" id="navbar-brand-cfg" href="#[promoteSearchPageGreeting.homepage]#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
-        				<img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">&nbsp;<span id="greeting" style="position:absolute; top:50%;float:left;"></span>
+      				  <a class="navbar-brand" id="navbar-brand-cfg" href="#[promoteSearchPageGreeting.homepage]#" style="margin-top:-6px;white-space:nowrap;">
+        				<img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">&nbsp;
+        				<span id="greeting"></span>
       				  </a>
                     </div>
                     <div class="navbar-collapse collapse">
+                      <input type="checkbox" name="search.publicTopNavBar.login" title="Enable login link/status" value="true" #(search.publicTopNavBar.login)#::checked="checked" #(/search.publicTopNavBar.login)# />
+    				  <ul class="nav navbar-nav">
+       					<li id="header_login">
+        					<a title="Log in to use extended search features" href="#" onclick="document.getElementById('header_login').className='hidden';document.getElementById('header_login_logged').className='navbar-text';return false;">
+	      						<span>Log in</span>
+        						<span class="glyphicon glyphicon-log-in"></span>
+        					</a>
+      					</li>
+      					<li id="header_login_logged" title="You are authenticated as userName" class="navbar-text hidden">
+      						<span class="glyphicon glyphicon-user text-info"></span>
+     						<span>userName</span>
+      					</li>
+    				  </ul>
                       <ul class="nav navbar-nav navbar-right">
                         <li id="header_search-cfg" class="dropdown">
                           <a href="#" data-toggle="dropdown" class="dropdown-toggle">Search Interfaces<b class="caret"></b></a>
@@ -236,8 +250,14 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                     <p class="url">
                       <a href="yacysearch.html" id="urlhash" target="LayouTest">http://url-of-the-search-result.net</a>
                     </p>
-                    <p>
-                      <input type="checkbox" name="search.result.show.keywords" aria-labelledby="tagsTitle" value="true" #(search.result.show.keywords)#::checked="checked" #(/search.result.show.keywords)# /> <span id="tagsTitle">Tags</span>: keyword subject keyword2 keyword3
+                    <p class="tags">
+                      <input type="checkbox" name="search.result.show.keywords" aria-labelledby="tagsTitle" value="true" #(search.result.show.keywords)#::checked="checked" #(/search.result.show.keywords)# />
+                      <span id="tagsTitle">Tags</span>: <span class="tag label label-default">keyword</span> <span class="tag label label-default">subject</span> <span class="tag label label-default">keyword2</span> <span class="tag label label-default">keyword3</span>
+                      <label>
+                      	Max. tags initially displayed
+                      	<input type="number" name="search.result.keywords.firstMaxCount" value="#[search.result.keywords.firstMaxCount]#" min="1" max="2147483647"/>
+                      	(remaining can then be expanded)
+                      </label>
                     </p>
                     <div class="urlinfo">
                       <table style="border-width:0">
@@ -252,7 +272,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="cacheLink" href="CacheResource_p.html" target="LayouTest">Cache</a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="proxyLink" href="proxy.html" target="LayouTest">View via Proxy</a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="browseIndexLink" href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="snapshotsLink" href="yacysearch.html" target="LayouTest">Snapshots</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="snapshotsLink" href="yacysearch.html" target="LayouTest">JPG Snapshot</a></td>
                           #(search.result.show.ranking)#::<td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><span title="Raw ranking score value">Ranking: 1.12195955E9</span>#(/search.result.show.ranking)#
                         </tr>
                         <tr>

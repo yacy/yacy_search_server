@@ -21,6 +21,7 @@
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.MediaTracker;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -106,7 +107,7 @@ public class snapshot {
         final boolean xml = ext.equals("xml");
         final boolean pdf = ext.equals("pdf");
         if (pdf && !authenticated) return null;
-        final boolean pngjpg = ext.equals("png") || ext.equals("jpg");
+        final boolean pngjpg = ext.equals("png") || ext.equals(DEFAULT_EXT);
         String urlhash = post.get("urlhash", "");
         String url = post.get("url", "");
         DigestURL durl = null;
@@ -286,7 +287,7 @@ public class snapshot {
                 int width = Math.min(post.getInt("width", DEFAULT_WIDTH), DEFAULT_WIDTH);
                 int height = Math.min(post.getInt("height", DEFAULT_HEIGHT), DEFAULT_HEIGHT);
                 String imageFileStub = pdfFile.getAbsolutePath(); imageFileStub = imageFileStub.substring(0, imageFileStub.length() - 3); // cut off extension
-                File imageFile = new File(imageFileStub + DEFAULT_WIDTH + "." + DEFAULT_HEIGHT + "." + DEFAULT_EXT);
+                File imageFile = new File(imageFileStub + DEFAULT_WIDTH + "." + DEFAULT_HEIGHT + "." + ext);
                 if (!imageFile.exists() && authenticated) {
                     Html2Image.pdf2image(pdfFile, imageFile, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_DENSITY, DEFAULT_QUALITY);
                 }
@@ -304,11 +305,22 @@ public class snapshot {
                 Image image;
                 try {
                     image = ImageParser.parse(imageFile.getAbsolutePath(), FileUtils.read(imageFile));
+                    if(image == null) {
+                    	/* Should not happen. If so, ImageParser.parse() should already have logged about the error */
+                    	return null;
+                    }
                     final Image scaled = image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
                     final MediaTracker mediaTracker = new MediaTracker(new Container());
                     mediaTracker.addImage(scaled, 0);
                     try {mediaTracker.waitForID(0);} catch (final InterruptedException e) {}
-                    return new EncodedImage(scaled, ext, true);
+                    
+					/*
+					 * Ensure there is no alpha component on the ouput image, as it is pointless
+					 * here and it is not well supported by the JPEGImageWriter from OpenJDK
+					 */
+					BufferedImage scaledBufferedImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                    scaledBufferedImg.createGraphics().drawImage(scaled, 0, 0, width, height, null);
+                    return new EncodedImage(scaledBufferedImg, ext, true);
                 } catch (IOException e) {
                     ConcurrentLog.logException(e);
                     return null;

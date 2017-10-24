@@ -860,6 +860,8 @@ search.result.noreferrer=false
 # search result lines may show additional information for each search hit
 # these information pieces may be switched on or off
 search.result.show.keywords = false
+# Maximum number of keywords initially displayed. The eventual remaining ones can then be expanded.
+search.result.keywords.firstMaxCount = 100
 search.result.show.date = true
 search.result.show.size = false
 search.result.show.metadata = false
@@ -1054,6 +1056,9 @@ publicSearchpage = true
 # if this is disabled, then the user must navigate manually from the search page
 # to /Status.html to get the main memu bar back
 publicTopmenu = true
+
+# set to true to include a login link/status in the search page public top navigation bar
+search.publicTopNavBar.login = true
 
 # Wiki access rights
 # the built-in wiki system allows by default only that the administrator is allowed to make changes
