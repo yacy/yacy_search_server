@@ -77,7 +77,7 @@ public final class BlacklistHelper {
     	if(location != null) {
     		if(location.startsWith("/")) {
     	    	/* Remove the starting "/" to redirect to a relative location for easier reverse proxy integration */
-    			location = location.substring(1, location.length() -1 );
+    			location = location.substring(1, location.length());
     		}
             return location;
     	}
@@ -126,7 +126,7 @@ public final class BlacklistHelper {
     	if(location != null) {
     		if(location.startsWith("/")) {
     	    	/* Remove the starting "/" to redirect to a relative location for easier reverse proxy integration */
-    			location = location.substring(1, location.length() -1 );
+    			location = location.substring(1, location.length());
     		}
             return location;
     	}
