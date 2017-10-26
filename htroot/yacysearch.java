@@ -137,6 +137,7 @@ public class yacysearch {
         
         final servletProperties prop = new servletProperties();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
+		prop.put("authSearch", authenticatedUserName != null);
 
         // produce vocabulary navigation sidebars
         Collection<Tagging> vocabularies = LibraryProvider.autotagging.getVocabularies();
@@ -206,7 +207,7 @@ public class yacysearch {
             return prop;
         }
 
-		if (post.containsKey("auth") && !extendedSearchRights) {
+		if (post.containsKey("auth") && authenticatedUserName == null) {
 			/*
 			 * Access to authentication protected features is explicitely requested here
 			 * but no authentication is provided : ask now for authentication.
@@ -784,7 +785,7 @@ public class yacysearch {
                                     RequestHeader.FileType.HTML,
                                     0,
                                     theQuery,
-                                    suggestion, true, extendedSearchRights).toString());
+                                    suggestion, true, authenticatedUserName != null).toString());
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
                         } catch (final ConcurrentModificationException e) {
@@ -862,7 +863,7 @@ public class yacysearch {
 			 * eventually including fetched results with higher ranks from the Solr and RWI stacks */
 			prop.put("resortEnabled", !jsResort && global && !stealthmode && theSearch.resortCacheAllowed.availablePermits() > 0 ? 1 : 0);
 			prop.put("resortEnabled_url",
-					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true, extendedSearchRights)
+					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true, authenticatedUserName != null)
 							.append("&startRecord=").append(startRecord).append("&resortCachedResults=true")
 							.toString());
 

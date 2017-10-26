@@ -103,13 +103,12 @@ public class yacysearchitem {
         final boolean adminAuthenticated = sb.verifyAuthentication(header);
         
 		final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-		final boolean userAuthenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
-		final boolean authenticated = adminAuthenticated || userAuthenticated;
-        
+		final boolean authenticated = adminAuthenticated || user != null;
+		
         final int item = post.getInt("item", -1);
         final RequestHeader.FileType fileType = header.fileType();
 
-		if (post.containsKey("auth") && !authenticated) {
+		if (post.containsKey("auth") && !adminAuthenticated && user == null) {
 			/*
 			 * Access to authentication protected features is explicitely requested here
 			 * but no authentication is provided : ask now for authentication.
@@ -120,7 +119,7 @@ public class yacysearchitem {
 			prop.authenticationRequired();
 			return prop;
 		}
-
+		
         // default settings for blank item
         prop.put("content", "0");
         prop.put("rss", "0");
@@ -178,6 +177,7 @@ public class yacysearchitem {
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_showPictures_link", resultUrlstring);
+            prop.put("content_showPictures_authSearch", authenticated);
             
             /* Add information about the current search navigators to let browser refresh yacysearchtrailer only if needed */
             prop.put("content_nav-generation", theSearch.getNavGeneration());
