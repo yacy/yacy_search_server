@@ -37,9 +37,9 @@ import net.yacy.document.parser.html.ContentScraperListener;
  * @author luccioman
  *
  */
-public class CrawlStarterFromSraper implements ContentScraperListener {
+public class CrawlStarterFromScraper implements ContentScraperListener {
 	
-	private final static ConcurrentLog log = new ConcurrentLog(CrawlStarterFromSraper.class.getSimpleName());
+	private final static ConcurrentLog log = new ConcurrentLog(CrawlStarterFromScraper.class.getSimpleName());
 	
 	/** CrawlStacker instance : will receive anchor links used as crawl starting points */
 	private CrawlStacker crawlStacker;
@@ -58,9 +58,9 @@ public class CrawlStarterFromSraper implements ContentScraperListener {
      * @param replace Specify whether old indexed entries should be replaced
      * @throws IllegalArgumentException when a required parameter is null
      */
-	public CrawlStarterFromSraper(final CrawlStacker crawlStacker, final byte[] initiatorHash,
-        final CrawlProfile profile,
-        final boolean replace) {
+	public CrawlStarterFromScraper(final CrawlStacker crawlStacker, final byte[] initiatorHash,
+                                   final CrawlProfile profile,
+                                   final boolean replace) {
 		if(crawlStacker == null) {
 			throw new IllegalArgumentException("crawlStacker parameter must not be null");
 		}
