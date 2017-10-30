@@ -31,6 +31,7 @@
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionSchema;
@@ -57,14 +58,25 @@ public class index {
         
         if(adminAuthenticated) {
 			authenticatedUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+        } else {
+        	final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
+        	if(user != null) {
+                authenticatedUserName = user.getUserName();
+        	}
         }
-        
-        if ((post != null) && (post.containsKey("auth") || post.containsKey("publicPage"))) {
-            if (!adminAuthenticated) {
-            	prop.authenticationRequired();
-                return prop;
-            }
-        }
+        boolean authenticated = adminAuthenticated || authenticatedUserName != null;
+		if (post != null) {
+			if (post.containsKey("publicPage") && !adminAuthenticated) { // Old style parameter : still in use ?
+				prop.authenticationRequired();
+				return prop;
+			}
+			if (post.containsKey("auth") && !authenticated) { // search with authentication required
+				prop.authenticationRequired();
+				return prop;
+			}
+		}
+		
+        prop.put("authSearch", authenticated);
         
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
@@ -130,6 +142,7 @@ public class index {
         prop.putHTML("constraint", constraint);
         prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);
         prop.put("searchdomswitches_searchoptions", searchoptions);
+        prop.put("searchdomswitches_searchoptions_authSearch", authenticated);
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
         prop.put("searchdomswitches_searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
         prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
@@ -159,7 +172,7 @@ public class index {
      * @param authenticatedUserName the name of the currently authenticated user or null
      */
 	private static void handleTopNavBarLoginSection(final RequestHeader header, final Switchboard sb,
-			final serverObjects prop, String authenticatedUserName) {
+			final serverObjects prop, final String authenticatedUserName) {
 		final boolean showLogin = sb.getConfigBool(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
 				SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT);
         if(showLogin) {

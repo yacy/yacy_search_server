@@ -119,6 +119,9 @@
         </li>
         <li id="header_administration">
           <form action="index.html" method="get">
+    		#(authorized)#::
+  				<input type="hidden" name="auth" id="auth" value=""/>
+  			#(/authorized)#
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary" title="Search Interface">
             	<span class="glyphicon glyphicon-search"></span>
             	<span class="hidden-sm hidden-md"> Search Interface &raquo;</span>

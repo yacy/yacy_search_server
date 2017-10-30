@@ -72,12 +72,11 @@ public class yacysearchtrailer {
         final boolean adminAuthenticated = sb.verifyAuthentication(header);
         
         final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-		final boolean userAuthenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
-		final boolean authenticated = adminAuthenticated || userAuthenticated;
+		final boolean authenticated = adminAuthenticated || user != null;
         
 		if (post.containsKey("auth") && !authenticated) {
 			/*
-			 * Access to authentication protected features is explicitely requested here
+			 * Authenticated search is explicitely requested here
 			 * but no authentication is provided : ask now for authentication.
              * Wihout this, after timeout of HTTP Digest authentication nonce, browsers no more send authentication information 
              * and as this page is not private, protected features would simply be hidden without asking browser again for authentication.

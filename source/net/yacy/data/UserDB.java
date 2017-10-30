@@ -28,11 +28,13 @@ package net.yacy.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import javax.servlet.http.Cookie;
@@ -139,34 +141,51 @@ public final class UserDB {
     /**
      * Use a ProxyAuth Value to authenticate user from HttpHeader.Authentication.
      * This supports only Basic authentication
-     * @param auth "BASIC " followed by base64 Encoded String, which contains "username:pw" for basic authentication
+     * @param header the current request HTTP headers including 'Authorization' header : 
+     *  either "BASIC " followed by base64 Encoded String, which contains "username:pw" for basic authentication, 
+     *  or "Digest" followed by valid user name, realm, nonce and other necessary parameters.
+     * @return the user entry when the authentication header contains valid authentication information or null
      */
-    public Entry proxyAuth(final String authHeader) {
+    public Entry proxyAuth(final RequestHeader header) {
         Entry entry = null;
-        if (authHeader != null) {
-            if (authHeader.toUpperCase().startsWith(HttpServletRequest.BASIC_AUTH)) {
-                String auth = authHeader.substring(6); // take out prefix "BASIC"
-                final String[] tmp = Base64Order.standardCoder.decodeString(auth.trim()).split(":");
-                if (tmp.length == 2) {
-                    entry = this.passwordAuth(tmp[0], tmp[1]);
-                    if (entry == null) {
-                        entry = this.md5Auth(tmp[0], tmp[1]);
-                    }
+        if(header == null) {
+        	return entry;
+        }
+        final String authHeader = header.get(RequestHeader.AUTHORIZATION, "").trim();
+        if (authHeader.toUpperCase(Locale.ROOT).startsWith(HttpServletRequest.BASIC_AUTH)) {
+        	String auth = authHeader.substring(6); // take out prefix "BASIC"
+            final String[] tmp = Base64Order.standardCoder.decodeString(auth.trim()).split(":");
+            if (tmp.length == 2) {
+            	entry = this.passwordAuth(tmp[0], tmp[1]);
+                if (entry == null) {
+                	entry = this.md5Auth(tmp[0], tmp[1]);
                 }
+            }
+        } else if (authHeader.toUpperCase(Locale.ROOT).startsWith(HttpServletRequest.DIGEST_AUTH)) {
+        	// handle DIGEST auth by servlet container
+            final Principal authenticatedUser = header.getUserPrincipal();
+            if (authenticatedUser != null && authenticatedUser.getName() != null) { // user is authenticated by Servlet container
+            	entry = getEntry(authenticatedUser.getName());
             }
         }
         return entry;
     }
 
+    /**
+     * @param header the HTTP request headers
+     * @return the authenticated user with valid authentication information found in the headers or null
+     */
     public Entry getUser(final RequestHeader header){
-        return getUser(header.get(RequestHeader.AUTHORIZATION), header.getCookies());
+        return getUser(header, header.getCookies());
     }
 
-    public Entry getUser(final String auth, final Cookie[] cookies){
-        Entry entry=null;
-        if(auth != null) {
-            entry=proxyAuth(auth);
-        }
+    /**
+     * @param header HTTP request headers
+     * @param cookies eventual client cookies
+     * @return the authenticated user entry from headers or cookies or null
+     */
+    public Entry getUser(final RequestHeader header, final Cookie[] cookies){
+        Entry entry = proxyAuth(header);
         if(entry == null && cookies != null) {
             entry=cookieAuth(cookies);
         }
@@ -174,24 +193,25 @@ public final class UserDB {
     }
 
     /**
-     * Determine if a user has admin rights from a authorisation http-headerfield.
+     * Determine if a user has admin rights from a 'Authorisation' http header field.
      * Tests both userDB and old style adminpw.
      * 
      * @param auth http-headerline for authorisation.
      * @param cookies
      */
-    public boolean hasAdminRight(final String auth, final Cookie[] cookies) {
-        final Entry entry = getUser(auth, cookies);
+    public boolean hasAdminRight(final RequestHeader header, final Cookie[] cookies) {
+        final Entry entry = getUser(header, cookies);
         return (entry != null) ? entry.hasRight(AccessRight.ADMIN_RIGHT) : false;
     }
 
     /**
-     * Use ProxyAuth String to authenticate user and save IP/username for ipAuth.
-     * @param auth base64 Encoded String, which contains "username:pw".
+     * Use HTTP headers to authenticate user and save IP/username for ipAuth.
+     * @param header HTTP request headers including 'Authorization' header with either base64 Encoded String, which contains "username:pw", 
+     * 	or Digest authentication information including notably user name, realm, and nonce.
      * @param ip IP address.
      */
-    public Entry proxyAuth(final String auth, final String ip) {
-        final Entry entry = proxyAuth(auth);
+    public Entry proxyAuth(final RequestHeader header, final String ip) {
+        final Entry entry = proxyAuth(header);
         if (entry != null) {
             entry.updateLastAccess(false);
             this.ipUsers.put(ip, entry.getUserName());

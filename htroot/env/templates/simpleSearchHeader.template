@@ -37,7 +37,7 @@
         	<span class="visible-sm glyphicon glyphicon-search"><b class="caret"></b></span>
         </a>
         <ul class="dropdown-menu" role="menu">
-          <li id="header_websearch"><a href="index.html#(authorized)#::?auth#(/authorized)#" onclick="this.href='index.html?#(authorized)#::auth&#(/authorized)#former='+document.searchform.search.value">Web Search</a></li>
+          <li id="header_websearch"><a href="index.html#(authSearch)#::?auth#(/authSearch)#" onclick="this.href='index.html?#(authSearch)#::auth&#(/authSearch)#former='+document.searchform.search.value">Web Search</a></li>
           <li id="header_filesearch"><a href="yacyinteractive.html" onclick="this.href='yacyinteractive.html?handover='+document.searchform.search.value">File Search</a></li>
           <li id="header_comparesearch"><a href="compare_yacy.html?display=0">Compare Search</a></li>
           <li id="header_hostbrowser"><a href="HostBrowser.html?hosts=">Index Browser</a></li>

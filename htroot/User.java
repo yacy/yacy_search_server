@@ -54,7 +54,7 @@ public class User{
         prop.put("logged-in_username", "");
         prop.put("logged-in_returnto", "");
         //identified via HTTPPassword
-        entry=sb.userDB.proxyAuth(requestHeader.get(RequestHeader.AUTHORIZATION));
+        entry=sb.userDB.proxyAuth(requestHeader);
         if(entry != null){
         	prop.put("logged-in_identified-by", "1");
         //try via cookie
