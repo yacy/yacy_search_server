@@ -1,6 +1,6 @@
-// CrawlStarterFromSraper.java
+// CrawlStarterFromScraper.java
 // ---------------------------
-// Copyright 2016 by luccioman; https://github.com/luccioman
+// Copyright 2016 - 2017 by luccioman; https://github.com/luccioman, Apply55gx; https://github.com/Apply55gx
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
