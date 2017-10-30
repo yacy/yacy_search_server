@@ -67,11 +67,11 @@
         <input type="hidden" name="verify" value="#[search.verify]#" />
         #(searchdomswitches)#::
         <div class="yacysearch">
-	        #(searchtext)#::<input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# />&nbsp;Text&nbsp;&nbsp;#(/searchtext)#
-	        #(searchimage)#::<input type="radio" id="image" name="contentdom" value="image" #(check)#::checked="checked"#(/check)# />&nbsp;Images&nbsp;&nbsp;#(/searchimage)#
-	        #(searchaudio)#::<input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;#(/searchaudio)#
-	        #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;#(/searchvideo)#
-	        #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications#(/searchapp)#
+	        #(searchtext)#::<label><input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# />&nbsp;Text&nbsp;&nbsp;</label>#(/searchtext)#
+	        #(searchimage)#::<label><input type="radio" id="image" name="contentdom" value="image" #(check)#::checked="checked"#(/check)# />&nbsp;Images&nbsp;&nbsp;</label>#(/searchimage)#
+	        #(searchaudio)#::<label><input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;</label>#(/searchaudio)#
+	        #(searchvideo)#::<label><input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;</label>#(/searchvideo)#
+	        #(searchapp)#::<label><input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications</label>#(/searchapp)#
 	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1#(authSearch)#::&auth#(/authSearch)#" onclick="this.href='index.html?searchoptions=1#(authSearch)#::&auth#(/authSearch)#&amp;former='+document.getElementById('search').value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom);">more options...</a>::#(/searchoptions)#
         </div>
         #(/searchdomswitches)#
