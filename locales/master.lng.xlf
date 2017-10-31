@@ -10974,14 +10974,14 @@
     <trans-unit id="29087484" xml:space="preserve" approved="no" translate="yes">
        <source>keyboard shotcuts</source>
     </trans-unit>
-    <trans-unit id="54da6c7" xml:space="preserve" approved="no" translate="yes">
-       <source>tab or page-up</source>
+    <trans-unit id="de5304cb" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;a href="https://en.wikipedia.org/wiki/Access_key"&gt;Access key&lt;/a&gt; modifier + n</source>
     </trans-unit>
     <trans-unit id="264b7705" xml:space="preserve" approved="no" translate="yes">
        <source>next result page</source>
     </trans-unit>
-    <trans-unit id="31e72520" xml:space="preserve" approved="no" translate="yes">
-       <source>page-down</source>
+    <trans-unit id="de5304cd" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;a href="https://en.wikipedia.org/wiki/Access_key"&gt;Access key&lt;/a&gt; modifier + p</source>
     </trans-unit>
     <trans-unit id="556fc109" xml:space="preserve" approved="no" translate="yes">
        <source>previous result page</source>
