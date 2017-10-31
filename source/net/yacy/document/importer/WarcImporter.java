@@ -70,6 +70,7 @@ public class WarcImporter extends Thread implements Importer {
     private boolean abort = false; // flag to signal stop of import
 
     public WarcImporter(InputStream f) {
+    	super("WarcImporter - from InputStream");
         source = f;
         recordCnt = 0;
         sourceSize = -1;
@@ -88,6 +89,7 @@ public class WarcImporter extends Thread implements Importer {
     }
 
     public WarcImporter(File f) throws FileNotFoundException{
+       super("WarcImporter - from file " + f.getName());
        name = f.getName();
        sourceSize = f.length();
        source = new FileInputStream(f);

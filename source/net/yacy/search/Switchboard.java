@@ -4297,7 +4297,7 @@ public final class Switchboard extends serverSwitch {
         final int shutdownPort;
         if ((shutdownPort = this.getConfigInt(SwitchboardConstants.SERVER_SHUTDOWNPORT, 0)) > 0) {
             // init thread to listen to a shutdown port - to receive a shutdown signal
-            Thread shutdownThread = new Thread() {
+            Thread shutdownThread = new Thread("Switchboard.waitForShutdown") {
                 @Override
                 public void run() {
                     ServerSocket ss = null;
