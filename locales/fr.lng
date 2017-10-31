@@ -713,6 +713,7 @@ YaCy: Help==YaCy: Aide
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="fr">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Page de recherche
 Search for #[former]#==Recherche pour  #[former]#
 Search</button>==Rechercher</button>

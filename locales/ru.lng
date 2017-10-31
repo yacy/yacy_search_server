@@ -1604,6 +1604,7 @@ from index==из индекса
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="ru">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Поиск
 #kiosk mode==режим киоска
 >Search<==>Поиск<

@@ -1480,6 +1480,7 @@ from index==vom Index
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="de">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Suchseite
 #kiosk mode==Kiosk Modus
 "Search"=="Suchen"

@@ -1280,6 +1280,7 @@ Download from Vimeo:==Завантажити з Vimeo:
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="uk">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Сторінка пошуку
 kiosk mode==режим кіоску
 "Search"=="Пошук"

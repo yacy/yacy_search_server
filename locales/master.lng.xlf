@@ -10836,6 +10836,9 @@
 
 <file original="index.html"  source-language="en"  datatype="html">
   <body>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
     <trans-unit id="a0a07773" xml:space="preserve" approved="no" translate="yes">
        <source>YaCy '#[clientname]#': Search Page</source>
     </trans-unit>
