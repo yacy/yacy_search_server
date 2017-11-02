@@ -747,6 +747,9 @@ only resources from smb servers==uniquement les ressources de serveurs samba
 Intranet Indexing==Indexage d'intranet
 must be selected==doit &ecirc;tre s&eacute;lectionn&eacute;
 only files from a local file system==uniquement les fichiers locaux
+spatial restrictions==contraintes spatiales
+only documents having location metadata (geographical coordinates)==uniquement les documents ayant des méta-données de localisation (coordonnées géographiques)
+only documents within a square zone embracing a circle of given radius (in decimal degrees) around the specified latitude and longitude (in decimal degrees)==uniquement les documents situés dans une zone carrée englobant un cercle de rayon indiqué (en degrés décimaux) autour de la latitude et la longitude spécifiées (en degrés décimaux) 
 ranking modifier</dt>==modificateur de classement</dt>
 sort by date (latest first)==trier par date (les plus r&eacute;cents en premier)
 multiple words shall appear near==les mots recherch&eacute;s doivent &ecirc;tre dans une m&ecirc;me expression

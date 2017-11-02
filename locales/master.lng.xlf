@@ -10944,6 +10944,15 @@
     <trans-unit id="82e93926" xml:space="preserve" approved="no" translate="yes">
        <source>only files from a local file system</source>
     </trans-unit>
+    <trans-unit id="76f4dfc3" xml:space="preserve" approved="no" translate="yes">
+       <source>spatial restrictions</source>
+    </trans-unit>
+    <trans-unit id="3c5ae2c9" xml:space="preserve" approved="no" translate="yes">
+       <source>only documents having location metadata (geographical coordinates)</source>
+    </trans-unit>
+    <trans-unit id="de47cea" xml:space="preserve" approved="no" translate="yes">
+       <source>only documents within a square zone embracing a circle of given radius (in decimal degrees) around the specified latitude and longitude (in decimal degrees)</source>
+    </trans-unit>
     <trans-unit id="252ec05d" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;ranking modifier&lt;</source>
     </trans-unit>
