@@ -1658,7 +1658,7 @@ latest first==сначала последние
 multiple words shall appear near==слова должны быть рядом
 doublequotes==двойные кавычки
 prefer given language==предпочитать указанный язык
-an ISO639 2-letter code==двухбуквенный языковой код ISO639
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==двухбуквенный языковой код <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a>
 heuristics==эвристики
 add search results from ==добавить результаты из 
 Search Navigation==Навигация по поиску

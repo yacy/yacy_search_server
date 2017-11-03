@@ -10972,7 +10972,7 @@
        <source>prefer given language</source>
     </trans-unit>
     <trans-unit id="18e0e8d6" xml:space="preserve" approved="no" translate="yes">
-       <source>an ISO639 2-letter code</source>
+       <source>an &lt;a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list"&gt;ISO 639-1&lt;/a&gt; 2-letter code</source>
     </trans-unit>
     <trans-unit id="7efd5ea9" xml:space="preserve" approved="no" translate="yes">
        <source>heuristics</source>

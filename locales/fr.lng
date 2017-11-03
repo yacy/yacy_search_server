@@ -754,7 +754,8 @@ ranking modifier</dt>==modificateur de classement</dt>
 sort by date (latest first)==trier par date (les plus r&eacute;cents en premier)
 multiple words shall appear near==les mots recherch&eacute;s doivent &ecirc;tre dans une m&ecirc;me expression
 "" (doublequotes)=="" (guillemets)
-prefer given language (an ISO639 2-letter code)==pr&eacute;f&eacute;rer le langage indiqu&eacute; (code ISO639 &agrave; 2 lettres)
+prefer given language==pr&eacute;f&eacute;rer le langage indiqu&eacute;
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==code <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Liste de référence des codes de langue à deux lettres">ISO 639-1</a> &agrave; 2 lettres
 heuristics==heuristiques
 add search results from external opensearch systems==ajouter les r&eacute;sultats de syst&egrave;mes opensearch externes
 Search Navigation==Navigation dans la recherche

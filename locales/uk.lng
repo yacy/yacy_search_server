@@ -1333,7 +1333,7 @@ latest first==останні спочатку
 multiple words shall appear near==Кілька слів повинні бути близько один від одного
 doublequotes==лапки
 prefer given language==Віддавати перевагу вказаній мові
-an ISO639 2-letter code==2-буквенний код ISO639
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==2-буквенний код <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a>
 heuristics==евристика
 add search results from ==додати пошукові результати з 
 Search Navigation==Пошукова навігація

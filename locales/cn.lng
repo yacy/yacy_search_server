@@ -1200,7 +1200,7 @@ latest first==最新者居首
 multiple words shall appear near==引用多个字
 doublequotes==双引号
 prefer given language==首选语言
-an ISO639 2-letter code==ISO639标准的双字母代码
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==<a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 标准的双字母代码
 heuristics==启发式
 add search results from blekko==添加来自blekko的搜索结果
 Search Navigation==搜索导航

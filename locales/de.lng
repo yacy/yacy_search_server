@@ -1534,7 +1534,7 @@ latest first==Neuste zuerst
 multiple words shall appear near==Mehrere Wörter sollen nah zusammen stehen
 doublequotes==Anführungszeichen
 prefer given language==Angegebene Sprache bevorzugen
-an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==2-Buchstaben-Ländercode nach <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a>
 heuristics==Heuristiken
 add search results from external opensearch systems==Benutze zusätzliche Ergebnisse von externen Opensearchsystemen
 Search Navigation==Such-Navigation
