@@ -846,6 +846,7 @@ from index==索引から
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="ja">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': 検索ページ
 #kiosk mode==Kiosk モード
 "Search"=="検索"

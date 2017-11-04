@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     #(forward)#::<meta http-equiv="REFRESH" content="0; url=#[target]#" />#(/forward)#
     <title>YaCy '#[clientname]#': Search Page</title>
@@ -176,6 +176,15 @@
           <dd>only files from a local file system (<a href="ConfigBasic.html">Intranet Indexing</a> must be selected)</dd>
         </dl>
       </dd>
+      <dt style="width:100px">spatial restrictions</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt>/location</dt>
+          <dd>only documents having location metadata (geographical coordinates)</dd>
+          <dt>/radius/&lt;latitude&gt;/&lt;longitude&gt;/&lt;distance&gt;</dt>
+          <dd>only documents within a square zone embracing a circle of given radius (in decimal degrees) around the specified latitude and longitude (in decimal degrees)</dd>
+        </dl>
+      </dd>
       <dt style="width:100px">ranking modifier</dt>
       <dd>
         <dl style="width:500px">
@@ -186,7 +195,7 @@
           <dt>"" (doublequotes)</dt>
           <dd>multiple words shall appear near</dd>
           <dt>/language/&lt;lang&gt;</dt>
-          <dd>prefer given language (an ISO639 2-letter code)</dd>
+          <dd>prefer given language (an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code)</dd>
         </dl>
       </dd>
       #(heuristic)#::
@@ -203,12 +212,12 @@
       <h4>Search Navigation</h4>
 
       <dl style="width:700px">
-      <dt style="width:100px">keyboard shotcuts</dt>
+      <dt style="width:100px">keyboard shortcuts</dt>
       <dd>
         <dl style="width:500px">
-          <dt>tab or page-up</dt>
+          <dt><a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + n</dt>
           <dd>next result page</dd>
-          <dt>page-down</dt>
+          <dt><a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + p</dt>
           <dd>previous result page</dd>
         </dl>
       </dd>

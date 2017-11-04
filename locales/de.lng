@@ -1480,6 +1480,7 @@ from index==vom Index
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="de">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Suchseite
 #kiosk mode==Kiosk Modus
 "Search"=="Suchen"
@@ -1533,14 +1534,12 @@ latest first==Neuste zuerst
 multiple words shall appear near==Mehrere Wörter sollen nah zusammen stehen
 doublequotes==Anführungszeichen
 prefer given language==Angegebene Sprache bevorzugen
-an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==2-Buchstaben-Ländercode nach <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a>
 heuristics==Heuristiken
 add search results from external opensearch systems==Benutze zusätzliche Ergebnisse von externen Opensearchsystemen
 Search Navigation==Such-Navigation
-keyboard shotcuts==Tastatur-Kürzel
-tab or page-up==Tab oder Bild hoch
+keyboard shortcuts==Tastatur-Kürzel
 next result page==Nächste Ergebnisseite
-page-down==Bild nach unten
 previous result page==Vorherige Ergebnisseite
 automatic result retrieval==Automatische Ergebnis-Abfrage
 browser integration==Browserintegration

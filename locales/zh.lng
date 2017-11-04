@@ -1,4 +1,4 @@
-# cn.lng
+# zh.lng
 # English-->Chinese
 # -----------------------
 # This is a part of YaCy, a peer-to-peer based web search engine
@@ -1147,6 +1147,7 @@ To learn how to do that, watch one of the demonstration videos below==观看以�
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="zh">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': 搜索页面
 #kiosk mode==Kiosk Modus
 "Search"=="搜索"
@@ -1199,14 +1200,14 @@ latest first==最新者居首
 multiple words shall appear near==引用多个字
 doublequotes==双引号
 prefer given language==首选语言
-an ISO639 2-letter code==ISO639标准的双字母代码
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==<a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 标准的双字母代码
 heuristics==启发式
 add search results from blekko==添加来自blekko的搜索结果
 Search Navigation==搜索导航
-keyboard shotcuts==快捷键
-tab or page-up==Tab或者Page Up
+keyboard shortcuts==快捷键
+<a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + n==<a href="https://zh.wikipedia.org/wiki/%E8%AE%BF%E9%97%AE%E9%94%AE">访问键</a> modifier + n
 next result page==下一页
-page-down==Page Down
+<a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + p==<a href="https://zh.wikipedia.org/wiki/%E8%AE%BF%E9%97%AE%E9%94%AE">访问键</a> modifier + p
 previous result page==上一页
 automatic result retrieval==自动结果检索
 browser integration==浏览集成

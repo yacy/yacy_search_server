@@ -10836,6 +10836,9 @@
 
 <file original="index.html"  source-language="en"  datatype="html">
   <body>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
     <trans-unit id="a0a07773" xml:space="preserve" approved="no" translate="yes">
        <source>YaCy '#[clientname]#': Search Page</source>
     </trans-unit>
@@ -10941,6 +10944,15 @@
     <trans-unit id="82e93926" xml:space="preserve" approved="no" translate="yes">
        <source>only files from a local file system</source>
     </trans-unit>
+    <trans-unit id="76f4dfc3" xml:space="preserve" approved="no" translate="yes">
+       <source>spatial restrictions</source>
+    </trans-unit>
+    <trans-unit id="3c5ae2c9" xml:space="preserve" approved="no" translate="yes">
+       <source>only documents having location metadata (geographical coordinates)</source>
+    </trans-unit>
+    <trans-unit id="de47cea" xml:space="preserve" approved="no" translate="yes">
+       <source>only documents within a square zone embracing a circle of given radius (in decimal degrees) around the specified latitude and longitude (in decimal degrees)</source>
+    </trans-unit>
     <trans-unit id="252ec05d" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;ranking modifier&lt;</source>
     </trans-unit>
@@ -10960,7 +10972,7 @@
        <source>prefer given language</source>
     </trans-unit>
     <trans-unit id="18e0e8d6" xml:space="preserve" approved="no" translate="yes">
-       <source>an ISO639 2-letter code</source>
+       <source>an &lt;a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list"&gt;ISO 639-1&lt;/a&gt; 2-letter code</source>
     </trans-unit>
     <trans-unit id="7efd5ea9" xml:space="preserve" approved="no" translate="yes">
        <source>heuristics</source>
@@ -10972,16 +10984,16 @@
        <source>Search Navigation</source>
     </trans-unit>
     <trans-unit id="29087484" xml:space="preserve" approved="no" translate="yes">
-       <source>keyboard shotcuts</source>
+       <source>keyboard shortcuts</source>
     </trans-unit>
-    <trans-unit id="54da6c7" xml:space="preserve" approved="no" translate="yes">
-       <source>tab or page-up</source>
+    <trans-unit id="de5304cb" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;a href="https://en.wikipedia.org/wiki/Access_key"&gt;Access key&lt;/a&gt; modifier + n</source>
     </trans-unit>
     <trans-unit id="264b7705" xml:space="preserve" approved="no" translate="yes">
        <source>next result page</source>
     </trans-unit>
-    <trans-unit id="31e72520" xml:space="preserve" approved="no" translate="yes">
-       <source>page-down</source>
+    <trans-unit id="de5304cd" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;a href="https://en.wikipedia.org/wiki/Access_key"&gt;Access key&lt;/a&gt; modifier + p</source>
     </trans-unit>
     <trans-unit id="556fc109" xml:space="preserve" approved="no" translate="yes">
        <source>previous result page</source>
