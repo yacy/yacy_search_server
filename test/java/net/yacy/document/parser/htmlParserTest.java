@@ -98,10 +98,45 @@ public class htmlParserTest extends TestCase {
             		inStream.close();
             	}
             }
-
-
         }
     }
+    
+	/**
+	 * Test the htmlParser.parse() method, with no charset information, neither
+	 * provided by HTTP header nor by meta tags or attributes.
+	 * 
+	 * @throws Exception
+	 *             when an unexpected error occurred
+	 */
+	@Test
+	public void testParseHtmlWithoutCharset() throws Exception {
+		final AnchorURL url = new AnchorURL("http://localhost/test.html");
+		final String mimetype = "text/html";
+		final StringBuilder testHtml = new StringBuilder("<!DOCTYPE html><html><body><p>");
+		/*
+		 * Include some non ASCII characters : once encoded they should make the charset
+		 * detector to detect the exact encoding
+		 */
+		testHtml.append("In München steht ein Hofbräuhaus.\n" + "Dort gibt es Bier aus Maßkrügen.<br>");
+		testHtml.append("<a href=\"http://localhost/doc1.html\">First link</a>");
+		testHtml.append("<a href=\"http://localhost/doc2.html\">Second link</a>");
+		testHtml.append("<a href=\"http://localhost/doc3.html\">Third link</a>");
+		testHtml.append("</p></body></html>");
+
+		final htmlParser parser = new htmlParser();
+
+		final Charset[] charsets = new Charset[] { StandardCharsets.UTF_8, StandardCharsets.ISO_8859_1 };
+
+		for (final Charset charset : charsets) {
+			try (InputStream sourceStream = new ByteArrayInputStream(testHtml.toString().getBytes(charset));) {
+				final Document[] docs = parser.parse(url, mimetype, null, new VocabularyScraper(), 0, sourceStream);
+				final Document doc = docs[0];
+				assertEquals(3, doc.getAnchors().size());
+				assertTrue(doc.getTextString().contains("Maßkrügen"));
+				assertEquals(charset.toString(), doc.getCharset());
+			}
+		}
+	}
     
     /**
      * Test the htmlParser.parseWithLimits() method with test content within bounds.
