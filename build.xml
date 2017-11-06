@@ -191,7 +191,7 @@
         <pathelement location="${lib}/httpclient-4.5.3.jar" />
         <pathelement location="${lib}/httpcore-4.4.6.jar" />
         <pathelement location="${lib}/httpmime-4.5.3.jar" />
-        <pathelement location="${lib}/icu4j-59_1.jar" />
+        <pathelement location="${lib}/icu4j-60.1.jar" />
     	<pathelement location="${lib}/imageio-bmp-3.3.1.jar" />
     	<pathelement location="${lib}/imageio-core-3.3.1.jar" />
     	<pathelement location="${lib}/imageio-metadata-3.3.1.jar" />
