@@ -429,13 +429,13 @@
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-bmp</artifactId>
-            <version>3.3.1</version>
+            <version>3.3.2</version>
             <type>jar</type>
         </dependency> 
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-tiff</artifactId>
-            <version>3.3.1</version>
+            <version>3.3.2</version>
             <type>jar</type>
         </dependency>        
         <dependency>
