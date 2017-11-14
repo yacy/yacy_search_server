@@ -469,6 +469,15 @@ public final class FileUtils {
         return source;
     }
 
+	/**
+	 * Generate a set of strings matching each line of the given file. Lines are
+	 * lower cased and any eventual surrounding space characters are removed. Empty
+	 * lines and lines starting with the '#' character are ignored.
+	 * 
+	 * @param file
+	 *            a file to load
+	 * @return a set of strings eventually empty
+	 */
     public static HashSet<String> loadList(final File file) {
         final HashSet<String> set = new HashSet<String>();
         BufferedReader br = null;
