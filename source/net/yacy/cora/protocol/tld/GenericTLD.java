@@ -17,7 +17,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package net.yacy.cora.protocol;
+package net.yacy.cora.protocol.tld;
 
 import java.util.Locale;
 
@@ -1282,7 +1282,8 @@ public enum GenericTLD {
 	}
 	
 	/**
-	 * @return the lower cased, Punycode encoded domain name of this enumeration instance
+	 * @return the lower cased, Punycode encoded (when the domain is
+	 *         internationalized) domain name of this enumeration instance
 	 */
 	public String getDomainName() {
 		return this.toString().toLowerCase(Locale.ROOT).replace('_', '-');

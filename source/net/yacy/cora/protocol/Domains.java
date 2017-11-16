@@ -55,6 +55,9 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.plugin.ClassProvider;
+import net.yacy.cora.protocol.tld.GenericTLD;
+import net.yacy.cora.protocol.tld.InternationalizedCountryCodeTLD;
+import net.yacy.cora.protocol.tld.SponsoredTLD;
 import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.storage.KeyList;
@@ -479,16 +482,6 @@ public class Domains {
          "YT=Mayotte"
      };
      
-     private static final String[] TLD_Sponsored = {
-         "AERO=The air-transport industry",
-         "COOP=cooperative associations",
-         "JOBS=human resource managers",
-         "MUSEUM=Museums",
-         "TEL=Published contact data",
-         "TRAVEL=The travel industry",
-         "INT=International",
-     };
-     
      private static final String[] TLD_Infrastructure = {
          "ARPA=operationally-critical infrastructural identifier spaces",
      };
@@ -497,6 +490,16 @@ public class Domains {
     		 "BIZ=Business",
              "NAME=Individuals",
              "PRO=Credentialed professionals",
+     };
+     
+	/**
+	 * Country-Code top-level domains (ccTLD) recently added by the ICANN. A
+	 * different list is used here so they can continue to be categorized with the
+	 * TLD_Generic_ID without modifying URL hash computation.
+	 */
+     private static final String[] TLD_RecentCountryCodes = {
+    		 "cw=Curaçao", // TLD Manager : University of Curacao 
+    		 "sx=Sint Maarten" // TLD Manager : SX Registry SA B.V. 
      };
      
      private static final String[] TLD_OpenNIC = {
@@ -715,9 +718,15 @@ public class Domains {
 		 * still associate them with YaCy's TLD_Generic_ID otherwise the URLs hash would
 		 * be modified
 		 */
+        insertTLDProps(TLD_RecentCountryCodes,   TLD_Generic_ID);
+        for(InternationalizedCountryCodeTLD tld : InternationalizedCountryCodeTLD.values()) {
+        	TLDID.put(tld.getDomainName(), TLD_Generic_ID);
+        }
         insertTLDProps(TLD_GenericRestricted,   TLD_Generic_ID);
         insertTLDProps(TLD_Infrastructure,   TLD_Generic_ID);
-        insertTLDProps(TLD_Sponsored,   TLD_Generic_ID);
+        for(SponsoredTLD tld : SponsoredTLD.values()) {
+        	TLDID.put(tld.getDomainName(), TLD_Generic_ID);
+        }
         
         insertTLDProps(TLD_OpenNIC,   TLD_Generic_ID);
         
