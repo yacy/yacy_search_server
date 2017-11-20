@@ -682,7 +682,7 @@ public class Domains {
         for (final String TLDelement : TLDList) {
             p = TLDelement.indexOf('=');
             if (p > 0) {
-                tld = TLDelement.substring(0, p).toLowerCase();
+                tld = TLDelement.substring(0, p).toLowerCase(Locale.ROOT);
                 //name = TLDList[i].substring(p + 1);
                 TLDID.put(tld, ID);
                 //TLDName.put(tld, name);
@@ -774,7 +774,7 @@ public class Domains {
     */
     public static InetAddress dnsResolveFromCache(String host) throws UnknownHostException {
         if ((host == null) || host.isEmpty()) return null;
-        host = host.toLowerCase().trim();
+        host = host.toLowerCase(Locale.ROOT).trim();
 
         // trying to resolve host by doing a name cache lookup
         InetAddress ip = NAME_CACHE_HIT.get(host);
@@ -846,7 +846,7 @@ public class Domains {
     public static String stripToHostName(String target) {
         // normalize
         if (target == null || target.isEmpty()) return null;
-        target = target.toLowerCase().trim(); // we can lowercase this because host names are case-insensitive
+        target = target.toLowerCase(Locale.ROOT).trim(); // we can lowercase this because host names are case-insensitive
         
         // extract the address (host:port) part (applies if this is an url)
         int p = target.indexOf("://");
@@ -887,7 +887,7 @@ public class Domains {
         
         // normalize
         if (target == null || target.isEmpty()) return port;
-        target = target.toLowerCase().trim(); // we can lowercase this because host names are case-insensitive
+        target = target.toLowerCase(Locale.ROOT).trim(); // we can lowercase this because host names are case-insensitive
         
         // extract the address (host:port) part (applies if this is an url)
         int p = target.indexOf("://");
@@ -920,7 +920,7 @@ public class Domains {
     public static InetAddress dnsResolve(final String host0) {
         // consider to call stripToHostName() before calling this
         if (host0 == null || host0.isEmpty()) return null;
-        final String host = host0.toLowerCase().trim();
+        final String host = host0.toLowerCase(Locale.ROOT).trim();
 
         if (MemoryControl.shortStatus()) {
             NAME_CACHE_HIT.clear();
@@ -1291,14 +1291,14 @@ public class Domains {
      * @param host
      * @return the TLD or ccSLD+TLD if that is on a list
      */
-    public static String getDNC(String host) {
+    public static String getDNC(final String host) {
         if (host == null || host.length() == 0) return "";
         int p0 = host.lastIndexOf('.');
-        if (p0 < 0) return host.toLowerCase();
+        if (p0 < 0) return host.toLowerCase(Locale.ROOT);
         int p1 = host.lastIndexOf('.', p0 - 1);
-        if (p1 < 0) return host.substring(p0 + 1).toLowerCase();
-        String ccSLDTLD = host.substring(p1 + 1).toLowerCase();
-        return ccSLD_TLD.contains(ccSLDTLD) ? ccSLDTLD : host.substring(p0 + 1).toLowerCase();
+        if (p1 < 0) return host.substring(p0 + 1).toLowerCase(Locale.ROOT);
+        String ccSLDTLD = host.substring(p1 + 1).toLowerCase(Locale.ROOT);
+        return ccSLD_TLD.contains(ccSLDTLD) ? ccSLDTLD : host.substring(p0 + 1).toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -1310,14 +1310,14 @@ public class Domains {
     public static String getSmartSLD(String host) {        
         if (host == null || host.length() == 0) return "";
         int p0 = host.lastIndexOf('.');
-        if (p0 < 0) return host.toLowerCase(); // no subdomain present
+        if (p0 < 0) return host.toLowerCase(Locale.ROOT); // no subdomain present
         int p1 = host.lastIndexOf('.', p0 - 1);
-        if (p1 < 0) return host.substring(0, p0).toLowerCase(); // no third-level domain present, just use the second level
-        String ccSLDTLD = host.substring(p1 + 1).toLowerCase();
-        if (!ccSLD_TLD.contains(ccSLDTLD)) return host.substring(p1 + 1, p0).toLowerCase(); // because the ccSLDTLD is not contained in the list of knwon ccSDL, we use the SLD from p1 to p0
+        if (p1 < 0) return host.substring(0, p0).toLowerCase(Locale.ROOT); // no third-level domain present, just use the second level
+        String ccSLDTLD = host.substring(p1 + 1).toLowerCase(Locale.ROOT);
+        if (!ccSLD_TLD.contains(ccSLDTLD)) return host.substring(p1 + 1, p0).toLowerCase(Locale.ROOT); // because the ccSLDTLD is not contained in the list of knwon ccSDL, we use the SLD from p1 to p0
         // the third level domain is the correct one
         int p2 = host.lastIndexOf('.', p1 - 1);
-        if (p2 < 0) return host.substring(0, p1).toLowerCase();
+        if (p2 < 0) return host.substring(0, p1).toLowerCase(Locale.ROOT);
         return host.substring(p2 + 1, p1);
     }
 
