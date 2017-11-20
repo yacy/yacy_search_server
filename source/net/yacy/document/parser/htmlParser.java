@@ -37,6 +37,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 
 import org.apache.commons.io.IOUtils;
 
@@ -341,7 +342,7 @@ public class htmlParser extends AbstractParser implements Parser {
         encoding = encoding.trim();
 
         // fix upper/lowercase
-        encoding = encoding.toUpperCase();
+        encoding = encoding.toUpperCase(Locale.ROOT);
         if (encoding.startsWith("SHIFT")) return "Shift_JIS";
         if (encoding.startsWith("BIG")) return "Big5";
         // all other names but such with "windows" use uppercase
