@@ -24,6 +24,7 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
@@ -105,47 +106,47 @@ public class Classification {
 
     private static void addSet(Set<String> set, final String extString) {
         if ((extString == null) || (extString.isEmpty())) return;
-        for (String s: CommonPattern.COMMA.split(extString, 0)) set.add(s.toLowerCase().trim());
+        for (String s: CommonPattern.COMMA.split(extString, 0)) set.add(s.toLowerCase(Locale.ROOT).trim());
     }
 
     public static boolean isTextExtension(String textExt) {
         if (textExt == null) return false;
-        return textExtSet.contains(textExt.trim().toLowerCase());
+        return textExtSet.contains(textExt.trim().toLowerCase(Locale.ROOT));
     }
 
     public static boolean isMediaExtension(String mediaExt) {
         if (mediaExt == null) return false;
-        return mediaExtSet.contains(mediaExt.trim().toLowerCase());
+        return mediaExtSet.contains(mediaExt.trim().toLowerCase(Locale.ROOT));
     }
 
     public static boolean isImageExtension(final String imageExt) {
         if (imageExt == null) return false;
-        return imageExtSet.contains(imageExt.trim().toLowerCase());
+        return imageExtSet.contains(imageExt.trim().toLowerCase(Locale.ROOT));
     }
 
     public static boolean isAudioExtension(final String audioExt) {
         if (audioExt == null) return false;
-        return audioExtSet.contains(audioExt.trim().toLowerCase());
+        return audioExtSet.contains(audioExt.trim().toLowerCase(Locale.ROOT));
     }
 
     public static boolean isVideoExtension(final String videoExt) {
         if (videoExt == null) return false;
-        return videoExtSet.contains(videoExt.trim().toLowerCase());
+        return videoExtSet.contains(videoExt.trim().toLowerCase(Locale.ROOT));
     }
 
     public static boolean isApplicationExtension(final String appsExt) {
         if (appsExt == null) return false;
-        return appsExtSet.contains(appsExt.trim().toLowerCase());
+        return appsExtSet.contains(appsExt.trim().toLowerCase(Locale.ROOT));
     }
 
     public static boolean isControlExtension(final String ctrlExt) {
         if (ctrlExt == null) return false;
-        return ctrlExtSet.contains(ctrlExt.trim().toLowerCase());
+        return ctrlExtSet.contains(ctrlExt.trim().toLowerCase(Locale.ROOT));
     }
 
     public static boolean isAnyKnownExtension(String ext) {
         if (ext == null) return false;
-        ext = ext.trim().toLowerCase();
+        ext = ext.trim().toLowerCase(Locale.ROOT);
         return textExtSet.contains(ext) || mediaExtSet.contains(ext) || ctrlExtSet.contains(ext);
     }
 
@@ -182,7 +183,7 @@ public class Classification {
 
     public static boolean isPictureMime(final String mimeType) {
         if (mimeType == null) return false;
-        return mimeType.toUpperCase().startsWith("IMAGE");
+        return mimeType.toUpperCase(Locale.ROOT).startsWith("IMAGE");
     }
 
     private static final Properties mimeTable = new Properties();
@@ -202,10 +203,10 @@ public class Classification {
         for (Entry<Object, Object> entry: mimeTable.entrySet()) {
             String ext = (String) entry.getKey();
             String mime = (String) entry.getValue();
-            if (mime.startsWith("text/")) textExtSet.add(ext.toLowerCase());
-            if (mime.startsWith("audio/")) audioExtSet.add(ext.toLowerCase());
-            if (mime.startsWith("video/")) videoExtSet.add(ext.toLowerCase());
-            if (mime.startsWith("application/")) appsExtSet.add(ext.toLowerCase());
+            if (mime.startsWith("text/")) textExtSet.add(ext.toLowerCase(Locale.ROOT));
+            if (mime.startsWith("audio/")) audioExtSet.add(ext.toLowerCase(Locale.ROOT));
+            if (mime.startsWith("video/")) videoExtSet.add(ext.toLowerCase(Locale.ROOT));
+            if (mime.startsWith("application/")) appsExtSet.add(ext.toLowerCase(Locale.ROOT));
         }
     }
 
@@ -214,11 +215,11 @@ public class Classification {
     }
 
     public static String ext2mime(final String ext) {
-        return ext == null ? "application/octet-stream" : mimeTable.getProperty(ext.toLowerCase(), "application/" + (ext == null || ext.length() == 0 ? "octet-stream" : ext));
+        return ext == null ? "application/octet-stream" : mimeTable.getProperty(ext.toLowerCase(Locale.ROOT), "application/" + (ext == null || ext.length() == 0 ? "octet-stream" : ext));
     }
 
     public static String ext2mime(final String ext, final String dfltMime) {
-        return ext == null ? dfltMime : mimeTable.getProperty(ext.toLowerCase(), dfltMime);
+        return ext == null ? dfltMime : mimeTable.getProperty(ext.toLowerCase(Locale.ROOT), dfltMime);
     }
 
     public static String url2mime(final MultiProtocolURL url, final String dfltMime) {
