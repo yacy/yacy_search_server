@@ -246,8 +246,8 @@
     	<pathelement location="${lib}/org.restlet.jar" />
     	<pathelement location="${lib}/langdetect.jar" />
         <pathelement location="${lib}/pdfbox-2.0.8.jar" />
-    	<pathelement location="${lib}/poi-3.16.jar" />
-    	<pathelement location="${lib}/poi-scratchpad-3.16.jar" />
+    	<pathelement location="${lib}/poi-3.17.jar" />
+    	<pathelement location="${lib}/poi-scratchpad-3.17.jar" />
         <pathelement location="${lib}/slf4j-api-1.7.24.jar" />
         <pathelement location="${lib}/slf4j-jdk14-1.7.24.jar" />
         <pathelement location="${lib}/solr-core-6.6.2.jar" />
