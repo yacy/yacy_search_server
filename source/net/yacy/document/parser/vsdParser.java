@@ -81,6 +81,7 @@ public class vsdParser extends AbstractParser implements Parser {
             String contents = "";
             SummaryInformation summary = null;
             try {
+            	// TODO : the VisioTextExtractor doesn't support Visio XML based formats such as .vdx or .vtx : handle this with a custom parser or with the relevant apache.poi component
                 final VisioTextExtractor extractor = new VisioTextExtractor(source);
             	contents = extractor.getText();
                 summary = extractor.getSummaryInformation();
