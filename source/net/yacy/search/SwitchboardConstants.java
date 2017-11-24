@@ -290,6 +290,12 @@ public final class SwitchboardConstants {
     /** Default maximum system load allowing remote Solr searches */
     public static final float REMOTESEARCH_MAXLOAD_SOLR_DEFAULT = 4.0f;
     
+    /** Key of the setting controlling whether https should be preferred for remote searches, when available on the target peer */
+    public static final String REMOTESEARCH_HTTPS_PREFERRED = "remotesearch.https.preferred";
+    
+    /** Default setting value controlling whether https should be preferred for remote searches, when available on the target peer */
+    public static final boolean REMOTESEARCH_HTTPS_PREFERRED_DEFAULT = false;
+    
 	/**
 	 * Setting key to configure whether responses from remote Solr instances
 	 * should be binary encoded :

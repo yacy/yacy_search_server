@@ -925,6 +925,8 @@ remotesearch.result.store=true
 remotesearch.result.store.maxsize=-1
 remotesearch.maxload.rwi=8.0
 remotesearch.maxload.solr=4.0
+# When available on the target peer, whether https should be preferred to perform remote search
+remotesearch.https.preferred = false
 
 # Control whether remote Solr instances responses should be binary encoded. Responses are transferred as XML when set to false. 
 remote.solr.binaryResponse.enabled=true

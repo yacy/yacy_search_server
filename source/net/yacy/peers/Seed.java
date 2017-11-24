@@ -756,10 +756,11 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     }
     
     /**
-     * generate a public address using a given ip. This combines the ip with the port and encloses the ip
+     * generate a public address using a given ip. This combines the ip with the http port and encloses the ip
      * with square brackets if the ip is of typeIPv6
      * @param ip
      * @return an address string which can be used as host:port part of an url (if no port avail returns just host)
+     * @ŧhrows RuntimeException when the ip parameter is null
      */
     public final String getPublicAddress(final String ip) {
         if (ip == null) throw new RuntimeException("ip == NULL"); // that should not happen in Peer-to-Peer mode (but can in Intranet mode)
@@ -775,6 +776,46 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         if (port == null || port.length() < 2 || port.length() > 5) {
             //just skip port if peer didn't report it..... may finally depart
             Network.log.severe("port not wellformed for peer" + this.getName() + ": " + port == null ? "null" : port);
+        } else {
+            sb.append(':');
+            sb.append(port);
+        }
+        return sb.toString();
+    }
+    
+    /**
+     * Generate a public URL using a given ip. This combines the ip with the http(s) port and encloses the ip
+     * with square brackets if the ip is of typeIPv6
+     * @param ip a host name or ip address
+     * @param preferHTTPS when true and https is available on this Seed, use it as the scheme part of the url 
+     * @return an URL string for the given peer ip
+     * @throws RuntimeException when the ip parameter is null
+     */
+    public final String getPublicURL(final String ip, final boolean preferHTTPS) {
+        if (ip == null) {
+        	throw new RuntimeException("ip == NULL"); // that should not happen in Peer-to-Peer mode (but can in Intranet mode)
+        }
+        final String scheme;
+        final String port;
+        if(preferHTTPS && getFlagSSLAvailable()) {
+        	scheme = "https://";
+        	port = this.dna.get(Seed.PORTSSL);
+        } else {
+        	scheme = "http://";
+        	port = this.dna.get(Seed.PORT);
+        }
+        final StringBuilder sb = new StringBuilder(scheme.length() + ip.length() + 8); // / = surplus for port
+        sb.append(scheme);
+        if (ip.indexOf(':') >= 0) {
+            if (!ip.startsWith("[")) sb.append('[');
+            sb.append(ip);
+            if (!ip.endsWith("]")) sb.append(']');
+        } else {
+            sb.append(ip);
+        }
+        if (port == null || port.length() < 2 || port.length() > 5) {
+            //just skip port if peer didn't report it..... may finally depart
+            Network.log.severe(preferHTTPS ? "https" : "http " + " port not wellformed for peer" + this.getName() + ": " + port == null ? "null" : port);
         } else {
             sb.append(':');
             sb.append(port);
