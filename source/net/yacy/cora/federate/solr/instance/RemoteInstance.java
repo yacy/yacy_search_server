@@ -306,12 +306,14 @@ public class RemoteInstance implements SolrInstance {
             s = new ConcurrentUpdateSolrClient(solrServerURL, this.client, 10, Runtime.getRuntime().availableProcessors());
         } else {
             ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url : " + this.solrurl + name);
-            s = new ConcurrentUpdateSolrClient(u.toString(), queueSizeByMemory(), Runtime.getRuntime().availableProcessors());	
+            ConcurrentUpdateSolrClient.Builder builder = new ConcurrentUpdateSolrClient.Builder(u.toString());
+            builder.withQueueSize(queueSizeByMemory());
+            builder.withThreadCount(Runtime.getRuntime().availableProcessors());
+            s = builder.build();
         }
         //s.setAllowCompression(true);
         s.setSoTimeout(this.timeout);
         //s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
-        s.setSoTimeout(this.timeout);
         this.server.put(name, s);
         return s;
     }
