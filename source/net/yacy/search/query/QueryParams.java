@@ -217,15 +217,8 @@ public final class QueryParams {
         }
         this.urlMask_isCatchall = this.urlMaskString.equals(catchall_pattern.toString());
         if (this.urlMask_isCatchall) {
-            String protocolfilter = modifier.protocol == null ? ".*" : modifier.protocol;
-            String defaulthostprefix = modifier.protocol == null ? "www" : modifier.protocol;
-            String hostfilter = modifier.sitehost == null && tld == null ? ".*" : modifier.sitehost == null ? ".*\\." + tld : modifier.sitehost.startsWith(defaulthostprefix + ".") ? "(" + defaulthostprefix + "\\.)?" + modifier.sitehost.substring(4) : "(" + defaulthostprefix + "\\.)?" + modifier.sitehost;
-            String filefilter = modifier.filetype == null ? ".*" : ".*" + modifier.filetype + ".*"; // TODO: should be ".ext" but while/comment above suggests not -> add filetype contrain pullOneFilteredFromRWI()
-            String filter = protocolfilter + "..." + hostfilter + "." + filefilter;
-            if (!filter.equals(".*....*..*")) {
-                Pattern r = Pattern.compile("(\\.|(\\.\\*))\\.\\*");
-                Matcher m;
-                while ((m = r.matcher(filter)).find()) filter = m.replaceAll(".*");
+            final String filter = QueryParams.buildURLFilter(modifier, tld);
+            if (!QueryParams.catchall_pattern.toString().equals(filter)) {
                 this.urlMaskString = filter;
                 this.urlMaskAutomaton = Automata.makeString(filter);
                 this.urlMask_isCatchall = false;
@@ -282,6 +275,43 @@ public final class QueryParams {
         this.standardFacetsMaxCount = FACETS_STANDARD_MAXCOUNT_DEFAULT;
         this.dateFacetMaxCount = FACETS_DATE_MAXCOUNT_DEFAULT;
     }
+
+	/**
+	 * @param modifier
+	 *            query modifier with eventual protocol, sitehost and filetype
+	 *            constraints. The modifier parameter itselft must not be null.
+	 * @param tld
+	 *            an eventual Top Level Domain name
+	 * @return an URL filter regular expression from the provided modifier and tld
+	 *         constraints, matching anything when there are no constraints at all.
+	 */
+	protected static String buildURLFilter(final QueryModifier modifier, final String tld) {
+		final String protocolfilter = modifier.protocol == null ? ".*" : modifier.protocol;
+		final String defaulthostprefix = modifier.protocol == null ? "www" : modifier.protocol;
+		final String hostfilter;
+		if(modifier.sitehost == null && tld == null) {
+			hostfilter = ".*";
+		} else if(modifier.sitehost == null) {
+			hostfilter = ".*\\." + tld;
+		} else if(modifier.sitehost.startsWith(defaulthostprefix + ".")){
+			hostfilter = "(" + defaulthostprefix + "\\.)?" + modifier.sitehost.substring(4);
+		} else {
+			hostfilter = "(" + defaulthostprefix + "\\.)?" + modifier.sitehost;
+		}
+		final String filefilter = modifier.filetype == null ? ".*" : ".*" + modifier.filetype + ".*"; // TODO: should be ".ext" but while/comment above suggests not -> add filetype contrain pullOneFilteredFromRWI()
+		String filter = protocolfilter + "..." + hostfilter + "." + filefilter;
+        if (!filter.equals(".*....*..*")) {
+        	/* Remove redundant sequences of catch all expressions */
+            Pattern r = Pattern.compile("(\\.|(\\.\\*))\\.\\*");
+            Matcher m;
+            while ((m = r.matcher(filter)).find()) {
+            	filter = m.replaceAll(".*");
+            }
+        } else {
+			filter = QueryParams.catchall_pattern.toString();
+		}
+		return filter;
+	}
 
     private double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
 
