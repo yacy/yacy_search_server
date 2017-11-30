@@ -287,7 +287,7 @@ public final class QueryParams {
 	 */
 	protected static String buildURLFilter(final QueryModifier modifier, final String tld) {
 		final String protocolfilter = modifier.protocol == null ? ".*" : modifier.protocol;
-		final String defaulthostprefix = modifier.protocol == null ? "www" : modifier.protocol;
+		final String defaulthostprefix = "www";
 		final String hostfilter;
 		if(modifier.sitehost == null && tld == null) {
 			hostfilter = ".*";
