@@ -139,6 +139,7 @@ public class MultiProtocolURLTest {
             
             new String[]{"http://www.yacy.net?data=1/2/3", "www.yacy.net"},
             new String[]{"http://www.yacy.net?url=http://test.com", "www.yacy.net"},
+            new String[]{"http://www.yacy.net#fragment", "www.yacy.net"},
             /* Punycode encoded internationalized domain name : Algeria TLD */
             new String[]{"http://xn--ggbdmbaav3cjl1c9heugfv.xn--lgbbat1ad8j/", "xn--ggbdmbaav3cjl1c9heugfv.xn--lgbbat1ad8j"},
             /* Internationalized domain name : Algeria TLD */

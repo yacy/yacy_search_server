@@ -228,6 +228,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     q = url.indexOf("?", p + 3);
                 }
             }
+            if (q < 0) { // check for www.test.com#fragment
+                q = url.indexOf("#", p + 3);
+            } 
             int r;
             if (q < 0) {
                 if ((r = url.indexOf('@', p + 3)) < 0) {
