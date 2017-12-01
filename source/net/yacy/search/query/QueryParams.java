@@ -651,7 +651,8 @@ public final class QueryParams {
         }
         
         if (this.tld != null) {
-            fqs.add(CollectionSchema.host_dnc_s.getSolrFieldName() + ":\"" + this.tld + '\"');
+        	/* Use the host_s field which is mandatory, rather than the optional host_dnc_s field */
+            fqs.add(CollectionSchema.host_s.getSolrFieldName() + ":*." + this.tld);
         }
         
         if (this.modifier.filetype != null) {
