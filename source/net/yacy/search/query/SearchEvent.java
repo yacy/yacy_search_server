@@ -973,8 +973,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                     continue pollloop;
                 }
             	
-                if ( !this.query.urlMask_isCatchall ) {
-                    // check url mask
+                if ( !this.query.urlMask_isCatchall && this.query.urlMaskPattern != null) {
+                    // check url mask, only when not redundant with query modifier and tld constraints
                     if (!iEntry.matches(this.query.urlMaskPattern)) {
                         if (log.isFine()) log.fine("dropped Node: url mask does not match");
                         updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
@@ -1407,7 +1407,9 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 continue;
             }
 
-            if (!this.query.urlMask_isCatchall && !page.matches(this.query.urlMaskPattern)) {
+			if (!this.query.urlMask_isCatchall && this.query.urlMaskPattern != null
+					&& !page.matches(this.query.urlMaskPattern)) {
+            	// check url mask, only when not redundant with query modifier and tld constraints
                 if (log.isFine()) log.fine("dropped RWI: no match with urlMask");
                 decrementCounts(page.word());
                 continue;

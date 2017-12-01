@@ -120,12 +120,17 @@ public final class QueryParams {
     private final QueryGoal queryGoal;
     public int itemsPerPage;
     public int offset;
+    
+    /** The URL mask pattern compiled from the urlMasString. 
+     * Null when the urlMaskString is not user provided but generated from the query modifiers */
     public Pattern urlMaskPattern;
     public Automaton urlMaskAutomaton;
     public String urlMaskString;
 
     public final Pattern prefer;
     public final String tld, inlink;
+    
+    /** true when the urlMasString is just a catch all pattern such as ".*" */
     boolean urlMask_isCatchall;
     public final Classification.ContentDomain contentdom;
     public final String targetlang;
@@ -224,7 +229,9 @@ public final class QueryParams {
                 this.urlMaskString = filter;
                 this.urlMaskAutomaton = Automata.makeString(filter);
                 this.urlMask_isCatchall = false;
-                this.urlMaskPattern = Pattern.compile(filter);
+                /* We let here the urlMaskPattern null :
+                 * final URL match checking will be made with the more accurate matchesURL function */
+                this.urlMaskPattern = null;
             }
         }
         this.tld = tld;
@@ -427,6 +434,10 @@ public final class QueryParams {
     }
     
 	/**
+	 * Check wheter the given URL matches the eventual modifier and top-level domain
+	 * constraints. Should be preferred as more accurate than the url mask pattern generated with
+	 * {@link #buildApproximateURLFilter(QueryModifier, String)}.
+	 * 
 	 * @param modifier
 	 *            the query modifier with eventual constraints on protocoln, host
 	 *            name or file extension
@@ -727,8 +738,8 @@ public final class QueryParams {
             fqs.add(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName() + ":\"" + this.inlink + '\"');
         }
         
-        if (!this.urlMask_isCatchall) {
-            // add a filter query on urls
+        if (!this.urlMask_isCatchall && this.urlMaskPattern != null) {
+            // add a filter query on urls only if user custom and not generated from other modifiers
             fqs.add(CollectionSchema.sku.getSolrFieldName() + ":/" + this.urlMaskString + "/");
         }
         
