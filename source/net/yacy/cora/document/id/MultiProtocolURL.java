@@ -912,7 +912,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     /**
-     * @return the host part of this URL, Punycode encoded for Internationalized Domain Names
+     * @return the host part of this URL, Punycode encoded for Internationalized Domain Names. Can be null, for example for file URLs such as "file:///path/file.ext"
      */
     public String getHost() {
         return this.host;
@@ -926,6 +926,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return orga;
     }
 
+    /**
+     * @return the top-level domain name part of this url host name, or the empty string.
+     */
     public String getTLD() {
         if (this.host == null) return "";
         int p = this.host.lastIndexOf('.');

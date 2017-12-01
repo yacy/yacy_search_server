@@ -963,6 +963,16 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         try {
             pollloop: for (URIMetadataNode iEntry: nodeList) {
             	
+                // check url related eventual constraints (protocol, tld, sitehost, and filetype)
+            	final String matchingResult = QueryParams.matchesURL(this.query.modifier, this.query.tld, iEntry.url());
+                if (!matchingResult.isEmpty()) {
+                    if (log.isFine()) {
+                    	log.fine("dropped Node: " + matchingResult);
+                    }
+                    updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
+                    continue pollloop;
+                }
+            	
                 if ( !this.query.urlMask_isCatchall ) {
                     // check url mask
                     if (!iEntry.matches(this.query.urlMaskPattern)) {
@@ -1016,13 +1026,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 if ( this.query.modifier.sitehash == null ) {
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
                         if (log.isFine()) log.fine("dropped Node: siteexclude");
-                        updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
-                        continue pollloop;
-                    }
-                } else {
-                    // filter out all domains that do not match with the site constraint
-                    if (iEntry.url().getHost().indexOf(this.query.modifier.sitehost) < 0) {
-                        if (log.isFine()) log.fine("dropped Node: sitehost");
                         updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                         continue pollloop;
                     }
@@ -1393,6 +1396,16 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         // returns from the current RWI list the best URL entry and removes this entry from the list
         URIMetadataNode page;
         mainloop: while ((page = pullOneRWI(skipDoubleDom)) != null) {
+        	
+            // check url related eventual constraints (protocol, tld, sitehost, and filetype)
+        	final String matchingResult = QueryParams.matchesURL(this.query.modifier, this.query.tld, page.url());
+            if (!matchingResult.isEmpty()) {
+                if (log.isFine()) {
+                	log.fine("dropped RWI: no match on " + matchingResult);
+                }
+                decrementCounts(page.word());
+                continue;
+            }
 
             if (!this.query.urlMask_isCatchall && !page.matches(this.query.urlMaskPattern)) {
                 if (log.isFine()) log.fine("dropped RWI: no match with urlMask");
@@ -1427,14 +1440,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             }
 
             // filter query modifiers variables (these are host, filetype, protocol, language, author, collection, dates_in_content(on,from,to,timezone) )
-            // while ( protocol, host, filetype ) currently maybe incorporated in (this.query.urlMaskPattern)  queryparam
-
-            // check modifier constraint filetype (using fileextension)
-            if (this.query.modifier.filetype != null && !this.query.modifier.filetype.equals(ext)) {
-                if (log.isFine()) log.fine("dropped RWI: file type constraint = " + this.query.modifier.filetype);
-                decrementCounts(page.word());
-                continue;
-            }
 
             /* check again modifier constraint (language) with the language in the full metadata, 
              * that may differ from the one in the reverse word reference which is already checked in addRWIs()*/
@@ -1480,12 +1485,12 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
             // content control
             if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false)) {
-		FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
-		if (f != null && !f.isListed(page.url(), null)) {
+            	FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
+            	if (f != null && !f.isListed(page.url(), null)) {
                     if (log.isFine()) log.fine("dropped RWI: url is blacklisted in contentcontrol");
-	            decrementCounts(page.word());
+                    decrementCounts(page.word());
                     continue;
-		}
+            	}
             }
 
             final String pageurl = page.url().toNormalform(true);

@@ -46,6 +46,7 @@ import java.util.regex.PatternSyntaxException;
 
 import org.apache.lucene.util.automaton.Automata;
 import org.apache.lucene.util.automaton.Automaton;
+import org.apache.lucene.util.automaton.RegExp;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.common.params.DisMaxParams;
@@ -55,6 +56,7 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
@@ -217,7 +219,7 @@ public final class QueryParams {
         }
         this.urlMask_isCatchall = this.urlMaskString.equals(catchall_pattern.toString());
         if (this.urlMask_isCatchall) {
-            final String filter = QueryParams.buildURLFilter(modifier, tld);
+            final String filter = QueryParams.buildApproximateURLFilter(modifier, tld);
             if (!QueryParams.catchall_pattern.toString().equals(filter)) {
                 this.urlMaskString = filter;
                 this.urlMaskAutomaton = Automata.makeString(filter);
@@ -277,6 +279,13 @@ public final class QueryParams {
     }
 
 	/**
+	 * Generate an URL filter from the query modifier and eventual tld, usable as a
+	 * first approximation for filtering, and compatible with the yacy/search
+	 * API.<br/>
+	 * For truly accurate filtering, checking constraints against parsed URLs in 
+	 * MultiprotocolURL instances is easier and more reliable than building a complex regular
+	 * expression that must be both compatible with the JDK {@link Pattern} and with Lucene {@link RegExp}.
+	 * 
 	 * @param modifier
 	 *            query modifier with eventual protocol, sitehost and filetype
 	 *            constraints. The modifier parameter itselft must not be null.
@@ -285,7 +294,7 @@ public final class QueryParams {
 	 * @return an URL filter regular expression from the provided modifier and tld
 	 *         constraints, matching anything when there are no constraints at all.
 	 */
-	protected static String buildURLFilter(final QueryModifier modifier, final String tld) {
+	protected static String buildApproximateURLFilter(final QueryModifier modifier, final String tld) {
 		final String protocolfilter = modifier.protocol == null ? ".*" : modifier.protocol;
 		final String defaulthostprefix = "www";
 		final String hostfilter;
@@ -416,6 +425,61 @@ public final class QueryParams {
         sb.append("]");
         return sb.toString();
     }
+    
+	/**
+	 * @param modifier
+	 *            the query modifier with eventual constraints on protocoln, host
+	 *            name or file extension
+	 * @param tld
+	 *            an eventual top-level domain name to filter on
+	 * @param url
+	 *            the url to check
+	 * @return the constraint that did not match ("url" when url is null,
+	 *         "protocol", "sitehost", "tld", or "filetype"), or the empty string
+	 *         when the url matches
+	 */
+	public static String matchesURL(final QueryModifier modifier, final String tld, final MultiProtocolURL url) {
+		if (url == null) {
+			return "url";
+		}
+		if (modifier != null) {
+			if (modifier.protocol != null) {
+				if (!modifier.protocol.equalsIgnoreCase(url.getProtocol())) {
+					return "protocol";
+				}
+			}
+			if (modifier.sitehost != null) {
+				/*
+				 * consider to search for hosts with 'www'-prefix, if not already part of the
+				 * host name
+				 */
+				final String wwwPrefix = "www.";
+				final String host;
+				final String hostWithWwwPrefix;
+				if (modifier.sitehost.startsWith(wwwPrefix)) {
+					hostWithWwwPrefix = modifier.sitehost;
+					host = modifier.sitehost.substring(wwwPrefix.length());
+				} else {
+					hostWithWwwPrefix = wwwPrefix + modifier.sitehost;
+					host = modifier.sitehost;
+				}
+				if (!host.equalsIgnoreCase(url.getHost()) && !hostWithWwwPrefix.equals(url.getHost())) {
+					return "sitehost";
+				}
+			}
+			if (tld != null) {
+				if (!tld.equalsIgnoreCase(url.getTLD())) {
+					return "tld";
+				}
+			}
+			if (modifier.filetype != null) {
+				if (!modifier.filetype.equalsIgnoreCase(MultiProtocolURL.getFileExtension(url.getFileName()))) {
+					return "filetype";
+				}
+			}
+		}
+		return "";
+	}
 
     /**
      * check if the given text matches with the query
