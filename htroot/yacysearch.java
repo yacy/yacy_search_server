@@ -29,6 +29,7 @@
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.IDN;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -497,18 +499,34 @@ public class yacysearch {
                 modifier.add("/heuristic");
             }
             
-            final int tldp = querystring.indexOf("tld:", 0);
+            final String tldModifierPrefix = "tld:";
+            final int tldp = querystring.indexOf(tldModifierPrefix, 0);
             if (tldp >= 0) {
                 int ftb = querystring.indexOf(' ', tldp);
-                if (ftb == -1) ftb = querystring.length();
-                tld = querystring.substring(tldp + 4, ftb);
-                querystring = querystring.replace("tld:" + tld, "");
-                modifier.add("tld:" + tld);
+                if (ftb == -1) {
+                	ftb = querystring.length();
+                }
+                tld = querystring.substring(tldp + tldModifierPrefix.length(), ftb);
+                querystring = querystring.replace(tldModifierPrefix + tld, "");
+                modifier.add(tldModifierPrefix + tld);
                 while ( tld.length() > 0 && tld.charAt(0) == '.' ) {
                     tld = tld.substring(1);
                 }
-                if (tld.length() == 0) tld = null;
+                if (tld.length() == 0) {
+                	tld = null;
+                } else {
+                	try {
+                		/* Convert to the same lower case ASCII Compatible Encoding that is used in normalized URLs */
+                		tld = IDN.toASCII(tld, 0);
+                	} catch(final IllegalArgumentException e){
+                		ConcurrentLog.warn("LOCAL_SEARCH", "Failed to convert tld modifier value " + tld + "to ASCII Compatible Encoding (ACE)", e);
+                	}
+                	
+                    /* Domain name in an URL is case insensitive : convert now modifier to lower case for further processing over normalized URLs */
+                    tld = tld.toLowerCase(Locale.ROOT);
+                }
             }
+            
             if (urlmask == null || urlmask.isEmpty()) urlmask = ".*"; //if no urlmask was given
 
             // read the language from the language-restrict option 'lr'
