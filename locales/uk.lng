@@ -2172,7 +2172,7 @@ Memory Settings==Налаштування пам’яті
 Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Пам’ять, утримувана для <abbr title="Java Virtual Machine">JVM</abbr>
 "Set"=="Виставити"
 Resource Observer==Спостерігач за ресурсами
-reset state==відновити стан
+Reset state==відновити стан
 > free space==> вільної пам’яті
 disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Вимкнути отримання <abbr title="Distributed Hash Table">DHT</abbr> при менше
 <abbr title="Random Access Memory">RAM</abbr>==Основна пам’ять

@@ -2433,7 +2433,7 @@ Memory Settings==Speicher Einstellungen
 Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Für <abbr title="Java Virtual Machine">JVM</abbr> reservierter Speicher
 "Set"=="Setzen"
 Resource Observer==Ressourcen Beobachter
-reset state==Status zurücksetzen
+Reset state==Status zurücksetzen
 > free space==> freiem Speicher
 disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Deaktivere eingehende <abbr title="Distributed Hash Table">DHT</abbr> Transfers unter
 <abbr title="Random Access Memory">RAM</abbr>==Arbeitsspeicher

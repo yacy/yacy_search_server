@@ -1482,7 +1482,8 @@ Resource Observer==Contrôle des ressources
 Memory state==État de la mémoire
 >proper<==>sain<
 >exhausted<==>espace libre insuffisant<
-reset state==réinitialiser l'état
+Reset state==Réinitialiser l'état
+Manually reset to 'proper' state==Réinitialiser manuellement à l'état 'sain'
 Enough memory is available for proper operation.==Il y a suffisamment de mémoire à disposition pour un fonctionnement correct.
 Within the last eleven minutes, at least four operations have tried to request memory that would have reduced free space within the minimum required.==Durant les onze dernières minutes, au moins quatre opérations ont tenté d'obtenir une quantité de mémoire qui aurait réduit l'espace libre en-deçà du minimum requis.
 Minimum required==Minimum requis

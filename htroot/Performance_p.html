@@ -126,8 +126,9 @@
         			<span class="info">
         				<img src="env/grafics/i16.gif" width="16" height="16" alt="Exhausted state info"/>
         				<span class="infobox" id="exhaustedStateInfo">Within the last eleven minutes, at least four operations have tried to request memory that would have reduced free space within the minimum required.</span>
-        			</span>#(/observerTrigger)#
-        			<a href="?resetObserver=">[reset state]</a>
+        			</span>
+        			<input type="submit" class="btn btn-warning" name="resetObserver" value="Reset state" title="Manually reset to 'proper' state"/>
+        			#(/observerTrigger)#
         		</div>
           		<div class="form-group">
           			<label for="memoryAcceptDHT">Minimum required</label>

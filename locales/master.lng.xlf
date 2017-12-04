@@ -6692,7 +6692,10 @@
        <source>&gt;exhausted&lt;</source>
     </trans-unit>
     <trans-unit id="7ade7e80" xml:space="preserve" approved="no" translate="yes">
-       <source>reset state</source>
+       <source>Reset state</source>
+    </trans-unit>
+    <trans-unit id="6d08abc8" xml:space="preserve" approved="no" translate="yes">
+       <source>Manually reset to 'proper' state</source>
     </trans-unit>
     <trans-unit id="a5c476c2" xml:space="preserve" approved="no" translate="yes">
        <source>Enough memory is available for proper operation.</source>
