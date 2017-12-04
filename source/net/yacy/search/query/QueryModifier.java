@@ -29,6 +29,8 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.DateDetection;
@@ -250,6 +252,14 @@ public class QueryModifier {
             while ( sitehost.endsWith(".") ) {
                 this.sitehost = this.sitehost.substring(0, this.sitehost.length() - 1);
             }
+            
+            try {
+            	/* Internationalized domain names support : convert to the same ASCII Compatible Encoding (ACE) representation that is used in normalized URLs */
+				this.sitehost = MultiProtocolURL.toPunycode(this.sitehost);
+			} catch (final PunycodeException e1) {
+                ConcurrentLog.logException(e1);
+			}
+            
             /* Domain name in an URL is case insensitive : convert now modifier to lower case for further processing over normalized URLs */
             this.sitehost = this.sitehost.toLowerCase(Locale.ROOT);
             
