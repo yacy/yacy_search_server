@@ -189,7 +189,7 @@
         <pathelement location="${lib}/guava-18.0.jar" />
         <pathelement location="${lib}/htmllexer.jar" />
         <pathelement location="${lib}/httpclient-4.5.3.jar" />
-        <pathelement location="${lib}/httpcore-4.4.6.jar" />
+        <pathelement location="${lib}/httpcore-4.4.8.jar" />
         <pathelement location="${lib}/httpmime-4.5.3.jar" />
         <pathelement location="${lib}/icu4j-60.1.jar" />
     	<pathelement location="${lib}/imageio-bmp-3.3.2.jar" />
