@@ -36,7 +36,9 @@ import net.yacy.kelondro.util.ISO639;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 
-
+/**
+ * Handle search query modifiers 
+ */
 public class QueryModifier {
 
     private final StringBuilder modifier;
@@ -103,28 +105,7 @@ public class QueryModifier {
         querystring = filetypeParser(querystring, "filetype:");
         
         // parse site
-        final int sp = querystring.indexOf("site:", 0);
-        if (sp >= 0) {
-            int ftb = querystring.indexOf(' ', sp);
-            if ( ftb == -1 ) {
-                ftb = querystring.length();
-            }
-            this.sitehost = querystring.substring(sp + 5, ftb);
-            querystring = querystring.replace("site:" + this.sitehost, "");
-            while ( this.sitehost.length() > 0 && this.sitehost.charAt(0) == '.' ) {
-                this.sitehost = this.sitehost.substring(1);
-            }
-            while ( sitehost.endsWith(".") ) {
-                this.sitehost = this.sitehost.substring(0, this.sitehost.length() - 1);
-            }
-            try {
-                this.sitehash = DigestURL.hosthash(this.sitehost, this.sitehost.startsWith("ftp.") ? 21 : 80);
-            } catch (MalformedURLException e) {
-                this.sitehash = "";
-                ConcurrentLog.logException(e);
-            }
-            add("site:" + this.sitehost);
-        }
+        querystring = parseSiteModifier(querystring);
         
         // parse author
         final int authori = querystring.indexOf("author:", 0);
@@ -243,6 +224,41 @@ public class QueryModifier {
         }
         return querystring;
     }
+    
+	/**
+	 * Parses the query string for any eventual site modifier (site:), and fill the
+	 * {@link #sitehost} and {@link #sitehash} attributes accordingly.
+	 * 
+	 * @param querystring
+	 *            the query string. Must not be null.
+	 * @return the query string with site operator removed
+	 */
+	protected String parseSiteModifier(String querystring) {
+		final String modifierPrefix = "site:";
+		final int sp = querystring.indexOf(modifierPrefix, 0);
+        if (sp >= 0) {
+            int ftb = querystring.indexOf(' ', sp);
+            if ( ftb == -1 ) {
+                ftb = querystring.length();
+            }
+            this.sitehost = querystring.substring(sp + modifierPrefix.length(), ftb);
+            querystring = querystring.replace(modifierPrefix + this.sitehost, "");
+            while ( this.sitehost.length() > 0 && this.sitehost.charAt(0) == '.' ) {
+                this.sitehost = this.sitehost.substring(1);
+            }
+            while ( sitehost.endsWith(".") ) {
+                this.sitehost = this.sitehost.substring(0, this.sitehost.length() - 1);
+            }
+            try {
+                this.sitehash = DigestURL.hosthash(this.sitehost, this.sitehost.startsWith("ftp.") ? 21 : 80);
+            } catch (MalformedURLException e) {
+                this.sitehash = "";
+                ConcurrentLog.logException(e);
+            }
+            add(modifierPrefix + this.sitehost);
+        }
+		return querystring;
+	}
     
     public void add(String m) {
         if (modifier.length() > 0 && modifier.charAt(modifier.length() - 1) != ' ' && m != null && m.length() > 0) modifier.append(' ');
