@@ -226,8 +226,9 @@ public class QueryModifier {
     }
     
 	/**
-	 * Parses the query string for any eventual site modifier (site:), and fill the
-	 * {@link #sitehost} and {@link #sitehash} attributes accordingly.
+	 * Parses the query string for any eventual site modifier (site:), adjust it to
+	 * lower case, and fill the {@link #sitehost} and {@link #sitehash} attributes
+	 * accordingly.
 	 * 
 	 * @param querystring
 	 *            the query string. Must not be null.
@@ -249,6 +250,9 @@ public class QueryModifier {
             while ( sitehost.endsWith(".") ) {
                 this.sitehost = this.sitehost.substring(0, this.sitehost.length() - 1);
             }
+            /* Domain name in an URL is case insensitive : convert now modifier to lower case for further processing over normalized URLs */
+            this.sitehost = this.sitehost.toLowerCase(Locale.ROOT);
+            
             try {
                 this.sitehash = DigestURL.hosthash(this.sitehost, this.sitehost.startsWith("ftp.") ? 21 : 80);
             } catch (MalformedURLException e) {
