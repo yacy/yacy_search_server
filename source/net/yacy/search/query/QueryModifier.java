@@ -214,7 +214,7 @@ public class QueryModifier {
             if ( ftb < 0 ) ftb = querystring.length();
             String tmpqueryparameter = querystring.substring(ftp + filetypePrefix.length(), ftb);
             querystring = querystring.replace(filetypePrefix + tmpqueryparameter, ""); // replace prefix:Text  as found
-            filetype = tmpqueryparameter.toLowerCase(); // file extension are always compared lowercase, can be converted here for further processing
+            filetype = tmpqueryparameter.toLowerCase(Locale.ROOT); // file extension are always compared lowercase, can be converted here for further processing
             while ( !filetype.isEmpty() && filetype.charAt(0) == '.' ) {
                 filetype = filetype.substring(1);
             }
