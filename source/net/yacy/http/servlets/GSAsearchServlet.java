@@ -42,6 +42,7 @@ import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
@@ -102,7 +103,7 @@ public class GSAsearchServlet extends HttpServlet {
     private void respond(final HttpServletRequest header, final Switchboard sb, final OutputStream out) {
 
         // remember the peer contact for peer statistics
-        String clientip = header.getRemoteAddr();
+        String clientip = RequestHeader.client(header);
         if (clientip == null) clientip = "<unknown>"; // read an artificial header addendum
         String userAgent = header.getHeader(HeaderFramework.USER_AGENT);
         if (userAgent == null) userAgent = "<unknown>";

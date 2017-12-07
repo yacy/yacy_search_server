@@ -725,9 +725,18 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     @Override
     public String getRemoteHost() {
         if (_request != null) {
-            return _request.getRemoteHost();
+            return host(_request);
         }
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    public static String host(final ServletRequest request) {
+        String clientHost = request.getRemoteHost();
+        if (request instanceof HttpServletRequest) {
+        	String XRealIP = ((HttpServletRequest) request).getHeader(X_Real_IP);
+        	if (XRealIP != null && XRealIP.length() > 0) clientHost = XRealIP; // get IP through nginx config "proxy_set_header X-Real-IP $remote_addr;"
+        }
+		return clientHost;
     }
 
     @Override

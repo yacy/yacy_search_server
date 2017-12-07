@@ -102,7 +102,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
             return;
         }
         
-        final String remoteHost = req.getRemoteHost();
+        final String remoteHost = req.getRemoteAddr();
         if (!Domains.isThisHostIP(remoteHost)) {
             if (!proxyippatternmatch(remoteHost)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,

@@ -208,8 +208,12 @@ public class yacysearchitem {
                 	prop.putXML("content_image_url", faviconURL.toNormalform(true));
             	}
             } else {
-            	prop.put("content_image", 1);
-            	prop.putXML("content_image_url", result.imageURL());
+            	try {
+            		prop.putXML("content_image_url", result.imageURL());
+            		prop.put("content_image", 1);
+            	} catch (UnsupportedOperationException e) {
+                	prop.put("content_image", 0);
+            	}
             }
             
             prop.put("content_urlhash", urlhash);
