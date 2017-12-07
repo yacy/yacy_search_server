@@ -20,6 +20,9 @@
         <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
         <input type="hidden" name="nav" value="all" />
+    	#(authorized)#::
+  		<input type="hidden" name="auth" id="auth" value=""/>
+  		#(/authorized)#
       </form>
     </div>
 	<script type="text/javascript">
@@ -116,6 +119,9 @@
         </li>
         <li id="header_administration">
           <form action="index.html" method="get">
+    		#(authorized)#::
+  				<input type="hidden" name="auth" id="auth" value=""/>
+  			#(/authorized)#
             <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary" title="Search Interface">
             	<span class="glyphicon glyphicon-search"></span>
             	<span class="hidden-sm hidden-md"> Search Interface &raquo;</span>

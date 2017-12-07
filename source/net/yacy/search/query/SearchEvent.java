@@ -30,6 +30,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -42,11 +43,16 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
+import org.apache.solr.common.SolrDocument;
+
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
@@ -58,10 +64,10 @@ import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.sorting.ClusteredScoreMap;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.sorting.ScoreMapUpdatesListener;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
@@ -89,9 +95,9 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.RemoteSearch;
 import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
-import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -104,9 +110,11 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.search.snippet.TextSnippet.ResultClass;
 
-import org.apache.solr.common.SolrDocument;
-
-public final class SearchEvent {
+public final class SearchEvent implements ScoreMapUpdatesListener {
+	
+	/** Supported protocols to be displayed in the protocol navigator.
+	 * (Using here a single String constant is faster than a unmodifiable Set instance) */
+	private static final String PROTOCOL_NAVIGATOR_SUPPORTED_VALUES = "http,https,smb,ftp,file";
 
     private static final int max_results_rwi = 3000;
     private static final int max_results_node = 150;
@@ -124,7 +132,9 @@ public final class SearchEvent {
     public final static ConcurrentLog log = new ConcurrentLog("SEARCH");
 
     public static final int SNIPPET_MAX_LENGTH = 220;
-    private static final int MAX_TOPWORDS = 12; // default count of words for topicnavigagtor
+    
+    /** Default count of words for topicnavigagtor */
+    private static final int MAX_TOPWORDS = 12;
 
     private long eventTime;
     public QueryParams query;
@@ -141,64 +151,150 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     public Thread rwiProcess;
     public Thread localsolrsearch;
+    
     /** Offset of the next local Solr index request
      * Example : last local request with offset=10 and itemsPerPage=20, sets this attribute to 30. */
     private int localsolroffset;
-    private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences; // counter for referenced that had been sorted out for other reasons
-    public final ScoreMap<String> locationNavigator; // a counter for the appearance of location coordinates
-    public final ScoreMap<String> protocolNavigator; // a counter for protocol types
-    public final ScoreMap<String> dateNavigator; // a counter for file types
-    public final ScoreMap<String> languageNavigator; // a counter for appearance of languages
-    public final Map<String, ScoreMap<String>> vocabularyNavigator; // counters for Vocabularies; key is metatag.getVocabularyName()
-    private final int topicNavigatorCount; // if 0 no topicNavigator, holds expected number of terms for the topicNavigator
-    // map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms)
-    public final Map<String, Navigator> navigatorPlugins; // map of active search navigators key=internal navigator name
+    
+    /** counter for referenced that had been sorted out for other reasons */
+    private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences;
+
+    /** a counter for the appearance of location coordinates .*/
+    public final ScoreMap<String> locationNavigator;
+    
+    /** a counter for protocol types */
+    public final ScoreMap<String> protocolNavigator;
+    
+    /** a counter for file types */
+    public final ConcurrentScoreMap<String> dateNavigator;
+    
+    /** a counter for appearance of languages */
+    public final ScoreMap<String> languageNavigator;
+    
+    /** counters for Vocabularies; key is metatag.getVocabularyName() */
+    public final Map<String, ScoreMap<String>> vocabularyNavigator;
+    
+    /** if 0 no topicNavigator, holds expected number of terms for the topicNavigator */
+    private final int topicNavigatorCount;
+    
+    /** map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms) */
+    public final Map<String, Navigator> navigatorPlugins;
+    
+	/** Holds the total number of successful write operations performed on all the active navigators since their initialization. */
+	private final AtomicLong navGeneration = new AtomicLong();
+    
     private final LoaderDispatcher                        loader;
-    private final HandleSet                               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    
+    /** a set of word hashes that are used to match with the snippets */
+    private final HandleSet                               snippetFetchWordHashes;
     private final boolean                                 deleteIfSnippetFail;
     private long                                          urlRetrievalAllTime;
     private long                                          snippetComputationAllTime;
     private ConcurrentHashMap<String, LinkedHashSet<String>> snippets;
     private final boolean remote;
-    public final boolean addResultsToLocalIndex; // add received results to local index (defult=true)
+    
+    /** add received results to local index (defult=true) */
+    public final boolean addResultsToLocalIndex;
+    
     /** Maximum size allowed (in kbytes) for a remote document result to be stored to local index */
     private long remoteStoredDocMaxSize;
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
-    private final ScoreMap<String> ref; // reference score computation for the commonSense heuristic
+    
+    /** reference score computation for the commonSense heuristic */
+    private final ScoreMap<String> ref;
     private final long maxtime;
-    private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
-    private final int[] flagcount; // flag counter
+    
+    /** key = domhash (6 bytes); value = like stack */
+    private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache;
+    
+    /** flag counter */
+    private final int[] flagcount;
     private final AtomicInteger feedersAlive, feedersTerminated, snippetFetchAlive;
     private boolean addRunning;
     private final AtomicInteger receivedRemoteReferences;
     private final ReferenceOrder order;
-    private final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
-    private final Map<String, String> taggingPredicates; // a map from tagging vocabulary names to tagging predicate uris
-    private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack; // thats the bag where the RWI search process writes to
-    private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack; // thats the bag where the solr results are written to
-    private final WeakPriorityBlockingQueue<URIMetadataNode>  resultList; // thats the result list where the actual search result is waiting to be displayed
-    private final boolean pollImmediately; // if this is true, then every entry in result List is polled immediately to prevent a re-ranking in the resultList. This is usefull if there is only one index source.
+    
+    /** map for double-check; String/Long relation, addresses ranking number (backreference for deletion) */
+    private final HandleSet urlhashes;
+    
+    /** a map from tagging vocabulary names to tagging predicate uris */
+    private final Map<String, String> taggingPredicates;
+    
+    /** thats the bag where the RWI search process writes to. Contains both references from both local and remote RWIs. */
+    private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack;
+    
+    /** thats the bag where the solr results are written to */
+    private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
+    
+    /** thats the result list where the actual search result is waiting to be displayed */
+    private final WeakPriorityBlockingQueue<URIMetadataNode>  resultList;
+    
+    /** if this is true, then every entry in result List is polled immediately to prevent a re-ranking in the resultList. This is usefull if there is only one index source. */
+    private final boolean pollImmediately;
     public  final boolean excludeintext_image;
     
     // the following values are filled during the search process as statistics for the search
-    public final AtomicInteger local_rwi_available;  // the number of hits generated/ranked by the local search in rwi index
-    public final AtomicInteger local_rwi_stored;     // the number of existing hits by the local search in rwi index
-    public final AtomicInteger remote_rwi_available; // the number of hits imported from remote peers (rwi/solr mixed)
-    public final AtomicInteger remote_rwi_stored;    // the number of existing hits at remote site
-    public final AtomicInteger remote_rwi_peerCount; // the number of peers which contributed to the remote search result
-    public final AtomicInteger local_solr_available; // the number of hits generated/ranked by the local search in solr
-    public final AtomicInteger local_solr_stored;    // the number of existing hits by the local search in solr
-    public final AtomicInteger remote_solr_available;// the number of hits imported from remote peers (rwi/solr mixed)
-    public final AtomicInteger remote_solr_stored;   // the number of existing hits at remote site
-    public final AtomicInteger remote_solr_peerCount;// the number of peers which contributed to the remote search result
+    // In the next comments "filtering" is doubles checking and applying eventual search query constraints/modifiers
     
+    /** the number of hits generated/ranked by the local search in rwi index, after filtering */
+    public final AtomicInteger local_rwi_available;
+    
+    /** the number of existing hits by the local search in rwi index, before any supplementary filtering */
+    public final AtomicInteger local_rwi_stored;
+    
+    /** the number of hits imported from remote peers (rwi/solr mixed + eventual site heuristics), after filtering */
+    public final AtomicInteger remote_rwi_available;
+    
+    /** the number of existing hits at remote sites, before any filtering */
+    public final AtomicInteger remote_rwi_stored;
+    
+    /** the number of peers which contributed to the remote search result */
+    public final AtomicInteger remote_rwi_peerCount;
+    
+    /** The number of results evicted from local solr results after filtering up to the current query offset */
+    public final AtomicInteger local_solr_evicted;
+    
+    /** the total number of existing hits by the local search in solr, before any supplementary filtering */
+    public final AtomicInteger local_solr_stored;
+    
+    /** the number of hits imported from remote peers (rwi/solr mixed), after filtering */
+    public final AtomicInteger remote_solr_available;
+    
+    /** the number of existing hits at remote site (rwi/solr mixed)*/
+    public final AtomicInteger remote_solr_stored;
+    
+    /** the number of peers which contributed to the remote search result */
+    public final AtomicInteger remote_solr_peerCount;
+    
+    /** Ensure only one {@link #resortCachedResults()} operation to be performed on this search event */
+    public final Semaphore resortCacheAllowed;
+
+	/**
+	 * Called when a search navigator has been updated : update the overall
+	 * navGeneration counter to help then tracking changes and eventually refresh the yacysearchtrailer.
+	 */
+	@Override
+	public void updatedScoreMap() {
+		this.navGeneration.incrementAndGet();
+	}
+    
+    /**
+     * @return the total number of results currently available and filtered (checking doubles and eventual query constraints/modifiers) from the different data sources 
+     */
     public int getResultCount() {
         return Math.max(
                 this.local_rwi_available.get() + this.remote_rwi_available.get() +
-                this.remote_solr_available.get() + this.local_solr_stored.get(),
+                this.remote_solr_available.get() + Math.max(0, this.local_solr_stored.get() - this.local_solr_evicted.get()),
                 imageViewed.size() + sizeSpare()
                );
     }
+    
+    /**
+     * @return the total number of successful write operations performed on all the active navigators since their initialization.
+     */
+    public long getNavGeneration() {
+		return this.navGeneration.get();
+	}
     
     /**
      * Set maximum size allowed (in kbytes) for a remote document result to be stored to local index.
@@ -260,14 +356,19 @@ public final class SearchEvent {
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
-        this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
-        this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
-        this.dateNavigator = navcfg.contains("date") ? new ClusteredScoreMap<String>(true) : null;
+        this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>(this) : null;
+        this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>(this) : null;
+        this.dateNavigator = navcfg.contains("date") ? new ConcurrentScoreMap<String>(this) : null;
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
-        this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
+        this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>(this) : null;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
         // prepare configured search navigation (plugins)
         this.navigatorPlugins = NavigatorPlugins.initFromCfgString(navcfg);
+        if(this.navigatorPlugins != null) {
+        	for(final Navigator nav : this.navigatorPlugins.values()) {
+        		nav.setUpdatesListener(this);
+        	}
+        }
 
         this.snippets = new ConcurrentHashMap<String, LinkedHashSet<String>>(); 
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
@@ -285,7 +386,7 @@ public final class SearchEvent {
         this.remoteStoredDocMaxSize = -1;
         this.local_rwi_available  = new AtomicInteger(0); // the number of results in the local peer after filtering
         this.local_rwi_stored     = new AtomicInteger(0);
-        this.local_solr_available = new AtomicInteger(0);
+        this.local_solr_evicted   = new AtomicInteger(0);
         this.local_solr_stored    = new AtomicInteger(0);
         this.remote_rwi_stored    = new AtomicInteger(0);
         this.remote_rwi_available = new AtomicInteger(0); // the number of result contributions from all the remote dht peers
@@ -293,6 +394,7 @@ public final class SearchEvent {
         this.remote_solr_stored   = new AtomicInteger(0);
         this.remote_solr_available= new AtomicInteger(0); // the number of result contributions from all the remote solr peers
         this.remote_solr_peerCount= new AtomicInteger(0); // the number of remote solr peers that have contributed
+        this.resortCacheAllowed = new Semaphore(1);
         final long start = System.currentTimeMillis();
 
         // do a soft commit for fresh results
@@ -302,7 +404,7 @@ public final class SearchEvent {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchInclusion = null;
-        this.ref = new ConcurrentScoreMap<String>();
+        this.ref = new ConcurrentScoreMap<String>(this);
         this.maxtime = query.maxtime;
         this.rwiStack = new WeakPriorityBlockingQueue<WordReferenceVars>(max_results_rwi, false);
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
@@ -324,7 +426,10 @@ public final class SearchEvent {
 
         // start a local solr search
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this, this.query.solrQuery(this.query.contentdom, true, this.excludeintext_image), this.query.offset, this.query.itemsPerPage, null /*this peer*/, 0, Switchboard.urlBlacklist);
+        	final boolean useSolrFacets = true;
+			this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
+					this.query.solrQuery(this.query.contentdom, useSolrFacets, this.excludeintext_image), this.query.offset,
+					this.query.itemsPerPage, null /* this peer */, 0, Switchboard.urlBlacklist, useSolrFacets, true);
         }
         this.localsolroffset = this.query.offset + this.query.itemsPerPage;
         
@@ -459,6 +564,9 @@ public final class SearchEvent {
         SearchEventCache.put(this.query.id(false), this);
     }
 
+    /**
+     * A concurrent task to perform the current search query on the local RWI.
+     */
     private class RWIProcess extends Thread {
     
         final Thread waitForThread;
@@ -468,6 +576,9 @@ public final class SearchEvent {
             this.waitForThread = waitForThread;
         }
         
+        /**
+         * Query the local RWI and feed the search event with the obtained results.
+         */
         @Override
         public void run() {
     
@@ -631,7 +742,16 @@ public final class SearchEvent {
                     if (log.isFine()) log.fine("dropped RWI: contentdom fail");
                     continue pollloop;
                 }
-
+                
+                // check language
+				if (this.query.modifier.language != null && !this.query.modifier.language.isEmpty()
+						&& !this.query.modifier.language.equals(iEntry.getLanguageString())) {
+                	if (log.isFine()) {
+                		log.fine("dropped RWI: language constraint = " + this.query.modifier.language);
+                	}
+                	continue pollloop;
+                }
+                
                 // count domZones
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
 
@@ -664,6 +784,15 @@ public final class SearchEvent {
                 }
                 // increase counter for statistics
                 if (local) this.local_rwi_available.incrementAndGet(); else this.remote_rwi_available.incrementAndGet();
+                
+                /* Fisrt filtering pass is now complete : update navigator counters that can already be updated */
+                if(this.languageNavigator != null) {
+                	final String lang = iEntry.getLanguageString();
+                	if(ISO639.exists(lang)) {
+                		this.languageNavigator.inc(lang);
+                	}
+                }
+                
                 successcounter++;
             }
             if (System.currentTimeMillis() >= timeout) ConcurrentLog.warn("SearchEvent", "rwi normalization ended with timeout = " + maxtime);
@@ -772,13 +901,24 @@ public final class SearchEvent {
         }
     }
     
+    /**
+     * Add result entries to this nodes stack and update eventual navigators counters.
+     * @param nodeList a list of entries from a Solr instance
+     * @param facets a map from a field name to scored values (aka Solr facet). May be null : in that case the navigators counters are updated one by one when inserting each result in the nodes stack. 
+     * @param solrsnippets a map from urlhash to snippet text
+     * @param local true when the nodeList comes from the local Solr
+     * @param resourceName the name of the data source to use for monitoring in the event tracker
+     * @param fullResource the full results count
+     * @param incrementNavigators when true, increment event navigators either with facet counts or with individual results
+     */
     public void addNodes(
         final List<URIMetadataNode> nodeList,
-        final Map<String, ReversibleScoreMap<String>> facets, // a map from a field name to scored values
-        final Map<String, LinkedHashSet<String>> solrsnippets, // a map from urlhash to snippet text
+        final Map<String, ReversibleScoreMap<String>> facets, 
+        final Map<String, LinkedHashSet<String>> solrsnippets,
         final boolean local,
         final String resourceName,
-        final int fullResource) {
+        final int fullResource,
+        final boolean incrementNavigators) {
 
         this.addBegin();
         
@@ -814,89 +954,30 @@ public final class SearchEvent {
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
 
-        // collect navigation information
-
-        // iterate over active navigator plugins to let them update the counters
-        for (String s : this.navigatorPlugins.keySet()) {
-            Navigator navi = this.navigatorPlugins.get(s);
-            if (navi != null) {
-                if (facets == null || facets.isEmpty() || !facets.containsKey(navi.getIndexFieldName())) { // just in case we got no solr facet
-                    navi.incDocList(nodeList);
-                } else {
-                    navi.incFacet(facets);
-                }
-            }
-        }
-
-        ReversibleScoreMap<String> fcts;
-        if (this.locationNavigator != null) {
-            fcts = facets.get(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
-            if (fcts != null) {
-                for (String coordinate: fcts) {
-                    int hc = fcts.get(coordinate);
-                    if (hc == 0) continue;
-                    this.locationNavigator.inc(coordinate, hc);
-                }
-            }
-        }
-        
-        if (this.dateNavigator != null) {
-            fcts = facets.get(CollectionSchema.dates_in_content_dts.getSolrFieldName());
-            if (fcts != null) this.dateNavigator.inc(fcts);
-        }
-
-        if (this.languageNavigator != null) {
-            fcts = facets.get(CollectionSchema.language_s.getSolrFieldName());
-            if (fcts != null) {
-                // remove unknown languages
-                Iterator<String> i = fcts.iterator();
-                while (i.hasNext()) {
-                    String lang = i.next();
-                    if (!ISO639.exists(lang)) {
-                        i.remove();
-                    }
-                }
-                this.languageNavigator.inc(fcts);
-            }
-        }
-
-        if (this.protocolNavigator != null) {
-            fcts = facets.get(CollectionSchema.url_protocol_s.getSolrFieldName());
-            if (fcts != null) {
-                // remove all protocols that we don't know
-                Iterator<String> i = fcts.iterator();
-                while (i.hasNext()) {
-                    String protocol = i.next();
-                    if ("http,https,smb,ftp,file".indexOf(protocol) < 0) i.remove();
-                }
-                this.protocolNavigator.inc(fcts);
-            }
-        }
-        
-        // get the vocabulary navigation
-        Set<String> genericFacets = new LinkedHashSet<>();
-        for (Tagging v: LibraryProvider.autotagging.getVocabularies()) genericFacets.add(v.getName());
-        genericFacets.addAll(ProbabilisticClassifier.getContextNames());
-        for (String v: genericFacets) {
-            fcts = facets.get(CollectionSchema.VOCABULARY_PREFIX + v + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
-            if (fcts != null) {
-                ScoreMap<String> vocNav = this.vocabularyNavigator.get(v);
-                if (vocNav == null) {
-                    vocNav = new ConcurrentScoreMap<String>();
-                    this.vocabularyNavigator.put(v, vocNav);
-                }
-                vocNav.inc(fcts);
-            }
+        // collect navigation information from Solr facets when available
+        if(incrementNavigators) {
+        	incrNavigatorsFromSolrFacets(facets);
         }
         
         // apply all constraints
         try {
             pollloop: for (URIMetadataNode iEntry: nodeList) {
-
-                if ( !this.query.urlMask_isCatchall ) {
-                    // check url mask
+            	
+                // check url related eventual constraints (protocol, tld, sitehost, and filetype)
+            	final String matchingResult = QueryParams.matchesURL(this.query.modifier, this.query.tld, iEntry.url());
+                if (!matchingResult.isEmpty()) {
+                    if (log.isFine()) {
+                    	log.fine("dropped Node: " + matchingResult);
+                    }
+                    updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
+                    continue pollloop;
+                }
+            	
+                if ( !this.query.urlMask_isCatchall && this.query.urlMaskPattern != null) {
+                    // check url mask, only when not redundant with query modifier and tld constraints
                     if (!iEntry.matches(this.query.urlMaskPattern)) {
                         if (log.isFine()) log.fine("dropped Node: url mask does not match");
+                        updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                         continue pollloop;
                     }
                 }
@@ -904,6 +985,7 @@ public final class SearchEvent {
                 // doublecheck for urls
                 if (this.urlhashes.has(iEntry.hash())) {
                     if (log.isFine()) log.fine("dropped Node: double check");
+                    updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                     continue pollloop;
                 }
 
@@ -916,6 +998,7 @@ public final class SearchEvent {
                 Bitfield flags = iEntry.flags();
                 if (!this.testFlags(flags)) {
                     if (log.isFine()) log.fine("dropped Node: flag test");
+                    updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                     continue pollloop;
                 }
 
@@ -926,6 +1009,7 @@ public final class SearchEvent {
                      (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
                      (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp))))) {
                     if (log.isFine()) log.fine("dropped Node: content domain does not match");
+                    updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                     continue pollloop;
                 }
                 
@@ -933,6 +1017,7 @@ public final class SearchEvent {
                 String ext = MultiProtocolURL.getFileExtension(iEntry.url().getFileName());
                 if (this.query.contentdom == ContentDomain.TEXT && Classification.isImageExtension(ext) && this.excludeintext_image) {
                     if (log.isFine()) log.fine("dropped Node: file name domain does not match");
+                    updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                     continue pollloop;
                 }
 
@@ -941,12 +1026,7 @@ public final class SearchEvent {
                 if ( this.query.modifier.sitehash == null ) {
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
                         if (log.isFine()) log.fine("dropped Node: siteexclude");
-                        continue pollloop;
-                    }
-                } else {
-                    // filter out all domains that do not match with the site constraint
-                    if (iEntry.url().getHost().indexOf(this.query.modifier.sitehost) < 0) {
-                        if (log.isFine()) log.fine("dropped Node: sitehost");
+                        updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                         continue pollloop;
                     }
                 }
@@ -954,6 +1034,7 @@ public final class SearchEvent {
                 if (this.query.modifier.language != null) {
                     if (!this.query.modifier.language.equals(iEntry.language())) {
                         if (log.isFine()) log.fine("dropped Node: language");
+                        updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                         continue pollloop;
                     }
                 }
@@ -961,6 +1042,7 @@ public final class SearchEvent {
                 if (this.query.modifier.author != null) {
                     if (!this.query.modifier.author.equals(iEntry.dc_creator())) {
                         if (log.isFine()) log.fine ("dropped Node: author");
+                        updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                         continue pollloop;
                     }
                 }
@@ -968,6 +1050,7 @@ public final class SearchEvent {
                 if (this.query.modifier.keyword != null) {
                     if (iEntry.dc_subject().indexOf(this.query.modifier.keyword) < 0) {
                         if (log.isFine()) log.fine ("dropped Node: keyword");
+                        updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                         continue pollloop;
                     }
                 }
@@ -992,12 +1075,190 @@ public final class SearchEvent {
                     }
                 }
                 // increase counter for statistics
-                if (local) this.local_solr_available.incrementAndGet(); else this.remote_solr_available.incrementAndGet();
+                if (!local) {
+                	this.remote_solr_available.incrementAndGet();
+                }
+                
+                // collect navigation information not available in facets
+                if(incrementNavigators) {
+                	incrNavigatorsFromSingleDocument(iEntry, facets);
+                }
             }
         } catch (final SpaceExceededException e ) {
         }
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.PRESORT, resourceName, nodeList.size(), System.currentTimeMillis() - timer), false);
     }
+
+    /**
+     * Increment this event eventual navigators with the given facets processed by a Solr instance
+     * @param facets facets counts from a Solr instance
+     */
+	private void incrNavigatorsFromSolrFacets(final Map<String, ReversibleScoreMap<String>> facets) {
+		if(facets != null && !facets.isEmpty()) {
+	        /* Iterate over active navigator plugins to let them update the counters */
+			for (String s : this.navigatorPlugins.keySet()) {
+				Navigator navi = this.navigatorPlugins.get(s);
+				if (navi != null) {
+					navi.incFacet(facets);
+				}
+			}
+
+			ReversibleScoreMap<String> fcts;
+			if (this.locationNavigator != null) {
+			    /* Is is still relevant? It looks like this nav is currently never filled, as a constraint on coordinates 
+				    * is expressed as a spatial filter not producing facets counts (see QueryParams.getFacetsFilterQueries()). */
+				fcts = facets.get(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
+				if (fcts != null) {
+					for (String coordinate: fcts) {
+						int hc = fcts.get(coordinate);
+						if (hc == 0) continue;
+						this.locationNavigator.inc(coordinate, hc);
+					}
+				}
+			}
+        
+			if (this.dateNavigator != null) {
+				fcts = facets.get(CollectionSchema.dates_in_content_dts.getSolrFieldName());
+				if (fcts != null) this.dateNavigator.inc(fcts);
+			}
+
+			if (this.languageNavigator != null) {
+				fcts = facets.get(CollectionSchema.language_s.getSolrFieldName());
+				if (fcts != null) {
+					// remove unknown languages
+					Iterator<String> i = fcts.iterator();
+					while (i.hasNext()) {
+						String lang = i.next();
+						if (!ISO639.exists(lang)) {
+							i.remove();
+						}
+					}
+					this.languageNavigator.inc(fcts);
+				}
+			}
+
+			if (this.protocolNavigator != null) {
+				fcts = facets.get(CollectionSchema.url_protocol_s.getSolrFieldName());
+				if (fcts != null) {
+					// remove all protocols that we don't know
+					Iterator<String> i = fcts.iterator();
+					while (i.hasNext()) {
+						String protocol = i.next();
+						if (PROTOCOL_NAVIGATOR_SUPPORTED_VALUES.indexOf(protocol) < 0) {
+							i.remove();
+						}
+					}
+					this.protocolNavigator.inc(fcts);
+				}
+			}
+        
+			// get the vocabulary navigation
+			Set<String> genericFacets = new LinkedHashSet<>();
+			for (Tagging v: LibraryProvider.autotagging.getVocabularies()) genericFacets.add(v.getName());
+				genericFacets.addAll(ProbabilisticClassifier.getContextNames());
+				for (String vocName: genericFacets) {
+					fcts = facets.get(CollectionSchema.VOCABULARY_PREFIX + vocName + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
+					if (fcts != null) {
+						ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+						if (vocNav == null) {
+							vocNav = new ConcurrentScoreMap<String>();
+							this.vocabularyNavigator.put(vocName, vocNav);
+						}
+						vocNav.inc(fcts);
+					}
+				}
+			}
+	}
+	
+    /**
+     * Increment this event eventual navigators with the given entry, only when the concerned field is not present in facets
+     * @param doc a document entry from a Solr source
+     * @param facets facets counts from a Solr instance
+     */
+	private void incrNavigatorsFromSingleDocument(final URIMetadataNode doc,
+			final Map<String, ReversibleScoreMap<String>> facets) {
+		
+		/* Iterate over active navigator plugins to let them update the counters */
+		for (String s : this.navigatorPlugins.keySet()) {
+			Navigator navi = this.navigatorPlugins.get(s);
+			if (navi != null && facets == null || !facets.containsKey(navi.getIndexFieldName())) {
+				navi.incDoc(doc);
+			}
+		}
+
+	    /* Note : would it be relevant to update here this.locationNavigator ? 
+		    		It looks like this nav is currently never filled */
+
+		if (this.dateNavigator != null) {
+			if (facets == null || !facets.containsKey(CollectionSchema.dates_in_content_dts.getSolrFieldName())) {
+				Date[] dates = doc.datesInContent();
+				if (dates != null) {
+					for (final Date date : dates) {
+						if (date != null) {
+							this.dateNavigator.inc(ISO8601Formatter.FORMATTER.format(date));
+						}
+					}
+				}
+			}
+		}
+
+		if (this.languageNavigator != null) {
+			if (facets == null || !facets.containsKey(CollectionSchema.language_s.getSolrFieldName())) {
+				final String lang = doc.language();
+				if (ISO639.exists(lang)) {
+					this.languageNavigator.inc(lang);
+				}
+
+			}
+		}
+		
+
+		if (this.protocolNavigator != null) {
+			if (facets == null || !facets.containsKey(CollectionSchema.url_protocol_s.getSolrFieldName())) {
+				final String protocol = doc.url().getProtocol();
+				// include only protocols supported protocols
+				if (protocol != null && PROTOCOL_NAVIGATOR_SUPPORTED_VALUES.indexOf(protocol) >= 0) {
+					this.protocolNavigator.inc(protocol);	
+				}
+			}
+		}
+
+		// get the vocabulary navigation
+		if(this.vocabularyNavigator != null) {
+			Set<String> genericFacets = new LinkedHashSet<>();
+			for (Tagging v : LibraryProvider.autotagging.getVocabularies()) {
+				genericFacets.add(v.getName());
+			}
+			genericFacets.addAll(ProbabilisticClassifier.getContextNames());
+			for (String vocName : genericFacets) {
+				final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName + CollectionSchema.VOCABULARY_TERMS_SUFFIX;
+				if (facets == null || !facets.containsKey(fieldName)) {
+					Object docValue = doc.getFieldValue(fieldName);
+					if(docValue instanceof String) {
+						ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+						if (vocNav == null) {
+							vocNav = new ConcurrentScoreMap<String>();
+							this.vocabularyNavigator.put(vocName, vocNav);
+						}
+						vocNav.inc((String)docValue);
+					} else if(docValue instanceof Collection) {
+						if (!((Collection<?>) docValue).isEmpty()) {
+							ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+							if (vocNav == null) {
+								vocNav = new ConcurrentScoreMap<String>();
+								this.vocabularyNavigator.put(vocName, vocNav);
+							}
+							for (Object singleDocValue : (Collection<?>) docValue) {
+								if (singleDocValue instanceof String) {
+									vocNav.inc((String) singleDocValue);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
     
     public void addExpectedRemoteReferences(int x) {
         if ( x > 0 ) {
@@ -1027,7 +1288,10 @@ public final class SearchEvent {
                 if (rwi == null) return null;
                 if (!skipDoubleDom) {
                     URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi);
-                    if (node == null) continue pollloop;
+                    if (node == null) {
+                    	decrementCounts(rwi.getElement());
+                    	continue pollloop;
+                    }
                     return node;
                 }
         
@@ -1042,7 +1306,10 @@ public final class SearchEvent {
                             m = new WeakPriorityBlockingQueue<WordReferenceVars>(max_results_rwi, false);
                             this.doubleDomCache.put(hosthash, m);
                             URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi);
-                            if (node == null) continue pollloop;
+                            if (node == null) {
+                            	decrementCounts(rwi.getElement());
+                            	continue pollloop;
+                            }
                             return node;
                         }
                         // second appearances of dom
@@ -1108,7 +1375,7 @@ public final class SearchEvent {
                 ConcurrentLog.logException(e);
             }
             if (node == null) {
-                if (bestEntry.getElement().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(bestEntry.getElement());
                 if (log.isFine()) log.fine("dropped RWI: hash not in metadata");
                 continue mainloop;
             }
@@ -1127,20 +1394,31 @@ public final class SearchEvent {
      */
     public URIMetadataNode pullOneFilteredFromRWI(final boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
-        int p = -1;
         URIMetadataNode page;
         mainloop: while ((page = pullOneRWI(skipDoubleDom)) != null) {
+        	
+            // check url related eventual constraints (protocol, tld, sitehost, and filetype)
+        	final String matchingResult = QueryParams.matchesURL(this.query.modifier, this.query.tld, page.url());
+            if (!matchingResult.isEmpty()) {
+                if (log.isFine()) {
+                	log.fine("dropped RWI: no match on " + matchingResult);
+                }
+                decrementCounts(page.word());
+                continue;
+            }
 
-            if (!this.query.urlMask_isCatchall && !page.matches(this.query.urlMaskPattern)) {
+			if (!this.query.urlMask_isCatchall && this.query.urlMaskPattern != null
+					&& !page.matches(this.query.urlMaskPattern)) {
+            	// check url mask, only when not redundant with query modifier and tld constraints
                 if (log.isFine()) log.fine("dropped RWI: no match with urlMask");
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(page.word());
                 continue;
             }
 
             // check for more errors
             if (page.url() == null) {
                 if (log.isFine()) log.fine("dropped RWI: url == null");
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(page.word());
                 continue; // rare case where the url is corrupted
             }
 
@@ -1152,7 +1430,7 @@ public final class SearchEvent {
                 (this.query.contentdom == Classification.ContentDomain.VIDEO && contentDomain != Classification.ContentDomain.VIDEO) ||
                 (this.query.contentdom == Classification.ContentDomain.APP && contentDomain != Classification.ContentDomain.APP)) && this.query.urlMask_isCatchall) {
                 if (log.isFine()) log.fine("dropped RWI: wrong contentdom = " + this.query.contentdom + ", domain = " + contentDomain);
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(page.word());
                 continue;
             }
             
@@ -1164,26 +1442,19 @@ public final class SearchEvent {
             }
 
             // filter query modifiers variables (these are host, filetype, protocol, language, author, collection, dates_in_content(on,from,to,timezone) )
-            // while ( protocol, host, filetype ) currently maybe incorporated in (this.query.urlMaskPattern)  queryparam
 
-            // check modifier constraint filetype (using fileextension)
-            if (this.query.modifier.filetype != null && !this.query.modifier.filetype.equals(ext)) {
-                if (log.isFine()) log.fine("dropped RWI: file type constraint = " + this.query.modifier.filetype);
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
-                continue;
-            }
-
-            // check modifier constraint (language)
+            /* check again modifier constraint (language) with the language in the full metadata, 
+             * that may differ from the one in the reverse word reference which is already checked in addRWIs()*/
             if (this.query.modifier.language != null && !this.query.modifier.language.equals(page.language())) {
                 if (log.isFine()) log.fine("dropped RWI: language constraint = " + this.query.modifier.language);
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(page.word());
                 continue;
             }
 
             // check modifier constraint (author)
             if (this.query.modifier.author != null && !page.dc_creator().toLowerCase().contains(this.query.modifier.author.toLowerCase()) /*!this.query.modifier.author.equalsIgnoreCase(page.dc_creator())*/) {
                 if (log.isFine()) log.fine("dropped RWI: author  constraint = " + this.query.modifier.author);
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(page.word());
                 continue;
             }
 
@@ -1192,10 +1463,10 @@ public final class SearchEvent {
             if (this.query.modifier.collection != null) {
                 Collection<Object> docCols = page.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName()); // get multivalued value
                 if (docCols == null) { // no collection info
-                    if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    decrementCounts(page.word());
                     continue;
                 } else if (!docCols.contains(this.query.modifier.collection)) {
-                    if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    decrementCounts(page.word());
                     continue;
                 }
             }
@@ -1203,25 +1474,25 @@ public final class SearchEvent {
             // check modifier constraint (keyword)
             if (this.query.modifier.keyword != null && !page.dc_subject().toLowerCase().contains(this.query.modifier.keyword.toLowerCase())) {
                 if (log.isFine()) log.fine("dropped RWI: keyword  constraint = " + this.query.modifier.keyword);
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(page.word());
                 continue;
             }
 
             // Check for blacklist
             if (Switchboard.urlBlacklist.isListed(BlacklistType.SEARCH, page.url())) {
                 if (log.isFine()) log.fine("dropped RWI: url is blacklisted in url blacklist");
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(page.word());
                 continue;
             }
 
             // content control
             if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false)) {
-		FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
-		if (f != null && !f.isListed(page.url(), null)) {
+            	FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
+            	if (f != null && !f.isListed(page.url(), null)) {
                     if (log.isFine()) log.fine("dropped RWI: url is blacklisted in contentcontrol");
-	            if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    decrementCounts(page.word());
                     continue;
-		}
+            	}
             }
 
             final String pageurl = page.url().toNormalform(true);
@@ -1234,7 +1505,7 @@ public final class SearchEvent {
                 || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.getQueryGoal().getExcludeWords()))
                 || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.getQueryGoal().getExcludeWords())))) {
                 if (log.isFine()) log.fine("dropped RWI: no match with query goal exclusion");
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(page.word());
                 continue;
             }
 
@@ -1247,14 +1518,14 @@ public final class SearchEvent {
                     }
                 }
                 if (log.isFine()) log.fine("dropped RWI: url does not match index-of constraint");
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(page.word());
                 continue;
             }
 
             // check location constraint
             if ((this.query.constraint != null) && (this.query.constraint.get(Tokenizer.flag_cat_haslocation)) && (page.lat() == 0.0 || page.lon() == 0.0)) {
                 if (log.isFine()) log.fine("dropped RWI: location constraint");
-                if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                decrementCounts(page.word());
                 continue;
             }
 
@@ -1266,7 +1537,7 @@ public final class SearchEvent {
                 double distance = Math.sqrt(latDelta * latDelta + lonDelta * lonDelta); // pythagoras
                 if (distance > this.query.radius) {
                     if (log.isFine()) log.fine("dropped RWI: radius constraint");
-                    if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    decrementCounts(page.word());
                     continue;
                 }
             }
@@ -1283,7 +1554,7 @@ public final class SearchEvent {
                         } 
                     } // if we reach this point the metatag was not found (= drop entry)
                     if (log.isFine()) log.fine("dropped RWI: url not tagged with vocabulary " + tag.getVocabularyName());
-                    if (page.word().local()) this.local_rwi_available.decrementAndGet(); else this.remote_rwi_available.decrementAndGet();
+                    decrementCounts(page.word());
                     continue mainloop;
                 }
             }
@@ -1298,11 +1569,229 @@ public final class SearchEvent {
                     navi.incDoc(page);
                 }
             }
+            
+            if(this.languageNavigator != null) {
+            	if(page.word() == null || page.word().getLanguageString() == null) {
+            		/* Increase the language navigator here only if the word reference 
+            		 * did not include information about language. Otherwise it should be done earlier in addRWIs() */
+            		final String lang = page.language();
+            		if(ISO639.exists(lang)) {
+            			this.languageNavigator.inc(lang);
+            		}
+            	}
+            }
+            
+            if(this.protocolNavigator != null && page.url() != null) {
+            	final String protocol = page.url().getProtocol();
+            	if(protocol != null) {
+            		this.protocolNavigator.inc(protocol);
+            	}
+            }
+            
+            if(this.dateNavigator != null) {
+				Date[] dates = page.datesInContent();
+				if (dates != null) {
+					for (final Date date : dates) {
+						if (date != null) {
+							this.dateNavigator.inc(ISO8601Formatter.FORMATTER.format(date));
+						}
+					}
+				}
+            }
 
             return page; // accept url
         }
         return null;
     }
+
+    /**
+     * Decrement statistics counts for the given RWI entry.
+     * @param entry an RWI entry result
+     */
+	private void decrementCounts(final WordReferenceVars entry) {
+		if(entry == null) {
+			return;
+		}
+		if (entry.local()) {
+			if(this.local_rwi_available.get() > 0) {
+				this.local_rwi_available.decrementAndGet();
+			}
+		} else {
+			if(this.remote_rwi_available.get() > 0) {
+				this.remote_rwi_available.decrementAndGet();
+			}
+		}
+		
+		/* The language navigator may have been incremented in the addRWIs() function */
+		if (this.languageNavigator != null) {
+			String lang = entry.getLanguageString();
+			if (lang != null && this.languageNavigator.get(lang) > 0) {
+				this.languageNavigator.dec(lang);
+			}
+		}
+	}
+	
+    /**
+     * Update counters when evicting a Solr entry from results.
+     * @param entry a Solr entry result to be evicted
+     * @param local when true the entry is coming from the local Solr
+     * @param facets facets counts from Solr
+     * @param navIncrementedEarlier when true, navigators have been incremented earlier with other facets or individual documents
+     */
+	private void updateCountsOnSolrEntryToEvict(final URIMetadataNode entry,
+			final Map<String, ReversibleScoreMap<String>> facets, final boolean local,
+			final boolean navIncrementedEarlier) {
+		if (entry == null) {
+			return;
+		}
+		if (local) {
+			this.local_solr_evicted.incrementAndGet();
+			/*
+			 * No need to decrement remote_solr_available as this counter is only
+			 * incremented after all filterings have been applied
+			 */
+		}
+
+		/*
+		 * Update eventual navigators counters when relevant
+		 */
+		final boolean navIncrementedWithFacets = facets != null && !facets.isEmpty() && !navIncrementedEarlier;
+		ReversibleScoreMap<String> fcts;
+		
+		
+		/* Iterate over active navigator plugins to let them update the counters */
+		for (String s : this.navigatorPlugins.keySet()) {
+			Navigator navi = this.navigatorPlugins.get(s);
+			if (navi != null) {
+				if (navIncrementedWithFacets) {
+					fcts = facets.get(navi.getIndexFieldName());
+				} else {
+					fcts = null;
+				}
+				final Object value = entry.getFieldValue(navi.getIndexFieldName());
+				if (value != null) {
+					if(value instanceof Collection) {
+						for (final Object singleVal : (Collection<?>) value) {
+							if (singleVal instanceof String) {
+								final String singleStringVal = (String)singleVal;
+								if (navIncrementedEarlier || (fcts != null && fcts.containsKey(singleStringVal))) {
+									if (navi.get(singleStringVal) > 0) {
+										navi.dec(singleStringVal);
+									}
+								}
+							}
+						}
+					} else if(value instanceof String){
+						final String stringValue = (String)value;
+						if (navIncrementedEarlier || (fcts != null && fcts.containsKey(stringValue))) {
+							if (navi.get(stringValue) > 0) {
+								navi.dec(stringValue);
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		
+		/* Note : would it be relevant to update here this.locationNavigator ? 
+		 * It looks like this nav is currently never filled, as a constraint on coordinates 
+		 * is expressed as a spatial filter not producing facets counts (see QueryParams.getFacetsFilterQueries())
+		 */
+
+		if (this.dateNavigator != null) {
+			if (navIncrementedWithFacets) {
+				fcts = facets.get(CollectionSchema.dates_in_content_dts.getSolrFieldName());
+			} else {
+				fcts = null;
+			}
+			Date[] dates = entry.datesInContent();
+			if (dates != null) {
+				for (final Date date : dates) {
+					if (date != null) {
+						final String dateStr = ISO8601Formatter.FORMATTER.format(date);
+						if (navIncrementedEarlier || (fcts != null && fcts.containsKey(dateStr))) {
+							if (this.dateNavigator.get(dateStr) > 0) {
+								this.dateNavigator.dec(dateStr);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if (this.languageNavigator != null) {
+			if (navIncrementedWithFacets) {
+				fcts = facets.get(CollectionSchema.language_s.getSolrFieldName());
+			} else {
+				fcts = null;
+			}
+			String lang = entry.language();
+			if (lang != null) {
+				if (navIncrementedEarlier || (fcts != null && fcts.containsKey(lang))) {
+					if (this.languageNavigator.get(lang) > 0) {
+						this.languageNavigator.dec(lang);
+					}
+				}
+			}
+		}
+
+		if (this.protocolNavigator != null) {
+			if (navIncrementedWithFacets) {
+				fcts = facets.get(CollectionSchema.url_protocol_s.getSolrFieldName());
+			} else {
+				fcts = null;
+			}
+			final String protocol = entry.url().getProtocol();
+			if (protocol != null) {
+				if (navIncrementedEarlier || (fcts != null && fcts.containsKey(protocol))) {
+					if (this.protocolNavigator.get(protocol) > 0) {
+						this.protocolNavigator.dec(protocol);
+					}
+				}
+			}
+		}
+
+		// get the vocabulary navigation
+		if (this.vocabularyNavigator != null) {
+			Set<String> genericFacets = new LinkedHashSet<>();
+			for (Tagging v : LibraryProvider.autotagging.getVocabularies()) {
+				genericFacets.add(v.getName());
+			}
+			genericFacets.addAll(ProbabilisticClassifier.getContextNames());
+			for (String vocName : genericFacets) {
+				final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName
+						+ CollectionSchema.VOCABULARY_TERMS_SUFFIX;
+				if (navIncrementedWithFacets) {
+					fcts = facets.get(fieldName);
+				} else {
+					fcts = null;
+				}
+				Object docValue = entry.getFieldValue(fieldName);
+				if (docValue instanceof String) {
+					if (navIncrementedEarlier || (fcts != null && fcts.containsKey((String) docValue))) {
+						ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+						if (vocNav != null && vocNav.get((String) docValue) > 0) {
+							vocNav.dec((String) docValue);
+						}
+					}
+				} else if(docValue instanceof Collection) {
+					if (!((Collection<?>) docValue).isEmpty()) {
+						for (Object singleDocValue : (Collection<?>) docValue) {
+							if (singleDocValue instanceof String) {
+								if (navIncrementedEarlier || (fcts != null && fcts.containsKey((String) singleDocValue))) {
+									ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+									if (vocNav != null && vocNav.get((String) singleDocValue) > 0) {
+										vocNav.dec((String) singleDocValue);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
     
     public long getURLRetrievalTime() {
         return this.urlRetrievalAllTime;
@@ -1344,58 +1833,25 @@ public final class SearchEvent {
     /**
      * Adds the retrieved results (fulltext & rwi) to the result list and
      * computes the text snippets
+     * @param concurrentSnippetFetch when true, allow starting concurrent tasks to fetch snippets when no one are already available
      * @return true on adding entries to resultlist otherwise false
      */
-    public boolean drainStacksToResult() {
+    public boolean drainStacksToResult(boolean concurrentSnippetFetch) {
         // we take one entry from both stacks at the same time
-        boolean success = false;
-        final Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
-        final URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
-        if (node != null) {
-            LinkedHashSet<String> solrsnippetlines = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
-            if (solrsnippetlines != null && solrsnippetlines.size() > 0) {
-                OpensearchResponseWriter.removeSubsumedTitle(solrsnippetlines, node.dc_title());
-                final TextSnippet solrsnippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_CACHE, "");
-                final TextSnippet yacysnippet = new TextSnippet(this.loader,
-                        node,
-                        this.query.getQueryGoal().getIncludeHashes(),
-                        CacheStrategy.CACHEONLY,
-                        false,
-                        180,
-                        false);
-                final String solrsnippetline = solrsnippet.descriptionline(this.getQuery().getQueryGoal());
-                final String yacysnippetline = yacysnippet.descriptionline(this.getQuery().getQueryGoal());
-                URIMetadataNode re = node.makeResultEntry(this.query.getSegment(), this.peers, solrsnippetline.length() >  yacysnippetline.length() ? solrsnippet : yacysnippet);
-                addResult(re, localEntryElement.getWeight());
-                success = true;
-            } else {
-                // we don't have a snippet from solr, try to get it in our way (by reloading, if necessary)
-                if (SearchEvent.this.snippetFetchAlive.get() >= 10) {
-                    // too many concurrent processes
-                    addResult(getSnippet(node, null), localEntryElement.getWeight());
-                    success = true;
-                } else {
+        boolean solrSuccess = drainSolrStackToResult(concurrentSnippetFetch);
+        boolean rwiSuccess = drainRWIStackToResult(concurrentSnippetFetch);
+        return solrSuccess || rwiSuccess;
+    }
 
-                    new Thread("SearchEvent.drainStacksToResult.getSnippet") {
-                        @Override
-                        public void run() {
-                            SearchEvent.this.oneFeederStarted();
-                            try {
-                                SearchEvent.this.snippetFetchAlive.incrementAndGet();
-                                try {
-                                    addResult(getSnippet(node, SearchEvent.this.query.snippetCacheStrategy), localEntryElement.getWeight());
-                                } catch (final Throwable e) {} finally {
-                                    SearchEvent.this.snippetFetchAlive.decrementAndGet();
-                                }
-                            } catch (final Throwable e) {} finally {
-                                SearchEvent.this.oneFeederTerminated();
-                            }
-                        }
-                    }.start();
-                }
-            }
-        }
-        if (SearchEvent.this.snippetFetchAlive.get() >= 10 || MemoryControl.shortStatus()) {
+    /**
+     * Adds the retrieved results from local and remotes RWI to the result list and
+     * computes the text snippets
+     * @param concurrentSnippetFetch when true, allow starting a concurrent task to fetch a snippet when no one is already available 
+     * @return true when an entry has been effectively added to resultlist otherwise false
+     */
+	private boolean drainRWIStackToResult(boolean concurrentSnippetFetch) {
+		boolean success = false;
+		if (SearchEvent.this.snippetFetchAlive.get() >= 10 || MemoryControl.shortStatus() || !concurrentSnippetFetch) {
             // too many concurrent processes
             final URIMetadataNode noderwi = pullOneFilteredFromRWI(true);
             if (noderwi != null) {
@@ -1427,7 +1883,64 @@ public final class SearchEvent {
             if (SearchEvent.this.query.snippetCacheStrategy == null) t.run(); else t.start(); //no need for concurrency if there is no latency
         }
         return success;
-    }
+	}
+
+    /**
+     * Adds the retrieved full text results from local and remotes Solr to the result list and
+     * computes the text snippets
+     * @param concurrentSnippetFetch when true, allow starting a concurrent task to fetch a snippet when no one is already available 
+     * @return true when an entry has been effectively added to resultlist otherwise false
+     */
+	private boolean drainSolrStackToResult(boolean concurrentSnippetFetch) {
+		boolean success = false;
+		final Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
+        final URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
+        if (node != null) {
+            LinkedHashSet<String> solrsnippetlines = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
+            if (solrsnippetlines != null && solrsnippetlines.size() > 0) {
+                OpensearchResponseWriter.removeSubsumedTitle(solrsnippetlines, node.dc_title());
+                final TextSnippet solrsnippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_CACHE, "");
+                final TextSnippet yacysnippet = new TextSnippet(this.loader,
+                        node,
+                        this.query.getQueryGoal().getIncludeHashes(),
+                        CacheStrategy.CACHEONLY,
+                        false,
+                        180,
+                        false);
+                final String solrsnippetline = solrsnippet.descriptionline(this.getQuery().getQueryGoal());
+                final String yacysnippetline = yacysnippet.descriptionline(this.getQuery().getQueryGoal());
+                URIMetadataNode re = node.makeResultEntry(this.query.getSegment(), this.peers, solrsnippetline.length() >  yacysnippetline.length() ? solrsnippet : yacysnippet);
+                addResult(re, localEntryElement.getWeight());
+                success = true;
+            } else {
+                // we don't have a snippet from solr, try to get it in our way (by reloading, if necessary)
+                if (SearchEvent.this.snippetFetchAlive.get() >= 10 || !concurrentSnippetFetch) {
+                    // too many concurrent processes
+                    addResult(getSnippet(node, null), localEntryElement.getWeight());
+                    success = true;
+                } else {
+
+                    new Thread("SearchEvent.drainStacksToResult.getSnippet") {
+                        @Override
+                        public void run() {
+                            SearchEvent.this.oneFeederStarted();
+                            try {
+                                SearchEvent.this.snippetFetchAlive.incrementAndGet();
+                                try {
+                                    addResult(getSnippet(node, SearchEvent.this.query.snippetCacheStrategy), localEntryElement.getWeight());
+                                } catch (final Throwable e) {} finally {
+                                    SearchEvent.this.snippetFetchAlive.decrementAndGet();
+                                }
+                            } catch (final Throwable e) {} finally {
+                                SearchEvent.this.oneFeederTerminated();
+                            }
+                        }
+                    }.start();
+                }
+            }
+        }
+		return success;
+	}
     
     /**
      * place the result to the result vector and apply post-ranking
@@ -1588,7 +2101,7 @@ public final class SearchEvent {
 				log.warn("Wait for local solr search was interrupted.");
 			}
 		}
-        if (this.remote && item >= this.localsolroffset && this.local_solr_stored.get() >= item) {
+        if (this.remote && item >= this.localsolroffset && this.local_solr_stored.get() > item) {
 			/* Request mixing remote and local Solr results : load remaining local solr results now. 
 			 * For local only search, a new SearchEvent should be created, starting directly at the requested offset,
 			 * thus allowing to handle last pages of large resultsets
@@ -1596,9 +2109,12 @@ public final class SearchEvent {
             int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
             if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
 			if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
+				// Do not increment again navigators from the local Solr on next local pages retrieval, as facets counts scope is on the total results and should already have been added
+				final boolean useSolrFacets = (this.localsolrsearch == null);
+				final boolean incrementNavigators = false;
 				this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
-						this.query.solrQuery(this.query.contentdom, false, this.excludeintext_image),
-						this.localsolroffset, nextitems, null /* this peer */, 0, Switchboard.urlBlacklist);
+						this.query.solrQuery(this.query.contentdom, useSolrFacets, this.excludeintext_image),
+						this.localsolroffset, nextitems, null /* this peer */, 0, Switchboard.urlBlacklist, useSolrFacets, incrementNavigators);
 			}
 			this.localsolroffset += nextitems;
         }
@@ -1621,7 +2137,7 @@ public final class SearchEvent {
         while ( this.resultList.sizeAvailable() <= resultListIndex &&
                 (this.rwiQueueSize() > 0 || this.nodeStack.sizeQueue() > 0 ||
                 (!this.isFeedingFinished() && System.currentTimeMillis() < finishTime))) {
-			if (!drainStacksToResult()) {
+			if (!drainStacksToResult(true)) {
 				try {
 					Thread.sleep(10);
 				} catch (final InterruptedException e) {
@@ -1788,6 +2304,65 @@ public final class SearchEvent {
         }
         return this.resultList.list(Math.min(this.query.neededResults(), this.resultList.sizeAvailable()));
     }
+    
+	/**
+	 * Re-sort results cached in the resultList and eventually include in that list
+	 * elements with higher ranks from the Solr and RWI stacks.
+	 */
+	public void resortCachedResults() {
+		/*
+		 * If stacks feeding is finished, drain as much as possible elements from stacks
+		 * while their ranking is higher than the last element in the result list
+		 */
+		if (isFeedingFinished() && this.resortCacheAllowed.tryAcquire()) {
+			/*
+			 * First put all elements of the resultList in its own sorted queue to have a
+			 * consistent sorting on the whole set
+			 */
+			this.resultList.requeueDrainedElements();
+
+			/*
+			 * Note : if the resultList is full (its maxSize has been reached) some elements
+			 * with the lowest ranking may be lost in this next step. Not really a problem
+			 * because they were not supposed to be here. If really necessary to keep them,
+			 * growing the maxSize of the resultList should be considered here.
+			 */
+			WeakPriorityBlockingQueue.Element<URIMetadataNode> initialLastResult = this.resultList.getLastInQueue();
+
+			/*
+			 * Drain stacks in two steps (Solr, then RWI), because one stack might still
+			 * contains higher ranked results when only lower ranked remain in the other
+			 */
+
+			/*
+			 * Here we do not fetch snippets concurrently as we want to know immediately the
+			 * drained element position in the final result list
+			 */
+			boolean drained = drainSolrStackToResult(false);
+			WeakPriorityBlockingQueue.Element<URIMetadataNode> newLastResult = this.resultList.getLastInQueue();
+
+			/*
+			 * Loop while at least one element has been added to the results list and is not
+			 * the last considering its final rank
+			 */
+			while (drained && newLastResult == initialLastResult) {
+				drained = drainSolrStackToResult(false);
+				newLastResult = this.resultList.getLastInQueue();
+			}
+
+			drained = drainRWIStackToResult(false);
+			newLastResult = this.resultList.getLastInQueue();
+
+			/*
+			 * Loop while at least one element has been added to the results list and is not
+			 * the last considering its final rank
+			 */
+			while (drained && newLastResult == initialLastResult) {
+				drained = drainRWIStackToResult(false);
+				newLastResult = this.resultList.getLastInQueue();
+			}
+		}
+	}
 
     /**
      * delete a specific entry from the search results

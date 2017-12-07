@@ -35,12 +35,11 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.Translator;
 import net.yacy.data.WorkTables;
 import net.yacy.http.YaCyHttpServer;
-import net.yacy.kelondro.workflow.InstantBusyThread;
+import net.yacy.peers.OnePeerPingBusyThread;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -48,8 +47,8 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.HTTPDFileHandler;
 import net.yacy.utils.translation.TranslatorXliff;
-import net.yacy.utils.upnp.UPnPMappingType;
 import net.yacy.utils.upnp.UPnP;
+import net.yacy.utils.upnp.UPnPMappingType;
 
 public class ConfigBasic {
 
@@ -58,7 +57,7 @@ public class ConfigBasic {
     private static final int NEXTSTEP_PEERNAME  = 2;
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
-
+    
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws FileNotFoundException, IOException {
 
         // return variable that accumulates replacements
@@ -81,7 +80,7 @@ public class ConfigBasic {
 
         //boolean doPeerPing = false;
         if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {
-            InstantBusyThread.oneTimeJob(sb.yc, "peerPing", 0);
+        	new OnePeerPingBusyThread(sb.yc).start();
             //doPeerPing = true;
         }
 
@@ -272,11 +271,12 @@ public class ConfigBasic {
         prop.put("lang_browser", "0"); // for client browser language dependent
         prop.put("lang_de", "0");
         prop.put("lang_fr", "0");
-        prop.put("lang_cn", "0");
+        prop.put("lang_zh", "0");
         prop.put("lang_ru", "0");
         prop.put("lang_uk", "0");
         prop.put("lang_en", "0");
         prop.put("lang_ja", "0");
+        prop.put("lang_el", "0");
         if ("default".equals(lang)) {
             prop.put("lang_en", "1");
         } else {
@@ -285,24 +285,26 @@ public class ConfigBasic {
         // set label class (green background) for active translation
         if (lang.equals("browser")) {
             List<String> l = Translator.activeTranslations();
-            prop.put("active_cn", l.contains("cn") ? "label-success" : "");
-            prop.put("active_de", l.contains("de") ? "label-success" : "");
-            prop.put("active_fr", l.contains("fr") ? "label-success" : "");
-            prop.put("active_hi", l.contains("hi") ? "label-success" : "");
-            prop.put("active_ja", l.contains("ja") ? "label-success" : "");
-            prop.put("active_ru", l.contains("ru") ? "label-success" : "");
-            prop.put("active_uk", l.contains("uk") ? "label-success" : "");
-            prop.put("active_en", "label-success");
+            prop.put("active_zh", l.contains("zh") ? "2" : "1");
+            prop.put("active_de", l.contains("de") ? "2" : "1");
+            prop.put("active_fr", l.contains("fr") ? "2" : "1");
+            prop.put("active_hi", l.contains("hi") ? "2" : "1");
+            prop.put("active_ja", l.contains("ja") ? "2" : "1");
+            prop.put("active_el", l.contains("el") ? "2" : "1");
+            prop.put("active_ru", l.contains("ru") ? "2" : "1");
+            prop.put("active_uk", l.contains("uk") ? "2" : "1");
+            prop.put("active_en", "2");
             
         } else {
-            prop.put("active_de", "");
-            prop.put("active_fr", "");
-            prop.put("active_hi", "");
-            prop.put("active_cn", "");
-            prop.put("active_ru", "");
-            prop.put("active_uk", "");
-            prop.put("active_en", "");
-            prop.put("active_ja", "");
+            prop.put("active_de", "0");
+            prop.put("active_fr", "0");
+            prop.put("active_hi", "0");
+            prop.put("active_zh", "0");
+            prop.put("active_ru", "0");
+            prop.put("active_uk", "0");
+            prop.put("active_en", "0");
+            prop.put("active_ja", "0");
+            prop.put("active_el", "0");
         }
         return prop;
     }

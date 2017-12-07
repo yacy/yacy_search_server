@@ -938,14 +938,14 @@ Replace the word "MySearch" with your own message==Заменить слово "
 
 #File: ConfigSearchPage_p.html
 #---------------------------
+<html lang="en">==<html lang="ru">
 Search Page<==Страница поиска<
 >Search Result Page Layout Configuration<==>Конфигурация макета страницы результатов поиска<
 Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==Ниже приведён общий макет страницы результатов поиска. Отметьте компоненты, которые должны быть отображены.
 To change colors and styles use the ==Изменить цвета, стили и скины вы можете 
 >Appearance<==>здесь<
  menu for different skins.==.
-Other portal settings can be adjusted in==Другие настройки портала могут быть изменены на 
->Generic Search Portal<==>странице интеграции поиска<
+Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.==Другие настройки портала могут быть изменены на Меню <a href="ConfigPortal_p.html">странице интеграции поиска</a>.
 >Page Template<==>Макет страницы<
 >Administration<==>Администрирование<
 >Web Search<==>Вэб-поиск<
@@ -1604,6 +1604,7 @@ from index==из индекса
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="ru">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Поиск
 #kiosk mode==режим киоска
 >Search<==>Поиск<
@@ -1657,14 +1658,12 @@ latest first==сначала последние
 multiple words shall appear near==слова должны быть рядом
 doublequotes==двойные кавычки
 prefer given language==предпочитать указанный язык
-an ISO639 2-letter code==двухбуквенный языковой код ISO639
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==двухбуквенный языковой код <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a>
 heuristics==эвристики
 add search results from ==добавить результаты из 
 Search Navigation==Навигация по поиску
-keyboard shotcuts==Назначения клавиш
-tab or page-up==Tab или PgUp
+keyboard shortcuts==Назначения клавиш
 next result page==следующая страница результатов
-page-down==PgDn
 previous result page==предыдущая страница результатов
 automatic result retrieval==Вывод результатов
 browser integration==Интеграция в браузер
@@ -2541,7 +2540,7 @@ Memory Settings==Настройки оперативной памяти
 Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Резервирование динамической памяти для Java
 "Set"=="Сохранить"
 Resource Observer==Обзор ресурсов
-reset state==сбросить состояние
+Reset state==сбросить состояние
 > free space==> свободного места
 disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Остановить <abbr title="Distributed Hash Table">DHT</abbr>-приём при достижении
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Изменения будут применены после <strong>перезапуска</strong> YaCy
@@ -4087,10 +4086,9 @@ and contributors, CC-BY-SA==и участники, лицензия CC-BY-SA
 >Media<==>Медиа<
 #>URL<==>URL-адрес<
 > of==> из 
-g> local,==g> локально,
-g> remote),==g> удалённо),
-> from==> из
-remote YaCy peers.==удалённых узлов YaCy.
+> local,==> локально,
+remote from==удалённо из
+YaCy peers).==узлов YaCy).
 >search<==>Поиск<
 #-----------------------------
 

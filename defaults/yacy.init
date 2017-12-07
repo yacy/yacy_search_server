@@ -860,6 +860,8 @@ search.result.noreferrer=false
 # search result lines may show additional information for each search hit
 # these information pieces may be switched on or off
 search.result.show.keywords = false
+# Maximum number of keywords initially displayed. The eventual remaining ones can then be expanded.
+search.result.keywords.firstMaxCount = 100
 search.result.show.date = true
 search.result.show.size = false
 search.result.show.metadata = false
@@ -885,6 +887,9 @@ search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,lang
 # max number of items displayed in search navigators
 search.navigation.maxcount=100
 
+# max number of items displayed in the dates navigator
+search.navigation.dates.maxcount=640
+
 # search result verification and snippet fetch caching rules
 # each search result can be verified byloading the link from the web
 # this can be enhanced using a cache. In some cases it may be appropriate
@@ -907,6 +912,11 @@ search.excludehosth=
 # the cases of nocache, iffresh and ifexist causes an index deletion
 search.verify.delete = true
 
+# If enabled, the results are sorted in the browser using Javascript.
+# This usually improves ranking accuracy, but doesn't work well for users
+# who have Javascript disabled, are using screen readers, or are on slow computers.
+search.jsresort = false
+
 # remote search details
 remotesearch.maxcount = 10
 remotesearch.maxtime = 3000
@@ -915,6 +925,8 @@ remotesearch.result.store=true
 remotesearch.result.store.maxsize=-1
 remotesearch.maxload.rwi=8.0
 remotesearch.maxload.solr=4.0
+# When available on the target peer, whether https should be preferred to perform remote search
+remotesearch.https.preferred = false
 
 # Control whether remote Solr instances responses should be binary encoded. Responses are transferred as XML when set to false. 
 remote.solr.binaryResponse.enabled=true
@@ -1046,6 +1058,9 @@ publicSearchpage = true
 # if this is disabled, then the user must navigate manually from the search page
 # to /Status.html to get the main memu bar back
 publicTopmenu = true
+
+# set to true to include a login link/status in the search page public top navigation bar
+search.publicTopNavBar.login = true
 
 # Wiki access rights
 # the built-in wiki system allows by default only that the administrator is allowed to make changes

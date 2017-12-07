@@ -252,19 +252,26 @@ public class RemoteSearch extends Thread {
         
         log.info("preparing remote search: shortmem=" + (shortmem ? "true" : "false") + ", indexingQueueSize=" + indexingQueueSize +
                 ", redundancy=" + redundancy + ", minage=" + minage + ", dhtPeers=" + dhtPeers.size() + ", robinsonpeers=" + robinsonPeers.size() + ", health: " + (healthMessage.length() > 0 ? healthMessage.substring(2) : "perfect"));
-        
+
+        /* Computing Solr facets is not relevant for remote Solr results and adds unnecessary CPU load on remote peers :
+         * facets count the total number of matching results per facet field, but we only fetch here at most 'count' results. The remaining part
+         * is not to be retrieved from remote peers even if making a new request filtering on one of these fields,
+         * as there is no insurance the same remote peers would be selected. What's more, remote results can contain many
+         * duplicates that would be filtered when adding them to the event node stack.
+         */
+        final boolean useFacets = false;
         
         // start solr searches
         final int targets = dhtPeers.size() + robinsonPeers.size();
         if (!sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
-            final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom, start == 0, event.excludeintext_image);
+            final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom, useFacets, event.excludeintext_image);
             for (Seed s: robinsonPeers) {
 				if (MemoryControl.shortStatus()
 						|| Memory.load() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR,
 								SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR_DEFAULT)) {
 					continue;
 				}
-                Thread t = solrRemoteSearch(event, solrQuery, start, count, s, targets, blacklist);
+                Thread t = solrRemoteSearch(event, solrQuery, start, count, s, targets, blacklist, useFacets, true);
                 event.nodeSearchThreads.add(t);
             }
         }
@@ -365,6 +372,8 @@ public class RemoteSearch extends Thread {
      * @param targetPeer the target of the Solr query. When null, the query will run on this local peer.
      * @param partitions the Solr query "partitions" parameter. Ignored when set to zero.
      * @param blacklist the blacklist to use. Can be empty but must not be null.
+     * @param useSolrFacets when true, use Solr computed facets when possible to update the event navigators counters
+     * @param incrementNavigators when true, increment event navigators either with facet counts or with individual results
      * @return the created and running Thread instance
      */
     public static Thread solrRemoteSearch(
@@ -374,7 +383,9 @@ public class RemoteSearch extends Thread {
                     final int count,
                     final Seed targetPeer,
                     final int partitions,
-                    final Blacklist blacklist) {
+                    final Blacklist blacklist,
+                    final boolean useSolrFacets,
+                    final boolean incrementNavigators) {
         
         //System.out.println("*** debug-remoteSearch ***:" + ConcurrentLog.stackTrace());
         
@@ -396,7 +407,9 @@ public class RemoteSearch extends Thread {
                                         count,
                                         targetPeer == null ? event.peers.mySeed() : targetPeer,
                                         partitions,
-                                        blacklist);
+                                        blacklist,
+                                        useSolrFacets,
+                                        incrementNavigators);
                         if (urls >= 0) {
                             // urls is an array of url hashes. this is only used for log output
                             event.peers.mySeed().incRI(urls);

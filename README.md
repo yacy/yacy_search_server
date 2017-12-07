@@ -1,4 +1,5 @@
 # YaCy
+[![Build Status](https://travis-ci.org/yacy/yacy_search_server.svg?branch=master)](https://travis-ci.org/yacy/yacy_search_server)
 
 [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/yacy/yacy_search_server/tree/master/docker)
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
@@ -49,11 +50,11 @@ The source code is inside the release package (see /source and /htroot).
 ## Where is the documentation?
 
 Documentation can be found at:
-- (Home Page)        http://yacy.net/
+- (Home Page)        https://yacy.net/
 - (German Forum)     http://forum.yacy.de/
 - (Wiki:de)          http://www.yacy-websuche.de/wiki/index.php/De:Start
 - (Wiki:en)          http://www.yacy-websearch.net/wiki/index.php/En:Start
-- (Tutorial Videos)  http://yacy.net/en/Tutorials.html and http://yacy.net/de/Lehrfilme.html
+- (Tutorial Videos)  https://yacy.net/en/Tutorials.html and https://yacy.net/de/Lehrfilme.html
 
 Every of these locations has a (YaCy) search functionality which combines
 all these locations into one search result.
@@ -61,11 +62,11 @@ all these locations into one search result.
 
 ## Dependencies? What other software do I need?
 
-You need java 1.7 or later to run YaCy, nothing else.
-Please download it from http://www.java.com
+You need Java 1.8 or later to run YaCy, nothing else (Java 1.7 can still be used to run the main [1.92/9000 release](https://github.com/yacy/yacy_search_server/releases/tag/Release_1.92) )
+Please download it from https://www.java.com
 
-YaCy also runs on IcedTea7.
-See http://icedtea.classpath.org
+YaCy also runs on Iced Tea 3.
+See https://icedtea.classpath.org
 
 NO OTHER SOFTWARE IS REQUIRED!
 (you don't need apache, tomcat or mysql or whatever)
@@ -159,7 +160,7 @@ open http://localhost:8090/ConfigHTCache_p.html and set a new size.
 ## Join the development!
 
 YaCy was created with the help of many. About 30 programmers have helped,
-a list of some of them can be seen here: http://yacy.net/en/Join.html
+a list of some of them can be seen here: https://yacy.net/en/Join.html
 Please join us!
 
 
@@ -176,7 +177,7 @@ Please clone our code and help with development!
 The code is licensed under the GPL v2.
 
 Compiling YaCy:
-- you need Java 1.7 or later and [Apache Ant](http://ant.apache.org/)
+- you need Java 1.8 or later and [Apache Ant](https://ant.apache.org/)
 - just compile: "ant clean all" - then you can "./startYACY.sh" or "./startYACY.bat"
 - create a release tarball: "ant dist"
 - create a Mac OS release: "ant distMacApp" (works only on a Mac)

@@ -58,7 +58,7 @@ import org.jwat.warc.WarcRecord;
  */
 public class WarcImporter extends Thread implements Importer {
 
-    static public Importer job; // static object to assure only one importer is running (if started from a servlet, this object is used to store the thread)
+    static public WarcImporter job; // static object to assure only one importer is running (if started from a servlet, this object is used to store the thread)
 
     private final InputStream source; // current input warc archive
     private String name; // file name of input source
@@ -67,8 +67,10 @@ public class WarcImporter extends Thread implements Importer {
     private long startTime; // (for statistic)
     private final long sourceSize; // length of the input source (for statistic)
     private long consumed; // bytes consumed from input source (for statistic)
+    private boolean abort = false; // flag to signal stop of import
 
     public WarcImporter(InputStream f) {
+    	super("WarcImporter - from InputStream");
         source = f;
         recordCnt = 0;
         sourceSize = -1;
@@ -87,6 +89,7 @@ public class WarcImporter extends Thread implements Importer {
     }
 
     public WarcImporter(File f) throws FileNotFoundException{
+       super("WarcImporter - from file " + f.getName());
        name = f.getName();
        sourceSize = f.length();
        source = new FileInputStream(f);
@@ -107,7 +110,7 @@ public class WarcImporter extends Thread implements Importer {
 
         WarcReader localwarcReader = WarcReaderFactory.getReader(f);
         WarcRecord wrec = localwarcReader.getNextRecord();
-        while (wrec != null) {
+        while (wrec != null && !abort) {
 
             HeaderLine hl = wrec.getHeader(WarcConstants.FN_WARC_TYPE);
             if (hl != null && hl.value.equals(WarcConstants.RT_RESPONSE)) { // filter responses
@@ -184,6 +187,13 @@ public class WarcImporter extends Thread implements Importer {
         } catch (IOException ex) {
             ConcurrentLog.info("WarcImporter", ex.getMessage());
         }
+    }
+    
+    /**
+     * Set the flag to stop import
+     */
+    public void quit() {
+        this.abort = true;
     }
 
     /**

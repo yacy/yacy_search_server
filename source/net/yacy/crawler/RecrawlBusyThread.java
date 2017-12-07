@@ -62,6 +62,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
 
     public RecrawlBusyThread(Switchboard xsb) {
         super(3000, 1000); // set lower limits of cycle delay
+        setName(THREAD_NAME);
         this.setIdleSleep(10*60000); // set actual cycle delays
         this.setBusySleep(2*60000);
         this.setPriority(Thread.MIN_PRIORITY);

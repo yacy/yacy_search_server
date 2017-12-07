@@ -423,6 +423,22 @@ p.tags {
   line-height: 1.4;
 }
 
+/* Button to expand/collapse tags beyond the initial number of tags display limit */
+.expandKeywordsBtn {
+	margin-top: 0.2em;
+}
+
+.expandKeywordsBtn[aria-expanded="true"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-left class */
+	content: "\e079\e079";
+}
+
+.expandKeywordsBtn[aria-expanded="false"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-right class */
+	content: "\e080\e080";
+}
+
+
 div.bookmark p {
   margin:1px;
 }
@@ -565,15 +581,15 @@ div.urlactions a {
   margin: 0px 0px 0px 3px;
 }
 
-a.bookmarklink:hover, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
+a.bookmarklink:hover, a.bookmarklink:focus, div.searchresults:hover a.bookmarklink, div.searchresults.hover a.bookmarklink {
   background:url(grafics/bookmark.gif) center center no-repeat;
 }
 
-a.recommendlink:hover, div.searchresults:hover a.recommendlink, div.searchresults.hover a.recommendlink {
+a.recommendlink:hover, a.recommendlink:focus, div.searchresults:hover a.recommendlink, div.searchresults.hover a.recommendlink {
   background:url(grafics/plus.gif) center center no-repeat;
 }
 
-a.deletelink:hover, div.searchresults:hover a.deletelink, div.searchresults.hover a.deletelink {
+a.deletelink:hover, a.deletelink:focus, div.searchresults:hover a.deletelink, div.searchresults.hover a.deletelink {
   background:url(grafics/minus.gif) center center no-repeat;
 }
 

@@ -71,6 +71,13 @@ public class SizeLimitedSet<E> extends AbstractSet<E> implements Set<E>, Cloneab
     public void clear() {
         map.clear();
     }
+    
+    /**
+     * @return true when the size limit has been exceeded at least one time
+     */
+    public boolean isLimitExceeded() {
+		return this.map.isLimitExceeded();
+	}
 
     @Override
     @SuppressWarnings("unchecked")

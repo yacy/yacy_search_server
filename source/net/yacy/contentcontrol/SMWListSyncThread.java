@@ -13,7 +13,7 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 
-public class SMWListSyncThread {
+public class SMWListSyncThread implements Runnable {
 
 	private final Switchboard sb;
 	private Boolean locked = false;
@@ -55,6 +55,7 @@ public class SMWListSyncThread {
 		return ret;
 	}
 
+	@Override
 	public final void run() {
 
 		if (!this.locked) {

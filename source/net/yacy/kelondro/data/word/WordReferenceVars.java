@@ -31,6 +31,7 @@ import java.util.Comparator;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
 import net.yacy.cora.date.MicroDate;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -66,6 +67,9 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
             posinphrase, posofphrase,
             urlcomps, urllength,
             wordsintext, wordsintitle;
+    
+    /** Stored average words distance, when it can not be processed from positions because created from a WordReferenceRow instance */
+    private int distance;
     private int virtualAge;
     private Queue<Integer> positions; // word positons of joined references
     private double termFrequency;
@@ -109,6 +113,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         } else {
             this.positions = null;
         }
+        this.distance = 0; // stored distance value is set to zero here because it has to be calculated from positions
         this.posinphrase = posinphrase;
         this.posintext = posintext;
         this.posofphrase = posofphrase;
@@ -139,6 +144,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         } else {
             this.positions = null;
         }
+        this.distance = e.distance();
         this.posinphrase = e.posinphrase();
         this.posintext = e.posintext();
         this.posofphrase = e.posofphrase();
@@ -154,7 +160,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     /**
      * initializer for special poison object
      */
-    public WordReferenceVars() {
+    private WordReferenceVars() {
         this.flags = null;
         this.lastModified = 0;
         this.language = null;
@@ -165,6 +171,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.lother = 0;
         this.phrasesintext = 0;
         this.positions = null;
+        this.distance = 0;
         this.posinphrase = 0;
         this.posintext = 0;
         this.posofphrase = 0;
@@ -209,6 +216,13 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     @Override
     public byte[] getLanguage() {
         return ASCII.getBytes(this.language);
+    }
+    
+    /**
+     * @return the ISO 639 language code of the reference
+     */
+    public String getLanguageString() {
+    	return this.language;
     }
 
     @Override
@@ -268,6 +282,16 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     public Collection<Integer> positions() {
         return this.positions;
     }
+    
+    @Override
+    public int distance() {
+    	int value =  super.distance();
+    	if(value == 0) {
+    		/* Calcualtion from positions returned 0 : let's try with the stored value */
+    		value = this.distance;
+    	}
+    	return value;
+    }
 
     @Override
     public int posofphrase() {
@@ -292,6 +316,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
                 this.type,          // type of document
                 this.llocal,        // outlinks to same domain
                 this.lother,        // outlinks to other domain
+                this.distance(),    // // average distance of multi search query words
                 this.flags          // attributes to the url and to the word according the url
         );
     }
@@ -369,7 +394,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.posintext > (v = other.posintext)) this.posintext = v;
 
         // calculate and remember min distance
-        if (this.positions != null || other.positions != null) {
+        if (this.distance() > 0 || other.distance() > 0) {
             int odist = other.distance();
             int dist = this.distance();
             if (odist > 0 && odist < dist) {
@@ -406,7 +431,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (this.posintext < (v = other.posintext)) this.posintext = v;
 
         // calculate and remember max distance
-        if (this.positions != null || other.positions != null) {
+        if (this.distance() > 0 || other.distance() > 0) {
             int odist = other.distance();
             int dist = this.distance();
             if (odist > 0 && odist > dist) {

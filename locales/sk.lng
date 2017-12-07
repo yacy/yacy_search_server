@@ -292,6 +292,7 @@ YaCy: Help==YaCy: Pomoc
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="sk">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Vyhladavacia stranka
 # NOT USED
 #P2P WEB SEARCH==P2P Internetov&eacute; Vyhlad&aacute;vanie

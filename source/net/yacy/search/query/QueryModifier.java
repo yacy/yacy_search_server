@@ -29,6 +29,8 @@ import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.DateDetection;
@@ -36,7 +38,9 @@ import net.yacy.kelondro.util.ISO639;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 
-
+/**
+ * Handle search query modifiers 
+ */
 public class QueryModifier {
 
     private final StringBuilder modifier;
@@ -103,28 +107,7 @@ public class QueryModifier {
         querystring = filetypeParser(querystring, "filetype:");
         
         // parse site
-        final int sp = querystring.indexOf("site:", 0);
-        if (sp >= 0) {
-            int ftb = querystring.indexOf(' ', sp);
-            if ( ftb == -1 ) {
-                ftb = querystring.length();
-            }
-            this.sitehost = querystring.substring(sp + 5, ftb);
-            querystring = querystring.replace("site:" + this.sitehost, "");
-            while ( this.sitehost.length() > 0 && this.sitehost.charAt(0) == '.' ) {
-                this.sitehost = this.sitehost.substring(1);
-            }
-            while ( sitehost.endsWith(".") ) {
-                this.sitehost = this.sitehost.substring(0, this.sitehost.length() - 1);
-            }
-            try {
-                this.sitehash = DigestURL.hosthash(this.sitehost, this.sitehost.startsWith("ftp.") ? 21 : 80);
-            } catch (MalformedURLException e) {
-                this.sitehash = "";
-                ConcurrentLog.logException(e);
-            }
-            add("site:" + this.sitehost);
-        }
+        querystring = parseSiteModifier(querystring);
         
         // parse author
         final int authori = querystring.indexOf("author:", 0);
@@ -221,6 +204,7 @@ public class QueryModifier {
 
     /**
      * Parse query string for filetype (file extension) parameter
+     * and adjust parameter to lowercase
      * @param querystring
      * @param filetypePrefix "filetype:"
      * @return querystring with filetype parameter removed
@@ -230,8 +214,9 @@ public class QueryModifier {
         if ( ftp >= 0 ) {
             int ftb = querystring.indexOf(' ', ftp);
             if ( ftb < 0 ) ftb = querystring.length();
-            filetype = querystring.substring(ftp + filetypePrefix.length(), ftb);
-            querystring = querystring.replace(filetypePrefix + filetype, "");
+            String tmpqueryparameter = querystring.substring(ftp + filetypePrefix.length(), ftb);
+            querystring = querystring.replace(filetypePrefix + tmpqueryparameter, ""); // replace prefix:Text  as found
+            filetype = tmpqueryparameter.toLowerCase(Locale.ROOT); // file extension are always compared lowercase, can be converted here for further processing
             while ( !filetype.isEmpty() && filetype.charAt(0) == '.' ) {
                 filetype = filetype.substring(1);
             }
@@ -241,6 +226,53 @@ public class QueryModifier {
         }
         return querystring;
     }
+    
+	/**
+	 * Parses the query string for any eventual site modifier (site:), adjust it to
+	 * lower case, and fill the {@link #sitehost} and {@link #sitehash} attributes
+	 * accordingly.
+	 * 
+	 * @param querystring
+	 *            the query string. Must not be null.
+	 * @return the query string with site operator removed
+	 */
+	protected String parseSiteModifier(String querystring) {
+		final String modifierPrefix = "site:";
+		final int sp = querystring.indexOf(modifierPrefix, 0);
+        if (sp >= 0) {
+            int ftb = querystring.indexOf(' ', sp);
+            if ( ftb == -1 ) {
+                ftb = querystring.length();
+            }
+            this.sitehost = querystring.substring(sp + modifierPrefix.length(), ftb);
+            querystring = querystring.replace(modifierPrefix + this.sitehost, "");
+            while ( this.sitehost.length() > 0 && this.sitehost.charAt(0) == '.' ) {
+                this.sitehost = this.sitehost.substring(1);
+            }
+            while ( sitehost.endsWith(".") ) {
+                this.sitehost = this.sitehost.substring(0, this.sitehost.length() - 1);
+            }
+            
+            try {
+            	/* Internationalized domain names support : convert to the same ASCII Compatible Encoding (ACE) representation that is used in normalized URLs */
+				this.sitehost = MultiProtocolURL.toPunycode(this.sitehost);
+			} catch (final PunycodeException e1) {
+                ConcurrentLog.logException(e1);
+			}
+            
+            /* Domain name in an URL is case insensitive : convert now modifier to lower case for further processing over normalized URLs */
+            this.sitehost = this.sitehost.toLowerCase(Locale.ROOT);
+            
+            try {
+                this.sitehash = DigestURL.hosthash(this.sitehost, this.sitehost.startsWith("ftp.") ? 21 : 80);
+            } catch (MalformedURLException e) {
+                this.sitehash = "";
+                ConcurrentLog.logException(e);
+            }
+            add(modifierPrefix + this.sitehost);
+        }
+		return querystring;
+	}
     
     public void add(String m) {
         if (modifier.length() > 0 && modifier.charAt(modifier.length() - 1) != ' ' && m != null && m.length() > 0) modifier.append(' ');

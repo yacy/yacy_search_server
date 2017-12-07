@@ -33,7 +33,7 @@ import net.yacy.data.ymark.YMarkUtil;
 import net.yacy.data.ymark.YMarkXBELImporter;
 import net.yacy.document.Parser.Failure;
 import net.yacy.kelondro.blob.Tables;
-import net.yacy.kelondro.workflow.InstantBusyThread;
+import net.yacy.kelondro.workflow.OneTimeBusyThread;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -71,7 +71,7 @@ public class import_ymark {
                 	empty = true;
                 }
                 YMarkAutoTagger autoTagger = new YMarkAutoTagger(autoTaggingQueue, sb.loader, sb.tables.bookmarks, bmk_user, merge);
-                InstantBusyThread.oneTimeJob(autoTagger, 0);
+                OneTimeBusyThread.startFromRunnable(autoTagger, 0);
         	}
 
             if(isAdmin && post.containsKey("table") && post.get("table").length() > 0) {
@@ -109,8 +109,8 @@ public class import_ymark {
                     MonitoredReader reader = new MonitoredReader(new InputStreamReader(stream, StandardCharsets.UTF_8), 1024*16, bytes.length);
                     if(post.get("importer").equals("html") && reader != null) {
                         final YMarkHTMLImporter htmlImporter = new YMarkHTMLImporter(reader, queueSize, root);
-                        InstantBusyThread.oneTimeJob(htmlImporter, 0);
-                        InstantBusyThread.oneTimeJob(htmlImporter.getConsumer(sb, bmk_user, autoTaggingQueue, autotag, empty, indexing, medialink), 0);
+                        OneTimeBusyThread.startFromRunnable(htmlImporter, 0);
+                        OneTimeBusyThread.startFromRunnable(htmlImporter.getConsumer(sb, bmk_user, autoTaggingQueue, autotag, empty, indexing, medialink), 0);
                         prop.put("status", "1");
                     } else if(post.get("importer").equals("xbel") && reader != null) {
                         final YMarkXBELImporter xbelImporter;
@@ -123,13 +123,13 @@ public class import_ymark {
                             prop.put("status", "0");
                             return prop;
                         }
-                        InstantBusyThread.oneTimeJob(xbelImporter, 0);
-                        InstantBusyThread.oneTimeJob(xbelImporter.getConsumer(sb, bmk_user, autoTaggingQueue, autotag, empty, indexing, medialink), 0);
+                        OneTimeBusyThread.startFromRunnable(xbelImporter, 0);
+                        OneTimeBusyThread.startFromRunnable(xbelImporter.getConsumer(sb, bmk_user, autoTaggingQueue, autotag, empty, indexing, medialink), 0);
                         prop.put("status", "1");
                     } else if(post.get("importer").equals("json") && reader != null) {
                         YMarkJSONImporter jsonImporter;
                         jsonImporter = new YMarkJSONImporter(reader, queueSize, root);
-                        InstantBusyThread.oneTimeJob(jsonImporter, 0);
+                        OneTimeBusyThread.startFromRunnable(jsonImporter, 0);
                         while ((bmk = jsonImporter.take()) != YMarkEntry.POISON) {
                         	putBookmark(sb, bmk_user, bmk, autoTaggingQueue, autotag, empty, indexing, medialink);
                         }
@@ -207,8 +207,8 @@ public class import_ymark {
 
         			mreader.addChangeListener(sb.tables.bookmarks.getProgressListener("DMOZImporter"));
         			DMOZImporter.setDepth(6);
-        			InstantBusyThread.oneTimeJob(DMOZImporter, 0);
-        			InstantBusyThread.oneTimeJob(DMOZImporter.getConsumer(sb, bmk_user, autoTaggingQueue, autotag, empty, indexing, medialink), 0);
+        			OneTimeBusyThread.startFromRunnable(DMOZImporter, 0);
+        			OneTimeBusyThread.startFromRunnable(DMOZImporter.getConsumer(sb, bmk_user, autoTaggingQueue, autotag, empty, indexing, medialink), 0);
 
         			prop.put("status", "1");
 				} catch (final Exception e) {

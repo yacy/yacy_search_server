@@ -8,11 +8,28 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand hidden-xs" id="navbar-brand" href="#[promoteSearchPageGreeting.homepage]#" style="position:absolute;top:-6px;display:inline;white-space:nowrap;">
-        <img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">&nbsp;<span id="greeting" style="position:absolute; top:50%;float:left;"></span>
+      <a class="navbar-brand hidden-xs" id="navbar-brand" href="#[promoteSearchPageGreeting.homepage]#" style="margin-top:-6px;white-space:nowrap;">
+        <img id="greeting-icon" class="yacylogo" src="#[promoteSearchPageGreeting.smallImage]#" alt="#[promoteSearchPageGreeting.imageAlt]#" 
+        	style="height:auto; width:auto; max-width:200px; max-height:32px;vertical-align:middle;float:left;">&nbsp;
+        <span id="greeting"></span>
       </a>
     </div>
     <div class="navbar-collapse collapse">
+    <ul class="nav navbar-nav">
+      #(showLogin)#::
+      <li id="header_login" title="You are authenticated as #[userName]#" class="navbar-text">
+      	<span class="glyphicon glyphicon-user text-info"></span>
+     	<span>#[userName]#</span>
+      </li>
+      ::
+      <li id="header_login">
+        <a title="Log in to use extended search features" href="#[loginURL]#">
+	      	<span>Log in</span>
+        	<span class="glyphicon glyphicon-log-in"></span>
+        </a>
+      </li>
+      #(/showLogin)#
+    </ul>
     <ul class="nav navbar-nav navbar-right">
       <li id="header_search" class="dropdown">
         <a href="#" data-toggle="dropdown" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false" title="Search Interfaces">
@@ -20,7 +37,7 @@
         	<span class="visible-sm glyphicon glyphicon-search"><b class="caret"></b></span>
         </a>
         <ul class="dropdown-menu" role="menu">
-          <li id="header_websearch"><a href="index.html" onclick="this.href='index.html?handover='+document.searchform.search.value">Web Search</a></li>
+          <li id="header_websearch"><a href="index.html#(authSearch)#::?auth#(/authSearch)#" onclick="this.href='index.html?#(authSearch)#::auth&#(/authSearch)#former='+document.searchform.search.value">Web Search</a></li>
           <li id="header_filesearch"><a href="yacyinteractive.html" onclick="this.href='yacyinteractive.html?handover='+document.searchform.search.value">File Search</a></li>
           <li id="header_comparesearch"><a href="compare_yacy.html?display=0">Compare Search</a></li>
           <li id="header_hostbrowser"><a href="HostBrowser.html?hosts=">Index Browser</a></li>

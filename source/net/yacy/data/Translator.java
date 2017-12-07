@@ -272,7 +272,7 @@ public class Translator {
         final String[] ms = CommonPattern.COMMA.split(
             "browser/Browser Language," +
             "default/English,de/Deutsch,fr/Fran&ccedil;ais,nl/Nederlands,it/Italiano,es/Espa&ntilde;ol,pt/Portug&ecirc;s,fi/Suomi,se/Svenska,dk/Dansk," +
-            "gr/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky,cn/&#27721;&#35821;/&#28450;&#35486;," +
+            "el/E&lambda;&lambda;&eta;v&iota;&kappa;&alpha;,sk/Slovensky,zh/&#27721;&#35821;/&#28450;&#35486;," +
             "ru/&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;,uk/&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;," + 
             "hi/&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;,ja/&#26085;&#26412;&#35486;"
             );
@@ -326,16 +326,23 @@ public class Translator {
      * @return list of language-codes of available/active translations
      */
     public static List<String> activeTranslations() {
-        Switchboard sb = Switchboard.getSwitchboard();
-        File localePath;
-        if (sb != null)
+        final Switchboard sb = Switchboard.getSwitchboard();
+        final File localePath;
+        if (sb != null) {
             localePath = sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
-        else
+        } else {
             localePath = new File ("DATA/LOCALE/htroot");
-        List<String> dirlist = new ArrayList<String>(); // get list of language subdirectories
-        File[] list = localePath.listFiles();
-        for (File f : list) {
-            if (f.isDirectory()) dirlist.add(f.getName()); // filter directories to add to result
+        }
+        final List<String> dirlist = new ArrayList<String>(); // get list of language subdirectories
+        if(localePath.isDirectory()) {
+        	final File[] list = localePath.listFiles();
+        	if(list != null) { // the list may be null on IO error
+        		for (final File f : list) {
+        			if (f.isDirectory()) {
+        				dirlist.add(f.getName()); // filter directories to add to result
+        			}
+        		}
+        	}
         }
         return dirlist;
     }

@@ -62,54 +62,56 @@ public class PerformanceQueues_p {
         	/* Check the transaction is valid : validation apply then for every uses of this post parameter */
         	TransactionManager.checkPostTransaction(header, post);
         	
-        	if(post.containsKey("defaultFile")){
-	            // TODO check file-path!
-	            final File value = new File(sb.getAppPath(), post.get("defaultFile", "defaults/yacy.init"));
-	            // check if value is readable file
-	            if(value.exists() && value.isFile() && value.canRead()) {
-	                defaultSettingsFile = value;
-	            }
-        	}
-            if (post.containsKey("Xmx")) {
-                int xmx = post.getInt("Xmx", 600); // default maximum heap size
-                if (OS.isWin32) xmx = Math.min(2000, xmx);
-                int xms = xmx; //Math.min(xmx, Math.max(90, xmx / 10));
-	            sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
-	            sb.setConfig("javastart_Xms", "Xms" + xms + "m");
-	            prop.put("setStartupCommit", "1");
-	            
-	            /* Acquire a transaction token for the restart operation */
-	            prop.put("setStartupCommit_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header, "/Steering.html"));
-            }
-            if(post.containsKey("diskFree")) {
-            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, post.getLong("diskFree", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT));
-            }
-            if(post.containsKey("diskFreeHardlimit")) {
-            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, post.getLong("diskFreeHardlimit", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT_DEFAULT));
-            	
-            	/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
-            	 * so we take only in account when the relate diskFreeHardlimit is set */
-				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE,
-						post.getBoolean("diskFreeAutoregulate"));
-            }
-			if (post.containsKey("diskUsed")) {
-				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE,
-						post.getLong("diskUsed", SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT));
-			}
-			if (post.containsKey("diskUsedHardlimit")) {
-				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT, post.getLong("diskUsedHardlimit",
-						SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT));
-				
-				/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
-				 * so we take only in account when the related diskFreeHardlimit is set */
-				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE,
-						post.getBoolean("diskUsedAutoregulate"));
-			}
-            if(post.containsKey("memoryAcceptDHT")) {
-            	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, post.getInt("memoryAcceptDHT", 50));
-            }
             if(post.containsKey("resetObserver")) {
+            	/* The the reset state button is pushed, we only perform this action and do not save other form field values at the same time */
             	MemoryControl.resetProperState();
+            } else {
+            	if(post.containsKey("defaultFile")){
+            		// TODO check file-path!
+            		final File value = new File(sb.getAppPath(), post.get("defaultFile", "defaults/yacy.init"));
+            		// check if value is readable file
+            		if(value.exists() && value.isFile() && value.canRead()) {
+            			defaultSettingsFile = value;
+            		}
+            	}
+            	if (post.containsKey("Xmx")) {
+            		int xmx = post.getInt("Xmx", 600); // default maximum heap size
+            		if (OS.isWin32) xmx = Math.min(2000, xmx);
+            		int xms = xmx; //Math.min(xmx, Math.max(90, xmx / 10));
+            		sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
+            		sb.setConfig("javastart_Xms", "Xms" + xms + "m");
+            		prop.put("setStartupCommit", "1");
+	            
+            		/* Acquire a transaction token for the restart operation */
+            		prop.put("setStartupCommit_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header, "/Steering.html"));
+            	}
+            	if(post.containsKey("diskFree")) {
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, post.getLong("diskFree", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT));
+            	}
+            	if(post.containsKey("diskFreeHardlimit")) {
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, post.getLong("diskFreeHardlimit", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT_DEFAULT));
+            	
+            		/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
+            		 * so we take only in account when the relate diskFreeHardlimit is set */
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE,
+            				post.getBoolean("diskFreeAutoregulate"));
+            	}
+            	if (post.containsKey("diskUsed")) {
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE,
+            				post.getLong("diskUsed", SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT));
+            	}
+            	if (post.containsKey("diskUsedHardlimit")) {
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT, post.getLong("diskUsedHardlimit",
+            				SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT));
+				
+            		/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
+            		 * so we take only in account when the related diskFreeHardlimit is set */
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE,
+            				post.getBoolean("diskUsedAutoregulate"));
+            	}
+            	if(post.containsKey("memoryAcceptDHT")) {
+            		sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, post.getInt("memoryAcceptDHT", 50));
+            	}
             }
         }
         final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : FileUtils.loadMap(defaultSettingsFile);

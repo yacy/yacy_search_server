@@ -87,9 +87,6 @@ public final class SwitchboardConstants {
      * connected to the YaCy-network</p>
      */
     public static final String PEER_PING                    = "30_peerping";
-    public static final String PEER_PING_METHOD_START       = "peerPing";
-    public static final String PEER_PING_METHOD_JOBCOUNT    = null;
-    public static final String PEER_PING_METHOD_FREEMEM     = null;
     public static final String PEER_PING_IDLESLEEP          = "30_peerping_idlesleep";
     public static final String PEER_PING_BUSYSLEEP          = "30_peerping_busysleep";
     // 40_peerseedcycle
@@ -98,9 +95,6 @@ public final class SwitchboardConstants {
      * <p>Name of the seed upload thread, providing the so-called seed-lists needed during bootstrapping</p>
      */
     public static final String SEED_UPLOAD                  = "40_peerseedcycle";
-    public static final String SEED_UPLOAD_METHOD_START     = "publishSeedList";
-    public static final String SEED_UPLOAD_METHOD_JOBCOUNT  = null;
-    public static final String SEED_UPLOAD_METHOD_FREEMEM   = null;
     public static final String SEED_UPLOAD_IDLESLEEP        = "40_peerseedcycle_idlesleep";
     public static final String SEED_UPLOAD_BUSYSLEEP        = "40_peerseedcycle_busysleep";
     // 50_localcrawl
@@ -111,9 +105,6 @@ public final class SwitchboardConstants {
      *
      */
     public static final String CRAWLJOB_LOCAL_CRAWL                             = "50_localcrawl";
-    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_START                = "coreCrawlJob";
-    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT             = "coreCrawlJobSize";
-    public static final String CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM              = "freemem";
     public static final String CRAWLJOB_LOCAL_CRAWL_IDLESLEEP                   = "50_localcrawl_idlesleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP                   = "50_localcrawl_busysleep";
     public static final String CRAWLJOB_LOCAL_CRAWL_LOADPREREQ                  = "50_localcrawl_loadprereq";    
@@ -148,9 +139,6 @@ public final class SwitchboardConstants {
      * <p>Name of the remote triggered crawl thread, responsible for processing a remote crawl received from another peer</p>
      */
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL                  = "62_remotetriggeredcrawl";
-    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START     = "remoteTriggeredCrawlJob";
-    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT  = "remoteTriggeredCrawlJobSize";
-    public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM   = null;
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP        = "62_remotetriggeredcrawl_idlesleep";
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP        = "62_remotetriggeredcrawl_busysleep";
  // 70_surrogates
@@ -163,18 +151,12 @@ public final class SwitchboardConstants {
     public static final String SURROGATES_LOADPREREQ           = "70_surrogates_loadprereq";
     public static final String SURROGATES_IDLESLEEP            = "70_surrogates_idlesleep";
     public static final String SURROGATES_BUSYSLEEP            = "70_surrogates_busysleep";
-    public static final String SURROGATES_METHOD_START         = "surrogateProcess";
-    public static final String SURROGATES_METHOD_JOBCOUNT      = "surrogateQueueSize";
-    public static final String SURROGATES_METHOD_FREEMEM       = "surrogateFreeMem";
     // 85_scheduler
     /**
      * <p><code>public static final String <strong>SCHEDULER</strong> = "85_scheduler"</code></p>
      * <p>The cleanup thread which is responsible for the start of scheduled processes from the API table</p>
      */
     public static final String SCHEDULER                    = "85_scheduler";
-    public static final String SCHEDULER_METHOD_START       = "schedulerJob";
-    public static final String SCHEDULER_METHOD_JOBCOUNT    = "schedulerJobSize";
-    public static final String SCHEDULER_METHOD_FREEMEM     = null;
     public static final String SCHEDULER_IDLESLEEP          = "85_scheduler_idlesleep";
     public static final String SCHEDULER_BUSYSLEEP          = "85_scheduler_busysleep";
     // 90_cleanup
@@ -183,9 +165,6 @@ public final class SwitchboardConstants {
      * <p>The cleanup thread which is responsible for pendant cleanup-jobs, news/ranking distribution, etc.</p>
      */
     public static final String CLEANUP                      = "90_cleanup";
-    public static final String CLEANUP_METHOD_START         = "cleanupJob";
-    public static final String CLEANUP_METHOD_JOBCOUNT      = "cleanupJobSize";
-    public static final String CLEANUP_METHOD_FREEMEM       = null;
     public static final String CLEANUP_IDLESLEEP            = "90_cleanup_idlesleep";
     public static final String CLEANUP_BUSYSLEEP            = "90_cleanup_busysleep";
     /**
@@ -310,6 +289,12 @@ public final class SwitchboardConstants {
     
     /** Default maximum system load allowing remote Solr searches */
     public static final float REMOTESEARCH_MAXLOAD_SOLR_DEFAULT = 4.0f;
+    
+    /** Key of the setting controlling whether https should be preferred for remote searches, when available on the target peer */
+    public static final String REMOTESEARCH_HTTPS_PREFERRED = "remotesearch.https.preferred";
+    
+    /** Default setting value controlling whether https should be preferred for remote searches, when available on the target peer */
+    public static final boolean REMOTESEARCH_HTTPS_PREFERRED_DEFAULT = false;
     
 	/**
 	 * Setting key to configure whether responses from remote Solr instances
@@ -567,8 +552,24 @@ public final class SwitchboardConstants {
     public static final String SEARCH_TARGET_SPECIAL_PATTERN  = "search.target.special.pattern"; // ie 'own' addresses in topframe, 'other' in iframe
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
+    
+    /** Key of the setting controlling whether search results resorting by browser JavaScript is enabled */
+    public static final String SEARCH_JS_RESORT = "search.jsresort";
+    
+    /** Default setting value controlling whether search results resorting by browser JavaScript is enabled */
+    public static final boolean SEARCH_JS_RESORT_DEFAULT = false;
+    
+    /** Key of the setting controlling whether the search public top navigation bar includes a login link/status */
+    public static final String SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN = "search.publicTopNavBar.login";
+    
+    /** Default setting value controlling whether the search public top navigation bar includes a login link/status */
+    public static final boolean SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT = true;
 
-    public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount"; // max lines displayed in standard search navigators/facets
+    /** Key of the setting controlling the max lines displayed in standard search navigators/facets */
+    public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount";
+    
+    /** Key of the setting controlling the max lines displayed in the dates navigator */
+    public static final String SEARCH_NAVIGATION_DATES_MAXCOUNT = "search.navigation.dates.maxcount";
     
     /** Key of the setting controlling whether a noreferrer link type should be added to search result links */
     public static final String SEARCH_RESULT_NOREFERRER = "search.result.noreferrer";
@@ -581,6 +582,18 @@ public final class SwitchboardConstants {
     
     /** Default setting value controlling whether the ranking score value should be displayed for each search result in the HTML results page */
     public static final boolean SEARCH_RESULT_SHOW_RANKING_DEFAULT = false;
+    
+    /** Key of the setting controlling whether a tags/keywords list should be displayed for each search result in the HTML results page */
+    public static final String SEARCH_RESULT_SHOW_KEYWORDS = "search.result.show.keywords";
+    
+    /** Default setting value controlling whether the ranking score value should be displayed for each search result in the HTML results page */
+    public static final boolean SEARCH_RESULT_SHOW_KEYWORDS_DEFAULT = false;
+    
+    /** Key of the setting controlling the maximum number of tags/keywords initially displayed for each search result in the HTML results page (the eventual remaining ones can then be expanded) */
+    public static final String SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT = "search.result.keywords.firstMaxCount";
+    
+    /** Default setting value controlling the maximum number of tags/keywords initially displayed for each search result in the HTML results page (the eventual remaining ones can then be expanded) */
+    public static final int SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT_DEFAULT = 100;
 
     /**
      * ranking+evaluation

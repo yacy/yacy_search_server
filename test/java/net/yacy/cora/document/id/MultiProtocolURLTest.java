@@ -14,10 +14,12 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import org.junit.Test;
-//import junit.framework.TestCase;
 
+/**
+ * Automated unit tests for the {@link MultiProtocolURL} class.
+ */
 public class MultiProtocolURLTest {
-
+	
     @Test
     public void testSessionIdRemoval() throws MalformedURLException {
         String[][] testURIs = new String[][]{
@@ -137,6 +139,7 @@ public class MultiProtocolURLTest {
             
             new String[]{"http://www.yacy.net?data=1/2/3", "www.yacy.net"},
             new String[]{"http://www.yacy.net?url=http://test.com", "www.yacy.net"},
+            new String[]{"http://www.yacy.net#fragment", "www.yacy.net"},
             /* Punycode encoded internationalized domain name : Algeria TLD */
             new String[]{"http://xn--ggbdmbaav3cjl1c9heugfv.xn--lgbbat1ad8j/", "xn--ggbdmbaav3cjl1c9heugfv.xn--lgbbat1ad8j"},
             /* Internationalized domain name : Algeria TLD */
@@ -169,11 +172,19 @@ public class MultiProtocolURLTest {
         Map<String, String> testurls = new HashMap<String, String>();
         // ( 1. parameter = urlstring to test, 2. parameter = expected protocol)
         testurls.put("http://host.com",  "http");
+        testurls.put("HTTP://EXAMPLE.COM",  "http");
+        testurls.put("https://host.com", "https");
         testurls.put("HTTPS://host.com", "https");
+        testurls.put("Ftp://example.org",   "ftp");
+        testurls.put("FTP://EXAMPLE.ORG",   "ftp");
         testurls.put("Ftp://host.com",   "ftp");
+        testurls.put("smb://host.com",   "smb");
         testurls.put("SMB://host.com",   "smb");
         testurls.put("/file.com",        "file");
         testurls.put("file://host.com/file.com", "file");
+        testurls.put("file:///file1.txt", "file");
+        testurls.put("FILE:///file2.txt", "file");
+        testurls.put("MAILTO:Abc@host.com",      "mailto");
         testurls.put("MailTo:Abc@host.com",      "mailto");
 
         for (String txt : testurls.keySet()) {
@@ -258,10 +269,12 @@ public class MultiProtocolURLTest {
         Map<String, String> testurls = new HashMap<String, String>();
         //  key=testurl, value=result
         testurls.put("path/file.xml","xml"); // easiest
+        testurls.put("/FILE.GIF","gif"); // easy upper case
         testurls.put("path/file?h.pdf",""); // file w/o extension
         testurls.put("file.html?param=h.pdf","html"); // dot in query part
         testurls.put("url?param=h.pdf",""); // dot in query part
         testurls.put("file.html?param", "html");
+        testurls.put("FILE.GIF?param", "gif");
         testurls.put("/path/","");
         for (String s : testurls.keySet()) {
             System.out.println("test getFileExtension: " + s + " -> " + testurls.get(s));

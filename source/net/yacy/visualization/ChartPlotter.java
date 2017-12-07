@@ -98,7 +98,7 @@ public class ChartPlotter extends RasterPlotter {
     public void chartDot(final int dimension_x, final int dimension_y, final float coord_x, final int coord_y, final int dotsize, final String anot, final int anotAngle) {
         final int x = (int) ((coord_x - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x]);
         assert this.scales[dimension_y] != 0;
-        final int y = (coord_y - this.offsets[dimension_y]) * this.pixels[dimension_y] / this.scales[dimension_y];
+        final int y = (int)((long)(coord_y - this.offsets[dimension_y]) * (long)(this.pixels[dimension_y]) / (this.scales[dimension_y]));
         if (dotsize == 1) plot(this.leftborder + x, this.height - this.bottomborder - y, 100);
                       else dot(this.leftborder + x, this.height - this.bottomborder - y, dotsize, true, 100);
         if (anot != null) PrintTool.print(this, this.leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), this.height - this.bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? (anot.length() * 6 + x > this.width ? 1 : -1) : ((anotAngle == 315) ? 1 : 0), 100);
@@ -106,9 +106,9 @@ public class ChartPlotter extends RasterPlotter {
 
     public void chartLine(final int dimension_x, final int dimension_y, final float coord_x1, final int coord_y1, final float coord_x2, final int coord_y2) {
         final int x1 = (int) ((coord_x1 - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x]);
-        final int y1 = (coord_y1 - this.offsets[dimension_y]) * this.pixels[dimension_y] / this.scales[dimension_y];
+        final int y1 = (int)((long)(coord_y1 - this.offsets[dimension_y]) * (long)(this.pixels[dimension_y]) / this.scales[dimension_y]);
         final int x2 = (int) ((coord_x2 - this.offsets[dimension_x]) * this.pixels[dimension_x] / this.scales[dimension_x]);
-        final int y2 = (coord_y2 - this.offsets[dimension_y]) * this.pixels[dimension_y] / this.scales[dimension_y];
+        final int y2 = (int)((long)(coord_y2 - this.offsets[dimension_y]) * (long)(this.pixels[dimension_y]) / this.scales[dimension_y]);
         line(this.leftborder + x1, this.height - this.bottomborder - y1, this.leftborder + x2, this.height - this.bottomborder - y2, 100);
     }
 
@@ -179,8 +179,12 @@ public class ChartPlotter extends RasterPlotter {
         line(x, this.topborder - 4, x, this.height - this.bottomborder + 4, 100);
     }
 
+    /**
+     * Write a test chart to a temporary file testimage.png
+     */
     public static void main(final String[] args) {
         System.setProperty("java.awt.headless", "true");
+        
         final long bg = 0xFFFFFF;
         final long fg = 0x000000;
         final long scale = 0xCCCCCC;
@@ -188,27 +192,42 @@ public class ChartPlotter extends RasterPlotter {
         final long blue = 0x0000FF;
         final ChartPlotter ip = new ChartPlotter(660, 240, bg, fg, fg, 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY", "");
         ip.declareDimension(DIMENSION_BOTTOM, 60, 60, -600, fg, scale, "TIME/SECONDS");
-        //ip.declareDimension(DIMENSION_TOP, 10, 40, "000000", null, "count");
         ip.declareDimension(DIMENSION_LEFT, 50, 40, 0, green, scale , "PPM [PAGES/MINUTE]");
         ip.declareDimension(DIMENSION_RIGHT, 100, 20, 0, blue, scale, "MEMORY/MEGABYTE");
+        
+        /* Draw an ascending line of 10 plots */
         ip.setColor(green);
-        ip.chartDot(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, 5, null, 0);
-        ip.chartLine(DIMENSION_BOTTOM, DIMENSION_LEFT, -160, 100, -130, 200);
+        final int width = 600, maxPPM = 240;
+        int steps = 10, x = - width;
+        int ppm = (int)(maxPPM * 0.1);
+        int ppmStep = (int)((maxPPM * 0.9) / steps);
+        for(int step = 0; step < steps; step++) {
+        	ip.chartDot(DIMENSION_BOTTOM, DIMENSION_LEFT, x, ppm, 5, null, 0);
+        	ip.chartLine(DIMENSION_BOTTOM, DIMENSION_LEFT, x, ppm, x + (width / steps), ppm + ppmStep);
+        	ppm += ppmStep;
+        	x += (width / steps);
+        }
+        
+        /* Draw a descending line of 20 plots */
         ip.setColor(blue);
-        ip.chartDot(DIMENSION_BOTTOM, DIMENSION_RIGHT, -50, 300, 2, null, 0);
-        ip.chartLine(DIMENSION_BOTTOM, DIMENSION_RIGHT, -80, 100, -50, 300);
-        //ip.print(100, 100, 0, "TEXT", true);
-        //ip.print(100, 100, 0, "1234", false);
-        //ip.print(100, 100, 90, "TEXT", true);
-        //ip.print(100, 100, 90, "1234", false);
-        final File file = new File(System.getProperty("java.io.tmpdir") + File.separator + "testimage.png");
+        steps = 20;
+        final int maxMBytes = 800;
+        int mBytes = (int)(maxMBytes * 0.8);
+        int mBytesStep = (int)((maxMBytes * 0.6) / steps);
+        x = - width;
+        for(int step = 0; step < steps; step++) {
+        	ip.chartDot(DIMENSION_BOTTOM, DIMENSION_RIGHT, x, mBytes, 5, null, 0);
+        	ip.chartLine(DIMENSION_BOTTOM, DIMENSION_RIGHT, x, mBytes, x + (width / steps), mBytes - mBytesStep);
+        	mBytes -= mBytesStep;
+        	x += (width / steps);
+        }
+        final File file = new File(System.getProperty("java.io.tmpdir"),"testimage.png");
         try (
         	/* Automatically closed by this try-with-resources statement */
             final FileOutputStream fos = new FileOutputStream(file);
         ) {
-            System.out.println("Writing file " + file);
             fos.write(RasterPlotter.exportImage(ip.getImage(), "png").getBytes());
-            //ImageIO.write(ip.getImage(), "png", fos);
+            System.out.println("CharPlotter test file written at " + file);
         } catch (final IOException e) {
         	e.printStackTrace();
         }

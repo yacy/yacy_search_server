@@ -840,15 +840,14 @@ Replace the word "MySearch" with your own message==Ersetzen Sie das Wort "Meine 
 
 #File: ConfigSearchPage_p.html
 #---------------------------
+<html lang="en">==<html lang="de">
 Search Page<==Suchseite<
 >Search Result Page Layout Configuration<==>Konfiguration des Seitenlayouts der Seite für Suchergebnisse<
 Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==Im Folgenden wird ein generisches Template einer Suchergebnisseite. Markieren Sie die Checkboxen für alle Features die angezeigt werden sollen.
 To change colors and styles use the ==Um die Farben und Stile zu ändern, verwenden Sie das
 >Appearance<==>Erscheinungsbild<
  menu for different skins.== Menü für verschiedene Skins.
-Other portal settings can be adjusted in==Andere Einstellungen für das Portal können im
->Generic Search Portal<==>Generisches Suchportal<
-menu.==Menü geändert werden.
+Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.==Andere Einstellungen für das Portal können im <a href="ConfigPortal_p.html">Generisches Suchportal</a> Menü geändert werden.
 >Page Template<==>Seiten Template<
 #>Administration<==>Administration<
 >Web Search<==>Websuche<
@@ -1481,6 +1480,7 @@ from index==vom Index
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="de">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Suchseite
 #kiosk mode==Kiosk Modus
 "Search"=="Suchen"
@@ -1534,14 +1534,12 @@ latest first==Neuste zuerst
 multiple words shall appear near==Mehrere Wörter sollen nah zusammen stehen
 doublequotes==Anführungszeichen
 prefer given language==Angegebene Sprache bevorzugen
-an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==2-Buchstaben-Ländercode nach <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a>
 heuristics==Heuristiken
 add search results from external opensearch systems==Benutze zusätzliche Ergebnisse von externen Opensearchsystemen
 Search Navigation==Such-Navigation
-keyboard shotcuts==Tastatur-Kürzel
-tab or page-up==Tab oder Bild hoch
+keyboard shortcuts==Tastatur-Kürzel
 next result page==Nächste Ergebnisseite
-page-down==Bild nach unten
 previous result page==Vorherige Ergebnisseite
 automatic result retrieval==Automatische Ergebnis-Abfrage
 browser integration==Browserintegration
@@ -2435,7 +2433,7 @@ Memory Settings==Speicher Einstellungen
 Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Für <abbr title="Java Virtual Machine">JVM</abbr> reservierter Speicher
 "Set"=="Setzen"
 Resource Observer==Ressourcen Beobachter
-reset state==Status zurücksetzen
+Reset state==Status zurücksetzen
 > free space==> freiem Speicher
 disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Deaktivere eingehende <abbr title="Distributed Hash Table">DHT</abbr> Transfers unter
 <abbr title="Random Access Memory">RAM</abbr>==Arbeitsspeicher
@@ -3757,10 +3755,9 @@ and contributors, CC-BY-SA==und Mitwirkenden, CC-BY-SA Lizenz
 >Media<==>Medium<
 #>URL<==>URL<
 > of==> aus 
-g> local,==g> lokal,
-#g> remote),==g> remote),
-> from==> von
-remote YaCy peers.==remote YaCy Peers.
+> local,==> lokal,
+remote from==remote von
+YaCy peers).==YaCy Peers).
 #-----------------------------
 
 #File: yacysearchitem.html

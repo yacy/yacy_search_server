@@ -24,6 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.concurrent.TimeUnit;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.Switchboard;
@@ -54,6 +56,7 @@ public class PerformanceGraph {
         RasterPlotter graph = ProfilingGraph.performanceGraph(
                 width, height,
                 indeSizeCache + " URLS / " + sb.index.RWICount() + " WORDS IN INDEX / " + sb.index.RWIBufferCount() + " WORDS IN CACHE",
+                600, TimeUnit.SECONDS,
                 showMemory, showPeers);
         return graph;
     }

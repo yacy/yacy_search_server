@@ -44,11 +44,20 @@ public class TextParserTest {
 	 */
 	@Test
 	public void testSupportsMimeLocaleConsistency() {
-		for (Locale locale : Locale.getAvailableLocales()) {
-			Locale.setDefault(locale);
-			for (String mimeType : TextParser.supportedMimeTypes()) {
-				assertNull(locale + " " + mimeType, TextParser.supportsMime(mimeType.toUpperCase(Locale.ROOT)));
+		Locale initialDefaultLocale = Locale.getDefault();
+		try {
+			for (Locale locale : Locale.getAvailableLocales()) {
+				Locale.setDefault(locale);
+				for (String mimeType : TextParser.supportedMimeTypes()) {
+					assertNull(locale + " " + mimeType, TextParser.supportsMime(mimeType.toUpperCase(Locale.ROOT)));
+				}
 			}
+		} finally {
+			/*
+			 * Restore the initial default locale to prevent side-effects on other JUnit
+			 * tests run in the same session
+			 */
+			Locale.setDefault(initialDefaultLocale);
 		}
 	}
 

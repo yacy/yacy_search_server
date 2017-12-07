@@ -119,8 +119,9 @@ function updatepage(str) {
     </fieldset>
     
 <link rel="stylesheet" href="env/morris.css">
-<script src="js/raphael-min.js"></script>
+<script src="js/raphael.min.js"></script>
 <script src="js/morris.js"></script>
+<script type="text/javascript" src="js/accessibleHistogram.js" charset="UTF-8"></script>
 <div id="graph" style="height:200px"></div>
 <script>
 var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index", function(data) {
@@ -131,23 +132,31 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
         var count = dates_in_content_dts[i + 1];
         if (date && count) {parsed[parsed.length] = {x: date,y: count};};
     };
-    if (parsed.length > 0) Morris.Bar({
-      element: 'graph',
-      data: parsed,
-      xkey: 'x',
-      ykeys: ['y'],
-      labels: ['number of documents about this date'],
-      yLabelFormat: function (y) { return y.toString() + ' docs'; },
-      barColors: function (row, series, type) {
-    	  var d = new Date(row.label);
-          if (d.getDay() === 6) return '#4aaf46'; //saturday
-          if (d.getDay() === 0) return '#4aaf46'; //sunday
-    	  return '#3574c0';
-      },
-      hideHover: 'false'
-    }).on('click', function(i, row) {
-    	console.log(i, row);
-    });
+    if (parsed.length > 0) {
+    	var histogram = Morris.Bar({
+      		element: 'graph',
+      		data: parsed,
+      		xkey: 'x',
+      		ykeys: ['y'],
+      		labels: ['number of documents about this date'],
+      		yLabelFormat: function (y) { return y.toString() + ' docs'; },
+      		barColors: function (row, series, type) {
+    	  		var d = new Date(row.label);
+          		if (d.getDay() === 6) return '#4aaf46'; //saturday
+          		if (d.getDay() === 0) return '#4aaf46'; //sunday
+    	  		return '#3574c0';
+      		},
+      		hideHover: 'false'
+    	}).on('click', function(i, row) {
+    		console.log(i, row);
+    	});
+    	
+		/* Add keyboard navigation support and accessible attributes */
+		makeAccessibleMorrisBar(histogram, 
+				"Number of documents per date histogram", 
+				function(data) {return data.x + " : " + data.y + " docs"}); 
+    }
+    
 });
 </script>
     #(/hosts)#

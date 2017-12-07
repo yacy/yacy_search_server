@@ -1,0 +1,172 @@
+# el.lng
+# English-->Greek
+# -----------------------
+# part of YaCy
+# (C) by Michael Peter Christen; mc@anomic.de
+# first published on http://www.anomic.de
+# Frankfurt, Germany, 2005
+#
+#
+# This file is written by (chronological order) Constantine Mousafiris <kvisitor@gnugr.org>
+# Αυτό το αρχείο γράφτηκε (με χρονολογική σειρά) από τον Κωστή Μουσαφείρη <kvisitor@gnugr.org>
+
+# If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
+# Αν βρείτε τυχόν σφάλματα ή αμετάφραστες γραμμές κειμένου σε αυτό το αρχείο, παρακαλώ μη διστάσετε να τα στείλλετε με ένα email στον συντηρητή.
+
+#File: ConfigLanguage_p.html
+#---------------------------
+#Only part 1.
+#Μόνον το Μέρος 1.
+#Contributors are in chronological order, not how much they did absolutely.
+#Οι άνθρωποι που συνεισέφεραν παρατίθενται κατά χρονολογική σειρά, και όχι με βάση το πόσο πολλά προσέφεραν κατ' απόλυτη έννοια.
+#Thank you for your help!
+#Σας ευχαριστούμε για τη βοήθειά σας!
+<!-- lang -->default(english)==Greek
+<!-- author -->==Constantine Mousafiris
+<!-- maintainer -->==
+#-----------------------------
+
+#File: Blacklist_p.html
+#---------------------------
+Blacklist Manager==Διαχειριστής Blacklist
+Blacklist==Μαύρη Λίστα
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==Αυτή η λειτουργία παρέχει στον proxy ένα φίλτρο για τις URL. Στις URL που περιλαμβάνονται στη Μαύρη Λίστα, δεν θα επιτραπεί να
+from being loaded. You can define several blacklists and activate them separately.== φορτωθούν. Μπορείτε να ορίσετε διάφορες Μαύρες Λίστες και να τις ενεργοποιήσετε ξεχωριστά.
+You may also provide your blacklist to other peers by sharing them; in return you may==Μπορείτε, επίσης, να προσφέρετε τη Μαύρη Λίστα σας στους άλλους ομότιμους χρήστες, καθιστώντας την διαμοιράσιμη. Σε αντάλλαγμα μπορείτε να
+collect blacklist entries from other peers.==συλλέγετε τις καταχωρήσεις από τις Μαύρες Λίστες των άλλων ομότιμων χρηστών.
+Edit list:==Τροποποίηση καταλόγου:
+(active)#not active::active#(/active)# #(shared)#not shared::shared#(/shared)==(active)#ανενεργή::ενεργή#(/active)# #(shared)#μη διαμοιρασμένη::διαμοιρασμένη#(/shared)
+"select"=="επιλέξτε"
+New list:==Νέος κατάλογος:
+"create"=="δημιουργία"
+Enable/disable this list==Ενεργοποίηση/Απενεργοποίηση Λίστας
+Share/don't share this list==Μοιράσου/Μη μοιράζεσαι αυτή τη λίστα
+Change==Αλλαγή
+Delete this list==Διαγραφή λίστας
+/>active==/>ενεργός
+/>shared==/>διαμοιρασμένος
+Active list:==Ενεργή Λίστα:
+These are the domain name / path patterns in this blacklist:==Αυτά είναι τα ονόματα χώρου (domain name)/διαδρομές σε αυτή την Μαύρη Λίστα:
+You can select them here for deletion==Μπορείτε να τα επιλέξετε εδώ για διαγραφή
+Delete URL pattern==Διαγραφή του URL pattern
+Enter new domain name / path pattern in the form:==Βάλτε στη φόρμα ένα νέο όνομα χώρου (domain name)/διαδρομή
+#path-regexpr==path-regexpr
+Add URL pattern==Προσθήκη ενός URL pattern
+Import blacklist items from other YaCy peers:==Εισαγωγή καταχωρήσεων από Μαύρες Λίστες άλλων ομότιμων χρηστών του YacY:
+#Host:==Host:
+"Load new blacklist items"=="Φορτώστε νέες καταχωρήσεις στη Μαύρη Λίστα"
+Import blacklist items from URL:==Εισαγωγή καταχωρήσεων της Μαύρης Λίστας από την URL
+#URL:==URL:
+"Load new blacklist items"=="Φορτώστε νέες καταχωρήσεις στη Μαύρη Λίστα"
+Import blacklist items from file:==Εισαγωγή καταχωρήσεων που βρίσκονται σε Μαύρες Λίστες, από το αρχείο:
+"Load new blacklist items"=="Φορτώστε νέες καταχωρήσεις στη Μαύρη Λίστα"
+was removed from blacklist==αφαιρέθηκε από τη Μαύρη Λίστα
+was added to the blacklist==προσετέθη στη Μαύρη Λίστα
+File:==Αρχείο:
+#-----------------------------
+
+#File: Bookmarks.html
+#---------------------------
+#YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Bookmarks
+#<h2>Bookmarks==<h2>Bookmarks
+Add Bookmark==Προσθήκη Σελειδοδείκτη (Bookmark)
+Edit Bookmark==Τροποποίηση Σελειδοδείκτη (Bookmark)
+#URL:==URL:
+Title:==Τίτλος:
+Description:==Περιγραφή:
+Tags (comma separated):==Tags (χωρισμένα με κόμματα):
+Public:==Δημόσιος:
+yes==ναι
+no==όχι
+"create"=="δημιουργία"
+"edit"=="τροποποίηση"
+Tagged with==Ετικέττα
+Edit==Τροποποίηση
+Delete==Διαγραφή
+next page==επόμενη σελίδα
+All==Όλα
+#-----------------------------
+
+#File: ConfigProfile_p.html
+#---------------------------
+Your Personal Profile==Το Προσωπικό σας Προφίλ
+You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Εδώ μπορείτε να δημιουργήσετε το προσωπικό σας προφίλ. Οι άλλοι χρήστες του YaCy θα μπορούν να δουν αυτές τις πληροφορίες, χρησιμοποιώντας το link στη σελίδα The search can also be applied globally, by searching other peers. You can use the following options to enhance your search results=='Δίκτυο'.
+You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Δε χρειάζεται να δώσετε κανένα προσωπικό στοιχείο, αλλά αν θέλετε να γνωστοποιήσετε τις πληροφορίες για το πως να έρθουν σε επαφή μαζί σας, μπορείτε να το κάνετε εδώ.
+#Name==Όνομα
+#Nick Name==Ψευδώνυμο
+#Homepage==Αρχική σελίδα
+#eMail==eMail
+#ICQ==ICQ
+#Jabber==Jabber
+#Yahoo!==Yahoo!
+#MSN=MSN
+Comment==Σχόλιο
+"Save"=="Αποθήκευση"
+#-----------------------------
+
+#File: Connections_p.html
+#---------------------------
+YaCy '#[clientname]#': Connection Tracking==YaCy '#[clientname]#': Ανίχνευση συνδέσεως
+Connection Tracking==Ανίχνευση συνδέσεως
+Incoming Connections==Εισερχόμενες συνδέσεις
+Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.==Προβολή ενεργών συνδέσεων #[numActiveRunning]# και των εκκρεμών συνδέσεων #[numActivePending]# από ένα μέγιστο #[numMax]# επιτρεπόμενων εισερχόμενων συνδέσεων.
+Protocol==Πρωτόκολλο
+Duration==Διάρκεια
+Source IP[:Port]==IP Πηγής[:Port]
+Dest. IP[:Port]==IP Προορισμού.[:Port]
+Command==Εντολή
+Used==Σε χρήση
+Close==Κλειστή
+Waiting for new request nr.==Αναμένοντας νέο αριθμό αιτήματος
+#-----------------------------
+
+#File: CookieMonitorIncoming_p.html
+#---------------------------
+Incoming Cookies Monitor==Παρακολούθηση Εισερχόμενων Cookies
+Cookie Monitor: Incoming Cookies==Παρακολούθηση Cookies: Εισερχόμενα Cookies
+This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Αυτός είναι ένας κατάλογος με τα Cookies που έστειλε ο διακομιστής  προς τους πελάτες του YaCy Proxy :
+Showing==Επίδειξη
+entries from a total of==καταχωρήσεις από ένα σύνολο
+Cookies==Cookies
+#-----------------------------
+
+#File: CookieMonitorOutgoing_p.html
+#---------------------------
+Outgoing Cookies Monitor==Παρακολούθηση Εξερχόμενων Cookies
+Cookie Monitor: Outgoing Cookies==Παρακολούθηση Cookies: Εξερχόμενα Cookies
+This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==:Αυτός είναι ένας κατάλογος με Cookies που έστειλε ένας browser ο οποίος χρησιμοποιούσε τον YaCy Proxy προς τον διακομιστή διαδικτύου
+Showing==Επίδειξη
+entries from a total of==καταχωρήσεις από ένα σύνολο
+Cookies==Cookies
+#-----------------------------
+
+#File: Help.html
+#---------------------------
+YaCy: Help==YaCy: Βοήθεια
+Help==Βοήθεια
+Search Page==Σελίδα Αναζήτησης
+Network==Δίκτυο
+Status==Κατάσταση
+
+YaCy uses Regular Expressions for some functions, for example in the blacklist.==Το YaCy, σε κάποιες συναρτήσεις, χρησιμοποιεί Regular Expressions, για παράδειγμα στη Μαύρη Λίστα.
+There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Υπάρχουν διάφορα πρότυπα για τις regexps, το YaCy χρησιμοποιεί την σύνταξη της Perl 5.
+Here is a short overview about the functions, which should fir for most cases:<==Ακολουθεί μία σύντομη επισκόπηση αυτών των συναρτήσεων, που πρέπει να επαρκούν για την πλειοψηφία των περιπτώσεων:<
+
+arbitrary character==αυθαίρετοι χαρακτήρες
+character x==χαρακτήρας x
+not x==όχι x
+0 or more times x==0 ή περισσότερες φορές x
+0 or 1 time x==0 ή 1 φορά x
+1 or more times x==1 ή περισσότερες φορές x
+concatenation of x and y==Concatenation των x και y
+x or y==x ή y
+String "foo" or string "bar"==String "foo" ή String "bar"
+a or b or c (same as a|b|c)==a ή b ή c (ίδιο όπως και το a|b|c)
+a or b or c (same as above)==a ή b ή c (όπως και πιο πάνω)
+exactly n appearances of x==ακριβώς n εμφανίσεις του  x
+at least n appearances of x==τουλάχιστον n εμφανίσεις του x
+at least n, maximum m appearanches of x==τουλάχιστον n, το ανώτερο m εμφανίσεις του x
+Modify priority of instructions==Αλλάξτε την προτεραιότητα των εντολών
+#-----------------------------
+
+# EOF

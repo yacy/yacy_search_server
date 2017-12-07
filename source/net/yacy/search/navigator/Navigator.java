@@ -24,8 +24,10 @@ package net.yacy.search.navigator;
 
 import java.util.List;
 import java.util.Map;
+
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.sorting.ScoreMapUpdatesListener;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.query.QueryModifier;
 
@@ -98,4 +100,9 @@ public interface Navigator extends ScoreMap<String> {
      * @return the name of the index field, the fieldname counted in incDoc, incDoclList, incFacet
      */
     public String getIndexFieldName();
+    
+    /**
+     * @param listener an eventual object which wants to listen to successful updates on this navigator score map
+     */
+    public void setUpdatesListener(final ScoreMapUpdatesListener listener);
 }

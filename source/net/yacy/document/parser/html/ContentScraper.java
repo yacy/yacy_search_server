@@ -187,12 +187,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     // class variables: collectors for links
     private final List<AnchorURL> anchors;
-    private final LinkedHashMap<DigestURL, String> rss, css;
-    private final LinkedHashMap<AnchorURL, EmbedEntry> embeds; // urlhash/embed relation
+    private final SizeLimitedMap<DigestURL, String> rss, css;
+    private final SizeLimitedMap<AnchorURL, EmbedEntry> embeds; // urlhash/embed relation
     private final List<ImageEntry> images; 
-    private final Set<AnchorURL> script, frames, iframes;
-    private final Map<String, String> metas;
-    private final Map<String, DigestURL> hreflang, navigation;
+    private final SizeLimitedSet<AnchorURL> script, frames, iframes;
+    private final SizeLimitedMap<String, String> metas;
+    private final SizeLimitedMap<String, DigestURL> hreflang, navigation;
     private LinkedHashSet<String> titles;
     private final List<String> articles;
     private final List<Date> startDates, endDates;
@@ -204,7 +204,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final EventListenerList htmlFilterEventListeners;
     private double lon, lat;
     private AnchorURL canonical, publisher;
-    private final int maxLinks;
+    
+    /** The maximum number of URLs to process and store in the anchors property. */
+    private final int maxAnchors;
+    
     private final VocabularyScraper vocabularyScraper;
     private final int timezoneOffset;
     private int breadcrumbs;
@@ -226,21 +229,24 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     /** Set to true when a limit on content size scraped has been exceeded */
     private boolean contentSizeLimitExceeded;
     
+    /** Set to true when the maxAnchors limit has been exceeded */
+    private boolean maxAnchorsExceeded;
+    
     /**
-     * scrape a document
+     * Create an ContentScraper instance
      * @param root the document root url
-     * @param maxLinks the maximum number of links to scrape
+     * @param maxAnchors the maximum number of URLs to process and store in the anchors property.
+     * @param maxLinks the maximum number of links (other than a, area, and canonical and stylesheet links) to store
      * @param vocabularyScraper handles maps from class names to vocabulary names and from documents to a map from vocabularies to terms
      * @param timezoneOffset local time zone offset
      */
     @SuppressWarnings("unchecked")
-    public ContentScraper(final DigestURL root, int maxLinks, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
+    public ContentScraper(final DigestURL root, final int maxAnchors, final int maxLinks, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         assert root != null;
         this.root = root;
-        this.maxLinks = maxLinks;
         this.vocabularyScraper = vocabularyScraper;
         this.timezoneOffset = timezoneOffset;
         this.evaluationScores = new Evaluation();
@@ -277,6 +283,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.publisher = null;
         this.breadcrumbs = 0;
         this.contentSizeLimitExceeded = false;
+        this.maxAnchorsExceeded = false;
+        this.maxAnchors = maxAnchors;
+    }
+    
+    /**
+     * Create an ContentScraper instance
+     * @param root the document root url
+     * @param maxLinks the maximum number of links (other than a, area, and canonical and stylesheet links) to store
+     * @param vocabularyScraper handles maps from class names to vocabulary names and from documents to a map from vocabularies to terms
+     * @param timezoneOffset local time zone offset
+     */
+    public ContentScraper(final DigestURL root, final int maxLinks, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
+        this(root, Integer.MAX_VALUE, maxLinks, vocabularyScraper, timezoneOffset);
     }
 
     @Override
@@ -366,7 +385,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             }
         }
         
-        findAbsoluteURLs(b, this.anchors, anchorListeners);
+        if(!this.maxAnchorsExceeded) {
+        	int maxLinksToDetect = this.maxAnchors - this.anchors.size();
+        	if(maxLinksToDetect < Integer.MAX_VALUE) {
+        		/* Add one to the anchors limit to detect when the limit is exceeded */
+        		maxLinksToDetect++;
+        	}
+        	findAbsoluteURLs(b, this.anchors, anchorListeners, maxLinksToDetect);
+        	if(this.anchors.size() > this.maxAnchors) {
+        		this.maxAnchorsExceeded = true;
+        		this.anchors.remove(this.anchors.size() -1);
+        	}
+        }
         
         // append string to content
         if (!b.isEmpty()) {
@@ -890,8 +920,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @param anchor anchor to add. Must not be null.
      */
     protected void addAnchor(AnchorURL anchor) {
-    	this.anchors.add(anchor);
-    	this.fireAddAnchor(anchor.toNormalform(false));
+    	if(this.anchors.size() >= this.maxAnchors) {
+    		this.maxAnchorsExceeded = true;
+    	} else {
+    		this.anchors.add(anchor);
+    		this.fireAddAnchor(anchor.toNormalform(false));
+    	}
     }
 
 
@@ -1095,7 +1129,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     /**
-     * @return true when a limit on content size scraped has been exceeded
+     * @return true when the limit on content size scraped has been exceeded
      */
     public boolean isContentSizeLimitExceeded() {
 		return this.contentSizeLimitExceeded;
@@ -1106,6 +1140,23 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      */
     public void setContentSizeLimitExceeded(final boolean contentSizeLimitExceeded) {
 		this.contentSizeLimitExceeded = contentSizeLimitExceeded;
+	}
+    
+    /**
+     * @return true when the maxAnchors limit has been exceeded
+     */
+    public boolean isMaxAnchorsExceeded() {
+		return this.maxAnchorsExceeded;
+	}
+    
+    /**
+     * @return true when at least one limit on content size, anchors number or links number has been exceeded
+     */
+	public boolean isLimitsExceeded() {
+		return this.contentSizeLimitExceeded || this.maxAnchorsExceeded || this.css.isLimitExceeded()
+				|| this.rss.isLimitExceeded() || this.embeds.isLimitExceeded() || this.metas.isLimitExceeded()
+				|| this.hreflang.isLimitExceeded() || this.navigation.isLimitExceeded() || this.script.isLimitExceeded()
+				|| this.frames.isLimitExceeded() || this.iframes.isLimitExceeded();
 	}
     
     /*

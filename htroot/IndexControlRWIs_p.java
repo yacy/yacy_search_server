@@ -679,7 +679,7 @@ public class IndexControlRWIs_p {
                 sb.getRanking(),
                 "",//userAgent
                 0.0d, 0.0d, 0.0d,
-                new String[0]);       
+                new String[0]);     
         final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE);       
         if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (final InterruptedException e) {}
         if (theSearch.local_rwi_available.get() == 0) {

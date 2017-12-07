@@ -330,7 +330,8 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
         String threadname = Thread.currentThread().getName();
-        String ql = ""; try {ql = URLDecoder.decode(params.toString(), StandardCharsets.UTF_8.name());} catch (UnsupportedEncodingException e) {}
+        String ql = "";
+        try {ql = URLDecoder.decode(params.toString(), StandardCharsets.UTF_8.name());} catch (UnsupportedEncodingException|IllegalStateException e) {e.printStackTrace();}
         Thread.currentThread().setName("Embedded.getResponseByParams solr query: q=" + ql);
         ConcurrentLog.info("EmbeddedSolrConnector.getResponseByParams", "QUERY: " + ql);
         //System.out.println("EmbeddedSolrConnector.getResponseByParams * QUERY: " + ql); System.out.println("STACKTRACE: " + ConcurrentLog.stackTrace());

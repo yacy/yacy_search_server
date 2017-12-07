@@ -28,15 +28,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.util.CommonPattern;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.search.schema.CollectionSchema;
-import net.yacy.search.schema.WebgraphSchema;
+import javax.net.ssl.SSLContext;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -48,18 +42,35 @@ import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.GzipDecompressingEntity;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
+
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 
 @SuppressWarnings("deprecation")
 public class RemoteInstance implements SolrInstance {
     
     private String solrurl;
-    private final Object client; // not declared as org.apache.http.impl.client.DefaultHttpClient to avoid warnings during compilation. TODO: switch to org.apache.http.impl.client.HttpClientBuilder
+    private final HttpClient client;
     private final String defaultCoreName;
     private final ConcurrentUpdateSolrClient defaultServer;
     private final Collection<String> coreNames;
@@ -129,62 +140,107 @@ public class RemoteInstance implements SolrInstance {
             }
         }
         if (solraccount.length() > 0) {
-            org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
-            cm.setMaxTotal(100);
-            cm.setDefaultMaxPerRoute(100);
-            
-            this.client = new org.apache.http.impl.client.DefaultHttpClient(cm) {
-                @Override
-                protected HttpContext createHttpContext() {
-                    HttpContext context = super.createHttpContext();
-                    AuthCache authCache = new org.apache.http.impl.client.BasicAuthCache();
-                    BasicScheme basicAuth = new BasicScheme();
-                    HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
-                    authCache.put(targetHost, basicAuth);
-                    context.setAttribute(org.apache.http.client.protocol.HttpClientContext.AUTH_CACHE, authCache);
-                    this.setHttpRequestRetryHandler(new org.apache.http.impl.client.DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
-                    return context;
-                }
-            };
-            org.apache.http.params.HttpParams params = ((org.apache.http.impl.client.DefaultHttpClient) this.client).getParams();
-            org.apache.http.params.HttpConnectionParams.setConnectionTimeout(params, timeout);
-            org.apache.http.params.HttpConnectionParams.setSoTimeout(params, timeout);
-            ((org.apache.http.impl.client.DefaultHttpClient) this.client).addRequestInterceptor(new HttpRequestInterceptor() {
-                @Override
-                public void process(final HttpRequest request, final HttpContext context) throws IOException {
-                    if (!request.containsHeader(HeaderFramework.ACCEPT_ENCODING)) request.addHeader(HeaderFramework.ACCEPT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
-                    if (!request.containsHeader(HTTP.CONN_DIRECTIVE)) request.addHeader(HTTP.CONN_DIRECTIVE, "close"); // prevent CLOSE_WAIT
-                }
-
-            });
-            ((org.apache.http.impl.client.DefaultHttpClient) this.client).addResponseInterceptor(new HttpResponseInterceptor() {
-                @Override
-                public void process(final HttpResponse response, final HttpContext context) throws IOException {
-                    HttpEntity entity = response.getEntity();
-                    if (entity != null) {
-                        Header ceheader = entity.getContentEncoding();
-                        if (ceheader != null) {
-                            HeaderElement[] codecs = ceheader.getElements();
-                            for (HeaderElement codec : codecs) {
-                                if (codec.getName().equalsIgnoreCase(HeaderFramework.CONTENT_ENCODING_GZIP)) {
-                                    response.setEntity(new GzipDecompressingEntity(response.getEntity()));
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            org.apache.http.impl.client.BasicCredentialsProvider credsProvider = new org.apache.http.impl.client.BasicCredentialsProvider();
-            credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
-            ((org.apache.http.impl.client.DefaultHttpClient) this.client).setCredentialsProvider(credsProvider);
+            /* Note : optionally trusting self-signed certificate on an external remote Solr may be considered for convenience */
+            this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, false);
+        } else if(u.isHTTPS()){
+        	/* Here we must trust self-signed certificates as most peers with SSL enabled use such certificates */
+        	this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, true);
         } else {
-            this.client = null;
+        	// The default HttpSolrClient will be used
+        	this.client = null;
         }
         
         this.defaultServer = (ConcurrentUpdateSolrClient) getServer(this.defaultCoreName);
         if (this.defaultServer == null) throw new IOException("cannot connect to url " + url + " and connect core " + defaultCoreName);
     }
+
+    /**
+     * @param solraccount eventual user name used to authenticate on the target Solr
+     * @param solraccount eventual password used to authenticate on the target Solr
+     * @param trustSelfSignedCertificates when true, https connections to an host rpviding a self-signed certificate are accepted
+     * @return a new apache HttpClient instance usable as a custom http client by SolrJ
+     */
+	private static HttpClient buildCustomHttpClient(final int timeout, final MultiProtocolURL u, final String solraccount, final String solrpw,
+			final String host, final boolean trustSelfSignedCertificates) {
+		
+		/* Important note : deprecated use of Apache classes is required because SolrJ still use them internally (see HttpClientUtil). 
+		 * Upgrade only when Solr implementation will become compatible */
+		
+		org.apache.http.impl.conn.PoolingClientConnectionManager cm;
+		SchemeRegistry registry = null;
+		if(trustSelfSignedCertificates) {
+            SSLContext sslContext;
+			try {
+				sslContext = SSLContextBuilder.create().loadTrustMaterial(TrustSelfSignedStrategy.INSTANCE).build();
+	            registry = new SchemeRegistry();
+	            registry.register(
+	                    new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+	            registry.register(
+	                    new Scheme("https", 443, new SSLSocketFactory(sslContext, AllowAllHostnameVerifier.INSTANCE)));
+			} catch (final Exception e) {
+				// Should not happen
+				ConcurrentLog.warn("RemoteInstance", "Error when initializing SSL context trusting self-signed certificates.", e);
+				registry = null;
+			}
+		}
+		if(registry != null) {
+			cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(registry);
+		} else {
+			cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
+		}
+		cm.setMaxTotal(100);
+		cm.setDefaultMaxPerRoute(100);
+		
+		org.apache.http.impl.client.DefaultHttpClient result = new org.apache.http.impl.client.DefaultHttpClient(cm) {
+		    @Override
+		    protected HttpContext createHttpContext() {
+		        HttpContext context = super.createHttpContext();
+		        AuthCache authCache = new org.apache.http.impl.client.BasicAuthCache();
+		        BasicScheme basicAuth = new BasicScheme();
+		        HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
+		        authCache.put(targetHost, basicAuth);
+		        context.setAttribute(org.apache.http.client.protocol.HttpClientContext.AUTH_CACHE, authCache);
+		        this.setHttpRequestRetryHandler(new org.apache.http.impl.client.DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
+		        return context;
+		    }
+		};
+		org.apache.http.params.HttpParams params = result.getParams();
+		org.apache.http.params.HttpConnectionParams.setConnectionTimeout(params, timeout);
+		org.apache.http.params.HttpConnectionParams.setSoTimeout(params, timeout);
+		result.addRequestInterceptor(new HttpRequestInterceptor() {
+		    @Override
+		    public void process(final HttpRequest request, final HttpContext context) throws IOException {
+		        if (!request.containsHeader(HeaderFramework.ACCEPT_ENCODING)) request.addHeader(HeaderFramework.ACCEPT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
+		        if (!request.containsHeader(HTTP.CONN_DIRECTIVE)) request.addHeader(HTTP.CONN_DIRECTIVE, "close"); // prevent CLOSE_WAIT
+		    }
+
+		});
+		result.addResponseInterceptor(new HttpResponseInterceptor() {
+		    @Override
+		    public void process(final HttpResponse response, final HttpContext context) throws IOException {
+		        HttpEntity entity = response.getEntity();
+		        if (entity != null) {
+		            Header ceheader = entity.getContentEncoding();
+		            if (ceheader != null) {
+		                HeaderElement[] codecs = ceheader.getElements();
+		                for (HeaderElement codec : codecs) {
+		                    if (codec.getName().equalsIgnoreCase(HeaderFramework.CONTENT_ENCODING_GZIP)) {
+		                        response.setEntity(new GzipDecompressingEntity(response.getEntity()));
+		                        return;
+		                    }
+		                }
+		            }
+		        }
+		    }
+		});
+		if(solraccount != null && !solraccount.isEmpty()) {
+			org.apache.http.impl.client.BasicCredentialsProvider credsProvider = new org.apache.http.impl.client.BasicCredentialsProvider();
+			credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
+			result.setCredentialsProvider(credsProvider);
+		}
+		
+		return result;
+	}
 
     @Override
     public int hashCode() {
@@ -228,27 +284,36 @@ public class RemoteInstance implements SolrInstance {
         ConcurrentUpdateSolrClient s = this.server.get(name);
         if (s != null) return s;
         // create new http server
+        final MultiProtocolURL u;
+        try {
+            u = new MultiProtocolURL(this.solrurl + name);
+        } catch (final MalformedURLException e) {
+            return null;
+        }
         if (this.client != null) {
-            final MultiProtocolURL u;
-            try {
-                u = new MultiProtocolURL(this.solrurl + name);
-            } catch (final MalformedURLException e) {
-                return null;
-            }
-            String host = u.getHost();
-            int port = u.getPort();
-            String solrpath = u.getPath();
-            String p = "http://" + host + ":" + port + solrpath;
-            ConcurrentLog.info("RemoteSolrConnector", "connecting Solr authenticated with url:" + p);
-            s = new ConcurrentUpdateSolrClient(p, ((org.apache.http.impl.client.DefaultHttpClient) this.client), 10, Runtime.getRuntime().availableProcessors());
+        	final String solrServerURL;
+        	if(StringUtils.isNotEmpty(u.getUserInfo())) {
+        		/* Remove user authentication info from the URL, as authentication will be handled by the custom http client */
+                String host = u.getHost();
+                int port = u.getPort();
+                String solrpath = u.getPath();
+                solrServerURL = u.getProtocol() + "://" + host + ":" + port + solrpath;
+                ConcurrentLog.info("RemoteSolrConnector", "connecting Solr authenticated with url : " + u);        		
+        	} else {
+        		solrServerURL = u.toString();
+        		ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url : " + u);
+        	}
+            s = new ConcurrentUpdateSolrClient(solrServerURL, this.client, 10, Runtime.getRuntime().availableProcessors());
         } else {
-            ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url:" + this.solrurl + name);
-            s = new ConcurrentUpdateSolrClient(this.solrurl + name, queueSizeByMemory(), Runtime.getRuntime().availableProcessors());
+            ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url : " + this.solrurl + name);
+            ConcurrentUpdateSolrClient.Builder builder = new ConcurrentUpdateSolrClient.Builder(u.toString());
+            builder.withQueueSize(queueSizeByMemory());
+            builder.withThreadCount(Runtime.getRuntime().availableProcessors());
+            s = builder.build();
         }
         //s.setAllowCompression(true);
         s.setSoTimeout(this.timeout);
         //s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
-        s.setSoTimeout(this.timeout);
         this.server.put(name, s);
         return s;
     }

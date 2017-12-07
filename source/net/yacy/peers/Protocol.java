@@ -487,8 +487,14 @@ public final class Protocol {
         SearchResult result = null;
         for (String ip: target.getIPs()) {
             //if (ip.indexOf(':') >= 0) System.out.println("Search target: IPv6: " + ip);
-            String clusteraddress = target.getPublicAddress(ip);
-            if (target.clash(event.peers.mySeed().getIPs())) clusteraddress = "localhost:" + event.peers.mySeed().getPort();
+			final String targetBaseURL;
+            if (target.clash(event.peers.mySeed().getIPs())) {
+            	targetBaseURL = "http://localhost:" + event.peers.mySeed().getPort();
+            } else {
+            	targetBaseURL = target.getPublicURL(ip,
+    					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+    							SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT));
+            }
             try {
                 result =
                     new SearchResult(
@@ -504,13 +510,18 @@ public final class Protocol {
                         maxDistance,
                         partitions,
                         target.getHexHash() + ".yacyh",
-                        clusteraddress,
+                        targetBaseURL,
                         secondarySearchSuperviser
                         );
                 break;
             } catch (final IOException e ) {
                 Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
-                event.peers.peerActions.interfaceDeparture(target, ip);
+                if(targetBaseURL.startsWith("https")) {
+                	/* First mark https unavailable on this peer before removing any interface */
+    				target.setFlagSSLAvailable(false);                	
+                } else {
+                	event.peers.peerActions.interfaceDeparture(target, ip);
+                }
                 return -1;
             }
         }
@@ -571,6 +582,9 @@ public final class Protocol {
         event.addExpectedRemoteReferences(count);
         SearchResult result = null;
         for (String ip: target.getIPs()) {
+        	final String targetBaseURL = target.getPublicURL(ip,
+					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+							SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT));
             try {
                 result =
                     new SearchResult(
@@ -586,13 +600,18 @@ public final class Protocol {
                         maxDistance,
                         partitions,
                         target.getHexHash() + ".yacyh",
-                        target.getPublicAddress(ip),
+                        targetBaseURL,
                         null
                         );
                 break;
             } catch (final IOException e ) {
                 Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
-                event.peers.peerActions.interfaceDeparture(target, ip);
+                if(targetBaseURL.startsWith("https")) {
+                	/* First mark https unavailable on this peer before removing any interface */
+    				target.setFlagSSLAvailable(false);                	
+                } else {
+                	event.peers.peerActions.interfaceDeparture(target, ip);
+                }
                 return -1;
             }
         }
@@ -746,8 +765,7 @@ public final class Protocol {
         } else {
             // feed results as nodes (SolrQuery results) which carry metadata,
             // to prevent a call to getMetaData for RWI results, which would fail (if no metadata in index and no display of these results)
-            Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>();
-            event.addNodes(storeDocs, facets, snip, false, target.getName() + "/" + target.hash, count);
+            event.addNodes(storeDocs, null, snip, false, target.getName() + "/" + target.hash, count, true);
         }
         event.addFinalize();
         event.addExpectedRemoteReferences(-count);
@@ -846,7 +864,7 @@ public final class Protocol {
             final int maxDistance,
             final int partitions,
             final String hostname,
-            final String hostaddress,
+            final String targetBaseURL,
             final SecondarySearchSuperviser secondarySearchSuperviser
             ) throws IOException {
             // send a search request to peer with remote Hash
@@ -903,8 +921,7 @@ public final class Protocol {
             }
 
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 8000);
-            //System.out.println("Protocol: http://" + hostaddress + "/yacy/search.html" + requestPartsToString(parts)); // DEBUG
-            byte[] a = httpClient.POSTbytes(new MultiProtocolURL("http://" + hostaddress + "/yacy/search.html"), hostname, parts, false, true);
+            byte[] a = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL + "/yacy/search.html"), hostname, parts, false, true);
             if (a != null && a.length > 200000) {
                 // there is something wrong. This is too large, maybe a hack on the other side?
                 a = null;
@@ -987,8 +1004,8 @@ public final class Protocol {
     	/** The solr query to run */
     	private final SolrQuery solrQuery;
     	
-    	/** The instance address */
-    	private final String address;
+    	/** The instance base URL */
+    	private final String targetBaseURL;
     	
     	/** The target seed information */
     	private final Seed target;
@@ -1011,15 +1028,15 @@ public final class Protocol {
     	/**
     	 * Constructor. All parameters are required to not be null.
     	 * @param solrQuery the Solr query to run
-    	 * @param address the instance address : host name or IP + the eventual port
+    	 * @param targetBaseURL the instance base URL : http(s) + host name or IP + the eventual port
     	 * @param target the remote target seed information
     	 * @param timeout the request timeout in milliseconds
     	 */
-		protected SolrRequestTask(final SolrQuery solrQuery, final String address, final Seed target,
+		protected SolrRequestTask(final SolrQuery solrQuery, final String targetBaseURL, final Seed target,
 				final boolean mySeed, final int timeout, final QueryResponse[] rsp, final SolrDocumentList[] docList) {
 			super("Protocol.solrQuery(" + solrQuery.getQuery() + " to " + target.hash + ")");
 			this.solrQuery = solrQuery;
-			this.address = address;
+			this.targetBaseURL = targetBaseURL;
 			this.target = target;
 			this.mySeed = mySeed;
 			this.timeout = timeout;
@@ -1041,13 +1058,13 @@ public final class Protocol {
 				/* Strip too large details to avoid polluting this log with complete remote stack traces */
 				message = message.substring(0, MAX_ERROR_MESSAGE_LENGTH) + "...";
 			}
-			log.fine(messageBegin + " at " + this.address + " : " + message);
+			log.fine(messageBegin + " at " + this.targetBaseURL + " : " + message);
 		}
     	
         @Override
         public void run() {
             try {
-                this.instance = new RemoteInstance("http://" + this.address, null, "solr", this.timeout); // this is a 'patch configuration' which considers 'solr' as default collection
+                this.instance = new RemoteInstance(this.targetBaseURL, null, "solr", this.timeout); // this is a 'patch configuration' which considers 'solr' as default collection
                 try {
 					boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
 					if (Switchboard.getSwitchboard() != null) {
@@ -1110,6 +1127,8 @@ public final class Protocol {
      * @param target target peer to query. May be null : in that case, local peer is queried.
      * @param partitions
      * @param blacklist url list to exclude from results
+     * @param useSolrFacets when true, use Solr computed facets when possible to update the event navigators counters
+     * @param incrementNavigators when true, increment event navigators either with facet counts or with individual results
      * @return the size of results list
      * @throws InterruptedException when interrupt status on calling thread is detected while processing
      */
@@ -1120,7 +1139,9 @@ public final class Protocol {
             final int count,
             final Seed target,
             final int partitions,
-            final Blacklist blacklist) throws InterruptedException {
+            final Blacklist blacklist,
+            final boolean useSolrFacets,
+            final boolean incrementNavigators) throws InterruptedException {
 
         //try {System.out.println("*** debug-query *** " + URLDecoder.decode(solrQuery.toString(), "UTF-8"));} catch (UnsupportedEncodingException e) {}
         
@@ -1167,13 +1188,20 @@ public final class Protocol {
             } else {
                 try {
                     final boolean myseed = target == event.peers.mySeed();
+                    final String targetBaseURL;
+                    if(myseed) {
+                    	targetBaseURL = "http://localhost:" + target.getPort();
+                    } else {
+            			targetBaseURL = target.getPublicURL(ip,
+            					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+            							SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT));
+                    }
                     if (!myseed && !target.getFlagSolrAvailable()) { // skip if peer.dna has flag that last try resulted in error
                         Network.log.info("SEARCH skip (solr), remote Solr interface not accessible, peer=" + target.getName());
                         return -1;
                     }
-                    final String address = myseed ? "localhost:" + target.getPort() : target.getPublicAddress(ip);
                     final int solrtimeout = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 6000);
-                    SolrRequestTask remoteRequest = new SolrRequestTask(solrQuery, address, target, myseed, solrtimeout, rsp, docList);
+                    SolrRequestTask remoteRequest = new SolrRequestTask(solrQuery, targetBaseURL, target, myseed, solrtimeout, rsp, docList);
                     remoteRequest.start();
                     remoteRequest.join(solrtimeout); // just wait until timeout appears
                     if (remoteRequest.isAlive()) {
@@ -1187,6 +1215,20 @@ public final class Protocol {
                         target.setFlagSolrAvailable(false || myseed);
                         return -1; // give up, leave remoteRequest abandoned.
                     }
+                    
+                    if (rsp[0] == null || docList[0] == null) {
+                        Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress(ip) + " returned null");
+                        if(!myseed) {
+                        	if(targetBaseURL.startsWith("https")) {
+                        		/* First mark https unavailable on this peer before removing anything else */
+                        		target.setFlagSSLAvailable(false);
+                        	} else {
+                        		target.setFlagSolrAvailable(false);
+                        	}
+                        }
+                        target.setFlagSolrAvailable(false || myseed);
+                        return -1;
+                    }
                 } catch(InterruptedException e) {
                 	/* Current thread might be interrupted by SearchEvent.cleanup() : 
                 	 * we must not in that case mark the target as not available but rather transmit the exception to the caller (likely RemoteSearch.solrRemoteSearch) */
@@ -1198,25 +1240,29 @@ public final class Protocol {
                 }
             }
 
-            if (rsp[0] == null || docList[0] == null) {
-                Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress(ip) + " returned null");
-                target.setFlagSolrAvailable(false || localsearch);
-                return -1;
-            }
-            
             // evaluate facets
-            for (String field: event.query.facetfields) {
-                FacetField facet = rsp[0].getFacetField(field);
-                ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
-                List<Count> values = facet == null ? null : facet.getValues();
-                if (values == null) continue;
-                for (Count ff: values) {
-                    int c = (int) ff.getCount();
-                    if (c == 0) continue;
-                    if (ff.getName().length() == 0) continue; // facet entry without text is not useful
-                    result.set(ff.getName(), c);
-                }
-                if (result.size() > 0) facets.put(field, result);
+            if(useSolrFacets) {
+            	for (String field: event.query.facetfields) {
+            		FacetField facet = rsp[0].getFacetField(field);
+            		ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+            		List<Count> values = facet == null ? null : facet.getValues();
+            		if (values == null) {
+            			continue;
+            		}
+            		for (Count ff: values) {
+            			int c = (int) ff.getCount();
+            			if (c == 0) {
+            				continue;
+            			}
+            			if (ff.getName().length() == 0) {
+            				continue; // facet entry without text is not useful
+            			}
+            			result.set(ff.getName(), c);
+            		}
+            		if (result.size() > 0) {
+            			facets.put(field, result);
+            		}
+            	}
             }
             
             // evaluate snippets
@@ -1331,7 +1377,7 @@ public final class Protocol {
         docList[0].clear();
         docList[0] = null;
         if (localsearch) {
-            event.addNodes(resultContainer, facets, snippets, true, "localpeer", numFound);
+            event.addNodes(resultContainer, facets, snippets, true, "localpeer", numFound, incrementNavigators);
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
             Network.log.info("local search (solr): localpeer sent " + resultContainer.size() + "/" + numFound + " references");
@@ -1347,7 +1393,7 @@ public final class Protocol {
                         docs); // will clear docs on return
                 writeToLocalIndexThread.start();
             }
-            event.addNodes(resultContainer, facets, snippets, false, target.getName() + "/" + target.hash, numFound);
+            event.addNodes(resultContainer, facets, snippets, false, target.getName() + "/" + target.hash, numFound, incrementNavigators);
             event.addFinalize();
             event.addExpectedRemoteReferences(-count);
             Network.log.info("remote search (solr): peer " + target.getName() + " sent " + (resultContainer.size()) + "/" + numFound + " references");

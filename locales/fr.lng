@@ -545,6 +545,60 @@ For explanation please look into defaults/yacy.init==Pour des explications, rega
 "Save"=="Sauvegarder"
 #-----------------------------
 
+#File: ConfigSearchPage_p.html
+#---------------------------
+<html lang="en">==<html lang="fr">
+Search Page<==Page de recherche<
+>Search Result Page Layout Configuration<==>Agencement de la page de résultats de recherche<
+Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==Ci-dessous se trouve un modèle générique de page de résultats de recherche. Cocher les cases des éléments que vous souhaitez voir s'afficher.
+To change colors and styles use the ==Pour modifier les couleurs et le style, utilisez le menu 
+>Appearance<==>Apparence graphique<
+ menu for different skins.== pour avoir accès à différentes présélections de styles.
+Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.==Les autres éléments de configuration du portail peuvent être définis dans le menu <a href="ConfigPortal_p.html">Generic Search Portal</a>.
+>Page Template<==>Modèle de page<
+>Text<==>Texte<
+>Video<==>Vidéo<
+>more options<==>plus d'options<
+>Topics<==>Sujets<
+>Cloud<==>Nuage<
+>Protocol<==>Protocole<
+>Filetype<==>Type de fichier<
+>Wiki Name Space<==>Espace de nommage Wiki<
+>Language<==>Langue<
+>Author<==>Auteur<
+>Vocabulary<==>Ontologie<
+>Provider<==>Hôte<
+>Title of Result<==>Titre du résultat<
+Description and text snippet of the search result==Description et extrait de texte du résultat de recherche
+"Date"=="Date"
+42 kbyte<==42 ko<
+"Size"=="Taille"
+>Metadata<==>Méta-données<
+>Parser<==>Analyseur d'URL<
+>Citation<==>Citations<
+>Pictures<==>Images<
+"Browse index"=="Parcourir l'index"
+For this option URL proxy must be enabled.==Pour cette option le proxy doit être activé.
+max. items==nb. max. d'éléments
+"Save Settings"=="Enregistrer"
+"Set Default Values"=="Valeurs par défaut"
+"Top navigation bar"=="Barre de navigation d'en-tête"
+>Location<==>Lieu<
+show search results on map==Montrer les résultats sur la carte
+Date Navigation==Statistiques par dates
+Maximum range (in days)==Période maximale (en jours)
+Maximum days number in the histogram. Beware that a large value may trigger high CPU loads both on the server and on the browser with large result sets.==Nombre maximum de jours de l'histogramme. Veuillez noter qu'une valeur élevée peut déclencher des charges CPU importantes tant sur le serveur que sur le navigateur lorsqu'il y a un grand nombre de résultats.
+keyword subject keyword2 keyword3==mot-clé sujet mot-clé2 mot-clé3
+View via Proxy==Ouvrir via le proxy
+>JPG Snapshot<==>Capture JPG<
+"Raw ranking score value"=="Score de classement brut"
+Ranking: 1.12195955E9==Score: 1.12195955E9
+"Delete navigator"=="Supprimer le groupe"
+Add Navigators==Ajout de groupes de navigation
+"Add navigator"=="Ajouter le groupe"
+>append==>Ajouter
+#-----------------------------
+
 #File: ConfigSkins_p.html
 #---------------------------
 Skin Selection==Choix de th&egrave;me
@@ -659,6 +713,7 @@ YaCy: Help==YaCy: Aide
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="fr">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Page de recherche
 Search for #[former]#==Recherche pour  #[former]#
 Search</button>==Rechercher</button>
@@ -692,18 +747,22 @@ only resources from smb servers==uniquement les ressources de serveurs samba
 Intranet Indexing==Indexage d'intranet
 must be selected==doit &ecirc;tre s&eacute;lectionn&eacute;
 only files from a local file system==uniquement les fichiers locaux
+spatial restrictions==contraintes spatiales
+only documents having location metadata (geographical coordinates)==uniquement les documents ayant des méta-données de localisation (coordonnées géographiques)
+only documents within a square zone embracing a circle of given radius (in decimal degrees) around the specified latitude and longitude (in decimal degrees)==uniquement les documents situés dans une zone carrée englobant un cercle de rayon indiqué (en degrés décimaux) autour de la latitude et la longitude spécifiées (en degrés décimaux) 
 ranking modifier</dt>==modificateur de classement</dt>
 sort by date (latest first)==trier par date (les plus r&eacute;cents en premier)
 multiple words shall appear near==les mots recherch&eacute;s doivent &ecirc;tre dans une m&ecirc;me expression
 "" (doublequotes)=="" (guillemets)
-prefer given language (an ISO639 2-letter code)==pr&eacute;f&eacute;rer le langage indiqu&eacute; (code ISO639 &agrave; 2 lettres)
+prefer given language==pr&eacute;f&eacute;rer le langage indiqu&eacute;
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==code <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Liste de référence des codes de langue à deux lettres">ISO 639-1</a> &agrave; 2 lettres
 heuristics==heuristiques
 add search results from external opensearch systems==ajouter les r&eacute;sultats de syst&egrave;mes opensearch externes
 Search Navigation==Navigation dans la recherche
-keyboard shotcuts==raccourcis clavier
-tab or page-up==Tab ou D&eacute;but
+keyboard shortcuts==raccourcis clavier
+<a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + n==Combinaison <a href="https://en.wikipedia.org/wiki/Access_key">"access key"</a> + n
 next result page==page de r&eacute;sultats suivante
-page-down==Page bas
+<a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + p==Combinaison <a href="https://en.wikipedia.org/wiki/Access_key">"access key"</a> + p
 previous result page==page de r&eacute;sultats pr&eacute;c&eacute;dente
 automatic result retrieval==r&eacute;cup&eacute;ration automatique de r&eacute;sultats
 browser integration==int&eacute;gration navigateur
@@ -1423,7 +1482,8 @@ Resource Observer==Contrôle des ressources
 Memory state==État de la mémoire
 >proper<==>sain<
 >exhausted<==>espace libre insuffisant<
-reset state==réinitialiser l'état
+Reset state==Réinitialiser l'état
+Manually reset to 'proper' state==Réinitialiser manuellement à l'état 'sain'
 Enough memory is available for proper operation.==Il y a suffisamment de mémoire à disposition pour un fonctionnement correct.
 Within the last eleven minutes, at least four operations have tried to request memory that would have reduced free space within the minimum required.==Durant les onze dernières minutes, au moins quatre opérations ont tenté d'obtenir une quantité de mémoire qui aurait réduit l'espace libre en-deçà du minimum requis.
 Minimum required==Minimum requis
@@ -2464,10 +2524,9 @@ Use the RSS search result format to add static searches to your RSS reader, if y
 No Results.==Pas de r&eacute;sultats.
 length of search words must be at least 1 character==les termes recherch&eacute;s doivent contenir au moins un caract&egrave;re
 > of <==> de <
- local, == locaux, 
- remote), == distants),  
-> from <==> de <
- remote YaCy peers.== noeuds YaCy distants.
+> local,==> locaux,
+remote from== distants de  
+YaCy peers).== noeuds YaCy).
 Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function==La recherche avec ce noeud est d&eacute;sactiv&eacute;e pour les utilisateurs non autoris&eacute;s. Veuillez vous <a href="Status.html?login=">connecter</a> en tant qu'administrateur pour utiliser la fonction de recherche.
 Illegal URL mask:==Masque d'URL incorrect :
 (not a valid regular expression), mask ignored.==(expression r&eacute;guli&egrave;re incorrecte), masque ignor&eacute;.
@@ -2638,8 +2697,9 @@ Parser Configuration==Configuration de l'analyseur syntaxique
 
 #File: env/templates/submenuDesign.template
 #-----------------------------
->Appearance==>Apparence
->Language==>Langue
+>Appearance<==>Apparence graphique<
+>Language<==>Langue<
+Search Page Layout==Agencement de la page de résultats
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template

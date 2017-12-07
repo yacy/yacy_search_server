@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     #(forward)#::<meta http-equiv="REFRESH" content="0; url=#[target]#" />#(/forward)#
     <title>YaCy '#[clientname]#': Search Page</title>
@@ -41,7 +41,7 @@
     #(topmenu)#
     #%env/templates/embeddedheader.template%#
     ::
-    #%env/templates/simpleheader.template%#
+    #%env/templates/simpleSearchHeader.template%#
     <script type="text/javascript">
       document.getElementById("header_websearch").className += " active";
     </script>
@@ -61,15 +61,18 @@
             <button id="Enter" name="Enter" class="btn btn-primary" type="submit">Search</button>
           </div>
         </div>
+    	#(authSearch)#::
+  		<input type="hidden" name="auth" id="auth" value=""/>
+  		#(/authSearch)#
         <input type="hidden" name="verify" value="#[search.verify]#" />
         #(searchdomswitches)#::
         <div class="yacysearch">
-	        #(searchtext)#::<input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# />&nbsp;Text&nbsp;&nbsp;#(/searchtext)#
-	        #(searchimage)#::<input type="radio" id="image" name="contentdom" value="image" #(check)#::checked="checked"#(/check)# />&nbsp;Images&nbsp;&nbsp;#(/searchimage)#
-	        #(searchaudio)#::<input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;#(/searchaudio)#
-	        #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;#(/searchvideo)#
-	        #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications#(/searchapp)#
-	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1" onclick="this.href='index.html?searchoptions=1&amp;former='+document.getElementById('searchinput').search.value+'&amp;contentdom='+radioValue(document.getElementById('searchinput').contentdom)">more options...</a>::#(/searchoptions)#
+	        #(searchtext)#::<label><input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# />&nbsp;Text&nbsp;&nbsp;</label>#(/searchtext)#
+	        #(searchimage)#::<label><input type="radio" id="image" name="contentdom" value="image" #(check)#::checked="checked"#(/check)# />&nbsp;Images&nbsp;&nbsp;</label>#(/searchimage)#
+	        #(searchaudio)#::<label><input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;</label>#(/searchaudio)#
+	        #(searchvideo)#::<label><input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;</label>#(/searchvideo)#
+	        #(searchapp)#::<label><input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications</label>#(/searchapp)#
+	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1#(authSearch)#::&auth#(/authSearch)#" onclick="this.href='index.html?searchoptions=1#(authSearch)#::&auth#(/authSearch)#&amp;former='+document.getElementById('search').value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom);">more options...</a>::#(/searchoptions)#
         </div>
         #(/searchdomswitches)#
         <input type="hidden" name="nav" value="#[search.navigation]#" />
@@ -173,6 +176,15 @@
           <dd>only files from a local file system (<a href="ConfigBasic.html">Intranet Indexing</a> must be selected)</dd>
         </dl>
       </dd>
+      <dt style="width:100px">spatial restrictions</dt>
+      <dd>
+        <dl style="width:500px">
+          <dt>/location</dt>
+          <dd>only documents having location metadata (geographical coordinates)</dd>
+          <dt>/radius/&lt;latitude&gt;/&lt;longitude&gt;/&lt;distance&gt;</dt>
+          <dd>only documents within a square zone embracing a circle of given radius (in decimal degrees) around the specified latitude and longitude (in decimal degrees)</dd>
+        </dl>
+      </dd>
       <dt style="width:100px">ranking modifier</dt>
       <dd>
         <dl style="width:500px">
@@ -183,7 +195,7 @@
           <dt>"" (doublequotes)</dt>
           <dd>multiple words shall appear near</dd>
           <dt>/language/&lt;lang&gt;</dt>
-          <dd>prefer given language (an ISO639 2-letter code)</dd>
+          <dd>prefer given language (an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code)</dd>
         </dl>
       </dd>
       #(heuristic)#::
@@ -200,12 +212,12 @@
       <h4>Search Navigation</h4>
 
       <dl style="width:700px">
-      <dt style="width:100px">keyboard shotcuts</dt>
+      <dt style="width:100px">keyboard shortcuts</dt>
       <dd>
         <dl style="width:500px">
-          <dt>tab or page-up</dt>
+          <dt><a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + n</dt>
           <dd>next result page</dd>
-          <dt>page-down</dt>
+          <dt><a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + p</dt>
           <dd>previous result page</dd>
         </dl>
       </dd>

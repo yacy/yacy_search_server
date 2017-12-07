@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.http.HttpStatus;
+
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.order.NaturalOrder;
@@ -345,7 +347,7 @@ public class QueryGoal {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
-        fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200");
+        fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
         if (noimages) {
             fqs.add("-" + CollectionSchema.content_type.getSolrFieldName() + ":(image/*)");
             fqs.add("-" + CollectionSchema.url_file_ext_s.getSolrFieldName() + ":(jpg OR png OR gif)");
@@ -379,11 +381,65 @@ public class QueryGoal {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
-        fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200");
+        fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
         fqs.add(
                 CollectionSchema.content_type.getSolrFieldName() + ":(image/*) OR " +
                 CollectionSchema.images_urlstub_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
         return fqs;
+    }
+    
+    /**
+     * Generate Solr filter queries to receive valid video content results.
+     *
+     * This filters out documents with bad HTTP status and includes documents with MIME type matching the prefix video/* as well
+     * docuemnts with links to video content.
+     *
+     * @return Solr filter queries for video content URLs
+     */
+    public List<String> collectionAudioFilterQuery() {
+		final ArrayList<String> fqs = new ArrayList<>();
+
+		// add filter to prevent that results come from failed urls
+		fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
+		fqs.add(CollectionSchema.content_type.getSolrFieldName() + ":(audio/*) OR "
+				+ CollectionSchema.audiolinkscount_i.getSolrFieldName() + ":[1 TO *]");
+		return fqs;
+    }
+    
+    /**
+     * Generate Solr filter queries to receive valid video content results.
+     *
+     * This filters out documents with bad HTTP status and includes documents with MIME type matching the prefix video/* as well
+     * docuemnts with links to video content.
+     *
+     * @return Solr filter queries for video content URLs
+     */
+    public List<String> collectionVideoFilterQuery() {
+        final ArrayList<String> fqs = new ArrayList<>();
+
+        // add filter to prevent that results come from failed urls
+		fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
+		fqs.add(CollectionSchema.content_type.getSolrFieldName() + ":(video/*) OR "
+				+ CollectionSchema.videolinkscount_i.getSolrFieldName() + ":[1 TO *]");
+		return fqs;
+    }
+    
+    /**
+     * Generate Solr filter queries to receive valid application specific content results.
+     *
+     * This filters out documents with bad HTTP status and includes documents with MIME type matching the prefix application/* as well
+     * docuemnts with links to application specific content.
+     *
+     * @return Solr filter queries for application specific content URLs
+     */
+    public List<String> collectionApplicationFilterQuery() {
+        final ArrayList<String> fqs = new ArrayList<>();
+
+        // add filter to prevent that results come from failed urls
+		fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
+		fqs.add(CollectionSchema.content_type.getSolrFieldName() + ":(application/*) OR "
+				+ CollectionSchema.applinkscount_i.getSolrFieldName() + ":[1 TO *]");
+		return fqs;
     }
     
     public StringBuilder collectionImageQuery(final QueryModifier modifier) {

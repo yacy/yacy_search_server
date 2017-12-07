@@ -1280,6 +1280,7 @@ Download from Vimeo:==Завантажити з Vimeo:
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="uk">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Сторінка пошуку
 kiosk mode==режим кіоску
 "Search"=="Пошук"
@@ -1332,14 +1333,12 @@ latest first==останні спочатку
 multiple words shall appear near==Кілька слів повинні бути близько один від одного
 doublequotes==лапки
 prefer given language==Віддавати перевагу вказаній мові
-an ISO639 2-letter code==2-буквенний код ISO639
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==2-буквенний код <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a>
 heuristics==евристика
 add search results from ==додати пошукові результати з 
 Search Navigation==Пошукова навігація
-keyboard shotcuts==швидкий доступ
-tab or page-up==tab чи page-up
+keyboard shortcuts==швидкий доступ
 next result page==наступна сторінка результатів
-page-down==page-down
 previous result page==попередня сторінка результатів
 automatic result retrieval==автоматичне одержання результатів
 browser integration==вбудовування в переглядач
@@ -2173,7 +2172,7 @@ Memory Settings==Налаштування пам’яті
 Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Пам’ять, утримувана для <abbr title="Java Virtual Machine">JVM</abbr>
 "Set"=="Виставити"
 Resource Observer==Спостерігач за ресурсами
-reset state==відновити стан
+Reset state==відновити стан
 > free space==> вільної пам’яті
 disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Вимкнути отримання <abbr title="Distributed Hash Table">DHT</abbr> при менше
 <abbr title="Random Access Memory">RAM</abbr>==Основна пам’ять
@@ -3408,10 +3407,9 @@ length of search words must be at least==Довжина пошукового з�
 d+ characters==d+ знаків
 
 > of==> з
-g> local,==g> локально,
-g> remote),==g> віддалених),
-> from==> з
-remote YaCy peers.==віддалених вузлів YaCy.
+> local,==> локально,
+remote from==віддалених з
+YaCy peers).==вузлів YaCy).
 #-----------------------------
 
 #File: yacysearchitem.html

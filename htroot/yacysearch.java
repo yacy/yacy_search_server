@@ -29,6 +29,7 @@
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.IDN;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -101,14 +103,22 @@ public class yacysearch {
         final Switchboard sb = (Switchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
 
-        final boolean authorized = sb.verifyAuthentication(header);
-        final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || authorized;
+        String authenticatedUserName = null;
+        final boolean adminAuthenticated = sb.verifyAuthentication(header);
+        final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || adminAuthenticated;
 
-        boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        if ( !authenticated ) {
-            final UserDB.Entry user = sb.userDB.getUser(header);
-            authenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
+        boolean extendedSearchRights = adminAuthenticated;
+        
+        if(adminAuthenticated) {
+			authenticatedUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+        } else {
+        	final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
+        	if(user != null) {
+                extendedSearchRights = user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT);
+                authenticatedUserName = user.getUserName();
+        	}
         }
+        
         final boolean localhostAccess = header.accessFromLocalhost();
         final String promoteSearchPageGreeting =
             (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
@@ -118,7 +128,7 @@ public class yacysearch {
         
         // in case that the crawler is running and the search user is the peer admin, we expect that the user wants to check recently crawled document
         // to ensure that recent crawl results are inside the search results, we do a soft commit here. This is also important for live demos!
-        if (authenticated && sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 0) {
+        if (extendedSearchRights && sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 0) {
             sb.index.fulltext().commit(true);
         }
         final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
@@ -129,6 +139,7 @@ public class yacysearch {
         
         final servletProperties prop = new servletProperties();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
+		prop.put("authSearch", authenticatedUserName != null);
 
         // produce vocabulary navigation sidebars
         Collection<Tagging> vocabularies = LibraryProvider.autotagging.getVocabularies();
@@ -198,6 +209,18 @@ public class yacysearch {
             return prop;
         }
 
+		if (post.containsKey("auth") && authenticatedUserName == null) {
+			/*
+			 * Access to authentication protected features is explicitely requested here
+			 * but no authentication is provided : ask now for authentication.
+             * Wihout this, after timeout of HTTP Digest authentication nonce, browsers no more send authentication information 
+             * and as this page is not private, protected features would simply be hidden without asking browser again for authentication.
+             * (see mantis 766 : http://mantis.tokeek.de/view.php?id=766) *
+			 */
+			prop.authenticationRequired();
+			return prop;
+		}
+		
         // check for JSONP
         if ( post.containsKey("callback") ) {
             final String jsonp = post.get("callback") + "([";
@@ -254,7 +277,7 @@ public class yacysearch {
         if ( !global ) {
             // we count only searches on the local peer here, because global searches
             // are counted on the target peer to preserve privacy of the searcher
-            if ( authenticated ) {
+            if ( extendedSearchRights ) {
                 // local or authenticated search requests are counted separately
                 // because they are not part of a public available peer statistic
                 sb.searchQueriesRobinsonFromLocal++;
@@ -287,7 +310,7 @@ public class yacysearch {
             ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM "
                 + client
                 + " gets no permission to search");
-        } else if ( !authenticated && !localhostAccess && !intranetMode ) {
+        } else if ( !extendedSearchRights && !localhostAccess && !intranetMode ) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
             synchronized ( trackerHandles ) {
                 final int accInThreeSeconds =
@@ -476,18 +499,34 @@ public class yacysearch {
                 modifier.add("/heuristic");
             }
             
-            final int tldp = querystring.indexOf("tld:", 0);
+            final String tldModifierPrefix = "tld:";
+            final int tldp = querystring.indexOf(tldModifierPrefix, 0);
             if (tldp >= 0) {
                 int ftb = querystring.indexOf(' ', tldp);
-                if (ftb == -1) ftb = querystring.length();
-                tld = querystring.substring(tldp + 4, ftb);
-                querystring = querystring.replace("tld:" + tld, "");
-                modifier.add("tld:" + tld);
+                if (ftb == -1) {
+                	ftb = querystring.length();
+                }
+                tld = querystring.substring(tldp + tldModifierPrefix.length(), ftb);
+                querystring = querystring.replace(tldModifierPrefix + tld, "");
+                modifier.add(tldModifierPrefix + tld);
                 while ( tld.length() > 0 && tld.charAt(0) == '.' ) {
                     tld = tld.substring(1);
                 }
-                if (tld.length() == 0) tld = null;
+                if (tld.length() == 0) {
+                	tld = null;
+                } else {
+                	try {
+                		/* Convert to the same lower case ASCII Compatible Encoding that is used in normalized URLs */
+                		tld = IDN.toASCII(tld, 0);
+                	} catch(final IllegalArgumentException e){
+                		ConcurrentLog.warn("LOCAL_SEARCH", "Failed to convert tld modifier value " + tld + "to ASCII Compatible Encoding (ACE)", e);
+                	}
+                	
+                    /* Domain name in an URL is case insensitive : convert now modifier to lower case for further processing over normalized URLs */
+                    tld = tld.toLowerCase(Locale.ROOT);
+                }
             }
+            
             if (urlmask == null || urlmask.isEmpty()) urlmask = ".*"; //if no urlmask was given
 
             // read the language from the language-restrict option 'lr'
@@ -647,12 +686,16 @@ public class yacysearch {
                     DigestURL.hosthashess(sb.getConfig("search.excludehosth", "")),
                     MultiProtocolURL.TLD_any_zone_filter,
                     client,
-                    authenticated,
+                    extendedSearchRights,
                     indexSegment,
                     ranking,
                     header.get(HeaderFramework.USER_AGENT, ""),
                     lat, lon, rad,
                     sb.getConfigArray("search.navigation", ""));
+			theQuery.setStandardFacetsMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
+					QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
+			theQuery.setDateFacetMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
+					QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT));
             EventTracker.delete(EventTracker.EClass.SEARCH);
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
                 theQuery.id(true),
@@ -684,7 +727,8 @@ public class yacysearch {
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event
-            if ( SearchEventCache.getEvent(theQuery.id(false)) == null ) {
+            final SearchEvent cachedEvent = SearchEventCache.getEvent(theQuery.id(false));
+            if (cachedEvent == null) {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset
                 startRecord = 0;
             }
@@ -702,8 +746,12 @@ public class yacysearch {
                     sb.getConfigLong(
                         SwitchboardConstants.REMOTESEARCH_MAXTIME_USER,
                         sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_MAXTIME_DEFAULT, 3000)));
+            
+            if(post.getBoolean("resortCachedResults") && cachedEvent == theSearch) {
+            	theSearch.resortCachedResults();
+            }
 
-            if ( startRecord == 0 && authenticated && !stealthmode ) {
+            if ( startRecord == 0 && extendedSearchRights && !stealthmode ) {
                 if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) ) {
                     sb.heuristicSite(theSearch, modifier.sitehost);
                 }
@@ -721,7 +769,7 @@ public class yacysearch {
                 + "remote_rwi_available(" + theSearch.remote_rwi_available.get() + "), "
                 + "remote_rwi_stored(" + theSearch.remote_rwi_stored.get() + "), "
                 + "remote_rwi_peerCount(" + theSearch.remote_rwi_peerCount.get() + "), "
-                + "local_solr_available(" + theSearch.local_solr_available.get() + "), "
+                + "local_solr_evicted(" + theSearch.local_solr_evicted.get() + "), "
                 + "local_solr_stored(" + theSearch.local_solr_stored.get() + "), "
                 + "remote_solr_available(" + theSearch.remote_solr_available.get() + "), "
                 + "remote_solr_stored(" + theSearch.remote_solr_stored.get() + "), "
@@ -755,7 +803,7 @@ public class yacysearch {
                                     RequestHeader.FileType.HTML,
                                     0,
                                     theQuery,
-                                    suggestion, true).toString());
+                                    suggestion, true, authenticatedUserName != null).toString());
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
                         } catch (final ConcurrentModificationException e) {
@@ -818,19 +866,38 @@ public class yacysearch {
             prop.put("num-results_itemsPerPage", Formatter.number(itemsPerPage));
             prop.put("num-results_totalcount", Formatter.number(theSearch.getResultCount())); // also in yacyserchtrailer (hint: timing in p2p search )
             prop.put("num-results_globalresults", global && (indexReceiveGranted || clustersearch) ? "1" : "0");
-            prop.put("num-results_globalresults_localResourceSize", Formatter.number(theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get(), true));
+            prop.put("num-results_globalresults_localIndexCount", Formatter.number(theSearch.local_rwi_stored.get() + theSearch.local_solr_stored.get(), true));
             prop.put("num-results_globalresults_remoteResourceSize", Formatter.number(theSearch.remote_rwi_stored.get() + theSearch.remote_solr_stored.get(), true));
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
+            
+			final boolean jsResort = global && extendedSearchRights // for now enable JavaScript resorting only for authenticated users as it requires too much resources per search request  
+					&& (contentdom == ContentDomain.ALL || contentdom == ContentDomain.TEXT) // For now JavaScript resorting can only be applied for text search 
+					&& sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
+			prop.put("jsResort", jsResort);
+            prop.put("num-results_jsResort", jsResort);
+            
+			/* In p2p mode only and if JavaScript resorting is not enabled, add a link allowing user to resort already drained results,
+			 * eventually including fetched results with higher ranks from the Solr and RWI stacks */
+			prop.put("resortEnabled", !jsResort && global && !stealthmode && theSearch.resortCacheAllowed.availablePermits() > 0 ? 1 : 0);
+			prop.put("resortEnabled_url",
+					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true, authenticatedUserName != null)
+							.append("&startRecord=").append(startRecord).append("&resortCachedResults=true")
+							.toString());
 
             // generate the search result lines; the content will be produced by another servlet
             for ( int i = 0; i < theQuery.itemsPerPage(); i++ ) {
                 prop.put("results_" + i + "_item", startRecord + i);
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
+
+                prop.put("jsResort_results_" + i + "_item", startRecord + i);
+                prop.put("jsResort_results_" + i + "_eventID", theQuery.id(false));
             }
             prop.put("results", theQuery.itemsPerPage());
+            prop.put("jsResort_results", theQuery.itemsPerPage());
             prop.put("resultTable", (contentdom == ContentDomain.APP || contentdom == ContentDomain.AUDIO || contentdom == ContentDomain.VIDEO) ? 1 : 0);
             prop.put("eventID", theQuery.id(false)); // for bottomline
+            prop.put("jsResort_eventID", theQuery.id(false));
 
             // process result of search
             if ( !filtered.isEmpty() ) {
@@ -852,8 +919,27 @@ public class yacysearch {
 
             prop.put("depth", "0");
             prop.put("localQuery", theSearch.query.isLocal() ? "1" : "0");
+            prop.put("jsResort_localQuery", theSearch.query.isLocal() ? "1" : "0");
+            
+            final boolean showLogin = sb.getConfigBool(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+					SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT);
+            if(showLogin) {
+            	if(authenticatedUserName != null) {
+            		/* Show the name of the authenticated user */
+            		prop.put("showLogin", 1);
+            		prop.put("showLogin_userName", authenticatedUserName);
+            	} else {
+            		/* Show a login link */
+            		prop.put("showLogin", 2);
+            		prop.put("showLogin_loginURL",
+            				QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true, true).toString());
+            	}
+            } else {
+            	prop.put("showLogin", 0);
+            }
 
         }
+        
         prop.put("focus", focus ? 1 : 0); // focus search field
         prop.put("searchagain", global ? "1" : "0");
         String former = originalquerystring.replaceAll(Segment.catchallString, "*");

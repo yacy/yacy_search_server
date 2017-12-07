@@ -25,12 +25,14 @@
 package net.yacy.cora.sorting;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,12 +40,35 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<E> {
 
-    protected final ConcurrentHashMap<E, AtomicInteger> map; // a mapping from a reference to the cluster key
-    private long gcount; // sum of all scores
+	/** a mapping from a reference to the cluster key */
+    protected final ConcurrentHashMap<E, AtomicInteger> map;
+    
+    /** sum of all scores */
+    private long gcount;
+    
+	/** Eventual registered object listening on map updates */
+	private ScoreMapUpdatesListener updatesListener;
 
     public ConcurrentScoreMap()  {
+        this(null);
+    }
+    
+    /**
+     * @param updatesListener an eventual object listening on score map updates
+     */
+    public ConcurrentScoreMap(final ScoreMapUpdatesListener updatesListener)  {
         this.map = new ConcurrentHashMap<E, AtomicInteger>();
         this.gcount = 0;
+        this.updatesListener = updatesListener;
+    }
+    
+    /**
+     * Dispatch the update event to the eventually registered listener.
+     */
+    private void dispatchUpdateToListener() {
+        if(this.updatesListener != null) {
+        	this.updatesListener.updatedScoreMap();
+        }
     }
 
     @Override
@@ -55,34 +80,40 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
     public synchronized void clear() {
         this.map.clear();
         this.gcount = 0;
+        dispatchUpdateToListener();
     }
 
-    /**
-     * shrink the cluster to a demanded size
-     * @param maxsize
-     */
     @Override
-    public void shrinkToMaxSize(final int maxsize) {
-        if (this.map.size() <= maxsize) return;
+    public int shrinkToMaxSize(final int maxsize) {
+        if (this.map.size() <= maxsize) {
+        	return 0;
+        }
+        int deletedNb = 0;
         int minScore = getMinScore();
         while (this.map.size() > maxsize) {
             minScore++;
-            shrinkToMinScore(minScore);
+            deletedNb += shrinkToMinScore(minScore);
         }
+        // No need to dispatch to listener, it is already done in shrinkToMinScore()
+        return deletedNb;
     }
 
-    /**
-     * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
-     * @param minScore
-     */
     @Override
-    public void shrinkToMinScore(final int minScore) {
+    public int shrinkToMinScore(final int minScore) {
         final Iterator<Map.Entry<E, AtomicInteger>> i = this.map.entrySet().iterator();
         Map.Entry<E, AtomicInteger> entry;
+        int deletedNb = 0;
         while (i.hasNext()) {
             entry = i.next();
-            if (entry.getValue().intValue() < minScore) i.remove();
+            if (entry.getValue().intValue() < minScore) {
+            	i.remove();
+            	deletedNb++;
+            }
         }
+        if(deletedNb > 0) {
+        	dispatchUpdateToListener();
+        }
+        return deletedNb;
     }
 
     public long totalCount() {
@@ -114,6 +145,8 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
 
         // increase overall counter
         this.gcount++;
+        
+        dispatchUpdateToListener();
     }
 
     @Override
@@ -126,6 +159,8 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
 
         // increase overall counter
         this.gcount--;
+        
+        dispatchUpdateToListener();
     }
 
     @Override
@@ -141,6 +176,8 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         }
         // increase overall counter
         this.gcount += newScore;
+        
+        dispatchUpdateToListener();
     }
 
     @Override
@@ -153,6 +190,8 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
 
         // increase overall counter
         this.gcount += incrementScore;
+        
+        dispatchUpdateToListener();
     }
 
     @Override
@@ -169,6 +208,9 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
 
         // decrease overall counter
         this.gcount -= score.intValue();
+        
+        dispatchUpdateToListener();
+        
         return score.intValue();
     }
 
@@ -246,6 +288,31 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         for (int i = l.size() - 1; i >= 0; i--) r.add(l.get(i));
         return r.iterator();
     }
+    
+    /**
+     * Creates and returns a sorted view of the keys, sorted by their own natural order.
+     * @param up true = asc order, false = reverse order
+     * @return iterator accessing the keys in natural order
+     */
+    public Iterator<E> keysByNaturalOrder(final boolean up) {
+    	TreeSet<E> sortedKeys;
+    	if(up) {
+    		sortedKeys = new TreeSet<>();
+    	} else {
+    		sortedKeys = new TreeSet<>(Collections.reverseOrder());
+    	}
+    	for(E key : this.map.keySet()) {
+    		sortedKeys.add(key);
+    	}
+    	return sortedKeys.iterator();
+    }
+    
+    /**
+     * @param updatesListener an eventual object which wants to listen to successful updates on this score map
+     */
+    public void setUpdatesListener(final ScoreMapUpdatesListener updatesListener) {
+		this.updatesListener = updatesListener;
+	}
 
     public static void main(final String[] args) {
         final ConcurrentScoreMap<String> a = new ConcurrentScoreMap<String>();
