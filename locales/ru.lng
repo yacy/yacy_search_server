@@ -3117,9 +3117,8 @@ If you block access to your server (setting anything else than '*'), then you wi
 from using other peers' indexes for search service.==использование поиска индексов другими узлами.
 However, blocking access may be correct in enterprise environments where you only want to index your==Ограничение доступа может быть полезным в корпоративной сети, где требуется только индексирование 
 company's own web pages.==вэб-страниц компаний.
-Filter have to be entered as IP, IP range or first part of allowed IP's separated by comma (e.g. 10.100.0-100.0-100, 127. )== Фильтр возможен по ip-адресу, по диапазону ip-адресов или по первым числам ip-адреса через запятую, (например  10.100.0-100.0-100, 127.)
-further details on format see Jetty ==Подробную информацию об IPAccessHandler смотрите
-<a href="http://download.eclipse.org/jetty/8.1.14.v20131031/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">IPAccessHandler</a> docu.==<a href="http://download.eclipse.org/jetty/8.1.14.v20131031/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">здесь</a>.
+further details on format see Jetty ==Подробную информацию об InetAddressSet смотрите
+<a href="http://download.eclipse.org/jetty/stable-9/apidocs/org/eclipse/jetty/util/InetAddressSet.html" target="_blank">InetAddressSet</a> documentation.==<a href="http://download.eclipse.org/jetty/stable-9/apidocs/org/eclipse/jetty/util/InetAddressSet.html" target="_blank">здесь</a>.
 fileHost:==Размещение файлов:
 staticIP (optional):==Постоянный IP-адрес (необязательно):
 <strong>The staticIP can help that your peer can be reached by other peers in case that your==<strong>Использование постоянного IP-адреса может помочь вашему узлу соединиться с другиму узлами
