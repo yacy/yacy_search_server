@@ -688,7 +688,12 @@ public final class LoaderDispatcher {
      * @return a map from URLs to the anchor texts of the urls
      * @throws IOException
      */
-    public final Map<AnchorURL, String> loadLinks(final DigestURL url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent, final int timezoneOffset) throws IOException {
+    public final Map<AnchorURL, String> loadLinks(
+    		final DigestURL url,
+    		final CacheStrategy cacheStrategy,
+    		BlacklistType blacklistType,
+    		final ClientIdentification.Agent agent,
+    		final int timezoneOffset) throws IOException {
         final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, blacklistType, agent);
         if (response == null) throw new IOException("response == null");
         final ResponseHeader responseHeader = response.getResponseHeader();
@@ -699,7 +704,7 @@ public final class LoaderDispatcher {
         final String supportError = TextParser.supports(url, responseHeader.getContentType());
         if (supportError != null) throw new IOException("no parser support: " + supportError);
         try {
-            documents = TextParser.parseSource(url, responseHeader.getContentType(), responseHeader.getCharacterEncoding(), response.profile().scraper(), timezoneOffset, response.depth(), response.getContent());
+            documents = TextParser.parseSource(url, responseHeader.getContentType(), responseHeader.getCharacterEncoding(), response.profile().ignoreDivClassName(), response.profile().scraper(), timezoneOffset, response.depth(), response.getContent());
             if (documents == null) throw new IOException("document == null");
         } catch (final Exception e) {
             throw new IOException("parser error: " + e.getMessage());

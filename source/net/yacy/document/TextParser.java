@@ -182,6 +182,7 @@ public final class TextParser {
             final DigestURL location,
             final String mimeType,
             final String charset,
+            final Set<String> ignore_class_name,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
@@ -198,7 +199,7 @@ public final class TextParser {
                 throw new Parser.Failure(errorMsg, location);
             }
             sourceStream = new BufferedInputStream(new FileInputStream(sourceFile));
-            docs = parseSource(location, mimeType, charset, scraper, timezoneOffset, depth, sourceFile.length(), sourceStream);
+            docs = parseSource(location, mimeType, charset, ignore_class_name, scraper, timezoneOffset, depth, sourceFile.length(), sourceStream);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
@@ -215,6 +216,7 @@ public final class TextParser {
             final DigestURL location,
             String mimeType,
             final String charset,
+            final Set<String> ignore_class_name,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
@@ -232,7 +234,7 @@ public final class TextParser {
         }
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
 
-        Document[] docs = parseSource(location, mimeType, idioms, charset, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, ignore_class_name, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE);
 
         return docs;
     }
@@ -241,6 +243,7 @@ public final class TextParser {
             final DigestURL location,
             String mimeType,
             final String charset,
+            final Set<String> ignore_class_name,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
@@ -302,7 +305,7 @@ public final class TextParser {
 					CloseShieldInputStream nonCloseInputStream = new CloseShieldInputStream(markableStream);
 					
 					try {
-						return parseSource(location, mimeType, parser, charset, scraper, timezoneOffset,
+						return parseSource(location, mimeType, parser, charset, ignore_class_name, scraper, timezoneOffset,
 								nonCloseInputStream, maxLinks, maxBytes);
 					} catch (Parser.Failure e) {
 						/* Try to reset the marked stream. If the failed parser has consumed too many bytes : 
@@ -364,15 +367,16 @@ public final class TextParser {
         } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
-        Document[] docs = parseSource(location, mimeType, idioms, charset, scraper, timezoneOffset, depth, b, maxLinks, maxBytes);
+        Document[] docs = parseSource(location, mimeType, idioms, charset, ignore_class_name, scraper, timezoneOffset, depth, b, maxLinks, maxBytes);
 
         return docs;
     }
 
 	public static Document[] parseSource(final DigestURL location, String mimeType, final String charset,
+			final Set<String> ignore_class_name,
 			final VocabularyScraper scraper, final int timezoneOffset, final int depth, final long contentLength,
 			final InputStream sourceStream) throws Parser.Failure {
-		return parseSource(location, mimeType, charset, scraper, timezoneOffset, depth, contentLength, sourceStream,
+		return parseSource(location, mimeType, charset, ignore_class_name, scraper, timezoneOffset, depth, contentLength, sourceStream,
 				Integer.MAX_VALUE, Long.MAX_VALUE);
 	}
     
@@ -397,7 +401,7 @@ public final class TextParser {
 	public static Document[] parseWithLimits(final DigestURL location, String mimeType, final String charset,
 			final int timezoneOffset, final int depth, final long contentLength, final InputStream sourceStream, int maxLinks,
 			long maxBytes) throws Parser.Failure{
-		return parseSource(location, mimeType, charset, new VocabularyScraper(), timezoneOffset, depth, contentLength,
+		return parseSource(location, mimeType, charset, new HashSet<String>(), new VocabularyScraper(), timezoneOffset, depth, contentLength,
 				sourceStream, maxLinks, maxBytes);
 	}
     
@@ -420,6 +424,7 @@ public final class TextParser {
             final String mimeType,
             final Parser parser,
             final String charset,
+            final Set<String> ignore_class_name,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final InputStream sourceStream,
@@ -435,11 +440,11 @@ public final class TextParser {
         try {
             final Document[] docs;
             if(parser.isParseWithLimitsSupported()) {
-            	docs = parser.parseWithLimits(location, mimeType, documentCharset, scraper, timezoneOffset, sourceStream, maxLinks, maxBytes);
+            	docs = parser.parseWithLimits(location, mimeType, documentCharset, ignore_class_name, scraper, timezoneOffset, sourceStream, maxLinks, maxBytes);
             } else {
             	/* Parser do not support partial parsing within limits : let's control it here*/
     			InputStream limitedSource = new StrictLimitInputStream(sourceStream, maxBytes);
-            	docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, limitedSource);
+            	docs = parser.parse(location, mimeType, documentCharset, ignore_class_name, scraper, timezoneOffset, limitedSource);
             }
             return docs;
         } catch(Parser.Failure e) {
@@ -468,6 +473,7 @@ public final class TextParser {
             final String mimeType,
             final Set<Parser> parsers,
             final String charset,
+            final Set<String> ignore_class_name,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
@@ -495,13 +501,13 @@ public final class TextParser {
             	}
                 try {
                 	if(parser.isParseWithLimitsSupported()) {
-                		docs = parser.parseWithLimits(location, mimeType, documentCharset, scraper, timezoneOffset, bis, maxLinks, maxBytes);
+                		docs = parser.parseWithLimits(location, mimeType, documentCharset, ignore_class_name, scraper, timezoneOffset, bis, maxLinks, maxBytes);
                 	} else {
                         /* Partial parsing is not supported by this parser : check content length now */
                        	if(sourceArray.length > maxBytes) {
                        		throw new Parser.Failure("Content size is over maximum size of " + maxBytes + "", location);		
                        	}
-                		docs = parser.parse(location, mimeType, documentCharset, scraper, timezoneOffset, bis);
+                		docs = parser.parse(location, mimeType, documentCharset, ignore_class_name, scraper, timezoneOffset, bis);
                 	}
                 } catch (final Parser.Failure e) {
 					if(parser instanceof gzipParser && e.getCause() instanceof GZIPOpeningStreamException && 

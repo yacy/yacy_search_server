@@ -159,7 +159,7 @@ public class QuickCrawlLink_p {
                         CacheStrategy.IFFRESH,
                         collection,
                         ClientIdentification.yacyIntranetCrawlerAgentName,
-                        null,
+                        null, null,
                         timezoneOffset);
                 sb.crawler.putActive(pe.handle().getBytes(), pe);
             } catch (final Exception e) {

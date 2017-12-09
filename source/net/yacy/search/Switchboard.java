@@ -2951,6 +2951,7 @@ public final class Switchboard extends serverSwitch {
                     new AnchorURL(response.url()),
                     response.getMimeType(),
                     response.getCharacterEncoding(),
+                    response.profile().ignoreDivClassName(),
                     response.profile().scraper(),
                     response.profile().timezoneOffset(),
                     response.depth(),

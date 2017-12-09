@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.HashSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -162,7 +163,7 @@ public class DocumentIndex extends Segment {
         InputStream sourceStream = null;
         try {
         	sourceStream = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
-            documents = TextParser.parseSource(url, null, null, new VocabularyScraper(), timezoneOffset, 0, length, sourceStream);
+            documents = TextParser.parseSource(url, null, null, new HashSet<String>(), new VocabularyScraper(), timezoneOffset, 0, length, sourceStream);
         } catch (final Exception e ) {
             throw new IOException("cannot parse " + url.toNormalform(false) + ": " + e.getMessage());
         } finally {

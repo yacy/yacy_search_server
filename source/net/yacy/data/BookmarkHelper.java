@@ -135,7 +135,7 @@ public class BookmarkHelper {
         final Set<String> tags=ListManager.string2set(tag); //this allow multiple default tags
         try {
             //load the links
-            final ContentScraper scraper = new ContentScraper(baseURL, 10000, new VocabularyScraper(), 0);
+            final ContentScraper scraper = new ContentScraper(baseURL, 10000, new HashSet<String>(), new VocabularyScraper(), 0);
             //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
             final Writer writer = new TransformerWriter(null, null, scraper, null, false);
             FileUtils.copy(input,writer);

@@ -28,6 +28,7 @@ import java.util.Set;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.document.Parser.Failure;
 
 public interface Parser {
 
@@ -59,6 +60,16 @@ public interface Parser {
             DigestURL url,
             String mimeType,
             String charset,
+            VocabularyScraper scraper,
+            int timezoneOffset,
+            InputStream source
+            ) throws Parser.Failure, InterruptedException;
+    
+    public Document[] parse(
+            DigestURL url,
+            String mimeType,
+            String charset,
+            Set<String> ignore_class_name,
             VocabularyScraper scraper,
             int timezoneOffset,
             InputStream source
@@ -103,10 +114,17 @@ public interface Parser {
 	 *             when the parser implementation doesn't support parsing within
 	 *             limits
 	 */
-	public Document[] parseWithLimits(DigestURL url, String mimeType, String charset, VocabularyScraper scraper,
+	public Document[] parseWithLimits(DigestURL url, String mimeType, String charset,
+			VocabularyScraper scraper,
 			int timezoneOffset, InputStream source, int maxLinks, long maxBytes)
 			throws Parser.Failure, InterruptedException, UnsupportedOperationException;
-    
+
+
+    public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String documentCharset,
+    		final Set<String> ignore_class_name, final VocabularyScraper vocscraper,
+    		final int timezoneOffset, final InputStream sourceStream, final int maxLinks, final long maxBytes)
+    				throws Parser.Failure, InterruptedException, UnsupportedOperationException;
+
 	/**
 	 * @return true when the parser implementation supports the
 	 *         parseWithLimits() operation.

@@ -35,6 +35,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
+import java.util.Set;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
@@ -61,6 +62,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
     public ScraperInputStream(
             final InputStream inStream,
             final String inputStreamCharset,
+            final Set<String> ignore_class_name,
             final VocabularyScraper vocabularyScraper,
             final DigestURL rooturl,
             final Transformer transformer,
@@ -72,7 +74,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
         this.bufferedIn = new BufferedInputStream(inStream, (int) preBufferSize);
         this.bufferedIn.mark((int) preBufferSize);
 
-        final ContentScraper scraper = new ContentScraper(rooturl, maxLinks, vocabularyScraper, timezoneOffset);
+        final ContentScraper scraper = new ContentScraper(rooturl, maxLinks, ignore_class_name, vocabularyScraper, timezoneOffset);
         scraper.registerHtmlFilterEventListener(this);
 
         try {

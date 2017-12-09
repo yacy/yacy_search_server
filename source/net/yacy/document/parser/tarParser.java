@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -69,6 +70,7 @@ public class tarParser extends AbstractParser implements Parser {
             final DigestURL location,
             final String mimeType,
             final String charset,
+            final Set<String> ignore_class_name,
             final VocabularyScraper scraper, 
             final int timezoneOffset,
             InputStream source) throws Parser.Failure, InterruptedException {
@@ -110,7 +112,7 @@ public class tarParser extends AbstractParser implements Parser {
 					 * as a possible parser for the sub resource.
 					 */
                     final DigestURL subLocation = new DigestURL(parentTarURL, name);
-                    final Document[] subDocs = TextParser.parseSource(subLocation, mime, null, scraper, timezoneOffset,	999, tmp);
+                    final Document[] subDocs = TextParser.parseSource(subLocation, mime, null, ignore_class_name, scraper, timezoneOffset,	999, tmp);
                     if (subDocs == null) {
                     	continue;
                     }

@@ -28,10 +28,12 @@ package net.yacy.crawler.data;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
@@ -44,6 +46,8 @@ import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.JSONArray;
+import net.yacy.cora.util.JSONTokener;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.data.word.Word;
@@ -96,6 +100,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         INDEX_TEXT                   ("indexText",                  false, CrawlAttribute.BOOLEAN, "Index Text"),
         INDEX_MEDIA                  ("indexMedia",                 false, CrawlAttribute.BOOLEAN, "Index Media"),
         COLLECTIONS                  ("collections",                false, CrawlAttribute.STRING,  "Collections (comma-separated list)"),
+        IGNORE_DIV_CLASS_NAME        ("ignore_class_name",      false, CrawlAttribute.STRING,  "Ignore DIV Class names"),
         SCRAPER                      ("scraper",                    false, CrawlAttribute.STRING,  "Declaration for Vocabulary Scraper"),
         TIMEZONEOFFSET               ("timezoneOffset",             true,  CrawlAttribute.INTEGER, "Time Zone of Crawl Start Agent");
         
@@ -128,6 +133,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     private Pattern snapshotsMustnotmatch = null;
 
     private final Map<String, AtomicInteger> doms;
+    private final Set<String> ignore_class_name;
     private final VocabularyScraper scraper;
 
     /**
@@ -190,6 +196,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final CacheStrategy cacheStrategy,
                  final String collections,
                  final String userAgentName,
+                 final Set<String> ignore_class_name,
                  final VocabularyScraper scraper,
                  final int timezoneOffset) {
         super(40);
@@ -230,9 +237,12 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key, snapshotsMustnotmatch);
         put(CrawlAttribute.CACHE_STRAGEGY.key,   cacheStrategy.toString());
         put(CrawlAttribute.COLLECTIONS.key,      CommonPattern.SPACE.matcher(collections.trim()).replaceAll(""));
-        // we transform the scraper information into a JSON Array
+        // we transform the ignore_class_name and scraper information into a JSON Array
+        this.ignore_class_name = ignore_class_name == null ? new HashSet<String>() : ignore_class_name;
+        String jsonString = new JSONArray(ignore_class_name).toString();
+        put(CrawlAttribute.IGNORE_DIV_CLASS_NAME.key, jsonString);
         this.scraper = scraper == null ? new VocabularyScraper() : scraper;
-        String jsonString = this.scraper.toString();
+        jsonString = this.scraper.toString();
         assert jsonString != null && jsonString.length() > 0 && jsonString.charAt(0) == '{' : "jsonString = " + jsonString;
         put(CrawlAttribute.SCRAPER.key, jsonString);
         put(CrawlAttribute.TIMEZONEOFFSET.key, timezoneOffset);
@@ -246,8 +256,16 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         super(ext == null ? 1 : ext.size());
         if (ext != null) putAll(ext);
         this.doms = new ConcurrentHashMap<String, AtomicInteger>();
-        String jsonString = ext.get(CrawlAttribute.SCRAPER.key);
+        String jsonString = ext.get(CrawlAttribute.IGNORE_DIV_CLASS_NAME.key);
+    	JSONArray a = jsonString == null ? new JSONArray() : new JSONArray(new JSONTokener(jsonString));
+        this.ignore_class_name = new HashSet<String>();
+        for (int i = 0; i < a.length(); i++) this.ignore_class_name.add(a.getString(i));
+        jsonString = ext.get(CrawlAttribute.SCRAPER.key);
         this.scraper = jsonString == null || jsonString.length() == 0 ? new VocabularyScraper() : new VocabularyScraper(jsonString);
+    }
+
+    public Set<String> ignoreDivClassName() {
+        return this.ignore_class_name;
     }
 
     public VocabularyScraper scraper() {
@@ -797,5 +815,20 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
         prop.put(CRAWL_PROFILE_PREFIX+count+"_crawlingDomFilterContent", i);
 
+    }
+    
+	public static void main(String[] args) {
+    	// test to convert the key set from set to string and back
+    	Set<String> a = new HashSet<>();
+    	a.add("eins"); a.add("zwei"); a.add("drei");
+    	JSONArray j = new JSONArray(a);
+    	String s = j.toString();
+    	System.out.println(s);
+    	JSONTokener o = new JSONTokener(s);
+    	j = new JSONArray(o);
+    	System.out.println(j);
+    	Set<String> h = new HashSet<String>();
+        for (int i = 0; i < j.length(); i++) h.add(j.getString(i));
+    	System.out.println(h);
     }
 }

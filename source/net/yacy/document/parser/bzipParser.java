@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.Set;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2Utils;
@@ -69,6 +70,7 @@ public class bzipParser extends AbstractParser implements Parser {
             final DigestURL location,
             final String mimeType,
             final String charset,
+            Set<String> ignore_class_name,
             final VocabularyScraper scraper, 
             final int timezoneOffset,
             final InputStream source)
@@ -123,7 +125,7 @@ public class bzipParser extends AbstractParser implements Parser {
             // creating a new parser class to parse the unzipped content
             final String contentfilename = BZip2Utils.getUncompressedFilename(location.getFileName());
             final String mime = TextParser.mimeOf(MultiProtocolURL.getFileExtension(contentfilename));
-            final Document[] docs = TextParser.parseSource(location, mime, null, scraper, timezoneOffset, 999, tempFile);
+            final Document[] docs = TextParser.parseSource(location, mime, null, ignore_class_name, scraper, timezoneOffset, 999, tempFile);
             if (docs != null) maindoc.addSubDocuments(docs);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;

@@ -297,7 +297,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_AUTOCRAWL_DEEP,
                 ClientIdentification.yacyInternetCrawlerAgentName,
-                null,
+                null, null,
                 0);
     	this.profilesActiveCrawls.put(
     	    UTF8.getBytes(this.defaultAutocrawlDeepProfile.handle()),
@@ -330,7 +330,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_AUTOCRAWL_SHALLOW,
                 ClientIdentification.yacyInternetCrawlerAgentName,
-                null,
+                null, null,
                 0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultAutocrawlShallowProfile.handle()),
@@ -362,7 +362,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_PROXY,
                 ClientIdentification.yacyProxyAgentName,
-                null,
+                null, null,
                 0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultProxyProfile.handle()),
@@ -394,7 +394,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_REMOTE,
                 ClientIdentification.yacyInternetCrawlerAgentName,
-                null,
+                null, null,
                 0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultRemoteProfile.handle()),
@@ -426,7 +426,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_TEXT,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null,
+                null, null,
                 0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultTextSnippetLocalProfile.handle()),
@@ -458,7 +458,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null,
+                null, null,
                 0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
@@ -491,7 +491,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_GREEDY_LEARNING_TEXT,
                 ClientIdentification.browserAgentName,
-                null,
+                null, null,
                 0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
@@ -523,7 +523,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null,
+                null, null,
                 0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultMediaSnippetLocalProfile.handle()),
@@ -555,7 +555,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null,
+                null, null,
                 0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultMediaSnippetGlobalProfile.handle()),
@@ -587,7 +587,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_SURROGATE,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null,
+                null, null,
                 0);
         this.profilesActiveCrawls.put(
             UTF8.getBytes(this.defaultSurrogateProfile.handle()),
@@ -622,7 +622,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.NOCACHE,
                 collection,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
-                null,
+                null, null,
                 0);
         this.profilesActiveCrawls.put(UTF8.getBytes(genericPushProfile.handle()), genericPushProfile);
         this.defaultPushProfiles.put(collection, genericPushProfile);

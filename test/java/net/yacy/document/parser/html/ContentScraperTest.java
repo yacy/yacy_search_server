@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -145,7 +146,7 @@ public class ContentScraperTest {
                 + "<time datetime='2016-12-23'>23. Dezember 2016</time>" // html5 time tag
                 + "</body></html>";
 
-        ContentScraper scraper = new ContentScraper(root, 10, new VocabularyScraper(), 0);
+        ContentScraper scraper = new ContentScraper(root, 10, new HashSet<String>(), new VocabularyScraper(), 0);
         final Writer writer = new TransformerWriter(null, null, scraper, null, false);
 
         FileUtils.copy(new StringReader(page), writer);

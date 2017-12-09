@@ -209,6 +209,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final int maxAnchors;
     
     private final VocabularyScraper vocabularyScraper;
+    private final Set<String> ignore_class_name;
     private final int timezoneOffset;
     private int breadcrumbs;
 
@@ -241,13 +242,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @param timezoneOffset local time zone offset
      */
     @SuppressWarnings("unchecked")
-    public ContentScraper(final DigestURL root, final int maxAnchors, final int maxLinks, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
+    public ContentScraper(final DigestURL root, final int maxAnchors, final int maxLinks, final Set<String> ignore_class_name, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         assert root != null;
         this.root = root;
         this.vocabularyScraper = vocabularyScraper;
+        this.ignore_class_name = ignore_class_name;
         this.timezoneOffset = timezoneOffset;
         this.evaluationScores = new Evaluation();
         this.rss = new SizeLimitedMap<DigestURL, String>(maxLinks);
@@ -294,8 +296,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @param vocabularyScraper handles maps from class names to vocabulary names and from documents to a map from vocabularies to terms
      * @param timezoneOffset local time zone offset
      */
-    public ContentScraper(final DigestURL root, final int maxLinks, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
-        this(root, Integer.MAX_VALUE, maxLinks, vocabularyScraper, timezoneOffset);
+    public ContentScraper(final DigestURL root, final int maxLinks, final Set<String> ignore_class_name, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
+        this(root, Integer.MAX_VALUE, maxLinks, ignore_class_name, vocabularyScraper, timezoneOffset);
     }
 
     @Override
@@ -835,11 +837,17 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         final String h;
         if (tag.name.equalsIgnoreCase("div")) {
-            final String id = tag.opts.getProperty("id", EMPTY_STRING);
-            this.evaluationScores.match(Element.divid, id);
-            final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
-            if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
-                breadcrumbs++;
+            final String classn = tag.opts.getProperty("class", EMPTY_STRING);
+            if (classn.length() > 0 && this.ignore_class_name.contains(classn)) {
+            	// we remove everything inside that tag, so it can be ignored
+            	tag.content.clear();
+            } else {
+	            final String id = tag.opts.getProperty("id", EMPTY_STRING);
+	            this.evaluationScores.match(Element.divid, id);
+	            final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
+	            if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
+	                breadcrumbs++;
+	            }
             }
         } else if ((tag.name.equalsIgnoreCase("h1")) && (tag.content.length() < 1024)) {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
@@ -1477,13 +1485,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (page == null) throw new IOException("no content in file " + file.toString());
 
         // scrape document to look up charset
-        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), StandardCharsets.UTF_8.name(), new VocabularyScraper(), new DigestURL("http://localhost"), null, false, maxLinks, timezoneOffset);
+        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), StandardCharsets.UTF_8.name(), new HashSet<String>(), new VocabularyScraper(), new DigestURL("http://localhost"), null, false, maxLinks, timezoneOffset);
         String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         htmlFilter.close();
         if (charset == null) charset = Charset.defaultCharset().toString();
 
         // scrape content
-        final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost"), maxLinks, new VocabularyScraper(), timezoneOffset);
+        final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost"), maxLinks, new HashSet<String>(), new VocabularyScraper(), timezoneOffset);
         final Writer writer = new TransformerWriter(null, null, scraper, null, false);
         FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
         writer.close();

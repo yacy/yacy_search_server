@@ -513,6 +513,14 @@ public class CrawlStartExpert {
         }
         prop.put("agentSelect_defaultAgentName", ClientIdentification.yacyInternetCrawlerAgentName);
 
+        // ---------- Ignore Class Name
+        if (post != null && post.containsKey("ignoreclassname")) {
+            prop.put("ignoreclassname", 
+                    post.get("ignoreclassname", ""));
+        } else {
+            prop.put("ignoreclassname", "");
+        }
+        
         // ---------- Enrich Vocabulary
         Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
         if (vocs.size() == 0) {

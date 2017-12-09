@@ -468,6 +468,15 @@ public class Crawler_p {
                 boolean snapshotsReplaceOld = post.getBoolean("snapshotsReplaceOld");
                 String snapshotsMustnotmatch = post.get("snapshotsMustnotmatch", "");
                 
+                String ignoreclassname_s = post.get("ignoreclassname");
+                Set<String> ignoreclassname = new HashSet<>();
+                if (ignoreclassname_s != null) {
+                	String[] ignoreclassname_a = ignoreclassname_s.trim().split(",");
+                	for (int i = 0; i < ignoreclassname_a.length; i++) {
+                		ignoreclassname.add(ignoreclassname_a[i].trim());
+                	}
+                }
+                
                 // get vocabulary scraper info
                 JSONObject vocabulary_scraper = new JSONObject(); // key = vocabulary_name, value = properties with key = type (i.e. 'class') and value = keyword in context
                 for (String key: post.keySet()) {
@@ -552,6 +561,7 @@ public class Crawler_p {
                             cachePolicy,
                             collection,
                             agentName,
+                            ignoreclassname,
                             new VocabularyScraper(vocabulary_scraper),
                             timezoneOffset);
                     handle = ASCII.getBytes(profile.handle());
@@ -646,7 +656,7 @@ public class Crawler_p {
 								/* No restriction on domains or subpath : we scrape now links and asynchronously push them to the crawlStacker */
 								final String crawlingFileContent = post.get("crawlingFile$file", "");
 								final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000,
-										new VocabularyScraper(), profile.timezoneOffset());
+										new HashSet<String>(), new VocabularyScraper(), profile.timezoneOffset());
 								FileCrawlStarterTask crawlStarterTask = new FileCrawlStarterTask(crawlingFile, crawlingFileContent, scraper, profile,
 										sb.crawlStacker, sb.peers.mySeed().hash.getBytes());
 	                            sb.crawler.putActive(handle, profile);
@@ -784,7 +794,7 @@ public class Crawler_p {
 			final String crawlingFileContent) throws MalformedURLException, IOException, FileNotFoundException {
 		List<AnchorURL> hyperlinks_from_file;
 		// check if the crawl filter works correctly
-		final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new VocabularyScraper(), timezoneOffset);
+		final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new HashSet<String>(), new VocabularyScraper(), timezoneOffset);
 		final Writer writer = new TransformerWriter(null, null, scraper, null, false);
 		if((crawlingFileContent == null || crawlingFileContent.isEmpty()) && crawlingFile != null) {
 			/* Let's report here detailed error to help user when he selected a wrong file */
