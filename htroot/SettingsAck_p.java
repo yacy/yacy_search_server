@@ -35,6 +35,7 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.http.InetPathAccessHandler;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
@@ -231,14 +232,14 @@ public class SettingsAck_p {
                 // testing proxy filter
                 int patternCount = 0;
                 String patternStr = null;
+                final StringTokenizer st = new StringTokenizer(filter,",");
                 try {
-                    final StringTokenizer st = new StringTokenizer(filter,",");
                     while (st.hasMoreTokens()) {
                         patternCount++;
                         patternStr = st.nextToken();
-                        Pattern.compile(patternStr);
+                        InetPathAccessHandler.checkPattern(patternStr);
                     }
-                } catch (final PatternSyntaxException e) {
+                } catch (final IllegalArgumentException e) {
                     prop.put("info", "27");
                     prop.putHTML("info_filter", filter);
                     prop.put("info_nr", patternCount);

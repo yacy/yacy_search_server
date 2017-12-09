@@ -707,17 +707,6 @@ public final class yacy {
             try {
                 fis = new FileInputStream(configFile);
                 p.load(fis);
-                // Test for server access restriction (is implemented using Jetty IPaccessHandler which does not support IPv6
-                // try to disable IPv6 
-                String teststr = p.getProperty("serverClient", "*");
-                if (!teststr.equals("*")) {
-                    // testing on Win-8 showed this property has to be set befor Switchboard starts 
-                    // and seems to be sensitive (or time critical) if other code had been executed before this (don't know why ... ?)
-                    System.setProperty("java.net.preferIPv6Addresses", "false");
-                    System.setProperty("java.net.preferIPv4Stack", "true"); // DO NOT PREFER IPv6, i.e. freifunk uses ipv6 only and host resolving does not work
-                    teststr = System.getProperty("java.net.preferIPv4Stack");
-                    System.out.println("set system property java.net.preferIP4Stack=" + teststr);
-                }   
                 
                 // test for yacy already running
                 if (lockFile.exists()) {  // another instance running? VM crash? User will have to care about this

@@ -391,9 +391,9 @@ proxyClient=localhost,127\.0\.0\.1,192\.168\..*,10\..*,0:0:0:0:0:0:0:1.*
 # to prevent that the asked peer knows which peer asks.
 YaCyHop=true
 
-# serverClient: client-ip's that may connect to the web server,
+# serverClient: comma separated client-ip's that may connect to the web server,
 # thus are allowed to use the search service
-# if you set this to another value, search requst from others
+# if you set this to another value, search requests from others
 # are blocked, but you will also be blocked from using others
 # search services.
 serverClient=*

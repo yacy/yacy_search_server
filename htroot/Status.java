@@ -173,10 +173,6 @@ public class Status
             prop.put("hintCrawlMonitor", "1");
         }
 
-        if (!System.getProperty("java.version").startsWith("1.8")) {
-            prop.put("hintJREVersion", "1");
-        }
-
         if (adminaccess && "intranet|webportal|allip".indexOf(env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified")) >= 0) {
             prop.put("hintSupport", "1");
         }

@@ -10,9 +10,9 @@
            from using other peers' indexes for search service.
            However, blocking access may be correct in enterprise environments where you only want to index your
            company's own web pages.<br />
-           Filter have to be entered as IP, IP range or first part of allowed IP's separated by comma (e.g. 10.100.0-100.0-100, 127. ) 
+           Filter have to be entered as IP, IP range or using CIDR notation separated by comma (e.g. 192.168.1.1,2001:db8::ff00:42:8329,192.168.1.10-192.168.1.20,192.168.1.30-40,192.168.2.0/24) 
            further details on format see Jetty 
-           <a href="http://download.eclipse.org/jetty/stable-9/apidocs/org/eclipse/jetty/server/handler/IPAccessHandler.html" target="_blank">IPAccessHandler</a> docu.
+           <a href="http://download.eclipse.org/jetty/stable-9/apidocs/org/eclipse/jetty/util/InetAddressSet.html" target="_blank">InetAddressSet</a> documentation.
     </td>
   </tr>
   <tr valign="top">
