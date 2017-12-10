@@ -72,6 +72,7 @@ public class Surftips {
             publicPage = post.get("publicPage", "0").equals("1");
             sb.setConfig("publicSurftips", publicPage);
         }
+        prop.put("surftips_publicSurftips", publicPage);
 
         if ((publicPage) || (authorizedAccess)) {
 
@@ -79,7 +80,7 @@ public class Surftips {
             String hash;
             if ((post != null) && ((hash = post.get("voteNegative", null)) != null)) {
                 if (!sb.verifyAuthentication(header)) {
-                	prop.authenticationRequired();
+                    prop.authenticationRequired();
                     return prop;
                 }
                 // make new news message with voting
@@ -93,7 +94,7 @@ public class Surftips {
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
                 if (!sb.verifyAuthentication(header)) {
-                	prop.authenticationRequired();
+                    prop.authenticationRequired();
                     return prop;
                 }
                 // make new news message with voting
