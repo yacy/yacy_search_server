@@ -219,7 +219,7 @@ public class PerformanceQueues_p {
                 idlesleep = Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), String.valueOf(idlesleep)));
                 busysleep = Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"), String.valueOf(busysleep)));
                 memprereq = Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"), String.valueOf(memprereq)));
-                loadprereq = Double.parseDouble(d(defaultSettings.get(threadName + "_loadprereq"), String.valueOf(memprereq)));
+                loadprereq = Double.parseDouble(d(defaultSettings.get(threadName + "_loadprereq"), String.valueOf(loadprereq)));
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
                 //if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
