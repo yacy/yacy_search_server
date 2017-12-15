@@ -68,6 +68,7 @@ import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -791,7 +792,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * @return an URL string for the given peer ip
      * @throws RuntimeException when the ip parameter is null
      */
-    public final String getPublicURL(final String ip, final boolean preferHTTPS) {
+    public final String getPublicURL(final String ip, final boolean preferHTTPS) throws RuntimeException {
         if (ip == null) {
         	throw new RuntimeException("ip == NULL"); // that should not happen in Peer-to-Peer mode (but can in Intranet mode)
         }
@@ -822,6 +823,27 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
         return sb.toString();
     }
+    
+	/**
+	 * Generate a public URL Multiprotocol instance using a given ip. This combines
+	 * the ip with the http(s) port and encloses the ip with square brackets if the
+	 * ip is of typeIPv6
+	 * 
+	 * @param ip
+	 *            a host name or ip address
+	 * @param preferHTTPS
+	 *            when true and https is available on this Seed, use it as the
+	 *            scheme part of the url
+	 * @return an MultiProtocolURL instance for the given peer ip
+	 * @throws RuntimeException
+	 *             when the ip parameter is null
+	 * @throws MalformedURLException
+	 *             when the ip and port could not make a well formed URL
+	 */
+	public final MultiProtocolURL getPublicMultiprotocolURL(final String ip, final boolean preferHTTPS)
+			throws RuntimeException, MalformedURLException {
+		return new MultiProtocolURL(getPublicURL(ip, preferHTTPS));
+	}
 
     /** @return the port number of this seed or <code>-1</code> if not present */
     public final int getPort() {

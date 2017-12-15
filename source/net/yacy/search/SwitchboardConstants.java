@@ -520,6 +520,13 @@ public final class SwitchboardConstants {
     public static final String NETWORK_BOOTSTRAP_SEEDLIST_STUB = "network.unit.bootstrap.seedlist";
 
     public static final String NETWORK_SEARCHVERIFY = "network.unit.inspection.searchverify";
+    
+    /** Key of the setting controlling whether https should be preferred for in-protocol operations when available on remote peers.
+     * A distinct general setting is available to control whether https sould be used for remote search queries : see {@link #REMOTESEARCH_HTTPS_PREFERRED} */
+    public static final String NETWORK_PROTOCOL_HTTPS_PREFERRED = "network.unit.protocol.https.preferred";
+    
+    /** Default setting value controlling whether https should be preferred for in-protocol operations when available on remote peers */
+    public static final boolean NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT = false;
 
     /**
      * appearance

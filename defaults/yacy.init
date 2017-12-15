@@ -127,6 +127,10 @@ network.unit.domain.nocheck = false
 # that means it is not usable in YaCy p2p-configurations, only in private portal configurations
 network.unit.tenant.agent =
 
+# Prefer https for in-protocol operations when available on remote peers
+# A distinct general setting is available to control whether https sould be used for remote search queries : remotesearch.https.preferred
+network.unit.protocol.https.preferred = false
+
 # Update process properties
 # The update server location is given in the network.unit.definition,
 # but the settings for update processing and cycles are individual.

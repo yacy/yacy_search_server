@@ -54,6 +54,7 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.operation.yacySeedUploadFile;
@@ -194,27 +195,51 @@ public class Network
 
     protected class publishThread extends Thread
     {
-        private Map<String, String> result;
         private final Seed seed;
 
         public publishThread(final ThreadGroup tg, final Seed seed) {
             super(tg, "PublishSeed_" + seed.getName());
             this.seed = seed;
-            this.result = null;
         }
 
         @Override
         public final void run() {
+        	Map<String, String> result = null;
             try {
-                for (String ip: this.seed.getIPs()) {
-                    this.result = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions, this.seed.getPublicAddress(ip), this.seed.hash);
-                    if ( this.result == null ) {
-                        // no or wrong response, delete that address
-                        final String cause = "peer ping to peer resulted in error response (added < 0)";
+				final boolean preferHttps = Network.this.sb.getConfigBool(
+						SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+						SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+                for (final String ip: this.seed.getIPs()) {
+                	try {
+                		MultiProtocolURL targetBaseURL = this.seed.getPublicMultiprotocolURL(ip, preferHttps);
+                        result = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions, targetBaseURL, this.seed.hash);
+						if (result == null && targetBaseURL.isHTTPS()) {
+							/* Failed with https : retry with http on the same address */
+							targetBaseURL = this.seed.getPublicMultiprotocolURL(ip, false);
+							result = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions,
+									targetBaseURL, this.seed.hash);
+							if (result != null) {
+								/* Got a result using http : mark SSL as unavailable on the peer */
+								log.info("publish: SSL/TLS unavailable on " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '"
+										+ this.seed.getName() + "' : can be reached using http but not https on address "
+										+ ip);
+	                            this.seed.setFlagSSLAvailable(false);
+	                            Network.this.sb.peers.updateConnected(this.seed);
+							}
+						}
+                        if(result == null) {
+                            // no or wrong response, delete that address
+                            final String cause = "peer ping to peer resulted in error response (added < 0)";
+                            log.info("publish: disconnected " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' from " + this.seed.getIPs() + ": " + cause);
+                            Network.this.sb.peers.peerActions.interfaceDeparture(this.seed, ip);
+                            continue;
+                        }
+                	} catch(final MalformedURLException e) {
+                        final String cause = "malformed peer URL";
                         log.info("publish: disconnected " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' from " + this.seed.getIPs() + ": " + cause);
                         Network.this.sb.peers.peerActions.interfaceDeparture(this.seed, ip);
-                        continue;
-                    }
+                		continue;
+                	}
                     // success! we have published our peer to a senior peer
                     // update latest news from the other peer
                     log.info("publish: handshaked "+ this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs());

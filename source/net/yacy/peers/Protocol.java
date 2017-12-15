@@ -58,7 +58,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -138,32 +137,37 @@ public final class Protocol {
      */
     public static class Post {
     
-        public byte[] result;                      // contains the result from a successful post or null if no attempt was successful
-        public Set<String> unsuccessfulAddresses;  // contains a set of addresses which had been tested for submission was without success
-        public String successfulAddress;           // contains the address which had been successfully used or null if no success with any Address
+    	/** Contains the result from a successful post or null if no attempt was successful */
+        private byte[] result;
         
+        /**
+         * @param targetBaseURL the base target URL
+         * @param targetHash the hash of the target peer
+         * @param path the path on the base URL
+         * @param parts the body content
+         * @param timeout the timeout in milliseconds
+         * @param httpFallback when true, retry as http when a https request failed
+         * @throws IOException
+         */
         public Post(
-            final String targetAddress,
-            final String targetPeerHash,
+            final MultiProtocolURL targetBaseURL,
+            final String targetHash,
             final String path,
             final Map<String, ContentBody> parts,
             final int timeout) throws IOException {
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
             httpClient.setTimout(timeout);
-            this.result = httpClient.POSTbytes(
-                new MultiProtocolURL("http://" + targetAddress + path),
-                Seed.b64Hash2hexHash(targetPeerHash) + ".yacyh",
-                parts,
-                false, true);
-            this.unsuccessfulAddresses = new HashSet<>();
-            if (this.result == null) {
-                this.unsuccessfulAddresses.add(targetAddress);
-                this.successfulAddress = null;
-            } else {
-                this.successfulAddress = targetAddress;
-            }
+            MultiProtocolURL targetURL = new MultiProtocolURL(targetBaseURL, path);
+			this.result = httpClient.POSTbytes(targetURL, Seed.b64Hash2hexHash(targetHash) + ".yacyh", parts, false,
+					true);
         }
-
+        
+        /**
+         * @return the result from a successful post or null if no attempt was successful
+         */
+        public byte[] getResult() {
+			return this.result;
+		}
     }
     
     /**
@@ -182,7 +186,7 @@ public final class Protocol {
     public static Map<String, String> hello(
         final Seed mySeed,
         final PeerActions peerActions,
-        final String targetAddress,
+        final MultiProtocolURL targetBaseURL,
         final String targetHash) {
 
         Map<String, String> result = null;
@@ -202,7 +206,7 @@ public final class Protocol {
             final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 30000);
             content =
                 httpClient.POSTbytes(
-                    new MultiProtocolURL("http://" + targetAddress + "/yacy/hello.html"),
+                    new MultiProtocolURL(targetBaseURL, "/yacy/hello.html"),
                     Seed.b64Hash2hexHash(targetHash) + ".yacyh",
                     parts,
                     false, true);
@@ -212,7 +216,7 @@ public final class Protocol {
             if ( Thread.currentThread().isInterrupted() ) {Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "' interrupted.");
                 return null;
             }
-            Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "', peer " + targetAddress + "; exception: " + e.getMessage());
+            Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "', peer " + targetBaseURL + "; exception: " + e.getMessage());
             // try again (go into loop)
             result = null;
         }
@@ -222,7 +226,7 @@ public final class Protocol {
                 + ((result == null) ? "result null" : ("result=" + result.toString())));
             return null;
         }
-        Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "' contacted peer at " + targetAddress + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + responseTime + " milliseconds");
+        Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "' contacted peer at " + targetBaseURL + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + responseTime + " milliseconds");
 
         // check consistency with expectation
         Seed otherPeer = null;
@@ -233,7 +237,7 @@ public final class Protocol {
             } else {
                 try {
                     // patch the remote peer address to avoid that remote peers spoof the network with wrong addresses
-                    String host = Domains.stripToHostName(targetAddress);
+                    String host = targetBaseURL.getHost();
                     InetAddress ie = Domains.dnsResolve(host);
                     otherPeer = Seed.genRemoteSeed(seed, false, ie.getHostAddress());
                     if ( !otherPeer.hash.equals(targetHash) ) {
@@ -342,7 +346,7 @@ public final class Protocol {
             } else {
                 try {
                     if ( i == 1 ) {
-                        String host = Domains.stripToHostName(targetAddress);
+                        String host = targetBaseURL.getHost();
                         InetAddress ia = Domains.dnsResolve(host);
                         if (ia == null) continue;
                         host = ia.getHostAddress(); // the actual address of the target as we had been successful when contacting them is patched here
@@ -364,23 +368,24 @@ public final class Protocol {
         return result;
     }
 
-    public static long[] queryRWICount(final String targetAddress, final String targetHash, int timeout) {        
+    public static long[] queryRWICount(final MultiProtocolURL targetBaseURL, final Seed target, int timeout) {        
         // prepare request
         final String salt = crypt.randomSalt();
 
         // send request
         try {
-            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
+            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("object", UTF8.StringBody("rwicount"));
             parts.put("env", UTF8.StringBody(""));
-            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "posting request to " + targetAddress);
-            final Post post = new Post(targetAddress, targetHash, "/yacy/query.html", parts, timeout);
-            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received CONTENT from requesting " + targetAddress + (post.result == null ? "NULL" : (": length = " + post.result.length)));
+            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "posting request to " + targetBaseURL);
+            final Post post = new Post(targetBaseURL, target.hash, "/yacy/query.html", parts, timeout);
+    		
+            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received CONTENT from requesting " + targetBaseURL + (post.result == null ? "NULL" : (": length = " + post.result.length)));
             final Map<String, String> result = FileUtils.table(post.result);
             if (result == null || result.isEmpty()) return new long[] {-1, -1};
-            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received RESULT from requesting " + targetAddress + " : result = " + result.toString());
+            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received RESULT from requesting " + targetBaseURL + " : result = " + result.toString());
             final String resp = result.get("response");
-            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received RESPONSE from requesting " + targetAddress + " : response = " + resp);
+            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received RESPONSE from requesting " + targetBaseURL + " : response = " + resp);
             if (resp == null) return new long[] {-1, -1};
             String magic = result.get("magic");
             if (magic == null) magic = "0";
@@ -390,7 +395,7 @@ public final class Protocol {
                 return new long[] {-1, -1};
             }
         } catch (final Exception e ) {
-            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received EXCEPTION from requesting " + targetAddress + ": " + e.getMessage());
+            //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received EXCEPTION from requesting " + targetBaseURL + ": " + e.getMessage());
             if (Network.log.isFine()) Network.log.fine("yacyClient.queryRWICount error:" + e.getMessage());
             return new long[] {-1, -1};
         }
@@ -518,7 +523,8 @@ public final class Protocol {
                 Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
                 if(targetBaseURL.startsWith("https")) {
                 	/* First mark https unavailable on this peer before removing any interface */
-    				target.setFlagSSLAvailable(false);                	
+    				target.setFlagSSLAvailable(false);
+    				event.peers.updateConnected(target);
                 } else {
                 	event.peers.peerActions.interfaceDeparture(target, ip);
                 }
@@ -608,7 +614,8 @@ public final class Protocol {
                 Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
                 if(targetBaseURL.startsWith("https")) {
                 	/* First mark https unavailable on this peer before removing any interface */
-    				target.setFlagSSLAvailable(false);                	
+    				target.setFlagSSLAvailable(false);     
+    				event.peers.updateConnected(target);
                 } else {
                 	event.peers.peerActions.interfaceDeparture(target, ip);
                 }
@@ -1222,11 +1229,11 @@ public final class Protocol {
                         	if(targetBaseURL.startsWith("https")) {
                         		/* First mark https unavailable on this peer before removing anything else */
                         		target.setFlagSSLAvailable(false);
+                        		event.peers.updateConnected(target);
                         	} else {
                         		target.setFlagSolrAvailable(false);
                         	}
                         }
-                        target.setFlagSolrAvailable(false || myseed);
                         return -1;
                     }
                 } catch(InterruptedException e) {
@@ -1477,26 +1484,34 @@ public final class Protocol {
 		return true;
 	}
 
-    public static Map<String, String> permissionMessage(final String targetAddress, final String targetHash) {
-        // ask for allowed message size and attachment size
-        // if this replies null, the peer does not answer
-
+	/**
+	 * Post a request asking for allowed message size and attachment size to the
+	 * target peer on the selected target ip. All parameters must not be null.
+	 * 
+	 * @param targetBaseURL
+	 *            the public base URL of the target peer on one of its reported IP
+	 *            addresses in {@link Seed#getIPs()}
+	 * @param target
+	 *            the target peer
+	 * @param sb
+	 *            the switchboard instance
+	 * @return the result of the request
+	 * @throws IOException
+	 *             when the peer doesn't answer on this IP or any other error
+	 *             occurred
+	 */
+	public static Map<String, String> permissionMessage(final MultiProtocolURL targetBaseURL, final Seed target,
+			final Switchboard sb) throws IOException {
         // prepare request
         final String salt = crypt.randomSalt();
 
         // send request
-        try {
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), targetHash, salt);
-            parts.put("process", UTF8.StringBody("permission"));
-            final Post post = new Post(targetAddress, targetAddress, "/yacy/message.html", parts, 6000);
-            final Map<String, String> result = FileUtils.table(post.result);
-            return result;
-        } catch (final Exception e ) {
-            // most probably a network time-out exception
-            Network.log.warn("yacyClient.permissionMessage error:" + e.getMessage());
-            return null;
-        }
+        final Map<String, ContentBody> parts = basicRequestParts(sb, target.hash, salt);
+        parts.put("process", UTF8.StringBody("permission"));
+        final Post post = new Post(targetBaseURL, target.hash, "/yacy/message.html", parts, 6000);
+        
+        final Map<String, String> result = FileUtils.table(post.result);
+        return result;
     }
 
     public static Map<String, String> crawlReceipt(
@@ -1702,12 +1717,21 @@ public final class Protocol {
         final ReferenceContainerCache<WordReference> indexes,
         boolean gzipBody,
         final int timeout) {
-        for (String ip : targetSeed.getIPs()) {
+    	final boolean preferHttps = Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED, SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+        for (final String ip : targetSeed.getIPs()) {
             if (ip == null) {
                 Network.log.warn("no address for transferRWI");
                 return null;
             }
-            final String address = targetSeed.getPublicAddress(ip);
+            MultiProtocolURL targetBaseURL = null;
+            try {
+            	targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, preferHttps);
+            } catch(final MalformedURLException e) {
+                Network.log.info("yacyClient.transferRWI malformed target URL : " + targetBaseURL);
+                // disconnect unavailable peer ip
+                Switchboard.getSwitchboard().peers.peerActions.interfaceDeparture(targetSeed, ip);
+                continue;
+            }
 
             // prepare post values
             final String salt = crypt.randomSalt();
@@ -1746,12 +1770,25 @@ public final class Protocol {
                 parts.put("entryc", UTF8.StringBody(Integer.toString(indexcount)));
                 parts.put("indexes", UTF8.StringBody(entrypost.toString()));
                 final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
-                final byte[] content =
-                        httpClient.POSTbytes(
-                                new MultiProtocolURL("http://" + address + "/yacy/transferRWI.html"),
-                                targetSeed.getHexHash() + ".yacyh",
-                                parts,
-                                gzipBody, true);
+                byte[] content = null;
+                try {
+					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferRWI.html"),
+							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
+                } catch(final IOException e) {
+                    if(targetBaseURL.isHTTPS()) {
+                    	targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
+                    	/* Failed with https : retry with http on the same address */
+						content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferRWI.html"),
+								targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
+						if(content != null) {
+							/* Success with http : mark SSL as unavailable on the target peer */
+							Network.log.info("yacyClient.transferRWI SSL unavailable on address " + ip);
+							Switchboard.getSwitchboard().peers.updateConnected(targetSeed);
+						}
+                    } else {
+                    	throw e;
+                    }
+                }
                 final Iterator<String> v = FileUtils.strings(content);
                 // this should return a list of urlhashes that are unknown
 
@@ -1761,7 +1798,7 @@ public final class Protocol {
                 result.put(Seed.IP, ip); // add used ip to result for error handling (in case no "result" key was received)
                 return result;
             } catch (final Exception e ) {
-                Network.log.info("yacyClient.transferRWI to " + address + " error: " + e.getMessage());
+                Network.log.info("yacyClient.transferRWI to " + targetBaseURL + " error: " + e.getMessage());
                 // disconnect unavailable peer ip
                 Switchboard.getSwitchboard().peers.peerActions.interfaceDeparture(targetSeed, ip);
             }
@@ -1908,7 +1945,10 @@ public final class Protocol {
             final Map<String, ContentBody> parts =
                 basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("object", UTF8.StringBody("host"));
-            final Post post = new Post(target.getPublicAddress(target.getIP()), target.hash, "/yacy/idx.json", parts, 30000);
+			final String remoteBaseURL = target.getPublicURL(target.getIP(),
+					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+							SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT));
+            final Post post = new Post(new MultiProtocolURL(remoteBaseURL), target.hash, "/yacy/idx.json", parts, 30000);
             if ( post.result == null || post.result.length == 0 ) {
                 Network.log.warn("yacyClient.loadIDXHosts error: empty result");
                 return null;

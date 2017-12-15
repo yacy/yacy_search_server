@@ -27,6 +27,7 @@
 // javac -classpath .:../classes Network.java
 // if the shell's current path is HTROOT
 
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -39,6 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -223,29 +225,40 @@ public class Network {
                 map.put(Seed.IP, challengeIP);
                 map.put(Seed.PORT, challengePort);
                 Seed peer = post.get("peerHash") == null ? null : new Seed(post.get("peerHash"), map);
-                String challengeAddress = peer.getPublicAddress(challengeIP);
                 sb.updateMySeed();
                 Seed mySeed = sb.peers.mySeed();
-                final Map<String, String> response = Protocol.hello(mySeed, sb.peers.peerActions, challengeAddress, peer.hash);
-
-                if (response == null) {
-                    Seed peerd = sb.peers.get(peer.hash);
-                    if (peerd != null) peer = peerd;
+                final String challengeURLStr = peer.getPublicURL(challengeIP, false);
+                try {
+                	final MultiProtocolURL challengeURL = new MultiProtocolURL(challengeURLStr);
+                	final Map<String, String> response = Protocol.hello(mySeed, sb.peers.peerActions, challengeURL, peer.hash);
+                	
+                    if (response == null) {
+                        Seed peerd = sb.peers.get(peer.hash);
+                        if (peerd != null) peer = peerd;
+                        sb.peers.peerActions.interfaceDeparture(peer, challengeIP);
+                        prop.put("table_comment",1);
+                        prop.put("table_comment_status", "publish: no response from peer '" + peer.getName() + "/" + post.get("peerHash") + "' from <a href=\"" + challengeURL + "\" target=\"_blank\">" + challengeURL + "</a>");
+                    } else {
+                        String yourtype = response.get("yourtype");
+                        String yourip = response.get("yourip");
+                        peer = sb.peers.getConnected(peer.hash);
+                        if (peer == null) {
+                            prop.put("table_comment",1);
+                            prop.put("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from <a href=\"" + challengeURL + "\" target=\"_blank\">" + challengeURL + "</a>, yourtype = " + yourtype + ", yourip = " + yourip);
+                        } else {
+                            prop.put("table_comment",2);
+                            prop.put("table_comment_status","publish: handshaked " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at <a href=\"" + challengeURL + "\" target=\"_blank\">" + challengeURL + "</a>, yourtype = " + yourtype + ", yourip = " + yourip);
+                            prop.putHTML("table_comment_details",peer.toString());
+                        }
+                    }
+                } catch(final MalformedURLException e) {
+                    final Seed peerd = sb.peers.get(peer.hash);
+                    if (peerd != null) {
+                    	peer = peerd;
+                    }
                     sb.peers.peerActions.interfaceDeparture(peer, challengeIP);
                     prop.put("table_comment",1);
-                    prop.put("table_comment_status", "publish: no response from peer '" + peer.getName() + "/" + post.get("peerHash") + "' from <a href=\"http://" + challengeAddress + "\" target=\"_blank\">" + challengeAddress + "</a>");
-                } else {
-                    String yourtype = response.get("yourtype");
-                    String yourip = response.get("yourip");
-                    peer = sb.peers.getConnected(peer.hash);
-                    if (peer == null) {
-                        prop.put("table_comment",1);
-                        prop.put("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from <a href=\"http://" + challengeAddress + "\" target=\"_blank\">" + challengeAddress + "</a>, yourtype = " + yourtype + ", yourip = " + yourip);
-                    } else {
-                        prop.put("table_comment",2);
-                        prop.put("table_comment_status","publish: handshaked " + peer.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + peer.getName() + "' at <a href=\"http://" + challengeAddress + "\" target=\"_blank\">" + challengeAddress + "</a>, yourtype = " + yourtype + ", yourip = " + yourip);
-                        prop.putHTML("table_comment_details",peer.toString());
-                    }
+                    prop.put("table_comment_status", "publish: malformed URL for peer '" + peer.getName() + "/" + post.get("peerHash") + "' : " + challengeURLStr);
                 }
 
                 prop.putHTML("table_peerHash",post.get("peerHash"));
