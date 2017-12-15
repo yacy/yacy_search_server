@@ -237,7 +237,7 @@ public final class Protocol {
             } else {
                 try {
                     // patch the remote peer address to avoid that remote peers spoof the network with wrong addresses
-                    String host = targetBaseURL.getHost();
+                    String host = Domains.stripToHostName(targetBaseURL.getHost());
                     InetAddress ie = Domains.dnsResolve(host);
                     otherPeer = Seed.genRemoteSeed(seed, false, ie.getHostAddress());
                     if ( !otherPeer.hash.equals(targetHash) ) {
@@ -346,7 +346,7 @@ public final class Protocol {
             } else {
                 try {
                     if ( i == 1 ) {
-                        String host = targetBaseURL.getHost();
+                        String host = Domains.stripToHostName(targetBaseURL.getHost());
                         InetAddress ia = Domains.dnsResolve(host);
                         if (ia == null) continue;
                         host = ia.getHostAddress(); // the actual address of the target as we had been successful when contacting them is patched here
