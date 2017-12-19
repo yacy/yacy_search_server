@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -220,7 +221,7 @@ public class YJsonResponseWriter implements QueryResponseWriter {
             	String imageurl = images_protocol.get(0) + "://" + images_stub.get(0);
             	solitaireTag(writer, "image", imageurl);
             } else {
-            	if (url != null && Response.docTypeExt(MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase()) == Response.DT_IMAGE) {
+            	if (url != null && Response.docTypeExt(MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase(Locale.ROOT)) == Response.DT_IMAGE) {
             		solitaireTag(writer, "image", url.toNormalform(true));
             	}
             }

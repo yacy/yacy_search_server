@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -982,7 +983,7 @@ public final class SeedDB implements AlternativeDomainNames {
                 host = host.substring(p + 1); // if ever, the double-dots are here but do not harm
             }
             // identify domain
-            final String domain = host.substring(0, host.length() - 5).toLowerCase();
+            final String domain = host.substring(0, host.length() - 5).toLowerCase(Locale.ROOT);
             seed = lookupByName(domain);
             if (seed == null) return null;
             if (this.mySeed == null) initMySeed();

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -77,7 +78,7 @@ public class FilterEngine {
     	assert entry != null;
     	int pos; // position between domain and path
     	if((pos = entry.indexOf('/')) > 0) {
-    		String host = entry.substring(0, pos).trim().toLowerCase();
+    		String host = entry.substring(0, pos).trim().toLowerCase(Locale.ROOT);
             final String path = entry.substring(pos + 1).trim();
 
             // avoid PatternSyntaxException e
@@ -123,7 +124,7 @@ public class FilterEngine {
     		return e.containsAll(type);
     	}
         // Cache Miss
-        return isListed(url.getHost().toLowerCase(), url.getFile());
+        return isListed(url.getHost().toLowerCase(Locale.ROOT), url.getFile());
     }
 
     public static boolean isMatchable (final String host) {

@@ -30,6 +30,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -253,7 +254,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
                  writer.write("<media:content medium=\"image\" url=\"");
                  XML.escapeCharData(imageurl, writer); writer.write("\"/>\n");
             } else {
-            	if (url != null && Response.docTypeExt(MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase()) == Response.DT_IMAGE) {
+            	if (url != null && Response.docTypeExt(MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase(Locale.ROOT)) == Response.DT_IMAGE) {
             		writer.write("<media:content medium=\"image\" url=\"");
                     XML.escapeCharData(url.toNormalform(true), writer); writer.write("\"/>\n");
             	}

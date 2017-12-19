@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -717,7 +718,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             String host = url.getHost();
             if (host == null) continue;
             if (host.startsWith("www.")) host = host.substring(4);
-            filter.append(Pattern.quote(host.toLowerCase())).append(".*|");
+            filter.append(Pattern.quote(host.toLowerCase(Locale.ROOT))).append(".*|");
         }
         filter.setCharAt(filter.length() - 1, ')');
         return filter.toString();
@@ -746,7 +747,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (host.startsWith("www.")) host = host.substring(4);
         String protocol = url.getProtocol();
         if ("http".equals(protocol) || "https".equals(protocol)) protocol = "https?+";
-        return new StringBuilder(host.length() + 20).append(protocol).append("://(www.)?").append(Pattern.quote(host.toLowerCase())).append(url.getPath()).append(".*").toString();
+        return new StringBuilder(host.length() + 20).append(protocol).append("://(www.)?").append(Pattern.quote(host.toLowerCase(Locale.ROOT))).append(url.getPath()).append(".*").toString();
     }
     
     public boolean isPushCrawlProfile() {

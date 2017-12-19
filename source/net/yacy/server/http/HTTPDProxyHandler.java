@@ -62,6 +62,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
@@ -314,7 +315,7 @@ public final class HTTPDProxyHandler {
 
             // handle outgoing cookies
             handleOutgoingCookies(requestHeader, url.getHost(), ip);
-            prepareRequestHeader(conProp, requestHeader, url.getHost().toLowerCase());
+            prepareRequestHeader(conProp, requestHeader, url.getHost().toLowerCase(Locale.ROOT));
             final ResponseHeader cachedResponseHeader = Cache.getResponseHeader(url.hash());
 
             // why are files unzipped upon arrival? why not zip all files in cache?
@@ -1042,7 +1043,7 @@ public final class HTTPDProxyHandler {
         int orgHostPort = orgurl.getPort();
         String orgHostName = orgurl.getHost();
         if (orgHostName == null) orgHostName = "unknown";
-        orgHostName = orgHostName.toLowerCase();
+        orgHostName = orgHostName.toLowerCase(Locale.ROOT);
         String orgHostPath = orgurl.getPath(); if (orgHostPath == null) orgHostPath = "";
         String orgHostArgs = orgurl.getSearchpart();; if (orgHostArgs == null) orgHostArgs = "";
         if (orgHostArgs.length() > 0) orgHostArgs = "?" + orgHostArgs;

@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
@@ -94,7 +95,7 @@ public final class LoaderDispatcher {
 
     public boolean isSupportedProtocol(final String protocol) {
         if ((protocol == null) || (protocol.isEmpty())) return false;
-        return this.supportedProtocols.contains(protocol.trim().toLowerCase());
+        return this.supportedProtocols.contains(protocol.trim().toLowerCase(Locale.ROOT));
     }
 
     @SuppressWarnings("unchecked")
@@ -208,7 +209,7 @@ public final class LoaderDispatcher {
         final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.get(UTF8.getBytes(request.profileHandle()));
         
         // check if url is in blacklist
-        if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {
+        if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(Locale.ROOT), url.getFile())) {
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
@@ -362,7 +363,7 @@ public final class LoaderDispatcher {
         final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.get(UTF8.getBytes(request.profileHandle()));
         
         // check if url is in blacklist
-        if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {
+        if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(Locale.ROOT), url.getFile())) {
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
