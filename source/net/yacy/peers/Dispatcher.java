@@ -88,37 +88,35 @@ public class Dispatcher {
      */
     private Map<String, Transmission.Chunk> transmissionBuffer;
 
-    // the segment backend is used to store the remaining indexContainers in case that the object is closed
+    /** the segment backend is used to store the remaining indexContainers in case that the object is closed */
     private final Segment segment;
 
-    // the seed database
+    /** the seed database */
     private final SeedDB seeds;
 
-    // the log
+    /** the log */
     private final ConcurrentLog log;
 
-    // transmission process
+    /** transmission process */
     private WorkflowProcessor<Transmission.Chunk> indexingTransmissionProcessor;
 
-    // transmission object
+    /** transmission object */
     private final Transmission transmission;
+    
+    /** The Switchboard instance holding the server environment */
+    private final Switchboard env;
 
     public Dispatcher(
-            final Segment segment,
-            final SeedDB seeds,
+            final Switchboard env,
             final boolean gzipBody,
             final int timeout
             ) {
+        this.env = env;
         this.transmissionBuffer = new ConcurrentHashMap<String, Transmission.Chunk>();
-        this.segment = segment;
-        this.seeds = seeds;
+        this.segment = env.index;
+        this.seeds = env.peers;
         this.log = new ConcurrentLog("INDEX-TRANSFER-DISPATCHER");
-        this.transmission = new Transmission(
-            this.log,
-            segment,
-            seeds,
-            gzipBody,
-            timeout);
+		this.transmission = new Transmission(env, this.log, gzipBody, timeout);
 
         final int concurrentSender = Math.min(8, WorkflowProcessor.availableCPU);
         this.indexingTransmissionProcessor = new WorkflowProcessor<Transmission.Chunk>(
@@ -366,7 +364,7 @@ public class Dispatcher {
         while (Protocol.metadataRetrievalRunning.get() > 0) try {Thread.sleep(1000);} catch (InterruptedException e) {break;}
         
         // we must test this here again
-        while (Memory.load() > Switchboard.getSwitchboard().getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f)) try {Thread.sleep(10000);} catch (InterruptedException e) {break;}
+        while (Memory.load() > this.env.getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f)) try {Thread.sleep(10000);} catch (InterruptedException e) {break;}
         
         // do the transmission
         final boolean success = chunk.transmit();

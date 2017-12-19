@@ -1596,18 +1596,25 @@ public final class Protocol {
     public static AtomicInteger metadataRetrievalRunning = new AtomicInteger(0);
 
     /**
-     * transfer the index. If the transmission fails, return a string describing the cause. If everything is
-     * ok, return null.
-     *
-     * @param targetSeed
-     * @param indexes
-     * @param urlCache
-     * @param gzipBody
-     * @param timeout
-     * @return
-     */
+	 * transfer the index. If the transmission fails, return a string describing the
+	 * cause. If everything is ok, return null.
+	 *
+	 * @param sb
+	 *            the Switchboard instance holding server environment
+	 * @param targetSeed
+	 *            the target peer
+	 * @param indexes
+	 *            the index entries to transfer
+	 * @param urlCache
+	 * @param gzipBody
+	 *            when true, the transferred data are compressed using gzip
+	 * @param timeout
+	 *            the maximum time in milliseconds to wait for a success of the
+	 *            http(s) request to the remote peer
+	 * @return
+	 */
     public static String transferIndex(
-        final SeedDB seeds,
+        final Switchboard sb,
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
         final HandleSet urlRefs,
@@ -1632,8 +1639,11 @@ public final class Protocol {
             }
         }
         
+		final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+				SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+        
         // transfer the RWI without the URLs
-        Map<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout);
+        Map<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout, preferHttps);
 
         if ( in == null ) {
             // targetSeed interface departure is already handled within transferRWI() for no response situation
@@ -1645,13 +1655,13 @@ public final class Protocol {
         if ( result == null ) {
             String errorCause = "no result from transferRWI";
             String usedIP = in.get(Seed.IP);
-            seeds.peerActions.interfaceDeparture(targetSeed, usedIP); // disconnect unavailable peer
+            sb.peers.peerActions.interfaceDeparture(targetSeed, usedIP); // disconnect unavailable peer
             return errorCause;
         }
 
         if ( !(result.equals("ok")) ) {
             targetSeed.setFlagAcceptRemoteIndex(false); // the peer does not want our index
-            seeds.addConnected(targetSeed); // update the peer
+            sb.peers.addConnected(targetSeed); // update the peer
             return result;
         }
 
@@ -1672,7 +1682,7 @@ public final class Protocol {
 
         EventChannel.channels(EventChannel.DHTSEND).addMessage(new RSSMessage("Sent " + indexes.size() + " RWIs " + indexes.toString() + " to " + targetSeed.getName() + "/[" + targetSeed.hash + "], " + uhs.length + " URLs there unknown", "", targetSeed.hash));
 
-        in = transferURL(targetSeed, uhs, urlRefs, segment, gzipBody, timeout);
+        in = transferURL(targetSeed, uhs, urlRefs, segment, gzipBody, timeout, preferHttps);
 
         if ( in == null ) {
             return "no connection from transferURL";
@@ -1682,13 +1692,13 @@ public final class Protocol {
         if ( result == null ) {
             String errorCause = "no result from transferURL";
             String usedIP = in.get(Seed.IP);
-            seeds.peerActions.interfaceDeparture(targetSeed, usedIP); // disconnect unavailable peer ip
+            sb.peers.peerActions.interfaceDeparture(targetSeed, usedIP); // disconnect unavailable peer ip
             return errorCause;
         }
 
         if ( !result.equals("ok") ) {
             targetSeed.setFlagAcceptRemoteIndex(false); // the peer does not want our index
-            seeds.addConnected(targetSeed); // update the peer
+            sb.peers.addConnected(targetSeed); // update the peer
             return result;
         }
         EventChannel.channels(EventChannel.DHTSEND).addMessage(
@@ -1701,23 +1711,29 @@ public final class Protocol {
     }
 
     /**
-     * Transfer Reverse Word Index entries to remote peer.
-     * If the used IP is not responding, this IP (interface) is removed from
-     * targtSeed IP list.
-     * Remote peer responds with list of unknown url hashes
-     *
-     * @param targetSeed
-     * @param indexes
-     * @param gzipBody
-     * @param timeout
-     * @return peer response or null if transfer failed
-     */
+	 * Transfer Reverse Word Index entries to remote peer. If the used IP is not
+	 * responding, this IP (interface) is removed from targtSeed IP list. Remote
+	 * peer responds with list of unknown url hashes
+	 *
+	 * @param targetSeed
+	 *            the target peer
+	 * @param indexes
+	 *            the index entries to transfer
+	 * @param gzipBody
+	 *            when true, the transferred data are compressed using gzip
+	 * @param timeout
+	 *            the maximum time in milliseconds to wait for a success of the
+	 *            http(s) request(s) to the remote peer
+	 * @param preferHttps
+	 *            when true, use https when available on the target peer
+	 * @return peer response or null if transfer failed
+	 */
     private static Map<String, String> transferRWI(
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
         boolean gzipBody,
-        final int timeout) {
-    	final boolean preferHttps = Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED, SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+        final int timeout,
+        final boolean preferHttps) {
         for (final String ip : targetSeed.getIPs()) {
             if (ip == null) {
                 Network.log.warn("no address for transferRWI");
@@ -1783,6 +1799,7 @@ public final class Protocol {
 						if(content != null) {
 							/* Success with http : mark SSL as unavailable on the target peer */
 							Network.log.info("yacyClient.transferRWI SSL unavailable on address " + ip);
+							targetSeed.setFlagSSLAvailable(false);
 							Switchboard.getSwitchboard().peers.updateConnected(targetSeed);
 						}
                     } else {
@@ -1809,12 +1826,18 @@ public final class Protocol {
     /**
      * Transfer URL entries to remote peer
      *
-     * @param targetSeed
-     * @param uhs
-     * @param urlRefs
+	 * @param targetSeed
+	 *            the target peer
+     * @param uhs hashes of URLs to transfer (unknown by the target peer)
+     * @param urlRefs list of locally known URLs entries
      * @param segment
-     * @param gzipBody
-     * @param timeout
+
+	 * @param gzipBody
+	 *            when true, the transferred data are compressed using gzip
+	 * @param timeout
+	 *            the maximum time in milliseconds to wait for a success of the
+	 *            http(s) request(s) to the remote peer
+     * @param preferHttps when true, use https when available on the target peer
      * @return remote peer response
      */
     private static Map<String, String> transferURL(
@@ -1823,14 +1846,10 @@ public final class Protocol {
         final HandleSet urlRefs,
         final Segment segment,
         boolean gzipBody,
-        final int timeout) {
+        final int timeout,
+        final boolean preferHttps) {
         // this post a message to the remote message board
-        for (String ip : targetSeed.getIPs()) {
-            final String address = targetSeed.getPublicAddress(ip);
-            if ( address == null ) {
-                return null;
-            }
-
+        for (final String ip : targetSeed.getIPs()) {
             // prepare post values
             final String salt = crypt.randomSalt();
             final Map<String, ContentBody> parts =
@@ -1851,7 +1870,7 @@ public final class Protocol {
             metadataRetrievalRunning.incrementAndGet();
             for (int i = 0; i < uhs.length; i++) {
                 key = ASCII.getBytes(uhs[i]);
-        	if (urlRefs.has(key)) {
+                if (urlRefs.has(key)) {
                     url = segment.fulltext().getMetadata(key);
                     if (url == null) {
                         if (Network.log.isFine()) Network.log.fine("DEBUG transferIndex: requested url hash '" + uhs[i] + "'");
@@ -1864,19 +1883,29 @@ public final class Protocol {
                         urlPayloadSize += resource.length();
                         urlc++;
                     }
-        	}
+                }
             }
             metadataRetrievalRunning.decrementAndGet();
-        
+            
             try {
+                MultiProtocolURL targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, preferHttps);
+                
                 parts.put("urlc", UTF8.StringBody(Integer.toString(urlc)));
                 final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
-                final byte[] content =
-                    httpClient.POSTbytes(
-                        new MultiProtocolURL("http://" + address + "/yacy/transferURL.html"),
-                        targetSeed.getHexHash() + ".yacyh",
-                        parts,
-                        gzipBody, true);
+                byte[] content = null;
+                try {
+					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferURL.html"),
+							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
+                } catch(final IOException e) {
+                	if(targetBaseURL.isHTTPS()) {
+                		targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
+                		/* Failed with https : retry with http on the same address */
+    					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferURL.html"),
+    							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);                		
+                	} else {
+                		throw e;
+                	}
+                }
                 final Iterator<String> v = FileUtils.strings(content);
 
                 final Map<String, String> result = FileUtils.table(v);
@@ -1885,7 +1914,7 @@ public final class Protocol {
                 result.put(Seed.IP, ip); // add used ip to result for error handling (in case no "result" key was received)
                 return result;
             } catch (final Exception e ) {
-                Network.log.warn("yacyClient.transferURL to " + address + " error: " + e.getMessage());
+                Network.log.warn("yacyClient.transferURL to " + ip + " error: " + e.getMessage());
             }
         }
         return null;

@@ -334,7 +334,7 @@ public class IndexControlRWIs_p {
                         // transport to other peer
                         final boolean gzipBody = sb.getConfigBool("indexControl.gzipBody", false);
                         final int timeout = (int) sb.getConfigLong("indexControl.timeout", 60000);
-                        final String error = Protocol.transferIndex(sb.peers, seed, icc, knownURLs, segment, gzipBody, timeout);
+                        final String error = Protocol.transferIndex(sb, seed, icc, knownURLs, segment, gzipBody, timeout);
                         prop.put("result", (error == null) ? ("Successfully transferred "
                                 + knownURLs.size()
                                 + " words in "

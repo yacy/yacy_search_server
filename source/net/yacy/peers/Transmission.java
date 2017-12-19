@@ -43,6 +43,7 @@ import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.workflow.WorkflowJob;
+import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 
 public class Transmission {
@@ -51,6 +52,9 @@ public class Transmission {
     // anything beyond that might get discarded without notice
     public static final int maxRWIsCount = 1000; // since SVN 7993 hardcoded in htroot/yacy/transferRWI.java:161
 
+    /** The Switchboard instance holding the server environment */
+    private final Switchboard env;
+    
     protected ConcurrentLog log;
     protected Segment segment;
     protected SeedDB seeds;
@@ -58,14 +62,14 @@ public class Transmission {
     protected int timeout4Transfer;
 
     public Transmission(
+    		final Switchboard env,
             final ConcurrentLog log,
-            final Segment segment,
-            final SeedDB seeds,
             final boolean gzipBody4Transfer,
             final int timeout4Transfer) {
+    	this.env = env;
         this.log = log;
-        this.segment = segment;
-        this.seeds = seeds;
+        this.segment = env.index;
+        this.seeds = env.peers;
         this.gzipBody4Transfer = gzipBody4Transfer;
         this.timeout4Transfer = timeout4Transfer;
     }
@@ -217,7 +221,9 @@ public class Transmission {
             }
             Transmission.this.log.info("starting new index transmission request to " + this.dhtTarget.getName());
             final long start = System.currentTimeMillis();
-            final String error = Protocol.transferIndex(Transmission.this.seeds, this.dhtTarget, this.containers, this.references, Transmission.this.segment, Transmission.this.gzipBody4Transfer, Transmission.this.timeout4Transfer);
+			final String error = Protocol.transferIndex(Transmission.this.env, this.dhtTarget, this.containers,
+					this.references, Transmission.this.segment, Transmission.this.gzipBody4Transfer,
+					Transmission.this.timeout4Transfer);
             if (error == null) {
                 // words successfully transfered
                 final long transferTime = System.currentTimeMillis() - start;
