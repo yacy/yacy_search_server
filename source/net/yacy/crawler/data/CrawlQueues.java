@@ -520,7 +520,9 @@ public class CrawlQueues {
         }
 
         // we know a peer which should provide remote crawl entries. load them now.
-        final RSSFeed feed = Protocol.queryRemoteCrawlURLs(this.sb.peers, seed, 60, 10000);
+		final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+				SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+        final RSSFeed feed = Protocol.queryRemoteCrawlURLs(this.sb.peers, seed, 60, 10000, preferHttps);
         if (feed == null || feed.isEmpty()) {
             // try again and ask another peer
             return remoteCrawlLoaderJob();

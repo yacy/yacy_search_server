@@ -1,4 +1,4 @@
-// plasmaSwitchboard.java
+// Switchboard.java
 // (C) 2004-2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2004 on http://yacy.net
 //
@@ -3674,15 +3674,9 @@ public final class Switchboard extends serverSwitch {
         @Override
         public void run() {
             final long t = System.currentTimeMillis();
-            final Map<String, String> response =
-                Protocol.crawlReceipt(
-                    Switchboard.this.peers.mySeed(),
-                    this.initiatorPeer,
-                    "crawl",
-                    "fill",
-                    "indexed",
-                    this.reference,
-                    "");
+			final Map<String, String> response = Protocol.crawlReceipt(Switchboard.this,
+					Switchboard.this.peers.mySeed(), this.initiatorPeer, "crawl", "fill", "indexed", this.reference,
+					"");
             if ( response == null ) {
                 Switchboard.this.log.info("Sending crawl receipt for '"
                     + this.reference.url().toNormalform(true)

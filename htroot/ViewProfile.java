@@ -1,4 +1,4 @@
-// ViewProfile_p.java
+// ViewProfile.java
 // -----------------------
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 07.04.2005 on http://yacy.net
@@ -113,7 +113,7 @@ public class ViewProfile {
                 }
 
                 // try to get the profile from remote peer
-                profile = Protocol.getProfile(seed);
+                profile = Protocol.getProfile(sb, seed);
 
                 // if profile did not arrive, say that peer is disconnected
                 if (profile == null) {
