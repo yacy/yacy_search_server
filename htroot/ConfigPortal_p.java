@@ -96,6 +96,9 @@ public class ConfigPortal_p {
                 /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
                 cleanSearchCache = oldJsResort != newJsResort;
                 sb.setConfig(SwitchboardConstants.SEARCH_JS_RESORT, newJsResort);
+                
+				sb.setConfig(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+						post.getBoolean(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED));
 
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, post.getBoolean(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
                 
@@ -163,7 +166,10 @@ public class ConfigPortal_p {
                 cleanSearchCache = oldJsResort != newJsResort;
                 sb.setConfig(SwitchboardConstants.SEARCH_JS_RESORT, newJsResort);
                 
-                
+				sb.setConfig(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+						Boolean.parseBoolean(config.getProperty(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+								String.valueOf(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT))));
+				
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, config.getProperty(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
                 sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE));
                 sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE));
@@ -193,6 +199,10 @@ public class ConfigPortal_p {
         prop.put(SwitchboardConstants.PUBLIC_SEARCHPAGE, sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, false) ? 1 : 0);
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
         prop.put(SwitchboardConstants.SEARCH_JS_RESORT, sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT) ? 1 : 0);
+        
+		prop.put(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+				sb.getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+						SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT) ? 1 : 0);
 
         prop.put(SwitchboardConstants.GREEDYLEARNING_ACTIVE, sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) ? 1 : 0);
         prop.put(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, sb.getConfig(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, "0"));

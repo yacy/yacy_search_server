@@ -62,6 +62,15 @@
           	</label>
           </dd>
           
+          <dt>Remote search encryption</dt>
+          <dd>
+          	<label>
+          		<input type="checkbox" name="remotesearch.https.preferred" value="true" #(remotesearch.https.preferred)#::checked="checked"#(/remotesearch.https.preferred)# />Prefer https for search queries on remote peers.
+          	</label>
+          	When SSL/TLS is enabled on remote peers, https should be used to encrypt data exchanged with them when performing peer-to-peer searches. 
+          	Please note that contrary to strict TLS, certificates are not validated against trusted certificate authorities (CA), thus allowing YaCy peers to use self-signed certificates. 
+          </dd>
+          
           <dt>Snippet Fetch Strategy &amp; Link Verification</dt>
           <dd>
           <img src="env/grafics/idea.png" width="32" height="32" alt="idea" align="center"/>Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)<br/>
