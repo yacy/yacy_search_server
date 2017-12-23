@@ -116,6 +116,7 @@ public final class search {
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "all");
+        final boolean strictContentDom = post.getBoolean("strictContentDom");
         final String  filter = post.get("filter", ".*"); // a filter on the url
         final int timezoneOffset = post.getInt("timezoneOffset", 0);
         QueryModifier modifier = new QueryModifier(timezoneOffset);
@@ -255,6 +256,7 @@ public final class search {
                     0.0d,
                     new String[0]
                     );
+            theQuery.setStrictContentDom(strictContentDom);
             Network.log.info("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
 
             final long timer = System.currentTimeMillis();
@@ -319,6 +321,7 @@ public final class search {
                     0.0d,
                     new String[0]
                     );
+            theQuery.setStrictContentDom(strictContentDom);
             Network.log.info("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
             EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()), ""));
             if (sb.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.remotesearch.play(-10.0f);

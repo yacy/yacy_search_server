@@ -290,6 +290,11 @@ public class yacysearch {
 
         // find search domain
         final Classification.ContentDomain contentdom = post == null || !post.containsKey("contentdom") ? ContentDomain.ALL : ContentDomain.contentdomParser(post.get("contentdom", "all"));
+        
+        // Strict/extended content domain constraint : configured setting may be overriden by request param
+		final boolean strictContentDom = !Boolean.FALSE.toString().equalsIgnoreCase(post.get("strictContentDom",
+				sb.getConfig(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
+						String.valueOf(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT))));
 
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
@@ -692,6 +697,7 @@ public class yacysearch {
                     header.get(HeaderFramework.USER_AGENT, ""),
                     lat, lon, rad,
                     sb.getConfigArray("search.navigation", ""));
+            theQuery.setStrictContentDom(strictContentDom);
 			theQuery.setStandardFacetsMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
 					QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
 			theQuery.setDateFacetMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,

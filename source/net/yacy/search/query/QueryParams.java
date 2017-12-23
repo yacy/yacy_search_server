@@ -132,7 +132,31 @@ public final class QueryParams {
     
     /** true when the urlMasString is just a catch all pattern such as ".*" */
     boolean urlMask_isCatchall;
+    
+    /** Content-Type classification of expected results */
     public final Classification.ContentDomain contentdom;
+    
+	/**
+	 * <p>When false, results can be extended to documents including links to documents
+	 * of {@link #contentdom} type, whithout being themselves of that type.</p>
+	 * Examples :
+	 * <ul>
+	 * <li>contentdom == IMAGE, strictContentDom == true
+	 *  <ul>
+	 *   <li>jpeg image : acceptable result</li>
+	 * 	 <li>html page embedding images : rejected</li>
+	 *  </ul>
+	 * </li>
+	 * <li>contentdom == IMAGE, strictContentDom == false
+	 *  <ul>
+	 *   <li>jpeg image : acceptable result</li>
+	 * 	 <li>html page embedding images : acceptable result</li>
+	 *  </ul>
+	 * </li>
+	 * </ul> 
+	 */
+    private boolean strictContentDom = false;
+    
     public final String targetlang;
     protected final Collection<Tagging.Metatag> metatags;
     public final Searchdom domType;
@@ -380,6 +404,20 @@ public final class QueryParams {
     public void setDateFacetMaxCount(final int dateFacetMaxCount) {
 		this.dateFacetMaxCount = dateFacetMaxCount;
 	}
+    
+    /**
+     * @return false when results can be extended to documents including links to documents ot contentdom type.
+     */
+    public boolean isStrictContentDom() {
+		return this.strictContentDom;
+	}
+    
+    /**
+     * @param strictContentDom when false, results can be extended to documents including links to documents ot contentdom type.
+     */
+    public void setStrictContentDom(final boolean strictContentDom) {
+		this.strictContentDom = strictContentDom;
+	}
 
     public static HandleSet hashes2Set(final String query) {
         final HandleSet keyhashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
@@ -513,20 +551,20 @@ public final class QueryParams {
         return SetTools.anymatchByTest(keywords, textwords);
     }
 
-    public SolrQuery solrQuery(final ContentDomain cd, final boolean getFacets, final boolean excludeintext_image) {
+    public SolrQuery solrQuery(final ContentDomain cd, final boolean strictContentDom, final boolean getFacets, final boolean excludeintext_image) {
         if (cd == ContentDomain.IMAGE) {
-        	return solrImageQuery(getFacets);
+        	return solrImageQuery(getFacets, strictContentDom);
         }
         final List<String> filterQueries;
 		switch (cd) {
 		case AUDIO:
-			filterQueries = this.queryGoal.collectionAudioFilterQuery();
+			filterQueries = this.queryGoal.collectionAudioFilterQuery(strictContentDom);
 			break;
 		case VIDEO:
-			filterQueries = this.queryGoal.collectionVideoFilterQuery();
+			filterQueries = this.queryGoal.collectionVideoFilterQuery(strictContentDom);
 			break;
 		case APP:
-			filterQueries = this.queryGoal.collectionApplicationFilterQuery();
+			filterQueries = this.queryGoal.collectionApplicationFilterQuery(strictContentDom);
 			break;
 		default:
 			filterQueries = this.queryGoal.collectionTextFilterQuery(excludeintext_image);
@@ -579,7 +617,7 @@ public final class QueryParams {
         return params;
     }
     
-    private SolrQuery solrImageQuery(boolean getFacets) {
+    private SolrQuery solrImageQuery(final boolean getFacets, final boolean strictContentDom) {
         if (this.cachedQuery != null) {
             this.cachedQuery.setStart(this.offset);
             if (!getFacets) this.cachedQuery.setFacet(false);
@@ -587,16 +625,18 @@ public final class QueryParams {
         }
         
         // construct query
-        final SolrQuery params = getBasicParams(getFacets, this.queryGoal.collectionImageFilterQuery());
+        final SolrQuery params = getBasicParams(getFacets, this.queryGoal.collectionImageFilterQuery(strictContentDom));
         params.setQuery(this.queryGoal.collectionImageQuery(this.modifier).toString());
         
-        // set boosts
-        StringBuilder bq = new StringBuilder();
-        bq.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"jpg\"");
-        bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tif\"");
-        bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tiff\"");
-        bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"png\"");
-        params.setParam(DisMaxParams.BQ, bq.toString());
+        if(!strictContentDom) {
+        	// set boosts
+        	StringBuilder bq = new StringBuilder();
+        	bq.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"jpg\"");
+        	bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tif\"");
+        	bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tiff\"");
+        	bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"png\"");
+        	params.setParam(DisMaxParams.BQ, bq.toString());
+        }
         
         // prepare result
         ConcurrentLog.info("Protocol", "SOLR QUERY: " + params.toString());
@@ -810,6 +850,7 @@ public final class QueryParams {
             //context.append(this.domType);
             context.append(asterisk);
             context.append(this.contentdom).append(asterisk);
+            context.append(this.strictContentDom).append(asterisk);
             context.append(this.zonecode).append(asterisk);
             context.append(ASCII.String(Word.word2hash(this.ranking.toExternalString()))).append(asterisk);
             context.append(Base64Order.enhancedCoder.encodeString(this.prefer.toString())).append(asterisk);

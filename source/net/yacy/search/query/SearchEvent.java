@@ -428,7 +428,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
         	final boolean useSolrFacets = true;
 			this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
-					this.query.solrQuery(this.query.contentdom, useSolrFacets, this.excludeintext_image), this.query.offset,
+					this.query.solrQuery(this.query.contentdom, this.query.isStrictContentDom(), useSolrFacets, this.excludeintext_image), this.query.offset,
 					this.query.itemsPerPage, null /* this peer */, 0, Switchboard.urlBlacklist, useSolrFacets, true);
         }
         this.localsolroffset = this.query.offset + this.query.itemsPerPage;
@@ -734,13 +734,27 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 }
 
                 // check document domain
-                if (this.query.contentdom.getCode() > 0 &&
-                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
-                     (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
-                     (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
-                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp))))) {
-                    if (log.isFine()) log.fine("dropped RWI: contentdom fail");
-                    continue pollloop;
+                if (this.query.contentdom.getCode() > 0) {
+                	boolean domainMatch = true;
+                	if(this.query.isStrictContentDom()) {
+                		if((this.query.contentdom == ContentDomain.AUDIO && iEntry.getType() != Response.DT_AUDIO) || 
+                                (this.query.contentdom == ContentDomain.VIDEO && iEntry.getType() != Response.DT_MOVIE) ||
+                                (this.query.contentdom == ContentDomain.IMAGE && iEntry.getType() != Response.DT_IMAGE) ||
+                                (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
+                                	domainMatch = false;    	
+                                }
+                	} else if((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
+                                (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
+                                (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
+                                (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
+                			domainMatch = false;
+                	}
+                	if(!domainMatch) {
+                		if (log.isFine()) {
+                			log.fine("dropped RWI: contentdom fail");
+                		}
+                		continue pollloop;
+                	}
                 }
                 
                 // check language
@@ -1003,14 +1017,25 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 }
 
                 // check document domain
-                if (this.query.contentdom.getCode() > 0 &&
-                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
+                if (this.query.contentdom.getCode() > 0) {
+                	boolean domainMatch = true;
+                	if(this.query.isStrictContentDom()) {
+                        if(this.query.contentdom != iEntry.getContentDomain()) {
+                        	domainMatch = false;
+                        }
+                	} else if((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
                      (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
                      (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
-                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp))))) {
-                    if (log.isFine()) log.fine("dropped Node: content domain does not match");
-                    updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
-                    continue pollloop;
+                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
+                		domainMatch = false;
+                    }
+                	if(!domainMatch) {
+                		if (log.isFine()) {
+                			log.fine("dropped Node: content domain does not match");
+                		}
+                		updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
+                		continue pollloop;
+                	}
                 }
                 
                 // filter out media links in text search, if wanted
@@ -2113,7 +2138,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 				final boolean useSolrFacets = (this.localsolrsearch == null);
 				final boolean incrementNavigators = false;
 				this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
-						this.query.solrQuery(this.query.contentdom, useSolrFacets, this.excludeintext_image),
+						this.query.solrQuery(this.query.contentdom, this.query.isStrictContentDom(), useSolrFacets, this.excludeintext_image),
 						this.localsolroffset, nextitems, null /* this peer */, 0, Switchboard.urlBlacklist, useSolrFacets, incrementNavigators);
 			}
 			this.localsolroffset += nextitems;
@@ -2204,7 +2229,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         return null;
     }
     
-    public ImageResult oneImageResult(final int item, final long timeout) throws MalformedURLException {
+    public ImageResult oneImageResult(final int item, final long timeout, final boolean strictContentDom) throws MalformedURLException {
         if (item < imageViewed.size()) return nthImage(item);
         if (imageSpareGood.size() > 0) return nextSpare(); // first put out all good spare, but no bad spare
         URIMetadataNode doc = oneResult(imagePageCounter++, timeout); // we must use a different counter here because the image counter can be higher when one page filled up several spare
@@ -2233,7 +2258,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                     if (!imageViewed.containsKey(id) && !containsSpare(id)) imageSpareGood.put(id, new ImageResult(doc.url(), doc.url(), doc.mime(), doc.title(), w, h, 0));
                 }
             }
-        } else {
+        } else if(!strictContentDom) {
             Collection<Object> altO = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
             Collection<Object> imgO = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
             if (imgO != null && imgO.size() > 0 && imgO instanceof List<?>) {

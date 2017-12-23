@@ -560,6 +560,16 @@ public final class SwitchboardConstants {
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
     
+	/**
+	 * Key of the setting controlling whether content domain filtering is strict :
+	 * when false, results can be extended to documents including links to documents
+	 * of contentdom type, whithout being themselves of that type.
+	 */
+    public static final String SEARCH_STRICT_CONTENT_DOM = "search.strictContentDom";
+    
+	/** Default setting value controlling whether content domain filtering is strict. */
+    public static final boolean SEARCH_STRICT_CONTENT_DOM_DEFAULT = false;
+    
     /** Key of the setting controlling whether search results resorting by browser JavaScript is enabled */
     public static final String SEARCH_JS_RESORT = "search.jsresort";
     

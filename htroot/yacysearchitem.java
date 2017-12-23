@@ -605,7 +605,7 @@ public class yacysearchitem {
 			final SearchEvent theSearch, final String target_special_pattern, long timeout, boolean fullViewingRights, final boolean noreferrer) {
 		prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
 		try {
-		    SearchEvent.ImageResult image = theSearch.oneImageResult(item, timeout);
+		    SearchEvent.ImageResult image = theSearch.oneImageResult(item, timeout, theSearch.query.isStrictContentDom());
 		    final String imageUrlstring = image.imageUrl.toNormalform(true);
 		    final String imageUrlExt = MultiProtocolURL.getFileExtension(image.imageUrl.getFileName());
 		    final String target = sb.getConfig(imageUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");

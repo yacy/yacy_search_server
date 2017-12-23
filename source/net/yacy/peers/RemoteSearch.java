@@ -61,6 +61,7 @@ public class RemoteSearch extends Thread {
     final private SearchEvent event;
     final private String wordhashes, excludehashes;
     final private ContentDomain contentdom;
+    final private boolean strictContentDom;
     final private int partitions;
     final private SecondarySearchSuperviser secondarySearchSuperviser;
     final private Blacklist blacklist;
@@ -78,6 +79,7 @@ public class RemoteSearch extends Thread {
               final String excludehashes,
               final String language,
               final ContentDomain contentdom,
+              final boolean strictContentDom,
               final int count,
               final long time,
               final int maxDistance,
@@ -91,6 +93,7 @@ public class RemoteSearch extends Thread {
         this.excludehashes = excludehashes;
         this.language = language;
         this.contentdom = contentdom;
+        this.strictContentDom = strictContentDom;
         this.partitions = partitions;
         this.secondarySearchSuperviser = secondarySearchSuperviser;
         this.blacklist = blacklist;
@@ -114,6 +117,7 @@ public class RemoteSearch extends Thread {
                         this.excludehashes,
                         this.language,
                         this.contentdom,
+                        this.strictContentDom,
                         this.count,
                         this.time,
                         this.maxDistance,
@@ -264,7 +268,8 @@ public class RemoteSearch extends Thread {
         // start solr searches
         final int targets = dhtPeers.size() + robinsonPeers.size();
         if (!sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_OFF, false)) {
-            final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom, useFacets, event.excludeintext_image);
+			final SolrQuery solrQuery = event.query.solrQuery(event.getQuery().contentdom,
+					event.query.isStrictContentDom(), useFacets, event.excludeintext_image);
             for (Seed s: robinsonPeers) {
 				if (MemoryControl.shortStatus()
 						|| Memory.load() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR,
@@ -292,6 +297,7 @@ public class RemoteSearch extends Thread {
                         QueryParams.hashSet2hashString(event.query.getQueryGoal().getExcludeHashes()),
                         event.query.targetlang == null ? "" : event.query.targetlang,
                         event.query.contentdom == null ? ContentDomain.ALL : event.query.contentdom,
+                        event.query.isStrictContentDom(),
                         count,
                         time,
                         event.query.maxDistance,
@@ -336,6 +342,7 @@ public class RemoteSearch extends Thread {
                                 QueryParams.hashSet2hashString(wordhashes),
                                 urlhashes,
                                 ContentDomain.ALL,
+                                false,
                                 20,
                                 time,
                                 999,

@@ -368,41 +368,49 @@ public class QueryGoal {
     /**
      * Generate a Solr filter query to receive valid image results.
      *
-     * This filters error-urls out and includes urls with mime image/* as well
-     * as urls with links to images.
+     * This filters error-urls out and includes urls with mime image/*, as well
+     * as urls with links to images when strict is false.
      * We use the mime (image/*) only to find images as the parser assigned the
      * best mime to index documents. This applies also to parsed file systems.
      * This ensures that no text urls with image-fileextension is returned
      * (as some large internet sites like to use such urls)
      *
+     * @param strict when true, do not include non-image urls with links to images
      * @return Solr filter query for image urls
      */
-    public List<String> collectionImageFilterQuery() {
+    public List<String> collectionImageFilterQuery(final boolean strict) {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
         fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
-        fqs.add(
-                CollectionSchema.content_type.getSolrFieldName() + ":(image/*) OR " +
-                CollectionSchema.images_urlstub_sxt.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM);
+		StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName()).append(":(image/*)");
+		if (!strict) {
+			filter.append(" OR ").append(CollectionSchema.images_urlstub_sxt.getSolrFieldName())
+					.append(AbstractSolrConnector.CATCHALL_DTERM);
+		}
+		fqs.add(filter.toString());
         return fqs;
     }
     
     /**
-     * Generate Solr filter queries to receive valid video content results.
+     * Generate Solr filter queries to receive valid audio content results.
      *
-     * This filters out documents with bad HTTP status and includes documents with MIME type matching the prefix video/* as well
-     * docuemnts with links to video content.
+     * This filters out documents with bad HTTP status and includes documents with MIME type matching the prefix audio/* as well
+     * documents with links to audio content when strict is false.
      *
-     * @return Solr filter queries for video content URLs
+     * @param strict when true, do not include non-audio urls with links to audio
+     * @return Solr filter queries for audio content URLs
      */
-    public List<String> collectionAudioFilterQuery() {
+    public List<String> collectionAudioFilterQuery(final boolean strict) {
 		final ArrayList<String> fqs = new ArrayList<>();
 
 		// add filter to prevent that results come from failed urls
 		fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
-		fqs.add(CollectionSchema.content_type.getSolrFieldName() + ":(audio/*) OR "
-				+ CollectionSchema.audiolinkscount_i.getSolrFieldName() + ":[1 TO *]");
+		StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName()).append(":(audio/*)");
+		if (!strict) {
+			filter.append(" OR ").append(CollectionSchema.audiolinkscount_i.getSolrFieldName()).append(":[1 TO *]");
+		}
+		fqs.add(filter.toString());
 		return fqs;
     }
     
@@ -410,17 +418,21 @@ public class QueryGoal {
      * Generate Solr filter queries to receive valid video content results.
      *
      * This filters out documents with bad HTTP status and includes documents with MIME type matching the prefix video/* as well
-     * docuemnts with links to video content.
+     * documents with links to video content when strict is false.
      *
+     * @param strict when true, do not include non-video urls with links to video
      * @return Solr filter queries for video content URLs
      */
-    public List<String> collectionVideoFilterQuery() {
+    public List<String> collectionVideoFilterQuery(final boolean strict) {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
 		fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
-		fqs.add(CollectionSchema.content_type.getSolrFieldName() + ":(video/*) OR "
-				+ CollectionSchema.videolinkscount_i.getSolrFieldName() + ":[1 TO *]");
+		StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName()).append(":(video/*)");
+		if (!strict) {
+			filter.append(" OR ").append(CollectionSchema.videolinkscount_i.getSolrFieldName()).append(":[1 TO *]");
+		}
+		fqs.add(filter.toString());
 		return fqs;
     }
     
@@ -428,17 +440,22 @@ public class QueryGoal {
      * Generate Solr filter queries to receive valid application specific content results.
      *
      * This filters out documents with bad HTTP status and includes documents with MIME type matching the prefix application/* as well
-     * docuemnts with links to application specific content.
+     * docuemnts with links to application specific content when strict is false.
      *
+     * @param strict when true, do not include non-video urls with links to video
      * @return Solr filter queries for application specific content URLs
      */
-    public List<String> collectionApplicationFilterQuery() {
+    public List<String> collectionApplicationFilterQuery(final boolean strict) {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
 		fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
-		fqs.add(CollectionSchema.content_type.getSolrFieldName() + ":(application/*) OR "
-				+ CollectionSchema.applinkscount_i.getSolrFieldName() + ":[1 TO *]");
+		StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName())
+				.append(":(application/*)");
+		if (!strict) {
+			filter.append(" OR ").append(CollectionSchema.applinkscount_i.getSolrFieldName()).append(":[1 TO *]");
+		}
+		fqs.add(filter.toString());
 		return fqs;
     }
     

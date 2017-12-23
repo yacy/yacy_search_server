@@ -488,6 +488,7 @@ public final class Protocol {
         final String excludehashes,
         final String language,
         final ContentDomain contentdom,
+        final boolean strictContentDom,
         final int count,
         final long time,
         final int maxDistance,
@@ -533,6 +534,7 @@ public final class Protocol {
                         "",
                         language,
                         contentdom,
+                        strictContentDom,
                         count,
                         time,
                         maxDistance,
@@ -600,6 +602,7 @@ public final class Protocol {
         final String wordhashes,
         final String urlhashes,
         final ContentDomain contentdom,
+        final boolean strictContentDom,
         final int count,
         final long time,
         final int maxDistance,
@@ -624,6 +627,7 @@ public final class Protocol {
                         urlhashes,
                         "",
                         contentdom,
+                        strictContentDom,
                         count,
                         time,
                         maxDistance,
@@ -889,6 +893,7 @@ public final class Protocol {
             final String urlhashes,
             final String language,
             final ContentDomain contentdom,
+            final boolean strictContentDom,
             final int count,
             final long time,
             final int maxDistance,
@@ -941,6 +946,9 @@ public final class Protocol {
             //parts.put("sitehost", UTF8.StringBody(event.query.modifier.sitehost));
             parts.put("author", UTF8.StringBody(event.query.modifier.author));
             parts.put("contentdom", UTF8.StringBody(contentdom == null ? ContentDomain.ALL.toString() : contentdom.toString()));
+            if(strictContentDom) {
+            	parts.put("strictContentDom", UTF8.StringBody("true"));	
+            }
             parts.put("maxdist", UTF8.StringBody(Integer.toString(maxDistance)));
             parts.put("profile", UTF8.StringBody(crypt.simpleEncode(event.query.ranking.toExternalString())));
             parts.put("constraint", UTF8.StringBody((event.query.constraint == null) ? "" : event.query.constraint.exportB64()));

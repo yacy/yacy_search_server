@@ -843,6 +843,17 @@ search.audio = false
 search.video = false
 search.app = false
 
+# Strict content domain filtering : when false, results can be extended to documents including links to documents
+# of contentdom type, whithout being themselves of that type.
+# Examples :
+# - contentdom search param == image, strictContentDom == true
+#  - jpeg image : acceptable result
+#  - html page embedding images : rejected
+# - contentdom search param == image, strictContentDom == false
+#  - jpeg image : acceptable result
+#  - html page embedding images : acceptable result
+search.strictContentDom = false
+
 # number of search results per page displayed by default
 search.items = 10
 
