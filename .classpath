@@ -58,8 +58,8 @@
 	<classpathentry kind="lib" path="lib/jetty-util-9.4.8.v20171121.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-webapp-9.4.8.v20171121.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-xml-9.4.8.v20171121.jar"/>
-	<classpathentry kind="lib" path="lib/httpclient-4.5.3.jar"/>
-	<classpathentry kind="lib" path="lib/httpmime-4.5.3.jar"/>
+	<classpathentry kind="lib" path="lib/httpclient-4.5.4.jar"/>
+	<classpathentry kind="lib" path="lib/httpmime-4.5.4.jar"/>
 	<classpathentry kind="lib" path="lib/noggit-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/woodstox-core-asl-4.4.1.jar"/>
