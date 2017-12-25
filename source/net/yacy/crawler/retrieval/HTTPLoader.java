@@ -279,9 +279,10 @@ public final class HTTPLoader {
 		final DigestURL redirectionUrl = DigestURL.newURL(request.url(), redirectionUrlString);
 
 		// restart crawling with new url
-		this.log.info("CRAWLER Redirection detected ('" + statusline + "') for URL "
-				+ requestURLString);
-		this.log.info("CRAWLER ..Redirecting request to: " + redirectionUrl.toNormalform(false));
+		this.log.info("CRAWLER Redirection from URL: " + requestURLString + " (" + statusline + ")");
+		this.log.info("CRAWLER Redirecting to URL:   " + redirectionUrl.toNormalform(false));
+		this.log.info("CRAWLER Deleting URL:         " + requestURLString);
+		this.sb.index.fulltext().remove(request.url().hash()); // remove URL from fulltext index
 
 		this.sb.webStructure.generateCitationReference(url, redirectionUrl);
 
