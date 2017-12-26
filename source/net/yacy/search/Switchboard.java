@@ -148,6 +148,7 @@ import net.yacy.crawler.data.Transactions;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.crawler.robots.RobotsTxt;
+import net.yacy.crawler.Recrawler;
 import net.yacy.data.BlogBoard;
 import net.yacy.data.BlogBoardComments;
 import net.yacy.data.BookmarkHelper;
@@ -309,6 +310,7 @@ public final class Switchboard extends serverSwitch {
     private boolean startupAction = true; // this is set to false after the first event
     private static Switchboard sb;
     public HashMap<String, Object[]> crawlJobsStatus = new HashMap<String, Object[]>();
+	private Recrawler re;
 
     public Switchboard(final File dataPath, final File appPath, final String initPath, final String configPath) {
         super(dataPath, appPath, initPath, configPath);
@@ -1232,11 +1234,40 @@ public final class Switchboard extends serverSwitch {
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
+        
+        this.re = new Recrawler(this);
+        final Recrawler re = this.re;
+
+        deployThread(
+                SwitchboardConstants.RECRAWLER_DIST,
+                "Recrawler",
+                "Recrawl stale document",
+                null,
+                new InstantBusyThread("Recrawler.HeartBeat", 120000, 120000) { //min id,bu
+                            @Override
+                            public boolean jobImpl() throws Exception {
+                                    re.HeartBeat();
+                                    return true;
+                            }
+                },
+                10000, //
+                Long.parseLong(getConfig(SwitchboardConstants.RECRAWLER_DIST_IDLESLEEP, "200000")),
+                Long.parseLong(getConfig(SwitchboardConstants.RECRAWLER_DIST_BUSYSLEEP, "200000")),
+                Long.parseLong(getConfig(SwitchboardConstants.RECRAWLER_DIST_MEMPREREQ, "33554432")),
+                Double.parseDouble(getConfig(SwitchboardConstants.RECRAWLER_DIST_LOADPREREQ, "2.0")));
+
+            this.log.info("RECRWALER RECRAWLER_DIST_LOADPREREQ: " + Double.parseDouble(getConfig(SwitchboardConstants.RECRAWLER_DIST_LOADPREREQ, "3.0")));
+        
+        
         this.trail = new LinkedBlockingQueue<String>();
 
         this.log.config("Finished Switchboard Initialization");
     }
 
+    
+    
+    
+    
     final String getSysinfo() {
         return getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global");
     }

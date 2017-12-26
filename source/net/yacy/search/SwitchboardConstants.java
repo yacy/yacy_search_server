@@ -167,6 +167,14 @@ public final class SwitchboardConstants {
     public static final String CLEANUP                      = "90_cleanup";
     public static final String CLEANUP_IDLESLEEP            = "90_cleanup_idlesleep";
     public static final String CLEANUP_BUSYSLEEP            = "90_cleanup_busysleep";
+    
+    public static final String RECRAWLER_DIST                   =  "100_recrawler";
+    public static final String RECRAWLER_DIST_MEMPREREQ         = "100_recrawler_memprereq";
+    public static final String RECRAWLER_DIST_LOADPREREQ        = "100_recrawler_loadprereq";
+    public static final String RECRAWLER_DIST_IDLESLEEP         = "100_recrawler_idlesleep";
+    public static final String RECRAWLER_DIST_BUSYSLEEP         = "100_recrawler_busysleep";
+
+    
     /**
      * <p><code>public static final String <strong>INDEX_DIST_CHUNK_SIZE_START</strong> = "indexDistribution.startChunkSize"</code></p>
      * <p>Name of the setting specifying how many words the very first chunk will contain when the DHT-thread starts</p>
