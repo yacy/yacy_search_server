@@ -1,7 +1,7 @@
 /**
- * RecrawlBusyThread.java
- * Copyright 2015 by Burkhard Buelte
- * First released 15.05.2015 at http://yacy.net
+ * Recrawler.java
+ * Copyright 2017 by ScRe13 https://github.com/Scre13
+ * First released 26.12.2017
  *
  * This is a part of YaCy, a peer-to-peer based web search engine
  *
@@ -21,43 +21,6 @@
  * along with this program in the file lgpl21.txt If not, see
  * <http://www.gnu.org/licenses/>.
  */
-// -------------------------------------
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
-//
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation; either version 2 of the License, or
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software
-// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-/*
-  the yacy process of getting in touch of other peers starts as follows:
-  - init seed cache. It is needed to determine the right peer for the Hello-Process
-  - create a own seed. This can be a new one or one loaded from a file
-  - The httpd must start up then first
-  - the own seed is completed by performing the 'yacyHello' process. This
-    process will result in a request back to the own peer to check if it runs
-    in server mode. This is the reason that the httpd must be started in advance.
-
-*/
-
-// contributions:
-// principal peer status via file generation by Alexander Schier [AS]
-
 package net.yacy.crawler;
 import java.io.IOException;
 import java.util.Date;
@@ -97,29 +60,7 @@ public class Recrawler {
 	public Recrawler(final Switchboard sb) {
 		final long time = System.currentTimeMillis();
 		this.sb = sb;
-		// sb.setConfig("yacyStatus", "");
-
-		// create a peer news channel
-		// final RSSFeed peernews = EventChannel.channels(EventChannel.PEERNEWS);
-		// peernews.addMessage(new RSSMessage("YaCy started", "", ""));
-
-		// ensure that correct IP is used
-		// final String staticIP = sb.getConfig(SwitchboardConstants.SERVER_STATICIP,
-		// "");
-		// if (staticIP.length() != 0 && Seed.isProperIP(staticIP)) {
-		// serverCore.useStaticIP = true;
-		// sb.peers.mySeed().setIP(staticIP);
-		// log.info("staticIP set to " + staticIP);
-		// } else {
-		// serverCore.useStaticIP = false;
-		// }
-
-		// loadSeedUploadMethods();
-
 		log.info("RECRWALER INITIALIZED");
-		// ATTENTION, VERY IMPORTANT: before starting the thread, the httpd yacy server
-		// must be running!
-
 		speedKey = System.currentTimeMillis() - time;
 	}
 
@@ -151,29 +92,20 @@ public class Recrawler {
 		log.info("RECRWALER starting cycle to add URLs to be recrawled");
 		String rows = "50"; // number of lines to be fetched
 		String days = "365"; // URLs last load > x days
-		//Long counter;
 		String dateQuery = String.format("fresh_date_dt:[* TO NOW/DAY-30DAY] AND load_date_dt:[* TO NOW/DAY-%sDAY]",
 				days, days); // URLs which have a fresh date > 30 days and were loaded > x days ago
 
 		final SolrQuery query = new SolrQuery();
 		query.setQuery(dateQuery);
-		// query.setQuery(this.sb.getConfig(SwitchboardConstants.AUTOCRAWL_QUERY,
-		// "*:*"));
+
 		query.setFields("sku, httpstatus_i");
-		// query.addFilterQuery(dateQuery);
-		//query.add("group", "true");
-		//query.add("group.field", "sku");
-		//query.add("group.limit", "1");
-		//query.add("group.main", "true");
 		query.add("rows", rows);
 		query.addSort("load_date_dt", SolrQuery.ORDER.asc);
 
 		log.info("RECRWALER QUERY:" + query.toString());
 		try {
 			
-			//counter = sb.index.fulltext().getDefaultConnector().getCountByQuery(query);
 			QueryResponse resp = sb.index.fulltext().getDefaultConnector().getResponseByParams(query);
-			//counter = resp.count();
 			log.info("RECRWALER RESPONSE:" + resp.toString());
 
 			final CrawlProfile profile = sb.crawler.defaultTextSnippetGlobalProfile;
@@ -184,7 +116,6 @@ public class Recrawler {
 			for (SolrDocument doc : resp.getResults()) {
 
 				DigestURL url;
-				// ScRe
 				if (doc.getFieldValue("sku") != null) {
 
 					final String u = doc.getFieldValue("sku").toString();
@@ -196,11 +127,6 @@ public class Recrawler {
 					
 					
 					url = new DigestURL(u);
-					
-					
-			
-					//sb.index.fulltext().remove(url.hash());
-					//sb.index.fulltext().commit(true);
 					final Request request = sb.loader.request(url, true, true);
 	                String acceptedError = sb.crawlStacker.checkAcceptanceChangeable(url, profile, 0);
 	                if (acceptedError == null) { // skip check if failed docs to be included
@@ -208,8 +134,6 @@ public class Recrawler {
 	                }
 	                if (acceptedError != null) {
 	                	log.info("RECRWALER addToCrawler: cannot load " + url.toNormalform(true) + ": " + acceptedError);
-	                	//sb.index.fulltext().remove(url.hash());
-	                	//sb.index.fulltext().commit(true);
 	                    continue;
 	                }
 	                final String s;
@@ -222,19 +146,10 @@ public class Recrawler {
 	                    added++;
 	                    
 	                }
-	                //sb.index.fulltext().remove(url.hash());
 				} else {
 
 				}
-				
-				 //doc.setField(CollectionSchema.load_date_dt.name(), ISO8601Formatter.FORMATTER.format(now) );
-				 //doc.setField(CollectionSchema.fresh_date_dt.name(), ISO8601Formatter.FORMATTER.format(now) );
-				 sb.index.fulltext().commit(true);
-				 //sb.index.fulltext().putDocument(doc);
-				 //sb.index.fulltext().getDefaultConnector().update(doc);
-				 //sb.index.fulltext().getDefaultConnector().update(doc);
-				 //sb.index.fulltext().getDefaultConnector().commit(false);
-				 
+				sb.index.fulltext().commit(true);
 			}
 			log.info("RECRWALER ADDED " + added + " URLs with timestamp: " + ISO8601Formatter.FORMATTER.format(now));
 		} catch (SolrException e) {
@@ -242,7 +157,6 @@ public class Recrawler {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
 		return;
 	}
 
