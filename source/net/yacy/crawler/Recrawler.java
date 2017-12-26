@@ -217,7 +217,7 @@ public class Recrawler {
 
 	                if (s != null) {
 	                	log.info("RECRWALER addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
-	                	sb.index.fulltext().remove(url.hash());
+	                	sb.index.fulltext().remove(url.hash()); // If adding URL fails, delete it from index
 	                } else {
 	                    added++;
 	                    

@@ -1244,11 +1244,11 @@ public final class Switchboard extends serverSwitch {
                 "Recrawl stale document",
                 null,
                 new InstantBusyThread("Recrawler.HeartBeat", 120000, 120000) { //min id,bu
-                            @Override
-                            public boolean jobImpl() throws Exception {
-                                    re.HeartBeat();
-                                    return true;
-                            }
+                	@Override
+                    public boolean jobImpl() throws Exception {
+                    	re.HeartBeat();
+                        return true;
+                    }
                 },
                 10000, //
                 Long.parseLong(getConfig(SwitchboardConstants.RECRAWLER_DIST_IDLESLEEP, "200000")),
@@ -1263,10 +1263,6 @@ public final class Switchboard extends serverSwitch {
 
         this.log.config("Finished Switchboard Initialization");
     }
-
-    
-    
-    
     
     final String getSysinfo() {
         return getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global");
