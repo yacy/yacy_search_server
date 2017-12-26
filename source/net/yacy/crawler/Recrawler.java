@@ -78,7 +78,7 @@ public class Recrawler {
 	}
 
 	
-	public final void HeartBeat() {
+	public final void AddToQueue() {
 		
 		final CrawlQueues cq = sb.crawlQueues;
 		// check if queue is not too full, 500 is a fair limit

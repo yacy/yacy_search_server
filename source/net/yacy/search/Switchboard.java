@@ -1239,35 +1239,31 @@ public final class Switchboard extends serverSwitch {
         final Recrawler re = this.re;
 
         deployThread(
-                SwitchboardConstants.RECRAWLER_DIST,
+                SwitchboardConstants.RECRAWLER,
                 "Recrawler",
-                "Recrawl stale document",
+                "Recrawl old document",
                 null,
-                new InstantBusyThread("Recrawler.HeartBeat", 120000, 120000) { //min id,bu
+                new InstantBusyThread("Recrawler.AddToQueue", 120000, 120000) {
                 	@Override
                     public boolean jobImpl() throws Exception {
-                    	re.HeartBeat();
+                    	re.AddToQueue();
                         return true;
                     }
                 },
                 10000, //
-                Long.parseLong(getConfig(SwitchboardConstants.RECRAWLER_DIST_IDLESLEEP, "200000")),
-                Long.parseLong(getConfig(SwitchboardConstants.RECRAWLER_DIST_BUSYSLEEP, "200000")),
-                Long.parseLong(getConfig(SwitchboardConstants.RECRAWLER_DIST_MEMPREREQ, "33554432")),
-                Double.parseDouble(getConfig(SwitchboardConstants.RECRAWLER_DIST_LOADPREREQ, "2.0")));
+                Long.parseLong(getConfig(SwitchboardConstants.RECRAWLER_IDLESLEEP, "200000")),
+                Long.parseLong(getConfig(SwitchboardConstants.RECRAWLER_BUSYSLEEP, "200000")),
+                Long.parseLong(getConfig(SwitchboardConstants.RECRAWLER_MEMPREREQ, "33554432")),
+                Double.parseDouble(getConfig(SwitchboardConstants.RECRAWLER_LOADPREREQ, "2.0")));
 
-            this.log.info("RECRWALER RECRAWLER_DIST_LOADPREREQ: " + Double.parseDouble(getConfig(SwitchboardConstants.RECRAWLER_DIST_LOADPREREQ, "3.0")));
-        
-        
         this.trail = new LinkedBlockingQueue<String>();
-
         this.log.config("Finished Switchboard Initialization");
     }
-    
+
     final String getSysinfo() {
         return getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global");
     }
-    
+
     @Override
     public void setHttpServer(YaCyHttpServer server) {
         super.setHttpServer(server);
