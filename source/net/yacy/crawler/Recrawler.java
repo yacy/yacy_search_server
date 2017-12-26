@@ -24,7 +24,6 @@
 package net.yacy.crawler;
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlQueues;
@@ -42,19 +41,9 @@ import net.yacy.cora.date.ISO8601Formatter;
 public class Recrawler {
 
 	// statics
-	public static final ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
-	public static final HashMap<String, String> seedUploadMethods = new HashMap<String, String>();
 	public static final ConcurrentLog log = new ConcurrentLog("YACY");
 	/** pseudo-random key derived from a time-interval while YaCy startup */
 	public static long speedKey = 0;
-	public static long magic = System.currentTimeMillis();
-	public CrawlQueues crawlQueues;
-	
-
-	// public static yacyShare shareManager = null;
-	// public static boolean terminate = false;
-
-	// class variables
 	Switchboard sb;
 
 	public Recrawler(final Switchboard sb) {

@@ -1234,7 +1234,6 @@ public final class Switchboard extends serverSwitch {
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
 
-        this.trail = new LinkedBlockingQueue<String>();
         
         this.re = new Recrawler(this);
         final Recrawler re = this.re;
