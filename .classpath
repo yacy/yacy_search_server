@@ -41,7 +41,7 @@
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.46.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.17.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.17.jar"/>
-	<classpathentry kind="lib" path="lib/commons-io-2.5.jar"/>
+	<classpathentry kind="lib" path="lib/commons-io-2.6.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.24.jar"/>
 	<classpathentry kind="lib" path="lib/chardet.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-client-9.4.8.v20171121.jar"/>
