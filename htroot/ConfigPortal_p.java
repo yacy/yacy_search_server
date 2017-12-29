@@ -94,8 +94,14 @@ public class ConfigPortal_p {
                 final boolean oldJsResort = sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
                 final boolean newJsResort = post.getBoolean(SwitchboardConstants.SEARCH_JS_RESORT);
                 /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
-                cleanSearchCache = oldJsResort != newJsResort;
+                cleanSearchCache = cleanSearchCache || oldJsResort != newJsResort;
                 sb.setConfig(SwitchboardConstants.SEARCH_JS_RESORT, newJsResort);
+                
+                final boolean oldStrictContentDom = sb.getConfigBool(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM, SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT);
+                final boolean newStrictContentDom = post.getBoolean(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM);
+                /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
+                cleanSearchCache = cleanSearchCache || oldStrictContentDom != newStrictContentDom;
+                sb.setConfig(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM, newStrictContentDom);
                 
 				sb.setConfig(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
 						post.getBoolean(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED));
@@ -163,8 +169,14 @@ public class ConfigPortal_p {
                 final boolean oldJsResort = sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
                 final boolean newJsResort = Boolean.parseBoolean(config.getProperty(SwitchboardConstants.SEARCH_JS_RESORT, String.valueOf(SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT)));
                 /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
-                cleanSearchCache = oldJsResort != newJsResort;
+                cleanSearchCache = cleanSearchCache || oldJsResort != newJsResort;
                 sb.setConfig(SwitchboardConstants.SEARCH_JS_RESORT, newJsResort);
+                
+                final boolean oldStrictContentDom = sb.getConfigBool(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM, SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT);
+                final boolean newStrictContentDom = Boolean.parseBoolean(config.getProperty(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM, String.valueOf(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT)));
+                /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
+                cleanSearchCache = cleanSearchCache || oldStrictContentDom != newStrictContentDom;
+                sb.setConfig(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM, newStrictContentDom);
                 
 				sb.setConfig(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
 						Boolean.parseBoolean(config.getProperty(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
@@ -199,6 +211,9 @@ public class ConfigPortal_p {
         prop.put(SwitchboardConstants.PUBLIC_SEARCHPAGE, sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, false) ? 1 : 0);
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
         prop.put(SwitchboardConstants.SEARCH_JS_RESORT, sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT) ? 1 : 0);
+		prop.put(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
+				sb.getConfigBool(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
+						SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT) ? 1 : 0);
         
 		prop.put(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
 				sb.getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,

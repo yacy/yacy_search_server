@@ -52,6 +52,19 @@
           <input type="radio" name="search.options" value="false" #(search.options)#checked="checked"::#(/search.options)# />do not show Advanced Search
           </dd>
           
+          <dt>Media Search</dt>
+          <dd>
+          	<label>
+          		<input type="radio" name="search.strictContentDom" value="false" #(search.strictContentDom)#checked="checked"::#(/search.strictContentDom)# />Extended
+          	</label>
+          	<label>
+          		<input type="radio" name="search.strictContentDom" value="true" #(search.strictContentDom)#::checked="checked"#(/search.strictContentDom)# />Strict
+          	</label>
+          	<p>Control whether media search results are strictly limited to indexed documents matching exactly the desired content domain  (images, videos or applications specific), 
+          		or extended to pages including such medias (provide generally more results, but eventually less relevant).
+          	</p>
+          </dd>
+          
           <dt>Remote results resorting</dt>
           <dd>
           	<label title="Remote results resorting can be triggered once the 'Refresh sorting' button (near the 'Search' button) becomes available.">
