@@ -153,6 +153,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
                             // get a fresh ram cache
                             IndexCell.this.ram = new ReferenceContainerCache<ReferenceType>(IndexCell.this.factory, termOrder, termSize);
                         }
+                        // WARNING : if this cell is queried before this dump termination, terms are no longer in the cache and would therefore not be found
                         // dump the buffer
                         IndexCell.this.merger.dump(ramdump, dumpFile, IndexCell.this.array);
                         IndexCell.this.lastDump = System.currentTimeMillis();

@@ -48,9 +48,13 @@ public class SegmentTest {
                 new File("test/DATA/INDEX/webportal/SEGMENTS"),
                 new File("test/DATA/INDEX/webportal/ARCHIVE"),
                 null, null);
+        
+        /* Warning : ensure the size is larger than the maximum number of test terms added to the index, otherwise
+         * query tests might randomly fail depending on when the index dump job (IndexCell.FlushThread) is run */
+        final int entityCacheMaxSize = 20;
 
         // connect RWI index
-        index.connectRWI(10, 1024);
+        index.connectRWI(entityCacheMaxSize, 1024);
     }
 
     @After
