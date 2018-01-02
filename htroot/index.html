@@ -138,6 +138,19 @@
             <input type="checkbox" id="indexof" name="indexof" #[indexofChecked]# /> <label for="indexof">only index pages</label>
           </td>
         </tr>
+        <tr>
+          <td><label id="mediaSearchLabel">Media search</label>:</td>
+          <td>
+          	<fieldset aria-labelledby="mediaSearchLabel">
+            	<label title="Extend media search results (images, videos or applications specific) to pages including such medias (provides generally more results, but eventually less relevant).">
+            		<input type="radio" name="strictContentDom" value="false" #(search.strictContentDom)#checked="checked"::#(/search.strictContentDom)#/> Extended
+            	</label>
+            	<label title="Strictly limit media search results (images, videos or applications specific) to indexed documents matching exactly the desired content domain.">
+            		<input type="radio" name="strictContentDom" value="true" #(search.strictContentDom)#::checked="checked"#(/search.strictContentDom)#> Strict
+            	</label>
+            </fieldset>
+          </td>
+        </tr>
       </table>
       
       <h4>Query Operators</h4>

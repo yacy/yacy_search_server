@@ -967,6 +967,9 @@ public final class QueryParams {
 
         sb.append("&contentdom=");
         sb.append(theQuery.contentdom.toString());
+        
+        sb.append("&strictContentDom=");
+        sb.append(String.valueOf(theQuery.isStrictContentDom()));
 
         sb.append("&former=");
         sb.append(theQuery.getQueryGoal().getQueryString(true));

@@ -190,6 +190,7 @@ public class yacysearch {
                 "search.navigation",
                 (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
             prop.put("contentdom", "text");
+            prop.put("strictContentDom", "false");
             prop.put("contentdomCheckText", "1");
             prop.put("contentdomCheckAudio", "0");
             prop.put("contentdomCheckVideo", "0");
@@ -965,6 +966,7 @@ public class yacysearch {
         prop.put("search.verify", snippetFetchStrategy == null ? sb.getConfig("search.verify", "iffresh") : snippetFetchStrategy.toName());
         prop.put("search.navigation", (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
         prop.putHTML("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
+        prop.putHTML("strictContentDom", String.valueOf(strictContentDom));
 
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", originalquerystring);

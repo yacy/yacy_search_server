@@ -134,6 +134,9 @@ public class index {
         prop.put("searchoptions_prefermaskoptions", "0");
         prop.putHTML("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
         prop.put("searchoptions_indexofChecked", "");
+		prop.put("searchoptions_" + SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
+				sb.getConfigBool(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
+						SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT) ? 1 : 0);
         prop.put("results", "");
         prop.put("type", type);
         prop.put("depth", "0");
