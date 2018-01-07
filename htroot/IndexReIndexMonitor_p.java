@@ -22,7 +22,7 @@ import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.migration;
 import net.yacy.crawler.RecrawlBusyThread;
-
+import net.yacy.data.TransactionManager;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.ReindexSolrBusyThread;
 import net.yacy.server.serverObjects;
@@ -34,12 +34,19 @@ public class IndexReIndexMonitor_p {
 
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+        
+        /* Acquire a transaction token for the next possible POST form submissions */
+        final String nextTransactionToken = TransactionManager.getTransactionToken(header);
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, nextTransactionToken);
 
         prop.put("docsprocessed", "0");
         prop.put("currentselectquery","");
         BusyThread reidxbt = sb.getThread(ReindexSolrBusyThread.THREAD_NAME);
         if (reidxbt == null) {
             if (post != null && post.containsKey("reindexnow") && sb.index.fulltext().connectedLocalSolr()) {
+            	/* Check the transaction is valid */
+            	TransactionManager.checkPostTransaction(header, post);
+            	
                 migration.reindexToschema(sb);
                 prop.put("querysize", "0");
                 prop.put("infomessage","reindex job started");
@@ -71,6 +78,9 @@ public class IndexReIndexMonitor_p {
             }
             
             if (post != null && post.containsKey("stopreindex")) {
+            	/* Check the transaction is valid */
+            	TransactionManager.checkPostTransaction(header, post);
+            	
                 sb.terminateThread(ReindexSolrBusyThread.THREAD_NAME, false);
                 prop.put("infomessage", "reindex job stopped");
                 prop.put("reindexjobrunning",0);
@@ -93,6 +103,9 @@ public class IndexReIndexMonitor_p {
         
         // to signal that a setting shall change the form provides a fixed parameter setup=recrawljob, if not present return status only
         if (post != null && "recrawljob".equals(post.get("setup"))) { // it's a command to recrawlThread
+        	
+        	/* Check the transaction is valid */
+        	TransactionManager.checkPostTransaction(header, post);
 
             if (recrawlbt == null) {
                 if (post.containsKey("recrawlnow") && sb.index.fulltext().connectedLocalSolr()) {
