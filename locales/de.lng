@@ -2094,8 +2094,6 @@ Documents are added to the crawler only if no other crawls are active==Dokumente
 and are added in small chunks.==und wird in kleinen Blöcken verarbeitet.
 "start recrawl job now"=="Starte Re-Crawl-Job jetzt"
 "stop recrawl job"=="Beende Re-Crawl-Job"
-to re-crawl documents with fresh_date_dt before today.==um Dokumente mit fresh_date_dt vor Heute erneut zu crawlen.
-after starting the recrawl job you can apply a custom Solr query to select documents to be processed==nach dem Start des Re-Crawl-Jobs kann die Solr Abfrage bearbeitet werden um gewünschte Dokumente zu verarbeiten
 Re-Crawl Query Details==Re-Crawl Abfrage Details
 Documents to process==Dokumente in Warteschlange
 Current Query==Aktuelle Abfrage

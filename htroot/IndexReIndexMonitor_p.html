@@ -67,11 +67,25 @@
           <table><tr valign="top"><td>
           <fieldset>
 
-          #(recrawljobrunning)#                
+          #(recrawljobrunning)#
+            <div class="form-group">
+            	<label>Solr query <input type="text" name="recrawlquerytext" size="40" value="#[recrawlquerytext]#" /></label>
+            	<input type="submit" name="simulateRecrawl" value="Simulate" class="btn btn-default" title="Check only how many documents would be selected for recrawl"/>
+            </div>
+            #(simulationResult)#
+            ::
+            <div class="alert alert-success" role="alert">#[docCount]# documents selected for recrawl.</div>
+            ::
+            <div class="alert alert-danger" role="alert">An error occurred when trying to run the selection query.</div>
+            ::
+            <div class="alert alert-danger" role="alert">The Solr index is not connected. Please restart your peer.</div>
+            #(/simulationResult)#
+            <div class="form-group">
+            	<label>Include failed URLs <input type="checkbox" name="includefailedurls" #(includefailedurls)#::checked="checked"#(/includefailedurls)# /></label>
+            </div>
+            <input type="submit" name="recrawlDefaults" value="Set defaults" class="btn btn-default" title="Reset to default values"/>
             <input type="submit" name="recrawlnow" value="start recrawl job now" class="btn btn-primary"/>
-            to re-crawl documents with fresh_date_dt before today.
-            <p></p>
-            <p><small>after starting the recrawl job you can apply a custom Solr query to select documents to be processed</small></p>
+            to re-crawl documents selected with the given query.
             ::<input type="submit" name="stoprecrawl" value="stop recrawl job" class="btn btn-danger"/> 
           #(/recrawljobrunning)#
 

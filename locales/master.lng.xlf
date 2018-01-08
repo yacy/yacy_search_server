@@ -5262,10 +5262,7 @@
        <source>"stop recrawl job"</source>
     </trans-unit>
     <trans-unit id="c8a1de3a" xml:space="preserve" approved="no" translate="yes">
-       <source>to re-crawl documents with fresh_date_dt before today.</source>
-    </trans-unit>
-    <trans-unit id="35a2988c" xml:space="preserve" approved="no" translate="yes">
-       <source>after starting the recrawl job you can apply a custom Solr query to select documents to be processed</source>
+       <source>to re-crawl documents selected with the given query.</source>
     </trans-unit>
     <trans-unit id="5c907d7" xml:space="preserve" approved="no" translate="yes">
        <source>Re-Crawl Query Details</source>

@@ -17,9 +17,14 @@
  * along with this program in the file lgpl21.txt If not, see
  * <http://www.gnu.org/licenses/>.
  */
+import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.OrderedScoreMap;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.workflow.BusyThread;
+
+import java.io.IOException;
+
 import net.yacy.migration;
 import net.yacy.crawler.RecrawlBusyThread;
 import net.yacy.data.TransactionManager;
@@ -101,21 +106,46 @@ public class IndexReIndexMonitor_p {
         // recrawl job handling
         BusyThread recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
         
+    	String recrawlQuery = RecrawlBusyThread.DEFAULT_QUERY;
+        boolean inclerrdoc = RecrawlBusyThread.DEFAULT_INCLUDE_FAILED;
         // to signal that a setting shall change the form provides a fixed parameter setup=recrawljob, if not present return status only
         if (post != null && "recrawljob".equals(post.get("setup"))) { // it's a command to recrawlThread
         	
         	/* Check the transaction is valid */
         	TransactionManager.checkPostTransaction(header, post);
+        	
+        	if(post.containsKey("recrawlquerytext")) {
+        		recrawlQuery = post.get("recrawlquerytext");
+        	}
+        	
+            if (post.containsKey("includefailedurls")) {
+                inclerrdoc = post.getBoolean("includefailedurls");
+            }
 
             if (recrawlbt == null) {
+                prop.put("recrawljobrunning_simulationResult", 0);
                 if (post.containsKey("recrawlnow") && sb.index.fulltext().connectedLocalSolr()) {
-                    sb.deployThread(RecrawlBusyThread.THREAD_NAME,
-                            "ReCrawl",
-                            "recrawl existing documents",
-                            null,
-                            new RecrawlBusyThread(Switchboard.getSwitchboard()),
-                            1000);
+					sb.deployThread(RecrawlBusyThread.THREAD_NAME, "ReCrawl", "recrawl existing documents", null,
+							new RecrawlBusyThread(Switchboard.getSwitchboard(), recrawlQuery, inclerrdoc), 1000);
                     recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
+                } else if(post.containsKey("simulateRecrawl") && sb.index.fulltext().connectedLocalSolr()) {
+                    SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
+                    if (!solrConnector.isClosed()) {
+                        try {
+                            // query all or only httpstatus=200 depending on includefailed flag
+                            final long count = solrConnector.getCountByQuery(RecrawlBusyThread.buildSelectionQuery(recrawlQuery, inclerrdoc));
+                            prop.put("recrawljobrunning_simulationResult", 1);
+                            prop.put("recrawljobrunning_simulationResult_docCount", count);
+                        } catch (final IOException e) {
+                        	prop.put("recrawljobrunning_simulationResult", 2);
+                        	ConcurrentLog.logException(e);
+                        }
+                    } else {
+                    	prop.put("recrawljobrunning_simulationResult", 3);
+                    }
+                } else if(post.containsKey("recrawlDefaults")) {
+                	recrawlQuery = RecrawlBusyThread.DEFAULT_QUERY;
+                    inclerrdoc = RecrawlBusyThread.DEFAULT_INCLUDE_FAILED;
                 }
             } else {
                 if (post.containsKey("stoprecrawl")) {
@@ -124,14 +154,9 @@ public class IndexReIndexMonitor_p {
                 }
             }
 
-            boolean inclerrdoc = false;
-            if (post.containsKey("includefailedurls")) {
-                inclerrdoc = post.getBoolean("includefailedurls");
-            }
-
             if (recrawlbt != null && !recrawlbt.shutdownInProgress()) {
                 if (post.containsKey("updquery") && post.containsKey("recrawlquerytext")) {
-                    ((RecrawlBusyThread) recrawlbt).setQuery(post.get("recrawlquerytext"),inclerrdoc);
+                    ((RecrawlBusyThread) recrawlbt).setQuery(recrawlQuery, inclerrdoc);
                 } else {
                     ((RecrawlBusyThread) recrawlbt).setIncludeFailed(inclerrdoc);
                 }
@@ -145,6 +170,8 @@ public class IndexReIndexMonitor_p {
             prop.put("recrawljobrunning_includefailedurls", ((RecrawlBusyThread) recrawlbt).getIncludeFailed());
         } else {
             prop.put("recrawljobrunning", 0);
+            prop.put("recrawljobrunning_recrawlquerytext", recrawlQuery);
+            prop.put("recrawljobrunning_includefailedurls", inclerrdoc);
         }
 
         // return rewrite properties

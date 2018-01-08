@@ -49,18 +49,40 @@ import org.apache.solr.common.SolrDocumentList;
  */
 public class RecrawlBusyThread extends AbstractBusyThread {
 
+	/** The thread name */
     public final static String THREAD_NAME = "recrawlindex";
+    
+    /** The default selection query */
+    public static final String DEFAULT_QUERY = CollectionSchema.fresh_date_dt.getSolrFieldName()+":[* TO NOW/DAY-1DAY]";
+    
+    /** Default value for inclusion or not of documents with a https status different from 200 (success) */
+    public static final boolean DEFAULT_INCLUDE_FAILED = false;
 
-    private String currentQuery = CollectionSchema.fresh_date_dt.getSolrFieldName()+":[* TO NOW/DAY-1DAY]"; // current query
-    private boolean includefailed = false; // flag if docs with httpstatus_i <> 200 shall be recrawled
+    /** The current query selecting documents to recrawl */
+    private String currentQuery;
+    
+    /** flag if docs with httpstatus_i <> 200 shall be recrawled */
+    private boolean includefailed;
+    
     private int chunkstart = 0;
     private final int chunksize;
     final Switchboard sb;
-    private final Set<DigestURL> urlstack; // buffer of urls to recrawl
+    
+    /** buffer of urls to recrawl */
+    private final Set<DigestURL> urlstack;
     public long urlsfound = 0;
     private String solrSortBy;
 
-    public RecrawlBusyThread(Switchboard xsb) {
+	/**
+	 * @param xsb
+	 *            the Switchboard instance holding server environment
+	 * @param query
+	 *            the Solr selection query
+	 * @param includeFailed
+	 *            set to true when documents with a https status different from 200
+	 *            (success) must be included
+	 */
+    public RecrawlBusyThread(final Switchboard xsb, final String query, final boolean includeFailed) {
         super(3000, 1000); // set lower limits of cycle delay
         setName(THREAD_NAME);
         this.setIdleSleep(10*60000); // set actual cycle delays
@@ -68,6 +90,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         this.setPriority(Thread.MIN_PRIORITY);
 
         this.sb = xsb;
+        this.currentQuery = query;
+        this.includefailed = includeFailed;
         urlstack = new HashSet<DigestURL>();
         // workaround to prevent solr exception on existing index (not fully reindexed) since intro of schema with docvalues
         // org.apache.solr.core.SolrCore java.lang.IllegalStateException: unexpected docvalues type NONE for field 'load_date_dt' (expected=NUMERIC). Use UninvertingReader or index with docvalues.
@@ -90,6 +114,19 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     public String getQuery () {
         return this.currentQuery;
     }
+    
+	/**
+	 * 
+	 * @param queryBase
+	 *            the base query
+	 * @param includeFailed
+	 *            set to true when documents with a https status different from 200
+	 *            (success) must be included
+	 * @return the Solr selection query for candidate URLs to recrawl
+	 */
+	public static final String buildSelectionQuery(final String queryBase, final boolean includeFailed) {
+		return includeFailed ? queryBase : queryBase + " AND (" + CollectionSchema.httpstatus_i.name() + ":200)";
+	}
 
     /**
      * Flag to include failed urls (httpstatus_i <> 200)
@@ -174,7 +211,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         if (!solrConnector.isClosed()) {
             try {
                 // query all or only httpstatus=200 depending on includefailed flag
-                docList = solrConnector.getDocumentListByQuery(this.includefailed ? currentQuery : currentQuery + " AND (" + CollectionSchema.httpstatus_i.name() + ":200)",
+                docList = solrConnector.getDocumentListByQuery(RecrawlBusyThread.buildSelectionQuery(this.currentQuery, this.includefailed),
                         this.solrSortBy, this.chunkstart, this.chunksize, CollectionSchema.sku.getSolrFieldName());
                 this.urlsfound = docList.getNumFound();
             } catch (Throwable e) {
