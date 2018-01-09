@@ -17,17 +17,21 @@
  * along with this program in the file lgpl21.txt If not, see
  * <http://www.gnu.org/licenses/>.
  */
+import java.io.IOException;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Locale;
+
+import net.yacy.migration;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.workflow.BusyThread;
-
-import java.io.IOException;
-
-import net.yacy.migration;
 import net.yacy.crawler.RecrawlBusyThread;
 import net.yacy.data.TransactionManager;
+import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.ReindexSolrBusyThread;
 import net.yacy.server.serverObjects;
@@ -149,7 +153,9 @@ public class IndexReIndexMonitor_p {
                 }
             } else {
                 if (post.containsKey("stoprecrawl")) {
-                    sb.terminateThread(RecrawlBusyThread.THREAD_NAME, false);
+            		/* We do not remove the thread from the Switchboard worker threads using serverSwitch.terminateThread(String,boolean),
+            		 * because we want to be able to provide a report after its termination */
+                    recrawlbt.terminate(false);
                     prop.put("recrawljobrunning", 0);
                 }
             }
@@ -169,7 +175,8 @@ public class IndexReIndexMonitor_p {
             prop.put("recrawljobrunning_recrawlquerytext", ((RecrawlBusyThread) recrawlbt).getQuery());
             prop.put("recrawljobrunning_includefailedurls", ((RecrawlBusyThread) recrawlbt).getIncludeFailed());
         } else {
-            prop.put("recrawljobrunning", 0);
+			prop.put("recrawljobrunning", 0);
+			processRecrawlReport(header, sb, prop, (RecrawlBusyThread)recrawlbt);
             prop.put("recrawljobrunning_recrawlquerytext", recrawlQuery);
             prop.put("recrawljobrunning_includefailedurls", inclerrdoc);
         }
@@ -177,4 +184,53 @@ public class IndexReIndexMonitor_p {
         // return rewrite properties
         return prop;
     }
+
+    /**
+     * Write information on the eventual last recrawl job terminated
+     * @param header current request header. Must not be null.
+     * @param sb Switchboard instance holding server environment
+     * @param prop this template result
+     * @param recrawlbt the eventual terminated recrawl thread
+     */
+	private static void processRecrawlReport(final RequestHeader header, final Switchboard sb,
+			final serverObjects prop, final RecrawlBusyThread recrawlbt) {
+		if (recrawlbt != null) {
+			prop.put("recrawljobrunning_recrawlReport", 1);
+			String lng = sb.getConfig("locale.language", Locale.ENGLISH.getLanguage());
+			Locale formatLocale;
+			if ("browser".equals(lng)) {
+				/* Only use the client locale when locale.language is set to browser */
+				formatLocale = header.getLocale();
+			} else {
+				formatLocale = Locale.forLanguageTag(lng);
+			}
+			final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
+					.withLocale(formatLocale);
+			prop.put("recrawljobrunning_recrawlReport_startTime", formatDateTime(formatter, recrawlbt.getStartTime()));
+			prop.put("recrawljobrunning_recrawlReport_endTime", formatDateTime(formatter, recrawlbt.getEndTime()));
+			prop.put("recrawljobrunning_recrawlReport_recrawledUrlsCount", recrawlbt.getRecrawledUrlsCount());
+		} else {
+			prop.put("recrawljobrunning_recrawlReport", 0);
+		}
+	}
+
+	/**
+	 * @param formatter the formatter to use. Must not be null.
+	 * @param time the date/time value to format. Can be null.
+	 * @return a string representing the formatted date/time, eventually empty.
+	 */
+	protected static String formatDateTime(final DateTimeFormatter formatter, final LocalDateTime time) {
+		String formattedTime;
+		if(time != null) {
+			try {
+				formattedTime = time.format(formatter);
+			} catch(final DateTimeException e) {
+				/* Fallback to ISO-8601 on any eventual formatting failure */
+				formattedTime = time.toString();
+			}
+		} else {
+			formattedTime = "";
+		}
+		return formattedTime;
+	}
 }

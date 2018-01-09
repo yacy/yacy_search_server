@@ -25,8 +25,13 @@ package net.yacy.crawler;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.util.ConcurrentLog;
@@ -37,8 +42,6 @@ import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionSchema;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 
 /**
  * Selects documents by a query from the local index
@@ -74,10 +77,19 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     /** The total number of candidate URLs found for recrawl */
     private long urlsToRecrawl = 0;
     
+    /** Total number of URLs added to the crawler queue for recrawl */
+    private long recrawledUrlsCount = 0;
+    
     private String solrSortBy;
     
     /** Set to true when more URLs are still to be processed */
     private boolean moreToRecrawl = true;
+    
+    /** The recrawl job start time */
+    private LocalDateTime startTime;
+    
+    /** The recrawl job end time */
+    private LocalDateTime endTime;
 
 	/**
 	 * @param xsb
@@ -117,7 +129,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         this.chunkstart = 0;
     }
 
-    public String getQuery () {
+    public String getQuery() {
         return this.currentQuery;
     }
     
@@ -178,6 +190,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
                     ConcurrentLog.info(THREAD_NAME, "addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
                 } else {
                     added++;
+                    this.recrawledUrlsCount++;
                 }
             }
             this.urlstack.clear();
@@ -212,7 +225,18 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         	didSomething = feedToCrawler();
         }
         return didSomething;
-
+    }
+    
+    @Override
+    public synchronized void start() {
+    	this.startTime = LocalDateTime.now();
+    	super.start();
+    }
+    
+    @Override
+    public void terminate(boolean waitFor) {
+    	super.terminate(waitFor);
+    	this.endTime = LocalDateTime.now();
     }
 
     /**
@@ -271,6 +295,23 @@ public class RecrawlBusyThread extends AbstractBusyThread {
      */
     public long getUrlsToRecrawl() {
 		return this.urlsToRecrawl;
+	}
+
+    /**
+     * @return The total number of URLs added to the crawler queue for recrawl
+     */
+    public long getRecrawledUrlsCount() {
+		return this.recrawledUrlsCount;
+	}
+
+    /** @return The recrawl job start time */
+    public LocalDateTime getStartTime() {
+		return this.startTime;
+	}
+    
+    /** @return The recrawl job end time */
+    public LocalDateTime getEndTime() {
+		return this.endTime;
 	}
 
     @Override
