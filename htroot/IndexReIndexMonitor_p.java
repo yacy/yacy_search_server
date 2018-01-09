@@ -122,7 +122,7 @@ public class IndexReIndexMonitor_p {
                 inclerrdoc = post.getBoolean("includefailedurls");
             }
 
-            if (recrawlbt == null) {
+            if (recrawlbt == null || recrawlbt.shutdownInProgress()) {
                 prop.put("recrawljobrunning_simulationResult", 0);
                 if (post.containsKey("recrawlnow") && sb.index.fulltext().connectedLocalSolr()) {
 					sb.deployThread(RecrawlBusyThread.THREAD_NAME, "ReCrawl", "recrawl existing documents", null,
@@ -165,7 +165,7 @@ public class IndexReIndexMonitor_p {
         // just post status of recrawlThread
         if (recrawlbt != null && !recrawlbt.shutdownInProgress()) { // provide status
             prop.put("recrawljobrunning", 1);
-            prop.put("recrawljobrunning_docCount", ((RecrawlBusyThread) recrawlbt).urlsfound);
+            prop.put("recrawljobrunning_docCount", ((RecrawlBusyThread) recrawlbt).getUrlsToRecrawl());
             prop.put("recrawljobrunning_recrawlquerytext", ((RecrawlBusyThread) recrawlbt).getQuery());
             prop.put("recrawljobrunning_includefailedurls", ((RecrawlBusyThread) recrawlbt).getIncludeFailed());
         } else {

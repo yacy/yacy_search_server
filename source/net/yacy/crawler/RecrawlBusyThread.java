@@ -45,7 +45,7 @@ import org.apache.solr.common.SolrDocumentList;
  * and feeds the found urls to the crawler to recrawl the documents.
  * This is intended to keep the index up-to-date
  * Currently the doucments are selected by expired fresh_date_dt field
- * an added to the crawler in smaller chunks (see chunksize) as long as no other crawl is runnin.
+ * an added to the crawler in smaller chunks (see chunksize) as long as no other crawl is running.
  */
 public class RecrawlBusyThread extends AbstractBusyThread {
 
@@ -66,12 +66,18 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     
     private int chunkstart = 0;
     private final int chunksize;
-    final Switchboard sb;
+    private final Switchboard sb;
     
     /** buffer of urls to recrawl */
     private final Set<DigestURL> urlstack;
-    public long urlsfound = 0;
+    
+    /** The total number of candidate URLs found for recrawl */
+    private long urlsToRecrawl = 0;
+    
     private String solrSortBy;
+    
+    /** Set to true when more URLs are still to be processed */
+    private boolean moreToRecrawl = true;
 
 	/**
 	 * @param xsb
@@ -92,10 +98,10 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         this.sb = xsb;
         this.currentQuery = query;
         this.includefailed = includeFailed;
-        urlstack = new HashSet<DigestURL>();
+        this.urlstack = new HashSet<DigestURL>();
         // workaround to prevent solr exception on existing index (not fully reindexed) since intro of schema with docvalues
         // org.apache.solr.core.SolrCore java.lang.IllegalStateException: unexpected docvalues type NONE for field 'load_date_dt' (expected=NUMERIC). Use UninvertingReader or index with docvalues.
-        solrSortBy = null; // CollectionSchema.load_date_dt.getSolrFieldName() + " asc";
+        this.solrSortBy = null; // CollectionSchema.load_date_dt.getSolrFieldName() + " asc";
         this.chunksize = sb.getConfigInt(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 200);
     }
 
@@ -191,10 +197,21 @@ public class RecrawlBusyThread extends AbstractBusyThread {
             return false;
         }
 
+        boolean didSomething = false;
         if (this.urlstack.isEmpty()) {
-            return processSingleQuery();
+        	if(!this.moreToRecrawl) {
+        		/* We do not remove the thread from the Switchboard worker threads using serverSwitch.terminateThread(String,boolean),
+        		 * because we want to be able to provide a report after its termination */
+        		terminate(false);
+        	} else {
+        		this.moreToRecrawl = processSingleQuery();
+        		/* Even if no more URLs are to recrawl, the job has done something by searching the Solr index */
+        		didSomething = true;
+        	}
+        } else {
+        	didSomething = feedToCrawler();
         }
-        return feedToCrawler();
+        return didSomething;
 
     }
 
@@ -208,21 +225,22 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         }
         SolrDocumentList docList = null;
         SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
-        if (!solrConnector.isClosed()) {
-            try {
-                // query all or only httpstatus=200 depending on includefailed flag
-                docList = solrConnector.getDocumentListByQuery(RecrawlBusyThread.buildSelectionQuery(this.currentQuery, this.includefailed),
-                        this.solrSortBy, this.chunkstart, this.chunksize, CollectionSchema.sku.getSolrFieldName());
-                this.urlsfound = docList.getNumFound();
-            } catch (Throwable e) {
-                this.urlsfound = 0;
-            }
-        } else {
-            this.urlsfound =0;
+        if (solrConnector.isClosed()) {
+        	this.urlsToRecrawl = 0;
+        	return false;
+        }
+        
+        try {
+            // query all or only httpstatus=200 depending on includefailed flag
+            docList = solrConnector.getDocumentListByQuery(RecrawlBusyThread.buildSelectionQuery(this.currentQuery, this.includefailed),
+                this.solrSortBy, this.chunkstart, this.chunksize, CollectionSchema.sku.getSolrFieldName());
+            this.urlsToRecrawl = docList.getNumFound();
+        } catch (final Throwable e) {
+        	this.urlsToRecrawl = 0;
         }
 
         if (docList != null) {
-            for (SolrDocument doc : docList) {
+            for (final SolrDocument doc : docList) {
                 try {
                     this.urlstack.add(new DigestURL((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName())));
                 } catch (MalformedURLException ex) {
@@ -237,10 +255,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
             this.chunkstart = this.chunkstart + this.chunksize;
         }
         
-        if (this.urlsfound <= this.chunkstart) {
-            this.chunkstart = 0;
+        if (docList == null || docList.size() < this.chunksize) {
             return false;
-            // TODO: add a stop condition
         }
         return true;
     }
@@ -249,6 +265,13 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     public int getJobCount() {
         return this.urlstack.size();
     }
+    
+    /**
+     * @return The total number of candidate URLs found for recrawl
+     */
+    public long getUrlsToRecrawl() {
+		return this.urlsToRecrawl;
+	}
 
     @Override
     public void freemem() {
