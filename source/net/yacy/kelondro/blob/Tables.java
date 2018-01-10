@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -48,7 +49,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.ByteArray;
-import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
@@ -577,7 +577,9 @@ public class Tables implements Iterable<String> {
             while (this.i.hasNext()) {
                 r = new Row(this.i.next());
                 if (this.whereValue != null) {
-                    if (ByteBuffer.equals(r.get(this.whereColumn), this.whereValue)) return r;
+                    if (Arrays.equals(r.get(this.whereColumn), this.whereValue)) {
+                    	return r;
+                    }
                 } else if (this.wherePattern != null) {
                     if (this.whereColumn == null) {
                         // shall match any column
@@ -681,7 +683,7 @@ public class Tables implements Iterable<String> {
                     if (map == null) continue;
                     r = new Row(pk, map);
                     if (this.whereValue != null) {
-                        if (ByteBuffer.equals(r.get(this.whereColumn), this.whereValue)) return r;
+                        if (Arrays.equals(r.get(this.whereColumn), this.whereValue)) return r;
                     } else if (this.wherePattern != null) {
                         if (this.whereColumn == null) {
                             // shall match any column
