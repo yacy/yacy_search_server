@@ -25,12 +25,15 @@ import java.time.format.FormatStyle;
 import java.util.Locale;
 
 import net.yacy.migration;
+import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.OrderedScoreMap;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.RecrawlBusyThread;
 import net.yacy.data.TransactionManager;
+import net.yacy.data.WorkTables;
+import net.yacy.kelondro.blob.Tables.Row;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.ReindexSolrBusyThread;
@@ -38,8 +41,11 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class IndexReIndexMonitor_p {
+	
+	/** This servlet name, used for identifying recorded API calls */
+	private static final String SERVLET_NAME = IndexReIndexMonitor_p.class.getSimpleName() + ".html";
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -132,6 +138,22 @@ public class IndexReIndexMonitor_p {
 					sb.deployThread(RecrawlBusyThread.THREAD_NAME, "ReCrawl", "recrawl existing documents", null,
 							new RecrawlBusyThread(Switchboard.getSwitchboard(), recrawlQuery, inclerrdoc), 1000);
                     recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
+                    
+	                /* store this call as an api call for easy scheduling possibility */
+					if(sb.tables != null) {
+						/* We avoid creating a duplicate of any already recorded API call with the same parameters */
+						final Row lastExecutedCall = WorkTables
+								.selectLastExecutedApiCall(IndexReIndexMonitor_p.SERVLET_NAME, post, sb);
+						if (lastExecutedCall != null && !post.containsKey(WorkTables.TABLE_API_COL_APICALL_PK)) {
+							byte[] lastExecutedCallPk = lastExecutedCall.getPK();
+							if (lastExecutedCallPk != null) {
+								post.add(WorkTables.TABLE_API_COL_APICALL_PK, UTF8.String(lastExecutedCallPk));
+							}
+						}
+						sb.tables.recordAPICall(post, IndexReIndexMonitor_p.SERVLET_NAME, WorkTables.TABLE_API_TYPE_CRAWLER,
+								"Recrawl documents matching selection query : " + recrawlQuery);
+					}
+                    
                 } else if(post.containsKey("simulateRecrawl") && sb.index.fulltext().connectedLocalSolr()) {
                     SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
                     if (!solrConnector.isClosed()) {

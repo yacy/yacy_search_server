@@ -100,31 +100,93 @@ public class WorkTables extends Tables {
     
     /**
      * 
-     * @param post the api call request parameters. Must not be null.
-     * @param servletName the name of the servlet
-     * @return the API URL to be recorded
+     * @param post the api call eventual request parameters.
+     * @param servletName the name of the servlet. Must not be null.
+     * @return the API URL to be recorded, formatted to include request parameters as URL query parameters
      */
     public static String generateRecordedURL(final serverObjects post, final String servletName) {
         /* Before API URL serialization, we set any eventual transaction token value to empty : 
          * this will later help identify a new valid transaction token will be necessary, 
-         * but without revealing it in the URL displayed in the process scheduler and storing an invalid value */
-        final String transactionToken = post.get(TransactionManager.TRANSACTION_TOKEN_PARAM);
-        if(transactionToken != null) {
+         * but prevents revealing it in the URL displayed in the process scheduler and prevents storing an outdated value */
+        final String transactionToken;
+        if(post != null) {
+        	transactionToken = post.get(TransactionManager.TRANSACTION_TOKEN_PARAM);
+        } else {
+        	transactionToken = null;
+        }
+        if(transactionToken != null && post != null) {
         	post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, "");
         }
         
         // generate the apicall url - without the apicall attributes
-        final String apiurl = /*"http://localhost:" + getConfig("port", "8090") +*/ "/" + servletName + "?" + post.toString();
+        String apiurl = "/" + servletName;
+        if(post != null) {
+        	apiurl += "?" + post.toString();
+        }
         
         /* Now restore the eventual transaction token to prevent side effects on the post object eventually still used by the caller */
-        if(transactionToken != null) {
-        	post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, transactionToken);
-        } else {
-        	post.remove(TransactionManager.TRANSACTION_TOKEN_PARAM);
+        if(post != null) {
+        	if(transactionToken != null) {
+        		post.put(TransactionManager.TRANSACTION_TOKEN_PARAM, transactionToken);
+        	} else {
+        		post.remove(TransactionManager.TRANSACTION_TOKEN_PARAM);
+        	}
         }
         
         return apiurl;
     }
+    
+    /**
+     * @param servletName the servlet name used to identify the API when the call is recorded.
+     * @param post Servlet request parameters. Must not be null.
+     * @param sb the {@link Switchboard} instance. Must not be null.
+     * @return the most recently recorded call to the given API with the same parameters, or null when no one was found or data is not accessible
+     */
+	public static Row selectLastExecutedApiCall(final String servletName, final serverObjects post, final Switchboard sb) {
+		Row lastRecordedCall = null;
+		if (servletName != null && sb != null && sb.tables != null) {
+			try {
+				if (post != null && post.containsKey(WorkTables.TABLE_API_COL_APICALL_PK)) {
+					/*
+					 * Search the table on the primary key when when present (re-execution of a
+					 * recorded call)
+					 */
+					lastRecordedCall = sb.tables.select(WorkTables.TABLE_API_NAME,
+							UTF8.getBytes(post.get(WorkTables.TABLE_API_COL_APICALL_PK)));
+				} else {
+					/* Else search the table on the API URL as recorded (including parameters) */
+					final String apiURL = WorkTables.generateRecordedURL(post, servletName);
+					final Iterator<Row> rowsIt = sb.tables.iterator(WorkTables.TABLE_API_NAME,
+							WorkTables.TABLE_API_COL_URL, UTF8.getBytes(apiURL));
+					while (rowsIt.hasNext()) {
+						final Row currentRow = rowsIt.next();
+						if (currentRow != null) {
+							final Date currentLastExec = currentRow.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC,
+									(Date) null);
+							if (currentLastExec != null) {
+								if (lastRecordedCall == null) {
+									/*
+									 * Do not break now the loop : we are looking for the most recent API call on
+									 * the same URL
+									 */
+									lastRecordedCall = currentRow;
+								} else if (lastRecordedCall.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, (Date) null)
+										.before(currentLastExec)) {
+									lastRecordedCall = currentRow;
+								}
+							}
+						}
+					}
+				}
+
+			} catch (final IOException e) {
+				ConcurrentLog.logException(e);
+			} catch (final SpaceExceededException e) {
+				ConcurrentLog.logException(e);
+			}
+		}
+		return lastRecordedCall;
+	}
 
     /**
      * recording of a api call. stores the call parameters into the API database table

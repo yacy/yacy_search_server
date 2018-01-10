@@ -26,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.Iterator;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -40,7 +39,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.document.importer.MediawikiImporter;
@@ -112,7 +110,7 @@ public class IndexImportMediawiki_p {
 					MultiProtocolURL sourceURL = null;
 					int status = 0;
 					String sourceFilePath = "";
-					final Row lastExecutedCall = selectLastExecutedCall(post, sb);
+					final Row lastExecutedCall = WorkTables.selectLastExecutedApiCall("IndexImportMediawiki_p.html", post, sb);
 					Date lastExecutionDate = null;
 					if (lastExecutedCall != null) {
 						lastExecutionDate = lastExecutedCall.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, (Date) null);
@@ -192,47 +190,6 @@ public class IndexImportMediawiki_p {
         return prop;
     }
     
-    /**
-     * @param post Servlet request parameters. Must not be null.
-     * @param sb the {@link Switchboard} instance. Must not be null.
-     * @return the most recently recorded call to this API with the same parameters
-     */
-	private static Row selectLastExecutedCall(final serverObjects post, final Switchboard sb) {
-		Row lastRecordedCall = null;
-		if (sb.tables != null) {
-			try {
-				if(post.containsKey(WorkTables.TABLE_API_COL_APICALL_PK)) {
-					/* Search the table on the primary key when when present (re-execution of a recorded call) */
-					lastRecordedCall = sb.tables.select(WorkTables.TABLE_API_NAME, UTF8.getBytes(post.get(WorkTables.TABLE_API_COL_APICALL_PK)));
-				} else {
-					/* Else search the table on the API URL as recorded (including parameters) */
-					final String apiURL = WorkTables.generateRecordedURL(post, "IndexImportMediawiki_p.html");
-					Iterator<Row> rowsIt = sb.tables.iterator(WorkTables.TABLE_API_NAME, WorkTables.TABLE_API_COL_URL,
-							UTF8.getBytes(apiURL));
-					while (rowsIt.hasNext()) {
-						Row currentRow = rowsIt.next();
-						if (currentRow != null) {
-							Date currentLastExec = currentRow.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, (Date) null);
-							if(currentLastExec != null) {
-								if(lastRecordedCall == null) {
-									lastRecordedCall = currentRow;
-								} else if(lastRecordedCall.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, (Date) null).before(currentLastExec)) {
-									lastRecordedCall = currentRow;
-								}
-							}
-						}
-					}
-				}
-
-			} catch (final IOException e) {
-				ConcurrentLog.logException(e);
-			} catch(final SpaceExceededException e) {
-				ConcurrentLog.logException(e);
-			}
-		}
-		return lastRecordedCall;
-	}
-	
     /**
      * @param fileURL the file URL. Must not be null.
      * @return the last modified date for the file at fileURL, or 0L when unknown or when an error occurred
