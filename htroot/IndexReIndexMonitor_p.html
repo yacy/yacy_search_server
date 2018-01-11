@@ -64,41 +64,12 @@
            and are added in small chunks.</p>
           <div class="container-fluid">
            <div class="row">
-        #(recrawljobrunning)#
-           #(recrawlReport)#::
-            <div class="col-md-10 col-lg-6">
-          	<div class="panel panel-info">
-          		<div class="panel-heading">
-          			<h3 class="panel-title">Last Re-Crawl job report</h3>
-          		</div>
-          		<div class="panel-body">
-          			<table class="table">
-          				<tbody>
-          					<tr>
-          						<th scope="row">Start time</th>
-          						<td>#[startTime]#</td>
-          					</tr>
-          					<tr>
-          						<th scope="row">End time</th>
-          						<td>#[endTime]#</td>
-          					</tr>
-          					<tr>
-          						<th scope="row">Count</th>
-          						<td>#[recrawledUrlsCount]#  URLs added to the crawler queue for recrawl</td>
-          					</tr>
-          				</tbody>
-          			</table>
-          		</div>
-          	 </div>
-          	 </div>
-          	#(/recrawlReport)#
-        #(/recrawljobrunning)#
-        <form action="IndexReIndexMonitor_p.html?setup=recrawljob" method="post" enctype="multipart/form-data" accept-charset="UTF-8" class="col-md-10 col-lg-6">
+         <form action="IndexReIndexMonitor_p.html?setup=recrawljob" method="post" enctype="multipart/form-data" accept-charset="UTF-8" class="col-md-10 col-lg-6">
           <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
           <table><tr valign="top"><td>
-          <fieldset>
 
           #(recrawljobrunning)#
+           <fieldset>
             <div class="form-group">
             	<label>Solr query <input type="text" name="recrawlquerytext" size="40" value="#[recrawlquerytext]#" /></label>
             	<input type="submit" name="simulateRecrawl" value="Simulate" class="btn btn-default" title="Check only how many documents would be selected for recrawl"/>
@@ -117,10 +88,9 @@
             <input type="submit" name="recrawlDefaults" value="Set defaults" class="btn btn-default" title="Reset to default values"/>
             <input type="submit" name="recrawlnow" value="start recrawl job now" class="btn btn-primary"/>
             to re-crawl documents selected with the given query.
-            ::<input type="submit" name="stoprecrawl" value="stop recrawl job" class="btn btn-danger"/> 
+           </fieldset>::
           #(/recrawljobrunning)#
 
-          </fieldset>
           </td>
           <td>
           #(recrawljobrunning)#::
@@ -145,11 +115,50 @@
                   <td>include failed urls</td><td><input type="checkbox" name="includefailedurls" onchange="this.form.submit()" #(includefailedurls)#::checked="checked"#(/includefailedurls)# /></td>
                 </tr>                  
               </table>
+              <input type="submit" name="stoprecrawl" value="stop recrawl job" class="btn btn-danger"/>
             </fieldset>
           #(/recrawljobrunning)#
           </td>
           </tr></table>
         </form>
+        
+           #(recrawlReport)#::
+            <div class="col-md-10 col-lg-6">
+          		<div class="panel panel-info">
+          			<div class="panel-heading">
+          				<h3 class="panel-title">#(jobStatus)#::::Last #(/jobStatus)#Re-Crawl job report</h3>
+          			</div>
+          			<div class="panel-body">
+	          			<table class="table">
+          					<tbody>
+	          				    <tr>
+          							<th scope="row">Status</th>
+          							<td>#(jobStatus)#Running::Shutdown in progress::Terminated#(/jobStatus)#</td>
+          						</tr>
+          						<tr>
+	          						<th scope="row">Start time</th>
+          							<td>#[startTime]#</td>
+          						</tr>
+          						<tr>
+	          						<th scope="row">End time</th>
+          							<td>#[endTime]#</td>
+          						</tr>
+          						<tr>
+	          						<th scope="row">Count</th>
+          							<td>#[recrawledUrlsCount]#  URLs added to the crawler queue for recrawl</td>
+          						</tr>
+          					</tbody>
+          				</table>
+          				#(jobStatus)#
+          					<a class="btn btn-default" href="IndexReIndexMonitor_p.html" role="button"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
+          					::
+          					<a class="btn btn-default" href="IndexReIndexMonitor_p.html" role="button"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
+          					::
+          				#(/jobStatus)#
+          			</div>
+          	 	</div>
+          	 </div>
+          	#(/recrawlReport)#
        </div>
       </div>
         #%env/templates/footer.template%#

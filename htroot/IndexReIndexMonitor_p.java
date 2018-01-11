@@ -190,6 +190,9 @@ public class IndexReIndexMonitor_p {
                 }
             }
         }
+        
+		processRecrawlReport(header, sb, prop, (RecrawlBusyThread)recrawlbt);
+        
         // just post status of recrawlThread
         if (recrawlbt != null && !recrawlbt.shutdownInProgress()) { // provide status
             prop.put("recrawljobrunning", 1);
@@ -198,7 +201,6 @@ public class IndexReIndexMonitor_p {
             prop.put("recrawljobrunning_includefailedurls", ((RecrawlBusyThread) recrawlbt).getIncludeFailed());
         } else {
 			prop.put("recrawljobrunning", 0);
-			processRecrawlReport(header, sb, prop, (RecrawlBusyThread)recrawlbt);
             prop.put("recrawljobrunning_recrawlquerytext", recrawlQuery);
             prop.put("recrawljobrunning_includefailedurls", inclerrdoc);
         }
@@ -208,31 +210,47 @@ public class IndexReIndexMonitor_p {
     }
 
     /**
-     * Write information on the eventual last recrawl job terminated
+     * Write information on the eventual currently running or last recrawl job terminated
      * @param header current request header. Must not be null.
      * @param sb Switchboard instance holding server environment
-     * @param prop this template result
-     * @param recrawlbt the eventual terminated recrawl thread
+     * @param prop this template result to write on. Must not be null.
+     * @param recrawlbt the eventual recrawl thread
      */
 	private static void processRecrawlReport(final RequestHeader header, final Switchboard sb,
 			final serverObjects prop, final RecrawlBusyThread recrawlbt) {
 		if (recrawlbt != null) {
-			prop.put("recrawljobrunning_recrawlReport", 1);
-			String lng = sb.getConfig("locale.language", Locale.ENGLISH.getLanguage());
+			prop.put("recrawlReport", 1);
 			Locale formatLocale;
-			if ("browser".equals(lng)) {
-				/* Only use the client locale when locale.language is set to browser */
-				formatLocale = header.getLocale();
+			if (sb != null) {
+				String lng = sb.getConfig("locale.language", Locale.ENGLISH.getLanguage());
+				if ("browser".equals(lng)) {
+					/* Only use the client locale when locale.language is set to browser */
+					formatLocale = header.getLocale();
+				} else {
+					formatLocale = Locale.forLanguageTag(lng);
+				}
 			} else {
-				formatLocale = Locale.forLanguageTag(lng);
+				/* Match the default language used in html templates */
+				formatLocale = Locale.ENGLISH;
 			}
 			final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
 					.withLocale(formatLocale);
-			prop.put("recrawljobrunning_recrawlReport_startTime", formatDateTime(formatter, recrawlbt.getStartTime()));
-			prop.put("recrawljobrunning_recrawlReport_endTime", formatDateTime(formatter, recrawlbt.getEndTime()));
-			prop.put("recrawljobrunning_recrawlReport_recrawledUrlsCount", recrawlbt.getRecrawledUrlsCount());
+			int jobStatus;
+			if(recrawlbt.isAlive()) {
+				if(recrawlbt.shutdownInProgress()) {
+					jobStatus = 1; // Shutdown in progress
+				} else {
+					jobStatus = 0; // Running
+				}
+			} else {
+				jobStatus = 2; // Terminated
+			}
+			prop.put("recrawlReport_jobStatus", jobStatus);
+			prop.put("recrawlReport_startTime", formatDateTime(formatter, recrawlbt.getStartTime()));
+			prop.put("recrawlReport_endTime", formatDateTime(formatter, recrawlbt.getEndTime()));
+			prop.put("recrawlReport_recrawledUrlsCount", recrawlbt.getRecrawledUrlsCount());
 		} else {
-			prop.put("recrawljobrunning_recrawlReport", 0);
+			prop.put("recrawlReport", 0);
 		}
 	}
 
