@@ -70,13 +70,16 @@
 
           #(recrawljobrunning)#
            <fieldset>
+            #(error)#::
+            <div class="alert alert-danger" role="alert">Re-crawl works only with an embedded local Solr index!</div>
+            #(/error)#
             <div class="form-group">
             	<label>Solr query <input type="text" name="recrawlquerytext" size="40" value="#[recrawlquerytext]#" /></label>
             	<input type="submit" name="simulateRecrawl" value="Simulate" class="btn btn-default" title="Check only how many documents would be selected for recrawl"/>
             </div>
             #(simulationResult)#
             ::
-            <div class="alert alert-success" role="alert">#[docCount]# documents selected for recrawl.</div>
+            <div class="alert alert-success" role="alert">#[docCount]# #(showSelectLink)#document(s)::<a href="#[browseSelectedUrl]#" target="recrawlCandidates" title="Browse metadata of the #[rows]# first selected documents">document(s)</a>#(/showSelectLink)# selected for recrawl.</div>
             ::
             <div class="alert alert-danger" role="alert">An error occurred when trying to run the selection query.</div>
             ::

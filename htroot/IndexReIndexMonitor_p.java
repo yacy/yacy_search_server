@@ -18,6 +18,9 @@
  * <http://www.gnu.org/licenses/>.
  */
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -134,42 +137,59 @@ public class IndexReIndexMonitor_p {
 
             if (recrawlbt == null || recrawlbt.shutdownInProgress()) {
                 prop.put("recrawljobrunning_simulationResult", 0);
-                if (post.containsKey("recrawlnow") && sb.index.fulltext().connectedLocalSolr()) {
-					sb.deployThread(RecrawlBusyThread.THREAD_NAME, "ReCrawl", "recrawl existing documents", null,
-							new RecrawlBusyThread(Switchboard.getSwitchboard(), recrawlQuery, inclerrdoc), 1000);
-                    recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
+                prop.put("recrawljobrunning_error", 0);
+                if(!sb.index.fulltext().connectedLocalSolr()) {
+                	prop.put("recrawljobrunning_error", 1); // Re-crawl works only with an embedded local Solr index
+                } else {
+                	if (post.containsKey("recrawlnow")) {
+                		sb.deployThread(RecrawlBusyThread.THREAD_NAME, "ReCrawl", "recrawl existing documents", null,
+                				new RecrawlBusyThread(Switchboard.getSwitchboard(), recrawlQuery, inclerrdoc), 1000);
+                		recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
                     
-	                /* store this call as an api call for easy scheduling possibility */
-					if(sb.tables != null) {
-						/* We avoid creating a duplicate of any already recorded API call with the same parameters */
-						final Row lastExecutedCall = WorkTables
-								.selectLastExecutedApiCall(IndexReIndexMonitor_p.SERVLET_NAME, post, sb);
-						if (lastExecutedCall != null && !post.containsKey(WorkTables.TABLE_API_COL_APICALL_PK)) {
-							byte[] lastExecutedCallPk = lastExecutedCall.getPK();
-							if (lastExecutedCallPk != null) {
-								post.add(WorkTables.TABLE_API_COL_APICALL_PK, UTF8.String(lastExecutedCallPk));
-							}
-						}
-						sb.tables.recordAPICall(post, IndexReIndexMonitor_p.SERVLET_NAME, WorkTables.TABLE_API_TYPE_CRAWLER,
-								"Recrawl documents matching selection query : " + recrawlQuery);
-					}
-                    
-                } else if(post.containsKey("simulateRecrawl") && sb.index.fulltext().connectedLocalSolr()) {
-                    SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
-                    if (!solrConnector.isClosed()) {
-                        try {
-                            // query all or only httpstatus=200 depending on includefailed flag
-                            final long count = solrConnector.getCountByQuery(RecrawlBusyThread.buildSelectionQuery(recrawlQuery, inclerrdoc));
-                            prop.put("recrawljobrunning_simulationResult", 1);
-                            prop.put("recrawljobrunning_simulationResult_docCount", count);
-                        } catch (final IOException e) {
-                        	prop.put("recrawljobrunning_simulationResult", 2);
-                        	ConcurrentLog.logException(e);
-                        }
-                    } else {
-                    	prop.put("recrawljobrunning_simulationResult", 3);
-                    }
-                } else if(post.containsKey("recrawlDefaults")) {
+                		/* store this call as an api call for easy scheduling possibility */
+                		if(sb.tables != null) {
+                			/* We avoid creating a duplicate of any already recorded API call with the same parameters */
+                			final Row lastExecutedCall = WorkTables
+                					.selectLastExecutedApiCall(IndexReIndexMonitor_p.SERVLET_NAME, post, sb);
+                			if (lastExecutedCall != null && !post.containsKey(WorkTables.TABLE_API_COL_APICALL_PK)) {
+                				byte[] lastExecutedCallPk = lastExecutedCall.getPK();
+                				if (lastExecutedCallPk != null) {
+                					post.add(WorkTables.TABLE_API_COL_APICALL_PK, UTF8.String(lastExecutedCallPk));
+                				}
+                			}
+                			sb.tables.recordAPICall(post, IndexReIndexMonitor_p.SERVLET_NAME, WorkTables.TABLE_API_TYPE_CRAWLER,
+                					"Recrawl documents matching selection query : " + recrawlQuery);
+                		}
+                	} else if(post.containsKey("simulateRecrawl")) {
+                		final SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
+                		if (!solrConnector.isClosed()) {
+                			try {
+                				// query all or only httpstatus=200 depending on includefailed flag
+                				final String finalQuery = RecrawlBusyThread.buildSelectionQuery(recrawlQuery, inclerrdoc);
+                				final long count = solrConnector.getCountByQuery(finalQuery);
+                				prop.put("recrawljobrunning_simulationResult", 1);
+                				prop.put("recrawljobrunning_simulationResult_docCount", count);
+                				if(count > 0) {
+                					/* Got some results : add a link to the related solr select URL for easily browsing results */
+                					final int maxRows = 10;
+                					final String solrSelectUrl = genLocalSolrSelectUrl(finalQuery, maxRows);
+                					prop.put("recrawljobrunning_simulationResult_showSelectLink", 1);
+                					prop.put("recrawljobrunning_simulationResult_showSelectLink_rows", maxRows);
+                					prop.put("recrawljobrunning_simulationResult_showSelectLink_browseSelectedUrl", solrSelectUrl);
+                				} else {
+                					prop.put("recrawljobrunning_simulationResult_showSelectLink", 0);
+                				}
+                			} catch (final IOException e) {
+                				prop.put("recrawljobrunning_simulationResult", 2);
+                				ConcurrentLog.logException(e);
+                			}
+                		} else {
+                			prop.put("recrawljobrunning_simulationResult", 3);
+                		}
+                	}
+                }
+                
+                if(post.containsKey("recrawlDefaults")) {
                 	recrawlQuery = RecrawlBusyThread.DEFAULT_QUERY;
                     inclerrdoc = RecrawlBusyThread.DEFAULT_INCLUDE_FAILED;
                 }
@@ -208,6 +228,23 @@ public class IndexReIndexMonitor_p {
         // return rewrite properties
         return prop;
     }
+
+	/**
+	 * @param query
+	 *            the Solr selection query. Must not be null and not
+	 *            percent-encoded.
+	 * @return the URL of the select query targetting the local Solr
+	 */
+	protected static String genLocalSolrSelectUrl(final String query, final int maxRows) {
+		String urlEncodedQUery;
+		try {
+			urlEncodedQUery = URLEncoder.encode(query, StandardCharsets.UTF_8.name());
+		} catch (final UnsupportedEncodingException e) {
+			// should not happen as UTF-8 must be supported on any Java platform
+			urlEncodedQUery = query;
+		}
+		return "solr/select?core=collection1&wt=html&start=0&rows=" + maxRows + "&q=" + urlEncodedQUery;
+	}
 
     /**
      * Write information on the eventual currently running or last recrawl job terminated
