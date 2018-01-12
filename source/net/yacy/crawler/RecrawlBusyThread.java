@@ -80,10 +80,22 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     /** Total number of URLs added to the crawler queue for recrawl */
     private long recrawledUrlsCount = 0;
     
+    /** Total number of URLs rejected for some reason by the crawl stacker or the crawler queue */
+    private long rejectedUrlsCount = 0;
+    
+    /** Total number of malformed URLs found */
+    private long malformedUrlsCount = 0;
+    
+    /** Total number of malformed URLs deleted from index */
+    private long malformedUrlsDeletedCount = 0;
+    
     private String solrSortBy;
     
     /** Set to true when more URLs are still to be processed */
     private boolean moreToRecrawl = true;
+    
+    /** True when the job terminated early because an error occurred when requesting the Solr index, or the Solr index was closed */
+    private boolean terminatedBySolrFailure = false;
     
     /** The recrawl job start time */
     private LocalDateTime startTime;
@@ -173,13 +185,14 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         if (!this.urlstack.isEmpty()) {
             final CrawlProfile profile = sb.crawler.defaultTextSnippetGlobalProfile;
 
-            for (DigestURL url : this.urlstack) {
+            for (final DigestURL url : this.urlstack) {
                 final Request request = sb.loader.request(url, true, true);
                 String acceptedError = sb.crawlStacker.checkAcceptanceChangeable(url, profile, 0);
                 if (!includefailed && acceptedError == null) { // skip check if failed docs to be included
                     acceptedError = sb.crawlStacker.checkAcceptanceInitially(url, profile);
                 }
                 if (acceptedError != null) {
+                	this.rejectedUrlsCount++;
                     ConcurrentLog.info(THREAD_NAME, "addToCrawler: cannot load " + url.toNormalform(true) + ": " + acceptedError);
                     continue;
                 }
@@ -187,6 +200,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
                 s = sb.crawlQueues.noticeURL.push(NoticedURL.StackType.LOCAL, request, profile, sb.robots);
 
                 if (s != null) {
+                	this.rejectedUrlsCount++;
                     ConcurrentLog.info(THREAD_NAME, "addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
                 } else {
                     added++;
@@ -248,9 +262,10 @@ public class RecrawlBusyThread extends AbstractBusyThread {
             return true;
         }
         SolrDocumentList docList = null;
-        SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
+        final SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
         if (solrConnector.isClosed()) {
         	this.urlsToRecrawl = 0;
+        	this.terminatedBySolrFailure = true;
         	return false;
         }
         
@@ -261,17 +276,20 @@ public class RecrawlBusyThread extends AbstractBusyThread {
             this.urlsToRecrawl = docList.getNumFound();
         } catch (final Throwable e) {
         	this.urlsToRecrawl = 0;
+        	this.terminatedBySolrFailure = true;
         }
 
         if (docList != null) {
             for (final SolrDocument doc : docList) {
                 try {
                     this.urlstack.add(new DigestURL((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName())));
-                } catch (MalformedURLException ex) {
+                } catch (final MalformedURLException ex) {
+                	this.malformedUrlsCount++;
                     try { // if index entry hasn't a valid url (useless), delete it
                         solrConnector.deleteById((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                        this.malformedUrlsDeletedCount++;
                         ConcurrentLog.severe(THREAD_NAME, "deleted index document with invalid url " + (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
-                    } catch (IOException ex1) {
+                    } catch (final IOException ex1) {
                         ConcurrentLog.severe(THREAD_NAME, ex1.getMessage());
                     }
                 }
@@ -297,11 +315,41 @@ public class RecrawlBusyThread extends AbstractBusyThread {
 		return this.urlsToRecrawl;
 	}
 
-    /**
-     * @return The total number of URLs added to the crawler queue for recrawl
-     */
+	/**
+	 * @return The total number of URLs added to the crawler queue for recrawl
+	 */
     public long getRecrawledUrlsCount() {
 		return this.recrawledUrlsCount;
+	}
+    
+	/**
+	 * @return The total number of URLs rejected for some reason by the crawl
+	 *         stacker or the crawler queue
+	 */
+    public long getRejectedUrlsCount() {
+		return this.rejectedUrlsCount;
+	}
+
+	/**
+	 * @return The total number of malformed URLs found
+	 */
+    public long getMalformedUrlsCount() {
+		return this.malformedUrlsCount;
+	}
+    
+	/**
+	 * @return The total number of malformed URLs deleted from index
+	 */
+    public long getMalformedUrlsDeletedCount() {
+		return this.malformedUrlsDeletedCount;
+	}
+    
+	/**
+	 * @return true when the job terminated early because an error occurred when
+	 *         requesting the Solr index, or the Solr index was closed
+	 */
+    public boolean isTerminatedBySolrFailure() {
+		return this.terminatedBySolrFailure;
 	}
 
     /** @return The recrawl job start time */

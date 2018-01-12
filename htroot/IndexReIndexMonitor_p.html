@@ -132,11 +132,16 @@
           				<h3 class="panel-title">#(jobStatus)#::::Last #(/jobStatus)#Re-Crawl job report</h3>
           			</div>
           			<div class="panel-body">
+          				#(error)#::<div class="alert alert-danger" role="alert">The job terminated early due to an error when requesting the Solr index.</div>#(/error)#
 	          			<table class="table">
           					<tbody>
 	          				    <tr>
           							<th scope="row">Status</th>
           							<td>#(jobStatus)#Running::Shutdown in progress::Terminated#(/jobStatus)#</td>
+          						</tr>
+	          				    <tr>
+          							<th scope="row">Query</th>
+          							<td>#[recrawlquerytext]#</td>
           						</tr>
           						<tr>
 	          						<th scope="row">Start time</th>
@@ -147,8 +152,16 @@
           							<td>#[endTime]#</td>
           						</tr>
           						<tr>
-	          						<th scope="row">Count</th>
-          							<td>#[recrawledUrlsCount]#  URLs added to the crawler queue for recrawl</td>
+	          						<th scope="row" title="URLs added to the crawler queue for recrawl">Recrawled URLs</th>
+          							<td>#[recrawledUrlsCount]#</td>
+          						</tr>
+          						<tr>
+	          						<th scope="row" title="URLs rejected for some reason by the crawl stacker or the crawler queue. Please check the logs for more details.">Rejected URLs</th>
+          							<td>#[rejectedUrlsCount]#</td>
+          						</tr>
+          						<tr>
+	          						<th scope="row">Malformed URLs</th>
+          							<td title="#[malformedUrlsDeletedCount]# deleted from the index">#[malformedUrlsCount]#</td>
           						</tr>
           					</tbody>
           				</table>

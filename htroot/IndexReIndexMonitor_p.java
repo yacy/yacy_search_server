@@ -257,6 +257,24 @@ public class IndexReIndexMonitor_p {
 			final serverObjects prop, final RecrawlBusyThread recrawlbt) {
 		if (recrawlbt != null) {
 			prop.put("recrawlReport", 1);
+			
+			prop.put("recrawlReport_error", recrawlbt.isTerminatedBySolrFailure());
+			
+			
+			int jobStatus;
+			if(recrawlbt.isAlive()) {
+				if(recrawlbt.shutdownInProgress()) {
+					jobStatus = 1; // Shutdown in progress
+				} else {
+					jobStatus = 0; // Running
+				}
+			} else {
+				jobStatus = 2; // Terminated
+			}
+			prop.put("recrawlReport_jobStatus", jobStatus);
+			
+			prop.put("recrawlReport_recrawlquerytext", recrawlbt.getQuery());
+			
 			Locale formatLocale;
 			if (sb != null) {
 				String lng = sb.getConfig("locale.language", Locale.ENGLISH.getLanguage());
@@ -272,20 +290,12 @@ public class IndexReIndexMonitor_p {
 			}
 			final DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM)
 					.withLocale(formatLocale);
-			int jobStatus;
-			if(recrawlbt.isAlive()) {
-				if(recrawlbt.shutdownInProgress()) {
-					jobStatus = 1; // Shutdown in progress
-				} else {
-					jobStatus = 0; // Running
-				}
-			} else {
-				jobStatus = 2; // Terminated
-			}
-			prop.put("recrawlReport_jobStatus", jobStatus);
 			prop.put("recrawlReport_startTime", formatDateTime(formatter, recrawlbt.getStartTime()));
 			prop.put("recrawlReport_endTime", formatDateTime(formatter, recrawlbt.getEndTime()));
 			prop.put("recrawlReport_recrawledUrlsCount", recrawlbt.getRecrawledUrlsCount());
+			prop.put("recrawlReport_rejectedUrlsCount", recrawlbt.getRejectedUrlsCount());
+			prop.put("recrawlReport_malformedUrlsCount", recrawlbt.getMalformedUrlsCount());
+			prop.put("recrawlReport_malformedUrlsDeletedCount", recrawlbt.getMalformedUrlsDeletedCount());
 		} else {
 			prop.put("recrawlReport", 0);
 		}
