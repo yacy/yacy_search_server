@@ -87,13 +87,15 @@ public final class CrawlSwitchboard {
     public static final String DBFILE_ACTIVE_CRAWL_PROFILES = "crawlProfilesActive1.heap";
     public static final String DBFILE_PASSIVE_CRAWL_PROFILES = "crawlProfilesPassive1.heap";
 
-    public static final long CRAWL_PROFILE_PROXY_RECRAWL_CYCLE = 60L * 24L;
-    public static final long CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
-    public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
-    public static final long CRAWL_PROFILE_GREEDY_LEARNING_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
-    public static final long CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
-    public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
-    public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L;
+    // Default time cycle in minutes before an indexed URL by a given crawl profile can be accepted for recrawl */
+    
+    public static final long CRAWL_PROFILE_PROXY_RECRAWL_CYCLE = 60L * 24L; // one day
+    public static final long CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L; // 30 days
+    public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L; // 30 days
+    public static final long CRAWL_PROFILE_GREEDY_LEARNING_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L; // 30 days
+    public static final long CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L; // 30 days
+    public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L; // 30 days
+    public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L; // 30 days
 
     private final ConcurrentLog log;
     private MapHeap profilesActiveCrawls;
