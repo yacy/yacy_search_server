@@ -66,6 +66,9 @@ public final class CrawlStacker {
     public static String ERROR_NO_MATCH_MUST_MATCH_FILTER = "url does not match must-match filter ";
     public static String ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER = "url matches must-not-match filter ";
     
+    /** Crawl reject reason prefix having specific processing */
+    public static final String CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX = "double in";
+    
     private final static ConcurrentLog log = new ConcurrentLog("STACKCRAWL");
     
     private final RobotsTxt robots;
@@ -135,7 +138,7 @@ public final class CrawlStacker {
             final String rejectReason = stackCrawl(entry);
 
             // if the url was rejected we store it into the error URL db
-            if (rejectReason != null && !rejectReason.startsWith("double in")) {
+            if (rejectReason != null && !rejectReason.startsWith(CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX)) {
                 final CrawlProfile profile = this.crawler.get(UTF8.getBytes(entry.profileHandle()));
                 this.nextQueue.errorURL.push(entry.url(), entry.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
             }
@@ -411,7 +414,7 @@ public final class CrawlStacker {
         // check if the url is double registered
         final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
         if (dbocc != null) {
-            return "double in: " + dbocc.name();
+            return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": " + dbocc.name();
         }
         String urlhash = ASCII.String(url.hash());
         LoadTimeURL oldEntry = null;
@@ -452,7 +455,7 @@ public final class CrawlStacker {
                 CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                     ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
         } else {
-            return "double in: local index, oldDate = " + ISO8601Formatter.FORMATTER.format(new Date(oldDate));
+            return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": local index, oldDate = " + ISO8601Formatter.FORMATTER.format(new Date(oldDate));
         }
 
         return null;

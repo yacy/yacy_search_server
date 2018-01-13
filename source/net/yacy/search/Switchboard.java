@@ -2971,7 +2971,7 @@ public final class Switchboard extends serverSwitch {
                     newDocs.add(doc);
                 } else {
                     // we consider this as fail urls to have a tracking of the problem
-                    if (rejectReason != null && !rejectReason.startsWith("double in")) {
+                    if (rejectReason != null && !rejectReason.startsWith(CrawlStacker.CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX)) {
                         this.crawlStacker.nextQueue.errorURL.push(response.url(), response.depth(), response.profile(), FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
                     }
                 }
