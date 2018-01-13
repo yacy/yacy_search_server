@@ -455,7 +455,9 @@ public final class CrawlStacker {
                 CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                     ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
         } else {
-            return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": local index, oldDate = " + ISO8601Formatter.FORMATTER.format(new Date(oldDate));
+			return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": local index, recrawl rejected. Document date = "
+					+ ISO8601Formatter.FORMATTER.format(new Date(oldDate)) + " is not older than crawl profile recrawl minimum date = "
+					+ ISO8601Formatter.FORMATTER.format(new Date(profile.recrawlIfOlder()));
         }
 
         return null;
