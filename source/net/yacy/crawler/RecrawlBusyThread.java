@@ -34,6 +34,8 @@ import org.apache.solr.common.SolrDocumentList;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.federate.yacy.CacheStrategy;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.NoticedURL;
@@ -183,7 +185,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         int added = 0;
 
         if (!this.urlstack.isEmpty()) {
-            final CrawlProfile profile = sb.crawler.defaultTextSnippetGlobalProfile;
+            final CrawlProfile profile = sb.crawler.defaultRecrawlJobProfile;
 
             for (final DigestURL url : this.urlstack) {
                 final Request request = sb.loader.request(url, true, true);
@@ -302,6 +304,28 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         }
         return true;
     }
+    
+	/**
+	 * @return a new default CrawlProfile instance to be used for recrawl jobs.
+	 */
+	public static CrawlProfile buildDefaultCrawlProfile() {
+		CrawlProfile profile = new CrawlProfile(CrawlSwitchboard.CRAWL_PROFILE_RECRAWL_JOB, CrawlProfile.MATCH_ALL_STRING, // crawlerUrlMustMatch
+				CrawlProfile.MATCH_NEVER_STRING, // crawlerUrlMustNotMatch
+				CrawlProfile.MATCH_ALL_STRING, // crawlerIpMustMatch
+				CrawlProfile.MATCH_NEVER_STRING, // crawlerIpMustNotMatch
+				CrawlProfile.MATCH_NEVER_STRING, // crawlerCountryMustMatch
+				CrawlProfile.MATCH_NEVER_STRING, // crawlerNoDepthLimitMatch
+				CrawlProfile.MATCH_ALL_STRING, // indexUrlMustMatch
+				CrawlProfile.MATCH_NEVER_STRING, // indexUrlMustNotMatch
+				CrawlProfile.MATCH_ALL_STRING, // indexContentMustMatch
+				CrawlProfile.MATCH_NEVER_STRING, // indexContentMustNotMatch
+				0, false, CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_RECRAWL_JOB_RECRAWL_CYCLE), -1,
+				true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
+				true, true, true, false, -1, false, true, CrawlProfile.MATCH_NEVER_STRING, CacheStrategy.IFFRESH,
+				"robot_" + CrawlSwitchboard.CRAWL_PROFILE_RECRAWL_JOB,
+				ClientIdentification.yacyInternetCrawlerAgentName, null, null, 0);
+		return profile;
+	}
 
     @Override
     public int getJobCount() {

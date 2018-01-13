@@ -61,6 +61,7 @@ public final class CrawlSwitchboard {
 	
     public static final String CRAWL_PROFILE_AUTOCRAWL_DEEP = "autocrawlDeep";
     public static final String CRAWL_PROFILE_AUTOCRAWL_SHALLOW = "autocrawlShallow";
+    public static final String CRAWL_PROFILE_RECRAWL_JOB = "recrawlJob";
     public static final String CRAWL_PROFILE_PROXY = "proxy";
     public static final String CRAWL_PROFILE_REMOTE = "remote";
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_TEXT = "snippetLocalText";
@@ -88,7 +89,13 @@ public final class CrawlSwitchboard {
     public static final String DBFILE_PASSIVE_CRAWL_PROFILES = "crawlProfilesPassive1.heap";
 
     // Default time cycle in minutes before an indexed URL by a given crawl profile can be accepted for recrawl */
-    
+
+	/**
+	 * The default recrawl time cycle in minutes for recrawl jobs. The recrawl date
+	 * limit can be set up by the recrawl job selection query, but a default limit
+	 * prevent unwanted overload on targets)
+	 */
+    public static final long CRAWL_PROFILE_RECRAWL_JOB_RECRAWL_CYCLE = 60L; // on hour
     public static final long CRAWL_PROFILE_PROXY_RECRAWL_CYCLE = 60L * 24L; // one day
     public static final long CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L; // 30 days
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L; // 30 days
@@ -104,7 +111,7 @@ public final class CrawlSwitchboard {
     private final Map<String, RowHandleSet> profilesActiveCrawlsCounter;
     public CrawlProfile defaultProxyProfile, defaultRemoteProfile, defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
     public CrawlProfile defaultTextGreedyLearningProfile, defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile, defaultSurrogateProfile;
-    public CrawlProfile defaultAutocrawlDeepProfile, defaultAutocrawlShallowProfile;
+    public CrawlProfile defaultAutocrawlDeepProfile, defaultAutocrawlShallowProfile, defaultRecrawlJobProfile;
     private Map<String, CrawlProfile> defaultPushProfiles; // for each collection one profile
     private final File queuesRoot;
     private Switchboard switchboard;
@@ -466,6 +473,13 @@ public final class CrawlSwitchboard {
             UTF8.getBytes(this.defaultTextSnippetGlobalProfile.handle()),
             this.defaultTextSnippetGlobalProfile);
         this.defaultTextSnippetGlobalProfile.setCacheStrategy(CacheStrategy.IFEXIST);
+        
+        // generate new default entry for RecrawlBusyThread 
+        this.defaultRecrawlJobProfile = RecrawlBusyThread.buildDefaultCrawlProfile();
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultRecrawlJobProfile.handle()),
+            this.defaultRecrawlJobProfile);
+        
         // generate new default entry for greedy learning
         this.defaultTextGreedyLearningProfile =
             new CrawlProfile(
