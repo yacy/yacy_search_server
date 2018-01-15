@@ -195,6 +195,7 @@ import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.kelondro.workflow.OneTimeBusyThread;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.kelondro.workflow.WorkflowTask;
 import net.yacy.kelondro.workflow.WorkflowThread;
 import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Dispatcher;
@@ -1006,8 +1007,14 @@ public final class Switchboard extends serverSwitch {
                 new String[] {
                     "RWI/Cache/Collections"
                 },
-                this,
-                "storeDocumentIndex",
+                new WorkflowTask<IndexingQueueEntry>() {
+
+					@Override
+					public IndexingQueueEntry process(final IndexingQueueEntry in) throws Exception {
+						storeDocumentIndex(in);
+						return null;
+					}
+				},
                 2,
                 null,
                 1);
@@ -1018,8 +1025,13 @@ public final class Switchboard extends serverSwitch {
                 new String[] {
                     "storeDocumentIndex"
                 },
-                this,
-                "webStructureAnalysis",
+                new WorkflowTask<IndexingQueueEntry>() {
+
+					@Override
+					public IndexingQueueEntry process(final IndexingQueueEntry in) throws Exception {
+						return webStructureAnalysis(in);
+					}
+				},
                 WorkflowProcessor.availableCPU + 1,
                 this.indexingStorageProcessor,
                 WorkflowProcessor.availableCPU);
@@ -1030,8 +1042,13 @@ public final class Switchboard extends serverSwitch {
                 new String[] {
                     "webStructureAnalysis"
                 },
-                this,
-                "condenseDocument",
+                new WorkflowTask<IndexingQueueEntry>() {
+
+					@Override
+					public IndexingQueueEntry process(final IndexingQueueEntry in) throws Exception {
+						return condenseDocument(in);
+					}
+				},
                 WorkflowProcessor.availableCPU + 1,
                 this.indexingAnalysisProcessor,
                 WorkflowProcessor.availableCPU);
@@ -1042,8 +1059,13 @@ public final class Switchboard extends serverSwitch {
                 new String[] {
                     "condenseDocument", "CrawlStacker"
                 },
-                this,
-                "parseDocument",
+                new WorkflowTask<IndexingQueueEntry>() {
+
+					@Override
+					public IndexingQueueEntry process(final IndexingQueueEntry in) throws Exception {
+						return parseDocument(in);
+					}
+				},
                 Math.max(20, WorkflowProcessor.availableCPU * 2), // it may happen that this is filled with new files from the search process. That means there should be enough place for two result pages
                 this.indexingCondensementProcessor,
                 WorkflowProcessor.availableCPU);
@@ -2890,8 +2912,6 @@ public final class Switchboard extends serverSwitch {
 
     /**
      * Parse a response to produce a new document to add to the index.
-     * <strong>Important :</strong> this method is called using reflection as a Workflow process and must therefore remain public.
-     * @param in an indexing workflow entry containing a response to parse
      */
     public IndexingQueueEntry parseDocument(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_PARSING);
@@ -3071,10 +3091,11 @@ public final class Switchboard extends serverSwitch {
         return documents;
     }
 
-    /**
-     * <strong>Important :</strong> this method is called using reflection as a Workflow process and must therefore remain public.
-     * @param in an indexing workflow entry containing a response and the related parsed document(s)
-     */
+	/**
+	 * This does a structural analysis of plain texts: markup of headlines, slicing
+	 * into phrases (i.e. sentences), markup with position, counting of words,
+	 * calculation of term frequency.
+	 */
     public IndexingQueueEntry condenseDocument(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
         CrawlProfile profile = in.queueEntry.profile();
@@ -3150,9 +3171,7 @@ public final class Switchboard extends serverSwitch {
     }
 
     /**
-     * Perform web structure analysis on parsed documents and update the web structure graph. 
-     * <strong>Important :</strong> this method is called using reflection as a Workflow process and must therefore remain public.
-     * @param in an indexing workflow entry containing parsed document(s)
+     * Perform web structure analysis on parsed documents and update the web structure graph.
      */
     public IndexingQueueEntry webStructureAnalysis(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_STRUCTUREANALYSIS);
@@ -3166,11 +3185,9 @@ public final class Switchboard extends serverSwitch {
         }
         return in;
     }
-
+    
     /**
      * Store a new entry to the local index.
-     * <strong>Important :</strong> this method is called using reflection as a Workflow process and must therefore remain public.
-     * @param in an indexing workflow entry containing parsed document(s) and a condenser instance
      */
     public void storeDocumentIndex(final IndexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_INDEXSTORAGE);

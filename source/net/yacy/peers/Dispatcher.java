@@ -44,11 +44,13 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.kelondro.workflow.WorkflowTask;
+import net.yacy.peers.Transmission.Chunk;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 
-public class Dispatcher {
+public class Dispatcher implements WorkflowTask<Transmission.Chunk> {
 
     /**
      * the dispatcher class accumulates indexContainerCache objects before they are transfered
@@ -123,7 +125,7 @@ public class Dispatcher {
                 "transferDocumentIndex",
                 "This is the RWI transmission process",
                 new String[]{"RWI/Cache/Collections"},
-                this, "transferDocumentIndex", concurrentSender * 3, null, concurrentSender);
+                this, concurrentSender * 3, null, concurrentSender);
     }
 
     public int bufferSize() {
@@ -350,15 +352,16 @@ public class Dispatcher {
         this.indexingTransmissionProcessor.enQueue(chunk);
         return true;
     }
+    
+    @Override
+    public Chunk process(final Transmission.Chunk chunk) throws Exception {
+    	return transferDocumentIndex(chunk);
+    }
 
     /**
-     * transfer job: this method is called using reflection from the switchboard
-     * the method is called as a Workflow process. That means it is always called whenever
-     * a job is placed in the workflow queue. This happens in dequeueContainer()
-     * @param chunk
-     * @return
+     * Transfer job implementation
      */
-    public Transmission.Chunk transferDocumentIndex(final Transmission.Chunk chunk) {
+    private Transmission.Chunk transferDocumentIndex(final Transmission.Chunk chunk) {
 
         // try to keep the system healthy; sleep as long as System load is too high
         while (Protocol.metadataRetrievalRunning.get() > 0) try {Thread.sleep(1000);} catch (InterruptedException e) {break;}

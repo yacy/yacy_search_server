@@ -55,13 +55,14 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.kelondro.workflow.WorkflowTask;
 import net.yacy.peers.SeedDB;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 
-public final class CrawlStacker {
+public final class CrawlStacker implements WorkflowTask<Request>{
     
     public static String ERROR_NO_MATCH_MUST_MATCH_FILTER = "url does not match must-match filter ";
     public static String ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER = "url matches must-not-match filter ";
@@ -99,7 +100,7 @@ public final class CrawlStacker {
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
         this.domainList = domainList;
-        this.requestQueue = new WorkflowProcessor<Request>("CrawlStacker", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, WorkflowProcessor.availableCPU);
+        this.requestQueue = new WorkflowProcessor<Request>("CrawlStacker", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, 10000, null, WorkflowProcessor.availableCPU);
         CrawlStacker.log.info("STACKCRAWL thread initialized.");
     }
 
@@ -130,7 +131,8 @@ public final class CrawlStacker {
         clear();
     }
 
-    public Request job(final Request entry) {
+    @Override
+    public Request process(final Request entry) {
         // this is the method that is called by the busy thread from outside
         if (entry == null) return null;
         
