@@ -1,48 +1,34 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+<!DOCTYPE html>
+<html lang="en">
     <head>
         <title>YaCy '#[clientname]#': Field Re-Indexing</title>
         #%env/templates/metas.template%#
     </head>
     <body id="IndexReindexMonitor">
-
         #%env/templates/header.template%#
         #%env/templates/submenuIndexControl.template%#
+      <div class="container-fluid">
+       <div class="row">
         <h2>Field Re-Indexing</h2>
         <p>In case that an index schema of the embedded/local index has changed, all documents with missing field entries can be indexed again with a reindex job.</p>
-        <form action="IndexReIndexMonitor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
-          <table><tr valign="top"><td>
+        <form action="IndexReIndexMonitor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" class="col-md-10 col-lg-6">
             <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
-            <fieldset>                 
-                <table>
-                    <tr>
-                        <td>Documents in current queue</td>
-                        <td>#[querysize]#</td>
-                        <td>#(reindexjobrunning)#::<input type="submit" value="refresh page" class="btn btn-success"/>#(/reindexjobrunning)#</td>
-                    </tr>
-                    <tr>
-                        <td>Documents processed</td>
-                        <td>#[docsprocessed]#</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>current select query </td>
-                        <td>#[currentselectquery]#</td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>&nbsp;</td>
-                        <td></td>
-                        <td></td>
-                    </tr>                    
-                </table>
+            <fieldset>
+            	<dl>
+                	<dt>Documents in current queue</dt>
+                	<dd>#[querysize]#</dd>
+                	<dt>Documents processed</dt>
+                	<dd>#[docsprocessed]#</dd>
+                	<dt>current select query </dt>
+                	<dd>#[currentselectquery]#</dd>
+                </dl>
+                #(reindexjobrunning)#::<input type="submit" value="refresh page" class="btn btn-success"/>#(/reindexjobrunning)#
                 #(reindexjobrunning)#                
                 <input type="submit" name="reindexnow" value="start reindex job now" class="btn btn-primary"/>
                 ::<input type="submit" name="stopreindex" value="stop reindexing" class="btn btn-danger"/>
                 #(/reindexjobrunning)# 
                 <p class="info">#[infomessage]#</p>                            
             </fieldset>
-          </td><td>
             #(reindexjobrunning)#::
             <fieldset><legend>Remaining field list</legend>
               <p>reindex documents containing these fields: </p>
@@ -56,17 +42,15 @@
               </table>
             </fieldset>
             #(/reindexjobrunning)#
-          </td></tr></table>
-        </form>    
+        </form>
+      </div>
+      <div class="row">
         <h2>Re-Crawl Index Documents</h2>
         <p>Searches the local index and selects documents to add to the crawler (recrawl the document).
            This runs transparent as background job. Documents are added to the crawler only if no other crawls are active
            and are added in small chunks.</p>
-          <div class="container-fluid">
-           <div class="row">
          <form action="IndexReIndexMonitor_p.html?setup=recrawljob" method="post" enctype="multipart/form-data" accept-charset="UTF-8" class="col-md-10 col-lg-6">
           <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
-          <table><tr valign="top"><td>
 
           #(recrawljobrunning)#
            <fieldset>
@@ -94,35 +78,23 @@
            </fieldset>::
           #(/recrawljobrunning)#
 
-          </td>
-          <td>
           #(recrawljobrunning)#::
             <fieldset><legend>Re-Crawl Query Details</legend>
-              <table>
-                <tr>
-                  <td>Documents to process</td><td>#[docCount]#</td>
-                </tr>
-                <tr>
-                  <td>Current Query</td><td>#[recrawlquerytext]#</td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td> </td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td> </td>
-                </tr>                  
-                <tr>
-                  <td>Edit Solr Query</td><td><input type="text" name="recrawlquerytext" size="40" value="#[recrawlquerytext]#" /><input type="submit" name="updquery" value="update" class="btn btn-sm btn-default"/></td>
-                </tr>
-                <tr>
-                  <td>include failed urls</td><td><input type="checkbox" name="includefailedurls" onchange="this.form.submit()" #(includefailedurls)#::checked="checked"#(/includefailedurls)# /></td>
-                </tr>                  
-              </table>
+              <dl>
+                <dt>Documents to process</dt>
+                <dd>#[docCount]#</dd>
+                <dt>Current Query</dt>
+                <dd>#[recrawlquerytext]#</dd>
+              </dl>
+              <div class="form-group">
+              	<label>Edit Solr Query <input type="text" name="recrawlquerytext" size="40" value="#[recrawlquerytext]#" /></label><input type="submit" name="updquery" value="update" class="btn btn-sm btn-default"/>
+              </div>
+              <div class="form-group">
+              	<label>Include failed urls <input type="checkbox" name="includefailedurls" onchange="this.form.submit()" #(includefailedurls)#::checked="checked"#(/includefailedurls)# /></label>
+              </div>
               <input type="submit" name="stoprecrawl" value="stop recrawl job" class="btn btn-danger"/>
             </fieldset>
           #(/recrawljobrunning)#
-          </td>
-          </tr></table>
         </form>
         
            #(recrawlReport)#::
