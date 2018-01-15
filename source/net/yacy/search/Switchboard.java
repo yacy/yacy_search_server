@@ -2533,6 +2533,10 @@ public final class Switchboard extends serverSwitch {
                         continue;
                     }
                     boolean insert = false;
+                    if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_RECRAWL_JOB) ) {
+                        selentry.put(CrawlProfile.CrawlAttribute.RECRAWL_IF_OLDER.key, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_RECRAWL_JOB_RECRAWL_CYCLE).getTime()));
+                        insert = true;
+                    }
                     if ( selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ) {
                         selentry.put(CrawlProfile.CrawlAttribute.RECRAWL_IF_OLDER.key, Long.toString(CrawlProfile.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE).getTime()));
                         insert = true;
