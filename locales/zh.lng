@@ -21,6 +21,931 @@
 <!-- lang -->default(english)==Chinese
 <!-- author -->==lofyer
 <!-- maintainer -->==lofyer@gmail.com
+Simple Editor==简单编辑器
+Download Language File==下载语言文件
+to add untranslated text==用于添加仍未翻译文本
+Supported formats are the internal language file (extension .lng) or XLIFF (extension .xlf) format.==支持的格式是内部语言文件（扩展名.lng）或XLIFF（扩展名.xlf）格式。
+#-----------------------------
+#File: env/templates/submenuTargetAnalysis.template
+#---------------------------
+Target Analysis==目标分析
+Mass Crawl Check==大量爬行检查
+Regex Test==正则表达式测试
+#-----------------------------
+
+#File: env/templates/submenuConfig.template
+#---------------------------
+System Administration==系统管理
+Viewer and administration for database tables==数据库表的查看与管理
+Performance Settings of Busy Queues==繁忙队列的性能设置
+#-----------------------------
+
+#File: env/templates/submenuDesign.template
+#---------------------------
+>Language<==>语言<
+Search Page Layout==搜索页面布局
+Design==设计
+>Appearance<==>外观<
+#-----------------------------
+
+#File: yacysearchtrailer.html
+#---------------------------
+>Provider==>提供者
+>Filetype==>文件类型
+>Language==>语言
+&nbsp;&nbsp;&nbsp;&nbsp;Stealth&nbsp;Mode&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;&nbsp;隐身&nbsp;模式&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;Peer-to-Peer&nbsp;&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;P2P&nbsp;&nbsp;&nbsp;&nbsp;
+"Privacy"=="隐私"
+Context Ranking==上下文排序
+Sort by Date==按日期排序
+Documents==文件
+Images==图像
+>Documents==>文件
+>Images==>图像
+"Your search is done using peers in the YaCy P2P network."=="您的搜索是靠YaCy P2P网络中的小伙伴完成的。"
+"You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used."=="您可以切换到'隐形模式'，这将关闭P2P，给你完全的隐私。期待较少的结果，因为那时只有您自己的搜索索引被使用。"
+"Your search is done using only your own peer, locally."=="你的搜索是靠在本地的YaCy端完成的。"
+"You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network."=="您可以切换到'P2P'，这将让您的搜索使用YaCy网络中的其他小伙伴的YaCy端。"
+"Your search is done using only your own peer=="你的搜索是靠在本地的YaCy端完成的。"
+"You can switch to 'Stealth Mode' which will switch off P2P=="您可以切换到'隐形模式'，这将关闭P2P，给你完全的隐私。期待较少的结果，因为那时只有您自己的搜索索引被使用。"
+#-----------------------------
+
+#File: CookieMonitorIncoming_p.html
+#---------------------------
+>Cookie<==>缓存<
+#-----------------------------
+
+#File: CrawlCheck_p.html
+#---------------------------
+Crawl Check==爬行检查
+This pages gives you an analysis about the possible success for a web crawl on given addresses.==通过本页面，您可以分析在特定地址上进行网络爬取的可能性。
+List of possible crawl start URLs==可行的起始抓行网址列表
+"Check given urls"=="检查给定的网址"
+>Analysis<==>分析<
+>Access<==>访问<
+>Robots<==>机器人<
+>Crawl-Delay<==>爬取延时<
+>Sitemap<==>网页<
+#-----------------------------
+
+#File: env/templates/submenuRanking.template
+#---------------------------
+Solr Ranking Config==Solr排名配置
+>Heuristics<==>启发式<
+Ranking and Heuristics==排名与启发式
+RWI Ranking Config==RWI排名配置
+#-----------------------------
+
+#File: ConfigPortal.html
+#---------------------------
+Enable Search for Everyone?==对所有人启用搜索？
+Search is available for everyone==搜索适用于所有人
+Only the administator is allowed to search==只有管理员被允许搜索
+Snippet Fetch Strategy &amp; Link Verification==片段获取策略＆amp; 链接验证
+Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==使用此选项加快搜索结果！ （使用CACHEONLY或FALSE关闭验证）
+NOCACHE: no use of web cache, load all snippets online==NOCACHE：不使用网页缓存，在网上加载所有片段
+IFFRESH: use the cache if the cache exists and is fresh otherwise load online==IFFRESH：如果高速缓存存在，则使用高速缓存，否则将重新在线载入
+IFEXIST: use the cache if the cache exist or load online==IFEXIST：如果缓存存在或在线加载，则使用缓存
+If verification fails, delete index reference==如果验证失败，请删除索引引用
+CACHEONLY: never go online, use all content from cache. If no cache entry exist, consider content nevertheless as available and show result without snippet==CACHEONLY：永远不联网，使用缓存中的所有内容。 如果不存在缓存条目，则尽管如此，仍然可以将内容视为可用并显示结果，而不是片段
+FALSE: no link verification and not snippet generation: all search results are valid without verification==FALSE：没有链接验证，也没有代码片段生成：所有搜索结果在没有验证的情况下都是有效的
+Greedy Learning Mode==贪婪学习模式
+load documents linked in search results, will be deactivated automatically when index size==加载链接到搜索结果中的文档，将自动停用在索引大小
+Default maximum number of results per page==每页结果的默认最大数量
+Special Target as Exception for an URL-Pattern==特殊目标作为URL模式的例外
+Pattern:<==模式:<
+set a remote user/password==设置一个远程用户/密码
+to change this options.==改变这个选项。
+(Headline)==（标题）
+(Content)==（内容）
+You have to <a href="ConfigAccounts_p.html">set a remote user/password</a> to change this options.==您必须<a href="ConfigAccounts_p.html">设置远程用户/密码</a>才能更改此选项。
+You have ==你有
+'About' Column<br/>(shown in a column alongside<br/>with the search result page)==“关于”栏<br/>（与搜索结果页面一起在一栏中显示）
+>Exclude Hosts<==>排除主机<
+List of hosts that shall be excluded from search results by default but can be included using the site:&lt;host&gt; operator:==默认情况下应从搜索结果中排除但可以使用网站包含的主机列表：＆lt; host＆gt;运营商:
+You have==你有
+NOCACHE: no use of web cache==NOCACHE：不使用网页缓存，在网上加载所有片段
+List of hosts that shall be excluded from search results by default but can be included using the site:==默认情况下应从搜索结果中排除但可以使用网站包含的主机列表：＆lt; host＆gt;运营商:
+Snippet Fetch Strategy ==片段获取策略＆amp; 链接验证
+If verification fails==如果验证失败，请删除索引引用
+CACHEONLY: never go online==CACHEONLY：永远不联网，使用缓存中的所有内容。 如果不存在缓存条目，则尽管如此，仍然可以将内容视为可用并显示结果，而不是片段
+load documents linked in search results==加载链接到搜索结果中的文档，将自动停用在索引大小
+#-----------------------------
+
+#File: env/templates/submenuComputation.template
+#---------------------------
+>Application Status<==>应用程序状态<
+>Status<==>状态<
+System==系统
+Thread Dump==线程转储
+>Processes<==>流程<
+>Server Log<==>服务器日志<
+>Concurrent Indexing<==>并发索引<
+>Memory Usage<==>内存使用<
+>Search Sequence<==>搜索序列<
+>Messages<==>消息<
+>Overview<==>概述<
+>Incoming&nbsp;News<==>传入的&nbsp;新闻<
+>Processed&nbsp;News<==>加工的&nbsp;新闻<
+>Outgoing&nbsp;News<==>传出的&nbsp;新闻<
+>Published&nbsp;News<==>已发布的&nbsp;新闻<
+>Community Data<==>社区数据<
+>Surftips<==>冲浪提示<
+>Local Peer Wiki<==>本地端百科 <
+UI Translations==用户界面翻译
+>Published==>已发布的
+>Processed==>加工的
+>Outgoing==>传出的
+>Incoming==>传入的
+#-----------------------------
+
+#File: env/templates/submenuPortalConfiguration.template
+#---------------------------
+Generic Search Portal==通用搜索门户
+User Profile==用户资料
+Local robots.txt==本地robots.txt
+Portal Configuration==门户配置
+Search Box Anywhere==搜索框Anywhere
+#-----------------------------
+
+#File: env/templates/submenuWebStructure.template
+#---------------------------
+Index Browser==索引浏览器
+#-----------------------------
+
+#File: Status.html
+#---------------------------
+>forum<==>论坛<
+Your settings are _not_ protected!==您的设置_不_受保护！
+#-----------------------------
+
+#File: env/templates/submenuAccessTracker.template
+#---------------------------
+Access Grid==访问网格
+Incoming Requests Overview==传入请求概述
+Incoming Requests Details==传入的请求详细信息
+All Connections<==所有连接<
+Local Search<==本地搜索<
+Log==日志
+Host Tracker==主机跟踪器
+Remote Search<==远程搜索<
+Cookie Menu==Cookie菜单
+Incoming&nbsp;Cookies==传入&nbsp;Cookies
+Outgoing&nbsp;Cookies==传出&nbsp;Cookies
+Incoming==传入
+Outgoing==传出
+#-----------------------------
+
+#File: Translator_p.html
+#---------------------------
+Translation Editor==翻译编辑器
+Translate untranslated text of the user interface (current language).==翻译用户界面中未翻译的文本（当前语言）。
+UI Translation==界面翻译
+Target Language:==目标语言
+activate a different language==激活另一种语言
+Source File==源文件
+view it==查看
+filter untranslated==列出未翻译项
+Source Text==源文
+Translated Text==翻译
+Save translation==保存翻译
+The modified translation file is stored in DATA/LOCALE directory.==修改的翻译文件储存在 DATA/LOCALE 目录下
+#-----------------------------
+
+#File: Help.html
+#---------------------------
+>Tutorial==>教学
+twitter this video==推特这个视频
+Download from Vimeo==从Vimeo下载
+More Tutorials==更多教学
+Please see the tutorials on==请参阅教程
+YaCy: Tutorial==YaCy: 教程
+#-----------------------------
+
+#File: ViewLog_p.html
+#---------------------------
+Server Log==服务器日志
+#-----------------------------
+
+#File: index.html
+#---------------------------
+>Search<==>搜索<
+Text==文本
+Audio==音频
+>ranking modifier<==>排名修改器<
+click on the red icon in the upper right after a search. this works good in combination with the==搜索后点击右上角的红色图标。 这个结合起来很好用
+add search results from external opensearch systems==添加外部opensearch系统的搜索结果
+only pages with &lt;date&gt; in content==仅内容包含&lt;date&gt;的页面 
+add search results from ==从中添加搜索结果
+this works good in combination with the '/date' ranking modifier.==这与“/ date”排名修饰符结合使用效果很好。
+click on the red icon in the upper right after a search.==搜索后点击右上角的红色图标。
+only pages with ==仅内容包含
+add search results from==从中添加搜索结果
+#-----------------------------
+
+#File: Performance_p.html
+#---------------------------
+Online Caution Settings:==在线警告设置：
+Proxy:==代理：
+#-----------------------------
+
+#File: api/citation.html
+#---------------------------
+Document Citations for==文档引用
+List of other web pages with citations==其他网页与引文列表
+Similar documents from different hosts:==41/5000 来自不同主机的类似文件:
+#-----------------------------
+
+#File: ViewFile.html
+#---------------------------
+See the page info about the url.==查看关于此网址的页面信息。
+"Show Metadata"=="显示元数据"
+"Browse Host"=="浏览主机"
+Citation Report==引用报告
+Collections==收藏
+MimeType:==Mime类型
+Search in Document:==在文档中搜索:
+"Show Snippet"=="显示摘录"
+(click this for full metadata)==(点击这个，获得完整的元数据)
+#-----------------------------
+
+#File: ConfigSearchPage_p.html
+#---------------------------
+Search Page<==搜索页<
+Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==以下是搜索结果页面的通用模板。 选中您希望显示的功能复选框。
+>Images<==>图片<
+>Audio<==>音频<
+>Video<==>视频<
+>Search Result Page Layout Configuration<==>搜索结果页面布局配置<
+To change colors and styles use the ==要改变颜色和样式使用
+>Appearance<==>外观<
+ menu for different skins.==不同皮肤的菜单。
+Other portal settings can be adjusted in==其他门户网站设置可以在这调整
+>Generic Search Portal<==>通用搜索门户<
+menu for different skins.==不同皮肤的菜单。
+To change colors and styles use the==要改变颜色和样式使用
+>Page Template<==>页面模板<
+>Text<==>文本<
+>Applications<==>应用<
+>more options<==>更多选项<
+>Tag<==>标签<
+>Topics<==>主题<
+>Cloud<==>云<
+>Protocol<==>协议<
+>Filetype<==>文件类型<
+>Wiki Name Space<==> 百科名称空间<
+>Language<==>语言<
+>Author<==>作者<
+>Vocabulary<==>词汇<
+>Provider<==>提供商<
+>Collection<==>收藏<
+>Title of Result<==>结果标题<
+Description and text snippet of the search result==搜索结果的描述和文本片段
+42 kbyte<==42千字节<
+>Metadata<==>元数据<
+>Parser<==>分析器<
+>Citation<==>引用<
+>Pictures<==>图片<
+>Cache<==>高速缓存<
+>Augmented Browsing<==>增强浏览<
+For this option URL proxy must be enabled.==对于这个选项，必须启用URL代理。
+"Save Settings"=="保存设置"
+"Set Default Values"=="设置默认值"
+menu.==菜单。
+#-----------------------------
+
+#File: ConfigBasic.html
+#---------------------------
+Your port has changed. Please wait 10 seconds.==您的端口已更改。 请等待10秒。
+Your browser will be redirected to the new <a href="http://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.==您的浏览器将在5秒内重定向到新的<a href="http://#[host]#:#[port]#/ConfigBasic.html">位置</a>。
+The peer port was changed successfully.==对端口已经成功修改
+Opening a router port is <i>not</i> a YaCy-specific task;==打开一个路由器端口不是一个YaCy特定的任务;
+However: if you fail to open a router port, you can nevertheless use YaCy with full functionality, the only function that is missing is on the side of the other YaCy users because they cannot see your peer.==但是，如果您无法打开路由器端口，则仍然可以使用YaCy的全部功能，缺少的唯一功能是在其他YaCy用户侧，因为他们无法看到您的YaCy端。
+Set by system property==由系统属性设置
+https enabled==https启用
+Configure your router for YaCy using UPnP:==使用UPnP为您的路由器配置YaCy:
+on port==在端口
+you can see instruction videos everywhere in the internet, just search for <a href="http://www.youtube.com/results?search_query=Open+Ports+on+a+Router">Open Ports on a &lt;our-router-type&gt; Router</a> and add your router type as search term.==您可以在互联网上的任何地方查看说明视频，只需搜索<a href="http://www.youtube.com/results?search_query=Open Ports on a Router">Open Ports on a &lt;our-router-type&gt; Router</a>并添加您的路由器类型作为搜索词。
+However: if you fail to open a router port==但是，如果您无法打开路由器端口，则仍然可以使用YaCy的全部功能，缺少的唯一功能是在其他YaCy用户侧，因为他们无法看到您的YaCy端。
+you can see instruction videos everywhere in the internet==您可以在互联网上的任何地方查看说明视频，只需搜索<a href="http://www.youtube.com/results?search_query=Open Ports on a Router">Open Ports on a 
+#-----------------------------
+
+#File: CookieMonitorOutgoing_p.html
+#---------------------------
+>Cookie<==>缓存<
+#-----------------------------
+
+#File: AccessGrid_p.html
+#---------------------------
+This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==这些图像显示了到您的YaCy对等体的传入连接以及从对等体到其他对等体和Web服务器的传出连接
+Server Access Grid==服务器访问网格
+YaCy Network Access==YaCy网络访问
+#-----------------------------
+
+#File: Blacklist_p.html
+#---------------------------
+Select list to edit:==选择列表进行编辑:
+Add URL pattern==添加URL模式
+Edit list==编辑列表
+The right '*', after the '/', can be replaced by a==在'/'之后的右边'*'可以被替换为
+>regular expression<==>正则表达式<
+(slow)==(慢)
+"set"=="集合"
+The right '*'==在'/'之后的右边'*'可以被替换为
+#-----------------------------
+
+#File: Blog.html
+#---------------------------
+by==通过
+Text:==文本:
+#-----------------------------
+
+#File: ServerScannerList.html
+#---------------------------
+>URL<==>网址<
+The following servers can be searched:==可以搜索以下服务器:
+>inaccessible<==>不可访问<
+#-----------------------------
+
+#File: env/templates/submenuIndexCreate.template
+#---------------------------
+Crawler/Spider<==爬虫/蜘蛛<
+Crawl Start (Expert)==抓取开始（专家模式）
+Network Scanner==网络扫描仪
+Crawling of MediaWikis==MediaWikis爬行
+Remote Crawling==远程爬行
+Scraping Proxy==刮研究代理
+Advanced Crawler==高级爬虫
+>Crawling of phpBB3 Forums<==>phpBB3论坛爬行<
+Crawling of phpBB3 Forums==phpBB3论坛爬行
+#-----------------------------
+
+#File: Tables_p.html
+#---------------------------
+Table Viewer==表查看器
+entries==条目
+#-----------------------------
+
+#File: env/templates/submenuIndexImport.template
+#---------------------------
+>Database Reader<==>数据库读取器<
+RSS Feed Importer==RSS订阅导入器
+OAI-PMH Importer==OAI-PMH导入器
+Database Reader for phpBB3 Forums==phpBB3论坛的数据库读取器
+Dump Reader for MediaWiki dumps==MediaWiki转储读取器
+#-----------------------------
+
+#File: Status_p.inc
+#---------------------------
+System Status==系统状态
+System==系统
+YaCy version==YaCy版本
+Tray-Icon==任务栏图标
+Java version:==Java版本:
+YaCy version:==YaCy版本:
+Max:==最大:
+Crawler:==爬虫:
+Proxy:==代理:
+>Reset==>重启
+Traffic ==交通
+Experimental<==实验<
+Remote:==远程:
+Enabled==开启
+RAM used:==占用内存:
+RAM max:==最大内存:
+DISK used:==占用硬盘:
+DISK free:==硬盘可用:
+on::off==开::关
+If you do this without YaCy running on a desktop-pc, this will possibly break startup.==如果您没在运行于桌面PC的YaCy上操作这个，这很可能会破坏启动。
+broken::connected==已损坏::已连接
+Transparent ==透明
+Proxy</dt>==代理</dt>
+Host:==主机:
+Threads:==线程:
+Traffic==交通
+If you do this without YaCy running on a desktop-pc==如果您没在运行于桌面PC的YaCy上操作这个，这很可能会破坏启动。
+Transparent==透明
+Load:==负载:
+Uptime:==运行时间:
+peak:==峰值:
+#-----------------------------
+
+#File: Settings_p.html
+#---------------------------
+Remote Proxy (optional)==远程代理(可选)
+#-----------------------------
+
+#File: TransNews_p.html
+#---------------------------
+Translation News for Language==语言翻译新闻
+Translation News==翻译新闻
+You can share your local addition to translations and distribute it to other peers.==你可以分享你的本地翻译，并分发给其他同行。
+The remote peer can vote on your translation and add it to the own local translation.==远方小伙伴可以对您的翻译进行投票并将其添加到他们的本地翻译中。
+entries available==可用的条目
+"Publish"=="发布"
+You can check your outgoing messages==你可以检查你的传出消息
+>here<==>这儿<
+File:==文件:
+Translation:==翻译:
+>score==>分数
+negative vote==反对票
+positive vote==赞成票
+Vote on this translation.==对这个翻译投票。
+If you vote positive the translation is added to your local translation list.==如果您投赞成票，翻译将被添加到您的本地翻译列表中。
+>Originator<==>发起人<
+#-----------------------------
+
+#File: yacy/ui/yacyui-bookmarks.html
+#---------------------------
+'Tags'=='标签'
+#-----------------------------
+
+#File: ConfigHeuristics_p.html
+#---------------------------
+search-result: shallow crawl on all displayed search results==搜索结果：对所有显示的搜索结果进行浅度爬取
+When a search is made then all displayed result links are crawled with a depth-1 crawl.==当进行搜索时，所有显示的结果链接的爬网深度-1。
+"Save"=="保存"
+"add"=="添加"
+>new<==>新建<
+>delete<==>删除<
+>Comment<==>评论<
+>Title<==>标题<
+>Active<==>激活<
+>copy &amp; paste a example config file<==>复制＆amp; 粘贴一个示例配置文件<
+Alternatively you may==或者你可以
+To find out more about OpenSearch see==要了解关于OpenSearch的更多信息，请参阅
+20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20个结果从远程系统中获取，并同时加载，立即解析并索引
+When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
+A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">启发式</a>是一种“基于经验的技术，有助于解决问题，学习和发现”
+This means: right after the search request every page is loaded and every page that is linked on this page.==这意味着：在搜索请求之后，就开始加载每个页面上的链接。
+If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中“添加为全局爬行作业”，则要爬网的页面将被添加到全局爬行队列（远程YaCy伙伴可以抓取要抓取的页面）。
+Default is to add the links to the local crawl queue (your peer crawls the linked pages).==默认是将链接添加到本地爬网队列（您的YaCy爬取链接的页面）。
+add as global crawl job==添加为全局爬行作业
+opensearch load external search result list from active systems below==opensearch从下面的活动系统加载外部搜索结果列表
+Available/Active Opensearch System==可用/激活Opensearch系统
+Url <small>(format opensearch==Url <small>（格式为opensearch
+Url template syntax==网址模板语法
+"reset to default list"=="重置为默认列表"
+"discover from index" class=="从索引中发现"类
+start background task, depending on index size this may run a long time==开始后台任务，这取决于索引的大小，这可能会运行很长一段时间
+With the button "discover from index" you can search within the metadata of your local index (Web Structure Index) to find systems which support the Opensearch specification.==使用“从索引发现”按钮，您可以在本地索引（Web结构索引）的元数据中搜索，以查找支持Opensearch规范的系统。
+The task is started in the background. It may take some minutes before new entries appear (after refreshing the page).==任务在后台启动。 出现新条目可能需要几分钟时间（在刷新页面之后）。
+"switch Solr fields on"=="开关Solr字段"
+('modify Solr Schema')==（'修改Solr模式'）
+located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==位于DATA / SETTINGS目录的<i> defaults / heuristicopensearch.conf </ i>中。
+For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.==对于发现功能，Web结构索引的<i> web图表</ i>选项和字段<i> target_rel_s，target_protocol_s，target_urlstub_s </ i>必须在<a href =“IndexSchema_p.html ？core = webgraph“> webgraph Solr模式</a>。
+20 results are taken from remote system and loaded simultanously==20个结果从远程系统中获取，并同时加载，立即解析并索引
+A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving==<a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">启发式</a>是一种“基于经验的技术，有助于解决问题，学习和发现”
+>copy ==>复制＆amp; 粘贴一个示例配置文件<
+When using this heuristic==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
+For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s==对于发现功能，Web结构索引的<i> web图表</ i>选项和字段<i> target_rel_s，target_protocol_s，target_urlstub_s </ i>必须在<a href =“IndexSchema_p.html ？core = webgraph“> webgraph Solr模式</a>。
+start background task==开始后台任务，这取决于索引的大小，这可能会运行很长一段时间
+>copy==>复制＆amp; 粘贴一个示例配置文件<
+#-----------------------------
+
+#File: Wiki.html
+#---------------------------
+Index==索引
+#-----------------------------
+
+#File: ConfigAccounts_p.html
+#---------------------------
+Username too short. Username must be &gt;= 4 Characters.==用户名太短。 用户名必须&gt;= 4 个字符。
+Username already used (not allowed).==用户名已被使用（不允许）。
+>Access Rules<==>访问规则<
+Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==保护所有页面：如果设置为开启，访问所有页面需要授权; 如果关闭，只有扩展名为“_p”的页面才受保护。
+Set Access Rules==设置访问规则
+Username too short. Username must be ==用户名太短。 用户名必须
+Protection of all pages: if set to on==保护所有页面：如果设置为开启，访问所有页面需要授权; 如果关闭，只有扩展名为“_p”的页面才受保护。
+#-----------------------------
+
+#File: env/templates/submenuBlacklist.template
+#---------------------------
+Content Control==内容控制
+#-----------------------------
+
+#File: ConfigProperties_p.html
+#---------------------------
+"Clear"=="清除"
+#-----------------------------
+
+#File: BlacklistImpExp_p.html
+#---------------------------
+Blacklist Import==黑名单导入
+#-----------------------------
+
+#File: Connections_p.html
+#---------------------------
+Server Connection Tracking==服务器连接跟踪
+Up-Bytes==截至字节
+Showing #[numActiveRunning]# active connections from a max. of #[numMax]# allowed incoming connections.==103/5000 正在显示＃[numActiveRunning]＃来自最大的活动连接。 ＃[numMax]＃允许传入连接。
+#-----------------------------
+
+#File: Autocrawl_p.html
+#---------------------------
+>Autocrawler<==>自动爬虫<
+Autocrawler automatically selects and adds tasks to the local crawl queue.==自动爬虫自动选择任务并将其添加到本地爬网队列。
+This will work best when there are already quite a few domains in the index.==如果索引中已经有一些域名，这将会工作得最好。
+Autocralwer Configuration==自动爬虫配置
+You need to restart for some settings to be applied==您需要重新启动才能应用一些设置
+Enable Autocrawler:==启用自动爬虫:
+Deep crawl every:==深入爬行:
+Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.==警告：如果这大于“取回行”，只有浅爬行将运行。
+Rows to fetch at once:==一次取回行:
+Recrawl only older than # days:==重新抓取只有＃天以前的时间:
+Get hosts by query:==通过查询获取主机:
+Can be any valid Solr query.==可以是任何有效的Solr查询。
+Shallow crawl depth (0 to 2):==浅爬行深度（0〜2）:
+Deep crawl depth (1 to 5):==深度爬行深度（1至5）:
+Index text:==索引文本:
+Index media:==索引媒体:
+"Save"=="保存"
+#-----------------------------
+
+#File: ConfigParser.html
+#---------------------------
+>File Viewer<==>文件查看器<
+>Extension<==>扩展<
+If you want to test a specific parser you can do so using the==如果你想测试一个特定的解析器，你可以使用
+>Mime-Type<==> MIME类型<
+#-----------------------------
+
+#File: Settings_Proxy.inc
+#---------------------------
+Remote Proxy (optional)==远程代理（可选）
+#-----------------------------
+
+#File: CrawlResults.html
+#---------------------------
+>Collection==>收藏
+"del & blacklist"=="删除＆黑名单"
+"del =="删除＆黑名单"
+#-----------------------------
+
+#File: env/templates/header.template
+#---------------------------
+Target Analysis==目标分析
+Re-Start<==重启<
+Shutdown<==关闭<
+Download YaCy==下载YaCy
+Search Interface==搜索界面
+About This Page==关于此页
+"Search..."=="搜索中..."
+Crawler Monitor==爬虫监视
+System Status==系统状态
+Peer-to-Peer Network==P2P网络
+Index Browser==索引浏览器
+Design==设计
+You did not yet start a web crawl!==您还没开启网络爬虫！
+Load Web Pages, Crawler==加载网页，爬虫
+RAM/Disk Usage &amp; Updates==内存/硬盘 使用 &amp;更新
+First Steps==第一步
+Advanced Crawler==高级爬虫
+Index Export/Import==索引 导出/导入
+Load Web Pages==加载网页，爬虫
+RAM/Disk Usage ==内存/硬盘 使用 
+&nbsp;Administration==&nbsp;管理
+Toggle navigation==切换导航
+Community (Web Forums)==社区（网络论坛）
+Project Wiki==项目百科
+Portal Configuration==门户配置
+Portal Design==门户设计
+Ranking and Heuristics==排名和启发式
+Content Semantic==内容语义
+Process Scheduler==进程调度器
+Network Access==网络访问
+>Terminal==>终端
+Confirm Re-Start==确认重启
+Project Wiki<==项目百科<
+Git Repository==Git存储库
+Bugtracker==错误追踪器
+"You just started a YaCy peer!"==“您刚开始一个YaCy端！”
+"As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options."=="作为初次使用者，您只能看到基本的功能。 设置一个用例或者命名您的Yacy端来看更多的选项。 开始第一个网页抓取，查看所有监视选项。"
+"You did not yet start a web crawl!"=="您还未启动一个网络爬虫！"
+"You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!"=="您不会在这里看到所有的监控选项，因为有些属于抓取结果监控。 开始网络爬行看看！"
+Use Case &amp; Account==用例 &amp; 账号
+System Administration==系统管理
+Configuration==配置
+Production==生产
+>Administration<==>管理<
+Search Portal Integration==搜索门户集成
+You just started a YaCy peer!==你刚开启了YaCy端！
+As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options.==作为初次使用者，您只能看到基本的功能。 设置一个用例或者命名您的Yacy端来看更多的选项。 开始第一个网页抓取，查看所有监视选项。
+You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!==您不会在这里看到所有的监控选项，因为有些属于抓取结果监控。 开始网络爬行看看！
+Use Case ==用例 
+"You do not see all monitoring options here=="您不会在这里看到所有的监控选项，因为有些属于抓取结果监控。 开始网络爬行看看！"
+You do not see all monitoring options here==您不会在这里看到所有的监控选项，因为有些属于抓取结果监控。 开始网络爬行看看！
+RAM/Disk Usage==内存/硬盘 使用
+Use Case==用例
+#-----------------------------
+
+#File: env/templates/submenuCrawler.template
+#---------------------------
+Load Web Pages==加载网页
+Site Crawling==网站爬行
+Parser Configuration==解析器配置
+#-----------------------------
+
+#File: AccessTracker_p.html
+#---------------------------
+>Host<==>主机<
+This is a list of requests (max. 1000) to the local http server within the last hour.==这是最近一小时内本地http服务器的请求列表（最多1000个）。
+#-----------------------------
+
+#File: ConfigHTCache_p.html
+#---------------------------
+>#[actualCacheSize]# MB for #[actualCacheDocCount]# files, #[docSizeAverage]# KB / file in average==>＃[actualCacheSize]＃MB为＃[actualCacheDocCount]＃文件，＃[docSizeAverage]＃平均KB /文件
+#-----------------------------
+
+#File: Bookmarks.html
+#---------------------------
+Tags==标签
+start autosearch of new bookmarks==开始自动搜索新书签
+This starts a serach of new or modified bookmarks since startup==开始搜索自从启动以来新的或修改的书签
+Every peer online will be ask for results.==每个在线的伙伴都会被索要结果。
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==要查看所有API的列表，请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>。
+To see a list of all APIs==要查看所有API的列表，请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>。
+#-----------------------------
+
+#File: ConfigAppearance_p.html
+#---------------------------
+>Skin Download<==>皮肤下载<
+#-----------------------------
+
+#File: WatchWebStructure_p.html
+#---------------------------
+>Text<==>文本<
+>Pivot Dot<==>枢轴点<
+"WebStructurePicture"=="Web结构图"
+>Other Dot<==>其他点<
+API wiki page==API 百科页面
+To see a list of all APIs, please visit the==要查看所有API的列表，请访问
+>Host List<==>主机列表<
+To see a list of all APIs==要查看所有API的列表，请访问
+#-----------------------------
+
+#File: Table_RobotsTxt_p.html
+#---------------------------
+API wiki page==API百科页面
+To see a list of all APIs, please visit the==要查看所有API的列表，请访问
+To see a list of all APIs==要查看所有API的列表，请访问
+#-----------------------------
+
+#File: ConfigProfile_p.html
+#---------------------------
+eMail==邮箱
+>Name<==>名字<
+Nick Name==昵称
+#-----------------------------
+
+#File: ContentControl_p.html
+#---------------------------
+Content Control<==内容控制<
+Peer Content Control URL Filter==小伙伴内容控制URL过滤器
+With this settings you can activate or deactivate content control on this peer.==使用此设置，您可以激活或取消激活此YaCy端上的内容控制。
+Use content control filtering:==使用内容控制过滤:
+>Enabled<==>已启用<
+Enables or disables content control.==启用或禁用内容控制。
+Use this table to create filter:==使用此表创建过滤器:
+Define a table. Default:==定义一个表格。 默认:
+Content Control SMW Import Settings==内容控制SMW导入设置
+With this settings you can define the content control import settings. You can define a==使用此设置，您可以定义内容控制导入设置。 你可以定义一个
+Semantic Media Wiki with the appropriate extensions.==语义媒体百科与适当的扩展。
+SMW import to content control list:==SMW导入到内容控制列表:
+Enable or disable constant background synchronization of content control list from SMW (Semantic Mediawiki). Requires restart!==启用或禁用来自SMW（Semantic Mediawiki）的内容控制列表的恒定后台同步。 需要重启！
+SMW import base URL:==SMW导入基URL:
+Define base URL for SMW special page "Ask". Example: ==为SMW特殊页面“Ask”定义基URL。 例
+SMW import target table:==SMW导入目标表:
+Define import target table. Default: contentcontrol==定义导入目标表。 默认值:contentcontrol
+Purge content control list on initial sync:==在初始同步时清除内容控制列表:
+Purge content control list on initial synchronisation after startup.==重启后，清除初始同步的内容控制列表。
+"Submit"=="提交"
+Define base URL for SMW special page "Ask". Example:==为SMW特殊页面“Ask”定义基URL。 例
+#-----------------------------
+
+#File: WikiHelp.html
+#---------------------------
+to embed this video:==嵌入此视频：
+Text will be displayed <span class="underline">underlined</span>.==文本要显示<span class =“underline”>下划线</ span>。
+Code==代码
+This tag displays a Youtube or Vimeo video with the id specified and fixed width 425 pixels and height 350 pixels.==这个标签显示一个425像素和350像素的Youtube或Vimeo视频。
+i.e. use==比如用
+#-----------------------------
+
+#File: yacy/ui/index.html
+#---------------------------
+Server Log==服务器日志
+#-----------------------------
+
+#File: ConfigNetwork_p.html
+#---------------------------
+>Network Definition<==>网络定义<
+Remote Network Definition URL==远程网络定义URL
+Enter custom URL...==输入自定义网址...
+>allow==>允许
+deny remote search==拒绝远程搜索
+>Peer Tags==>伙伴标签
+#-----------------------------
+
+#File: env/templates/submenuSemantic.template
+#---------------------------
+Content Semantic==内容语义
+>Automated Annotation<==>自动注释<
+Auto-Annotation Vocabulary Editor==自动注释词汇编辑器
+Knowledge Loader==知识加载器
+>Augmented Content<==>增强内容<
+Augmented Browsing==增强浏览
+#-----------------------------
+
+#File: CrawlProfileEditor_p.html
+#---------------------------
+Crawl Profile Editor==爬取配置文件编辑器
+Status==状态
+Domain Counter Content==域计数器内容
+#-----------------------------
+
+#File: env/templates/submenuCrawlMonitor.template
+#---------------------------
+Overview</a>==概述</a>
+Receipts</a>==收据</a>
+Queries</a>==查询</a>
+DHT Transfer==DHT 传输
+Proxy Use==代理使用
+Local Crawling</a>==本地爬行</a>
+Global Crawling</a>==全球爬行</a>
+Surrogate Import==代理导入
+Crawl Results==爬行结果
+Crawler<==爬虫<
+Global==全球
+robots.txt Monitor==robots.txt 监视器
+Remote==远程
+No-Load==空载
+#-----------------------------
+
+#File: env/templates/simpleheader.template
+#---------------------------
+Project Wiki==项目百科
+Search Interface==搜索界面
+About This Page==关于此页
+Bugtracker==Bug追踪器
+Git Repository==Git存储库
+Community (Web Forums)==社区（网络论坛）
+Download YaCy==下载YaCy
+Google Appliance API==Google设备API
+>URL Viewer<==>URL查看器<
+>File Search<==>文件搜索<
+>Compare Search<==>比较搜索<
+>Index Browser<==>索引浏览器<
+Example Calls to the Search API:==调用搜索API的示例:
+Administration &raquo;==管理 &raquo;
+Search Interfaces==搜索界面
+Toggle navigation==切换导航
+Solr Default Core==Solr默认核心
+Solr Webgraph Core==Solr网页图形核心
+Administration ==管理 
+Administration==管理
+#-----------------------------
+
+#File: env/templates/submenuIndexControl.template
+#---------------------------
+URL Database Administration==URL数据库管理
+Index Deletion==索引删除
+Index Sources &amp; Targets==索引来源 ＆amp; 目标
+Solr Schema Editor==Solr模式编辑器
+Field Re-Indexing==字段重新索引
+Reverse Word Index==反向字索引
+Content Analysis==内容分析
+Index Sources ==索引来源 ＆amp; 目标
+Index Sources==索引来源 ＆amp; 目标
+#-----------------------------
+
+#File: api/yacydoc.html
+#---------------------------
+>Title<==>标题<
+#-----------------------------
+
+#File: ConfigUpdate_p.html
+#---------------------------
+>System Update<==>系统更新<
+>changelog<==>更新日志<
+> and <==>和<
+> RSS feed<==> RSS订阅<
+(unsigned)==（未签名）
+(signed)==（签名）
+add the following line to==将以下行添加到
+#-----------------------------
+
+#File: YMarks.html
+#---------------------------
+"Import"=="导入"
+documents=="文件"
+days==天
+hours==小时
+minutes==分钟
+for new documents automatically.==自动地对新文件。
+run this crawl once==爬行一次
+>Query<==>查询<
+Query Type==查询类型
+>Import<==>导入<
+Tag Manager==标签管理器
+Bookmarks (user: #[user]# size: #[size]#)==书签(用户:＃[user]＃大小:＃[size]＃)
+"Replace"=="替换"
+#-----------------------------
+
+#File: AugmentedBrowsing_p.html
+#---------------------------
+Augmented Browsing<==增强浏览<
+, where parameter is the url of an external web page.==其中参数是外部网页的网址。
+URL Proxy Settings<==URL代理设置<
+With this settings you can activate or deactivate URL proxy which is the method used for augmentation.==使用此设置，您可以激活或取消激活用于扩充的URL代理。
+Service call: ==服务电话:
+>URL proxy:<==>URL 代理:<
+Globally enables or disables URL proxy via ==全局启用或禁用URL代理通过
+>Enabled<==>已启用<
+Show search results via URL proxy:==通过URL代理显示搜索结果:
+Enables or disables URL proxy for all search results. If enabled, all search results will be tunneled through URL proxy.==为所有搜索结果启用或禁用URL代理。 如果启用，所有搜索结果将通过URL代理隧道传输。
+Alternatively you may add this javascript to your browser favorites/short-cuts, which will reload the current browser address==或者，您可以将此JavaScript添加到您的浏览器收藏夹/快捷方式，这将重新加载当前的浏览器地址
+via the YaCy proxy servlet.==通过YaCy代理servlet。
+or right-click this link and add to favorites:==或右键单击此链接并添加到收藏夹:
+Restrict URL proxy use:==限制URL代理使用:
+Define client filter. Default: ==定义客户端过滤器。 默认:
+URL substitution:==网址替换:
+Define URL substitution rules which allow navigating in proxy environment. Possible values: all, domainlist. Default: domainlist.==定义允许在代理环境中导航的URL替换规则。 可能的值：all，domainlist。 默认：domainlist。
+"Submit"=="提交"
+Alternatively you may add this javascript to your browser favorites/short-cuts==或者，您可以将此JavaScript添加到您的浏览器收藏夹/快捷方式，这将重新加载当前的浏览器地址
+Enables or disables URL proxy for all search results. If enabled==为所有搜索结果启用或禁用URL代理。 如果启用，所有搜索结果将通过URL代理隧道传输。
+Service call:==服务电话:
+Define client filter. Default:==定义客户端过滤器。 默认:
+Define URL substitution rules which allow navigating in proxy environment. Possible values: all==定义允许在代理环境中导航的URL替换规则。 可能的值：all，domainlist。 默认：domainlist。
+Globally enables or disables URL proxy via==全局启用或禁用URL代理通过
+#-----------------------------
+
+#File: env/templates/submenuMaintenance.template
+#---------------------------
+RAM/Disk Usage &amp; Updates==内存/硬盘 使用 &amp; 更新
+Web Cache==Web缓存
+Download System Update==下载系统更新
+>Performance<==>性能<
+RAM/Disk Usage ==内存/硬盘 使用 
+RAM/Disk Usage==内存/硬盘 使用
+#-----------------------------
+
+#File: terminal_p.html
+#---------------------------
+Domain Monitor==域监视器
+YaCy Peer Live Monitoring Terminal==YaCy 小伙伴实时监控终端
+YaCy System Terminal Monitor==YaCy系统终端监视器
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+Use Case &amp; Accounts==用例 &amp; 账号
+Use Case ==用例 
+Use Case==用例
+#-----------------------------
+
+#File: yacysearch.html
+#---------------------------
+"search"=="搜索"
+>search<==>搜索<
+Illegal URL mask:==非法网址掩码:
+>Media<==>媒体<
+g> remote),==g> 远程),
+>log in<==>登录<
+length of search words must be at least 1 character==搜索文本最少一个字符
+#-----------------------------
+
+#File: BlogComments.html
+#---------------------------
+by==通过
+#-----------------------------
+
+#File: ContentAnalysis_p.html
+#---------------------------
+Content Analysis==内容分析
+These are document analysis attributes.==这些是文档分析属性。
+Double Content Detection==双重内容检测
+Double-Content detection is done using a ranking on a 'unique'-Field, named 'fuzzy_signature_unique_b'.==双内容检测是使用名为'fuzzy_signature_unique_b'的'unique'字段上的排名完成的。
+This is the minimum length of a word which shall be considered as element of the signature. Should be either 2 or 3.==这是一个应被视为签名的元素单词的最小长度。 应该是2或3。
+The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less==quantRate是参与签名计算的单词数量的度量。 数字越高，越少
+words are used for the signature.==单词用于签名。
+For minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5.==对于minTokenLen = 2，quantRate值不应低于0.24; 对于minTokenLen = 3，quantRate值必须不低于0.5。
+"Re-Set to default"=="重置为默认"
+"Set"=="设置"
+Double-Content detection is done using a ranking on a 'unique'-Field==双内容检测是使用名为'fuzzy_signature_unique_b'的'unique'字段上的排名完成的。
+The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number==quantRate是参与签名计算的单词数量的度量。 数字越高，越少
+#-----------------------------
+
+#File: yacyinteractive.html
+#---------------------------
+API wiki page==API 百科页面
+"Search..."=="搜索中..."
+e="Search"==e="搜索"
+loading from local index...==从本地索引加载...
+To see a list of all APIs, please visit the==要查看所有API的列表，请访问
+The query format is similar to==查询格式类似于
+This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.==此搜索结果也可以作为RSS / <a href="http://www.opensearch.org" target="_blank"> opensearch </a>输出检索。
+To see a list of all APIs==要查看所有API的列表，请访问
 #-----------------------------
 
 #File: AccessTracker_p.html
