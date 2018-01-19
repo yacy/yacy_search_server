@@ -84,7 +84,7 @@ public class IndexReIndexMonitor_p {
                 final OrderedScoreMap<String> querylist = ((ReindexSolrBusyThread) reidxbt).getQueryList();
                 if (querylist != null) {
                     int i = 0;
-                    for (String oneqs : querylist) { // just use fieldname from query (fieldname:[* TO *])
+                    for (final String oneqs : querylist) { // just use fieldname from query (fieldname:[* TO *])
                         prop.put("reindexjobrunning_fieldlist_"+i+"_fieldname", oneqs.substring(0, oneqs.indexOf(':')));
                         prop.put("reindexjobrunning_fieldlist_"+i+"_fieldscore", querylist.get(oneqs));
                         i++;
@@ -115,6 +115,8 @@ public class IndexReIndexMonitor_p {
                 prop.putHTML("infomessage", "! reindex works only with embedded Solr index !");
             }
         }
+        
+		processReindexReport(header, sb, prop, reidxbt instanceof ReindexSolrBusyThread ? (ReindexSolrBusyThread)reidxbt : null);
 
         // recrawl job handling
         BusyThread recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
@@ -228,6 +230,34 @@ public class IndexReIndexMonitor_p {
         // return rewrite properties
         return prop;
     }
+    
+	/**
+	 * Write information on the eventual currently running or last reindex job
+	 * terminated
+	 * 
+	 * @param header
+	 *            current request header. Must not be null.
+	 * @param sb
+	 *            Switchboard instance holding server environment
+	 * @param prop
+	 *            this template result to write on. Must not be null.
+	 * @param recrawlbt
+	 *            the eventual reindex thread
+	 */
+	private static void processReindexReport(final RequestHeader header, final Switchboard sb, final serverObjects prop,
+			final ReindexSolrBusyThread recrawlbt) {
+		if (recrawlbt != null) {
+			prop.put("reindexReport", 1);
+
+			prop.put("reindexReport_currentQuery", recrawlbt.getCurrentQuery());
+
+			prop.put("reindexReport_currentQuerySize",
+					recrawlbt.getQueryList() != null ? recrawlbt.getQueryList().size() : 0);
+			prop.put("reindexReport_processedCount", recrawlbt.getProcessed());
+		} else {
+			prop.put("reindexReport", 0);
+		}
+	}
 
 	/**
 	 * @param query
@@ -292,6 +322,7 @@ public class IndexReIndexMonitor_p {
 					.withLocale(formatLocale);
 			prop.put("recrawlReport_startTime", formatDateTime(formatter, recrawlbt.getStartTime()));
 			prop.put("recrawlReport_endTime", formatDateTime(formatter, recrawlbt.getEndTime()));
+			prop.put("recrawlReport_urlsToRecrawlCount", recrawlbt.getUrlsToRecrawl());
 			prop.put("recrawlReport_recrawledUrlsCount", recrawlbt.getRecrawledUrlsCount());
 			prop.put("recrawlReport_rejectedUrlsCount", recrawlbt.getRejectedUrlsCount());
 			prop.put("recrawlReport_malformedUrlsCount", recrawlbt.getMalformedUrlsCount());

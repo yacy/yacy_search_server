@@ -3,7 +3,8 @@
     <head>
         <title>YaCy '#[clientname]#': Field Re-Indexing</title>
         #%env/templates/metas.template%#
-    </head>
+        <script type="text/javascript" src="js/IndexReIndexMonitor.js"></script>
+	</head>
     <body id="IndexReindexMonitor">
         #%env/templates/header.template%#
         #%env/templates/submenuIndexControl.template%#
@@ -53,7 +54,7 @@
           <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
 
           #(recrawljobrunning)#
-           <fieldset>
+           <fieldset id="newJobFieldset">
             #(error)#::
             <div class="alert alert-danger" role="alert">Re-crawl works only with an embedded local Solr index!</div>
             #(/error)#
@@ -75,14 +76,12 @@
             <input type="submit" name="recrawlDefaults" value="Set defaults" class="btn btn-default" title="Reset to default values"/>
             <input type="submit" name="recrawlnow" value="start recrawl job now" class="btn btn-primary"/>
             to re-crawl documents selected with the given query.
-           </fieldset>::
-          #(/recrawljobrunning)#
-
-          #(recrawljobrunning)#::
-            <fieldset><legend>Re-Crawl Query Details</legend>
+           </fieldset>
+           ::
+           <fieldset id="updateJobFieldset"><legend>Re-Crawl Query Details</legend>
               <dl>
                 <dt>Documents to process</dt>
-                <dd>#[docCount]#</dd>
+                <dd id="urlsToRecrawlCount">#[docCount]#</dd>
                 <dt>Current Query</dt>
                 <dd>#[recrawlquerytext]#</dd>
               </dl>
@@ -101,46 +100,53 @@
             <div class="col-md-10 col-lg-6">
           		<div class="panel panel-info">
           			<div class="panel-heading">
-          				<h3 class="panel-title">#(jobStatus)#::::Last #(/jobStatus)#Re-Crawl job report</h3>
+          				<h3 class="panel-title">#(jobStatus)#::::Last #(/jobStatus)#Re-Crawl job report 
+          					<span id="refreshingIcon" class="glyphicon glyphicon-transfer hidden" title="Automatically refreshing"></span>
+          					<span id="refreshFailureIcon" class="glyphicon glyphicon-warning-sign warning hidden" title="An error occurred whil trying to refresh automatically"></span>
+          				</h3>
           			</div>
           			<div class="panel-body">
-          				#(error)#::<div class="alert alert-danger" role="alert">The job terminated early due to an error when requesting the Solr index.</div>#(/error)#
+          				<div id="earlyRecrawlTermination" class="alert alert-danger #(error)#hidden::#(/error)#" role="alert">The job terminated early due to an error when requesting the Solr index.</div>
 	          			<table class="table">
           					<tbody>
 	          				    <tr>
           							<th scope="row">Status</th>
-          							<td>#(jobStatus)#Running::Shutdown in progress::Terminated#(/jobStatus)#</td>
-          						</tr>
+									<td id="recrawlStatus"
+										arial-live="polite"
+										data-status="#(jobStatus)#0::1::2#(/jobStatus)#"
+										data-status0="Running" data-status1="Shutdown in progress"
+										data-status2="Terminated">#(jobStatus)#Running::Shutdown in progress::Terminated#(/jobStatus)#</td>
+								</tr>
 	          				    <tr>
           							<th scope="row">Query</th>
-          							<td>#[recrawlquerytext]#</td>
+          							<td id="recrawlQueryText">#[recrawlquerytext]#</td>
           						</tr>
           						<tr>
 	          						<th scope="row">Start time</th>
-          							<td>#[startTime]#</td>
+          							<td id="recrawlStartTime">#[startTime]#</td>
           						</tr>
           						<tr>
 	          						<th scope="row">End time</th>
-          							<td>#[endTime]#</td>
+          							<td id="recrawlEndTime">#[endTime]#</td>
           						</tr>
           						<tr>
 	          						<th scope="row" title="URLs added to the crawler queue for recrawl">Recrawled URLs</th>
-          							<td>#[recrawledUrlsCount]#</td>
+          							<td id="recrawledUrlsCount" aria-live="polite">#[recrawledUrlsCount]#</td>
           						</tr>
           						<tr>
 	          						<th scope="row" title="URLs rejected for some reason by the crawl stacker or the crawler queue. Please check the logs for more details.">Rejected URLs</th>
-          							<td>#[rejectedUrlsCount]#</td>
+          							<td id="rejectedUrlsCount">#[rejectedUrlsCount]#</td>
           						</tr>
           						<tr>
 	          						<th scope="row">Malformed URLs</th>
-          							<td title="#[malformedUrlsDeletedCount]# deleted from the index">#[malformedUrlsCount]#</td>
+          							<td id="malformedUrlsCount" title="#[malformedUrlsDeletedCount]# deleted from the index">#[malformedUrlsCount]#</td>
           						</tr>
           					</tbody>
           				</table>
           				#(jobStatus)#
-          					<a class="btn btn-default" href="IndexReIndexMonitor_p.html" role="button"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
+          					<a id="recrawlRefreshBtn" class="btn btn-default" href="IndexReIndexMonitor_p.html" role="button"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
           					::
-          					<a class="btn btn-default" href="IndexReIndexMonitor_p.html" role="button"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
+          					<a id="recrawlRefreshBtn" class="btn btn-default" href="IndexReIndexMonitor_p.html" role="button"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
           					::
           				#(/jobStatus)#
           			</div>
