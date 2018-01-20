@@ -257,6 +257,11 @@ public class Response {
         return this.request.name();
     }
 
+	/**
+	 * @return the requested URL that produced this response. When redirection(s)
+	 *         occurred, this is not the initial URL, but the last redirection
+	 *         target.
+	 */
     public DigestURL url() {
         return this.request.url();
     }

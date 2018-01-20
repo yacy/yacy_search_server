@@ -267,7 +267,11 @@ public final class LoaderDispatcher {
         final String storeError = response.shallStoreCacheForCrawler();
         if (storeError == null) {
             try {
-                Cache.store(url, response.getResponseHeader(), response.getContent());
+            	/* Important : we associate here the loaded content with the URL response.url(). 
+            	 * On eventual redirection(s), response.url() provides the last redirection location. 
+            	 * If instead we associated content with the initial url (beginning of the redirection(s) chain),
+            	 * the parsers would then have a wrong base URL when following links with relative URLs. */
+                Cache.store(response.url(), response.getResponseHeader(), response.getContent());
             } catch (final IOException e) {
                 LoaderDispatcher.log.warn("cannot write " + response.url() + " to Cache (3): " + e.getMessage(), e);
             }
