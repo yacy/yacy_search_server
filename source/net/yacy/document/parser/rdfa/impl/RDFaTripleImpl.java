@@ -45,7 +45,7 @@ public class RDFaTripleImpl{
 		}
 
 		if (templates == null) {
-                    File f = new File(Switchboard.getSwitchboard().appPath, "defaults" + File.separatorChar + "RDFaParser.xsl");
+                    File f = new File(Switchboard.getSwitchboard() != null ? Switchboard.getSwitchboard().appPath : null, "defaults" + File.separatorChar + "RDFaParser.xsl");
 			try {
 				StreamSource aSource = new StreamSource(f);
 				TransformerFactory aFactory = TransformerFactory.newInstance();

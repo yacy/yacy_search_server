@@ -5,11 +5,9 @@ package net.yacy.document.parser.rdfa.impl;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -56,21 +54,36 @@ public class RDFaParser extends AbstractParser implements Parser {
             final InputStream source) throws Failure,
 			InterruptedException {
 
-		Document[] htmlDocs = parseHtml(url, mimeType, charset, scraper, timezoneOffset, source);
+		if(!source.markSupported()) {
+			throw new Failure("RDFaParser needs an input stream with mark/reset operations supported.", url);
+		}
+		final int maxBytes = 10 * 1024;
+		source.mark(maxBytes);
+		
+		Document[] htmlDocs = this.hp.parse(url, mimeType, charset, scraper, timezoneOffset, source);
+		
+		boolean resetDone;
+		try {
+			source.reset();
+			resetDone = true;
+		} catch (final IOException e1) {
+			ConcurrentLog.warn("RDFA PARSER",
+					"Could not reset stream to beginning : only HTML has been parsed. Document may be larger than limit (" + maxBytes + " bytes.)");
+			resetDone = false;
+		}
 
-		// TODO: current hardcoded restriction: apply rdfa parser only on selected sources.
-
-		if (url.toNormalform(true).contains(".yacy") || url.toNormalform(true).contains("experiments")) {
-		// if (true == false) {
+		Document[] retDocs;
+		if (resetDone) {
 			Document rdfaDoc = parseRDFa(url, mimeType, charset, source);
-			Document[] retDocs = new Document[htmlDocs.length + 1];
+			retDocs = new Document[htmlDocs.length + 1];
 			for (int i = 0; i < htmlDocs.length; i++) {
 				retDocs[i] = htmlDocs[i];
 			}
 			retDocs[retDocs.length - 1] = rdfaDoc;
-			return retDocs;
+		} else {
+			retDocs = htmlDocs;
 		}
-        return htmlDocs;
+		return retDocs;
 	}
 
 	private static Document parseRDFa(DigestURL url, String mimeType,
@@ -99,26 +112,6 @@ public class RDFaParser extends AbstractParser implements Parser {
 					"Conversion triple to document failed");
 		}
 		return doc;
-	}
-
-	private Document[] parseHtml(
-	        final DigestURL url,
-	        final String mimeType,
-			final String charset,
-			final VocabularyScraper scraper,
-			final int timezoneOffset,
-			final InputStream source) throws Failure,
-			InterruptedException {
-
-		Document[] htmlDocs = null;
-		try {
-			htmlDocs = this.hp.parse(url, mimeType, charset, scraper, timezoneOffset, source);
-			source.reset();
-
-		} catch (final IOException e1) {
-			ConcurrentLog.warn("RDFA PARSER", "Super call failed");
-		}
-		return htmlDocs;
 	}
 
 	private static Document convertAllTriplesToDocument(DigestURL url,
@@ -162,49 +155,48 @@ public class RDFaParser extends AbstractParser implements Parser {
 	}
 
 	public static void main(String[] args) {
-        URL aURL = null;
-        if (args.length < 1) {
-            System.out.println("Usage: one and only one argument giving a file path or a URL.");
-        } else {
-            File aFile = new File(args[0]);
-            Reader aReader = null;
-            if (aFile.exists()) {
-                try {
-                    aReader = new FileReader(aFile);
-                } catch (final FileNotFoundException e) {
-                    aReader = null;
-                }
-            } else {
-                try {
-                    aURL = new URL(args[0]);
-                    aReader = new InputStreamReader(aURL.openStream());
-                } catch (final MalformedURLException e) {
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                    aReader = null;
-                }
+		try {
+			URL aURL = null;
+			if (args.length < 1) {
+				System.out.println("Usage: one and only one argument giving a file path or a URL.");
+			} else {
+				File aFile = new File(args[0]);
+				if (aFile.exists()) {
+					try {
+						aURL = aFile.getAbsoluteFile().toURI().toURL();
+					} catch (final MalformedURLException e) {
+						System.err.println("Could not convert file path to URL.");
+					}
+				} else {
+					try {
+						aURL = new URL(args[0]);
+					} catch (final MalformedURLException e) {
+						System.err.println("URL is malformed.");
+					}
 
-            }
+				}
 
-            if (aReader != null) {
-                RDFaParser aParser = new RDFaParser();
-                try {
-                    aParser.parse(new DigestURL(args[0]), "", "", new VocabularyScraper(), 0, aURL.openStream());
-                } catch (final FileNotFoundException e) {
-                    e.printStackTrace();
-                } catch (final IOException e) {
-                    e.printStackTrace();
-                } catch (final Failure e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (final InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            } else
-                System.out.println("File or URL not recognized.");
-
-        }
+				if (aURL != null) {
+					RDFaParser aParser = new RDFaParser();
+					try {
+						aParser.parse(new DigestURL(args[0]), "", "", new VocabularyScraper(), 0, aURL.openStream());
+					} catch (final FileNotFoundException e) {
+						e.printStackTrace();
+					} catch (final IOException e) {
+						e.printStackTrace();
+					} catch (final Failure e) {
+						e.printStackTrace();
+					} catch (final InterruptedException e) {
+						e.printStackTrace();
+					}
+				} else {
+					System.out.println("File or URL not recognized.");
+				}
+				
+			}
+		} finally {
+			ConcurrentLog.shutdown();
+		}
 
     }
 }
