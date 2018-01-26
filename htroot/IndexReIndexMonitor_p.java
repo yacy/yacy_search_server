@@ -164,8 +164,10 @@ public class IndexReIndexMonitor_p {
                 		}
                 	} else if(post.containsKey("simulateRecrawl")) {
                 		final SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
-                		if (!solrConnector.isClosed()) {
+                		if (solrConnector != null && !solrConnector.isClosed()) {
                 			try {
+                				/* Ensure indexed data is up-to-date */
+                				solrConnector.commit(true);
                 				// query all or only httpstatus=200 depending on includefailed flag
                 				final String finalQuery = RecrawlBusyThread.buildSelectionQuery(recrawlQuery, inclerrdoc);
                 				final long count = solrConnector.getCountByQuery(finalQuery);

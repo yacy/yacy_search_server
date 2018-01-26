@@ -129,6 +129,12 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         // org.apache.solr.core.SolrCore java.lang.IllegalStateException: unexpected docvalues type NONE for field 'load_date_dt' (expected=NUMERIC). Use UninvertingReader or index with docvalues.
         this.solrSortBy = null; // CollectionSchema.load_date_dt.getSolrFieldName() + " asc";
         this.chunksize = sb.getConfigInt(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 200);
+        
+        final SolrConnector solrConnector = this.sb.index.fulltext().getDefaultConnector();
+        if (solrConnector != null && !solrConnector.isClosed()) {
+        	/* Ensure indexed data is up-to-date before running the main job */
+        	solrConnector.commit(true);
+        }
     }
 
     /**
@@ -265,7 +271,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         }
         SolrDocumentList docList = null;
         final SolrConnector solrConnector = sb.index.fulltext().getDefaultConnector();
-        if (solrConnector.isClosed()) {
+        if (solrConnector == null || solrConnector.isClosed()) {
         	this.urlsToRecrawl = 0;
         	this.terminatedBySolrFailure = true;
         	return false;
