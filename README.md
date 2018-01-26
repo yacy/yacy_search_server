@@ -86,7 +86,7 @@ to stop : double-click stopYACY.bat
 
 - on Mac OS X:
 please use the Mac Application and start or stop it like any
-other Mac Application (doubleclick to start)
+other Mac Application (double-click to start)
 
 
 ## How do I use this software, where is the administration interface?
@@ -152,7 +152,7 @@ up to over 1 million web pages then you should start to increase the
 memory assignment. Open http://localhost:8090/Performance_p.html
 and set a higher/lower memory assignment.
 If you have millions of web pages in your search index then you might
-habe gigabytes of disk space allocated. You can reduce the disk
+have gigabytes of disk space allocated. You can reduce the disk
 space i.e. setting the htcache space to a different size; to do that
 open http://localhost:8090/ConfigHTCache_p.html and set a new size.
 
@@ -184,7 +184,7 @@ Compiling YaCy:
 - create a debian release: "ant deb"
 - work with eclipse: within eclipse you also need to start the ant build process
   because the servlet pages are not compiled by the eclipse build process
-after the dist prodecure, the release can be found in the RELEASE subdirectory
+after the dist procedure, the release can be found in the RELEASE subdirectory
 
 Build with Maven:
 - for the first time goto subdirectory libbuild (which contains the maven parent pom)
@@ -204,7 +204,7 @@ scripts you can create more shell api access methods yourself easily.
 
 ## Contact
 
-Our primary point of contact is the german forum at http://forum.yacy.net
+Our primary point of contact is the German forum at http://forum.yacy.net
 We encourage you to start a YaCy forum in your own language.
 
 If you have any questions, please do not hesitate to contact the maintainer:
