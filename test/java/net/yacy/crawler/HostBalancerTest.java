@@ -8,7 +8,8 @@ import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.data.WorkTables;
-import static net.yacy.kelondro.util.FileUtils.deletedelete;
+import net.yacy.kelondro.util.FileUtils;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -16,15 +17,16 @@ public class HostBalancerTest {
 
     final File queuesRoot = new File("test/DATA/INDEX/QUEUES");
     final File datadir = new File("test/DATA");
-
+    
+    private static final boolean EXCEED_134217727 = true;
+    private static final int ON_DEMAND_LIMIT = 1000;
+    
     /**
      * Test of reopen existing HostBalancer cache to test/demonstrate issue with
      * HostQueue for file: protocol
      */
     @Test
     public void testReopen() throws IOException, SpaceExceededException, InterruptedException {
-        boolean exceed134217727 = true;
-        int onDemandLimit = 1000;
         String hostDir = "C:\\filedirectory";
 
         // prepare one urls for push test
@@ -32,10 +34,9 @@ public class HostBalancerTest {
         DigestURL url = new DigestURL(urlstr);
         Request req = new Request(url, null);
 
-        deletedelete(queuesRoot); // start clean test
+        FileUtils.deletedelete(queuesRoot); // start clean test
 
-        HostBalancer hb = new HostBalancer(queuesRoot, onDemandLimit, exceed134217727);
-        Thread.sleep(100); // wait for file operation
+        HostBalancer hb = new HostBalancer(queuesRoot, ON_DEMAND_LIMIT, EXCEED_134217727, false);
         hb.clear();
 
         Thread.sleep(100);
@@ -58,8 +59,7 @@ public class HostBalancerTest {
 
         Thread.sleep(200); // wait a bit for file operation
 
-        hb = new HostBalancer(queuesRoot, onDemandLimit, exceed134217727); // reopen balancer
-        Thread.sleep(200); // wait a bit for file operation
+        hb = new HostBalancer(queuesRoot, ON_DEMAND_LIMIT, EXCEED_134217727, false); // reopen balancer
 
         assertEquals("size after reopen (with one existing url)", 1, hb.size()); // expect size=1 from previous push
         assertTrue("check existance of pushed url", hb.has(url.hash())); // check url exists (it fails as after reopen internal queue.hosthash is wrong)
