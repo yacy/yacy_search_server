@@ -30,7 +30,7 @@
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.24.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.24.jar"/>
 	<classpathentry kind="lib" path="lib/httpcore-4.4.8.jar"/>
-	<classpathentry kind="lib" path="lib/metadata-extractor-2.10.1.jar"/>
+	<classpathentry kind="lib" path="lib/metadata-extractor-2.11.0.jar"/>
 	<classpathentry kind="lib" path="lib/xmpcore-5.1.3.jar"/>
 	<classpathentry kind="lib" path="lib/jcifs-1.3.17.jar"/>
 	<classpathentry kind="lib" path="lib/guava-18.0.jar"/>
