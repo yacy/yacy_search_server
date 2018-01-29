@@ -5261,9 +5261,6 @@
     <trans-unit id="7d21764d" xml:space="preserve" approved="no" translate="yes">
        <source>"stop recrawl job"</source>
     </trans-unit>
-    <trans-unit id="c8a1de3a" xml:space="preserve" approved="no" translate="yes">
-       <source>to re-crawl documents selected with the given query.</source>
-    </trans-unit>
     <trans-unit id="5c907d7" xml:space="preserve" approved="no" translate="yes">
        <source>Re-Crawl Query Details</source>
     </trans-unit>
@@ -5279,8 +5276,98 @@
     <trans-unit id="ce0038c9" xml:space="preserve" approved="no" translate="yes">
        <source>update</source>
     </trans-unit>
-    <trans-unit id="9a13a76f" xml:space="preserve" approved="no" translate="yes">
-       <source>include failed urls</source>
+    <trans-unit id="bd92c8c3" xml:space="preserve" approved="no" translate="yes">
+       <source>to re-crawl documents selected with the given query.</source>
+    </trans-unit>
+    <trans-unit id="e4b8676f" xml:space="preserve" approved="no" translate="yes">
+       <source>Include failed URLs</source>
+    </trans-unit>
+    <trans-unit id="4d2cc460" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Field&lt;</source>
+    </trans-unit>
+    <trans-unit id="7f052acb" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;count&lt;</source>
+    </trans-unit>
+    <trans-unit id="3c7266be" xml:space="preserve" approved="no" translate="yes">
+       <source>Re-crawl works only with an embedded local Solr index!</source>
+    </trans-unit>
+    <trans-unit id="21136644" xml:space="preserve" approved="no" translate="yes">
+       <source>Simulate</source>
+    </trans-unit>
+    <trans-unit id="72379d4d" xml:space="preserve" approved="no" translate="yes">
+       <source>Check only how many documents would be selected for recrawl</source>
+    </trans-unit>
+    <trans-unit id="217b3471" xml:space="preserve" approved="no" translate="yes">
+       <source>"Browse metadata of the #[rows]# first selected documents"</source>
+    </trans-unit>
+    <trans-unit id="3825d1fa" xml:space="preserve" approved="no" translate="yes">
+       <source>document(s)&lt;/a&gt;#(/showSelectLink)# selected for recrawl.</source>
+    </trans-unit>
+    <trans-unit id="a248104" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Solr query &lt;</source>
+    </trans-unit>
+    <trans-unit id="9d0f3870" xml:space="preserve" approved="no" translate="yes">
+       <source>Set defaults</source>
+    </trans-unit>
+    <trans-unit id="58b79d6f" xml:space="preserve" approved="no" translate="yes">
+       <source>"Reset to default values"</source>
+    </trans-unit>
+    <trans-unit id="cc77a2e1" xml:space="preserve" approved="no" translate="yes">
+       <source>Last #(/jobStatus)#Re-Crawl job report</source>
+    </trans-unit>
+    <trans-unit id="61fbdbe4" xml:space="preserve" approved="no" translate="yes">
+       <source>Automatically refreshing</source>
+    </trans-unit>
+    <trans-unit id="af4ac853" xml:space="preserve" approved="no" translate="yes">
+       <source>An error occurred while trying to refresh automatically</source>
+    </trans-unit>
+    <trans-unit id="20fae44a" xml:space="preserve" approved="no" translate="yes">
+       <source>The job terminated early due to an error when requesting the Solr index.</source>
+    </trans-unit>
+    <trans-unit id="1aada46c" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Status&lt;</source>
+    </trans-unit>
+    <trans-unit id="e664c485" xml:space="preserve" approved="no" translate="yes">
+       <source>"Running"</source>
+    </trans-unit>
+    <trans-unit id="82eba8e2" xml:space="preserve" approved="no" translate="yes">
+       <source>"Shutdown in progress"</source>
+    </trans-unit>
+    <trans-unit id="f6a654dd" xml:space="preserve" approved="no" translate="yes">
+       <source>"Terminated"</source>
+    </trans-unit>
+    <trans-unit id="1e5dd5c0" xml:space="preserve" approved="no" translate="yes">
+       <source>Running::Shutdown in progress::Terminated</source>
+    </trans-unit>
+    <trans-unit id="609b4652" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Query&lt;</source>
+    </trans-unit>
+    <trans-unit id="7a2942b3" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Start time&lt;</source>
+    </trans-unit>
+    <trans-unit id="aa1ad8ec" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;End time&lt;</source>
+    </trans-unit>
+    <trans-unit id="b0c496ca" xml:space="preserve" approved="no" translate="yes">
+       <source>URLs added to the crawler queue for recrawl</source>
+    </trans-unit>
+    <trans-unit id="96c2caad" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Recrawled URLs&lt;</source>
+    </trans-unit>
+    <trans-unit id="7eb5d832" xml:space="preserve" approved="no" translate="yes">
+       <source>URLs rejected for some reason by the crawl stacker or the crawler queue. Please check the logs for more details.</source>
+    </trans-unit>
+    <trans-unit id="ac471974" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Rejected URLs&lt;</source>
+    </trans-unit>
+    <trans-unit id="47a10af5" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Malformed URLs&lt;</source>
+    </trans-unit>
+    <trans-unit id="6cf2982f" xml:space="preserve" approved="no" translate="yes">
+       <source>"#[malformedUrlsDeletedCount]# deleted from the index"</source>
+    </trans-unit>
+    <trans-unit id="8bd17283" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt; Refresh&lt;</source>
     </trans-unit>
   </body>
 </file>

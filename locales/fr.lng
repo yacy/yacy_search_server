@@ -1262,6 +1262,63 @@ Title==Titre
 "delete"=="Supprimer"
 #-----------------------------
 
+#File: IndexReIndexMonitor_p.html
+#---------------------------
+Field Re-Indexing<==Ré-indexation de champ<
+In case that an index schema of the embedded/local index has changed, all documents with missing field entries can be indexed again with a reindex job.==Lorsque le schéma de l'index embarqué/local a changé, tous les documents ayant des champs supprimés peuvent être ré-indexés via une tâche de ré-indexation.
+"refresh page"=="Rafraîchir la page"
+Documents in current queue<==Documents de la file courante<
+Documents processed<==Documents traités<
+current select query==Requête de sélection courante
+"start reindex job now"=="Démarrer la tâche maintenant"
+"stop reindexing"=="Arrêter la ré-indexation"
+Remaining field list==Liste de champs restants
+reindex documents containing these fields:==Ré-indexer les documents contenant ces champs :
+Re-Crawl Index Documents==Re-balayage et ré-indexation de documents
+Searches the local index and selects documents to add to the crawler (recrawl the document).==Recherche et sélectionne dans l'index local les documents à ajouter au balayeur (re-télécharge chaque document).
+This runs transparent as background job.==S'exécute en tant que tâche de fond.
+Documents are added to the crawler only if no other crawls are active==Les documents ne sont ajoutés au balayeur que si aucun autre balayage n'est actif,
+and are added in small chunks.==et sont ajoutés par petits paquets.
+"start recrawl job now"=="Démarrer la tâche maintenant"
+"stop recrawl job"=="Arrêter la tâche"
+to re-crawl documents selected with the given query.==pour re-balayer les documents sélectionnés avec la requête indiquée
+Re-Crawl Query Details==Détails du re-balayage
+Documents to process==Documents à traiter
+Current Query==Requête courante
+Edit Solr Query==Modifier la requête Solr
+update==Appliquer
+Include failed URLs==Inclure les URLs en échec
+>Field<==>Champ<
+>count<==>Nombre<
+Re-crawl works only with an embedded local Solr index!==Le re-balayage fonctionne seulement avec un index Solr local!
+Simulate==Simuler
+Check only how many documents would be selected for recrawl==Vérifier seulement combien de documents seraient sélectionnés pour être re-balayés
+"Browse metadata of the #[rows]# first selected documents"=="Parcourir les méta-données des #[rows]# premiers documents sélectionnés"
+document(s)</a>#(/showSelectLink)# selected for recrawl.==document(s)</a>#(/showSelectLink)# sélectionnés pour le re-balayage.
+>Solr query <==>Requête Solr <
+Set defaults==Valeurs par défaut
+"Reset to default values"=="Ré-initialiser avec les valeurs par défaut"
+Last #(/jobStatus)#Re-Crawl job report==Dernier #(/jobStatus)#Rapport de re-balayage
+Automatically refreshing==Rafraîchi automatiquement
+An error occurred while trying to refresh automatically==Une erreur est survenue lors du rafraîchissement automatique
+The job terminated early due to an error when requesting the Solr index.==La tâche s'est terminée de façon précoce suite une erreur d'accès à l'index Solr.
+>Status<==>Statut<
+"Running"=="En cours d'exécution"
+"Shutdown in progress"=="Arrêt en cours"
+"Terminated"=="Terminé"
+Running::Shutdown in progress::Terminated==En cours d'exécution::Arrêt en cours::Terminé
+>Query<==>Requête<
+>Start time<==>Moment de démarrage<
+>End time<==>Moment d'arrêt<
+URLs added to the crawler queue for recrawl==URLs ajoutées à la file de balayage pour re-balayage
+>Recrawled URLs<==>URLs re-balayées<
+URLs rejected for some reason by the crawl stacker or the crawler queue. Please check the logs for more details.==URLs rejetées par le contrôleur d'ajout ou la file de balayage. Veuillez consulter les logs pour plus de détails.
+>Rejected URLs<==>URLs rejetées<
+>Malformed URLs<==>URLs mal formées<
+"#[malformedUrlsDeletedCount]# deleted from the index"=="#[malformedUrlsDeletedCount]# supprimées de l'index"
+> Refresh<==> Rafraîchir<
+#-----------------------------
+
 #File: IndexTransfer_p.html
 #---------------------------
 The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==L'index local consiste actuellement en (au moins) #[wcount]# mots et #[ucount]# URLs.

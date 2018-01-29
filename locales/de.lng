@@ -2099,7 +2099,7 @@ Documents to process==Dokumente in Warteschlange
 Current Query==Aktuelle Abfrage
 Edit Solr Query==Edit Solr Abfrage
 update==aktualisieren
-include failed urls==inklusive Fehler-Urls
+Include failed URLs==inklusive Fehler-Urls
 #-----------------------------
 
 #File: Load_MediawikiWiki.html
