@@ -48,11 +48,12 @@ public class Translator_p {
                 prop.put("errmsg", 0);
             }
 
-            File lngfile = new File(sb.getAppPath("locale.source", "locales"), langcfg + ".lng");
+            final File localesFolder = sb.getAppPath("locale.source", "locales");
+            File lngfile = new File(localesFolder, langcfg + ".lng");
             TranslationManager localTransMgr = new TranslationManager(/*new File ("locales","master.lng.xlf")*/);
 
-            File masterxlf = new File(sb.getAppPath("locale.source", "locales"), "master.lng.xlf");
-            if (!masterxlf.exists()) localTransMgr.createMasterTranslationLists(masterxlf);
+            File masterxlf = new File(localesFolder, "master.lng.xlf");
+            if (!masterxlf.exists()) localTransMgr.createMasterTranslationLists(localesFolder, masterxlf);
             Map<String, Map<String, String>> origTrans = localTransMgr.joinMasterTranslationLists(masterxlf, lngfile);
             final File locallngfile = localTransMgr.getScratchFile(lngfile);
             Map<String, Map<String, String>> localTrans = localTransMgr.loadTranslationsLists(locallngfile); // TODO: this will read file twice
