@@ -289,9 +289,10 @@ public class dbtest {
 
         // start test
         final long startup = System.currentTimeMillis();
+        memprofiler profiler = null;
         try {
             // create a memory profiler
-            final memprofiler profiler = new memprofiler(1024, 320, 120, new File(tablename_test + ".profile.png"));
+            profiler = new memprofiler(1024, 320, 120, new File(tablename_test + ".profile.png"));
             profiler.start();
 
             // create the database access
@@ -432,6 +433,11 @@ public class dbtest {
             profiler.terminate();
         } catch (final Exception e) {
             ConcurrentLog.logException(e);
+        } finally {
+        	if(profiler != null) {
+        		profiler.terminate();
+        	}
+        	ConcurrentLog.shutdown();
         }
     }
 }
