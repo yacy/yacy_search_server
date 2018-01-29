@@ -26,6 +26,7 @@
 
 package net.yacy.search.ranking;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -36,7 +37,6 @@ import java.util.concurrent.Semaphore;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
-import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.LargeNumberCache;
 import net.yacy.document.Tokenizer;
@@ -257,7 +257,7 @@ public class ReferenceOrder {
            + ((flags.get(Tokenizer.flag_cat_hasaudio))     ? 255 << this.ranking.coeff_cathasaudio        : 0)
            + ((flags.get(Tokenizer.flag_cat_hasvideo))     ? 255 << this.ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Tokenizer.flag_cat_hasapp))       ? 255 << this.ranking.coeff_cathasapp          : 0)
-           + ((ByteBuffer.equals(t.getLanguage(), ASCII.getBytes(this.language))) ? 255 << this.ranking.coeff_language    : 0);
+           + ((Arrays.equals(t.getLanguage(), ASCII.getBytes(this.language))) ? 255 << this.ranking.coeff_language    : 0);
 
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 

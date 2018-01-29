@@ -29,6 +29,7 @@ package net.yacy.search.index;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -303,7 +304,7 @@ public class Segment {
                         byte[] hh = new byte[6]; // host hash
                         System.arraycopy(refidh, 6, hh, 0, 6);
                         if (ByteBuffer.equals(hh, 0, id, 6, 6)) {
-                            if (acceptSelfReference || !ByteBuffer.equals(refidh, id)) {
+                            if (acceptSelfReference || !Arrays.equals(refidh, id)) {
                                 internalIDs.put(refidh);
                                 internal++;
                             }

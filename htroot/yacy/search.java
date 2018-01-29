@@ -30,6 +30,7 @@
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -48,7 +49,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.gui.Audio;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -368,7 +368,7 @@ public final class search {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
                     indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsMaxCountHash());
                     indexabstract.append("indexabstract.").append(ASCII.String(theSearch.getAbstractsMaxCountHash())).append("=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
-                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(ByteBuffer.equals(theSearch.getAbstractsNearDHTHash(), theSearch.getAbstractsMaxCountHash())))) {
+                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(Arrays.equals(theSearch.getAbstractsNearDHTHash(), theSearch.getAbstractsMaxCountHash())))) {
                         // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
                         indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsNearDHTHash());
                         indexabstract.append("indexabstract.").append(ASCII.String(theSearch.getAbstractsNearDHTHash())).append("=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);

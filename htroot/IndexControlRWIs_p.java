@@ -27,6 +27,7 @@
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
@@ -42,7 +43,6 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
@@ -146,7 +146,7 @@ public class IndexControlRWIs_p {
             }
 
             if ( post.containsKey("keyhashsearch") ) {
-                if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                if ( keystring.isEmpty() || !Arrays.equals(Word.word2hash(keystring), keyhash) ) {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final SearchEvent theSearch = genSearchresult(prop, sb, keyhash, null);
@@ -246,7 +246,7 @@ public class IndexControlRWIs_p {
             }
 
             if ( post.containsKey("urllist") ) {
-                if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                if ( keystring.isEmpty() || !Arrays.equals(Word.word2hash(keystring), keyhash) ) {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final Bitfield flags = compileFlags(post);
@@ -261,7 +261,7 @@ public class IndexControlRWIs_p {
             	TransactionManager.checkPostTransaction(header, post);
             	
                 try {
-                    if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                    if ( keystring.isEmpty() || !Arrays.equals(Word.word2hash(keystring), keyhash) ) {
                         prop.put("keystring", "&lt;" + errmsg + "&gt;");
                     }
 

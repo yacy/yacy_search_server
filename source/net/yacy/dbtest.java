@@ -5,6 +5,7 @@ package net.yacy;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Random;
@@ -15,7 +16,6 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.CloneableIterator;
 import net.yacy.cora.order.NaturalOrder;
-import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.index.Index;
@@ -73,7 +73,7 @@ public class dbtest {
             final String s = UTF8.String(this.value).trim();
             if (s.isEmpty()) return false;
             final long source = Long.parseLong(s);
-            return ByteBuffer.equals(this.key, randomHash(source, source));
+            return Arrays.equals(this.key, randomHash(source, source));
         }
 
         public byte[] getKey() {
@@ -340,13 +340,13 @@ public class dbtest {
                     if (entry == null)
                         System.out.println("missing value for entry " + UTF8.String(key) + " in test table");
                     else
-                        if (!ByteBuffer.equals(entry.getColBytes(1, false), key)) System.out.println("wrong value for entry " + UTF8.String(key) + ": " + UTF8.String(entry.getColBytes(1, false)) + " in test table");
+                        if (!Arrays.equals(entry.getColBytes(1, false), key)) System.out.println("wrong value for entry " + UTF8.String(key) + ": " + UTF8.String(entry.getColBytes(1, false)) + " in test table");
                     if (table_reference != null) {
                         entry = table_reference.get(key, false);
                         if (entry == null)
                             System.out.println("missing value for entry " + UTF8.String(key) + " in reference table");
                         else
-                            if (!ByteBuffer.equals(entry.getColBytes(1, false), key)) System.out.println("wrong value for entry " + UTF8.String(key) + ": " + UTF8.String(entry.getColBytes(1, false)) + " in reference table");
+                            if (!Arrays.equals(entry.getColBytes(1, false), key)) System.out.println("wrong value for entry " + UTF8.String(key) + ": " + UTF8.String(entry.getColBytes(1, false)) + " in reference table");
                     }
 
                     if (i % 1000 == 0) {
