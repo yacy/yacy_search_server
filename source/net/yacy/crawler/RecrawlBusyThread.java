@@ -26,12 +26,14 @@ package net.yacy.crawler;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 
+import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -194,7 +196,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
             final CrawlProfile profile = sb.crawler.defaultRecrawlJobProfile;
 
             for (final DigestURL url : this.urlstack) {
-                final Request request = sb.loader.request(url, true, true);
+				final Request request = new Request(ASCII.getBytes(this.sb.peers.mySeed().hash), url, null, "",
+						new Date(), profile.handle(), 0, profile.timezoneOffset());
                 String acceptedError = sb.crawlStacker.checkAcceptanceChangeable(url, profile, 0);
                 if (!includefailed && acceptedError == null) { // skip check if failed docs to be included
                     acceptedError = sb.crawlStacker.checkAcceptanceInitially(url, profile);
