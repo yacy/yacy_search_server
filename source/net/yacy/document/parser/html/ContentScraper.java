@@ -191,6 +191,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final SizeLimitedMap<AnchorURL, EmbedEntry> embeds; // urlhash/embed relation
     private final List<ImageEntry> images; 
     private final SizeLimitedSet<AnchorURL> script, frames, iframes;
+    
+	/**
+	 * URLs of linked data item types referenced from HTML content with standard
+	 * annotations such as RDFa, microdata, microformats or JSON-LD
+	 */
+    private final SizeLimitedSet<DigestURL> linkedDataTypes;
+    
     private final SizeLimitedMap<String, String> metas;
     private final SizeLimitedMap<String, DigestURL> hreflang, navigation;
     private LinkedHashSet<String> titles;
@@ -260,6 +267,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.embeds = new SizeLimitedMap<AnchorURL, EmbedEntry>(maxLinks);
         this.frames = new SizeLimitedSet<AnchorURL>(maxLinks);
         this.iframes = new SizeLimitedSet<AnchorURL>(maxLinks);
+        this.linkedDataTypes = new SizeLimitedSet<>(maxLinks);
         this.metas = new SizeLimitedMap<String, String>(maxLinks);
         this.hreflang = new SizeLimitedMap<String, DigestURL>(maxLinks);
         this.navigation = new SizeLimitedMap<String, DigestURL>(maxLinks);
@@ -543,12 +551,49 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
     
-    private void checkOpts(Tag tag) {
+	/**
+	 * Parse the eventual microdata itemtype attribute of a tag and extract its
+	 * valid URL tokens when the itemscope attribute is present.
+	 * 
+	 * @param tagAttributes parsed HTML tag attributes.
+	 * @return a set of URLs eventually empty when no itemtype attribute is present
+	 *         or when its value is not valid
+	 * @see <a href="https://www.w3.org/TR/microdata/#dfn-itemtype">itemtype
+	 *      definition at W3C</a>
+	 * @see <a href=
+	 *      "https://html.spec.whatwg.org/multipage/microdata.html#attr-itemtype">itemtype
+	 *      definition at WHATWG</a>
+	 */
+	private Set<DigestURL> parseMicrodataItemType(final Properties tagAttributes) {
+		final Set<DigestURL> types = new HashSet<>();
+		if (tagAttributes != null) {
+			/*
+			 * The itemtype attribute must not be specified on elements that do not have an
+			 * itemscope attribute specified. So we lazily check here for itemscope boolean
+			 * attribute presence (strictly conforming parsing would also check it has no
+			 * value or the value is the empty string or "itemscope")
+			 */
+			if (tagAttributes.getProperty("itemscope") != null) {
+				final Set<String> itemTypes = parseSpaceSeparatedTokens(tagAttributes.getProperty("itemtype"));
+
+				for (final String itemType : itemTypes) {
+					try {
+						types.add(new DigestURL(itemType));
+					} catch (final MalformedURLException ignored) {
+						/* Each itemtype space-separated token must be a valid absolute URL */
+					}
+				}
+			}
+		}
+		return types;
+	}
+    
+    private void checkOpts(final Tag tag) {
         // vocabulary classes
         final String classprop = tag.opts.getProperty("class", EMPTY_STRING);
         this.vocabularyScraper.check(this.root, classprop, tag.content);
         
-        // itemprop (schema.org)
+        // itemprop microdata property (standard definition at https://www.w3.org/TR/microdata/#dfn-attr-itemprop)
         String itemprop = tag.opts.getProperty("itemprop");
         if (itemprop != null) {
             String propval = tag.opts.getProperty("content"); // value for <meta itemprop="" content=""> see https://html.spec.whatwg.org/multipage/microdata.html#values
@@ -620,7 +665,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 	 *            attribute string, may be null
 	 * @return a set of tokens eventually empty
 	 */
-	public static Set<String> parseSpaceSeparatedTokens(String attr) {
+	public static Set<String> parseSpaceSeparatedTokens(final String attr) {
 		Set<String> tokens = new HashSet<>();
 		/* Check attr string is not empty to avoid adding a single empty string
 		 * in result */
@@ -923,6 +968,22 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.fireScrapeTag1(tag.name, tag.opts, tag.content.getChars());
     }
     
+	/**
+	 * Scraping operation applied to any kind of tag opening, being either singleton
+	 * or paired tag, not restricted to tags listed in
+	 * {@link ContentScraper#linkTags0} and {@link ContentScraper#linkTags1}.
+	 */
+	@Override
+	public void scrapeAnyTagOpening(final String tagName, final Properties tagAttributes) {
+		if (tagAttributes != null) {
+			/*
+			 * HTML microdata can be annotated on any kind of tag, so we don't restrict this
+			 * scraping to the limited sets in linkTags0 and linkTags1
+			 */
+			this.linkedDataTypes.addAll(parseMicrodataItemType(tagAttributes));
+		}
+	}
+    
     /**
      * Add an anchor to the anchors list, and trigger any eventual listener
      * @param anchor anchor to add. Must not be null.
@@ -1092,6 +1153,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // returns a url (String) / name (String) relation
         return this.iframes;
     }
+    
+	/**
+	 * @return URLs of linked data item types referenced from HTML content with standard
+	 *         annotations such as RDFa, microdata, microformats or JSON-LD
+	 */
+	public SizeLimitedSet<DigestURL> getLinkedDataTypes() {
+		return this.linkedDataTypes;
+	}
 
     public Set<AnchorURL> getScript() {
         return this.script;
@@ -1164,7 +1233,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 		return this.contentSizeLimitExceeded || this.maxAnchorsExceeded || this.css.isLimitExceeded()
 				|| this.rss.isLimitExceeded() || this.embeds.isLimitExceeded() || this.metas.isLimitExceeded()
 				|| this.hreflang.isLimitExceeded() || this.navigation.isLimitExceeded() || this.script.isLimitExceeded()
-				|| this.frames.isLimitExceeded() || this.iframes.isLimitExceeded();
+				|| this.frames.isLimitExceeded() || this.iframes.isLimitExceeded() || this.linkedDataTypes.isLimitExceeded();
 	}
     
     /*
@@ -1384,6 +1453,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.script.clear();
         this.frames.clear();
         this.iframes.clear();
+        this.linkedDataTypes.clear();
         this.embeds.clear();
         this.images.clear();
         this.icons.clear();

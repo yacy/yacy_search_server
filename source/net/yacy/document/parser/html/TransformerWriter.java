@@ -292,6 +292,10 @@ public final class TransformerWriter extends Writer {
         final CharBuffer charBuffer = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
         ContentScraper.Tag tag = new ContentScraper.Tag(tagname, charBuffer.propParser());
         charBuffer.close();
+        
+        /* Apply processing relevant for any kind of tag opening */
+        this.scraper.scrapeAnyTagOpening(tag.name, tag.opts);
+        
         if (this.scraper != null && this.scraper.isTag0(tagname)) {
             // this single tag is collected at once here
             this.scraper.scrapeTag0(tag);
