@@ -68,10 +68,11 @@ public class Tokenizer {
         this.words = new TreeMap<String, Word>(NaturalOrder.naturalComparator);
         this.synonyms = new LinkedHashSet<String>();
         assert text != null;
-        String[] wordcache = new String[LibraryProvider.autotagging.getMaxWordsInTerm() - 1];
-        for (int i = 0; i < wordcache.length; i++) wordcache[i] = "";
+        final String[] wordcache = new String[LibraryProvider.autotagging.getMaxWordsInTerm() - 1];
+        for (int i = 0; i < wordcache.length; i++) {
+        	wordcache[i] = "";
+        }
         String k;
-        Tagging.Metatag tag;
         int wordlen;
         int allwordcounter = 0;
         int allsentencecounter = 0;
@@ -98,51 +99,9 @@ public class Tokenizer {
                 // get tags from autotagging
                 if (doAutotagging) {
                     Set<String> vocabularyNames = LibraryProvider.autotagging.getVocabularyNames();
-                    //Collection<Tagging> vocabularies = LibraryProvider.autotagging.getVocabularies();
-                    //assert vocabularyNames.size() == vocabularies.size();
-                    Map<String, String> vocMap = scraper == null ? null : scraper.removeVocMap(root);
-                    if (vocMap != null && vocMap.size() > 0) {
-                        for (Map.Entry<String, String> entry: vocMap.entrySet()) {
-                            String navigatorName = entry.getKey();
-                            String term = entry.getValue();
-                            vocabularyNames.remove(navigatorName); // prevent that this is used again for auto-annotation
-                            Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(navigatorName);
-                            if (vocabulary != null) {
-                                // extend the vocabulary
-                                String obj = vocabulary.getObjectlink(term);
-                                if (obj == null) try {vocabulary.put(term, "", root.toNormalform(true));} catch (IOException e) {} // this makes IO, be careful!
-                                // create annotation
-                                tag = vocabulary.getMetatagFromTerm(term);
-                                Set<Tagging.Metatag> tagset = new HashSet<>();
-                                tagset.add(tag);
-                                this.tags.put(navigatorName, tagset);
-                            }
-                        }
-                    }
-                    if (vocabularyNames.size() > 0) for (int wordc = 1; wordc <= wordcache.length + 1; wordc++) {
-                        // wordc is number of words that are tested
-                        StringBuilder sb = new StringBuilder();
-                        if (wordc == 1) {
-                            sb.append(word);
-                        } else {
-                            for (int w = 0; w < wordc - 1; w++) {
-                                sb.append(wordcache[wordcache.length - wordc + w + 1]).append(' ');
-                            }
-                            sb.append(word);
-                        }
-                        String testterm = sb.toString().trim();
-                        //System.out.println("Testing: " + testterm);
-                        tag = LibraryProvider.autotagging.getTagFromTerm(vocabularyNames, testterm);
-                        if (tag != null) {
-                            String navigatorName = tag.getVocabularyName();
-                            Set<Tagging.Metatag> tagset = this.tags.get(navigatorName);
-                            if (tagset == null) {
-                                tagset = new HashSet<Tagging.Metatag>();
-                                this.tags.put(navigatorName, tagset);
-                            }
-                            tagset.add(tag);
-                        }
-                    }
+                    extendVocabularies(root, scraper, vocabularyNames);
+                    
+                    extractAutoTagsFromText(wordcache, word, vocabularyNames);
                 }
                 // shift wordcache
                 System.arraycopy(wordcache, 1, wordcache, 0, wordcache.length - 1);
@@ -214,6 +173,89 @@ public class Tokenizer {
         // if text doesn't end with punktuation but has words after last found sentence, inc sentence count for trailing text.
         this.RESULT_NUMB_SENTENCES = allsentencecounter + (wordInSentenceCounter > 1 ? 1 : 0);
     }
+
+	/**
+	 * Check whether a single word or multiple ones match tags
+	 * from the given autotagging vocabularies. Then fill this instance "tags" map
+	 * with the eventually matching tags found.
+	 * 
+	 * @param wordcache
+	 *            the words to be checked for matching a tag as a single word or as combination of words 
+	 * @param word
+	 *            an additional word to be considered for tag matching
+	 * @param vocabularyNames
+	 *            names of the autotagging vocabularies to check
+	 */
+	protected void extractAutoTagsFromText(final String[] wordcache, final String word, final Set<String> vocabularyNames) {
+		Tagging.Metatag tag;
+		if (vocabularyNames.size() > 0) {
+			for (int wordc = 1; wordc <= wordcache.length + 1; wordc++) {
+				// wordc is number of words that are tested
+				StringBuilder sb = new StringBuilder();
+				if (wordc == 1) {
+					sb.append(word);
+				} else {
+					for (int w = 0; w < wordc - 1; w++) {
+						sb.append(wordcache[wordcache.length - wordc + w + 1]).append(' ');
+					}
+					sb.append(word);
+				}
+				String testterm = sb.toString().trim();
+				tag = LibraryProvider.autotagging.getTagFromTerm(vocabularyNames, testterm);
+				if (tag != null) {
+					String navigatorName = tag.getVocabularyName();
+					Set<Tagging.Metatag> tagset = this.tags.get(navigatorName);
+					if (tagset == null) {
+						tagset = new HashSet<Tagging.Metatag>();
+						this.tags.put(navigatorName, tagset);
+					}
+					tagset.add(tag);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Extend the specified vocabularies, with terms eventually found by the
+	 * vocabulary scraper for these vocabularies. The scraper is emptied after
+	 * processing, and extended vocabularies names are removed from the
+	 * vocabularyNames.
+	 * 
+	 * @param root
+	 *            the document URL
+	 * @param scraper
+	 *            the vocabulary scraper, eventually containing new terms scraped
+	 *            for the registered vocabularies
+	 * @param vocabularyNames
+	 *            vocabularies names to be extended
+	 */
+	protected void extendVocabularies(final DigestURL root, final VocabularyScraper scraper,
+			final Set<String> vocabularyNames) {
+		Tagging.Metatag tag;
+		Map<String, String> vocMap = scraper == null ? null : scraper.removeVocMap(root);
+		if (vocMap != null && vocMap.size() > 0) {
+		    for (Map.Entry<String, String> entry: vocMap.entrySet()) {
+		        String navigatorName = entry.getKey();
+		        String term = entry.getValue();
+		        vocabularyNames.remove(navigatorName); // prevent that this is used again for auto-annotation
+		        Tagging vocabulary = LibraryProvider.autotagging.getVocabulary(navigatorName);
+		        if (vocabulary != null) {
+		            // extend the vocabulary
+		            String obj = vocabulary.getObjectlink(term);
+		            if (obj == null) {
+		            	try {
+		            		vocabulary.put(term, "", root.toNormalform(true));
+		            	} catch (IOException e) {} // this makes IO, be careful!
+		            }
+		            // create annotation
+		            tag = vocabulary.getMetatagFromTerm(term);
+		            Set<Tagging.Metatag> tagset = new HashSet<>();
+		            tagset.add(tag);
+		            this.tags.put(navigatorName, tagset);
+		        }
+		    }
+		}
+	}
 
     /**
      * @return returns the words as word/indexWord relation map. All words are lowercase.

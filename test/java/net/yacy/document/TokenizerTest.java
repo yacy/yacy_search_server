@@ -1,7 +1,6 @@
 
 package net.yacy.document;
 
-import java.net.MalformedURLException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -17,7 +16,7 @@ public class TokenizerTest {
      * Test of words method, of class Tokenizer.
      */
     @Test
-    public void testWords() throws MalformedURLException {
+    public void testWords() {
         //  pos  =      1   2   3   4       5        6      7    8   9    10     // 1-letter words don't count
         String text = "One word is not a sentence because words are just words.";
         WordCache meaningLib = new WordCache(null);
@@ -43,7 +42,7 @@ public class TokenizerTest {
      */
     @Test
     public void testNumberOfSentences() {
-        Set<String> testText = new HashSet();
+        Set<String> testText = new HashSet<>();
         // text with 5 sentences
         testText.add("Sentence One. Sentence Two. Comment on this. This is sentence four! Good By................");
         testText.add("Sentence One. Sentence two. Sentence 3? Sentence 4! Sentence w/o punktuation at end of text");
