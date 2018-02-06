@@ -980,27 +980,16 @@ public final class QueryParams {
 	protected static void appendNavUrlQueryParams(final StringBuilder sb, final QueryParams theQuery, final String newModifier,
 			final boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
 		if (newModifier == null) {
-            if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
+            if (!theQuery.modifier.isEmpty()) {
+            	sb.append("+" + theQuery.modifier.toString());
+            }
         } else {
             if (!newModifier.isEmpty()) {
                 if (!theQuery.modifier.isEmpty()) {
                 	sb.append("+" + theQuery.modifier.toString());
                 }
                 if (newModifierReplacesOld) {
-                    int nmpi = newModifier.indexOf(":");
-                    if (nmpi > 0) {
-                        String nmp = newModifier.substring(0, nmpi) + ":";
-                        int i = sb.indexOf(nmp);
-                        if (i > 0) {
-                        	sb.setLength(i);
-                            if (sb.charAt(sb.length() - 1) == ' ') {
-                            	sb.setLength(sb.length() - 1);
-                            }
-                        }
-                        if (sb.charAt(sb.length() - 1) == '+') {
-                        	sb.setLength(sb.length() - 1);
-                        }
-                    }
+                    removeOldModifiersFromNavUrl(sb, newModifier);
                 }
                 try {
                 	sb.append("+" + URLEncoder.encode(newModifier, StandardCharsets.UTF_8.name()));
@@ -1039,6 +1028,40 @@ public final class QueryParams {
         if(authenticatedFeatures) {
         	sb.append("&auth");
         }
+	}
+
+	/**
+	 * Remove from the URL builder any query modifiers with the same name that the new modifier 
+	 * @param sb
+	 *            a StringBuilder holding the search URL navigation being built.
+	 *            Must not be null and contain the URL base and the query string
+	 *            with its eventual modifiers
+	 * @param newModifier
+	 *            a new modifier of form key:value. Must not be null.
+	 */
+	protected static void removeOldModifiersFromNavUrl(final StringBuilder sb, final String newModifier) {
+		int nmpi = newModifier.indexOf(":");
+		if (nmpi > 0) {
+		    final String newModifierKey = newModifier.substring(0, nmpi) + ":";
+		    int sameModifierIndex = sb.indexOf(newModifierKey);
+		    while (sameModifierIndex > 0) {
+		    	final int spaceModifierIndex = sb.indexOf(" ", sameModifierIndex);
+		    	if(spaceModifierIndex > sameModifierIndex) {
+		    		/* There are other modifiers after the matching one : we only remove the old matching modifier */
+		    		sb.delete(sameModifierIndex, spaceModifierIndex + 1);
+		    	} else {
+		    		/* The matching modifier is the last : we truncate the builder */
+		        	sb.setLength(sameModifierIndex);	
+		    	}
+		    	sameModifierIndex = sb.indexOf(newModifierKey);
+		    }
+		    if (sb.charAt(sb.length() - 1) == '+') {
+		    	sb.setLength(sb.length() - 1);
+		    }
+		    if (sb.charAt(sb.length() - 1) == ' ') {
+		    	sb.setLength(sb.length() - 1);
+		    }
+		}
 	}
 
 }

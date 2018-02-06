@@ -23,6 +23,9 @@
 package net.yacy.search.query;
 
 import java.net.MalformedURLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -232,5 +235,49 @@ public class QueryParamsTest {
 		final String filter = QueryParams.buildApproximateURLFilter(modifier, null);
 		
 		Assert.assertEquals(QueryParams.catchall_pattern.toString(), filter);
+	}
+	
+	/**
+	 * Test removal of old modifier(s) when building a search navigation URL.
+	 */
+	@Test
+	public void testRemoveOldModifiersFromNavUrl() {
+		final String baseURL = "yacysearch.html?query=test+search+terms";
+		
+		final String newModifier = "keywords:new";
+
+		final Map<String, String> modifiers2Expected = new HashMap<>();
+		/* No existing modifiers */
+		modifiers2Expected.put(baseURL, baseURL);
+		
+		/* No existing modifiers */
+		modifiers2Expected.put(baseURL + "+keywords:old", baseURL);
+		
+		/* One modifier matching the new modifier's name, but with a different value */
+		modifiers2Expected.put(baseURL + "+keywords:old", baseURL);
+		
+		/* One modifier matching the new modifier's name, with the same value */
+		modifiers2Expected.put(baseURL + "+keywords:new", baseURL);
+		
+		/* Two modifiers matching the new modifier's name */
+		modifiers2Expected.put(baseURL + "+keywords:old keywords:new", baseURL);
+		
+		/* One modifier with a different name than the new one */
+		modifiers2Expected.put(baseURL + "+site:example.org", baseURL + "+site:example.org");
+		
+		/* Two modifiers, only one matching the new modifier's name */
+		modifiers2Expected.put(baseURL + "+site:example.org keywords:old", baseURL + "+site:example.org");
+		
+		/* Three modifiers, the one not matching the new modifier's name in the middle of the others */
+		modifiers2Expected.put(baseURL + "+keywords:old site:example.org keywords:other", baseURL + "+site:example.org");
+		
+		/* Three modifiers, only one matching the new modifier's name. The others having two different naming styles. */
+		modifiers2Expected.put(baseURL + "+keywords:old /language/en site:example.org keywords:other", baseURL + "+/language/en site:example.org");
+		
+		for(final Entry<String, String> entry : modifiers2Expected.entrySet()) {
+			StringBuilder sb = new StringBuilder(entry.getKey());		
+			QueryParams.removeOldModifiersFromNavUrl(sb, newModifier);
+			Assert.assertEquals(entry.getValue(), sb.toString());
+		}
 	}
 }
