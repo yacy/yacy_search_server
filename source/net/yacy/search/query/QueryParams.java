@@ -881,23 +881,55 @@ public final class QueryParams {
     }
 
     /**
-	 * make a query anchor tag
+	 * Build a search query URL from the given parameters.
 	 * 
+	 * @param ext extension of the servlet to request (e.g. "html", "rss", "json"...)
+	 * @param page index of the wanted page (first page is zero)
+	 * @param theQuery holds the main query parameters. Must not be null.
+	 * @param newModifier a eventual new modifier to append to the eventual ones already defined in theQuery QueryParams. Can be null.
+	 * @param newModifierReplacesOld when newModifier is not null, it is appended in addition
+	 *            to existing modifier(s) - if it is empty it overwrites (clears) existing
+	 *            modifier(s)
 	 * @param authenticatedFeatures
 	 *            when true, access to authentication protected search features is
 	 *            wanted
-	 * @return the anchor url builder
+	 * @return a StringBuilder instance with the URL to the new search result page
 	 */
 	public static StringBuilder navurl(final RequestHeader.FileType ext, final int page, final QueryParams theQuery,
-			final String newQueryString, boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
+			final String newModifier, boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
 
-		final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, newModifierReplacesOld,
+		final StringBuilder sb = navurlBase(ext, theQuery, newModifier, newModifierReplacesOld,
 				authenticatedFeatures);
 
         sb.append("&startRecord=");
         sb.append(page * theQuery.itemsPerPage());
 
         return sb;
+    }
+	
+    /**
+	 * Build a search query URL with a new search query string, but keeping any already defined eventual modifiers.
+	 * 
+	 * @param ext extension of the servlet to request (e.g. "html", "rss", "json"...)
+	 * @param page index of the wanted page (first page is zero)
+	 * @param theQuery holds the main query parameters. Must not be null.
+	 * @param authenticatedFeatures
+	 *            when true, access to authentication protected search features is
+	 *            wanted
+	 * @return the URL to the new search result page
+	 */
+	public static String navUrlWithNewQueryString(final RequestHeader.FileType ext, final int page, final QueryParams theQuery,
+			final String newQueryString, final boolean authenticatedFeatures) {
+
+        final StringBuilder sb = new StringBuilder(120);
+        sb.append("yacysearch.");
+        sb.append(ext.name().toLowerCase(Locale.ROOT));
+        sb.append("?query=");
+
+        sb.append(new QueryGoal(newQueryString).getQueryString(true));
+        appendNavUrlQueryParams(sb, theQuery, null, false, authenticatedFeatures);
+
+        return sb.toString();
     }
 
      /**
@@ -907,11 +939,11 @@ public final class QueryParams {
 	 *            extension of servlet (e.g. html, rss)
 	 * @param theQuery
 	 *            search query
-	 * @param newModifier
-	 *            optional new modifier. - if null existing modifier of theQuery is
+	 * @param newModifier optional new modifier. - if null existing modifier(s) of theQuery are
 	 *            appended - if not null this new modifier is appended in addition
-	 *            to existing modifier - if isEmpty overwrites (clears) existing
-	 *            modifier
+	 *            to eventually existing modifier(s) - if isEmpty overwrites (clears) any eventual existing
+	 *            modifier(s)
+	 * @param newModifierReplacesOld considered only when newModifier is not null and not empty. When true, any existing modifiers with the same name are replaced with the new one.
 	 * @param authenticatedFeatures
 	 *            when true, access to authentication protected search features is
 	 *            wanted
@@ -920,24 +952,54 @@ public final class QueryParams {
 	public static StringBuilder navurlBase(final RequestHeader.FileType ext, final QueryParams theQuery,
 			final String newModifier, final boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
 
-        StringBuilder sb = new StringBuilder(120);
+        final StringBuilder sb = new StringBuilder(120);
         sb.append("yacysearch.");
         sb.append(ext.name().toLowerCase(Locale.ROOT));
         sb.append("?query=");
 
         sb.append(theQuery.getQueryGoal().getQueryString(true));
-        if (newModifier == null) {
+        appendNavUrlQueryParams(sb, theQuery, newModifier, newModifierReplacesOld, authenticatedFeatures);
+
+        return sb;
+    }
+
+    /**
+	 * Append search query parameters to the URL builder already filled with the beginning of the URL.
+	 * 
+	 * @param sb the URL string builder to fill. Must not be null.
+	 * @param theQuery holds the main query parameters. Must not be null.
+	 * @param newModifier optional new modifier. - if null existing modifier(s) of theQuery are
+	 *            appended - if not null this new modifier is appended in addition
+	 *            to eventually existing modifier(s) - if isEmpty overwrites (clears) any eventual existing
+	 *            modifier(s)
+	 * @param newModifierReplacesOld considered only when newModifier is not null and not empty. When true, any existing modifiers with the same name are replaced with the new one.
+	 * @param authenticatedFeatures
+	 *            when true, access to authentication protected search features is
+	 *            wanted
+	 */
+	protected static void appendNavUrlQueryParams(final StringBuilder sb, final QueryParams theQuery, final String newModifier,
+			final boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
+		if (newModifier == null) {
             if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
         } else {
             if (!newModifier.isEmpty()) {
-                if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
+                if (!theQuery.modifier.isEmpty()) {
+                	sb.append("+" + theQuery.modifier.toString());
+                }
                 if (newModifierReplacesOld) {
                     int nmpi = newModifier.indexOf(":");
                     if (nmpi > 0) {
                         String nmp = newModifier.substring(0, nmpi) + ":";
                         int i = sb.indexOf(nmp);
-                        if (i > 0) sb = new StringBuilder(sb.substring(0, i).trim());
-                        if (sb.charAt(sb.length() - 1) == '+') sb.setLength(sb.length() - 1);
+                        if (i > 0) {
+                        	sb.setLength(i);
+                            if (sb.charAt(sb.length() - 1) == ' ') {
+                            	sb.setLength(sb.length() - 1);
+                            }
+                        }
+                        if (sb.charAt(sb.length() - 1) == '+') {
+                        	sb.setLength(sb.length() - 1);
+                        }
                     }
                 }
                 try {
@@ -977,8 +1039,6 @@ public final class QueryParams {
         if(authenticatedFeatures) {
         	sb.append("&auth");
         }
-
-        return sb;
-    }
+	}
 
 }

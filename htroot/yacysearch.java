@@ -804,13 +804,9 @@ public class yacysearch {
                         try {
                             suggestion = meanIt.next().toString();
                             prop.put("didYouMean_suggestions_" + meanCount + "_word", suggestion);
-                            prop.put(
-                                "didYouMean_suggestions_" + meanCount + "_url",
-                                QueryParams.navurl(
-                                    RequestHeader.FileType.HTML,
-                                    0,
-                                    theQuery,
-                                    suggestion, true, authenticatedUserName != null).toString());
+							prop.put("didYouMean_suggestions_" + meanCount + "_url",
+									QueryParams.navUrlWithNewQueryString(RequestHeader.FileType.HTML, 0, theQuery,
+											suggestion, authenticatedUserName != null));
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
                         } catch (final ConcurrentModificationException e) {
