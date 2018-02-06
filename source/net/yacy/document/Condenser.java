@@ -26,11 +26,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.SortedSet;
 
 import org.apache.solr.common.params.MapSolrParams;
@@ -40,8 +42,12 @@ import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.analysis.EnhancedTextProfileSignature;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
+import net.yacy.cora.language.synonyms.AutotaggingLibrary;
+import net.yacy.cora.lod.vocabulary.Tagging;
+import net.yacy.cora.lod.vocabulary.Tagging.Metatag;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.language.Identificator;
@@ -190,6 +196,10 @@ public final class Condenser extends Tokenizer {
                 }
             }
         }
+        
+        if(doAutotagging) {
+        	extractAutoTagsFromLinkedDataTypes(document.getLinkedDataTypes(), LibraryProvider.autotagging);
+        }
 
         // extend the tags in the document object with autotagging tags
         if (!this.tags.isEmpty()) {
@@ -214,6 +224,36 @@ public final class Condenser extends Tokenizer {
         /* Restore the current thread initial name */
         Thread.currentThread().setName(initialThreadName);
     }
+    
+	/**
+	 * Search for tags matching the given linked data types identifiers (absolute
+	 * URLs) in the given autotagging library. Then fill this instance "tags" map
+	 * with the eventually matching tags found.
+	 * 
+	 * @param linkedDataTypes
+	 *            a set of linked data typed items identifiers (absolute URLs) to
+	 *            search
+	 * @param tagLibrary
+	 *            the autotagging library holding vocabularies to search in
+	 */
+	protected void extractAutoTagsFromLinkedDataTypes(final Set<DigestURL> linkedDataTypes,
+			final AutotaggingLibrary tagLibrary) {
+		if (linkedDataTypes == null || tagLibrary == null) {
+			return;
+		}
+		for (final DigestURL linkedDataType : linkedDataTypes) {
+			final Set<Metatag> tags = tagLibrary.getTagsFromTermURL(linkedDataType);
+			for (final Metatag tag : tags) {
+				final String navigatorName = tag.getVocabularyName();
+				Set<Tagging.Metatag> tagset = this.tags.get(navigatorName);
+				if (tagset == null) {
+					tagset = new HashSet<Metatag>();
+					this.tags.put(navigatorName, tagset);
+				}
+				tagset.add(tag);
+			}
+		}
+	}
 
     private void insertTextToWords(
             final SentenceReader text,

@@ -951,6 +951,11 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return this.protocol;
     }
 
+    /**
+     * @return this URL fragment or null if has no fragment
+     * @see <a href="https://url.spec.whatwg.org/#concept-url-fragment">URL fragment concept at WHATWG</a>
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.5">URL fragment section in RFC 3986</a> 
+     */
     public String getRef() {
         return this.anchor;
     }

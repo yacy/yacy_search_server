@@ -419,12 +419,28 @@ public final class Switchboard extends serverSwitch {
             public void run() {
                 Thread.currentThread().setName("LibraryProvider.initialize");
                 LibraryProvider.initialize(Switchboard.this.dictionariesPath);
-                // persistent Vocabulary Switch
-                Set<String> omit = Switchboard.this.getConfigSet("search.result.show.vocabulary.omit");
-                for (String o: omit) {
-                    Tagging t = LibraryProvider.autotagging.getVocabulary(o);
-                    if (t != null) t.setFacet(false);
+                // persistent Vocabulary Switches
+                final Set<String> omit = Switchboard.this.getConfigSet("search.result.show.vocabulary.omit");
+                for (final String o: omit) {
+                    final Tagging t = LibraryProvider.autotagging.getVocabulary(o);
+                    if (t != null) {
+                    	t.setFacet(false);
+                    } else {
+                    	log.config("search.result.show.vocabulary.omit configuration value contains an unknown vocabulary name : " + o);
+                    }
                 }
+                
+				final Set<String> linkedDataVocs = Switchboard.this
+						.getConfigSet(SwitchboardConstants.VOCABULARIES_MATCH_LINKED_DATA_NAMES);
+				for (final String vocName : linkedDataVocs) {
+					final Tagging t = LibraryProvider.autotagging.getVocabulary(vocName);
+					if (t != null) {
+						t.setMatchFromLinkedData(true);
+					} else {
+						log.config(SwitchboardConstants.VOCABULARIES_MATCH_LINKED_DATA_NAMES
+								+ " configuration value contains an unknown vocabulary name : " + vocName);
+					}
+				}
 
                 Thread.currentThread().setName("ProbabilisticClassification.initialize");
                 ProbabilisticClassifier.initialize(Switchboard.this.classificationPath);

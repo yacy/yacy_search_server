@@ -162,6 +162,15 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <dt>Prefix</dt><dd>#[prefix]#</dd>
         <dt>Objectspace</dt><dd>#(editable)##[objectspace]#::<input type="text" name="objectspace" value="#[objectspace]#" size="78" maxlength="128" /><br/>if set, uses the predicate <a href="#[objectspacepredicate]#" target="_blank">#[objectspacepredicate]#</a> for generated objects. Hint: use 'http://dbpedia.org/resource/' as default.#(/editable)#</dd>
         <dt>Is Facet?</dt><dd><input type="checkbox" name="isFacet"#(isFacet)#:: checked="checked"#(/isFacet)#/> (If checked, this vocabulary is used for search facets. Not feasible for large vocabularies!)</dd>
+        <dt>Match terms from</dt>
+        <dd>
+        	<label>
+          		<input type="radio" name="vocabularies.matchLinkedData" value="false" #(vocabularies.matchLinkedData)#checked="checked"::#(/vocabularies.matchLinkedData)# />Cleartext
+          	</label>
+          	<label>
+          		<input type="radio" name="vocabularies.matchLinkedData" value="true" #(vocabularies.matchLinkedData)#::checked="checked"#(/vocabularies.matchLinkedData)# />Linked data/Semantic web annotations
+          	</label>
+        </dd>
       </dl>
       <table class="sortable" border="0">
       <tr class="TableHeader" valign="bottom">

@@ -214,6 +214,7 @@ public class htmlParser extends AbstractParser implements Parser {
                 scraper.getDate());
         ppd.setScraperObject(scraper);
         ppd.setIcons(scraper.getIcons());
+        ppd.setLinkedDataTypes(scraper.getLinkedDataTypes());
         ppd.setPartiallyParsed(scraper.isLimitsExceeded());
         
         return ppd;

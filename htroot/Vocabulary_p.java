@@ -49,6 +49,7 @@ import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -238,13 +239,27 @@ public class Vocabulary_p {
                         }
                     }
                     
-                    // check the isFacet property
+                    // check the isFacet and isMatchFromLinkedData properties
                     if (vocabulary != null && post.containsKey("set")) {
                         boolean isFacet = post.getBoolean("isFacet");
                         vocabulary.setFacet(isFacet);
                         Set<String> omit = env.getConfigSet("search.result.show.vocabulary.omit");
-                        if (isFacet) omit.remove(vocabularyName); else omit.add(vocabularyName);
+                        if (isFacet) {
+                        	omit.remove(vocabularyName); 
+                        } else {
+                        	omit.add(vocabularyName);
+                        }
                         env.setConfig("search.result.show.vocabulary.omit", omit);
+                        
+                        boolean isMatchFromLinkedData = post.getBoolean("vocabularies.matchLinkedData");
+                        vocabulary.setMatchFromLinkedData(isMatchFromLinkedData);
+                        final Set<String> matchLinkedDataVocs = env.getConfigSet(SwitchboardConstants.VOCABULARIES_MATCH_LINKED_DATA_NAMES);
+                        if (isMatchFromLinkedData) {
+                        	matchLinkedDataVocs.add(vocabularyName);
+                        } else {
+                        	matchLinkedDataVocs.remove(vocabularyName); 
+                        }
+                        env.setConfig(SwitchboardConstants.VOCABULARIES_MATCH_LINKED_DATA_NAMES, matchLinkedDataVocs);
                     }
                 }
             } catch (final IOException e) {
@@ -273,6 +288,7 @@ public class Vocabulary_p {
             prop.putXML("edit_namexml", vocabulary.getName());
             prop.putHTML("edit_namespace", vocabulary.getNamespace());
             prop.put("edit_isFacet", vocabulary.isFacet() ? 1 : 0);
+            prop.put("edit_vocabularies.matchLinkedData", vocabulary.isMatchFromLinkedData());
             prop.put("edit_size", vocabulary.size());
             prop.putHTML("edit_predicate", vocabulary.getPredicate());
             prop.putHTML("edit_prefix", Tagging.DEFAULT_PREFIX);

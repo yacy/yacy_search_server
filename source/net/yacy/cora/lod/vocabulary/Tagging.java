@@ -47,6 +47,9 @@ public class Tagging {
 
     public final static String DEFAULT_NAMESPACE= "http://yacy.net/autotagging#";
     public final static String DEFAULT_PREFIX = "tags";
+    
+    /** Default value for the property matchFromLinkedData */
+    public final static boolean DEFAULT_MATCH_FROM_LINKED_DATA = false;
 
     private final String navigatorName;
     private final Map<String, String> synonym2term;
@@ -55,7 +58,16 @@ public class Tagging {
     private final Map<String, TaggingEntry> term2entries;
     
     private File propFile;
-    private boolean isFacet; // true if the vocabulary shall generate a navigation facet
+    
+    /** true if the vocabulary shall generate a navigation facet */
+    private boolean isFacet;
+    
+	/**
+	 * True when this vocabulary terms should only be matched from linked data types
+	 * annotations (with microdata, RDFa, microformats...) instead of clear text
+	 * words
+	 */
+	private boolean matchFromLinkedData;
 
     private String predicate, namespace, objectspace;
 
@@ -101,6 +113,7 @@ public class Tagging {
         this.objectspace = null;
         this.propFile = null;
         this.isFacet = true;
+        this.matchFromLinkedData = DEFAULT_MATCH_FROM_LINKED_DATA;
     }
 
     public Tagging(String name, File propFile) throws IOException {
@@ -283,6 +296,25 @@ public class Tagging {
     
     public void setFacet(boolean isFacet) {
         this.isFacet = isFacet;
+    }
+    
+	/**
+	 * @return true when this vocabulary terms should be matched from linked data
+	 *         types annotations (with microdata, RDFa, microformats...) instead of
+	 *         clear text words
+	 */
+    public boolean isMatchFromLinkedData() {
+		return this.matchFromLinkedData;
+	}
+    
+	/**
+	 * @param facetFromLinkedData
+	 *            true when this vocabulary terms should be matched from linked
+	 *            data types annotations (with microdata, RDFa, microformats...)
+	 *            instead of clear text words
+	 */
+    public void setMatchFromLinkedData(final boolean facetFromLinkedData) {
+    	this.matchFromLinkedData = facetFromLinkedData;
     }
     
     public int size() {
@@ -525,16 +557,41 @@ public class Tagging {
         return this.propFile;
     }
 
+	/**
+	 * @param word
+	 *            a synonym to look for
+	 * @return a Metatag instance with the matching term, or null when the synonym
+	 *         is not in this vocabulary.
+	 */
     public Metatag getMetatagFromSynonym(final String word) {
         String printname = this.synonym2term.get(word);
         if (printname == null) return null;
         return new Metatag(printname);
     }
-
-    public Metatag getMetatagFromTerm(final String word) {
-        return new Metatag(word);
+    
+	/**
+	 * @param term
+	 *            a term to look for
+	 * @return a Metatag instance with the matching term, or null when it is not in
+	 *         this vocabulary.
+	 */
+    public Metatag getMetatagFromTerm(final String term) {
+        TaggingEntry entry = this.term2entries.get(term);
+        if(entry == null) {
+        	return null;
+        }
+        return new Metatag(term);
     }
 
+	/**
+	 * @param word
+	 *            the object of the Metatag
+	 * @return a new Metatag instance related to this vocabulary
+	 */
+    public Metatag buildMetatagFromTerm(final String word) {
+        return new Metatag(word);
+    }
+    
     public Set<String> tags() {
         return this.synonym2term.keySet();
     }

@@ -279,6 +279,11 @@ surrogates.out = DATA/SURROGATES/out
 # this directory also contains subdirectories for input sources, the did-you-mean function and other
 dictionaries = DATA/DICTIONARIES
 
+# Set of comma separated vocabulary names whose terms should only be matched 
+# from linked data types annotations in documents (with microdata, RDFa, microformats...) 
+# instead of cleartext words
+vocabularies.matchLinkedData.names =
+
 # a path to the classification directory
 # each subdirectory is the name of a context (which becomes a navigator) with '.txt' files
 # containing texts to teach a bayesian filter. One of the files must be named 'negative.txt'.
@@ -887,6 +892,7 @@ search.result.show.cache = true
 search.result.show.proxy = false
 search.result.show.hostbrowser = true
 search.result.show.vocabulary = false
+# Set of comma separated vocabulary names not to be used as search results facets
 search.result.show.vocabulary.omit = 
 search.result.show.snapshots = false
 # when true, display the raw ranking score value

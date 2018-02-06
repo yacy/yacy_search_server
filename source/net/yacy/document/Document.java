@@ -87,8 +87,16 @@ public class Document {
     // text in image tags.
     private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks; // TODO: check if redundant value (set to key.getNameProperty()) is needed
     private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
+    
     /** links to icons that belongs to the document (mapped by absolute URL) */
     private Map<DigestURL, IconEntry> icons;
+    
+	/**
+	 * URLs of linked data item types/classes referenced by the document (for example in
+	 * HTML with standard annotations such as RDFa, microdata, microformats or
+	 * JSON-LD)
+	 */
+	private Set<DigestURL> linkedDataTypes;
     private boolean resorted;
     private final Set<String> languages;
     private boolean indexingDenied;
@@ -145,6 +153,7 @@ public class Document {
         this.videolinks = null;
         this.applinks = null;
         this.icons = new HashMap<>();
+        this.linkedDataTypes = new HashSet<>();
         this.resorted = false;
         this.inboundlinks = null;
         this.outboundlinks = null;
@@ -817,7 +826,7 @@ dc_rights
      * Set links to icons that belongs to the document (mapped by absolute URL)
      * @param icons
      */
-    public void setIcons(Map<DigestURL, IconEntry> icons) {
+    public void setIcons(final Map<DigestURL, IconEntry> icons) {
     	/* Better to ensure now icons property will not be null */
     	if(icons != null) {
     		this.icons = icons;	
@@ -825,6 +834,28 @@ dc_rights
     		this.icons = new HashMap<>();
     	}
 	}
+    
+	/**
+	 * @return URLs of linked data item types/classes referenced by the document (for example in
+	 * HTML with standard annotations such as RDFa, microdata, microformats or
+	 * JSON-LD)
+	 */
+    public Set<DigestURL> getLinkedDataTypes() {
+		return this.linkedDataTypes;
+	}
+    
+	/**
+	 * @return URLs of linked data item types/classes referenced by the document
+	 */
+    public void setLinkedDataTypes(final Set<DigestURL> linkedDataTypes) {
+    	if(linkedDataTypes != null) {
+    		/* Ensure non null property */
+    		this.linkedDataTypes = linkedDataTypes;
+    	} else {
+    		this.linkedDataTypes.clear();
+    	}
+    }
+    
 
     public int inboundLinkNofollowCount() {
         if (this.inboundlinks == null) resortLinks();

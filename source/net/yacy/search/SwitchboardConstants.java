@@ -411,6 +411,11 @@ public final class SwitchboardConstants {
     public static final String DICTIONARY_SOURCE_PATH         = "dictionaries";
     public static final String DICTIONARY_SOURCE_PATH_DEFAULT = "DATA/DICTIONARIES";
     
+    /** Setting key for a set of comma separated vocabulary names whose terms should only be matched 
+    * from linked data types annotations in documents (with microdata, RDFa, microformats...) 
+    * instead of cleartext words */
+    public static final String VOCABULARIES_MATCH_LINKED_DATA_NAMES = "vocabularies.matchLinkedData.names";
+    
     public static final String CLASSIFICATION_SOURCE_PATH         = "classification";
     public static final String CLASSIFICATION_SOURCE_PATH_DEFAULT = "DATA/CLASSIFICATION";
 
