@@ -794,7 +794,7 @@ public class yacysearch {
             final int meanMax = (post != null) ? post.getInt("meanCount", 0) : 0;
 
             prop.put("meanCount", meanMax);
-            if ( meanMax > 0 && !json && !rss && sb.index.connectedRWI()) {
+            if ( meanMax > 0 && !json && !rss) {
                 final DidYouMean didYouMean = new DidYouMean(indexSegment, querystring);
                 final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(100, 5, sb.index.fulltext().collectionSize() < 2000000).iterator();
                 int meanCount = 0;
