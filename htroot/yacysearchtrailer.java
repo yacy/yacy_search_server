@@ -144,21 +144,22 @@ public class yacysearchtrailer {
                 nav = "%2Flanguage%2F" + name;
                 /* Avoid double percent encoding in QueryParams.navurl */
                 rawNav = "/language/" + name;
+                final String navUrl;
                 if (theSearch.query.modifier.language == null || !theSearch.query.modifier.language.contains(name)) {
                     pos++;
                     prop.put("nav-languages_element_" + i + "_on", 1);
                     prop.put(fileType, "nav-languages_element_" + i + "_modifier", nav);
+					navUrl = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString();
                 } else {
                     neg++;                    
                     prop.put("nav-languages_element_" + i + "_on", 0);
                     prop.put(fileType, "nav-languages_element_" + i + "_modifier", "-" + nav);
-                    nav="";
-                    rawNav = "";
+					navUrl = QueryParams.navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav,
+							authenticated);
                 }
                 String longname = ISO639.country(name);
                 prop.put(fileType, "nav-languages_element_" + i + "_name", longname == null ? name : longname);
-				prop.put(fileType, "nav-languages_element_" + i + "_url",
-						QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString());
+				prop.put(fileType, "nav-languages_element_" + i + "_url", navUrl);
                 prop.put(fileType, "nav-languages_element_" + i + "_id", "languages_" + i);
                 prop.put("nav-languages_element_" + i + "_count", count);
                 prop.put("nav-languages_element_" + i + "_nl", 1);
@@ -238,22 +239,23 @@ public class yacysearchtrailer {
                 nav = "%2F" + name;
                 /* Avoid double percent encoding in QueryParams.navurl */
                 rawNav = "/" + name;
+                final String url;
                 if (oldProtocolModifier == null || !oldProtocolModifier.equals(name)) {
                     pos++;
                     prop.put("nav-protocols_element_" + i + "_on", 0);
                     prop.put("nav-protocols_element_" + i + "_onclick", 0);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", nav);
+					url = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString();
                 } else {
                     neg++;                    
                     prop.put("nav-protocols_element_" + i + "_on", 1);
                     prop.put("nav-protocols_element_" + i + "_onclick", 1);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", "-" + nav);
-                    nav="";
-                    rawNav = "";
+					url = QueryParams
+							.navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav, authenticated)
+							.toString();
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
-				String url = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated)
-						.toString();
                 prop.put("nav-protocols_element_" + i + "_onclick_url", url);
                 prop.put(fileType, "nav-protocols_element_" + i + "_url", url);
                 prop.put("nav-protocols_element_" + i + "_count", count);
@@ -346,18 +348,18 @@ public class yacysearchtrailer {
                     nav = "%2Fvocabulary%2F" + navname + "%2F" + MultiProtocolURL.escape(Tagging.encodePrintname(name)).toString();
                     /* Avoid double percent encoding in QueryParams.navurl */
                     rawNav = "/vocabulary/" + navname + "/" + MultiProtocolURL.escape(Tagging.encodePrintname(name)).toString();
+                    final String navUrl;
                     if (!theSearch.query.modifier.toString().contains("/vocabulary/" + navname + "/" + name.replace(' ', '_'))) {
                         prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 1);
                         prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", nav);
+                        navUrl = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString();
                     } else {
                         prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_on", 0);
                         prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_modifier", "-" + nav);
-                        nav="";
-                        rawNav = "";
+                        navUrl = QueryParams.navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav, authenticated);
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-					prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", QueryParams
-							.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString());
+					prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", navUrl);
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_id", "vocabulary_" + navname + "_" + i);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
@@ -404,20 +406,21 @@ public class yacysearchtrailer {
                     nav = "";
                 }
                 boolean isactive = navi.modifieractive(theSearch.query.modifier, name);
+                final String navUrl;
                 if (!isactive) {
                     pos++;
                     prop.put("navs_" + ni + "_element_" + i + "_on", 1);
                     prop.put(fileType, "navs_" + ni + "_element_" + i + "_modifier", nav);
+					navUrl = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString();
                 } else {
                     neg++;
                     prop.put("navs_" + ni + "_element_" + i + "_on", 0);
                     prop.put(fileType, "navs_" + ni + "_element_" + i + "_modifier", "-" + nav);
-                    nav = "";
-                    rawNav = "";
+					navUrl = QueryParams.navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav,
+							authenticated);
                 }
                 prop.put(fileType, "navs_" + ni + "_element_" + i + "_name", navi.getElementDisplayName(name));
-				prop.put(fileType, "navs_" + ni + "_element_" + i + "_url", QueryParams
-						.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString());
+				prop.put(fileType, "navs_" + ni + "_element_" + i + "_url", navUrl);
                 prop.put(fileType, "navs_" + ni + "_element_" + i + "_id", naviname + "_" + i);
                 prop.put("navs_" + ni + "_element_" + i + "_count", count);
                 prop.put("navs_" + ni + "_element_" + i + "_nl", 1);

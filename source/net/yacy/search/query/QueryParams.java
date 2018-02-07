@@ -44,6 +44,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.util.automaton.Automata;
 import org.apache.lucene.util.automaton.Automaton;
 import org.apache.lucene.util.automaton.RegExp;
@@ -908,6 +909,47 @@ public final class QueryParams {
     }
 	
     /**
+	 * Build a search query URL from the given parameters, removing only the given single query modifier.
+	 * 
+	 * @param ext extension of the servlet to request (e.g. "html", "rss", "json"...)
+	 * @param page index of the wanted page (first page is zero)
+	 * @param theQuery holds the main query parameters. Must not be null.
+	 * @param modifierToRemove the query modifier to remove (e.g. "keyword:word", "/language/en", "site:example.org"...)
+	 * @param authenticatedFeatures
+	 *            when true, access to authentication protected search features is
+	 *            wanted
+	 * @return the URL to the new search result page
+	 */
+	public static String navUrlWithSingleModifierRemoved(final RequestHeader.FileType ext, final int page, final QueryParams theQuery,
+			final String modifierToRemove, final boolean authenticatedFeatures) {
+
+        final StringBuilder sb = new StringBuilder(120);
+        sb.append("yacysearch.");
+        sb.append(ext.name().toLowerCase(Locale.ROOT));
+        sb.append("?query=");
+
+        sb.append(theQuery.getQueryGoal().getQueryString(true));
+        
+        if (!theQuery.modifier.isEmpty()) {
+        	String modifierString = theQuery.modifier.toString();
+        	if(StringUtils.isNotBlank(modifierToRemove)) {
+        		if(modifierString.startsWith(modifierToRemove)) {
+        			modifierString = modifierString.substring(modifierToRemove.length());
+        		} else {
+        			modifierString = modifierString.replace(" " + modifierToRemove, "");
+        		}
+        	}
+        	if(StringUtils.isNotBlank(modifierString)) {
+        		sb.append("+" + modifierString.trim());
+        	}
+        }
+        
+        appendNavUrlQueryParams(sb, theQuery, authenticatedFeatures);
+
+        return sb.toString();
+    }
+	
+    /**
 	 * Build a search query URL with a new search query string, but keeping any already defined eventual modifiers.
 	 * 
 	 * @param ext extension of the servlet to request (e.g. "html", "rss", "json"...)
@@ -927,7 +969,12 @@ public final class QueryParams {
         sb.append("?query=");
 
         sb.append(new QueryGoal(newQueryString).getQueryString(true));
-        appendNavUrlQueryParams(sb, theQuery, null, false, authenticatedFeatures);
+        
+        if (!theQuery.modifier.isEmpty()) {
+        	sb.append("+" + theQuery.modifier.toString());
+        }
+        
+        appendNavUrlQueryParams(sb, theQuery, authenticatedFeatures);
 
         return sb.toString();
     }
@@ -958,27 +1005,7 @@ public final class QueryParams {
         sb.append("?query=");
 
         sb.append(theQuery.getQueryGoal().getQueryString(true));
-        appendNavUrlQueryParams(sb, theQuery, newModifier, newModifierReplacesOld, authenticatedFeatures);
-
-        return sb;
-    }
-
-    /**
-	 * Append search query parameters to the URL builder already filled with the beginning of the URL.
-	 * 
-	 * @param sb the URL string builder to fill. Must not be null.
-	 * @param theQuery holds the main query parameters. Must not be null.
-	 * @param newModifier optional new modifier. - if null existing modifier(s) of theQuery are
-	 *            appended - if not null this new modifier is appended in addition
-	 *            to eventually existing modifier(s) - if isEmpty overwrites (clears) any eventual existing
-	 *            modifier(s)
-	 * @param newModifierReplacesOld considered only when newModifier is not null and not empty. When true, any existing modifiers with the same name are replaced with the new one.
-	 * @param authenticatedFeatures
-	 *            when true, access to authentication protected search features is
-	 *            wanted
-	 */
-	protected static void appendNavUrlQueryParams(final StringBuilder sb, final QueryParams theQuery, final String newModifier,
-			final boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
+        
 		if (newModifier == null) {
             if (!theQuery.modifier.isEmpty()) {
             	sb.append("+" + theQuery.modifier.toString());
@@ -998,7 +1025,23 @@ public final class QueryParams {
                 }
             }
         }
+		
+        appendNavUrlQueryParams(sb, theQuery, authenticatedFeatures);
 
+        return sb;
+    }
+
+    /**
+	 * Append search query parameters to the URL builder already filled with the beginning of the URL.
+	 * 
+	 * @param sb the URL string builder to fill. Must not be null.
+	 * @param theQuery holds the main query parameters. Must not be null.
+	 * @param authenticatedFeatures
+	 *            when true, access to authentication protected search features is
+	 *            wanted
+	 */
+	protected static void appendNavUrlQueryParams(final StringBuilder sb, final QueryParams theQuery,
+			final boolean authenticatedFeatures) {
         sb.append("&maximumRecords=");
         sb.append(theQuery.itemsPerPage());
 
