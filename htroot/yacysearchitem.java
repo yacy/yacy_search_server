@@ -541,17 +541,10 @@ public class yacysearchitem {
 		// check if url exists in bookmarks
 		boolean bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
 		prop.put("content_authorized_bookmark", !bookmarkexists);
-		// bookmark icon check for YMarks
-		//prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
 		
-		/* Bookmark, delete and recommend action links share the same URL prefix */
-		StringBuilder linkBuilder = new StringBuilder();
-		final String actionLinkPrefix = linkBuilder.append("yacysearch.html?query=").append(origQ.replace(' ', '+'))
-				.append("&Enter=Search&count=").append(theSearch.query.itemsPerPage()).append("&offset=")
-				.append((theSearch.query.neededResults() - theSearch.query.itemsPerPage())).append("&resource=")
-				.append(resource).append("&time=3").append("&meanCount=").append(theSearch.query.getMaxSuggestions())
-				.append("&auth").toString();
-		linkBuilder.setLength(0);
+		final StringBuilder linkBuilder = QueryParams.navurl(RequestHeader.FileType.HTML, theSearch.query.offset / theSearch.query.itemsPerPage(),
+				theSearch.query, null, false, true);
+		final int baseUrlLength = linkBuilder.length();
 		
 		String encodedURLString;
 		try {
@@ -560,27 +553,15 @@ public class yacysearchitem {
 			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
 			encodedURLString = crypt.simpleEncode(resultUrlstring);
 		}
-		final String bookmarkLink = linkBuilder.append(actionLinkPrefix).append("&bookmarkref=").append(urlhash)
-				.append("&bookmarkurl=").append(encodedURLString).append("&urlmaskfilter=.*")
-				.toString();
-		linkBuilder.setLength(0);
+		final String bookmarkLink = linkBuilder.append("&bookmarkref=").append(urlhash)
+				.append("&bookmarkurl=").append(encodedURLString).toString();
+		linkBuilder.setLength(baseUrlLength);
 		
-		/* Delete and recommend action links share the same URL suffix */
-		String encodedRanking;
-		try {
-			encodedRanking = URLEncoder.encode(crypt.simpleEncode(theSearch.query.ranking.toExternalString()), StandardCharsets.UTF_8.name());
-		} catch (UnsupportedEncodingException e1) {
-			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
-			encodedRanking = crypt.simpleEncode(resultUrlstring);
-		}
-		String actionLinkSuffix = linkBuilder.append(urlhash)
-				.append("&urlmaskfilter=.*").append("&order=").append(encodedRanking).toString();
-		linkBuilder.setLength(0);
+		String deleteLink = linkBuilder.append("&deleteref=").append(urlhash).toString();
+		linkBuilder.setLength(baseUrlLength);
 		
-		String deleteLink = linkBuilder.append(actionLinkPrefix).append("&deleteref=").append(actionLinkSuffix).toString();
-		linkBuilder.setLength(0);
-		String recommendLink = linkBuilder.append(actionLinkPrefix).append("&recommendref=").append(actionLinkSuffix).toString();
-		linkBuilder.setLength(0);
+		String recommendLink = linkBuilder.append("&recommendref=").append(urlhash).toString();
+		linkBuilder.setLength(baseUrlLength);
 		
 		prop.put("content_authorized_bookmark_bookmarklink", bookmarkLink);
 		prop.put("content_authorized_recommend_deletelink", deleteLink);
