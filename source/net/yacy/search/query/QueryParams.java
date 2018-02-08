@@ -158,6 +158,12 @@ public final class QueryParams {
 	 */
     private boolean strictContentDom = false;
     
+	/**
+	 * The maximum number of suggestions ("Did you mean") to display at the top of
+	 * the first search results page
+	 */
+    private int maxSuggestions = 0;
+    
     public final String targetlang;
     protected final Collection<Tagging.Metatag> metatags;
     public final Searchdom domType;
@@ -418,6 +424,23 @@ public final class QueryParams {
      */
     public void setStrictContentDom(final boolean strictContentDom) {
 		this.strictContentDom = strictContentDom;
+	}
+    
+	/**
+	 * @return The maximum number of suggestions ("Did you mean") to display at the
+	 *         top of the first search results page
+	 */
+	public int getMaxSuggestions() {
+		return this.maxSuggestions;
+	}
+
+	/**
+	 * @param maxSuggestions
+	 *            The maximum number of suggestions ("Did you mean") to display at
+	 *            the top of the first search results page
+	 */
+	public void setMaxSuggestions(final int maxSuggestions) {
+		this.maxSuggestions = maxSuggestions;
 	}
 
     public static HandleSet hashes2Set(final String query) {
@@ -871,6 +894,9 @@ public final class QueryParams {
             context.append(this.inlink).append(asterisk);
             context.append(this.lat).append(asterisk).append(this.lon).append(asterisk).append(this.radius).append(asterisk);
             context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());
+            
+            // Note : this.maxSuggestions search parameter do not need to be part of this id, as it has no impact on results themselves
+            
             String result = context.toString();
             if (anonymized) {
                 this.idCacheAnon = result;
@@ -1064,6 +1090,9 @@ public final class QueryParams {
         
         sb.append("&strictContentDom=");
         sb.append(String.valueOf(theQuery.isStrictContentDom()));
+        
+        sb.append("&meanCount=");
+        sb.append(theQuery.getMaxSuggestions());
 
         sb.append("&former=");
         sb.append(theQuery.getQueryGoal().getQueryString(true));

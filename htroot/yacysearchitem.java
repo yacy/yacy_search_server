@@ -549,7 +549,8 @@ public class yacysearchitem {
 		final String actionLinkPrefix = linkBuilder.append("yacysearch.html?query=").append(origQ.replace(' ', '+'))
 				.append("&Enter=Search&count=").append(theSearch.query.itemsPerPage()).append("&offset=")
 				.append((theSearch.query.neededResults() - theSearch.query.itemsPerPage())).append("&resource=")
-				.append(resource).append("&time=3").append("auth").toString();
+				.append(resource).append("&time=3").append("&meanCount=").append(theSearch.query.getMaxSuggestions())
+				.append("&auth").toString();
 		linkBuilder.setLength(0);
 		
 		String encodedURLString;

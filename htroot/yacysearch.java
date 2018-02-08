@@ -296,6 +296,9 @@ public class yacysearch {
 		final boolean strictContentDom = !Boolean.FALSE.toString().equalsIgnoreCase(post.get("strictContentDom",
 				sb.getConfig(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
 						String.valueOf(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT))));
+		
+		/* Maximum number of suggestions to display in the first results page */
+        final int meanMax = post.getInt("meanCount", 0);
 
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
@@ -699,6 +702,7 @@ public class yacysearch {
                     lat, lon, rad,
                     sb.getConfigArray("search.navigation", ""));
             theQuery.setStrictContentDom(strictContentDom);
+            theQuery.setMaxSuggestions(meanMax);
 			theQuery.setStandardFacetsMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
 					QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
 			theQuery.setDateFacetMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
@@ -791,10 +795,10 @@ public class yacysearch {
             AccessTracker.add(AccessTracker.Location.local, theQuery, theSearch.getResultCount());
 
             // check suggestions
-            final int meanMax = (post != null) ? post.getInt("meanCount", 0) : 0;
 
             prop.put("meanCount", meanMax);
-            if ( meanMax > 0 && !json && !rss) {
+            /* Suggestions ("Did you mean") are only provided in the first html results page */
+            if ( meanMax > 0 && startRecord ==0 && !json && !rss) {
                 final DidYouMean didYouMean = new DidYouMean(indexSegment, querystring);
                 final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(100, 5, sb.index.fulltext().collectionSize() < 2000000).iterator();
                 int meanCount = 0;
