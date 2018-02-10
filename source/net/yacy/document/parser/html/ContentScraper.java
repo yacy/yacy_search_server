@@ -145,6 +145,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         public String name;
         public Properties opts;
         public CharBuffer content;
+        
+        /** Set to true when this tag should be ignored from scraping */
+        private boolean ignore = false;
+        
         public Tag(final String name) {
             this.name = name;
             this.opts = new Properties();
@@ -174,6 +178,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         public String toString() {
             return "<" + name + " " + opts + ">" + content + "</" + name + ">";
         }
+        
+        /** @return true when this tag should be ignored from scraping */
+        public boolean isIgnore() {
+			return this.ignore;
+		}
+        
+        /**
+         * @param ignore true when this tag should be ignored from scraping
+         */
+        public void setIgnore(final boolean ignore) {
+			this.ignore = ignore;
+		}
     }
 
     // all these tags must be given in lowercase, because the tags from the files are compared in lowercase
@@ -216,7 +232,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final int maxAnchors;
     
     private final VocabularyScraper vocabularyScraper;
-    private final Set<String> ignore_class_name;
+    
+    /** Set of CSS class names whose matching div elements content should be ignored */
+    private final Set<String> ignoreDivClassNames;
+    
     private final int timezoneOffset;
     private int breadcrumbs;
 
@@ -245,18 +264,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @param root the document root url
      * @param maxAnchors the maximum number of URLs to process and store in the anchors property.
      * @param maxLinks the maximum number of links (other than a, area, and canonical and stylesheet links) to store
+     * @param ignoreDivClassNames an eventual set of CSS class names whose matching div elements content should be ignored
      * @param vocabularyScraper handles maps from class names to vocabulary names and from documents to a map from vocabularies to terms
      * @param timezoneOffset local time zone offset
      */
     @SuppressWarnings("unchecked")
-    public ContentScraper(final DigestURL root, final int maxAnchors, final int maxLinks, final Set<String> ignore_class_name, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
+    public ContentScraper(final DigestURL root, final int maxAnchors, final int maxLinks, final Set<String> ignoreDivClassNames, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         assert root != null;
         this.root = root;
         this.vocabularyScraper = vocabularyScraper;
-        this.ignore_class_name = ignore_class_name;
+        this.ignoreDivClassNames = ignoreDivClassNames;
         this.timezoneOffset = timezoneOffset;
         this.evaluationScores = new Evaluation();
         this.rss = new SizeLimitedMap<DigestURL, String>(maxLinks);
@@ -314,9 +334,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     @Override
-    public void scrapeText(final char[] newtext0, final String insideTag) {
-        // System.out.println("SCRAPE: " + UTF8.String(newtext));
-        if (insideTag != null && (TagName.script.name().equals(insideTag) || TagName.style.name().equals(insideTag))) return;
+    public void scrapeText(final char[] newtext0, final Tag insideTag) {
+        if (insideTag != null) {
+        	if(insideTag.ignore) {
+        		return;
+        	}
+			if ((TagName.script.name().equals(insideTag.name) || TagName.style.name().equals(insideTag.name))) {
+				return;
+			}
+        }
         int p, pl, q, s = 0;
         char[] newtext = CharacterCoding.html2unicode(new String(newtext0)).toCharArray();
         
@@ -377,7 +403,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         // find tags inside text
         String b = cleanLine(stripAllTags(newtext));
-        if ((insideTag != null) && (!(insideTag.equals("a")))) {
+        if ((insideTag != null) && (!(insideTag.name.equals(TagName.a.name())))) {
             // texts inside tags sometimes have no punctuation at the line end
             // this is bad for the text semantics, because it is not possible for the
             // condenser to distinguish headlines from text beginnings.
@@ -697,6 +723,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      */
     @Override
     public void scrapeTag0(final Tag tag) {
+    	if(tag.ignore) {
+    		return;
+    	}
         checkOpts(tag);
         if (tag.name.equalsIgnoreCase("img")) {
             final String src = tag.opts.getProperty("src", EMPTY_STRING);
@@ -861,6 +890,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      */
     @Override
     public void scrapeTag1(final Tag tag) {
+    	if(tag.ignore) {
+    		return;
+    	}
         checkOpts(tag);
         // System.out.println("ScrapeTag1: tag.tagname=" + tag.tagname + ", opts=" + tag.opts.toString() + ", text=" + UTF8.String(text));
         if (tag.name.equalsIgnoreCase("a") && tag.content.length() < 2048) {
@@ -882,18 +914,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         final String h;
         if (tag.name.equalsIgnoreCase("div")) {
-            final String classn = tag.opts.getProperty("class", EMPTY_STRING);
-            if (classn.length() > 0 && this.ignore_class_name.contains(classn)) {
-            	// we remove everything inside that tag, so it can be ignored
-            	tag.content.clear();
-            } else {
-	            final String id = tag.opts.getProperty("id", EMPTY_STRING);
-	            this.evaluationScores.match(Element.divid, id);
-	            final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
-	            if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
-	                breadcrumbs++;
-	            }
-            }
+	       final String id = tag.opts.getProperty("id", EMPTY_STRING);
+	       this.evaluationScores.match(Element.divid, id);
+	       final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
+	       if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
+	    	   breadcrumbs++;
+	       }
         } else if ((tag.name.equalsIgnoreCase("h1")) && (tag.content.length() < 1024)) {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.headlines[0].add(h);
@@ -974,14 +1000,32 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 	 * {@link ContentScraper#linkTags0} and {@link ContentScraper#linkTags1}.
 	 */
 	@Override
-	public void scrapeAnyTagOpening(final String tagName, final Properties tagAttributes) {
-		if (tagAttributes != null) {
+	public void scrapeAnyTagOpening(final Tag tag) {
+		if (tag != null && !tag.ignore && tag.opts != null) {
 			/*
 			 * HTML microdata can be annotated on any kind of tag, so we don't restrict this
 			 * scraping to the limited sets in linkTags0 and linkTags1
 			 */
-			this.linkedDataTypes.addAll(parseMicrodataItemType(tagAttributes));
+			this.linkedDataTypes.addAll(parseMicrodataItemType(tag.opts));
 		}
+	}
+	
+	@Override
+	public boolean shouldIgnoreTag(final Tag tag, final Tag parentTag) {
+		boolean ignore = false;
+		
+        /* First, inherit ignore property from eventual parent */
+		if(parentTag != null) {
+			ignore = parentTag.ignore;
+		}
+		
+		/* Parent is not marked as ignored : let's check the current tag */
+		if (!ignore && this.ignoreDivClassNames != null && tag != null && TagName.div.name().equals(tag.name)) {
+			final String classAttr = tag.opts.getProperty("class", EMPTY_STRING);
+			final Set<String> classes = ContentScraper.parseSpaceSeparatedTokens(classAttr);
+			ignore = !Collections.disjoint(this.ignoreDivClassNames, classes);
+		}
+		return ignore;
 	}
     
     /**

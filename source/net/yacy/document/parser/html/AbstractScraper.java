@@ -65,17 +65,6 @@ public abstract class AbstractScraper implements Scraper {
         return (this.tags1 != null) && (this.tags1.contains(tag.toLowerCase()));
     }
 
-    //the 'missing' method that shall be implemented:
-    @Override
-    public abstract void scrapeText(char[] text, String insideTag);
-
-    // the other methods must take into account to construct the return value correctly
-    @Override
-    public abstract void scrapeTag0(ContentScraper.Tag tag);
-
-    @Override
-    public abstract void scrapeTag1(ContentScraper.Tag tag);
-
     public static String stripAllTags(final char[] s) {
         if (s.length > 80 && !MemoryControl.request(s.length * 2, false)) return "";
         final StringBuilder r = new StringBuilder(s.length);

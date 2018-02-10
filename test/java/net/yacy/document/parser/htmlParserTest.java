@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -136,6 +137,107 @@ public class htmlParserTest extends TestCase {
 				assertTrue(doc.getTextString().contains("Maßkrügen"));
 				assertEquals(charset.toString(), doc.getCharset());
 			}
+		}
+	}
+	
+	/**
+	 * Test the htmlParser.parse() method, when filtering out div elements on their CSS class.
+	 * 
+	 * @throws Exception
+	 *             when an unexpected error occurred
+	 */
+	@Test
+	public void testParseHtmlDivClassFilter() throws Exception {
+		final AnchorURL url = new AnchorURL("http://localhost/test.html");
+		final String mimetype = "text/html";
+		final StringBuilder testHtml = new StringBuilder("<!DOCTYPE html><head><title>Test document</title></head>");
+
+		testHtml.append("<div class=\"top\">Top text");
+		testHtml.append("<a href=\"http://localhost/top.html\">Top link</a>");
+		testHtml.append("</div>");
+
+		testHtml.append("<div class=\"optional\">Some optional content");
+		testHtml.append("<a href=\"http://localhost/content.html\">Link from optional block</a>");
+		testHtml.append("</div>");
+
+		testHtml.append("<p class=\"optional\">A paragraph</p>");
+
+		testHtml.append("<div class=\"optional-text\">Text-only optional block</div>");
+		
+		testHtml.append("<div class=\"optional desc\">");
+		testHtml.append("<div class=\"optional child\">");
+		testHtml.append("<div class=\"child\">");
+		testHtml.append("<p>Child text at depth 3</p>");
+		testHtml.append("</div></div></div>");
+
+		testHtml.append("<div class=\"bottom optional media\" itemscope itemtype=\"https://schema.org/LocalBusiness\"><img itemprop=\"logo\" src=\"http://localhost/image.png\" alt=\"Our Company\"></div>");
+		
+		final htmlParser parser = new htmlParser();
+
+		/* No CSS class filter */
+		try (InputStream sourceStream = new ByteArrayInputStream(
+				testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
+			final Document[] docs = parser.parse(url, mimetype, null, new VocabularyScraper(), 0, sourceStream);
+			final Document doc = docs[0];
+			final String parsedDext = doc.getTextString();
+			
+			/* Check everything has been parsed */
+			assertEquals(2, doc.getAnchors().size());
+			assertEquals(1, doc.getImages().size());
+			assertEquals(1, doc.getLinkedDataTypes().size());
+			assertTrue(parsedDext.contains("Top"));
+			assertTrue(parsedDext.contains("Some"));
+			assertTrue(parsedDext.contains("from"));
+			assertTrue(parsedDext.contains("paragraph"));
+			assertTrue(parsedDext.contains("Text-only"));
+			assertTrue(parsedDext.contains("depth"));
+		}
+		
+		/* Filter on CSS classes with no matching elements */
+		try (InputStream sourceStream = new ByteArrayInputStream(
+				testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
+			final Set<String> ignore = new HashSet<>();
+			ignore.add("opt");
+			ignore.add("head");
+			ignore.add("container");
+			final Document[] docs = parser.parse(url, mimetype, null, new VocabularyScraper(), 0, sourceStream);
+			final Document doc = docs[0];
+			final String parsedDext = doc.getTextString();
+			
+			/* Check everything has been parsed */
+			assertEquals(2, doc.getAnchors().size());
+			assertEquals(1, doc.getImages().size());
+			assertEquals(1, doc.getLinkedDataTypes().size());
+			assertTrue(parsedDext.contains("Top"));
+			assertTrue(parsedDext.contains("Some"));
+			assertTrue(parsedDext.contains("from"));
+			assertTrue(parsedDext.contains("paragraph"));
+			assertTrue(parsedDext.contains("Text-only"));
+			assertTrue(parsedDext.contains("depth"));
+		}
+		
+		/* Filter on CSS class with matching elements */
+		try (InputStream sourceStream = new ByteArrayInputStream(
+				testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
+			final Set<String> ignore = new HashSet<>();
+			ignore.add("optional");
+			final Document[] docs = parser.parse(url, mimetype, null, ignore, new VocabularyScraper(), 0, sourceStream);
+			final Document doc = docs[0];
+			final String parsedDext = doc.getTextString();
+			
+			/* Check matching blocks have been ignored */
+			assertEquals(1, doc.getAnchors().size());
+			assertEquals("http://localhost/top.html", doc.getAnchors().iterator().next().toString());
+			assertEquals(0, doc.getLinkedDataTypes().size());
+			assertEquals(0, doc.getImages().size());
+			assertFalse(parsedDext.contains("Some"));
+			assertFalse(parsedDext.contains("from"));
+			assertFalse(parsedDext.contains("depth"));
+			
+			/* Check non-matching blocks have been normally parsed */
+			assertTrue(parsedDext.contains("Top"));
+			assertTrue(parsedDext.contains("Text-only"));
+			assertTrue(parsedDext.contains("paragraph"));
 		}
 	}
     

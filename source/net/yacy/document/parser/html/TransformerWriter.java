@@ -232,15 +232,19 @@ public final class TransformerWriter extends Writer {
         if (this.tagStack.size() == 0) {
             // we are not collection tag text -> case (1) - (3)
             // case (1): this is not a tag opener/closer
-            if (this.scraper != null && content.length > 0) this.scraper.scrapeText(content, null);
-            if (this.transformer != null) return this.transformer.transformText(content);
+            if (this.scraper != null && content.length > 0) {
+            	this.scraper.scrapeText(content, null);
+            }
+            if (this.transformer != null) {
+            	return this.transformer.transformText(content);
+            }
             return content;
         }
 
         // we are collection tag text for the tag 'filterTag' -> case (4) - (7)
         // case (4): getting no tag, go on collecting content
         if (this.scraper != null) {
-            this.scraper.scrapeText(content, this.tagStack.lastElement().name);
+            this.scraper.scrapeText(content, this.tagStack.lastElement());
         }
         if (this.transformer != null) {
             this.tagStack.lastElement().content.append(this.transformer.transformText(content));
@@ -293,8 +297,22 @@ public final class TransformerWriter extends Writer {
         ContentScraper.Tag tag = new ContentScraper.Tag(tagname, charBuffer.propParser());
         charBuffer.close();
         
+        final ContentScraper.Tag parentTag;
+        if(this.tagStack.size() > 0) {
+        	parentTag = this.tagStack.lastElement();
+        } else {
+        	parentTag = null;
+        }
+        
+        /* Check scraper ignoring rules */
+		if (this.scraper != null && this.scraper.shouldIgnoreTag(tag, parentTag)) {
+			tag.setIgnore(true);
+		}
+        
         /* Apply processing relevant for any kind of tag opening */
-        this.scraper.scrapeAnyTagOpening(tag.name, tag.opts);
+        if(this.scraper != null) {
+        	this.scraper.scrapeAnyTagOpening(tag);
+        }
         
         if (this.scraper != null && this.scraper.isTag0(tagname)) {
             // this single tag is collected at once here
