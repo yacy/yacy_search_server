@@ -128,50 +128,6 @@ public class yacysearchtrailer {
         int count;
         Iterator<String> navigatorIterator;
 
-        // language navigators
-        final ScoreMap<String> languageNavigator = theSearch.languageNavigator;
-        if (languageNavigator == null || languageNavigator.isEmpty()) {
-            prop.put("nav-languages", 0);
-        } else {
-            prop.put("nav-languages", 1);
-            navigatorIterator = languageNavigator.keys(false);
-            int i = 0, pos = 0, neg = 0;
-            String nav, rawNav;
-            while (i < theSearch.getQuery().getStandardFacetsMaxCount() && navigatorIterator.hasNext()) {
-                name = navigatorIterator.next();
-                count = languageNavigator.get(name);
-                if (count == 0) break;
-                nav = "%2Flanguage%2F" + name;
-                /* Avoid double percent encoding in QueryParams.navurl */
-                rawNav = "/language/" + name;
-                final String navUrl;
-                if (theSearch.query.modifier.language == null || !theSearch.query.modifier.language.contains(name)) {
-                    pos++;
-                    prop.put("nav-languages_element_" + i + "_on", 1);
-                    prop.put(fileType, "nav-languages_element_" + i + "_modifier", nav);
-					navUrl = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString();
-                } else {
-                    neg++;                    
-                    prop.put("nav-languages_element_" + i + "_on", 0);
-                    prop.put(fileType, "nav-languages_element_" + i + "_modifier", "-" + nav);
-					navUrl = QueryParams.navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav,
-							authenticated);
-                }
-                String longname = ISO639.country(name);
-                prop.put(fileType, "nav-languages_element_" + i + "_name", longname == null ? name : longname);
-				prop.put(fileType, "nav-languages_element_" + i + "_url", navUrl);
-                prop.put(fileType, "nav-languages_element_" + i + "_id", "languages_" + i);
-                prop.put("nav-languages_element_" + i + "_count", count);
-                prop.put("nav-languages_element_" + i + "_nl", 1);
-                i++;
-            }
-            prop.put("nav-languages_element", i);
-            prop.put("nav-languages_count", i);
-            i--;
-            prop.put("nav-languages_element_" + i + "_nl", 0);
-            if (pos == 1 && neg == 0) prop.put("nav-languages", 0); // this navigation is not useful
-        }
-
         // topics navigator
         final ScoreMap<String> topicNavigator = theSearch.getTopicNavigator(TOPWORDS_MAXCOUNT);
         if (topicNavigator == null || topicNavigator.isEmpty()) {

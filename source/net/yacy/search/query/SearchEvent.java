@@ -168,9 +168,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     /** a counter for file types */
     public final ConcurrentScoreMap<String> dateNavigator;
     
-    /** a counter for appearance of languages */
-    public final ScoreMap<String> languageNavigator;
-    
     /** counters for Vocabularies; key is metatag.getVocabularyName() */
     public final Map<String, ScoreMap<String>> vocabularyNavigator;
     
@@ -360,7 +357,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>(this) : null;
         this.dateNavigator = navcfg.contains("date") ? new ConcurrentScoreMap<String>(this) : null;
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
-        this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>(this) : null;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
         // prepare configured search navigation (plugins)
         this.navigatorPlugins = NavigatorPlugins.initFromCfgString(navcfg);
@@ -799,14 +795,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 // increase counter for statistics
                 if (local) this.local_rwi_available.incrementAndGet(); else this.remote_rwi_available.incrementAndGet();
                 
-                /* Fisrt filtering pass is now complete : update navigator counters that can already be updated */
-                if(this.languageNavigator != null) {
-                	final String lang = iEntry.getLanguageString();
-                	if(ISO639.exists(lang)) {
-                		this.languageNavigator.inc(lang);
-                	}
-                }
-                
                 successcounter++;
             }
             if (System.currentTimeMillis() >= timeout) ConcurrentLog.warn("SearchEvent", "rwi normalization ended with timeout = " + maxtime);
@@ -1147,21 +1135,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 				if (fcts != null) this.dateNavigator.inc(fcts);
 			}
 
-			if (this.languageNavigator != null) {
-				fcts = facets.get(CollectionSchema.language_s.getSolrFieldName());
-				if (fcts != null) {
-					// remove unknown languages
-					Iterator<String> i = fcts.iterator();
-					while (i.hasNext()) {
-						String lang = i.next();
-						if (!ISO639.exists(lang)) {
-							i.remove();
-						}
-					}
-					this.languageNavigator.inc(fcts);
-				}
-			}
-
 			if (this.protocolNavigator != null) {
 				fcts = facets.get(CollectionSchema.url_protocol_s.getSolrFieldName());
 				if (fcts != null) {
@@ -1226,17 +1199,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 				}
 			}
 		}
-
-		if (this.languageNavigator != null) {
-			if (facets == null || !facets.containsKey(CollectionSchema.language_s.getSolrFieldName())) {
-				final String lang = doc.language();
-				if (ISO639.exists(lang)) {
-					this.languageNavigator.inc(lang);
-				}
-
-			}
-		}
-		
 
 		if (this.protocolNavigator != null) {
 			if (facets == null || !facets.containsKey(CollectionSchema.url_protocol_s.getSolrFieldName())) {
@@ -1595,17 +1557,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 }
             }
             
-            if(this.languageNavigator != null) {
-            	if(page.word() == null || page.word().getLanguageString() == null) {
-            		/* Increase the language navigator here only if the word reference 
-            		 * did not include information about language. Otherwise it should be done earlier in addRWIs() */
-            		final String lang = page.language();
-            		if(ISO639.exists(lang)) {
-            			this.languageNavigator.inc(lang);
-            		}
-            	}
-            }
-            
             if(this.protocolNavigator != null && page.url() != null) {
             	final String protocol = page.url().getProtocol();
             	if(protocol != null) {
@@ -1644,14 +1595,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 		} else {
 			if(this.remote_rwi_available.get() > 0) {
 				this.remote_rwi_available.decrementAndGet();
-			}
-		}
-		
-		/* The language navigator may have been incremented in the addRWIs() function */
-		if (this.languageNavigator != null) {
-			String lang = entry.getLanguageString();
-			if (lang != null && this.languageNavigator.get(lang) > 0) {
-				this.languageNavigator.dec(lang);
 			}
 		}
 	}
@@ -1740,22 +1683,6 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 								this.dateNavigator.dec(dateStr);
 							}
 						}
-					}
-				}
-			}
-		}
-
-		if (this.languageNavigator != null) {
-			if (navIncrementedWithFacets) {
-				fcts = facets.get(CollectionSchema.language_s.getSolrFieldName());
-			} else {
-				fcts = null;
-			}
-			String lang = entry.language();
-			if (lang != null) {
-				if (navIncrementedEarlier || (fcts != null && fcts.containsKey(lang))) {
-					if (this.languageNavigator.get(lang) > 0) {
-						this.languageNavigator.dec(lang);
 					}
 				}
 			}

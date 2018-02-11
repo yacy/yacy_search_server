@@ -22,7 +22,9 @@
  */
 package net.yacy.search.navigator;
 
+import java.util.Collection;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.search.query.QueryModifier;
 import net.yacy.search.schema.CollectionSchema;
@@ -72,6 +74,40 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
                 int count = map.get(entry);
                 if (count > 0) {
                     this.inc(entry, count);
+                }
+            }
+        }
+    }
+
+    /**
+     * Increase the score for the key value contained in the defined field in
+     * the doc, if no language info in doc try to use associated word reference.
+     * @param doc URIMetadataNode with field for the key content
+     */
+    @Override
+    public void incDoc(URIMetadataNode doc) {
+        if (field != null) {
+            Object val = doc.getFieldValue(field.getSolrFieldName());
+            if (val != null) {
+                if (val instanceof Collection) {
+                    Collection<?> ll = (Collection<?>) val;
+                    for (Object obj : ll) {
+                        if (obj instanceof String) {
+                            final String s = (String) obj;
+                            if (!s.isEmpty()) {
+                                this.inc(s);
+                            }
+                        }
+                    }
+                } else {
+                    this.inc((String) val);
+                }
+            } else {
+                if (doc.word() != null && doc.word().getLanguageString() != null) {
+                    /* Increase the language navigator here only if the word reference
+                     * did not include information about language. Otherwise it should be done earlier in addRWIs() */
+                    final String lang = doc.word().getLanguageString();
+                    this.inc(lang);
                 }
             }
         }
