@@ -39,7 +39,6 @@ import net.yacy.data.UserDB;
 import net.yacy.document.DateDetection;
 import net.yacy.document.LibraryProvider;
 import net.yacy.http.servlets.TemplateMissingParameterException;
-import net.yacy.kelondro.util.ISO639;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
