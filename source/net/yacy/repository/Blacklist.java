@@ -329,10 +329,11 @@ public class Blacklist {
 	 *            source file
 	 * @param items
 	 *            blacklist host/path items to add
-	 * @throws PunycodeException
+	 * @throws PunycodeException when a entry domain name could not be Punycode encoded
+	 * @throws PatternSyntaxException when an entry regular expression is not valid
 	 */
 	public final void add(final BlacklistType blacklistType, final String blacklistToUse,
-			final Collection<BlacklistHostAndPath> items) throws PunycodeException {
+			final Collection<BlacklistHostAndPath> items) throws PunycodeException, PatternSyntaxException {
 
 		if (items != null) {
 			PrintWriter pw = null;
@@ -409,9 +410,11 @@ public class Blacklist {
      * @param blacklistToUse source file
      * @param host
      * @param path
-     * @throws PunycodeException
+	 * @throws PunycodeException when a entry domain name could not be Punycode encoded
+	 * @throws PatternSyntaxException when an entry regular expression is not valid
      */
-    public final void add(final BlacklistType blacklistType, final String blacklistToUse, final String host, final String path) throws PunycodeException {
+	public final void add(final BlacklistType blacklistType, final String blacklistToUse, final String host,
+			final String path) throws PunycodeException, PatternSyntaxException {
     	final Collection<BlacklistHostAndPath> oneItemList = new ArrayList<>();
     	oneItemList.add(new BlacklistHostAndPath(host, path));
         this.add(blacklistType, blacklistToUse, oneItemList);

@@ -69,6 +69,9 @@
         <legend>Edit list <b><em>#[currentBlacklist]#</em></b></legend>
       <!-- Blacklist configuration -->
       #(edit)#
+      
+      #(addError)#::<div class="alert alert-danger" role="alert">Could not add entry <code>#[entry]#</code>. Please check syntax.</div>#(/addError)#
+      #(moveError)#::<div class="alert alert-danger" role="alert">An error occurred while moving entries to the target list.</div>#(/moveError)#
 
       <form action="Blacklist_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
         <p>Add new pattern:</p>
@@ -146,6 +149,15 @@
 
       ::
       <p>Edit existing pattern(s):</p>
+      #(editError)#::<div class="alert alert-danger" role="alert">An error occurred while editing the following entries. Please check syntax.
+      	<ul>
+      	  #{list}#
+          	<li><code>#[item]#</code></li>
+          #{/list}#
+          #(hasMore)#::<li>#[more]# more...</li>#(/hasMore)#
+        </ul>
+      </div>
+      #(/editError)#
       <form name="editBlacklistEntry" action="Blacklist_p.html" method="post" enctype="multipart/form-data">
         <div>
           <input type="hidden" name="currentBlacklist" value="#[currentBlacklist]#" />

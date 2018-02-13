@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -448,7 +449,7 @@ public class IndexControlRWIs_p {
                                                 blacklist,
                                                 url.getHost(),
                                                 ".*");
-                                        } catch (PunycodeException e) {
+                                        } catch (final PunycodeException | PatternSyntaxException e) {
                                             ConcurrentLog.warn(APP_NAME,
                                                             "Unable to add blacklist entry to blacklist "
                                                                             + supportedBlacklistType, e);

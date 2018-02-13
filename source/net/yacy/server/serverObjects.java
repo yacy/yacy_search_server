@@ -59,6 +59,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -485,8 +486,12 @@ public class serverObjects implements Serializable, Cloneable {
         return s.equals("true") || s.equals("on") || s.equals("1");
     }
 
-    // returns a set of all values where their key mappes the keyMapper
-    public String[] getAll(final String keyMapper) {
+    /**
+     * @param keyMapper a regular expression for keys matching 
+     * @return a set of all values where their key mappes the keyMapper
+     * @throws PatternSyntaxException when the keyMapper syntax is not valid
+     */
+    public String[] getAll(final String keyMapper) throws PatternSyntaxException {
         // the keyMapper may contain regular expressions as defined in String.matches
         // this method is particulary useful when parsing the result of checkbox forms
         final List<String> v = new ArrayList<String>();
@@ -497,6 +502,25 @@ public class serverObjects implements Serializable, Cloneable {
         }
 
         return v.toArray(new String[0]);
+    }
+    
+    /**
+     * @param keyMapper a regular expression for keys matching
+     * @return a map of keys/values where keys matches the keyMapper
+     * @throws PatternSyntaxException when the keyMapper syntax is not valid
+     */
+    public Map<String, String> getMatchingEntries(final String keyMapper) throws PatternSyntaxException  {
+        // the keyMapper may contain regular expressions as defined in String.matches
+        // this method is particulary useful when parsing the result of checkbox forms
+    	final Pattern p = Pattern.compile(keyMapper);
+        final Map<String, String> map = new HashMap<>();
+        for (final Map.Entry<String, String> entry: entrySet()) {
+            if (entry.getKey().matches(keyMapper)) {
+            	map.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return map;
     }
 
     // put all elements of another hashtable into the own table
