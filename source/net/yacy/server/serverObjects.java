@@ -495,8 +495,9 @@ public class serverObjects implements Serializable, Cloneable {
         // the keyMapper may contain regular expressions as defined in String.matches
         // this method is particulary useful when parsing the result of checkbox forms
         final List<String> v = new ArrayList<String>();
+        final Pattern keyPattern = Pattern.compile(keyMapper);
         for (final Map.Entry<String, String> entry: entrySet()) {
-            if (entry.getKey().matches(keyMapper)) {
+            if (keyPattern.matcher(entry.getKey()).matches()) {
                 v.add(entry.getValue());
             }
         }
@@ -512,10 +513,10 @@ public class serverObjects implements Serializable, Cloneable {
     public Map<String, String> getMatchingEntries(final String keyMapper) throws PatternSyntaxException  {
         // the keyMapper may contain regular expressions as defined in String.matches
         // this method is particulary useful when parsing the result of checkbox forms
-    	final Pattern p = Pattern.compile(keyMapper);
+    	final Pattern keyPattern = Pattern.compile(keyMapper);
         final Map<String, String> map = new HashMap<>();
         for (final Map.Entry<String, String> entry: entrySet()) {
-            if (entry.getKey().matches(keyMapper)) {
+            if (keyPattern.matcher(entry.getKey()).matches()) {
             	map.put(entry.getKey(), entry.getValue());
             }
         }
