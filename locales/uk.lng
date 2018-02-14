@@ -91,7 +91,6 @@ domain.net/fullpath<==domain.de/повний шлях<
 #*.sub.domain.net/*<==*.sub.domain.de/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
-a complete <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a> (slow)==повний <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">регулярний вираз</a> (повільний)
 #was removed from blacklist==було видалено з чорного списку
 #was added to the blacklist==було додано до чорного списку
 Activate this list for==Активува цей список для

@@ -140,7 +140,6 @@ domain.net/fullpath<==domain.de/vollerpfad<
 *.sub.domain.net/*<==*.sub.domain.de/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
-a complete <==ein ganzer <
 (slow)==(langsam)
 #was removed from blacklist==wurde aus Blacklist entfernt
 #was added to the blacklist==wurde zur Blacklist hinzugefügt

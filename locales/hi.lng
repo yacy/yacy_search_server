@@ -92,7 +92,6 @@ domain.net/fullpath<==डोमेन .नेट /फुल्ल्पथ <
 *.sub.domain.net/*<==*.सुब .डोमेन .दे /*<
 #sub.domain.*/*<==सुब .डोमेन .*/*<
 #domain.*/*<==डोमेन .*/*<
-a complete <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a> (slow)==एक पूरा   <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">रेगेक्स</a> (मगर धीरे )
 #was removed from blacklist==ब्लैकलिस्ट से हटा दिया गया था 
 #was added to the blacklist==ब्लैकलिस्ट में जोड़ा गया था 
 Activate this list for==इस लिस्ट को सक्रिय करें

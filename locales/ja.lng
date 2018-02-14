@@ -158,7 +158,6 @@ domain.net/fullpath<==domain.net/フルパス<
 #*.sub.domain.net/*<==*.sub.domain.net/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
-a complete <==完全な <
 (slow)==(遅い)
 #was removed from blacklist==はブラックリストから削除されました
 #was added to the blacklist==はブラックリストに追加されました

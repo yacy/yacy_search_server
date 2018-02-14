@@ -44,7 +44,6 @@ Move selected pattern(s) to==Déplacer l(es) entrée(s) sélectionnée(s) vers
 Add new pattern:==Ajouter une nouvelle entrée :
 The right '*', after the '/', can be replaced by a==Le caractère '*' à droite, après le '/', peut être remplacé par une
 >regular expression<==>expression régulière<
-a complete <==une <
 (slow)==(lent)
 Show entries:==Afficher les entrées :
 Entries per page:==Entrées par page :

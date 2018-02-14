@@ -459,7 +459,6 @@ domain.net/fullpath<==domain.net/绝对路径<
 #*.sub.domain.net/*<==*.sub.domain.net/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
-a complete <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a> (slow)==一个完整的<a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">正则表达式</a> (慢)
 #was removed from blacklist==wurde aus Blacklist entfernt
 #was added to the blacklist==wurde zur Blacklist hinzugefügt
 Activate this list for==为以下条目激活此名单

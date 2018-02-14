@@ -175,7 +175,6 @@ domain.net/fullpath<==domain.net/полный путь<
 #*.sub.domain.net/*<==*.sub.domain.net/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
-a complete <==полное <
 (slow)==(медленно)
 #was removed from blacklist==был удален из черного списка
 #was added to the blacklist==был добавлен в черный список

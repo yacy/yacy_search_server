@@ -482,9 +482,6 @@
     <trans-unit id="8c112b7c" xml:space="preserve" approved="no" translate="yes">
        <source>*.sub.domain.net/*&lt;</source>
     </trans-unit>
-    <trans-unit id="66a3cc34" xml:space="preserve" approved="no" translate="yes">
-       <source>a complete &lt;</source>
-    </trans-unit>
     <trans-unit id="4ac92f20" xml:space="preserve" approved="no" translate="yes">
        <source>(slow)</source>
     </trans-unit>
