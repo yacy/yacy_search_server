@@ -86,6 +86,7 @@ public class Vocabulary_p {
                     final boolean discoverFromCSV = post.get("discovermethod", "").equals("csv");
                     final String discoverFromCSVPath = post.get("discoverpath", "").replaceAll("%20", " ");
                     String discoverFromCSVCharset = post.get("charset", StandardCharsets.UTF_8.name());
+                    final String columnSeparator = post.get("columnSeparator", ";");
                     final int discovercolumnliteral = post.getInt("discovercolumnliteral", 0);
                     final int discovercolumnsynonyms = post.getInt("discovercolumnsynonyms", -1);
                     final int discovercolumnobjectlink = post.getInt("discovercolumnobjectlink", -1);
@@ -105,11 +106,11 @@ public class Vocabulary_p {
                             // read file (try-with-resource to close inputstream automatically)
                             try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), discoverFromCSVCharset))) {
                                 String line = null;
-                                Pattern semicolon = Pattern.compile(";");
+                                final Pattern separatorPattern = Pattern.compile(columnSeparator);
                                 Map<String, String> synonym2literal = new HashMap<>(); // helper map to check if there are double synonyms
                                 while ((line = r.readLine()) != null) {
                                     if (line.length() == 0) continue;
-                                    String[] l = semicolon.split(line);
+                                    String[] l = separatorPattern.split(line);
                                     if (l.length == 0) l = new String[]{line};
                                     String literal = discovercolumnliteral < 0 || l.length <= discovercolumnliteral ? null : l[discovercolumnliteral].trim();
                                     if (literal == null) continue;
