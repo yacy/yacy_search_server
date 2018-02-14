@@ -89,7 +89,6 @@ import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.Bitfield;
-import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.RemoteSearch;
