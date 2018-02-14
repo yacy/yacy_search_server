@@ -87,6 +87,7 @@ public class Vocabulary_p {
                     final String discoverFromCSVPath = post.get("discoverpath", "").replaceAll("%20", " ");
                     String discoverFromCSVCharset = post.get("charset", StandardCharsets.UTF_8.name());
                     final String columnSeparator = post.get("columnSeparator", ";");
+                    final int lineStart = post.getInt("discoverLineStart", 0);
                     final int discovercolumnliteral = post.getInt("discovercolumnliteral", 0);
                     final int discovercolumnsynonyms = post.getInt("discovercolumnsynonyms", -1);
                     final int discovercolumnobjectlink = post.getInt("discovercolumnobjectlink", -1);
@@ -108,12 +109,21 @@ public class Vocabulary_p {
                                 String line = null;
                                 final Pattern separatorPattern = Pattern.compile(columnSeparator);
                                 Map<String, String> synonym2literal = new HashMap<>(); // helper map to check if there are double synonyms
+                                int lineIndex = -1;
                                 while ((line = r.readLine()) != null) {
-                                    if (line.length() == 0) continue;
+                                	lineIndex++;
+                                	if(lineIndex < lineStart) {
+                                		continue;
+                                	}
+                                    if (line.length() == 0) {
+                                    	continue;
+                                    }
                                     String[] l = separatorPattern.split(line);
                                     if (l.length == 0) l = new String[]{line};
                                     String literal = discovercolumnliteral < 0 || l.length <= discovercolumnliteral ? null : l[discovercolumnliteral].trim();
-                                    if (literal == null) continue;
+                                    if (literal == null) {
+                                    	continue;
+                                    }
                                     literal = normalizeLiteral(literal);
                                     String objectlink = discovercolumnobjectlink < 0 || l.length <= discovercolumnobjectlink ? null : l[discovercolumnobjectlink].trim();
                                     if (literal.length() > 0) {
