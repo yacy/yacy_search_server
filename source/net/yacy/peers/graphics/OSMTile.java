@@ -152,7 +152,7 @@ public class OSMTile {
             // see http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
             final int hash = (this.xtile + 7 * this.ytile + 13 * this.zoom + retry) % 4;
             final String host = (hash == 3) ? "tile.openstreetmap.org" : ((char) ('a' + hash)) + ".tile.openstreetmap.org";
-            final String url = "http://" + host + "/" + this.zoom + "/" + this.xtile + "/" + this.ytile + ".png";
+            final String url = "https://" + host + "/" + this.zoom + "/" + this.xtile + "/" + this.ytile + ".png";
             //System.out.println("OSM URL = " + url);
             return url;
         }
