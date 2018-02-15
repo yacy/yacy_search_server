@@ -21,11 +21,14 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,76 +88,14 @@ public class Vocabulary_p {
                     final boolean discoverFromAuthor = post.get("discovermethod", "").equals("author");
                     final boolean discoverFromCSV = post.get("discovermethod", "").equals("csv");
                     final String discoverFromCSVPath = post.get("discoverpath", "").replaceAll("%20", " ");
-                    String discoverFromCSVCharset = post.get("charset", StandardCharsets.UTF_8.name());
-                    final String columnSeparator = post.get("columnSeparator", ";");
-                    final int lineStart = post.getInt("discoverLineStart", 0);
-                    final int discovercolumnliteral = post.getInt("discovercolumnliteral", 0);
-                    final int discovercolumnsynonyms = post.getInt("discovercolumnsynonyms", -1);
-                    final int discovercolumnobjectlink = post.getInt("discovercolumnobjectlink", -1);
+
                     final File discoverFromCSVFile = discoverFromCSVPath.length() > 0 ? new File(discoverFromCSVPath) : null;
-                    final boolean discoverenrichsynonyms = post.get("discoversynonymsmethod", "none").equals("enrichsynonyms");
-                    final boolean discoverreadcolumn = post.get("discoversynonymsmethod", "none").equals("readcolumn");
+
                     Segment segment = sb.index;
                     String t;
                     if (!discoverNot) {
                         if (discoverFromCSV && discoverFromCSVFile != null && discoverFromCSVFile.exists()) {
-                            // auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
-                            if (discoverFromCSVCharset.equals("autodetect")) {
-                                List<String> charsets = FileUtils.detectCharset(discoverFromCSVFile);
-                                discoverFromCSVCharset = charsets.get(0);
-                                ConcurrentLog.info("FileUtils", "detected charset: " + discoverFromCSVCharset + " used to read " + discoverFromCSVFile.toString());
-                            }
-                            // read file (try-with-resource to close inputstream automatically)
-                            try (BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), discoverFromCSVCharset))) {
-                                String line = null;
-                                final Pattern separatorPattern = Pattern.compile(columnSeparator);
-                                Map<String, String> synonym2literal = new HashMap<>(); // helper map to check if there are double synonyms
-                                int lineIndex = -1;
-                                while ((line = r.readLine()) != null) {
-                                	lineIndex++;
-                                	if(lineIndex < lineStart) {
-                                		continue;
-                                	}
-                                    if (line.length() == 0) {
-                                    	continue;
-                                    }
-                                    String[] l = separatorPattern.split(line);
-                                    if (l.length == 0) l = new String[]{line};
-                                    String literal = discovercolumnliteral < 0 || l.length <= discovercolumnliteral ? null : l[discovercolumnliteral].trim();
-                                    if (literal == null) {
-                                    	continue;
-                                    }
-                                    literal = normalizeLiteral(literal);
-                                    String objectlink = discovercolumnobjectlink < 0 || l.length <= discovercolumnobjectlink ? null : l[discovercolumnobjectlink].trim();
-                                    if (literal.length() > 0) {
-                                        String synonyms = "";
-                                        if (discoverenrichsynonyms) {
-                                            Set<String> sy = SynonymLibrary.getSynonyms(literal);
-                                            if (sy != null) {
-                                                for (String s: sy) synonyms += "," + s;
-                                            }
-                                        } else if (discoverreadcolumn) {
-                                            synonyms = discovercolumnsynonyms < 0 || l.length <= discovercolumnsynonyms ? null : l[discovercolumnsynonyms].trim();
-                                            synonyms = normalizeLiteral(synonyms);
-                                        } else {
-                                            synonyms = Tagging.normalizeTerm(literal);
-                                        }
-                                        // check double synonyms
-                                        if (synonyms.length() > 0) {
-                                            String oldliteral = synonym2literal.get(synonyms);
-                                            if (oldliteral != null && !literal.equals(oldliteral)) {
-                                                // replace old entry with combined new
-                                                table.remove(oldliteral);
-                                                String newliteral = oldliteral + "," + literal;
-                                                literal = newliteral;
-                                            }
-                                            synonym2literal.put(synonyms, literal);
-                                        }
-                                        // store term
-                                        table.put(literal, new Tagging.SOTuple(synonyms, objectlink == null ? "" : objectlink));
-                                    }
-                                }
-                            }
+                            handleDiscoverFromCSV(post, table, discoverFromCSVFile);
                         } else {
                             Iterator<DigestURL> ui = segment.urlSelector(discoveruri, Long.MAX_VALUE, 100000);
                             while (ui.hasNext()) {
@@ -351,10 +292,210 @@ public class Vocabulary_p {
         return prop;
     }
     
-    private static String normalizeLiteral(String literal) {
-        if (literal == null) return "";
-        if (literal.length() > 0 && (literal.charAt(0) == '"' || literal.charAt(0) == '\'')) literal = literal.substring(1);
-        if (literal.length() > 0 && (literal.charAt(literal.length() - 1) == '"' || literal.charAt(literal.length() - 1) == '\'')) literal = literal.substring(0, literal.length() - 1);
+	/**
+	 * Parse a CSV content line and extract field values. When the last field of
+	 * this line starts with and unclosed escape character, the current line is
+	 * appended to the escapedContent buffer.
+	 * 
+	 * @param line
+	 *            a raw line from a CSV document. Must not be null.
+	 * @param separatorPattern
+	 *            the field separator character compiled as a Pattern instance. Must
+	 *            not be null.
+	 * @param escape
+	 *            escape character
+	 * @param multiLineContent
+	 *            eventually holds content of previous lines whose last field
+	 *            includes an escaped line separator
+	 * @return the list of field values extracted from the line, eventually empty.
+	 */
+    private static List<String> parseCSVLine(final String line, final Pattern separatorPattern, final String escape, final StringBuilder multiLineContent) {
+        final List<String> fields = new ArrayList<>();
+        String[] tokens = separatorPattern.split(line);
+        if (tokens.length == 0) {
+        	tokens = new String[]{line};
+        }
+        
+        /* Handle continuation of multi-lines field content escaped between escape char */
+        if(multiLineContent.length() > 0) {
+        	int closingEscapeIndex = -1;
+        	for(int index = 0; index < tokens.length; index++) {
+        		if(tokens[index].endsWith(escape)) {
+        			closingEscapeIndex = index;
+        			break;
+        		}
+        	}
+        	if(closingEscapeIndex >= 0) {
+        		/* End of multi-line escape */
+            	multiLineContent.append("\n").append(line);
+                tokens = separatorPattern.split(multiLineContent.toString());
+        		multiLineContent.setLength(0);
+                if (tokens.length == 0) {
+                	tokens = new String[]{line};
+                }
+        	} else {
+        		/* Multi-line escape continue */
+                multiLineContent.append("\n").append(line);
+            	return fields;
+        	}
+        }
+        
+        /* Handle separator char escaped between escape char */
+        final StringBuilder escapedSeparatorContent = new StringBuilder();
+        for(final String field : tokens) {
+        	if(escapedSeparatorContent.length() == 0) {
+        		if(field.startsWith(escape) && !field.endsWith(escape)) {
+        			/* Beginning of escape */
+        			escapedSeparatorContent.append(field).append(separatorPattern.toString());
+        			continue;
+        		}
+        	} else if(field.endsWith(escape)) {
+        		/* End of field escape */
+        		escapedSeparatorContent.append(field);
+        		fields.add(escapedSeparatorContent.toString());
+        		escapedSeparatorContent.setLength(0);
+    			continue;
+        	} else {
+        		/* Escape continue */
+        		escapedSeparatorContent.append(field).append(separatorPattern.toString());
+    			continue;
+        	}
+       		fields.add(field);
+        }
+        
+        if(escapedSeparatorContent.length() > 0) {
+        	/* Handle beginning of field content with escaped line separator */
+        	multiLineContent.setLength(0);
+            multiLineContent.append(line);
+        }
+        return fields;
+    }
+
+    /**
+     * Fill the vocabulary table from a CSV file.
+     * @param post current request parameters. Must not be null.
+     * @param table the vocabulary table to fill. Must not be null.
+     * @param discoverFromCSVFile. Must not be null.
+     * @throws IOException when a read/write error occurred
+     * @throws UnsupportedEncodingException
+     * @throws FileNotFoundException when the file does not exists or can not be read for some reason.
+     */
+	protected static void handleDiscoverFromCSV(final serverObjects post, final Map<String, Tagging.SOTuple> table,
+			final File discoverFromCSVFile)
+			throws IOException, UnsupportedEncodingException, FileNotFoundException {
+		String charsetName = post.get("charset", StandardCharsets.UTF_8.name());
+		final String columnSeparator = post.get("columnSeparator", ";");
+		final String escapeChar = "\"";
+		final int lineStart = post.getInt("discoverLineStart", 0);
+		final int discovercolumnliteral = post.getInt("discovercolumnliteral", 0);
+		final int discovercolumnsynonyms = post.getInt("discovercolumnsynonyms", -1);
+		final int discovercolumnobjectlink = post.getInt("discovercolumnobjectlink", -1);
+        final boolean discoverenrichsynonyms = post.get("discoversynonymsmethod", "none").equals("enrichsynonyms");
+        final boolean discoverreadcolumn = post.get("discoversynonymsmethod", "none").equals("readcolumn");
+		
+		// auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
+		if (charsetName.equals("autodetect")) {
+		    List<String> charsets = FileUtils.detectCharset(discoverFromCSVFile);
+		    charsetName = charsets.get(0);
+		    ConcurrentLog.info("FileUtils", "detected charset: " + charsetName + " used to read " + discoverFromCSVFile.toString());
+		}
+	    final Pattern separatorPattern = Pattern.compile(columnSeparator);
+	    
+		// read file (try-with-resource to close inputstream automatically)
+		try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), charsetName))) {
+		    discoverFromCSVReader(table, escapeChar, lineStart, discovercolumnliteral, discovercolumnsynonyms,
+					discovercolumnobjectlink, discoverenrichsynonyms, discoverreadcolumn, separatorPattern, r);
+		}
+	}
+
+	/**
+	 * Fill the vocabulary table from reader open on CSV content.
+	 * @param table the vocabulary table to fill. Must not be null.
+	 * @param escapeChar CSV escape character (standard is double quote). Must not be null. 
+	 * @param lineStart index (zero based) of the first line to parse. Previous lines are ignored. 
+	 * @param literalsColumn index (zero based) of the column to read for literals
+	 * @param synonymsColumn index (zero based) of the column to read for synonyms. Set to -1 to ignore.
+	 * @param discovercolumnobjectlink
+	 * @param discoverenrichsynonyms
+	 * @param readSynonymFromColumn when true synonym terms are read from the column at synonymsColumn index
+	 * @param separatorPattern the field separator character compiled as a Pattern instance. Must not be null.
+	 * @param reader an open reader on CSV content. Must not be null.
+	 * @throws IOException when an read error occurred
+	 */
+	protected static void discoverFromCSVReader(final Map<String, Tagging.SOTuple> table, final String escapeChar,
+			final int lineStart, final int literalsColumn, final int synonymsColumn,
+			final int discovercolumnobjectlink, final boolean discoverenrichsynonyms, final boolean readSynonymFromColumn,
+			final Pattern separatorPattern, final BufferedReader reader) throws IOException {
+		String line = null;
+		final StringBuilder multiLineContent = new StringBuilder();
+		final Map<String, String> synonym2literal = new HashMap<>(); // helper map to check if there are double synonyms
+		int lineIndex = -1;
+		while ((line = reader.readLine()) != null) {
+			lineIndex++;
+			if(lineIndex < lineStart) {
+				continue;
+			}
+		    if (line.length() == 0) {
+		    	continue;
+		    }
+		    
+			final List<String> fields = parseCSVLine(line, separatorPattern, escapeChar, multiLineContent);
+			if (multiLineContent.length() > 0) {
+				continue;
+			}
+		    
+		    
+		    String literal = literalsColumn < 0 || fields.size() <= literalsColumn ? null : fields.get(literalsColumn).trim();
+		    if (literal == null) {
+		    	continue;
+		    }
+		    literal = normalizeLiteral(literal, escapeChar);
+		    final String objectlink = discovercolumnobjectlink < 0 || fields.size() <= discovercolumnobjectlink ? null : fields.get(discovercolumnobjectlink).trim();
+		    if (literal.length() > 0) {
+		        String synonyms = "";
+		        if (discoverenrichsynonyms) {
+		            final Set<String> sy = SynonymLibrary.getSynonyms(literal);
+		            if (sy != null) {
+		                for (final String s: sy) {
+		                	synonyms += "," + s;
+		                }
+		            }
+		        } else if (readSynonymFromColumn) {
+		            synonyms = synonymsColumn < 0 || fields.size() <= synonymsColumn ? null : fields.get(synonymsColumn).trim();
+		            synonyms = normalizeLiteral(synonyms, escapeChar);
+		        } else {
+		            synonyms = Tagging.normalizeTerm(literal);
+		        }
+		        // check double synonyms
+		        if (synonyms.length() > 0) {
+		            String oldliteral = synonym2literal.get(synonyms);
+		            if (oldliteral != null && !literal.equals(oldliteral)) {
+		                // replace old entry with combined new
+		                table.remove(oldliteral);
+		                String newliteral = oldliteral + "," + literal;
+		                literal = newliteral;
+		            }
+		            synonym2literal.put(synonyms, literal);
+		        }
+		        // store term
+		        table.put(literal, new Tagging.SOTuple(synonyms, objectlink == null ? "" : objectlink));
+		    }
+		}
+	}
+    
+    private static String normalizeLiteral(String literal, final String escapeChar) {
+        if (literal == null) {
+        	return "";
+        }
+        if(literal.length() > 1 && literal.startsWith(escapeChar) && literal.endsWith(escapeChar)) {
+            literal = literal.replace("\"\"", "\"");
+        }
+        if (literal.length() > 0 && (literal.charAt(0) == '"' || literal.charAt(0) == '\'')) {
+        	literal = literal.substring(1);
+        }
+        if (literal.length() > 0 && (literal.charAt(literal.length() - 1) == '"' || literal.charAt(literal.length() - 1) == '\'')) {
+        	literal = literal.substring(0, literal.length() - 1);
+        }
         return literal;
     }
 }
