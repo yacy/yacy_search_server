@@ -943,6 +943,7 @@ Showing latest #[count]# lines from a stack of #[all]# entries.==नवीनत
 
 #File: CrawlStartExpert.html
 #---------------------------
+<html lang="en">==<html lang="hi">
 Expert Crawl Start==विशेषज्ञ क्रॉल प्रारंभ
 Start Crawling Job:==नौकरी रेंगने प्रारंभ:
 You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".==आप वेब पेज रेंगने के लिए प्रारंभ बिंदु के रूप में यूआरएल को परिभाषित करने और यहां रेंगने शुरू कर सकते हैं.  "क्रॉलिंग " YaCy, किसी वेबसाइट डाउनलोड कर इसमें सभी लिंक निकालें और फिर इन कड़ियों के पीछे सामग्री डाउनलोड जाएगा. लंबे समय के रूप में  "क्रॉलिंग गहराई के तहत निर्दिष्ट के रूप में यह दोहराया है.

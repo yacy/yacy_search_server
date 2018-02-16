@@ -1263,6 +1263,7 @@ Blacklist to use==Используется чёрный список
 
 #File: CrawlStartExpert.html
 #---------------------------
+<html lang="en">==<html lang="ru">
 Expert Crawl Start==Расширенное индексирование
 Start Crawling Job:==Запустить индексирование:
 You can define URLs as start points for Web page crawling and start crawling here.==Здесь можете указать начальные ссылки и запустить индексирование.

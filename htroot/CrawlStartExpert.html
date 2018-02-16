@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" >
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>YaCy '#[clientname]#': Crawl Start</title>
     #%env/templates/metas.template%#
@@ -231,8 +231,8 @@
             Each of these URLs are the root for a crawl start, existing start URLs are always re-loaded.
             Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
           </span></span>
-              <input type="radio" align="top" name="crawlingMode" id="url" value="url" #(crawlingMode_url)#::checked="checked"#(/crawlingMode_url)# />
-              <textarea name="crawlingURL" id="crawlingURL" cols="64" rows="3" size="41" onkeypress="changed()">#[starturl]#</textarea>
+              <input type="radio" style="vertical-align: top" name="crawlingMode" id="url" value="url" #(crawlingMode_url)#::checked="checked"#(/crawlingMode_url)# />
+              <textarea name="crawlingURL" id="crawlingURL" cols="64" rows="3" onkeypress="changed()">#[starturl]#</textarea>
                 &nbsp;
                 <span id="robotsOK"></span>
 	            <span id="title"><br/></span>
@@ -247,7 +247,7 @@
 	          <input type="radio" name="crawlingMode" id="sitelist" value="sitelist" #(has_url)#disabled="disabled"::#(/has_url)# #(crawlingMode_sitelist)#::checked="checked"#(/crawlingMode_sitelist)#/><br />
               <div id="sitelistURLs"></div>
               <button id="expandSiteListBtn" style="visibility:hidden" type="button" onclick="this.disabled = true;loadInfos(true);" class="btn btn-default btn-xs" title="Show all links">
-              	<span class="glyphicon glyphicon-option-horizontal"/>
+              	<span class="glyphicon glyphicon-option-horizontal"></span>
               </button>
 	        </dd>
 	        <dt>From Sitemap</dt>
@@ -293,7 +293,7 @@
             <input name="crawlingDomMaxPages" id="crawlingDomMaxPages" type="text" size="6" maxlength="6" value="#[crawlingDomMaxPages]#" />
           </dd>
           
-          <dt><label for="Constraints">misc. Constraints</label></dt>
+          <dt><label>misc. Constraints</label></dt>
           <dd>
             <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled.
@@ -311,25 +311,25 @@
             The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>.
             Example: to allow only urls that contain the word 'science', set the must-match filter to '.*science.*'. 
             You can also use an automatic domain-restriction to fully crawl a single domain.
-            Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy</a>.
+            Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy.
             </span></span>
-            <table border="0">
-            <tr><td width="110"><img src="env/grafics/plus.gif"> must-match</td><td></td></tr>
+            <table style="border-width: 0px">
+            <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td></td></tr>
 			<tr><td colspan="2"><input type="radio" name="range" id="rangeDomain" value="domain" #(range_domain)#::checked="checked"#(/range_domain)#/><div id="rangeDomainDescription" style="display:inline">Restrict to start domain(s)</div></td></tr>
 			<tr><td colspan="2"><input type="radio" name="range" id="rangeSubpath" value="subpath" #(range_subpath)#::checked="checked"#(/range_subpath)#/><div id="rangeSubpathDescription" style="display:inline">Restrict to sub-path(s)</div></td></tr>
 			<tr><td><input type="radio" name="range" id="rangeWide" value="wide" #(range_wide)#::checked="checked"#(/range_wide)#/>Use filter</td>
-			<td valign="bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
-            <tr><td><img src="env/grafics/minus.gif"> must-not-match</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
+			<td style="vertical-align: bottom"><input name="mustmatch" id="mustmatch" type="text" size="55" maxlength="100000" value="#[mustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
+            <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
 	        <dt>Load Filter on IPs</dt>
 	        <dd>
-            <table border="0">
-            <tr><td width="110"><img src="env/grafics/plus.gif"> must-match</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100000" value="#[ipMustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
-		    <tr><td><img src="env/grafics/minus.gif"> must-not-match</td><td><input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="55" maxlength="100000" value="#[ipMustnotmatch]#" /></td></tr>
+            <table style="border-width: 0px">
+            <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td><input name="ipMustmatch" id="ipMustmatch" type="text" size="55" maxlength="100000" value="#[ipMustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
+		    <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="ipMustnotmatch" id="ipMustnotmatch" type="text" size="55" maxlength="100000" value="#[ipMustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
-          <dt><label for="crawlingCountryMustMatch">Must-Match List for Country Codes</label>
+          <dt><label>Must-Match List for Country Codes</label>
           </dt>
           <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             Crawls can be restricted to specific countries. This uses the country code that can be computed from
@@ -350,18 +350,18 @@
             <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>
             that <b>must not match</b> with the URLs to allow that the content of the url is indexed.
-            Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy</a>.
+            Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy.
             </span></span>
-            <table border="0">
-		    <tr><td width="110"><img src="env/grafics/plus.gif"> must-match</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
-		    <tr><td><img src="env/grafics/minus.gif"> must-not-match</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
+            <table style="border-width: 0px">
+		    <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
+		    <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
 	        <dt>Filter on Content of Document<br/>(all visible text, including camel-case-tokenized url and title)</dt>
 	        <dd>
-            <table border="0">
-		    <tr><td width="110"><img src="env/grafics/plus.gif"> must-match</td><td><input name="indexcontentmustmatch" id="indexcontentmustmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustmatch]#" onblur="if (this.value=='') this.value='.*';"/></td><td>(must not be empty)</td></tr>
-		    <tr><td><img src="env/grafics/minus.gif"> must-not-match</td><td><input name="indexcontentmustnotmatch" id="indexcontentmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustnotmatch]#" /></td></tr>
+            <table style="border-width: 0px">
+		    <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td><input name="indexcontentmustmatch" id="indexcontentmustmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
+		    <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="indexcontentmustnotmatch" id="indexcontentmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
 	      </dl>
@@ -372,8 +372,8 @@
           <dl>
 	        <dt>Filter div class names</dt>
 	        <dd>
-            <table border="0">
-		    <tr><td width="110">set of CSS class names</td><td><input name="ignoreclassname" id="ignoreclassname" type="text" size="55" maxlength="100000" value="#[ignoreclassname]#" onblur="if (this.value=='') this.value='';"/></td><td>comma-separated list of &lt;div&gt; element class names which should be filtered out</td></tr>
+            <table style="border-width: 0px">
+		    <tr><td style="width:110px">set of CSS class names</td><td><input name="ignoreclassname" id="ignoreclassname" type="text" size="55" maxlength="100000" value="#[ignoreclassname]#" onblur="if (this.value=='') this.value='';"/></td><td>comma-separated list of &lt;div&gt; element class names which should be filtered out</td></tr>
 			</table>
 	        </dd>
 	      </dl>
@@ -512,7 +512,7 @@
         <fieldset>
           <legend>Snapshot Creation</legend>
           <dl>
-          <dt><label for="snapshotMaxdepth">Max Depth for Snapshots</label></dt>
+          <dt><label>Max Depth for Snapshots</label></dt>
           <dd>
             <span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             Snapshots are xml metadata and pictures of web pages that can be created during crawling time.
@@ -523,16 +523,16 @@
             </span></span>
 			<input type="text" name="snapshotsMaxDepth" id="snapshotsMaxDepth" size="2" maxlength="2" value="#[snapshotsMaxDepth]#" />
 	      </dd>
-          <dt><label for="snapshotVersion">Multiple Snapshot Versions</label></dt>
+          <dt><label>Multiple Snapshot Versions</label></dt>
           <dd>
             <input type="radio" name="snapshotsReplaceOld" value="on" checked="checked"/> replace old snapshots with new one&nbsp;&nbsp;&nbsp;
 			<input type="radio" name="snapshotsReplaceOld" value="off" /> add new versions for each crawl
           </dd>
-          <dt><label for="<label for="snapshotVersion">must-not-match filter for snapshot generation</label></dt>
+          <dt><label for="snapshotsMustnotmatch">must-not-match filter for snapshot generation</label></dt>
           <dd><input name="snapshotsMustnotmatch" id="snapshotsMustnotmatch" type="text" size="55" maxlength="100000" value="#[snapshotsMustnotmatch]#" /></dd>
           #(snapshotEnableImages)#
           <input type="hidden" name="snapshotsLoadImage" id="snapshotsLoadImage" value="false"/>::
-          <dt><label for="snapshotImage">Image Creation</label></dt>
+          <dt><label>Image Creation</label></dt>
           <dd>
             <input type="checkbox" name="snapshotsLoadImage" id="snapshotsLoadImage"#(snapshotsLoadImageChecked)#:: checked="checked"#(/snapshotsLoadImageChecked)#/>
           </dd>
@@ -563,7 +563,7 @@
             <strong>A YaCyNews message will be created to inform all peers about a global crawl</strong>,
             so they can omit starting a crawl with the same start point.
             </span></span>
-            <table border="0">
+            <table style="border-width: 0px">
               <tr>
                 <td>
                   <input type="checkbox" name="crawlOrder" id="crawlOrder" #(crawlOrderChecked)#::checked="checked"#(/crawlOrderChecked)# />
@@ -602,6 +602,7 @@
 	      </dl>
         </fieldset>
 
+		<dl>
           <dt><input type="hidden" name="crawlingstart" value="1"/><input type="submit" value="Start New Crawl Job" class="btn btn-primary"/></dt><dd></dd>
         </dl>
       </fieldset>

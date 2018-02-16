@@ -1025,6 +1025,7 @@ Initiator==Зачинщик
 
 #File: CrawlStartExpert.html
 #---------------------------
+<html lang="en">==<html lang="uk">
 Crawl Start<==Запуск сканування<
 Expert Crawl Start==Розширений запуск сканування
 Start Crawling Job:==Завдання запуску сканування:

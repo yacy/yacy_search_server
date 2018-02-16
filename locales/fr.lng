@@ -832,6 +832,7 @@ Word-Hash:</td>==Mot-Hash:</td>
 
 #File: CrawlStartExpert.html
 #---------------------------
+<html lang="en">==<html lang="fr">
 Index Creation==Cr&eacute;er un index
 Start Crawling Job:==T&acirc;che de d&eacute;marrage du crawl:
 You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".==Vous pouvez  d&eacute;finir les URLs de d&eacute;part et d&eacute;marrer le crawl ici. Crawler signifie que YaCy t&eacute;l&eacute;chargera les sites de d&eacute;part et extraira tous leurs liens ainsi que leur contenu. Cela sera r&eacute;p&eacute;t&eacute; jusqu'a ce que la "profondeur de crawl" soit atteinte.

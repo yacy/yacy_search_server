@@ -755,6 +755,7 @@ Crawl Results<==クロールの結果<
 
 #File: CrawlStartExpert.html
 #---------------------------
+<html lang="en">==<html lang="ja">
 Expert Crawl Start==エキスパート クロールの開始
 Start Crawling Job:==クローリングのジョブを開始する:
 >Crawl Job<==>クロール ジョブ<

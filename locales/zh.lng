@@ -1384,6 +1384,7 @@ Showing latest #[count]# lines from a stack of #[all]# entries.==显示栈中 #[
 
 #File: CrawlStartExpert.html
 #---------------------------
+<html lang="en">==<html lang="zh">
 Expert Crawl Start==Crawl高级设置
 Start Crawling Job:==开始Crawl任务:
 You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".==您可以将指定URL作为网页crawling的起始点. "Crawling"意即YaCy会下载指定的网站, 并解析出网站中链接的所有内容, 其深度由"Crawling深度"指定.
