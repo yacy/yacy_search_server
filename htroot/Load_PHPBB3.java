@@ -44,6 +44,18 @@ public class Load_PHPBB3 {
         final String repository = "http://" + a + "/";
         prop.put("starturl", (intranet) ? repository : "http://");
         prop.put("address", a);
+        
+        // hidden form param : clean up search events cache ?
+        if (post != null && post.containsKey("cleanSearchCache")) {
+        	prop.put("cleanSearchCacheChecked", post.getBoolean("cleanSearchCache"));
+        } else {
+			/*
+			 * no parameter passed : no search event cache clean-up
+			 * when JavaScript search resort is enabled, as it heavily relies on search events cache
+			 */
+			prop.put("cleanSearchCacheChecked", !sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT,
+					SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT));
+        }
 
         // return rewrite properties
         return prop;

@@ -35,6 +35,7 @@ import net.yacy.cora.util.Html2Image;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.document.LibraryProvider;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -363,6 +364,19 @@ public class CrawlStartExpert {
             }
         } else {
             prop.put("deleteIfOlderUnitSelect_list_2_default", 1);
+        }
+        
+        
+        // clean up search events cache ?
+        if (post != null && post.containsKey("cleanSearchCache")) {
+        	prop.put("cleanSearchCacheChecked", post.getBoolean("cleanSearchCache"));
+        } else {
+			/*
+			 * no parameter passed : the checkbox is proposed unchecked
+			 * when JavaScript search resort is enabled, as it heavily relies on search events cache
+			 */
+			prop.put("cleanSearchCacheChecked", !sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT,
+					SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT));
         }
 
         // delete any document before the crawl is started?

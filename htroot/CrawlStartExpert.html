@@ -381,6 +381,16 @@
         <fieldset>
           <legend>Clean-Up before Crawl Start</legend>
           <dl>
+            <dt><label for="cleanSearchCache">Clean up search events cache</label></dt>
+            <dd>
+            	<input type="checkbox" name="cleanSearchCache" id="cleanSearchCache" #(cleanSearchCacheChecked)#::checked="checked"#(/cleanSearchCacheChecked)# aria-describedby="cleanSearchCacheInfo"/>
+            	<div class="info" style="float:right">
+            		<img src="env/grafics/i16.gif" width="16" height="16" alt="Clean up search events cache info"/>
+            		<span style="right:0px;" id="cleanSearchCacheInfo">
+            			Check this option to be sure to get fresh search results including newly crawled documents. Beware that it will also interrupt any refreshing/resorting of search results currently requested from browser-side.
+            		</span>
+            	</div>
+            </dd>
             <dt>No Deletion</dt>
             <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             After a crawl was done in the past, document may become stale and eventually they are also deleted on the target host.

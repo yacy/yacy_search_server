@@ -74,20 +74,18 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
+/**
+ * This servlet does NOT create the Crawler servlet page content! This controls
+ * a web crawl start or the crawl monitor page (Crawler_p.html). The interfaces for entering the web crawl parameters are
+ * in CrawlStartSite.html and CrawlStartExpert.html.
+ */
 public class Crawler_p {
-
-    // this servlet does NOT create the Crawler servlet page content!
-    // this servlet starts a web crawl. The interface for entering the web crawl parameters is in IndexCreate_p.html
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
 
-        // clean up all search events
-        SearchEventCache.cleanupEvents(true);
-        sb.index.clearCaches(); // every time the ranking is changed we need to remove old orderings
-        
         // inital values for AJAX Elements (without JavaScript)
         final serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
@@ -220,6 +218,12 @@ public class Crawler_p {
             if (sb.peers == null) {
                 prop.put("info", "3");
             } else {
+            	
+            	if(post.getBoolean("cleanSearchCache")) {
+            		// clean up all search events
+            		SearchEventCache.cleanupEvents(true);
+            		sb.index.clearCaches(); // every time the ranking is changed we need to remove old orderings
+            	}
                 
                 // remove crawlingFileContent before we record the call
                 String crawlingFileName = post.get("crawlingFile");

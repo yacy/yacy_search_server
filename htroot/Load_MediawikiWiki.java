@@ -26,6 +26,7 @@
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -45,6 +46,18 @@ public class Load_MediawikiWiki {
         }
         prop.put("starturl", "http://");
         prop.put("address", a);
+        
+        // hidden form param : clean up search events cache ?
+        if (post != null && post.containsKey("cleanSearchCache")) {
+        	prop.put("cleanSearchCacheChecked", post.getBoolean("cleanSearchCache"));
+        } else {
+			/*
+			 * no parameter passed : no search event cache clean-up
+			 * when JavaScript search resort is enabled, as it heavily relies on search events cache
+			 */
+			prop.put("cleanSearchCacheChecked", !sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT,
+					SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT));
+        }
 
         // return rewrite properties
         return prop;
