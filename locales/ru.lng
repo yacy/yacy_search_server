@@ -3804,6 +3804,7 @@ You can edit your profile <a href="ConfigProfile_p.html">here</a>==Вы може
 
 #File: Vocabulary_p.html
 #---------------------------
+<html lang="en">==<html lang="ru">
 YaCy '#[clientname]#': Federated Index==YaCy '#[clientname]#': Управление словарём
 The information that is presented on this page can also be retrieved as XML==Информация представленная на этой странице, также может быть получена в виде XML.
 Click the API icon to see the RDF Ontology definition for this vocabulary.==Нажмите на иконку API для просмотра определения онтологии RDF для этого словаря.

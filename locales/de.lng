@@ -3556,6 +3556,7 @@ You can edit your profile <a href="ConfigProfile_p.html">here</a>==Sie können I
 
 #File: Vocabulary_p.html
 #---------------------------
+<html lang="en">==<html lang="de">
 The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
 Click the API icon to see the RDF Ontology definition for this vocabulary.==Klicken Sie auf das API Symbol, um die RDF Ontology Definition für diese Vokabelliste anzuzeigen.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.

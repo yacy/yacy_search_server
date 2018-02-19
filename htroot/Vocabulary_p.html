@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>YaCy '#[clientname]#': Federated Index</title>
     #%env/templates/metas.template%#
@@ -107,10 +107,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <dl>
         <dt>Vocabulary Name</dt>
         <dd><input type="text" name="discovername" value="" size="78" maxlength="128" onkeydown="for (i=0; i < 6; i++) document.getElementsByName('discovermethod')[i].disabled=''"/></dd>
-        <hr>
         <dt>Empty Vocabulary&nbsp;<input type="radio" name="discovermethod" value="none" checked="checked" disabled="disabled"/></dt>
         <dd></dd>
-        <dt>Auto-Discover&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</br>
+        <dt>Auto-Discover&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
             from file name&nbsp;<input type="radio" name="discovermethod" value="path" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
             from page title&nbsp;<input type="radio" name="discovermethod" value="title" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
             from page title (splitted)&nbsp;<input type="radio" name="discovermethod" value="titlesplitted" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
@@ -135,9 +134,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
             <dt><i>Column for Literals</i></dt>
             <dd><input type="number" id="discovercolumnliteral" name="discovercolumnliteral" min="0" max="99" step="1" size="2" value="0" disabled="disabled" style="width:50px;"> (first has index 0)</dd>
             <dt><i>Synonyms</i></dt>
-            <dd><input type="radio" name="discoversynonymsmethod" id="discoversynonymsmethod" value="none" checked="checked"/> <i>no Synonyms</i><br/>
-                <input type="radio" name="discoversynonymsmethod" id="discoversynonymsmethod" value="enrichsynonyms"/> <i>Auto-Enrich with Synonyms from Stemming Library</i><br/>
-                <input type="radio" name="discoversynonymsmethod" id="discoversynonymsmethod" value="readcolumn" onclick="document.getElementById('discovercolumnsynonyms').value=parseInt(document.getElementById('discovercolumnliteral').value)+1;"/> <i>Read Column</i><br/>
+            <dd><input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodNo" value="none" checked="checked"/> <i>no Synonyms</i><br/>
+                <input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodAuto" value="enrichsynonyms"/> <i>Auto-Enrich with Synonyms from Stemming Library</i><br/>
+                <input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodReadCol" value="readcolumn" onclick="document.getElementById('discovercolumnsynonyms').value=parseInt(document.getElementById('discovercolumnliteral').value)+1;"/> <i>Read Column</i><br/>
                 <input type="number" id="discovercolumnsynonyms" name="discovercolumnsynonyms" min="-1" max="99" step="1" size="2" value="-1" disabled="disabled" style="width:50px;"> (first has index 0)
             </dd>
             <dt><i>Column for Object Link (optional)</i></dt>

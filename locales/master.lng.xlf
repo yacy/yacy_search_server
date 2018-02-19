@@ -9459,6 +9459,9 @@
 
 <file original="Vocabulary_p.html"  source-language="en"  datatype="html">
   <body>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
     <trans-unit id="16c5dae2" xml:space="preserve" approved="no" translate="yes">
        <source>YaCy '#[clientname]#': Federated Index</source>
     </trans-unit>
