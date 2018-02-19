@@ -43,14 +43,15 @@ function updatepage(str) {
   
   if (totalResults > 0 && firstChannel.items.length > 0) {
     var item;
-    html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
-    html += "<tr class=\"TableHeader\" valign=\"bottom\">";
-    html += "<td>URL from index (total results = " + totalResults + ")<\/td>";
+    html += "<table class=\"networkTable\" style=\"border-width: 0px\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
+    html += "<thead><tr class=\"TableHeader\" style=\"vertical-align: bottom\">";
+    html += "<th>URL from index (total results = " + totalResults + ")<\/th>";
+    html += "</thead><tbody>";
     for (var i = 0; i < firstChannel.items.length; i++) {
         item = firstChannel.items[i];
-        html += "<tr class=\"TableCellLight\"><td align=\"left\" onclick=\"document.getElementById('searchform').value='" + item.link + "';\">" + item.link + "<\/td>";
+        html += "<tr class=\"TableCellLight\"><td style=\"text-align: left\" onclick=\"document.getElementById('searchform').value='" + item.link + "';\">" + item.link + "<\/td>";
     }
-    html += "<\/table>";
+    html += "</tbody><\/table>";
   }
   document.getElementById("searchresults").innerHTML = html;
 }
@@ -186,38 +187,44 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           	</label>
         </dd>
       </dl>
-      <table class="sortable" border="0">
-      <tr class="TableHeader" valign="bottom">
-        <td>Modify</td>
-        <td>Delete</td>
-        <td>Literal</td>
-        <td>Synonyms</td>
-        <td>Object Link</td>
-      </tr>
-      #{terms}#
-      <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-        <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="modify_#[term]#" id="modify_#[term]#" value="checked" disabled="disabled"/>#(/editable)#</td>
-        <td align="center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" />#(/editable)#</td>
-        <td align="left">#[term]#</td>
-        <td align="left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="40" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
-        <td align="left">#(editable)##[objectlink]#::<input type="text" name="objectlink_#[term]#" value="#[objectlink]#" size="60" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
-      </tr>
-      #{/terms}#
+      <table class="sortable" style="border-width: 0px">
+      <thead>
+      	<tr class="TableHeader" style="vertical-align: bottom">
+        	<th>Modify</th>
+        	<th>Delete</th>
+        	<th>Literal</th>
+        	<th>Synonyms</th>
+        	<th>Object Link</th>
+      	</tr>
+      </thead>
+      <tbody>
+      	#{terms}#
+      	<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+        	<td style="text-align: center">#(editable)#&nbsp;::<input type="checkbox" name="modify_#[term]#" id="modify_#[term]#" value="checked" disabled="disabled"/>#(/editable)#</td>
+        	<td style="text-align: center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" />#(/editable)#</td>
+        	<td style="text-align: left">#[term]#</td>
+        	<td style="text-align: left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="40" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
+        	<td style="text-align: left">#(editable)##[objectlink]#::<input type="text" name="objectlink_#[term]#" value="#[objectlink]#" size="60" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
+      	</tr>
+      	#{/terms}#
+      </tbody>
       #(editable)#::
-      <tr class="TableCellDark">
-        <td align="center" colspan="2"><input type="checkbox" name="add_new" id="add_new" value="checked" disabled="disabled"/><i>add</i></td>
-        <td align="left"><input type="text" name="newterm" id="newterm" value="" size="24" maxlength="128" onkeyup="document.getElementById('add_new').checked='checked'; document.getElementById('add_new').disabled=''"/></td>
-        <td align="left"><input type="text" name="newsynonyms" id="newsynonyms" value="" size="40" maxlength="1024"/></td>
-        <td align="left"><input type="text" name="newobjectlink" id="newobjectlink" value="" size="60" maxlength="1024"/></td>
-      </tr>
-      <tr class="TableCellDark">
-        <td colspan="3"></td>
-        <td colspan="2" align="right" class="TableCellSummary"><input type="checkbox" name="clear_table" id="clear_table" value="checked" /><i>clear table (remove all terms)</i></td>
-      </tr>
-      <tr class="TableCellDark">
-        <td colspan="3"></td>
-        <td colspan="2" align="right" class="TableCellSummary"><input type="checkbox" name="delete_vocabulary" id="delete_vocabulary" value="checked" /><i>delete vocabulary</i></td>
-      </tr>
+      <tfoot>
+      	<tr class="TableCellDark">
+        	<td style="text-align: center" colspan="2"><input type="checkbox" name="add_new" id="add_new" value="checked" disabled="disabled"/><i>add</i></td>
+        	<td style="text-align: left"><input type="text" name="newterm" id="newterm" value="" size="24" maxlength="128" onkeyup="document.getElementById('add_new').checked='checked'; document.getElementById('add_new').disabled=''"/></td>
+        	<td style="text-align: left"><input type="text" name="newsynonyms" id="newsynonyms" value="" size="40" maxlength="1024"/></td>
+        	<td style="text-align: left"><input type="text" name="newobjectlink" id="newobjectlink" value="" size="60" maxlength="1024"/></td>
+      	</tr>
+      	<tr class="TableCellDark">
+        	<td colspan="3"></td>
+        	<td colspan="2" style="text-align: right" class="TableCellSummary"><input type="checkbox" name="clear_table" id="clear_table" value="checked" /><i>clear table (remove all terms)</i></td>
+      	</tr>
+      	<tr class="TableCellDark">
+        	<td colspan="3"></td>
+        	<td colspan="2" style="text-align: right" class="TableCellSummary"><input type="checkbox" name="delete_vocabulary" id="delete_vocabulary" value="checked" /><i>delete vocabulary</i></td>
+      	</tr>
+      </tfoot>
       #(/editable)#
       </table>
       <input type="hidden" name="vocabulary" value="#[name]#" />
