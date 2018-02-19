@@ -100,20 +100,19 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     </form>
     
     #(create)#::
-    <!--<form action="Vocabulary_p.html" id="searchform" method="get" accept-charset="UTF-8" onkeyup="xmlhttpPost(); return false;">-->
     <form action="Vocabulary_p.html" id="searchform" method="get" accept-charset="UTF-8" >
       <fieldset><legend>Vocabulary Production</legend>
       
       <dl>
         <dt>Vocabulary Name</dt>
-        <dd><input type="text" name="discovername" value="" size="78" maxlength="128" onkeydown="for (i=0; i < 6; i++) document.getElementsByName('discovermethod')[i].disabled=''"/></dd>
-        <dt>Empty Vocabulary&nbsp;<input type="radio" name="discovermethod" value="none" checked="checked" disabled="disabled"/></dt>
+        <dd><input type="text" name="discovername" value="" size="78" maxlength="128" required="required"/></dd>
+        <dt>Empty Vocabulary&nbsp;<input type="radio" name="discovermethod" value="none" checked="checked"/></dt>
         <dd></dd>
         <dt>Auto-Discover&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
-            from file name&nbsp;<input type="radio" name="discovermethod" value="path" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
-            from page title&nbsp;<input type="radio" name="discovermethod" value="title" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
-            from page title (splitted)&nbsp;<input type="radio" name="discovermethod" value="titlesplitted" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
-            from page author&nbsp;<input type="radio" name="discovermethod" value="author" disabled="disabled" onclick="document.getElementById('discoverobjectspace').disabled=''"/></dt>
+            from file name&nbsp;<input type="radio" name="discovermethod" value="path" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
+            from page title&nbsp;<input type="radio" name="discovermethod" value="title" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
+            from page title (splitted)&nbsp;<input type="radio" name="discovermethod" value="titlesplitted" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
+            from page author&nbsp;<input type="radio" name="discovermethod" value="author" onclick="document.getElementById('discoverobjectspace').disabled=''"/></dt>
         <dd>
             <dl>
             <dt></dt>
@@ -124,7 +123,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
             <dd><input type="text" id="discoverobjectspace" name="discoverobjectspace" value="http://" size="78" maxlength="512" disabled="disabled"/><div id="searchresults"></div></dd>
             </dl>
         </dd>
-        <dt>Import from a csv file&nbsp;<input type="radio" name="discovermethod" value="csv" disabled="disabled" onclick="document.getElementById('discoverpath').disabled='';document.getElementById('discoverLineStart').disabled='';document.getElementById('discovercolumnliteral').disabled='';document.getElementById('discovercolumnsynonyms').disabled='';document.getElementById('discovercolumnobjectlink').disabled='';document.getElementById('discoverCharset').disabled='';document.getElementById('discoverColSeparator').disabled='';"/></dt>
+        <dt>Import from a csv file&nbsp;<input type="radio" name="discovermethod" value="csv" onclick="document.getElementById('discoverpath').disabled='';document.getElementById('discoverLineStart').disabled='';document.getElementById('discovercolumnliteral').disabled='';document.getElementById('discovercolumnsynonyms').disabled='';document.getElementById('discovercolumnobjectlink').disabled='';document.getElementById('discoverCharset').disabled='';document.getElementById('discoverColSeparator').disabled='';"/></dt>
         <dd>
             <dl>
             <dt><i>File Path</i></dt>
