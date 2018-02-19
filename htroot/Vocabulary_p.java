@@ -57,7 +57,13 @@ import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
+/**
+ * Handle creation and edition of vocabularies through the Vocabulary_p.html page.
+ */
 public class Vocabulary_p {
+	
+	/** Logger */
+	private final static ConcurrentLog LOG = new ConcurrentLog(Vocabulary_p.class.getSimpleName());
 
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
@@ -69,18 +75,15 @@ public class Vocabulary_p {
         Tagging vocabulary = vocabularyName == null ? null : LibraryProvider.autotagging.getVocabulary(vocabularyName);
         if (vocabulary == null) vocabularyName = null;
         if (post != null) {
-            try {
                 // create a vocabulary
                 if (vocabulary == null && discovername != null && discovername.length() > 0) {
-                    // store this call as api call
-                    sb.tables.recordAPICall(post, "Vocabulary_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "vocabulary creation for " + discovername);
                     // get details of creation
                     String discoverobjectspace = post.get("discoverobjectspace", "");
                     MultiProtocolURL discoveruri = null;
                     if (discoverobjectspace.length() > 0) try {discoveruri = new MultiProtocolURL(discoverobjectspace);} catch (final MalformedURLException e) {}
                     if (discoveruri == null) discoverobjectspace = "";
-                    Map<String, Tagging.SOTuple> table = new LinkedHashMap<String, Tagging.SOTuple>();
-                    File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
+                    final Map<String, Tagging.SOTuple> table = new LinkedHashMap<String, Tagging.SOTuple>();
+                    final File propFile = LibraryProvider.autotagging.getVocabularyFile(discovername);
                     final boolean discoverNot = post.get("discovermethod", "").equals("none");
                     final boolean discoverFromPath = post.get("discovermethod", "").equals("path");
                     final boolean discoverFromTitle = post.get("discovermethod", "").equals("title");
@@ -91,11 +94,34 @@ public class Vocabulary_p {
 
                     final File discoverFromCSVFile = discoverFromCSVPath.length() > 0 ? new File(discoverFromCSVPath) : null;
 
-                    Segment segment = sb.index;
+                    final Segment segment = sb.index;
                     String t;
+                    int csvFileStatus = 0;
                     if (!discoverNot) {
-                        if (discoverFromCSV && discoverFromCSVFile != null && discoverFromCSVFile.exists()) {
-                            handleDiscoverFromCSV(post, table, discoverFromCSVFile);
+                        if (discoverFromCSV) {
+    						if(discoverFromCSVFile != null) {
+    							final String csvPath = discoverFromCSVFile.getAbsolutePath();
+    							if (!discoverFromCSVFile.exists()) {
+    								csvFileStatus = 2;
+    								prop.put("create_csvFileStatus_csvPath", csvPath);
+    							} else if (!discoverFromCSVFile.canRead()) {
+    								csvFileStatus = 3;
+    								prop.put("create_csvFileStatus_csvPath", csvPath);
+    							} else if (discoverFromCSVFile.isDirectory()) {
+    								csvFileStatus = 4;
+    								prop.put("create_csvFileStatus_csvPath", csvPath);
+    							} else {
+    								try {
+    									handleDiscoverFromCSV(post, table, discoverFromCSVFile);
+    								} catch(final IOException e) {
+    									LOG.warn("Could not read CSV file at " + discoverFromCSVFile, e);
+    									csvFileStatus = 3;
+    									prop.put("create_csvFileStatus_csvPath", csvPath);	
+    								}
+    							}
+    						} else {
+    							csvFileStatus = 1;
+    						}
                         } else {
                             Iterator<DigestURL> ui = segment.urlSelector(discoveruri, Long.MAX_VALUE, 100000);
                             while (ui.hasNext()) {
@@ -144,79 +170,96 @@ public class Vocabulary_p {
                             }
                         }
                     }
-                    Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
-                    LibraryProvider.autotagging.addVocabulary(newvoc);
-                    vocabularyName = discovername;
-                    vocabulary = newvoc;
+					prop.put("create_csvFileStatus", csvFileStatus);
+                    if(csvFileStatus == 0) {
+                    	try {
+                    		Tagging newvoc = new Tagging(discovername, propFile, discoverobjectspace, table);
+                    		prop.put("create_vocabWriteError", false);
+                    		
+                            LibraryProvider.autotagging.addVocabulary(newvoc);
+                            vocabularyName = discovername;
+                            vocabulary = newvoc;
+                            
+                            // store this call as api call
+                            sb.tables.recordAPICall(post, "Vocabulary_p.html", WorkTables.TABLE_API_TYPE_CRAWLER, "vocabulary creation for " + discovername);
+                    	} catch(final IOException e) {
+                    		prop.put("create_vocabWriteError", true);
+                    		final String vocabPath = propFile.getAbsolutePath();
+                    		prop.put("create_vocabWriteError_vocabPath", vocabPath);
+                    		LOG.severe("Could not write vocabulary file at " + vocabPath, e);
+                    	}
+                    }
                 } else if (vocabulary != null) {
-                    // check if objectspace was set
-                    vocabulary.setObjectspace(post.get("objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace()));
+                	try {
+                		// check if objectspace was set
+                		vocabulary.setObjectspace(post.get("objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace()));
 
-                    // check if a term was added
-                    if (post.get("add_new", "").equals("checked") && post.get("newterm", "").length() > 0) {
-                    	String objectlink = post.get("newobjectlink", "");
-                    	if (objectlink.length() > 0) try {
-                    		objectlink = new MultiProtocolURL(objectlink).toNormalform(true);
-                    	} catch (final MalformedURLException e) {}
-                        vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""), objectlink);
-                    }
+                		// check if a term was added
+                		if (post.get("add_new", "").equals("checked") && post.get("newterm", "").length() > 0) {
+                			String objectlink = post.get("newobjectlink", "");
+                			if (objectlink.length() > 0) try {
+                				objectlink = new MultiProtocolURL(objectlink).toNormalform(true);
+                			} catch (final MalformedURLException e) {}
+                			vocabulary.put(post.get("newterm", ""), post.get("newsynonyms", ""), objectlink);
+                		}
 
-                    // check if a term was modified
-                    for (Map.Entry<String, String> e : post.entrySet()) {
-                        if (e.getKey().startsWith("modify_") && e.getValue().equals("checked")) {
-                            String term = e.getKey().substring(7);
-                            String synonyms = post.get("synonyms_" + term, "");
-                            String objectlink = post.get("objectlink_" + term, "");
-                            vocabulary.put(term, synonyms, objectlink);
-                        }
-                    }
+                		// check if a term was modified
+                		for (Map.Entry<String, String> e : post.entrySet()) {
+                			if (e.getKey().startsWith("modify_") && e.getValue().equals("checked")) {
+                				String term = e.getKey().substring(7);
+                				String synonyms = post.get("synonyms_" + term, "");
+                				String objectlink = post.get("objectlink_" + term, "");
+                				vocabulary.put(term, synonyms, objectlink);
+                			}
+                		}
 
-                    // check if the vocabulary shall be cleared
-                    if (post.get("clear_table", "").equals("checked") ) {
-                        vocabulary.clear();
-                    }
+                		// check if the vocabulary shall be cleared
+                		if (post.get("clear_table", "").equals("checked") ) {
+                			vocabulary.clear();
+                		}
 
-                    // check if the vocabulary shall be deleted
-                    if (post.get("delete_vocabulary", "").equals("checked") ) {
-                        LibraryProvider.autotagging.deleteVocabulary(vocabularyName);
-                        vocabulary = null;
-                        vocabularyName = null;
-                    }
+                		// check if the vocabulary shall be deleted
+                		if (post.get("delete_vocabulary", "").equals("checked") ) {
+                			LibraryProvider.autotagging.deleteVocabulary(vocabularyName);
+                			vocabulary = null;
+                			vocabularyName = null;
+                		}
 
-                    // check if a term shall be deleted
-                    if (vocabulary != null && vocabulary.size() > 0) for (Map.Entry<String, String> e : post.entrySet()) {
-                        if (e.getKey().startsWith("delete_") && e.getValue().equals("checked")) {
-                            String term = e.getKey().substring(7);
-                            vocabulary.delete(term);
-                        }
-                    }
+                		// check if a term shall be deleted
+                		if (vocabulary != null && vocabulary.size() > 0) for (Map.Entry<String, String> e : post.entrySet()) {
+                			if (e.getKey().startsWith("delete_") && e.getValue().equals("checked")) {
+                				String term = e.getKey().substring(7);
+                				vocabulary.delete(term);
+                			}
+                		}
                     
-                    // check the isFacet and isMatchFromLinkedData properties
-                    if (vocabulary != null && post.containsKey("set")) {
-                        boolean isFacet = post.getBoolean("isFacet");
-                        vocabulary.setFacet(isFacet);
-                        Set<String> omit = env.getConfigSet("search.result.show.vocabulary.omit");
-                        if (isFacet) {
-                        	omit.remove(vocabularyName); 
-                        } else {
-                        	omit.add(vocabularyName);
-                        }
-                        env.setConfig("search.result.show.vocabulary.omit", omit);
-                        
-                        boolean isMatchFromLinkedData = post.getBoolean("vocabularies.matchLinkedData");
-                        vocabulary.setMatchFromLinkedData(isMatchFromLinkedData);
-                        final Set<String> matchLinkedDataVocs = env.getConfigSet(SwitchboardConstants.VOCABULARIES_MATCH_LINKED_DATA_NAMES);
-                        if (isMatchFromLinkedData) {
-                        	matchLinkedDataVocs.add(vocabularyName);
-                        } else {
-                        	matchLinkedDataVocs.remove(vocabularyName); 
-                        }
-                        env.setConfig(SwitchboardConstants.VOCABULARIES_MATCH_LINKED_DATA_NAMES, matchLinkedDataVocs);
+                		// check the isFacet and isMatchFromLinkedData properties
+                		if (vocabulary != null && post.containsKey("set")) {
+                			boolean isFacet = post.getBoolean("isFacet");
+                			vocabulary.setFacet(isFacet);
+                			Set<String> omit = env.getConfigSet("search.result.show.vocabulary.omit");
+                			if (isFacet) {
+                				omit.remove(vocabularyName); 
+                			} else {
+                				omit.add(vocabularyName);
+                			}
+                			env.setConfig("search.result.show.vocabulary.omit", omit);
+                			
+                			boolean isMatchFromLinkedData = post.getBoolean("vocabularies.matchLinkedData");
+                			vocabulary.setMatchFromLinkedData(isMatchFromLinkedData);
+                			final Set<String> matchLinkedDataVocs = env.getConfigSet(SwitchboardConstants.VOCABULARIES_MATCH_LINKED_DATA_NAMES);
+                			if (isMatchFromLinkedData) {
+                				matchLinkedDataVocs.add(vocabularyName);
+                			} else {
+                				matchLinkedDataVocs.remove(vocabularyName); 
+                			}
+                			env.setConfig(SwitchboardConstants.VOCABULARIES_MATCH_LINKED_DATA_NAMES, matchLinkedDataVocs);
+                		}
+                    } catch (final IOException e) {
+                        ConcurrentLog.logException(e);
                     }
                 }
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-            }
+
         }
 
         int count = 0;
@@ -401,10 +444,13 @@ public class Vocabulary_p {
 		}
 	    final Pattern separatorPattern = Pattern.compile(columnSeparator);
 	    
-		// read file (try-with-resource to close inputstream automatically)
-		try (final BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(discoverFromCSVFile), charsetName))) {
-		    discoverFromCSVReader(table, escapeChar, lineStart, discovercolumnliteral, discovercolumnsynonyms,
-					discovercolumnobjectlink, discoverenrichsynonyms, discoverreadcolumn, separatorPattern, r);
+		// read file (try-with-resource to close resources automatically)
+		try (final FileInputStream fileStream = new FileInputStream(discoverFromCSVFile);
+				final InputStreamReader reader = new InputStreamReader(fileStream, charsetName);
+				final BufferedReader bufferedReader = new BufferedReader(reader);) {
+			discoverFromCSVReader(table, escapeChar, lineStart, discovercolumnliteral, discovercolumnsynonyms,
+					discovercolumnobjectlink, discoverenrichsynonyms, discoverreadcolumn, separatorPattern,
+					bufferedReader);
 		}
 	}
 

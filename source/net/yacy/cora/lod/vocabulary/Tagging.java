@@ -128,9 +128,9 @@ public class Tagging {
      * @param propFile
      * @param objectspace
      * @param table
-     * @throws IOException
+     * @throws IOException when an error occurred while writing table content to propFile
      */
-    public Tagging(String name, File propFile, String objectspace, Map<String, SOTuple> table) throws IOException {
+    public Tagging(final String name, final File propFile, final String objectspace, final Map<String, SOTuple> table) throws IOException {
         this(name);
         this.propFile = propFile;
         this.objectspace = objectspace;
@@ -157,7 +157,7 @@ public class Tagging {
 			    }
 			    term = normalizeKey(e.getKey());
 			    tags = e.getValue().getSynonymsList();
-			    Set<String> synonyms = new HashSet<String>();
+			    final Set<String> synonyms = new HashSet<String>();
 			    synonyms.add(term);
 			    tagloop: for (String synonym: tags) {
 			        if (synonym.isEmpty()) continue tagloop;
@@ -168,7 +168,7 @@ public class Tagging {
 			        this.synonym2term.put(synonym, term);
 			        this.term2entries.put(term, new SynonymTaggingEntry(synonym));
 			    }
-			    String synonym = normalizeTerm(term);
+			    final String synonym = normalizeTerm(term);
 			    this.synonym2term.put(synonym, term);
                 if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) {
                 	this.term2entries.put(term, new TaggingEntryWithObjectLink(synonym, e.getValue().getObjectlink()));
@@ -184,7 +184,7 @@ public class Tagging {
             	final BufferedWriter w = new BufferedWriter(new OutputStreamWriter(outStream, StandardCharsets.UTF_8.name()));
             ) {
             	if (objectspace != null && objectspace.length() > 0) w.write("#objectspace:" + objectspace + "\n");
-            	for (Map.Entry<String, SOTuple> e: table.entrySet()) {
+            	for (final Map.Entry<String, SOTuple> e: table.entrySet()) {
             		String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
             		String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
             		w.write(e.getKey() + (s == null || s.isEmpty() ? "" : ":" + e.getValue().getSynonymsCSV()) + (o == null || o.isEmpty() || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");

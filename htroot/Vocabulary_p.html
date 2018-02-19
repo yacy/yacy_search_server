@@ -102,7 +102,15 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     #(create)#::
     <form action="Vocabulary_p.html" id="searchform" method="get" accept-charset="UTF-8" >
       <fieldset><legend>Vocabulary Production</legend>
-      
+      #(csvFileStatus)#
+        ::<div class="alert alert-danger" role="alert">Please provide a CSV file path.</div>
+    	::<div class="alert alert-danger" role="alert">CSV file not found "#[csvPath]#".</div>
+    	::<div class="alert alert-danger" role="alert">Can not read CSV file "#[csvPath]#".</div>
+    	::<div class="alert alert-danger" role="alert">CSV file error : you selected a directory ("#[csvPath]#").</div>
+      #(/csvFileStatus)#
+      #(vocabWriteError)#
+        ::<div class="alert alert-danger" role="alert">Could not write vocabulary file at "#[vocabPath]#".</div>
+      #(/vocabWriteError)#
       <dl>
         <dt>Vocabulary Name</dt>
         <dd><input type="text" name="discovername" value="" size="78" maxlength="128" required="required"/></dd>
