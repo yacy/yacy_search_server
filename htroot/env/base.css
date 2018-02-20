@@ -1128,6 +1128,14 @@ div#tagcloud {
 
 /******* yacysearchtrailer.html end ***********/
 
+/******* Vocabulary_p.html **********/
+
+#Vocabulary_p label {
+	font-weight: bold;
+}
+
+/******* Vocabulary_p.html end ***********/ 
+
 /************* header.template ****************/
 /* Specific styles for the header template */
 

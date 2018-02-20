@@ -43,7 +43,7 @@ function updatepage(str) {
   
   if (totalResults > 0 && firstChannel.items.length > 0) {
     var item;
-    html += "<table class=\"networkTable\" style=\"border-width: 0px\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
+    html += "<table class=\"networkTable\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
     html += "<thead><tr class=\"TableHeader\" style=\"vertical-align: bottom\">";
     html += "<th>URL from index (total results = " + totalResults + ")<\/th>";
     html += "</thead><tbody>";
@@ -84,25 +84,31 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       The object can be denoted by a url stub that, combined with the term, becomes the url for the object.
     </p>
     
-    <form action="Vocabulary_p.html" method="get" accept-charset="UTF-8">
-      <fieldset><legend>Vocabulary Selection</legend>
-      <dl>
-        <dt>Vocabulary Name</dt>
-        <dd>
-          <select name="vocabulary" onchange="this.form.submit()">
-            #{vocabularyset}#
-            <option value="#[name]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>
-            #{/vocabularyset}#
-          </select>
-        </dd>
-        <dt></dt><dd><input type="submit" class="btn btn-primary" name="view" value="View" /></dd>
-      </dl>
+    <form action="Vocabulary_p.html" method="get" accept-charset="UTF-8" class="form-horizontal">
+      <fieldset>
+        <legend>Vocabulary Selection</legend>
+        <div class="form-group">
+        	<label for="vocabularyName" class="col-sm-4 col-lg-3 control-label">Vocabulary Name</label>
+        	<div class="col-sm-5">
+         		<select name="vocabulary" id="vocabularyName" onchange="this.form.submit()" class="form-control">
+            		#{vocabularyset}#
+            		<option value="#[name]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>
+            		#{/vocabularyset}#
+          		</select>
+          	</div>
+        </div>
+        <div class="form-group">
+        	<div class="col-sm-offset-4 col-lg-offset-3 col-sm-7">
+        		<input type="submit" class="btn btn-primary" name="view" value="View" />
+        	</div>
+        </div>
     </fieldset>
     </form>
     
     #(create)#::
-    <form action="Vocabulary_p.html" id="searchform" method="get" accept-charset="UTF-8" >
-      <fieldset><legend>Vocabulary Production</legend>
+    <form action="Vocabulary_p.html" id="searchform" method="get" accept-charset="UTF-8" class="form-horizontal">
+      <fieldset>
+        <legend>Vocabulary Production</legend>
       #(csvFileStatus)#
         ::<div class="alert alert-danger" role="alert">Please provide a CSV file path.</div>
     	::<div class="alert alert-danger" role="alert">CSV file not found "#[csvPath]#".</div>
@@ -112,61 +118,141 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       #(vocabWriteError)#
         ::<div class="alert alert-danger" role="alert">Could not write vocabulary file at "#[vocabPath]#".</div>
       #(/vocabWriteError)#
-      <dl>
-        <dt>Vocabulary Name</dt>
-        <dd><input type="text" name="discovername" value="" size="78" maxlength="128" required="required"/></dd>
-        <dt>Empty Vocabulary&nbsp;<input type="radio" name="discovermethod" value="none" checked="checked"/></dt>
-        <dd></dd>
-        <dt>Auto-Discover&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>
-            from file name&nbsp;<input type="radio" name="discovermethod" value="path" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
-            from page title&nbsp;<input type="radio" name="discovermethod" value="title" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
-            from page title (splitted)&nbsp;<input type="radio" name="discovermethod" value="titlesplitted" onclick="document.getElementById('discoverobjectspace').disabled=''"/><br/>
-            from page author&nbsp;<input type="radio" name="discovermethod" value="author" onclick="document.getElementById('discoverobjectspace').disabled=''"/></dt>
-        <dd>
-            <dl>
-            <dt></dt>
-            <dd>It is possible to produce a vocabulary out of the existing search index. This is done using a given 'objectspace' which you can enter as a URL Stub.
+        <div class="form-group">
+          <label for="discoverName" class="col-sm-4 col-lg-3 control-label">Vocabulary Name</label>
+          <div class="col-sm-5">
+          	<input type="text" id="discoverName" name="discovername" value="" maxlength="128" required="required" class="form-control"/>
+          </div>
+        </div>
+        <div class="form-group">
+        	<div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          		<label>
+          			<input type="radio" name="discovermethod" value="none" checked="checked"/> Empty Vocabulary
+          		</label>
+        	</div>
+        </div>
+    	<label class="col-sm-4 col-lg-3 control-label">Auto-Discover</label>
+    	<div class="form-group">
+          <div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          	<label>
+          		<input type="radio" name="discovermethod" value="path" onclick="document.getElementById('discoverobjectspace').disabled=''"/> from file name
+          	</label>
+          </div>
+          <div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          	<label>
+          		<input type="radio" name="discovermethod" value="title" onclick="document.getElementById('discoverobjectspace').disabled=''"/> from page title
+          	</label>
+          </div>
+          <div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          	<label>
+          		<input type="radio" name="discovermethod" value="titlesplitted" onclick="document.getElementById('discoverobjectspace').disabled=''"/> from page title (splitted)
+          	</label>
+          </div>
+          <div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          	<label>
+          		<input type="radio" name="discovermethod" value="author" onclick="document.getElementById('discoverobjectspace').disabled=''"/> from page author
+          	</label>
+          </div>
+        </div>
+        <div class="form-group">
+            <label for="discoverobjectspace" class="col-sm-4 col-lg-3 control-label">Objectspace</label>
+            <div class="col-sm-5">
+          		<input type="text" id="discoverobjectspace" name="discoverobjectspace" value="http://" size="78" maxlength="512" disabled="disabled" class="form-control" aria-describedby="helpDiscoverObjectSpace"/>
+            </div>
+        	<div id="helpDiscoverObjectSpace" class="col-sm-offset-1 col-sm-11 col-lg-offset-0 col-lg-4">It is possible to produce a vocabulary out of the existing search index. This is done using a given 'objectspace' which you can enter as a URL Stub.
                 This stub is used to find all matching URLs. If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.
-                This works best with wikis. Try to use a wiki url as objectspace path.</dd>
-            <dt><i>Objectspace</i></dt>
-            <dd><input type="text" id="discoverobjectspace" name="discoverobjectspace" value="http://" size="78" maxlength="512" disabled="disabled"/><div id="searchresults"></div></dd>
-            </dl>
-        </dd>
-        <dt>Import from a csv file&nbsp;<input type="radio" name="discovermethod" value="csv" onclick="document.getElementById('discoverpath').disabled='';document.getElementById('discoverLineStart').disabled='';document.getElementById('discovercolumnliteral').disabled='';document.getElementById('discovercolumnsynonyms').disabled='';document.getElementById('discovercolumnobjectlink').disabled='';document.getElementById('discoverCharset').disabled='';document.getElementById('discoverColSeparator').disabled='';"/></dt>
-        <dd>
-            <dl>
-            <dt><i>File Path</i></dt>
-            <dd><input type="text" id="discoverpath" name="discoverpath" value="" size="78" maxlength="256" disabled="disabled"></dd>
-            <dt><i>Start line</i></dt>
-            <dd><input type="number" id="discoverLineStart" name="discoverLineStart" min="0" max="99" step="1" size="2" value="0" disabled="disabled" style="width:50px;"> (first has index 0)</dd>
-            <dt><i>Column for Literals</i></dt>
-            <dd><input type="number" id="discovercolumnliteral" name="discovercolumnliteral" min="0" max="99" step="1" size="2" value="0" disabled="disabled" style="width:50px;"> (first has index 0)</dd>
-            <dt><i>Synonyms</i></dt>
-            <dd><input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodNo" value="none" checked="checked"/> <i>no Synonyms</i><br/>
-                <input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodAuto" value="enrichsynonyms"/> <i>Auto-Enrich with Synonyms from Stemming Library</i><br/>
-                <input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodReadCol" value="readcolumn" onclick="document.getElementById('discovercolumnsynonyms').value=parseInt(document.getElementById('discovercolumnliteral').value)+1;"/> <i>Read Column</i><br/>
-                <input type="number" id="discovercolumnsynonyms" name="discovercolumnsynonyms" min="-1" max="99" step="1" size="2" value="-1" disabled="disabled" style="width:50px;"> (first has index 0)
-            </dd>
-            <dt><i>Column for Object Link (optional)</i></dt>
-            <dd><input type="number" id="discovercolumnobjectlink" name="discovercolumnobjectlink" min="-1" max="99" step="1" size="2" value="-1" disabled="disabled" style="width:50px;"> (first has index 0, if unused set -1)</dd>
-            <dt><i>Charset of Import File</i></dt>
-            <dd><select name="charset" id="discoverCharset" disabled="disabled">#{charset}#<option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>#{/charset}#</select></dd>
-            <dt><i>Column separator</i></dt>
-            <dd><select name="columnSeparator" id="discoverColSeparator" disabled="disabled">
-            		<option value="," title="Standard CSV field delimiter">Comma ','</option>
-            		<option value=";">Semicolon ';'</option>
-            	</select>
-            </dd>
-            </dl>
-        </dd>
-        <dt></dt><dd><input type="submit" class="btn btn-primary" name="create" value="Create" /></dd>
-      </dl>
+                This works best with wikis. Try to use a wiki url as objectspace path.</div>
+            <div id="searchresults"></div>
+        </div>
+        <div class="form-group">
+          <div class="radio col-sm-offset-4 col-lg-offset-3 col-sm-7">
+          	<label>
+          		<input type="radio" name="discovermethod" value="csv" onclick="document.getElementById('discoverpath').disabled='';document.getElementById('discoverLineStart').disabled='';document.getElementById('discovercolumnliteral').disabled='';document.getElementById('discovercolumnsynonyms').disabled='';document.getElementById('discovercolumnobjectlink').disabled='';document.getElementById('discoverCharset').disabled='';document.getElementById('discoverColSeparator').disabled='';"/>
+          		Import from a csv file
+          	</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="discoverpath" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>File Path</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-5">
+          	<input type="text" id="discoverpath" name="discoverpath" value="" size="78" maxlength="256" disabled="disabled" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="discoverLineStart" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Start line</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-2">
+          	<input type="number" id="discoverLineStart" name="discoverLineStart" min="0" max="99" step="1" size="2" value="0" disabled="disabled" class="form-control" aria-describedby="helpLineStart">
+          </div>
+          <span id="helpLineStart" class="col-xs-offset-2 col-sm-offset-0 help-block">(first has index 0)</span>
+        </div>
+        <div class="form-group">
+          <label for="discovercolumnliteral" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Column for Literals</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-2">
+          	<input type="number" id="discovercolumnliteral" name="discovercolumnliteral" min="0" max="99" step="1" size="2" value="0" disabled="disabled" class="form-control" aria-describedby="helpDiscoverColumnLiteral">
+          </div>
+          <span id="helpDiscoverColumnLiteral" class="col-xs-offset-2 col-sm-offset-0 help-block">(first has index 0)</span>
+        </div>
+    	<label class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Synonyms</i></label>
+    	<div class="form-group">
+          <div class="radio col-xs-offset-1 col-sm-offset-5 col-lg-offset-4 col-sm-7">
+          	<label>
+          		<input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodNo" value="none" checked="checked"/> <i>no Synonyms</i>
+          	</label>
+          </div>
+          <div class="radio col-xs-offset-1 col-sm-offset-5 col-lg-offset-4 col-sm-7">
+          	<label>
+          		<input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodAuto" value="enrichsynonyms"/> <i>Auto-Enrich with Synonyms from Stemming Library</i>
+          	</label>
+          </div>
+          <div class="radio col-xs-offset-1 col-sm-offset-5 col-lg-offset-4 col-sm-2">
+          	<label>
+          		<input type="radio" name="discoversynonymsmethod" id="discoverSynonymsMethodReadCol" value="readcolumn" onclick="document.getElementById('discovercolumnsynonyms').value=parseInt(document.getElementById('discovercolumnliteral').value)+1;"/>
+          		<i>Read Column</i>
+          	</label>
+          </div>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-5">
+          	<div class="col-sm-6">
+          		<input type="number" id="discovercolumnsynonyms" name="discovercolumnsynonyms" min="-1" max="99" step="1" size="2" value="-1" disabled="disabled" class="form-control" aria-describedby="helpDiscoverColumnSynonyms">
+          	</div>
+          	<span id="helpDiscoverColumnSynonyms" class="help-block col-sm-6">(first has index 0)</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="discovercolumnobjectlink" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Column for Object Link (optional)</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-2">
+          	<input type="number" id="discovercolumnobjectlink" name="discovercolumnobjectlink" min="-1" max="99" step="1" size="2" value="-1" disabled="disabled" class="form-control" aria-describedby="helpDiscoverColumnObjectLink">
+          </div>
+          <span id="helpDiscoverColumnObjectLink" class="col-xs-offset-2 col-sm-offset-0 help-block">(first has index 0, if unused set -1)</span>
+        </div>
+        <div class="form-group">
+          <label for="discoverCharset" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Charset of Import File</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-3">
+          	<select name="charset" id="discoverCharset" disabled="disabled" class="form-control">
+          	#{charset}#<option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>#{/charset}#
+          	</select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="discoverColSeparator" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>Column separator</i></label>
+          <div class="col-xs-offset-1 col-sm-offset-0 col-sm-3">
+          	<select name="columnSeparator" id="discoverColSeparator" disabled="disabled" class="form-control">
+            	<option value="," title="Standard CSV field delimiter">Comma ','</option>
+            	<option value=";">Semicolon ';'</option>
+          	</select>
+          </div>
+        </div>
+        <div class="form-group">
+        	<div class="col-sm-offset-4 col-lg-offset-3 col-sm-7">
+       	        <input type="submit" class="btn btn-primary" name="create" value="Create" />
+        	</div>
+        </div>
+
     </fieldset>
     </form>
     #(/create)#
     
     #(edit)#::
-    <form action="Vocabulary_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form action="Vocabulary_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" class="form-horizontal">
       <fieldset><legend>Vocabulary Editor</legend>
       <dl>
         <dt>Vocabulary Name</dt><dd>#[name]#</dd>
@@ -175,21 +261,44 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <dt>Namespace</dt><dd>#[namespace]#</dd>
         <dt>Predicate</dt><dd>#[predicate]#</dd>
         <dt>Prefix</dt><dd>#[prefix]#</dd>
-        <dt>Objectspace</dt><dd>#(editable)##[objectspace]#::<input type="text" name="objectspace" value="#[objectspace]#" size="78" maxlength="128" /><br/>if set, uses the predicate <a href="#[objectspacepredicate]#" target="_blank">#[objectspacepredicate]#</a> for generated objects. Hint: use 'http://dbpedia.org/resource/' as default.#(/editable)#</dd>
-        <dt>Is Facet?</dt><dd><input type="checkbox" name="isFacet"#(isFacet)#:: checked="checked"#(/isFacet)#/> (If checked, this vocabulary is used for search facets. Not feasible for large vocabularies!)</dd>
-        <dt>Match terms from</dt>
-        <dd>
-        	<label>
-          		<input type="radio" name="vocabularies.matchLinkedData" value="false" #(vocabularies.matchLinkedData)#checked="checked"::#(/vocabularies.matchLinkedData)# />Cleartext
-          	</label>
-          	<label>
-          		<input type="radio" name="vocabularies.matchLinkedData" value="true" #(vocabularies.matchLinkedData)#::checked="checked"#(/vocabularies.matchLinkedData)# />Linked data/Semantic web annotations
-          	</label>
-        </dd>
       </dl>
-      <table class="sortable" style="border-width: 0px">
+        <div class="form-group">
+            <label #(editable)#::for="editObjectSpace"#(/editable)# class="col-xs-12 col-sm-3 control-label">Objectspace</label>
+            <div class="col-xs-5 col-sm-5">
+            	#(editable)#<p class="form-control-static">#[objectspace]#</p>::
+            	<input type="text" id="editObjectSpace" name="objectspace" value="#[objectspace]#" maxlength="128" class="form-control" aria-describedby="helpEditObjectSpace"/>
+            	#(/editable)#
+            </div>
+        	#(editable)#::<div id="helpEditObjectSpace" class="col-xs-12 col-sm-offset-3 col-sm-7 help-block">
+        	if set, uses the predicate <a href="#[objectspacepredicate]#" target="_blank">#[objectspacepredicate]#</a> for generated objects. Hint: use 'http://dbpedia.org/resource/' as default.
+        	</div>
+        	#(/editable)#
+        </div>
+        <div class="form-group">
+        	<label for="editIsFacet" class="col-xs-1 col-sm-3 control-label">Is Facet?</label>
+        	<div class="checkbox-inline">
+          		<input type="checkbox" id="editIsFacet" name="isFacet"#(isFacet)#:: checked="checked"#(/isFacet)# aria-describedby="helpEditIsFacet"/>
+				<span id="helpEditIsFacet" class="help-block">
+        			(If checked, this vocabulary is used for search facets. Not feasible for large vocabularies!)
+        		</span>
+        	</div>
+        </div>
+    	<div class="form-group">
+    	  <label class="col-xs-2 col-sm-3 control-label">Match terms from</label>
+          <div class="radio-inline">
+        	<label>
+          		<input type="radio" name="vocabularies.matchLinkedData" value="false" #(vocabularies.matchLinkedData)#checked="checked"::#(/vocabularies.matchLinkedData)# #(editable)#disabled="disabled"::#(/editable)#/>Cleartext
+          	</label>
+          </div>
+          <div class="radio-inline">
+          	<label>
+          		<input type="radio" name="vocabularies.matchLinkedData" value="true" #(vocabularies.matchLinkedData)#::checked="checked"#(/vocabularies.matchLinkedData)# #(editable)#disabled="disabled"::#(/editable)#/>Linked data/Semantic web annotations
+          	</label>
+          </div>
+        </div>
+      <table class="sortable">
       <thead>
-      	<tr class="TableHeader" style="vertical-align: bottom">
+      	<tr class="TableHeader">
         	<th>Modify</th>
         	<th>Delete</th>
         	<th>Literal</th>
@@ -200,29 +309,29 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <tbody>
       	#{terms}#
       	<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-        	<td style="text-align: center">#(editable)#&nbsp;::<input type="checkbox" name="modify_#[term]#" id="modify_#[term]#" value="checked" disabled="disabled"/>#(/editable)#</td>
-        	<td style="text-align: center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" />#(/editable)#</td>
-        	<td style="text-align: left">#[term]#</td>
-        	<td style="text-align: left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="40" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
-        	<td style="text-align: left">#(editable)##[objectlink]#::<input type="text" name="objectlink_#[term]#" value="#[objectlink]#" size="60" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
+        	<td class="text-center">#(editable)#&nbsp;::<input type="checkbox" name="modify_#[term]#" id="modify_#[term]#" value="checked" disabled="disabled"/>#(/editable)#</td>
+        	<td class="text-center">#(editable)#&nbsp;::<input type="checkbox" name="delete_#[term]#" id="delete_#[term]#" value="checked" />#(/editable)#</td>
+        	<td class="text-left">#[term]#</td>
+        	<td class="text-left">#(editable)##[synonyms]#::<input type="text" name="synonyms_#[term]#" value="#[synonyms]#" size="40" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
+        	<td class="text-left">#(editable)##[objectlink]#::<input type="text" name="objectlink_#[term]#" value="#[objectlink]#" size="60" maxlength="1024" onkeyup="document.getElementById('modify_#[term]#').checked='checked'; document.getElementById('modify_#[term]#').disabled=''; document.getElementById('delete_#[term]#').disabled='disabled';"/>#(/editable)#</td>
       	</tr>
       	#{/terms}#
       </tbody>
       #(editable)#::
       <tfoot>
       	<tr class="TableCellDark">
-        	<td style="text-align: center" colspan="2"><input type="checkbox" name="add_new" id="add_new" value="checked" disabled="disabled"/><i>add</i></td>
-        	<td style="text-align: left"><input type="text" name="newterm" id="newterm" value="" size="24" maxlength="128" onkeyup="document.getElementById('add_new').checked='checked'; document.getElementById('add_new').disabled=''"/></td>
-        	<td style="text-align: left"><input type="text" name="newsynonyms" id="newsynonyms" value="" size="40" maxlength="1024"/></td>
-        	<td style="text-align: left"><input type="text" name="newobjectlink" id="newobjectlink" value="" size="60" maxlength="1024"/></td>
+        	<td class="text-center" colspan="2"><label><input type="checkbox" name="add_new" id="add_new" value="checked" disabled="disabled"/> <i>add</i></label></td>
+        	<td class="text-left"><input type="text" name="newterm" id="newterm" value="" size="24" maxlength="128" onkeyup="document.getElementById('add_new').checked='checked'; document.getElementById('add_new').disabled=''"/></td>
+        	<td class="text-left"><input type="text" name="newsynonyms" id="newsynonyms" value="" size="40" maxlength="1024"/></td>
+        	<td class="text-left"><input type="text" name="newobjectlink" id="newobjectlink" value="" size="60" maxlength="1024"/></td>
       	</tr>
       	<tr class="TableCellDark">
         	<td colspan="3"></td>
-        	<td colspan="2" style="text-align: right" class="TableCellSummary"><input type="checkbox" name="clear_table" id="clear_table" value="checked" /><i>clear table (remove all terms)</i></td>
+        	<td colspan="2" class="TableCellSummary text-right"><label><input type="checkbox" name="clear_table" id="clear_table" value="checked" /> <i>clear table (remove all terms)</i></label></td>
       	</tr>
       	<tr class="TableCellDark">
         	<td colspan="3"></td>
-        	<td colspan="2" style="text-align: right" class="TableCellSummary"><input type="checkbox" name="delete_vocabulary" id="delete_vocabulary" value="checked" /><i>delete vocabulary</i></td>
+        	<td colspan="2" class="TableCellSummary text-right"><label><input type="checkbox" name="delete_vocabulary" id="delete_vocabulary" value="checked" /> <i>delete vocabulary</i></label></td>
       	</tr>
       </tfoot>
       #(/editable)#
