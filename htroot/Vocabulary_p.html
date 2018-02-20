@@ -106,7 +106,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     </form>
     
     #(create)#::
-    <form action="Vocabulary_p.html" id="searchform" method="get" accept-charset="UTF-8" class="form-horizontal">
+    <form action="Vocabulary_p.html" id="searchform" method="post" accept-charset="UTF-8" class="form-horizontal">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
       <fieldset>
         <legend>Vocabulary Production</legend>
       #(csvFileStatus)#
@@ -253,6 +254,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     
     #(edit)#::
     <form action="Vocabulary_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" class="form-horizontal">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
       <fieldset><legend>Vocabulary Editor</legend>
       <dl>
         <dt>Vocabulary Name</dt><dd>#[name]#</dd>

@@ -47,6 +47,7 @@ import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -65,18 +66,30 @@ public class Vocabulary_p {
 	/** Logger */
 	private final static ConcurrentLog LOG = new ConcurrentLog(Vocabulary_p.class.getSimpleName());
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+        
+        /* Acquire a transaction token for the next POST form submission */
+        final String nextToken = TransactionManager.getTransactionToken(header);
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, nextToken);
+        prop.put("edit_" + TransactionManager.TRANSACTION_TOKEN_PARAM, nextToken);
+        prop.put("create_" + TransactionManager.TRANSACTION_TOKEN_PARAM, nextToken);
+        
         Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
 
         String vocabularyName = (post == null) ? null : post.get("vocabulary", null);
         String discovername = (post == null) ? null : post.get("discovername", null);
         Tagging vocabulary = vocabularyName == null ? null : LibraryProvider.autotagging.getVocabulary(vocabularyName);
-        if (vocabulary == null) vocabularyName = null;
+        if (vocabulary == null) {
+        	vocabularyName = null;
+        }
         if (post != null) {
                 // create a vocabulary
                 if (vocabulary == null && discovername != null && discovername.length() > 0) {
+                	/* Check the transaction is valid */
+                	TransactionManager.checkPostTransaction(header, post);
+                	
                     // get details of creation
                     String discoverobjectspace = post.get("discoverobjectspace", "");
                     MultiProtocolURL discoveruri = null;
@@ -189,7 +202,10 @@ public class Vocabulary_p {
                     		LOG.severe("Could not write vocabulary file at " + vocabPath, e);
                     	}
                     }
-                } else if (vocabulary != null) {
+                } else if (vocabulary != null && post.containsKey("set")) {
+                	/* Check the transaction is valid */
+                	TransactionManager.checkPostTransaction(header, post);
+                	
                 	try {
                 		// check if objectspace was set
                 		vocabulary.setObjectspace(post.get("objectspace", vocabulary.getObjectspace() == null ? "" : vocabulary.getObjectspace()));
