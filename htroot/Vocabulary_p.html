@@ -111,10 +111,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <fieldset>
         <legend>Vocabulary Production</legend>
       #(csvFileStatus)#
-        ::<div class="alert alert-danger" role="alert">Please provide a CSV file path.</div>
+        ::<div class="alert alert-danger" role="alert">Please provide a CSV file path or <abbr title="Uniform Resource Locator">URL</abbr>.</div>
     	::<div class="alert alert-danger" role="alert">CSV file not found "#[csvPath]#".</div>
-    	::<div class="alert alert-danger" role="alert">Can not read CSV file "#[csvPath]#".</div>
+    	::<div class="alert alert-danger" role="alert">Can not read CSV file at "#[csvFile]#".</div>
     	::<div class="alert alert-danger" role="alert">CSV file error : you selected a directory ("#[csvPath]#").</div>
+    	::<div class="alert alert-danger" role="alert">CSV file URL is malformed "#[csvUrl]#".</div>
       #(/csvFileStatus)#
       #(vocabWriteError)#
         ::<div class="alert alert-danger" role="alert">Could not write vocabulary file at "#[vocabPath]#".</div>
@@ -174,7 +175,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           </div>
         </div>
         <div class="form-group">
-          <label for="discoverpath" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>File Path</i></label>
+          <label for="discoverpath" class="col-xs-offset-1 col-sm-offset-0 col-sm-5 col-lg-4 control-label"><i>File Path or <abbr title="Uniform Resource Locator">URL</abbr></i></label>
           <div class="col-xs-offset-1 col-sm-offset-0 col-sm-5">
           	<input type="text" id="discoverpath" name="discoverpath" value="" size="78" maxlength="256" disabled="disabled" class="form-control">
           </div>

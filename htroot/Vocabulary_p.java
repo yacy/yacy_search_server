@@ -20,7 +20,6 @@
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -40,18 +39,22 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.language.synonyms.SynonymLibrary;
 import net.yacy.cora.lod.vocabulary.DCTerms;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.SOTuple;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.crawler.retrieval.StreamResponse;
 import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.document.LibraryProvider;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
@@ -105,35 +108,54 @@ public class Vocabulary_p {
                     final boolean discoverFromCSV = post.get("discovermethod", "").equals("csv");
                     final String discoverFromCSVPath = post.get("discoverpath", "").replaceAll("%20", " ");
 
-                    final File discoverFromCSVFile = discoverFromCSVPath.length() > 0 ? new File(discoverFromCSVPath) : null;
 
                     final Segment segment = sb.index;
                     String t;
                     int csvFileStatus = 0;
                     if (!discoverNot) {
                         if (discoverFromCSV) {
-    						if(discoverFromCSVFile != null) {
-    							final String csvPath = discoverFromCSVFile.getAbsolutePath();
-    							if (!discoverFromCSVFile.exists()) {
-    								csvFileStatus = 2;
-    								prop.put("create_csvFileStatus_csvPath", csvPath);
-    							} else if (!discoverFromCSVFile.canRead()) {
-    								csvFileStatus = 3;
-    								prop.put("create_csvFileStatus_csvPath", csvPath);
-    							} else if (discoverFromCSVFile.isDirectory()) {
-    								csvFileStatus = 4;
-    								prop.put("create_csvFileStatus_csvPath", csvPath);
-    							} else {
-    								try {
-    									handleDiscoverFromCSV(post, table, discoverFromCSVFile);
-    								} catch(final IOException e) {
-    									LOG.warn("Could not read CSV file at " + discoverFromCSVFile, e);
-    									csvFileStatus = 3;
-    									prop.put("create_csvFileStatus_csvPath", csvPath);	
-    								}
-    							}
-    						} else {
+    						if(discoverFromCSVPath.isEmpty()) {
     							csvFileStatus = 1;
+    						} else {
+    							DigestURL csvUrl = null;
+    		                    if(discoverFromCSVPath.contains("://")) {
+    		                    	try {
+    		                    		csvUrl = new DigestURL(discoverFromCSVPath);
+    		                    	} catch(final MalformedURLException e) {
+    									csvFileStatus = 5;
+    									prop.put("create_csvFileStatus_csvUrl", discoverFromCSVPath);	
+    		                    	}
+    		                    } else {
+    		                    	final File discoverFromCSVFile = new File(discoverFromCSVPath);
+    		                    	final String csvPath = discoverFromCSVFile.getAbsolutePath();
+    		                    	if (!discoverFromCSVFile.exists()) {
+    		                    		csvFileStatus = 2;
+    		                    		prop.put("create_csvFileStatus_csvPath", csvPath);
+    		                    	} else if (!discoverFromCSVFile.canRead()) {
+    		                    		csvFileStatus = 3;
+    		                    		prop.put("create_csvFileStatus_csvFile", csvPath);
+    		                    	} else if (discoverFromCSVFile.isDirectory()) {
+    		                    		csvFileStatus = 4;
+    		                    		prop.put("create_csvFileStatus_csvPath", csvPath);
+    		                    	} else {
+        		                    	try {
+        		                    		csvUrl = new DigestURL(discoverFromCSVFile);
+        		                    	} catch(final MalformedURLException e) {
+        									csvFileStatus = 5;
+        									prop.put("create_csvFileStatus_csvUrl", "file://" + discoverFromCSVFile.getAbsolutePath());	
+        		                    	}
+    		                    	}
+    		                    }
+    		                    
+    		                    if(csvUrl != null) {
+    		                    	try {
+    		                    		handleDiscoverFromCSV(sb, post, table, csvUrl);
+    		                    	} catch(final IOException e) {
+    		                    		LOG.warn("Could not read CSV file at " + csvUrl, e);
+    		                    		csvFileStatus = 3;
+    		                    		prop.put("create_csvFileStatus_csvFile", csvUrl.toString());	
+    		                    	}
+    		                    }
     						}
                         } else {
                             Iterator<DigestURL> ui = segment.urlSelector(discoveruri, Long.MAX_VALUE, 100000);
@@ -432,15 +454,16 @@ public class Vocabulary_p {
 
     /**
      * Fill the vocabulary table from a CSV file.
+     * @param sb the main Switchbaord instance. Must not be null.
      * @param post current request parameters. Must not be null.
      * @param table the vocabulary table to fill. Must not be null.
-     * @param discoverFromCSVFile. Must not be null.
+     * @param csvFileUrl the file URL. Must not be null.
      * @throws IOException when a read/write error occurred
      * @throws UnsupportedEncodingException
      * @throws FileNotFoundException when the file does not exists or can not be read for some reason.
      */
-	protected static void handleDiscoverFromCSV(final serverObjects post, final Map<String, Tagging.SOTuple> table,
-			final File discoverFromCSVFile)
+	protected static void handleDiscoverFromCSV(final Switchboard sb, final serverObjects post, final Map<String, Tagging.SOTuple> table,
+			final DigestURL csvFileUrl)
 			throws IOException, UnsupportedEncodingException, FileNotFoundException {
 		String charsetName = post.get("charset", StandardCharsets.UTF_8.name());
 		final String columnSeparator = post.get("columnSeparator", ";");
@@ -451,22 +474,53 @@ public class Vocabulary_p {
 		final int discovercolumnobjectlink = post.getInt("discovercolumnobjectlink", -1);
         final boolean discoverenrichsynonyms = post.get("discoversynonymsmethod", "none").equals("enrichsynonyms");
         final boolean discoverreadcolumn = post.get("discoversynonymsmethod", "none").equals("readcolumn");
-		
-		// auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
-		if (charsetName.equals("autodetect")) {
-		    List<String> charsets = FileUtils.detectCharset(discoverFromCSVFile);
-		    charsetName = charsets.get(0);
-		    ConcurrentLog.info("FileUtils", "detected charset: " + charsetName + " used to read " + discoverFromCSVFile.toString());
-		}
+        
 	    final Pattern separatorPattern = Pattern.compile(columnSeparator);
 	    
-		// read file (try-with-resource to close resources automatically)
-		try (final FileInputStream fileStream = new FileInputStream(discoverFromCSVFile);
-				final InputStreamReader reader = new InputStreamReader(fileStream, charsetName);
-				final BufferedReader bufferedReader = new BufferedReader(reader);) {
-			discoverFromCSVReader(table, escapeChar, lineStart, discovercolumnliteral, discovercolumnsynonyms,
-					discovercolumnobjectlink, discoverenrichsynonyms, discoverreadcolumn, separatorPattern,
-					bufferedReader);
+		// auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
+		if (charsetName.equals("autodetect")) {
+
+			try (final StreamResponse streamResponse = sb.loader.openInputStream(
+					sb.loader.request(csvFileUrl, true, false), CacheStrategy.IFFRESH, BlacklistType.CRAWLER,
+					ClientIdentification.yacyInternetCrawlerAgent, Integer.MAX_VALUE);) {
+				if(streamResponse == null || streamResponse.getContentStream() == null) {
+					throw new IOException("Could not get CSV content at " + csvFileUrl);
+				}
+				
+				charsetName = streamResponse.getResponse().getCharacterEncoding();
+				
+				if(charsetName == null) {
+					/* Charset not provided in response headers : try to detect it from content */
+					final List<String> charsets = FileUtils.detectCharset(streamResponse.getContentStream());
+					charsetName = charsets.get(0);
+					LOG.info("detected charset: " + charsetName + " used to read " + csvFileUrl.toString());
+				} else {
+					LOG.info("detected charset: " + charsetName + " used to read " + csvFileUrl.toString());
+					/* Use now the open stream */
+					try (final InputStreamReader reader = new InputStreamReader(streamResponse.getContentStream(), charsetName);
+							final BufferedReader bufferedReader = new BufferedReader(reader);) {
+						discoverFromCSVReader(table, escapeChar, lineStart, discovercolumnliteral, discovercolumnsynonyms,
+								discovercolumnobjectlink, discoverenrichsynonyms, discoverreadcolumn, separatorPattern,
+								bufferedReader);
+					}
+					return;
+				}
+			}
+		}
+		
+		// when autodetection of content charset has been selected, a remote resource may opened again, but has some chances to be now in cache
+		try(final StreamResponse streamResponse = sb.loader.openInputStream(
+				sb.loader.request(csvFileUrl, true, false), CacheStrategy.IFFRESH, BlacklistType.CRAWLER,
+				ClientIdentification.yacyInternetCrawlerAgent, Integer.MAX_VALUE);) {
+			if(streamResponse == null || streamResponse.getContentStream() == null) {
+				throw new IOException("Could not get CSV content at " + csvFileUrl);
+			}
+			try (final InputStreamReader reader = new InputStreamReader(streamResponse.getContentStream(), charsetName);
+					final BufferedReader bufferedReader = new BufferedReader(reader);) {
+				discoverFromCSVReader(table, escapeChar, lineStart, discovercolumnliteral, discovercolumnsynonyms,
+						discovercolumnobjectlink, discoverenrichsynonyms, discoverreadcolumn, separatorPattern,
+						bufferedReader);
+			}
 		}
 	}
 

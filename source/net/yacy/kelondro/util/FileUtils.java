@@ -1028,32 +1028,35 @@ public final class FileUtils {
     }
     
     /**
-     * auto-detect the charset of a file
-     * used code from http://jchardet.sourceforge.net/;
-     * see also: http://www-archive.mozilla.org/projects/intl/chardet.html
-     * @param file
+     * Auto-detect the charset of content in a stream.
+     * Used code from http://jchardet.sourceforge.net/.
+     * Don't forget to close the stream in caller.
+     * @see <a href="http://www-archive.mozilla.org/projects/intl/chardet.html">chardet</a>
+     * @param inStream an open stream
      * @return a list of probable charsets
-     * @throws IOException
+     * @throws IOException when a read error occured
      */
-    public static List<String> detectCharset(File file) throws IOException {
+    public static List<String> detectCharset(final InputStream inStream) throws IOException {
         // auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
         List<String> result;
-        try (BufferedInputStream imp = new BufferedInputStream(new FileInputStream(file))) { // try-with-resource to close inputstream
-            nsDetector det = new nsDetector(nsPSMDetector.ALL);
-            byte[] buf = new byte[1024] ;
-            int len;
-            boolean done = false ;
-            boolean isAscii = true ;
-            while ((len = imp.read(buf,0,buf.length)) != -1) {
-                if (isAscii) isAscii = det.isAscii(buf,len);
-                if (!isAscii && !done) done = det.DoIt(buf,len, false);
-            }   det.DataEnd();
-            result = new ArrayList<>();
+        nsDetector det = new nsDetector(nsPSMDetector.ALL);
+        byte[] buf = new byte[1024] ;
+        int len;
+        boolean done = false ;
+        boolean isAscii = true ;
+        while ((len = inStream.read(buf,0,buf.length)) != -1) {
             if (isAscii) {
-                result.add(StandardCharsets.US_ASCII.name());
-            } else {
-                for (String c: det.getProbableCharsets()) result.add(c); // worst case this returns "nomatch"
+            	isAscii = det.isAscii(buf,len);
             }
+            if (!isAscii && !done) {
+            	done = det.DoIt(buf,len, false);
+            }
+        }   det.DataEnd();
+        result = new ArrayList<>();
+        if (isAscii) {
+            result.add(StandardCharsets.US_ASCII.name());
+        } else {
+            for (String c: det.getProbableCharsets()) result.add(c); // worst case this returns "nomatch"
         }
         return result;
     }
@@ -1070,8 +1073,9 @@ public final class FileUtils {
         Thread t = new Thread("FileUtils.checkCharset") {
             @Override
             public void run() {
-                try {
-                    List<String> charsets = FileUtils.detectCharset(file);
+            	try (final FileInputStream fileStream = new FileInputStream(file); 
+            			final BufferedInputStream imp = new BufferedInputStream(fileStream)) { // try-with-resource to close resources
+                    List<String> charsets = FileUtils.detectCharset(imp);
                     if (charsets.contains(givenCharset)) {
                         ConcurrentLog.info("checkCharset", "appropriate charset '" + givenCharset + "' for import of " + file + ", is part one detected " + charsets);
                     } else {
