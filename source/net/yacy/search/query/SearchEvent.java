@@ -1219,27 +1219,37 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 			for (String vocName : genericFacets) {
 				final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName + CollectionSchema.VOCABULARY_TERMS_SUFFIX;
 				if (facets == null || !facets.containsKey(fieldName)) {
-					Object docValue = doc.getFieldValue(fieldName);
-					if(docValue instanceof String) {
-						ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
-						if (vocNav == null) {
-							vocNav = new ConcurrentScoreMap<String>();
-							this.vocabularyNavigator.put(vocName, vocNav);
-						}
-						vocNav.inc((String)docValue);
-					} else if(docValue instanceof Collection) {
-						if (!((Collection<?>) docValue).isEmpty()) {
-							ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
-							if (vocNav == null) {
-								vocNav = new ConcurrentScoreMap<String>();
-								this.vocabularyNavigator.put(vocName, vocNav);
-							}
-							for (Object singleDocValue : (Collection<?>) docValue) {
-								if (singleDocValue instanceof String) {
-									vocNav.inc((String) singleDocValue);
-								}
-							}
-						}
+					incrementVocNavigator(doc, vocName, fieldName);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Increment a vocabulary navigator with the given document
+	 * @param doc a document entry. Must not be null.
+	 * @param vocName the name of the vocabulary. Must not be null.
+	 * @param fieldName the name of the field eventually holding the vocabulary information in the document entry
+	 */
+	protected void incrementVocNavigator(final URIMetadataNode doc, final String vocName, final String fieldName) {
+		final Object docValue = doc.getFieldValue(fieldName);
+		if(docValue instanceof String) {
+			ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+			if (vocNav == null) {
+				vocNav = new ConcurrentScoreMap<String>();
+				this.vocabularyNavigator.put(vocName, vocNav);
+			}
+			vocNav.inc((String)docValue);
+		} else if(docValue instanceof Collection) {
+			if (!((Collection<?>) docValue).isEmpty()) {
+				ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+				if (vocNav == null) {
+					vocNav = new ConcurrentScoreMap<String>();
+					this.vocabularyNavigator.put(vocName, vocNav);
+				}
+				for (final Object singleDocValue : (Collection<?>) docValue) {
+					if (singleDocValue instanceof String) {
+						vocNav.inc((String) singleDocValue);
 					}
 				}
 			}
@@ -1573,6 +1583,20 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 					}
 				}
             }
+            
+    		// handle the vocabulary navigator
+			if (this.vocabularyNavigator != null) {
+				Set<String> genericFacets = new LinkedHashSet<>();
+				for (Tagging v : LibraryProvider.autotagging.getVocabularies()) {
+					genericFacets.add(v.getName());
+				}
+				genericFacets.addAll(ProbabilisticClassifier.getContextNames());
+				for (final String vocName : genericFacets) {
+					final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName
+							+ CollectionSchema.VOCABULARY_TERMS_SUFFIX;
+					incrementVocNavigator(page, vocName, fieldName);
+				}
+			}
 
             return page; // accept url
         }
