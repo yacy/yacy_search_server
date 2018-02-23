@@ -104,6 +104,8 @@ public class yacysearchitem {
         
 		final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
 		final boolean authenticated = adminAuthenticated || user != null;
+
+        final boolean extendedSearchRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
 		
         final int item = post.getInt("item", -1);
         final RequestHeader.FileType fileType = header.fileType();
@@ -450,6 +452,20 @@ public class yacysearchitem {
                 final String resultUrlstring = ms.url().toNormalform(true);
                 final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
                 prop.putHTML("content_item_href", resultUrlstring);
+                final String mediaType = ms.mime();
+				if (extendedSearchRights && mediaType != null && mediaType.startsWith("audio/")) {
+					/*
+					 * Display HTML5 embedded audio only :
+					 * - when content-type is known to be audio (each browser has its own set of supported audio subtypes, 
+					 *  so the browser will then handle itself eventual report about unsupported media format)
+					 * - to authenticated users with extended search rights to prevent any media redistribution issue
+					 */
+                    prop.put("content_item_embed", true);
+                    prop.putHTML("content_item_embed_href", resultUrlstring);
+                    prop.putHTML("content_item_embed_mediaType", mediaType);	
+                } else {
+                	prop.put("content_item_embed", false);
+                }
                 prop.put("content_item_noreferrer", noreferrer ? 1 : 0);
                 prop.putHTML("content_item_hrefshort", nxTools.shortenURLString(resultUrlstring, MAX_URL_LENGTH));
                 prop.putHTML("content_item_target", target);

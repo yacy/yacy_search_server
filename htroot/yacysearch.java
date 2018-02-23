@@ -902,7 +902,8 @@ public class yacysearch {
             }
             prop.put("results", theQuery.itemsPerPage());
             prop.put("jsResort_results", theQuery.itemsPerPage());
-            prop.put("resultTable", (contentdom == ContentDomain.APP || contentdom == ContentDomain.AUDIO || contentdom == ContentDomain.VIDEO) ? 1 : 0);
+            prop.put("resultTable", (contentdom == ContentDomain.APP || contentdom == ContentDomain.VIDEO) ? 1 : (contentdom == ContentDomain.AUDIO ? 2 : 0) );
+            prop.put("resultTable_embed", (contentdom == ContentDomain.AUDIO && extendedSearchRights));
             prop.put("eventID", theQuery.id(false)); // for bottomline
             prop.put("jsResort_eventID", theQuery.id(false));
 

@@ -199,7 +199,8 @@ document.getElementById("Enter").innerHTML = "search again";
 <div id="datehistogram"></div>
 
 <!-- linklist begin -->
-#(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td></tr>#(/resultTable)#
+#(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td></tr>
+::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td>#(embed)#::<td>Player</td>#(/embed)#</tr>#(/resultTable)#
 #(jsResort)#
   #{results}#
   <!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
@@ -208,7 +209,7 @@ document.getElementById("Enter").innerHTML = "search again";
   <div id="resultscontainer">
   </div>
 #(/jsResort)#
-#(resultTable)#::</table>#(/resultTable)#
+#(resultTable)#::</table>::</table>#(/resultTable)#
 <!-- linklist end -->
 
 #(num-results)#

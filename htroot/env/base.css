@@ -1128,6 +1128,16 @@ div#tagcloud {
 
 /******* yacysearchtrailer.html end ***********/
 
+/******* yacysearchitem.html **********/
+
+/* Mark audio element with media playing error */
+.audioError {
+	border-style: solid;
+	border-color: orange;
+}
+
+/******* yacysearchitem.html end ***********/ 
+
 /******* Vocabulary_p.html **********/
 
 #Vocabulary_p label {
