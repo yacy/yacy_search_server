@@ -24,7 +24,6 @@
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.16.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
-	<classpathentry kind="lib" path="lib/jaudiotagger-2.0.4-20111207.115108-15.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.10.jar"/>
 	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.24.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.24.jar"/>
@@ -105,5 +104,6 @@
 	<classpathentry kind="lib" path="lib/jwat-archive-common-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-warc-1.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/commons-collections4-4.1.jar"/>
+	<classpathentry kind="lib" path="lib/jaudiotagger-2.2.5.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

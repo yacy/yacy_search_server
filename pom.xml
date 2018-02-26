@@ -342,6 +342,14 @@
         </profile>
     </profiles>
 
+	<repositories>
+    	<repository>
+    		<!-- After version 2.0.3 JAudioTagger library is no more archived on Maven Central repository -->
+        	<id>jaudiotagger-repository</id>
+        	<url>https://dl.bintray.com/ijabz/maven</url>
+    	</repository>
+	</repositories>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -440,9 +448,9 @@
             <type>jar</type>
         </dependency>        
         <dependency>
-            <groupId>org</groupId>
+            <groupId>net.jthink</groupId>
             <artifactId>jaudiotagger</artifactId>
-            <version>2.0.3</version>
+            <version>2.2.5</version>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.jchardet</groupId>
