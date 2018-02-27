@@ -297,6 +297,8 @@ releases = DATA/RELEASE
 # parser.mime.deny: specifies mime-types that shall not be indexed
 parser.mime.deny=
 parser.extensions.deny=
+# The audioTagParser is disabled by default as it needs to create a temporary file each time an audio resource is parsed
+# Audio file extensions and media types can be enabled in the ConfigParser_p.html page if this is not a problem with your install 
 parser.enableAudioTags=false
 
 # experimental single-page parser for pdf files: split one pdf into individual pages;

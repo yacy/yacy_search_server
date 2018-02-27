@@ -30,10 +30,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.SupportedFileFormat;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -43,30 +53,168 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
 
-import org.jaudiotagger.audio.AudioFile;
-import org.jaudiotagger.audio.AudioFileIO;
-import org.jaudiotagger.tag.FieldKey;
-import org.jaudiotagger.tag.Tag;
-
 /**
  * this parser can parse id3 tags of mp3 audio files
  */
 public class audioTagParser extends AbstractParser implements Parser {
 	
-	public static String EXTENSIONS 	= "mp3,ogg,oga,m4a,m4p,flac,wma";
-	public static String MIME_TYPES 	= "audio/mpeg,audio/MPA,audio/mpa-robust,audio/mp4,audio/flac,audio/x-flac,audio/x-ms-wma,audio/x-ms-asf";
-	public static String SEPERATOR 	= ",";
+	/**
+	 * Enumeration of internet media types supported by the {@link audioTagParser}.
+	 */
+	public enum SupportedAudioMediaType {
+
+		AIF("audio/aiff", new String[] { "audio/x-aiff" }, new String[] { SupportedFileFormat.AIF.getFilesuffix(),
+				SupportedFileFormat.AIFC.getFilesuffix(), SupportedFileFormat.AIFF.getFilesuffix() }),
+
+		/** @see <a href="https://www.iana.org/assignments/media-types/audio/mpeg">mpeg assignment at IANA</a> */
+		MPEG("audio/mpeg", new String[] {"audio/MPA"}, new String[] {SupportedFileFormat.MP3.getFilesuffix()}),
+
+		/** @see <a href="https://www.iana.org/assignments/media-types/audio/MPA">MPA assignment at IANA</a> */
+		MPA("audio/MPA", new String[] {}),
+
+		/** @see <a href="https://www.iana.org/assignments/media-types/audio/mpa-robust">mpa-robust assignment at IANA</a> */
+		MPA_ROBUST("audio/mpa-robust", new String[] {}),
+
+		/** @see <a href="https://www.iana.org/assignments/media-types/audio/mp4">mp4 assignment at IANA</a> */
+		MP4("audio/mp4",
+				new String[] { SupportedFileFormat.M4A.getFilesuffix() /* Audio-only MPEG-4 */,
+						SupportedFileFormat.M4B.getFilesuffix()/* Audio book (Apple) */,
+						SupportedFileFormat.M4P.getFilesuffix()/* Apple iTunes */,
+						SupportedFileFormat.MP4.getFilesuffix() /* Standard extension */ }), 
+		
+		/** @see <a href="https://xiph.org/flac/index.html*>FLAC home page</a> */
+		FLAC("audio/flac", new String[] { "audio/x-flac" }, new String[] { SupportedFileFormat.FLAC.getFilesuffix() }),
+
+		/** @see <a href="https://www.iana.org/assignments/media-types/audio/ogg">ogg assignment at IANA</a> */
+		OGG("audio/ogg", new String[] {SupportedFileFormat.OGG.getFilesuffix()}), 
+		
+		WMA("audio/x-ms-wma", new String[] { "audio/x-ms-asf" },
+				new String[] { SupportedFileFormat.WMA.getFilesuffix() }), 
+		
+		REAL_AUDIO("audio/vnd.rn-realaudio", new String[] { "audio/x-pn-realaudio" },
+				new String[] { SupportedFileFormat.RA.getFilesuffix(), SupportedFileFormat.RM.getFilesuffix() }),
+
+		/** @see <a href="https://tools.ietf.org/html/rfc2361">RFC 2361 memo (not a standard)</a> */
+		WAV("audio/vnd.wave", new String[] { "audio/wav", "audio/wave", "audio/x-wav" },
+				new String[] { SupportedFileFormat.WAV.getFilesuffix() });
+
+		/** 
+		 * Lower case media type.
+		 * When possible the subtype not starting with a "x-" prefix is preferred.
+		 * @see <a href="https://tools.ietf.org/html/rfc6648">RFC 6648 about Deprecating the "X-" Prefix</a>*/
+		private final String mediaType;
+
+		/** Lower case alternate flavors ot the media type */
+		private final Set<String> alternateMediaTypes;
+		
+		/** Lower case file extensions */
+		private final Set<String> fileExtensions;
+		
+		/**
+		 * @param mediaType the media type, formatted as "type/subtype"
+		 * @param fileExtensions a set of file extensions matching the given media type
+		 */
+		private SupportedAudioMediaType(final String mediaType, final String[] fileExtensions) {
+			this(mediaType, new String[] {}, fileExtensions);
+		}
+
+		/**
+		 * @param mediaType the main media type, formatted as "type/subtype"
+		 * @param alternateMediaTypes alternate flavors the the main media type, all formatted as "type/subtype"
+		 * @param fileExtensions a set of file extensions matching the given media type
+		 */
+		private SupportedAudioMediaType(final String mediaType, final String[] alternateMediaTypes, final String[] fileExtensions) {
+			this.mediaType = mediaType.toLowerCase(Locale.ROOT);
+			Set<String> alternates = new HashSet<>();
+			for (final String alternateMediaType : alternateMediaTypes) {
+				alternates.add(alternateMediaType.toLowerCase(Locale.ROOT));
+			}
+			if (alternates.isEmpty()) {
+				this.alternateMediaTypes = Collections.emptySet();
+			} else {
+				this.alternateMediaTypes = Collections.unmodifiableSet(alternates);
+			}
+			
+			Set<String> extensions = new HashSet<>();
+			for (final String fileExtension : fileExtensions) {
+				extensions.add(fileExtension.toLowerCase(Locale.ROOT));
+			}
+			if (extensions.isEmpty()) {
+				this.fileExtensions = Collections.emptySet();
+			} else {
+				this.fileExtensions = Collections.unmodifiableSet(extensions);
+			}
+
+		}
+
+		/**
+		 * @return the lower cased standard or preferred media type in the form
+		 *         "type/subtype"
+		 */
+		public String getMediaType() {
+			return this.mediaType;
+		}
+
+		/**
+		 * @return a set of alternate media types in the form "type/subtype", equivalent
+		 *         to the main media type. May be empty.
+		 */
+		public Set<String> getAlternateMediaTypes() {
+			return this.alternateMediaTypes;
+		}
+
+		/**
+		 * @return the set of file extensions related to this media type
+		 */
+		public Set<String> getFileExtensions() {
+			return this.fileExtensions;
+		}
+		
+		/**
+		 * @return all the supported media types as strings
+		 */
+		public static Set<String> getAllMediaTypes() {
+			final Set<String> mediaTypes = new HashSet<>();
+			for(final SupportedAudioMediaType mediaType : SupportedAudioMediaType.values()) {
+				mediaTypes.add(mediaType.getMediaType());
+				for(final String mediaTypeString : mediaType.getAlternateMediaTypes()) {
+					mediaTypes.add(mediaTypeString);	
+				}
+			}
+			return mediaTypes;
+		}
+		
+		/**
+		 * @return all the supported file extensions
+		 */
+		public static Set<String> getAllFileExtensions() {
+			final Set<String> extensions = new HashSet<>();
+			for(final SupportedAudioMediaType mediaType : SupportedAudioMediaType.values()) {
+				extensions.addAll(mediaType.getFileExtensions());
+			}
+			return extensions;
+		}
+	}
+	
+	/** Map from each supported audio file extensions to a single audio media type */
+	private final Map<String, SupportedAudioMediaType> ext2NormalMediaType;
+
 	
     public audioTagParser() {
         super("Audio File Meta-Tag Parser");
-        final String[] extArray = EXTENSIONS.split(SEPERATOR);
-        for (final String ext : extArray) {
-        	this.SUPPORTED_EXTENSIONS.add(ext);
+        
+        final Map<String, SupportedAudioMediaType> normalMap = new HashMap<>();
+        
+        for(final SupportedAudioMediaType mediaType : SupportedAudioMediaType.values()) {
+        	this.SUPPORTED_MIME_TYPES.add(mediaType.getMediaType());
+        	this.SUPPORTED_MIME_TYPES.addAll(mediaType.getAlternateMediaTypes());
+        	this.SUPPORTED_EXTENSIONS.addAll(mediaType.getFileExtensions());
+        	for(final String fileExtension : mediaType.getFileExtensions()) {
+        		normalMap.put(fileExtension, mediaType);
+        	}
         }
-        final String[] mimeArray = MIME_TYPES.split(SEPERATOR);
-        for (final String mime : mimeArray) {
-        	this.SUPPORTED_MIME_TYPES.add(mime);
-        }
+        
+        this.ext2NormalMediaType = Collections.unmodifiableMap(normalMap);
     }
 
     @Override
@@ -80,25 +228,9 @@ public class audioTagParser extends AbstractParser implements Parser {
             throws Parser.Failure, InterruptedException {
 
         String filename = location.getFileName();
-        final String fileext = '.' + MultiProtocolURL.getFileExtension(filename);
+        final String fileext = MultiProtocolURL.getFileExtension(filename);
         filename = filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename);
-    	String mime = mimeType;
    	    
-    	// fix mimeType
-    	if(!this.SUPPORTED_MIME_TYPES.contains(mimeType)) {
-    		if(fileext.equals("mp3")) {
-    			mime = "audio/mpeg";
-    		} else if(fileext.equals("ogg")) {
-    			mime = "audio/ogg";
-    		} else if(fileext.equals("flac")) {
-    			mime = "audio/flac";
-    		} else if(fileext.equals("wma")) {
-    			mime = "audio/x-ms-wma";
-    		} else if(fileext.startsWith("m4")) {
-    			mime = "audio/mp4";
-    		}
-    	}
-    	    	
     	Document[] docs;
         BufferedOutputStream fout = null;        
         File tempFile = null;
@@ -109,7 +241,7 @@ public class audioTagParser extends AbstractParser implements Parser {
         		f = AudioFileIO.read(location.getFSFile());
         	} else {
             	// create a temporary file, as jaudiotagger requires a file rather than an input stream 
-            	tempFile = File.createTempFile(filename,fileext);              
+            	tempFile = File.createTempFile(filename, "." + fileext);              
                 fout = new BufferedOutputStream(new FileOutputStream(tempFile));  
                 int c;  
                 while ((c = source.read()) != -1) {  
@@ -159,6 +291,18 @@ public class audioTagParser extends AbstractParser implements Parser {
             // dc:subject
             final String[] subject = new String[1];
             subject[0] = tag.getFirst(FieldKey.GENRE);
+            
+        	/* normalize to a single Media Type. Advantages : 
+        	 * - index document with the right media type when HTTP response header "Content-Type" is missing or has a wrong value
+        	 * - for easier search by CollectionSchema.content_type in the index
+             */
+            String mime = mimeType;
+            if(fileext != null && !fileext.isEmpty() ) {
+            	final SupportedAudioMediaType mediaType = this.ext2NormalMediaType.get(fileext);
+            	if(mediaType != null) {
+            		mime = mediaType.getMediaType();
+            	}
+            }
 
             docs = new Document[]{new Document(
                     location,

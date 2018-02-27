@@ -867,24 +867,16 @@ public final class Switchboard extends serverSwitch {
         
     	final boolean enableAudioTags = getConfigBool("parser.enableAudioTags", false);
         log.config("Parser: parser.enableAudioTags= "+enableAudioTags);
-    	final StringBuilder denyExt = new StringBuilder(256);
-    	final StringBuilder denyMime = new StringBuilder(256);
-    	denyExt.append(getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
-    	denyMime.append(getConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, ""));
+    	final Set<String> denyExt = getConfigSet(SwitchboardConstants.PARSER_EXTENSIONS_DENY);
+    	final Set<String> denyMime = getConfigSet(SwitchboardConstants.PARSER_MIME_DENY);
     	
+    	/* audioTagParser is disabled by default as it needs a temporary file (because of the JAudiotagger implementation) for each parsed document */
     	if (!enableAudioTags) {
-    		if(denyExt.length()>0) {
-    			denyExt.append(audioTagParser.SEPERATOR);
-    		}
-    		denyExt.append(audioTagParser.EXTENSIONS);
-    		
-    		if(denyMime.length()>0) {
-    			denyMime.append(audioTagParser.SEPERATOR);
-    		}
-    		denyMime.append(audioTagParser.MIME_TYPES);
+			denyExt.addAll(audioTagParser.SupportedAudioMediaType.getAllFileExtensions());
+			denyMime.addAll(audioTagParser.SupportedAudioMediaType.getAllMediaTypes());
         	
-        	setConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, denyExt.toString());
-        	setConfig(SwitchboardConstants.PARSER_MIME_DENY, denyMime.toString());
+        	setConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, denyExt);
+        	setConfig(SwitchboardConstants.PARSER_MIME_DENY, denyMime);
         	setConfig("parser.enableAudioTags", true);
         }
                 
