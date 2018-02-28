@@ -34,8 +34,8 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -130,11 +130,15 @@ public class Document {
         this.charset = charset;
         this.parserObject = parserObject;
         this.keywords = new LinkedHashSet<String>();
-        if (keywords != null) this.keywords.addAll(Arrays.asList(keywords));
+        if (keywords != null) {
+        	Collections.addAll(this.keywords, keywords);
+        }
         this.titles = (titles == null) ? new ArrayList<String>(1) : titles;
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
         this.sections =  new LinkedList<String>() ;
-        if (sections != null) this.sections.addAll(Arrays.asList(sections));
+        if (sections != null) {
+        	Collections.addAll(this.sections, sections);
+        }
         this.descriptions = (abstrcts == null) ? new ArrayList<String>() : abstrcts;
         if (lat >= -90.0d && lat <= 90.0d && lon >= -180.0d && lon <= 180.0d) {
             this.lon = lon;
@@ -1016,8 +1020,8 @@ dc_rights
             }
 
             titles.addAll(doc.titles());
-            sectionTitles.addAll(Arrays.asList(doc.getSectionTitles()));
-            for (String d: doc.dc_description()) descriptions.add(d);
+            Collections.addAll(sectionTitles, doc.getSectionTitles());
+            Collections.addAll(descriptions, doc.dc_description());
 
             if (doc.getTextLength() > 0) {
                 if (docTextLength > 0) content.write('\n');
