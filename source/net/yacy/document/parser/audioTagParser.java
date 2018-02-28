@@ -24,10 +24,7 @@
 
 package net.yacy.document.parser;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,11 +45,11 @@ import org.jaudiotagger.tag.Tag;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
+import net.yacy.kelondro.util.FileUtils;
 
 /**
  * this parser can parse id3 tags of mp3 audio files
@@ -235,8 +232,7 @@ public class audioTagParser extends AbstractParser implements Parser {
         filename = filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename);
    	    
     	Document[] docs;
-        BufferedOutputStream fout = null;        
-        File tempFile = null;
+    	File tempFile = null;
         AudioFile f;
         
         try {        	
@@ -244,12 +240,8 @@ public class audioTagParser extends AbstractParser implements Parser {
         		f = AudioFileIO.read(location.getFSFile());
         	} else {
             	// create a temporary file, as jaudiotagger requires a file rather than an input stream 
-            	tempFile = File.createTempFile(filename, "." + fileext);              
-                fout = new BufferedOutputStream(new FileOutputStream(tempFile));  
-                int c;  
-                while ((c = source.read()) != -1) {  
-                    fout.write(c);  
-                }
+        		tempFile = File.createTempFile(filename, "." + fileext);
+        		FileUtils.copy(source, tempFile);
                 f = AudioFileIO.read(tempFile);
         	}
             
@@ -344,15 +336,13 @@ public class audioTagParser extends AbstractParser implements Parser {
                     new Date()
 	    	)};
 		} finally {
-            try {
-				if (fout != null)
-					fout.close();
-			} catch (final IOException e) {
-				// TODO Auto-generated catch block
-				ConcurrentLog.logException(e);
-			}
-            if (tempFile != null)
+            if (tempFile != null) {
             	tempFile.delete();
+				/*
+				 * If temp file deletion failed it should not be an issue as the operation is
+				 * delayed to JVM exit (see YaCy custome temp directory deletion in yacy class)
+				 */
+            }
 		}
         return docs;
     }
