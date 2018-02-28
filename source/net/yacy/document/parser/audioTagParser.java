@@ -314,27 +314,7 @@ public class audioTagParser extends AbstractParser implements Parser {
             };            
             return docs;
         } catch (final Exception e) {
-			// return a generic document as default
-	    	docs = new Document[]{new Document(
-	                location,
-	                mimeType,
-	                charset,
-	                this,
-	                null,
-	                null,
-	                singleList(filename), // title
-	                null, // author
-	                location.getHost(),
-	                null,
-	                null,
-	                0.0d, 0.0d,
-	                location.toTokens(),
-	                null,
-	                null,
-	                null,
-	                false,
-                    new Date()
-	    	)};
+        	throw new Parser.Failure("Unexpected error while parsing audio file. " + e.getMessage(), location);
 		} finally {
             if (tempFile != null) {
             	tempFile.delete();
@@ -344,7 +324,6 @@ public class audioTagParser extends AbstractParser implements Parser {
 				 */
             }
 		}
-        return docs;
     }
 
 	/**
