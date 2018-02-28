@@ -144,7 +144,7 @@ public class svgParser extends AbstractParser implements Parser {
             }
 
             ConcurrentLog.logException(e);
-            throw new Parser.Failure("Unexpected error while parsing odt file. " + e.getMessage(), location);
+            throw new Parser.Failure("Unexpected error while parsing svg file. " + e.getMessage(), location);
         }
     }
 
