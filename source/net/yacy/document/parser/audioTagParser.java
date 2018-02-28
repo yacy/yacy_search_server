@@ -250,47 +250,63 @@ public class audioTagParser extends AbstractParser implements Parser {
                 f = AudioFileIO.read(tempFile);
         	}
             
-            Tag tag = f.getTag();
+            final Tag tag = f.getTag();
        
             final Set<String> lang = new HashSet<String>();
-           	lang.add(tag.getFirst(FieldKey.LANGUAGE));
+            if(tag != null) {
+            	lang.add(tag.getFirst(FieldKey.LANGUAGE));
+            }
            	
             // title
             final List<String> titles = new ArrayList<String>();
-            titles.add(tag.getFirst(FieldKey.TITLE));
-            titles.add(tag.getFirst(FieldKey.ALBUM));
+            if(tag != null) {
+            	titles.add(tag.getFirst(FieldKey.TITLE));
+            	titles.add(tag.getFirst(FieldKey.ALBUM));
+            }
             titles.add(filename);
              
             // text
             final List<String> descriptions = new ArrayList<String>(7);
             final StringBuilder text = new StringBuilder(500);
             final char space = ' ';
-            String field = tag.getFirst(FieldKey.ARTIST);
-            descriptions.add(FieldKey.ARTIST.name() + ": " + field);
-            text.append(field); text.append(space);
-            field = tag.getFirst(FieldKey.ALBUM); 
-            descriptions.add(FieldKey.ALBUM.name() + ": " + field);
-            text.append(field); text.append(space);
-            field = tag.getFirst(FieldKey.TITLE); 
-            descriptions.add(FieldKey.TITLE.name() + ": " + field);
-            text.append(field); text.append(space);
-            field = tag.getFirst(FieldKey.COMMENT);
-            descriptions.add(FieldKey.COMMENT.name() + ": " + field);
-            text.append(field); text.append(space);
-            field = tag.getFirst(FieldKey.LYRICS);
-            descriptions.add(FieldKey.LYRICS.name() + ": " + field);
-            text.append(field); text.append(space);
-            field = tag.getFirst(FieldKey.TAGS);
-            descriptions.add(FieldKey.TAGS.name() + ": " + field);
-            text.append(field); text.append(space);
-            field = tag.getFirst(FieldKey.GENRE);
-            descriptions.add(FieldKey.GENRE.name() + ": " + field);
-            text.append(field); text.append(space);
+            if(tag != null) {
+            	String field = tag.getFirst(FieldKey.ARTIST);
+            	descriptions.add(FieldKey.ARTIST.name() + ": " + field);
+            	text.append(field); text.append(space);
+            	
+            	field = tag.getFirst(FieldKey.ALBUM); 
+            	descriptions.add(FieldKey.ALBUM.name() + ": " + field);
+            	text.append(field); text.append(space);
+            	
+            	field = tag.getFirst(FieldKey.TITLE); 
+            	descriptions.add(FieldKey.TITLE.name() + ": " + field);
+            	text.append(field); text.append(space);
+            	
+            	field = tag.getFirst(FieldKey.COMMENT);
+            	descriptions.add(FieldKey.COMMENT.name() + ": " + field);
+            	text.append(field); text.append(space);
+            	
+            	field = tag.getFirst(FieldKey.LYRICS);
+            	descriptions.add(FieldKey.LYRICS.name() + ": " + field);
+            	text.append(field); text.append(space);
+            	
+            	field = tag.getFirst(FieldKey.TAGS);
+            	descriptions.add(FieldKey.TAGS.name() + ": " + field);
+            	text.append(field); text.append(space);
+            	
+            	field = tag.getFirst(FieldKey.GENRE);
+            	descriptions.add(FieldKey.GENRE.name() + ": " + field);
+            	text.append(field); text.append(space);
+            }
             text.append(location.toTokens());
             
             // dc:subject
-            final String[] subject = new String[1];
-            subject[0] = tag.getFirst(FieldKey.GENRE);
+            final String[] subject;
+            if(tag != null) {
+            	subject = new String[] {tag.getFirst(FieldKey.GENRE)};
+            } else {
+            	subject = new String[0];
+            }
             
         	/* normalize to a single Media Type. Advantages : 
         	 * - index document with the right media type when HTTP response header "Content-Type" is missing or has a wrong value
@@ -312,7 +328,7 @@ public class audioTagParser extends AbstractParser implements Parser {
                     lang, // languages
                     subject, // keywords, dc:subject
                     titles, // title
-                    tag.getFirst(FieldKey.ARTIST), // author
+                    tag != null ? tag.getFirst(FieldKey.ARTIST) : null, // author
                     location.getHost(), // publisher
                     null, // sections
                     descriptions, // abstrct
