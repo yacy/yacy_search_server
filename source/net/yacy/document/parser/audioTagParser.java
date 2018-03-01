@@ -226,22 +226,29 @@ public class audioTagParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream source)
             throws Parser.Failure, InterruptedException {
-
+    	return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, Integer.MAX_VALUE, Long.MAX_VALUE);
+    }
+    
+    @Override
+    public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String charset, final VocabularyScraper scraper,
+    		final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes)
+    		throws UnsupportedOperationException, Failure, InterruptedException {
         String filename = location.getFileName();
         final String fileext = MultiProtocolURL.getFileExtension(filename);
         filename = filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename);
    	    
-    	Document[] docs;
     	File tempFile = null;
         AudioFile f;
         
-        try {        	
+        try {
+        	boolean partiallyParsed = false;
         	if (location.isFile()) {
         		f = AudioFileIO.read(location.getFSFile());
         	} else {
             	// create a temporary file, as jaudiotagger requires a file rather than an input stream 
         		tempFile = File.createTempFile(filename, "." + fileext);
-        		FileUtils.copy(source, tempFile);
+        		long bytesCopied = FileUtils.copy(source, tempFile, maxBytes);
+        		partiallyParsed = bytesCopied == maxBytes && source.read() != -1;
                 f = AudioFileIO.read(tempFile);
         	}
             
@@ -292,7 +299,7 @@ public class audioTagParser extends AbstractParser implements Parser {
             	}
             }
 
-            docs = new Document[]{new Document(
+            final Document doc = new Document(
                     location,
                     mime,
                     charset,
@@ -310,9 +317,9 @@ public class audioTagParser extends AbstractParser implements Parser {
                     null,
                     null,
                     false,
-                    new Date())
-            };            
-            return docs;
+                    new Date());
+            doc.setPartiallyParsed(partiallyParsed);
+            return new Document[]{doc};
         } catch (final Exception e) {
         	throw new Parser.Failure("Unexpected error while parsing audio file. " + e.getMessage(), location);
 		} finally {
@@ -324,6 +331,11 @@ public class audioTagParser extends AbstractParser implements Parser {
 				 */
             }
 		}
+    }
+    
+    @Override
+    public boolean isParseWithLimitsSupported() {
+    	return true;
     }
 
 	/**

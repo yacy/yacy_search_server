@@ -237,6 +237,7 @@ public final class FileUtils {
      * @param source InputStream instance
      * @param dest File instance
      * @param count the amount of bytes to copy (-1 for all, else must be greater than zero)
+     * @return the number of bytes actually copied (may be lower than count)
      * @throws IOException when a read/write error occurred
      * @throws NullPointerException when a parameter is null
      * @see #copy(InputStream source, OutputStream dest)
@@ -244,7 +245,7 @@ public final class FileUtils {
      * @see #copy(File source, OutputStream dest)
      * @see #copy(File source, File dest)
      */
-    public static void copy(final InputStream source, final File dest, final long count) throws IOException {
+    public static long copy(final InputStream source, final File dest, final long count) throws IOException {
         final String path = dest.getParent();
         if ( path != null && path.length() > 0 ) {
             new File(path).mkdirs();
@@ -252,7 +253,7 @@ public final class FileUtils {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(dest);
-            copy(source, fos, count);
+            return copy(source, fos, count);
         } finally {
             if ( fos != null ) {
                 try {
