@@ -129,6 +129,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         script(TagType.pair),
         span(TagType.pair),
         div(TagType.pair),
+        nav(TagType.pair),
         article(TagType.pair), // html5
         time(TagType.pair), // html5 <time datetime>
         // tags used to capture tag content
@@ -1020,7 +1021,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 		}
 		
 		/* Parent is not marked as ignored : let's check the current tag */
-		if (!ignore && this.ignoreDivClassNames != null && tag != null && TagName.div.name().equals(tag.name)) {
+		if (!ignore &&
+		        this.ignoreDivClassNames != null &&
+		        tag != null &&
+		        (TagName.div.name().equals(tag.name) || TagName.nav.name().equals(tag.name))) {
 			final String classAttr = tag.opts.getProperty("class", EMPTY_STRING);
 			final Set<String> classes = ContentScraper.parseSpaceSeparatedTokens(classAttr);
 			ignore = !Collections.disjoint(this.ignoreDivClassNames, classes);

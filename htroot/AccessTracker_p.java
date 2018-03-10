@@ -24,12 +24,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -39,9 +37,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.OrderedScoreMap;
-import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.Seed;
