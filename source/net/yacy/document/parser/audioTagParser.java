@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -42,13 +43,17 @@ import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.SupportedFileFormat;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.TagField;
+import org.jaudiotagger.tag.TagTextField;
 
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
+import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.util.FileUtils;
 
 /**
@@ -197,8 +202,8 @@ public class audioTagParser extends AbstractParser implements Parser {
 	/** Map from each supported audio file extensions to a single audio media type */
 	private final Map<String, SupportedAudioMediaType> ext2NormalMediaType;
 	
+	/** Space character */
 	private static final char SPACE_CHAR = ' ';
-
 	
     public audioTagParser() {
         super("Audio File Meta-Tag Parser");
@@ -287,6 +292,22 @@ public class audioTagParser extends AbstractParser implements Parser {
             	subject = new String[0];
             }
             
+			/*
+			 * Some URLs may be found in free text tags such as comments or in dedicated
+			 * ones such as 'W' prefixed ID3 tags
+			 */
+			Set<AnchorURL> detectedUrls;
+			if (tag != null) {
+				detectedUrls = new HashSet<>();
+				partiallyParsed = partiallyParsed || extractUrlsFromTags(maxLinks, tag, detectedUrls);
+				if (detectedUrls.isEmpty()) {
+					/* Set is empty : reuse the empty set constant object */
+					detectedUrls = Collections.emptySet();
+				}
+			} else {
+				detectedUrls = Collections.emptySet();
+			}
+            
         	/* normalize to a single Media Type. Advantages : 
         	 * - index document with the right media type when HTTP response header "Content-Type" is missing or has a wrong value
         	 * - for easier search by CollectionSchema.content_type in the index
@@ -313,7 +334,7 @@ public class audioTagParser extends AbstractParser implements Parser {
                     descriptions, // abstrct
                     0.0d, 0.0d, // lon, lat
                     text.toString(), // text
-                    null,
+                    detectedUrls,
                     null,
                     null,
                     false,
@@ -332,6 +353,65 @@ public class audioTagParser extends AbstractParser implements Parser {
             }
 		}
     }
+
+	/**
+	 * Process text tags to detect eventual URLs and fill the urls set.
+	 * 
+	 * @param maxLinks
+	 *            the maximum links to process and to add to the anchors set
+	 * @param tag
+	 *            parsed audio tags. Must not be null.
+	 * @param urls
+	 *            the URLs set to fill. Must not be null.
+	 * @return true when the tags contain more URLs than maxLinks limit.
+	 */
+	private boolean extractUrlsFromTags(final int maxLinks, final Tag tag, final Set<AnchorURL> urls) {
+		long detectedUrls = 0;
+		final Set<AnchorURL> additionalUrls = new HashSet<>();
+		try {
+			/* Try to iterate over all tag fields */
+			final Iterator<TagField> it = tag.getFields();
+			while (it.hasNext() && (detectedUrls < maxLinks || additionalUrls.isEmpty())) {
+				final TagField field = it.next();
+				if (field != null && !field.isEmpty() && !field.isBinary() && field instanceof TagTextField) {
+					final String value = ((TagTextField) field).getContent();
+					if (detectedUrls < maxLinks) {
+						detectedUrls += ContentScraper.findAbsoluteURLs(value, urls, null, maxLinks - detectedUrls);
+					} else {
+						/* MaxLinks limit reached : check now if at least one more URL is available */
+						ContentScraper.findAbsoluteURLs(value, additionalUrls, null, 1);
+					}
+				}
+			}
+		} catch (final UnsupportedOperationException ignored) {
+			/*
+			 * The getFields() function is not supported in the ID3v1Tag class : let's
+			 * iterate over common tag fields only
+			 */
+			final FieldKey[] commonKeys = FieldKey.values();
+			for (int keyIndex = 0; keyIndex < commonKeys.length
+					&& (detectedUrls < maxLinks || additionalUrls.isEmpty()); keyIndex++) {
+				final FieldKey key = commonKeys[keyIndex];
+				final List<String> values = tag.getAll(key);
+				if (values != null) {
+					for (int valIndex = 0; valIndex < values.size()
+							&& (detectedUrls < maxLinks || additionalUrls.isEmpty()); valIndex++) {
+						final String value = values.get(valIndex);
+						if (StringUtils.isNotBlank(value)) {
+							if (detectedUrls < maxLinks) {
+								detectedUrls += ContentScraper.findAbsoluteURLs(value, urls, null,
+										maxLinks - detectedUrls);
+							} else {
+								/* MaxLinks limit reached : check now if at least one more URL is available */
+								ContentScraper.findAbsoluteURLs(value, additionalUrls, null, 1);
+							}
+						}
+					}
+				}
+			}
+		}
+		return !additionalUrls.isEmpty();
+	}
     
     @Override
     public boolean isParseWithLimitsSupported() {
