@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -205,6 +206,14 @@ public class audioTagParser extends AbstractParser implements Parser {
 	/** Space character */
 	private static final char SPACE_CHAR = ' ';
 	
+	/** Field keys set of description text tags common to various tagging software and audio file formats */
+	private static final Set<FieldKey> COMMON_DESCRIPTION_FIELDS = Collections.unmodifiableSet(EnumSet.of(
+			FieldKey.ARTIST, FieldKey.ALBUM_ARTIST, FieldKey.ORIGINAL_ARTIST, FieldKey.COMPOSER, FieldKey.CONDUCTOR,
+			FieldKey.LYRICIST, FieldKey.ORIGINAL_LYRICIST, FieldKey.ENGINEER, FieldKey.PRODUCER, FieldKey.MIXER,
+			FieldKey.DJMIXER, FieldKey.ARRANGER, FieldKey.ARTISTS, FieldKey.GROUPING, FieldKey.RECORD_LABEL,
+			FieldKey.REMIXER, FieldKey.ALBUM, FieldKey.ORIGINAL_ALBUM, FieldKey.TITLE, FieldKey.SUBTITLE,
+			FieldKey.COMMENT, FieldKey.DISC_SUBTITLE, FieldKey.LYRICS, FieldKey.TAGS, FieldKey.GENRE, FieldKey.MOOD));
+	
     public audioTagParser() {
         super("Audio File Meta-Tag Parser");
         
@@ -268,6 +277,7 @@ public class audioTagParser extends AbstractParser implements Parser {
             final List<String> titles = new ArrayList<String>();
             if(tag != null) {
             	titles.add(tag.getFirst(FieldKey.TITLE));
+            	titles.add(tag.getFirst(FieldKey.SUBTITLE));
             	titles.add(tag.getFirst(FieldKey.ALBUM));
             }
             titles.add(filename);
@@ -276,10 +286,8 @@ public class audioTagParser extends AbstractParser implements Parser {
             final List<String> descriptions = new ArrayList<String>(7);
             final StringBuilder text = new StringBuilder(500);
             if(tag != null) {
-				final FieldKey[] fieldsToProcess = new FieldKey[] { FieldKey.ARTIST, FieldKey.ALBUM, FieldKey.TITLE,
-						FieldKey.COMMENT, FieldKey.LYRICS, FieldKey.TAGS, FieldKey.GENRE };
-				for (final FieldKey field : fieldsToProcess) {
-					processTagField(field, tag, descriptions, text);
+				for (final FieldKey field : COMMON_DESCRIPTION_FIELDS) {
+					processDescriptionTagField(field, tag, descriptions, text);
 				}
             }
             text.append(location.toTokens());
@@ -419,11 +427,11 @@ public class audioTagParser extends AbstractParser implements Parser {
     }
 
 	/**
-	 * Process a tag field : add its value to the descriptions and to text. All
+	 * Process a description tag field : add its value to the descriptions and to text. All
 	 * parameters must not be null.
 	 * 
 	 * @param fieldKey
-	 *            a field key
+	 *            a field key of a text field
 	 * @param tag
 	 *            a parsed audio tag
 	 * @param descriptions
@@ -431,13 +439,17 @@ public class audioTagParser extends AbstractParser implements Parser {
 	 * @param text
 	 *            the document text to fill
 	 */
-	private void processTagField(final FieldKey fieldKey, final Tag tag, final List<String> descriptions,
+	private void processDescriptionTagField(final FieldKey fieldKey, final Tag tag, final List<String> descriptions,
 			final StringBuilder text) {
-		final String fieldValue = tag.getFirst(fieldKey);
-		if(StringUtils.isNotBlank(fieldValue)) {
-			descriptions.add(fieldKey.name() + ": " + fieldValue);
-			text.append(fieldValue);
-			text.append(SPACE_CHAR);
+		final List<String> fieldValues = tag.getAll(fieldKey);
+		if (fieldValues != null) {
+			for (final String fieldValue : fieldValues) {
+				if (StringUtils.isNotBlank(fieldValue)) {
+					descriptions.add(fieldKey.name() + ": " + fieldValue);
+					text.append(fieldValue);
+					text.append(SPACE_CHAR);
+				}
+			}
 		}
 	}
 }
