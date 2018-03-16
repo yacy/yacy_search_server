@@ -24,16 +24,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
-
-import net.yacy.cora.federate.solr.SolrType;
-import net.yacy.cora.lod.vocabulary.DublinCore;
-import net.yacy.search.schema.CollectionSchema;
-import net.yacy.search.schema.WebgraphSchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
@@ -50,7 +46,13 @@ import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
+import org.apache.solr.search.ReturnFields;
 import org.apache.solr.search.SolrIndexSearcher;
+
+import net.yacy.cora.federate.solr.SolrType;
+import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
 
 public class HTMLResponseWriter implements QueryResponseWriter {
 
@@ -165,7 +167,7 @@ public class HTMLResponseWriter implements QueryResponseWriter {
 
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id);
-            LinkedHashMap<String, String> tdoc = translateDoc(schema, doc);
+            LinkedHashMap<String, String> tdoc = translateDoc(schema, doc, rsp.getReturnFields());
 
             
             String title;
@@ -187,19 +189,19 @@ public class HTMLResponseWriter implements QueryResponseWriter {
             writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
             writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
 
-            writeDoc(writer, tdoc, title, coreName);
+            writeDoc(writer, tdoc, title, coreName, rsp.getReturnFields());
 
             while (iterator.hasNext()) {
                 id = iterator.nextDoc();
                 doc = searcher.doc(id);
-                tdoc = translateDoc(schema, doc);
+                tdoc = translateDoc(schema, doc, rsp.getReturnFields());
                 if(CollectionSchema.CORE_NAME.equals(coreName)) {
                 	title = tdoc.get(CollectionSchema.title.getSolrFieldName());
                     if (title == null) title = "";
                 } else {
                 	title = "";
                 }
-                writeDoc(writer, tdoc, title, coreName);
+                writeDoc(writer, tdoc, title, coreName, rsp.getReturnFields());
             }
         } else {
             writer.write("<title>No Document Found</title>\n</head><body>\n");
@@ -209,7 +211,18 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("</body></html>\n");
     }
 
-    private static final void writeDoc(final Writer writer, final LinkedHashMap<String, String> tdoc, final String title, final String coreName) throws IOException {
+    /**
+     * Append an html representation of the document fields to the writer.
+     * @param writer an open output writer. Must not be null.
+     * @param tdoc the documents fields, mapped from field names to values. Must not be null.
+     * @param title the document title. May be empty.
+     * @param coreName the Solr core name.
+     * @param returnFields the eventual fields return configuration, allowing for example to
+	 *            rename fields with a pseudo in the result. May be null.
+     * @throws IOException when a write error occurred.
+     */
+	private static final void writeDoc(final Writer writer, final LinkedHashMap<String, String> tdoc,
+			final String title, final String coreName, final ReturnFields returnFields) throws IOException {
         writer.write("<form name=\"yacydoc" + title + "\" method=\"post\" action=\"#\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\">\n");
         writer.write("<fieldset>\n");
         
@@ -225,9 +238,13 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         }
 
         writer.write("<dl>\n");
+        /* Fields may be renamed in the ouput result, using aliases in the 'fl' parameter 
+         * (see https://lucene.apache.org/solr/guide/6_6/common-query-parameters.html#CommonQueryParameters-FieldNameAliases) */
+		final Map<String, String> fieldRenamings = returnFields == null ? Collections.emptyMap()
+				: returnFields.getFieldRenames();
         for (Map.Entry<String, String> entry: tdoc.entrySet()) {
             writer.write("<dt>");
-            writer.write(entry.getKey());
+        	writer.write(fieldRenamings.getOrDefault(entry.getKey(), entry.getKey()));
             writer.write("</dt><dd>");
             if (entry.getKey().equals("sku")) {
                 writer.write("<a href=\"" + entry.getValue() + "\">" + entry.getValue() + "</a>");
@@ -241,7 +258,19 @@ public class HTMLResponseWriter implements QueryResponseWriter {
         writer.write("</form>\n");
     }
     
-    public static final LinkedHashMap<String, String> translateDoc(final IndexSchema schema, final Document doc) {
+	/**
+	 * Translate an indexed document in a map of field names to field values.
+	 * 
+	 * @param schema
+	 *            the schema of the indexed document. Must not be null.
+	 * @param doc
+	 *            the indexed document. Must not be null.
+	 * @param returnFields
+	 *            the eventual fields return configuration, allowing for example to
+	 *            restrict the actually returned fields. May be null.
+	 * @return a map of field names to field values
+	 */
+    private static final LinkedHashMap<String, String> translateDoc(final IndexSchema schema, final Document doc, final ReturnFields returnFields) {
         List<IndexableField> fields = doc.getFields();
         int sz = fields.size();
         int fidx1 = 0, fidx2 = 0;
@@ -253,28 +282,42 @@ public class HTMLResponseWriter implements QueryResponseWriter {
             while (fidx2 < sz && fieldName.equals(fields.get(fidx2).name())) {
                 fidx2++;
             }
-            SchemaField sf = schema.getFieldOrNull(fieldName);
-            if (sf == null) sf = new SchemaField(fieldName, new TextField());
-            FieldType type = sf.getType();
+            if(returnFields == null || returnFields.wantsField(fieldName)) {
+            	SchemaField sf = schema.getFieldOrNull(fieldName);
+            	if (sf == null) {
+            		sf = new SchemaField(fieldName, new TextField());
+            	}
+            	FieldType type = sf.getType();
             
-            if (fidx1 + 1 == fidx2) {
-                if (sf.multiValued()) {
-                    String sv = value.stringValue();
-                    kv.put(fieldName, field2string(type, sv));
-                } else {
-                    kv.put(fieldName, field2string(type, value.stringValue()));
-                }
-            } else {
-                int c = 0;
-                for (int i = fidx1; i < fidx2; i++) {
-                    String sv = fields.get(i).stringValue();
-                    kv.put(fieldName + "_" + c++, field2string(type, sv));
-                }
+            	if (fidx1 + 1 == fidx2) {
+            		if (sf.multiValued()) {
+            			String sv = value.stringValue();
+            			kv.put(fieldName, field2string(type, sv));
+            		} else {
+            			kv.put(fieldName, field2string(type, value.stringValue()));
+            		}
+            	} else {
+            		int c = 0;
+            		for (int i = fidx1; i < fidx2; i++) {
+            			String sv = fields.get(i).stringValue();
+            			kv.put(fieldName + "_" + c++, field2string(type, sv));
+            		}
+            	}
             }
             
             fidx1 = fidx2;
         }
         return kv;
+    }
+    
+    /**
+     * Translate an indexed document in a map of field names to field values.
+     * @param schema the schema of the indexed document. Must not be null.
+     * @param doc the indexed document. Must not be null.
+     * @return a map of field names to field values
+     */
+    public static final LinkedHashMap<String, String> translateDoc(final IndexSchema schema, final Document doc) {
+        return translateDoc(schema, doc, null);
     }
 
     private static String field2string(final FieldType type, final String value) {

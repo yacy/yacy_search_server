@@ -99,8 +99,7 @@ public class SolrSelectServlet extends HttpServlet {
         RESPONSE_WRITER.putAll(SolrCore.DEFAULT_RESPONSE_WRITERS);
         XSLTResponseWriter xsltWriter = new XSLTResponseWriter();
         OpensearchResponseWriter opensearchResponseWriter = new OpensearchResponseWriter();
-        @SuppressWarnings("rawtypes")
-        NamedList initArgs = new NamedList();
+        NamedList<?> initArgs = new NamedList<>();
         xsltWriter.init(initArgs);
         RESPONSE_WRITER.put("xslt", xsltWriter); // try i.e. http://localhost:8090/solr/select?q=*:*&start=0&rows=10&wt=xslt&tr=json.xsl
         RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
