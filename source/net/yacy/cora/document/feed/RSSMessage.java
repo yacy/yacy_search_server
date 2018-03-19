@@ -43,23 +43,55 @@ import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.CommonPattern;
 
+/**
+ * Represents a RSS/Atom feed entry or channel.
+ */
 public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMessage> {
 
+	/**
+	 * Feed entry data tokens, mostly matching Atom and RSS elements.
+	 * @see <a href="http://www.rssboard.org/rss-specification">Latest RSS specification</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc4287">The Atom Syndication Format RFC</a>
+	 */
     public static enum Token {
 
+    	/** Human-readable title for an entry or a feed. */
         title(new String[]{"title","atom:title","rss:title",DublinCore.Title.getURIref()}),
+        
+        /** Reference from an entry or feed to a Web resource URL */
         link(new String[]{"link","atom:link","rss:link"}),
+        
+        /** Human-readable description or subtitle for an entry or a feed. */
         description(new String[]{"description","subtitle","atom:subtitle","rss:description", DublinCore.Description.getURIref()}),
+        
+        /** The publication date for content in a feed or for an antry. */
         pubDate(new String[]{"pubDate","lastBuildDate","updated","rss:lastBuildDate","rss:updated"}),
+        
+        /** Copyright notice for content in the channel. */
         copyright(new String[]{"copyright","publisher",DublinCore.Publisher.getURIref()}),
+        
+        /** The author of an item (Email address) */
         author(new String[]{"author","creator",DublinCore.Creator.getURIref()}),
+        
         subject(new String[]{"subject",DublinCore.Subject.getURIref()}),
+        
+        /** One or more categories a channel or item belongs to */
         category(new String[]{"category"}),
+        
         referrer(new String[]{"referrer","referer"}),
+        
+        /** The language the channel is written in. */
         language(new String[]{"language",DublinCore.Language.getURIref()}),
+        
+        /** A string that uniquely identifies an item (RSS 2.0) */
         guid(new String[]{"guid"}),
+        
+        /**  Time To Live : number of minutes that indicates how long a channel (RSS 2.0) can be cached before refreshing from the source. */
         ttl(new String[]{"ttl"}),
-        docs(new String[]{"docs"}), // url to the documentation for the format used in the RSS file
+        
+        /** URL to the documentation for the format used in the RSS file (for example http://www.rssboard.org/rss-specification) */
+        docs(new String[]{"docs"}),
+        
         size(new String[]{"size", "length", YaCyMetadata.size.getURIref()}),
         lon(new String[]{Geo.Long.getURIref(), "geo:lon"}), // include possible misspelling geo:lon (instead of geo:long)
         lat(new String[]{Geo.Lat.getURIref()});
