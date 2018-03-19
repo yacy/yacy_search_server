@@ -24,7 +24,7 @@
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.16.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
-	<classpathentry kind="lib" path="lib/commons-codec-1.10.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.11.jar"/>
 	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.24.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.24.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.24.jar"/>
