@@ -86,6 +86,9 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         /** A string that uniquely identifies an item (RSS 2.0) */
         guid(new String[]{"guid"}),
         
+        /** URL describing a media object that is attached to a feed item */
+        enclosure(new String[]{"enclosure"}),
+        
         /**  Time To Live : number of minutes that indicates how long a channel (RSS 2.0) can be cached before refreshing from the source. */
         ttl(new String[]{"ttl"}),
         
@@ -163,15 +166,19 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         if (description.length() > 0) this.map.put(Token.description.name(), description);
         this.map.put(Token.link.name(), link.toNormalform(true));
         this.map.put(Token.pubDate.name(), HeaderFramework.FORMAT_RFC1123.format(new Date()));
-        if (guid.length() > 0) this.map.put(Token.guid.name(), guid);
+        if (guid.length() > 0) {
+        	this.map.put(Token.guid.name(), guid);
+        }
     }
 
     public RSSMessage() {
         this.map = new HashMap<String, String>();
     }
-
+    
     public void setValue(final Token token, final String value) {
-        if (value.length() > 0) this.map.put(token.name(), value);
+        if (value.length() > 0) {
+        	this.map.put(token.name(), value);
+        }
     }
 
     @Override
@@ -277,7 +284,12 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         }
         return guid;
     }
-
+    
+    @Override
+    public String getEnclosure() {
+    	return Token.enclosure.valueFrom(this.map, "");
+    }
+    
     public String getTTL() {
         return Token.ttl.valueFrom(this.map, "");
     }
@@ -371,7 +383,12 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     public void setGuid(final String guid) {
         setValue(Token.guid, guid);
     }
-
+    
+    @Override
+    public void setEnclosure(final String enclosure) {
+    	setValue(Token.enclosure, enclosure);
+    }
+    
     @Override
     public void setLanguage(final String language) {
         setValue(Token.language, language);

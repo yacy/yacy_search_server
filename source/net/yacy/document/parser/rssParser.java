@@ -34,10 +34,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
+
 import net.yacy.cora.document.feed.Hit;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSReader;
+import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
@@ -46,6 +50,8 @@ import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ImageEntry;
 
 public class rssParser extends AbstractParser implements Parser {
+	
+	private final static ConcurrentLog LOG = new ConcurrentLog(rssParser.class.getSimpleName());
 
     public rssParser() {
         super("RSS Parser");
@@ -67,7 +73,7 @@ public class rssParser extends AbstractParser implements Parser {
             final int timezoneOffset,
             final InputStream source)
             throws Failure, InterruptedException {
-        RSSReader rssReader;
+        final RSSReader rssReader;
         try {
             rssReader = new RSSReader(RSSFeed.DEFAULT_MAXSIZE, source);
         } catch (final IOException e) {
@@ -89,34 +95,59 @@ public class rssParser extends AbstractParser implements Parser {
         DigestURL itemuri;
         Set<String> languages;
         Document doc;
-        for (final Hit item: feed) {
-        	try {
-        		itemuri = new DigestURL(item.getLink());
-        		languages = new HashSet<String>();
-        		languages.add(item.getLanguage());
+        for (final Hit item : feed) {
+        	final String linkUrlString = item.getLink();
+        	itemuri = null;
+        	if(StringUtils.isNotBlank(linkUrlString)) {
+            	/* Link element is optional in RSS 2.0 and Atom */
+        		try {
+        			itemuri = new DigestURL(item.getLink());
+        		} catch(final MalformedURLException e) {
+        			LOG.warn("Malformed feed item link url : " + linkUrlString);
+        		}
+        	}
+        	languages = new HashSet<String>();
+        	languages.add(item.getLanguage());
+        		
+        	Set<AnchorURL> anchors = null;
+        	final String enclosureUrlString = item.getEnclosure();
+        	if(StringUtils.isNotBlank(enclosureUrlString)) {
+        		try {
+        			final AnchorURL enclosureUrl = new AnchorURL(enclosureUrlString);
+        			if(itemuri == null) {
+        				/* No <link> element in this item : the enclosure URL is used as the sub document main location URL */
+        				itemuri = enclosureUrl;
+        			} else {
+        				anchors = new HashSet<>();
+        				anchors.add(enclosureUrl);
+        			}
+        		} catch(final MalformedURLException e) {
+        			LOG.warn("Malformed feed item enclosure url : " + enclosureUrlString);
+        		}
+        	}
+        		
+        	if(itemuri != null) {
         		doc = new Document(
-                    itemuri,
-                    TextParser.mimeOf(itemuri),
-                    charset,
-                    this,
-                    languages,
-                    item.getSubject(),
-                    singleList(item.getTitle()),
-                    item.getAuthor(),
-                    item.getCopyright(),
-                    null,
-                    item.getDescriptions(),
-                    item.getLon(),
-                    item.getLat(),
-                    null,
-                    null,
-                    null,
-                    new LinkedHashMap<DigestURL, ImageEntry>(),
-                    false,
-                    item.getPubDate());
+        				itemuri,
+        				TextParser.mimeOf(itemuri),
+        				charset,
+        				this,
+        				languages,
+        				item.getSubject(),
+        				singleList(item.getTitle()),
+        				item.getAuthor(),
+        				item.getCopyright(),
+        				null,
+        				item.getDescriptions(),
+        				item.getLon(),
+        				item.getLat(),
+        				null,
+        				anchors,
+        				null,
+        				new LinkedHashMap<DigestURL, ImageEntry>(),
+        				false,
+        				item.getPubDate());
         		docs.add(doc);
-        	} catch (final MalformedURLException e) {
-        		continue;
         	}
         }
 

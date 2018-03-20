@@ -57,6 +57,11 @@ public interface Hit {
     
     public void setSize(long size);
     
+    /**
+     * @param enclosure an URL describing a media object that is attached to a feed item
+     */
+    public void setEnclosure(String enclosure);
+    
     public String getAuthor();
     
     public String getCopyright();
@@ -82,6 +87,11 @@ public interface Hit {
     public String[] getSubject();
     
     public long getSize();
+    
+    /**
+     * @return an URL describing a media object that is attached to a feed item
+     */
+    public String getEnclosure();
 
     public double getLon();
     
