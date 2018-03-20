@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
+
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.RSSFeed;
@@ -97,22 +99,31 @@ public class RSSLoader extends Thread {
 
     public static void indexAllRssFeed(final Switchboard sb, final DigestURL url, final RSSFeed feed, Map<String, Pattern> collections) {
         int loadCount = 0;
-        List<DigestURL> list = new ArrayList<DigestURL>();
-        Map<String, DigestURL> urlmap = new HashMap<String, DigestURL>();
+        final Map<String, DigestURL> urlmap = new HashMap<String, DigestURL>();
         for (final RSSMessage message: feed) {
-            try {
-                final DigestURL messageurl = new DigestURL(message.getLink());
-                if (indexTriggered.containsKey(messageurl.hash())) continue;
-                urlmap.put(ASCII.String(messageurl.hash()), messageurl);
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-            }
+        	final String linkStr = message.getLink();
+        	if(StringUtils.isNotBlank(linkStr)) { // Link element is optional in RSS 2.0 and Atom
+                DigestURL messageurl;
+				try {
+					messageurl = new DigestURL(linkStr);
+	                if (indexTriggered.containsKey(messageurl.hash())) {
+	                	continue;
+	                }
+	                urlmap.put(ASCII.String(messageurl.hash()), messageurl);
+				} catch (MalformedURLException e1) {
+					ConcurrentLog.warn("Load_RSS", "Malformed feed item link URL : " + linkStr);
+				}
+        	}
         }
+        
+        final List<DigestURL> list = new ArrayList<DigestURL>();
         for (final Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
             HarvestProcess harvestProcess;
             try {
                 harvestProcess = sb.urlExists(e.getKey());
-                if (harvestProcess != null) continue;
+                if (harvestProcess != null) {
+                	continue;
+                }
                 list.add(e.getValue());
                 indexTriggered.insertIfAbsent(ASCII.getBytes(e.getKey()), new Date());
                 loadCount++;

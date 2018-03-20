@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
+
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.feed.Hit;
@@ -57,7 +59,7 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class Load_RSS_p {
-
+	
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
@@ -285,31 +287,44 @@ public class Load_RSS_p {
         // index all selected items: description only
         if (rss != null && post.containsKey("indexSelectedItemContent")) {
             final RSSFeed feed = rss.getFeed();
-            List<DigestURL> list = new ArrayList<DigestURL>();
-            Map<String, RSSMessage> messages = new HashMap<String, RSSMessage>();
+            final Map<String, DigestURL> hash2UrlMap = new HashMap<String, DigestURL>();
             loop: for (final Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getValue().startsWith("mark_")) try {
+                if (entry.getValue().startsWith("mark_")) {
                     final RSSMessage message = feed.getMessage(entry.getValue().substring(5));
-                    final DigestURL messageurl = new DigestURL(message.getLink());
-                    if (RSSLoader.indexTriggered.containsKey(messageurl.hash())) continue loop;
-                    messages.put(ASCII.String(messageurl.hash()), message);
-                } catch (final IOException e) {
-                    ConcurrentLog.logException(e);
+                    if(message == null || StringUtils.isBlank(message.getLink())) {
+                    	/* Link element is optional in RSS 2.0 and Atom */
+                    	continue loop;
+                    }
+                    DigestURL messageUrl;
+					try {
+						messageUrl = new DigestURL(message.getLink());
+					} catch (MalformedURLException e) {
+						ConcurrentLog.warn("Load_RSS", "Malformed feed item link URL : " + message.getLink());
+						continue loop;
+					}
+                    if (RSSLoader.indexTriggered.containsKey(messageUrl.hash())) {
+                    	continue loop;
+                    }
+                    hash2UrlMap.put(ASCII.String(messageUrl.hash()), messageUrl);
                 }
             }
-            loop: for (final Map.Entry<String, RSSMessage> entry: messages.entrySet()) {
+            
+            final List<DigestURL> urlsToIndex = new ArrayList<DigestURL>();
+            loop: for (final Map.Entry<String, DigestURL> entry: hash2UrlMap.entrySet()) {
                 try {
-                    final RSSMessage message = entry.getValue();
-                    final DigestURL messageurl = new DigestURL(message.getLink());
-                    HarvestProcess harvestProcess = sb.urlExists(ASCII.String(messageurl.hash()));
-                    if (harvestProcess != null) continue loop;
-                    list.add(messageurl);
-                    RSSLoader.indexTriggered.insertIfAbsent(messageurl.hash(), new Date());
+                    final DigestURL messageUrl = entry.getValue();
+                    HarvestProcess harvestProcess = sb.urlExists(ASCII.String(messageUrl.hash()));
+                    if (harvestProcess != null) {
+                    	continue loop;
+                    }
+                    urlsToIndex.add(messageUrl);
+                    RSSLoader.indexTriggered.insertIfAbsent(messageUrl.hash(), new Date());
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
             }
-            sb.addToIndex(list, null, null, collections, true);
+            
+            sb.addToIndex(urlsToIndex, null, null, collections, true);
         }
 
         if (rss != null && post.containsKey("indexAllItemContent")) {
@@ -339,33 +354,44 @@ public class Load_RSS_p {
             prop.putHTML("showitems_ttl", channel == null ? "" : channel.getTTL());
             prop.put("showitems_docs", feed.size()); // number of documents
 
-            Map<String, DigestURL> urls = new HashMap<String, DigestURL>();
-            for (final Hit item: feed) {
-                try {
-                    final DigestURL messageurl = new DigestURL(item.getLink());
-                    urls.put(ASCII.String(messageurl.hash()), messageurl);
-                } catch (final MalformedURLException e) {
-                    ConcurrentLog.logException(e);
-                    continue;
-                }
-            }
-            
             int i = 0;
             for (final Hit item: feed) {
-                try {
-                    final DigestURL messageurl = new DigestURL(item.getLink());
-                    author = item.getAuthor();
-                    if (author == null) author = item.getCopyright();
-                    pubDate = item.getPubDate();
-                    HarvestProcess harvestProcess;
+            	DigestURL link = null;
+            	final String linkStr = item.getLink();
+            	if(StringUtils.isNotBlank(linkStr)) {
+            		/* Link element is optional in RSS 2.0 and Atom */
+            		try {
+            			link = new DigestURL(linkStr);
+            		} catch (final MalformedURLException e) {
+            			ConcurrentLog.warn("Load_RSS", "Malformed feed item link URL : " + linkStr);
+            		}
+            	}
+
+                author = item.getAuthor();
+                if (author == null) {
+                 	author = item.getCopyright();
+                }
+                pubDate = item.getPubDate();
+                
+                HarvestProcess harvestProcess;
                     try {
-                        harvestProcess = sb.urlExists(ASCII.String(messageurl.hash()));
-                        prop.put("showitems_item_" + i + "_state", harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(messageurl.hash()) ? 1 : 0);
-                        prop.put("showitems_item_" + i + "_state_count", i);
-                        prop.putHTML("showitems_item_" + i + "_state_guid", item.getGuid());
+                    	if(link != null && StringUtils.isNotEmpty(item.getGuid())) {
+                    		harvestProcess = sb.urlExists(ASCII.String(link.hash()));
+                    		
+                        	prop.put("showitems_item_" + i + "_hasLink", true);
+                        	prop.putHTML("showitems_item_" + i + "_hasLink_link", link.toNormalform(true));
+                        	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(link.hash()) ? 1 : 0;
+                    		prop.put("showitems_item_" + i + "_state", state);
+                    		prop.put("showitems_item_" + i + "_indexable", state == 0);
+                            prop.put("showitems_item_" + i + "_indexable_count", i);
+                            prop.putHTML("showitems_item_" + i + "_indexable_guid", item.getGuid());
+                    	} else {
+                    		prop.put("showitems_item_" + i + "_state", 0);
+                    		prop.put("showitems_item_" + i + "_indexable", false);
+                        	prop.put("showitems_item_" + i + "_hasLink", false);
+                    	}
                         prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
                         prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
-                        prop.putHTML("showitems_item_" + i + "_link", messageurl.toNormalform(true));
                         prop.putHTML("showitems_item_" + i + "_description", item.getDescriptions().toString());
                         prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
                         prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
@@ -374,10 +400,6 @@ public class Load_RSS_p {
                         ConcurrentLog.logException(e);
                         continue;
                     }
-                } catch (final MalformedURLException e) {
-                    ConcurrentLog.logException(e);
-                    continue;
-                }
             }
             prop.put("showitems_item", i);
             prop.put("showitems_num", i);
