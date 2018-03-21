@@ -27,11 +27,11 @@ To build the Alpine variant :
 
 `luccioman/yacy:latest`
 
-This image is based on latest stable official Debian [java](https://hub.docker.com/_/java/) image provided by Docker. Embed Yacy compiled from latest git repository sources.
+This image is based on latest stable official Debian [openjdk](https://hub.docker.com/_/openjdk/) image provided by Docker. Embed Yacy compiled from latest git repository sources.
 
 `luccioman/yacy:latest-alpine`
 
-This image is based on latest stable official Alpine Linux [java](https://hub.docker.com/_/java/) image provided by Docker. Embed Yacy compiled from latest git repository sources.
+This image is based on latest stable official Alpine Linux [openjdk](https://hub.docker.com/_/openjdk/) image provided by Docker. Embed Yacy compiled from latest git repository sources.
 	
 ## Default admin account
 
