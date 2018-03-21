@@ -97,7 +97,14 @@ public class RSSLoader extends Thread {
         recordAPI(this.sb, null, this.urlf, feed, 7, "seldays");
     }
 
-    public static void indexAllRssFeed(final Switchboard sb, final DigestURL url, final RSSFeed feed, Map<String, Pattern> collections) {
+    /**
+     * Iterate over the given feed and add all item links and enclosures URLs to a new switchboard indexing task.
+     * @param sb the main environment switchboard instance. Must not be null.
+     * @param feedUrl the feed url. Must not be null.
+     * @param feed the parsed feed. Must not be null. 
+     * @param collections
+     */
+    public static void indexAllRssFeed(final Switchboard sb, final DigestURL feedUrl, final RSSFeed feed, final Map<String, Pattern> collections) {
         int loadCount = 0;
         final Map<String, DigestURL> urlmap = new HashMap<String, DigestURL>();
         for (final RSSMessage message: feed) {
@@ -112,6 +119,21 @@ public class RSSLoader extends Thread {
 	                urlmap.put(ASCII.String(messageurl.hash()), messageurl);
 				} catch (MalformedURLException e1) {
 					ConcurrentLog.warn("Load_RSS", "Malformed feed item link URL : " + linkStr);
+				}
+        	}
+        	
+        	/* An enclosure (media) URL may also be defined for that item */
+        	final String enclosureStr = message.getEnclosure();
+        	if(StringUtils.isNotBlank(enclosureStr)) { // Link element is optional in RSS 2.0 and Atom
+                DigestURL enclosureUrl;
+				try {
+					enclosureUrl = new DigestURL(enclosureStr);
+	                if (indexTriggered.containsKey(enclosureUrl.hash())) {
+	                	continue;
+	                }
+	                urlmap.put(ASCII.String(enclosureUrl.hash()), enclosureUrl);
+				} catch (MalformedURLException e1) {
+					ConcurrentLog.warn("Load_RSS", "Malformed feed item enclosure URL : " + enclosureStr);
 				}
         	}
         }
@@ -135,7 +157,7 @@ public class RSSLoader extends Thread {
         // update info for loading
 
         try {
-            Tables.Data rssRow = sb.tables.select("rss", url.hash());
+            Tables.Data rssRow = sb.tables.select("rss", feedUrl.hash());
             if (rssRow == null) rssRow = new Tables.Data();
             final Date lastLoadDate = rssRow.get("last_load_date", new Date(0));
             final long deltaTime = Math.min(System.currentTimeMillis() - lastLoadDate.getTime(), 1000 * 60 * 60 * 24);
@@ -143,13 +165,13 @@ public class RSSLoader extends Thread {
             final int lastAvg = rssRow.get("avg_upd_per_day", 0);
             final long thisAvg = 1000 * 60 * 60 * 24 / deltaTime * loadCount;
             final long nextAvg = lastAvg == 0 ? thisAvg : (thisAvg + lastAvg * 2) / 3;
-            rssRow.put("url", UTF8.getBytes(url.toNormalform(true)));
+            rssRow.put("url", UTF8.getBytes(feedUrl.toNormalform(true)));
             rssRow.put("title", feed.getChannel().getTitle());
             rssRow.put("last_load_date", new Date());
             rssRow.put("last_load_count", loadCount);
             rssRow.put("all_load_count", allLoadCount + loadCount);
             rssRow.put("avg_upd_per_day", nextAvg);
-            sb.tables.update("rss", url.hash(), rssRow);
+            sb.tables.update("rss", feedUrl.hash(), rssRow);
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         } catch (final SpaceExceededException e) {

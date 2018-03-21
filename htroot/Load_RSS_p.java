@@ -60,6 +60,12 @@ import net.yacy.server.serverSwitch;
 
 public class Load_RSS_p {
 	
+	/** Value prefix of checkbox inputs used to select items */
+	private static final String CHECKBOX_ITEM_PREFIX = "mark_";
+	
+	/** Value prefix of checkbox inputs used to select media items */
+	private static final String CHECKBOX_MEDIA_ITEM_PREFIX = "media_";
+	
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
@@ -79,8 +85,8 @@ public class Load_RSS_p {
         
         if (post != null && post.containsKey("removeSelectedFeedsNewList")) {
             for (final Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getValue().startsWith("mark_")) try {
-                    sb.tables.delete("rss", entry.getValue().substring(5).getBytes());
+                if (entry.getValue().startsWith(CHECKBOX_ITEM_PREFIX)) try {
+                    sb.tables.delete("rss", entry.getValue().substring(CHECKBOX_ITEM_PREFIX.length()).getBytes());
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
@@ -114,8 +120,8 @@ public class Load_RSS_p {
 
         if (post != null && post.containsKey("removeSelectedFeedsScheduler")) {
             for (final Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getValue().startsWith("mark_")) try {
-                    final byte[] pk = entry.getValue().substring(5).getBytes();
+                if (entry.getValue().startsWith(CHECKBOX_ITEM_PREFIX)) try {
+                    final byte[] pk = entry.getValue().substring(CHECKBOX_ITEM_PREFIX.length()).getBytes();
                     final Row rssRow = sb.tables.select("rss", pk);
                     final byte[] schedulerPK = rssRow.get("api_pk", (byte[]) null);
                     if (schedulerPK != null) sb.tables.delete("api", schedulerPK);
@@ -161,10 +167,10 @@ public class Load_RSS_p {
         if (post != null && post.containsKey("addSelectedFeedScheduler")) {
             ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
             for (final Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getValue().startsWith("mark_")) {
+                if (entry.getValue().startsWith(CHECKBOX_ITEM_PREFIX)) {
                     Row row;
                     try {
-                        final byte [] pk = entry.getValue().substring(5).getBytes();
+                        final byte [] pk = entry.getValue().substring(CHECKBOX_ITEM_PREFIX.length()).getBytes();
                         row = sb.tables.select("rss", pk);
                     } catch (final IOException e) {
                         ConcurrentLog.logException(e);
@@ -289,8 +295,9 @@ public class Load_RSS_p {
             final RSSFeed feed = rss.getFeed();
             final Map<String, DigestURL> hash2UrlMap = new HashMap<String, DigestURL>();
             loop: for (final Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getValue().startsWith("mark_")) {
-                    final RSSMessage message = feed.getMessage(entry.getValue().substring(5));
+                if (entry.getValue().startsWith(CHECKBOX_ITEM_PREFIX)) {
+                	/* Process selected item links */
+                    final RSSMessage message = feed.getMessage(entry.getValue().substring(CHECKBOX_ITEM_PREFIX.length()));
                     if(message == null || StringUtils.isBlank(message.getLink())) {
                     	/* Link element is optional in RSS 2.0 and Atom */
                     	continue loop;
@@ -306,6 +313,24 @@ public class Load_RSS_p {
                     	continue loop;
                     }
                     hash2UrlMap.put(ASCII.String(messageUrl.hash()), messageUrl);
+                } else if(entry.getValue().startsWith(CHECKBOX_MEDIA_ITEM_PREFIX)) {
+                	/* Process selected item enclosure (media) links */
+                    final RSSMessage message = feed.getMessage(entry.getValue().substring(CHECKBOX_MEDIA_ITEM_PREFIX.length()));
+                    if(message == null || StringUtils.isBlank(message.getEnclosure())) {
+                    	/* Enclosure element is optional */
+                    	continue loop;
+                    }
+                    DigestURL mediaUrl;
+					try {
+						mediaUrl = new DigestURL(message.getEnclosure());
+					} catch (MalformedURLException e) {
+						ConcurrentLog.warn("Load_RSS", "Malformed feed item enclosure URL : " + message.getEnclosure());
+						continue loop;
+					}
+                    if (RSSLoader.indexTriggered.containsKey(mediaUrl.hash())) {
+                    	continue loop;
+                    }
+                    hash2UrlMap.put(ASCII.String(mediaUrl.hash()), mediaUrl);
                 }
             }
             
@@ -366,6 +391,21 @@ public class Load_RSS_p {
             			ConcurrentLog.warn("Load_RSS", "Malformed feed item link URL : " + linkStr);
             		}
             	}
+            	
+            	DigestURL enclosure = null;
+            	final String enclosureStr = item.getEnclosure();
+            	if(StringUtils.isNotBlank(enclosureStr)) {
+            		try {
+            			enclosure = new DigestURL(enclosureStr);
+            		} catch (final MalformedURLException e) {
+            			ConcurrentLog.warn("Load_RSS", "Malformed feed item enclosure URL : " + enclosureStr);
+            		}
+            	}
+            	
+            	if(link == null) {
+            		/* No link in this feed item : we use the enclosure media URL as the main link */
+            		link = enclosure;
+            	}
 
                 author = item.getAuthor();
                 if (author == null) {
@@ -374,32 +414,56 @@ public class Load_RSS_p {
                 pubDate = item.getPubDate();
                 
                 HarvestProcess harvestProcess;
-                    try {
-                    	if(link != null && StringUtils.isNotEmpty(item.getGuid())) {
-                    		harvestProcess = sb.urlExists(ASCII.String(link.hash()));
+                try {
+                 	if(link != null && StringUtils.isNotEmpty(item.getGuid())) {
+                   		harvestProcess = sb.urlExists(ASCII.String(link.hash()));
+                   		
+                       	prop.put("showitems_item_" + i + "_hasLink", true);
+                       	prop.putHTML("showitems_item_" + i + "_hasLink_link", link.toNormalform(true));
+                       	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(link.hash()) ? 1 : 0;
+                   		prop.put("showitems_item_" + i + "_state", state);
+                   		prop.put("showitems_item_" + i + "_indexable", state == 0);
+                        prop.put("showitems_item_" + i + "_indexable_count", i);
+                        prop.putHTML("showitems_item_" + i + "_indexable_inputValue", (link == enclosure ? CHECKBOX_MEDIA_ITEM_PREFIX : CHECKBOX_ITEM_PREFIX) + item.getGuid());
+                   	} else {
+                  		prop.put("showitems_item_" + i + "_state", 0);
+                   		prop.put("showitems_item_" + i + "_indexable", false);
+                       	prop.put("showitems_item_" + i + "_hasLink", false);
+                   	}
+                    prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
+                    prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
+                    prop.putHTML("showitems_item_" + i + "_description", item.getDescriptions().toString());
+                    prop.put("showitems_item_" + i + "_defaultMediaDesc", false);
+                    prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
+                    prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
+                    i++;
+                } catch (IOException e) {
+                    ConcurrentLog.logException(e);
+                }
+                    
+                try {
+                  	if(enclosure != null && enclosure != link && StringUtils.isNotEmpty(item.getGuid())) {
+                   		harvestProcess = sb.urlExists(ASCII.String(enclosure.hash()));
                     		
-                        	prop.put("showitems_item_" + i + "_hasLink", true);
-                        	prop.putHTML("showitems_item_" + i + "_hasLink_link", link.toNormalform(true));
-                        	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(link.hash()) ? 1 : 0;
-                    		prop.put("showitems_item_" + i + "_state", state);
-                    		prop.put("showitems_item_" + i + "_indexable", state == 0);
-                            prop.put("showitems_item_" + i + "_indexable_count", i);
-                            prop.putHTML("showitems_item_" + i + "_indexable_guid", item.getGuid());
-                    	} else {
-                    		prop.put("showitems_item_" + i + "_state", 0);
-                    		prop.put("showitems_item_" + i + "_indexable", false);
-                        	prop.put("showitems_item_" + i + "_hasLink", false);
-                    	}
-                        prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
+                       	prop.put("showitems_item_" + i + "_hasLink", true);
+                       	prop.putHTML("showitems_item_" + i + "_hasLink_link", enclosure.toNormalform(true));
+                       	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(enclosure.hash()) ? 1 : 0;
+                   		prop.put("showitems_item_" + i + "_state", state);
+                   		prop.put("showitems_item_" + i + "_indexable", state == 0);
+                        prop.put("showitems_item_" + i + "_indexable_count", i);
+                        prop.putHTML("showitems_item_" + i + "_indexable_inputValue", "media_" + item.getGuid());
+                        prop.putHTML("showitems_item_" + i + "_author", "");
                         prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
-                        prop.putHTML("showitems_item_" + i + "_description", item.getDescriptions().toString());
-                        prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
-                        prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
+                        prop.putHTML("showitems_item_" + i + "_description", "");
+                        /* Description is already used for the main item link, use here a default one */
+                        prop.put("showitems_item_" + i + "_defaultMediaDesc", true);
+                        prop.putHTML("showitems_item_" + i + "_language", "");
+                        prop.putHTML("showitems_item_" + i + "_date", "");
                         i++;
-                    } catch (IOException e) {
-                        ConcurrentLog.logException(e);
-                        continue;
-                    }
+                   	}
+                } catch (IOException e) {
+                    ConcurrentLog.logException(e);
+                }
             }
             prop.put("showitems_item", i);
             prop.put("showitems_num", i);
