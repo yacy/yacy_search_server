@@ -26,7 +26,7 @@
       This does not load the rss file as such into the index but all the messages inside the RSS feeds as individual documents.
     </p>
     
-    <form action="Load_RSS_p.html" method="get" accept-charset="UTF-8">
+    <form action="Load_RSS_p.html" method="post" accept-charset="UTF-8">
        <fieldset>
         <dl>
           <dt><b>URL of the RSS feed</b></dt>
@@ -130,7 +130,7 @@
 	#(/shownewfeeds)#
 	
 	#(showitems)#::
-	<form id="rssfeed" action="Load_RSS_p.html"><fieldset>
+	<form id="rssfeed" method="post" action="Load_RSS_p.html"><fieldset>
 	  <legend>RSS Feed of #[rss]#</legend>
       <dl>
 		<dt>Title</dt><dd>#[title]#</dd>
