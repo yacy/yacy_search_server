@@ -33,6 +33,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.Html2Image;
 import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.CrawlProfile.CrawlAttribute;
 import net.yacy.document.LibraryProvider;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -300,6 +301,22 @@ public class CrawlStartExpert {
         } else {
             prop.put("indexcontentmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         }
+        
+		// Filter on Media Type of Document: must match
+		if (post != null && post.containsKey(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key)) {
+			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key,
+					post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
+		} else {
+			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING);
+		}
+
+		// Filter on Media Type of Document: must-not-match
+		if (post != null && post.containsKey(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key)) {
+			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key,
+					post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
+		} else {
+			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
+		}
 
 
         // ---------- Clean-Up before Crawl Start

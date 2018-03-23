@@ -52,6 +52,7 @@ import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.FileCrawlStarterTask;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.CrawlProfile.CrawlAttribute;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.SitemapImporter;
 import net.yacy.crawler.robots.RobotsTxt;
@@ -568,6 +569,12 @@ public class Crawler_p {
                             ignoreclassname,
                             new VocabularyScraper(vocabulary_scraper),
                             timezoneOffset);
+                    
+					profile.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key,
+							post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
+					profile.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, post
+							.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
+                    
                     handle = ASCII.getBytes(profile.handle());
 
                     // before we fire up a new crawl, we make sure that another crawl with the same name is not running

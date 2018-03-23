@@ -53,6 +53,7 @@ import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.query.QueryParams;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 
 /**
@@ -89,6 +90,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         INDEXING_URL_MUSTNOTMATCH    ("indexURLMustNotMatch",       false, CrawlAttribute.STRING,  "Indexing URL Must-Not-Match Filter"),
         INDEXING_CONTENT_MUSTMATCH   ("indexContentMustMatch",      false, CrawlAttribute.STRING,  "Indexing Content Must-Match Filter"),
         INDEXING_CONTENT_MUSTNOTMATCH("indexContentMustNotMatch",   false, CrawlAttribute.STRING,  "Indexing Content Must-Not-Match Filter"),
+        INDEXING_MEDIA_TYPE_MUSTMATCH("indexMediaTypeMustMatch",    false, CrawlAttribute.STRING,  "Indexing Media Type (MIME) Must-Match Filter"),
+        INDEXING_MEDIA_TYPE_MUSTNOTMATCH("indexMediaTypeMustNotMatch", false, CrawlAttribute.STRING, "Indexing Media Type (MIME) Must-Not-Match Filter"),
         RECRAWL_IF_OLDER             ("recrawlIfOlder",             false, CrawlAttribute.INTEGER, "Recrawl If Older"),
         STORE_HTCACHE                ("storeHTCache",               false, CrawlAttribute.BOOLEAN, "Store in HTCache"),
         CACHE_STRAGEGY               ("cacheStrategy",              false, CrawlAttribute.STRING,  "Cache Strategy (NOCACHE,IFFRESH,IFEXIST,CACHEONLY)"),
@@ -112,7 +115,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         public final String key, label;
         public final boolean readonly;
         public final int type;
-        private CrawlAttribute(String key, final boolean readonly, final int type, final String label) {
+        private CrawlAttribute(final String key, final boolean readonly, final int type, final String label) {
             this.key = key;
             this.readonly = readonly;
             this.type = type;
@@ -131,6 +134,15 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     private Pattern crawlernodepthlimitmatch = null;
     private Pattern indexurlmustmatch = null, indexurlmustnotmatch = null;
     private Pattern indexcontentmustmatch = null, indexcontentmustnotmatch = null;
+    
+    /** Pattern on the media type documents must match before being indexed 
+     * @see CollectionSchema#content_type */
+    private Pattern indexMediaTypeMustMatch = null;
+    
+    /** Pattern on the media type documents must not match before being indexed
+     * @see CollectionSchema#content_type  */
+    private Pattern indexMediaTypeMustNotMatch = null;
+    
     private Pattern snapshotsMustnotmatch = null;
 
     private final Map<String, AtomicInteger> doms;
@@ -247,6 +259,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         assert jsonString != null && jsonString.length() > 0 && jsonString.charAt(0) == '{' : "jsonString = " + jsonString;
         put(CrawlAttribute.SCRAPER.key, jsonString);
         put(CrawlAttribute.TIMEZONEOFFSET.key, timezoneOffset);
+        put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING);
+        put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
     }
 
     /**
@@ -539,6 +553,52 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return this.indexcontentmustnotmatch;
     }
     
+	/**
+	 * Get the Pattern on media type that documents must match in order to be indexed
+	 * 
+	 * @return a {@link Pattern} instance, defaulting to
+	 *         {@link CrawlProfile#MATCH_ALL_PATTERN} when the regular expression
+	 *         string is not set or its syntax is incorrect
+	 */
+    public Pattern getIndexMediaTypeMustMatchPattern() {
+		if (this.indexMediaTypeMustMatch == null) {
+			/* Cache the compiled pattern for faster next calls */
+			final String patternStr = get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key);
+			try {
+				this.indexMediaTypeMustMatch = (patternStr == null
+						|| patternStr.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN
+								: Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
+			} catch (final PatternSyntaxException e) {
+				this.indexMediaTypeMustMatch = CrawlProfile.MATCH_ALL_PATTERN;
+			}
+		}
+        return this.indexMediaTypeMustMatch;
+    }
+    
+	/**
+	 * Get the Pattern on media type that documents must not match in order to be indexed
+	 * 
+	 * @return a {@link Pattern} instance, defaulting to
+	 *         {@link CrawlProfile#MATCH_NEVER_PATTERN} when the regular expression
+	 *         string is not set or its syntax is incorrect
+	 */
+    public Pattern getIndexMediaTypeMustNotMatchPattern() {
+		if (this.indexMediaTypeMustNotMatch == null) {
+			/* Cache the compiled pattern for faster next calls */
+			final String patternStr = get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key);
+			try {
+				this.indexMediaTypeMustNotMatch = (patternStr == null
+						|| patternStr.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN
+								: Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
+			} catch (final PatternSyntaxException e) {
+				this.indexMediaTypeMustNotMatch = CrawlProfile.MATCH_NEVER_PATTERN;
+			}
+		}
+        return this.indexMediaTypeMustNotMatch;
+    }
+    
+    
+    
     /**
      * Gets depth of crawl job (or height of the tree which will be
      * created by the crawler).
@@ -575,7 +635,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public void setCacheStrategy(final CacheStrategy newStrategy) {
         put(CrawlAttribute.CACHE_STRAGEGY.key, newStrategy.toString());
     }
-
+    
     /**
      * Gets the minimum date that an entry must have to be re-crawled.
      * @return time in ms representing a date
@@ -795,6 +855,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexURLMustNotMatch", this.get(CrawlAttribute.INDEXING_URL_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexContentMustMatch", this.get(CrawlAttribute.INDEXING_CONTENT_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexContentMustNotMatch", this.get(CrawlAttribute.INDEXING_CONTENT_MUSTNOTMATCH.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, this.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, this.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key));
         //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_mustmatch", this.urlMustMatchPattern().toString()); // TODO: remove, replace with crawlerURLMustMatch
         //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", this.urlMustNotMatchPattern().toString()); // TODO: remove, replace with crawlerURLMustNotMatch
         //prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (this.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(this.recrawlIfOlder())); // TODO: remove, replace with recrawlIfOlder

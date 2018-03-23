@@ -88,14 +88,14 @@ public class ErrorCache {
     }
 
     /**
-     * Adds a error document to the Solr index (marked as failed by httpstatus_i <> 200)
-     * and caches recently added failed docs (up to maxStackSize = 1000)
+     * Adds an error to the cache of recently added failed docs (up to maxStackSize = 1000)
+     * and eventually (depending on the failCategory) stores an error document to the Solr index (marked as failed by httpstatus_i <> 200) 
      *
-     * @param url  failed url
-     * @param crawldepth info crawldepth
+     * @param url failed url. Must not be null.
+     * @param crawldepth crawl depth at the time the error occurred.
      * @param profile info of collection
-     * @param failCategory .store to index otherwise cache only
-     * @param anycause info cause-string
+     * @param failCategory .store to index otherwise cache only. Must not be null.
+     * @param anycause info cause-string. Defaults to "unknown" when null.
      * @param httpcode http response code
      */
     public void push(final DigestURL url, final int crawldepth, final CrawlProfile profile, final FailCategory failCategory, String anycause, final int httpcode) {

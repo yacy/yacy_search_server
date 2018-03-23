@@ -170,12 +170,14 @@
                 disableIf('ipMustnotmatch', defaultMatchNone);
                 disableIf('indexmustnotmatch', defaultMatchNone);
                 disableIf('indexcontentmustnotmatch', defaultMatchNone);
+                disableIf('indexMediaTypeMustNotMatch', defaultMatchNone);
 
                 // remove if MATCH_ALL_STRING
                 disableIf('mustmatch', defaultMatchAll);
                 disableIf('ipMustmatch', defaultMatchAll);
                 disableIf('indexmustmatch', defaultMatchAll);
                 disableIf('indexcontentmustmatch', defaultMatchAll);
+                disableIf('indexMediaTypeMustMatch', defaultMatchAll);
 
                 // remove default collection name
                 disableIf('collection', '#[defaultCollection]#');
@@ -363,6 +365,28 @@
 		    <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td><input name="indexcontentmustmatch" id="indexcontentmustmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
 		    <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="indexcontentmustnotmatch" id="indexcontentmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexcontentmustnotmatch]#" /></td></tr>
 			</table>
+	        </dd>
+ 	        <dt>Filter on Document Media Type (aka MIME type)</dt>
+	        <dd>
+            	<div class="info" style="float:right">
+            		<img src="env/grafics/i16.gif" width="16" height="16" alt="Clean up search events cache info"/>
+            		<span style="right:0px;" id="mediaTypeMustMatchInfo">
+            			The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>
+            			that <b>must match</b> with the document Media Type (also known as MIME Type) to allow the URL to be indexed. 
+            			Standard Media Types are described at the <a href="https://www.iana.org/assignments/media-types/media-types.xhtml" target="_blank">IANA registry</a>.
+            			Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy.
+            		</span>
+            	</div>
+            	<table style="border-width: 0px">
+		    		<tr>
+		    			<td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td>
+		    			<td><input name="indexMediaTypeMustMatch" id="indexMediaTypeMustMatch" type="text" size="55" maxlength="100000" value="#[indexMediaTypeMustMatch]#" aria-describedby="mediaTypeMustMatchInfo" /></td>
+		    		</tr>
+		    		<tr>
+		    			<td><img src="env/grafics/minus.gif" alt=""> must-not-match</td>
+		    			<td><input name="indexMediaTypeMustNotMatch" id="indexMediaTypeMustNotMatch" type="text" size="55" maxlength="100000" value="#[indexMediaTypeMustNotMatch]#" /></td>
+		    		</tr>
+				</table>
 	        </dd>
 	      </dl>
         </fieldset>

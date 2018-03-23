@@ -30,6 +30,8 @@
 		<indexURLMustNotMatch>#[indexURLMustNotMatch]#</indexURLMustNotMatch>
 		<indexContentMustMatch>#[indexContentMustMatch]#</indexContentMustMatch>
 		<indexContentMustNotMatch>#[indexContentMustNotMatch]#</indexContentMustNotMatch>
+		<indexMediaTypeMustMatch>#[indexMediaTypeMustMatch]#</indexMediaTypeMustMatch>
+		<indexMediaTypeMustNotMatch>#[indexMediaTypeMustNotMatch]#</indexMediaTypeMustNotMatch>
 		<status>#(status)#terminated::active::system#(/status)#</status>
 		<crawlingDomFilterContent>
 		#{crawlingDomFilterContent}#

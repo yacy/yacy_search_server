@@ -138,6 +138,7 @@ import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.HarvestProcess;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.CrawlProfile.CrawlAttribute;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.data.NoticedURL.StackType;
@@ -3151,6 +3152,28 @@ public final class Switchboard extends serverSwitch {
                 this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern(), -1);
                 continue docloop;
             }
+            
+            /* Check document media type (aka MIME type)*/
+            final Pattern mustMatchMediaType = profile.getIndexMediaTypeMustMatchPattern();
+            final Pattern mustNotMatchMediaType = profile.getIndexMediaTypeMustNotMatchPattern();
+			if (!(mustMatchMediaType == CrawlProfile.MATCH_ALL_PATTERN
+					|| mustMatchMediaType.matcher(document.dc_format()).matches())
+					|| (mustNotMatchMediaType != CrawlProfile.MATCH_NEVER_PATTERN
+							&& mustNotMatchMediaType.matcher(document.dc_format()).matches())) {
+				final String failReason = new StringBuilder(
+						"indexing prevented by regular expression on media type; indexContentMustMatchPattern = ")
+								.append(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH).append(" = ")
+								.append(mustMatchMediaType.pattern()).append(", ")
+								.append(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH).append(" = ")
+								.append(mustNotMatchMediaType.pattern()).toString();
+				if (this.log.isInfo()) {
+					this.log.info("Not Condensed Resource '" + urls + " : " + failReason);
+				}
+				// create a new errorURL DB entry
+				this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile,
+						FailCategory.FINAL_PROCESS_CONTEXT, failReason, -1);
+				continue docloop;
+			}
             doclist.add(document);
         }
 

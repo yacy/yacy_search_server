@@ -378,6 +378,9 @@ dc_rights
         return this.publisher == null ? "" : this.publisher;
     }
 
+    /**
+     * @return the Media Type (aka MIME Type) of the document
+     */
     public String dc_format() {
         return this.mimeType;
     }
