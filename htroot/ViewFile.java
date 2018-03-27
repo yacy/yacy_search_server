@@ -89,6 +89,7 @@ public class ViewFile {
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
         prop.put("moar", 0);
         prop.put("viewMode", VIEW_MODE_NO_TEXT);
+        prop.put("viewModeValue", "");
         prop.putHTML("error_words", "");
         prop.put("error_vMode-sentences", "1");
         prop.put("error", "1");
@@ -118,6 +119,7 @@ public class ViewFile {
         final boolean showSnippet = post.get("show", "").equals("Show Snippet");
         final String viewMode = showSnippet ? "sentences" : post.get("viewMode", "sentences");
         prop.put("error_vMode-" + viewMode, "1");
+        prop.put("viewModeValue", viewMode);
         
         DigestURL url = null;
         String descr = "";

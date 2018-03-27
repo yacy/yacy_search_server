@@ -77,6 +77,7 @@ function updatepage(str) {
     <h2>View URL Content</h2>
 
     <form method="get" action="ViewFile.html" id="searchform" accept-charset="ascii" onkeyup="xmlhttpPost(); return false;">
+      <input type="hidden" name="viewMode" value="#[viewModeValue]#" />
       <fieldset><legend>Get URL Viewer</legend>
         <dl>
           <dt>URL:</dt>
