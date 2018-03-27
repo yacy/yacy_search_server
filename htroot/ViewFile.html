@@ -45,7 +45,7 @@ function updatepage(str) {
     html += "<td>URL from index (total results = " + totalResults + ")<\/td>";
     for (var i = 0; i < firstChannel.items.length; i++) {
         item = firstChannel.items[i];
-        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"ViewFile.html?url=" + item.link + "\">" + item.link + "<\/a><\/td>";
+        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"ViewFile.html?viewMode=#[viewModeValue]#&url=" + item.link + "\">" + item.link + "<\/a><\/td>";
     }
     html += "<\/table>";
   }

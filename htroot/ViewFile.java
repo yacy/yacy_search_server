@@ -89,7 +89,7 @@ public class ViewFile {
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
         prop.put("moar", 0);
         prop.put("viewMode", VIEW_MODE_NO_TEXT);
-        prop.put("viewModeValue", "");
+        prop.put("viewModeValue", "sentences");
         prop.putHTML("error_words", "");
         prop.put("error_vMode-sentences", "1");
         prop.put("error", "1");
