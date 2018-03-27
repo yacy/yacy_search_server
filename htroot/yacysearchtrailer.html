@@ -45,8 +45,14 @@
 <p class="navbutton"></p>
 <div id="rankingButtons" class="btn-group btn-group-justified" data-nav-generation="#[nav-generation]#">
   <!-- data-nav-generation attribute helps the browser know whether the search navigators have to be refreshed -->
-  <div class="btn-group btn-group-xs"><button type="button" id="sort_button_context" class="btn btn-default" onclick="document.getElementById('search').value=document.getElementById('search').value.replace(' /date','');document.searchform.submit();">Context Ranking</button></div>
-  <div class="btn-group btn-group-xs"><button type="button" id="sort_button_date" class="btn btn-default" onclick="document.getElementById('search').value=document.getElementById('search').value + ' /date';document.searchform.submit();">Sort by Date</button></div>
+  <div class="btn-group btn-group-xs">
+  	<button type="button" id="sort_button_context" class="btn btn-default" title="Use the default ranking profile (customizable), ordering results by score." 
+  		onclick="document.getElementById('search').value=document.getElementById('search').value.replace(' /date','');document.searchform.submit();">Context Ranking</button>
+  </div>
+  <div class="btn-group btn-group-xs">
+  	<button type="button" id="sort_button_date" class="btn btn-default" title="Use the 'Date' ranking profile, ordering results by default on each document last modification date."
+  		onclick="document.getElementById('search').value=document.getElementById('search').value + ' /date';document.searchform.submit();">Sort by Date</button>
+  </div>
 </div>
 <script>
   if (document.getElementById('search').value.indexOf(" /date") == -1) {
