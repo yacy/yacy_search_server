@@ -261,6 +261,7 @@ public class Table_API_p {
         final List<Tables.Row> table = new ArrayList<Tables.Row>(maximumRecords);
         int count = 0;
         int tablesize = 0;
+        int filteredSize = 0;
         try {
             tablesize = sb.tables.size(WorkTables.TABLE_API_NAME);
             final Iterator<Tables.Row> plainIterator = sb.tables.iterator(WorkTables.TABLE_API_NAME);
@@ -268,9 +269,12 @@ public class Table_API_p {
             Tables.Row r;
             boolean dark = true;
             boolean scheduledactions = false;
-            int c = 0;
+            int matchCount = 0;
             byte[] typeb, commentb, urlb;
             String type, comment, url;
+			final boolean hasFilter = typefilter != QueryParams.catchall_pattern
+					|| query != QueryParams.catchall_pattern;
+            
             // first prepare a list
             while (mapIterator.hasNext()) {
                 r = mapIterator.next();
@@ -287,10 +291,21 @@ public class Table_API_p {
                 if (urlb == null) continue;
                 url = UTF8.String(urlb);
                 if (!query.matcher(url).matches()) continue;
-                if (c >= startRecord) table.add(r);
-                c++;
-                if (table.size() >= maximumRecords) break;
+                if (matchCount >= startRecord && table.size() < maximumRecords) {
+                	table.add(r);
+                }
+                matchCount++;
+                if (table.size() >= maximumRecords && !hasFilter) {
+                	/* When a filter is defined, we must continue iterating over the table to get the total count of matching items */
+                	break;
+                }
             }
+            if(hasFilter) {
+            	filteredSize = matchCount;
+            } else {
+            	filteredSize = tablesize;
+            }
+            
             // then work on the list
             for (final Tables.Row row : table) {
                 final Date now = new Date();
@@ -435,7 +450,7 @@ public class Table_API_p {
             prop.put("showtable_navigation", 1);
             prop.put("showtable_navigation_startRecord", startRecord);
             prop.put("showtable_navigation_to", Math.min(tablesize, startRecord + maximumRecords));
-            prop.put("showtable_navigation_of", tablesize);
+            prop.put("showtable_navigation_of", filteredSize);
             prop.put("showtable_navigation_left", startRecord == 0 ? 0 : 1);
             prop.put("showtable_navigation_left_startRecord", Math.max(0, startRecord - maximumRecords));
             prop.put("showtable_navigation_left_maximumRecords", maximumRecords);
@@ -443,8 +458,8 @@ public class Table_API_p {
             prop.put("showtable_navigation_left_filter", typefilter.pattern());
             prop.put("showtable_navigation_left", startRecord == 0 ? 0 : 1);
             prop.put("showtable_navigation_filter", typefilter.pattern());
-            prop.put("showtable_navigation_right", startRecord + maximumRecords >= tablesize ? 0 : 1);
-            prop.put("showtable_navigation_right_startRecord", Math.min(tablesize - maximumRecords, startRecord + maximumRecords));
+            prop.put("showtable_navigation_right", startRecord + maximumRecords >= filteredSize ? 0 : 1);
+            prop.put("showtable_navigation_right_startRecord", Math.min(filteredSize - maximumRecords, startRecord + maximumRecords));
             prop.put("showtable_navigation_right_maximumRecords", maximumRecords);
             prop.put("showtable_navigation_right_inline", (inline) ? 1 : 0);
             prop.put("showtable_navigation_right_filter", typefilter.pattern());
