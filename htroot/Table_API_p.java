@@ -47,6 +47,9 @@ import net.yacy.server.serverSwitch;
 
 public class Table_API_p {
 
+	/** Default results page size */
+	private static final int DEFAULT_MAX_RECORDS = 25;
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
@@ -55,7 +58,7 @@ public class Table_API_p {
         prop.put("showtable", 0);
 
         int startRecord = 0;
-        int maximumRecords = 25;
+        int maximumRecords = DEFAULT_MAX_RECORDS;
         Pattern query = QueryParams.catchall_pattern;
         if (post != null && post.containsKey("startRecord")) {
             startRecord = post.getInt("startRecord", 0);
@@ -63,10 +66,10 @@ public class Table_API_p {
         if (post != null && post.containsKey("maximumRecords")) {
             maximumRecords = post.getInt("maximumRecords", 0);
         }
+        String queryParam = "";
         if (post != null && post.containsKey("query") && !post.get("query", "").isEmpty()) {
-            query = Pattern.compile(".*" + post.get("query", "") + ".*");
-            startRecord = 0;
-            maximumRecords = 1000;
+        	queryParam = post.get("query", "");
+            query = Pattern.compile(".*" + queryParam + ".*");
         }
         final boolean inline = (post != null && post.getBoolean("inline"));
 
@@ -445,8 +448,8 @@ public class Table_API_p {
         prop.put("showtable_maximumRecords", maximumRecords);
         prop.put("showtable_inline", (inline) ? 1 : 0);
         prop.put("showtable_filter", typefilter.pattern());
-        prop.put("showtable_query", query.pattern().replaceAll("\\.\\*", ""));
-        if (tablesize >= maximumRecords) {
+        prop.put("showtable_query", queryParam);
+        if (filteredSize > maximumRecords) {
             prop.put("showtable_navigation", 1);
             prop.put("showtable_navigation_startRecord", startRecord);
             prop.put("showtable_navigation_to", Math.min(tablesize, startRecord + maximumRecords));
@@ -456,6 +459,7 @@ public class Table_API_p {
             prop.put("showtable_navigation_left_maximumRecords", maximumRecords);
             prop.put("showtable_navigation_left_inline", (inline) ? 1 : 0);
             prop.put("showtable_navigation_left_filter", typefilter.pattern());
+            prop.put("showtable_navigation_left_query", queryParam);
             prop.put("showtable_navigation_left", startRecord == 0 ? 0 : 1);
             prop.put("showtable_navigation_filter", typefilter.pattern());
             prop.put("showtable_navigation_right", startRecord + maximumRecords >= filteredSize ? 0 : 1);
@@ -463,6 +467,7 @@ public class Table_API_p {
             prop.put("showtable_navigation_right_maximumRecords", maximumRecords);
             prop.put("showtable_navigation_right_inline", (inline) ? 1 : 0);
             prop.put("showtable_navigation_right_filter", typefilter.pattern());
+            prop.put("showtable_navigation_right_query", queryParam);
         } else {
             prop.put("showtable_navigation", 0);
         }

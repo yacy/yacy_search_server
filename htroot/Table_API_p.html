@@ -53,13 +53,13 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <span id="resCounter" style="display: inline;">
       #(navigation)#
       ::
-      #(left)#<img src="env/grafics/navdl.gif" alt="no previous page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#" target="_self"><img src="env/grafics/navsl.gif" alt="previous page" /></a>#(/left)#
+      #(left)#<img src="env/grafics/navdl.gif" alt="no previous page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self"><img src="env/grafics/navsl.gif" alt="previous page" /></a>#(/left)#
       #[startRecord]#-#[to]# of #[of]#
-      #(right)#<img src="env/grafics/navdr.gif" alt="no next page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#" target="_self"><img src="env/grafics/navsr.gif" alt="next page" /></a>#(/right)#
+      #(right)#<img src="env/grafics/navdr.gif" alt="no next page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self"><img src="env/grafics/navsr.gif" alt="next page" /></a>#(/right)#
       <img src="env/grafics/nave.gif" alt="" />
       #(/navigation)#
 
-      <input type="hidden" name="startRecord" value="#[startRecord]#" />
+      <input type="hidden" name="startRecord" value="0" /> <!-- This form is used to type a new query, so we start at record zero -->
       <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
       <input type="hidden" name="inline" value="#(inline)#false::true#(/inline)#" />
       <input type="hidden" name="filter" value="#[filter]#" />
