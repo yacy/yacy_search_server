@@ -4,6 +4,8 @@
 [![Deploy to Docker Cloud](https://files.cloud.docker.com/images/deploy-to-dockercloud.svg)](https://cloud.docker.com/stack/deploy/?repo=https://github.com/yacy/yacy_search_server/tree/master/docker)
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
+[中文](./README-zh.md)
+
 ## What is this?
 
 YaCy is a search engine software. It takes a new approach to search
