@@ -281,19 +281,36 @@ public class Table_API_p {
             // first prepare a list
             while (mapIterator.hasNext()) {
                 r = mapIterator.next();
-                if (r == null) continue;
+                if (r == null) {
+                	continue;
+                }
                 typeb = r.get(WorkTables.TABLE_API_COL_TYPE);
-                if (typeb == null) continue;
+                if (typeb == null) {
+                	continue;
+                }
                 type = UTF8.String(typeb);
-                if (!typefilter.matcher(type).matches()) continue;
+                if (!typefilter.matcher(type).matches()) {
+                	continue;
+                }
                 commentb = r.get(WorkTables.TABLE_API_COL_COMMENT);
-                if (commentb == null) continue;
+                if (commentb == null) {
+                	continue;
+                }
                 comment = UTF8.String(commentb);
-                if (!query.matcher(comment).matches()) continue;
                 urlb = r.get(WorkTables.TABLE_API_COL_URL);
-                if (urlb == null) continue;
+                if (urlb == null) {
+                	continue;
+                }
                 url = UTF8.String(urlb);
-                if (!query.matcher(url).matches()) continue;
+                if(inline) {
+                	if (!query.matcher(comment).matches()) {
+                    	/* When inlined, the url is not displayed so we search only on the comment */
+                    	continue;
+                	}
+                } else if (!query.matcher(comment).matches() && !query.matcher(url).matches()) {
+                	/* The entry is evicted when both url and comment do not match the query */
+                	continue;
+                }
                 if (matchCount >= startRecord && table.size() < maximumRecords) {
                 	table.add(r);
                 }
