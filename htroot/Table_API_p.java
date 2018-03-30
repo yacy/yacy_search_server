@@ -452,7 +452,7 @@ public class Table_API_p {
         if (filteredSize > maximumRecords) {
             prop.put("showtable_navigation", 1);
             prop.put("showtable_navigation_startRecord", startRecord);
-            prop.put("showtable_navigation_to", Math.min(tablesize, startRecord + maximumRecords));
+            prop.put("showtable_navigation_to", Math.min(filteredSize, startRecord + table.size()));
             prop.put("showtable_navigation_of", filteredSize);
             prop.put("showtable_navigation_left", startRecord == 0 ? 0 : 1);
             prop.put("showtable_navigation_left_startRecord", Math.max(0, startRecord - maximumRecords));
@@ -463,7 +463,7 @@ public class Table_API_p {
             prop.put("showtable_navigation_left", startRecord == 0 ? 0 : 1);
             prop.put("showtable_navigation_filter", typefilter.pattern());
             prop.put("showtable_navigation_right", startRecord + maximumRecords >= filteredSize ? 0 : 1);
-            prop.put("showtable_navigation_right_startRecord", Math.min(filteredSize - maximumRecords, startRecord + maximumRecords));
+            prop.put("showtable_navigation_right_startRecord", startRecord + maximumRecords);
             prop.put("showtable_navigation_right_maximumRecords", maximumRecords);
             prop.put("showtable_navigation_right_inline", (inline) ? 1 : 0);
             prop.put("showtable_navigation_right_filter", typefilter.pattern());
