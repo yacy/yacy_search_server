@@ -8221,6 +8221,12 @@
     <trans-unit id="e24b0b3d" xml:space="preserve" approved="no" translate="yes">
        <source>and set an administration password.</source>
     </trans-unit>
+    <trans-unit id="f6c053fa" xml:space="preserve" approved="no" translate="yes">
+       <source>Access is unrestricted from localhost (this includes administration features).</source>
+    </trans-unit>
+    <trans-unit id="ad48a7e2" xml:space="preserve" approved="no" translate="yes">
+       <source>Please check the &lt;a href="ConfigAccounts_p.html"&gt;accounts configuration&lt;/a&gt; page to ensure that the settings match the security level you need.</source>
+    </trans-unit>
     <trans-unit id="7623b0bd" xml:space="preserve" approved="no" translate="yes">
        <source>You have not published your peer seed yet. This happens automatically, just wait.</source>
     </trans-unit>

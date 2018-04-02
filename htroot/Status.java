@@ -140,6 +140,10 @@ public class Status
 
         if ( sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false) ) {
             prop.put("unrestrictedLocalAccess", 1);
+            if(sb.getConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, "").indexOf("ConfigAccounts_p.html", 0) < 0) {
+            	/* Encourage checking accounts config page to be sure that unrestricted local access is desired */
+            	prop.put("warningUnrestrictedLocalAccess", true);	
+            }
         }
 
         // resource observer status

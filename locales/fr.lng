@@ -2135,6 +2135,8 @@ Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page 
 and set an administration password.==et d&eacute;finir un mot de passe administrateur.
 You have not published your peer seed yet. This happens automatically, just wait.==Votre noeud n'est pas encore connu du r&eacute;seau. Attendez quelques instants, cela se d&eacute;roule automatiquement.
 Your network configuration is in private mode. Your peer seed will not be published.== La configuration de votre r&eacute;seau est en mode priv&eacute;. Votre noeud restera inconnu du r&eacute;seau.
+Access is unrestricted from localhost (this includes administration features).==Aucune restriction d'accès (cela inclut les fonctions d'administration) n'est définie pour les connexions depuis un navigateur local (localhost).
+Please check the <a href="ConfigAccounts_p.html">accounts configuration</a> page to ensure that the settings match the security level you need.==Veuillez vérifier la page de configuration des <a href="ConfigAccounts_p.html">comptes</a> pour vous assurer que les réglages satisfont le niveau de sécurité souhaité.
 The peer must go online to get a peer address.==Le noeud doit aller en ligne afin de recevoir une adresse.
 You cannot be reached from outside.==Votre noeud ne peut pas &ecirc;tre atteint depuis l'ext&eacute;rieur.
 A possible reason is that you are behind a firewall, NAT or Router.==Il est possible que vous soyez derri&egrave;re un pare-feu, un NAT ou un routeur.
