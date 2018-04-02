@@ -301,9 +301,11 @@ No password is set for the administration account.==Aucun mot de passe n'est d&e
 Please define a password for the admin account.==Veuillez d&eacute;finir un mot de passe pour le compte admin.
 Admin Account==Compte admin
 Access from localhost without account==Acc&egrave;s sans compte &agrave; partir d'un navigateur local
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==L'acc&egrave;s &agrave; votre nœud depuis votre ordinateur (acc&egrave;s local) est autorisé. La cr&eacute;ation d'un compte administrateur n'est pas n&eacute;cessaire.
+Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==L'acc&egrave;s &agrave; votre nœud depuis votre propre ordinateur (acc&egrave;s local) vous est donné avec des droits d'aministrateur. La cr&eacute;ation d'un compte administrateur n'est pas n&eacute;cessaire.
+This setting is convenient but less secure than using a qualified admin account.==Ce réglage est pratique mais moins sécurisé qu'un accès limité aux comptes autorisés.
+Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Utilisez-le avec précaution, notamment lorsque vous consultez des sites web non fiables et potentiellement malveillants tout en faisant tourner votre nœud YaCy sur le même ordinateur.
 Access only with qualified account==Acc&egrave;s avec un compte autoris&eacute; uniquement
-You need this only if you want a remote access to your peer.==N&eacute;cessaire uniquement si vous d&eacute;sirez disposer d'un acc&egrave;s &agrave; distance &agrave; votre noeud.
+This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Nécessaire si vous d&eacute;sirez disposer d'un acc&egrave;s &agrave; distance &agrave; votre noeud, mais renforce également les contrôles d'accès aux fonctions d'administration de votre nœud.
 Peer User:==Utilisateur du noeud:
 New Peer Password:==Nouveau mot de passe du nœud:
 Repeat Peer Password:==Entrer &agrave; nouveau le mot de passe du nœud:

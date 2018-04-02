@@ -308,9 +308,7 @@ No password is set for the administration account.==Для адміністра�
 Please define a password for the admin account.==Будь ласка, встановіть пароль для облікового запису адміністратора.
 Admin Account==Обліковий запис адміністратора
 Access from localhost without account==Доступ з місцевого хосту без облікового запису
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==Доступ з комп’ютера (місцевий доступ) гарантовано. Обліковий запис адміністратора не потрібен.
 Access only with qualified account==Доступ тільки з відповідного облікового запису
-You need this only if you want a remote access to your peer.==Це потрібно тільки при потребі мати віддалений доступ до даного вузла.
 Peer User:==Користувач вузла:
 New Peer Password:==Новий пароль:
 Repeat Peer Password:==Повтор паролю:

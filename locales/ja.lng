@@ -372,9 +372,8 @@ No password is set for the administration account.==管理アカウントの為�
 Please define a password for the admin account.==管理アカウントの為のパスワードを定めて下さい.
 Admin Account==Admin Konto
 Access from localhost without account==アカウント無しでのローカルホストからのアクセス
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==あなた自身のコンピューターからのあなたのピアへのアクセス(ローカルホスト アクセス)は許可されました. 管理アカウントを構成する必要はありません.
+Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==あなたの自分のコンピュータ（ローカルホストアクセス）からピアへのアクセスは管理者権限を付与されています. 管理アカウントを構成する必要はありません.
 Access only with qualified account==資格のあるアカウントでのみのアクセス
-You need this only if you want a remote access to your peer.==あなたがあなたのピアへリモートアクセスしたい場合にだけこれが必要です.
 Peer User:==ピア ユーザー:
 New Peer Password:==新規のピアのパスワード:
 Repeat Peer Password:==ピアのパスワードを繰り返して下さい:

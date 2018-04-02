@@ -679,9 +679,7 @@ No password is set for the administration account.==管理员账户未设置密�
 Please define a password for the admin account.==请设置一个管理员密码.
 Admin Account==管理员
 Access from localhost without account==本地匿名访问
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==您可以从自己的电脑访问(本地访问). 不需要设置管理员账户.
 Access only with qualified account==只允许授权用户访问
-You need this only if you want a remote access to your peer.==如果您需要能从远端访问到本地peer的授权, 您可以设置此项.
 Peer User:==Peer用户:
 New Peer Password:==新Peer密码:
 Repeat Peer Password:==重复Peer密码:

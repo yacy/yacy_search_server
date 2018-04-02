@@ -385,9 +385,7 @@ No password is set for the administration account.==Пароль не устан
 Please define a password for the admin account.==Пожалуйста, установите пароль для учётной записи администратора.
 Admin Account==Учётная запись администратора
 Access from localhost without account==Доступ со своего компьютера возможен без учётной записи.
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==Доступ к узлу со своего компьютера разрешен. Нет необходимости настраивать учётную запись.
 Access only with qualified account==Доступ только с квалифицированной учётной записи
-You need this only if you want a remote access to your peer.==Необходимо, если вы желаете открыть удалённый доступ к вашему узлу.
 Peer User:==Пользователь узла:
 New Peer Password:==Новый пароль узла:
 Repeat Peer Password:==Повторите пароль узла:

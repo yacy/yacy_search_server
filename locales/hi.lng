@@ -298,9 +298,7 @@ No password is set for the administration account.== एडमिनिस्ट
 Please define a password for the admin account.==एडमिनिस्ट्रेशन खाते के लिए एक पासवर्ड को परिभाषित करें.
 Admin Account==एडमिनिस्ट्रेशन खाता
 Access from localhost without account==खाते के बिना लोकलहोस्ट से एक्सेस करे.
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==अपने पीअर के लिए प्रवेश अपने कंप्यूटर से प्रदान किया जाता है  (localhost access). एडमिनिस्ट्रेशन खाता कॉन्फ़िगर करने के लिए कोई ज़रूरत नहीं है .
 Access only with qualified account==योग्य खाते के साथ ही प्रवेश है .
-You need this only if you want a remote access to your peer.== अगर आप अपने पीअर के लिए रिमोट एक्सेस करना चाहते हैं  तब ही इसका इस्तेमाल करे.
 Peer User:==पीयर यूज़र:
 New Peer Password:==नया पीयर पासवर्ड :
 Repeat Peer Password:==पीयर पासवर्ड दोहराएँ :

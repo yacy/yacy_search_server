@@ -856,13 +856,13 @@
        <source>Access from localhost without account</source>
     </trans-unit>
     <trans-unit id="36413877" xml:space="preserve" approved="no" translate="yes">
-       <source>Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.</source>
+       <source>Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.</source>
     </trans-unit>
     <trans-unit id="a5765027" xml:space="preserve" approved="no" translate="yes">
        <source>Access only with qualified account</source>
     </trans-unit>
     <trans-unit id="384d4cfc" xml:space="preserve" approved="no" translate="yes">
-       <source>You need this only if you want a remote access to your peer.</source>
+       <source>This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.</source>
     </trans-unit>
     <trans-unit id="9bceed91" xml:space="preserve" approved="no" translate="yes">
        <source>Peer User:</source>
@@ -929,6 +929,12 @@
     </trans-unit>
     <trans-unit id="7ee6148e" xml:space="preserve" approved="no" translate="yes">
        <source>Save User</source>
+    </trans-unit>
+    <trans-unit id="b26b9832" xml:space="preserve" approved="no" translate="yes">
+       <source>This setting is convenient but less secure than using a qualified admin account.</source>
+    </trans-unit>
+    <trans-unit id="8db59370" xml:space="preserve" approved="no" translate="yes">
+       <source>Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.</source>
     </trans-unit>
   </body>
 </file>

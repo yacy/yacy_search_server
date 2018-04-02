@@ -353,9 +353,9 @@ No password is set for the administration account.==Für den Administrator Zugan
 Please define a password for the admin account.==Bitte setzen Sie ein Passwort für das admin Konto.
 Admin Account==Admin Konto
 Access from localhost without account==Zugriff von localhost ohne Konto
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==Der Zugriff von Ihrem Computer (localhost Zugang) ist garantiert. Sie brauchen kein Administratorkonto erstellen.
+Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==Der Zugriff von Ihrem Computer (localhost Zugang) ist garantiert mit Administratorrechten gewährt. Sie brauchen kein Administratorkonto erstellen.
 Access only with qualified account==Zugriff nur mit berechtigtem Konto
-You need this only if you want a remote access to your peer.==Sie benötigen dies nur, wenn Sie Fernzugriff auf Ihren Peer haben wollen.
+This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Das ist erforderlich, wenn Sie Fernzugriff auf Ihren Peer haben wollen, aber es härtet auch aus die Zugriffskontrolle auf Ihre Peer-Administrations-Operationen.
 Peer User:==Peer Benutzer:
 New Peer Password:==Neues Peer Passwort:
 Repeat Peer Password:==Wiederhole Peer Passwort:
