@@ -65,7 +65,7 @@ public class Status
 
         // check if the basic configuration was accessed before and forward
         prop.put("forwardToConfigBasic", 0);
-        if ((post == null || !post.containsKey("noforward")) && sb.getConfig("server.servlets.called", "").indexOf("ConfigBasic.html", 0) < 0) {
+        if ((post == null || !post.containsKey("noforward")) && sb.getConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, "").indexOf("ConfigBasic.html", 0) < 0) {
             // forward to ConfigBasic
             prop.put("forwardToConfigBasic", 1);
         }

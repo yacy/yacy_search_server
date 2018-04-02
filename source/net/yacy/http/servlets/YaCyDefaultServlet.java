@@ -1031,7 +1031,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
                 
-                sb.setConfig("server.servlets.called", appendPath(sb.getConfig("server.servlets.called", ""), target));
+                sb.setConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, appendPath(sb.getConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, ""), target));
                 if (args != null && !args.isEmpty()) {
                     sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), target));
                 }

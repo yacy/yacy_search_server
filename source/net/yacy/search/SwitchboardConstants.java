@@ -458,6 +458,9 @@ public final class SwitchboardConstants {
      */
     public static final String WORK_PATH                = "workPath";
     public static final String WORK_PATH_DEFAULT        = "DATA/WORK";
+    
+    /** Setting key of the property that collects the names of all servlets that have been used so far. */
+    public static final String SERVER_SERVLETS_CALLED    = "server.servlets.called";
 
 
     /*
