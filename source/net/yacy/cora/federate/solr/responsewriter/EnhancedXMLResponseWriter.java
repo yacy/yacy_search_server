@@ -93,7 +93,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
 
     public static void write(final Writer writer, final SolrQueryRequest request, final SolrDocumentList sdl) throws IOException {
         writer.write(XML_START);
-        writeDocs(writer, request, sdl, new SolrReturnFields(request));
+        writeDocs(writer, sdl, request != null ? new SolrReturnFields(request) : new SolrReturnFields());
         writer.write(XML_STOP);
     }
 
@@ -144,7 +144,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         writer.write(lb);
     }
     
-    private static final void writeDocs(final Writer writer, @SuppressWarnings("unused") final SolrQueryRequest request, final SolrDocumentList docs, final ReturnFields returnFields) throws IOException {
+    private static final void writeDocs(final Writer writer, final SolrDocumentList docs, final ReturnFields returnFields) throws IOException {
         boolean includeScore = false;
         final int sz = docs.size();
         writer.write("<result");
