@@ -1273,10 +1273,11 @@ color_searchurlhover = #1c65ba
 # because this default scheme is used the default example scheme can be used as solr configuration
 # to use this, do the following:
 # - set federated.service.solr.indexing.enabled = true
-# - download solr from http://www.apache.org/dyn/closer.cgi/lucene/solr/
-# - extract the solr (3.1) package, 'cd example' and start solr with 'java -jar start.jar'
+# - download a Solr package from http://www.apache.org/dyn/closer.cgi/lucene/solr/ with a version matching the current major Solr version in Yacy (see 'solr.version' in the pom.xml)
+# - extract the solr package, go to the extracted directory and start solr (for example with 'bin/solr start' or 'bin/solr start -cloud')
+# - create the 'collection1' and 'webgraph' collections with the appropriate configuration, for example with 'bin/solr create -c collection1 -d /yacy_src_dir/defaults/solr' 
 # - start yacy and then start a crawler. The crawler will fill both, YaCy and solr indexes.
-# - to check whats in solr after indexing, open http://localhost:8983/solr/admin/
+# - to check what is in solr after indexing, open http://localhost:8983/solr/
 federated.service.solr.indexing.enabled = false
 federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
 federated.service.solr.indexing.sharding = MODULO_HOST_MD5
