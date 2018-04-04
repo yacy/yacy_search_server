@@ -77,18 +77,51 @@ public class RemoteInstance implements SolrInstance {
     private final Map<String, ConcurrentUpdateSolrClient> server;
     private final int timeout;
     
-    public static ArrayList<RemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames, String defaultCoreName, final int timeout) throws IOException {
+	/**
+	 * @param urlList
+	 *            the list of URLs of remote Solr shard instances. Must not be null.
+	 * @param coreNames
+	 *            the Solr core names for the main collection and the webgraph
+	 * @param defaultCoreName
+	 *            the core name of the main collection
+	 * @param timeout
+	 *            the connection timeout in milliseconds
+	 * @param trustSelfSignedOnAuthenticatedServer
+	 *            when true, self-signed certificates are accepcted for an https
+	 *            connection to a remote server with authentication credentials
+	 * @throws IOException
+	 *             when a connection could not be opened to a remote Solr instance
+	 */
+	public static ArrayList<RemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames,
+			String defaultCoreName, final int timeout, final boolean trustSelfSignedOnAuthenticatedServer)
+			throws IOException {
         urlList.replace(' ', ',');
         String[] urls = CommonPattern.COMMA.split(urlList);
         ArrayList<RemoteInstance> instances = new ArrayList<RemoteInstance>();
         for (final String u: urls) {
-            RemoteInstance instance = new RemoteInstance(u, coreNames, defaultCoreName, timeout);
+            RemoteInstance instance = new RemoteInstance(u, coreNames, defaultCoreName, timeout, trustSelfSignedOnAuthenticatedServer);
             instances.add(instance);
         }
         return instances;
     }
     
-    public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName, final int timeout) throws IOException {
+	/**
+	 * @param url
+	 *            the remote Solr URL. A default localhost URL is assumed when null.
+	 * @param coreNames
+	 *            the Solr core names for the main collection and the webgraph
+	 * @param defaultCoreName
+	 *            the core name of the main collection
+	 * @param timeout
+	 *            the connection timeout in milliseconds
+	 * @param trustSelfSignedOnAuthenticatedServer
+	 *            when true, self-signed certificates are accepcted for an https
+	 *            connection to a remote server with authentication credentials
+	 * @throws IOException
+	 *             when a connection could not be opened to the remote Solr instance
+	 */
+	public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName,
+			final int timeout, final boolean trustSelfSignedOnAuthenticatedServer) throws IOException {
         this.timeout = timeout;
         this.server= new HashMap<String, ConcurrentUpdateSolrClient>();
         this.solrurl = url == null ? "http://127.0.0.1:8983/solr/" : url; // that should work for the example configuration of solr 4.x.x
@@ -140,8 +173,7 @@ public class RemoteInstance implements SolrInstance {
             }
         }
         if (solraccount.length() > 0) {
-            /* Note : optionally trusting self-signed certificate on an external remote Solr may be considered for convenience */
-            this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, false);
+            this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, trustSelfSignedOnAuthenticatedServer);
         } else if(u.isHTTPS()){
         	/* Here we must trust self-signed certificates as most peers with SSL enabled use such certificates */
         	this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, true);

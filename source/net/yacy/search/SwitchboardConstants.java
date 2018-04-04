@@ -316,6 +316,13 @@ public final class SwitchboardConstants {
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY         = "federated.service.solr.indexing.lazy";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT      = "federated.service.solr.indexing.timeout";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_WRITEENABLED = "federated.service.solr.indexing.writeEnabled";
+    
+    /** Setting key controlling whether a self-signed certificate is acceptable from a remote Solr instance requested with authentication credentials. 
+     * This has no impact on connections to remote Solr instances used in p2p search for which self-signed certificates are always accepted. */
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED = "federated.service.solr.indexing.authenticated.allowSelfSigned";
+
+    /** Default value controlling whether a self-signed certificate is acceptable from a remote Solr instance with authentication credentials. */
+    public static final boolean FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT = false;
 
     public static final String CORE_SERVICE_FULLTEXT            = "core.service.fulltext";
     public static final String CORE_SERVICE_RWI                 = "core.service.rwi.tmp";

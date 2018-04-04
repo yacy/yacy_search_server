@@ -135,7 +135,7 @@ public class RemoteSolrConnector extends SolrServerConnector implements SolrConn
     public static void main(final String args[]) {
         RemoteSolrConnector solr;
         try {
-            RemoteInstance instance = new RemoteInstance("http://127.0.0.1:8983/solr/", null, "collection1", 10000);
+            RemoteInstance instance = new RemoteInstance("http://127.0.0.1:8983/solr/", null, "collection1", 10000, false);
             ArrayList<RemoteInstance> instances = new ArrayList<RemoteInstance>();
             instances.add(instance);
             solr = new RemoteSolrConnector(new ShardInstance(instances, ShardSelection.Method.MODULO_HOST_MD5, true), true, "solr");

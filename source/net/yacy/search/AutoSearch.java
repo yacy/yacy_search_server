@@ -255,7 +255,11 @@ public class AutoSearch extends AbstractBusyThread {
             solrQuery.set(CommonParams.ROWS, sb.getConfig(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_USER, "20"));
             this.setName("Protocol.solrQuery(" + solrQuery.getQuery() + " to " + seed.hash + ")");
             try {
-                RemoteInstance instance = new RemoteInstance("http://" + seed.getPublicAddress(seed.getIP()) + "/solr/", null, null, 10000); // this is a 'patch configuration' which considers 'solr' as default collection
+				final boolean trustSelfSignedOnAuthenticatedServer = this.sb.getConfigBool(
+						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
+						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT);
+        		
+                RemoteInstance instance = new RemoteInstance("http://" + seed.getPublicAddress(seed.getIP()) + "/solr/", null, null, 10000, trustSelfSignedOnAuthenticatedServer); // this is a 'patch configuration' which considers 'solr' as default collection
                 try {
 					SolrConnector solrConnector = new RemoteSolrConnector(instance,
 							sb.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,

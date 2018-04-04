@@ -36,6 +36,10 @@
       <dt>Use remote Solr server(s)&nbsp;<input type="checkbox" name="solr.indexing.solrremote" id="solr_indexing_solrremote" #(solr.indexing.solrremote.checked)#:: checked="checked"#(/solr.indexing.solrremote.checked)# onclick="if(!document.getElementById('config').solr_indexing_solrremote.checked) {document.getElementById('config').core_service_fulltext.checked = true;}"/></dt>
       <dd>It's easy to <a href="http://www.yacy-websearch.net/wiki/index.php/Dev:Solr" target="_blank">attach an external Solr to YaCy</a>.
       This external Solr can be used instead the internal Solr. It can also be used additionally to the internal Solr, then both Solr indexes are mirrored. 
+      </dd>
+      
+      <dt>Allow self-signed certificates <input type="checkbox" name="federated.service.solr.indexing.authenticated.allowSelfSigned" #(federated.service.solr.indexing.authenticated.allowSelfSigned.checked)#:: checked="checked"#(/federated.service.solr.indexing.authenticated.allowSelfSigned.checked)#/></dt>
+      <dd>Tick this when the remote Solr server is password protected and is requested over HTTPS but provides only a self-signed certificate (not a validated one by an official Certificate Authority). The Solr URL could be for example something like <i>https://user:password@localhost:8984/solr</i>.
       </dd>	
       
       #(table)#::

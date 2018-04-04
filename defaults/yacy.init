@@ -1285,6 +1285,8 @@ federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.lazy = true
 federated.service.solr.indexing.timeout = 60000
 federated.service.solr.indexing.writeEnabled = true
+# Set to true when TLS is enabled with a self-signed certificated on a main external Solr with authentication required ( its URL looks like https://user:password@localhost:8984/solr/) 
+federated.service.solr.indexing.authenticated.allowSelfSigned = false
 
 # temporary definition of backend services to use.
 # After the migration a rwi+solr combination is used, the solr contains the content of the previously used metadata-db.

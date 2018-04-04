@@ -1102,7 +1102,14 @@ public final class Protocol {
         @Override
         public void run() {
             try {
-                this.instance = new RemoteInstance(this.targetBaseURL, null, "solr", this.timeout); // this is a 'patch configuration' which considers 'solr' as default collection
+    			boolean trustSelfSignedOnAuthenticatedServer = SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT;
+    			if (Switchboard.getSwitchboard() != null) {
+    				trustSelfSignedOnAuthenticatedServer = Switchboard.getSwitchboard().getConfigBool(
+    						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
+    						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT);
+    			}
+				
+                this.instance = new RemoteInstance(this.targetBaseURL, null, "solr", this.timeout, trustSelfSignedOnAuthenticatedServer); // this is a 'patch configuration' which considers 'solr' as default collection
                 try {
 					boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
 					if (Switchboard.getSwitchboard() != null) {
