@@ -59,7 +59,7 @@ import org.apache.solr.search.SolrIndexSearcher;
  * example:
  * http://localhost:8090/solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt&facet.field=collection_sxt&start=0&rows=10&query=www
  */
-public class YJsonResponseWriter implements QueryResponseWriter {
+public class YJsonResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
 
     // define a list of simple YaCySchema -> json Token matchings
     private static final Map<String, String> field2tag = new HashMap<String, String>();

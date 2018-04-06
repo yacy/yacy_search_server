@@ -54,7 +54,7 @@ import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
-public class HTMLResponseWriter implements QueryResponseWriter {
+public class HTMLResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
 
     public static final Pattern dqp = Pattern.compile("\"");
     

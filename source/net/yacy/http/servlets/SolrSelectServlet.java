@@ -40,6 +40,7 @@ import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.federate.solr.responsewriter.EmbeddedSolrResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
@@ -60,17 +61,23 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.BinaryResponseWriter;
+import org.apache.solr.response.CSVResponseWriter;
 import org.apache.solr.response.QueryResponseWriter;
+import org.apache.solr.response.RawResponseWriter;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.response.XSLTResponseWriter;
@@ -287,16 +294,55 @@ public class SolrSelectServlet extends HttpServlet {
                     out.flush();
                 }
             } else {
-                // write a 'faked' response using a call to the backend
-                SolrDocumentList sdl = connector.getDocumentListByQuery(
-                        mmsp.getMap().get(CommonParams.Q)[0],
-                        mmsp.getMap().get(CommonParams.SORT) == null ? null : mmsp.getMap().get(CommonParams.SORT)[0],
-                        Integer.parseInt(mmsp.getMap().get(CommonParams.START)[0]),
-                        Integer.parseInt(mmsp.getMap().get(CommonParams.ROWS)[0]),
-                        mmsp.getMap().get(CommonParams.FL));
-                OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream());
-                EnhancedXMLResponseWriter.write(osw, req, sdl);
-                osw.close();
+				if (responseWriter instanceof EmbeddedSolrResponseWriter || responseWriter instanceof CSVResponseWriter
+						|| responseWriter instanceof XSLTResponseWriter || responseWriter instanceof RawResponseWriter) {
+					/* These writers need a non null req.getSearcher(), req.getSchema() and/or req.getCore() */
+					throw new ServletException("The writer " + responseWriter.getClass().getSimpleName() + " can only process responses from an embedded Solr server.");
+                } 
+            	
+            	QueryResponse queryRsp = connector.getResponseByParams(ModifiableSolrParams.of(mmsp));
+            	
+                /* Create SolrQueryRequestBase and SolrQueryResponse instances as these types are requited by Solr standard writers.
+                 * WARNING : the SolrQueryRequestBase instance will return null for the getSearcher(), getCore() and getSchema() functions.
+                 * Be sure thath the responseWriter instance can handle this properly.  */
+            	req = new SolrQueryRequestBase(null, mmsp) {};
+            	
+            	rsp = new SolrQueryResponse();
+                NamedList<Object> responseHeader = new SimpleOrderedMap<Object>();
+                responseHeader.add("params", mmsp.toNamedList());
+                rsp.add("responseHeader", responseHeader);
+                rsp.setHttpCaching(false);
+                rsp.getValues().addAll(queryRsp.getResponse());
+
+            	
+                // prepare response
+                hresponse.setHeader("Cache-Control", "no-cache, no-store");
+                
+                final SolrDocumentList documentsList = queryRsp.getResults();
+                long numFound = documentsList.getNumFound();
+                AccessTracker.addToDump(querystring, numFound, new Date(), "sq");
+                
+                // write response header
+                final String contentType = responseWriter.getContentType(req, rsp);
+                if (null != contentType) {
+                	response.setContentType(contentType);
+                }
+
+                if (Method.HEAD == reqMethod) {
+                    return;
+                }
+                
+                // write response body
+                if (responseWriter instanceof EnhancedXMLResponseWriter) {
+					out = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8);
+					EnhancedXMLResponseWriter.write(out, req, documentsList);
+                } else if(responseWriter instanceof BinaryResponseWriter) {
+               		((BinaryResponseWriter) responseWriter).write(response.getOutputStream(), req, rsp);
+               	} else {
+               		out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8));
+               		responseWriter.write(out, req, rsp);
+               		out.flush();
+               	}
             }
         } catch (final Throwable ex) {
             sendError(hresponse, ex);
@@ -305,7 +351,14 @@ public class SolrSelectServlet extends HttpServlet {
                 req.close();
             }
             SolrRequestInfo.clearRequestInfo();
-            if (out != null) try {out.close();} catch (final IOException e1) {}
+            if (out != null) {
+				try {
+					out.close();
+				} catch (final IOException e1) {
+					ConcurrentLog.info("SolrSelect", "Could not close output writer."
+							+ (e1.getMessage() != null ? "Cause : " + e1.getMessage() : ""));
+				}
+            }
         }
     }
 

@@ -20,7 +20,7 @@ import org.apache.solr.search.SolrIndexSearcher;
 /**
  * this writer is supposed to be used to generate iframes. It generates links for the /api/snapshot.jpg servlet.
  */
-public class SnapshotImagesReponseWriter implements QueryResponseWriter  {
+public class SnapshotImagesReponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter  {
 
     private static final Set<String> DEFAULT_FIELD_LIST = new HashSet<>();
     

@@ -59,7 +59,7 @@ import org.apache.solr.search.SolrIndexSearcher;
  * example: GET /gsa/searchresult?q=chicken+teriyaki&output=xml&client=test&site=test&sort=date:D:S:d1
  * for a xml reference, see https://developers.google.com/search-appliance/documentation/614/xml_reference
  */
-public class GSAResponseWriter implements QueryResponseWriter {
+public class GSAResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
 
     private static String YaCyVer = null;
     private static final char lb = '\n';

@@ -58,7 +58,7 @@ import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
 
-public class OpensearchResponseWriter implements QueryResponseWriter {
+public class OpensearchResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
 
     // define a list of simple YaCySchema -> RSS Token matchings
     private static final Map<String, String> field2tag = new HashMap<String, String>();
