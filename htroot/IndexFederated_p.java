@@ -87,7 +87,8 @@ public class IndexFederated_p {
         	TransactionManager.checkPostTransaction(header, post);
         	
             boolean post_core_fulltext = post.getBoolean(SwitchboardConstants.CORE_SERVICE_FULLTEXT);
-            final boolean previous_core_fulltext = sb.index.fulltext().connectedLocalSolr() && env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false);
+			final boolean previous_core_fulltext = sb.index.fulltext().connectedLocalSolr() && env.getConfigBool(
+					SwitchboardConstants.CORE_SERVICE_FULLTEXT, SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT);
             env.setConfig(SwitchboardConstants.CORE_SERVICE_FULLTEXT, post_core_fulltext);
 
             if (previous_core_fulltext && !post_core_fulltext) {
@@ -100,7 +101,9 @@ public class IndexFederated_p {
             }
             
             // solr
-            final boolean solrRemoteWasOn = sb.index.fulltext().connectedRemoteSolr() && env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, true);
+			final boolean solrRemoteWasOn = sb.index.fulltext().connectedRemoteSolr()
+					&& env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED,
+							SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT);
             String solrurls = post.get("solr.indexing.url", env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, "http://127.0.0.1:8983/solr"));
             final boolean solrRemoteIsOnAfterwards = post.getBoolean("solr.indexing.solrremote") & solrurls.length() > 0;
             env.setConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, solrRemoteIsOnAfterwards);
@@ -144,7 +147,10 @@ public class IndexFederated_p {
             if (solrRemoteIsOnAfterwards) try {
                 if (solrRemoteWasOn) sb.index.fulltext().disconnectRemoteSolr();
                 // switch on
-                final boolean usesolr = sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) & solrurls.length() > 0;
+					final boolean usesolr = sb.getConfigBool(
+							SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED,
+							SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT)
+							& solrurls.length() > 0;
                 final int solrtimeout = sb.getConfigInt(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT, 10000);
         		final boolean trustSelfSignedOnAuthenticatedServer = Switchboard.getSwitchboard().getConfigBool(
         				SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
@@ -193,11 +199,15 @@ public class IndexFederated_p {
             prop.put("table_list", size.length);
         }
 
-        prop.put(SwitchboardConstants.CORE_SERVICE_FULLTEXT + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT, false) ? 1 : 0);
+		prop.put(SwitchboardConstants.CORE_SERVICE_FULLTEXT + ".checked",
+				env.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
+						SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT) ? 1 : 0);
         prop.put("core.service.rwi.checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_RWI, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_CITATION + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_CITATION, false) ? 1 : 0);
         prop.put(SwitchboardConstants.CORE_SERVICE_WEBGRAPH + ".checked", env.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false) ? 1 : 0);
-        prop.put("solr.indexing.solrremote.checked", env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED, false) ? 1 : 0);
+		prop.put("solr.indexing.solrremote.checked",
+				env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED,
+						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT) ? 1 : 0);
 		prop.put(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED + ".checked",
 				env.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
 						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT));

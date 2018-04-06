@@ -44,6 +44,7 @@ import net.yacy.data.WorkTables;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.search.schema.CollectionSchema;
@@ -81,6 +82,11 @@ public class IndexControlURLs_p {
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
         prop.put("dumprestore_optimizemax", 10);
+		prop.put("dumprestore_rebootSolrEnabled",
+				sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
+						SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT)
+						&& !sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED,
+								SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT));
         prop.put("cleanup", ucount == 0 ? 0 : 1);
         prop.put("cleanupsolr", segment.fulltext().connectedRemoteSolr() ? 1 : 0);
         prop.put("cleanuprwi", segment.termIndex() != null && !segment.termIndex().isEmpty() ? 1 : 0);
@@ -235,8 +241,14 @@ public class IndexControlURLs_p {
         	/* Check the transaction is valid */
         	TransactionManager.checkPostTransaction(header, post);
         	
-            segment.fulltext().rebootSolr();
-            sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr reboot");
+			if (sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
+					SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT)
+					&& !sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED,
+							SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT)) {
+				/* This operation is designed only for an embdded local Solr with no mirroring to an external remote Solr server */
+        		segment.fulltext().rebootEmbeddedLocalSolr();
+        		sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr reboot");
+        	}
         }
 
         if (post.containsKey("deletedomain")) {

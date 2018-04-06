@@ -310,7 +310,12 @@ public final class SwitchboardConstants {
     /** Default configuration setting for remote Solr responses binary encoding */
     public static final boolean REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT            = true;
 
+    /** Key of the setting controlling whether to use or not remote Solr server(s) */
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED      = "federated.service.solr.indexing.enabled";
+    
+    /** Default setting value controlling whether to use or not remote Solr server(s) */
+    public static final boolean FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT = false;
+    
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL          = "federated.service.solr.indexing.url";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING     = "federated.service.solr.indexing.sharding";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY         = "federated.service.solr.indexing.lazy";
@@ -324,7 +329,12 @@ public final class SwitchboardConstants {
     /** Default value controlling whether a self-signed certificate is acceptable from a remote Solr instance with authentication credentials. */
     public static final boolean FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT = false;
 
+    /** Key of the setting controlling wheter to use or not an embedded Solr instance */
     public static final String CORE_SERVICE_FULLTEXT            = "core.service.fulltext";
+    
+    /** Default setting value controlling wheter to use or not an embedded Solr instance */
+    public static final boolean CORE_SERVICE_FULLTEXT_DEFAULT   = true;
+    
     public static final String CORE_SERVICE_RWI                 = "core.service.rwi.tmp";
     public static final String CORE_SERVICE_CITATION            = "core.service.citation.tmp";
     public static final String CORE_SERVICE_WEBGRAPH            = "core.service.webgraph.tmp";

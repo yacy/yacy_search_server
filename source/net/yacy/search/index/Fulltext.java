@@ -641,9 +641,10 @@ public final class Fulltext {
     }
     
     /**
-     * reboot solr (experimental to check resource management)
+     * Reboot the local embedded Solr (experimental to check resource management).
+     * Please check before that the local embedded Solr is enabled and no external remote Solr is attached.
      */
-    public void rebootSolr() {
+    public void rebootEmbeddedLocalSolr() {
         synchronized (this.solrInstances) {
             this.disconnectLocalSolr();
             // this.solrInstances.close(); // moved to (InstanceMirror) sorlInstances.close()

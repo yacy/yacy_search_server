@@ -129,9 +129,10 @@ function updatepage(str) {
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset><legend>Reboot Solr Core</legend>
+      #(rebootSolrEnabled)#<div class="alert alert-info">This feature is available when using exclusively a local embedded Solr.</div>::#(/rebootSolrEnabled)#
       <dl>
         <dt>&nbsp;</dt>
-        <dd><input type="submit" name="rebootsolr" value="Shut Down and Re-Start Solr" class="btn btn-primary" style="width:240px;"/>
+        <dd><input type="submit" name="rebootsolr" value="Shut Down and Re-Start Solr" class="btn btn-primary" style="width:240px;" #(rebootSolrEnabled)#disabled="disabled"::#(/rebootSolrEnabled)#/>
         </dd>
       </dl>
     </fieldset>
