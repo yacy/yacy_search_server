@@ -82,6 +82,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.core.SolrInfoMBean;
 import org.apache.lucene.util.Version;
 
@@ -581,13 +582,17 @@ public final class Fulltext {
     }
     
     /**
-     * create a dump file from the current solr directory
+     * Create a dump file from the current embedded solr directory
      * @return file reference to the dump
+     * @throws SolrException when no embedded Solr is available
      */
-    public File dumpSolr() {
-        EmbeddedInstance esc = this.solrInstances.getEmbedded();
-        File storagePath = esc.getContainerPath();
-        File zipOut = new File(this.archivePath, storagePath.getName() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
+    public File dumpEmbeddedSolr() throws SolrException {
+        final EmbeddedInstance esc = this.solrInstances.getEmbedded();
+        if(esc == null) {
+        	throw new SolrException(ErrorCode.SERVICE_UNAVAILABLE, "No embedded Solr available.");
+        }
+        final File storagePath = esc.getContainerPath();
+        final File zipOut = new File(this.archivePath, storagePath.getName() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
         synchronized (this.solrInstances) {
             this.disconnectLocalSolr();
             try {
@@ -606,12 +611,16 @@ public final class Fulltext {
     }
     
     /**
-     * restore a solr dump to the current solr directory
-     * @param solrDumpZipFile
+     * Restore a solr dump to the current embedded solr directory
+     * @param solrDumpZipFile the dump file to use
+     * @throws SolrException when no embedded Solr is available
      */
-    public void restoreSolr(File solrDumpZipFile) {
-        EmbeddedInstance esc = this.solrInstances.getEmbedded();
-        File storagePath = esc.getContainerPath();
+    public void restoreEmbeddedSolr(final File solrDumpZipFile) {
+        final EmbeddedInstance esc = this.solrInstances.getEmbedded();
+        if(esc == null) {
+        	throw new SolrException(ErrorCode.SERVICE_UNAVAILABLE, "No embedded Solr available.");
+        }
+        final File storagePath = esc.getContainerPath();
         synchronized (this.solrInstances) {
             // this.disconnectLocalSolr(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances.close();

@@ -68,17 +68,18 @@
     #(dumprestore)#::
     <form action="IndexExport_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
     <fieldset><legend>Dump and Restore of Solr Index</legend>
+      #(dumpRestoreEnabled)#<div class="alert alert-info">This feature is available only when a local embedded Solr is active.</div>::#(/dumpRestoreEnabled)#
       <dl>
         <dt>&nbsp;</dt>
-        <dd><input type="submit" name="indexdump" value="Create Dump" class="btn btn-primary" style="width:240px;"/>
+        <dd><input type="submit" name="indexdump" value="Create Dump" class="btn btn-primary" style="width:240px;" #(dumpRestoreEnabled)#disabled="disabled"::#(/dumpRestoreEnabled)#/>
         </dd>
       </dl>
       <dl>
         <dt class="TableCellDark">Dump File</dt>
-        <dd><input type="text" name="dumpfile" value="#[dumpfile]#" size="80" maxlength="250" />
+        <dd><input type="text" name="dumpfile" value="#[dumpfile]#" size="80" maxlength="250" #(dumpRestoreEnabled)#disabled="disabled"::#(/dumpRestoreEnabled)#/>
         </dd>
         <dt>&nbsp;</dt>
-        <dd><input type="submit" name="indexrestore" value="Restore Dump" class="btn btn-primary" style="width:240px;"/>
+        <dd><input type="submit" name="indexrestore" value="Restore Dump" class="btn btn-primary" style="width:240px;" #(dumpRestoreEnabled)#disabled="disabled"::#(/dumpRestoreEnabled)#/>
         </dd>
       </dl>
     </fieldset>
@@ -86,8 +87,16 @@
     #(/dumprestore)#
     
     #(indexdump)#::
-    <div class="alert alert-success">Stored a solr dump to file #[dumpfile]#</div>::
+    <div class="alert alert-success" role="alert">Stored a solr dump to file #[dumpfile]#</div>::
+    <div class="alert alert-danger" role="alert">Could not create the Solr dump : no embedded Solr is available.</div>::
+    <div class="alert alert-danger" role="alert">An error occurred while trying to create the Solr dump.</div>
     #(/indexdump)#
+    
+    #(indexRestore)#::
+    <div class="alert alert-success" role="alert">Successfully restored Solr index from dump file!</div>::
+    <div class="alert alert-danger" role="alert">Could not restore the Solr dump : no embedded Solr is available.</div>::
+    <div class="alert alert-danger" role="alert">An error occurred while trying to restore the Solr dump.</div>
+    #(/indexRestore)#
     
     #%env/templates/footer.template%#
   </body>
