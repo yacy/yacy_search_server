@@ -21,7 +21,6 @@
 package net.yacy.cora.federate.solr.instance;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +57,6 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
@@ -284,19 +282,35 @@ public class RemoteInstance implements SolrInstance {
         return o instanceof RemoteInstance && ((RemoteInstance) o).solrurl.equals(this.solrurl);
     }
 
-    /**
-     * @return the administration URL of the remote Solr instance
-     */
-    public String getAdminInterface() {
-        final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
-        final String localhostExtern = localhostExternAddress == null ? "127.0.0.1" : localhostExternAddress.getHostAddress();
-        String u = this.solrurl;
-        int p = u.indexOf("localhost",0);
-        if (p < 0) p = u.indexOf("127.0.0.1",0);
-        if (p < 0) p = u.indexOf("0:0:0:0:0:0:0:1",0);
-        if (p >= 0) u = u.substring(0, p) + localhostExtern + u.substring(p + 9);
-        return u;
-    }
+	/**
+	 * @param toExternalAddress
+	 *            when true, try to replace the eventual loopback host part of the
+	 *            Solr URL with the external host name of the hosting machine
+	 * @param externalHost
+	 *            the eventual external host name or address to use when
+	 *            toExternalAddress is true
+	 * @return the administration URL of the remote Solr instance
+	 */
+	public String getAdminInterface(final boolean toExternalAddress, final String externalHost) {
+		String u = this.solrurl;
+		if (toExternalAddress && externalHost != null && !externalHost.trim().isEmpty()) {
+			try {
+				MultiProtocolURL url = new MultiProtocolURL(u);
+
+				if(url.isLocal()) {
+					url = url.ofNewHost(externalHost);
+					u = url.toString();
+				}
+
+			} catch (final MalformedURLException ignored) {
+				/*
+				 * This should not happen as the solrurl attribute has already been parsed in
+				 * the constructor
+				 */
+			}
+		}
+		return u;
+	}
 
     @Override
     public String getDefaultCoreName() {

@@ -81,9 +81,18 @@ public class ShardInstance implements SolrInstance {
         for (RemoteInstance instance: instances) instance.close();
     }
     
-    public ArrayList<String> getAdminInterfaces() {
+	/**
+	 * @param toExternalAddress
+	 *            when true, try to replace the eventual loopback host part of the
+	 *            Solr instances URLs with the external host name of the hosting machine
+	 * @param externalHost
+	 *            the eventual external host name or address to use when
+	 *            toExternalAddress is true
+	 * @return the administration URLs of the Solr instances
+	 */
+    public ArrayList<String> getAdminInterfaces(final boolean toExternalAddress, final String externalHost) {
         ArrayList<String> a = new ArrayList<String>();
-        for (RemoteInstance i: this.instances) a.add(i.getAdminInterface());
+        for (RemoteInstance i: this.instances) a.add(i.getAdminInterface(toExternalAddress, externalHost));
         return a;
     }
 }

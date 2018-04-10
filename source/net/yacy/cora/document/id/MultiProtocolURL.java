@@ -482,6 +482,33 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         identSearchpart();
         escape();
     }
+    
+    /**
+     * @param host the new host to apply to the copy
+     * @return an exact copy of this URL instance but with a new host. The original instance remains unchanged.
+     * @throws IllegalArgumentException when the host parameter is null or empty.
+     */
+    public MultiProtocolURL ofNewHost(final String host) throws IllegalArgumentException {
+    	if(host == null || host.trim().isEmpty()) {
+    		throw new IllegalArgumentException("Host parameter must not be null");
+    	}
+    	MultiProtocolURL copy = new MultiProtocolURL(this);
+    	
+    	if (host.indexOf(':') >= 0 && host.charAt(0) != '[') {
+    		copy.host = '[' + host + ']'; // IPv6 host must be enclosed in square brackets
+    	} else {
+        	copy.host = host;	
+    	}
+    	
+        if (!Punycode.isBasic(this.host)) try {
+            this.host = toPunycode(this.host);
+        } catch (final PunycodeException e) {
+        	ConcurrentLog.logException(e);
+        }
+    	
+    	return copy;
+    	
+    }
 
     /**
      * Resolve '..' segments in the path.

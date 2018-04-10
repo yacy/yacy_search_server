@@ -189,7 +189,18 @@ public class IndexFederated_p {
             prop.put("table", 1);
             final SolrConnector solr = sb.index.fulltext().getDefaultRemoteSolrConnector();
             final long[] size = new long[]{((RemoteSolrConnector) solr).getSize()};
-            final ArrayList<String> urls = ((ShardInstance) ((RemoteSolrConnector) solr).getInstance()).getAdminInterfaces();
+            
+            final boolean toExternalAddress = !header.accessFromLocalhost();
+            String externalHost = null;
+            if(toExternalAddress) {
+            	/* The request does not come from the same computer than this peer : we get the external address used to reach it from the request headers, and we will use  
+            	 * it if some remote solr instance(s) URLs are configured with loopback address alias (such as 'localhost', '127.0.0.1', '[::1]')
+            	 * to render the externally reachable Solr instance(s) admin URLs */
+            	externalHost = header.getServerName();
+            }
+            
+			final ArrayList<String> urls = ((ShardInstance) ((RemoteSolrConnector) solr).getInstance())
+					.getAdminInterfaces(toExternalAddress, externalHost);
             boolean dark = false;
             for (int i = 0; i < size.length; i++) {
                 prop.put("table_list_" + i + "_dark", dark ? 1 : 0); dark = !dark;
