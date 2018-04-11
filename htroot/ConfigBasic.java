@@ -171,33 +171,60 @@ public class ConfigBasic {
         }
 
         // set a use case
+        prop.put("setUseCase_switchError", 0);
+        prop.put("setUseCase_switchWarning", 0);
         String networkName = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "");
         if (post != null && post.containsKey("usecase")) {
+			boolean hasNonEmptyRemoteSolr = sb.index.fulltext().connectedRemoteSolr()
+					&& (sb.index.fulltext().collectionSize() > 0 || sb.index.fulltext().webgraphSize() > 0);
             if ("freeworld".equals(post.get("usecase", "")) && !"freeworld".equals(networkName)) {
-                // switch to freeworld network
-                sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, true);
-                sb.switchNetwork("defaults/yacy.network.freeworld.unit");
-                // switch to p2p mode
-                sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
-                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
-                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true);
-                // set default behavior for search verification
-                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh"); // nocache,iffresh,ifexist,cacheonly,false
-                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
+            	if("intranet".equals(networkName) && hasNonEmptyRemoteSolr) {
+            		/* One or more non empty remote Solr(s) attached : disallow switching from intranet to another network to prevent disclosure of indexed private documents */
+            		prop.put("setUseCase_switchError", 1);
+            	} else {
+                	if(hasNonEmptyRemoteSolr) {
+                		/* One or more non empty remote Solr(s) attached : warn the user even if not coming from intranet as indexed documents may be irrelevant for the new mode */
+                		prop.put("setUseCase_switchWarning", 2);
+                	} 
+            		// switch to freeworld network
+            		sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, true);
+            		sb.switchNetwork("defaults/yacy.network.freeworld.unit");
+            		// switch to p2p mode
+            		sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
+            		sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+            		sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true);
+            		// set default behavior for search verification
+            		sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh"); // nocache,iffresh,ifexist,cacheonly,false
+            		sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
+            	}
             }
             if ("portal".equals(post.get("usecase", "")) && !"webportal".equals(networkName)) {
-                // switch to webportal network
-                sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, false);
-                sb.switchNetwork("defaults/yacy.network.webportal.unit");
-                // switch to robinson mode
-                sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
-                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
-                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false);
-                // set default behavior for search verification
-                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "ifexist"); // nocache,iffresh,ifexist,cacheonly,false
-                sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");
+            	if("intranet".equals(networkName) && hasNonEmptyRemoteSolr) {
+            		/* One or more non empty remote Solr(s) attached : disallow switching from intranet to another network to prevent disclosure of indexed private documents */
+            		prop.put("setUseCase_switchError", 1);
+            	} else {
+                	if(hasNonEmptyRemoteSolr) {
+                		/* One or more non empty remote Solr(s) attached : warn the user even if not coming from intranet as indexed documents may be irrelevant for the new mode */
+                		prop.put("setUseCase_switchWarning", 2);
+                	} 
+                	
+            		// switch to webportal network
+            		sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, false);
+            		sb.switchNetwork("defaults/yacy.network.webportal.unit");
+            		// switch to robinson mode
+            		sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
+            		sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+            		sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false);
+            		// set default behavior for search verification
+            		sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "ifexist"); // nocache,iffresh,ifexist,cacheonly,false
+            		sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");
+            	}
             }
             if ("intranet".equals(post.get("usecase", "")) && !"intranet".equals(networkName)) {
+            	if(hasNonEmptyRemoteSolr) {
+            		/* One or more non empty remote Solr(s) attached : warn the user as the indexed documents may be public external resources out of scope for intranet/localhost domain. */
+            		prop.put("setUseCase_switchWarning", 1);
+            	} 
                 // switch to intranet network
                 sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, false);
                 sb.switchNetwork("defaults/yacy.network.intranet.unit");

@@ -53,6 +53,14 @@
 	<li>
           <img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Use Case: what do you want to do with YaCy:<br />
           <fieldset>
+          #(switchError)#::<div class="alert alert-danger" role="alert"><p>Can not leave from Intranet Indexing : one or more remote Solr instances are attached and may contain private documents indexed.</p> 
+          <p>Please first delete all index entries (see the <a href="IndexControlURLs_p.html">URL Database Administration</a> page) or disconnect the remote Solr instance(s) from YaCy (see the <a href="IndexFederated_p.html">Index Sources &amp; Targets</a> page).</p></div>
+          #(/switchError)#
+          #(switchWarning)#::<div class="alert alert-warning" role="alert"><p>One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.</p> 
+          <p>You may want to delete all indexed documents (see the <a href="IndexControlURLs_p.html">URL Database Administration</a> page), disconnect or change the remote Solr instance(s) attached (see the <a href="IndexFederated_p.html">Index Sources &amp; Targets</a> page).</p></div>
+          ::<div class="alert alert-warning" role="alert"><p>One or more remote Solr instances are attached.</p> 
+          <p>Please be sure you want to expose the indexed documents in this new mode. You may want to disconnect or change the remote Solr instance(s) attached (see the <a href="IndexFederated_p.html">Index Sources &amp; Targets</a> page).</p></div>
+          #(/switchWarning)#
           <table border="0">
           <tr>
             <td style="width: 256px;"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /><label for="usecaseFreeworld">Community-based web search</label></td>
