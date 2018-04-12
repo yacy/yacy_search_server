@@ -47,6 +47,7 @@ import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.SnapshotImagesReponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.SolrjResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -333,9 +334,10 @@ public class SolrSelectServlet extends HttpServlet {
                 }
                 
                 // write response body
-                if (responseWriter instanceof EnhancedXMLResponseWriter) {
+                if (responseWriter instanceof SolrjResponseWriter) {
 					out = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8);
-					EnhancedXMLResponseWriter.write(out, req, documentsList);
+					((SolrjResponseWriter) responseWriter).write(out, req,
+							defaultConnector ? CollectionSchema.CORE_NAME : WebgraphSchema.CORE_NAME, queryRsp);
                 } else if(responseWriter instanceof BinaryResponseWriter) {
                		((BinaryResponseWriter) responseWriter).write(response.getOutputStream(), req, rsp);
                	} else {

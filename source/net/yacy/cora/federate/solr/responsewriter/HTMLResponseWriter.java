@@ -24,15 +24,21 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.XML;
@@ -48,13 +54,17 @@ import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.ReturnFields;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.search.SolrReturnFields;
 
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.lod.vocabulary.DublinCore;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
-public class HTMLResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
+/**
+ * Solr response writer producing an HTML representation.
+ */
+public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWriter {
 
     public static final Pattern dqp = Pattern.compile("\"");
     
@@ -110,7 +120,125 @@ public class HTMLResponseWriter implements QueryResponseWriter, EmbeddedSolrResp
         assert values.get("responseHeader") != null;
         assert values.get("response") != null;
 
-        writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
+        writeHtmlHead(writer);
+
+        NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
+        paramsList.remove("wt");
+        
+        final String coreName = request.getCore().getName();
+        
+        String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName).replaceAll("%22");
+
+        DocList response = ((ResultContext) values.get("response")).getDocList();
+        final int sz = response.size();
+        if (sz > 0) {
+            SolrIndexSearcher searcher = request.getSearcher();
+            DocIterator iterator = response.iterator();
+            IndexSchema schema = request.getSchema();
+
+            int id = iterator.nextDoc();
+            Document doc = searcher.doc(id);
+            LinkedHashMap<String, String> tdoc = translateDoc(schema, doc, rsp.getReturnFields());
+
+			String title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc
+            writeTitle(writer, coreName, sz, title);
+            
+            writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
+            writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
+
+            writeDoc(writer, tdoc, coreName, rsp.getReturnFields());
+
+            while (iterator.hasNext()) {
+                id = iterator.nextDoc();
+                doc = searcher.doc(id);
+                tdoc = translateDoc(schema, doc, rsp.getReturnFields());
+
+                writeDoc(writer, tdoc, coreName, rsp.getReturnFields());
+            }
+        } else {
+            writer.write("<title>No Document Found</title>\n</head><body>\n");
+            writer.write("<div class='alert alert-info'>No documents found</div>\n");
+        }
+        
+        writer.write("</body></html>\n");
+    }
+    
+	@Override
+	public void write(final Writer writer, final SolrQueryRequest request, final String coreName, final QueryResponse rsp) throws IOException {
+		writeHtmlHead(writer);
+
+		final SolrParams originalParams = request.getOriginalParams();
+		final NamedList<Object> paramsList = originalParams.toNamedList();
+		paramsList.remove("wt");
+
+		final String xmlquery = dqp
+				.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName)
+				.replaceAll("%22");
+
+		final SolrDocumentList docsList = rsp.getResults();
+		final int sz = docsList.size();
+		if (sz > 0) {
+			final Iterator<SolrDocument> iterator = docsList.iterator();
+
+			SolrDocument doc = iterator.next();
+			final ReturnFields fieldsToReturn = request != null ? new SolrReturnFields(request) : new SolrReturnFields();
+
+			final Object titleValue = doc.getFirstValue(CollectionSchema.title.getSolrFieldName());
+			final String firstDocTitle = formatValue(titleValue);
+			writeTitle(writer, coreName, sz, firstDocTitle);
+
+			writer.write("<div id=\"api\"><a href=\"" + xmlquery
+					+ "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
+			writer.write(
+					"<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
+
+			writeDoc(writer, translateDoc(doc, fieldsToReturn), coreName, fieldsToReturn);
+
+			while (iterator.hasNext()) {
+				doc = iterator.next();
+
+				writeDoc(writer, translateDoc(doc, fieldsToReturn), coreName, fieldsToReturn);
+			}
+		} else {
+			writer.write("<title>No Document Found</title>\n</head><body>\n");
+			writer.write("<div class='alert alert-info'>No documents found</div>\n");
+		}
+
+		writer.write("</body></html>\n");
+	}
+
+    /**
+     * Appends the response HTML title to the writer, close the head section and starts the body section.
+     * @param writer must not be null.
+     * @param coreName the name of the requested Solr core
+     * @param responseSize the number of documents in the Solr response
+     * @param firstDocTitle the eventual title of the first document of the result set
+     * @throws IOException when a write error occurred
+     */
+	private void writeTitle(final Writer writer, final String coreName, final int responseSize, final String firstDocTitle)
+			throws IOException {
+		if(CollectionSchema.CORE_NAME.equals(coreName)) {
+			if (responseSize == 1) {
+				writer.write("<title>");
+				writer.write(firstDocTitle == null ? "" : firstDocTitle);
+				writer.write("</title>\n</head><body>\n");
+			} else {
+				writer.write("<title>Documents List</title>\n</head><body>\n");
+			}
+		} else if(WebgraphSchema.CORE_NAME.equals(coreName)) {
+			writer.write("<title>Links list</title>\n</head><body>\n");
+		} else {
+			writer.write("<title>Solr documents List</title>\n</head><body>\n");
+		}
+	}
+
+    /**
+     * Append the response HTML head beginning to the writer.
+     * @param writer must not be null
+     * @throws IOException when a write error occurred
+     */
+	private void writeHtmlHead(final Writer writer) throws IOException {
+		writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
         //writer.write("<!--\n");
         //writer.write("this is a XHTML+RDFa file. It contains RDF annotations with dublin core properties\n");
         //writer.write("you can validate it with http://validator.w3.org/\n");
@@ -150,79 +278,30 @@ public class HTMLResponseWriter implements QueryResponseWriter, EmbeddedSolrResp
         writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/ie7.css\" />\n");
         writer.write("<![endif]-->\n");
         writer.write("<!-- (C), Architecture: Michael Peter Christen; Contact: mc <at> yacy.net -->\n");
+	}
+    
 
-        NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
-        paramsList.remove("wt");
-        
-        final String coreName = request.getCore().getName();
-        
-        String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName).replaceAll("%22");
-
-        DocList response = ((ResultContext) values.get("response")).getDocList();
-        final int sz = response.size();
-        if (sz > 0) {
-            SolrIndexSearcher searcher = request.getSearcher();
-            DocIterator iterator = response.iterator();
-            IndexSchema schema = request.getSchema();
-
-            int id = iterator.nextDoc();
-            Document doc = searcher.doc(id);
-            LinkedHashMap<String, String> tdoc = translateDoc(schema, doc, rsp.getReturnFields());
-
-            
-            String title;
-            if(CollectionSchema.CORE_NAME.equals(coreName)) {
-            	title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc
-            	if (title == null) title = "";
-            	if (sz == 1) {
-            		writer.write("<title>" + title + "</title>\n</head><body>\n");
-            	} else {
-            		writer.write("<title>Documents List</title>\n</head><body>\n");
-            	}
-            } else if(WebgraphSchema.CORE_NAME.equals(coreName)) {
-            	title = "";
-            	writer.write("<title>Links list</title>\n</head><body>\n");
-            } else {
-            	title = "";
-            	writer.write("<title>Solr documents List</title>\n</head><body>\n");
-            }
-            writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
-            writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
-
-            writeDoc(writer, tdoc, title, coreName, rsp.getReturnFields());
-
-            while (iterator.hasNext()) {
-                id = iterator.nextDoc();
-                doc = searcher.doc(id);
-                tdoc = translateDoc(schema, doc, rsp.getReturnFields());
-                if(CollectionSchema.CORE_NAME.equals(coreName)) {
-                	title = tdoc.get(CollectionSchema.title.getSolrFieldName());
-                    if (title == null) title = "";
-                } else {
-                	title = "";
-                }
-                writeDoc(writer, tdoc, title, coreName, rsp.getReturnFields());
-            }
-        } else {
-            writer.write("<title>No Document Found</title>\n</head><body>\n");
-            writer.write("<div class='alert alert-info'>No documents found</div>\n");
-        }
-        
-        writer.write("</body></html>\n");
-    }
 
     /**
      * Append an html representation of the document fields to the writer.
      * @param writer an open output writer. Must not be null.
      * @param tdoc the documents fields, mapped from field names to values. Must not be null.
-     * @param title the document title. May be empty.
      * @param coreName the Solr core name.
      * @param returnFields the eventual fields return configuration, allowing for example to
 	 *            rename fields with a pseudo in the result. May be null.
      * @throws IOException when a write error occurred.
      */
-	private static final void writeDoc(final Writer writer, final LinkedHashMap<String, String> tdoc,
-			final String title, final String coreName, final ReturnFields returnFields) throws IOException {
+	private static final void writeDoc(final Writer writer, final LinkedHashMap<String, String> tdoc, final String coreName, final ReturnFields returnFields) throws IOException {
+    	String title;
+        if(CollectionSchema.CORE_NAME.equals(coreName)) {
+        	title = tdoc.get(CollectionSchema.title.getSolrFieldName());
+            if (title == null) {
+            	title = "";
+            }
+        } else {
+        	title = "";
+        }
+		
         writer.write("<form name=\"yacydoc" + title + "\" method=\"post\" action=\"#\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\">\n");
         writer.write("<fieldset>\n");
         
@@ -243,6 +322,9 @@ public class HTMLResponseWriter implements QueryResponseWriter, EmbeddedSolrResp
 		final Map<String, String> fieldRenamings = returnFields == null ? Collections.emptyMap()
 				: returnFields.getFieldRenames();
         for (Map.Entry<String, String> entry: tdoc.entrySet()) {
+        	if(returnFields != null && !returnFields.wantsField(entry.getKey())) {
+        		continue;
+        	}
             writer.write("<dt>");
         	writer.write(fieldRenamings.getOrDefault(entry.getKey(), entry.getKey()));
             writer.write("</dt><dd>");
@@ -310,6 +392,49 @@ public class HTMLResponseWriter implements QueryResponseWriter, EmbeddedSolrResp
         return kv;
     }
     
+	/**
+	 * Translate an indexed document in a map of field names to field values.
+	 * 
+	 * @param doc
+	 *            the indexed document. Must not be null.
+	 * @param returnFields
+	 *            the eventual fields return configuration, allowing for example to
+	 *            restrict the actually returned fields. May be null.
+	 * @return a map of field names to field values
+	 */
+	private static final LinkedHashMap<String, String> translateDoc(final SolrDocument doc,
+			final ReturnFields returnFields) {
+		LinkedHashMap<String, String> kv = new LinkedHashMap<String, String>();
+		for (final Entry<String, Object> entry : doc) {
+			String fieldName = entry.getKey();
+
+			if (returnFields == null || returnFields.wantsField(fieldName)) {
+				Object value = entry.getValue();
+
+				if (value instanceof Collection<?>) {
+					Collection<?> values = (Collection<?>) value;
+					if(values.size() > 1) {
+						int c = 0;
+						for (final Object singleValue : values) {
+							if (singleValue != null) {
+								kv.put(fieldName + "_" + c++, formatValue(singleValue));
+							}
+						}
+					} else if(values.size() == 1) {
+						Object singleValue = values.iterator().next();
+						if(singleValue != null) {
+							kv.put(fieldName, formatValue(singleValue));		
+						}
+					}
+				} else if (value != null) {
+					kv.put(fieldName, formatValue(value));
+				}
+			}
+
+		}
+		return kv;
+	}
+    
     /**
      * Translate an indexed document in a map of field names to field values.
      * @param schema the schema of the indexed document. Must not be null.
@@ -319,12 +444,32 @@ public class HTMLResponseWriter implements QueryResponseWriter, EmbeddedSolrResp
     public static final LinkedHashMap<String, String> translateDoc(final IndexSchema schema, final Document doc) {
         return translateDoc(schema, doc, null);
     }
+    
+    /**
+     * Format a solr field single value
+     * @param value the value
+     * @return a String representation of the value
+     */
+    private static String formatValue(final Object value) {
+        if (value instanceof Date) {
+            return ((Date)value).toInstant().toString();
+        } else if(value != null) {
+        	return value.toString();
+        }
+        return null;
+    }
 
+    /**
+     * Reformat a solr field value string depending on the field type
+     * @param type the Solr field type. Must not be null.
+     * @param value the value
+     * @return a value eventually reformatted
+     */
     private static String field2string(final FieldType type, final String value) {
         String typeName = type.getTypeName();
-        if (typeName.equals(SolrType.bool.printName())) {
+        if (SolrType.bool.printName().equals(typeName)) {
             return "F".equals(value) ? "false" : "true";
-        } else if (typeName.equals(SolrType.date.printName())) {
+        } else if (SolrType.date.printName().equals(typeName)) {
             return new Date(Long.parseLong(value)).toInstant().toString();
         }
         return value;

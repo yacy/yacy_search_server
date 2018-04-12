@@ -33,6 +33,7 @@ import net.yacy.cora.federate.solr.SolrType;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
@@ -54,7 +55,7 @@ import org.apache.solr.search.ReturnFields;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.search.SolrReturnFields;
 
-public class EnhancedXMLResponseWriter implements QueryResponseWriter {
+public class EnhancedXMLResponseWriter implements QueryResponseWriter, SolrjResponseWriter {
 
     private static final char lb = '\n';
     private static final char[] XML_START = "<?xml version = \"1.0\" encoding = \"UTF-8\"?>\n<response>\n".toCharArray();
@@ -91,9 +92,10 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         writer.write(XML_STOP);
     }
 
-    public static void write(final Writer writer, final SolrQueryRequest request, final SolrDocumentList sdl) throws IOException {
+    @Override
+    public void write(final Writer writer, final SolrQueryRequest request, final String coreName, final QueryResponse response) throws IOException {
         writer.write(XML_START);
-        writeDocs(writer, sdl, request != null ? new SolrReturnFields(request) : new SolrReturnFields());
+        writeDocs(writer, response.getResults(), request != null ? new SolrReturnFields(request) : new SolrReturnFields());
         writer.write(XML_STOP);
     }
 
