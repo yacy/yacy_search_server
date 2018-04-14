@@ -85,7 +85,7 @@
 	<classpathentry kind="lib" path="lib/metrics-core-3.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.6.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="lib" path="lib/icu4j-60.2.jar"/>
+	<classpathentry kind="lib" path="lib/icu4j-61.1.jar"/>
 	<classpathentry kind="lib" path="lib/htmllexer.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.11.2.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar"/>
