@@ -138,6 +138,26 @@
 		</div>
 	</fieldset>
 	
+	<fieldset>
+		<legend>Text snippets statistics</legend>
+		
+		<div class="form-group">
+			<div class="col-sm-4">
+				<div class="checkbox">
+					<label>
+						<input name="debug.snippets.statistics.enabled" id="snippetsStatsEnabled" 
+							type="checkbox" #(debug.snippets.statistics.enabled)#::checked#(/debug.snippets.statistics.enabled)#
+							aria-describedby="snippetStatisticsInfo"/>
+						Enable text snippets statistics
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-8" id="snippetStatisticsInfo">
+	 			When checked, statistics are collected on text snippets generation for search results. The are resumed in the <a href="ConfigPortal_p.html">Portal Configuration</a> page.
+            </div>
+		</div>
+	</fieldset>
+	
     <div class="col-sm-6">
     	<input type="submit" class="btn btn-primary" name="debugAnalysisSettings" value="Submit" aria-describedby="submitInfo"/>
 		<em id="submitInfo">Changes will take effect immediately.</em>

@@ -43,6 +43,7 @@ import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -579,6 +580,10 @@ public class SettingsAck_p {
             
             tickedCheckbox = post.containsKey("searchShowRanking");
             env.setConfig(SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING, tickedCheckbox);
+            
+            tickedCheckbox = post.containsKey(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED);
+			sb.setConfig(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED, tickedCheckbox);
+			TextSnippet.statistics.setEnabled(tickedCheckbox);
             
             /* For easier user understanding, the following flags controlling data sources selection 
              * are rendered in the UI as checkboxes corresponding to enabled value when ticked */

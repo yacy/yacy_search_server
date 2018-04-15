@@ -1874,7 +1874,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             LinkedHashSet<String> solrsnippetlines = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
             if (solrsnippetlines != null && solrsnippetlines.size() > 0) {
                 OpensearchResponseWriter.removeSubsumedTitle(solrsnippetlines, node.dc_title());
-                final TextSnippet solrsnippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_CACHE, "");
+                final TextSnippet solrsnippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_SOLR, "");
                 final TextSnippet yacysnippet = new TextSnippet(this.loader,
                         node,
                         this.query.getQueryGoal().getIncludeHashes(),

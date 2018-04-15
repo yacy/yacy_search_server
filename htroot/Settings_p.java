@@ -241,6 +241,10 @@ public final class Settings_p {
         
         prop.put("searchShowRankingChecked", env.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING, SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING_DEFAULT) ? 1 : 0);
         
+		prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED,
+				sb.getConfigBool(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED,
+						SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED_DEFAULT));
+        
         // return rewrite properties
         return prop;
     }

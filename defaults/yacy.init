@@ -500,6 +500,8 @@ debug.search.remote.dht.off=false
 debug.search.remote.dht.testlocal=false
 debug.search.remote.solr.off=false
 debug.search.remote.solr.testlocal=false
+# Set to true to enable computation of statistics on text snippets processing 
+debug.snippets.statistics.enabled=false
 
 #staticIP if you have a static IP, you can use this setting
 staticIP=

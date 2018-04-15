@@ -374,6 +374,12 @@ public final class SwitchboardConstants {
     /** when set to true : do not use dht, search local peer in a shortcut to the own server */
     public static final String DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL= "debug.search.remote.solr.testlocal";
     
+    /** Key of the setting controlling whether text snippets statistics should be computed */
+    public static final String DEBUG_SNIPPETS_STATISTICS_ENABLED = "debug.snippets.statistics.enabled";
+    
+    /** Default value for the setting controlling whether text snippets statistics should be computed */
+    public static final boolean DEBUG_SNIPPETS_STATISTICS_ENABLED_DEFAULT = false;
+    
     /**
      * <p><code>public static final String <strong>WORDCACHE_MAX_COUNT</strong> = "wordCacheMaxCount"</code></p>
      * <p>Name of the setting how many words the word-cache (or DHT-Out cache) shall contain maximal. Indexing pages if the

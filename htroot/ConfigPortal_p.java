@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.time.Duration;
 import java.util.Properties;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -41,6 +42,7 @@ import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.HTTPDFileHandler;
@@ -218,6 +220,11 @@ public class ConfigPortal_p {
 		prop.put(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
 				sb.getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
 						SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT) ? 1 : 0);
+		
+		final boolean textSnippetsStatisticsEnabled = sb.getConfigBool(
+				SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED,
+				SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED_DEFAULT);
+		prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED, textSnippetsStatisticsEnabled);
 
         prop.put(SwitchboardConstants.GREEDYLEARNING_ACTIVE, sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) ? 1 : 0);
         prop.put(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, sb.getConfig(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, "0"));
@@ -229,6 +236,28 @@ public class ConfigPortal_p {
     	} else {
     		prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, "");
     	}
+        
+        /* Provide some basic stats about text snippets generation time to help choosing snippet options */
+        if(textSnippetsStatisticsEnabled) {
+			final long totalSnippets = TextSnippet.statistics.getTotalSnippets();
+			final long totalSnippetsInitTime = TextSnippet.statistics.getTotalInitTime();
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalSnippets", totalSnippets);
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalFromSolr",
+					TextSnippet.statistics.getTotalFromSolr());
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalFromCache",
+					TextSnippet.statistics.getTotalFromCache());
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalFromMetadata",
+					TextSnippet.statistics.getTotalFromMetadata());
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalFromWeb",
+					TextSnippet.statistics.getTotalFromWeb());
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalFailures",
+					TextSnippet.statistics.getTotalFailures());
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_snippetsMeanTime",
+					formatDuration(totalSnippets > 0 ? totalSnippetsInitTime / totalSnippets : 0));
+
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_snippetsMaxTime",
+					formatDuration(TextSnippet.statistics.getMaxInitTime()));
+        }
 
         prop.put("search.verify.nocache", sb.getConfig("search.verify", "").equals("nocache") ? 1 : 0);
         prop.put("search.verify.iffresh", sb.getConfig("search.verify", "").equals("iffresh") ? 1 : 0);
@@ -278,5 +307,21 @@ public class ConfigPortal_p {
         prop.put("myContext", YaCyDefaultServlet.getContext(header, sb));
         return prop;
     }
+
+    /**
+     * @param durationValue a duration in milliseconds
+     * @return the duration value formatted for display with its time unit
+     */
+	private static String formatDuration(final long durationValue) {
+		final Duration duration = Duration.ofMillis(durationValue);
+		
+		final String formattedDuration;
+		if(duration.getSeconds() > 0) {
+			formattedDuration = duration.getSeconds() + "s";
+		} else {
+			formattedDuration = duration.toMillis() + "ms";
+		}
+		return formattedDuration;
+	}
 
 }

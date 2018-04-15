@@ -225,6 +225,7 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
+import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.RobotsTxtConfig;
@@ -959,6 +960,9 @@ public final class Switchboard extends serverSwitch {
 
         // generate snippets cache
         this.log.config("Initializing Snippet Cache");
+        
+		TextSnippet.statistics.setEnabled(getConfigBool(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED,
+				SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED_DEFAULT));
 
         // init the wiki
         wikiParser = new WikiCode();
