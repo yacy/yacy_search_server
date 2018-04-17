@@ -52,5 +52,5 @@ VOLUME ["/opt/yacy_search_server/DATA"]
 # Next commands run as yacy as non-root user for improved security
 USER yacy
 
-# Start yacy in debug mode (-d) to display console logs and to wait for yacy process
-CMD ["/bin/sh","/opt/yacy_search_server/startYACY.sh","-d"]
+# Start yacy as a foreground process (-f) to display console logs and to wait for yacy process
+CMD ["/bin/sh","/opt/yacy_search_server/startYACY.sh","-f"]
