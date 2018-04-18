@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.Translator;
 import net.yacy.data.WorkTables;
 import net.yacy.http.YaCyHttpServer;
@@ -65,47 +66,71 @@ public class ConfigBasic {
         final serverObjects prop = new serverObjects();
         final File langPath = new File(sb.getAppPath("locale.source", "locales").getAbsolutePath());
         String lang = env.getConfig("locale.language", "browser");
-
+        
         final int authentication = sb.adminAuthenticated(header);
         if (authentication < 2) {
             // must authenticate
         	prop.authenticationRequired();
             return prop;
         }
-
-        // store this call as api call
-        if (post != null && post.containsKey("set")) {
-            sb.tables.recordAPICall(post, "ConfigBasic.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "basic settings");
-        }
-
-        //boolean doPeerPing = false;
+        
+        /* For authenticated users only : acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        
         if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {
         	new OnePeerPingBusyThread(sb.yc).start();
-            //doPeerPing = true;
         }
 
-        // language settings
-        if (post != null && post.containsKey("language")  && !lang.equals(post.get("language", "default")) &&
-                (new TranslatorXliff().changeLang(env, langPath, post.get("language", "default") + ".lng"))) {
-            prop.put("changedLanguage", "1");
+        String peerName = sb.peers.mySeed().getName();
+        long port = env.getLocalPort(); //this allows a low port, but it will only get one, if the user edits the config himself.
+        boolean ssl = env.getConfigBool("server.https", false);
+        boolean upnp = false;
+        if (post != null) {
+        	/* Settings will be modified : check this is a valid transaction using HTTP POST method */
+        	TransactionManager.checkPostTransaction(header, post);
+
+            // store this call as api call
+        	if(post.containsKey("set")) {
+        		sb.tables.recordAPICall(post, "ConfigBasic.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "basic settings");
+        	}
+        	
+        	// language settings
+        	if(post.containsKey("language")  && !lang.equals(post.get("language", "default"))) {
+            	if(new TranslatorXliff().changeLang(env, langPath, post.get("language", "default") + ".lng")) {
+            		prop.put("changedLanguage", "1");
+            	}
+        	}
+        	
+        	// port settings
+        	if(post.getInt("port", 0) > 1023) {
+                port = post.getLong("port", 8090);
+                ssl = post.getBoolean("withssl");
+        	}
+        	
+        	// peer name settings
+        	peerName = post.get("peername", "");
+        	
+        	// UPnP config
+        	if(post.containsKey("port")) { // hack to allow checkbox
+                upnp = post.containsKey("enableUpnp");
+                if (upnp && !sb.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false)) {
+                    UPnP.addPortMappings();
+                }
+                sb.setConfig(SwitchboardConstants.UPNP_ENABLED, upnp);
+                if (!upnp) {
+                    UPnP.deletePortMappings();
+                }
+        	}
+        }
+        
+        if (ssl) {
+        	prop.put("withsslenabled_sslport", env.getHttpServer().getSslPort());
+        }
+        
+        if (peerName != null && peerName.length() > 0) {
+        	peerName = peerName.replace(' ', '-');
         }
 
-        // peer name settings
-        String peerName = (post == null) ? sb.peers.mySeed().getName() : post.get("peername", "");
-        if (peerName != null && peerName.length() > 0) peerName = peerName.replace(' ', '-');
-        
-        // port settings
-        final long port;
-        boolean ssl;
-        if (post != null && post.getInt("port", 0) > 1023) {
-            port = post.getLong("port", 8090);
-            ssl = post.getBoolean("withssl");
-        } else {
-            port = env.getLocalPort(); //this allows a low port, but it will only get one, if the user edits the config himself.
-            ssl = env.getConfigBool("server.https", false);
-        }
-        if (ssl) prop.put("withsslenabled_sslport",env.getHttpServer().getSslPort());
-        
         // check if peer name already exists
         final Seed oldSeed = sb.peers.lookupByName(peerName);
         if (oldSeed == null &&
@@ -113,21 +138,6 @@ public class ConfigBasic {
             Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches()) {
             sb.peers.setMyName(peerName);
             sb.peers.saveMySeed();
-        }
-
-        // UPnP config
-        final boolean upnp;
-        if (post != null && post.containsKey("port")) { // hack to allow checkbox
-            upnp = post.containsKey("enableUpnp");
-            if (upnp && !sb.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false)) {
-                UPnP.addPortMappings();
-            }
-            sb.setConfig(SwitchboardConstants.UPNP_ENABLED, upnp);
-            if (!upnp) {
-                UPnP.deletePortMappings();
-            }
-        } else {
-            upnp = false;
         }
 
         // check port and ssl connection
@@ -175,6 +185,9 @@ public class ConfigBasic {
         prop.put("setUseCase_switchWarning", 0);
         String networkName = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "");
         if (post != null && post.containsKey("usecase")) {
+        	/* Settings will be modified : check this is a valid transaction using HTTP POST method */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
 			boolean hasNonEmptyRemoteSolr = sb.index.fulltext().connectedRemoteSolr()
 					&& (sb.index.fulltext().collectionSize() > 0 || sb.index.fulltext().webgraphSize() > 0);
             if ("freeworld".equals(post.get("usecase", "")) && !"freeworld".equals(networkName)) {

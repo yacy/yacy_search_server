@@ -49,6 +49,7 @@
     #(commitDHTNoGlobalSearch)#::<div class="error">Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.</div>#(/commitDHTNoGlobalSearch)#
     #(commitRobinson)#::<div class="commit">For Robinson Mode, index distribution and receive is switched off.</div>#(/commitRobinson)#
     <form id="NetworkForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+     <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
     <fieldset>
       <legend>
         <label>Network and Domain Specification</label>
@@ -101,6 +102,7 @@
       without any data exchange between your peer and other peers.
     </p>
     <form id="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
       <fieldset>
       <legend>
         <input type="radio" name="network" id="p2p" onclick="EnableP2P()" value="p2p"#(p2p.checked)#:: checked="checked"#(/p2p.checked)# />

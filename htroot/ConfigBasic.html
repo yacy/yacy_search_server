@@ -28,7 +28,8 @@
       Your YaCy Peer needs some basic information to operate properly
     </p>
     
-    <form action="ConfigBasic.html" method="get" accept-charset="UTF-8">
+    <form action="ConfigBasic.html" method="post" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
       <ol>
         <li>
           <img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Select a language for the interface:<br />
@@ -46,7 +47,7 @@
           </fieldset>
         </li>
         <!-- take care that no other items are changed, but also change the former if no js is enabled -->
-        <script type="text/javascript"> document.write('</form><form action="ConfigBasic.html" method="get">'); </script>
+        <script type="text/javascript"> document.write('</form><form action="ConfigBasic.html" method="post" accept-charset="UTF-8"><input type="hidden" name="transactionToken" value="#[transactionToken]#"/>');</script>
 
 	#(setUseCase)#::
 	
