@@ -20,19 +20,18 @@
 
 import java.net.MalformedURLException;
 import java.util.Date;
-import java.util.Set;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.IndexingQueueEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -40,9 +39,9 @@ import net.yacy.server.serverSwitch;
 
 public class push_p {
     
-    // test: http://localhost:8090/api/push_p.json?count=1&synchronous=false&commit=false&url-0=http://nowhere.cc/example.txt&data-0=%22hello%20world%22&lastModified-0=Tue,%2015%20Nov%201994%2012:45:26%20GMT&contentType-0=text/plain&collection-0=testpush
+    // test: http://localhost:8090/api/push_p.json?count=1&synchronous=false&commit=false&url-0=http://nowhere.cc/example.txt&data-0=%22hello%20world%22&lastModified-0=Tue,%2015%20Nov%201994%2012:45:26%20GMT&contentType-0=text/plain&collection-0=testpush&responseHeader-0=
     
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -122,10 +121,7 @@ public class push_p {
                 }
                 prop.put("mode_results_" + i + "_success", "1");
 
-                Set<String> ips = Domains.myPublicIPs();
-                String address = ips.size() == 0 ? "127.0.0.1" : ips.iterator().next();
-                if (address == null) address = "127.0.0.1";
-                prop.put("mode_results_" + i + "_success_message", "http://" + address + ":" + sb.getLocalPort() + "/solr/select?q=sku:%22" + u + "%22");
+                prop.put("mode_results_" + i + "_success_message", YaCyDefaultServlet.getContext(header, sb) + "/solr/select?q=sku:%22" + u + "%22");
                 countsuccess++;
             } catch (MalformedURLException e) {
                 e.printStackTrace();
