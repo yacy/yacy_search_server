@@ -226,12 +226,13 @@ public class Status
             prop.put("peerStatistics", "1");
             prop.put("peerStatistics_uptime", PeerActions.formatInterval(uptime));
             thisHash = sb.peers.mySeed().hash;
-            if ( sb.peers.mySeed().getIPs().size() == 0 ) {
+            final Set<String> myIps = sb.peers.mySeed().getIPs();
+            if ( myIps.size() == 0 ) {
                 prop.put("peerAddress", "0"); // not assigned + instructions
                 prop.put("warningGoOnline", "1");
             } else {
                 prop.put("peerAddress", "1"); // Address
-                prop.put("peerAddress_address", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()));
+                prop.put("peerAddress_address", sb.peers.mySeed().getPublicAddress(myIps.iterator().next()));
                 prop.putXML("peerAddress_peername", sb.peers.mySeed().getName().toLowerCase());
             }
         }

@@ -372,18 +372,24 @@ public class Network
                 }
                 i++;
 
-                String ip = seed.getIP();
-                final String address = seed.getPublicAddress(ip);
-                if ( log.isFine() ) log.fine("HELLO #" + i + " to peer '" + seed.get(Seed.NAME, "") + "' at " + address); // debug
-                final String seederror = seed.isProper(false);
-                if ( (address == null) || (seederror != null) ) {
-                    // we don't like that address, delete it
-                    this.sb.peers.peerActions.interfaceDeparture(seed, ip);
+                final Set<String> ips = seed.getIPs();
+                if(ips.isEmpty()) {
+                	/* This should not happen : seeds db maintains only seeds with at least one IP */
+                	log.warn("Peer " + seed.getName() + "has no known IP address");
                 } else {
-                    // starting a new publisher thread
-                    publishThread t = new publishThread(Network.publishThreadGroup, seed);
-                    t.start();
-                    syncList.add(t);
+                	String ip = ips.iterator().next();
+                	final String address = seed.getPublicAddress(ip);
+                	if ( log.isFine() ) log.fine("HELLO #" + i + " to peer '" + seed.getName() + "' at " + address); // debug
+                	final String seederror = seed.isProper(false);
+                	if ( (address == null) || (seederror != null) ) {
+                		// we don't like that address, delete it
+                		this.sb.peers.peerActions.interfaceDeparture(seed, ip);
+                	} else {
+                		// starting a new publisher thread
+                		publishThread t = new publishThread(Network.publishThreadGroup, seed);
+                		t.start();
+                		syncList.add(t);
+                	}
                 }
             }
 

@@ -29,6 +29,7 @@ import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
@@ -278,14 +279,17 @@ public class Surftips {
                 Seed seed = sb.peers.getConnected(record.originator());
                 if (seed == null) seed = sb.peers.getDisconnected(record.originator());
                 if (seed != null) {
-                    url = "http://" + seed.getPublicAddress(seed.getIP()) + "/Wiki.html?page=" + record.attribute("page", "");
-                    entry = rowdef.newEntry(new byte[][]{
-                                UTF8.getBytes(url),
-                                UTF8.getBytes(record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")),
-                                UTF8.getBytes("Wiki Update: " + record.attribute("description", "")),
-                                UTF8.getBytes(record.id())
-                        });
-                    score = 4 + timeFactor(record.created());
+                	final Set<String> ips = seed.getIPs();
+                	if(!ips.isEmpty()) {
+                		url = seed.getPublicURL(ips.iterator().next(), false) + "/Wiki.html?page=" + record.attribute("page", "");
+                		entry = rowdef.newEntry(new byte[][]{
+                					UTF8.getBytes(url),
+                					UTF8.getBytes(record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")),
+                					UTF8.getBytes("Wiki Update: " + record.attribute("description", "")),
+                					UTF8.getBytes(record.id())
+                        	});
+                		score = 4 + timeFactor(record.created());
+                	}
                 }
             }
 
@@ -293,14 +297,17 @@ public class Surftips {
                 Seed seed = sb.peers.getConnected(record.originator());
                 if (seed == null) seed = sb.peers.getDisconnected(record.originator());
                 if (seed != null) {
-                    url = "http://" + seed.getPublicAddress(seed.getIP()) + "/Blog.html?page=" + record.attribute("page", "");
-                    entry = rowdef.newEntry(new byte[][]{
-                            UTF8.getBytes(url),
-                            UTF8.getBytes(record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")),
-                            UTF8.getBytes("Blog Entry: " + record.attribute("subject", "")),
-                            UTF8.getBytes(record.id())
-                        });
-                    score = 4 + timeFactor(record.created());
+                	final Set<String> ips = seed.getIPs();
+                	if(!ips.isEmpty()) {
+                		url = seed.getPublicURL(ips.iterator().next(), false) + "/Blog.html?page=" + record.attribute("page", "");
+                		entry = rowdef.newEntry(new byte[][]{
+                				UTF8.getBytes(url),
+                				UTF8.getBytes(record.attribute("author", "Anonymous") + ": " + record.attribute("page", "")),
+                				UTF8.getBytes("Blog Entry: " + record.attribute("subject", "")),
+                				UTF8.getBytes(record.id())
+                        	});
+                		score = 4 + timeFactor(record.created());
+                	}
                 }
             }
 

@@ -24,6 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.Set;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -32,20 +34,21 @@ import net.yacy.server.serverSwitch;
 
 public class Load_MediawikiWiki {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         // define visible variables
-        String a;
-        if (sb.peers.myIPs().isEmpty()) {
-            a = "localhost:" + sb.getLocalPort();
+        String myUrl;
+        final Set<String> myIps = sb.peers.mySeed().getIPs();
+        if (myIps.isEmpty()) {
+            myUrl = "http://localhost:" + sb.getLocalPort();
         } else {
-            a = sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP());
+            myUrl = sb.peers.mySeed().getPublicURL(myIps.iterator().next(), true);
         }
         prop.put("starturl", "http://");
-        prop.put("address", a);
+        prop.put("address", myUrl);
         
         // hidden form param : clean up search events cache ?
         if (post != null && post.containsKey("cleanSearchCache")) {

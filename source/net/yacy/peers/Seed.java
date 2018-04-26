@@ -1303,8 +1303,16 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         // check IP
         if ( !checkOwnIP ) {
             // checking of IP is omitted if we read the own seed file
-            final String ip = getIP();
-            if (!isProperIP(ip)) return "not a proper IP " + ip;
+            final Set<String> ips = getIPs();
+            if(ips.isEmpty()) {
+            	return "no IP at all";
+            }
+           	for(final String ip: ips) {
+           		if (!isProperIP(ip)) {
+           			Network.log.severe("not a proper IP " + ip + " peer : " + this.getName() + "ips " + ips);
+           			return "not a proper IP " + ip;		
+                }
+           	}
         }
 
         // seedURL

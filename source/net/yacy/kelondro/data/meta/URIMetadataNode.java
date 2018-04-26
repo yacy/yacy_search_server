@@ -918,7 +918,13 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             final Seed seed = peers.getConnected(hash);
             final String path = this.url().getFile();
             String address = null;
-            if ((seed == null) || ((address = seed.getPublicAddress(seed.getIP())) == null)) {
+            if(seed != null) {
+            	final Set<String> ips = seed.getIPs();
+            	if(!ips.isEmpty()) {
+            		address = seed.getPublicAddress(ips.iterator().next());
+            	}
+            }
+            if (address == null) {
                 // seed is not known from here
                 try {
                     if (indexSegment.termIndex() != null) indexSegment.termIndex().remove(

@@ -374,11 +374,15 @@ public class Network {
                                 }
                                 if (abort) continue;
                             }
+                            final Set<String> ips = seed.getIPs();
+                            if(ips.isEmpty()) {
+                            	continue;
+                            }
                             prop.put(STR_TABLE_LIST + conCount + "_updatedProfile", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_updatedWikiPage", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 0);
-                            String ip = seed.getIP();
+                            final String ip = ips.iterator().next();
                             if (conCount >= maxCount) { break; }
                             if (sb.peers != null && sb.peers.mySeed() != null && seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", 2);
@@ -419,7 +423,7 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(Seed.NAME, "deadlink"));
                             prop.put(STR_TABLE_LIST + conCount + "_special", (seed.getFlagRootNode() && !seed.getFlagAcceptRemoteIndex()) ? 1 : 0);
                             prop.put(STR_TABLE_LIST + conCount + "_ssl", (seed.getFlagSSLAvailable()) ? 1 : 0);
-                            prop.put(STR_TABLE_LIST + conCount + "_ssl_ip", seed.getIP());
+                            prop.put(STR_TABLE_LIST + conCount + "_ssl_ip", ip);
                             prop.put(STR_TABLE_LIST + conCount + "_ssl_portssl", seed.get(Seed.PORTSSL,"8443"));
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
@@ -436,9 +440,8 @@ public class Network {
                             }
                             prop.putHTML(STR_TABLE_LIST + conCount + "_location", location);
                             String port = seed.get(Seed.PORT, "-");
-                            Set<String> ips = seed.getIPs();
                             int ipsc = 0;
-                            for (String s: ips) {
+                            for (final String s: ips) {
                                 prop.put(STR_TABLE_LIST + conCount + "_ips_" + ipsc + "_nodestate", seed.getFlagRootNode() ? 1 : 0);
                                 prop.put(STR_TABLE_LIST + conCount + "_ips_" + ipsc + "_c", c ? 1 : 0);
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_ips_" + ipsc + "_c_hash", seed.hash);

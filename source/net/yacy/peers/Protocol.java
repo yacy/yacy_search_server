@@ -58,6 +58,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -1216,7 +1217,6 @@ public final class Protocol {
         Map<String, LinkedHashSet<String>> snippets = new HashMap<String, LinkedHashSet<String>>(); // this will be a list of urlhash-snippet entries
         final QueryResponse[] rsp = new QueryResponse[]{null};
         final SolrDocumentList[] docList = new SolrDocumentList[]{null};
-        String ip = target.getIP();
         {// encapsulate expensive solr QueryResponse object
             if (localsearch && !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
                 // search the local index
@@ -1231,12 +1231,21 @@ public final class Protocol {
                     return -1;
                 }
             } else {
+                String targetBaseURL = null;
                 try {
                     final boolean myseed = target == event.peers.mySeed();
-                    final String targetBaseURL;
                     if(myseed) {
                     	targetBaseURL = "http://localhost:" + target.getPort();
                     } else {
+                        final Set<String> ips = target.getIPs();
+                        if(ips.isEmpty()) {
+                        	/* This should not happen : seeds db maintains only seeds with at least one IP */
+                        	Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + " has no known IP address");
+                        	target.setFlagSolrAvailable(false);
+                        	return -1;
+                        }
+                        final String ip = ips.iterator().next();
+                        
             			targetBaseURL = target.getPublicURL(ip,
             					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
             							SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT));
@@ -1279,7 +1288,9 @@ public final class Protocol {
                 	 * we must not in that case mark the target as not available but rather transmit the exception to the caller (likely RemoteSearch.solrRemoteSearch) */
                     throw e;
                 } catch (final Throwable e) {
-                    Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + target.getPublicAddress(ip) + " (" + e.getMessage() + ")");
+                	if(Network.log.isInfo()) {
+                		Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + (targetBaseURL != null ? "/" + targetBaseURL : "") + " (" + e.getMessage() + ")");
+                	}
                     target.setFlagSolrAvailable(false || localsearch);
                     return -1;
                 }
@@ -2035,7 +2046,12 @@ public final class Protocol {
             final Map<String, ContentBody> parts =
                 basicRequestParts(Switchboard.getSwitchboard(), target.hash, salt);
             parts.put("object", UTF8.StringBody("host"));
-			final String remoteBaseURL = target.getPublicURL(target.getIP(),
+            final Set<String> targetIps = target.getIPs();
+            if(targetIps.isEmpty()) {
+                Network.log.warn("yacyClient.loadIDXHosts error: no known address on target peer.");
+                return null;            	
+            }
+			final String remoteBaseURL = target.getPublicURL(targetIps.iterator().next(),
 					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
 							SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT));
             final Post post = new Post(new MultiProtocolURL(remoteBaseURL), target.hash, "/yacy/idx.json", parts, 30000);
