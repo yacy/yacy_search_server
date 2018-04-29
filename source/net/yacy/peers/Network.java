@@ -588,7 +588,7 @@ public class Network
             String logt;
 
             // be shure that we have something to say
-            if ( sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()) == null ) {
+            if (sb.peers.mySeed().getIPs().isEmpty()) {
                 final String errorMsg = "We have no valid IP address until now";
                 log.warn("SaveSeedList: " + errorMsg);
                 return errorMsg;
@@ -702,7 +702,10 @@ public class Network
         } finally {
             sb.peers.lastSeedUpload_seedDBSize = sb.peers.sizeConnected();
             sb.peers.lastSeedUpload_timeStamp = System.currentTimeMillis();
-            sb.peers.lastSeedUpload_myIP = sb.peers.mySeed().getIP();
+            final Set<String> myIPs = sb.peers.myIPs();
+            if(!myIPs.isEmpty()) {
+                sb.peers.lastSeedUpload_myIP = myIPs.iterator().next();	
+            }
         }
     }
 
