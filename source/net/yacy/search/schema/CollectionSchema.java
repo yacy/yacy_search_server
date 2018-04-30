@@ -161,7 +161,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     images_alt_sxt(SolrType.string, true, true, true, false, true, "all image link alt tag"), // no need to index this; don't turn it into a txt field; use images_text_t instead
     images_height_val(SolrType.num_integer, true, true, true, false, false, "size of images:height"),
     images_width_val(SolrType.num_integer, true, true, true, false, false, "size of images:width"),
-    images_pixel_val(SolrType.num_integer, true, true, true, false, false, "size of images as number of pixels (easier for a search restriction than with and height)"),
+    images_pixel_val(SolrType.num_integer, true, true, true, false, false, "size of images as number of pixels (easier for a search restriction than width and height)"),
     images_withalt_i(SolrType.num_integer, true, true, false, false, false, "number of image links with alt tag"),
     htags_i(SolrType.num_integer, true, true, false, false, false, "binary pattern for the existance of h1..h6 headlines"),
     canonical_s(SolrType.string, true, true, false, false, false, "url inside the canonical link element"),
