@@ -133,7 +133,7 @@ public class TextSnippetTest {
 
         // test with raw line (no marking added by YaCy)
         TextSnippet ts = new TextSnippet(
-            url.hash(),
+            url,
             rawtestline,
             true, // isMarked,
             TextSnippet.ResultClass.SOURCE_METADATA, "");
@@ -144,7 +144,7 @@ public class TextSnippetTest {
 
         // test with marking of query word
          ts = new TextSnippet(
-            url.hash(),
+            url,
             rawtestline,
             false, // isMarked,
             TextSnippet.ResultClass.SOURCE_METADATA, "");
@@ -157,7 +157,7 @@ public class TextSnippetTest {
         // test text with some numbers (english/german format)
         rawtestline = "Test Version 1.83 calculates pi to 3,14 always";
         ts = new TextSnippet(
-            url.hash(),
+            url,
             rawtestline,
             false, // isMarked,
             TextSnippet.ResultClass.SOURCE_METADATA, "");

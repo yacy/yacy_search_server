@@ -26,6 +26,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongBinaryOperator;
 
+import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.snippet.TextSnippet.ResultClass;
 
@@ -33,6 +35,9 @@ import net.yacy.search.snippet.TextSnippet.ResultClass;
  * Handle statistics on TextSnippet processing.
  */
 public class TextSnippetStatistics {
+	
+	/** Logs handler */
+	private static final ConcurrentLog logger = new ConcurrentLog(TextSnippetStatistics.class.getName());
 
 	/** Total number of TextSnippet instances created since last JVM start */
 	private AtomicLong totalSnippets = new AtomicLong(0);
@@ -141,17 +146,21 @@ public class TextSnippetStatistics {
 	 * @param resultStatus
 	 *            the snippet result status.
 	 */
-	public void addTextSnippetStatistics(final long initTime, final ResultClass resultStatus) {
+	public void addTextSnippetStatistics(final DigestURL url, final long initTime, final ResultClass resultStatus) {
 		if (this.enabled.get() && resultStatus != null) {
 			this.totalSnippets.incrementAndGet();
 			this.totalInitTime.addAndGet(initTime);
-			this.maxInitTime.accumulateAndGet(initTime, new LongBinaryOperator() {
+			if(initTime == this.maxInitTime.accumulateAndGet(initTime, new LongBinaryOperator() {
 				
 				@Override
 				public long applyAsLong(long currentValue, long updateValue) {
 					return currentValue < updateValue ? updateValue : currentValue;
 				}
-			});
+			})) {
+				if(logger.isFine()) {
+					logger.fine("New max snippet init time : status " + resultStatus + " in " + initTime + " ms for URL " + url);
+				}
+			}
 			
 			if (resultStatus != null) {
 				switch (resultStatus) {
