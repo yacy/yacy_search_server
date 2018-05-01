@@ -191,7 +191,7 @@ public class TextSnippetStatistics {
 	 *         initialization since last JVM start
 	 */
 	public long getMaxInitTime() {
-		return this.totalInitTime.get();
+		return this.maxInitTime.get();
 	}
 
 	/**
