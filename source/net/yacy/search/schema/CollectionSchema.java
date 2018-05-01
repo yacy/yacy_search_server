@@ -155,7 +155,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     /** All icon links protocols : split from icons_urlstub to provide some compression, as http protocol is implied as default and not stored */
     icons_protocol_sxt(SolrType.string, true, true, true, false, false, "all icon links protocols"),
     icons_rel_sxt(SolrType.string, true, true, true, false, false, "all icon links relationships space separated (e.g.. 'icon apple-touch-icon')"),
-    icons_sizes_sxt(SolrType.num_integer, true, true, true, false, false, "all icon sizes space separated (e.g. '16x16 32x32')"),
+    icons_sizes_sxt(SolrType.string, true, true, true, false, false, "all icon sizes space separated (e.g. '16x16 32x32')"),
     
     images_text_t(SolrType.text_general, true, true, false, false, true, "all text/words appearing in image alt texts or the tokenized url"),
     images_alt_sxt(SolrType.string, true, true, true, false, true, "all image link alt tag"), // no need to index this; don't turn it into a txt field; use images_text_t instead
