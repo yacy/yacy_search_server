@@ -91,6 +91,26 @@ public class ConfigNetwork_p
                     sb.switchNetwork(networkDefinition);
                 }
             }
+            
+			if (post.containsKey("setEncryption")) {
+				/*
+				 * Settings will be modified : check this is a valid transaction using HTTP POST
+				 * method
+				 */
+				TransactionManager.checkPostTransaction(header, post);
+
+				final boolean httpsPreferred = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+						SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+				final boolean newHttpsPreferred = post
+						.getBoolean(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED);
+				if (httpsPreferred == newHttpsPreferred) {
+					// no change
+					commit = 3;
+				} else {
+					commit = 1;
+					sb.setConfig(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED, newHttpsPreferred);
+				}
+			}
 
             if ( post.containsKey("save") ) {
             	/* Settings will be modified : check this is a valid transaction using HTTP POST method */
@@ -211,6 +231,11 @@ public class ConfigNetwork_p
             prop.put("networks_" + c++ + "_network", s);
         }
         prop.put("networks", c);
+        
+        // set encryption setting
+		prop.put(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+				sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+						SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT));
 
         return prop;
     }
