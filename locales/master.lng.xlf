@@ -1485,6 +1485,9 @@
 
 <file original="ConfigNetwork_p.html"  source-language="en"  datatype="html">
   <body>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
     <trans-unit id="a4561a44" xml:space="preserve" approved="no" translate="yes">
        <source>Network Configuration</source>
     </trans-unit>

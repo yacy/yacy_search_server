@@ -936,6 +936,7 @@ your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/t
 
 #File: ConfigNetwork_p.html
 #---------------------------
+<html lang="en">==<html lang="zh">
 >Network Definition<==>网络定义<
 Remote Network Definition URL==远程网络定义URL
 Enter custom URL...==输入自定义网址...

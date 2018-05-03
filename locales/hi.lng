@@ -506,6 +506,7 @@ your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/t
 
 #File: ConfigNetwork_p.html
 #---------------------------
+<html lang="en">==<html lang="hi">
 Network Configuration==संजाल विन्यास
 No changes were made!==कोई परिवर्तन नहीं किया गया
 Accepted Changes==स्वीकृत परिवर्तन
