@@ -786,7 +786,7 @@ Your peer does not accept any outside index data, but responds on all remote sea
 >Peer Tags==>Тэги узла
 When you allow access from the YaCy network, your data is recognized using keywords==Когда вы разрешаете доступ из сети YaCy, ваши данные распознаются с помощью ключевых слов
 Please describe your search portal with some keywords (comma-separated)==Пожалуйста, опишите ваш поисковый портал несколькими словами (через запятую)
-If you leave the field empty, no peer asks your peer. If you fill in a '*', your peer is always asked.==Если вы оставите поле пустым, то другие узлы не будут опрашивать ваш узел. Если вы укажите в поле '*', то ваш узел всегда будет опрашиваться.</br>
+If you leave the field empty, no peer asks your peer. If you fill in a '*', your peer is always asked.==Если вы оставите поле пустым, то другие узлы не будут опрашивать ваш узел. Если вы укажите в поле '*', то ваш узел всегда будет опрашиваться.
 "Save"=="Сохранить"
 #-----------------------------
 
