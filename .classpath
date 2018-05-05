@@ -99,10 +99,10 @@
 	<classpathentry kind="lib" path="lib/imageio-bmp-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/jsonic-1.3.10.jar"/>
 	<classpathentry kind="lib" path="lib/langdetect.jar"/>
-	<classpathentry kind="lib" path="lib/jwat-common-1.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jwat-gzip-1.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jwat-archive-common-1.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jwat-warc-1.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jwat-common-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jwat-gzip-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jwat-archive-common-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/jwat-warc-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/commons-collections4-4.1.jar"/>
 	<classpathentry kind="lib" path="lib/jaudiotagger-2.2.5.jar"/>
 	<classpathentry kind="output" path="gen"/>
