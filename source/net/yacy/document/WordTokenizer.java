@@ -27,6 +27,7 @@ package net.yacy.document;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -200,6 +201,36 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
 	            oldpos = map.put(hash, LargeNumberCache.valueOf(pos));
 	            if (oldpos != null) {
 	                map.put(hash, oldpos);
+	            }
+
+	            pos += word.length() + 1;
+	        }
+	        return map;
+        } finally {
+        	words.close();
+        	words = null;
+        }
+    }
+    
+    /**
+     * Tokenize the given sentence and generate a word-wordPos mapping
+     * @param sentence the sentence to be tokenized
+     * @return a ordered map containing word as key and position as value. The map is ordered by words.
+     */
+    public static SortedMap<String, Integer> tokenizeSentence(final String sentence, int maxlength) {
+        final SortedMap<String, Integer> map = new TreeMap<String, Integer>();
+        WordTokenizer words = new WordTokenizer(new SentenceReader(sentence), null);
+        try {
+	        int pos = 0;
+	        String word;
+	        Integer oldpos;
+	        while (words.hasMoreElements() && maxlength-- > 0) {
+	            word = words.nextElement().toString().toLowerCase(Locale.ENGLISH);
+
+	            // don't overwrite old values, that leads to too far word distances
+	            oldpos = map.put(word, LargeNumberCache.valueOf(pos));
+	            if (oldpos != null) {
+	                map.put(word, oldpos);
 	            }
 
 	            pos += word.length() + 1;

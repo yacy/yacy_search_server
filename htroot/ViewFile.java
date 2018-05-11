@@ -350,6 +350,7 @@ public class ViewFile {
                 TextSnippet snippet = new TextSnippet(
                         sb.loader,
                         urlEntry,
+                        goal.getIncludeWordsSet(),
                         goal.getIncludeHashes(),
                         CacheStrategy.CACHEONLY,
                         false,

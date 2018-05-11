@@ -126,7 +126,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         SOURCE_WEB(false),
         /** Snippet computed by YaCy from document metadata */
         SOURCE_METADATA(false),
-        ERROR_NO_HASH_GIVEN(true),
+        /** Could not extract a snippet because no search term was provided */
+        ERROR_NO_TERM_GIVEN(true),
         ERROR_SOURCE_LOADING(true),
         ERROR_RESOURCE_LOADING(true),
         ERROR_PARSER_FAILED(true),
@@ -166,6 +167,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     public TextSnippet(
             final LoaderDispatcher loader,
             final URIMetadataNode row,
+            final Set<String> queryTerms,
             final HandleSet queryhashes,
             final CacheStrategy cacheStrategy,
             final boolean pre,
@@ -175,36 +177,40 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         // heise = "0OQUNU3JSs05"
         
         final DigestURL url = row.url();
-        if (queryhashes.isEmpty()) {
-            //System.out.println("found no queryhashes for URL retrieve " + url);
-            init(url, null, false, ResultClass.ERROR_NO_HASH_GIVEN, "no query hashes given", beginTime);
+        if (queryTerms.isEmpty()) {
+            init(url, null, false, ResultClass.ERROR_NO_TERM_GIVEN, "no query terms given", beginTime);
             return;
         }
 
         // try to get snippet from snippetCache
         ResultClass source = ResultClass.SOURCE_CACHE;
-        final String wordhashes = RemoteSearch.set2string(queryhashes);
-        final String urls = ASCII.String(url.hash());
-        final String snippetLine = snippetsCache.get(wordhashes, urls);
-        if (snippetLine != null) {
-            // found the snippet
-            init(url, snippetLine, false, source, null, beginTime);
-            return;
+    	final String urlHash = ASCII.String(url.hash());
+        final String wordhashes;
+        if(queryhashes != null) {
+        	wordhashes = RemoteSearch.set2string(queryhashes);
+        	final String snippetLine = snippetsCache.get(wordhashes, urlHash);
+        	if (snippetLine != null) {
+        		// found the snippet
+        		init(url, snippetLine, false, source, null, beginTime);
+        		return;
+        	}
+        } else {
+        	wordhashes = null;
         }
 
         // try to get the snippet from a document at the cache (or in the web)
         // this requires that the document is parsed after loading
         String textline = null;
-        HandleSet remainingHashes = queryhashes.clone();
+        Set<String> remainingTerms = new HashSet<>(queryTerms);
         List<StringBuilder> sentences = null;
         
         // try to get the snippet from metadata
-        removeMatchingHashes(row.url().toTokens(), remainingHashes);
-        removeMatchingHashes(row.dc_title(), remainingHashes);
-        removeMatchingHashes(row.dc_creator(), remainingHashes);
-        removeMatchingHashes(row.dc_subject(), remainingHashes);
+        removeMatchingTerms(row.url().toTokens(), remainingTerms);
+        removeMatchingTerms(row.dc_title(), remainingTerms);
+        removeMatchingTerms(row.dc_creator(), remainingTerms);
+        removeMatchingTerms(row.dc_subject(), remainingTerms);
         
-        if (!remainingHashes.isEmpty()) {
+        if (!remainingTerms.isEmpty()) {
             // we did not find everything in the metadata, look further into the document itself.
 
             // first acquire the sentences (from description/abstract or text):
@@ -245,9 +251,9 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
 
             if (sentences.size() > 0) {
                 try {
-                    final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);
+                    final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingTerms, snippetMaxLength);
                     textline = tsr.getSnippet();
-                    remainingHashes = tsr.getRemainingWords();
+                    remainingTerms = tsr.getRemainingTerms();
                 } catch (final UnsupportedOperationException e) {
                     init(url, null, false, ResultClass.ERROR_NO_MATCH, "snippet extractor failed:" + e.getMessage(), beginTime);
                     return;
@@ -255,7 +261,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             }
        }
 
-       if (remainingHashes.isEmpty()) {
+       if (remainingTerms.isEmpty()) {
             // we found the snippet or the query is fully included in the headline or url
             if (textline == null || textline.length() == 0) {
                 // this is the case where we don't have a snippet because all search words are included in the headline or the url
@@ -347,23 +353,25 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         }
 
         try {
-            final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingHashes, snippetMaxLength);
+            final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingTerms, snippetMaxLength);
             textline = tsr.getSnippet();
-            remainingHashes =  tsr.getRemainingWords();
+            remainingTerms =  tsr.getRemainingTerms();
         } catch (final UnsupportedOperationException e) {
             init(url, null, false, ResultClass.ERROR_NO_MATCH, "snippet extractor failed:" + e.getMessage(), beginTime);
             return;
         }
         sentences = null;
 
-        if (textline == null || !remainingHashes.isEmpty()) {
+        if (textline == null || !remainingTerms.isEmpty()) {
             init(url, null, false, ResultClass.ERROR_NO_MATCH, "no matching snippet found", beginTime);
             return;
         }
         if (textline.length() > snippetMaxLength) textline = textline.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
-        snippetsCache.put(wordhashes, urls, textline);
+        if(wordhashes != null) {
+        	snippetsCache.put(wordhashes, urlHash, textline);
+        }
         init(url, textline, false, source, null, beginTime);
     }
 
@@ -589,17 +597,18 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 CharacterCoding.unicode2html(prefix.toString(), false));
         theWord.append(CharacterCoding.unicode2html(postfix.toString(), false));
         return theWord.toString();
-    }
-
-    private static void removeMatchingHashes(final String sentence, final HandleSet queryhashes) {
-        if (queryhashes.size() == 0) return;
-        final Set<byte[]> m = WordTokenizer.hashSentence(sentence, 100).keySet();
-        //for (byte[] b: m) System.out.println("sentence hash: " + ASCII.String(b));
-        //for (byte[] b: queryhashes) System.out.println("queryhash: " + ASCII.String(b));
-        ArrayList<byte[]> o = new ArrayList<byte[]>(queryhashes.size());
-        for (final byte[] b : queryhashes) {
-            if (m.contains(b)) o.add(b);
+    }    
+    
+    /**
+     * Modify the queryTerms set : remove terms present in the given sentence.
+     * @param sentence a sentence potentially matching some terms of queryTerms
+     * @param queryTerms a set of normalized terms
+     */
+    private static void removeMatchingTerms(final String sentence, final Set<String> queryTerms) {
+        if (queryTerms.size() == 0) {
+        	return;
         }
-        for (final byte[] b : o) queryhashes.remove(b);
+        final Set<String> sentenceWords = WordTokenizer.tokenizeSentence(sentence, 100).keySet();
+        queryTerms.removeAll(sentenceWords);
     }
 }

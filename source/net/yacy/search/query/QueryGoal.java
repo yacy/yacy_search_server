@@ -251,17 +251,31 @@ public class QueryGoal {
     }
     
     /**
-     * @return a set of words to be included in the search result
+     * @return an iterator on the set of words to be included in the search result
      */
     public Iterator<String> getIncludeWords() {
         return this.include_words.iterator();
     }
+    
+    /**
+     * @return a copy of the set of words to be included in the search result
+     */
+    public Set<String> getIncludeWordsSet() {
+        return new NormalizedWords(this.include_words);
+    }
 
     /**
-     * @return a set of words to be excluded in the search result
+     * @return an iterator on the set of words to be excluded from the search result
      */
     public Iterator<String> getExcludeWords() {
         return this.exclude_words.iterator();
+    }
+    
+    /**
+     * @return a copy of the set of words to be excluded from the search result
+     */
+    public Set<String> getExcludeWordsSet() {
+        return new NormalizedWords(this.exclude_words);
     }
    
     /**

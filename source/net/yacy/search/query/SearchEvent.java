@@ -183,6 +183,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     
     /** a set of word hashes that are used to match with the snippets */
     private final HandleSet                               snippetFetchWordHashes;
+    /** a set of words that are used to match with the snippets */
+    private final Set<String>                             snippetFetchWords;
     private final boolean                                 deleteIfSnippetFail;
     private long                                          urlRetrievalAllTime;
     private long                                          snippetComputationAllTime;
@@ -531,7 +533,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         this.resultList = new WeakPriorityBlockingQueue<URIMetadataNode>(Math.max(max_results_node, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
 
         // snippets do not need to match with the complete query hashes,
-        // only with the query minus the stopwords which had not been used for the search       
+        // only with the query minus the stopwords which had not been used for the search 
         boolean filtered = false;
         // check if query contains stopword
         if (Switchboard.stopwordHashes != null) {
@@ -547,6 +549,10 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         if (filtered) { // remove stopwords
             this.snippetFetchWordHashes.excludeDestructive(Switchboard.stopwordHashes);
         }
+        
+        this.snippetFetchWords = query.getQueryGoal().getIncludeWordsSet();
+        // remove stopwords
+        this.snippetFetchWords.removeAll(Switchboard.stopwords);
 
         // clean up events
         SearchEventCache.cleanupEvents(false);
@@ -1877,6 +1883,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 final TextSnippet solrsnippet = new TextSnippet(node.url(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_SOLR, "");
                 final TextSnippet yacysnippet = new TextSnippet(this.loader,
                         node,
+                        this.query.getQueryGoal().getIncludeWordsSet(),
                         this.query.getQueryGoal().getIncludeHashes(),
                         CacheStrategy.CACHEONLY,
                         false,
@@ -2000,6 +2007,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             final TextSnippet snippet = new TextSnippet(
                     null,
                     page,
+                    this.snippetFetchWords,
                     this.snippetFetchWordHashes,
                     null,
                     ((this.query.constraint != null) && (this.query.constraint.get(Tokenizer.flag_cat_indexof))),
@@ -2016,6 +2024,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             final TextSnippet snippet = new TextSnippet(
                     this.loader,
                     page,
+                    this.snippetFetchWords,
                     this.snippetFetchWordHashes,
                     cacheStrategy,
                     ((this.query.constraint != null) && (this.query.constraint.get(Tokenizer.flag_cat_indexof))),
@@ -2032,7 +2041,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 return page.makeResultEntry(this.query.getSegment(), this.peers, null); // result without snippet
             } else {
                 // problems with snippet fetch
-                if (this.snippetFetchWordHashes.has(Segment.catchallHash)) {
+                if (this.snippetFetchWords.contains(Segment.catchallString)) {
                     // we accept that because the word cannot be on the page
                     return page.makeResultEntry(this.query.getSegment(), this.peers, null);
                 }
