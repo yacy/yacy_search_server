@@ -88,8 +88,30 @@ public class TextSnippetTest {
         for (String word : wordlist) {
             assertTrue("testTextSnippet word included " + word, rstr.contains(word));
         }
-
     }
+    
+    /**
+     * Test snippet extraction when only document title matches searched terms.
+     * @throws MalformedURLException when the test document URL is malformed. Should not happen.
+     */
+	@Test
+	public void testTextSnippetMatchTitle() throws MalformedURLException {
+		final URIMetadataNode testDoc = new URIMetadataNode(doc);
+		testDoc.addField(CollectionSchema.title.name(), "New test case title");
+		testDoc.addField(CollectionSchema.keywords.name(), "junit");
+		testDoc.addField(CollectionSchema.author.name(), "test author");
+		testDoc.addField(CollectionSchema.text_t.name(),
+				"A new testcase has been introduced. " + "It includes a few test lines but only title should match.");
+
+		final String querywords = "title";
+		final QueryGoal qg = new QueryGoal(querywords);
+
+		final TextSnippet ts = new TextSnippet(null, testDoc, qg.getIncludeWordsSet(), qg.getIncludeHashes(),
+				cacheStrategy, pre, snippetMaxLength, reindexing);
+		assertEquals("testTextSnippet Error Code: ", "", ts.getError());
+		assertTrue("Snippet line should be extracted from first text lines.",
+				ts.getLineRaw().startsWith("A new testcase has been introduced."));
+	}
 
     /**
      * Test of getLineMarked method, of class TextSnippet.

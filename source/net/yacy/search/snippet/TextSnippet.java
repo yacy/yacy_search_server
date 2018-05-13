@@ -47,6 +47,7 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
+import net.yacy.document.SentenceReader;
 import net.yacy.document.SnippetExtractor;
 import net.yacy.document.WordTokenizer;
 import net.yacy.document.parser.html.CharacterCoding;
@@ -202,7 +203,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         // this requires that the document is parsed after loading
         String textline = null;
         Set<String> remainingTerms = new HashSet<>(queryTerms);
-        List<StringBuilder> sentences = null;
+        SentenceReader sentences = null;
+        List<StringBuilder> firstSentencesList = null;
         
         // try to get the snippet from metadata
         removeMatchingTerms(row.url().toTokens(), remainingTerms);
@@ -214,15 +216,17 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // we did not find everything in the metadata, look further into the document itself.
 
             // first acquire the sentences (from description/abstract or text):
-            ArrayList<String> solrdesc = row.getDescription();
+            final ArrayList<String> solrdesc = row.getDescription();
             if (!solrdesc.isEmpty()) { // include description_txt (similar to solr highlighting config)
-                sentences = new ArrayList<StringBuilder>();
-                for (String s:solrdesc) sentences.add(new StringBuilder(s));
+            	firstSentencesList = new ArrayList<>();
+                for (final String s : solrdesc) {
+                	firstSentencesList.add(new StringBuilder(s));
+                }
             }
             final String solrText = row.getText();
             if (solrText != null && solrText.length() > 0) { // TODO: instead of join with desc, we could check if snippet already complete and skip further computation
                 // compute sentences from solr query
-                if (sentences == null) sentences = row.getSentences(pre); else sentences.addAll(row.getSentences(pre));
+               	sentences = new SentenceReader(firstSentencesList, solrText, pre);
             } else if (net.yacy.crawler.data.Cache.has(url.hash())) {
                 // get the sentences from the cache
                 final Request request = loader == null ? null : loader.request(url, true, reindexing);
@@ -236,7 +240,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 if (response != null) {
                     try {
                         document = Document.mergeDocuments(response.url(), response.getMimeType(), response.parse());
-                        sentences = document.getSentences(pre);
+                        sentences = new SentenceReader(firstSentencesList, document.getTextString(), pre);
                         response = null;
                         document = null;
                     } catch (final Parser.Failure e) {
@@ -249,7 +253,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 return;
             }
 
-            if (sentences.size() > 0) {
+            if (sentences.iterator().hasNext()) {
                 try {
                     final SnippetExtractor tsr = new SnippetExtractor(sentences, remainingTerms, snippetMaxLength);
                     textline = tsr.getSnippet();
@@ -265,30 +269,38 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // we found the snippet or the query is fully included in the headline or url
             if (textline == null || textline.length() == 0) {
                 // this is the case where we don't have a snippet because all search words are included in the headline or the url
-                String solrText = row.getText();
-                if (solrText != null && solrText.length() > 0) {
-                    // compute sentences from solr query
-                    sentences = row.getSentences(pre);
-                }
-                if (sentences == null || sentences.size() == 0) {
+            	if(sentences == null) {
+            		String solrText = row.getText();
+            		if (solrText != null && solrText.length() > 0) {
+            			// compute sentences from solr query
+            			sentences = new SentenceReader(firstSentencesList, solrText, pre);
+            		}
+            	} else {
+                	sentences.reset();
+            	}
+                if (sentences == null || (!sentences.iterator().hasNext())) {
                     textline = row.dc_subject();
                 } else {
                     // use the first lines from the text after the h1 tag as snippet
                     // get first the h1 tag
                     List<String> h1 = row.h1();
-                    if (h1 != null && h1.size() > 0 && sentences.size() > 2) {
+                    if (h1 != null && h1.size() > 0) {
                         // find first appearance of first h1 in sentences and then take the next sentence
                         String h1s = h1.get(0);
                         if (h1s.length() > 0) {
-                            solrsearch: for (int i = 0; i < sentences.size() - 2; i++) {
-                                if (sentences.get(i).toString().startsWith(h1s)) {
-                                    textline = sentences.get(i + 1).toString();
+                        	String prevSentence = null, currentSentence;
+                            solrsearch: for (final StringBuilder sentence: sentences) {
+                            	currentSentence = sentence.toString();
+                                if (prevSentence != null && prevSentence.startsWith(h1s)) {
+                                    textline = currentSentence;
                                     break solrsearch;
                                 }
+                                prevSentence = currentSentence;
                             }
                         }
                     }
                     if (textline == null) {
+                    	sentences.reset();
                         final StringBuilder s = new StringBuilder(snippetMaxLength);
                         for (final StringBuilder t: sentences) {
                         	s.append(t).append(' ');
@@ -344,10 +356,10 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         }
 
         // compute sentences from parsed document
-        sentences = document.getSentences(pre);
+        sentences = new SentenceReader(document.getTextString(), pre);
         document.close();
 
-        if (sentences == null) {
+        if (!sentences.hasNext()) {
             init(url, null, false, ResultClass.ERROR_PARSER_NO_LINES, "parser returned no sentences", beginTime);
             return;
         }

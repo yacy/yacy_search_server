@@ -20,7 +20,6 @@
 
 package net.yacy.document;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,8 +34,8 @@ public class SnippetExtractor {
     private Set<String> remainingTerms;
 
     
-    public SnippetExtractor(final Collection<StringBuilder> sentences, final Set<String> queryTerms, int maxLength) throws UnsupportedOperationException {
-        if (sentences == null) throw new UnsupportedOperationException("sentence == null");
+    public SnippetExtractor(final Iterable<StringBuilder> sentences, final Set<String> queryTerms, int maxLength) throws UnsupportedOperationException {
+        if (sentences == null) throw new UnsupportedOperationException("sentences == null");
         if (queryTerms == null || queryTerms.isEmpty()) throw new UnsupportedOperationException("queryTerms == null");
         SortedMap<String, Integer> hs;
         final TreeMap<Long, StringBuilder> order = new TreeMap<Long, StringBuilder>();
@@ -45,7 +44,7 @@ public class SnippetExtractor {
         TreeSet<Integer> positions;
         int linenumber = 0;
         int fullmatchcounter = 0;
-        lookup: for (final StringBuilder sentence: sentences) {
+        lookup: for(final StringBuilder sentence : sentences) {
             hs = WordTokenizer.tokenizeSentence(sentence.toString(), 100);
             positions = new TreeSet<Integer>();
             for (final String word: queryTerms) {

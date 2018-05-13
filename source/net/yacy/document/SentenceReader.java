@@ -24,35 +24,67 @@
 
 package net.yacy.document;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
+/**
+ * Read sentences from a given text.
+ * This enumerates StringBuilder objects. 
+ */
 public class SentenceReader implements Iterator<StringBuilder>, Iterable<StringBuilder> {
-    // read sentences from a given input stream
-    // this enumerates StringBuilder objects
 
+	/** Holds the next element */
     private StringBuilder buffer;
+    
+    /** List of already parsed sentences, eventually in addition to those extracted from the main text. */
+    private List<StringBuilder> parsedSentences;
+    
+    /** Current position in the parsedSentences list. */
+    private int sentencesPos;
+    
+    /** The main text to parse for sentences */
     private String text;
+    
+    /** The current character position in the main text */
     private int pos;
+    
+    /** When true sentences can not include line break characters */
     private boolean pre = false;
 
     public SentenceReader(final String text) {
-    	assert text != null;
-        this.text = text;
-        this.pos = 0;
-        this.pre = false;
-        this.buffer = nextElement0();
+    	this(new ArrayList<>(), text, false);
     }
 
     public SentenceReader(final String text, final boolean pre) {
-    	this(text);
-        this.pre = pre;
+    	this(new ArrayList<>(), text, pre);
     }
-
+    
+    public SentenceReader(final List<StringBuilder> parsedSentences, final String text, final boolean pre) {
+    	assert text != null;
+        this.text = text;
+        this.pos = 0;
+        this.pre = pre;
+        if(parsedSentences == null) {
+        	this.parsedSentences = new ArrayList<>();
+        } else {
+        	this.parsedSentences = parsedSentences;
+        }
+        this.sentencesPos = 0;
+        this.buffer = nextElement0();
+    }
+    
     public void pre(final boolean x) {
         this.pre = x;
     }
 
     private StringBuilder nextElement0() {
+    	if(this.sentencesPos < this.parsedSentences.size()) {
+    		final StringBuilder element = this.parsedSentences.get(this.sentencesPos);
+    		this.sentencesPos++;
+    		return element;
+    	}
+    	
         final StringBuilder s = new StringBuilder(80);
         int nextChar;
         char c, lc = ' '; // starting with ' ' as last character prevents that the result string starts with a ' '
@@ -73,6 +105,9 @@ public class SentenceReader implements Iterator<StringBuilder>, Iterable<StringB
             s.trimToSize();
             s.deleteCharAt(s.length() - 1);
         }
+        /* Add to parsed sentences list for eventual reuse after a reset */
+        this.parsedSentences.add(s);
+        this.sentencesPos++;
         return s;
     }
 
@@ -118,9 +153,19 @@ public class SentenceReader implements Iterator<StringBuilder>, Iterable<StringB
     public Iterator<StringBuilder> iterator() {
         return this;
     }
+    
+    /**
+     * Reset the iterator position to zero
+     */
+    public void reset() {
+   		/* Reset only the sentences position to reuse already parsed sentences */
+   		this.sentencesPos = 0;
+   		this.buffer = nextElement0();
+    }
 
     public synchronized void close() {
     	this.text = null;
+    	this.parsedSentences = null;
     }
 
     public static void main(String[] args) {
