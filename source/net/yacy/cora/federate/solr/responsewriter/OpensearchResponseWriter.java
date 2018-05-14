@@ -373,11 +373,15 @@ public class OpensearchResponseWriter implements QueryResponseWriter, EmbeddedSo
      * @param snippets snippets list eventually empty
      * @return the largest snippet containing at least a space character among the list, or null
      */
-    public static String getLargestSnippet(LinkedHashSet<String> snippets) {
-        if (snippets == null || snippets.size() == 0) return null;
+    public static String getLargestSnippet(final LinkedHashSet<String> snippets) {
+        if (snippets == null || snippets.size() == 0) {
+        	return null;
+        }
         String l = null;
-        for (String s: snippets) {
-            if ((l == null || s.length() > l.length()) && s.indexOf(' ') > 0) l = s;
+        for (final String s: snippets) {
+			if ((l == null || s.length() > l.length()) && s.length() > 1 && s.indexOf(' ', 1) > 0) {
+				l = s;
+			}
         }
         if(l != null) {
         	l = l.replaceAll("\"", "'");
