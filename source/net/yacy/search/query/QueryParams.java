@@ -115,6 +115,9 @@ public final class QueryParams {
         //missing: namespace
     }
     
+    /** List of Solr fields used to extract text snippets when requesting the Solr index */
+    private final static CollectionSchema[] SOLR_SNIPPET_FIELDS = new CollectionSchema[]{CollectionSchema.description_txt, CollectionSchema.h4_txt, CollectionSchema.h3_txt, CollectionSchema.h2_txt, CollectionSchema.h1_txt, CollectionSchema.text_t};
+    
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
 
@@ -634,6 +637,21 @@ public final class QueryParams {
         }
         if (bq.length() > 0) params.setParam(DisMaxParams.BQ, bq.split("[\\r\\n]+")); // split on any sequence consisting of CR and/or LF
         if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
+        
+        // set highlighting query attributes
+        if (this.contentdom == Classification.ContentDomain.TEXT || this.contentdom == Classification.ContentDomain.ALL) {
+        	params.setHighlight(true);
+        	params.setHighlightFragsize(SearchEvent.SNIPPET_MAX_LENGTH);
+            //params.setHighlightRequireFieldMatch();
+        	params.setHighlightSimplePost("</b>");
+        	params.setHighlightSimplePre("<b>");
+        	params.setHighlightSnippets(5);
+            for (final CollectionSchema field: SOLR_SNIPPET_FIELDS) {
+            	params.addHighlightField(field.getSolrFieldName());
+            }
+        } else {
+            params.setHighlight(false);
+        }
         
         // prepare result
         ConcurrentLog.info("Protocol", "SOLR QUERY: " + params.toString());

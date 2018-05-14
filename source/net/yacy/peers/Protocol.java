@@ -74,7 +74,6 @@ import org.apache.solr.common.SolrInputDocument;
 
 import net.yacy.migration;
 import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -1021,8 +1020,6 @@ public final class Protocol {
         }
     }
 
-    private final static CollectionSchema[] snippetFields = new CollectionSchema[]{CollectionSchema.description_txt, CollectionSchema.h4_txt, CollectionSchema.h3_txt, CollectionSchema.h2_txt, CollectionSchema.h1_txt, CollectionSchema.text_t};
-    
     /**
      * A task dedicated to requesting a Solr instance
      */
@@ -1199,19 +1196,6 @@ public final class Protocol {
         solrQuery.setStart(offset);
         solrQuery.setRows(count);
         
-        // set highlighting query attributes
-        if (event.query.contentdom == Classification.ContentDomain.TEXT || event.query.contentdom == Classification.ContentDomain.ALL) {
-            solrQuery.setHighlight(true);
-            solrQuery.setHighlightFragsize(SearchEvent.SNIPPET_MAX_LENGTH);
-            //solrQuery.setHighlightRequireFieldMatch();
-            solrQuery.setHighlightSimplePost("</b>");
-            solrQuery.setHighlightSimplePre("<b>");
-            solrQuery.setHighlightSnippets(5);
-            for (CollectionSchema field: snippetFields) solrQuery.addHighlightField(field.getSolrFieldName());
-            //System.out.println("*** debug-query-highligh ***:" + ConcurrentLog.stackTrace());
-        } else {
-            solrQuery.setHighlight(false);
-        }
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(event.query.facetfields.size());
         Map<String, LinkedHashSet<String>> snippets = new HashMap<String, LinkedHashSet<String>>(); // this will be a list of urlhash-snippet entries
@@ -1322,15 +1306,15 @@ public final class Protocol {
             }
             
             // evaluate snippets
-            Map<String, Map<String, List<String>>> rawsnippets = rsp[0].getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
+            final Map<String, Map<String, List<String>>> rawsnippets = rsp[0].getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
             if (rawsnippets != null) {
-                nextsnippet: for (Map.Entry<String, Map<String, List<String>>> re: rawsnippets.entrySet()) {
-                    Map<String, List<String>> rs = re.getValue();
-                    for (CollectionSchema field: snippetFields) {
-                        if (rs.containsKey(field.getSolrFieldName())) {
-                            List<String> s = rs.get(field.getSolrFieldName());
+                nextsnippet: for (final Map.Entry<String, Map<String, List<String>>> re: rawsnippets.entrySet()) {
+                    final Map<String, List<String>> rs = re.getValue();
+                    for (final String field: solrQuery.getHighlightFields()) {
+                        if (rs.containsKey(field)) {
+                            final List<String> s = rs.get(field);
                             if (s.size() > 0) {
-                                LinkedHashSet<String> ls = new LinkedHashSet<String>();
+                                final LinkedHashSet<String> ls = new LinkedHashSet<String>();
                                 ls.addAll(s);
                                 snippets.put(re.getKey(), ls);
                                 continue nextsnippet;
