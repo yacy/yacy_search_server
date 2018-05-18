@@ -39,7 +39,6 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.common.util.XML;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
@@ -77,18 +76,31 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter, SolrjResp
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
         writer.write(XML_START);
-        NamedList<?> values = rsp.getValues();
+        final NamedList<?> values = rsp.getValues();
         
         assert values.get("responseHeader") != null;
         assert values.get("response") != null;
 
-        SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocList response = ((ResultContext) values.get("response")).getDocList();
-        @SuppressWarnings("unchecked")
-        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
+        final NamedList<Object> responseHeader = rsp.getResponseHeader();
+        final Object responseObj = rsp.getResponse();
         writeProps(writer, "responseHeader", responseHeader); // this.writeVal("responseHeader", responseHeader);
-        writeDocs(writer, request, response, rsp.getReturnFields()); // this.writeVal("response", response);
-        writeProps(writer, "highlighting", highlighting);
+        
+        if(responseObj instanceof ResultContext) {
+        	/* Regular response object */
+        	writeDocs(writer, request, ((ResultContext) responseObj).getDocList(), rsp.getReturnFields());
+        } else if(responseObj instanceof SolrDocumentList) {
+			/*
+			 * The response object can be a SolrDocumentList when the response is partial,
+			 * for example when the allowed processing time has been exceeded
+			 */
+        	writeDocs(writer, (SolrDocumentList)responseObj, rsp.getReturnFields());
+        } else {
+        	throw new IOException("Unable to process Solr response format");
+        }
+        final Object highlightingObj = values.get("highlighting");
+        if(highlightingObj instanceof NamedList ) {
+        	writeProps(writer, "highlighting", (NamedList<?>)highlightingObj);
+        }
         writer.write(XML_STOP);
     }
 

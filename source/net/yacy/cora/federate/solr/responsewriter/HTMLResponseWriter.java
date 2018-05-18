@@ -113,6 +113,20 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 		writer.write("*/");
 		writer.write("</script>");
 	}
+	
+	/**
+	 * Append a link to the related Solr API.
+	 * @param writer the output writer
+	 * @param paramsList the original request parameters
+	 * @param coreName the requested Solr core name
+	 * @throws IOException when a write error occurred
+	 */
+	private void writeApiLink(final Writer writer, final NamedList<Object> paramsList, final String coreName) throws IOException {
+        final String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName).replaceAll("%22");
+        
+        writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
+        writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
+	}
 
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
@@ -127,38 +141,55 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
         
         final String coreName = request.getCore().getName();
         
-        String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName).replaceAll("%22");
+        final Object responseObj = rsp.getResponse();
+        final int sz;
+        if(responseObj instanceof SolrDocumentList) {
+			/*
+			 * The response object can be a SolrDocumentList when the response is partial,
+			 * for example when the allowed processing time has been exceeded
+			 */
+        	final SolrDocumentList docList = ((SolrDocumentList)responseObj);
+        	
+        	writeSolrDocumentList(writer, request, coreName, paramsList, docList);
+        } else if(responseObj instanceof ResultContext){
+        	/* Regular response object */
+        	final DocList documents = ((ResultContext)responseObj).getDocList();
+        	
+        	sz = documents.size();
+        	
+            if (sz > 0) {
+                SolrIndexSearcher searcher = request.getSearcher();
+                DocIterator iterator = documents.iterator();
+                IndexSchema schema = request.getSchema();
 
-        DocList response = ((ResultContext) values.get("response")).getDocList();
-        final int sz = response.size();
-        if (sz > 0) {
-            SolrIndexSearcher searcher = request.getSearcher();
-            DocIterator iterator = response.iterator();
-            IndexSchema schema = request.getSchema();
+                int id = iterator.nextDoc();
+                Document doc = searcher.doc(id);
+                LinkedHashMap<String, String> tdoc = translateDoc(schema, doc, rsp.getReturnFields());
 
-            int id = iterator.nextDoc();
-            Document doc = searcher.doc(id);
-            LinkedHashMap<String, String> tdoc = translateDoc(schema, doc, rsp.getReturnFields());
-
-			String title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc
-            writeTitle(writer, coreName, sz, title);
-            
-            writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
-            writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
-
-            writeDoc(writer, tdoc, coreName, rsp.getReturnFields());
-
-            while (iterator.hasNext()) {
-                id = iterator.nextDoc();
-                doc = searcher.doc(id);
-                tdoc = translateDoc(schema, doc, rsp.getReturnFields());
+    			String title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc
+                writeTitle(writer, coreName, sz, title);
+                
+                writeApiLink(writer, paramsList, coreName);
 
                 writeDoc(writer, tdoc, coreName, rsp.getReturnFields());
+
+                while (iterator.hasNext()) {
+                    id = iterator.nextDoc();
+                    doc = searcher.doc(id);
+                    tdoc = translateDoc(schema, doc, rsp.getReturnFields());
+
+                    writeDoc(writer, tdoc, coreName, rsp.getReturnFields());
+                }
+            } else {
+                writer.write("<title>No Document Found</title>\n</head><body>\n");
+                writer.write("<div class='alert alert-info'>No documents found</div>\n");
             }
+        	
         } else {
-            writer.write("<title>No Document Found</title>\n</head><body>\n");
-            writer.write("<div class='alert alert-info'>No documents found</div>\n");
+            writer.write("<title>Unable to process Solr response</title>\n</head><body>\n");
+            writer.write("<div class='alert alert-info'>Unknown Solr response format</div>\n");        	
         }
+
         
         writer.write("</body></html>\n");
     }
@@ -171,14 +202,27 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 		final NamedList<Object> paramsList = originalParams.toNamedList();
 		paramsList.remove("wt");
 
-		final String xmlquery = dqp
-				.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName)
-				.replaceAll("%22");
-
 		final SolrDocumentList docsList = rsp.getResults();
-		final int sz = docsList.size();
+		
+		writeSolrDocumentList(writer, request, coreName, paramsList, docsList);
+
+		writer.write("</body></html>\n");
+	}
+
+	/**
+	 * Append to the writer HTML reprensentation of the given documents list. 
+	 * @param writer the output writer
+	 * @param request the initial Solr request
+	 * @param coreName the requested Solr core
+	 * @param paramsList the original request parameters
+	 * @param docList the result Solr documents list
+	 * @throws IOException
+	 */
+	private void writeSolrDocumentList(final Writer writer, final SolrQueryRequest request, final String coreName,
+			final NamedList<Object> paramsList, final SolrDocumentList docList) throws IOException {
+		final int sz = docList.size();
 		if (sz > 0) {
-			final Iterator<SolrDocument> iterator = docsList.iterator();
+			final Iterator<SolrDocument> iterator = docList.iterator();
 
 			SolrDocument doc = iterator.next();
 			final ReturnFields fieldsToReturn = request != null ? new SolrReturnFields(request) : new SolrReturnFields();
@@ -187,10 +231,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 			final String firstDocTitle = formatValue(titleValue);
 			writeTitle(writer, coreName, sz, firstDocTitle);
 
-			writer.write("<div id=\"api\"><a href=\"" + xmlquery
-					+ "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
-			writer.write(
-					"<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
+			writeApiLink(writer, paramsList, coreName);
 
 			writeDoc(writer, translateDoc(doc, fieldsToReturn), coreName, fieldsToReturn);
 
@@ -203,8 +244,6 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 			writer.write("<title>No Document Found</title>\n</head><body>\n");
 			writer.write("<div class='alert alert-info'>No documents found</div>\n");
 		}
-
-		writer.write("</body></html>\n");
 	}
 
     /**

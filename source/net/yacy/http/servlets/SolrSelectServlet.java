@@ -273,10 +273,19 @@ public class SolrSelectServlet extends HttpServlet {
                 }
                 
 
-                NamedList<?> values = rsp.getValues();
-                DocList r = ((ResultContext) values.get("response")).getDocList();
-                int numFound = r.matches();
-                AccessTracker.addToDump(querystring, numFound, new Date(), "sq");
+                final Object responseObj = rsp.getResponse();
+                if(responseObj instanceof ResultContext) {
+                	/* Regular response object */
+                	final DocList r = ((ResultContext) responseObj).getDocList();
+                    AccessTracker.addToDump(querystring, r.matches(), new Date(), "sq");
+                } else if(responseObj instanceof SolrDocumentList){
+					/*
+					 * The response object can be a SolrDocumentList when the response is partial,
+					 * for example when the allowed processing time has been exceeded
+					 */
+                	final SolrDocumentList r = (SolrDocumentList) responseObj;
+                    AccessTracker.addToDump(querystring, r.getNumFound(), new Date(), "sq");
+                }
                 
                 // write response header
                 final String contentType = responseWriter.getContentType(req, rsp);
