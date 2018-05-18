@@ -318,13 +318,27 @@ public class SolrSelectServlet extends HttpServlet {
             	req = new SolrQueryRequestBase(null, mmsp) {};
             	
             	rsp = new SolrQueryResponse();
-                NamedList<Object> responseHeader = new SimpleOrderedMap<Object>();
-                responseHeader.add("params", mmsp.toNamedList());
-                rsp.add("responseHeader", responseHeader);
                 rsp.setHttpCaching(false);
-                rsp.getValues().addAll(queryRsp.getResponse());
-
-            	
+                rsp.setAllValues(queryRsp.getResponse());
+                
+                if(!mmsp.getBool(CommonParams.OMIT_HEADER, false)) {
+                	NamedList<Object> responseHeader = rsp.getResponseHeader();
+                	if (responseHeader == null) {
+                		/* The remote Solr provided no response header ? Not likely to happen but let's add one */
+                		responseHeader = new SimpleOrderedMap<Object>();
+                		responseHeader.add("params", mmsp.toNamedList());
+                		rsp.addResponseHeader(responseHeader);
+                	} else {
+                		final int paramsIndex = responseHeader.indexOf("params", 0);
+                		if (paramsIndex >= 0) {
+                			/* Write this Solr servlet initial params to the response header and not the params sent to the remote Solr that differ a little (notably the wt param) */
+                			responseHeader.setVal(paramsIndex, mmsp.toNamedList());
+                		} else {
+                			responseHeader.add("params", mmsp.toNamedList());
+                		}
+                	}
+                }
+ 
                 // prepare response
                 hresponse.setHeader("Cache-Control", "no-cache, no-store");
                 
