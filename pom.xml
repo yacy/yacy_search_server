@@ -466,7 +466,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.21</version>
+            <version>1.7.25</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -500,7 +500,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.24</version>
+            <version>1.7.25</version>
             <type>jar</type>
         </dependency>        
         <dependency>
@@ -611,11 +611,11 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-deploy</artifactId>
             <version>${jetty.version}</version>
-        </dependency>
+        </dependency>       
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.21</version>
+            <version>1.7.25</version>
             <type>jar</type>
         </dependency>       
         <dependency>
