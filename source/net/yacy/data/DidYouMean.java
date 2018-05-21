@@ -44,6 +44,9 @@ import net.yacy.search.schema.CollectionSchema;
  * @author orbiter (extensions for multi-language support + multi-word suggestions)
  */
 public class DidYouMean {
+	
+	/** Logs handler */
+	private static final ConcurrentLog logger = new ConcurrentLog("DidYouMean");
 
     private static final int MinimumInputWordLength = 2;
     private static final int MinimumOutputWordLength = 4;
@@ -150,7 +153,7 @@ public class DidYouMean {
      * get suggestions for a given word. The result is first ordered using a term size ordering,
      * and a subset of the result is sorted again with a IO-intensive order based on the index size
      * @param word0
-     * @param timeout
+     * @param timeout maximum time (in milliseconds) allowed for processing suggestions. A negative value means no limit.
      * @param preSortSelection the number of words that participate in the IO-intensive sort
      * @return
      */
@@ -159,26 +162,32 @@ public class DidYouMean {
             return this.resultSet; // return nothing if input is too short
         }
         final long startTime = System.currentTimeMillis();
-        final long timelimit = startTime + timeout;
+        /* Allocate only a part of the total allowed time to the first processing step, so that some time remains to process results in case of timeout */
+        final long preSortTimeout = timeout >= 0 ? ((long)(timeout * 0.8)) : timeout;
+        long totalTimeLimit = timeout >= 0 ? startTime + timeout : Long.MAX_VALUE;
         int lastIndexOfSpace = this.word.lastIndexOf(" ");
         final Collection<StringBuilder> preSorted;
         if (askIndex && lastIndexOfSpace > 0) {
             // several words
-            preSorted = getSuggestions(this.word.substring(0, lastIndexOfSpace), this.word.substring(lastIndexOfSpace + 1), timeout, preSortSelection, this.segment);
+            preSorted = getSuggestions(this.word.substring(0, lastIndexOfSpace), this.word.substring(lastIndexOfSpace + 1), preSortTimeout, preSortSelection, this.segment);
         } else {
             if (this.endsWithSpace) {
-                preSorted = getSuggestions(this.word.toString(), "", timeout, preSortSelection, this.segment);
+                preSorted = getSuggestions(this.word.toString(), "", preSortTimeout, preSortSelection, this.segment);
             } else {
-                preSorted = getSuggestions(timeout, askIndex);
+                preSorted = getSuggestions(preSortTimeout, askIndex);
             }
         }
+        
         final ReversibleScoreMap<StringBuilder> scored = new ClusteredScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
-        LinkedHashSet<StringBuilder> countSorted = new LinkedHashSet<StringBuilder>();
+        final LinkedHashSet<StringBuilder> countSorted = new LinkedHashSet<StringBuilder>();
         if (this.more) {
             final int wc = this.segment.getWordCountGuess(this.word.toString()); // all counts must be greater than this
             try {
     	        for (final StringBuilder s: preSorted) {
-    	            if (System.currentTimeMillis() > timelimit) break;
+    	            if (System.currentTimeMillis() > totalTimeLimit) {
+    	            	logger.fine("Timeout while processing pre-sorted results.");
+    	            	break;
+    	            }
     	            if (!(scored.sizeSmaller(2 * preSortSelection))) break;
     	            String s0 = s.toString();
     	            int wcg = s0.indexOf(' ') > 0 ? s0.length() * 100 : this.segment.getWordCountGuess(s0);
@@ -200,10 +209,12 @@ public class DidYouMean {
             } catch (final ConcurrentModificationException e) {
             }
         }
-
+        
         // finished
-        ConcurrentLog.info("DidYouMean", "found " + preSorted.size() + " unsorted terms, returned " + countSorted.size() + " sorted suggestions; execution time: "
-                        + (System.currentTimeMillis() - startTime) + "ms");
+        if(logger.isInfo()) {
+        	logger.info("found " + preSorted.size() + " unsorted terms, returned " + countSorted.size() + " sorted suggestions; execution time: "
+                        + (System.currentTimeMillis() - startTime) + "ms; " + " timeout : " + timeout + "ms.");
+        }
 
         return countSorted;
     }
@@ -212,11 +223,13 @@ public class DidYouMean {
      * return a string that is a suggestion list for the list of given words
      * @param head - the sequence of words before the last space in the sequence, fixed (not to be corrected); possibly empty
      * @param tail - the word after the last space, possibly empty or misspelled
-     * @param timeout for operation
+     * @param timeout maximum time allowed for operation in milliseconds. A negative value means no limit.
      * @param preSortSelection - number of suggestions to be computed
      * @return
      */
     private static Collection<StringBuilder> getSuggestions(final String head, final String tail, final long timeout, final int preSortSelection, final Segment segment) {
+    	final long startTime = System.currentTimeMillis();
+        long totalTimeLimit = timeout >= 0 ? startTime + timeout : Long.MAX_VALUE;
         final SortedSet<StringBuilder> result = new TreeSet<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
         int count = 30;
         final SolrQuery solrQuery = new SolrQuery();
@@ -250,7 +263,13 @@ public class DidYouMean {
         //solrQuery.addHighlightField(CollectionSchema.title.getSolrFieldName());
         solrQuery.addHighlightField(CollectionSchema.text_t.getSolrFieldName());
         solrQuery.setFields(); // no fields wanted! only snippets
+        if(timeout >= 0) {
+            /* Allocate only a part of the total allowed time to the solr request, so that some time remains to process results in case of timeout */
+        	final long solrAllowedTime = (long)(timeout * 0.8);
+            solrQuery.setTimeAllowed(solrAllowedTime > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int)solrAllowedTime);
+        }
         OrderedScoreMap<String> snippets = new OrderedScoreMap<String>(null);
+        final long solrResponseTime;
         try {
             QueryResponse response = segment.fulltext().getDefaultConnector().getResponseByParams(solrQuery);
             
@@ -290,7 +309,12 @@ public class DidYouMean {
             }
             */
             
-            Map<String, Map<String, List<String>>> rawsnippets = response.getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
+            if(System.currentTimeMillis() > totalTimeLimit) {
+            	logger.fine("Solr suggestions timeout. No more time to process raw snippets.");
+            	return result;
+            }
+            
+            final Map<String, Map<String, List<String>>> rawsnippets = response.getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
             if (rawsnippets != null) {
                 for (Map<String, List<String>> re: rawsnippets.values()) {
                     for (List<String> sl: re.values()) {
@@ -319,7 +343,18 @@ public class DidYouMean {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+        	solrResponseTime = System.currentTimeMillis();
         }
+        
+        if(System.currentTimeMillis() > totalTimeLimit) {
+			if (logger.isFine()) {
+				logger.fine(
+						"Solr suggestions timeout. No more time to filter " + snippets.size() + " sorted snippets.");
+			}
+        	return result;
+        }
+        
         // delete all snippets which occur double-times, i.e. one that is a substring of another: remove longer snippet
         Iterator<String> si = snippets.keys(false);
         while (si.hasNext()) {
@@ -338,18 +373,23 @@ public class DidYouMean {
         while (si.hasNext() && result.size() < preSortSelection) {
             result.add(new StringBuilder(si.next()));
         }
+        
+		if (logger.isFine()) {
+			logger.fine(
+					"Solr suggestions response processed in " + (System.currentTimeMillis() - solrResponseTime) + "ms");
+		}
         return result;
     }
 
     /**
      * This method triggers the producer and consumer threads of the DidYouMean object.
      * @param word a String with a single word
-     * @param timeout execution time in ms.
+     * @param timeout maximum expected execution time in milliseconds. A nagative value means no limit.
      * @return a Set&lt;String&gt; with word variations contained in term index.
      */
     private Collection<StringBuilder> getSuggestions(final long timeout, boolean askIndex) {
         final long startTime = System.currentTimeMillis();
-        this.timeLimit = startTime + timeout;
+        this.timeLimit = timeout >= 0 ? startTime + timeout : Long.MAX_VALUE;
         
         Thread[] producers = null;
         if (this.more) {
@@ -521,6 +561,3 @@ public class DidYouMean {
     }
 
 }
-
-
-
