@@ -6,32 +6,39 @@
     #%env/templates/metas.template%#
     <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?query=#[former]#" />
     <link rel="search" type="application/opensearchdescription+xml" title="YaCy '#[clientname]#'" href="opensearchdescription.xml" />
-    <script type="text/javascript" src="env/bootstrap/js/typeahead.jquery.min.js"></script>
+    <script type="text/javascript" src="env/bootstrap/js/typeahead.jquery.js"></script>
     <script type="text/javascript" src="js/html.js"></script>
     <script type="text/javascript">
-     var suggestMatcher = function() {
-       return function opensearch(q, cb) {
-       	 $.getJSON("suggest.json?q=" + q, function(data) {
-           	var parsed = [];
-            for (var i = 0; i < data[1].length; i++) {
-                var row = data[1][i];
-                if (row) {
-                    parsed[parsed.length] = {
-                        data: [row],
-                        value: row,
-                        result: row
-                    };  
-                };
-            };
-            cb(parsed); 
-          });
-        };
-      };     
     $(document).ready(function() {
+      var suggestTimeoutId = null;
+      
+      /* Configure the search input field to get suggestions on key strokes */
       $('#search').typeahead({hint:false,highlight:true,minLength:1}, {
     	name: 'states',
     	displayKey: 'value',
-    	source: suggestMatcher()
+    	source: function(query, render) {
+    		if(suggestTimeoutId != null) {
+    			/* Remove delayed call not yet done */
+    			clearTimeout(suggestTimeoutId);
+    		}
+			/* Limit the rate of calls to the suggest API by adding a delay before effective call */
+    		suggestTimeoutId = setTimeout(function() {
+    	       	 $.getJSON("suggest.json?q=" + query, function(data) {
+    	            var parsed = [];
+    	             for (var i = 0; i < data[1].length; i++) {
+    	                 var row = data[1][i];
+    	                 if (row) {
+    	                     parsed[parsed.length] = {
+    	                         data: [row],
+    	                         value: row,
+    	                         result: row
+    	                     };  
+    	                 };
+    	             };
+    	             render(parsed); 
+    	           });
+    		}, 300);
+    	}
       });
     });
     </script>
