@@ -153,7 +153,7 @@ public class ConfigPortal_p {
                     }
                 }
                 sb.setConfig(SwitchboardConstants.GREETING, config.getProperty(SwitchboardConstants.GREETING,"P2P Web Search"));
-                sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, config.getProperty(SwitchboardConstants.GREETING_HOMEPAGE,"http://yacy.net"));
+                sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, config.getProperty(SwitchboardConstants.GREETING_HOMEPAGE,"https://yacy.net"));
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, config.getProperty(SwitchboardConstants.GREETING_LARGE_IMAGE,"env/grafics/YaCyLogo_120ppi.png"));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, config.getProperty(SwitchboardConstants.GREETING_SMALL_IMAGE,"env/grafics/YaCyLogo_60ppi.png"));
                 sb.setConfig(SwitchboardConstants.GREETING_IMAGE_ALT, config.getProperty(SwitchboardConstants.GREETING_IMAGE_ALT,"YaCy project web site"));

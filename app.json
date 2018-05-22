@@ -8,9 +8,9 @@
 		"decentralized",
 		"java"
 	],
-	"website": "http://yacy.net",
+	"website": "https://yacy.net",
 	"repository": "https://github.com/yacy/yacy_search_server",
-	"logo": "http://yacy.net/material/YaCyLogo2011.svg",
+	"logo": "https://yacy.net/material/YaCyLogo2011.svg",
 	"env": {
 		"YACY_INIT_ADMIN_PASSWORD": {
 			"description": "Administrator initial password : please fill with a Base64 MD5 value",

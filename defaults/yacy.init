@@ -315,7 +315,7 @@ promoteSearchPageGreeting = Web Search by the People, for the People
 # if the following property is set to true, the network name is used as greeting
 promoteSearchPageGreeting.useNetworkName = false
 # the following attributes can be used to define a custom image, alternative text and home page on the search page
-promoteSearchPageGreeting.homepage = http://yacy.net
+promoteSearchPageGreeting.homepage = https://yacy.net
 promoteSearchPageGreeting.imageAlt = YaCy project web site
 promoteSearchPageGreeting.largeImage = env/grafics/YaCyLogo_120ppi.png
 promoteSearchPageGreeting.smallImage = env/grafics/YaCyLogo_60ppi.png
@@ -1222,7 +1222,7 @@ content.phpbb3.dumpfile =
 about.headline=Please support YaCy!
 about.body=<iframe src="env/donate.html" width="100%" height="90" border="0" frameborder="0" scrolling="no" hspace="0" vspace="0" name="donate"></iframe><br/><div style="padding:8px;">If you run a YaCy server, feel free to replace our donation plea with your own support message, use the <a href="ConfigPortal_p.html">Portal Configuration</a> servlet.</div>
 
-donation.iframesource=http://yacy.net/include/donate.html
+donation.iframesource=https://yacy.net/include/donate.html
 donation.iframetarget=env/donate.html
 
 # search heuristics

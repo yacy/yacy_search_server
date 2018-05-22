@@ -49,7 +49,7 @@ public class feed {
                 prop.put("channel_pubDate", (new Date()).toString());
                 prop.putXML("item_" + messageCount + "_title", channelName + ": " + "YaCy Test Entry " + (new Date()).toString());
                 prop.putXML("item_" + messageCount + "_description", "abcdefg");
-                prop.putXML("item_" + messageCount + "_link", "http://yacy.net");
+                prop.putXML("item_" + messageCount + "_link", "https://yacy.net");
                 prop.put("item_" + messageCount + "_pubDate", (new Date()).toString());
                 prop.put("item_" + messageCount + "_guid", System.currentTimeMillis());
                 messageCount++;
