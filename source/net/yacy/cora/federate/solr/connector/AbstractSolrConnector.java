@@ -206,10 +206,9 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final long endtime = maxtime < 0 || maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime; // we know infinity!
         final Thread[] t = new Thread[concurrency];
         for (int i = 0; i < Math.max(1, concurrency); i++) {
-            t[i] = new Thread() {
+            t[i] = new Thread("AbstractSolrConnector:concurrentDocumentsByQueriesWithPrefetch(" + querystrings.size() + " queries, first: " + querystrings.iterator().next() + ")") {
                 @Override
                 public void run() {
-                    this.setName("AbstractSolrConnector:concurrentDocumentsByQueriesWithPrefetch(" + querystrings.size() + " queries, first: " + querystrings.iterator().next() + ")");
                     String nextID;
                     try {
                         while (System.currentTimeMillis() < endtime && (nextID = idQueue.take()) != AbstractSolrConnector.POISON_ID) {

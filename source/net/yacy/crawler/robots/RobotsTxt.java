@@ -235,10 +235,9 @@ public class RobotsTxt {
             return;
         }
         if (robotsTable != null && robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
-        Thread t = new Thread() {
+        Thread t = new Thread("Robots.txt:ensureExist(" + theURL.toNormalform(true) + ")") {
             @Override
             public void run(){
-                this.setName("Robots.txt:ensureExist(" + theURL.toNormalform(true) + ")");
                 // make or get a synchronization object
                 DomSync syncObj = RobotsTxt.this.syncObjects.get(urlHostPort);
                 if (syncObj == null) {

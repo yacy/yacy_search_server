@@ -49,10 +49,9 @@ public class SRURSSConnector {
             final CacheStrategy verify,
             final boolean global,
             final ClientIdentification.Agent agent) {
-        final Thread job = new Thread() {
+        final Thread job = new Thread("searchSRURSS:" + urlBase) {
             @Override
             public void run() {
-                Thread.currentThread().setName("searchSRURSS:" + urlBase);
                 int startRecord = 0;
                 RSSMessage message;
                 int maximumRecords = maximumRecordsInit;

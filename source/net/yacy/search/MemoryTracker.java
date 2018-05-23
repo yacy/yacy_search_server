@@ -46,9 +46,9 @@ public class MemoryTracker extends Thread {
     private boolean running;
     
     public MemoryTracker(final long time) {
+    	super("MemoryTracker");
     	this.delaytime = time;
     	running = true;
-    	this.setName("MemoryTracker");
     }
     
     @Override

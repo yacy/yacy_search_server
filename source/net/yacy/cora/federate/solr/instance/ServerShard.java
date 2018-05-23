@@ -388,10 +388,9 @@ public class ServerShard extends SolrClient {
         final Collection<QueryResponse> qrl = new ConcurrentLinkedQueue<QueryResponse>();
         List<Thread> t = new ArrayList<Thread>();
         for (final SolrClient s: qs) {
-            Thread t0 = new Thread() {
+            Thread t0 = new Thread("ServerShard.query/1(" + params.toString() + ")") {
                 @Override
                 public void run() {
-                    this.setName("ServerShard.query/1(" + params.toString() + ")");
                     QueryResponse rsp;
                     try {
                         rsp = s.query(params);
@@ -427,10 +426,9 @@ public class ServerShard extends SolrClient {
         // concurrently call all shards
         List<Thread> t = new ArrayList<Thread>();
         for (final SolrClient s: qs) {
-            Thread t0 = new Thread() {
+            Thread t0 = new Thread("ServerShard.query/2(" + params.toString() + ")") {
                 @Override
                 public void run() {
-                    this.setName("ServerShard.query/2(" + params.toString() + ")");
                     QueryResponse rsp;
                     try {
                         rsp = s.query(params, method);

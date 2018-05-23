@@ -526,10 +526,9 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
     public final static byte[] POISON_QUEUE_ENTRY = "POISON".getBytes();
     public BlockingQueue<byte[]> keyQueue(final int size) {
         final ArrayBlockingQueue<byte[]> set = new ArrayBlockingQueue<byte[]>(size);
-        (new Thread() {
+        (new Thread("MapHeap.keyQueue:" + size) {
             @Override
             public void run() {
-                Thread.currentThread().setName("MapHeap.keyQueue:" + size);
                 try {
                     final Iterator<byte[]> i = MapHeap.this.blob.keys(true, false);
                     while (i.hasNext())

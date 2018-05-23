@@ -271,10 +271,9 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         final String host = ftpURL.getHost();
         final int port = ftpURL.getPort();
         final int pathParts = ftpURL.getPaths().length;
-        new Thread() {
+        new Thread("enqueueEntriesFTP") {
             @Override
             public void run() {
-                Thread.currentThread().setName("enqueueEntriesFTP");
                 BlockingQueue<FTPClient.entryInfo> queue;
                 try {
                     queue = FTPClient.sitelist(host, port, user, pw, ftpURL.getPath(), profile.depth());

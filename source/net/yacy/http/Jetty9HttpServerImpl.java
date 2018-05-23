@@ -298,11 +298,10 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
     @Override
     public void reconnect(final int milsec) {
 
-        new Thread() {
+        new Thread("Jetty8HttpServer.reconnect") {
 
             @Override
             public void run() {
-                this.setName("Jetty8HttpServer.reconnect");
                 try {
                     Thread.sleep(milsec);
                 } catch (final InterruptedException e) {

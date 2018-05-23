@@ -357,20 +357,18 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
             return this.solr1.getCountByQuery(querystring);
         }
         final AtomicLong count = new AtomicLong(0);
-        Thread t0 = new Thread() {
+        Thread t0 = new Thread("MirrorSolrConnector.getCountByQuery/t0") {
             @Override
             public void run() {
-                this.setName("MirrorSolrConnector.getCountByQuery/t0");
                 try {
                     count.addAndGet(MirrorSolrConnector.this.solr0.getCountByQuery(querystring));
                 } catch (final IOException e) {}
             }
         };
         t0.start();
-        Thread t1 = new Thread() {
+        Thread t1 = new Thread("MirrorSolrConnector.getCountByQuery/t1") {
             @Override
             public void run() {
-                this.setName("MirrorSolrConnector.getCountByQuery/t1");
                 try {
                     count.addAndGet(MirrorSolrConnector.this.solr1.getCountByQuery(querystring));
                 } catch (final IOException e) {}

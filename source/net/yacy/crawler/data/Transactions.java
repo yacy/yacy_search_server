@@ -211,10 +211,9 @@ public class Transactions {
         final String urls = url.toNormalform(true);
         final File pdfPath = Transactions.definePath(url, depth, date, "pdf", Transactions.State.INVENTORY);
         if (concurrency && executorRunning.intValue() < Runtime.getRuntime().availableProcessors()) {
-            Thread t = new Thread(){
+            Thread t = new Thread("Transactions.store"){
                 @Override
                 public void run() {
-                	this.setName("Transactions.store");
                     executorRunning.incrementAndGet();
                     try {
                         Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath);

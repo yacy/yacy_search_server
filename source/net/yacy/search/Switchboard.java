@@ -416,10 +416,9 @@ public final class Switchboard extends serverSwitch {
         
         // init libraries
         this.log.config("initializing libraries");
-        new Thread() {
+        new Thread("LibraryProvider.initialize") {
             @Override
             public void run() {
-                Thread.currentThread().setName("LibraryProvider.initialize");
                 LibraryProvider.initialize(Switchboard.this.dictionariesPath);
                 // persistent Vocabulary Switches
                 final Set<String> omit = Switchboard.this.getConfigSet("search.result.show.vocabulary.omit");
@@ -857,10 +856,9 @@ public final class Switchboard extends serverSwitch {
 
         // init bookmarks DB: needs more time since this does a DNS lookup for each Bookmark.
         // Can be started concurrently
-        new Thread() {
+        new Thread("Switchboard.initBookmarks") {
             @Override
             public void run() {
-                Thread.currentThread().setName("Switchboard.initBookmarks");
                 try {
                     initBookmarks();
                 } catch (final IOException e ) {
@@ -1281,10 +1279,9 @@ public final class Switchboard extends serverSwitch {
         super.setHttpServer(server);
         
         // finally start jobs which shall be started after start-up
-        new Thread() {
+        new Thread("Switchboard.setHttpServer") {
             @Override
             public void run() {
-                Thread.currentThread().setName("Switchboard.setHttpServer");
                 try {Thread.sleep(10000);} catch (final InterruptedException e) {} // needs httpd up
                 schedulerJob(); // trigger startup actions
             }
@@ -3450,10 +3447,9 @@ public final class Switchboard extends serverSwitch {
         final List<Thread> stackthreads = new ArrayList<Thread>(); // do this concurrently
         for (DigestURL url: rootURLs) {
             final DigestURL turl = url;
-            Thread t = new Thread() {
+            Thread t = new Thread("Switchboard.stackURLs") {
                 @Override
                 public void run() {
-                	this.setName("Switchboard.stackURLs");
                     String failreason;
                     if ((failreason = Switchboard.this.stackUrl(profile, turl)) == null) successurls.add(turl); else failurls.put(turl, failreason);
                 }
@@ -4018,10 +4014,9 @@ public final class Switchboard extends serverSwitch {
     }
 
     public final void heuristicSite(final SearchEvent searchEvent, final String host) {
-        new Thread() {
+        new Thread("Switchboard.heuristicSite:" + host) {
             @Override
             public void run() {
-                Thread.currentThread().setName("Switchboard.heuristicSite:" + host);
                 String r = host;
                 if ( r.indexOf("//", 0) < 0 ) {
                     r = "http://" + r;
@@ -4132,10 +4127,9 @@ public final class Switchboard extends serverSwitch {
         final SearchEvent searchEvent,
         final String feedName) {
 
-        new Thread() {
+        new Thread("heuristicRSS:" + feedName) {
             @Override
             public void run() {
-                Thread.currentThread().setName("heuristicRSS:" + feedName);
                 final DigestURL url;
                 try {
                     url = new DigestURL(MultiProtocolURL.unescape(urlpattern));

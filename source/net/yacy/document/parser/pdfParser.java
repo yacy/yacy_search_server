@@ -206,10 +206,9 @@ public class pdfParser extends AbstractParser implements Parser {
                     stripper.setEndPage(Integer.MAX_VALUE); // set to default
                     // we start the pdf parsing in a separate thread to ensure that it can be terminated
                     final PDDocument pdfDocC = pdfDoc;
-                    final Thread t = new Thread() {
+                    final Thread t = new Thread("pdfParser.getText:" + location) {
                         @Override
                         public void run() {
-                            Thread.currentThread().setName("pdfParser.getText:" + location);
                             try {
                                 writer.append(stripper.getText(pdfDocC));
                             } catch (final Throwable e) {}

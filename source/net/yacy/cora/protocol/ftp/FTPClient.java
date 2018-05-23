@@ -2556,11 +2556,10 @@ public class FTPClient {
         ftpClient.open(host, port);
         ftpClient.login(user, pw);
         final LinkedBlockingQueue<entryInfo> queue = new LinkedBlockingQueue<entryInfo>();
-        new Thread() {
+        new Thread("FTP.sitelist(" + host + ":" + port + ")") {
             @Override
             public void run() {
                 try {
-                    Thread.currentThread().setName("FTP.sitelist(" + host + ":" + port + ")");
                     sitelist(ftpClient, path, queue, depth);
                     ftpClient.quit();
                 } catch (final Exception e) {} finally {

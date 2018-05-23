@@ -113,8 +113,9 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     private class FlushThread extends Thread {
         public FlushThread(String name) {
-            this.setName("IndexCell.FlushThread(" + name + ")");
+            super("IndexCell.FlushThread(" + name + ")");
         }
+        
         @Override
         public void run() {
             while (IndexCell.this.flushShallRun) {

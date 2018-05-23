@@ -331,10 +331,9 @@ public class RemoteSearch extends Thread {
         // prepare seed targets and threads
         final Seed targetPeer = event.peers.getConnected(targethash);
         if (targetPeer == null || targetPeer.hash == null) return null;
-        Thread secondary = new Thread() {
+        Thread secondary = new Thread("RemoteSearch.secondaryRemoteSearch(" + wordhashes + " to " + targethash + ")") {
             @Override
             public void run() {
-                this.setName("RemoteSearch.secondaryRemoteSearch(" + wordhashes + " to " + targethash + ")");
                 event.oneFeederStarted();
                 try {
                     int urls = Protocol.secondarySearch(
@@ -400,10 +399,9 @@ public class RemoteSearch extends Thread {
         // check own peer status
         if (event.peers.mySeed() == null) { return null; }
         // prepare threads
-        Thread solr = new Thread() {
+        Thread solr = new Thread("RemoteSearch.solrRemoteSearch(" + solrQuery.getQuery() + " to " + (targetPeer == null ? "myself" : targetPeer.hash) + ")") {
             @Override
             public void run() {
-                this.setName("RemoteSearch.solrRemoteSearch(" + solrQuery.getQuery() + " to " + (targetPeer == null ? "myself" : targetPeer.hash) + ")");
                     int urls = 0;
                     try {
                         event.oneFeederStarted();

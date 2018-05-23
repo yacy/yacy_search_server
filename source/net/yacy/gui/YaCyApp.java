@@ -164,10 +164,9 @@ public class YaCyApp {
 
         // registering shutdown hook
         log.info("Registering Shutdown Hook");
-        Thread t = new Thread() {
+        Thread t = new Thread("YaCyApp") {
             @Override
             public void run() {
-                Thread.currentThread().setName("YaCyApp");
                 app = new Application("YaCy GUI", operation, menues, new InfoPage(host, port));
                 app.setLocationRelativeTo(null);
                 app.setVisible(true);

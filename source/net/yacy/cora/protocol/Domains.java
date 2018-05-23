@@ -121,10 +121,9 @@ public class Domains {
         // if such a lookup blocks, it can cause that the static initiatializer does not finish fast
         // therefore we start the host name lookup as concurrent thread
         // meanwhile the host name is "127.0.0.1" which is not completely wrong
-        new Thread() {
+        new Thread("Domains: init") {
             @Override
             public void run() {
-                Thread.currentThread().setName("Domains: init");
                 // try to get local addresses from interfaces
                 try {
                     final Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();

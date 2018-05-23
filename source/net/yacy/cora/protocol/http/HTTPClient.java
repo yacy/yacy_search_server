@@ -1122,8 +1122,7 @@ public class HTTPClient {
 	    private volatile boolean shutdown;
 	    
 	    public IdleConnectionMonitorThread(HttpClientConnectionManager connMgr) {
-	        super();
-	        this.setName("HTTPClient.IdleConnectionMonitorThread");
+	        super("HTTPClient.IdleConnectionMonitorThread");
 	        this.connMgr = connMgr;
 	    }
 

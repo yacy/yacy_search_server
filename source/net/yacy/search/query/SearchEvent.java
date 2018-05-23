@@ -451,11 +451,9 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 // start this concurrently because the remote search needs an enumeration
                 // of the remote peers which may block in some cases when i.e. DHT is active
                 // at the same time.
-                new Thread() {
+                new Thread("SearchEvent.primaryRemoteSearches") {
                     @Override
                     public void run() {
-                        this.setName("SearchEvent.init(" + query.getQueryGoal().getQueryString(false) + ")");
-                        Thread.currentThread().setName("SearchEvent.primaryRemoteSearches");
                         RemoteSearch.primaryRemoteSearches(
                         	SearchEvent.this,
                             0, remote_maxcount,

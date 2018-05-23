@@ -148,10 +148,9 @@ public final class Cache {
         // We do this as a concurrent job only once after start-up silently
         if (responseHeaderDB.size() != fileDB.size()) {
             ConcurrentLog.warn("Cache", "file and metadata size is not equal, starting a cleanup thread...");
-            Thread startupCleanup = new Thread() {
+            Thread startupCleanup = new Thread("Cache startupCleanup") {
                 @Override
                 public void run() {
-                    Thread.currentThread().setName("Cache startupCleanup");
                     // enumerate the responseHeaderDB and find out all entries that are not inside the fileDBunbuffered
                     BlockingQueue<byte[]> q = responseHeaderDB.keyQueue(1000);
                     final HandleSet delkeys = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
