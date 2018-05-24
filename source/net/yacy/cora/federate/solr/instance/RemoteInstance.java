@@ -235,7 +235,9 @@ public class RemoteInstance implements SolrInstance {
 		    }
 		};
 		org.apache.http.params.HttpParams params = result.getParams();
+		/* Set the maximum time to establish a connection to the remote server */
 		org.apache.http.params.HttpConnectionParams.setConnectionTimeout(params, timeout);
+		/* Set the maximum time between data packets reception one a connection has been established */
 		org.apache.http.params.HttpConnectionParams.setSoTimeout(params, timeout);
 		result.addRequestInterceptor(new HttpRequestInterceptor() {
 		    @Override
@@ -361,6 +363,9 @@ public class RemoteInstance implements SolrInstance {
             s = builder.build();
         }
         //s.setAllowCompression(true);
+        /* Set the maximum time to establish a connection to the remote server */
+        s.setConnectionTimeout(this.timeout);
+        /* Set the maximum time between data packets reception one a connection has been established */
         s.setSoTimeout(this.timeout);
         //s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
         this.server.put(name, s);
