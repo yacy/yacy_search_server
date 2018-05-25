@@ -233,9 +233,18 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
 </script>
 
                   <fieldset>
-                    <div class="searchresults">
+					<label>
+						<input type="checkbox" name="search.result.show.favicon" aria-describedby="faviconDesc" value="true" #(search.result.show.favicon)#::checked="checked"#(/search.result.show.favicon)# /> 
+						Show websites favicon
+					</label> 
+					<span class="info" style="padding-left: 10px">
+						<img src="env/grafics/i16.gif" alt="info"/>
+						<span id="faviconDesc">Not showing websites favicon can help you save some CPU time and network bandwidth.
+						</span>
+					</span>
+					<div class="searchresults">
                       <h4 class="linktitle">
-                        <img width="16" height="16" src="env/grafics/dfltfvcn.ico" class="favicon" alt="" />
+                        <img width="16" height="16" src="env/grafics/dfltfvcn.ico" class="favicon" alt="" title="Website favicon"/>
                         <a href="yacysearch.html" target="LayouTest">Title of Result</a>
                       </h4>
                     <p class="snippet">

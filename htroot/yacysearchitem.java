@@ -222,9 +222,13 @@ public class yacysearchitem {
             String resultFileName = resultURL.getFileName();
             prop.putHTML("content_target", target);
             DigestURL faviconURL = null;
-            if ((fileType == FileType.HTML || fileType == FileType.JSON) && (resultURL.isHTTP() || resultURL.isHTTPS())) {
-            	faviconURL = getFaviconURL(result, new Dimension(16, 16));
-            }
+			final boolean showFavicon = sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON,
+					SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON_DEFAULT);
+            
+			if (((fileType == FileType.HTML && showFavicon) || fileType == FileType.JSON)
+					&& (resultURL.isHTTP() || resultURL.isHTTPS())) {
+				faviconURL = getFaviconURL(result, new Dimension(16, 16));
+			}
             if(faviconURL == null) {
             	prop.put("content_favicon", 0);
             } else {

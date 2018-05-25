@@ -883,6 +883,8 @@ search.result.noreferrer=false
 
 # search result lines may show additional information for each search hit
 # these information pieces may be switched on or off
+# When true the favicon (when available) of the website the URL belongs to is fetched and displayed
+search.result.show.favicon = true
 search.result.show.keywords = false
 # Maximum number of keywords initially displayed. The eventual remaining ones can then be expanded.
 search.result.keywords.firstMaxCount = 100

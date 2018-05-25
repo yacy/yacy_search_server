@@ -74,6 +74,7 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.video", post.getBoolean("search.video"));
                 sb.setConfig("search.app", post.getBoolean("search.app"));
 
+                sb.setConfig(SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON, post.getBoolean(SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON));
                 sb.setConfig(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS, post.getBoolean(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS));
                 
                 // maximum number of initially displayed keywords/tags
@@ -176,6 +177,9 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.audio", config.getProperty("search.audio","false"));
                 sb.setConfig("search.video", config.getProperty("search.video","false"));
                 sb.setConfig("search.app", config.getProperty("search.app","false"));
+				sb.setConfig(SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON,
+						config.getProperty(SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON,
+								Boolean.toString(SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON_DEFAULT)));
 				sb.setConfig(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS,
 						config.getProperty(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS,
 								Boolean.toString(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS_DEFAULT)));
@@ -223,6 +227,10 @@ public class ConfigSearchPage_p {
         prop.put("search.audio", sb.getConfigBool("search.audio", false) ? 1 : 0);
         prop.put("search.video", sb.getConfigBool("search.video", false) ? 1 : 0);
         prop.put("search.app", sb.getConfigBool("search.app", false) ? 1 : 0);
+        
+		prop.put(SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON,
+				sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON,
+						SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON_DEFAULT));
 
 		prop.put(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS,
 				sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS,

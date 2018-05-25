@@ -642,6 +642,14 @@ public final class SwitchboardConstants {
     
     /** Default setting value controlling the maximum number of tags/keywords initially displayed for each search result in the HTML results page (the eventual remaining ones can then be expanded) */
     public static final int SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT_DEFAULT = 100;
+    
+    /** Key of the setting controlling whether the eventual website favicon should be fetched and displayed for each search result in the HTML results page */
+    public static final String SEARCH_RESULT_SHOW_FAVICON = "search.result.show.favicon";
+    
+    /** Default setting value controlling whether the eventual website favicon should be fetched and displayed for each search result in the HTML results page */
+    public static final boolean SEARCH_RESULT_SHOW_FAVICON_DEFAULT = true;
+    
+    
 
     /**
      * ranking+evaluation
