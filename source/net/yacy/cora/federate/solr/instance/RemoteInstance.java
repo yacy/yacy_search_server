@@ -354,7 +354,11 @@ public class RemoteInstance implements SolrInstance {
         		solrServerURL = u.toString();
         		ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url : " + u);
         	}
-            s = new ConcurrentUpdateSolrClient(solrServerURL, this.client, 10, Runtime.getRuntime().availableProcessors());
+        	ConcurrentUpdateSolrClient.Builder builder = new ConcurrentUpdateSolrClient.Builder(solrServerURL);
+        	builder.withHttpClient(this.client);
+            builder.withQueueSize(10);
+            builder.withThreadCount(Runtime.getRuntime().availableProcessors());
+            s = builder.build();
         } else {
             ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url : " + this.solrurl + name);
             ConcurrentUpdateSolrClient.Builder builder = new ConcurrentUpdateSolrClient.Builder(u.toString());
