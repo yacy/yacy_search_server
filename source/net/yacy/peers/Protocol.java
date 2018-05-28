@@ -1120,6 +1120,9 @@ public final class Protocol {
 						try {
 							this.rsp[0] = this.solrConnector.getResponseByParams(solrQuery);
 							this.docList[0] = this.rsp[0].getResults();
+							if(log.isFine() && rsp[0] != null && rsp[0].getElapsedTime() >= 0) {
+								log.fine("Got a response from solr instance at " + this.targetBaseURL + " in " + rsp[0].getElapsedTime() + "ms");
+							}
 						} catch (Exception e) {
 							logError("Could not get result from solr", e);
 						}
