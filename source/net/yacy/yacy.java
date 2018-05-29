@@ -56,6 +56,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -621,6 +622,8 @@ public final class yacy {
         		} catch (final InterruptedException e1) {
         			e1.printStackTrace();
         		}
+                
+                RemoteInstance.closeConnectionManager();
             	
                 System.exit(-1);
             }
@@ -632,6 +635,7 @@ public final class yacy {
     		} catch (final InterruptedException e1) {
     			e1.printStackTrace();
     		}
+            RemoteInstance.closeConnectionManager();
             
             System.exit(-1);
         }
@@ -641,6 +645,7 @@ public final class yacy {
 		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
+        RemoteInstance.closeConnectionManager();
 
         // finished
         ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
@@ -678,6 +683,7 @@ public final class yacy {
 		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
+        RemoteInstance.closeConnectionManager();
 
         // finished
         ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);

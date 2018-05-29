@@ -2001,6 +2001,7 @@ public final class Switchboard extends serverSwitch {
         } catch (final InterruptedException e ) {
             ConcurrentLog.logException(e);
         }
+        RemoteInstance.closeConnectionManager();
         this.log.config("SWITCHBOARD SHUTDOWN TERMINATED");
         /* Print also to the standard output : when this method is triggered by the shutdown hook thread, the LogManager is likely to have
          * been concurrently reset by its own shutdown hook thread */
