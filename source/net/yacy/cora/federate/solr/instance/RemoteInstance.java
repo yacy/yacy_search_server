@@ -43,6 +43,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.GzipDecompressingEntity;
+import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -51,6 +52,7 @@ import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -193,6 +195,10 @@ public class RemoteInstance implements SolrInstance {
             final ModifiableSolrParams params = new ModifiableSolrParams();
             params.set(HttpClientUtil.PROP_FOLLOW_REDIRECTS, false);
             this.client = HttpClientUtil.createClient(params, CONNECTION_MANAGER);
+            if(this.client instanceof DefaultHttpClient && this.client.getParams() != null) {
+            	/* Set the maximum time to get a connection from the shared connections pool */
+            	HttpClientParams.setConnectionManagerTimeout(this.client.getParams(), timeout);
+            }
         }
         
         this.defaultServer = (ConcurrentUpdateSolrClient) getServer(this.defaultCoreName);
@@ -273,6 +279,8 @@ public class RemoteInstance implements SolrInstance {
 		org.apache.http.params.HttpConnectionParams.setConnectionTimeout(params, timeout);
 		/* Set the maximum time between data packets reception one a connection has been established */
 		org.apache.http.params.HttpConnectionParams.setSoTimeout(params, timeout);
+		/* Set the maximum time to get a connection from the shared connections pool */
+		HttpClientParams.setConnectionManagerTimeout(params, timeout);
 		result.addRequestInterceptor(new HttpRequestInterceptor() {
 		    @Override
 		    public void process(final HttpRequest request, final HttpContext context) throws IOException {
