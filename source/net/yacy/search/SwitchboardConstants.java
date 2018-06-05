@@ -484,6 +484,12 @@ public final class SwitchboardConstants {
     
     /** Setting key of the property that collects the names of all servlets that have been used so far. */
     public static final String SERVER_SERVLETS_CALLED    = "server.servlets.called";
+    
+    /** Key of the setting controlling whether HTTP responses should be compressed with gzip when the user-agent accepts it (by including gzip in a 'Accept-Encoding' HTTP request header) */
+    public static final String SERVER_RESPONSE_COMPRESS_GZIP = "server.response.compress.gzip";
+    
+    /** Default setting value controlling whether HTTP responses should be compressed */
+    public static final boolean SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT = true;
 
 
     /*

@@ -135,6 +135,11 @@ public final class Settings_p {
         // server access filter
         prop.putHTML("serverfilter", env.getConfig("serverClient", "*"));
         
+        /* gzip compression of HTTP responses */
+		prop.put(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
+				env.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
+						SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT));
+        
         // server password
         prop.put("serveruser","server");
         

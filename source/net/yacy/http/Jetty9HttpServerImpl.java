@@ -48,6 +48,7 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.InetAccessHandler;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
@@ -142,6 +143,19 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         sholder.setAsyncSupported(true); // needed for YaCyQoSFilter
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         htrootContext.addServlet(sholder, "/*");
+        
+        /* Handle gzip compression of responses to user agents accepting it */
+		final GzipHandler gzipHandler;
+		if (sb.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
+				SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT)) {
+			gzipHandler = new GzipHandler();
+			/*
+			 * Ensure decompression of requests body is disabled : it is already handled by
+			 * the GZIPRequestWrapper in the YaCyDefaultServlet
+			 */
+			gzipHandler.setInflateBufferSize(0);
+			htrootContext.setGzipHandler(gzipHandler);
+		}
 
         // -----------------------------------------------------------------------------
         // here we set and map the mandatory servlets, needed for typical YaCy operation

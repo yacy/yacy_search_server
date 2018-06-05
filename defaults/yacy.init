@@ -92,6 +92,11 @@ server.maxTrackingCount = 1000
 # maximum number of hosts that are tracked
 server.maxTrackingHostCount = 100
 
+# When set to true, enable gzip compression of HTTP responses when the user-agent (browser, another YaCy peer or any kind of client) 
+# accept gzip encoding (by including gzip in a 'Accept-Encoding' HTTP request header)
+# This adds some processing overhead, but reduces the amount of bytes sent over network.
+server.response.compress.gzip = true
+
 # Global HTTP Referrer policy delivered by meta tag (see https://www.w3.org/TR/referrer-policy/ for available policies)
 # Can be left empty : the browser should then fallback to the default "no-referrer-when-downgrade" policy
 # Be careful, some policies will also affect YaCy internal links : "no-referrer", "same-origin", "origin" and "strict-origin". This can be useful 

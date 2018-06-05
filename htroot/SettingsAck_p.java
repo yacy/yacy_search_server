@@ -258,6 +258,23 @@ public class SettingsAck_p {
             prop.putHTML("info_filter", filter);
             return prop;
         }
+        
+        /* Compression settings */
+        if (post.containsKey("serverCompression")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=ServerAccess");
+            
+			final boolean oldValue = env.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
+					SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT);
+        	final boolean newValue = post.containsKey(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP);
+            env.setConfig(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP, newValue);
+            
+            prop.put("needsRestart", newValue != oldValue);
+            
+            /* server compression settings saved */
+            prop.put("info", "37");
+        	return prop;
+        }
 
         if (post.containsKey("proxysettings")) {
             // set backlink

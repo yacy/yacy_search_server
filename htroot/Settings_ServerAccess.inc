@@ -66,4 +66,32 @@
 </table>
 </fieldset>
 
+<fieldset>
+	<legend>Compression settings</legend>
+	
+	<div class="form-group">
+		<div class="col-sm-3">
+			<div class="checkbox">
+				<label>
+					<input name="server.response.compress.gzip" id="responseCompressGzip" 
+						type="checkbox" #(server.response.compress.gzip)#::checked#(/server.response.compress.gzip)# 
+						aria-describedby="responseCompressGzipInfo"/>
+					Compress responses with gzip
+				</label>
+			</div>
+		</div>
+		<div class="col-sm-9" id="responseCompressGzipInfo">
+ 			When checked (default), HTTP responses can be compressed using gzip. 
+ 			The requesting user-agent (a web browser, another YaCy peer or any other tool) uses the header 'Accept-Encoding' to tell whether it accepts gzip compression or not. 
+ 			This adds some processing overhead, but can significantly reduce the amount of bytes transmitted over the network. 
+        </div>
+	</div>
+	<div class="form-group">
+    	<div class="col-sm-12">
+    		<input type="submit" class="btn btn-primary" name="serverCompression" value="Submit" aria-describedby="submitInfo"/>
+			<em id="submitInfo">Changes need a server restart.</em>
+    	</div>
+    </div>
+</fieldset>
+
 </form>
