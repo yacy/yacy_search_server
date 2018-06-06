@@ -470,6 +470,9 @@ public final class Switchboard extends serverSwitch {
         // set a high maximum cache size to current size; this is adopted later automatically
         final int wordCacheMaxCount = (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
         setConfig(SwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
+        
+        /* Init outgoing connections pools with user defined settings */
+		initOutgoingConnectionPools();
 
         // load the network definition
         try {
@@ -1269,6 +1272,29 @@ public final class Switchboard extends serverSwitch {
 
         this.log.config("Finished Switchboard Initialization");
     }
+
+	/**
+	 * Initialize outgoing connections pools with user defined settings
+	 */
+	private void initOutgoingConnectionPools() {
+		int generalPoolMaxTotal = getConfigInt(SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL,
+				SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL_DEFAULT);
+		if (generalPoolMaxTotal <= 0) {
+			/* Fix eventually wrong value from the config file */
+			generalPoolMaxTotal = SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL_DEFAULT;
+			setConfig(SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL, generalPoolMaxTotal);
+		}
+		HTTPClient.initPoolMaxConnections(HTTPClient.CONNECTION_MANAGER, generalPoolMaxTotal);
+
+		int remoteSolrPoolMaxTotal = getConfigInt(SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL,
+				SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT);
+		if (remoteSolrPoolMaxTotal <= 0) {
+			/* Fix eventually wrong value from the config file */
+			remoteSolrPoolMaxTotal = SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT;
+			setConfig(SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL, remoteSolrPoolMaxTotal);
+		}
+		RemoteInstance.initPoolMaxConnections(RemoteInstance.CONNECTION_MANAGER, remoteSolrPoolMaxTotal);
+	}
 
     final String getSysinfo() {
         return getConfig(SwitchboardConstants.NETWORK_NAME, "") + (isRobinsonMode() ? "-" : "/") + getConfig(SwitchboardConstants.NETWORK_DOMAIN, "global");

@@ -118,9 +118,14 @@ import net.yacy.kelondro.util.NamePrefixThreadFactory;
 public class HTTPClient {
     
     private final static int default_timeout = 6000;
+    /** Maximum number of simultaneously open outgoing HTTP connections in the pool */
 	private final static int maxcon = 200;
 	private static IdleConnectionMonitorThread connectionMonitor = null;
 	private final static RequestConfig dfltReqConf = initRequestConfig();
+	
+	/** The connection manager holding the configured connection pool for this client */
+	public static final PoolingHttpClientConnectionManager CONNECTION_MANAGER = initPoolingConnectionManager();
+	
 	private final static HttpClientBuilder clientBuilder = initClientBuilder();
 	private final RequestConfig.Builder reqConfBuilder;
 	private Set<Entry<String, String>> headers = null;
@@ -171,7 +176,7 @@ public class HTTPClient {
     private static HttpClientBuilder initClientBuilder() {
     	final HttpClientBuilder builder = HttpClientBuilder.create();
     	
-    	builder.setConnectionManager(initPoolingConnectionManager());
+    	builder.setConnectionManager(CONNECTION_MANAGER);
 		builder.setDefaultRequestConfig(dfltReqConf);
 		
     	// UserAgent
@@ -210,15 +215,8 @@ public class HTTPClient {
 				if (ip == null) throw new UnknownHostException(host0);
 				return new InetAddress[]{ip};
 			}});
-        // how much connections do we need? - default: 20
-        pooling.setMaxTotal(maxcon);
-        // for statistics same value should also be set here
-        ConnectionInfo.setMaxcount(maxcon);
-        // connections per host (2 default)
-        pooling.setDefaultMaxPerRoute((int) (2 * Memory.cores()));
-        // Increase max connections for localhost
-        final HttpHost localhost = new HttpHost(Domains.LOCALHOST);
-        pooling.setMaxPerRoute(new HttpRoute(localhost), maxcon);
+        initPoolMaxConnections(pooling, maxcon);
+        
         pooling.setValidateAfterInactivity(default_timeout); // on init set to default 5000ms
         final SocketConfig socketConfig = SocketConfig.custom()
                 // Defines whether the socket can be bound even though a previous connection is still in a timeout state.
@@ -237,6 +235,35 @@ public class HTTPClient {
 
         return pooling;
     }
+    
+	/**
+	 * Initialize the maximum connections for the given pool
+	 * 
+	 * @param pool
+	 *            a pooling connection manager. Must not be null.
+	 * @param maxConnections.
+	 *            The new maximum connections values. Must be greater than 0.
+	 * @throws IllegalArgumentException
+	 *             when pool is null or when maxConnections is lower than 1
+	 */
+	public static void initPoolMaxConnections(final PoolingHttpClientConnectionManager pool, int maxConnections) {
+		if (pool == null) {
+			throw new IllegalArgumentException("pool parameter must not be null");
+		}
+		if (maxConnections <= 0) {
+			throw new IllegalArgumentException("maxConnections parameter must be greater than zero");
+		}
+		pool.setMaxTotal(maxConnections);
+		// for statistics same value should also be set here
+		ConnectionInfo.setMaxcount(maxConnections);
+		
+        // connections per host (2 default)
+        pool.setDefaultMaxPerRoute((int) (2 * Memory.cores()));
+		
+		// Increase max connections for localhost
+		final HttpHost localhost = new HttpHost(Domains.LOCALHOST);
+		pool.setMaxPerRoute(new HttpRoute(localhost), maxConnections);
+	}
 
     /**
      * This method should be called just before shutdown

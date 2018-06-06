@@ -28,8 +28,12 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.http.pool.PoolStats;
+
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.data.TransactionManager;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.rwi.IndexCell;
@@ -307,6 +311,25 @@ public class PerformanceQueues_p {
             sb.setConfig("httpdMaxBusySessions",maxBusy);
 
         }
+        
+		if ((post != null) && (post.containsKey("connectionPoolConfig"))) {
+
+			/* Configure the general outgoing HTTP connection pool */
+			int maxTotal = post.getInt(SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL,
+					SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL_DEFAULT);
+			if (maxTotal > 0) {
+				sb.setConfig(SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL, maxTotal);
+				HTTPClient.initPoolMaxConnections(HTTPClient.CONNECTION_MANAGER, maxTotal);
+			}
+
+			/* Configure the remote Solr outgoing HTTP connection pool */
+			maxTotal = post.getInt(SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL,
+					SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT);
+			if (maxTotal > 0) {
+				sb.setConfig(SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL, maxTotal);
+				RemoteInstance.initPoolMaxConnections(RemoteInstance.CONNECTION_MANAGER, maxTotal);
+			}
+		}
 
         if ((post != null) && (post.containsKey("onlineCautionSubmit"))) {
             sb.setConfig(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseProxy", 30000)));
@@ -343,6 +366,24 @@ public class PerformanceQueues_p {
         prop.put("pool_2_numActive", ConnectionInfo.getServerCount());
 
         prop.put("pool", "3");
+        
+        /* Connection pools settings */
+		prop.put(SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL,
+				sb.getConfigInt(SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL,
+						SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL_DEFAULT));
+		prop.put(SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL,
+				sb.getConfigInt(SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL,
+						SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT));
+		/* Connection pools stats */
+		PoolStats stats = HTTPClient.CONNECTION_MANAGER.getTotalStats();
+		prop.put("pool.general.leased", stats.getLeased());
+		prop.put("pool.general.available", stats.getAvailable());
+		prop.put("pool.general.pending", stats.getPending());
+		
+		stats = RemoteInstance.CONNECTION_MANAGER.getTotalStats();
+		prop.put("pool.remoteSolr.leased", stats.getLeased());
+		prop.put("pool.remoteSolr.available", stats.getAvailable());
+		prop.put("pool.remoteSolr.pending", stats.getPending());
         
         /* Remote searches max loads settings */
 		prop.put("remoteSearchRWIMaxLoad", sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI,

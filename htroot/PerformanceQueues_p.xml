@@ -44,4 +44,20 @@
 			<numActive>#[numActive]#</numActive>
 		</Pool>#{/pool}#
 	</ThreadPools>
+	<ConnectionPools>
+		<ConnectionPool>
+			<Name>General</Name>
+			<maxTotal>#[http.outgoing.pool.general.maxTotal]#</maxTotal>
+			<active>#[pool.general.leased]#</active>
+			<idle>#[pool.general.available]#</idle>
+			<pending>#[pool.general.pending]#</pending>
+		</ConnectionPool>
+		<ConnectionPool>
+			<Name>Remote Solr servers</Name>
+			<maxTotal>#[http.outgoing.pool.remoteSolr.maxTotal]#</maxTotal>
+			<active>#[pool.remoteSolr.leased]#</active>
+			<idle>#[pool.remoteSolr.available]#</idle>
+			<pending>#[pool.remoteSolr.pending]#</pending>
+		</ConnectionPool>
+	</ConnectionPools>
 </PerfmanceQueues>

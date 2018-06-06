@@ -210,6 +210,12 @@ clientTimeout = 10000
 # a limit on the number of concurrent connections
 httpdMaxBusySessions = 200
 
+# maximum number of simultaneously open outgoing HTTP connections in the general pool (net.yacy.cora.protocol.http.HTTPClient)
+http.outgoing.pool.general.maxTotal = 200
+
+# maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool (net.yacy.cora.federate.solr.instance.RemoteInstance)
+http.outgoing.pool.remoteSolr.maxTotal = 100
+
 # default root path for the file server
 # may be overridden by the htdocs parameter
 # users shall be encouraged to use the htdocs path for individual content,

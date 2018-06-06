@@ -490,6 +490,19 @@ public final class SwitchboardConstants {
     
     /** Default setting value controlling whether HTTP responses should be compressed */
     public static final boolean SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT = true;
+    
+    
+    /** Key of the setting controlling the maximum number of simultaneously open outgoing HTTP connections in the general pool (net.yacy.cora.protocol.http.HTTPClient) */
+    public static final String HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL = "http.outgoing.pool.general.maxTotal";
+    
+    /** Default setting value controlling the maximum number of simultaneously open outgoing HTTP connections in the general pool */
+    public static final int HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL_DEFAULT = 200;
+    
+    /** Key of the setting controlling the maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool (net.yacy.cora.federate.solr.instance.RemoteInstance) */
+    public static final String HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL = "http.outgoing.pool.remoteSolr.maxTotal";
+    
+    /** Default setting value controlling the maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool */
+    public static final int HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT = 100;
 
 
     /*

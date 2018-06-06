@@ -65,6 +65,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.Memory;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
@@ -75,8 +76,8 @@ import net.yacy.search.schema.WebgraphSchema;
 @SuppressWarnings("deprecation")
 public class RemoteInstance implements SolrInstance {
 	
-	/** The connection manager used to handle the common HTTP connections pool. */
-	private static final org.apache.http.impl.conn.PoolingClientConnectionManager CONNECTION_MANAGER = buildConnectionManager();
+	/** The connection manager holding the HTTP connections pool shared between remote Solr clients. */
+	public static final org.apache.http.impl.conn.PoolingClientConnectionManager CONNECTION_MANAGER = buildConnectionManager();
 	
 	/** A custom scheme registry allowing https connections to servers using self-signed certificate */
 	private static final SchemeRegistry SCHEME_REGISTRY = buildTrustSelfSignedSchemeRegistry();
@@ -206,18 +207,37 @@ public class RemoteInstance implements SolrInstance {
     }
 	
 	/**
+	 * Initialize the maximum connections for the given pool
+	 * 
+	 * @param pool
+	 *            a pooling connection manager. Must not be null.
+	 * @param maxConnections.
+	 *            The new maximum connections values. Must be greater than 0.
+	 * @throws IllegalArgumentException
+	 *             when pool is null or when maxConnections is lower than 1
+	 */
+	public static void initPoolMaxConnections(final org.apache.http.impl.conn.PoolingClientConnectionManager pool, int maxConnections) {
+		if (pool == null) {
+			throw new IllegalArgumentException("pool parameter must not be null");
+		}
+		if (maxConnections <= 0) {
+			throw new IllegalArgumentException("maxConnections parameter must be greater than zero");
+		}
+		pool.setMaxTotal(maxConnections);
+		
+        /* max connections per host */
+        pool.setDefaultMaxPerRoute((int) (2 * Memory.cores()));
+	}
+	
+	/**
 	 * @return a connection manager with a HTTP connection pool
 	 */
 	private static org.apache.http.impl.conn.PoolingClientConnectionManager buildConnectionManager() {
 		/* Important note : use of deprecated Apache classes is required because SolrJ still use them internally (see HttpClientUtil). 
 		 * Upgrade only when Solr implementation will become compatible */
 		
-		org.apache.http.impl.conn.PoolingClientConnectionManager cm;
-
-		cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
-		
-		cm.setMaxTotal(100);
-		cm.setDefaultMaxPerRoute(100);
+		final org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager();
+		initPoolMaxConnections(cm, 100);
 		return cm;
 	}
 	
