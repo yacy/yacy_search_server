@@ -76,7 +76,6 @@ import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.conn.DnsResolver;
-import org.apache.http.conn.HttpClientConnectionManager;
 import org.apache.http.conn.routing.HttpRoute;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
@@ -90,6 +89,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.IdleConnectionEvictor;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
@@ -120,11 +120,31 @@ public class HTTPClient {
     private final static int default_timeout = 6000;
     /** Maximum number of simultaneously open outgoing HTTP connections in the pool */
 	private final static int maxcon = 200;
-	private static IdleConnectionMonitorThread connectionMonitor = null;
+	
+	/** Default sleep time in seconds between each run of the connection evictor */
+	private static final int DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME = 5;
+	
+	/** Default maximum time in seconds to keep alive an idle connection in the pool */
+	private static final int DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE = 30;
+	
 	private final static RequestConfig dfltReqConf = initRequestConfig();
 	
 	/** The connection manager holding the configured connection pool for this client */
 	public static final PoolingHttpClientConnectionManager CONNECTION_MANAGER = initPoolingConnectionManager();
+	
+	/**
+	 * Background daemon thread evicting expired idle connections from the pool.
+	 * This may be eventually already done by the pool itself on connection request,
+	 * but this background task helps when no request is made to the pool for a long
+	 * time period.
+	 */
+	private static final IdleConnectionEvictor EXPIRED_CONNECTIONS_EVICTOR = new IdleConnectionEvictor(
+			CONNECTION_MANAGER, DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME, TimeUnit.SECONDS,
+			DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
+	
+	static {
+		EXPIRED_CONNECTIONS_EVICTOR.start();
+	}
 	
 	private final static HttpClientBuilder clientBuilder = initClientBuilder();
 	private final RequestConfig.Builder reqConfBuilder;
@@ -208,13 +228,13 @@ public class HTTPClient {
     	        .register("http", plainsf)
     	        .register("https", getSSLSocketFactory())
     	        .build();
-    	final PoolingHttpClientConnectionManager pooling = new PoolingHttpClientConnectionManager(registry, new DnsResolver(){
+    	final PoolingHttpClientConnectionManager pooling = new PoolingHttpClientConnectionManager(registry, null, null, new DnsResolver(){
 			@Override
 			public InetAddress[] resolve(final String host0)throws UnknownHostException {
 				final InetAddress ip = Domains.dnsResolve(host0);
 				if (ip == null) throw new UnknownHostException(host0);
 				return new InetAddress[]{ip};
-			}});
+			}}, DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
         initPoolMaxConnections(pooling, maxcon);
         
         pooling.setValidateAfterInactivity(default_timeout); // on init set to default 5000ms
@@ -227,11 +247,6 @@ public class HTTPClient {
                 .setTcpNoDelay(false)
                 .build();
         pooling.setDefaultSocketConfig(socketConfig);
-
-        if (connectionMonitor == null) {
-            connectionMonitor = new IdleConnectionMonitorThread(pooling);
-            connectionMonitor.start();
-        }
 
         return pooling;
     }
@@ -265,19 +280,27 @@ public class HTTPClient {
 		pool.setMaxPerRoute(new HttpRoute(localhost), maxConnections);
 	}
 
-    /**
-     * This method should be called just before shutdown
-     * to stop the ConnectionManager and idledConnectionEvictor
-     *
-     * @throws InterruptedException
-     */
-    public static void closeConnectionManager() throws InterruptedException {
-    	if (connectionMonitor != null) {
-    		// Shut down the evictor thread
-    		connectionMonitor.shutdown();
-    		connectionMonitor.join();
-    	}
-    }
+	/**
+	 * This method should be called just before shutdown to stop the
+	 * ConnectionManager and the idle connections evictor.
+	 *
+	 * @throws InterruptedException
+	 *             when the current thread is interrupted before the idle
+	 *             connections evictor thread termination.
+	 */
+	public static void closeConnectionManager() throws InterruptedException {
+		try {
+			if (EXPIRED_CONNECTIONS_EVICTOR != null) {
+				// Shut down the evictor thread
+				EXPIRED_CONNECTIONS_EVICTOR.shutdown();
+				EXPIRED_CONNECTIONS_EVICTOR.awaitTermination(1L, TimeUnit.SECONDS);
+			}
+		} finally {
+			if (CONNECTION_MANAGER != null) {
+				CONNECTION_MANAGER.shutdown();
+			}
+		}
+	}
 
     /**
      * This method sets the Header used for the request
@@ -1142,42 +1165,5 @@ public class HTTPClient {
                 e.printStackTrace();
         }
     }
-
-	public static class IdleConnectionMonitorThread extends Thread {
-	    
-	    private final HttpClientConnectionManager connMgr;
-	    private volatile boolean shutdown;
-	    
-	    public IdleConnectionMonitorThread(HttpClientConnectionManager connMgr) {
-	        super("HTTPClient.IdleConnectionMonitorThread");
-	        this.connMgr = connMgr;
-	    }
-
-	    @Override
-	    public void run() {
-	        try {
-	            while (!shutdown) {
-	                synchronized (this) {
-	                    wait(5000);
-	                    // Close expired connections
-	                    connMgr.closeExpiredConnections();
-	                    // Optionally, close connections
-	                    // that have been idle longer than 30 sec
-	                    connMgr.closeIdleConnections(30, TimeUnit.SECONDS);
-	                }
-	            }
-                connMgr.shutdown();
-	        } catch (final InterruptedException ex) {
-	            // terminate
-	        }
-	    }
-	    
-	    public void shutdown() {
-	        shutdown = true;
-	        synchronized (this) {
-	            notifyAll();
-	        }
-	    }
-	}
 
 }

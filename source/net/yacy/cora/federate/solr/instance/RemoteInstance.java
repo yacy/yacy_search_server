@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 
@@ -53,6 +54,7 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -60,6 +62,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.apache.solr.client.solrj.impl.HttpClientUtil;
 import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.update.UpdateShardHandler.IdleConnectionsEvictor;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -76,12 +79,35 @@ import net.yacy.search.schema.WebgraphSchema;
 @SuppressWarnings("deprecation")
 public class RemoteInstance implements SolrInstance {
 	
+	/** Default maximum time in seconds to keep alive an idle connection in the pool */
+	private static final int DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE = 30;
+	
+	/** Default sleep time in seconds between each run of the connection evictor */
+	private static final int DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME = 5;
+	
+	/** Default total maximum number of connections in the pool */
+	private static final int DEFAULT_POOL_MAX_TOTAL = 100;
+	
 	/** The connection manager holding the HTTP connections pool shared between remote Solr clients. */
 	public static final org.apache.http.impl.conn.PoolingClientConnectionManager CONNECTION_MANAGER = buildConnectionManager();
 	
+	/**
+	 * Background daemon thread evicting expired idle connections from the pool.
+	 * This may be eventually already done by the pool itself on connection request,
+	 * but this background task helps when no request is made to the pool for a long
+	 * time period.
+	 */
+	private static final IdleConnectionsEvictor EXPIRED_CONNECTIONS_EVICTOR = new IdleConnectionsEvictor(
+			CONNECTION_MANAGER, DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME, TimeUnit.SECONDS,
+			DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
+	
+	static {
+		EXPIRED_CONNECTIONS_EVICTOR.start();
+	}
+	
 	/** A custom scheme registry allowing https connections to servers using self-signed certificate */
 	private static final SchemeRegistry SCHEME_REGISTRY = buildTrustSelfSignedSchemeRegistry();
-    
+	
     private String solrurl;
     private final HttpClient client;
     private final String defaultCoreName;
@@ -236,8 +262,9 @@ public class RemoteInstance implements SolrInstance {
 		/* Important note : use of deprecated Apache classes is required because SolrJ still use them internally (see HttpClientUtil). 
 		 * Upgrade only when Solr implementation will become compatible */
 		
-		final org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager();
-		initPoolMaxConnections(cm, 100);
+		final org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(
+				SchemeRegistryFactory.createDefault(), DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
+		initPoolMaxConnections(cm, DEFAULT_POOL_MAX_TOTAL);
 		return cm;
 	}
 	
@@ -461,7 +488,20 @@ public class RemoteInstance implements SolrInstance {
 	 * connections. Must be called at the end of the application.
 	 */
 	public static void closeConnectionManager() {
-		CONNECTION_MANAGER.shutdown();
+		try {
+			if (EXPIRED_CONNECTIONS_EVICTOR != null) {
+				// Shut down the evictor thread
+				EXPIRED_CONNECTIONS_EVICTOR.shutdown();
+				try {
+					EXPIRED_CONNECTIONS_EVICTOR.awaitTermination(1L, TimeUnit.SECONDS);
+				} catch (final InterruptedException ignored) {
+				}
+			}
+		} finally {
+			if (CONNECTION_MANAGER != null) {
+				CONNECTION_MANAGER.shutdown();
+			}
+		}
 	}
 
     public static int queueSizeByMemory() {
