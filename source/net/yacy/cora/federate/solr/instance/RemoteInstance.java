@@ -217,10 +217,12 @@ public class RemoteInstance implements SolrInstance {
         	/* Here we must trust self-signed certificates as most peers with SSL enabled use such certificates */
         	this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, true);
         } else {
-        	/* Build a http client the Solr utils as in the HttpSolrClient constructor implementation. 
-        	 * The only difference is that the common connection manager is used and configured in the buildConnectionManager() function */
+        	/* Build a http client using the Solr utils as in the HttpSolrClient constructor implementation. 
+        	 * The main difference is that a shared connection manager is used (configured in the buildConnectionManager() function) */
             final ModifiableSolrParams params = new ModifiableSolrParams();
             params.set(HttpClientUtil.PROP_FOLLOW_REDIRECTS, false);
+            /* Accept gzip compression of responses to reduce network usage */
+            params.set(HttpClientUtil.PROP_ALLOW_COMPRESSION, true);
             this.client = HttpClientUtil.createClient(params, CONNECTION_MANAGER);
             if(this.client instanceof DefaultHttpClient && this.client.getParams() != null) {
             	/* Set the maximum time to get a connection from the shared connections pool */
