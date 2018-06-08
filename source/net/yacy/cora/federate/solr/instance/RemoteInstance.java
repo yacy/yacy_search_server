@@ -66,6 +66,7 @@ import org.apache.solr.update.UpdateShardHandler.IdleConnectionsEvictor;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.http.StrictSizeLimitResponseInterceptor;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Memory;
@@ -143,7 +144,7 @@ public class RemoteInstance implements SolrInstance {
         }
         return instances;
     }
-    
+	
 	/**
 	 * @param url
 	 *            the remote Solr URL. A default localhost URL is assumed when null.
@@ -161,6 +162,30 @@ public class RemoteInstance implements SolrInstance {
 	 */
 	public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName,
 			final int timeout, final boolean trustSelfSignedOnAuthenticatedServer) throws IOException {
+		this(url, coreNames, defaultCoreName, timeout, trustSelfSignedOnAuthenticatedServer, Long.MAX_VALUE);
+	}
+    
+	/**
+	 * @param url
+	 *            the remote Solr URL. A default localhost URL is assumed when null.
+	 * @param coreNames
+	 *            the Solr core names for the main collection and the webgraph
+	 * @param defaultCoreName
+	 *            the core name of the main collection
+	 * @param timeout
+	 *            the connection timeout in milliseconds
+	 * @param trustSelfSignedOnAuthenticatedServer
+	 *            when true, self-signed certificates are accepcted for an https
+	 *            connection to a remote server with authentication credentials
+	 * @param maxBytesPerReponse
+	 *            maximum acceptable decompressed size in bytes for a response from
+	 *            the remote Solr server. Negative value or Long.MAX_VALUE means no
+	 *            limit.
+	 * @throws IOException
+	 *             when a connection could not be opened to the remote Solr instance
+	 */
+	public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName,
+			final int timeout, final boolean trustSelfSignedOnAuthenticatedServer, final long maxBytesPerResponse) throws IOException {
         this.timeout = timeout;
         this.server= new HashMap<String, ConcurrentUpdateSolrClient>();
         this.solrurl = url == null ? "http://127.0.0.1:8983/solr/" : url; // that should work for the example configuration of solr 4.x.x
@@ -212,10 +237,10 @@ public class RemoteInstance implements SolrInstance {
             }
         }
         if (solraccount.length() > 0) {
-            this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, trustSelfSignedOnAuthenticatedServer);
+            this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, trustSelfSignedOnAuthenticatedServer, maxBytesPerResponse);
         } else if(u.isHTTPS()){
         	/* Here we must trust self-signed certificates as most peers with SSL enabled use such certificates */
-        	this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, true);
+        	this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, true, maxBytesPerResponse);
         } else {
         	/* Build a http client using the Solr utils as in the HttpSolrClient constructor implementation. 
         	 * The main difference is that a shared connection manager is used (configured in the buildConnectionManager() function) */
@@ -224,9 +249,20 @@ public class RemoteInstance implements SolrInstance {
             /* Accept gzip compression of responses to reduce network usage */
             params.set(HttpClientUtil.PROP_ALLOW_COMPRESSION, true);
             this.client = HttpClientUtil.createClient(params, CONNECTION_MANAGER);
-            if(this.client instanceof DefaultHttpClient && this.client.getParams() != null) {
-            	/* Set the maximum time to get a connection from the shared connections pool */
-            	HttpClientParams.setConnectionManagerTimeout(this.client.getParams(), timeout);
+            if(this.client instanceof DefaultHttpClient) {
+            	if(this.client.getParams() != null) {
+            		/* Set the maximum time to get a connection from the shared connections pool */
+            		HttpClientParams.setConnectionManagerTimeout(this.client.getParams(), timeout);
+            	}
+            	
+        		if (maxBytesPerResponse >= 0 && maxBytesPerResponse < Long.MAX_VALUE) {
+        			/*
+        			 * Add in last position the eventual interceptor limiting the response size, so
+        			 * that this is the decompressed amount of bytes that is considered
+        			 */
+        			((DefaultHttpClient)this.client).addResponseInterceptor(new StrictSizeLimitResponseInterceptor(maxBytesPerResponse),
+        					((DefaultHttpClient)this.client).getResponseInterceptorCount());
+        		}
             }
         }
         
@@ -298,10 +334,14 @@ public class RemoteInstance implements SolrInstance {
      * @param solraccount eventual user name used to authenticate on the target Solr
      * @param solraccount eventual password used to authenticate on the target Solr
      * @param trustSelfSignedCertificates when true, https connections to an host providing a self-signed certificate are accepted
+	 * @param maxBytesPerReponse
+	 *            maximum acceptable decompressed size in bytes for a response from
+	 *            the remote Solr server. Negative value or Long.MAX_VALUE means no
+	 *            limit.
      * @return a new apache HttpClient instance usable as a custom http client by SolrJ
      */
 	private static HttpClient buildCustomHttpClient(final int timeout, final MultiProtocolURL u, final String solraccount, final String solrpw,
-			final String host, final boolean trustSelfSignedCertificates) {
+			final String host, final boolean trustSelfSignedCertificates, final long maxBytesPerResponse) {
 		
 		/* Important note : use of deprecated Apache classes is required because SolrJ still use them internally (see HttpClientUtil). 
 		 * Upgrade only when Solr implementation will become compatible */
@@ -360,6 +400,15 @@ public class RemoteInstance implements SolrInstance {
 			org.apache.http.impl.client.BasicCredentialsProvider credsProvider = new org.apache.http.impl.client.BasicCredentialsProvider();
 			credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
 			result.setCredentialsProvider(credsProvider);
+		}
+		
+		if (maxBytesPerResponse >= 0 && maxBytesPerResponse < Long.MAX_VALUE) {
+			/*
+			 * Add in last position the eventual interceptor limiting the response size, so
+			 * that this is the decompressed amount of bytes that is considered
+			 */
+			result.addResponseInterceptor(new StrictSizeLimitResponseInterceptor(maxBytesPerResponse),
+					result.getResponseInterceptorCount());
 		}
 		
 		return result;

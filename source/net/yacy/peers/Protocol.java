@@ -110,6 +110,7 @@ import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.peers.graphics.WebStructureGraph;
 import net.yacy.peers.graphics.WebStructureGraph.HostReference;
@@ -1086,15 +1087,17 @@ public final class Protocol {
 		 * @param messageBegin beginning of the log message
 		 * @param ex exception to log
 		 */
-		private void logError(String messageBegin, Exception ex) {
-			String message = ex.getMessage();
-			if(message == null) {
-				message = "no details";
-			} else if(message.length() > MAX_ERROR_MESSAGE_LENGTH){
-				/* Strip too large details to avoid polluting this log with complete remote stack traces */
-				message = message.substring(0, MAX_ERROR_MESSAGE_LENGTH) + "...";
+		private void logError(final String messageBegin, final Exception ex) {
+			if(log.isFine()) {
+				String message = ex.getMessage();
+				if(message == null) {
+					message = "no details";
+				} else if(message.length() > MAX_ERROR_MESSAGE_LENGTH){
+					/* Strip too large details to avoid polluting this log with complete remote stack traces */
+					message = message.substring(0, MAX_ERROR_MESSAGE_LENGTH) + "...";
+				}
+				log.fine(messageBegin + " at " + this.targetBaseURL + " : " + message);
 			}
-			log.fine(messageBegin + " at " + this.targetBaseURL + " : " + message);
 		}
     	
         @Override
@@ -1106,8 +1109,13 @@ public final class Protocol {
     						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
     						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT);
     			}
-				
-                this.instance = new RemoteInstance(this.targetBaseURL, null, "solr", this.timeout, trustSelfSignedOnAuthenticatedServer); // this is a 'patch configuration' which considers 'solr' as default collection
+    			/* Add a limit to the maximum acceptable size of the remote peer Solr response. This can help prevent out of memory errors when :
+    			 * - this peer is overloaded
+    			 * - the remote peer has indexed documents with excessively large metadata (too large at least to fit within this peer resources)
+    			 * - the remote peer is a malicious one and would like to trigger a deny of service */
+				final long maxBytesPerResponse = MemoryControl.available() / 4;
+    			
+                this.instance = new RemoteInstance(this.targetBaseURL, null, "solr", this.timeout, trustSelfSignedOnAuthenticatedServer, maxBytesPerResponse); // this is a 'patch configuration' which considers 'solr' as default collection
                 try {
 					boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
 					if (Switchboard.getSwitchboard() != null) {
