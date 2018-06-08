@@ -1115,7 +1115,7 @@ public final class Protocol {
     			 * - the remote peer is a malicious one and would like to trigger a deny of service */
 				final long maxBytesPerResponse = MemoryControl.available() / 4;
     			
-                this.instance = new RemoteInstance(this.targetBaseURL, null, "solr", this.timeout, trustSelfSignedOnAuthenticatedServer, maxBytesPerResponse); // this is a 'patch configuration' which considers 'solr' as default collection
+                this.instance = new RemoteInstance(this.targetBaseURL, null, "solr", this.timeout, trustSelfSignedOnAuthenticatedServer, maxBytesPerResponse, false); // this is a 'patch configuration' which considers 'solr' as default collection
                 try {
 					boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
 					if (Switchboard.getSwitchboard() != null) {

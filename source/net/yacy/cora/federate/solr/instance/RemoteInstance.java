@@ -61,6 +61,7 @@ import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.apache.solr.client.solrj.impl.HttpClientUtil;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.update.UpdateShardHandler.IdleConnectionsEvictor;
 
@@ -109,13 +110,32 @@ public class RemoteInstance implements SolrInstance {
 	/** A custom scheme registry allowing https connections to servers using self-signed certificate */
 	private static final SchemeRegistry SCHEME_REGISTRY = buildTrustSelfSignedSchemeRegistry();
 	
+	/** Solr server URL */
     private String solrurl;
+    
+    /** HTTP client used to request the Solr server */
     private final HttpClient client;
+    
+    /** Default Solr core name */
     private final String defaultCoreName;
-    private final ConcurrentUpdateSolrClient defaultServer;
+    
+    /** Solr client for the default core */
+    private final SolrClient defaultServer;
+    
+    /** Solr core names for the main collection and the webgraph */
     private final Collection<String> coreNames;
-    private final Map<String, ConcurrentUpdateSolrClient> server;
+    
+    /** Map from Solr core names to SolrClient instances */
+    private final Map<String, SolrClient> server;
+    
+    /** Connection timeout in milliseconds */
     private final int timeout;
+    
+	/**
+	 * When true, the instance will be used for update operations. The Solr client
+	 * is adjusted for better performance of multiple updates.
+	 */
+	private final boolean concurrentUpdates;
     
 	/**
 	 * @param urlList
@@ -146,6 +166,8 @@ public class RemoteInstance implements SolrInstance {
     }
 	
 	/**
+	 * Build a new instance optimized for concurrent updates, with no limit on responses size.
+	 *  
 	 * @param url
 	 *            the remote Solr URL. A default localhost URL is assumed when null.
 	 * @param coreNames
@@ -162,7 +184,7 @@ public class RemoteInstance implements SolrInstance {
 	 */
 	public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName,
 			final int timeout, final boolean trustSelfSignedOnAuthenticatedServer) throws IOException {
-		this(url, coreNames, defaultCoreName, timeout, trustSelfSignedOnAuthenticatedServer, Long.MAX_VALUE);
+		this(url, coreNames, defaultCoreName, timeout, trustSelfSignedOnAuthenticatedServer, Long.MAX_VALUE, true);
 	}
     
 	/**
@@ -181,13 +203,18 @@ public class RemoteInstance implements SolrInstance {
 	 *            maximum acceptable decompressed size in bytes for a response from
 	 *            the remote Solr server. Negative value or Long.MAX_VALUE means no
 	 *            limit.
+	 * @param concurrentUpdates
+	 *            when true, the instance will be used for update operations. The
+	 *            Solr client is adjusted for better performance of multiple
+	 *            updates.
 	 * @throws IOException
 	 *             when a connection could not be opened to the remote Solr instance
 	 */
 	public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName,
-			final int timeout, final boolean trustSelfSignedOnAuthenticatedServer, final long maxBytesPerResponse) throws IOException {
+			final int timeout, final boolean trustSelfSignedOnAuthenticatedServer, final long maxBytesPerResponse, final boolean concurrentUpdates) throws IOException {
         this.timeout = timeout;
-        this.server= new HashMap<String, ConcurrentUpdateSolrClient>();
+        this.concurrentUpdates = concurrentUpdates;
+        this.server= new HashMap<String, SolrClient>();
         this.solrurl = url == null ? "http://127.0.0.1:8983/solr/" : url; // that should work for the example configuration of solr 4.x.x
         this.coreNames = coreNames == null ? new ArrayList<String>() : coreNames;
         if (this.coreNames.size() == 0) {
@@ -248,6 +275,13 @@ public class RemoteInstance implements SolrInstance {
             params.set(HttpClientUtil.PROP_FOLLOW_REDIRECTS, false);
             /* Accept gzip compression of responses to reduce network usage */
             params.set(HttpClientUtil.PROP_ALLOW_COMPRESSION, true);
+            
+            /* Set the maximum time to establish a connection to the remote server */
+            params.set(HttpClientUtil.PROP_CONNECTION_TIMEOUT, this.timeout);
+            /* Set the maximum time between data packets reception once a connection has been established */
+            params.set(HttpClientUtil.PROP_SO_TIMEOUT, this.timeout);
+            
+            
             this.client = HttpClientUtil.createClient(params, CONNECTION_MANAGER);
             if(this.client instanceof DefaultHttpClient) {
             	if(this.client.getParams() != null) {
@@ -266,7 +300,7 @@ public class RemoteInstance implements SolrInstance {
             }
         }
         
-        this.defaultServer = (ConcurrentUpdateSolrClient) getServer(this.defaultCoreName);
+        this.defaultServer = getServer(this.defaultCoreName);
         if (this.defaultServer == null) throw new IOException("cannot connect to url " + url + " and connect core " + defaultCoreName);
     }
 	
@@ -469,10 +503,13 @@ public class RemoteInstance implements SolrInstance {
         return this.defaultServer;
     }
 
+    /**
+     * @param name the name of the Solr core
+     */
     @Override
-    public SolrClient getServer(String name) {
+    public SolrClient getServer(final String name) {
         // try to get the server from the cache
-        ConcurrentUpdateSolrClient s = this.server.get(name);
+    	SolrClient s = this.server.get(name);
         if (s != null) return s;
         // create new http server
         final MultiProtocolURL u;
@@ -481,37 +518,29 @@ public class RemoteInstance implements SolrInstance {
         } catch (final MalformedURLException e) {
             return null;
         }
-        if (this.client != null) {
-        	final String solrServerURL;
-        	if(StringUtils.isNotEmpty(u.getUserInfo())) {
-        		/* Remove user authentication info from the URL, as authentication will be handled by the custom http client */
-                String host = u.getHost();
-                int port = u.getPort();
-                String solrpath = u.getPath();
-                solrServerURL = u.getProtocol() + "://" + host + ":" + port + solrpath;
-                ConcurrentLog.info("RemoteSolrConnector", "connecting Solr authenticated with url : " + u);        		
-        	} else {
-        		solrServerURL = u.toString();
-        		ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url : " + u);
-        	}
-        	ConcurrentUpdateSolrClient.Builder builder = new ConcurrentUpdateSolrClient.Builder(solrServerURL);
-        	builder.withHttpClient(this.client);
-            builder.withQueueSize(queueSizeByMemory());
-            builder.withThreadCount(Runtime.getRuntime().availableProcessors());
-            s = builder.build();
+        final String solrServerURL;
+        if(StringUtils.isNotEmpty(u.getUserInfo())) {
+        	/* Remove user authentication info from the URL, as authentication will be handled by the custom http client */
+            String host = u.getHost();
+            int port = u.getPort();
+            String solrpath = u.getPath();
+            solrServerURL = u.getProtocol() + "://" + host + ":" + port + solrpath;
+            ConcurrentLog.info("RemoteSolrConnector", "connecting Solr authenticated with url : " + u);        		
         } else {
-            ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url : " + this.solrurl + name);
-            ConcurrentUpdateSolrClient.Builder builder = new ConcurrentUpdateSolrClient.Builder(u.toString());
-            builder.withQueueSize(queueSizeByMemory());
-            builder.withThreadCount(Runtime.getRuntime().availableProcessors());
-            s = builder.build();
+        	solrServerURL = u.toString();
+        	ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url : " + u);
         }
-        //s.setAllowCompression(true);
-        /* Set the maximum time to establish a connection to the remote server */
-        s.setConnectionTimeout(this.timeout);
-        /* Set the maximum time between data packets reception one a connection has been established */
-        s.setSoTimeout(this.timeout);
-        //s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
+        if(this.concurrentUpdates) {
+        	final ConcurrentUpdateSolrClient.Builder builder = new ConcurrentUpdateSolrClient.Builder(solrServerURL);
+        	builder.withHttpClient(this.client);
+        	builder.withQueueSize(queueSizeByMemory());
+        	builder.withThreadCount(Runtime.getRuntime().availableProcessors());
+        	s = builder.build();
+        } else {
+        	final HttpSolrClient.Builder builder = new HttpSolrClient.Builder(solrServerURL);
+        	builder.withHttpClient(this.client);
+        	s = builder.build();
+        }
         this.server.put(name, s);
         return s;
     }
@@ -524,13 +553,16 @@ public class RemoteInstance implements SolrInstance {
 	 */
 	@Override
 	public void close() {
-		for (final ConcurrentUpdateSolrClient solrClient : this.server.values()) {
+		for (final SolrClient solrClient : this.server.values()) {
 			/*
 			 * Close every open Solr client : this is important as it shutdowns client's
 			 * internal asynchronous tasks executor. To release the common connection
 			 * manager, see closeConnectionManager().
 			 */
-			solrClient.close();
+			try {
+				solrClient.close();
+			} catch (final IOException ignored) {
+			}
 		}
 	}
     

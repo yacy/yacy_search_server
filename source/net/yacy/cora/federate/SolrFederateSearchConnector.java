@@ -102,7 +102,8 @@ public class SolrFederateSearchConnector extends AbstractFederateSearchConnector
 						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
 						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT);
 			}
-            RemoteInstance instance = new RemoteInstance(baseurl, remotecorename, corename, 20000, trustSelfSignedOnAuthenticatedServer);
+			RemoteInstance instance = new RemoteInstance(baseurl, remotecorename, corename, 20000,
+					trustSelfSignedOnAuthenticatedServer, Long.MAX_VALUE, false);
             try {
 				boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
 				if (Switchboard.getSwitchboard() != null) {

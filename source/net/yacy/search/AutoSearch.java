@@ -270,7 +270,7 @@ public class AutoSearch extends AbstractBusyThread {
 						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
 						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT);
         		
-                RemoteInstance instance = new RemoteInstance(targetBaseURL + "/solr/", null, null, 10000, trustSelfSignedOnAuthenticatedServer); // this is a 'patch configuration' which considers 'solr' as default collection
+                RemoteInstance instance = new RemoteInstance(targetBaseURL + "/solr/", null, null, 10000, trustSelfSignedOnAuthenticatedServer, Long.MAX_VALUE, false); // this is a 'patch configuration' which considers 'solr' as default collection
                 try {
 					SolrConnector solrConnector = new RemoteSolrConnector(instance,
 							sb.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
