@@ -44,6 +44,10 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
     public static final String PATTERN_SIMPLE  = "yyyy/MM/dd HH:mm:ss";
     
+    /** A regular expression matching the PATTERN_SIMPLE pattern (does not control last day of month (30/31 or 28/29 for february).
+     * Can be used as a HTML5 input field validation pattern */
+    public static final String PATTERN_SIMPLE_REGEX  ="[0-9]{4}/(0[1-9]|1[012])/(0[1-9]|1[0-9]|2[0-9]|3[01]) (0[0-9]|1[0-9]|2[0-3])(:[0-5][0-9]){2}";
+    
     public static final SimpleDateFormat FORMAT_SHORT_DAY     = new SimpleDateFormat(PATTERN_SHORT_DAY, Locale.US);
     public static final SimpleDateFormat FORMAT_SHORT_MINUTE  = new SimpleDateFormat(PATTERN_SHORT_MINUTE, Locale.US);
     public static final SimpleDateFormat FORMAT_SHORT_SECOND  = new SimpleDateFormat(PATTERN_SHORT_SECOND, Locale.US);
@@ -157,7 +161,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         else throw new IllegalArgumentException("UTC String malformed (wrong sign):" + diffString);
         final int oh = NumberTools.parseIntDecSubstring(diffString, 1, 3);
         final int om = NumberTools.parseIntDecSubstring(diffString, 3);
-        return (int) ( ((ahead) ? 1 : -1) * (oh * 60 + om));
+        return ((ahead) ? 1 : -1) * (oh * 60 + om);
     }
     
     /**

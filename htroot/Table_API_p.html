@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>YaCy '#[clientname]#': Peer Steering</title>
     
@@ -76,7 +76,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <th>Call<br/>Count</th>
           <th>Recording<br/>Date</th>
           <th>Last&nbsp;Exec<br/>Date</th>
-          <th>Next&nbsp;Exec<br/>Date</th>
+          <th>Next&nbsp;Exec<br/>Date#(hasEditableNextExecDate)#:: <button type="submit" name="submitNextExecDates" class="btn btn-default btn-xs" title="Apply edited next execution dates">
+          		<span class="glyphicon glyphicon-ok"></span>
+				<span> Apply</span>
+          	</button>#(/hasEditableNextExecDate)#
+          </th>
           <th class="sorttable_nosort">Event Trigger</th>
           <th class="sorttable_nosort">Scheduler</th>
           #(inline)#<th class="sorttable_nosort">URL</th>::#(/inline)#
@@ -113,7 +117,14 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <td valign="top">#[callcount]#</td>
           <td valign="top">#[dateRecording]#</td>
           <td valign="top">#[dateLastExec]#</td>
-          <td valign="top">#[dateNextExec]#</td>
+          <td valign="top">#(editableDateNext)# #[dateNextExec]# 
+          	::
+    		#(dateFormatError)#::<div class="alert alert-danger" role="alert">Malformed date "#[invalidDate]#".</div>#(/dateFormatError)#
+    		#(dateBeforeNowError)#::<div class="alert alert-danger" role="alert">"#[invalidDate]#" is before the current date.</div>#(/dateBeforeNowError)#
+          	<input name="date_next_exec_#[pk]#" type="text" required="required" 
+          		maxlength="19" minlength="19" pattern="#[dateLastExecPattern]#" 
+          		value="#[dateNextExec]#" size="19" title="yyyy/MM/dd HH:mm:ss"/>#(/editableDateNext)#
+          </td>
           <td valign="top">
           #(event)#
             <select name="event_select_#[pk]#" onchange='submitchange("#[pk]#")'>
@@ -194,14 +205,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <input type="hidden" name="scheduleeventaction" id="scheduleeventaction" value="false" />
       <input type="hidden" name="current_pk" id="current_pk" value="" />
       <input type="hidden" name="num" value="#[num]#" />
-      <p>
-      <div class="form-horizontal">
+      <div class="form-group col-sm-12">
         <input type="submit" name="execrows" value="Execute Selected Actions" class="btn btn-success"/>&nbsp;&nbsp;&nbsp;
         <input type="submit" name="deleterows" value="Delete Selected Actions" class="btn btn-danger" onclick="return confirm('Confirm Deletion')"/>&nbsp;&nbsp;&nbsp;
       </div>
-      </p>
-      <p>
-      <div class="form-group">
+      <div class="form-group col-sm-6">
         <input type="submit" name="deleteold" value="Delete all Actions which had been created before " class="btn btn-warning" style="float:left;" onclick="return confirm('Confirm Deletion')"/>
         <select name="deleteoldtime" class="form-control selectWidth input-sm" style="width:auto;">
           <option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option>
@@ -212,7 +220,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <option value="365">1 year</option><option value="730">2 years</option>
         </select>
       </div>
-      </p>
+      #(hasEditableNextExecDate)#::
+      <div class="form-group col-sm-6">
+ 		<input type="submit" name="submitNextExecDates" class="btn btn-default" value="Apply edited next execution dates"/>
+      </div>
+      #(/hasEditableNextExecDate)#
       
     </form>
     #(/showtable)#

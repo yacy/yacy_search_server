@@ -18,8 +18,11 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +38,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
@@ -157,6 +161,50 @@ public class Table_API_p {
             } catch (final Throwable e) { ConcurrentLog.logException(e); }
         }
         
+        /* Edition of scheduled next execution dates */
+        final Map<String, String> invalidNextExecDateFormats = new HashMap<>();
+        final Map<String, String> nextExecDatesBeforeNow = new HashMap<>();
+        if (post != null && post.containsKey("submitNextExecDates")) {
+        	
+        	/* Check this is a valid transaction */
+        	TransactionManager.checkPostTransaction(header, post);
+        	
+        	
+        	final String dateNexExecPrefix = "date_next_exec_";
+        	final Date now = new Date();
+            for (final Map.Entry<String, String> entry : post.entrySet()) {
+                if (entry.getKey().startsWith(dateNexExecPrefix) && entry.getValue() != null) {
+                    try {
+                    	final String rowPkStr = entry.getKey().substring(dateNexExecPrefix.length());
+						final Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME,
+								rowPkStr.getBytes(StandardCharsets.UTF_8));
+						if(row != null) {
+							final int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
+							final String dateNextExecStr = entry.getValue().trim();
+							try {
+								final Date dateNextExec = GenericFormatter.FORMAT_SIMPLE.parse(dateNextExecStr);
+								
+								if(time != 0) { // Check there is effectively a schedule period on this row 
+									if(dateNextExec.before(now)) {
+										nextExecDatesBeforeNow.put(rowPkStr, dateNextExecStr);
+									} else {
+										row.put(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, dateNextExec);
+									
+										sb.tables.update(WorkTables.TABLE_API_NAME, row);
+									}
+								}
+							} catch (final ParseException e) {
+								invalidNextExecDateFormats.put(rowPkStr, dateNextExecStr);
+							}
+							
+						}
+					} catch (final IOException | SpaceExceededException e) {
+						ConcurrentLog.logException(e);
+					}
+                }
+            }
+        }
+        
         if (post != null && !post.get("deleterows", "").isEmpty()) {
         	
         	/* Check this is a valid transaction */
@@ -250,7 +298,7 @@ public class Table_API_p {
             }
             prop.put("showexec_list", count);
         }
-
+        
         // generate table
         prop.put("showtable", 1);
         prop.put("showtable_inline", inline ? 1 : 0);
@@ -328,12 +376,14 @@ public class Table_API_p {
             
             // then work on the list
             for (final Tables.Row row : table) {
+            	final String rowPKStr = UTF8.String(row.getPK());
                 final Date now = new Date();
                 final Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, now) : null;
                 final Date date_recording = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, date);
                 final Date date_last_exec = row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
                 final Date date_next_exec = row.get(WorkTables.TABLE_API_COL_DATE_NEXT_EXEC, (Date) null);
                 final int callcount = row.get(WorkTables.TABLE_API_COL_APICALL_COUNT, 1);
+                final int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
                 prop.put("showtable_list_" + count + "_inline", inline ? 1 : 0);
                 prop.put("showtable_list_" + count + "_dark", dark ? 1 : 0);
                 dark = !dark;
@@ -342,7 +392,24 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_callcount", callcount);
                 prop.put("showtable_list_" + count + "_dateRecording", date_recording == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_recording));
                 prop.put("showtable_list_" + count + "_dateLastExec", date_last_exec == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_last_exec));
-                prop.put("showtable_list_" + count + "_dateNextExec", date_next_exec == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_next_exec));
+                
+                prop.put("showtable_list_" + count + "_editableDateNext", time != 0);
+                final String enteredDateBeforeNow = nextExecDatesBeforeNow.get(rowPKStr);
+                prop.put("showtable_list_" + count + "_editableDateNext_dateBeforeNowError", enteredDateBeforeNow != null);
+                if(enteredDateBeforeNow != null) {
+                	prop.put("showtable_list_" + count + "_editableDateNext_dateBeforeNowError_invalidDate", enteredDateBeforeNow);
+                }
+                
+                final String invalidEnteredDate = invalidNextExecDateFormats.get(rowPKStr);
+                prop.put("showtable_list_" + count + "_editableDateNext_dateFormatError", invalidEnteredDate != null);
+                if(invalidEnteredDate != null) {
+                	prop.put("showtable_list_" + count + "_editableDateNext_dateFormatError_invalidDate", invalidEnteredDate);
+                }
+                
+                prop.put("showtable_list_" + count + "_editableDateNext_dateLastExecPattern", GenericFormatter.PATTERN_SIMPLE_REGEX);
+                prop.put("showtable_list_" + count + "_editableDateNext_dateNextExec", date_next_exec == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_next_exec));
+                prop.put("showtable_list_" + count + "_editableDateNext_pk", rowPKStr);
+                
                 prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));
                 prop.putHTML("showtable_list_" + count + "_comment", row.get(WorkTables.TABLE_API_COL_COMMENT));
                 // check type & action to link crawl start URLs back to CrawlStartExpert.html
@@ -352,7 +419,7 @@ public class Table_API_p {
                     if (editUrl.length() > 1000) {
                         final MultiProtocolURL u = new MultiProtocolURL("http://localhost:8090" + editUrl);                       
                         prop.put("showtable_list_" + count + "_isCrawlerStart", 2);
-                        prop.put("showtable_list_" + count + "_isCrawlerStart_pk", UTF8.String(row.getPK()));
+                        prop.put("showtable_list_" + count + "_isCrawlerStart_pk", rowPKStr);
                         prop.put("showtable_list_" + count + "_isCrawlerStart_servlet", "CrawlStartExpert.html");
                         Map<String, String> attr = u.getAttributes();
                         int ac = 0;
@@ -383,7 +450,7 @@ public class Table_API_p {
                 // events
                 final String kind = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_KIND, "off");
                 final String action = row.get(WorkTables.TABLE_API_COL_APICALL_EVENT_ACTION, "startup");
-                prop.put("showtable_list_" + count + "_event_pk", UTF8.String(row.getPK()));
+                prop.put("showtable_list_" + count + "_event_pk", rowPKStr);
                 boolean schedulerDisabled = "regular".equals(kind);
                 if ("off".equals(kind)) {
                     prop.put("showtable_list_" + count + "_event", 0);
@@ -403,11 +470,10 @@ public class Table_API_p {
 
                 // scheduler
                 final String unit = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_UNIT, "days");
-                final int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
                 prop.put("showtable_list_" + count + "_selectedMinutes", unit.equals("minutes") ? 1 : 0);
                 prop.put("showtable_list_" + count + "_selectedHours", unit.equals("hours") ? 1 : 0);
                 prop.put("showtable_list_" + count + "_selectedDays", (unit.isEmpty() || unit.equals("days")) ? 1 : 0);
-                prop.put("showtable_list_" + count + "_scheduler_pk", UTF8.String(row.getPK()));
+                prop.put("showtable_list_" + count + "_scheduler_pk", rowPKStr);
                 prop.put("showtable_list_" + count + "_scheduler_disabled", schedulerDisabled ? 1 : 0);
                 prop.put("showtable_list_" + count + "_repeatTime", time);
                 if (time == 0) {
@@ -448,6 +514,7 @@ public class Table_API_p {
                 }
                 count++;
             }
+            prop.put("showtable_hasEditableNextExecDate", scheduledactions);
             if (scheduledactions) {
                 prop.put("showschedulerhint", 1);
                 prop.put("showschedulerhint_tfminutes", sb.getConfigLong(SwitchboardConstants.CLEANUP_BUSYSLEEP, 300000) / 60000);
