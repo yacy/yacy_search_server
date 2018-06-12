@@ -1,4 +1,3 @@
-LINEA 1390
 # it.lng
 # English-->Italian
 # -----------------------
@@ -358,13 +357,13 @@ DHT==DHT
 "Change Network"=="Cambia rete"
 Peer-to-Peer Mode==Modalità Peer2Peer
 >Index Distribution==>Distribuzione indice
->Index Receive==Ricezione indice
+>Index Receive==>Ricezione indice
 pages per minute==pagine per minuto
->Robinson Mode==Modalità Robinson
+>Robinson Mode==>Modalità Robinson
 "Save"=="Salva"
 #-----------------------------
 
-#File: ConfigParser.html
+#File: ConfigParser_p.html
 #---------------------------
 Parser Configuration==Configurazione parser
 > enable/disable<==> attivato / disattivato<
@@ -373,9 +372,9 @@ Parser Configuration==Configurazione parser
 "Submit"=="Invia"
 #-----------------------------
 
-#File: ConfigPortal.html
+#File: ConfigPortal_p.html
 #---------------------------
-Greeting Line<==Messaggio di benvenuto
+Greeting Line<==Messaggio di benvenuto<
 URL of Home Page<==URL della homepage<
 Enable Search for Everyone?==Ricerca permessa a tutti?
 Search is available for everyone==Ricerca permessa a tutti
@@ -539,7 +538,6 @@ Cookie==Cookie
 
 #File: CrawlCheck_p.html
 #---------------------------
-Crawl Check==
 "Check given urls"=="Verifica gli URL"
 >Analysis<==>Analisi<
 >URL<==>URL<
@@ -707,12 +705,6 @@ See an==Guarda un
 >example==>esempio
 #-----------------------------
 
-#File: IndexCleaner_p.html
-#---------------------------
-Stop==Stop
-Pause==Pausa
-#-----------------------------
-
 #File: IndexControlRWIs_p.html
 #---------------------------
 document type</td>==tipo documento</td>
@@ -820,20 +812,6 @@ years<==anni<
 months<==mesi<
 days<==giorni<
 hours<==ore<
-#-----------------------------
-
-#File: IndexImport_p.html
-#---------------------------
-Cache Size==Dimensione cache
-Import&nbsp;Path:==Importa percorso:
-Status==Status
-"Pause"=="Pausa"
-Example Path:==Esempio percorso:
->Description==>Descrizione
->File==>File
->Directory==>Directory
->Yes<==>Sì<
->No<==>No<
 #-----------------------------
 
 #File: IndexImportMediawiki_p.html
@@ -1023,7 +1001,7 @@ Thread==Thread
 #File: PerformanceSearch_p.html
 #---------------------------
 Query==Query
-Event<==Evento
+Event<==Evento<
 #-----------------------------
 
 #File: ProxyIndexingMonitor_p.html
@@ -1048,7 +1026,7 @@ Status:==Status:
 #---------------------------
 Regular Expression==Espressione regolare
 Java Pattern==pattern Java
-Result<==Risultato
+Result<==Risultato<
 #-----------------------------
 
 #File: RemoteCrawl_p.html
@@ -1534,7 +1512,7 @@ Ranking and Heuristics==Ranking ed euristiche
 
 #File: env/templates/simpleheader.template
 #---------------------------
-Administration<==Amministrazione<
+Administration &raquo;==Amministrazione &raquo;
 Web Search<==>Ricerca web<
 File Search<==>Ricerca file<
 Compare Search<==>Confronta ricerche<
@@ -1627,7 +1605,7 @@ Crawling of MediaWikis==Crawling di MediaWiki
 Crawling of phpBB3 Forums==Crawling di forum phpBB3
 Network Scanner==Scanner di rete
 Remote Crawling==Crawling remoto
-Autocrawl==Autocrawler
+>Autocrawl<==>Autocrawler<
 #-----------------------------
 
 #File: env/templates/submenuPortalIntegration.template
