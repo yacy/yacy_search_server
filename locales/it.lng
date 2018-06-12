@@ -1513,9 +1513,9 @@ Ranking and Heuristics==Ranking ed euristiche
 #File: env/templates/simpleheader.template
 #---------------------------
 Administration &raquo;==Amministrazione &raquo;
-Web Search<==>Ricerca web<
-File Search<==>Ricerca file<
-Compare Search<==>Confronta ricerche<
+Web Search<==Ricerca web<
+File Search<==Ricerca file<
+Compare Search<==Confronta ricerche<
 #-----------------------------
 
 #File: env/templates/submenuAccessTracker.template
