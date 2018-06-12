@@ -317,6 +317,7 @@ public class ConfigBasic {
         prop.put("lang_en", "0");
         prop.put("lang_ja", "0");
         prop.put("lang_el", "0");
+        prop.put("lang_it", "0");
         if ("default".equals(lang)) {
             prop.put("lang_en", "1");
         } else {
@@ -331,6 +332,7 @@ public class ConfigBasic {
             prop.put("active_hi", l.contains("hi") ? "2" : "1");
             prop.put("active_ja", l.contains("ja") ? "2" : "1");
             prop.put("active_el", l.contains("el") ? "2" : "1");
+            prop.put("active_it", l.contains("it") ? "2" : "1");
             prop.put("active_ru", l.contains("ru") ? "2" : "1");
             prop.put("active_uk", l.contains("uk") ? "2" : "1");
             prop.put("active_en", "2");
@@ -345,6 +347,7 @@ public class ConfigBasic {
             prop.put("active_en", "0");
             prop.put("active_ja", "0");
             prop.put("active_el", "0");
+            prop.put("active_it", "0");
         }
         return prop;
     }
