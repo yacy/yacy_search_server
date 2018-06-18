@@ -143,7 +143,7 @@ public class FileCrawlStarterTask extends Thread {
 				this.profile, true);
 		this.scraper.registerHtmlFilterEventListener(anchorListener);
 
-		final Writer writer = new TransformerWriter(null, null, this.scraper, null, false);
+		final Writer writer = new TransformerWriter(null, null, this.scraper, false);
 		FileInputStream inStream = null;
 
 		try {

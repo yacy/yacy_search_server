@@ -806,7 +806,7 @@ public class Crawler_p {
 		List<AnchorURL> hyperlinks_from_file;
 		// check if the crawl filter works correctly
 		final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new HashSet<String>(), new VocabularyScraper(), timezoneOffset);
-		final Writer writer = new TransformerWriter(null, null, scraper, null, false);
+		final Writer writer = new TransformerWriter(null, null, scraper, false);
 		if((crawlingFileContent == null || crawlingFileContent.isEmpty()) && crawlingFile != null) {
 			/* Let's report here detailed error to help user when he selected a wrong file */
 			if(!crawlingFile.exists()) {
