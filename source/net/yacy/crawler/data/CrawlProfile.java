@@ -49,6 +49,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.JSONArray;
+import net.yacy.cora.util.JSONException;
 import net.yacy.cora.util.JSONTokener;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.document.VocabularyScraper;
@@ -290,11 +291,32 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (ext != null) putAll(ext);
         this.doms = new ConcurrentHashMap<String, AtomicInteger>();
         String jsonString = ext.get(CrawlAttribute.IGNORE_DIV_CLASS_NAME.key);
-    	JSONArray a = jsonString == null ? new JSONArray() : new JSONArray(new JSONTokener(jsonString));
+    	JSONArray a;
+    	if(jsonString == null) {
+    		a = new JSONArray();
+    	} else {
+    		try {
+    			a = new JSONArray(new JSONTokener(jsonString));
+    		} catch(final JSONException e) {
+    			ConcurrentLog.logException(e);
+    			a = new JSONArray();
+    		}
+    	}
         this.ignore_class_name = new HashSet<String>();
         for (int i = 0; i < a.length(); i++) this.ignore_class_name.add(a.getString(i));
         jsonString = ext.get(CrawlAttribute.SCRAPER.key);
-        this.scraper = jsonString == null || jsonString.length() == 0 ? new VocabularyScraper() : new VocabularyScraper(jsonString);
+        if(jsonString == null || jsonString.length() == 0) {
+        	this.scraper = new VocabularyScraper();
+        } else {
+        	VocabularyScraper loadedScraper;
+        	try {
+        		loadedScraper = new VocabularyScraper(jsonString);
+        	} catch(final JSONException e) {
+        		ConcurrentLog.logException(e);
+        		loadedScraper = new VocabularyScraper();	
+        	}
+    		this.scraper = loadedScraper;
+        }
     }
 
     public Set<String> ignoreDivClassName() {
