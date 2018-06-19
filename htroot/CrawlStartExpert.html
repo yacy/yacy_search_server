@@ -171,6 +171,8 @@
                 disableIf('indexmustnotmatch', defaultMatchNone);
                 disableIf('indexcontentmustnotmatch', defaultMatchNone);
                 disableIf('indexMediaTypeMustNotMatch', defaultMatchNone);
+                disableIf('indexSolrQueryMustMatch', "#[solrQueryMatchAllStr]#");
+                disableIf('indexSolrQueryMustNotMatch', "#[solrEmptyQueryStr]#");
 
                 // remove if MATCH_ALL_STRING
                 disableIf('mustmatch', defaultMatchAll);
@@ -369,7 +371,7 @@
  	        <dt>Filter on Document Media Type (aka MIME type)</dt>
 	        <dd>
             	<div class="info" style="float:right">
-            		<img src="env/grafics/i16.gif" width="16" height="16" alt="Clean up search events cache info"/>
+            		<img src="env/grafics/i16.gif" width="16" height="16" alt="Media Type filter info"/>
             		<span style="right:0px;" id="mediaTypeMustMatchInfo">
             			The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>
             			that <b>must match</b> with the document Media Type (also known as MIME Type) to allow the URL to be indexed. 
@@ -387,6 +389,39 @@
 		    			<td><input name="indexMediaTypeMustNotMatch" id="indexMediaTypeMustNotMatch" type="text" size="55" maxlength="100000" value="#[indexMediaTypeMustNotMatch]#" /></td>
 		    		</tr>
 				</table>
+	        </dd>
+ 	        <dt>Solr query filter on any active <a href="IndexSchema_p.html" target="_blank">indexed</a> field(s)</dt>
+	        <dd>
+            	<div class="info" style="float:right">
+            		<img src="env/grafics/i16.gif" width="16" height="16" alt="Solr query filter info"/>
+            		<span style="right:0px;" id="indexSolrQueryInfo">
+            			Each parsed document is checked against the given Solr query before being added to the index. 
+            			The query must be written in respect to the <a href="https://lucene.apache.org/solr/guide/6_6/the-standard-query-parser.html#the-standard-query-parser" target="_blank">standard</a> Solr query syntax.
+            		</span>
+            	</div>
+            	<table style="border-width: 0px" role="presentation">
+		    		#(embeddedSolrConnected)#
+		    		<tr>
+		    			<td>
+		    				<div class="info"><p>The embedded local Solr index must be connected to use this kind of filter.</p>
+		    				<p>You can configure this with the <a href="IndexFederated_p.html">Index Sources &amp; targets</a> page.</p></div>
+		    			</td>
+		    		</tr>
+		    		::
+		    		<tr>
+		    			<td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td>
+		    			<td>
+		    				<input name="indexSolrQueryMustMatch" id="indexSolrQueryMustMatch" type="text" size="55" maxlength="100000" value="#[indexSolrQueryMustMatch]#" aria-describedby="indexSolrQueryInfo" />
+		    			</td>
+		    		</tr>
+		    		<tr>
+		    			<td style="width:110px"><img src="env/grafics/minus.gif" alt=""> must-not-match</td>
+		    			<td>
+		    				<input name="indexSolrQueryMustNotMatch" id="indexSolrQueryMustNotMatch" type="text" size="55" maxlength="100000" value="#[indexSolrQueryMustNotMatch]#" aria-describedby="indexSolrQueryInfo" />
+		    			</td>
+		    		</tr>
+		    		#(/embeddedSolrConnected)#
+            	</table>
 	        </dd>
 	      </dl>
         </fieldset>

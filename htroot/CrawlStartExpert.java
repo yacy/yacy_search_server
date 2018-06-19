@@ -28,6 +28,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.solr.core.SolrCore;
+
+import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
@@ -49,9 +52,11 @@ public class CrawlStartExpert {
         final serverObjects prop = new serverObjects();
         final String defaultCollection = "user";
 
-        // javascript values
+        // javascript constants
         prop.put("matchAllStr", CrawlProfile.MATCH_ALL_STRING);
         prop.put("matchNoneStr", CrawlProfile.MATCH_NEVER_STRING);
+        prop.put("solrQueryMatchAllStr", CrawlProfile.SOLR_MATCH_ALL_QUERY);
+        prop.put("solrEmptyQueryStr", CrawlProfile.SOLR_EMPTY_QUERY);
         prop.put("defaultCollection", defaultCollection);
 
         // ---------- Start point
@@ -316,6 +321,29 @@ public class CrawlStartExpert {
 					post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
 		} else {
 			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
+		}
+		
+		// Filter with a Solr syntax query
+		/* Check that the embedded local Solr index is connected, as its schema is required to apply the eventual Solr filter query */
+		final EmbeddedInstance embeddedSolr = sb.index.fulltext().getEmbeddedInstance();
+		final SolrCore embeddedCore = embeddedSolr != null ? embeddedSolr.getDefaultCore() : null;
+		final boolean embeddedSolrConnected = embeddedSolr != null && embeddedCore != null;
+		prop.put("embeddedSolrConnected", embeddedSolrConnected);
+		
+		if(embeddedSolrConnected) {
+			if (post != null && post.containsKey(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key)) {
+				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key,
+						post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY).trim());
+			} else {
+				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY);
+			}
+			
+			if (post != null && post.containsKey(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key)) {
+				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key,
+						post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY).trim());
+			} else {
+				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY);
+			}
 		}
 
 

@@ -489,7 +489,7 @@ public class Segment {
         }
     }
 
-    private static String votedLanguage(
+    public static String votedLanguage(
                     final DigestURL url,
                     final String urlNormalform,
                     final Document document,
@@ -573,15 +573,41 @@ public class Segment {
             final String proxy,
             final String acceptLanguage
             ) {
+        final CollectionConfiguration collectionConfig = this.fulltext.getDefaultConfiguration();
+        final String language = votedLanguage(url, url.toNormalform(true), document, condenser); // identification of the language
+        
+		final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(this, collections, responseHeader,
+				document, condenser, referrerURL, language, crawlProfile.isPushCrawlProfile(),
+				this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
+		
+		return storeDocument(url, crawlProfile, responseHeader, document, vector, language, condenser,
+				searchEvent, sourceName, storeToRWI, proxy, acceptLanguage);
+    }
+
+    public SolrInputDocument storeDocument(
+            final DigestURL url,
+            final CrawlProfile crawlProfile,
+            final ResponseHeader responseHeader,
+            final Document document,
+            final CollectionConfiguration.SolrVector vector,
+            final String language,
+            final Condenser condenser,
+            final SearchEvent searchEvent,
+            final String sourceName, // contains the crawl profile hash if this comes from a web crawl
+            final boolean storeToRWI,
+            final String proxy,
+            final String acceptLanguage
+            ) {
         final long startTime = System.currentTimeMillis();
+        
+        final CollectionConfiguration collectionConfig = this.fulltext.getDefaultConfiguration();
+        final String urlNormalform = url.toNormalform(true);
         
         // CREATE INDEX
         // load some document metadata
         final Date loadDate = new Date();
         final String id = ASCII.String(url.hash());
         final String dc_title = document.dc_title();
-        final String urlNormalform = url.toNormalform(true);
-        final String language = votedLanguage(url, urlNormalform, document, condenser); // identification of the language
 
         // get last modified date of the document to be used for the rwi index
         // (the lastmodified document propery should be the same in rwi and fulltext (calculated in yacy2solr))
@@ -591,10 +617,6 @@ public class Segment {
         if (modDate.getTime() > loadDate.getTime()) modDate = loadDate;
         char docType = Response.docType(document.dc_format());
 
-        // CREATE SOLR DOCUMENT
-        final CollectionConfiguration collectionConfig = this.fulltext.getDefaultConfiguration();
-        final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(this, collections, responseHeader, document, condenser, referrerURL, language, crawlProfile.isPushCrawlProfile(), this.fulltext().useWebgraph() ? this.fulltext.getWebgraphConfiguration() : null, sourceName);
-        
         // ENRICH DOCUMENT WITH RANKING INFORMATION
         this.fulltext.getDefaultConfiguration().postprocessing_references(this.getReferenceReportCache(), vector, url, null);
         

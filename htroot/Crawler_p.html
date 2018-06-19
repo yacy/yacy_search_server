@@ -216,9 +216,23 @@ window.setInterval("setTableSize()", 1000);
         <!-- 8 -->
         Crawling of "#[crawlingURL]#" started. <strong>Please wait some seconds, 
         it may take some seconds until the first result appears there.</strong> 
-        If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.<br />
+        If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.<br />::
+        <!-- 9 -->
+        No embedded local Solr index is connected. This is required to use a Solr query filter.
+		You can configure this with the <a href="IndexFederated_p.html">Index Sources &amp; targets</a> page.::
+		<!-- 10 -->
+		The Solr filter query syntax is not valid : <code>#[solrQuery]#</code>::
+		<!-- 11 -->
+		Could not parse the Solr filter query : <code>#[solrQuery]#</code>
 #(/info)#
 </p>
+
+<!-- #(noEmbeddedSolr)#::<div class="alert alert-error">No embedded local Solr index is connected. This is required to use the Solr filter query. 
+	You can configure this with the <a href="IndexFederated_p.html">Index Sources &amp; targets</a> page.</div>
+#(/noEmbeddedSolr)#
+
+#(solrQuerySyntaxtError)#::<div class="alert alert-error">The Solr filter query syntax is not valid : #[solrQuery]#</div>
+#(/solrQuerySyntaxtError)#-->
 <!-- crawl queues -->
 
 #(info-queue)#::<div class="alert alert-warning">#[message]#</div>#(/info-queue)#

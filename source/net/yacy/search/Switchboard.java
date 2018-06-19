@@ -91,7 +91,10 @@ import java.util.zip.ZipInputStream;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.core.SolrCore;
+import org.apache.solr.search.SyntaxError;
 
 import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;
@@ -114,6 +117,7 @@ import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
+import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.vocabulary.Tagging;
@@ -218,6 +222,7 @@ import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.search.index.Segment.ReferenceReportCache;
+import net.yacy.search.index.SingleDocumentMatcher;
 import net.yacy.search.query.AccessTracker;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
@@ -3212,6 +3217,10 @@ public final class Switchboard extends serverSwitch {
 						FailCategory.FINAL_PROCESS_CONTEXT, failReason, -1);
 				continue docloop;
 			}
+			
+			/* The eventual Solr/Lucene filter query will be checked just before adding the document to the index,
+			 * when the SolrInputDocument is built, at storeDocumentIndex()*/
+			
             doclist.add(document);
         }
 
@@ -3327,16 +3336,36 @@ public final class Switchboard extends serverSwitch {
 
         // remove stopwords
         this.log.info("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + url.toNormalform(true));
+        
+        final CollectionConfiguration collectionConfig = this.index.fulltext().getDefaultConfiguration();
+        final String language = Segment.votedLanguage(url, url.toNormalform(true), document, condenser); // identification of the language
+        
+		final CollectionConfiguration.SolrVector vector = collectionConfig.yacy2solr(this.index, collections, queueEntry.getResponseHeader(),
+				document, condenser, referrerURL, language, profile.isPushCrawlProfile(),
+				this.index.fulltext().useWebgraph() ? this.index.fulltext().getWebgraphConfiguration() : null, sourceName);
+		
+		/*
+		 * One last posible filtering step before adding to index : using the eventual
+		 * profile Solr querie filters
+		 */
+		final String profileSolrFilterError = checkCrawlProfileSolrFilters(profile, vector);
+		if (profileSolrFilterError != null) {
+			this.crawlQueues.errorURL.push(url, queueEntry.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT,
+					profileSolrFilterError + ", process case=" + processCase + ", profile name = "
+							+ profile.collectionName(),
+					-1);
+			return;
+		}
 
         // STORE WORD INDEX
         SolrInputDocument newEntry =
             this.index.storeDocument(
                 url,
-                referrerURL,
-                collections,
                 profile,
                 queueEntry.getResponseHeader(),
                 document,
+                vector,
+                language,
                 condenser,
                 searchEvent,
                 sourceName,
@@ -3400,6 +3429,66 @@ public final class Switchboard extends serverSwitch {
             }
         }
     }
+
+	/**
+	 * Check that the given Solr document matches the eventual crawl profil Solr
+	 * query filters.
+	 * 
+	 * @param profile
+	 *            the eventual crawl profile.
+	 * @param document
+	 *            the Solr document to check. Must not be null.
+	 * @return an eventual error message or null when no Solr query filters are
+	 *         defined or when they match with the Solr document.
+	 * @throws IllegalArgumentException
+	 *             when the document is null
+	 */
+	private String checkCrawlProfileSolrFilters(final CrawlProfile profile,
+			final CollectionConfiguration.SolrVector document) throws IllegalArgumentException {
+		if (profile != null) {
+			final String indexFilterQuery = profile.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key);
+			final String indexSolrQueryMustNotMatch = profile.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key);
+			if ((indexFilterQuery != null && !indexFilterQuery.isEmpty()
+					&& !CrawlProfile.SOLR_MATCH_ALL_QUERY.equals(indexFilterQuery))
+					|| (indexSolrQueryMustNotMatch != null
+							&& !CrawlProfile.SOLR_EMPTY_QUERY.equals(indexSolrQueryMustNotMatch))) {
+				final EmbeddedInstance embeddedSolr = this.index.fulltext().getEmbeddedInstance();
+				final SolrCore embeddedCore = embeddedSolr != null ? embeddedSolr.getDefaultCore() : null;
+				final boolean embeddedSolrConnected = embeddedSolr != null && embeddedCore != null;
+
+				if (!embeddedSolrConnected) {
+					return "no connected embedded instance for profile Solr query filter";
+				}
+
+				if ((indexFilterQuery != null && !indexFilterQuery.isEmpty()
+						&& !CrawlProfile.SOLR_MATCH_ALL_QUERY.equals(indexFilterQuery))) {
+					try {
+						if (!SingleDocumentMatcher.matches(document, indexFilterQuery, embeddedCore)) {
+							return "denied by profile Solr query must-match filter";
+						}
+					} catch (final SyntaxError | SolrException e) {
+						return "invalid syntax for profile Solr query must-match filter";
+					} catch (final RuntimeException e) {
+						return "could not parse the Solr query must-match filter";
+					}
+				}
+
+				if (indexSolrQueryMustNotMatch != null
+						&& !CrawlProfile.SOLR_EMPTY_QUERY.equals(indexSolrQueryMustNotMatch)) {
+					try {
+						if (SingleDocumentMatcher.matches(document, indexSolrQueryMustNotMatch, embeddedCore)) {
+							return "denied by profile Solr query must-not-match filter";
+						}
+					} catch (final SyntaxError | SolrException e) {
+						return "invalid syntax for profile Solr query must-not-match filter";
+					} catch (final RuntimeException e) {
+						return "could not parse the Solr query must-not-match filter";
+					}
+				}
+			}
+		}
+		return null;
+	}
 
     public final void addAllToIndex(
         final DigestURL url,

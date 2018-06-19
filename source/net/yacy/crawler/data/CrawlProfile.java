@@ -41,6 +41,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -63,9 +64,22 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
 
     private static final long serialVersionUID = 5527325718810703504L;
 
+    /** Regular expression pattern matching everything */
     public static final String  MATCH_ALL_STRING    = ".*";
+    
+    /** Regular expression pattern matching nothing */
     public static final String  MATCH_NEVER_STRING  = "";
+    
+    /** Empty Solr query */
+    public static final String  SOLR_EMPTY_QUERY  = "";
+    
+    /** Match all Solr query */
+    public static final String  SOLR_MATCH_ALL_QUERY  = AbstractSolrConnector.CATCHALL_QUERY;
+    
+    /** Regular expression matching everything */
     public static final Pattern MATCH_ALL_PATTERN   = Pattern.compile(MATCH_ALL_STRING);
+    
+    /** Regular expression matching nothing */
     public static final Pattern MATCH_NEVER_PATTERN = Pattern.compile(MATCH_NEVER_STRING);
 
     public static final String CRAWL_PROFILE_PUSH_STUB = "push_";
@@ -92,6 +106,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         INDEXING_CONTENT_MUSTNOTMATCH("indexContentMustNotMatch",   false, CrawlAttribute.STRING,  "Indexing Content Must-Not-Match Filter"),
         INDEXING_MEDIA_TYPE_MUSTMATCH("indexMediaTypeMustMatch",    false, CrawlAttribute.STRING,  "Indexing Media Type (MIME) Must-Match Filter"),
         INDEXING_MEDIA_TYPE_MUSTNOTMATCH("indexMediaTypeMustNotMatch", false, CrawlAttribute.STRING, "Indexing Media Type (MIME) Must-Not-Match Filter"),
+        INDEXING_SOLR_QUERY_MUSTMATCH("indexSolrQueryMustMatch",    false, CrawlAttribute.STRING,  "Indexing Solr Query Must-Match Filter"),
+        INDEXING_SOLR_QUERY_MUSTNOTMATCH("indexSolrQueryMustNotMatch", false, CrawlAttribute.STRING,  "Indexing Solr Query Must-Not-Match Filter"),
         RECRAWL_IF_OLDER             ("recrawlIfOlder",             false, CrawlAttribute.INTEGER, "Recrawl If Older"),
         STORE_HTCACHE                ("storeHTCache",               false, CrawlAttribute.BOOLEAN, "Store in HTCache"),
         CACHE_STRAGEGY               ("cacheStrategy",              false, CrawlAttribute.STRING,  "Cache Strategy (NOCACHE,IFFRESH,IFEXIST,CACHEONLY)"),
@@ -261,6 +277,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(CrawlAttribute.TIMEZONEOFFSET.key, timezoneOffset);
         put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING);
         put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
+        put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY);
+        put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY);
     }
 
     /**
@@ -857,6 +875,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexContentMustNotMatch", this.get(CrawlAttribute.INDEXING_CONTENT_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, this.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, this.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, this.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, this.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key));
         //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_mustmatch", this.urlMustMatchPattern().toString()); // TODO: remove, replace with crawlerURLMustMatch
         //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", this.urlMustNotMatchPattern().toString()); // TODO: remove, replace with crawlerURLMustNotMatch
         //prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (this.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(this.recrawlIfOlder())); // TODO: remove, replace with recrawlIfOlder
