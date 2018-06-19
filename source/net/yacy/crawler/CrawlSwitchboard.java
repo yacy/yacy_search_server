@@ -136,9 +136,8 @@ public final class CrawlSwitchboard {
             CrawlProfile p;
             try {
                 p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
-            } catch (final IOException e ) {
-                p = null;
-            } catch (final SpaceExceededException e ) {
+            } catch (final IOException | SpaceExceededException | RuntimeException e ) {
+            	ConcurrentLog.warn("CrawlProfiles", "Could not load profile " + handle, e);
                 p = null;
             }
             if ( p == null ) {
