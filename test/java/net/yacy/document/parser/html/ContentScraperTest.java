@@ -150,7 +150,7 @@ public class ContentScraperTest {
                 + "</body></html>";
 
         ContentScraper scraper = new ContentScraper(root, 10, new HashSet<String>(), new VocabularyScraper(), 0);
-        final Writer writer = new TransformerWriter(null, null, scraper, null, false);
+        final Writer writer = new TransformerWriter(null, null, scraper, false);
 
         FileUtils.copy(new StringReader(page), writer);
         writer.close();
@@ -401,7 +401,7 @@ public class ContentScraperTest {
 
 		for (final Entry<String, String[]> html2Result : html2Results.entrySet()) {
 			ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), new VocabularyScraper(), 0);
-			try (final Writer writer = new TransformerWriter(null, null, scraper, null, false)) {
+			try (final Writer writer = new TransformerWriter(null, null, scraper, false)) {
 				FileUtils.copy(new StringReader(html2Result.getKey()), writer);
 
 				final Set<DigestURL> expected = new HashSet<>();
