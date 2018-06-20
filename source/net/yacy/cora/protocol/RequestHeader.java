@@ -853,7 +853,7 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     @Override
     public AsyncContext startAsync(ServletRequest servletRequest, ServletResponse servletResponse) throws IllegalStateException {
         if (_request != null) {
-            startAsync(servletRequest, servletResponse);
+            return _request.startAsync(servletRequest, servletResponse);
         }
         throw new UnsupportedOperationException("Not supported yet.");
     }
