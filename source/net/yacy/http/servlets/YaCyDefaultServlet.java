@@ -537,7 +537,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         } else {
             // Parse the satisfiable ranges
-            List<?> ranges = InclusiveByteRange.satisfiableRanges(reqRanges, content_length);
+            final List<InclusiveByteRange> ranges = InclusiveByteRange.satisfiableRanges(reqRanges, content_length);
 
             //  if there are no satisfiable ranges, send 416 response
             if (ranges == null || ranges.isEmpty()) {
@@ -553,14 +553,13 @@ public class YaCyDefaultServlet extends HttpServlet  {
             //  if there is only a single valid range (must be satisfiable
             //  since were here now), send that range with a 216 response
             if (ranges.size() == 1) {
-                InclusiveByteRange singleSatisfiableRange =
-                        (InclusiveByteRange) ranges.get(0);
-                long singleLength = singleSatisfiableRange.getSize(content_length);
+                final InclusiveByteRange singleSatisfiableRange = ranges.iterator().next();
+                long singleLength = singleSatisfiableRange.getSize();
                 writeHeaders(response, resource, singleLength);
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
                 response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
                         singleSatisfiableRange.toHeaderRangeString(content_length));
-                resource.writeTo(out, singleSatisfiableRange.getFirst(content_length), singleLength);
+                resource.writeTo(out, singleSatisfiableRange.getFirst(), singleLength);
                 out.close();
                 return;
             }
@@ -595,7 +594,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             int length = 0;
             String[] header = new String[ranges.size()];
             for (int i = 0; i < ranges.size(); i++) {
-                InclusiveByteRange ibr = (InclusiveByteRange) ranges.get(i);
+                InclusiveByteRange ibr = ranges.get(i);
                 header[i] = ibr.toHeaderRangeString(content_length);
                 length +=
                         ((i > 0) ? 2 : 0)
@@ -603,17 +602,17 @@ public class YaCyDefaultServlet extends HttpServlet  {
                         + (mimetype == null ? 0 : HeaderFramework.CONTENT_TYPE.length() + 2 + mimetype.length()) + 2
                         + HeaderFramework.CONTENT_RANGE.length() + 2 + header[i].length() + 2
                         + 2
-                        + (ibr.getLast(content_length) - ibr.getFirst(content_length)) + 1;
+                        + (ibr.getLast() - ibr.getFirst()) + 1;
             }
             length += 2 + 2 + multi.getBoundary().length() + 2 + 2;
             response.setContentLength(length);
 
             for (int i = 0; i < ranges.size(); i++) {
-                InclusiveByteRange ibr = (InclusiveByteRange) ranges.get(i);
+                InclusiveByteRange ibr = ranges.get(i);
                 multi.startPart(mimetype, new String[]{HeaderFramework.CONTENT_RANGE + ": " + header[i]});
 
-                long start = ibr.getFirst(content_length);
-                long size = ibr.getSize(content_length);
+                long start = ibr.getFirst();
+                long size = ibr.getSize();
                 if (in != null) {
                     // Handle non cached resource
                     if (start < pos) {
