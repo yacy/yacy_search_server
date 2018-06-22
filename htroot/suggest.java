@@ -103,7 +103,7 @@ public class suggest {
         }
 
         // check for JSONP
-        if ( post.containsKey("callback") ) {
+        if (post != null && post.containsKey("callback") ) {
             final String jsonp = post.get("callback") + "([";
             prop.put("jsonp-start", jsonp);
             prop.put("jsonp-end", "])");
