@@ -741,9 +741,9 @@ public final class Fulltext {
         
 
         String s = new File(path, yacy_dump_prefix +
-                "f" + GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate) + "_" +
-                "l" + GenericFormatter.FORMAT_SHORT_MINUTE.format(lastdate) + "_" +
-                "n" + GenericFormatter.FORMAT_SHORT_MINUTE.format(new Date(now)) + "_" +
+                "f" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate) + "_" +
+                "l" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(lastdate) + "_" +
+                "n" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(new Date(now)) + "_" +
                 "c" + String.format("%1$012d", doccount)).getAbsolutePath() + "_tc"; // the name ends with the transaction token ('c' = 'created')
         
         // create export file name
@@ -767,7 +767,7 @@ public final class Fulltext {
     
     public static void main(String args[]) {
     	Date firstdate = null;
-    	System.out.println(GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate));
+    	System.out.println(GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate));
     }
 
     public Export export() {

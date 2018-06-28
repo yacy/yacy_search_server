@@ -674,8 +674,8 @@ public class DateDetection {
         // check standard date formats
         try {d = CONFORM.parse(text);} catch (ParseException e) {}
         //if (d == null) try {d = GenericFormatter.FORMAT_SHORT_DAY.parse(text);} catch (ParseException e) {} // did not work well and fired for wrong formats; do not use
-        if (d == null) try {d = GenericFormatter.FORMAT_RFC1123_SHORT.parse(text);} catch (ParseException e) {}
-        if (d == null) try {d = GenericFormatter.FORMAT_ANSIC.parse(text);} catch (ParseException e) {}
+        if (d == null) try {d = GenericFormatter.newRfc1123ShortFormat().parse(text);} catch (ParseException e) {}
+        if (d == null) try {d = GenericFormatter.newAnsicFormat().parse(text);} catch (ParseException e) {}
             
         if (d == null) {
             // check other date formats

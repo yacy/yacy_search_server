@@ -49,6 +49,10 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -855,14 +859,15 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return Integer.parseInt(port);
     }
 
-    /** puts the current time into the lastseen field and cares about the time differential to UTC */
+    /** puts the current UTC time into the lastseen field */
     public final void setLastSeenUTC() {
-        // because java thinks it must apply the UTC offset to the current time,
-        // to create a string that looks like our current time, it adds the local UTC offset to the
-        // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        final GenericFormatter my_SHORT_SECOND_FORMATTER = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
-        final String ls = my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
-        this.dna.put(Seed.LASTSEEN, ls);
+    	try {
+    		/* Prefer using first the shared and thread-safe DateTimeFormatter instance */
+    		this.dna.put(Seed.LASTSEEN, GenericFormatter.FORMAT_SHORT_SECOND.format(Instant.now()));
+    	} catch(final DateTimeException e) {
+    		/* This should not happen, but rather than failing we fallback to the old formatter wich uses synchronization locks */
+    		this.dna.put(Seed.LASTSEEN, GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
+    	}
     }
 
     /**
@@ -870,9 +875,17 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     public final long getLastSeenUTC() {
         try {
-            final GenericFormatter my_SHORT_SECOND_FORMATTER =
-                new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
-            final long t = my_SHORT_SECOND_FORMATTER.parse(get(Seed.LASTSEEN, "20040101000000"), 0).getTime().getTime();
+        	final String lastSeenStr = get(Seed.LASTSEEN, "20040101000000");
+        	long t;
+        	try {
+        		/* Prefer using first the shared and thread-safe DateTimeFormatter instance */
+        		t = LocalDateTime.parse(lastSeenStr, GenericFormatter.FORMAT_SHORT_SECOND).toInstant(ZoneOffset.UTC).toEpochMilli();
+        	} catch(final RuntimeException e) {
+        		/* Retry with the old date API parser */
+        		final GenericFormatter my_SHORT_SECOND_FORMATTER =
+        				new GenericFormatter(GenericFormatter.newShortSecondFormat(), GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
+        		t = my_SHORT_SECOND_FORMATTER.parse(lastSeenStr, 0).getTime().getTime();
+        	}
             // getTime creates a UTC time number. But in this case java thinks, that the given
             // time string is a local time, which has a local UTC offset applied.
             // Therefore java subtracts the local UTC offset, to get a UTC number.
@@ -903,13 +916,20 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             return this.birthdate;
         }
         long b;
-        try {
-            final GenericFormatter my_SHORT_SECOND_FORMATTER =
-                new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
-            b = my_SHORT_SECOND_FORMATTER.parse(get(Seed.BDATE, "20040101000000"), 0).getTime().getTime();
-        } catch (final ParseException e ) {
-            b = System.currentTimeMillis();
-        }
+        final String bdateStr = get(Seed.BDATE, "20040101000000");
+    	try {
+    		/* Prefer using first the shared and thread-safe DateTimeFormatter instance */
+    		b = LocalDateTime.parse(bdateStr, GenericFormatter.FORMAT_SHORT_SECOND).toInstant(ZoneOffset.UTC).toEpochMilli();
+    	} catch(final RuntimeException e) {
+    		/* Retry with the old date API parser */
+    		try {
+    			final GenericFormatter my_SHORT_SECOND_FORMATTER =
+    					new GenericFormatter(GenericFormatter.newShortSecondFormat(), GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
+    			b = my_SHORT_SECOND_FORMATTER.parse(bdateStr, 0).getTime().getTime();
+    		} catch (final ParseException pe) {
+    			b = System.currentTimeMillis();
+    		}
+    	}
         this.birthdate = b;
         return this.birthdate;
     }

@@ -245,7 +245,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             // RFC 1036/850 (old)      "Monday, 12-Nov-07 10:11:12 GMT"
             FORMAT_RFC1036,
             // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
-            GenericFormatter.FORMAT_ANSIC,
+            GenericFormatter.newAnsicFormat(),
     };
 
 

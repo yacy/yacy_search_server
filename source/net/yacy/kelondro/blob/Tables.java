@@ -75,7 +75,7 @@ public class Tables implements Iterable<String> {
     private int keymaxlen;
 
     // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_MILSEC_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_MILSEC, 1);
+    private final static GenericFormatter my_SHORT_MILSEC_FORMATTER  = new GenericFormatter(GenericFormatter.newShortMilsecFormat(), 1);
 
     public Tables(final File location, final int keymaxlen) {
         this.location = new File(location.getAbsolutePath());

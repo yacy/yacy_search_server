@@ -25,6 +25,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.time.Instant;
 import java.util.Date;
 
 import org.apache.http.Header;
@@ -131,11 +132,11 @@ public class IndexImportMediawiki_p {
 						
 						if (status == 0 && post.getBoolean("iffresh")) {
 							long lastModified = getLastModified(sourceURL);
-							if (lastExecutionDate != null && lastModified != 0L
-									&& lastModified <= lastExecutionDate.getTime()) {
+							if (lastExecutionDate != null && lastModified != 0L && Instant.ofEpochMilli(lastModified)
+									.isBefore(lastExecutionDate.toInstant())) {
 								status = 5;
-								prop.put("import_status_lastImportDate",
-										GenericFormatter.FORMAT_SIMPLE.format(lastExecutionDate));
+								prop.put("import_status_lastImportDate", GenericFormatter
+										.formatSafely(lastExecutionDate.toInstant(), GenericFormatter.FORMAT_SIMPLE));
 								
 				                /* the import is not performed, but we increase here the api call count */
 								if(sb.tables != null) {

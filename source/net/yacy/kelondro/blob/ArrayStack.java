@@ -103,7 +103,7 @@ public class ArrayStack implements BLOB {
     private final ExecutorService executor;
 
     // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_MILSEC_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_MILSEC, 1);
+    private final static GenericFormatter my_SHORT_MILSEC_FORMATTER  = new GenericFormatter(GenericFormatter.newShortMilsecFormat(), 1);
 
 
     public ArrayStack(

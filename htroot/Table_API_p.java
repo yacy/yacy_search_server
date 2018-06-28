@@ -19,6 +19,7 @@
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -57,6 +58,8 @@ public class Table_API_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+        
+    	final DateFormat dateFormat = GenericFormatter.newSimpleDateFormat();
         
         prop.put("showexec", 0);
         prop.put("showtable", 0);
@@ -182,7 +185,7 @@ public class Table_API_p {
 							final int time = row.get(WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME, 0);
 							final String dateNextExecStr = entry.getValue().trim();
 							try {
-								final Date dateNextExec = GenericFormatter.FORMAT_SIMPLE.parse(dateNextExecStr);
+								final Date dateNextExec = dateFormat.parse(dateNextExecStr);
 								
 								if(time != 0) { // Check there is effectively a schedule period on this row 
 									if(dateNextExec.before(now)) {
@@ -390,8 +393,8 @@ public class Table_API_p {
                 prop.put("showtable_list_" + count + "_pk", UTF8.String(row.getPK()));
                 prop.put("showtable_list_" + count + "_count", count);
                 prop.put("showtable_list_" + count + "_callcount", callcount);
-                prop.put("showtable_list_" + count + "_dateRecording", date_recording == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_recording));
-                prop.put("showtable_list_" + count + "_dateLastExec", date_last_exec == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_last_exec));
+                prop.put("showtable_list_" + count + "_dateRecording", date_recording == null ? "-" : dateFormat.format(date_recording));
+                prop.put("showtable_list_" + count + "_dateLastExec", date_last_exec == null ? "-" : dateFormat.format(date_last_exec));
                 
                 prop.put("showtable_list_" + count + "_editableDateNext", time != 0);
                 final String enteredDateBeforeNow = nextExecDatesBeforeNow.get(rowPKStr);
@@ -407,7 +410,7 @@ public class Table_API_p {
                 }
                 
                 prop.put("showtable_list_" + count + "_editableDateNext_dateLastExecPattern", GenericFormatter.PATTERN_SIMPLE_REGEX);
-                prop.put("showtable_list_" + count + "_editableDateNext_dateNextExec", date_next_exec == null ? "-" : GenericFormatter.FORMAT_SIMPLE.format(date_next_exec));
+                prop.put("showtable_list_" + count + "_editableDateNext_dateNextExec", date_next_exec == null ? "-" : dateFormat.format(date_next_exec));
                 prop.put("showtable_list_" + count + "_editableDateNext_pk", rowPKStr);
                 
                 prop.put("showtable_list_" + count + "_type", row.get(WorkTables.TABLE_API_COL_TYPE));

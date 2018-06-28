@@ -49,8 +49,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.time.DateTimeException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -2148,10 +2151,17 @@ public final class Protocol {
             if ( targetHash != null ) parts.put("youare", UTF8.StringBody(targetHash));
         
             // time information for synchronization
-            // use our own formatter to prevent concurrency locks with other processes
-            final GenericFormatter my_SHORT_SECOND_FORMATTER = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
-            parts.put("mytime", UTF8.StringBody(my_SHORT_SECOND_FORMATTER.format()));
-            parts.put("myUTC", UTF8.StringBody(Long.toString(System.currentTimeMillis())));
+            final long myTime = System.currentTimeMillis();
+            String formattedTime;
+            try {
+            	/* Prefer using first the shared and thread-safe DateTimeFormatter instance */
+            	formattedTime = GenericFormatter.FORMAT_SHORT_SECOND.format(Instant.ofEpochMilli(myTime));
+            } catch(final DateTimeException e) {
+            	/* This should not happen, but rather than failing we fallback to the old formatter wich uses synchronization locks */
+            	formattedTime = GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(myTime));
+            }
+            parts.put("mytime", UTF8.StringBody(formattedTime));
+            parts.put("myUTC", UTF8.StringBody(Long.toString(myTime)));
         
             // network identification
             parts.put(SwitchboardConstants.NETWORK_NAME, UTF8.StringBody(Switchboard.getSwitchboard().getConfig(

@@ -40,7 +40,6 @@ package net.yacy.peers;
 
 import java.net.MalformedURLException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -49,6 +48,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.feed.RSSFeed;
@@ -188,11 +188,6 @@ public class Network
         publishMySeed();
     }
 
-    // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_SECOND_FORMATTER = new GenericFormatter(
-        GenericFormatter.FORMAT_SHORT_SECOND,
-        GenericFormatter.time_second);
-
     protected class publishThread extends Thread
     {
         private final Seed seed;
@@ -256,13 +251,19 @@ public class Network
                             // update last seed date
                             if ( newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC() ) {
                                 if ( log.isFine() ) {
-                                    log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " with old LastSeen: '" + my_SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "'");
+									final String newSeedLastSeenStr = GenericFormatter.formatSafely(
+											newSeed.getLastSeenUTC(), GenericFormatter.FORMAT_SHORT_SECOND);
+                                    log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " with old LastSeen: '" + newSeedLastSeenStr + "'");
                                 }
                                 newSeed.setLastSeenUTC();
                                 Network.this.sb.peers.peerActions.peerArrival(newSeed, true);
                             } else {
                                 if ( log.isFine() ) {
-                                    log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " with old LastSeen: '" + my_SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" + my_SHORT_SECOND_FORMATTER.format(new Date(this.seed.getLastSeenUTC())) + "'");
+									final String newSeedLastSeenStr = GenericFormatter.formatSafely(
+											newSeed.getLastSeenUTC(), GenericFormatter.FORMAT_SHORT_SECOND);
+									final String thisSeedLastSeenStr = GenericFormatter.formatSafely(
+											newSeed.getLastSeenUTC(), GenericFormatter.FORMAT_SHORT_SECOND);
+                                    log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " with old LastSeen: '" + newSeedLastSeenStr + "', this is more recent: '" + thisSeedLastSeenStr + "'");
                                 }
                                 this.seed.setLastSeenUTC();
                                 Network.this.sb.peers.peerActions.peerArrival(this.seed, true);
