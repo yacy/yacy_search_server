@@ -23,6 +23,16 @@
         document.getElementById("current_pk").value = from;
     	document.getElementById("apilist").submit();
     }
+    
+    /**
+    * Reset the start record to display first results page
+    */
+    function resetStartRecord() {
+    	var startRecordField = document.getElementById("startRecordField");
+    	if(startRecordField != null) {
+    		startRecordField.value = "0";
+    	}
+    }
     </script>
     <script type="text/javascript" src="js/sorttable.js"></script>
   </head>
@@ -59,11 +69,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <img src="env/grafics/nave.gif" alt="" />
       #(/navigation)#
 
-      <input type="hidden" name="startRecord" value="0" /> <!-- This form is used to type a new query, so we start at record zero -->
+      <input type="hidden" name="startRecord" value="#[startRecord]#" id="startRecordField"/>
       <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
       <input type="hidden" name="inline" value="#(inline)#false::true#(/inline)#" />
       <input type="hidden" name="filter" value="#[filter]#" />
-      <input type="text" name="query" value="#[query]#" style="font-size:16px;float:left;border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;" />
+      <input type="text" name="query" value="#[query]#" onchange="resetStartRecord()" style="font-size:16px;float:left;border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;"/>
 
       </span>
       <br/>
