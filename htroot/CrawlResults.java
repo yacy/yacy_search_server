@@ -24,7 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -34,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.Punycode.PunycodeException;
@@ -350,11 +352,17 @@ public class CrawlResults {
         return prop;
     }
 
-    private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
+	private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter
+			.ofPattern("uuuu/MM/dd", Locale.US).withZone(ZoneId.systemDefault());
+	
+	/**
+	 * @param date a date to render as a String
+	 * @return the date formatted using the DAY_FORMATTER pattern.
+	 */
     private static String daydate(final Date date) {
         if (date == null) {
             return "";
         }
-        return dayFormatter.format(date);
+        return GenericFormatter.formatSafely(date.toInstant(), DAY_FORMATTER);
     }
 }

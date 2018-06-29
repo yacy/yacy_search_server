@@ -1,6 +1,7 @@
 
 import java.net.MalformedURLException;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.Domains;
@@ -28,10 +30,18 @@ import net.yacy.server.serverSwitch;
 
 public class IndexCreateQueues_p {
 
-    private static SimpleDateFormat dayFormatter = new SimpleDateFormat("yyyy/MM/dd", Locale.US);
+	private static final DateTimeFormatter DAY_FORMATTER = DateTimeFormatter
+			.ofPattern("uuuu/MM/dd", Locale.US).withZone(ZoneId.systemDefault());
+	
+	/**
+	 * @param date a date to render as a String
+	 * @return the date formatted using the DAY_FORMATTER pattern.
+	 */
     private static String daydate(final Date date) {
-        if (date == null) return "";
-        return dayFormatter.format(date);
+        if (date == null) {
+            return "";
+        }
+        return GenericFormatter.formatSafely(date.toInstant(), DAY_FORMATTER);
     }
 
     private static final int INVALID    = 0;

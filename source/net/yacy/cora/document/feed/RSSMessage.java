@@ -25,6 +25,7 @@
 package net.yacy.cora.document.feed;
 
 import java.text.ParseException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -156,7 +157,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         if (title.length() > 0) this.map.put(Token.title.name(), title);
         if (description.length() > 0) this.map.put(Token.description.name(), description);
         if (link.length() > 0) this.map.put(Token.link.name(), link);
-        this.map.put(Token.pubDate.name(), HeaderFramework.FORMAT_RFC1123.format(new Date()));
+        this.map.put(Token.pubDate.name(), HeaderFramework.formatNowRFC1123());
         this.map.put(Token.guid.name(), artificialGuidPrefix + Integer.toHexString((title + description + link).hashCode()));
     }
 
@@ -165,7 +166,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         if (title.length() > 0) this.map.put(Token.title.name(), title);
         if (description.length() > 0) this.map.put(Token.description.name(), description);
         this.map.put(Token.link.name(), link.toNormalform(true));
-        this.map.put(Token.pubDate.name(), HeaderFramework.FORMAT_RFC1123.format(new Date()));
+        this.map.put(Token.pubDate.name(), HeaderFramework.formatNowRFC1123());
         if (guid.length() > 0) {
         	this.map.put(Token.guid.name(), guid);
         }
@@ -261,8 +262,8 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         if (!dateString.isEmpty()) { // skip parse exception on empty string
             Date date;
             try {
-                date = HeaderFramework.FORMAT_RFC1123.parse(dateString);
-            } catch (final ParseException e) {
+				date = Date.from(ZonedDateTime.parse(dateString, HeaderFramework.RFC1123_FORMATTER).toInstant());
+            } catch (final RuntimeException e) {
                 try {
                     date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(dateString, 0).getTime();
                 } catch (final ParseException e1) {
@@ -401,7 +402,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     @Override
     public void setPubDate(final Date pubdate) {
-        setValue(Token.pubDate, HeaderFramework.FORMAT_RFC1123.format(pubdate));
+        setValue(Token.pubDate, HeaderFramework.formatNowRFC1123());
     }
 
     @Override
