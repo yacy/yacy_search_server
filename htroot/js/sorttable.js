@@ -3,7 +3,7 @@
   version 2
   7th April 2007
   Stuart Langridge, http://www.kryogenix.org/code/browser/sorttable/
-  fixed for YaCy 20th September 2016
+  fixed for YaCy 20th September 2016, 28th June 2018
   
   Instructions:
   Download this file
@@ -260,8 +260,10 @@ sorttable = {
     
     hasInputs = (typeof node.getElementsByTagName == 'function') &&
                  node.getElementsByTagName('input').length;
-    
-    if (node.getAttribute("sorttable_customkey") != null) {
+    if (node.nodeName.toLowerCase() == 'input') {
+        return node.value.replace(/^\s+|\s+$/g, '');
+    } 
+    else if (node.getAttribute && node.getAttribute("sorttable_customkey") != null) {
       return node.getAttribute("sorttable_customkey");
     }
     else if (typeof node.textContent != 'undefined' && !hasInputs) {
@@ -272,18 +274,14 @@ sorttable = {
     }
     else if (typeof node.text != 'undefined' && !hasInputs) {
       return node.text.replace(/^\s+|\s+$/g, '');
-    }
-    else {
+    } else {
       switch (node.nodeType) {
-        case 3:
-          if (node.nodeName.toLowerCase() == 'input') {
-            return node.value.replace(/^\s+|\s+$/g, '');
-          }
-        case 4:
+        case 3: // Node.TEXT_NODE
+        case 4: // Node.CDATA_SECTION_NODE
           return node.nodeValue.replace(/^\s+|\s+$/g, '');
           break;
-        case 1:
-        case 11:
+        case 1: // Node.ELEMENT_NODE
+        case 11: // Node.DOCUMENT_FRAGMENT_NODE
           var innerText = '';
           for (var i = 0; i < node.childNodes.length; i++) {
             innerText += sorttable.getInnerText(node.childNodes[i]);
