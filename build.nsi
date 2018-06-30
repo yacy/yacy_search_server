@@ -2,7 +2,8 @@
 ; ----------------------------------------
 ;(C) 2004-2006 by Alexander Schier
 ;(C) 2008-2010 by David Wieditz
-;(C) 2011-     by Rene Kluge
+;(C) 2011      by Rene Kluge
+;(C) 2018      by luccioman; https://github.com/luccioman
 /*----------------------------------------
 MANUALS
 http://nsis.sourceforge.net/Docs/
@@ -63,11 +64,11 @@ SetCompressor /SOLID LZMA
 ; at least we need Java 8
 !define JRE_VERSION8 "1.8"
 
-; download link Oracle Java 8 Update 131
-; 32 bit / jre-8u131-windows-i586.exe
-!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=220313_d54c1d3a095b4ff2b6607d096fa80163"
-; 64 bit / jre-8u131-windows-x64.exe
-!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=220315_d54c1d3a095b4ff2b6607d096fa80163"
+; download links for Oracle Java 8 Update 171 (available at https://java.com/fr/download/manual.jsp)
+; 32 bit / jre-8u171-windows-i586.exe
+!define JRE_32 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=233170_512cd62ec5174c3487ac17c61aaa89e8"
+; 64 bit / jre-8u171-windows-x64.exe
+!define JRE_64 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=233172_512cd62ec5174c3487ac17c61aaa89e8"
 
 ;!define JRE_32 "http://yacy.berlios.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
 ;!define JRE_64 "http://yacy.berlios.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
