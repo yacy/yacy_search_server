@@ -23,6 +23,7 @@ package net.yacy.cora.federate.solr.responsewriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.time.DateTimeException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -32,13 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.util.CommonPattern;
-import net.yacy.http.servlets.GSAsearchServlet;
-import net.yacy.peers.operation.yacyVersion;
-import net.yacy.search.Switchboard;
-import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
@@ -53,6 +47,14 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
+
+import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.CommonPattern;
+import net.yacy.http.servlets.GSAsearchServlet;
+import net.yacy.peers.operation.yacyVersion;
+import net.yacy.search.Switchboard;
+import net.yacy.search.schema.CollectionSchema;
 
 /**
  * implementation of a GSA search result.
@@ -359,11 +361,14 @@ public class GSAResponseWriter implements QueryResponseWriter, EmbeddedSolrRespo
      * @see ISO8601Formatter
      */
     public final String formatGSAFS(final Date date) {
-        if (date == null) return "";
-        synchronized (GSAsearchServlet.FORMAT_GSAFS) {
-            final String s = GSAsearchServlet.FORMAT_GSAFS.format(date);
-            return s;
+        if (date == null) {
+        	return "";
         }
+		try {
+			return GSAsearchServlet.FORMAT_GSAFS.format(date.toInstant());
+		} catch (final DateTimeException e) {
+			return "";
+		}
     }
 
 }

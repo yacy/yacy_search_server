@@ -30,15 +30,17 @@ package net.yacy.kelondro.blob;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
@@ -411,15 +413,13 @@ public class MapDataMining extends MapHeap {
         super.close();
     }
     
-    private static final String shortDateFormatString = "yyyyMMddHHmmss";
-    private static final SimpleDateFormat shortFormatter = new SimpleDateFormat(shortDateFormatString, Locale.US);
     private static final long minutemillis = 60000;
     private static long date2000 = 0;
 
     static {
         try {
-            date2000 = shortFormatter.parse("20000101000000").getTime();
-        } catch (final ParseException e) {}
+            date2000 = ZonedDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC).toInstant().toEpochMilli();
+        } catch (final DateTimeException e) {}
     }
 
     private static final byte[] plainByteArray = new byte[256];
@@ -453,9 +453,10 @@ public class MapDataMining extends MapHeap {
         if (s == null || s.isEmpty() || s.charAt(0) == '-') return 0;
         try {
             long l = 0;
-            if (s.length() == shortDateFormatString.length()) {
+            if (s.length() == GenericFormatter.PATTERN_SHORT_SECOND.length()) {
                 // try a date
-                l = ((shortFormatter.parse(s).getTime() - date2000) / minutemillis);
+				l = ((LocalDateTime.parse(s, GenericFormatter.FORMAT_SHORT_SECOND).toInstant(ZoneOffset.UTC)
+						.toEpochMilli() - date2000) / minutemillis);
                 if (l < 0) l = 0;
             } else {
                 // try a number

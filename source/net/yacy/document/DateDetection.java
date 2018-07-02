@@ -20,12 +20,12 @@
 
 package net.yacy.document;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjuster;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -63,8 +63,10 @@ import net.yacy.cora.date.GenericFormatter;
 public class DateDetection {
 
     private static final TimeZone UTC_TIMEZONE = TimeZone.getTimeZone("UTC");
-    private static final String CONPATT  = "yyyy/MM/dd";
-    private static final SimpleDateFormat CONFORM = new SimpleDateFormat(CONPATT, Locale.US);
+    private static final String CONPATT  = "uuuu/MM/dd";
+    
+	private static final DateTimeFormatter CONFORM = DateTimeFormatter.ofPattern(CONPATT).withLocale(Locale.US)
+			.withZone(ZoneOffset.UTC);
     private static final LinkedHashMap<Language, String[]> Weekdays = new LinkedHashMap<>();
     private static final LinkedHashMap<Language, String[]> Months = new LinkedHashMap<>();
     private static final int[] MaxDaysInMonth = new int[]{31,29,31,30,31,30,31,31,30,31,30,31};
@@ -75,7 +77,6 @@ public class DateDetection {
     }
     
     static {
-        CONFORM.setTimeZone(UTC_TIMEZONE);
         // all names must be lowercase because compared strings are made to lowercase as well
         Weekdays.put(Language.GERMAN,  new String[]{"montag", "dienstag", "mittwoch", "donnerstag", "freitag", "samstag" /*oder: "sonnabend"*/, "sonntag"});
         Weekdays.put(Language.ENGLISH, new String[]{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"});
@@ -133,8 +134,7 @@ public class DateDetection {
         }
     }
 
-    private final static Date TODAY = new Date();
-    private final static int CURRENT_YEAR  = Integer.parseInt(CONFORM.format(TODAY).substring(0, 4)); // we need that to parse dates without given years, see the ShortStyle class
+    private final static int CURRENT_YEAR  = LocalDate.now().getYear(); // we need that to parse dates without given years, see the ShortStyle class
 
     private final static String BODNCG = "(?:\\s|^)"; // begin of date non-capturing group
     private final static String EODNCG = "(?:[).:;! ]|$)"; // end of date non-capturing group
@@ -312,7 +312,7 @@ public class DateDetection {
      */
     private static Date[] sameDayEveryYear(final int month, final int day, final int currentYear) {
         final Date[] r = new Date[4];
-        final Calendar cal = CONFORM.getCalendar();
+        final Calendar cal = new GregorianCalendar(UTC_TIMEZONE);
         cal.clear();
         cal.set(currentYear - 1, month, day); // set start in previous year
         r[0] = cal.getTime();
@@ -336,7 +336,7 @@ public class DateDetection {
 		january1Calendar.clear();
 		
 		/* Calendar using UTC time zone to produce date results */
-		final Calendar utcCalendar = CONFORM.getCalendar();
+		final Calendar utcCalendar = new GregorianCalendar(UTC_TIMEZONE);
 		
 		/* Calendar using the same time zone as in the holidayrule to extract year,month, and day fields */
 		final Calendar ruleCalendar = new GregorianCalendar(ruleTimeZone);
@@ -552,17 +552,41 @@ public class DateDetection {
                 int month = this.firstEntity == EntityType.MONTH ? i1 : this.secondEntity == EntityType.MONTH ? i2 : i3;
                 if (day > MaxDaysInMonth[month - 1]) continue; // validity check of the day number
                 int year = this.firstEntity == EntityType.YEAR ? i1 : this.secondEntity == EntityType.YEAR ? i2 : i3;
-                synchronized (CONFORM) {try {
-                    dates.add(CONFORM.parse(year + "/" + (month < 10 ? "0" : "") + month + "/" + (day < 10 ? "0" : "") + day));
-                } catch (ParseException e) {
-                    continue;
-                }}
+				final Date parsed = parseDateSafely(
+						year + "/" + (month < 10 ? "0" : "") + month + "/" + (day < 10 ? "0" : "") + day, CONFORM);
+                if(parsed != null) {
+                	dates.add(parsed);
+                }
                 if (dates.size() > 100) {dates.clear(); break;} // that does not make sense
             }
             return dates;
         }
         
     }
+    
+	/**
+	 * Safely parse the given string to an instant using the given formatter. Return
+	 * null when the format can not be applied to the given string or when any
+	 * parsing error occurred.
+	 * 
+	 * @param str
+	 *            the string to parse
+	 * @param formatter
+	 *            the formatter to use
+	 * @return an Instant instance or null
+	 */
+	protected static Date parseDateSafely(final String str, final DateTimeFormatter formatter) {
+		Date res = null;
+		if (str != null && !str.isEmpty()) {
+			try {
+				if (formatter != null) {
+					res = Date.from(LocalDate.parse(str, formatter).atStartOfDay().toInstant(ZoneOffset.UTC));
+				}
+			} catch (final RuntimeException ignored) {
+			}
+		}
+		return res;
+	}
     
     public static enum ShortStyle implements StyleParser {
         MD_ENGLISH(EntityType.MONTH, EntityType.DAY, // Big-endian (month, day), e.g. "from october 1st to september 13th"
@@ -619,16 +643,18 @@ public class DateDetection {
                 if (day > MaxDaysInMonth[month - 1]) continue; // validity check of the day number
                 int thisyear = CURRENT_YEAR;
                 int nextyear = CURRENT_YEAR + 1;
-                synchronized (CONFORM) {try {
-                    String datestub = "/" + (month < 10 ? "0" : "") + month + "/" + (day < 10 ? "0" : "") + day;
-                    Date atThisYear = CONFORM.parse(thisyear + datestub);
-                    Date atNextYear = CONFORM.parse(nextyear + datestub);
-                    dates.add(atThisYear);
-                    dates.add(atNextYear);
-                    //dates.add(atThisYear.after(TODAY) ? atThisYear : atNextYear); // we consider these kind of dates as given for the future
-                } catch (ParseException e) {
-                    continue;
-                }}
+                String datestub = "/" + (month < 10 ? "0" : "") + month + "/" + (day < 10 ? "0" : "") + day;
+
+                final Date atThisYear = parseDateSafely(thisyear + datestub, CONFORM);
+                if(atThisYear != null) {
+                	dates.add(atThisYear);
+                }
+                
+                final Date atNextYear = parseDateSafely(nextyear + datestub, CONFORM);
+                if(atNextYear != null) {
+                	dates.add(atNextYear);
+                }
+                //dates.add(atThisYear.after(TODAY) ? atThisYear : atNextYear); // we consider these kind of dates as given for the future
                 if (dates.size() > 100) {dates.clear(); break;} // that does not make sense
             }
             return dates;
@@ -670,12 +696,15 @@ public class DateDetection {
      * @return determined date or null
      */
     public static Date parseLine(final String text, final int timezoneOffset) {
-        Date d = null;
         // check standard date formats
-        try {d = CONFORM.parse(text);} catch (ParseException e) {}
+        Date d = parseDateSafely(text, CONFORM);
         //if (d == null) try {d = GenericFormatter.FORMAT_SHORT_DAY.parse(text);} catch (ParseException e) {} // did not work well and fired for wrong formats; do not use
-        if (d == null) try {d = GenericFormatter.newRfc1123ShortFormat().parse(text);} catch (ParseException e) {}
-        if (d == null) try {d = GenericFormatter.newAnsicFormat().parse(text);} catch (ParseException e) {}
+        if (d == null) {
+        	d = parseDateSafely(text, GenericFormatter.FORMAT_RFC1123_SHORT);
+        }
+        if (d == null) {
+        	d = parseDateSafely(text, GenericFormatter.FORMAT_ANSIC);
+        }
             
         if (d == null) {
             // check other date formats

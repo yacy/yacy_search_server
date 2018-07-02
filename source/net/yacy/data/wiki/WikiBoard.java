@@ -54,7 +54,7 @@ public class WikiBoard {
     private static final String DATE_FORMAT = "yyyyMMddHHmmss";
     private static final String ANONYMOUS = "anonymous";
 
-    protected static final SimpleDateFormat SimpleFormatter = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+    private static final SimpleDateFormat SimpleFormatter = new SimpleDateFormat(DATE_FORMAT, Locale.US);
 
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
