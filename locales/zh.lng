@@ -3307,13 +3307,12 @@ to a scheduler for a periodic execution.==或者用于周期执行一系列动�
 "next page"=="下一页"
 "previous page"=="上一页"
  of #[of]#== 共 #[of]#
->Date==>日期
 >Type==>类型
 >Comment==>注释
-Call<br/>Count<==调用<br/>次数<
-Recording<==正在记录<
-Last&nbsp;Exec==上次&nbsp;执行
-Next&nbsp;Exec==下次&nbsp;执行
+Call Count<==调用 次数<
+Recording&nbsp;Date==正在记录&nbsp;日期
+Last&nbsp;Exec&nbsp;Date==上次&nbsp;执行&nbsp;日期
+Next&nbsp;Exec&nbsp;Date==下次&nbsp;执行&nbsp;日期
 >Scheduler<==>定时器<
 #>URL<==>URL
 >no repetition<==>无安排<

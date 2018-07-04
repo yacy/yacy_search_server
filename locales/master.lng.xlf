@@ -8765,9 +8765,6 @@
     <trans-unit id="1449865e" xml:space="preserve" approved="no" translate="yes">
        <source> of #[of]#</source>
     </trans-unit>
-    <trans-unit id="38a150c" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Date</source>
-    </trans-unit>
     <trans-unit id="391b498" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Type</source>
     </trans-unit>
@@ -8775,16 +8772,16 @@
        <source>&gt;Comment</source>
     </trans-unit>
     <trans-unit id="c2a0ac2a" xml:space="preserve" approved="no" translate="yes">
-       <source>Call&lt;br/&gt;Count&lt;</source>
+       <source>Call Count&lt;</source>
     </trans-unit>
     <trans-unit id="a2a91c8b" xml:space="preserve" approved="no" translate="yes">
-       <source>Recording&lt;</source>
+       <source>Recording&amp;nbsp;Date</source>
     </trans-unit>
     <trans-unit id="9c5940cb" xml:space="preserve" approved="no" translate="yes">
-       <source>Last&amp;nbsp;Exec</source>
+       <source>Last&amp;nbsp;Exec&amp;nbsp;Date</source>
     </trans-unit>
     <trans-unit id="409928e8" xml:space="preserve" approved="no" translate="yes">
-       <source>Next&amp;nbsp;Exec</source>
+       <source>Next&amp;nbsp;Exec&amp;nbsp;Date</source>
     </trans-unit>
     <trans-unit id="2ef20848" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Event Trigger&lt;</source>

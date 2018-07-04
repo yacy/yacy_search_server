@@ -15,7 +15,7 @@
 ## "global classes"                          ##
 # i.e. ".strong"; ".left"; ".error";
 ###############################################
-## "privat classes"                          ##
+## "private classes"                          ##
 # all HTML-elements with a specific class
 # i.e. "div.content"; "span.left";
 # and
@@ -605,6 +605,12 @@ a.thumblink {
   line-height: 128px;
   text-align: center;
   overflow: hidden;
+}
+
+/* Link in a table header that triggers server-side table sorting */
+a.sortTableLink, a.sortTableLink:link, a.sortTableLink:visited, a.sortTableLink:hover {
+	text-decoration: none; 
+	color: white;
 }
 
 /*----------

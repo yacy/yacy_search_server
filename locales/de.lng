@@ -3294,13 +3294,12 @@ to a scheduler for a periodic execution.==einem Scheduler für periodische Ausf�
 "next page"=="Keine nächste Seite"
 "previous page"=="Keine vorherige Seite"
  of #[of]#== von #[of]#
->Date==>Datum
 >Type==>Typ
 >Comment==>Kommentar
-Call<br/>Count<==Aufruf<br/>Zähler<
-Recording<==Aufzeichnungs<
-Last&nbsp;Exec==Letzte&nbsp;Ausführung
-Next&nbsp;Exec==Nächste&nbsp;Ausführung
+Call Count<==Aufruf Zähler<
+Recording&nbsp;Date==Aufzeichnungs&nbsp;Datum
+Last&nbsp;Exec&nbsp;Date==Letzte&nbsp;Ausführung&nbsp;Datum
+Next&nbsp;Exec&nbsp;Date==Nächste&nbsp;Ausführung&nbsp;Datum
 #>URL<==>URL<
 >Event Trigger<==>Ereignis Auslöser<
 "clone"=="Ereignis klonen"

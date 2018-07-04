@@ -44,6 +44,7 @@ import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.blob.Tables.Row;
+import net.yacy.kelondro.blob.Tables.SortDirection;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.QueryParams;
@@ -85,6 +86,21 @@ public class Table_API_p {
         Pattern typefilter = QueryParams.catchall_pattern;
         if (post != null && post.containsKey("filter") && post.get("filter", "").length() > 0) {
             typefilter = Pattern.compile(post.get("filter", ".*"));
+        }
+        
+        /* Applying JSON API convention for the sort parameter format (http://jsonapi.org/format/#fetching-sorting) */
+        String sortParam = WorkTables.TABLE_API_COL_DATE_RECORDING;
+        if(post != null) {
+        	sortParam = post.get("sort", WorkTables.TABLE_API_COL_DATE_RECORDING).trim();
+        }
+        final SortDirection sortDir;
+        final String sortColumn;
+        if(sortParam.startsWith("-")) {
+        	sortColumn = sortParam.substring(1);
+        	sortDir = SortDirection.DESC;
+        } else {
+        	sortColumn = sortParam;
+        	sortDir = SortDirection.ASC;
         }
 
         // process scheduler and event input actions
@@ -310,6 +326,8 @@ public class Table_API_p {
         final String nextTransactionToken = TransactionManager.getTransactionToken(header);
         prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, nextTransactionToken);
         prop.put("showtable_" + TransactionManager.TRANSACTION_TOKEN_PARAM, nextTransactionToken);
+        
+        final Date now = new Date();
 
         // insert rows
         final List<Tables.Row> table = new ArrayList<Tables.Row>(maximumRecords);
@@ -319,7 +337,22 @@ public class Table_API_p {
         try {
             tablesize = sb.tables.size(WorkTables.TABLE_API_NAME);
             final Iterator<Tables.Row> plainIterator = sb.tables.iterator(WorkTables.TABLE_API_NAME);
-            final Iterator<Tables.Row> mapIterator = Tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE_RECORDING).iterator();
+			final Iterator<Tables.Row> mapIterator;
+			if(sortColumn.isEmpty()) {
+				mapIterator = plainIterator;
+			} else {
+				if (WorkTables.TABLE_API_COL_APICALL_COUNT.equals(sortColumn)
+						|| WorkTables.TABLE_API_COL_APICALL_SCHEDULE_TIME.equals(sortColumn)) {
+					mapIterator = Tables.orderByInt(plainIterator, sortColumn, 0, sortDir).iterator();
+				} else if (WorkTables.TABLE_API_COL_DATE.equals(sortColumn)
+						|| WorkTables.TABLE_API_COL_DATE_RECORDING.equals(sortColumn)
+						|| WorkTables.TABLE_API_COL_DATE_LAST_EXEC.equals(sortColumn)
+						|| WorkTables.TABLE_API_COL_DATE_NEXT_EXEC.equals(sortColumn)) {
+					mapIterator = Tables.orderByDate(plainIterator, sortColumn, now, sortDir).iterator();
+				} else {
+					mapIterator = Tables.orderByString(plainIterator, sortColumn, "", sortDir).iterator();
+				}
+			}
             Tables.Row r;
             boolean dark = true;
             boolean scheduledactions = false;
@@ -380,7 +413,6 @@ public class Table_API_p {
             // then work on the list
             for (final Tables.Row row : table) {
             	final String rowPKStr = UTF8.String(row.getPK());
-                final Date now = new Date();
                 final Date date = row.containsKey(WorkTables.TABLE_API_COL_DATE) ? row.get(WorkTables.TABLE_API_COL_DATE, now) : null;
                 final Date date_recording = row.get(WorkTables.TABLE_API_COL_DATE_RECORDING, date);
                 final Date date_last_exec = row.get(WorkTables.TABLE_API_COL_DATE_LAST_EXEC, date);
@@ -536,6 +568,10 @@ public class Table_API_p {
         prop.put("showtable_inline", (inline) ? 1 : 0);
         prop.put("showtable_filter", typefilter.pattern());
         prop.put("showtable_query", queryParam);
+        prop.put("showtable_sort", sortParam);
+        
+        putTableSortProperties(prop, sortDir, sortColumn);
+		
         if (filteredSize > maximumRecords) {
             prop.put("showtable_navigation", 1);
             prop.put("showtable_navigation_startRecord", startRecord);
@@ -547,6 +583,7 @@ public class Table_API_p {
             prop.put("showtable_navigation_left_inline", (inline) ? 1 : 0);
             prop.put("showtable_navigation_left_filter", typefilter.pattern());
             prop.put("showtable_navigation_left_query", queryParam);
+            prop.put("showtable_navigation_left_sort", sortParam);
             prop.put("showtable_navigation_left", startRecord == 0 ? 0 : 1);
             prop.put("showtable_navigation_filter", typefilter.pattern());
             prop.put("showtable_navigation_right", startRecord + maximumRecords >= filteredSize ? 0 : 1);
@@ -555,6 +592,7 @@ public class Table_API_p {
             prop.put("showtable_navigation_right_inline", (inline) ? 1 : 0);
             prop.put("showtable_navigation_right_filter", typefilter.pattern());
             prop.put("showtable_navigation_right_query", queryParam);
+            prop.put("showtable_navigation_right_sort", sortParam);
         } else {
             prop.put("showtable_navigation", 0);
         }
@@ -562,4 +600,47 @@ public class Table_API_p {
         // return rewrite properties
         return prop;
     }
+
+	/**
+	 * Fill the serverObjects instance with table columns sort properties.
+	 * 
+	 * @param prop
+	 *            the serverObjects instance to fill. Must not be null.
+	 * @param sortDir
+	 *            the current sort direction
+	 * @param sortColumn
+	 *            the current sort column
+	 */
+	private static void putTableSortProperties(final serverObjects prop, final SortDirection sortDir,
+			final String sortColumn) {
+		boolean sortedByAsc = WorkTables.TABLE_API_COL_TYPE.equals(sortColumn) && sortDir == SortDirection.ASC;
+		prop.put("showtable_sortedByType", WorkTables.TABLE_API_COL_TYPE.equals(sortColumn));
+		prop.put("showtable_sortedByType_asc", sortedByAsc);
+		prop.put("showtable_nextSortTypeDesc", sortedByAsc);
+
+		sortedByAsc = WorkTables.TABLE_API_COL_COMMENT.equals(sortColumn) && sortDir == SortDirection.ASC;
+		prop.put("showtable_sortedByComment", WorkTables.TABLE_API_COL_COMMENT.equals(sortColumn));
+		prop.put("showtable_sortedByComment_asc", sortedByAsc);
+		prop.put("showtable_nextSortCommentDesc", sortedByAsc);
+
+		sortedByAsc = WorkTables.TABLE_API_COL_APICALL_COUNT.equals(sortColumn) && sortDir == SortDirection.ASC;
+		prop.put("showtable_sortedByApiCallCount", WorkTables.TABLE_API_COL_APICALL_COUNT.equals(sortColumn));
+		prop.put("showtable_sortedByApiCallCount_asc", sortedByAsc);
+		prop.put("showtable_nextSortApiCallCountDesc", sortedByAsc);
+
+		sortedByAsc = WorkTables.TABLE_API_COL_DATE_RECORDING.equals(sortColumn) && sortDir == SortDirection.ASC;
+		prop.put("showtable_sortedByDateRecording", WorkTables.TABLE_API_COL_DATE_RECORDING.equals(sortColumn));
+		prop.put("showtable_sortedByDateRecording_asc", sortedByAsc);
+		prop.put("showtable_nextSortDateRecordingDesc", sortedByAsc);
+
+		sortedByAsc = WorkTables.TABLE_API_COL_DATE_LAST_EXEC.equals(sortColumn) && sortDir == SortDirection.ASC;
+		prop.put("showtable_sortedByDateLastExec", WorkTables.TABLE_API_COL_DATE_LAST_EXEC.equals(sortColumn));
+		prop.put("showtable_sortedByDateLastExec_asc", sortedByAsc);
+		prop.put("showtable_nextSortDateLastExecDesc", sortedByAsc);
+
+		sortedByAsc = WorkTables.TABLE_API_COL_DATE_NEXT_EXEC.equals(sortColumn) && sortDir == SortDirection.ASC;
+		prop.put("showtable_sortedByDateNextExec", WorkTables.TABLE_API_COL_DATE_NEXT_EXEC.equals(sortColumn));
+		prop.put("showtable_sortedByDateNextExec_asc", sortedByAsc);
+		prop.put("showtable_nextSortDateNextExecDesc", sortedByAsc);
+	}
 }

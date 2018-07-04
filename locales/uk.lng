@@ -2993,10 +2993,10 @@ to a scheduler for a periodic execution.==для періодичного сам
  of #[of]#== з #[of]#
 >Type==>Тип
 >Comment==>Примітка
-Call<br/>Count<==Виклики<
->Recording<br/>Date<==>Дата<br/>запису<
->Last&nbsp;Exec<br/>Date<==>Останній<br/>запуск<
->Next&nbsp;Exec<br/>Date<==>Наступний<br/>запуск<
+Call Count<==Виклики<
+>Recording&nbsp;Date<==>Дата&nbsp;запису<
+>Last&nbsp;Exec&nbsp;Date<==>Останній&nbsp;запуск<
+>Next&nbsp;Exec&nbsp;Date<==>Наступний&nbsp;запуск<
 >Scheduler<==>Планувальник<
 >no repetition<==>без повторення<
 >activate scheduler<==>з плануванням<
