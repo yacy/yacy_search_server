@@ -82,6 +82,8 @@ public class CrawlQueues {
 
     public  NoticedURL noticeURL;
     public  ErrorCache errorURL;
+    
+    /** URLs pulled by remote peers in order to crawl them for us */
     public Map<String, DigestURL> delegatedURL;
 
     public CrawlQueues(final Switchboard sb, final File queuePath) {
@@ -107,7 +109,7 @@ public class CrawlQueues {
         if (this.remoteCrawlProviderHashes == null) this.remoteCrawlProviderHashes = new ArrayList<String>();
         if (this.delegatedURL == null) {
             this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
-            log.config("Finishted Startup of Crawling Management");
+            log.config("Finished Startup of Crawling Management");
         }
     }
     /**
@@ -205,7 +207,9 @@ public class CrawlQueues {
     public void removeURL(final byte[] hash) {
         assert hash != null && hash.length == 12;
         this.noticeURL.removeByURLHash(hash);
-        if (this.delegatedURL != null) this.delegatedURL.remove(hash);
+        if (this.delegatedURL != null) {
+        	this.delegatedURL.remove(ASCII.String(hash));
+        }
     }
     
     public int removeHosts(final Set<String> hosthashes) {
