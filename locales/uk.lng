@@ -967,9 +967,9 @@ Some processes occur double to document the complex index migration structure.==
 This is the list of web pages that this peer initiated to crawl,==Це список сторінок, які були запущені на сканування вашим вузлом,
 but had been crawled by <em>other</em> peers.==але просканувалися <em>іншими </em> вузлами.
 This is the 'mirror'-case of process (6).==Це є "дзеркальним" до (6)
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Використання:</em> Тут видаються записи, якщо ви запустили місцеве сканування на сторінці "створення індексу" і ввімкнули
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request=="віддалене індексування". Кожна сторінка, яку індексує віддалений вузол на ваш запит,
-is reported back and can be monitored here.==повертається і відображається тут.
+<em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the==<em>Використання:</em> Тут видаються записи, якщо ви запустили місцеве сканування на сторінці '<a href="CrawlStartExpert.html">створення індексу</a>' і ввімкнули
+'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.=="віддалене індексування", and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.
+Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.==Кожна сторінка, яку індексує віддалений вузол на ваш запит, повертається і відображається тут.
 #результат
 #наслідок
 #висновок
@@ -1000,7 +1000,7 @@ These web pages had been crawled by your own crawl task.==Ці сторінки 
 (6) Results for Global Crawling==(6) Результати загальних сканувань
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Ці сторінки були проіндексовані вашим вузлом, але були запущені за бажанням іншої сторони (віддалене сканування).
 This is the 'mirror'-case of process (1).==Це в "дзеркальний" процес до (1).
-<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Використання:</em> Цей список заповнюється, якщо ви ввімкнули "приймати віддалені запити на сканування" на сторінці створення індексу.
+<em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==<em>Використання:</em> Цей список заповнюється, якщо ви ввімкнули "Приймати запити на сканування" на сторінці '<a href="RemoteCrawl_p.html">Віддалений сканування</a>'.
 The stack is empty.==Список порожній.
 Statistics about #[domains]# domains in this stack:==Статистика щодо #[domains]# доменів в цій черзі:
 (7) Results from surrogates import==(7) Результати з імпорту "заміщень"

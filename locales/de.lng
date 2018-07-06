@@ -1123,9 +1123,9 @@ Some processes occur double to document the complex index migration structure.==
 This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
 but had been crawled by <em>other</em> peers.==die aber von <em>anderen</em> Peers gecrawlt wurden.
 This is the 'mirror'-case of process (6).==Dies ist der 'Gegensatz' Prozess zu (6)
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Anwendungsfall:</em> Sie erhalten hier Einträge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
-is reported back and can be monitored here.==wird nun zurück gemeldet und hier angezeigt.
+<em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the==<em>Anwendungsfall:</em> Sie erhalten hier Einträge, wenn Sie einen lokalen Crawl auf der '<a href="CrawlStartExpert.html">Experten Crawl Start</a>' Seite starten und
+'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.==die 'Remote Indexierung' aktivieren, und wenn Sie auf der Seite '<a href="RemoteCrawl_p.html">Remote Crawling</a>' das Kennzeichen'Akzeptiere Remote Crawl Anfragen' gesetzt haben.
+Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.==Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde, wird nun zurück gemeldet und hier angezeigt.
 (2) Results for Result of Search Queries==(2) Ergebnisse der Resultate bei Suchanfragen
 This index transfer was initiated by your peer by doing a search query.==Dieser Index Transfer wurde von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
 The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecrawlt und nun Ihnen breitgestellt.
@@ -1149,7 +1149,7 @@ These web pages had been crawled by your own crawl task.==Diese Internetseiten w
 (6) Results for Global Crawling==(6) Ergebnisse des globalen Crawlens
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
 This is the 'mirror'-case of process (1).==Dies ist der 'Gegensatz' Prozess zu (1).
-<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste füllt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
+<em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==<em>Anwendung:</em> Diese Liste füllt sich, wenn Sie 'Akzeptiere Remote Crawl Anfragen' auf der '<a href="RemoteCrawl_p.html">Remote Crawling</a>' Seite aktiviert haben.
 The stack is empty.==Die Liste ist leer.
 Statistics about #[domains]# domains in this stack:==Statistiken über #[domains]# Domains in diesem Bereich:
 (7) Results from surrogates import==(7) Ergebnisse aus dem Surrogat Import

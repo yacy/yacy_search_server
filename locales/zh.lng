@@ -1333,9 +1333,9 @@ Some processes occur double to document the complex index migration structure.==
 This is the list of web pages that this peer initiated to crawl,==这是peer初始化时crawl的网页列表,
 but had been crawled by <em>other</em> peers.==但是先前它们已被<em>其他</em>peer crawl.
 This is the 'mirror'-case of process (6).==这是进程(6)的'镜像'实例
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>用法:</em> 您可以在这获得细目, 如果'索引创建'页面中选中了
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request=='远程索引'. 每一个远端peer索引页面所依据的peer请求
-is reported back and can be monitored here.==都在这里显示.
+<em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the==<em>用法:</em> 您可以在这获得细目, 如果'<a href="CrawlStartExpert.html">高级爬虫</a>'页面中选中了
+'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.=='远程索引', and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.
+Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.== 每一个远端peer索引页面所依据的peer请求都在这里显示.
 (2) Results for Result of Search Queries==(2) 搜索查询结果报告页
 This index transfer was initiated by your peer by doing a search query.==通过搜索, 此索引转移能被初始化.
 The index was crawled and contributed by other peers.==这个索引是被其他peer贡献与crawl的.
@@ -1359,7 +1359,7 @@ These web pages had been crawled by your own crawl task.==您的crawl任务crawl
 (6) Results for Global Crawling==(6) 全球crawl结果
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==这些网页已经被您的peer索引, 但是它们是被远端peer crawl的.
 This is the 'mirror'-case of process (1).==这是进程(1)的'镜像'实例.
-<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>用法:</em>如果您选中了'索引创建'页面的'接受远端crawl请求', 则会在此列表中显示. 
+<em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==<em>用法:</em>如果您选中了'<a href="RemoteCrawl_p.html">远程爬行</a>'页面的'接受远端crawl请求', 则会在此列表中显示.
 The stack is empty.==栈为空.
 Statistics about #[domains]# domains in this stack:==此栈显示有关 #[domains]# 域的数据:
 (7) Results from surrogates import==(7) 备份导入结果

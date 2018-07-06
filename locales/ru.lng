@@ -1209,9 +1209,9 @@ Some processes occur double to document the complex index migration structure.==
 This is the list of web pages that this peer initiated to crawl,==Здесь указаны вэб-страницы, инициированные вашим узлом для индексирования,
 but had been crawled by <em>other</em> peers.==но проиндексированные другими узлами.
 This is the 'mirror'-case of process (6).==Это действие обратное глобальному индексированию. (6)
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==Вы берёте значения здесь, запускаете локальное индексирование на странице 'Индексирование/Сканер сети' и проверяете
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request== флаг 'Выполнять удалённое индексирование'. Каждая страница, проиндексированная удалённым узлом
-is reported back and can be monitored here.== отображается здесь.
+<em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the==Вы берёте значения здесь, запускаете локальное индексирование на странице '<a href="CrawlStartExpert.html">Расширенная индексация</a>' и проверяете
+'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.== флаг 'Выполнять удалённое индексирование', and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page. 
+Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.==Каждая страница, проиндексированная удалённым узлом отображается здесь.
 (2) Results for Result of Search Queries==(2) Результаты поисковых запросов
 This index transfer was initiated by your peer by doing a search query.==Передачи индекса были инициированы вашим узлом во время поискового запроса.
 The index was crawled and contributed by other peers.==Индексация производилась другими узлами.
@@ -1235,7 +1235,7 @@ These web pages had been crawled by your own crawl task.==Эти вэб-стра
 (6) Results for Global Crawling==(6) Результаты глобального индексирования
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Эти страницы проиндексированы вашим узлом, но индексатор был инициирован удалённым узлом..
 This is the 'mirror'-case of process (1).==Это противоположность процессу (1).
-<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the '<a href="RemoteCrawl_p.html">Index Create</a>' page==Этот список будет пополняться, если вы включите "Выполнять удалённое индексирование" на странице '<a href="RemoteCrawl_p.html">Удалённое индексирование</a>'.
+<em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==Этот список будет пополняться, если вы включите "Удалённое индексирование" на странице '<a href="RemoteCrawl_p.html">Удалённое индексирование</a>'.
 The stack is empty.==Список пуст.
 Statistics about #[domains]# domains in this stack:==В этой таблице данные о #[domains]# доменах:
 (7) Results from surrogates import==(7) Результаты замещающего импорта

@@ -50,6 +50,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -348,6 +349,7 @@ public class CrawlResults {
         }
 
         prop.put("process", tabletype.getCode());
+        prop.put("process_remoteCrawlerDisabled", !sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
         // return rewrite properties
         return prop;
     }

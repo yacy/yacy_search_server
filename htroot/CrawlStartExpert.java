@@ -620,7 +620,10 @@ public class CrawlStartExpert {
             // Do Remote Indexing?
             if (sb.isP2PMode()) {
                 prop.put("remoteindexing", 1);
-                prop.put("remoteindexing_crawlOrderChecked", env.getConfigBool("crawlOrder", true) ? 1 : 0);
+				prop.put("remoteindexing_remoteCrawlerDisabled",
+						!sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
+				prop.put("remoteindexing_remoteCrawlerDisabled_crawlOrderChecked", env.getConfigBool("crawlOrder", true));
+                prop.put("remoteindexing_crawlOrderChecked", env.getConfigBool("crawlOrder", true));
                 prop.put("remoteindexing_intention", "");
             } else {
                 prop.put("remoteindexing", 0);
@@ -632,7 +635,10 @@ public class CrawlStartExpert {
                     post.getBoolean("indexMedia") ? 1 : 0);
             if (sb.isP2PMode()) {
                 prop.put("remoteindexing", 1);
-                prop.put("remoteindexing_crawlOrderChecked", post.getBoolean("crawlOrder") ? 1 : 0);
+				prop.put("remoteindexing_remoteCrawlerDisabled",
+						!sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
+				prop.put("remoteindexing_remoteCrawlerDisabled_crawlOrderChecked", post.getBoolean("crawlOrder"));
+                prop.put("remoteindexing_crawlOrderChecked", post.getBoolean("crawlOrder"));
                 prop.put("remoteindexing_intention", post.get("intention", ""));
             } else {
                 prop.put("remoteindexing", 0);

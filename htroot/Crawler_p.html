@@ -227,6 +227,13 @@ window.setInterval("setTableSize()", 1000);
 #(/info)#
 </p>
 
+#(wontReceiptRemoteResults)#::
+<div class="alert alert-warning">
+ 	<p>You asked for remote indexing, but remote crawl results won't be added to the local index as the remote crawler is currently disabled on this peer.</p>
+	<p>You can activate it in the <a href="RemoteCrawl_p.html">Remote Crawl Configuration</a> page.</p>
+</div>
+#(/wontReceiptRemoteResults)#
+
 <!-- #(noEmbeddedSolr)#::<div class="alert alert-error">No embedded local Solr index is connected. This is required to use the Solr filter query. 
 	You can configure this with the <a href="IndexFederated_p.html">Index Sources &amp; targets</a> page.</div>
 #(/noEmbeddedSolr)#

@@ -2932,13 +2932,13 @@
        <source>This is the 'mirror'-case of process (6).</source>
     </trans-unit>
     <trans-unit id="477bfd45" xml:space="preserve" approved="no" translate="yes">
-       <source>&lt;em&gt;Use Case:&lt;/em&gt; You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the</source>
+       <source>&lt;em&gt;Use Case:&lt;/em&gt; You get entries here, if you start a local crawl on the '&lt;a href="CrawlStartExpert.html"&gt;Advanced Crawler&lt;/a&gt;' page and check the</source>
     </trans-unit>
     <trans-unit id="59986be9" xml:space="preserve" approved="no" translate="yes">
-       <source>'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request</source>
+       <source>'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '&lt;a href="RemoteCrawl_p.html"&gt;Remote Crawling&lt;/a&gt;' page.</source>
     </trans-unit>
     <trans-unit id="7f968d75" xml:space="preserve" approved="no" translate="yes">
-       <source>is reported back and can be monitored here.</source>
+       <source>Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.</source>
     </trans-unit>
     <trans-unit id="c4ada7d6" xml:space="preserve" approved="no" translate="yes">
        <source>(2) Results for Result of Search Queries</source>
@@ -3007,7 +3007,7 @@
        <source>This is the 'mirror'-case of process (1).</source>
     </trans-unit>
     <trans-unit id="7d5fcb88" xml:space="preserve" approved="no" translate="yes">
-       <source>&lt;em&gt;Use Case:&lt;/em&gt; This list may fill if you check the 'Accept remote crawling requests'-flag on the '&lt;a href="RemoteCrawl_p.html"&gt;Index Create&lt;/a&gt;' page</source>
+       <source>&lt;em&gt;Use Case:&lt;/em&gt; This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '&lt;a href="RemoteCrawl_p.html"&gt;Remote Crawling&lt;/a&gt;' page</source>
     </trans-unit>
     <trans-unit id="fa27dad0" xml:space="preserve" approved="no" translate="yes">
        <source>The stack is empty.</source>

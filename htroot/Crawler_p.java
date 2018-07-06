@@ -651,6 +651,9 @@ public class Crawler_p {
 
                 // start the crawl
                 if(hasCrawlstartDataOK) {
+                	
+                	final boolean wontReceiptRemoteRsults = crawlOrder && !sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false);
+                	
                 	if ("url".equals(crawlingMode)) {
                         // stack requests
                         sb.crawler.putActive(handle, profile);
@@ -694,7 +697,11 @@ public class Crawler_p {
                             prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
                             prop.putHTML("info_reasonString", fr.toString());
                         }
-                        if (successurls.size() > 0) sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                        if (successurls.size() > 0) {
+                        	sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                        	
+            				prop.put("wontReceiptRemoteResults", wontReceiptRemoteRsults);
+                        }
                 	} else if ("sitemap".equals(crawlingMode)) {
                 		try {
                 			final DigestURL sitemapURL = sitemapURLStr.indexOf("//") > 0 ? new DigestURL(sitemapURLStr) : new DigestURL(rootURLs.iterator().next(), sitemapURLStr); // fix for relative paths which should not exist but are used anyway
@@ -702,6 +709,7 @@ public class Crawler_p {
                 			final SitemapImporter importer = new SitemapImporter(sb, sitemapURL, profile);
                 			importer.start();
                 			sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+            				prop.put("wontReceiptRemoteResults", wontReceiptRemoteRsults);
                 		} catch (final Exception e) {
                 			// mist
                 			prop.put("info", "6");//Error with url
@@ -740,6 +748,7 @@ public class Crawler_p {
                 				ConcurrentLog.logException(e);
                 			}
                 			sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+            				prop.put("wontReceiptRemoteResults", wontReceiptRemoteRsults);
                 		}
                 	}
                 }

@@ -98,10 +98,17 @@
             }
 
             // Remote crawl
+            var remoteCrawlerDisabledInfo = document.getElementById('remoteCrawlerDisabledInfo');
             if ($('#crawlOrder').isChecked()) {
+            	if(remoteCrawlerDisabledInfo != null) {
+            		remoteCrawlerDisabledInfo.className = '';
+            	}
                 $('#intention').enable();
                 if (cId === "crawlOrder") { $('#intention').focus(); }
             } else {
+            	if(remoteCrawlerDisabledInfo != null) {
+            		remoteCrawlerDisabledInfo.className = 'hidden';
+            	}
                 $('#intention').disable();
             }
         }
@@ -623,9 +630,16 @@
             so they can omit starting a crawl with the same start point.
             </span></span>
             <table style="border-width: 0px">
+              #(remoteCrawlerDisabled)#::
+              <tr #(crawlOrderChecked)#class="hidden"::#(/crawlOrderChecked)# id="remoteCrawlerDisabledInfo">
+              	<td colspan="2"><div class="info"><p>Remote crawl results won't be added to the local index as the remote crawler is disabled on this peer.</p>
+		    				<p>You can activate it in the <a href="RemoteCrawl_p.html">Remote Crawl Configuration</a> page.</p></div>
+		    	</td>
+		      </tr>
+		      #(/remoteCrawlerDisabled)#
               <tr>
                 <td>
-                  <input type="checkbox" name="crawlOrder" id="crawlOrder" #(crawlOrderChecked)#::checked="checked"#(/crawlOrderChecked)# />
+                  <input type="checkbox" name="crawlOrder" id="crawlOrder" #(crawlOrderChecked)#::checked="checked"#(/crawlOrderChecked)#/>
                 </td>
                 <td>
                   <label for="intention">Describe your intention to start this global crawl (optional)</label>:<br />
