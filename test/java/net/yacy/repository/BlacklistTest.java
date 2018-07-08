@@ -29,7 +29,8 @@ public class BlacklistTest {
         hostList.add(pattern);
 
         // proof assumption pattern(path) != path
-        boolean ret = hostList.contains(path);
+		@SuppressWarnings("unlikely-arg-type")
+		boolean ret = hostList.contains(path);
         assertFalse("match blacklist pattern " + path, ret);
 
         // proof pattern.toString match works
