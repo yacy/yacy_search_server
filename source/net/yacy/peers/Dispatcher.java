@@ -177,7 +177,7 @@ public class Dispatcher implements WorkflowTask<Transmission.Chunk> {
         int refcount = 0;
 
         // first select the container
-        final long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+        final long timeout = maxtime == Integer.MAX_VALUE ? Long.MAX_VALUE : (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         while (
                 (containers.size() < maxContainerCount) &&
                 (refcount < maxReferenceCount) &&
