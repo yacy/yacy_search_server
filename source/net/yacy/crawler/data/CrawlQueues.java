@@ -371,7 +371,7 @@ public class CrawlQueues {
                             + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
                             + ", depth=" + urlEntry.depth()
                             + ", crawlDepth=" + profile.depth()
-                            + ", must-match=" + profile.urlMustMatchPattern().toString()
+                            + ", must-match=" + profile.formattedUrlMustMatchPattern()
                             + ", must-not-match=" + profile.urlMustNotMatchPattern().toString()
                             + ", permission=" + ((this.sb.peers == null) ? "undefined" : (((this.sb.peers.mySeed().isSenior()) || (this.sb.peers.mySeed().isPrincipal())) ? "true" : "false")));
                 }

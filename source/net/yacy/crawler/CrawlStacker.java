@@ -496,8 +496,11 @@ public final class CrawlStacker implements WorkflowTask<Request>{
 
         // filter with must-match for URLs
         if ((depth > 0) && !profile.urlMustMatchPattern().matcher(urlstring).matches()) {
-            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urlstring + "' does not match must-match crawling filter '" + profile.urlMustMatchPattern().toString() + "'.");
-            return ERROR_NO_MATCH_MUST_MATCH_FILTER + profile.urlMustMatchPattern().toString();
+        	final String patternStr = profile.formattedUrlMustMatchPattern();
+            if (CrawlStacker.log.isFine()) {
+            	CrawlStacker.log.fine("URL '" + urlstring + "' does not match must-match crawling filter '" + patternStr + "'.");
+            }
+            return ERROR_NO_MATCH_MUST_MATCH_FILTER + patternStr;
         }
 
         // filter with must-not-match for URLs

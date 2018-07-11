@@ -467,6 +467,24 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
         return this.crawlerurlmustmatch;
     }
+    
+	/**
+	 * Render the urlMustMatchPattern as a String of limited size, suffixing it with
+	 * "..." when it is truncated. Used to prevent unnecessary growth of the logs,
+	 * and to prevent exceeding the field size limit for
+	 * CollectionSchema.failreason_s (32k) when the pattern is present in a fail doc
+	 * added to the Solr index.
+	 * 
+	 * @return the urlMustMatchPattern formatted as a String of limited size
+	 */
+    public String formattedUrlMustMatchPattern() {
+    	String patternStr = urlMustMatchPattern().toString();
+    	if(patternStr.length() > 1000) {
+    		/* The pattern may be quite large when using the 'From Link-List of URL' crawl start point. */
+    		patternStr = patternStr.substring(0, Math.min(patternStr.length(), 1000)) + "...";
+    	}
+    	return patternStr;
+    }
 
     /**
      * Gets the regex which must not be matched by URLs in order to be crawled.

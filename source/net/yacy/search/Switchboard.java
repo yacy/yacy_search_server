@@ -2992,7 +2992,7 @@ public final class Switchboard extends serverSwitch {
                 "processResourceStack processCase=" + processCase
                 + ", depth=" + response.depth()
                 + ", maxDepth=" + ((response.profile() == null) ? "null" : Integer.toString(response.profile().depth()))
-                + ", must-match=" + ((response.profile() == null) ? "null" : response.profile().urlMustMatchPattern().toString())
+                + ", must-match=" + ((response.profile() == null) ? "null" : response.profile().formattedUrlMustMatchPattern())
                 + ", must-not-match=" + ((response.profile() == null) ? "null" : response.profile().urlMustNotMatchPattern().toString())
                 + ", initiatorHash=" + ((response.initiator() == null) ? "null" : ASCII.String(response.initiator()))
                 + ", url=" + response.url()); // DEBUG
