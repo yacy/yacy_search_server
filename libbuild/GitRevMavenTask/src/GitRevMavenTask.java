@@ -9,6 +9,7 @@ import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
@@ -25,9 +26,8 @@ import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
  * Maven plugin to create property with YaCy release number,
  * a 4 digit number based on commits to the Git repository
  *
- * @phase initialize
  */
-@Mojo(name = "create")
+@Mojo(name = "create", defaultPhase = LifecyclePhase.INITIALIZE)
 public class GitRevMavenTask extends AbstractMojo {
 
     @Component
