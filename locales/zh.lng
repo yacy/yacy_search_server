@@ -143,7 +143,7 @@ The modified translation file is stored in DATA/LOCALE directory.==修改的翻�
 #---------------------------
 Document Citations for==文档引用
 List of other web pages with citations==其他网页与引文列表
-Similar documents from different hosts:==41/5000 来自不同主机的类似文件:
+Similar documents from different hosts:==来自不同主机的类似文件:
 #-----------------------------
 
 #File: ConfigSearchPage_p.html
@@ -156,10 +156,9 @@ Below is a generic template of the search result page. Mark the check boxes for 
 >Search Result Page Layout Configuration<==>搜索结果页面布局配置<
 To change colors and styles use the ==要改变颜色和样式使用
 >Appearance<==>外观<
- menu for different skins.==不同皮肤的菜单。
 Other portal settings can be adjusted in==其他门户网站设置可以在这调整
 >Generic Search Portal<==>通用搜索门户<
-menu for different skins.==不同皮肤的菜单。
+menu for different skins==不同皮肤的菜单
 To change colors and styles use the==要改变颜色和样式使用
 >Page Template<==>页面模板<
 >Text<==>文本<
@@ -185,10 +184,10 @@ Description and text snippet of the search result==搜索结果的描述和文�
 >Pictures<==>图片<
 >Cache<==>高速缓存<
 >Augmented Browsing<==>增强浏览<
-For this option URL proxy must be enabled.==对于这个选项，必须启用URL代理。
+For this option URL proxy must be enabled==对于这个选项，必须启用URL代理
 "Save Settings"=="保存设置"
 "Set Default Values"=="设置默认值"
-menu.==菜单。
+menu==菜单
 #-----------------------------
 
 #File: AccessGrid_p.html
@@ -200,11 +199,16 @@ YaCy Network Access==YaCy网络访问
 
 #File: env/templates/submenuIndexImport.template
 #---------------------------
->Database Reader<==>数据库读取器<
+>Content Export / Import<==>内容导出/导入<
+>Export<==>导出<
+>Internal Index Export<==>内部索引导出<
+>Import<==>导入<
 RSS Feed Importer==RSS订阅导入器
 OAI-PMH Importer==OAI-PMH导入器
-Database Reader for phpBB3 Forums==phpBB3论坛的数据库读取器
-Dump Reader for MediaWiki dumps==MediaWiki转储读取器
+>Warc Importer<==>Warc导入器<
+>Database Reader<==>数据库阅读器<
+Database Reader for phpBB3 Forums==phpBB3论坛的数据库阅读器
+Dump Reader for MediaWiki dumps==MediaWiki转储阅读器
 #-----------------------------
 
 #File: TransNews_p.html
@@ -224,26 +228,26 @@ Translation:==翻译:
 >score==>分数
 negative vote==反对票
 positive vote==赞成票
-Vote on this translation.==对这个翻译投票。
-If you vote positive the translation is added to your local translation list.==如果您投赞成票，翻译将被添加到您的本地翻译列表中。
+Vote on this translation==对这个翻译投票
+If you vote positive the translation is added to your local translation list==如果您投赞成票，翻译将被添加到您的本地翻译列表中
 >Originator<==>发起人<
 #-----------------------------
 
 #File: Autocrawl_p.html
 #---------------------------
 >Autocrawler<==>自动爬虫<
-Autocrawler automatically selects and adds tasks to the local crawl queue.==自动爬虫自动选择任务并将其添加到本地爬网队列。
-This will work best when there are already quite a few domains in the index.==如果索引中已经有一些域名，这将会工作得最好。
+Autocrawler automatically selects and adds tasks to the local crawl queue==自动爬虫自动选择任务并将其添加到本地爬网队列
+This will work best when there are already quite a few domains in the index==如果索引中已经有一些域名，这将会工作得最好
 Autocralwer Configuration==自动爬虫配置
 You need to restart for some settings to be applied==您需要重新启动才能应用一些设置
 Enable Autocrawler:==启用自动爬虫:
 Deep crawl every:==深入抓取:
-Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.==警告：如果这大于“取回行”，只有浅抓取将运行。
+Warning: if this is bigger than "Rows to fetch" only shallow crawls will run==警告：如果这大于“取回行”，只有浅抓取将运行
 Rows to fetch at once:==一次取回行:
-Recrawl only older than # days:==重新抓取只有＃天以前的时间:
+Recrawl only older than # days:==重新抓取只有 # 天以前的时间:
 Get hosts by query:==通过查询获取主机:
 Can be any valid Solr query.==可以是任何有效的Solr查询。
-Shallow crawl depth (0 to 2):==浅抓取深度（0〜2）:
+Shallow crawl depth (0 to 2):==浅抓取深度（0至2）:
 Deep crawl depth (1 to 5):==深度抓取深度（1至5）:
 Index text:==索引文本:
 Index media:==索引媒体:
@@ -269,25 +273,25 @@ Parser Configuration==解析器配置
 #---------------------------
 Content Control<==内容控制<
 Peer Content Control URL Filter==节点内容控制地址过滤器
-With this settings you can activate or deactivate content control on this peer.==使用此设置，您可以激活或取消激活此YaCy节点上的内容控制。
+With this settings you can activate or deactivate content control on this peer==使用此设置，您可以激活或取消激活此YaCy节点上的内容控制
 Use content control filtering:==使用内容控制过滤:
 >Enabled<==>已启用<
-Enables or disables content control.==启用或禁用内容控制。
+Enables or disables content control==启用或禁用内容控制
 Use this table to create filter:==使用此表创建过滤器:
-Define a table. Default:==定义一个表格。 默认:
+Define a table. Default:==定义一个表格. 默认:
 Content Control SMW Import Settings==内容控制SMW导入设置
-With this settings you can define the content control import settings. You can define a==使用此设置，您可以定义内容控制导入设置。 你可以定义一个
-Semantic Media Wiki with the appropriate extensions.==语义媒体百科与适当的扩展。
+With this settings you can define the content control import settings. You can define a==使用此设置,您可以定义内容控制导入设置. 你可以定义一个
+Semantic Media Wiki with the appropriate extensions==语义媒体百科与适当的扩展
 SMW import to content control list:==SMW导入到内容控制列表:
 Enable or disable constant background synchronization of content control list from SMW (Semantic Mediawiki). Requires restart!==启用或禁用来自SMW（Semantic Mediawiki）的内容控制列表的恒定后台同步。 需要重启！
 SMW import base URL:==SMW导入基URL:
-Define base URL for SMW special page "Ask". Example: ==为SMW特殊页面“Ask”定义基础地址。 例:
+Define base URL for SMW special page "Ask". Example: ==为SMW特殊页面“Ask”定义基础地址.例:
 SMW import target table:==SMW导入目标表:
-Define import target table. Default: contentcontrol==定义导入目标表。 默认值:contentcontrol
+Define import target table. Default: contentcontrol==定义导入目标表. 默认值:contentcontrol
 Purge content control list on initial sync:==在初始同步时清除内容控制列表:
-Purge content control list on initial synchronisation after startup.==重启后，清除初始同步的内容控制列表。
+Purge content control list on initial synchronisation after startup.==重启后，清除初始同步的内容控制列表.
 "Submit"=="提交"
-Define base URL for SMW special page "Ask". Example:==为SMW特殊页面“Ask”定义基础地址。 例:
+Define base URL for SMW special page "Ask". Example:==为SMW特殊页面“Ask”定义基础地址.例:
 #-----------------------------
 
 #File: env/templates/submenuSemantic.template
@@ -307,63 +311,62 @@ documents=="文件"
 days==天
 hours==小时
 minutes==分钟
-for new documents automatically.==自动地对新文件。
+for new documents automatically==自动地对新文件
 run this crawl once==抓取一次
 >Query<==>查询<
 Query Type==查询类型
 >Import<==>导入<
 Tag Manager==标签管理器
-Bookmarks (user: #[user]# size: #[size]#)==书签(用户:＃[user]＃大小:＃[size]＃)
+Bookmarks (user: #[user]# size: #[size]#)==书签(用户: #[user]# 大小: #[size]#)
 "Replace"=="替换"
 #-----------------------------
 
 #File: AugmentedBrowsing_p.html
 #---------------------------
 Augmented Browsing<==增强浏览<
-, where parameter is the url of an external web page.==其中参数是外部网页的网址。
+, where parameter is the url of an external web page==其中参数是外部网页的网址
 URL Proxy Settings<==URL代理设置<
 With this settings you can activate or deactivate URL proxy which is the method used for augmentation.==使用此设置，您可以激活或取消激活用于扩充的URL代理。
 Service call: ==服务电话:
 >URL proxy:<==>URL 代理:<
-Globally enables or disables URL proxy via ==全局启用或禁用URL代理通过
+Globally enables or disables URL proxy via==全局启用或禁用URL代理通过
 >Enabled<==>已启用<
 Show search results via URL proxy:==通过URL代理显示搜索结果:
 Enables or disables URL proxy for all search results. If enabled, all search results will be tunneled through URL proxy.==为所有搜索结果启用或禁用URL代理。 如果启用，所有搜索结果将通过URL代理隧道传输。
 Alternatively you may add this javascript to your browser favorites/short-cuts, which will reload the current browser address==或者，您可以将此JavaScript添加到您的浏览器收藏夹/快捷方式，这将重新加载当前的浏览器地址
-via the YaCy proxy servlet.==通过YaCy代理servlet。
+via the YaCy proxy servlet==通过YaCy代理servlet
 or right-click this link and add to favorites:==或右键单击此链接并添加到收藏夹:
 Restrict URL proxy use:==限制URL代理使用:
-Define client filter. Default: ==定义客户端过滤器。 默认:
+Define client filter. Default: ==定义客户端过滤器.默认:
 URL substitution:==网址替换:
 Define URL substitution rules which allow navigating in proxy environment. Possible values: all, domainlist. Default: domainlist.==定义允许在代理环境中导航的URL替换规则。 可能的值：all，domainlist。 默认：domainlist。
 "Submit"=="提交"
 Alternatively you may add this javascript to your browser favorites/short-cuts==或者，您可以将此JavaScript添加到您的浏览器收藏夹/快捷方式，这将重新加载当前的浏览器地址
 Enables or disables URL proxy for all search results. If enabled==为所有搜索结果启用或禁用URL代理。 如果启用，所有搜索结果将通过URL代理隧道传输。
 Service call:==服务电话:
-Define client filter. Default:==定义客户端过滤器。 默认:
-Define URL substitution rules which allow navigating in proxy environment. Possible values: all==定义允许在代理环境中导航的URL替换规则。 可能的值：all，domainlist。 默认：domainlist。
+Define client filter. Default:==定义客户端过滤器.默认:
+Define URL substitution rules which allow navigating in proxy environment. Possible values: all==定义允许在代理环境中导航的URL替换规则.可能的值：all，domainlist.默认：domainlist。
 Globally enables or disables URL proxy via==全局启用或禁用URL代理通过
 #-----------------------------
 
 #File: env/templates/submenuMaintenance.template
 #---------------------------
 RAM/Disk Usage &amp; Updates==内存/硬盘 使用 &amp; 更新
-Web Cache==Web缓存
+Web Cache==网页缓存
 Download System Update==下载系统更新
 >Performance<==>性能<
-RAM/Disk Usage ==内存/硬盘 使用 
 RAM/Disk Usage==内存/硬盘 使用
 #-----------------------------
 
 #File: ContentAnalysis_p.html
 #---------------------------
 Content Analysis==内容分析
-These are document analysis attributes.==这些是文档分析属性。
+These are document analysis attributes==这些是文档分析属性
 Double Content Detection==双重内容检测
 Double-Content detection is done using a ranking on a 'unique'-Field, named 'fuzzy_signature_unique_b'.==双内容检测是使用名为'fuzzy_signature_unique_b'的'unique'字段上的排名完成的。
 This is the minimum length of a word which shall be considered as element of the signature. Should be either 2 or 3.==这是一个应被视为签名的元素单词的最小长度。 应该是2或3。
 The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less==quantRate是参与签名计算的单词数量的度量。 数字越高，越少
-words are used for the signature.==单词用于签名。
+words are used for the signature==单词用于签名
 For minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5.==对于minTokenLen = 2，quantRate值不应低于0.24; 对于minTokenLen = 3，quantRate值必须不低于0.5。
 "Re-Set to default"=="重置为默认"
 "Set"=="设置"
@@ -372,22 +375,21 @@ The quantRate is a measurement for the number of words that take part in a signa
 #-----------------------------
 
 
-
 #File: AccessTracker_p.html
 #---------------------------
 Access Tracker==访问跟踪
 Server Access Overview==网站访问概况
-This is a list of #[num]# requests to the local http server within the last hour.==最近一小时内有 #[num]# 个到本地的访问请求.
-This is a list of requests to the local http server within the last hour.==此列表显示最近一小时内到本机的访问请求.
-Showing #[num]# requests.==显示 #[num]# 个请求.
+This is a list of #[num]# requests to the local http server within the last hour==最近一小时内有 #[num]# 个到本地的访问请求
+This is a list of requests to the local http server within the last hour==此列表显示最近一小时内到本机的访问请求
+Showing #[num]# requests==显示 #[num]# 个请求
 >Host<==>主机<
 >Path<==>路径<
 Date<==日期<
 Access Count During==访问时间
-last Second==最近1 秒
-last Minute==最近1 分
-last 10 Minutes==最近10 分
-last Hour==最近1 小时
+last Second==最近1秒
+last Minute==最近1分
+last 10 Minutes==最近10分
+last Hour==最近1小时
 The following hosts are registered as source for brute-force requests to protected pages==以下主机作为保护页面强制请求的源
 #>Host==>Host
 Access Times==访问时间
@@ -407,17 +409,17 @@ Expected Results==期望结果
 Returned Results==返回结果
 Known Results==已知结果
 Used Time (ms)==消耗时间(毫秒)
-URL fetch (ms)==获取URL(毫秒)
+URL fetch (ms)==获取地址(毫秒)
 Snippet comp (ms)==片段比较(毫秒)
 Query==查询字符
 >User Agent<==>用户代理<
 Top Search Words (last 7 Days)==热门搜索词汇(最近7天)
 Search Word Hashes==搜索字哈希值
 Count</td>==计数</td>
-Queries Per Last Hour==小时平均查询
+Queries Per Last Hour==查询/小时
 Access Dates==访问日期
 This is a list of searches that had been requested from remote peer search interface==此列表显示从远端节点所进行的搜索. 
-This is a list of requests (max. 1000) to the local http server within the last hour.==这是最近一小时内本地http服务器的请求列表(最多1000个).
+This is a list of requests (max. 1000) to the local http server within the last hour==这是最近一小时内本地http服务器的请求列表(最多1000个)
 #-----------------------------
 
 
@@ -436,7 +438,7 @@ Used Blacklist engine:==使用的黑名单引擎:
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==提供代理URL过滤;过滤掉自载入时加入进黑名单的URL.
 from being loaded. You can define several blacklists and activate them separately.==您可以自定义黑名单并分别激活它们.
 You may also provide your blacklist to other peers by sharing them; in return you may==您也可以提供你自己的黑名单列表给其他人;
-collect blacklist entries from other peers.==同样，其他人也能将黑名单列表共享给您.
+collect blacklist entries from other peers==同样，其他人也能将黑名单列表共享给您
 Active list:==激活列表:
 No blacklist selected==未选中黑名单
 Select list:==选中黑名单:
@@ -456,7 +458,7 @@ Delete selected pattern(s)==删除选中规则
 Move selected pattern(s) to==移动选中规则
 #You can select them here for deletion==您可以从这里选择要删除的项
 Add new pattern:==添加新规则:
-"Add URL pattern"=="添加URL规则"
+"Add URL pattern"=="添加地址规则"
 The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.== 在 '/' 后边的 '*' ,可用<a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">正则表达式</a>表示.
 domain.net/fullpath<==domain.net/绝对路径<
 #>domain.net/*<==>domain.net/*<
@@ -470,20 +472,20 @@ Activate this list for==为以下条目激活此名单
 Show entries:==显示条目:
 Entries per page:==页面条目:
 Edit existing pattern(s):==编辑现有规则:
-"Save URL pattern(s)"=="保存URL规则"
+"Save URL pattern(s)"=="保存地址规则"
 #-----------------------------
 
 #File: BlacklistCleaner_p.html
 #---------------------------
 Blacklist Cleaner==黑名单整理
-Here you can remove or edit illegal or double blacklist-entries.==在这里您可以删除或者编辑一个非法或者重复的黑名单条目.
+Here you can remove or edit illegal or double blacklist-entries==在这里您可以删除或者编辑一个非法或者重复的黑名单条目
 Check list==校验名单
 "Check"=="校验"
-Allow regular expressions in host part of blacklist entries.==允许黑名单中主机部分的正则表达式.
+Allow regular expressions in host part of blacklist entries==允许黑名单中主机部分的正则表达式
 The blacklist-cleaner only works for the following blacklist-engines up to now:==此整理目前只对以下黑名单引擎有效:
 Illegal Entries in #[blList]# for==非法条目在 #[blList]# 
 Deleted #[delCount]# entries==已删除 #[delCount]# 个条目
-Altered #[alterCount]# entries!==已修改 #[alterCount]# 个条目
+Altered #[alterCount]# entries==已修改 #[alterCount]# 个条目
 Two wildcards in host-part==主机部分中的两个通配符
 Either subdomain <u>or</u> wildcard==子域名<u>或者</u>通配符 
 Path is invalid Regex==无效正则表达式
@@ -507,11 +509,11 @@ plain text file:<==文本文件:<
 XML file:==XML文件:
 Upload a regular text file which contains one blacklist entry per line.==上传一个每行都有一个黑名单条目的文本文件.
 Upload an XML file which contains one or more blacklists.==上传一个包含一个或多个黑名单的XML文件.
-Export blacklist items to...==导出黑名单到...
+Export blacklist items to==导出黑名单到
 Here you can export a blacklist as an XML file. This file will contain additional==您可以导出黑名单到一个XML文件中，此文件含有
-information about which cases a blacklist is activated for.==激活黑名单所具备条件的详细信息.
+information about which cases a blacklist is activated for==激活黑名单所具备条件的详细信息
 "Export list as XML"=="导出名单到XML"
-Here you can export a blacklist as a regular text file with one blacklist entry per line.==您可以导出黑名单到一个文本文件中，且每行都仅有一个黑名单条目.
+Here you can export a blacklist as a regular text file with one blacklist entry per line==您可以导出黑名单到一个文本文件中，且每行都仅有一个黑名单条目
 This file will not contain any additional information==此文件不会包含详细信息
 "Export list as text"=="导出名单到文本"
 #-----------------------------
@@ -523,7 +525,7 @@ Used Blacklist engine:==使用的黑名单引擎:
 Test list:==测试黑名单:
 "Test"=="测试"
 The tested URL was==此链接
-It is blocked for the following cases:==由于以下原因，此名单无效:
+It is blocked for the following cases:==由于以下原因,此名单无效:
 #Crawling==Crawling
 #DHT==DHT
 News==新闻
@@ -551,7 +553,7 @@ Subject:==标题:
 Text:==文本:
 You can use==您可以用
 Yacy-Wiki Code==YaCy-百科代码
-here.==.
+here.==这儿.
 Comments:==评论:
 deactivated==无效
 >activated==>有效
@@ -560,7 +562,7 @@ moderated==改变
 "Preview"=="预览"
 "Discard"=="取消"
 >Preview==>预览
-No changes have been submitted so far!==未作出任何改变!
+No changes have been submitted so far==未作出任何改变
 Access denied==拒绝访问
 To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==如果编辑或者创建博客内容，您需要登录.
 Are you sure==确定
@@ -642,7 +644,7 @@ previous page==前一页
 next page==后一页
 All==所有
 Show==显示
-Bookmarks per page.==每页书签.
+Bookmarks per page==书签/每页
 #unsorted==默认排序
 #-----------------------------
 
@@ -672,11 +674,11 @@ Username too short. Username must be ==用户名太短. 用户名必须
 User Administration==用户管理
 User created:==用户已创建:
 User changed:==用户已改变:
-Generic error.==一般错误.
-Passwords do not match.==密码不匹配.
-Username too short. Username must be >= 4 Characters.==用户名太短, 至少为4个字符.
-No password is set for the administration account.==管理员账户未设置密码.
-Please define a password for the admin account.==请设置一个管理员密码.
+Generic error==一般错误
+Passwords do not match==密码不匹配
+Username too short. Username must be >= 4 Characters==用户名太短, 至少为4个字符
+No password is set for the administration account==管理员账户未设置密码
+Please define a password for the admin account==请设置一个管理员密码
 
 #Admin Account
 Admin Account==管理员
@@ -1116,6 +1118,8 @@ do not show Advanced Search==不显示高级搜索
 Media Search==媒体搜索
 Remote results resorting==远程搜索结果排序
 Remote search encryption==远程搜索加密
+>Snippet Fetch Strategy==>片段提取策略
+Link Verification<==链接验证<
 Greedy Learning Mode==贪心学习模式
 Index remote results==索引远程结果
 Limit size of indexed remote results==现在远程索引结果容量
@@ -1187,9 +1191,10 @@ For explanation please look into defaults/yacy.init==详细内容请参考defaul
 
 #File: ConfigRobotsTxt_p.html
 #---------------------------
-Exclude Web-Spiders==排除Web-Spider
+>Exclude Web-Spiders<==>拒绝网页爬虫<
 Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==在这里您可以创建一个robots.txt, 以阻止试图访问您节点网络接口的网络爬虫.
-is a volunteer agreement most search-engines (including YaCy) follow.==是一个大多数搜索引擎(包括YaCy)都遵守的协议.
+>is a volunteer agreement most search-engines==>是一个大多数搜索引擎
+(including YaCy) follow==(包括YaCy)都遵守的协议
 It disallows crawlers to access webpages or even entire domains.==它会阻止网络爬虫进入网页甚至是整个域.
 Deny access to==禁止访问以下页面
 Entire Peer==整个节点
@@ -1202,6 +1207,7 @@ Wiki==维基
 Public bookmarks==公共书签
 Home Page==首页
 File Share==共享文件
+>Impressum<==>公司信息<
 "Save restrictions"=="保存"
 #-----------------------------
 
@@ -1607,7 +1613,7 @@ Available Intranet Server==可用局域网服务器
 Network Scanner==网络扫描器
 YaCy can scan a network segment for available http, ftp and smb server.==YaCy可扫描http, ftp 和smb服务器.
 You must first select a IP range and then, after this range is scanned,==须先指定IP范围, 再进行扫描,
-it is possible to select servers that had been found for a full-site crawl.==才有可能选择主机并将其作为全站crawl的服务器.
+it is possible to select servers that had been found for a full-site crawl.==才有可能选择主机并将其作为全站抓取的服务器.
 #No servers had been detected in the given IP range== 
 Please enter a different IP range for another scan.==未检测到可用服务器, 请重新指定IP范围.
 Please wait...==请稍候...
@@ -1723,7 +1729,6 @@ YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': 搜索页面
 #kiosk mode==Kiosk Modus
 "Search"=="搜索"
 
-
 advanced parameters==高级参数
 Max. number of results==搜索结果最多有
 Results per page==每个页面显示结果
@@ -1782,7 +1787,7 @@ after searching, click-open on the default search engine in the upper right sear
 search as rss feed==作为RSS-Feed搜索
 click on the red icon in the upper right after a search. this works good in combination with the '/date' ranking modifier. See an==搜索后点击右上方的红色图标. 配合'/date'排名修改, 能取得较好效果.
 >example==>例
-json search results==JSON搜索结果
+json search results==json搜索结果
 for ajax developers: get the search rss feed and replace the '.rss' extension in the search result url with '.json'==对AJAX开发者: 获取搜索结果页的RSS-Feed, 并用'.json'替换'.rss'搜索结果链接中的扩展名
 #-----------------------------
 
@@ -1792,18 +1797,18 @@ Index Cleaner==索引整理
 >URL-DB-Cleaner==>URL-DB-清理
 #ThreadAlive:
 #ThreadToString:
-Total URLs searched:==搜索到的全部URL:
-Blacklisted URLs found:==搜索到的黑名单URL:
+Total URLs searched:==搜索到的全部地址:
+Blacklisted URLs found:==搜索到的黑名单地址:
 Percentage blacklisted:==黑名单占百分比:
-last searched URL:==最近搜索到的URL: 
-last blacklisted URL found:==最近搜索到的黑名单URL:
+last searched URL:==最近搜索到的地址: 
+last blacklisted URL found:==最近搜索到的黑名单地址:
 >RWI-DB-Cleaner==>RWI-DB-清理
 RWIs at Start:==启动时RWIs:
 RWIs now:==当前反向字索引: 
 wordHash in Progress:==处理中的Hash值:
 last wordHash with deleted URLs:==已删除网址的Hash值:
-Number of deleted URLs in on this Hash:==此Hash中已删除的URL数:
-URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:==URL-DB-清理 - 清理数据库, 会删除黑名单URl:
+Number of deleted URLs in on this Hash:==此Hash中已删除的地址数:
+URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:==URL-DB-清理 - 清理数据库, 会删除黑名单地址:
 Start/Resume==开始/继续
 Stop==停止
 Pause==暂停
@@ -1817,7 +1822,7 @@ The local index currently contains #[wcount]# reverse word indexes==本地索引
 RWI Retrieval (= search for a single word)==RWI接收(= 搜索单个单词)
 Select Segment:==选择片段:
 Retrieve by Word:<==输入单词:<
-"Show URL Entries for Word"=="显示关键字相关的URL"
+"Show URL Entries for Word"=="显示关键字相关的地址"
 Retrieve by Word-Hash==输入单词Hash值
 "Show URL Entries for Word-Hash"=="显示关键字Hash值相关的URL"
 "Generate List"=="生成列表"
@@ -1859,8 +1864,8 @@ to Peer==指定节点
 <dd>select==<dd>选择
 or enter a hash==或者输入节点的Hash值
 Sequential List of Word-Hashes==字Hash值的顺序列表
-No URL entries related to this word hash==无对应入口URL对于字Hash
->#[count]# URL entries related to this word hash==>#[count]# 个入口URL与此字Hash相关
+No URL entries related to this word hash==无对应入口地址对于字Hash
+>#[count]# URL entries related to this word hash==>#[count]# 个入口地址与此字Hash相关
 Resource</td>==资源</td>
 Negative Ranking Factors==负向排名因素
 Positive Ranking Factors==正向排名因素
@@ -1898,14 +1903,21 @@ Blacklist Extension==黑名单扩展
 
 #File: IndexControlURLs_p.html
 #---------------------------
-URL References Administration==参考地址管理
+>URL Database Administration<==>地址数据库管理<
 The local index currently contains #[ucount]# URL references==目前本地索引含有 #[ucount]# 个参考地址
+
+#URL Retrieval
 URL Retrieval==地址获取
-Select Segment:==选择片段:
 Retrieve by URL:<==输入地址:<
-"Show Details for URL"=="显示细节"
 Retrieve by URL-Hash==输入地址Hash值
+"Show Details for URL"=="显示细节"
 "Show Details for URL-Hash"=="显示细节"
+
+#Cleanup
+>Cleanup<==>清理<
+>Index Deletion<==>删除索引<
+
+Select Segment:==选择片段:
 "Generate List"=="生成列表"
 Statistics about top-domains in URL Database==地址数据库中顶级域数据
 Show top==显示全部URL中的
@@ -2025,13 +2037,23 @@ Import failed:==导入失败:
 
 #File: DictionaryLoader_p.html
 #---------------------------
-Dictionary Loader==功能扩展
+>Knowledge Loader<==>知识加载器<
 YaCy can use external libraries to enable or enhance some functions. These libraries are not==您可以使用外部插件来增强一些功能. 考虑到程序大小问题,
 included in the main release of YaCy because they would increase the application file too much.==这些插件并未被包含在主程序中.
 You can download additional files here.==您可以在这下载扩展文件.
+
+#Geolocalization
 >Geolocalization<==>位置定位<
 Geolocalization will enable YaCy to present locations from OpenStreetMap according to given search words.==根据关键字, YaCy能从OpenStreetMap获得的位置信息.
 >GeoNames<==>位置<
+
+#Suggestions
+>Suggestions<==>建议<
+
+#Synonyms
+>Synonyms<==>同义词<
+
+Dictionary Loader==功能扩展
 With this file it is possible to find cities with a population > 1000 all over the world.==使用此文件能够找到全世界平均人口大于1000的城市.
 >Download from<==>下载来源<
 >Storage location<==>存储位置<
@@ -2207,12 +2229,12 @@ Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer 
 When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==当索引完成时, xml文件会被移动到 /DATA/SURROGATES/out
 You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==您可以将文件从/DATA/SURROGATES/out 移动到 /DATA/SURROGATES/in 以重复索引.
 Import Process==导入进程
-#Thread:==Thread:
+Thread:==线程:
 #Dump:==Dump:
 Processed:==已完成:
-Wiki Entries==Wiki条目
+Wiki Entries==百科条目
 Speed:==速度:
-articles per second<==个文章每秒<
+articles per second<==文章/秒<
 Running Time:==运行时间:
 hours,==小时,
 minutes<==分<
@@ -2223,7 +2245,7 @@ Remaining Time:==剩余时间:
 
 #File: IndexImportOAIPMH_p.html
 #---------------------------
-#OAI-PMH Import==OAI-PMH Import
+OAI-PMH Import==OAI-PMH导入
 Results from the import can be monitored in the <a href="CrawlResults.html?process=7">indexing results for surrogates==导入结果<a href="CrawlResults.html?process=7">监视
 Single request import==单个导入请求
 This will submit only a single request as given here to a OAI-PMH server and imports records into the index==向OAI-PMH服务器提交如下导入请求, 并将返回记录导入索引
@@ -2304,8 +2326,8 @@ The following form is a simplified crawl start that uses the proper values for a
 Just insert the front page URL of your forum. After you started the crawl you may want to get back==将论坛首页填入表格. 开始crawl后,
 to this page to read the integration hints below.==您可能需要返回此页面阅读以下提示.
 URL of the phpBB3 forum main page==phpBB3论坛主页
-This is a crawl start point==这是crawl起始点
-"Get content of phpBB3: crawl forum pages"=="获取phpBB3内容: crawl论坛页面"
+This is a crawl start point==这是抓取起始点
+"Get content of phpBB3: crawl forum pages"=="获取phpBB3内容: 抓取论坛页面"
 Inserting a Search Window to phpBB3==在phpBB3中添加搜索框
 To integrate a search window into phpBB3, you must insert some code into a forum template.==在论坛模板中添加以下代码以将搜索框集成到phpBB3中.
 There are several templates that can be used for phpBB3, but in this guide we consider that==phpBB3中有多种模板,
@@ -2367,7 +2389,7 @@ Available after successful loading of rss feed in preview==仅在读取rss feed�
 >Docs<==>文件<
 >State<==><
 #>URL<==>URL<
-"Add Selected Items to Index (full content of url)"=="添加选中条目到索引(URL中全部内容)"
+"Add Selected Items to Index (full content of url)"=="添加选中条目到索引(地址中全部内容)"
 #-----------------------------
 
 #File: Messages_p.html
@@ -2431,9 +2453,9 @@ YaCy Network<==YaCy网络<
 >Online Peers<==>在线节点<
 >Number of<br/>Documents<==>文件<br/>数目<
 Indexing Speed:==索引速度:
-Pages Per Minute (PPM)==页面每分钟(PPM)
+Pages Per Minute (PPM)==页面/分钟(PPM)
 Query Frequency:==请求频率:
-Queries Per Hour (QPH)==请求每小时(QPH)
+Queries Per Hour (QPH)==请求/小时(QPH)
 >Today<==>今天<
 >Last Hour<==>1小时前<
 >Last&nbsp;Week<==>最近一周<
@@ -2502,16 +2524,19 @@ Your Peer:==您的节点:
 >Info<==>信息<
 >Version<==>版本<
 >Release<==>版本<
->Age<==>年龄<
+>Age<==>年龄(天)<
 #>UTC<==>UTC<
->Uptime<==>开机时间<
+>Uptime<==>正常运行时间<
 >Links<==>链接<
 >RWIs<==>反向字索引<
-Sent<br/>Words==已发送关键字
+>Sent DHT<==>已发送DHT<
+>Received DHT<==>已接受DHT<
+>Word Chunks<==>词汇块<
 Sent<br/>URLs==已发送网址
-Received<br/>Words==已接收关键字
 Received<br/>URLs==已接收网址
 Known<br/>Seeds==已知种子
+Sent<br/>Words==已发送词语
+Received<br/>Words==已接收词语
 Connects<br/>per hour==连接/小时
 #Own/Other==Eigene/Andere
 >dark green font<==>深绿色字<
@@ -2750,10 +2775,10 @@ This is the time delta between accessing of the same domain during a crawl.==这
 The crawl balancer tries to avoid that domains are==crawl平衡器能够避免频繁地访问同一域名,
 accessed too often, but if the balancer fails (i.e. if there are only links left from the same domain), then these minimum==如果平衡器失效(比如相同域名下只剩链接了), 则此有此间歇
 delta times are ensured.==提供访问保障.
-#>Crawler Domain<==>爬虫 Domain<
+>Crawler Domain<==>爬虫域名<
 >Minimum Access Time Delta<==>最小访问间歇<
->local (intranet) crawls<==>本地(局域网)crawl<
->global (internet) crawls<==>全球(广域网)crawl<
+>local (intranet) crawls<==>本地(局域网)抓取<
+>global (internet) crawls<==>全球(广域网)抓取<
 "Enter New Parameters"=="使用新参数"
 Thread Pool Settings:==线程池设置:
 maximum Active==最大活动
@@ -2909,7 +2934,7 @@ Remote Crawler Configuration==远端爬虫配置
 >Accept Remote Crawl Requests<==>接受远端抓取请求<
 Perform web indexing upon request of another peer.==收到另一节点请求时进行网页索引.
 Load with a maximum of==最多每分钟读取
-pages per minute==个页面
+pages per minute==页面/分钟
 "Save"=="保存"
 Crawl results will appear in the==抓取会出现在
 >Crawl Result Monitor<==>抓取结果监视<
@@ -2967,12 +2992,12 @@ Viewer for Peer-News==查看节点新闻
 Viewer for Cookies in Proxy==查看代理cookie
 ### --- Those 3 items are removed in latest SVN END
 Server Access Settings==服务器访问设置
-Proxy Access Settings==代理访问设置
+>Transparent Proxy Access Settings==>透明代理访问设置
 #Content Parser Settings==Inhalt Parser Einstellungen
 Crawler Settings==爬虫设置
 HTTP Networking==HTTP网络
 Remote Proxy (optional)==远程代理(可选)
-Seed Upload Settings==Seed上传设置
+Seed Upload Settings==种子上传设置
 Message Forwarding (optional)==消息发送(可选)
 #-----------------------------
 
@@ -3067,19 +3092,19 @@ Use <a==使用 <a
 
 #File: Settings_Seed.inc
 #---------------------------
-Seed Upload Settings==seed上传设置
+Seed Upload Settings==种子上传设置
 With these settings you can configure if you have an account on a public accessible==如果您有一个公共服务器的账户, 可在此设置
-server where you can host a seed-list file.==seed列表文件相关选项.
+server where you can host a seed-list file.==种子列表文件相关选项.
 General Settings:==通用设置:
 If you enable one of the available uploading methods, you will become a principal peer.==如果节点使用了以下某种上传方式, 则本机节点会成为主要节点.
-Your peer will then upload the seed-bootstrap information periodically,==您的节点会定期上传seed启动信息,
-but only if there have been changes to the seed-list.==前提是seed列表有变更.
+Your peer will then upload the seed-bootstrap information periodically,==您的节点会定期上传种子启动信息,
+but only if there have been changes to the seed-list.==前提是种子列表有变更.
 Upload Method==上传方式
 "Submit"=="提交"
 Retry Uploading==重试上传
 Here you can specify which upload method should be used.==在此指定上传方式.
 Select 'none' to deactivate uploading.==选择'none'关闭上传
-The URL that can be used to retrieve the uploaded seed file, like==能够上传seed文件的链接, 比如
+The URL that can be used to retrieve the uploaded seed file, like==能够上传种子文件的链接, 比如
 #-----------------------------
 
 #File: Settings_Seed_UploadFile.inc
@@ -3399,7 +3424,10 @@ Please send us feed-back!==可以给我们一个反馈嘛!
 We don't track YaCy users, YaCy does not send 'home-pings', we do not even know how many people use YaCy as their private search engine.==我们不跟踪YAY用户，YaCy不发送“回家Ping”，我们甚至不知道有多少人使用Yyas作为他们的私人搜索引擎。
 Therefore we like to ask you: do you like YaCy?==所以我们想问你：你喜欢YaCy吗？
 Will you use it again... if not, why?==你会再次使用它吗？如果不是，为什么？
-Is it possible that we change a bit to suit your needs?==我们有可能改变一下以满足您的需求吗？
+Is it possible that we change a bit to suit your needs==我们有可能改变一下以满足您的需求吗
+Please send us feed-back about your experience with an==请向我们发送有关您的体验的回馈
+Professional Support==专业级支持
+If you are a professional user and you would like to use YaCy in your company in combination with consulting services by YaCy specialists, please see==如果您是专业用户,并且希望在公司中使用YaCy并获得YaCy专家的咨询服务,请参阅
 Then YaCy will restart.==然后YaCy会重新启动.
 If you can't reach YaCy's interface after 5 minutes restart failed.==如果5分钟后不能访问此页面说明重启失败.
 Installing release==正在安装
@@ -3442,21 +3470,26 @@ Show surftips to everyone==所有人均可使用建议
 
 #File: Table_API_p.html
 #---------------------------
-: Peer Steering==: 节点向导
-Steering of API Actions<==API动作向导<
+>Process Scheduler<==>进程调度器<
 This table shows actions that had been issued on the YaCy interface==此表显示YaCy用于
 to change the configuration or to request crawl actions.==改变配置或者处理抓取请求的动作接口函数.
 These recorded actions can be used to repeat specific actions and to send them==它们用于重复执行某一指定动作,
 to a scheduler for a periodic execution.==或者用于周期执行一系列动作.
+: Peer Steering==: 节点向导
+Steering of API Actions<==API动作向导<
+
+#Recorded Actions
 >Recorded Actions<==>已记录动作<
+>Type==>类型
+>Comment==>注释
+>Call<==>调用<
+>Count<==>次数<
 "next page"=="下一页"
 "previous page"=="上一页"
 "next page"=="下一页"
 "previous page"=="上一页"
  of #[of]#== 共 #[of]#
->Type==>类型
->Comment==>注释
-Call Count<==调用 次数<
+
 Recording&nbsp;Date==正在记录&nbsp;日期
 Last&nbsp;Exec&nbsp;Date==上次&nbsp;执行&nbsp;日期
 Next&nbsp;Exec&nbsp;Date==下次&nbsp;执行&nbsp;日期
@@ -3989,8 +4022,8 @@ Index Browser==索引浏览器
 You did not yet start a web crawl!==您还没开启网络爬虫！
 
 Advanced Crawler==高级爬虫
-Index Export/Import==索引 导出/导入
-RAM/Disk Usage ==内存/硬盘 使用 
+Index Export/Import==索引导出/导入
+RAM/Disk Usage ==内存/硬盘使用 
 &nbsp;Administration==&nbsp;管理
 Toggle navigation==切换导航
 Community (Web Forums)==社区（网络论坛）
@@ -4219,19 +4252,18 @@ User Profile==用户资料
 
 #File: env/templates/submenuIndexControl.template
 #---------------------------
-URL Database Administration==URL数据库管理
+Index Administration==索引管理
+URL Database Administration==地址数据库管理
 Index Deletion==索引删除
-Index Sources &amp; Targets==索引来源 ＆amp; 目标
+Index Sources &amp; Targets==索引来源&目标
 Solr Schema Editor==Solr模式编辑器
 Field Re-Indexing==字段重新索引
 Reverse Word Index==反向字索引
 Content Analysis==内容分析
-Index Sources ==索引来源 ＆amp; 目标
-Index Sources==索引来源 ＆amp; 目标
-Index Administration==索引管理
+
 Reverse Word Index Administration==详细关键字索引管理
-URL References Database==URL关联关系数据库
-URL Viewer==URL浏览
+URL References Database==地址关联关系数据库
+URL Viewer==地址浏览
 #-----------------------------
 
 #File: env/templates/submenuIndexCreate.template
