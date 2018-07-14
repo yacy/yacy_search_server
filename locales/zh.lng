@@ -26,13 +26,13 @@
 #File: env/templates/submenuTargetAnalysis.template
 #---------------------------
 Target Analysis==目标分析
-Mass Crawl Check==大量爬行检查
+Mass Crawl Check==大量抓取检查
 Regex Test==正则表达式测试
 #-----------------------------
 
 #File: CrawlCheck_p.html
 #---------------------------
-Crawl Check==爬行检查
+Crawl Check==抓取检查
 This pages gives you an analysis about the possible success for a web crawl on given addresses.==通过本页面，您可以分析在特定地址上进行网络爬取的可能性。
 List of possible crawl start URLs==可行的起始抓行网址列表
 "Check given urls"=="检查给定的网址"
@@ -100,13 +100,13 @@ Thread Dump==线程转储
 >Search Sequence<==>搜索序列<
 >Messages<==>消息<
 >Overview<==>概述<
->Incoming&nbsp;News<==>传入的&nbsp;新闻<
->Processed&nbsp;News<==>加工的&nbsp;新闻<
->Outgoing&nbsp;News<==>传出的&nbsp;新闻<
->Published&nbsp;News<==>已发布的&nbsp;新闻<
+>Incoming&nbsp;News<==>传入的新闻<
+>Processed&nbsp;News<==>加工的新闻<
+>Outgoing&nbsp;News<==>传出的新闻<
+>Published&nbsp;News<==>已发布的新闻<
 >Community Data<==>社区数据<
 >Surftips<==>冲浪提示<
->Local Peer Wiki<==>本地端百科 <
+>Local Peer Wiki<==>本地节点百科 <
 UI Translations==用户界面翻译
 >Published==>已发布的
 >Processed==>加工的
@@ -120,7 +120,7 @@ Generic Search Portal==通用搜索门户
 User Profile==用户资料
 Local robots.txt==本地robots.txt
 Portal Configuration==门户配置
-Search Box Anywhere==搜索框Anywhere
+Search Box Anywhere==随处搜索框
 #-----------------------------
 
 #File: Translator_p.html
@@ -193,7 +193,7 @@ menu.==菜单。
 
 #File: AccessGrid_p.html
 #---------------------------
-This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==这些图像显示了到您的YaCy对等体的传入连接以及从对等体到其他对等体和Web服务器的传出连接
+This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==这些图像显示了到您的YaCy节点的传入连接以及从节点到其他节点和Web服务器的传出连接
 Server Access Grid==服务器访问网格
 YaCy Network Access==YaCy网络访问
 #-----------------------------
@@ -211,12 +211,14 @@ Dump Reader for MediaWiki dumps==MediaWiki转储读取器
 #---------------------------
 Translation News for Language==语言翻译新闻
 Translation News==翻译新闻
-You can share your local addition to translations and distribute it to other peers.==你可以分享你的本地翻译，并分发给其他同行。
-The remote peer can vote on your translation and add it to the own local translation.==远方小伙伴可以对您的翻译进行投票并将其添加到他们的本地翻译中。
+You can share your local addition to translations and distribute it to other peers.==你可以分享你的本地翻译，并分发给其他节点。
+The remote peer can vote on your translation and add it to the own local translation.==远程节点可以对您的翻译进行投票并将其添加到他们的本地翻译中。
 entries available==可用的条目
 "Publish"=="发布"
 You can check your outgoing messages==你可以检查你的传出消息
 >here<==>这儿<
+To edit or add local translations you can use==要编辑或添加本地翻译,你可以用
+
 File:==文件:
 Translation:==翻译:
 >score==>分数
@@ -235,14 +237,14 @@ This will work best when there are already quite a few domains in the index.==�
 Autocralwer Configuration==自动爬虫配置
 You need to restart for some settings to be applied==您需要重新启动才能应用一些设置
 Enable Autocrawler:==启用自动爬虫:
-Deep crawl every:==深入爬行:
-Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.==警告：如果这大于“取回行”，只有浅爬行将运行。
+Deep crawl every:==深入抓取:
+Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.==警告：如果这大于“取回行”，只有浅抓取将运行。
 Rows to fetch at once:==一次取回行:
 Recrawl only older than # days:==重新抓取只有＃天以前的时间:
 Get hosts by query:==通过查询获取主机:
 Can be any valid Solr query.==可以是任何有效的Solr查询。
-Shallow crawl depth (0 to 2):==浅爬行深度（0〜2）:
-Deep crawl depth (1 to 5):==深度爬行深度（1至5）:
+Shallow crawl depth (0 to 2):==浅抓取深度（0〜2）:
+Deep crawl depth (1 to 5):==深度抓取深度（1至5）:
 Index text:==索引文本:
 Index media:==索引媒体:
 "Save"=="保存"
@@ -259,15 +261,15 @@ If you want to test a specific parser you can do so using the==如果你想测�
 #File: env/templates/submenuCrawler.template
 #---------------------------
 Load Web Pages==加载网页
-Site Crawling==网站爬行
+Site Crawling==网站抓取
 Parser Configuration==解析器配置
 #-----------------------------
 
 #File: ContentControl_p.html
 #---------------------------
 Content Control<==内容控制<
-Peer Content Control URL Filter==小伙伴内容控制URL过滤器
-With this settings you can activate or deactivate content control on this peer.==使用此设置，您可以激活或取消激活此YaCy端上的内容控制。
+Peer Content Control URL Filter==节点内容控制地址过滤器
+With this settings you can activate or deactivate content control on this peer.==使用此设置，您可以激活或取消激活此YaCy节点上的内容控制。
 Use content control filtering:==使用内容控制过滤:
 >Enabled<==>已启用<
 Enables or disables content control.==启用或禁用内容控制。
@@ -279,13 +281,13 @@ Semantic Media Wiki with the appropriate extensions.==语义媒体百科与适�
 SMW import to content control list:==SMW导入到内容控制列表:
 Enable or disable constant background synchronization of content control list from SMW (Semantic Mediawiki). Requires restart!==启用或禁用来自SMW（Semantic Mediawiki）的内容控制列表的恒定后台同步。 需要重启！
 SMW import base URL:==SMW导入基URL:
-Define base URL for SMW special page "Ask". Example: ==为SMW特殊页面“Ask”定义基URL。 例
+Define base URL for SMW special page "Ask". Example: ==为SMW特殊页面“Ask”定义基础地址。 例:
 SMW import target table:==SMW导入目标表:
 Define import target table. Default: contentcontrol==定义导入目标表。 默认值:contentcontrol
 Purge content control list on initial sync:==在初始同步时清除内容控制列表:
 Purge content control list on initial synchronisation after startup.==重启后，清除初始同步的内容控制列表。
 "Submit"=="提交"
-Define base URL for SMW special page "Ask". Example:==为SMW特殊页面“Ask”定义基URL。 例
+Define base URL for SMW special page "Ask". Example:==为SMW特殊页面“Ask”定义基础地址。 例:
 #-----------------------------
 
 #File: env/templates/submenuSemantic.template
@@ -306,7 +308,7 @@ days==天
 hours==小时
 minutes==分钟
 for new documents automatically.==自动地对新文件。
-run this crawl once==爬行一次
+run this crawl once==抓取一次
 >Query<==>查询<
 Query Type==查询类型
 >Import<==>导入<
@@ -396,22 +398,25 @@ Remote Search Log==远端搜索日志
 #Total:==Total:
 Success:==成功:
 Remote Search Host Tracker==远端搜索跟踪
-This is a list of searches that had been requested from this' peer search interface==此列表显示从远端peer所进行的搜索
+This is a list of searches that had been requested from this' peer search interface==此列表显示从远端节点所进行的搜索
 Showing #[num]# entries from a total of #[total]# requests.==显示 #[num]# 条目,共 #[total]# 个请求.
 Requesting Host==请求主机
+Peer Name==节点名称
 Offset==偏移量
 Expected Results==期望结果
 Returned Results==返回结果
+Known Results==已知结果
 Used Time (ms)==消耗时间(毫秒)
 URL fetch (ms)==获取URL(毫秒)
 Snippet comp (ms)==片段比较(毫秒)
 Query==查询字符
-#>User Agent<==>User Agent<
+>User Agent<==>用户代理<
+Top Search Words (last 7 Days)==热门搜索词汇(最近7天)
 Search Word Hashes==搜索字哈希值
 Count</td>==计数</td>
 Queries Per Last Hour==小时平均查询
 Access Dates==访问日期
-This is a list of searches that had been requested from remote peer search interface==此列表显示从远端peer所进行的搜索. 
+This is a list of searches that had been requested from remote peer search interface==此列表显示从远端节点所进行的搜索. 
 This is a list of requests (max. 1000) to the local http server within the last hour.==这是最近一小时内本地http服务器的请求列表(最多1000个).
 #-----------------------------
 
@@ -495,7 +500,7 @@ No Blacklist selected==未选中黑名单
 Blacklist Import==黑名单导入
 Used Blacklist engine:==使用的黑名单引擎:
 Import blacklist items from...==导入黑名单条目从...
-other YaCy peers:==其他的YaCy Peers:
+other YaCy peers:==其他的YaCy 节点s:
 "Load new blacklist items"=="载入黑名单条目"
 #URL:==URL:
 plain text file:<==文本文件:<
@@ -545,7 +550,7 @@ Author:==作者:
 Subject:==标题:
 Text:==文本:
 You can use==您可以用
-Yacy-Wiki Code==YaCy-Wiki 代码
+Yacy-Wiki Code==YaCy-百科代码
 here.==.
 Comments:==评论:
 deactivated==无效
@@ -580,7 +585,7 @@ Author:==作者:
 Subject:==标题:
 #Text:==Text:
 You can use==您可以用
-Yacy-Wiki Code==YaCy-Wiki 代码
+Yacy-Wiki Code==YaCy-百科代码
 here.==在这里.
 "Submit"=="提交"
 "Preview"=="预览"
@@ -663,12 +668,7 @@ Search Result==结果
 #---------------------------
 Username too short. Username must be &gt;= 4 Characters.==用户名太短。 用户名必须&gt;= 4 个字符.
 Username already used (not allowed).==用户名已被使用（不允许）.
->Access Rules<==>访问规则<
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==保护所有页面：如果设置为开启，访问所有页面需要授权; 如果关闭，只有扩展名为“_p”的页面才受保护.
-Set Access Rules==设置访问规则
 Username too short. Username must be ==用户名太短. 用户名必须
-Protection of all pages: if set to on==保护所有页面：如果设置为开启，访问所有页面需要授权; 如果关闭，只有扩展名为“_p”的页面才受保护.
-User Accounts==用户账户
 User Administration==用户管理
 User created:==用户已创建:
 User changed:==用户已改变:
@@ -677,15 +677,33 @@ Passwords do not match.==密码不匹配.
 Username too short. Username must be >= 4 Characters.==用户名太短, 至少为4个字符.
 No password is set for the administration account.==管理员账户未设置密码.
 Please define a password for the admin account.==请设置一个管理员密码.
+
+#Admin Account
 Admin Account==管理员
 Access from localhost without account==本地匿名访问
+Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==通过管理员权限授予从您自己的计算机访问您的节点（localhost访问权限）.无需配置管理帐户.
+This setting is convenient but less secure than using a qualified admin account.==此设置很方便，但比使用合格的管理员帐户安全性低.
+Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==请谨慎使用，尤其是在计算机上运行YaCy节点并浏览不受信任和可能有恶意的网站时.
 Access only with qualified account==只允许授权用户访问
-Peer User:==Peer用户:
-New Peer Password:==新Peer密码:
-Repeat Peer Password:==重复Peer密码:
+This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==如果您希望远程访问你的节点,则这是必需的,但它也会加强节点管理操作的访问控制.
+Peer User:==节点用户:
+New Peer Password:==新节点密码:
+Repeat Peer Password:==重复节点密码:
 "Define Administrator"=="设置管理员账户"
+
+#Access Rules
+>Access Rules<==>访问规则<
+Protection of all pages: if set to on==保护所有页面：如果设置为开启
+access to all pages need authorization==访问所有页面需要授权
+if off, only pages with "_p" extension are protected==如果关闭，只有扩展名为“_p”的页面才受保护
+Set Access Rules==设置访问规则
+
+#User Accounts
+User Accounts==用户账户
 Select user==选择用户
 New user==新用户
+or goto user==或者去用户
+>account list<==>账号列表<
 Edit User==编辑用户
 Delete User==删除用户
 Edit current user:==编辑当前用户:
@@ -696,6 +714,7 @@ First name==名
 Last name==姓
 Address==地址
 Rights==权限
+</body>==<script>window.onload = function () {$("label:contains('Wiki Admin right')").text('百科管理权'); $("label:contains('Upload right')").text('上传权'); $("label:contains('Download right')").text('下载权'); $("label:contains('Admin right')").text('管理权'); $("label:contains('Proxy usage right')").text('代理使用权'); $("label:contains('Blog right')").text('博客权'); $("label:contains('Bookmark right')").text('书签权'); $("label:contains('Extended Search right')").text('拓展搜索权');}</script></body>
 Timelimit==时限
 Time used==已用时
 Save User==保存用户
@@ -729,8 +748,9 @@ The generic skin 'generic_pd' can be configured here with custom colors:==能在
 >Sign&nbsp;'bad'<==>符号&nbsp;'坏'<
 >Sign&nbsp;'good'<==>符号&nbsp;'好'<
 >Sign&nbsp;'other'<==>符号&nbsp;'其他'<
->Search&nbsp;Headline<==>搜索页面&nbsp;标题<
->Search&nbsp;URL==>搜索页面&nbsp;链接<
+>Search&nbsp;Headline<==>搜索&nbsp;标题<
+>Search&nbsp;URL==>搜索&nbsp;地址
+hover==悬浮
 "Set Colors"=="设置颜色"
 >Skin Download<==>下载皮肤<
 Skins can be installed from download locations==安装下载皮肤
@@ -749,23 +769,24 @@ Your port has changed. Please wait 10 seconds.==您的端口已更改. 请等待
 Your browser will be redirected to the new <a href="http://#[host]#:#[port]#/ConfigBasic.html">location</a> in 5 seconds.==您的浏览器将在5秒内重定向到新的<a href="http://#[host]#:#[port]#/ConfigBasic.html">位置</a>.
 The peer port was changed successfully.==对端口已经成功修改
 Opening a router port is <i>not</i> a YaCy-specific task;==打开一个路由器端口不是一个YaCy特定的任务;
-However: if you fail to open a router port, you can nevertheless use YaCy with full functionality, the only function that is missing is on the side of the other YaCy users because they cannot see your peer.==但是，如果您无法打开路由器端口，则仍然可以使用YaCy的全部功能，缺少的唯一功能是在其他YaCy用户侧，因为他们无法看到您的YaCy端.
+However: if you fail to open a router port, you can nevertheless use YaCy with full functionality, the only function that is missing is on the side of the other YaCy users because they cannot see your peer.==但是，如果您无法打开路由器端口，则仍然可以使用YaCy的全部功能，缺少的唯一功能是在其他YaCy用户侧，因为他们无法看到您的YaCy节点.
 Set by system property==由系统属性设置
 https enabled==https启用
 Configure your router for YaCy using UPnP:==使用UPnP为您的路由器配置YaCy:
 on port==在端口
 you can see instruction videos everywhere in the internet, just search for <a href="http://www.youtube.com/results?search_query=Open+Ports+on+a+Router">Open Ports on a &lt;our-router-type&gt; Router</a> and add your router type as search term.==您可以在互联网上的任何地方查看说明视频，只需搜索<a href="http://www.youtube.com/results?search_query=Open Ports on a Router">Open Ports on a &lt;our-router-type&gt; Router</a>并添加您的路由器类型作为搜索词。
-However: if you fail to open a router port==但是，如果您无法打开路由器端口，则仍然可以使用YaCy的全部功能，缺少的唯一功能是在其他YaCy用户侧，因为他们无法看到您的YaCy端。
+However: if you fail to open a router port==但是，如果您无法打开路由器端口，则仍然可以使用YaCy的全部功能，缺少的唯一功能是在其他YaCy用户侧，因为他们无法看到您的YaCy节点。
 you can see instruction videos everywhere in the internet==您可以在互联网上的任何地方查看说明视频，只需搜索<a href="http://www.youtube.com/results?search_query=Open Ports on a Router">Open Ports on a 
 Access Configuration==访问设置
 Basic Configuration==基本设置
-Your YaCy Peer needs some basic information to operate properly==您的YaCy Peer需要一些基本信息才能工作
+Your YaCy Peer needs some basic information to operate properly==您的YaCy 节点需要一些基本信息才能工作
 Select a language for the interface==选择界面语言
+&#27721;&#35821;/&#28450;&#35486==中文
 Use Case: what do you want to do with YaCy:==用途: 您用YaCy做什么:
 Community-based web search==基于社区的网络搜索
 Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==加入并支持全球网络 'freeworld', 自由地搜索.
 Search portal for your own web pages==属于您自己的搜索引擎
-Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==本机YaCy的peer创建与索引过程独立于其他peer, 即您可以定义自己的搜索偏向.
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==本机YaCy的节点创建与索引过程独立于其他节点, 即您可以定义自己的搜索偏向.
 Files may also be shared with the YaCy server, assign a path here:==您也能与YaCy服务器共享内容, 在这里指定路径:
 This path can be accessed at ==可以通过以下链接访问
 Use that path as crawl start point.==将此路径作为索引起点.
@@ -773,14 +794,14 @@ Intranet Indexing==局域网索引
 Create a search portal for your intranet or web pages or your (shared) file system.==创建您自己的局域网, 网页或者您共享的文件系统.
 URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==适合http/https/ftp协议的链接/主机名/IP
 or smb:==或者服务器信息块(SMB):
-Your peer name has not been customized; please set your own peer name==您的peer尚未命名, 请命名它
-You may change your peer name==您可以改变您的peer名称
-Peer Name:==Peer名称:
-Your peer cannot be reached from outside==外部将不能访问您的peer
+Your peer name has not been customized; please set your own peer name==您的节点尚未命名, 请命名它
+You may change your peer name==您可以改变您的节点名称
+Peer Name:==节点名称:
+Your peer cannot be reached from outside==外部将不能访问您的节点
 which is not fatal, but would be good for the YaCy network==此举有利于YaCy网络
 please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==请改变您的防火墙或者虚拟机路由设置, 从而外网能访问这个端口
-Your peer can be reached by other peers==外部将能访问您的peer
-Peer Port:==Peer端口:
+Your peer can be reached by other peers==外部将能访问您的节点
+Peer Port:==节点端口:
 Configure your router for YaCy:==设置本机路由:
 Configuration was not successful. This may take a moment.==配置失败. 这需要花费一些时间.
 Set Configuration==保存设置
@@ -789,15 +810,15 @@ Your basic configuration is complete! You can now (for example)==配置成功, �
 just <==开始<
 start an uncensored search==自由地搜索了
 start your own crawl</a> and contribute to the global index, or create your own private web index==开始您的索引, 并将其贡献给全球索引, 或者创建一个您自己的私有搜索网页
-set a personal peer profile</a> (optional settings)==设置私有peer</a> (可选项)
-monitor at the network page</a> what the other peers are doing==监视网络页面</a>, 以及其他peer的活动
-Your Peer name is a default name; please set an individual peer name.==您的peer名称为系统默认, 请设置另外一个名称.
+set a personal peer profile</a> (optional settings)==设置私有节点</a> (可选项)
+monitor at the network page</a> what the other peers are doing==监视网络页面</a>, 以及其他节点的活动
+Your Peer name is a default name; please set an individual peer name.==您的节点名称为系统默认, 请设置另外一个名称.
 You did not set a user name and/or a password.==您未设置用户名和/或密码.
 Some pages are protected by passwords.==一些页面受密码保护.
-You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==您可以在 <a href="ConfigAccounts_p.html">账户菜单</a> 设置密码, 从而加强您的YaCy peer安全性.</p>::
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==您可以在 <a href="ConfigAccounts_p.html">账户菜单</a> 设置密码, 从而加强您的YaCy节点安全性.</p>::
 You did not open a port in your firewall or your router does not forward the server port to your peer.==您未打开防火墙端口或者您的路由器未能与主机的服务端口建立链接.
 This is needed if you want to fully participate in the YaCy network.==如果您要完全加入YaCy网络, 此项是必须的.
-You can also use your peer without opening it, but this is not recomended.==不开放您的peer您也能使用, 但是不推荐.
+You can also use your peer without opening it, but this is not recomended.==不开放您的节点您也能使用, 但是不推荐.
 #-----------------------------
 
 #File: ConfigHeuristics_p.html
@@ -818,9 +839,9 @@ To find out more about OpenSearch see==要了解关于OpenSearch的更多信息�
 When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
 A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">启发式</a>是一种“基于经验的技术，有助于解决问题，学习和发现”
 This means: right after the search request every page is loaded and every page that is linked on this page.==这意味着：在搜索请求之后，就开始加载每个页面上的链接。
-If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中“添加为全局爬行作业”，则要爬网的页面将被添加到全局爬行队列（远程YaCy伙伴可以抓取要抓取的页面）。
+If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中“添加为全局抓取作业”，则要爬网的页面将被添加到全局抓取队列（远程YaCy伙伴可以抓取要抓取的页面）。
 Default is to add the links to the local crawl queue (your peer crawls the linked pages).==默认是将链接添加到本地爬网队列（您的YaCy爬取链接的页面）。
-add as global crawl job==添加为全局爬行作业
+add as global crawl job==添加为全局抓取作业
 opensearch load external search result list from active systems below==opensearch从下面的活动系统加载外部搜索结果列表
 Available/Active Opensearch System==可用/激活Opensearch系统
 Url <small>(format opensearch==Url <small>（格式为opensearch
@@ -861,15 +882,23 @@ Because this 'instant crawl' must obey the robots.txt and a minimum access time 
 
 #File: ConfigHTCache_p.html
 #---------------------------
->#[actualCacheSize]# MB for #[actualCacheDocCount]# files, #[docSizeAverage]# KB / file in average==>#[actualCacheSize]#MB为#[actualCacheDocCount]#文件, #[docSizeAverage]#平均KB /文件
-Hypertext Cache Configuration==HTCache配置
-The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==HTCache存储着从HTTP和FTP协议获得的内容. 其中从smb:// 和 file:// 取得的内容不会被缓存.
+Hypertext Cache Configuration==超文本缓存配置
+The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==超文本缓存存储着从HTTP和FTP协议获得的内容. 其中从smb:// 和 file:// 取得的内容不会被缓存.
 The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==此缓存是队列式的: 队列满时, 会删除旧内容, 从而加入新内容.
-HTCache Configuration==HTCache配置
+
+#HTCache Configuration
+HTCache Configuration==超文本缓存配置
+Cache hits==缓存命中率
 The path where the cache is stored==缓存存储路径
-The current size of the cache==当前缓存大小
-The maximum size of the cache==缓存最大尺寸
+The current size of the cache==当前缓存容量
+>#[actualCacheSize]# MB for #[actualCacheDocCount]# files, #[docSizeAverage]# KB / file in average==>#[actualCacheSize]#MB为#[actualCacheDocCount]#文件, #[docSizeAverage]#平均KB /文件
+The maximum size of the cache==缓存最大容量
+Compression level==压缩级别
+Concurrent access timeout==并行存取超时
+milliseconds==毫秒
 "Set"=="设置"
+
+#Cleanup
 Cleanup==清除
 Cache Deletion==删除缓存
 Delete HTTP &amp; FTP Cache==删除HTTP &amp; FTP 缓存
@@ -937,87 +966,96 @@ your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/t
 #File: ConfigNetwork_p.html
 #---------------------------
 <html lang="en">==<html lang="zh">
->Network Definition<==>网络定义<
-Remote Network Definition URL==远程网络定义URL
-Enter custom URL...==输入自定义网址...
->allow==>允许
-deny remote search==拒绝远程搜索
 Network Configuration==网络设置
-No changes were made!==未作出任何改变!
-Accepted Changes==应用设置
-Inapplicable Setting Combination==设置未被应用
-#P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-Tätigkeit läuft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
-For P2P operation, at least DHT distribution or DHT receive (or both) must be set. You have thus defined a Robinson configuration==对于P2P操作, 需要配置DHT分布网络或者DHT设备(或都要配置). 因此您需要定义一个Robinson配置.
-Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==仅当接收索引选项打开时, 才能进行P2P全球搜索.
-For Robinson Mode, index distribution and receive is switched off==在Robinson模式中, 索引分发和接收是默认关闭的.
-#This Robinson Mode switches remote indexing on, but limits targets to peers within the same cluster. Remote indexing requests from peers within the same cluster are accepted==Dieser Robinson-Modus aktiviert Remote-Indexierung, aber beschränkt die Anfragen auf Peers des selben Clusters. Nur Remote-Indexierungsanfragen von Peers des selben Clusters werden akzeptiert
-#This Robinson Mode does not allow any remote indexing (neither requests remote indexing, nor accepts it)==Dieser Robinson-Modus erlaubt keinerlei Remote-Indexierung (es wird weder Remote-Indexierung angefragt, noch akzeptiert)
-Network and Domain Specification==指定网络和域.
-# With this configuration it is not allowed to authentify automatically from localhost!==Diese Konfiguration erlaubt keine automatische Authentifikation von localhost!
-# Please open the <a href="ConfigAccounts_p.html">Account Configuration</a> and set a new password.==Bitte in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> ein neues Passwort festlegen.
-YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==您可以操作由YaCy peer组成的计算网格或者一个单独节点.
-To control that all participants within a web indexing domain have access to the same domain,==进行索引的域需要具有访问权限才能控制相同域内的所有成员,
-this network definition must be equal to all members of the same YaCy network.==且此设置对同一YaCy网络内的所有成员有效.
-Network Definition==网络定义
+
+#Network and Domain Specification
+Network and Domain Specification==确定网络和域
+YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==您可以操作由YaCy节点组成的计算网格或者一个单独节点.
+To control that all participants within a web indexing domain have access to the same domain,==进行索引的域需要具有访问权限才能控制相同域内的所有节点,
+this network definition must be equal to all members of the same YaCy network.==且此设置对同一YaCy网络内的所有节点有效.
+>Network Definition<==>网络定义<
+Enter custom URL...==输入自定义网址...
+Remote Network Definition URL==远程网络定义地址
 Network Nick==网络别名
 Long Description==描述
 Indexing Domain==索引域
 #DHT==DHT
 "Change Network"=="改变网络"
+
+#Distributed Computing Network for Domain
 Distributed Computing Network for Domain==域内分布式计算网络.
-You can configure if you want to participate at the global YaCy network or if you want to have your==如果要加入YaCy全球网络或者仅仅
-own separate search cluster with or without connection to the global network. You may also define==作为一个独立的搜索cluster, 请配置此项.
-a completely independent search engine instance, without any data exchange between your peer and other==您也可以不与其他peer有任何数据交换, 作一个完全独立的搜索引擎.
-peers, which we call a 'Robinson' peer.==对于这种配置的peer, 即叫做Robinson peer.
+Enable Peer-to-Peer Mode to participate in the global YaCy network==开启点对点模式从而加入全球YaCy网
+or if you want your own separate search cluster with or without connection to the global network==或者不论加不加入全球YaCy网，你都可以打造个人搜索群
+Enable 'Robinson Mode' for a completely independent search engine instance==开启漂流模式获得完全独立的搜索引擎
+without any data exchange between your peer and other peers==本节点不会与其他节点有任何数据交换
+
+#Peer-to-Peer Mode
 Peer-to-Peer Mode==点对点模式
 >Index Distribution==>索引分发
-This enables automated, DHT-ruled Index Transmission to other peers==自动向其他peer传递DHT规则的索引
+This enables automated, DHT-ruled Index Transmission to other peers==自动向其他节点传递DHT规则的索引
 >enabled==>开启
-disabled during crawling==在crawl时关闭
+disabled during crawling==在抓取时关闭
 disabled during indexing==在索引时关闭
 >Index Receive==>接收索引
 Accept remote Index Transmissions==接受远程索引传递
-This works only if you have a senior peer. The DHT-rules do not work without this function==仅当您拥有更上级peer时有效. 如果未设置此项, DHT规则不生效
+This works only if you have a senior peer. The DHT-rules do not work without this function==仅当您拥有更上级节点时有效. 如果未设置此项, DHT规则不生效
 >reject==>拒绝
-accept transmitted URLs that match your blacklist==接受符合黑名单的URL
-#>Accept Remote Crawl Requests==>Remotecrawl-Anfragen akzeptieren
-#Perform web indexing upon request of another peer==Führe Indexierung bei Anfrage eines anderen Peers aus
-#This works only if you are a senior peer==Dies funktioniert nur, wenn Sie ein Senior-Peer sind
-#Load with a maximum of==Lade mit maximal
-#pages per minute==Seiten pro Minute (PPM)
->Robinson Mode==>Robinson模式
-If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==如果您的peer运行在'Robinson模式', 您能在不与其他peer交换数据的情况下进行搜索
-There is no index receive and no index distribution between your peer and any other peer==您不会与其他peer进行索引传递
-In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==对于Robinson模式的cluster， 一样会应答远端的crawl请求
->Private Peer==>私有Peer
-Your search engine will not contact any other peer, and will reject every request==您的搜索引擎不会与其他peer联系, 并会拒绝每一个外部请求
-#>Private Cluster==>Privater Cluster
-#Your peer is part of a private cluster without public visibility
-#Index data is not distributed, but remote crawl requests are distributed and accepted from your cluster
-#Search requests are spread over all peers of the cluster, and answered from all peers of the cluster
-#List of ip:port - addresses of the cluster: (comma-separated)
->Public Cluster==>公共Cluster
-Your peer is part of a public cluster within the YaCy network==您的peer属于YaCy网络内的一个公共cluster
-Index data is not distributed, but remote crawl requests are distributed and accepted==索引数据不会被分发, 但是外部的crawl请求会被分发和接受
-Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==搜索请求在当前cluster内的所有peer中传播, 并且这些peer同样会作出回应
-List of .yacy or .yacyh - domains of the cluster: (comma-separated)==Cluster内 .yacy 或者 .yacyh 的域名列表 : (以逗号隔开)
->Public Peer==>公共Peer
-You are visible to other peers and contact them to distribute your presence==对于其他peer您是可见的, 可以与他们进行通信以分发你的索引
-Your peer does not accept any outside index data, but responds on all remote search requests==您的peer不接受任何外部索引数据, 但是会回应所有外部搜索请求
->Peer Tags==>成员标签
+accept transmitted URLs that match your blacklist==接受与您的黑名单匹配的传输网址
+>allow==>允许
+
+#Robinson Mode
+>Robinson Mode==>漂流模式
+If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==如果您的节点运行在'漂流模式', 您能在不与其他节点交换数据的情况下进行搜索
+There is no index receive and no index distribution between your peer and any other peer==您不会与其他节点进行索引传递
+In case of Robinson-clustering there can be acceptance of remote crawl requests from peers of that cluster==对于漂流群模式，一样会应答那个群内远端节点的抓取请求
+>Private Peer==>私有节点
+Your search engine will not contact any other peer, and will reject every request==您的搜索引擎不会与其他节点联系, 并会拒绝每一个外部请求
+>Public Peer==>公共节点
+You are visible to other peers and contact them to distribute your presence==对于其他节点您是可见的, 可以与他们进行通信以分发你的索引
+Your peer does not accept any outside index data, but responds on all remote search requests==您的节点不接受任何外部索引数据, 但是会回应所有外部搜索请求
+>Public Cluster==>公共群
+Your peer is part of a public cluster within the YaCy network==您的节点属于YaCy网络内的一个公共群
+Index data is not distributed, but remote crawl requests are distributed and accepted==索引数据不会被分发, 但是外部的抓取请求会被分发和接受
+Search requests are spread over all peers of the cluster, and answered from all peers of the cluster==搜索请求在当前群内的所有节点中传播, 并且这些节点同样会作出回应
+List of .yacy or .yacyh - domains of the cluster: (comma-separated)==群内.yacy 或者.yacyh 的域名列表: (以逗号隔开)
+>Peer Tags==>节点标签
 When you allow access from the YaCy network, your data is recognized using keywords==当您允许YaCy网络的访问时, 您的数据会以关键字形式表示
 Please describe your search portal with some keywords (comma-separated)==请用关键字描述您的搜索门户 (以逗号隔开)
-If you leave the field empty, no peer asks your peer. If you fill in a '*', your peer is always asked.==如果此部分留空, 那么您的peer不会被其他peer访问. 如果内容是 '*' 则标示您的peer永远被允许访问.
+If you leave the field empty, no peer asks your peer. If you fill in a '*', your peer is always asked.==如果此部分留空, 那么您的节点不会被其他节点访问. 如果内容是 '*' 则标示您的节点永远被允许访问.
 "Save"=="保存"
+
+#Outgoing communications encryption
+Outgoing communications encryption==出色的通信加密
+Protocol operations encryption==协议操作加密
+Prefer HTTPS for outgoing connexions to remote peers==更喜欢以HTTPS作为输出连接到远程节点
+When==当
+is enabled on remote peers==在远端节点开启时
+it should be used to encrypt outgoing communications with them (for operations such as network presence, index transfer, remote crawl==它应该被用来加密与它们的传出通信（操作:网络存在、索引传输、远程爬行
+Please note that contrary to strict TLS==请注意，与严格的TLS相反
+certificates are not validated against trusted certificate authorities==证书向受信任的证书颁发机构进行验证
+thus allowing YaCy peers to use self-signed certificates==从而允许YaCy节点使用自签名证书
+Note also that encryption of remote search queries is configured with a dedicated setting in the==另请注意，远程搜索查询加密的专用设置配置请使用
+page==页面
+
+deny remote search==拒绝远程搜索
+No changes were made!==未作出任何改变!
+Accepted Changes==应用设置
+Inapplicable Setting Combination==设置未被应用
+
+
 #-----------------------------
 
 #File: ConfigParser_p.html
 #---------------------------
 Parser Configuration==解析配置
+
+#Content Parser Settings
 Content Parser Settings==内容解析设置
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==此设置能开启/关闭依据文件类型(MIME)的内容解析.
 For a detailed description of the various MIME-types take a look at==关于MIME的详细描述请参考
-enable/disable Parser==Parser 开启 / 关闭
+If you want to test a specific parser you can do so using the==如果要测试特定的解析器,可以使用
+enable/disable Parser==开启/关闭解析器
+
 # --- Parser Names are hard-coded BEGIN ---
 ##Mime-Type==MIME Typ
 ##Microsoft Powerpoint Parser==Microsoft Powerpoint Parser
@@ -1044,6 +1082,13 @@ enable/disable Parser==Parser 开启 / 关闭
 #BMP Image Parser==BMP Bild Parser
 # --- Parser Names are hard-coded END ---
 "Submit"=="提交"
+
+#PDF Parser Attributes
+PDF Parser Attributes==PDF解析器属性
+This is an experimental setting which makes it possible to split PDF documents into individual index entries==这是一个实验设置，可以将PDF文档拆分为单独的索引条目
+Every page will become a single index hit and the url is artifically extended with a post/get attribute value containing the page number as value==每个页面都将成为单个索引匹配，并且使用包含页码作为值的post/get属性值人为扩展url
+Split PDF==分割PDF
+Property Name==属性名
 #-----------------------------
 
 #File: ConfigPortal_p.html
@@ -1055,35 +1100,52 @@ You can change the 'corporate identity'-images, the greeting line==您可以改�
 and a link to a home page that is reached when the 'corporate identity'-images are clicked.==和一个指向首页的 'Corporate Identity' 图像链接.
 To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==若要改变颜色和风格,请到<a href="ConfigAppearance_p.html">外观选项</a>选择您喜欢的皮肤和语言.
 Greeting Line<==问候语<
-URL of Home Page<==首页链接<
-URL of a Small Corporate Image<==小图位置<
-URL of a Large Corporate Image<==大图位置<
-Show Navigation Bar on Search Page?==显示导航栏和搜索页?
-Show Navigation Top-Menu&nbsp;==显示顶级导航菜单&nbsp;
-no link to YaCy Menu (admin must navigate to /Status.html manually)==没有到YaCy菜单的链接(管理页面必须指向/Status.html)
-Show Advanced Search Options on Search Page?==在搜索页显示高级搜索选项?
+URL of Home Page<==主页链接<
+URL of a Small Corporate Image<==企业形象小图地址<
+URL of a Large Corporate Image<==企业形象大图地址<
+Alternative text for Corporate Images<==企业形象代替文字<
+Enable Search for Everyone==对任何人开启搜索
+Search is available for everyone==任何人可用搜索
+Only the administator is allowed to search==只有管理员可以搜索
+Show Navigation Bar on Search Page==显示导航栏和搜索页
+Show Navigation Top-Menu==显示顶级导航菜单
+no link to YaCy Menu (admin must navigate to /Status.html manually)==没有到YaCy菜单的链接(管理页面必须手动指向 /Status.html)
+Show Advanced Search Options on Search Page==在搜索页显示高级搜索选项
 Show Advanced Search Options on index.html&nbsp;==在index.html显示高级搜索选项?
 do not show Advanced Search==不显示高级搜索
-Show Information Links for each Search Result Entry==显示搜索结果的链接信息
->Date&==>日期&
->Size&==>大小&
->Metadata&==>元数据&
-#>Parser&==>Parser&
->Pictures==>图像
+Media Search==媒体搜索
+Remote results resorting==远程搜索结果排序
+Remote search encryption==远程搜索加密
+Greedy Learning Mode==贪心学习模式
+Index remote results==索引远程结果
+Limit size of indexed remote results==现在远程索引结果容量
 Default Pop-Up Page<==默认弹出页面<
->Status Page==>状态页面
->Search Front Page==>搜索首页
->Search Page (small header)==>搜索页面(二级标题)
->Interactive Search Page==>交互搜索页面
+Default maximum number of results per page==默认每页最大结果数
 Default index.html Page (by forwarder)==默认index.html(前者指定)
 Target for Click on Search Results==点击搜索结果时
-
 "_blank" (new window)=="_blank" (新窗口)
 "_self" (same window)=="_self" (同一窗口)
 "_parent" (the parent frame of a frameset)=="_parent" (父级窗口)
 "_top" (top of all frames)=="_top" (置顶)
+Special Target as Exception for an URL-Pattern==作为URL模式的异常的特殊目标
+Exclude Hosts==排除的主机
+#List of hosts that shall be excluded from search results by default but can be included using the site:<host> operator==默认情况下将被排除在搜索结果之外的主机列表,但可以使用site:<host>操作符包括进来
+'About' Column<=='关于'栏<
+shown in a column alongside==显示在
+with the search result page==搜索结果页侧栏
+(Headline)==(标题)
+(Content)==(内容)
+Show Information Links for each Search Result Entry==显示搜索结果的链接信息
+>Date&==>日期&
+>Size&==>大小&
+>Metadata&==>元数据&
+>Parser&==>解析器&
+>Pictures==>图像
+>Status Page==>状态页面
+>Search Front Page==>搜索首页
+>Search Page (small header)==>搜索页面(二级标题)
+>Interactive Search Page==>交互搜索页面
 "searchresult" (a default custom page name for search results)=="搜索结果" (搜索结果页面名称)
-
 "Change Search Page"=="改变搜索页"
 "Set to Default Values"=="设为默认值"
 The search page can be integrated in your own web pages with an iframe. Simply use the following code:==使用以下代码, 将搜索页能集成在网页框架中:
@@ -1096,11 +1158,11 @@ A third option is the interactive search. Use this code:==交互搜索代码:
 #---------------------------
 >Name<==>名字<
 Your Personal Profile==您的个人资料
-You can create a personal profile here, which can be seen by other YaCy-members==您可以在这创建个人资料, 而且对其他YaCy成员可见
+You can create a personal profile here, which can be seen by other YaCy-members==您可以在这创建个人资料, 而且对其他YaCy节点可见
 or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==或者<a href="ViewProfile.html?hash=localhash">在公共场所时</a>使用<a href="ViewProfile.rdf?hash=localhash">FOAF RDF 文件</a>.
 Name==名字
 Nick Name==昵称
-Homepage (appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online)==首页(显示在每个<a href="Supporter.html">支持者</a> 页面中, 前提是您的peer在线).
+Homepage (appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online)==首页(显示在每个<a href="Supporter.html">支持者</a> 页面中, 前提是您的节点在线).
 eMail==邮箱
 #ICQ==ICQ
 #Jabber==Jabber
@@ -1126,11 +1188,11 @@ For explanation please look into defaults/yacy.init==详细内容请参考defaul
 #File: ConfigRobotsTxt_p.html
 #---------------------------
 Exclude Web-Spiders==排除Web-Spider
-Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==在这里您可以创建一个robots.txt, 以阻止试图访问您peer网络接口的网络爬虫.
+Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==在这里您可以创建一个robots.txt, 以阻止试图访问您节点网络接口的网络爬虫.
 is a volunteer agreement most search-engines (including YaCy) follow.==是一个大多数搜索引擎(包括YaCy)都遵守的协议.
-It disallows crawlers to access webpages or even entire domains.==它会阻止网络爬虫(crawlers)进入网页甚至是整个域.
+It disallows crawlers to access webpages or even entire domains.==它会阻止网络爬虫进入网页甚至是整个域.
 Deny access to==禁止访问以下页面
-Entire Peer==整个peer
+Entire Peer==整个节点
 Status page==状态页面
 Network pages==网络页面
 Surftips==建议
@@ -1214,7 +1276,7 @@ Last Deploy==最近一次应用更新
 #---------------------------
 Server Connection Tracking==服务器连接跟踪
 Up-Bytes==截至字节
-Showing #[numActiveRunning]# active connections from a max. of #[numMax]# allowed incoming connections.==103/5000 正在显示＃[numActiveRunning]＃来自最大的活动连接。 ＃[numMax]＃允许传入连接。
+Showing #[numActiveRunning]# active connections from a max. of #[numMax]# allowed incoming connections==正在显示 #[numActiveRunning]# 活动连接,最大允许传入连接 #[numMax]# 
 Connection Tracking==连接跟踪
 Incoming Connections==进入连接
 Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.==显示 #[numActiveRunning]# 活动, #[numActivePending]# 挂起连接, 最大允许 #[numMax]# 个进入连接.
@@ -1265,42 +1327,43 @@ Cookie==缓存
 #File: CrawlProfileEditor_p.html
 #---------------------------
 Crawl Profile Editor==爬取配置文件编辑器
-Domain Counter Content==域计数器内容
->Crawl Profile Editor<==>Crawl文件编辑<
->Crawler Steering<==>Crawler向导<
->Crawl Scheduler<==>定期Crawl<
->Scheduled Crawls can be modified in this table<==>请在下表中修改已安排的crawl<
-Crawl profiles hold information about a crawl process that is currently ongoing.==Crawl文件里保存有正在运行的crawl进程信息.
+>Crawl Profile Editor<==>抓取文件编辑<
+>Crawler Steering<==>爬虫向导<
+>Crawl Scheduler<==>抓取调度器<
+>Scheduled Crawls can be modified in this table<==>请在下表中修改已安排的抓取<
+Crawl profiles hold information about a crawl process that is currently ongoing.==抓取文件里保存有正在运行的抓取进程信息.
 #Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen über eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl gehört.
 #The profiles for remote crawls, <a href="ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile für Remote Crawl, <a href="ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
 #cannot be altered here as they are hard-coded.==können nicht verändert werden, weil sie "hard-coded" sind.
-Crawl Profile List==Crawl文件列表
-Crawl Thread==Crawl线程
-Status==状态
-#Start URL==Start URL
->Depth</strong>==>深度</strong>
-Must Match==必须匹配
-Must Not Match==必须不符
-MaxAge</strong>==最长寿命</strong>
-#Auto Filter Depth</strong>==Auto Filter Tiefe</strong>
-#Auto Filter Content</strong>==Auto Inhalts Filter</strong>
-Max Page Per Domain</strong>==每个域中拥有最大页面</strong>
-Accept==接受
-Fill Proxy Cache==填充代理缓存
-Local Text Indexing==本地文本索引
-Local Media Indexing==本地媒体索引
-Remote Indexing==远程索引
-#Status / Action==Status / Aktion
-#terminated::active==beendet::aktiv
+
+#Crawl Profile List
+Crawl Profile List==抓取文件列表
+Crawl Thread<==抓取线程<
+>Collections<==>搜集<
+>Status<==>状态<
+>Depth<==>深度<
+Must Match<==必须匹配<
+>Must Not Match<==>必须不符<
+>Recrawl if older than<==>重新抓取如果老于<
+>Domain Counter Content<==>域计数器内容<
+>Max Page Per Domain<==>每个域中拥有最大页面<
+>Accept==>接受
+URLs<==地址<
+>Fill Proxy Cache<==>填充代理缓存<
+>Local Text Indexing<==>本地文本索引<
+>Local Media Indexing<==>本地媒体索引<
+>Remote Indexing<==>远程索引<
+
+MaxAge<==最长寿命<
 no::yes==否::是
 Running==运行中
 "Terminate"=="终结"
 Finished==已完成
 "Delete"=="删除"
-"Delete finished crawls"=="删除已完成的crawl进程"
+"Delete finished crawls"=="删除已完成的抓取进程"
 Select the profile to edit==选择要修改的文件
 "Edit profile"=="修改文件"
-An error occurred during editing the crawl profile:==修改crawl文件时发生错误:
+An error occurred during editing the crawl profile:==修改抓取文件时发生错误:
 Edit Profile==修改文件
 "Submit changes"=="提交改变"
 #-----------------------------
@@ -1310,64 +1373,76 @@ Edit Profile==修改文件
 >Collection==>收藏
 "del & blacklist"=="删除＆黑名单"
 "del =="删除＆黑名单"
-Crawl Results<==Crawl结果<
+Crawl Results<==抓取结果<
 Overview</a>==概况</a>
 Receipts</a>==回执</a>
 Queries</a>=请求</a>
 DHT Transfer==DHT转移
 Proxy Use==Proxy使用 
-Local Crawling</a>==本地crawl</a>
-Global Crawling</a>==全球crawl</a>
+Local Crawling</a>==本地抓取</a>
+Global Crawling</a>==全球抓取</a>
 Surrogate Import</a>==导入备份</a>
->Crawl Results Overview<==>Crawl结果一览<
+>Crawl Results Overview<==>抓取结果一览<
 These are monitoring pages for the different indexing queues.==索引队列监视页面.
 YaCy knows 5 different ways to acquire web indexes. The details of these processes (1-5) are described within the submenu's listed==YaCy使用5种不同的方式来获取网络索引. 进程(1-5)的细节在子菜单中显示
 above which also will show you a table with indexing results so far. The information in these tables is considered as private,==以上列表也会显示目前的索引结果. 表中的信息应该视为隐私, 
 so you need to log-in with your administration password.==所以您最好设置一个有密码的管理员账户来查看.
 Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private==事件(6)与事件(1)相反, 显示本地回执. 它也包含索引结果, 但不属于隐私
-since it shows crawl requests from other peers.==因为它含有来自其他peer的请求.
+since it shows crawl requests from other peers.==因为它含有来自其他节点的请求.
 Case (7) occurs if surrogate files are imported==如果备份被导入, 则事件(7)发生.
 The image above illustrates the data flow initiated by web index acquisition.==上图为网页索引的数据流.
 Some processes occur double to document the complex index migration structure.==一些进程可能出现双重文件索引结构混合的情况.
-(1) Results of Remote Crawl Receipts==(1) 远程crawl回执结果 
-This is the list of web pages that this peer initiated to crawl,==这是peer初始化时crawl的网页列表,
-but had been crawled by <em>other</em> peers.==但是先前它们已被<em>其他</em>peer crawl.
+
+(1) Results of Remote Crawl Receipts==(1) 远程抓取回执结果 
+This is the list of web pages that this peer initiated to crawl,==这是节点初始化时抓取的网页列表,
+but had been crawled by <em>other</em> peers.==但是先前它们已被<em>其他</em>节点抓取.
 This is the 'mirror'-case of process (6).==这是进程(6)的'镜像'实例
-<em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the==<em>用法:</em> 您可以在这获得细目, 如果'<a href="CrawlStartExpert.html">高级爬虫</a>'页面中选中了
-'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.=='远程索引', and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.
-Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.== 每一个远端peer索引页面所依据的peer请求都在这里显示.
+<em>Use Case:</em>==<em>用法:</em>
+You get entries here==你在此得到条目
+if you start a local crawl on the 'Index Creation'-Page==如果您在'索引创建'页面上启动本地抓取
+and check the==并检查
+'Do Remote Indexing'-flag=='执行远程索引'标记
+#Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here==远程节点根据此节点的请求编制索引的每个页面都会被报告回来，并且可以在此处进行监视
+
 (2) Results for Result of Search Queries==(2) 搜索查询结果报告页
 This index transfer was initiated by your peer by doing a search query.==通过搜索, 此索引转移能被初始化.
-The index was crawled and contributed by other peers.==这个索引是被其他peer贡献与crawl的.
-<em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em>用法:</em>当您在'搜索页面'进行搜索时, 此表会被填充.
+The index was crawled and contributed by other peers.==这个索引是被其他节点贡献与抓取的.
+This list fills up if you do a search query on the 'Search Page'==当您在'搜索页面'进行搜索时, 此表会被填充.
+>Domain<==>域名<
+>URLs<==>地址数<
+
 (3) Results for Index Transfer==(3) 索引转移结果
-The url fetch was initiated and executed by other peers.==被其他peer初始化并抓取的URL.
+The url fetch was initiated and executed by other peers.==被其他节点初始化并抓取的地址.
 These links here have been transmitted to you because your peer is the most appropriate for storage according to==这些链接已经被传递给你, 因为根据全球分布哈希表的计算,
-the logic of the Global Distributed Hash Table.==您的peer是最适合存储它们的.
-<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>用法:</em>当您选中了在'索引控制'里的'接收索引'时, 这个表会被填充.
+the logic of the Global Distributed Hash Table.==您的节点是最适合存储它们的.
+This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==当您选中了在'索引控制'里的'接收索引'时, 这个表会被填充.
+
 (4) Results for Proxy Indexing==(4) 代理索引结果
 These web pages had been indexed as result of your proxy usage.==以下是由于使用代理而索引的网页.
 No personal or protected page is indexed==不包括私有或受保护网页
 such pages are detected by Cookie-Use or POST-Parameters (either in URL or as HTTP protocol)==通过检测cookie用途和提交参数(链接或者HTTP协议)能够识别出此类网页,
 and automatically excluded from indexing.==并在索引时自动排除.
-<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>用法:</em>必须把YaCy用作代理才能填充此表格.
+You must use YaCy as proxy to fill up this table.==必须把YaCy用作代理才能填充此表格.
 Set the proxy settings of your browser to the same port as given==将浏览器代理端口设置为
 on the 'Settings'-page in the 'Proxy and Administration Port' field.=='设置'页面'代理和管理端口'选项中的端口.
-(5) Results for Local Crawling==(5) 本地crawl结果
-These web pages had been crawled by your own crawl task.==您的crawl任务crawl了这些网页.
-<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>用法:</em>在'索引创建'页面设置crawl起始点以开始crawl.
-(6) Results for Global Crawling==(6) 全球crawl结果
-These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==这些网页已经被您的peer索引, 但是它们是被远端peer crawl的.
+
+(5) Results for Local Crawling==(5)本地抓取结果
+These web pages had been crawled by your own crawl task.==您的爬虫任务已经抓取了这些网页.
+start a crawl by setting a crawl start point on the 'Index Create' page.==在'索引创建'页面设置抓取起始点以开始抓取.
+
+(6) Results for Global Crawling==(6)全球抓取结果
+These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==这些网页已经被您的节点索引, 但是它们是被远端节点 crawl的.
 This is the 'mirror'-case of process (1).==这是进程(1)的'镜像'实例.
-<em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==<em>用法:</em>如果您选中了'<a href="RemoteCrawl_p.html">远程爬行</a>'页面的'接受远端crawl请求', 则会在此列表中显示.
 The stack is empty.==栈为空.
 Statistics about #[domains]# domains in this stack:==此栈显示有关 #[domains]# 域的数据:
+This list may fill if you check the 'Accept remote crawling requests'-flag on the==如果您选中“接受远程抓取请求”标记，请填写列表在
+page<==页面<
+
 (7) Results from surrogates import==(7) 备份导入结果
 These records had been imported from surrogate files in DATA/SURROGATES/in==这些记录从 DATA/SURROGATES/in 中的备份文件中导入
-<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>用法:</em>将包含Dublin核心元数据的文件放在 DATA/SURROGATES/in 中, 或者使用索引导入方式
+place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==将包含Dublin核心元数据的文件放在 DATA/SURROGATES/in 中, 或者使用索引导入方式
 (i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>)==(例如 <a href="IndexImportMediawiki_p.html">MediaWiki 导入</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH 导入</a>)
-#Domain==Domain
-#URLs=URLs
+
 "delete all"=="全部删除"
 Showing all #[all]# entries in this stack.==显示栈中所有 #[all]# 条目.
 Showing latest #[count]# lines from a stack of #[all]# entries.==显示栈中 #[all]# 条目的最近 #[count]# 行.
@@ -1384,13 +1459,31 @@ Showing latest #[count]# lines from a stack of #[all]# entries.==显示栈中 #[
 #File: CrawlStartExpert.html
 #---------------------------
 <html lang="en">==<html lang="zh">
-Expert Crawl Start==Crawl高级设置
-Start Crawling Job:==开始Crawl任务:
-You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".==您可以将指定URL作为网页crawling的起始点. "Crawling"意即YaCy会下载指定的网站, 并解析出网站中链接的所有内容, 其深度由"Crawling深度"指定.
+Expert Crawl Start==抓取高级设置
+Start Crawling Job:==开始抓取任务:
+You can define URLs as start points for Web page crawling and start crawling here==您可以将指定URL作为抓取网页的起始点
+"Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links== "抓取中"意即YaCy会下载指定的网站, 并解析出网站中链接的所有内容
+This is repeated as long as specified under "Crawling Depth"==它将一直重复至到满足指定的"抓取深度"
+A crawl can also be started using wget and the==抓取也可以将wget和
+for this web page==用于此网页
+
+#Crawl Job
+>Crawl Job<==>抓取工作<
+A Crawl Job consist of one or more start point, crawl limitations and document freshness rules==抓取作业由一个或多个起始点、抓取限制和文档新鲜度规则组成
+>Start Point==>起始点
+>Crawler Filter==>爬虫过滤器
+>Document Filter==>文档过滤器
+>Content Filter==>内容过滤器
+>Clean-Up before Crawl Start==>抓取前清理
+>Double-Check Rules==>双重检查规则
+>Document Cache==>文档缓存
+>Snapshot Creation==>创建快照
+>Index Attributes==>索引属性
+
 Attribute<==属性<
 Value<==值<
 Description<==描述<
->Starting Point:==>起始点:
+
 >From URL==>来自URL
 From Sitemap==来自站点地图
 From File==来自文件
@@ -1401,21 +1494,21 @@ Create Bookmark==创建书签
 Title<==标题<
 Folder<==目录<
 This option lets you create a bookmark from your crawl start URL.==此选项会将起始链接设为书签.
-Crawling Depth</label>==Crawling深度</label>
-This defines how often the Crawler will follow links (of links..) embedded in websites.==此选项为crawler跟踪网站嵌入链接的深度.
+Crawling Depth</label>==抓取深度</label>
+This defines how often the Crawler will follow links (of links..) embedded in websites.==此选项为爬虫跟踪网站嵌入链接的深度.
 0 means that only the page you enter under "Starting Point" will be added==设置为 0 代表仅将"起始点"
 to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will==添加到索引. 建议设置为2-4. 由于设置为8会索引将近25,000,000,000个页面, 所以不建议设置大于8的值,
 index approximately 25.600.000.000 pages, maybe this is the whole WWW.==这可能是整个互联网的内容.
-Scheduled re-crawl<==已安排的重新Crawl<
+Scheduled re-crawl<==已安排的重新抓取<
 >no&nbsp;doubles<==>无&nbsp;重复<
 run this crawl once and never load any page that is already known, only the start-url may be loaded again.==仅运行一次crawl, 并且不载入重复网页, 可能会重载起始链接.
 >re-load<==>重载<
-run this crawl once, but treat urls that are known since==运行此crawl, 但是将链接视为从
+run this crawl once, but treat urls that are known since==运行此抓取, 但是将链接视为从
 >years<==>年<
 >months<==>月<
 >days<==>日<
 >hours<==>时<
-not as double and load them again. No scheduled re-crawl.==不重复并重新载入. 无安排的crawl任务.
+not as double and load them again. No scheduled re-crawl.==不重复并重新载入. 无安排的抓取任务.
 >scheduled<==>定期<
 after starting this crawl, repeat the crawl every==运行此crawl后, 每隔
 > automatically.==> 运行.
@@ -1464,9 +1557,9 @@ no&nbsp;cache==无&nbsp;缓存
 #if&nbsp;fresh==if&nbsp;fresh
 if&nbsp;fresh==如果&nbsp;有更新&nbsp;缓存&nbsp;命中
 #if&nbsp;exist==if&nbsp;exist
-if&nbsp;exist==如果&nbsp;缓存&nbsp;命中
+if&nbsp;exist==如果缓存命中
 #cache&nbsp;only==cache&nbsp;only
-cache&nbsp;only==仅&nbsp;缓存
+cache&nbsp;only==仅缓存
 never use the cache, all content from fresh internet source;==从不使用缓存内容, 全部从因特网资源即时抓取;
 use the cache if the cache exists and is fresh using the proxy-fresh rules;==如果缓存中存在并且是最新则使用代理刷新规则;
 use the cache if the cache exist. Do no check freshness. Otherwise use online source;==如果缓存存在则使用缓存. 不检查是否最新. 否则使用最新源;
@@ -1475,20 +1568,20 @@ never go online, use all content from cache. If no cache exist, treat content as
 Do Local Indexing:==本地索引:
 index text==索引文本
 index media==索引媒体
-This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==此选项开启时, crawler会下载网页索引. 默认打开, 除非您仅要填充
+This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==此选项开启时, 爬虫会下载网页索引. 默认打开, 除非您仅要填充
 Document Cache without indexing.==文件缓存而不进行索引.
 Do Remote Indexing==远程索引
-Describe your intention to start this global crawl (optional)==在这填入您要进行全球crawl的目的(可选)
-This message will appear in the 'Other Peer Crawl Start' table of other peers.==此消息会显示在其他peer的'其他peer crawl起始'列表中.
-If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果选中, crawler会联系其他peer, 并将其作为此次crawl的远程索引器.
-If you need your crawling results locally, you should switch this off.==如果您仅想crawl本地内容, 请关闭此设置.
-Only senior and principal peers can initiate or receive remote crawls.==仅高级peer和主peer能初始化或者接收远程crawl.
-A YaCyNews message will be created to inform all peers about a global crawl==YaCy新闻消息中会通知其他peer这个全球crawl,
-so they can omit starting a crawl with the same start point.==然后他们才能以相同起始点进行crawl.
+Describe your intention to start this global crawl (optional)==在这填入您要进行全球抓取的目的(可选)
+This message will appear in the 'Other Peer Crawl Start' table of other peers.==此消息会显示在其他节点的'其他节点抓取起始'列表中.
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果选中, 爬虫会联系其他节点, 并将其作为此次crawl的远程索引器.
+If you need your crawling results locally, you should switch this off.==如果您仅想抓取本地内容, 请关闭此设置.
+Only senior and principal peers can initiate or receive remote crawls.==仅高级节点和主节点能初始化或者接收远程抓取.
+A YaCyNews message will be created to inform all peers about a global crawl==YaCy新闻消息中会通知其他节点这个全球抓取,
+so they can omit starting a crawl with the same start point.==然后他们才能以相同起始点进行抓取.
 Exclude <em>static</em> Stop-Words==排除<em>静态</em>非索引字
 This can be useful to circumvent that extremely common words are added to the database, i.e. "the", "he", "she", "it"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==此项用于规避极常用字, 比如 "个", "他", "她", "它"等. 当要在索引时排除所有在<tt>yacy.stopwords</tt>文件中的字词时,
 check this box.==请选中此项.
-"Start New Crawl"=="开始新crawl"
+Start New Crawl==开始新抓取
 #-----------------------------
 
 #File: CrawlStartIntranet_p.html
@@ -1506,7 +1599,7 @@ Available Intranet Server==可用局域网服务器
 >Process<==>状态<
 >not in index<==>不在索引中<
 >indexed<==>已加入索引<
-"Add Selected Servers to Crawler"=="添加选中服务器到crawler"
+"Add Selected Servers to Crawler"=="添加选中服务器到爬虫"
 #-----------------------------
 
 #File: CrawlStartScanner_p.html
@@ -1544,41 +1637,50 @@ Sites that do not appear during a scheduled scan period will be excluded from se
 
 #File: CrawlStartSite.html
 #---------------------------
->Site Crawling<==>crawl站点<
-Site Crawler:==站点crawler:
-Download all web pages from a given domain or base URL.==下载给定域或者URL里的所有网页.
->Site Crawl Start<==>起始crawl站点<
+>Site Crawling<==>站点抓取<
+Site Crawler:==站点爬虫:
+Download all web pages from a given domain or base URL.==下载给定域名或者网址里的所有网页.
+
+#Site Crawl Start
+>Site Crawl Start<==>开始抓取站点<
 >Site<==>站点<
-Link-List of URL==URL链接表
+Start URL==起始地址
+must start with<==头部必须有<
+Link-List of URL==网址链接表
+Sitemap URL==网址地图
+>Path<==>路径<
+load all files in domain==载入域中所有文件
+load only files in a sub-path of given url==仅载入给定网址子路径中文件
+>Limitation<==>限制<
+not more than <==不超过<
+>documents<==>文件<
+>Collection<==>搜集器<
+>Start<==>启动<
+"Start New Crawl"=="开始新的抓取"
+
 >Scheduler<==>定时器<
-run this crawl once==运行此crawl
+run this crawl once==立即开启抓取
 scheduled, look every==每
 >minutes<==>分钟<
 >hours<==>小时<
 >days<==>天<
-for new documents automatically.==, 以自动查找新文件.
->Path<==>路径<
-load all files in domain==载入域中所有文件
-load only files in a sub-path of given url==仅载入给定URL子路径中文件
->Limitation<==>限制<
-not more than <==不超过<
->documents<==>文件<
->Dynamic URLs<==>动态URL<
+for new documents automatically.==,以自动查找新文件.
+>Dynamic URLs<==>动态网址<
 allow <==允许<
 urls with a '?' in the path==路径中含有'?'
-#>Start<==>Start<
-"Start New Crawl"=="开始新crawl"
+
+#Hints
 Hints<==提示<
->Crawl Speed Limitation<==>crawl速度限制<
+>Crawl Speed Limitation<==>抓取速度限制<
 No more that two pages are loaded from the same host in one second (not more that 120 document per minute) to limit the load on the target server.==每秒最多从同一主机中载入两个页面(每分钟不超过120个文件)以限制目标主机负载.
 >Target Balancer<==>目标平衡器<
-A second crawl for a different host increases the throughput to a maximum of 240 documents per minute since the crawler balances the load over all hosts.==对于不同主机的二次crawl, 会上升到每分钟最多240个文件, 因为crawler会自动平衡所有主机的负载.
->High Speed Crawling<==>高速crawl<
-A 'shallow crawl' which is not limited to a single host (or site)==当目标主机很多时, 用于多个主机(或站点)的'浅crawl'方式,
+A second crawl for a different host increases the throughput to a maximum of 240 documents per minute since the crawler balances the load over all hosts.==对于不同主机的第二次抓取, 会上升到每分钟最多240个文件, 因为爬虫会自动平衡所有主机的负载.
+>High Speed Crawling<==>高速抓取<
+A 'shallow crawl' which is not limited to a single host (or site)==当目标主机很多时, 用于多个主机(或站点)的'浅抓取'方式,
 can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.==会增加每秒页面数(ppm).
-This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==对应设置<a href="CrawlStartExpert.html">专家模式起始crawl</a>选项.
+This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==对应设置<a href="CrawlStartExpert.html">专家模式起始抓取</a>选项.
 >Scheduler Steering<==>定时器向导<
-The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.==可以使用<a href="Table_API_p.html">API向导</a>改变或删除crawl定时器.
+The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.==可以使用<a href="Table_API_p.html">API向导</a>改变或删除抓取定时器.
 #-----------------------------
 
 #File: Help.html
@@ -1602,6 +1704,10 @@ To learn how to do that, watch one of the demonstration videos below==观看以�
 >Search<==>搜索<
 Text==文本
 Audio==音频
+Images==图像
+Video==视频
+Applications==应用程序
+more options...==更多设置...
 >ranking modifier<==>排名修改器<
 click on the red icon in the upper right after a search. this works good in combination with the==搜索后点击右上角的红色图标. 这个结合起来很好用
 add search results from external opensearch systems==添加外部opensearch系统的搜索结果
@@ -1616,12 +1722,8 @@ add search results from==从中添加搜索结果
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': 搜索页面
 #kiosk mode==Kiosk Modus
 "Search"=="搜索"
-#Text==Text
-Images==图像
-#Audio==Audio
-Video==视频
-Applications==应用程序
-more options...==更多设置...
+
+
 advanced parameters==高级参数
 Max. number of results==搜索结果最多有
 Results per page==每个页面显示结果
@@ -1697,15 +1799,15 @@ last searched URL:==最近搜索到的URL:
 last blacklisted URL found:==最近搜索到的黑名单URL:
 >RWI-DB-Cleaner==>RWI-DB-清理
 RWIs at Start:==启动时RWIs:
-RWIs now:==当前RWIs: 
+RWIs now:==当前反向字索引: 
 wordHash in Progress:==处理中的Hash值:
-last wordHash with deleted URLs:==已删除URL的Hash值:
+last wordHash with deleted URLs:==已删除网址的Hash值:
 Number of deleted URLs in on this Hash:==此Hash中已删除的URL数:
 URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:==URL-DB-清理 - 清理数据库, 会删除黑名单URl:
 Start/Resume==开始/继续
 Stop==停止
 Pause==暂停
-RWI-DB-Cleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWI-DB-清理 - 清理数据库, 会删除与黑名单URL相关的信息:
+RWI-DB-Cleaner - Clean up the database by deletion of words with reference to blacklisted urls:==RWI-数据库-清理 - 清理数据库, 会删除与黑名单URL相关的信息:
 #-----------------------------
 
 #File: IndexControlRWIs_p.html
@@ -1722,7 +1824,7 @@ Retrieve by Word-Hash==输入单词Hash值
 Cleanup==清理
 >Index Deletion<==>删除索引<
 >Delete Search Index<==>删除搜索索引<
-Stop Crawler and delete Crawl Queues==停止crawl并删除crawl队列
+Stop Crawler and delete Crawl Queues==停止爬虫并删除crawl队列
 Delete HTTP &amp; FTP Cache==删除HTTP &amp; FTP缓存
 Delete robots.txt Cache==删除robots.txt缓存
 Delete cached snippet-fetching failures during search==删除已缓存的错误信息
@@ -1750,12 +1852,12 @@ Display URL List==显示URL列表
 Number of lines==行数
 all lines==全部
 "List Selected URLs"=="列出选中URL"
-Transfer RWI to other Peer==传递RWI给其他peer
+Transfer RWI to other Peer==传递RWI给其他节点
 Transfer by Word-Hash==按字Hash值传递
 "Transfer to other peer"=="传递"
-to Peer==指定peer
+to Peer==指定节点
 <dd>select==<dd>选择
-or enter a hash==或者输入peer的Hash值
+or enter a hash==或者输入节点的Hash值
 Sequential List of Word-Hashes==字Hash值的顺序列表
 No URL entries related to this word hash==无对应入口URL对于字Hash
 >#[count]# URL entries related to this word hash==>#[count]# 个入口URL与此字Hash相关
@@ -1796,42 +1898,42 @@ Blacklist Extension==黑名单扩展
 
 #File: IndexControlURLs_p.html
 #---------------------------
-URL References Administration==URL关联管理
-The local index currently contains #[ucount]# URL references==目前本地索引含有 #[ucount]# 个URL关联
-URL Retrieval==URL获取
+URL References Administration==参考地址管理
+The local index currently contains #[ucount]# URL references==目前本地索引含有 #[ucount]# 个参考地址
+URL Retrieval==地址获取
 Select Segment:==选择片段:
-Retrieve by URL:<==输入URL:<
+Retrieve by URL:<==输入地址:<
 "Show Details for URL"=="显示细节"
-Retrieve by URL-Hash==输入URL Hash值
+Retrieve by URL-Hash==输入地址Hash值
 "Show Details for URL-Hash"=="显示细节"
 "Generate List"=="生成列表"
-Statistics about top-domains in URL Database==URL数据库中顶级域数据
+Statistics about top-domains in URL Database==地址数据库中顶级域数据
 Show top==显示全部URL中的
 domains from all URLs.==个域.
 "Generate Statistics"=="生成数据"
 Statistics about the top-#[domains]# domains in the database:==数据库中头 #[domains]# 个域的数据:
 "delete all"=="全部删除"
-#Domain==Domain
-#URLs==URLs
-Sequential List of URL-Hashes==URL Hash顺序列表
-Loaded URL Export==导出已加载URL
+Domain==域名
+URLs==地址
+Sequential List of URL-Hashes==地址Hash顺序列表
+Loaded URL Export==导出已加载地址
 Export File==导出文件
-#URL Filter==URL Filter
-#Export Format==Export Format
+URL Filter==地址过滤器
+Export Format==导出格式
 #Only Domain <i>(superfast)==Nur Domains <i>(sehr schnell)
 Only Domain:==仅域名:
-Full URL List:==完整URL列表:
+Full URL List:==完整地址列表:
 Plain Text List (domains only)==文本文件(仅域名)
 HTML (domains as URLs, no title)==HTML (超链接格式的域名, 不包括标题)
 #Full URL List <i>(high IO)==Vollständige URL Liste <i>(hoher IO)
-Plain Text List (URLs only)==文本文件(仅URL)
-HTML (URLs with title)==HTML (带标题的URL)
+Plain Text List (URLs only)==文本文件(仅地址)
+HTML (URLs with title)==HTML (带标题的地址)
 #XML (RSS)==XML (RSS)
-"Export URLs"=="导出URL"
+"Export URLs"=="导出地址"
 Export to file #[exportfile]# is running ..  #[urlcount]# URLs so far==正在导出到 #[exportfile]#  .. 已经导出 #[urlcount]# 个URL
-Finished export of #[urlcount]# URLs to file==已完成导出 #[urlcount]# 个URL到文件
+Finished export of #[urlcount]# URLs to file==已完成导出 #[urlcount]# 个地址到文件
 Export to file #[exportfile]# failed:==导出到文件 #[exportfile]# 失败:
-No entry found for URL-hash==未找到合适条目对应URL-Hash
+No entry found for URL-hash==未找到合适条目对应地址Hash
 #URL String</td>==URL Adresse</td>
 #Hash</td>==Hash</td>
 #Description</td>==Beschreibung</td>
@@ -1843,9 +1945,9 @@ No entry found for URL-hash==未找到合适条目对应URL-Hash
 #Size</td>==Größe</td>
 #Words</td>==Wörter</td>
 "Show Content"=="显示内容"
-"Delete URL"=="删除URL"
+"Delete URL"=="删除地址"
 this may produce unresolved references at other word indexes but they do not harm==这可能和其他关键字产生未解析关联, 但是这并不影响系统性能
-"Delete URL and remove all references from words"=="删除URl并从关键字中删除所有关联"
+"Delete URL and remove all references from words"=="删除地址并从关键字中删除所有关联"
 delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)==删除指向此链接的关联字,(很多, 但是会阻止未解析关联的产生)
 #-----------------------------
 
@@ -1861,16 +1963,17 @@ Depth==深度
 
 #File: IndexCreateParserErrors_p.html
 #---------------------------
+>Rejected URLs<==>拒绝地址<
 Parser Errors==解析错误
-Rejected URL List:==拒绝URL列表:
-There are #[num]# entries in the rejected-urls list.==在拒绝URL列表中有 #[num]# 个条目.
+Rejected URL List:==拒绝地址列表:
+There are #[num]# entries in the rejected-urls list.==在拒绝地址列表中有 #[num]# 个条目.
 Showing latest #[num]# entries.==显示最近的 #[num]# 个条目.
 "show more"=="更多"
 "clear list"=="清除列表"
 There are #[num]# entries in the rejected-queue:==拒绝队列中有 #[num]# 个条目:
-#Initiator==Initiator
 Executor==执行器
-#URL==URL
+>Time<==>时间<
+>URL<==>地址<
 Fail-Reason==错误原因
 #-----------------------------
 
@@ -1967,16 +2070,18 @@ Delete Entries:==已删除条目:
 >Depth<==>深度<
 Modified Date==修改日期
 Anchor Name==祖先名
+This crawler queue is empty==抓取队列为空
+Crawl Queue<==抓取队列<
 #-----------------------------
 
 #File: IndexCreateWWWGlobalQueue_p.html
 #---------------------------
 Global Crawl Queue==全球crawl队列
-This queue stores the urls that shall be sent to other peers to perform a remote crawl.==此队列存储着需要发送到其他peer进行crawl的链接.
+This queue stores the urls that shall be sent to other peers to perform a remote crawl.==此队列存储着需要发送到其他节点进行crawl的链接.
 If there is no peer for remote crawling available, the links are crawled locally.==如果远端无可用crawl, 则此队列对本地有效.
 The global crawler queue is empty==全球crawl队列为空.
 "clear global crawl queue"=="清空全球crawl队列"
-There are <strong>#[num]#</strong> entries in the global crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==全球crawler队列中有 <strong>#[num]#</strong> 个条目. 显示最近的 <strong>#[show-num]#</strong> 个.
+There are <strong>#[num]#</strong> entries in the global crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==全球爬虫队列中有 <strong>#[num]#</strong> 个条目. 显示最近的 <strong>#[show-num]#</strong> 个.
 Show last==显示最近
 </a> entries.==</a> 个.
 Initiator==发起者
@@ -1990,7 +2095,7 @@ Anchor Name==祖先名
 #File: IndexCreateWWWLocalQueue_p.html
 #---------------------------
 Local Crawl Queue==本地crawl队列
-This queue stores the urls that shall be crawled localy by this peer.==此队列存储着本地peer要crawl的队列.
+This queue stores the urls that shall be crawled localy by this peer.==此队列存储着本地节点要crawl的队列.
 It may also contain urls that are computed by the proxy-prefetch.==此队列中也包含通过代理预取的链接.
 The local crawler queue is empty==本地crawl队列为空.
 There are <strong>#[num]#</strong> entries in the local crawler queue. Showing <strong>#[show-num]#</strong> most recent entries.==本地crawl队列中有 <strong>#[num]#</strong> 个条目. 显示最近的 <strong>#[show-num]#</strong> 个.
@@ -2011,7 +2116,7 @@ This may take a quite long time.==这会花费很长一段时间.
 #File: IndexCreateWWWRemoteQueue_p.html
 #---------------------------
 Remote Crawl Queue==远端Crawl队列
-This queue stores the urls that other peers sent to you in order to perform a remote crawl for them.==此队列存储着其他peer发送给您从而为他们进行crawl的链接.
+This queue stores the urls that other peers sent to you in order to perform a remote crawl for them.==此队列存储着其他节点发送给您从而为他们进行crawl的链接.
 The remote crawler queue is empty==远端crawl队列为空
 "clear remote crawl queue"=="清空远端crawl队列"
 There are <strong>#[num]#</strong> entries in the remote crawler queue.==远端crawl队列中有 <strong>#[num]#</strong> 个条目.
@@ -2038,7 +2143,7 @@ Starting new Job==开始新任务
 Import&nbsp;Type:==导入类型:
 Cache Size==缓存大小
 Usage Examples==使用<br />举例
-"Path to the PLASMADB directory of the foreign peer"=="其他peer的PLASMADB目录路径"
+"Path to the PLASMADB directory of the foreign peer"=="其他节点的PLASMADB目录路径"
 Import&nbsp;Path:==导入失败:
 "Start Import"=="开始导入"
 Attention:==注意:
@@ -2077,7 +2182,7 @@ The assortment file must have the postfix==分类文件一定要有后缀名
 If you would like to import an assortment file from the <tt>PLASMADBACLUSTERABKP</tt>==如果您想从 <tt>PLASMADBACLUSTERABKP</tt> 中导入分类文件,
 you have to rename it first.==则须先重命名.
 >Notes:==>注意:
-Please note that the imported words are useless if the destination peer doesn't know==如果目的peer不知道导入的关键字属于那些链接,
+Please note that the imported words are useless if the destination peer doesn't know==如果目的节点不知道导入的关键字属于那些链接,
 the URLs the imported words belongs to.==则导入的关键字无效.
 Crawling Queue Import:==导入crawl队列:
 Contains data about the crawljob an URL belongs to==含有crawl任务链接的数据
@@ -2281,7 +2386,7 @@ Date:==日期:
 reply==回复
 >delete==>删除
 Compose Message==撰写短消息
-Send message to peer==发送消息至peer
+Send message to peer==发送消息至节点
 "Compose"=="撰写"
 Message:==短消息:
 inbox==收件箱
@@ -2291,7 +2396,7 @@ inbox==收件箱
 #---------------------------
 Send message==发送短消息
 You cannot send a message to==不能发送消息至
-The peer does not respond. It was now removed from the peer-list.==远端peer未响应, 将从peer列表中删除.
+The peer does not respond. It was now removed from the peer-list.==远端节点未响应, 将从节点列表中删除.
 The peer <b>==peer <b>
 is alive and responded:==可用:
 You are allowed to send me a message==您现在可以给我发送消息
@@ -2306,9 +2411,9 @@ You can use==您可以在这使用
 Wiki Code</a> here.==Wiki Code </a>.
 Preview message==预览消息
 The message has not been sent yet!==短消息未发送!
-The peer is alive but cannot respond. Sorry.==peer属于活动状态但是无响应.
-Your message has been sent. The target peer responded:==您的短消息已发送. 接收peer返回:
-The target peer is alive but did not receive your message. Sorry.==抱歉, 接收peer属于活动状态但是没有接收到您的消息.
+The peer is alive but cannot respond. Sorry.==节点属于活动状态但是无响应.
+Your message has been sent. The target peer responded:==您的短消息已发送. 接收节点返回:
+The target peer is alive but did not receive your message. Sorry.==抱歉, 接收节点属于活动状态但是没有接收到您的消息.
 Here is a copy of your message, so you can copy it to save it for further attempts:==这是您的消息副本, 可被保存已备用:
 You cannot call this page directly. Instead, use a link on the <a href="Network.html">Network</a> page.==您不能直接使用此页面. 请使用 <a href="Network.html">网络</a> 页面的对应功能.
 #-----------------------------
@@ -2316,22 +2421,42 @@ You cannot call this page directly. Instead, use a link on the <a href="Network.
 #File: Network.html
 #---------------------------
 YaCy Search Network==YaCy搜索网络
+Network Overview==网络一览
+Active Senior==主动高级
+Passive Senior==被动高级
+Junior (fragment)==初级（片段）
+Network History==网络历史
 YaCy Network<==YaCy网络<
+>Network<==>网络<
+>Online Peers<==>在线节点<
+>Number of<br/>Documents<==>文件<br/>数目<
+Indexing Speed:==索引速度:
+Pages Per Minute (PPM)==页面每分钟(PPM)
+Query Frequency:==请求频率:
+Queries Per Hour (QPH)==请求每小时(QPH)
+>Today<==>今天<
+>Last Hour<==>1小时前<
+>Last&nbsp;Week<==>最近一周<
+>Last&nbsp;Month<==>最近一月<
+>Now<==>现在<
+>Active<==>活动<
+>Passive<==>被动<
+>Potential<==>潜在<
+>This Peer<==>本机节点<
 The information that is presented on this page can also be retrieved as XML.==此页信息也可表示为XML.
 Click the API icon to see the XML.==点击API图标查看XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==获取所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
-Network Overview==网络一览
-Active&nbsp;Peers==活动peer
-Passive&nbsp;Peers==被动peer
-Potential&nbsp;Peers==潜在peer
-Active Peers in '#[networkName]#' Network=='#[networkName]#'网络中的活动peer
-Passive Peers in '#[networkName]#' Network=='#[networkName]#'网络中的被动peer
-Potential Peers in '#[networkName]#' Network=='#[networkName]#'网络中的潜在peer
-Manually contacting Peer==手动联系peer
-no remote #[peertype]# peer for this list known==当前列表中无远端 #[peertype]# peer.
-Showing #[num]# entries from a total of #[total]# peers.==显示全部 #[total]# 个peer中的 #[num]# 个.
-send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==发送消息(<strong>m</strong>)/<br/>显示资料(<strong>p</strong>)/<br/>编辑wiki(<strong>w</strong>)/<br/>浏览博客(<strong>b</strong>)
-Search for a peername (RegExp allowed)==搜索peer名称(允许正则表达式)
+To see a list of all APIs==获取所有API
+please visit the==请访问
+API wiki page==API百科页面
+
+Active Peers in '#[networkName]#' Network=='#[networkName]#'网络中的主动节点
+Passive Peers in '#[networkName]#' Network=='#[networkName]#'网络中的被动节点
+Potential Peers in '#[networkName]#' Network=='#[networkName]#'网络中的潜在节点
+Manually contacting Peer==手动联系节点
+no remote #[peertype]# peer for this list known==当前列表中无远端 #[peertype]# 节点.
+Showing #[num]# entries from a total of #[total]# peers.==显示全部 #[total]# 个节点中的 #[num]# 个.
+send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==发送消息(<strong>m</strong>)/<br/>显示资料(<strong>p</strong>)/<br/>编辑百科(<strong>w</strong>)/<br/>浏览博客(<strong>b</strong>)
+Search for a peername (RegExp allowed)==搜索节点名称(允许正则表达式)
 "Search"=="搜索"
 Name==名称
 Address==地址
@@ -2340,11 +2465,11 @@ Type==类型
 Release/<br/>SVN==YaCy版本/<br/>SVN
 Last<br/>Seen==最后<br/>上线
 Location==位置
->URLs for<br/>Remote<br/>Crawl<==>用于<br/>远端<br/>crawl的URL<
+>URLs for<br/>Remote<br/>Crawl<==>用于<br/>远端<br/>抓取的URL<
 Offset==偏移
-Send message to peer==发送消息至peer
-View profile of peer==查看peer资料
-Read and edit wiki on peer==查看并编辑wiki
+Send message to peer==发送消息至节点
+View profile of peer==查看节点资料
+Read and edit wiki on peer==查看并编辑百科
 Browse blog of peer==查看博客
 #"Ranking Receive: no"=="接收排名: 否"
 #"no ranking receive"=="无接收排名"
@@ -2356,64 +2481,49 @@ Browse blog of peer==查看博客
 "DHT Receive: no"=="接收DHT: 否"
 #no tags given==keine Tags angegeben
 "no DHT receive"=="无接收DHT"
-"Accept Crawl: no"=="接受crawl: 否"
+"Accept Crawl: no"=="接受抓取: 否"
 "no crawl"=="无crawl"
-"Accept Crawl: yes"=="接受crawl: 是"
-"crawl possible"=="可用crawl"
+"Accept Crawl: yes"=="接受抓取: 是"
+"crawl possible"=="可以抓取"
 Contact: passive==通信: 被动
 Contact: direct==通信: 直接
-Seed download: possible==Seed下载: 可用
+Seed download: possible==种子下载: 可用
 runtime:==运行时间:
-#Peers==Peers
+Peers==节点
 #YaCy Cluster==YaCy Cluster
-
->Network<==>网络<
-#>Online Peers<==>Online Peers<
->Number of<br/>Documents<==>文件<br/>数目<
-Indexing Speed:==索引速度:
-Pages Per Minute (PPM)==页面每分钟(PPM)
-Query Frequency:==请求频率:
-Queries Per Hour (QPH)==请求每小时(QPH)
->Today<==>今天<
->Last&nbsp;Week<==>最近&nbsp;一周<
->Last&nbsp;Month<==>最近&nbsp;一月<
->Now<==>现在<
->Active<==>活动<
->Passive<==>被动<
->Potential<==>潜在<
->This Peer<==>本机peer<
-URLs for<br/>Remote Crawl==用于远端<br/>crawl的URL
+URLs for<br/>Remote Crawl==远端<br/>抓取的地址
 "The YaCy Network"=="YaCy网络"
 
 Indexing<br/>PPM==索引<br/>PPM
 (public&nbsp;local)==公共&nbsp;本地
 (remote)==(远程)
-Your Peer:==您的peer:
-#>Name<==>Name<
-#>Info<==>Info<
-#>Version<==>Version<
+Your Peer:==您的节点:
+>Name<==>名称<
+>Info<==>信息<
+>Version<==>版本<
+>Release<==>版本<
+>Age<==>年龄<
 #>UTC<==>UTC<
 >Uptime<==>开机时间<
-#>Links<==>Links<
-#>RWIs<==>RWIs<
-Sent<br/>Words==已发送<br/>关键字
-Sent<br/>URLs==已发送<br/>URL
-Received<br/>Words==已接收<br/>关键字
-Received<br/>URLs==已接收<br/>URL
-Known<br/>Seeds==已知<br/>Seeds
-Connects<br/>per hour==联系<br/>每小时
-#Version==Version
+>Links<==>链接<
+>RWIs<==>反向字索引<
+Sent<br/>Words==已发送关键字
+Sent<br/>URLs==已发送网址
+Received<br/>Words==已接收关键字
+Received<br/>URLs==已接收网址
+Known<br/>Seeds==已知种子
+Connects<br/>per hour==连接/小时
 #Own/Other==Eigene/Andere
 >dark green font<==>深绿色字<
-senior/principal peers==高级/主要 peer
+senior/principal peers==高级/主要 节点
 >light green font<==>浅绿色字<
->passive peers<==>被动peer<
+>passive peers<==>被动节点<
 >pink font<==>粉色字<
-junior peers==次级peer
+junior peers==次级节点
 red point==红点
-this peer==本机peer
+this peer==本机节点
 >grey waves<==>灰色波浪<
->crawling activity<==>crawl活动<
+>crawling activity<==>抓取活动<
 >green radiation<==>绿色辐射圆<
 >strong query activity<==>强烈请求活动<
 >red lines<==>红线<
@@ -2434,20 +2544,25 @@ Processed&nbsp;News==已处理
 Outgoing&nbsp;News==已生成
 Published&nbsp;News==已发布
 This is the YaCyNews system (currently under testing).==这是YaCy新闻系统(测试中).
-The news service is controlled by several entry points:==新闻服务由以下动作控制:
-A crawl start with activated remote indexing will automatically create a news entry.==使用活动远程索引作为起始点的crawl会自动创建一个新闻条目.
-Other peers may use this information to prevent double-crawls from the same start point.==其他的peer能利用此信息以防止相同起始点的二次crawl.
-A table with recently started crawls is presented on the Index Create - page=="创建首页"-页面会显示最近启动的crawl.
-A change in the personal profile will create a news entry. You can see recently made changes of==个人信息的改变会创建一个新闻条目, 可以在网络页面查看,
+The news service is controlled by several entry points:==新闻服务会因为下面的操作产生:
+A crawl start with activated remote indexing will automatically create a news entry.==由远程创建索引激活的一次抓取会自动创建一个新闻条目.
+Other peers may use this information to prevent double-crawls from the same start point.==其他的节点能利用此信息以防止相同起始点的二次抓取.
+A table with recently started crawls is presented on the Index Create - page=="索引创建"-页面会显示最近启动的抓取.
+A change in the personal profile will create a news entry. You can see recently made changes of==个人信息的改变会创建一个新闻条目, 可以在网络个人信息页面查看,
 profile entries on the Network page, where that profile change is visualized with a '*' beside the 'P' (profile) - selector.==以带有 '*' 的 'P' (资料)标记出.
+Publishing of added or modified translation for the user interface.==发布用户界面翻译的添加或者修改信息。
+Other peers may include it in their local translation list.==其他节点可能会接受这些翻译。
+To publish a translation, use the integrated==要发布新的翻译，请用
+translation editor==翻译编辑器
+to add a translation and publish it afterwards.==来添加翻译并发布。 
 More news services will follow.==接下来会有更多的新闻服务.
 
 Above you can see four menues:==上面四个菜单选项分别为:
-<strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>已接收新闻(#[insize]#)</strong>: 发送至您peer的新闻.
+<strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>已接收新闻(#[insize]#)</strong>: 发送至您节点的新闻.
 Only these news will be used to display specific news services as explained above.==这些消息含有上述的特定新闻服务.
 You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==您可以使用'创建首页'和'网络'页面的设置隐藏它们.
 <strong>Processed News (#[prsize]#)</strong>: this is simply an archive of incoming news that you removed by processing.==<strong>已处理新闻(#[prsize]#)</strong>: 此页面显示您已删除的新闻.
-<strong>Outgoing News (#[ousize]#)</strong>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<strong>已生成新闻(#[ousize]#)</strong>: 此页面显示您的peer创建的新闻条目, 默认发布给其他peer.
+<strong>Outgoing News (#[ousize]#)</strong>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<strong>已生成新闻(#[ousize]#)</strong>: 此页面显示您的节点创建的新闻条目, 默认发布给其他节点.
 you can stop the broadcast if you want.==您也可以选择停止发布.
 <strong>Published News (#[pusize]#)</strong>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<strong>已发布新闻(#[pusize]#)</strong>: 显示已经完全发布出去的新闻或者已经从发布列表删除的新闻.
 Originator==拥有者
@@ -2465,18 +2580,37 @@ Attributes==属性
 <html lang="en">==<html lang="zh">
 Online Caution Settings:==在线警告设置：
 Performance Settings==性能设置
+refresh graph==刷新图表
+
+#Memory Settings
 Memory Settings==内存设置
 Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==<abbr title="Java Virtual Machine">JVM</abbr>内存设置
 "Set"=="设置"
+
+#Resource Observer
 Resource Observer==资源查看
-Reset state==重置
-> free space==> 空闲空间
-disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==停止接收<abbr title="Distributed Hash Table">DHT</abbr>当低于
-<abbr title="Random Access Memory">RAM</abbr>==内存
+Free space disk==空闲硬盘空间
+Used space disk==使用硬盘空间
+Steady-state minimum==稳态最小值
+Steady-state maximum==稳态最大值
+Disable crawls==停止抓取
+when free space is below==当空闲空间过低时
+when used space is over==当使用空间过高时
+Absolute minimum==绝对最小值
+Absolute maximum==绝对最大值
+Disable==关闭
+>Autoregulate<==>自动调节<
+when absolute minimum limit has been reached==当达到绝对最小值时
+when absolute maximum limit has been reached==当达到绝对最大值时
+RAM==内存
+Memory state==内存状态
+Enough memory is available for proper operation==运行有足够的空间
+proper==合适
+>Minimum required<==>最小要求<
+free space==空闲空间
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==已接受改变. 在YaCy<strong>重启</strong>后生效
 restart now</a>==立即重启</a>
 Confirm Restart==确定重启
-refresh graph==刷新图表
 #show memory tables==Zeige Speicher-Tabellen
 Use Default Profile:==使用默认配置:
 and use==并使用
@@ -2490,8 +2624,11 @@ Below normal==低于普通
 Idle</option>==空闲</option>
 "Set new Priority"=="置为新优先级"
 Changes take effect after <strong>restart</strong> of YaCy==在YaCy<strong>重启</strong>后生效.
+Reset state==重置
+
+#Online Caution Settings
 Online Caution Settings==在线警告设置
-This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==这是代理被访问或者搜索完成后的一段crawl空闲时间.
+This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==这是代理被访问或者搜索完成后的一段抓取空闲时间.
 The delay is extended by this time each time the proxy is accessed afterwards.==在访问代理后, 会触发此延时,
 This shall improve performance of the affected process (proxy or search).==从而提高相关进程(代理或者搜索)的性能.
 (current delta is==(当前设置为
@@ -2613,7 +2750,7 @@ This is the time delta between accessing of the same domain during a crawl.==这
 The crawl balancer tries to avoid that domains are==crawl平衡器能够避免频繁地访问同一域名,
 accessed too often, but if the balancer fails (i.e. if there are only links left from the same domain), then these minimum==如果平衡器失效(比如相同域名下只剩链接了), 则此有此间歇
 delta times are ensured.==提供访问保障.
-#>Crawler Domain<==>Crawler Domain<
+#>Crawler Domain<==>爬虫 Domain<
 >Minimum Access Time Delta<==>最小访问间歇<
 >local (intranet) crawls<==>本地(局域网)crawl<
 >global (internet) crawls<==>全球(广域网)crawl<
@@ -2649,9 +2786,10 @@ Query==请求
 Event<==事件<
 Comment<==注释<
 Time<==时间<
+Delta (ms)==间隔(毫秒)
 Duration (ms)==耗时(毫秒)
 Result-Count==结果数目
-The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==下图显示了通过询问DHT中peer解析的最近搜索请求情况:
+The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==下图显示了通过询问DHT中节点解析的最近搜索请求情况:
 red -> request list alive==红色 -> 活动请求列表
 green -> request has terminated==绿色 -> 已终结请求列表
 grey -> the search target hash order position(s) (more targets if a dht partition is used)<==灰色 -> 搜索目标hash序列位置(如果使用dht会产生更多目标)<
@@ -2688,9 +2826,9 @@ If this is on, all pages (except private content) that passes the proxy is index
 Do Local Media-Indexing==进行本地媒体索引
 This is the same as for Local Text-Indexing, but switches only the indexing of media content on.==与本地文本索引类似, 但是仅当'索引媒体内容'打开时有效.
 Do Remote Indexing==进行远程索引
-If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果被选中, crawler会联系其他peer并将之作为远程索引器.
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果被选中, 爬虫会联系其他节点并将之作为远程索引器.
 If you need your crawling results locally, you should switch this off.==如果仅需要本地索引结果, 可以关闭此项.
-Only senior and principal peers can initiate or receive remote crawls.==只有高级peer和主要peer能初始化和接收远端crawl.
+Only senior and principal peers can initiate or receive remote crawls.==只有高级节点和主要节点能初始化和接收远端crawl.
 Please note that this setting only take effect for a prefetch depth greater than 0.==请注意, 此设置仅在预读深度大于0时有效.
 Proxy generally==代理杂项设置
 Path==路径
@@ -2724,7 +2862,7 @@ Crawl with YaCy==用YaCy进行crawl
 Title:==标题:
 Link:==链接:
 Status:==状态:
-URL successfully added to Crawler Queue==已成功添加链接到crawl队列.
+URL successfully added to Crawler Queue==已成功添加网址到爬虫队列.
 Malformed URL==异常链接
 Unable to create new crawling profile for URL:==创建链接crawl信息失败:
 Unable to add URL to crawler queue:==添加链接到crawl队列失败:
@@ -2762,26 +2900,26 @@ Post-Ranking==二次排名
 
 #File: RemoteCrawl_p.html
 #---------------------------
-Remote Crawl Configuration==远端crawl配置
-#>Remote Crawler<==>Remote Crawler<
-The remote crawler is a process that requests urls from other peers.==远端crawler是一个处理来自其他peer链接请求的进程.
-Peers offer remote-crawl urls if the flag 'Do Remote Indexing'==如果选中了'进行远程索引', 则peer在开始crawl时
-is switched on when a crawl is started.==能够进行远端crawl.
-Remote Crawler Configuration==远端crawler配置
->Accept Remote Crawl Requests<==>接受远端crawl请求<
-Perform web indexing upon request of another peer.==收到另一peer请求时进行网页索引.
+Remote Crawl Configuration==远端抓取配置
+>Remote Crawler<==>远程爬虫<
+The remote crawler is a process that requests urls from other peers.==远端爬虫是一个处理来自其他节点链接请求的进程.
+Peers offer remote-crawl urls if the flag 'Do Remote Indexing'==如果选中了'进行远程索引', 则节点在开始抓取时
+is switched on when a crawl is started.==能够进行远端抓取.
+Remote Crawler Configuration==远端爬虫配置
+>Accept Remote Crawl Requests<==>接受远端抓取请求<
+Perform web indexing upon request of another peer.==收到另一节点请求时进行网页索引.
 Load with a maximum of==最多每分钟读取
 pages per minute==个页面
 "Save"=="保存"
-Crawl results will appear in the==crawl会出现在
->Crawl Result Monitor<==>crawl结果监视<
-Peers offering remote crawl URLs==提供远端crawl的peer
-If the remote crawl option is switched on, then this peer will load URLs from the following remote peers:==如果选中了远端crawl选项, 则本机peer会从以下远端peer读取链接:
+Crawl results will appear in the==抓取会出现在
+>Crawl Result Monitor<==>抓取结果监视<
+Peers offering remote crawl URLs==提供远端抓取的节点
+If the remote crawl option is switched on, then this peer will load URLs from the following remote peers:==如果选中了远端抓取选项, 则本机节点会从以下远端节点读取链接:
 #>Name<==>Name<
 #>Remote<br/>Crawl<==>Remote<br/>Crawl<
 #>Release/<br/>SVN<==>Version/<br/>SVN<
->PPM<==>==>页面每分钟(PPM)<
->QPH<==>请求每小时(QPH)<
+>PPM<==>页面/分钟(PPM)<
+>QPH<==>请求/小时(QPH)<
 >Last<br/>Seen<==>上次<br/>出现<
 >UTC</strong><br/>Offset<==>UTC</strong><br/>时区<
 #>Uptime<==>Uptime<
@@ -2809,7 +2947,7 @@ Available server within the given IP range==指定IP范围内的可用服务器
 >denied<==>拒绝<
 >not in index<==>未在索引中<
 >indexed<==>已被索引<
-"Add Selected Servers to Crawler"=="添加选中服务器到crawler"
+"Add Selected Servers to Crawler"=="添加选中服务器到爬虫"
 #------------------------------
 
 #File: Settings_p.html
@@ -2825,13 +2963,13 @@ Performance Settings for Memory==内存性能设置
 Performance Settings of Search Sequence==搜索时间性能设置
 ### --- Those 3 items are removed in latest SVN BEGIN
 Viewer and administration for database tables==查看与管理数据库表格
-Viewer for Peer-News==查看peer新闻
+Viewer for Peer-News==查看节点新闻
 Viewer for Cookies in Proxy==查看代理cookie
 ### --- Those 3 items are removed in latest SVN END
 Server Access Settings==服务器访问设置
 Proxy Access Settings==代理访问设置
 #Content Parser Settings==Inhalt Parser Einstellungen
-Crawler Settings==Crawler设置
+Crawler Settings==爬虫设置
 HTTP Networking==HTTP网络
 Remote Proxy (optional)==远程代理(可选)
 Seed Upload Settings==Seed上传设置
@@ -2840,17 +2978,17 @@ Message Forwarding (optional)==消息发送(可选)
 
 #File: Settings_Crawler.inc
 #---------------------------
-Generic Crawler Settings==普通crawler设置
+Generic Crawler Settings==普通爬虫设置
 Connection timeout in ms==连接超时(ms)
 means unlimited==表示无超时
-HTTP Crawler Settings:==HTTP crawler设置:
+HTTP Crawler Settings:==HTTP 爬虫设置:
 Maximum Filesize==文件最大尺寸
-FTP Crawler Settings==FTP crawler设置
-SMB Crawler Settings==SMB crawler设置
-Local File Crawler Settings==本地文件crawler设置
+FTP Crawler Settings==FTP 爬虫设置
+SMB Crawler Settings==SMB 爬虫设置
+Local File Crawler Settings==本地文件爬虫设置
 Maximum allowed file size in bytes that should be downloaded==允许下载的最大文件尺寸(字节)
 Larger files will be skipped==超出此限制的文件将被忽略
-Please note that if the crawler uses content compression, this limit is used to check the compressed content size==请注意, 如果crawler使用内容压缩, 则此限制对压缩后文件大小有效.
+Please note that if the crawler uses content compression, this limit is used to check the compressed content size==请注意, 如果爬虫使用内容压缩, 则此限制对压缩后文件大小有效.
 Submit==提交
 Changes will take effect immediately==改变立即生效
 #-----------------------------
@@ -2879,8 +3017,8 @@ YaCy can use another proxy to connect to the internet. You can enter the address
 Use remote proxy</label>==使用远程代理</label>
 Enables the usage of the remote proxy by yacy==打开以支持远程代理
 Use remote proxy for yacy &lt;-&gt; yacy communication==为YaCy &lt;-&gt; YaCy 通信使用代理
-Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==选此指定远程代理是否支持YaCy peer间通信.
-<em>Hint:</em> Enabling this option could cause this peer to remain in junior status.==<em>提示:</em> 打开此选项后本地peer会被置为次级peer.
+Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==选此指定远程代理是否支持YaCy节点间通信.
+<em>Hint:</em> Enabling this option could cause this peer to remain in junior status.==<em>提示:</em> 打开此选项后本地节点会被置为次级节点.
 Use remote proxy for HTTPS==为HTTPS使用远程代理
 Specifies if YaCy should forward ssl connections to the remote proxy.==选此指定YaCy是否使用SSL代理.
 Remote proxy host==远程代理主机
@@ -2933,8 +3071,8 @@ Seed Upload Settings==seed上传设置
 With these settings you can configure if you have an account on a public accessible==如果您有一个公共服务器的账户, 可在此设置
 server where you can host a seed-list file.==seed列表文件相关选项.
 General Settings:==通用设置:
-If you enable one of the available uploading methods, you will become a principal peer.==如果peer使用了以下某种上传方式, 则本机peer会成为主要peer.
-Your peer will then upload the seed-bootstrap information periodically,==您的peer会定期上传seed启动信息,
+If you enable one of the available uploading methods, you will become a principal peer.==如果节点使用了以下某种上传方式, 则本机节点会成为主要节点.
+Your peer will then upload the seed-bootstrap information periodically,==您的节点会定期上传seed启动信息,
 but only if there have been changes to the seed-list.==前提是seed列表有变更.
 Upload Method==上传方式
 "Submit"=="提交"
@@ -2957,8 +3095,8 @@ Here you can specify the path within the filesystem where the seed-list file sho
 #---------------------------
 Uploading via FTP:==通过FTP上传:
 This is the account for a FTP server where you can host a seed-list file.==此账户能够访问FTP服务器以存储seed列表文件.
-If you set this, you will become a principal peer.==如果设置了此选项, 本地peer会被置为主要peer.
-Your peer will then upload the seed-bootstrap information periodically,==您的peer会定期上传seed启动信息,
+If you set this, you will become a principal peer.==如果设置了此选项, 本地节点会被置为主要节点.
+Your peer will then upload the seed-bootstrap information periodically,==您的节点会定期上传seed启动信息,
 but only if there had been changes to the seed-list.==前提是seed列表有变更.
 The host where you have a FTP account, like==ftp服务器, 比如
 Path</label>==路径</label>
@@ -2997,14 +3135,14 @@ Here you can restrict access to the server.==通过此限制访问服务器的IP
 By default, the access is not limited,==默认情况下, 不对访问作限制,
 because this function is needed to spawn the p2p index-sharing function.==否则会影响p2p索引共享功能.
 If you block access to your server (setting anything else than '*'), then you will also be blocked==如果作了访问限制(不要设置'*'),
-from using other peers' indexes for search service.==不能使用其他peer的索引.
+from using other peers' indexes for search service.==不能使用其他节点的索引.
 However, blocking access may be correct in enterprise environments where you only want to index your==然而, 在企业环境中, 如果仅需要索引公司内部网页,
 company's own web pages.==则可作相应限制.
 staticIP (optional):==静态IP (可选):
 <strong>The staticIP can help that your peer can be reached by other peers in case that your==<strong>如果您在防火墙或者代理后,
-peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy==静态IP能够确保其他peer能够找到您.</strong> 您可以创建一个穿过防火墙/代理的通道,
+peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy==静态IP能够确保其他节点能够找到您.</strong> 您可以创建一个穿过防火墙/代理的通道,
 (look out for 'tunneling through https proxy with connect command') and create==(查找"通过connect命令创建https代理通道")
-an access point for incoming connections.==以给其他peer提供访问点.
+an access point for incoming connections.==以给其他节点提供访问点.
 This access address can be set here (either as IP number or domain name).==在此设置访问地址(IP地址或者域名).
 If the address of outgoing connections is equal to the address of incoming connections,==如果流出链接的地址和流入链接的相同,
 you don't need to set anything here, please leave it blank.==请留空此栏.
@@ -3040,22 +3178,22 @@ Auto pop-up of the Status page is now <strong>enabled</strong>==自动弹出状�
 You are now permanently <strong>online</strong>.==您现在处于永久<strong>在线状态</strong>.
 After a short while you should see the effect on the====一会儿可以在
 status</a> page.==Status</a> 页面看到变化.
-The Peer Name is:==peer名:
+The Peer Name is:==节点名:
 Your static Ip(or DynDns) is:==静态IP(或DynDns)为:
-Seed Settings changed.#(success)#::You are now a principal peer.==seed设置已改变.#(success)#::本地peer已成为主要peer.
+Seed Settings changed.#(success)#::You are now a principal peer.==seed设置已改变.#(success)#::本地节点已成为主要节点.
 Seed Settings changed, but something is wrong.==seed设置已改变, 但是未完全成功.
 Seed Uploading was deactivated automatically.==seed上传自动关闭. 
 Please return to the settings page and modify the data.==请返回设置页面修改参数.
 The remote-proxy setting has been changed==远程代理设置已改变.
 The new setting is effective immediately, you don't need to re-start.==新设置立即生效.
-The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==提交的peer名已存在, 请更改.</strong> peer名未改变.
-Your Peer Language is:==peer语言:
+The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==提交的节点名已存在, 请更改.</strong> 节点名未改变.
+Your Peer Language is:==节点语言:
 The submitted peer name is not well-formed. Please choose a different name.</strong> The Peer name has not been changed.
 Peer names must not contain characters other than (a-z, A-Z, 0-9, '-', '_') and must not be longer than 80 characters.
 #The new parser settings where changed successfully.==Die neuen Parser Einstellungen wurden erfolgreich gespeichert.
 Parsing of the following mime-types was enabled:
 Seed Upload method was changed successfully.==seed上传方式改变成功.
-You are now a principal peer.==本地peer已成为主要peer.
+You are now a principal peer.==本地节点已成为主要节点.
 Seed Upload Method:==seed上传方式:
 Seed File URL:==seed文件URL:
 Your proxy networking settings have been changed.==代理网络设置已改变.
@@ -3118,12 +3256,12 @@ Welcome to YaCy!==欢迎使用YaCy!
 Your settings are _not_ protected!</strong>==您的设置未受保护!</strong>
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==请打开<a href="ConfigAccounts_p.html">账户设置</a> <strong>页面</strong>
 and set an administration password.==并设置管理密码.
-You have not published your peer seed yet. This happens automatically, just wait.==尚未发布您的peer seed. 将会自动发布, 请稍候.
-The peer must go online to get a peer address.==peer必须上线获得peer地址.
-You cannot be reached from outside.==外部不能访问您的peer.
+You have not published your peer seed yet. This happens automatically, just wait.==尚未发布您的节点种子. 将会自动发布, 请稍候.
+The peer must go online to get a peer address.==节点必须上线获得节点地址.
+You cannot be reached from outside.==外部不能访问您的节点.
 A possible reason is that you are behind a firewall, NAT or Router.==很可能是您在防火墙, NAT或者路由的后面.
 But you can <a href="index.html">search the internet</a> using the other peers'==但是您依然能进行<a href="index.html">搜索</a>
-global index on your own search page.==, 需要通过其他peer的全球索引.
+global index on your own search page.==, 需要通过其他节点的全球索引.
 "bad"=="坏"
 "idea"=="主意"
 "good"=="好"
@@ -3131,19 +3269,23 @@ global index on your own search page.==, 需要通过其他peer的全球索引.
 We encourage you to open your firewall for the port you configured (usually: 8090),==我们推荐您开发防火墙端口(通常是: 8090),
 or to set up a 'virtual server' in your router settings (often called DMZ).==或者在路由设置中(DMZ)建立一个"虚拟服务器".
 Please be fair, contribute your own index to the global index.==请公平地贡献您的索引给全球索引.
-Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==空闲磁盘空间低于 #[minSpace]#. crawl已被关闭,
+Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==空闲磁盘空间低于 #[minSpace]#. 抓取已被关闭,
 it as soon as possible and restart YaCy.==请尽快修复并重启YaCy.
 Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix==空闲内存低于 #[minSpace]#. DHT-in已被关闭,
 Latest public version is==最新版本为
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==您可以下载最新版本YaCy, 点此进行升级并重启:
-#"Update YaCy"=="Update YaCy"
+"Update YaCy"=="更新YaCy"
 Install YaCy==安装YaCy
 You are running a server in senior mode and you support the global internet index,==服务器运行在高级模式, 并支持全球索引,
 which you can also <a href="index.html">search yourself</a>.==您也能进行<a href="index.html">本地搜索</a>.
-You have a principal peer because you publish your seed-list to a public accessible server==您拥有一个主要peer, 因为您向公共服务器公布了您的seed列表,
+You have a principal peer because you publish your seed-list to a public accessible server==您拥有一个主要节点, 因为您向公共服务器公布了您的种子列表,
 where it can be retrieved using the URL==可使用此URL进行接收:
-Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite.html">here</a>==网页索引器当前空闲. 可以点击<a href="CrawlStartSite.html">这里</a>开始网页crawl
-Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==网页索引器当前忙碌. 点击<a href="Crawler_p.html">这里</a>查看状态.
+Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite.html">here</a>==网页索引器当前空闲. 可以点击<a href="CrawlStartSite.html">这里</a>开始抓取网页
+Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here==网页索引器当前忙碌. 点击<a href="Crawler_p.html">这里</a>查看状态
+If you need professional support==如果你需要专业级支持
+please write to==请EMAIL来信
+For community support==如果需要社区支持
+please visit our==请访问我们的
 #-----------------------------
 
 #File: Status_p.inc
@@ -3158,7 +3300,7 @@ Max:==最大:
 Crawler:==爬虫:
 Proxy:==代理:
 >Reset==>重启
-Traffic ==交通
+Traffic ==流量
 Experimental<==实验<
 Remote:==远程:
 Enabled==开启
@@ -3173,7 +3315,7 @@ Transparent ==透明
 Proxy</dt>==代理</dt>
 Host:==主机:
 Threads:==线程:
-Traffic==交通
+Traffic==流量
 If you do this without YaCy running on a desktop-pc==如果您没在运行于桌面PC的YaCy上操作这个，这很可能会破坏启动。
 Transparent==透明
 Load:==负载:
@@ -3190,18 +3332,18 @@ Password is missing==无密码
 password-protected==受密码保护
 Unrestricted access from localhost==本地无限制访问
 Address</dt>==地址</dt>
-peer address not assigned==未分配peer地址
+peer address not assigned==未分配节点地址
 Public Address:==公共地址:
 YaCy Address:==YaCy地址:
-#Peer Host==Peer Host
-#Port Forwarding Host==Port Forwarding Host
+Peer Host==节点主机
+Port Forwarding Host==端口转发主机
 not used==未使用
 broken==已损坏
 connected==已连接
-#Remote Proxy==Remote Proxy
+Remote Proxy==远程代理
 not used==未使用
 Used for YaCy -> YaCy communication:==用于YaCy -> YaCy通信:
-WARNING:==注意:
+WARNING:==警告:
 You do this on your own risk.==此动作危险.
 If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==如果您不是在台式机上或者已安装Java6的机器上运行, 可能会破坏开机程序.
 In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==在此情况下, 您需要手动修改配置文件 DATA/SETTINGS/yacy.conf
@@ -3227,10 +3369,10 @@ Active:==活动:
 Loader Queue==加载器队列
 paused==已暂停
 >Queues<==>队列<
-Local Crawl==本地crawl
-Remote triggered Crawl==引入远端crawl
+Local Crawl==本地抓取
+Remote triggered Crawl==远端触发的抓取
 Pre-Queueing==预排序
-Seed server==seed服务器
+Seed server==种子服务器
 Configure==配置
 Enabled: Updating to server==已打开, 与服务器同步:
 Last upload: #[lastUpload]# ago.==Letzte Aktualisierung vor: #[lastUpload]#
@@ -3240,9 +3382,9 @@ Enabled: Updating to file==已打开: 与文件同步
 #File: Steering.html
 #---------------------------
 Steering</title>==向导</title>
-Checking peer status...==正在检查peer状态...
-Peer is online again, forwarding to status page...==peer再次上线, 正在传输状态...
-Peer is not online yet, will check again in a few seconds...==peer尚未上线, 几秒后重新检测...
+Checking peer status...==正在检查节点状态...
+Peer is online again, forwarding to status page...==节点再次上线, 正在传输状态...
+Peer is not online yet, will check again in a few seconds...==节点尚未上线, 几秒后重新检测...
 No action submitted==未提交动作
 Go back to the <a href="Settings_p.html">Settings</a> page==将返回<a href="Settings_p.html">设置</a>页面
 Your system is not protected by a password==您的系统未受密码保护
@@ -3250,9 +3392,14 @@ Please go to the <a href="ConfigAccounts_p.html">User Administration</a> page an
 You don't have the correct access right to perform this task.==无执行此任务权限.
 Please log in.==请登录.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==您现在可以返回<a href="Settings_p.html">设置</a>页面进行详细设置.
-#See you soon!==See you soon!
+See you soon!==下次再见！
 Just a moment, please!==请稍候.
-Application will terminate after working off all scheduled tasks.==程序在所有任务完成后将停止,
+Application will terminate after working off all scheduled tasks.==程序在所有任务完成后将停止.
+Please send us feed-back!==可以给我们一个反馈嘛!
+We don't track YaCy users, YaCy does not send 'home-pings', we do not even know how many people use YaCy as their private search engine.==我们不跟踪YAY用户，YaCy不发送“回家Ping”，我们甚至不知道有多少人使用Yyas作为他们的私人搜索引擎。
+Therefore we like to ask you: do you like YaCy?==所以我们想问你：你喜欢YaCy吗？
+Will you use it again... if not, why?==你会再次使用它吗？如果不是，为什么？
+Is it possible that we change a bit to suit your needs?==我们有可能改变一下以满足您的需求吗？
 Then YaCy will restart.==然后YaCy会重新启动.
 If you can't reach YaCy's interface after 5 minutes restart failed.==如果5分钟后不能访问此页面说明重启失败.
 Installing release==正在安装
@@ -3270,7 +3417,7 @@ Supporter are switched off for users without authorization==未授权用户不�
 "Give positive vote"=="给予好评"
 "negative vote"=="差评"
 "Give negative vote"=="给予差评"
-provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==由各peer提供. 仅显示所有peer中当前在线链接.
+provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==由各节点提供. 仅显示所有节点中当前在线链接.
 #-----------------------------
 
 #File: Surftips.html
@@ -3286,7 +3433,7 @@ title="negative vote"==title="差评"
 alt="Give negative vote"==alt="给予差评"
 YaCy Supporters<==YaCy参与者<
 >a list of home pages of yacy users<==>显示YaCy用户<
-provided by YaCy peers using public bookmarks, link votes and crawl start points==由使用公共书签, 链接评价和crawl起始点的peer提供
+provided by YaCy peers using public bookmarks, link votes and crawl start points==由使用公共书签, 网址评价和抓取起始点的节点提供
 "Please enter a comment to your link recommendation. (Your Vote is also considered without a comment.)"=="输入推荐链接备注. (可留空.)"
 "authentication required"=="需要认证"
 Hide surftips for users without autorization==隐藏非认证用户的建议功能
@@ -3295,10 +3442,10 @@ Show surftips to everyone==所有人均可使用建议
 
 #File: Table_API_p.html
 #---------------------------
-: Peer Steering==: Peer向导
+: Peer Steering==: 节点向导
 Steering of API Actions<==API动作向导<
 This table shows actions that had been issued on the YaCy interface==此表显示YaCy用于
-to change the configuration or to request crawl actions.==改变配置或者处理crawl请求的动作接口函数.
+to change the configuration or to request crawl actions.==改变配置或者处理抓取请求的动作接口函数.
 These recorded actions can be used to repeat specific actions and to send them==它们用于重复执行某一指定动作,
 to a scheduler for a periodic execution.==或者用于周期执行一系列动作.
 >Recorded Actions<==>已记录动作<
@@ -3400,11 +3547,11 @@ search rows for==搜索
 
 #File: terminal_p.html
 #---------------------------
-YaCy Peer Live Monitoring Terminal==YaCy成员实时监控终端
+YaCy Peer Live Monitoring Terminal==YaCy节点实时监控终端
 YaCy System Terminal Monitor==YaCy系统终端监视器
 #YaCy System Monitor==YaCy System Monitor
 Search Form==搜索页面
-Crawl Start==开始crawl
+Crawl Start==开始抓取
 Status Page==状态页面
 Confirm Shutdown==确认关闭
 >&lt;Shutdown==>&lt;关闭程序
@@ -3500,12 +3647,12 @@ reversed order==倒序排列
 
 #File: ViewProfile.html
 #---------------------------
-Local Peer Profile:==本地peer资料:
-Remote Peer Profile==远端peer资料
+Local Peer Profile:==本地节点资料:
+Remote Peer Profile==远端节点资料
 Wrong access of this page==页面权限错误
-The requested peer is unknown or a potential peer.==所请求peer未知或者是潜在peer.
+The requested peer is unknown or a potential peer.==所请求节点未知或者是潜在节点.
 The profile can't be fetched.==无法获取资料.
-The peer==peer
+The peer==节点
 is not online.==当前不在线.
 This is the Profile of==资料
 #Name==Name
@@ -3525,28 +3672,26 @@ View this profile as==查看方式
 
 #File: Crawler_p.html
 #---------------------------
-Crawler Queues==Crawler队列
-PPM (Pages Per Minute)==PPM (页面每分钟)
-#Traffic (Crawler)==Traffic (Crawler)
+Crawler Queues==爬虫队列
 RWI RAM (Word Cache)==RWI RAM (关键字缓存)
 Error with profile management. Please stop YaCy, delete the file DATA/PLASMADB/crawlProfiles0.db==资料管理出错. 请关闭YaCy, 并删除文件 DATA/PLASMADB/crawlProfiles0.db
 and restart.==后重启.
 Error:==错误:
 Application not yet initialized. Sorry. Please wait some seconds and repeat==抱歉, 程序未初始化, 请稍候并重复
-ERROR: Crawl filter==错误: crawl过滤
-does not match with==与crawl根
-crawl root==不匹配
+ERROR: Crawl filter==错误: 抓取过滤
+does not match with==不匹配
+crawl root==抓取根
 Please try again with different==请使用不同的过滤字再试一次
 filter. ::==. ::
-Crawling of==crawl
+Crawling of==在抓取
 failed. Reason:==失败. 原因:
-Error with URL input==URL输入错误
+Error with URL input==网址输入错误
 Error with file input==文件输入错误
 started.==已开始.
 Please wait some seconds,==请稍等,
 it may take some seconds until the first result appears there.==在出现第一个搜索结果前需要几秒钟时间.
-If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.==如果您crawl了不需要的页面, 您可以 <a href="IndexCreateQueues_p.html?stack=LOCAL">点这</a> 删除它们.
-Crawl Queue:==crawl队列:
+If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.==如果您抓取了不需要的页面, 您可以 <a href="IndexCreateQueues_p.html?stack=LOCAL">点这</a> 删除它们.
+Crawl Queue:==抓取队列:
 Queue</th>==队列</th>
 Profile</th>==资料</th>
 Initiator==发起者
@@ -3558,24 +3703,39 @@ Delete==删除
 Next update in==下次更新将在
 /> seconds.==/> 秒后.
 See a access timing <a href="api/latency_p.xml">here</a>==<a href="api/latency_p.xml">点这</a> 查看访问时间
-Queue</th>==队列</th>
->Size==>大小
-#Max==Max
-#Indexing</td>==Indexieren</td>
-Loader==加载器
-Local Crawler==本地crawler
 unlimited==无限制
-#Remote Crawler==Remote Crawler
-#Speed==速度
+
+#Crawler
+>Crawler<==>爬虫<
+Queues==队列
+Queue==队列
+>Size==>大小
+Local Crawler==本地爬虫
+Limit Crawler==受限爬虫
+Remote Crawler==远端爬虫
+No-Load Crawler==未加载爬虫
+Loader==加载器
+Index Size==索引大小
+Database==数据库
+Entries==条目数
+#Seg-<br>ments==分段<br>
+>Progress<==>进度<
+Indicator==指示器
+Level==级别
+Speed / PPM==速度/PPM
+(Pages Per Minute)==(页/分钟)
+Crawler PPM==爬虫PPM
+Postprocessing Progress==后处理进度
+#idle</span>==空闲</span>
+Traffic (Crawler)==流量 (爬虫)
+>Load<==>负荷<
+
 "minimum"=="最小"
 "custom"=="自定义"
 "maximum"=="最大"
-Database==数据库
-Entries==条目数
 Pages (URLs)==页面(链接)
 RWIs (Words)==RWIs (字)
-Indicator==指示器
-Level==级别
+
 #-----------------------------
 
 #File: WatchWebStructure_p.html
@@ -3740,7 +3900,7 @@ length of search words must be at least 3 characters==搜索关键字至少为3�
 > of==> 共
 > local,==> 本地,
 remote from==远端 来自
-YaCy peers).==YaCy peer).
+YaCy peers).==YaCy 节点).
 #-----------------------------
 
 #File: yacysearchitem.html
@@ -3767,9 +3927,9 @@ Images==图像
 >Images==>图像
 "Your search is done using peers in the YaCy P2P network."=="您的搜索是靠YaCy P2P网络中的小伙伴完成的。"
 "You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used."=="您可以切换到'隐形模式'，这将关闭P2P，给你完全的隐私。期待较少的结果，因为那时只有您自己的搜索索引被使用。"
-"Your search is done using only your own peer, locally."=="你的搜索是靠在本地的YaCy端完成的。"
-"You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network."=="您可以切换到'P2P'，这将让您的搜索使用YaCy网络中的其他小伙伴的YaCy端。"
-"Your search is done using only your own peer=="你的搜索是靠在本地的YaCy端完成的。"
+"Your search is done using only your own peer, locally."=="你的搜索是靠在本地的YaCy节点完成的。"
+"You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network."=="您可以切换到'P2P'，这将让您的搜索使用YaCy网络中的YaCy节点。"
+"Your search is done using only your own peer=="你的搜索是靠在本地的YaCy节点完成的。"
 "You can switch to 'Stealth Mode' which will switch off P2P=="您可以切换到'隐形模式'，这将关闭P2P，给你完全的隐私。期待较少的结果，因为那时只有您自己的搜索索引被使用。"
 
 show search results for "#[query]#" on map==显示 "#[query]#" 的搜索结果
@@ -3792,8 +3952,8 @@ Table Viewer==查看表格
 >Author<==>作者<
 >Description<==>描述<
 >Subject<==>主题<
-#>Publisher<==>Veröffentlicher<
-#>Contributor<==>Beiträger<
+>Publisher<==>发布者<
+>Contributor<==>贡献者<
 >Date<==>日期<
 >Type<==>类型<
 >Identifier<==>标识符<
@@ -3808,6 +3968,13 @@ Table Viewer==查看表格
 ### Subdirectory env/templates ###
 #File: env/templates/header.template
 #---------------------------
+### FIRST STEPS ###
+First Steps==初步
+Use Case &amp; Account==用例 &amp; 账号
+Load Web Pages, Crawler==加载网页，爬虫
+RAM/Disk Usage &amp; Updates==内存/硬盘 使用 &amp;更新
+Load Web Pages==加载网页
+### MONITORING ###
 Target Analysis==目标分析
 Re-Start<==重启<
 Shutdown<==关闭<
@@ -3819,14 +3986,10 @@ Crawler Monitor==爬虫监视
 System Status==系统状态
 Peer-to-Peer Network==P2P网络
 Index Browser==索引浏览器
-Design==设计
 You did not yet start a web crawl!==您还没开启网络爬虫！
-Load Web Pages, Crawler==加载网页，爬虫
-RAM/Disk Usage &amp; Updates==内存/硬盘 使用 &amp;更新
-First Steps==第一步
+
 Advanced Crawler==高级爬虫
 Index Export/Import==索引 导出/导入
-Load Web Pages==加载网页，爬虫
 RAM/Disk Usage ==内存/硬盘 使用 
 &nbsp;Administration==&nbsp;管理
 Toggle navigation==切换导航
@@ -3842,22 +4005,22 @@ Confirm Re-Start==确认重启
 Project Wiki<==项目百科<
 Git Repository==Git存储库
 Bugtracker==错误追踪器
-"You just started a YaCy peer!"==“您刚开始一个YaCy端！”
-"As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options."=="作为初次使用者,您只能看到基本的功能. 设置一个用例或者命名您的Yacy端来看更多的选项. 开始第一个网页抓取, 查看所有监视选项."
+"You just started a YaCy peer!"==“您刚开始一个YaCy节点！”
+"As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options."=="作为初次使用者,您只能看到基本的功能. 请命名您的Yacy节点来看更多的选项. 开始第一个网页抓取, 查看所有监视选项."
 "You did not yet start a web crawl!"=="您还未启动一个网络爬虫！"
-"You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!"=="您不会在这里看到所有的监控选项,因为有些属于抓取结果监控. 开始网络爬行看看！"
-Use Case &amp; Account==用例 &amp; 账号
+"You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!"=="您不会在这里看到所有的监控选项,因为有些属于抓取结果监控. 开始网络抓取看看！"
+
 System Administration==系统管理
 Configuration==配置
 Production==生产
 >Administration<==>管理<
 Search Portal Integration==搜索门户集成
-You just started a YaCy peer!==你刚开启了YaCy端！
-As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options.==作为初次使用者, 您只能看到基本的功能. 设置一个用例或者命名您的Yacy端来看更多的选项. 开始第一个网页抓取, 查看所有监视选项.
-You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!==您不会在这里看到所有的监控选项,因为有些属于抓取结果监控. 开始网络爬行看看！
+You just started a YaCy peer!==你刚开启了YaCy节点！
+As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options.==作为初次使用者, 您只能看到基本的功能. 请命名您的Yacy节点来看更多的选项. 开始第一个网页抓取, 查看所有监视选项.
+You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!==您不会在这里看到所有的监控选项,因为有些属于抓取结果监控. 开始网络抓取看看！
 Use Case ==用例 
-"You do not see all monitoring options here=="您不会在这里看到所有的监控选项, 因为有些属于抓取结果监控. 开始网络爬行看看！"
-You do not see all monitoring options here==您不会在这里看到所有的监控选项, 因为有些属于抓取结果监控. 开始网络爬行看看！
+"You do not see all monitoring options here=="您不会在这里看到所有的监控选项, 因为有些属于抓取结果监控. 开始网络抓取看看！"
+You do not see all monitoring options here==您不会在这里看到所有的监控选项, 因为有些属于抓取结果监控. 开始网络抓取看看！
 RAM/Disk Usage==内存/硬盘 使用
 Use Case==用例
 
@@ -3880,8 +4043,8 @@ Local Peer Wiki==本地Wiki
 Index&nbsp;Production==索引
 Index&nbsp;Control==索引&nbsp;控制
 Index Creation==索引创建
-Crawler Monitor==crawler监视
-Crawl Results==crawl结果
+Crawler Monitor==爬虫监视
+Crawl Results==抓取结果
 Index Administration==索引管理
 Filter &amp; Blacklists==过滤 &amp; 黑名单
 ### SEARCH INTEGRATION ###
@@ -3898,7 +4061,7 @@ Access Tracker==访问跟踪
 >Terminal==>终端
 "New Messages"=="新消息"
 ### PEER CONTROL
-Peer Control==peer控制
+Peer Control==节点控制
 Admin Console==管理控制台
 >API Action Steering<==>API动作向导<
 Confirm Restart==确认重启
@@ -3914,7 +4077,7 @@ YaCy Project Wiki==YaCy项目Wiki
 # Development Change Log==Entwicklung Änderungshistorie
 amp;language=en==amp;language=cn
 Development Change Log==变更日志
-Peer Statistics::YaCy Statistics==peer统计数据::YaCy数据
+Peer Statistics::YaCy Statistics==节点统计数据::YaCy数据
 #-----------------------------
 
 #File: env/templates/simpleheader.template
@@ -3942,7 +4105,7 @@ Administration==管理
 #Administration<==Administration<
 >Web Search<==>网页搜索<
 >Search Network<==>搜索网络<
-#Peer Owner Profile==peer所有者资料
+#Peer Owner Profile==节点所有者资料
 Help / YaCy Wiki==帮助 / YaCy Wiki
 #-----------------------------
 
@@ -3987,7 +4150,7 @@ System Administration==系统管理
 Viewer and administration for database tables==数据库表的查看与管理
 Performance Settings of Busy Queues==繁忙队列的性能设置
 #UNUSED HERE
-#Peer Administration Console==控制台
+#Peer Administration Console==节点控制台
 Status==状态
 >Accounts==>账户
 Network Configuration==网络设置
@@ -4023,22 +4186,22 @@ Receipts</a>==收据</a>
 Queries</a>==查询</a>
 DHT Transfer==DHT 传输
 Proxy Use==代理使用
-Local Crawling</a>==本地爬行</a>
-Global Crawling</a>==全球爬行</a>
+Local Crawling</a>==本地抓取</a>
+Global Crawling</a>==全球抓取</a>
 Surrogate Import==代理导入
-Crawl Results==爬行结果
+Crawl Results==抓取结果
 Crawler<==爬虫<
 Global==全球
 robots.txt Monitor==robots.txt 监视器
 Remote==远程
 No-Load==空载
 Processing Monitor==进程监视
-Crawler Queues==crawler队列
+Crawler Queues==爬虫队列
 Loader<==加载器<
-Rejected URLs==已拒绝URL
+Rejected URLs==已拒绝地址
 >Queues<==>队列<
 Local<==本地<
-Crawler Steering==crawl向导
+Crawler Steering==抓取向导
 Scheduler and Profile Editor<==定时器与资料编辑器<
 #-----------------------------
 
@@ -4076,18 +4239,18 @@ URL Viewer==URL浏览
 Crawler/Spider<==爬虫/蜘蛛<
 Crawl Start (Expert)==抓取开始（专家模式）
 Network Scanner==网络扫描仪
-Crawling of MediaWikis==MediaWikis爬行
-Remote Crawling==远程爬行
+Crawling of MediaWikis==MediaWikis抓取
+Remote Crawling==远程抓取
 Scraping Proxy==刮研究代理
 Advanced Crawler==高级爬虫
->Crawling of phpBB3 Forums<==>phpBB3论坛爬行<
-Crawling of phpBB3 Forums==phpBB3论坛爬行
+>Crawling of phpBB3 Forums<==>phpBB3论坛抓取<
+Crawling of phpBB3 Forums==phpBB3论坛抓取
 
-#Web Crawler Control==Web Crawler Steuerung
-#Start a Web Crawl==Starte einen Web Crawl
+#Web Crawler Control==Web 爬虫 Steuerung
+Start a Web Crawl==开启网页抓取
 #Crawl Start==Crawl starten
 #Crawl Profile Editor==Crawl Profil Editor
-#Crawler Queues==Crawler Puffer
+Crawler Queues==爬虫队列
 #Indexing<==Indexierung<
 #Loader<==Lader<
 #URLs to be processed==zu verarbeitende URLs
@@ -4102,17 +4265,17 @@ Crawling of phpBB3 Forums==phpBB3论坛爬行
 #>Music==>Musik
 #--- New menu items ---
 Index Creation==索引创建
-Full Site Crawl==全站crawl
+Full Site Crawl==全站抓取
 Sitemap Loader==网站地图加载
-Crawl Start<br/>(Expert)==开始crawl<br/>(专家模式)
+Crawl Start<br/>(Expert)==开始抓取<br/>(专家模式)
 Network<br/>Scanner==网络<br/>扫描仪
 #>Intranet<br/>Scanner<==>Intranet<br/>Scanner<
-Crawling of==正在crawl
+Crawling of==正在抓取
 #MediaWikis==MediaWikis
 >phpBB3 Forums<==>phpBB3论坛<
 Content Import<==导入内容<
 Network Harvesting<==网络采集<
-Remote<br/>Crawling==远程<br/>爬行
+Remote<br/>Crawling==远程<br/>抓取
 Scraping<br/>Proxy==刮研究<br/>代理
 Database Reader<==数据库读取<
 for phpBB3 Forums==对于phpBB3论坛
@@ -4131,8 +4294,8 @@ Search Box Anywhere==任意位置搜索框
 #File: env/templates/submenuPublication.template
 #---------------------------
 Publication==发布
-#Wiki==Wiki
-#Blog==Blog
+Wiki==百科
+Blog==博客
 File Hosting==文件共享
 #-----------------------------
 
@@ -4195,7 +4358,7 @@ Did you mean:==是不是:
 
 #File: www/welcome.html
 #---------------------------
-YaCy: Default Page for Individual Peer Content==YaCy: 每个peer的默认页面
+YaCy: Default Page for Individual Peer Content==YaCy: 每个节点的默认页面
 Individual&nbsp;Web&nbsp;Page==每个网页
 Welcome to your own web page<br />in the <strong>YaCy Network==欢迎来到<br /><strong>YaCy网络
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==这是网页服务器演示页面!
@@ -4246,7 +4409,7 @@ Server Log==服务器日志
 
 #File: yacy/ui/yacyui-admin.html
 #---------------------------
-Peer Control==peer控制
+Peer Control==节点控制
 "Login"=="登录"
 #Login==Anmelden
 Themes==主题
@@ -4254,7 +4417,7 @@ Messages==消息
 Re-Start==重启
 Shutdown==关闭
 Web Indexing==网页索引
-Crawl Start==开始crawl
+Crawl Start==开始抓取
 Monitoring==监视
 YaCy Network==YaCy网络
 >Settings==>设置
@@ -4273,16 +4436,16 @@ Accounts==账户
 "YaCy Statistics"=="YaCy数据"
 	Statistics==	数据
 "YaCy Forum"=="YaCy论坛"
-#Forum==Forum
+Forum==论坛
 "Help"=="帮助"
 #"YaCy Wiki"=="YaCy Wiki"
-#Wiki==Wiki
+Wiki==百科
 #-----------------------------
 
 #File: yacy/ui/yacyui-bookmarks.html
 #---------------------------
 'Add'=='添加'
-'Crawl'=='crawl'
+'Crawl'=='抓取'
 'Edit'=='编辑'
 'Delete'=='删除'
 'Rename'=='重命名'
@@ -4315,7 +4478,7 @@ Search term:==搜索条目:
 "help"=="帮助"
 Resource/Network:==资源/网络:
 freeworld==自由世界
-local peer==本地peer
+local peer==本地节点
 >bookmarks==>书签
 sciencenet==ScienceNet
 >Language:==>语言:
