@@ -3975,10 +3975,15 @@ failed. Reason:==失败. 原因:
 Error with URL input==网址输入错误
 Error with file input==文件输入错误
 started.==已开始.
+pause reason: resource observer: not enough memory space==暂停原因: 资源观察器:没有足够内存空间
 Please wait some seconds,==请稍等,
 it may take some seconds until the first result appears there.==在出现第一个搜索结果前需要几秒钟时间.
 If you crawl any un-wanted pages, you can delete them <a href="IndexCreateQueues_p.html?stack=LOCAL">here</a>.==如果您抓取了不需要的页面, 您可以 <a href="IndexCreateQueues_p.html?stack=LOCAL">点这</a> 删除它们.
 Crawl Queue:==抓取队列:
+Running Crawls==运行中的抓取
+>Name<==>名字<
+>Status<==>状态<
+>Crawled Pages<==>抓取到的页面<
 Queue</th>==队列</th>
 Profile</th>==资料</th>
 Initiator==发起者
