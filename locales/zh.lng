@@ -835,6 +835,22 @@ This is needed if you want to fully participate in the YaCy network.==如果您�
 You can also use your peer without opening it, but this is not recomended.==不开放您的节点您也能使用, 但是不推荐.
 #-----------------------------
 
+#File: RankingSolr_p.html
+#---------------------------
+>Solr Ranking Configuration<==>Solr排名配置<
+These are ranking attributes for Solr.==这些是Solr的排名属性.
+This ranking applies for internal and remote (P2P or shard) Solr access.==此排名适用于内部和远程(P2P或分片)Solr访问.
+Select a profile:==选择配置文件:
+>Boost Function<==>提升功能<
+>Boost Query<==>提升查询<
+>Filter Query<==>过滤器查询<
+>Solr Boosts<==>Solr提升<
+"Set Boost Function"=="设置提升功能"
+"Set Boost Query"=="设置提升查询"
+"Set Filter Query"=="设置过滤器查询"
+"Set Field Boosts"=="设置字段提升"
+"Re-Set to default"=="重置为默认"
+#-----------------------------
 #File: RankingRWI_p.html
 #---------------------------
 >RWI Ranking Configuration<==>RWI排名配置<
@@ -1535,7 +1551,7 @@ These web pages had been crawled by your own crawl task.==您的爬虫任务已�
 start a crawl by setting a crawl start point on the 'Index Create' page.==在'索引创建'页面设置抓取起始点以开始抓取.
 
 (6) Results for Global Crawling==(6)全球抓取结果
-These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==这些网页已经被您的节点索引, 但是它们是被远端节点 crawl的.
+These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==这些网页已经被您的节点索引, 但是它们是被远端节点抓取的.
 This is the 'mirror'-case of process (1).==这是进程(1)的'镜像'实例.
 The stack is empty.==栈为空.
 Statistics about #[domains]# domains in this stack:==此栈显示有关 #[domains]# 域的数据:
@@ -2971,11 +2987,12 @@ Search Event Cache<==搜索事件缓存<
 #---------------------------
 Performance Settings of Queues and Processes==队列和进程性能设置
 Scheduled tasks overview and waiting time settings:==定时任务一览与等待时间设置:
-Queue Size==队列.-<br />大小
+>Thread<==>线程<
+Queue Size==队列大小
 >Total==>全部
-#Block Time==
-#Sleep Time==
-#Exec Time==
+Block Time==阻塞时间
+Sleep Time==睡眠时间
+Exec Time==执行时间
 <td>Idle==<td>空闲
 >Busy==>忙碌
 Short Mem<br />Cycles==小内存<br />周期
@@ -3014,7 +3031,7 @@ flushed to disc; this may last some minutes.==它们会被冲刷到硬盘中, �
 #This is is the init size of space for words in cache.==Dies ist die Anfangsgröße von Wörtern im Cache.
 Enter New Cache Size==使用新缓存大小
 Balancer Settings==平衡器设置
-This is the time delta between accessing of the same domain during a crawl.==这是在crawl期间, 访问同一域名的间歇值.
+This is the time delta between accessing of the same domain during a crawl.==这是在抓取期间, 访问同一域名的间歇值.
 The crawl balancer tries to avoid that domains are==crawl平衡器能够避免频繁地访问同一域名,
 accessed too often, but if the balancer fails (i.e. if there are only links left from the same domain), then these minimum==如果平衡器失效(比如相同域名下只剩链接了), 则此有此间歇
 delta times are ensured.==提供访问保障.
@@ -3870,7 +3887,7 @@ New Password is empty.==新密码为空.
 
 #File: ViewFile.html
 #---------------------------
-See the page info about the url.==查看关于此网址的页面信息。
+See the page info about the url.==查看关于此地址的页面信息。
 "Show Metadata"=="显示元数据"
 "Browse Host"=="浏览主机"
 Citation Report==引用报告
@@ -3879,10 +3896,10 @@ MimeType:==Mime类型
 Search in Document:==在文档中搜索:
 "Show Snippet"=="显示摘录"
 (click this for full metadata)==(点击这个，获得完整的元数据)
-View URL Content==查看链接内容
->Get URL Viewer<==>获取链接浏览器<
->URL Metadata<==>链接元数据<
-#URL==URL
+View URL Content==查看地址内容
+>Get URL Viewer<==>获取地址查看器<
+>URL Metadata<==>地址元数据<
+URL==地址
 #Hash==Hash
 Word Count==字数
 Description==描述
@@ -3989,6 +4006,11 @@ Index Size==索引大小
 Database==数据库
 Entries==条目数
 #Seg-<br>ments==分段<br>
+>Documents<==>文档<
+>Webgraph Edges<==>网页图形边缘<
+>Citations<==>引用<
+(reverse link index)==(反向链接索引)
+(P2P Chunks)==(P2P块)
 >Progress<==>进度<
 Indicator==指示器
 Level==级别
@@ -4005,8 +4027,29 @@ Traffic (Crawler)==流量 (爬虫)
 "maximum"=="最大"
 Pages (URLs)==页面(链接)
 RWIs (Words)==RWIs (字)
-
 #-----------------------------
+
+#File: HostBrowser.html
+#---------------------------
+>Index Browser<==>索引浏览器<
+Browse the index of==浏览索引来自
+documents.==文档.
+Enter a host or an URL for a file list or view a list of==输入主机或者地址来查看文件列表,它们来自
+>all hosts<==>全部主机<
+>only hosts with urls pending in the crawler<==>只是在爬虫中地址待处理的主机<
+>only with load errors<==>只有加载错误<
+>Host/URL<==>主机/地址<
+>Browse Host<==>浏览主机<
+>Host List<==>主机列表<
+>Count Colors:<==>颜色表示:<
+Documents without Errors<==没有错误的文档<
+Pending in Crawler<==在爬虫中待处理<
+Crawler Excludes<==爬虫排除<
+Load Errors<==加载错误<
+#Administration Options==管理选项
+#"Delete Load Errors"=="删除加载错误项"
+#-----------------------------
+
 
 #File: WatchWebStructure_p.html
 #---------------------------
@@ -4360,10 +4403,11 @@ Git Repository==Git存储库
 Community (Web Forums)==社区（网络论坛）
 Download YaCy==下载YaCy
 Google Appliance API==Google设备API
->URL Viewer<==>URL查看器<
+>Web Search<==>网页搜索<
 >File Search<==>文件搜索<
 >Compare Search<==>比较搜索<
 >Index Browser<==>索引浏览器<
+>URL Viewer<==>地址查看器<
 Example Calls to the Search API:==调用搜索API的示例:
 Administration &raquo;==管理 &raquo;
 Search Interfaces==搜索界面
@@ -4373,7 +4417,7 @@ Solr Webgraph Core==Solr网页图形核心
 Administration ==管理 
 Administration==管理
 #Administration<==Administration<
->Web Search<==>网页搜索<
+
 >Search Network<==>搜索网络<
 #Peer Owner Profile==节点所有者资料
 Help / YaCy Wiki==帮助 / YaCy Wiki
