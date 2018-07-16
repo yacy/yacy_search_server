@@ -1471,9 +1471,7 @@ public final class Switchboard extends serverSwitch {
             this.crawlStacker.announceClose();
             this.crawlStacker.close();
             
-            synchronized ( this.index ) {
-                this.index.close();
-            }
+            this.index.close();
             this.webStructure.close();
 
             this.log.info("SWITCH NETWORK: START UP OF NEW INDEX DATABASE...");
