@@ -43,6 +43,14 @@ List of possible crawl start URLs==可行的起始抓行网址列表
 >Sitemap<==>网页<
 #-----------------------------
 
+#File: RegexTest.html
+#---------------------------
+>Regex Test<==>正则表达式测试<
+>Test String<==>测试字符串<
+>Regular Expression<==>正则表达式<
+>Result<==>结果<
+#-----------------------------
+
 #File: env/templates/submenuRanking.template
 #---------------------------
 Solr Ranking Config==Solr排名配置
@@ -101,9 +109,9 @@ Thread Dump==线程转储
 >Messages<==>消息<
 >Overview<==>概述<
 >Incoming&nbsp;News<==>传入的新闻<
->Processed&nbsp;News<==>加工的新闻<
+>Processed&nbsp;News<==>处理的新闻<
 >Outgoing&nbsp;News<==>传出的新闻<
->Published&nbsp;News<==>已发布的新闻<
+>Published&nbsp;News<==>发布的新闻<
 >Community Data<==>社区数据<
 >Surftips<==>冲浪提示<
 >Local Peer Wiki<==>本地节点百科 <
@@ -148,28 +156,30 @@ Similar documents from different hosts:==来自不同主机的类似文件:
 
 #File: ConfigSearchPage_p.html
 #---------------------------
-Search Page<==搜索页<
-Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==以下是搜索结果页面的通用模板。 选中您希望显示的功能复选框。
->Images<==>图片<
->Audio<==>音频<
->Video<==>视频<
 >Search Result Page Layout Configuration<==>搜索结果页面布局配置<
-To change colors and styles use the ==要改变颜色和样式使用
+Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==以下是搜索结果页面的通用模板.选中您希望显示的功能复选框.
+To change colors and styles use the ==要改变颜色和样式使用 
 >Appearance<==>外观<
+menu for different skins==不同皮肤的菜单
 Other portal settings can be adjusted in==其他门户网站设置可以在这调整
 >Generic Search Portal<==>通用搜索门户<
-menu for different skins==不同皮肤的菜单
-To change colors and styles use the==要改变颜色和样式使用
+menu.==菜单.
+
 >Page Template<==>页面模板<
->Text<==>文本<
->Applications<==>应用<
->more options<==>更多选项<
 >Tag<==>标签<
 >Topics<==>主题<
 >Cloud<==>云<
+>Text<==>文本<
+>Images<==>图片<
+>Audio<==>音频<
+>Video<==>视频<
+>Applications<==>应用<
+>more options<==>更多选项<
+>Location<==>位置<
+Search Page<==搜索页<
 >Protocol<==>协议<
 >Filetype<==>文件类型<
->Wiki Name Space<==> 百科名称空间<
+>Wiki Name Space<==>百科名称空间<
 >Language<==>语言<
 >Author<==>作者<
 >Vocabulary<==>词汇<
@@ -185,9 +195,11 @@ Description and text snippet of the search result==搜索结果的描述和文�
 >Cache<==>高速缓存<
 >Augmented Browsing<==>增强浏览<
 For this option URL proxy must be enabled==对于这个选项，必须启用URL代理
+>Add Navigators<==>添加导航器<
+>append==>附加
 "Save Settings"=="保存设置"
 "Set Default Values"=="设置默认值"
-menu==菜单
+
 #-----------------------------
 
 #File: AccessGrid_p.html
@@ -598,7 +610,7 @@ here.==在这里.
 #---------------------------
 start autosearch of new bookmarks==开始自动搜索新书签
 This starts a serach of new or modified bookmarks since startup==开始搜索自从启动以来新的或修改的书签
-Every peer online will be ask for results.==每个在线的伙伴都会被索要结果。
+Every peer online will be ask for results.==每个在线的节点都会被索要结果。
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==要查看所有API的列表，请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>。
 To see a list of all APIs==要查看所有API的列表，请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>。
 YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': 书签
@@ -823,6 +835,59 @@ This is needed if you want to fully participate in the YaCy network.==如果您�
 You can also use your peer without opening it, but this is not recomended.==不开放您的节点您也能使用, 但是不推荐.
 #-----------------------------
 
+#File: RankingRWI_p.html
+#---------------------------
+>RWI Ranking Configuration<==>RWI排名配置<
+The document ranking influences the order of the search result entities.==文档排名会影响实际搜索结果的顺序.
+A ranking is computed using a number of attributes from the documents that match with the search word.==排名计算使用到与搜索词匹配的文档中的多个属性.
+The attributes are first normalized over all search results and then the normalized attribute is multiplied with the ranking coefficient computed from this list.==在所有搜索结果基础上,先对属性进行归一化,然后将归一化的属性与相应的排名系数相乘.
+The ranking coefficient grows exponentially with the ranking levels given in the following table.==排名系数随着下表中给出的排名水平呈指数增长.
+If you increase a single value by one, then the strength of the parameter doubles.==如果将单个值增加1,则参数的影响效果加倍.
+
+#Pre-Ranking
+>Pre-Ranking<==>预排名<
+</body>==<script>window.onload = function () {$("label:contains('Appearance In Emphasized Text')").text('出现在强调的文本中');$("label:contains('Appearance In URL')").text('出现在地址中'); $("label:contains('Appearance In Author')").text('出现在作者中'); $("label:contains('Appearance In Reference/Anchor Name')").text('出现在参考/锚点名称中'); $("label:contains('Appearance In Tags')").text('出现在标签中'); $("label:contains('Appearance In Title')").text('出现在标题中'); $("label:contains('Authority of Domain')").text('域名权威'); $("label:contains('Category App, Appearance')").text('类别:出现在应用中'); $("label:contains('Category Audio Appearance')").text('类别:出现在音频中'); $("label:contains('Category Image Appearance')").text('类别:出现在图像中'); $("label:contains('Category Video Appearance')").text('类别:出现在视频中'); $("label:contains('Category Index Page')").text('类别:索引页面'); $("label:contains('Date')").text('日期'); $("label:contains('Domain Length')").text('域名长度'); $("label:contains('Hit Count')").text('命中数'); $("label:contains('Preferred Language')").text('倾向的语言'); $("label:contains('Links To Local Domain')").text('本地域名链接'); $("label:contains('Links To Other Domain')").text('其他域名链接'); $("label:contains('Phrases In Text')").text('文本中短语'); $("label:contains('Term Frequency')").text('术语频率'); $("label:contains('URL Components')").text('地址组件'); $("label:contains('Term Frequency')").text('术语频率'); $("label:contains('URL Length')").text('地址长度'); $("label:contains('Word Distance')").text('词汇距离'); $("label:contains('Words In Text')").text('文本词汇'); $("label:contains('Words In Title')").text('标题词汇');}</script></body>
+
+#>Appearance In Emphasized Text<==>出现在强调的文本中<
+#a higher ranking level prefers documents where the search word is emphasized==较高的排名级别更倾向强调搜索词的文档
+#>Appearance In URL<==>出现在地址中<
+#a higher ranking level prefers documents with urls that match the search word==较高的排名级别更倾向具有与搜索词匹配的地址的文档
+#Appearance In Author==出现在作者中
+#a higher ranking level prefers documents with authors that match the search word==较高的排名级别更倾向与搜索词匹配的作者的文档
+#>Appearance In Reference/Anchor Name<==>出现在参考/锚点名称中<
+#a higher ranking level prefers documents where the search word matches in the description text==较高的排名级别更倾向搜索词在描述文本中匹配的文档
+#>Appearance In Tags<==>出现在标签中<
+#a higher ranking level prefers documents where the search word is part of subject tags==较高的排名级别更喜欢搜索词是主题标签一部分的文档
+#>Appearance In Title<==>出现在标题中<
+#a higher ranking level prefers documents with titles that match the search word==较高的排名级别更喜欢具有与搜索词匹配的标题的文档
+#>Authority of Domain<==>域名权威<
+#a higher ranking level prefers documents from domains with a large number of matching documents==较高的排名级别更喜欢来自具有大量匹配文档的域的文档
+#>Category App, Appearance<==>类别:出现在应用中<
+#a higher ranking level prefers documents with embedded links to applications==更高的排名级别更喜欢带有嵌入式应用程序链接的文档
+#>Category Audio Appearance<==>类别:出现在音频中<
+#a higher ranking level prefers documents with embedded links to audio content==较高的排名级别更喜欢具有嵌入音频内容链接的文档
+#>Category Image Appearance<==>类别:出现在图像中<
+#>Category Video Appearance<==>类别:出现在视频中<
+#>Category Index Page<==>类别:索引页面<
+#a higher ranking level prefers 'index of' (directory listings) pages==较高的排名级别更喜欢(目录列表)页面的索引
+#>Date<==>日期<
+#a higher ranking level prefers younger documents.==更高的排名水平更喜欢最新的文件.
+#The age of a document is measured using the date submitted by the remote server as document date==使用远程服务器提交的日期作为文档日期来测量文档的年龄
+#>Domain Length<==>域名长度<
+#a higher ranking level prefers documents with a short domain name==较高的排名级别更喜欢具有短域名的文档
+#>Hit Count<==>命中数<
+#a higher ranking level prefers documents with a large number of matchings for the search word(s)==较高的排名级别更喜欢具有大量匹配搜索词的文档
+
+There are two ranking stages:==有两个排名阶段:
+first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.==首先对搜索结果进行一次排名, 然后再对首次排名结果进行二次排名.
+The two stages are separated because they need statistical information from the result of the pre-ranking.==两个结果是分开的, 因为它们都需要上次排名的统计结果.
+#Post-Ranking
+>Post-Ranking<==二次排名
+
+"Set as Default Ranking"=="保存为默认排名"
+"Re-Set to Built-In Ranking"=="重置排名设置"
+#-----------------------------
+
 #File: ConfigHeuristics_p.html
 #---------------------------
 search-result: shallow crawl on all displayed search results==搜索结果：对所有显示的搜索结果进行浅度爬取
@@ -841,7 +906,7 @@ To find out more about OpenSearch see==要了解关于OpenSearch的更多信息�
 When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
 A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">启发式</a>是一种“基于经验的技术，有助于解决问题，学习和发现”
 This means: right after the search request every page is loaded and every page that is linked on this page.==这意味着：在搜索请求之后，就开始加载每个页面上的链接。
-If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中“添加为全局抓取作业”，则要爬网的页面将被添加到全局抓取队列（远程YaCy伙伴可以抓取要抓取的页面）。
+If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中“添加为全局抓取作业”，则要爬网的页面将被添加到全局抓取队列（远程YaCy节点可以抓取要抓取的页面）。
 Default is to add the links to the local crawl queue (your peer crawls the linked pages).==默认是将链接添加到本地爬网队列（您的YaCy爬取链接的页面）。
 add as global crawl job==添加为全局抓取作业
 opensearch load external search result list from active systems below==opensearch从下面的活动系统加载外部搜索结果列表
@@ -1041,7 +1106,7 @@ page==页面
 
 deny remote search==拒绝远程搜索
 No changes were made!==未作出任何改变!
-Accepted Changes==应用设置
+Accepted Changes==接受改变
 Inapplicable Setting Combination==设置未被应用
 
 
@@ -1098,8 +1163,8 @@ Property Name==属性名
 Integration of a Search Portal==搜索门户设置
 If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==如果您想将YaCy作为您的网站搜索门户, 您可能需要在这改变搜索页面的图标和信息.
 The search page may be customized.==搜索页面可以自由定制.
-You can change the 'corporate identity'-images, the greeting line==您可以改变 'Corporate Identity' 图像, 问候语
-and a link to a home page that is reached when the 'corporate identity'-images are clicked.==和一个指向首页的 'Corporate Identity' 图像链接.
+You can change the 'corporate identity'-images, the greeting line==您可以改变'企业标志'图像,问候语
+and a link to a home page that is reached when the 'corporate identity'-images are clicked.==和一个指向首页的'企业标志'图像链接.
 To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==若要改变颜色和风格,请到<a href="ConfigAppearance_p.html">外观选项</a>选择您喜欢的皮肤和语言.
 Greeting Line<==问候语<
 URL of Home Page<==主页链接<
@@ -1116,13 +1181,41 @@ Show Advanced Search Options on Search Page==在搜索页显示高级搜索选�
 Show Advanced Search Options on index.html&nbsp;==在index.html显示高级搜索选项?
 do not show Advanced Search==不显示高级搜索
 Media Search==媒体搜索
+>Extended==>拓展
+>Strict==>严格
+Control whether media search results are as default strictly limited to indexed documents matching exactly the desired content domain==控制媒体搜索结果是否默认严格限制为与所需内容域完全匹配的索引文档
+(images, videos or applications specific)==(图像,视频或具体应用)
+or extended to pages including such medias (provide generally more results, but eventually less relevant).==或扩展到包括此类媒体的网页(通常提供更多结果,但相关性更弱)
 Remote results resorting==远程搜索结果排序
+>On demand, server-side==>按需,服务器端
+Automated, with JavaScript in the browser==自动化,在浏览器中使用JavaScript
+>for authenticated users only<==>仅限经过身份验证的用户<
 Remote search encryption==远程搜索加密
->Snippet Fetch Strategy==>片段提取策略
+Prefer https for search queries on remote peers.==首选https用于远程节点上的搜索查询.
+When SSL/TLS is enabled on remote peers, https should be used to encrypt data exchanged with them when performing peer-to-peer searches.==在远程节点上启用SSL/TLS时,应使用https来加密在执行P2P搜索时与它们交换的数据.
+Please note that contrary to strict TLS, certificates are not validated against trusted certificate authorities (CA), thus allowing YaCy peers to use self-signed certificates.==请注意,与严格TLS相反,证书不会针对受信任的证书颁发机构(CA)进行验证,因此允许YaCy节点使用自签名证书.
+>Snippet Fetch Strategy==>摘要提取策略
+Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==使用此选项加快搜索结果!(使用CACHEONLY或FALSE关闭验证)
+NOCACHE: no use of web cache, load all snippets online==NOCACHE:不使用网络缓存,在线加载所有网页摘要
+IFFRESH: use the cache if the cache exists and is fresh otherwise load online==IFFRESH:如果缓存存在则使用最新的缓存,否则在线加载
+IFEXIST: use the cache if the cache exist or load online==IFEXIST:如果缓存存在则使用缓存,或在线加载
+If verification fails, delete index reference==如果验证失败,删除索引参考
+CACHEONLY: never go online, use all content from cache.==CACHEONLY:永远不上网,内容只来自缓存.
+If no cache entry exist, consider content nevertheless as available and show result without snippet==如果不存在缓存条目,将内容视为可用,并显示没有摘要的结果
+FALSE: no link verification and not snippet generation: all search results are valid without verification==FALSE:没有链接验证且没有摘要生成:所有搜索结果在没有验证情况下有效
 Link Verification<==链接验证<
 Greedy Learning Mode==贪心学习模式
+load documents linked in search results,==加载搜索结果中链接的文档,
+will be deactivated automatically when index size==将自动停用当索引大小
+ (see==(见
+>Heuristics: search-result<==>启发式:搜索结果<
+ to use this permanent)==使得它永久性)
 Index remote results==索引远程结果
+add remote search results to the local index==将远程搜索结果添加到本地索引
+( default=on, it is recommended to enable this option ! )==(默认=开启,建议启用此选项!)
 Limit size of indexed remote results==现在远程索引结果容量
+maximum allowed size in kbytes for each remote search result to be added to the local index==每个远程搜索结果的最大允许大小(以KB为单位)添加到本地索引
+for example, a 1000kbytes limit might be useful if you are running YaCy with a low memory setup==例如,如果运行具有低内存设置的YaCy,则1000KB限制可能很有用
 Default Pop-Up Page<==默认弹出页面<
 Default maximum number of results per page==默认每页最大结果数
 Default index.html Page (by forwarder)==默认index.html(前者指定)
@@ -1132,13 +1225,18 @@ Target for Click on Search Results==点击搜索结果时
 "_parent" (the parent frame of a frameset)=="_parent" (父级窗口)
 "_top" (top of all frames)=="_top" (置顶)
 Special Target as Exception for an URL-Pattern==作为URL模式的异常的特殊目标
+Pattern:<=模式:<
 Exclude Hosts==排除的主机
-#List of hosts that shall be excluded from search results by default but can be included using the site:<host> operator==默认情况下将被排除在搜索结果之外的主机列表,但可以使用site:<host>操作符包括进来
+List of hosts that shall be excluded from search results by default==默认情况下将被排除在搜索结果之外的主机列表
+but can be included using the site:<host> operator=但可以使用site:<host>操作符包括进来
 'About' Column<=='关于'栏<
 shown in a column alongside==显示在
 with the search result page==搜索结果页侧栏
 (Headline)==(标题)
 (Content)==(内容)
+>You have to==>你必须
+>set a remote user/password<==>设置一个远程用户/密码<
+to change this options.<==来改变设置.<
 Show Information Links for each Search Result Entry==显示搜索结果的链接信息
 >Date&==>日期&
 >Size&==>大小&
@@ -1201,7 +1299,7 @@ Entire Peer==整个节点
 Status page==状态页面
 Network pages==网络页面
 Surftips==建议
-News pages==新闻
+News pages==新页面
 Blog==博客
 Wiki==维基
 Public bookmarks==公共书签
@@ -1467,7 +1565,7 @@ Showing latest #[count]# lines from a stack of #[all]# entries.==显示栈中 #[
 <html lang="en">==<html lang="zh">
 Expert Crawl Start==抓取高级设置
 Start Crawling Job:==开始抓取任务:
-You can define URLs as start points for Web page crawling and start crawling here==您可以将指定URL作为抓取网页的起始点
+You can define URLs as start points for Web page crawling and start crawling here==您可以将指定地址作为抓取网页的起始点
 "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links== "抓取中"意即YaCy会下载指定的网站, 并解析出网站中链接的所有内容
 This is repeated as long as specified under "Crawling Depth"==它将一直重复至到满足指定的"抓取深度"
 A crawl can also be started using wget and the==抓取也可以将wget和
@@ -1476,35 +1574,165 @@ for this web page==用于此网页
 #Crawl Job
 >Crawl Job<==>抓取工作<
 A Crawl Job consist of one or more start point, crawl limitations and document freshness rules==抓取作业由一个或多个起始点、抓取限制和文档新鲜度规则组成
+#Start Point
 >Start Point==>起始点
+Define the start-url(s) here.==在这儿确定起始地址.
+You can submit more than one URL, each line one URL please.==你可以提交多个地址,请一行一个地址.
+Each of these URLs are the root for a crawl start, existing start URLs are always re-loaded.==每个地址中都是抓取开始的根，已有的起始地址会被重新加载.
+Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.==对已经访问过的地址,如果它们不允许被重新抓取,则被标记为'重复'.
+One Start URL or a list of URLs:==一个起始地址或地址列表:
+(must start with==(头部必须有
+>From Link-List of URL<==>来自地址的链接列表<
+From Sitemap==来自站点地图
+From File (enter a path==来自文件(输入
+within your local file system)<==你本地文件系统的地址)<
+
+#Crawler Filter
 >Crawler Filter==>爬虫过滤器
+These are limitations on the crawl stacker. The filters will be applied before a web page is loaded==这些是抓取堆栈器的限制.将在加载网页之前应用过滤器
+This defines how often the Crawler will follow links (of links..) embedded in websites.==此选项为爬虫跟踪网站嵌入链接的深度.
+0 means that only the page you enter under "Starting Point" will be added==设置为0代表仅将"起始点"
+to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will==添加到索引.建议设置为2-4.由于设置为8会索引将近256亿个页面,所以不建议设置大于8的值,
+index approximately 25.600.000.000 pages, maybe this is the whole WWW.==这可能是整个互联网的内容.
+>Crawling Depth<==>抓取深度<
+also all linked non-parsable documents==还包括所有链接的不可解析文档
+>Unlimited crawl depth for URLs matching with<==>不限抓取深度,对这些匹配的网址<
+>Maximum Pages per Domain<==>每个域名最大页面数<
+Use</label>:==使用</label>:
+Page-Count==页面数
+You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.==使用此选项,您可以限制将从单个域名中抓取和索引的页面数.
+You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==您可以将此设置与'Auto-Dom-Filter'结合起来, 以限制给定深度中所有域名.
+the given depth. Domains outside the given depth are then sorted-out anyway.==超出深度范围的域名会被自动忽略.
+>misc. Constraints<==>其余约束<
+A questionmark is usually a hint for a dynamic page.==动态页面常用问号标记.
+URLs pointing to dynamic content should usually not be crawled.==通常不会抓取指向动态页面的地址.
+However, there are sometimes web pages with static content that==然而,也有些含有静态内容的页面用问号标记.
+is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==如果您不确定,不要选中此项以防抓取时陷入死循环.
+Accept URLs with query-part ('?')==接受具有查询格式('?')的地址
+>Load Filter on URLs<==>对地址加载过滤器<
+> must-match<==>必须匹配<
+The filter is a <==这个过滤器是一个<
+>regular expression<==>正则表达式<
+Example: to allow only urls that contain the word 'science', set the must-match filter to '.*science.*'.==列如:只允许包含'science'的地址,就在'必须匹配过滤器'中输入'.*science.*'.
+You can also use an automatic domain-restriction to fully crawl a single domain.==您也可以使用主动域名限制来完全抓取单个域名.
+Attention: you can test the functionality of your regular expressions using the==注意:你可测试你的正则表达式功能使用
+>Regular Expression Tester<==>正则表达式测试器<
+within YaCy.==在YaCy中.
+Restrict to start domain==限制起始域
+Restrict to sub-path==限制子路经
+Use filter==使用过滤器
+(must not be empty)==(不能为空)
+> must-not-match<==>必须排除<
+>Load Filter on IPs<==>对IP加载过滤器<
+>Must-Match List for Country Codes<==>国家代码必须匹配列表<
+Crawls can be restricted to specific countries.==可以限制只在某个具体国家抓取.
+This uses the country code that can be computed from==这会使用国家代码, 它来自
+the IP of the server that hosts the page.==该页面所在主机的IP.
+The filter is not a regular expressions but a list of country codes,==这个过滤器不是正则表达式,而是
+separated by comma.==由逗号隔开的国家代码列表.
+>no country code restriction<==>没有国家代码限制<
+
+#Document Filter
 >Document Filter==>文档过滤器
+These are limitations on index feeder.==这些是索引进料器的限制.
+The filters will be applied after a web page was loaded.==加载网页后将应用过滤器.
+that <b>must not match</b> with the URLs to allow that the content of the url is indexed.==它必须排除这些地址,从而允许地址中的内容被索引.
+>Filter on URLs<==>地址过滤器<
+>Filter on Content of Document<==>文档内容过滤器<
+>(all visible text, including camel-case-tokenized url and title)<==>(所有可见文本,包括camel-case-tokenized的网址和标题)<
+>Filter on Document Media Type (aka MIME type)<==>文档媒体类型过滤器(又称MIME类型)<
+>Solr query filter on any active <==>Solr查询过滤器对任何有效的<
+>indexed<==>索引的<
+> field(s)<==>域<
+
+#Content Filter
 >Content Filter==>内容过滤器
+These are limitations on parts of a document.==这些是文档部分的限制.
+The filter will be applied after a web page was loaded.==加载网页后将应用过滤器.
+>Filter div or nav class names<==>div或nav类名过滤器<
+>set of CSS class names<==>CSS类名集合<
+#comma-separated list of <div> or <nav> element class names==以逗号分隔的<div>或<nav>元素类名列表
+which should be filtered out==应该被过滤掉
+
+#Clean-Up before Crawl Start
 >Clean-Up before Crawl Start==>抓取前清理
+>Clean up search events cache<==>清除搜索事件缓存<
+Check this option to be sure to get fresh search results including newly crawled documents.==选中此选项以确保获得新包括新抓取文档的搜索结果.
+Beware that it will also interrupt any refreshing/resorting of search results currently requested from browser-side.==请注意,它也会中断当前从浏览器端请求的搜索结果的刷新/排序.
+>No Deletion<==>不删除<
+Do not delete any document before the crawl is started.==在抓取前不删除任何文档.
+>Delete sub-path<==>删除子路径<
+For each host in the start url list, delete all documents (in the given subpath) from that host.==对于启动URL列表中的每个主机,从这些主机中删除所有文档(在给定的子路径中).
+>Delete only old<==>删除旧文件<
+Treat documents that are loaded==认为加载于
+ago as stale and delete them before the crawl is started==前的文档是旧文档,在抓取前删除它们.
+
+#Double-Check Rules
 >Double-Check Rules==>双重检查规则
+>No&nbsp;Doubles<==>无双重检查<
+A web crawl performs a double-check on all links found in the internet against the internal database.==网页抓取参照自身数据库,对所有找到的链接进行重复性检查.
+If the same url is found again,== 如果链接重复,
+then the url is treated as double when you check the 'no doubles' option.==并且'无重复'选项打开, 则被以重复链接对待.
+A url may be loaded again when it has reached a specific age,==如果地址存在时间超过一定时间,
+to use that check the 're-load' option.==并且'重加载'选项打开,则此地址会被重新读取.
+Never load any page that is already known.==切勿加载任何已知的页面.
+Only the start-url may be loaded again.==只有起始地址可能会被重新加载.
+>Re-load<==>重加载<
+Treat documents that are loaded==认为加载于
+ago as stale and load them again.==前的文档是旧文档并重新加载它们.
+If they are younger, they are ignored.==如果它们是新文档,不需要重新加载.
+
+#Document Cache
 >Document Cache==>文档缓存
+Store to Web Cache==存储到网页缓存
+This option is used by default for proxy prefetch, but is not needed for explicit crawling.==这个选项默认打开, 并用于预抓取, 但对于精确抓取此选项无效.
+Policy for usage of Web Cache==网页缓存使用策略
+The caching policy states when to use the cache during crawling:==缓存策略即表示抓取时何时使用缓存:
+never use the cache, all content from fresh internet source;==从不使用缓存内容, 全部从因特网资源即时抓取;
+use the cache if the cache exists and is fresh using the proxy-fresh rules;==如果缓存中存在并且是最新则使用代理刷新规则;
+use the cache if the cache exist. Do no check freshness. Otherwise use online source;==如果缓存存在则使用缓存. 不检查是否最新. 否则使用最新源;
+never go online, use all content from cache. If no cache exist, treat content as unavailable==从不检查线上内容, 全部使用缓存内容. 如果缓存存在, 将其视为无效
+no&nbsp;cache==无缓存
+if&nbsp;fresh==如果有,更新
+if&nbsp;exist==如果有,退出
+cache&nbsp;only==仅缓存
+
+#Snapshot Creation
 >Snapshot Creation==>创建快照
+>Max Depth for Snapshots<==>快照最大深度<
+>Multiple Snapshot Versions<==>多个快照版本<
+replace old snapshots with new one==用新快照代替老快照
+add new versions for each crawl==每次抓取添加新版本
+>must-not-match filter for snapshot generation<==>快照产生排除过滤器<
+
+#Index Attributes
 >Index Attributes==>索引属性
+>Indexing<==>创建索引<
+index text==索引文本
+index media==索引媒体
+Do Remote Indexing==远程索引
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果选中, 爬虫会联系其他节点, 并将其作为此次抓取的远程索引器.
+If you need your crawling results locally, you should switch this off.==如果您仅想抓取本地内容, 请关闭此设置.
+Only senior and principal peers can initiate or receive remote crawls.==仅高级节点和主节点能初始化或者接收远程抓取.
+A YaCyNews message will be created to inform all peers about a global crawl==YaCy新闻消息中会将这个全球抓取通知其他节点,
+so they can omit starting a crawl with the same start point.==然后他们才能以相同起始点进行抓取.
+Describe your intention to start this global crawl (optional)==在这填入您要进行全球抓取的目的(可选)
+This message will appear in the 'Other Peer Crawl Start' table of other peers.==此消息会显示在其他节点的'其他节点抓取起始'列表中.
+>Add Crawl result to collection(s)<==>添加抓取结果到收集器<
+>Time Zone Offset<==>时区偏移<
+
+Start New Crawl Job==开始新抓取工作
 
 Attribute<==属性<
 Value<==值<
 Description<==描述<
-
 >From URL==>来自URL
-From Sitemap==来自站点地图
-From File==来自文件
-Existing start URLs are always re-crawled.==已存在的起始链接将会被重新crawl.
-Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.==对于已经访问过的链接, 如果它们不允许被重新crawl，则被标记为'重复'.
+Existing start URLs are always re-crawled.==已存在的起始链接将会被重新抓取.
 Create Bookmark==创建书签
 (works with "Starting Point: From URL" only)==(仅从"起始链接"开始)
 Title<==标题<
 Folder<==目录<
 This option lets you create a bookmark from your crawl start URL.==此选项会将起始链接设为书签.
-Crawling Depth</label>==抓取深度</label>
-This defines how often the Crawler will follow links (of links..) embedded in websites.==此选项为爬虫跟踪网站嵌入链接的深度.
-0 means that only the page you enter under "Starting Point" will be added==设置为 0 代表仅将"起始点"
-to the index. 2-4 is good for normal indexing. Values over 8 are not useful, since a depth-8 crawl will==添加到索引. 建议设置为2-4. 由于设置为8会索引将近25,000,000,000个页面, 所以不建议设置大于8的值,
-index approximately 25.600.000.000 pages, maybe this is the whole WWW.==这可能是整个互联网的内容.
 Scheduled re-crawl<==已安排的重新抓取<
 >no&nbsp;doubles<==>无&nbsp;重复<
 run this crawl once and never load any page that is already known, only the start-url may be loaded again.==仅运行一次crawl, 并且不载入重复网页, 可能会重载起始链接.
@@ -1516,78 +1744,22 @@ run this crawl once, but treat urls that are known since==运行此抓取, 但�
 >hours<==>时<
 not as double and load them again. No scheduled re-crawl.==不重复并重新载入. 无安排的抓取任务.
 >scheduled<==>定期<
-after starting this crawl, repeat the crawl every==运行此crawl后, 每隔
+after starting this crawl, repeat the crawl every==运行此抓取后, 每隔
 > automatically.==> 运行.
-A web crawl performs a double-check on all links found in the internet against the internal database. If the same url is found again,==网页crawl参照自身数据库, 对所有找到的链接进行重复性检查. 如果链接重复,
-then the url is treated as double when you check the 'no doubles' option. A url may be loaded again when it has reached a specific age,==并且'无重复'选项打开, 则被以重复链接对待. 如果链接存在时间超过一定时间,
-to use that check the 're-load' option. When you want that this web crawl is repeated automatically, then check the 'scheduled' option.==并且'重载'选项打开, 则此链接会被重新读取. 当您想这些crawl自动运行时, 请选中'定期'选项.
-In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.==此种情况下, crawl会每隔一定时间自动运行并且不会重复寻找前一次crawl中的链接.
+In this case the crawl is repeated after the given time and no url from the previous crawl is omitted as double.==此种情况下, 抓取会每隔一定时间自动运行并且不会重复寻找前一次crawl中的链接.
 Must-Match Filter==必须与过滤器匹配
-Use filter==使用过滤器
-Restrict to start domain==限制为起始域
-Restrict to sub-path==限制为子路经
-#The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Dieser Filter ist ein emacs-ähnlicher regulärer Ausdruck, der mit den zu crawlenden URLs übereinstimmen muss;
-The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>==过滤是一组<b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">正则表达式</a></b>
 that must match with the URLs which are used to be crawled; default is 'catch all'.==, 它们表示了要抓取的链接规则; 默认是'抓取所有'.
-Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'.==比如: 如果仅抓取包含'科学'的链接, 可将过滤器设置为 '.*.*'.
-You can also use an automatic domain-restriction to fully crawl a single domain.==您也可以使用域限制来抓取整个域.
-Must-Not-Match Filter==必须与过滤器不匹配
 This filter must not match to allow that the page is accepted for crawling.==此过滤器表示了所有不被抓取的网页规则.
 The empty string is a never-match filter which should do well for most cases.==对于大多数情况可以留空.
 If you don't know what this means, please leave this field empty.==如果您不知道这些设置的意义, 请将此留空.
-#Re-crawl known URLs:==Re-crawl bekannter URLs:
-Use</label>:==使用</label>:
-#It depends on the age of the last crawl if this is done or not: if the last crawl is older than the given==Es hängt vom Alter des letzten Crawls ab, ob dies getan oder nicht getan wird: wenn der letzte Crawl älter als das angegebene
-#Auto-Dom-Filter:==Auto-Dom-Filter:
-#This option will automatically create a domain-filter which limits the crawl on domains the crawler==Diese Option erzeugt automatisch einen Domain-Filter der den Crawl auf die Domains beschränkt ,
-#will find on the given depth. You can use this option i.e. to crawl a page with bookmarks while==die auf der angegebenen Tiefe gefunden werden. Diese Option kann man beispielsweise benutzen, um eine Seite mit Bookmarks zu crawlen
-#restricting the crawl on only those domains that appear on the bookmark-page. The adequate depth==und dann den folgenden Crawl automatisch auf die Domains zu beschränken, die in der Bookmarkliste vorkamen. Die einzustellende Tiefe für
-#for this example would be 1.==dieses Beispiel wäre 1.
-#The default value 0 gives no restrictions.==Der Vorgabewert 0 bedeutet, dass nichts eingeschränkt wird.
-Maximum Pages per Domain:==每个域允许的最多页面:
-Page-Count==页面计数
-You can limit the maximum number of pages that are fetched and indexed from a single domain with this option.==您可以将从单个域中抓取和索引的页面数目限制为此值.
-You can combine this limitation with the 'Auto-Dom-Filter', so that the limit is applied to all the domains within==您可以将此设置与'Auto-Dom-Filter'结合起来, 以限制给定深度中所有域.
-the given depth. Domains outside the given depth are then sorted-out anyway.==超出深度范围的域会被自动忽略.
-Accept URLs with==接受链接
 dynamic URLs==动态URL
-A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic content should usually not be crawled. However, there are sometimes web pages with static content that==动态页面通常用问号标记. 通常不会抓取指向动态页面的链接. 然而, 也有些含有静态内容的页面用问号标记.
-is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==如果您不确定, 不要选中此项, 以防抓取时陷入死循环.
-Store to Web Cache==存储到网页缓存
-This option is used by default for proxy prefetch, but is not needed for explicit crawling.==这个选项默认打开, 并用于预抓取, 但对于精确抓取此选项无效.
-
-Policy for usage of Web Cache==网页缓存使用策略
-The caching policy states when to use the cache during crawling:==缓存策略即表示抓取时何时使用缓存:
-#no&nbsp;cache==no&nbsp;cache
-no&nbsp;cache==无&nbsp;缓存
-#if&nbsp;fresh==if&nbsp;fresh
-if&nbsp;fresh==如果&nbsp;有更新&nbsp;缓存&nbsp;命中
-#if&nbsp;exist==if&nbsp;exist
-if&nbsp;exist==如果缓存命中
-#cache&nbsp;only==cache&nbsp;only
-cache&nbsp;only==仅缓存
-never use the cache, all content from fresh internet source;==从不使用缓存内容, 全部从因特网资源即时抓取;
-use the cache if the cache exists and is fresh using the proxy-fresh rules;==如果缓存中存在并且是最新则使用代理刷新规则;
-use the cache if the cache exist. Do no check freshness. Otherwise use online source;==如果缓存存在则使用缓存. 不检查是否最新. 否则使用最新源;
-never go online, use all content from cache. If no cache exist, treat content as unavailable==从不检查线上内容, 全部使用缓存内容. 如果缓存存在, 将其视为无效
-
 Do Local Indexing:==本地索引:
-index text==索引文本
-index media==索引媒体
 This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==此选项开启时, 爬虫会下载网页索引. 默认打开, 除非您仅要填充
 Document Cache without indexing.==文件缓存而不进行索引.
-Do Remote Indexing==远程索引
-Describe your intention to start this global crawl (optional)==在这填入您要进行全球抓取的目的(可选)
-This message will appear in the 'Other Peer Crawl Start' table of other peers.==此消息会显示在其他节点的'其他节点抓取起始'列表中.
-If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果选中, 爬虫会联系其他节点, 并将其作为此次crawl的远程索引器.
-If you need your crawling results locally, you should switch this off.==如果您仅想抓取本地内容, 请关闭此设置.
-Only senior and principal peers can initiate or receive remote crawls.==仅高级节点和主节点能初始化或者接收远程抓取.
-A YaCyNews message will be created to inform all peers about a global crawl==YaCy新闻消息中会通知其他节点这个全球抓取,
-so they can omit starting a crawl with the same start point.==然后他们才能以相同起始点进行抓取.
 Exclude <em>static</em> Stop-Words==排除<em>静态</em>非索引字
 This can be useful to circumvent that extremely common words are added to the database, i.e. "the", "he", "she", "it"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==此项用于规避极常用字, 比如 "个", "他", "她", "它"等. 当要在索引时排除所有在<tt>yacy.stopwords</tt>文件中的字词时,
 check this box.==请选中此项.
-Start New Crawl==开始新抓取
+
 #-----------------------------
 
 #File: CrawlStartIntranet_p.html
@@ -2035,6 +2207,48 @@ Import successful!==导入成功!
 Import failed:==导入失败:
 #-----------------------------
 
+
+#File: Vocabulary_p.html
+#---------------------------
+>Vocabulary Administration<==>词汇管理<
+Vocabularies can be used to produce a search navigation.==词汇表可用于生成搜索导航.
+A vocabulary must be created before content is indexed.==必须在索引内容之前创建词汇.
+The vocabulary is used to annotate the indexed content with a reference to the object that is denoted by the term of the vocabulary.==词汇用于通过引用由词汇的术语表示的对象来注释索引的内容.
+The object can be denoted by a url stub that, combined with the term, becomes the url for the object.==该对象可以用地址存根表示，该存根与该术语一起成为该对象的地址.
+
+>Vocabulary Selection<==>词汇选择<
+>Vocabulary Name<==>词汇名<
+"View"=="查看"
+
+>Vocabulary Production<==>词汇生成<
+ Empty Vocabulary== 空词汇
+>Auto-Discover<==>自动发现<
+> from file name==> 来自文件名
+> from page title (splitted)==> 来自页面标题(拆分)
+> from page title==> 来自页面标题
+> from page author==> 来自页面作者
+>Objectspace<==>对象空间<
+It is possible to produce a vocabulary out of the existing search index.==可以从现有搜索索引中生成词汇表.
+This is done using a given 'objectspace' which you can enter as a URL Stub.==这是使用给定的“对象空间”完成的,您可以将其作为地址存根输入.
+This stub is used to find all matching URLs.==此存根用于查找所有匹配的地址.
+If the remaining path from the matching URLs then denotes a single file, the file name is used as vocabulary term.==如果来自匹配地址的剩余路径表示单个文件,则文件名用作词汇表术语.
+This works best with wikis.==这适用于百科.
+Try to use a wiki url as objectspace path.==尝试使用百科地址作为对象空间路径
+Import from a csv file==从csv文件导入
+>File Path or==>文件路径或者
+>Start line<==>起始行<
+>Column for Literals<==>文本列<
+>Synonyms<==>同义词<
+>no Synonyms<==>无同义词<
+>Auto-Enrich with Synonyms from Stemming Library<==>使用词干库中的同义词自动丰富<
+>Read Column<==>读取列<
+>Column for Object Link (optional)<==>对象链接列(可选)<
+>Charset of Import File<==>导入文件字符集<
+>Column separator<==>列分隔符<
+"Create"=="创建"
+#-----------------------------
+
+
 #File: DictionaryLoader_p.html
 #---------------------------
 >Knowledge Loader<==>知识加载器<
@@ -2214,16 +2428,16 @@ Various stack files that belong to the crawling queue==属于crawl队列的各�
 
 #File: IndexImportMediawiki_p.html
 #---------------------------
-#MediaWiki Dump Import==MediaWiki Dump Import
+MediaWiki Dump Import==MediaWiki转储导入
 No import thread is running, you can start a new thread here==当前无运行导入任务, 不过您可以在这开始
 Bad input data:==损坏数据:
-MediaWiki Dump File Selection: select a 'bz2' file==MediaWiki 备份文件: 选择一个 'bz2' 文件
+MediaWiki Dump File Selection: select a 'bz2' file==MediaWiki备份文件: 选择一个 'bz2' 文件
 You can import MediaWiki dumps here. An example is the file==您可以在这导入MediaWiki副本. 示例
-Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==副本文件必须是 XML 格式并用 bz2 压缩的. 将其放进YaCy目录或其子目录中.
+Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==副本文件必须是XML格式并用bz2压缩的.将其放进YaCy目录或其子目录中.
 "Import MediaWiki Dump"=="导入MediaWiki备份"
 When the import is started, the following happens:==:开始导入时, 会进行以下工作
 The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==备份文件即时被解压, 并被译为Dublin核心元数据格式:
-Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==每个输出文件都含有10000个wiki记录, 并都被保存在 /DATA/SURROGATES/in 的临时目录中.
+Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==每个输出文件都含有10000个百科记录, 并都被保存在 /DATA/SURROGATES/in 的临时目录中.
 When each of the generated output file is finished, it is renamed to a .xml file==生成的输出文件都以 .xml结尾
 Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==只要 /DATA/SURROGATES/in 中含有 xml文件, YaCy索引器就会读取它们并为其中的条目制作索引.
 When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==当索引完成时, xml文件会被移动到 /DATA/SURROGATES/out
@@ -2281,27 +2495,27 @@ Import List==导入列表
 
 #File: Load_MediawikiWiki.html
 #---------------------------
-YaCy '#[clientname]#': Configuration of a Wiki Search==YaCy '#[clientname]#': Wiki搜索配置
-#Integration in MediaWiki==Integration in MediaWiki
-It is possible to insert wiki pages into the YaCy index using a web crawl on that pages.==使用网页crawl, 能将wiki网页添加到YaCy主页中.
-This guide helps you to crawl your wiki and to insert a search window in your wiki pages.==此向导帮助您crawl您的wiki网页, 在其中添加一个搜索框.
-Retrieval of Wiki Pages==接收Wiki网页
-The following form is a simplified crawl start that uses the proper values for a wiki crawl.==下栏是使用某一值的Wiki crawl起始点.
-Just insert the front page URL of your wiki.==请填入Wiki的URL.
-After you started the crawl you may want to get back==crawl开始后,
+YaCy '#[clientname]#': Configuration of a Wiki Search==YaCy'#[clientname]#':Wiki搜索配置
+Integration in MediaWiki==MediaWiki整合
+It is possible to insert wiki pages into the YaCy index using a web crawl on that pages.==使用网页抓取, 能将百科网页添加到YaCy主页中.
+This guide helps you to crawl your wiki and to insert a search window in your wiki pages.==此向导帮助你抓取你的百科网页并在其中添加一个搜索框.
+Retrieval of Wiki Pages==接收百科网页
+The following form is a simplified crawl start that uses the proper values for a wiki crawl.==下栏是使用某一值的百科抓取起始点.
+Just insert the front page URL of your wiki.==请填入百科的地址.
+After you started the crawl you may want to get back==抓取开始后,
 to this page to read the integration hints below.==您可能需要返回此页面阅读以下提示.
-URL of the wiki main page==Wiki主页URL
-This is a crawl start point==将作为crawl起始点
-"Get content of Wiki: crawl wiki pages"=="获取Wiki内容: crawl Wiki页面"
+URL of the wiki main page==百科主页地址
+This is a crawl start point==将作为抓取起始点
+"Get content of Wiki: crawl wiki pages"=="获取百科内容: 抓取百科页面"
 Inserting a Search Window to MediaWiki==在MediaWiki中添加搜索框
-To integrate a search window into a MediaWiki, you must insert some code into the wiki template.==在wiki模板中添加以下代码以将搜索框集成到MediaWiki中.
+To integrate a search window into a MediaWiki, you must insert some code into the wiki template.==在百科模板中添加以下代码以将搜索框集成到MediaWiki中.
 There are several templates that can be used for MediaWiki, but in this guide we consider that==MediaWiki中有多种模板,
 you are using the default template, 'MonoBook.php':==在此我们使用默认模板 'MonoBook.php':
-open skins/MonoBook.php==打开 skins/MonoBook.php
+open skins/MonoBook.php==打开skins/MonoBook.php
 find the line where the default search window is displayed, there are the following statements:==找到搜索框显示部分代码, 如下:
 Remove that code or set it in comments using '&lt;!--' and '--&gt;'==删除以上代码或者用 '&lt;!--' '--&gt;' 将其注释掉
 Insert the following code:==插入以下代码:
-Search with YaCy in this Wiki:==在此Wiki中使用YaCy搜索:
+Search with YaCy in this Wiki:==在此百科中使用YaCy搜索:
 value="Search"==value="搜索"
 Check all appearances of static IPs given in the code snippet and replace it with your own IP, or your host name==用您自己的IP或者主机名替代代码中给出的IP地址
 You may want to change the default text elements in the code snippet==您可以更改代码中的文本元素
@@ -2312,18 +2526,18 @@ the <a href="ConfigLiveSearch.html">configuration for live search</a>.==<a href=
 #File: Load_PHPBB3.html
 #---------------------------
 Configuration of a phpBB3 Search==phpBB3搜索配置
-#Integration in phpBB3==Integration in phpBB3
+Integration in phpBB3==phpBB3整合
 It is possible to insert forum pages into the YaCy index using a database import of forum postings.==导入含有论坛帖子的数据库, 能在YaCy主页显示论坛内容.
 This guide helps you to insert a search window in your phpBB3 pages.==此向导能帮助您在您的phpBB3论坛页面中添加搜索框.
 Retrieval of phpBB3 Forum Pages using a database export==phpBB3论坛页面需使用数据库导出
-Forum posting contain rich information about the topic, the time, the subject and the author.==论坛帖子中含有话题, 时间, 主题和作者等丰富信息.
-This information is in an bad annotated form in web pages delivered by the forum software.==此类信息往往由论坛散播, 并且对于搜索引擎来说, 它们的标注很费解.
+Forum posting contain rich information about the topic, the time, the subject and the author.==论坛帖子中含有话题、时间、主题和作者等丰富信息.
+This information is in an bad annotated form in web pages delivered by the forum software.==此类信息往往由论坛散播,并且对于搜索引擎来说,它们的标注很费解.
 It is much better to retrieve the forum postings directly from the database.==所以, 直接从数据库中获取帖子内容效果更好.
 This will cause that YaCy is able to offer nice navigation features after searches.==这会使得YaCy在每次搜索后提供较好引导特性.
 YaCy has a phpBB3 extraction feature, please go to the <a href="ContentIntegrationPHPBB3_p.html">phpBB3 content integration</a> servlet for direct database imports.==YaCy能够解析phpBB3关键字, 参见 <a href="ContentIntegrationPHPBB3_p.html">phpBB3内容集成</a> 直接导入数据库方法.
-Retrieval of phpBB3 Forum Pages using a web crawl==使用网页crawl接收phpBB3论坛页面
-The following form is a simplified crawl start that uses the proper values for a phpbb3 forum crawl.==下栏是使用某一值的phpBB3论坛crawl起始点.
-Just insert the front page URL of your forum. After you started the crawl you may want to get back==将论坛首页填入表格. 开始crawl后,
+Retrieval of phpBB3 Forum Pages using a web crawl==接受phpBB3论坛页面的网页抓取
+The following form is a simplified crawl start that uses the proper values for a phpbb3 forum crawl.==下栏是使用某一值的phpBB3论坛抓取起始点.
+Just insert the front page URL of your forum. After you started the crawl you may want to get back==将论坛首页填入表格. 开始抓取后,
 to this page to read the integration hints below.==您可能需要返回此页面阅读以下提示.
 URL of the phpBB3 forum main page==phpBB3论坛主页
 This is a crawl start point==这是抓取起始点
@@ -2343,11 +2557,37 @@ To see all options for the search widget, look at the more generic description o
 the <a href="ConfigLiveSearch.html">configuration for live search</a>.==der Seite <a href="ConfigLiveSearch.html">搜索栏集成: 即时搜索</a>.
 #-----------------------------
 
+#File: IndexExport_p.html
+#---------------------------
+>Index Export<==>索引导出<
+>The local index currently contains==> 本地索引目前包含
+documents.<==文档<
+#Loaded URL Export
+>Loaded URL Export<==>加载的地址导出<
+>Export Path<==>导出路径<
+>URL Filter<==>地址过滤器<
+>query<==>查询<
+>maximum age (seconds, -1 = unlimited)<==>最大年龄(秒, -1=无限制)<
+>Export Format<==>导出格式<
+>Full Data Records:<==>完整数据记录:<
+>Full URL List:<==>完整地址列表:<
+>Only Domain:<==>仅仅域名:<
+>Only Text:<==>仅仅文本:<
+"Export"=="导出"
+
+#Dump and Restore of Solr Index
+>Dump and Restore of Solr Index<==>Solr索引的转储和恢复<
+"Create Dump"=="创建转储"
+>Dump File<==>转储文件<
+"Restore Dump"=="恢复转储"
+
+#-----------------------------
+
 #File: Load_RSS_p.html
 #---------------------------
 Configuration of a RSS Search==RSS搜索配置
-Loading of RSS Feeds<==正在读取RSS feed<
-RSS feeds can be loaded into the YaCy search index.==YaCy能够读取RSS feed.
+Loading of RSS Feeds<==加载RSS Feeds<
+RSS feeds can be loaded into the YaCy search index.==YaCy能够读取RSS feeds.
 This does not load the rss file as such into the index but all the messages inside the RSS feeds as individual documents.==但不是直接读取RSS文件, 而是将RSS feed中的所有信息分别当作单独的文件来读取.
 URL of the RSS feed==RSS feed链接
 >Preview<==>预览<
@@ -2446,7 +2686,7 @@ YaCy Search Network==YaCy搜索网络
 Network Overview==网络一览
 Active Senior==主动高级
 Passive Senior==被动高级
-Junior (fragment)==初级（片段）
+Junior (fragment)==初级(片段)
 Network History==网络历史
 YaCy Network<==YaCy网络<
 >Network<==>网络<
@@ -2504,7 +2744,7 @@ Browse blog of peer==查看博客
 #no tags given==keine Tags angegeben
 "no DHT receive"=="无接收DHT"
 "Accept Crawl: no"=="接受抓取: 否"
-"no crawl"=="无crawl"
+"no crawl"=="无抓取"
 "Accept Crawl: yes"=="接受抓取: 是"
 "crawl possible"=="可以抓取"
 Contact: passive==通信: 被动
@@ -2517,7 +2757,7 @@ URLs for<br/>Remote Crawl==远端<br/>抓取的地址
 "The YaCy Network"=="YaCy网络"
 
 Indexing<br/>PPM==索引<br/>PPM
-(public&nbsp;local)==公共&nbsp;本地
+(public&nbsp;local)==(公共/本地)
 (remote)==(远程)
 Your Peer:==您的节点:
 >Name<==>名称<
@@ -2525,13 +2765,16 @@ Your Peer:==您的节点:
 >Version<==>版本<
 >Release<==>版本<
 >Age<==>年龄(天)<
-#>UTC<==>UTC<
->Uptime<==>正常运行时间<
+>UTC<==>时区<
+>Uptime<==>运行时间<
 >Links<==>链接<
 >RWIs<==>反向字索引<
 >Sent DHT<==>已发送DHT<
 >Received DHT<==>已接受DHT<
 >Word Chunks<==>词汇块<
+>Sent==>已发送
+>Received==>已接受
+>DHT Word Chunks<==>DHT词汇块<
 Sent<br/>URLs==已发送网址
 Received<br/>URLs==已接收网址
 Known<br/>Seeds==已知种子
@@ -2540,11 +2783,11 @@ Received<br/>Words==已接收词语
 Connects<br/>per hour==连接/小时
 #Own/Other==Eigene/Andere
 >dark green font<==>深绿色字<
-senior/principal peers==高级/主要 节点
+senior/principal peers==高级/主要节点
 >light green font<==>浅绿色字<
 >passive peers<==>被动节点<
 >pink font<==>粉色字<
-junior peers==次级节点
+junior peers==初级节点
 red point==红点
 this peer==本机节点
 >grey waves<==>灰色波浪<
@@ -2564,10 +2807,10 @@ this peer==本机节点
 #File: News.html
 #---------------------------
 Overview==概述
-Incoming&nbsp;News==已接收
-Processed&nbsp;News==已处理
-Outgoing&nbsp;News==已生成
-Published&nbsp;News==已发布
+>Incoming&nbsp;News<==>传入的新闻<
+>Processed&nbsp;News<==>处理的新闻<
+>Outgoing&nbsp;News<==>传出的新闻<
+>Published&nbsp;News<==>发布的新闻<
 This is the YaCyNews system (currently under testing).==这是YaCy新闻系统(测试中).
 The news service is controlled by several entry points:==新闻服务会因为下面的操作产生:
 A crawl start with activated remote indexing will automatically create a news entry.==由远程创建索引激活的一次抓取会自动创建一个新闻条目.
@@ -2583,13 +2826,13 @@ to add a translation and publish it afterwards.==来添加翻译并发布。
 More news services will follow.==接下来会有更多的新闻服务.
 
 Above you can see four menues:==上面四个菜单选项分别为:
-<strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>已接收新闻(#[insize]#)</strong>: 发送至您节点的新闻.
+<strong>Incoming News (#[insize]#)</strong>: latest news that arrived your peer.==<strong>传入的新闻(#[insize]#)</strong>: 发送至您节点的新闻.
 Only these news will be used to display specific news services as explained above.==这些消息含有上述的特定新闻服务.
 You can process these news with a button on the page to remove their appearance from the IndexCreate and Network page==您可以使用'创建首页'和'网络'页面的设置隐藏它们.
-<strong>Processed News (#[prsize]#)</strong>: this is simply an archive of incoming news that you removed by processing.==<strong>已处理新闻(#[prsize]#)</strong>: 此页面显示您已删除的新闻.
-<strong>Outgoing News (#[ousize]#)</strong>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<strong>已生成新闻(#[ousize]#)</strong>: 此页面显示您的节点创建的新闻条目, 默认发布给其他节点.
+<strong>Processed News (#[prsize]#)</strong>: this is simply an archive of incoming news that you removed by processing.==<strong>处理的新闻(#[prsize]#)</strong>: 此页面显示您已删除的传入新闻存档.
+<strong>Outgoing News (#[ousize]#)</strong>: here your can see news entries that you have created. These news are currently broadcasted to other peers.==<strong>传出的新闻(#[ousize]#)</strong>: 此页面显示您节点创建的新闻条目, 正在发布给其他节点.
 you can stop the broadcast if you want.==您也可以选择停止发布.
-<strong>Published News (#[pusize]#)</strong>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<strong>已发布新闻(#[pusize]#)</strong>: 显示已经完全发布出去的新闻或者已经从发布列表删除的新闻.
+<strong>Published News (#[pusize]#)</strong>: your news that have been broadcasted sufficiently or that you have removed from the broadcast list.==<strong>发布的新闻(#[pusize]#)</strong>: 显示已经完全发布出去的新闻或者从传出列表中删除的新闻.
 Originator==拥有者
 Created==创建时间
 Category==分类
@@ -2839,7 +3082,7 @@ this controls the proxy auto configuration script for browsers at http://localho
 whether the proxy should only be used for .yacy-Domains==代理是否只对 .yacy 域名有效.
 Proxy pre-fetch setting:==代理预读设置:
 this is an automated html page loading procedure that takes actual proxy-requested==这是一个自动预读网页的过程
-URLs as crawling start points for crawling.==期间会将请求代理的URL作为crawl起始点.
+URLs as crawling start points for crawling.==期间会将请求代理的URL作为抓取起始点.
 Prefetch Depth==预读深度
 A prefetch of 0 means no prefetch; a prefetch of 1 means to prefetch all==设置为0则不预读; 设置为1预读所有嵌入链接,
 embedded URLs, but since embedded image links are loaded by the browser==但是嵌入图像链接是由浏览器读取,
@@ -2879,18 +3122,18 @@ Page.==页面查看最近索引页面快照.
 
 #File: QuickCrawlLink_p.html
 #---------------------------
-Quick Crawl Link==快速crawl链接
+Quick Crawl Link==快速抓取链接
 Quickly adding Bookmarks:==快速添加书签:
 Simply drag and drop the link shown below to your Browsers Toolbar/Link-Bar.==仅需拖动以下链接至浏览器工具栏/书签栏.
 If you click on it while browsing, the currently viewed website will be inserted into the YaCy crawling queue for indexing.==如果在浏览网页时点击, 当前查看页面会被插入到crawl队列已用于索引
-Crawl with YaCy==用YaCy进行crawl
+Crawl with YaCy==用YaCy抓取
 Title:==标题:
 Link:==链接:
 Status:==状态:
 URL successfully added to Crawler Queue==已成功添加网址到爬虫队列.
 Malformed URL==异常链接
-Unable to create new crawling profile for URL:==创建链接crawl信息失败:
-Unable to add URL to crawler queue:==添加链接到crawl队列失败:
+Unable to create new crawling profile for URL:==创建链接抓取信息失败:
+Unable to add URL to crawler queue:==添加链接到抓取队列失败:
 #-----------------------------
 
 #File: Ranking_p.html
@@ -2902,12 +3145,6 @@ The attributes are first normalized over all search results and then the normali
 The ranking coefficient grows exponentially with the ranking levels given in the following table.==排名系数根据下表排名级别呈指数增长.
 If you increase a single value by one, then the strength of the parameter doubles.==如果值加1, 则参数影响强度加倍.
 Pre-Ranking==预排名
-
-# Aktuell sind die Werte und Hover over Information in der Ranking_p.java hartcodiert und können nicht übersetzt werden
-#
-#Date==Datum
-#a higher ranking level prefers younger documents.==Ein höherer Ranking Level bevorzugt jüngere Dokumente
-#The age of a document is measured using the date submitted by the remote server as document date==Das Alter eines Dokuments wird gemessen anhand des Dokument Datums das der Remote Server übermittelt
 
 There are two ranking stages:==有两个排名阶段:
 first all results are ranked using the pre-ranking and from the resulting list the documents are ranked again with a post-ranking.==首先对搜索结果进行一次排名, 然后再对首次排名结果进行二次排名.
@@ -3043,7 +3280,7 @@ Use remote proxy</label>==使用远程代理</label>
 Enables the usage of the remote proxy by yacy==打开以支持远程代理
 Use remote proxy for yacy &lt;-&gt; yacy communication==为YaCy &lt;-&gt; YaCy 通信使用代理
 Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==选此指定远程代理是否支持YaCy节点间通信.
-<em>Hint:</em> Enabling this option could cause this peer to remain in junior status.==<em>提示:</em> 打开此选项后本地节点会被置为次级节点.
+<em>Hint:</em> Enabling this option could cause this peer to remain in junior status.==<em>提示:</em> 打开此选项后本地节点会被置为初级节点.
 Use remote proxy for HTTPS==为HTTPS使用远程代理
 Specifies if YaCy should forward ssl connections to the remote proxy.==选此指定YaCy是否使用SSL代理.
 Remote proxy host==远程代理主机
@@ -3324,7 +3561,7 @@ YaCy version:==YaCy版本:
 Max:==最大:
 Crawler:==爬虫:
 Proxy:==代理:
->Reset==>重启
+>Reset==>重置
 Traffic ==流量
 Experimental<==实验<
 Remote:==远程:
@@ -3453,11 +3690,11 @@ provided by YaCy peers with an URL in their profile. This shows only URLs from p
 Surftips</title>==建议</title>
 Surftips</h2>==建议</h2>
 Surftips are switched off==建议已关闭
-title="bookmark"==title="书签"
+title="bookmark"==标题="书签"
 alt="Add to bookmarks"==alt="添加到书签"
-title="positive vote"==title="好评"
+title="positive vote"==标题=="好评"
 alt="Give positive vote"==alt="给予好评"
-title="negative vote"==title="差评"
+title="negative vote"==标题=="差评"
 alt="Give negative vote"==alt="给予差评"
 YaCy Supporters<==YaCy参与者<
 >a list of home pages of yacy users<==>显示YaCy用户<
@@ -3958,7 +4195,7 @@ Documents==文件
 Images==图像
 >Documents==>文件
 >Images==>图像
-"Your search is done using peers in the YaCy P2P network."=="您的搜索是靠YaCy P2P网络中的小伙伴完成的。"
+"Your search is done using peers in the YaCy P2P network."=="您的搜索是靠YaCy P2P网络中的节点完成的。"
 "You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used."=="您可以切换到'隐形模式'，这将关闭P2P，给你完全的隐私。期待较少的结果，因为那时只有您自己的搜索索引被使用。"
 "Your search is done using only your own peer, locally."=="你的搜索是靠在本地的YaCy节点完成的。"
 "You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network."=="您可以切换到'P2P'，这将让您的搜索使用YaCy网络中的YaCy节点。"
@@ -4273,10 +4510,10 @@ Crawl Start (Expert)==抓取开始（专家模式）
 Network Scanner==网络扫描仪
 Crawling of MediaWikis==MediaWikis抓取
 Remote Crawling==远程抓取
-Scraping Proxy==刮研究代理
+Scraping Proxy==刮痧代理
+>Autocrawl<==>自动抓取<
 Advanced Crawler==高级爬虫
 >Crawling of phpBB3 Forums<==>phpBB3论坛抓取<
-Crawling of phpBB3 Forums==phpBB3论坛抓取
 
 #Web Crawler Control==Web 爬虫 Steuerung
 Start a Web Crawl==开启网页抓取
@@ -4308,7 +4545,7 @@ Crawling of==正在抓取
 Content Import<==导入内容<
 Network Harvesting<==网络采集<
 Remote<br/>Crawling==远程<br/>抓取
-Scraping<br/>Proxy==刮研究<br/>代理
+Scraping<br/>Proxy==刮痧<br/>代理
 Database Reader<==数据库读取<
 for phpBB3 Forums==对于phpBB3论坛
 Dump Reader for==Dump阅读器为
