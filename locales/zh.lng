@@ -3707,11 +3707,11 @@ provided by YaCy peers with an URL in their profile. This shows only URLs from p
 Surftips</title>==建议</title>
 Surftips</h2>==建议</h2>
 Surftips are switched off==建议已关闭
-title="bookmark"==标题="书签"
+title="bookmark"==title="书签"
 alt="Add to bookmarks"==alt="添加到书签"
-title="positive vote"==标题=="好评"
+title="positive vote"==title=="好评"
 alt="Give positive vote"==alt="给予好评"
-title="negative vote"==标题=="差评"
+title="negative vote"==title=="差评"
 alt="Give negative vote"==alt="给予差评"
 YaCy Supporters<==YaCy参与者<
 >a list of home pages of yacy users<==>显示YaCy用户<
@@ -4189,7 +4189,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 
 #File: yacysearch.html
 #---------------------------
-"search"=="搜索"
+# Do not translate id="search" and rel="search" which only have technical html semantics
 >search<==>搜索<
 Illegal URL mask:==非法网址掩码:
 >Media<==>媒体<
@@ -4793,7 +4793,9 @@ YaCy P2P Websearch==YaCy P2P搜索
 >Video==>视频
 >Applications==>程序
 Search term:==搜索条目:
-"help"=="帮助"
+# do not translate class="help" which only has technical html semantics
+alt="help"==alt="帮助"
+title="help"==title="帮助"
 Resource/Network:==资源/网络:
 freeworld==自由世界
 local peer==本地节点
