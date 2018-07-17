@@ -351,7 +351,8 @@ public class yacysearchtrailer {
                 name = navigatorIterator.next();
                 count = navi.get(name);
                 if (count == 0) {
-                    break;
+                	/* This entry has a zero count, but the next may be positive */
+                    continue;
                 }
 
                 rawNav = navi.getQueryModifier(name);
@@ -380,6 +381,10 @@ public class yacysearchtrailer {
                 prop.put("navs_" + ni + "_element_" + i + "_count", count);
                 prop.put("navs_" + ni + "_element_" + i + "_nl", 1);
                 i++;
+            }
+            if(i == 0) {
+            	/* The navigator has only entries with value==0 : this is equivalent to empty navigator */
+            	continue;
             }
             prop.put("navs_" + ni + "_element", i);
             prop.put("navs_" + ni + "_count", i);
