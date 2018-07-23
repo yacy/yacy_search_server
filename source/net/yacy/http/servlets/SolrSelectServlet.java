@@ -245,13 +245,13 @@ public class SolrSelectServlet extends HttpServlet {
             // add default queryfield parameter according to local ranking config (or defaultfield)
             if (ranking != null) { // ranking normally never null
                 final String qf = ranking.getQueryFields();
-                if (qf.length() > 4) { // make sure qf has content (else use df)
+                if (qf.length() > 4 && !mmsp.getMap().containsKey(DisMaxParams.QF)) { // make sure qf has content (else use df)
                     MultiMapSolrParams.addParam(DisMaxParams.QF, qf, mmsp.getMap()); // add QF that we set to be best suited for our index
                             // TODO: if every peer applies a decent QF itself, this can be reverted to getMap().put()
-                } else {
+                } else if(!mmsp.getMap().containsKey(CommonParams.DF)) {
                     mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
                 }
-            } else {
+            } else if(!mmsp.getMap().containsKey(CommonParams.DF)) {
                 mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
             }
 
