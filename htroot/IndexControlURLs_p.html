@@ -63,7 +63,7 @@ function updatepage(str) {
     #%env/templates/header.template%#
     #%env/templates/submenuIndexControl.template%#
     <div id="api">
-    <a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[urlhash]#%22">
+    <a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&omitHeader=true&q=id:%22#[urlhash]#%22">
     <img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
     <span>These document details can be retrieved as <a href="http://www.w3.org/TR/xhtml-rdfa-primer/" target="_blank">XHTML+RDFa</a>
     document containg <a href="http://www.w3.org/RDF/" target="_blank">RDF</a> annotations in <a href="http://dublincore.org/" target="_blank">Dublin Core</a> vocabulary.
@@ -181,7 +181,7 @@ function updatepage(str) {
     
     #(genUrlProfile)#
     ::No entry found for URL-hash #[urlhash]#
-    ::<iframe src="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[urlhash]#%22" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
+    ::<iframe src="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&omitHeader=true&q=id:%22#[urlhash]#%22" width="100%" height="420" frameborder="0" scrolling="no"></iframe>
     <br />
     <p>
       <form action="ViewFile.html" method="get" accept-charset="UTF-8">

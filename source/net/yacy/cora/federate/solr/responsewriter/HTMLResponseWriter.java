@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -39,6 +40,7 @@ import org.apache.lucene.index.IndexableField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.XML;
@@ -58,6 +60,7 @@ import org.apache.solr.search.SolrReturnFields;
 
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
@@ -127,6 +130,157 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
         writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
         writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
 	}
+	
+	/**
+	 * Optionally (omitHeader request param must not be true) append to the writer an HTML representation of the response header. 
+	 * @param writer the output writer. Must not be null.
+	 * @param request the initial Solr request. Must not be null.
+	 * @param responseHeader the eventual Solr response header.
+	 * @throws IOException when an error occurred while appending content to the writer
+	 */
+	private void writeResponseHeader(final Writer writer, final SolrQueryRequest request, final NamedList<Object> responseHeader)
+			throws IOException {
+		if (responseHeader != null && request.getParams() == null || !request.getParams().getBool(CommonParams.OMIT_HEADER, false)) {
+			writer.write(
+					"<form name=\"responseHeaders\" method=\"get\" action=\"select\" enctype=\"multipart/form-data\" accept-charset=\"UTF-8\" class=\"form-horizontal\">\n");
+			writer.write("<fieldset>\n");
+			writer.write("<h1>Response header</h1>\n");
+			writeNamedList(writer, responseHeader, 0);
+			writer.write("<div class=\"col-sm-offset-2\">");
+			writer.write("<input class=\"btn btn-primary\" type=\"submit\">");
+			writer.write("</div>");
+			writer.write("</fieldset>\n");
+			writer.write("</form>\n");
+		}
+	}
+	
+	/**
+	 * Append to the writer an HTML representation of the given values. 
+	 * @param writer the output writer. Must not be null.
+	 * @param list the values to write. Must not be null.
+	 * @param nestingLevel the nesting level of the list.
+	 * @throws IOException when an error occurred while appending content to the writer
+	 */
+	private void writeNamedList(final Writer writer, final NamedList<?> list, final int nestingLevel)
+			throws IOException {
+		if (list != null && list.size() > 0) {
+			writer.write("<dl>\n");
+			for (final Map.Entry<String, ?> entry : list) {
+				final String key = entry.getKey();
+				final Object value = entry.getValue();
+				writer.write("<dt>");
+				writer.write(key);
+				writer.write("</dt>\n<dd>");
+				if (value instanceof NamedList<?>) {
+					if (nestingLevel < 5) { // prevent any infite recursive loop
+						if("params".equals(key) && nestingLevel == 0) {
+							writeEditableNamedList(writer, (NamedList<?>) value, nestingLevel + 1);
+						} else {
+							writeNamedList(writer, (NamedList<?>) value, nestingLevel + 1);
+						}
+					}
+				} else if (value instanceof Iterable<?>) {
+					writeIterable(writer, key, (Iterable<?>) value);
+				} else if (value instanceof Object[]) {
+					writeIterable(writer, key, Arrays.asList((Object[]) value));
+				} else {
+					writer.write(CharacterCoding.unicode2html(String.valueOf(value), true));
+				}
+				writer.write("</dd>\n");
+			}
+			writer.write("</dl>\n");
+		}
+	}
+	
+	/**
+	 * Append to the writer a representation of the given values as HTML form input fields grouped in a fieldset. 
+	 * @param writer the output writer. Must not be null.
+	 * @param list the values to write. Must not be null.
+	 * @param nestingLevel the nesting level of the list.
+	 * @throws IOException when an error occurred while appending content to the writer
+	 */
+	private void writeEditableNamedList(final Writer writer, final NamedList<?> list, final int nestingLevel)
+			throws IOException {
+		if (list != null && list.size() > 0) {
+			writer.write("<fieldset>\n");
+			for (final Map.Entry<String, ?> entry : list) {
+				final String key = entry.getKey();
+				final Object value = entry.getValue();
+
+				if (value instanceof NamedList<?>) {
+					if (nestingLevel < 5) { // prevent any infite recursive loop
+						writeEditableNamedList(writer, (NamedList<?>) value, nestingLevel + 1);
+					}
+				} else if (value instanceof Iterable<?>) {
+					writeEditableIterable(writer, key, (Iterable<?>) value);
+				} else if (value instanceof Object[]) {
+					writeEditableIterable(writer, key, Arrays.asList((Object[]) value));
+				} else {
+					writeEditableValue(writer, key, key, key, value);
+				}
+			}
+			writer.write("</fieldset>\n");
+		}
+	}
+
+	/**
+	 * Append to the writer a representation of the given value as an HTML form input field. 
+	 * @param writer the output writer. Must not be null.
+	 * @param inputLabel the html label to render. Must not be null.
+	 * @param inputId the id attribute of the html input field to render. Must not be null.
+	 * @param inputName the name of the html input field to render. Must not be null.
+	 * @param value the value to write. Must not be null.
+	 * @throws IOException when an error occurred while appending content to the writer
+	 */
+	private void writeEditableValue(final Writer writer, final String inputLabel, final String inputId, final String inputName, final Object value) throws IOException {
+		writer.write("<div class=\"form-group\">\n");
+		writer.write("<label for=\"" + inputId + "\" class=\"col-sm-2 control-label\">");
+		writer.write(inputLabel);
+		writer.write("</label>\n");
+		writer.write("<div class=\"col-sm-10\">\n");
+		writer.write("<input type=\"text\" class=\"form-control\" id=\"" + inputId + "\" name=\"" + inputName + "\" value=\"");
+		writer.write(CharacterCoding.unicode2html(String.valueOf(value), true));
+		writer.write("\"/>\n");
+		writer.write("</div></div>\n");
+	}
+
+	/**
+	 * Append to the writer an HTML representation of the given values. 
+	 * @param writer the output writer. Must not be null.
+	 * @param key the key of the values. Must not be null.
+	 * @param values the values to write. Must not be null.
+	 * @throws IOException when an error occurred while appending content to the writer
+	 */
+	private void writeIterable(final Writer writer, final String key, final Iterable<?> values) throws IOException {
+		int count = 0;
+		for (final Object value : values) {
+			writer.write("<dt>");
+			writer.write(key);
+			writer.write("_");
+			writer.write(Integer.toString(count));
+			writer.write("</dt>\n<dd>");
+			writer.write(CharacterCoding.unicode2html(String.valueOf(value), true));
+			count++;
+			writer.write("</dd>\n");
+		}
+	}
+	
+	/**
+	 * Append to the writer a representation of the given values as HTML form input fields. 
+	 * @param writer the output writer. Must not be null.
+	 * @param key the key of the values. Must not be null.
+	 * @param values the values to write. Must not be null.
+	 * @throws IOException when an error occurred while appending content to the writer
+	 */
+	private void writeEditableIterable(final Writer writer, final String key, final Iterable<?> values)
+			throws IOException {
+		int count = 0;
+		for (final Object value : values) {
+			writeEditableValue(writer, key + "_" + Integer.toString(count), key + "_" + Integer.toString(count), key,
+					value);
+			count++;
+		}
+	}
 
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
@@ -150,7 +304,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 			 */
         	final SolrDocumentList docList = ((SolrDocumentList)responseObj);
         	
-        	writeSolrDocumentList(writer, request, coreName, paramsList, docList);
+        	writeSolrDocumentList(writer, request, rsp.getResponseHeader(), coreName, paramsList, docList);
         } else if(responseObj instanceof ResultContext){
         	/* Regular response object */
         	final DocList documents = ((ResultContext)responseObj).getDocList();
@@ -169,6 +323,8 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
     			String title = doc.get(CollectionSchema.title.getSolrFieldName()); // title is multivalued, after translation fieldname could be in tdoc. "title_0" ..., so get it from doc
                 writeTitle(writer, coreName, sz, title);
                 
+            	writeResponseHeader(writer, request, rsp.getResponseHeader());
+                
                 writeApiLink(writer, paramsList, coreName);
 
                 writeDoc(writer, tdoc, coreName, rsp.getReturnFields());
@@ -182,18 +338,24 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
                 }
             } else {
                 writer.write("<title>No Document Found</title>\n</head><body>\n");
+                
+            	writeResponseHeader(writer, request, rsp.getResponseHeader());
+                
                 writer.write("<div class='alert alert-info'>No documents found</div>\n");
             }
         	
         } else {
             writer.write("<title>Unable to process Solr response</title>\n</head><body>\n");
+            
+        	writeResponseHeader(writer, request, rsp.getResponseHeader());
+            
             writer.write("<div class='alert alert-info'>Unknown Solr response format</div>\n");        	
         }
 
         
         writer.write("</body></html>\n");
     }
-    
+
 	@Override
 	public void write(final Writer writer, final SolrQueryRequest request, final String coreName, final QueryResponse rsp) throws IOException {
 		writeHtmlHead(writer);
@@ -203,8 +365,9 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 		paramsList.remove("wt");
 
 		final SolrDocumentList docsList = rsp.getResults();
+		final NamedList<Object> responseHeader = rsp.getHeader();
 		
-		writeSolrDocumentList(writer, request, coreName, paramsList, docsList);
+		writeSolrDocumentList(writer, request, responseHeader, coreName, paramsList, docsList);
 
 		writer.write("</body></html>\n");
 	}
@@ -213,12 +376,13 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 	 * Append to the writer HTML reprensentation of the given documents list. 
 	 * @param writer the output writer
 	 * @param request the initial Solr request
+	 * @param responseHeader the eventual Solr response header
 	 * @param coreName the requested Solr core
 	 * @param paramsList the original request parameters
 	 * @param docList the result Solr documents list
 	 * @throws IOException
 	 */
-	private void writeSolrDocumentList(final Writer writer, final SolrQueryRequest request, final String coreName,
+	private void writeSolrDocumentList(final Writer writer, final SolrQueryRequest request, final NamedList<Object> responseHeader, final String coreName,
 			final NamedList<Object> paramsList, final SolrDocumentList docList) throws IOException {
 		final int sz = docList.size();
 		if (sz > 0) {
@@ -230,6 +394,8 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 			final Object titleValue = doc.getFirstValue(CollectionSchema.title.getSolrFieldName());
 			final String firstDocTitle = formatValue(titleValue);
 			writeTitle(writer, coreName, sz, firstDocTitle);
+			
+			writeResponseHeader(writer, request, responseHeader);
 
 			writeApiLink(writer, paramsList, coreName);
 
