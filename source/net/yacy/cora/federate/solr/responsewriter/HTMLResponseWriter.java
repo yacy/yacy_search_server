@@ -120,12 +120,15 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 	/**
 	 * Append a link to the related Solr API.
 	 * @param writer the output writer
-	 * @param paramsList the original request parameters
+	 * @param solrParams the original request parameters
 	 * @param coreName the requested Solr core name
 	 * @throws IOException when a write error occurred
 	 */
-	private void writeApiLink(final Writer writer, final NamedList<Object> paramsList, final String coreName) throws IOException {
-        final String xmlquery = dqp.matcher("../solr/select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName).replaceAll("%22");
+	private void writeApiLink(final Writer writer, final SolrParams solrParams, final String coreName) throws IOException {
+        final NamedList<Object> paramsList = solrParams.toNamedList();
+        paramsList.remove("wt");
+		
+        final String xmlquery = dqp.matcher("select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName).replaceAll("%22");
         
         writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
         writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see this page as XML.</span></div>\n");
@@ -290,9 +293,6 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 
         writeHtmlHead(writer);
 
-        NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
-        paramsList.remove("wt");
-        
         final String coreName = request.getCore().getName();
         
         final Object responseObj = rsp.getResponse();
@@ -304,7 +304,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 			 */
         	final SolrDocumentList docList = ((SolrDocumentList)responseObj);
         	
-        	writeSolrDocumentList(writer, request, rsp.getResponseHeader(), coreName, paramsList, docList);
+        	writeSolrDocumentList(writer, request, rsp.getResponseHeader(), coreName, docList);
         } else if(responseObj instanceof ResultContext){
         	/* Regular response object */
         	final DocList documents = ((ResultContext)responseObj).getDocList();
@@ -325,7 +325,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
                 
             	writeResponseHeader(writer, request, rsp.getResponseHeader());
                 
-                writeApiLink(writer, paramsList, coreName);
+                writeApiLink(writer, request.getOriginalParams(), coreName);
 
                 writeDoc(writer, tdoc, coreName, rsp.getReturnFields());
 
@@ -360,14 +360,10 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 	public void write(final Writer writer, final SolrQueryRequest request, final String coreName, final QueryResponse rsp) throws IOException {
 		writeHtmlHead(writer);
 
-		final SolrParams originalParams = request.getOriginalParams();
-		final NamedList<Object> paramsList = originalParams.toNamedList();
-		paramsList.remove("wt");
-
 		final SolrDocumentList docsList = rsp.getResults();
 		final NamedList<Object> responseHeader = rsp.getHeader();
 		
-		writeSolrDocumentList(writer, request, responseHeader, coreName, paramsList, docsList);
+		writeSolrDocumentList(writer, request, responseHeader, coreName, docsList);
 
 		writer.write("</body></html>\n");
 	}
@@ -378,12 +374,12 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 	 * @param request the initial Solr request
 	 * @param responseHeader the eventual Solr response header
 	 * @param coreName the requested Solr core
-	 * @param paramsList the original request parameters
 	 * @param docList the result Solr documents list
 	 * @throws IOException
 	 */
-	private void writeSolrDocumentList(final Writer writer, final SolrQueryRequest request, final NamedList<Object> responseHeader, final String coreName,
-			final NamedList<Object> paramsList, final SolrDocumentList docList) throws IOException {
+	private void writeSolrDocumentList(final Writer writer, final SolrQueryRequest request,
+			final NamedList<Object> responseHeader, final String coreName, final SolrDocumentList docList)
+			throws IOException {
 		final int sz = docList.size();
 		if (sz > 0) {
 			final Iterator<SolrDocument> iterator = docList.iterator();
@@ -397,7 +393,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 			
 			writeResponseHeader(writer, request, responseHeader);
 
-			writeApiLink(writer, paramsList, coreName);
+			writeApiLink(writer, request.getOriginalParams(), coreName);
 
 			writeDoc(writer, translateDoc(doc, fieldsToReturn), coreName, fieldsToReturn);
 
