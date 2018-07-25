@@ -60,6 +60,7 @@ import org.apache.solr.search.SolrReturnFields;
 
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
@@ -291,7 +292,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
         assert values.get("responseHeader") != null;
         assert values.get("response") != null;
 
-        writeHtmlHead(writer);
+        writeHtmlHead(writer, request);
 
         final String coreName = request.getCore().getName();
         
@@ -308,6 +309,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
         } else if(responseObj instanceof ResultContext){
         	/* Regular response object */
         	final DocList documents = ((ResultContext)responseObj).getDocList();
+        	final String rootPath = getRootPath(request);
         	
         	sz = documents.size();
         	
@@ -327,14 +329,14 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
                 
                 writeApiLink(writer, request.getOriginalParams(), coreName);
 
-                writeDoc(writer, tdoc, coreName, rsp.getReturnFields());
+                writeDoc(writer, tdoc, coreName, rsp.getReturnFields(), rootPath);
 
                 while (iterator.hasNext()) {
                     id = iterator.nextDoc();
                     doc = searcher.doc(id);
                     tdoc = translateDoc(schema, doc, rsp.getReturnFields());
 
-                    writeDoc(writer, tdoc, coreName, rsp.getReturnFields());
+                    writeDoc(writer, tdoc, coreName, rsp.getReturnFields(), rootPath);
                 }
             } else {
                 writer.write("<title>No Document Found</title>\n</head><body>\n");
@@ -358,7 +360,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 
 	@Override
 	public void write(final Writer writer, final SolrQueryRequest request, final String coreName, final QueryResponse rsp) throws IOException {
-		writeHtmlHead(writer);
+		writeHtmlHead(writer, request);
 
 		final SolrDocumentList docsList = rsp.getResults();
 		final NamedList<Object> responseHeader = rsp.getHeader();
@@ -381,6 +383,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 			final NamedList<Object> responseHeader, final String coreName, final SolrDocumentList docList)
 			throws IOException {
 		final int sz = docList.size();
+		final String rootPath = getRootPath(request);
 		if (sz > 0) {
 			final Iterator<SolrDocument> iterator = docList.iterator();
 
@@ -395,12 +398,12 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 
 			writeApiLink(writer, request.getOriginalParams(), coreName);
 
-			writeDoc(writer, translateDoc(doc, fieldsToReturn), coreName, fieldsToReturn);
+			writeDoc(writer, translateDoc(doc, fieldsToReturn), coreName, fieldsToReturn, rootPath);
 
 			while (iterator.hasNext()) {
 				doc = iterator.next();
 
-				writeDoc(writer, translateDoc(doc, fieldsToReturn), coreName, fieldsToReturn);
+				writeDoc(writer, translateDoc(doc, fieldsToReturn), coreName, fieldsToReturn, rootPath);
 			}
 		} else {
 			writer.write("<title>No Document Found</title>\n</head><body>\n");
@@ -438,7 +441,9 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
      * @param writer must not be null
      * @throws IOException when a write error occurred
      */
-	private void writeHtmlHead(final Writer writer) throws IOException {
+	private void writeHtmlHead(final Writer writer, final SolrQueryRequest request) throws IOException {
+		final String rootPath = getRootPath(request);
+		
 		writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
         //writer.write("<!--\n");
         //writer.write("this is a XHTML+RDFa file. It contains RDF annotations with dublin core properties\n");
@@ -454,31 +459,65 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
         //writer.write("<link rel=\"transformation\" href=\"http://www-sop.inria.fr/acacia/soft/RDFa2RDFXML.xsl\"/>\n");
 
         writer.write("<!-- Bootstrap core CSS -->\n");
-        writer.write("<link href=\"../env/bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n");
-        writer.write("<link href=\"../env/bootstrap/css/bootstrap-switch.min.css\" rel=\"stylesheet\">\n");
-        //writer.write("<script src=\"../env/bootstrap/js/jquery.min.js\"></script>\n");
-        //writer.write("<script src=\"../env/bootstrap/js/bootstrap.min.js\"></script>\n");
-        //writer.write("<script src=\"../env/bootstrap/js/bootstrap-switch.min.js\"></script>\n");
+        writer.write("<link href=\"" + rootPath + "env/bootstrap/css/bootstrap.min.css\" rel=\"stylesheet\">\n");
+        writer.write("<link href=\"" + rootPath + "env/bootstrap/css/bootstrap-switch.min.css\" rel=\"stylesheet\">\n");
+        //writer.write("<script src=\"" + rootPath + "env/bootstrap/js/jquery.min.js\"></script>\n");
+        //writer.write("<script src=\"" + rootPath + "env/bootstrap/js/bootstrap.min.js\"></script>\n");
+        //writer.write("<script src=\"" + rootPath + "env/bootstrap/js/bootstrap-switch.min.js\"></script>\n");
         writer.write("<!-- Custom styles for this template, i.e. navigation (move this to base.css) -->\n");
-        writer.write("<link href=\"../env/bootstrap-base.css\" rel=\"stylesheet\">\n");
+        writer.write("<link href=\"" + rootPath + "env/bootstrap-base.css\" rel=\"stylesheet\">\n");
         //writer.write("<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->\n");
         //writer.write("<!--[if lt IE 9]>\n");
-        //writer.write("  <script src=\"../env/bootstrap/js/html5shiv.js\"></script>\n");
-        //writer.write("  <script src=\"../env/bootstrap/js/respond.min.js\"></script>\n");
+        //writer.write("  <script src=\"" + rootPath + "env/bootstrap/js/html5shiv.js\"></script>\n");
+        //writer.write("  <script src=\"" + rootPath + "env/bootstrap/js/respond.min.js\"></script>\n");
         //writer.write("<![endif]-->\n");
         writer.write("<!-- old css styles -->\n");
-        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"../env/base.css\" />\n");
-        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/style.css\" />\n");
+        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"" + rootPath + "env/base.css\" />\n");
+        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"" + rootPath + "env/style.css\" />\n");
         writer.write("<!--[if lt IE 6]>\n");
-        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/oldie.css\" />\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"" + rootPath + "env/oldie.css\" />\n");
         writer.write("<![endif]-->\n");
         writer.write("<!--[if lte IE 6.0]>\n");
-        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/ie6.css\" />\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"" + rootPath + "env/ie6.css\" />\n");
         writer.write("<![endif]-->\n");
         writer.write("<!--[if lte IE 7.0]>\n");
-        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/ie7.css\" />\n");
+        writer.write(" <link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"" + rootPath + "env/ie7.css\" />\n");
         writer.write("<![endif]-->\n");
         writer.write("<!-- (C), Architecture: Michael Peter Christen; Contact: mc <at> yacy.net -->\n");
+	}
+
+	/**
+	 * Compute the root path as a relative URL prefix from the original servlet
+	 * request URI if provided in the Solr request context, otherwise return a
+	 * regular "/". Using relative URLs when possible makes deployment behind a
+	 * reverse proxy more reliable and convenient as no URL rewriting is needed.
+	 * 
+	 * @param request the Solr request. Must not be null.
+	 * @return the root context path to use as a prefix for resources URLs such as
+	 *         stylesheets
+	 */
+	private String getRootPath(final SolrQueryRequest request) {
+		String rootPath = "/";
+		final Map<Object, Object> context = request.getContext();
+		if (context != null) {
+			final Object requestUriObj = context.get("requestURI");
+			if (requestUriObj instanceof String) {
+				String servletRequestUri = (String) requestUriObj;
+				if(servletRequestUri.startsWith("/")) {
+					servletRequestUri = servletRequestUri.substring(1);
+					
+					final String[] pathParts = CommonPattern.SLASH.split(servletRequestUri);
+					if(pathParts.length > 1) {
+						final StringBuilder sb = new StringBuilder();
+						for(int i = 1; i < pathParts.length; i++) {
+							sb.append("../");
+						}
+						rootPath = sb.toString();
+					}
+				}
+			}
+		}
+		return rootPath;
 	}
     
 
@@ -490,9 +529,10 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
      * @param coreName the Solr core name.
      * @param returnFields the eventual fields return configuration, allowing for example to
 	 *            rename fields with a pseudo in the result. May be null.
+	 * @param rootPath the path prefix to append to other resources URLs. Must not be null.
      * @throws IOException when a write error occurred.
      */
-	private static final void writeDoc(final Writer writer, final LinkedHashMap<String, String> tdoc, final String coreName, final ReturnFields returnFields) throws IOException {
+	private static final void writeDoc(final Writer writer, final LinkedHashMap<String, String> tdoc, final String coreName, final ReturnFields returnFields, final String rootPath) throws IOException {
     	String title;
         if(CollectionSchema.CORE_NAME.equals(coreName)) {
         	title = tdoc.get(CollectionSchema.title.getSolrFieldName());
@@ -510,7 +550,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
         if(CollectionSchema.CORE_NAME.equals(coreName)) {
         	String sku = tdoc.get(CollectionSchema.sku.getSolrFieldName());
         	if(sku != null) {
-        		final String jsc= "javascript:w = window.open('../QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&followFrames=on&obeyHtmlRobotsNoindex=on&obeyHtmlRobotsNofollow=off&xdstopw=on&title=" + URLEncoder.encode(title, StandardCharsets.UTF_8.name()) + "&url='+escape('"+sku+"'),'_blank','height=250,width=600,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();";
+        		final String jsc= "javascript:w = window.open('" + rootPath + "QuickCrawlLink_p.html?indexText=on&indexMedia=on&crawlingQ=on&followFrames=on&obeyHtmlRobotsNoindex=on&obeyHtmlRobotsNofollow=off&xdstopw=on&title=" + URLEncoder.encode(title, StandardCharsets.UTF_8.name()) + "&url='+escape('"+sku+"'),'_blank','height=250,width=600,resizable=yes,scrollbar=no,directory=no,menubar=no,location=no');w.focus();";
         		writer.write("<div class='btn btn-default btn-sm' style='float:right' onclick=\""+jsc+"\">re-crawl url</div>\n");
         	}
         	

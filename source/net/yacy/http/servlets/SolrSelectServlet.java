@@ -233,7 +233,7 @@ public class SolrSelectServlet extends HttpServlet {
             }
 
             // get the embedded connector
-            String requestURI = hrequest.getRequestURI();
+            final String requestURI = hrequest.getRequestURI();
             boolean defaultConnector = (requestURI.startsWith("/solr/" + WebgraphSchema.CORE_NAME)) ? false : requestURI.startsWith("/solr/" + CollectionSchema.CORE_NAME) || mmsp.get("core", CollectionSchema.CORE_NAME).equals(CollectionSchema.CORE_NAME);
             mmsp.getMap().remove("core");
             SolrConnector connector = defaultConnector ? sb.index.fulltext().getDefaultEmbeddedConnector() : sb.index.fulltext().getEmbeddedConnector(WebgraphSchema.CORE_NAME);
@@ -259,6 +259,10 @@ public class SolrSelectServlet extends HttpServlet {
             final SolrQueryResponse rsp;
             if (connector instanceof EmbeddedSolrConnector) {
                 req = ((EmbeddedSolrConnector) connector).request(mmsp);
+                
+                /* Add the servlet request URI to the context for eventual computation of relative paths in writers */
+                req.getContext().put("requestURI", requestURI);
+                
                 rsp = ((EmbeddedSolrConnector) connector).query(req);
 
                 // prepare response
@@ -316,6 +320,9 @@ public class SolrSelectServlet extends HttpServlet {
                  * WARNING : the SolrQueryRequestBase instance will return null for the getSearcher(), getCore() and getSchema() functions.
                  * Be sure thath the responseWriter instance can handle this properly.  */
             	req = new SolrQueryRequestBase(null, mmsp) {};
+            	
+            	/* Add the servlet request URI to the context for eventual computation of relative paths in writers */
+            	req.getContext().put("requestURI", requestURI);
             	
             	rsp = new SolrQueryResponse();
                 rsp.setHttpCaching(false);
