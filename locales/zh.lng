@@ -907,8 +907,6 @@ The two stages are separated because they need statistical information from the 
 #File: ConfigHeuristics_p.html
 #---------------------------
 Heuristics Configuration==启发式配置
-A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://de.wikipedia.org/wiki/Heuristik">启发式</a> '是一个依赖于经验来解决问题, 学习与发现问题的过程.' (Wikipedia).
-A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving==<a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">启发式</a>是一种“基于经验的技术，有助于解决问题，学习和发现”
 A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">启发式</a>是一种“基于经验的技术，有助于解决问题，学习和发现”
 search-result: shallow crawl on all displayed search results==搜索结果:浅度爬取所有显示的搜索结果
 When a search is made then all displayed result links are crawled with a depth-1 crawl.==当进行搜索时,所有显示的结果网址的爬网深度-1。
@@ -919,7 +917,7 @@ When a search is made then all displayed result links are crawled with a depth-1
 >Comment<==>评论<
 >Title<==>标题<
 >Active<==>激活<
->copy &amp; paste a example config file<==>复制＆amp; 粘贴一个示例配置文件<
+>copy &amp; paste a example config file<==>复制&amp; 粘贴一个示例配置文件<
 Alternatively you may==或者你可以
 To find out more about OpenSearch see==要了解关于OpenSearch的更多信息，请参阅
 20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20个结果从远程系统中获取并同时加载,立即解析并创建索引.
@@ -933,14 +931,14 @@ Available/Active Opensearch System==可用/激活Opensearch系统
 Url <small>(format opensearch==Url <small>（格式为opensearch
 Url template syntax==网址模板语法
 "reset to default list"=="重置为默认列表"
-"discover from index" class=="从索引中发现"类
+"discover from index"=="从索引中发现"
 start background task, depending on index size this may run a long time==开始后台任务，这取决于索引的大小，这可能会运行很长一段时间
 With the button "discover from index" you can search within the metadata of your local index (Web Structure Index) to find systems which support the Opensearch specification.==使用“从索引发现”按钮，您可以在本地索引（Web结构索引）的元数据中搜索，以查找支持Opensearch规范的系统。
 The task is started in the background. It may take some minutes before new entries appear (after refreshing the page).==任务在后台启动。 出现新条目可能需要几分钟时间（在刷新页面之后）。
 "switch Solr fields on"=="开关Solr字段"
 ('modify Solr Schema')==（'修改Solr模式'）
-located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==位于DATA / SETTINGS目录的<i> defaults / heuristicopensearch.conf </ i>中。
-For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.==对于发现功能，Web结构索引的<i> web图表</ i>选项和字段<i> target_rel_s，target_protocol_s，target_urlstub_s </ i>必须在<a href =“IndexSchema_p.html ？core = webgraph“> webgraph Solr模式</a>。
+located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==位于DATA / SETTINGS目录的<i> defaults / heuristicopensearch.conf </i>中。
+For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.==对于发现功能，Web结构索引的<i> web图表</i>选项和字段<i> target_rel_s，target_protocol_s，target_urlstub_s </i>必须在<a href="IndexSchema_p.html?core=webgraph">webgraph Solr模式</a>。
 20 results are taken from remote system and loaded simultanously==20个结果从远程系统中获取，并同时加载，立即解析并索引
 >copy ==>复制＆amp; 粘贴一个示例配置文件<
 When using this heuristic==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
