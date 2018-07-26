@@ -126,7 +126,7 @@ UI Translations==用户界面翻译
 #---------------------------
 Generic Search Portal==通用搜索门户
 User Profile==用户资料
-Local robots.txt==本地robots.txt
+Local robots.txt==本地爬虫协议
 Portal Configuration==门户配置
 Search Box Anywhere==随处搜索框
 #-----------------------------
@@ -204,7 +204,7 @@ For this option URL proxy must be enabled==对于这个选项，必须启用URL�
 
 #File: AccessGrid_p.html
 #---------------------------
-This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==这些图像显示了到您的YaCy节点的传入连接以及从节点到其他节点和Web服务器的传出连接
+This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==这幅图显示了到您节点的传入连接,以及从您节点到其他节点或网站服务器的传出连接
 Server Access Grid==服务器访问网格
 YaCy Network Access==YaCy网络访问
 #-----------------------------
@@ -437,20 +437,20 @@ This is a list of requests (max. 1000) to the local http server within the last 
 
 #File: Blacklist_p.html
 #---------------------------
-Select list to edit:==选择列表进行编辑:
-Add URL pattern==添加URL模式
-Edit list==编辑列表
-The right '*', after the '/', can be replaced by a==在'/'之后的右边'*'可以被替换为
->regular expression<==>正则表达式<
-(slow)==(慢)
-"set"=="集合"
-The right '*'==右边的'*'
 Blacklist Administration==黑名单管理
-Used Blacklist engine:==使用的黑名单引擎:
-This function provides an URL filter to the proxy; any blacklisted URL is blocked==提供代理URL过滤;过滤掉自载入时加入进黑名单的URL.
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==提供代理地址过滤;过滤掉自载入时加入进黑名单的地址.
 from being loaded. You can define several blacklists and activate them separately.==您可以自定义黑名单并分别激活它们.
 You may also provide your blacklist to other peers by sharing them; in return you may==您也可以提供你自己的黑名单列表给其他人;
 collect blacklist entries from other peers==同样，其他人也能将黑名单列表共享给您
+Select list to edit:==选择列表进行编辑:
+Add URL pattern==添加地址规则
+Edit list==编辑列表
+The right '*', after the '/', can be replaced by a==在'/'之后的右边'*'可以被替换为
+>regular expression<==>正则表达式<
+#(slow)==(慢)
+"set"=="集合"
+The right '*'==右边的'*'
+Used Blacklist engine:==使用的黑名单引擎:
 Active list:==激活列表:
 No blacklist selected==未选中黑名单
 Select list:==选中黑名单:
@@ -472,7 +472,7 @@ Move selected pattern(s) to==移动选中规则
 Add new pattern:==添加新规则:
 "Add URL pattern"=="添加地址规则"
 The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.== 在 '/' 后边的 '*' ,可用<a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">正则表达式</a>表示.
-domain.net/fullpath<==domain.net/绝对路径<
+#domain.net/fullpath<==domain.net/绝对路径<
 #>domain.net/*<==>domain.net/*<
 #*.domain.net/*<==*.domain.net/*<
 #*.sub.domain.net/*<==*.sub.domain.net/*<
@@ -537,8 +537,8 @@ Used Blacklist engine:==使用的黑名单引擎:
 Test list:==测试黑名单:
 "Test"=="测试"
 The tested URL was==此链接
-It is blocked for the following cases:==由于以下原因,此名单无效:
-#Crawling==Crawling
+It is blocked for the following cases:==在下列情况下,它会被阻止:
+Crawling==抓取中
 #DHT==DHT
 News==新闻
 Proxy==代理
@@ -824,9 +824,9 @@ Your basic configuration is complete! You can now (for example)==配置成功, �
 just <==开始<
 start an uncensored search==自由地搜索了
 start your own crawl</a> and contribute to the global index, or create your own private web index==开始您的索引, 并将其贡献给全球索引, 或者创建一个您自己的私有搜索网页
-set a personal peer profile</a> (optional settings)==设置私有节点</a> (可选项)
+set a personal peer profile</a> (optional settings)==设置个人节点资料</a> (可选项)
 monitor at the network page</a> what the other peers are doing==监视网络页面</a>, 以及其他节点的活动
-Your Peer name is a default name; please set an individual peer name.==您的节点名称为系统默认, 请设置另外一个名称.
+Your Peer name is a default name; please set an individual peer name.==您的节点名称为系统默认,请另外设置一个名称.
 You did not set a user name and/or a password.==您未设置用户名和/或密码.
 Some pages are protected by passwords.==一些页面受密码保护.
 You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==您可以在 <a href="ConfigAccounts_p.html">账户菜单</a> 设置密码, 从而加强您的YaCy节点安全性.</p>::
@@ -862,7 +862,7 @@ If you increase a single value by one, then the strength of the parameter double
 
 #Pre-Ranking
 >Pre-Ranking<==>预排名<
-</body>==<script>window.onload = function () {$("label:contains('Appearance In Emphasized Text')").text('出现在强调的文本中');$("label:contains('Appearance In URL')").text('出现在地址中'); $("label:contains('Appearance In Author')").text('出现在作者中'); $("label:contains('Appearance In Reference/Anchor Name')").text('出现在参考/锚点名称中'); $("label:contains('Appearance In Tags')").text('出现在标签中'); $("label:contains('Appearance In Title')").text('出现在标题中'); $("label:contains('Authority of Domain')").text('域名权威'); $("label:contains('Category App, Appearance')").text('类别:出现在应用中'); $("label:contains('Category Audio Appearance')").text('类别:出现在音频中'); $("label:contains('Category Image Appearance')").text('类别:出现在图像中'); $("label:contains('Category Video Appearance')").text('类别:出现在视频中'); $("label:contains('Category Index Page')").text('类别:索引页面'); $("label:contains('Date')").text('日期'); $("label:contains('Domain Length')").text('域名长度'); $("label:contains('Hit Count')").text('命中数'); $("label:contains('Preferred Language')").text('倾向的语言'); $("label:contains('Links To Local Domain')").text('本地域名链接'); $("label:contains('Links To Other Domain')").text('其他域名链接'); $("label:contains('Phrases In Text')").text('文本中短语'); $("label:contains('Term Frequency')").text('术语频率'); $("label:contains('URL Components')").text('地址组件'); $("label:contains('Term Frequency')").text('术语频率'); $("label:contains('URL Length')").text('地址长度'); $("label:contains('Word Distance')").text('词汇距离'); $("label:contains('Words In Text')").text('文本词汇'); $("label:contains('Words In Title')").text('标题词汇');}</script></body>
+</body>==<script>window.onload = function () {$("label:contains('Appearance In Emphasized Text')").text('出现在强调的文本中');$("label:contains('Appearance In URL')").text('出现在地址中'); $("label:contains('Appearance In Author')").text('出现在作者中'); $("label:contains('Appearance In Reference/Anchor Name')").text('出现在参考/锚点名称中'); $("label:contains('Appearance In Tags')").text('出现在标签中'); $("label:contains('Appearance In Title')").text('出现在标题中'); $("label:contains('Authority of Domain')").text('域名权威'); $("label:contains('Category App, Appearance')").text('类别:出现在应用中'); $("label:contains('Category Audio Appearance')").text('类别:出现在音频中'); $("label:contains('Category Image Appearance')").text('类别:出现在图像中'); $("label:contains('Category Video Appearance')").text('类别:出现在视频中'); $("label:contains('Category Index Page')").text('类别:索引页面'); $("label:contains('Date')").text('日期'); $("label:contains('Domain Length')").text('域名长度'); $("label:contains('Hit Count')").text('命中数'); $("label:contains('Preferred Language')").text('倾向的语言'); $("label:contains('Links To Local Domain')").text('本地域名链接'); $("label:contains('Links To Other Domain')").text('其他域名链接'); $("label:contains('Phrases In Text')").text('文本中短语');$("label:contains('Position In Phrase')").text('在短语中位置');$("label:contains('Position In Text')").text('在文本中位置');$("label:contains('Position Of Phrase')").text('短语的位置'); $("label:contains('Term Frequency')").text('术语频率'); $("label:contains('URL Components')").text('地址组件'); $("label:contains('Term Frequency')").text('术语频率'); $("label:contains('URL Length')").text('地址长度'); $("label:contains('Word Distance')").text('词汇距离'); $("label:contains('Words In Text')").text('文本词汇'); $("label:contains('Words In Title')").text('标题词汇');}</script></body>
 
 #>Appearance In Emphasized Text<==>出现在强调的文本中<
 #a higher ranking level prefers documents where the search word is emphasized==较高的排名级别更倾向强调搜索词的文档
@@ -906,8 +906,12 @@ The two stages are separated because they need statistical information from the 
 
 #File: ConfigHeuristics_p.html
 #---------------------------
-search-result: shallow crawl on all displayed search results==搜索结果：对所有显示的搜索结果进行浅度爬取
-When a search is made then all displayed result links are crawled with a depth-1 crawl.==当进行搜索时，所有显示的结果链接的爬网深度-1。
+Heuristics Configuration==启发式配置
+A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://de.wikipedia.org/wiki/Heuristik">启发式</a> '是一个依赖于经验来解决问题, 学习与发现问题的过程.' (Wikipedia).
+A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving==<a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">启发式</a>是一种“基于经验的技术，有助于解决问题，学习和发现”
+A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">启发式</a>是一种“基于经验的技术，有助于解决问题，学习和发现”
+search-result: shallow crawl on all displayed search results==搜索结果:浅度爬取所有显示的搜索结果
+When a search is made then all displayed result links are crawled with a depth-1 crawl.==当进行搜索时,所有显示的结果网址的爬网深度-1。
 "Save"=="保存"
 "add"=="添加"
 >new<==>新建<
@@ -918,13 +922,12 @@ When a search is made then all displayed result links are crawled with a depth-1
 >copy &amp; paste a example config file<==>复制＆amp; 粘贴一个示例配置文件<
 Alternatively you may==或者你可以
 To find out more about OpenSearch see==要了解关于OpenSearch的更多信息，请参阅
-20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20个结果从远程系统中获取，并同时加载，立即解析并索引
+20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20个结果从远程系统中获取并同时加载,立即解析并创建索引.
 When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
-A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">启发式</a>是一种“基于经验的技术，有助于解决问题，学习和发现”
 This means: right after the search request every page is loaded and every page that is linked on this page.==这意味着：在搜索请求之后，就开始加载每个页面上的链接。
 If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中“添加为全局抓取作业”，则要爬网的页面将被添加到全局抓取队列（远程YaCy节点可以抓取要抓取的页面）。
 Default is to add the links to the local crawl queue (your peer crawls the linked pages).==默认是将链接添加到本地爬网队列（您的YaCy爬取链接的页面）。
-add as global crawl job==添加为全局抓取作业
+add as global crawl job==添加为全球抓取作业
 opensearch load external search result list from active systems below==opensearch从下面的活动系统加载外部搜索结果列表
 Available/Active Opensearch System==可用/激活Opensearch系统
 Url <small>(format opensearch==Url <small>（格式为opensearch
@@ -939,14 +942,11 @@ The task is started in the background. It may take some minutes before new entri
 located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==位于DATA / SETTINGS目录的<i> defaults / heuristicopensearch.conf </ i>中。
 For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.==对于发现功能，Web结构索引的<i> web图表</ i>选项和字段<i> target_rel_s，target_protocol_s，target_urlstub_s </ i>必须在<a href =“IndexSchema_p.html ？core = webgraph“> webgraph Solr模式</a>。
 20 results are taken from remote system and loaded simultanously==20个结果从远程系统中获取，并同时加载，立即解析并索引
-A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving==<a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">启发式</a>是一种“基于经验的技术，有助于解决问题，学习和发现”
 >copy ==>复制＆amp; 粘贴一个示例配置文件<
 When using this heuristic==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
 For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s==对于发现功能，Web结构索引的<i> web图表</ i>选项和字段<i> target_rel_s，target_protocol_s，target_urlstub_s </ i>必须在<a href =“IndexSchema_p.html ？core = webgraph“> webgraph Solr模式</a>。
 start background task==开始后台任务，这取决于索引的大小，这可能会运行很长一段时间
 >copy==>复制＆amp; 粘贴一个示例配置文件<
-Heuristics Configuration==启发式配置
-A <a href="http://en.wikipedia.org/wiki/Heuristic">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==<a href="http://de.wikipedia.org/wiki/Heuristik">启发式</a> '是一个依赖于经验来解决问题, 学习与发现问题的过程.' (Wikipedia).
 The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==您可以在这里开启启发式搜索, 通过猜测链接, 嵌套搜索和访问其他搜索引擎, 从而找到更多符合您期望的结果.
 When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==开启启发式搜索时, 搜索结果给出的链接并不是直接搜索的链接, 而是已经缓存在其他服务器上的结果.
 This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==这保证了黑名单的有效性, 并且搜索关键字是通过启发式搜索找到的.
@@ -960,7 +960,7 @@ The search result was discovered by a heuristic, not previously known by YaCy==�
 'site'-operator: instant shallow crawl=='站点'-操作符: 即时浅抓取
 When a search is made using a 'site'-operator (like: 'download site:yacy.net') then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==当使用'站点'-操作符搜索时(比如: 'download site:yacy.net') ,主机就会立即抓取层数为 最大限制深度-1 的内容.
 That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==意即: 在链接请求发出后, 搜索引擎就会载入在同一主机中每一个与此页面相连的网页.
-Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).==因为'立即抓取'依赖于robots.txt和两个相连页面的最小访问时间, 所以这个启发式选项会相当慢, 但是在第二次搜索时会搜索到更多条目(需要间隔几秒钟).
+Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).==因为'立即抓取'依赖于爬虫协议和两个相连页面的最小访问时间, 所以这个启发式选项会相当慢, 但是在第二次搜索时会搜索到更多条目(需要间隔几秒钟).
 #-----------------------------
 
 #File: ConfigHTCache_p.html
@@ -985,7 +985,7 @@ milliseconds==毫秒
 Cleanup==清除
 Cache Deletion==删除缓存
 Delete HTTP &amp; FTP Cache==删除HTTP &amp; FTP 缓存
-Delete robots.txt Cache==删除robots.txt 缓存
+Delete robots.txt Cache==删除爬虫协议缓存
 "Delete"=="删除"
 #-----------------------------
 
@@ -1077,14 +1077,15 @@ Peer-to-Peer Mode==点对点模式
 >Index Distribution==>索引分发
 This enables automated, DHT-ruled Index Transmission to other peers==自动向其他节点传递DHT规则的索引
 >enabled==>开启
-disabled during crawling==在抓取时关闭
-disabled during indexing==在索引时关闭
+disabled during crawling==关闭 在抓取时
+disabled during indexing==关闭 在索引时
 >Index Receive==>接收索引
 Accept remote Index Transmissions==接受远程索引传递
 This works only if you have a senior peer. The DHT-rules do not work without this function==仅当您拥有更上级节点时有效. 如果未设置此项, DHT规则不生效
 >reject==>拒绝
-accept transmitted URLs that match your blacklist==接受与您的黑名单匹配的传输网址
+accept transmitted URLs that match your blacklist==接受 与您黑名单匹配的传来的地址
 >allow==>允许
+deny remote search==拒绝 远程搜索
 
 #Robinson Mode
 >Robinson Mode==>漂流模式
@@ -1120,7 +1121,6 @@ thus allowing YaCy peers to use self-signed certificates==从而允许YaCy节点
 Note also that encryption of remote search queries is configured with a dedicated setting in the==另请注意，远程搜索查询加密的专用设置配置请使用
 page==页面
 
-deny remote search==拒绝远程搜索
 No changes were made!==未作出任何改变!
 Accepted Changes==接受改变
 Inapplicable Setting Combination==设置未被应用
@@ -1266,7 +1266,7 @@ Show Information Links for each Search Result Entry==显示搜索结果的链接
 "searchresult" (a default custom page name for search results)=="搜索结果" (搜索结果页面名称)
 "Change Search Page"=="改变搜索页"
 "Set to Default Values"=="设为默认值"
-The search page can be integrated in your own web pages with an iframe. Simply use the following code:==使用以下代码, 将搜索页能集成在网页框架中:
+The search page can be integrated in your own web pages with an iframe. Simply use the following code:==使用以下代码,将搜索页集成在你的网站中:
 This would look like:==示例:
 For a search page with a small header, use this code:==对于一个拥有二级标题的页面, 可使用以下代码:
 A third option is the interactive search. Use this code:==交互搜索代码:
@@ -1274,11 +1274,10 @@ A third option is the interactive search. Use this code:==交互搜索代码:
 
 #File: ConfigProfile_p.html
 #---------------------------
->Name<==>名字<
 Your Personal Profile==您的个人资料
 You can create a personal profile here, which can be seen by other YaCy-members==您可以在这创建个人资料, 而且对其他YaCy节点可见
 or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==或者<a href="ViewProfile.html?hash=localhash">在公共场所时</a>使用<a href="ViewProfile.rdf?hash=localhash">FOAF RDF 文件</a>.
-Name==名字
+>Name<==>名字<
 Nick Name==昵称
 Homepage (appears on every <a href="Supporter.html">Supporter Page</a> as long as your peer is online)==首页(显示在每个<a href="Supporter.html">支持者</a> 页面中, 前提是您的节点在线).
 eMail==邮箱
@@ -1306,7 +1305,7 @@ For explanation please look into defaults/yacy.init==详细内容请参考defaul
 #File: ConfigRobotsTxt_p.html
 #---------------------------
 >Exclude Web-Spiders<==>拒绝网页爬虫<
-Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==在这里您可以创建一个robots.txt, 以阻止试图访问您节点网络接口的网络爬虫.
+Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==在这里您可以创建一个爬虫协议, 以阻止试图访问您节点网络接口的网络爬虫.
 >is a volunteer agreement most search-engines==>是一个大多数搜索引擎
 (including YaCy) follow==(包括YaCy)都遵守的协议
 It disallows crawlers to access webpages or even entire domains.==它会阻止网络爬虫进入网页甚至是整个域.
@@ -1491,8 +1490,8 @@ Edit Profile==修改文件
 #File: CrawlResults.html
 #---------------------------
 >Collection==>收藏
-"del & blacklist"=="删除＆黑名单"
-"del =="删除＆黑名单"
+"del & blacklist"=="删除并拉黑"
+"del =="删除
 Crawl Results<==抓取结果<
 Overview</a>==概况</a>
 Receipts</a>==回执</a>
@@ -1502,8 +1501,8 @@ Proxy Use==Proxy使用
 Local Crawling</a>==本地抓取</a>
 Global Crawling</a>==全球抓取</a>
 Surrogate Import</a>==导入备份</a>
->Crawl Results Overview<==>抓取结果一览<
-These are monitoring pages for the different indexing queues.==索引队列监视页面.
+>Crawl Results Overview<==>抓取结果概述<
+These are monitoring pages for the different indexing queues.==创建索引队列的监视页面.
 YaCy knows 5 different ways to acquire web indexes. The details of these processes (1-5) are described within the submenu's listed==YaCy使用5种不同的方式来获取网络索引. 进程(1-5)的细节在子菜单中显示
 above which also will show you a table with indexing results so far. The information in these tables is considered as private,==以上列表也会显示目前的索引结果. 表中的信息应该视为隐私, 
 so you need to log-in with your administration password.==所以您最好设置一个有密码的管理员账户来查看.
@@ -1799,11 +1798,11 @@ Available Intranet Server==可用局域网服务器
 #File: CrawlStartScanner_p.html
 #---------------------------
 Network Scanner==网络扫描器
-YaCy can scan a network segment for available http, ftp and smb server.==YaCy可扫描http, ftp 和smb服务器.
-You must first select a IP range and then, after this range is scanned,==须先指定IP范围, 再进行扫描,
+YaCy can scan a network segment for available http, ftp and smb server.==YaCy可扫描http,ftp和smb服务器.
+You must first select a IP range and then, after this range is scanned,==须先指定IP范围,再进行扫描,
 it is possible to select servers that had been found for a full-site crawl.==才有可能选择主机并将其作为全站抓取的服务器.
 #No servers had been detected in the given IP range== 
-Please enter a different IP range for another scan.==未检测到可用服务器, 请重新指定IP范围.
+Please enter a different IP range for another scan.==未检测到可用服务器,请重新指定IP范围.
 Please wait...==请稍候...
 >Scan the network<==>扫描网络<
 Scan Range==扫描范围
@@ -1943,14 +1942,14 @@ only the local index==仅本地索引
 Query Operators==查询操作
 restrictions==限制
 only urls with the &lt;phrase&gt; in the url==仅包含&lt;phrase&gt;的URL
-only urls with extension==仅带扩展名的URL
-only urls from host==仅来自主机的URL
+only urls with extension==仅带扩展名的地址
+only urls from host==仅来自主机的地址
 only pages with as-author-anotated==仅作者授权页面
 only pages from top-level-domains==仅来自顶级域名的页面
 only resources from http or https servers==仅来自http/https服务器的资源
 only resources from ftp servers==仅来自ftp服务器的资源
 they are rare==很少
-crawl them yourself==您需要crawl它们
+crawl them yourself==您需要自己抓取它们
 only resources from smb servers==仅来自smb服务器的资源
 Intranet Indexing</a> must be selected==局域网索引</a>必须被选中
 only files from a local file system==仅来自本机文件系统的文件
@@ -2019,7 +2018,7 @@ Cleanup==清理
 >Delete Search Index<==>删除搜索索引<
 Stop Crawler and delete Crawl Queues==停止爬虫并删除crawl队列
 Delete HTTP &amp; FTP Cache==删除HTTP &amp; FTP缓存
-Delete robots.txt Cache==删除robots.txt缓存
+Delete robots.txt Cache==删除爬虫协议缓存
 Delete cached snippet-fetching failures during search==删除已缓存的错误信息
 "Delete"=="删除"
 No entry for word '#[word]#'==无'#[word]#'的对应条目
@@ -2149,6 +2148,22 @@ No entry found for URL-hash==未找到合适条目对应地址Hash
 this may produce unresolved references at other word indexes but they do not harm==这可能和其他关键字产生未解析关联, 但是这并不影响系统性能
 "Delete URL and remove all references from words"=="删除地址并从关键字中删除所有关联"
 delete the reference to this url at every other word where the reference exists (very extensive, but prevents unresolved references)==删除指向此链接的关联字,(很多, 但是会阻止未解析关联的产生)
+#-----------------------------
+
+#File: IndexDeletion_p.html
+#---------------------------
+>Index Deletion<==>索引删除<
+The search index contains==搜索索引包含了
+documents.==文档.
+You can delete them here.==你可以在这儿删除它们.
+Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.==删除是同时进行的,这可能导致最近删除的文档尚未反映在文档计数中.
+#-----------------------------
+
+#File: IndexFederated_p.html
+#---------------------------
+>Index Sources & Targets<==>索引来源&目标<
+YaCy supports multiple index storage locations.==YaCy支持多地索引储存.
+As an internal indexing database a deep-embedded multi-core Solr is used and it is possible to attach also a remote Solr.==内部索引数据库使用了深度嵌入式多核Solr,并且还可以附加远程Solr.
 #-----------------------------
 
 #File: IndexCreateLoaderQueue_p.html
@@ -2605,18 +2620,20 @@ Configuration of a RSS Search==RSS搜索配置
 Loading of RSS Feeds<==加载RSS Feeds<
 RSS feeds can be loaded into the YaCy search index.==YaCy能够读取RSS feeds.
 This does not load the rss file as such into the index but all the messages inside the RSS feeds as individual documents.==但不是直接读取RSS文件, 而是将RSS feed中的所有信息分别当作单独的文件来读取.
-URL of the RSS feed==RSS feed链接
+URL of the RSS feed==RSS feed地址
 >Preview<==>预览<
 "Show RSS Items"=="显示RSS条目"
+>Indexing<==>创建索引<
 Available after successful loading of rss feed in preview==仅在读取rss feed后有效
-"Add All Items to Index (full content of url)"=="添加所有条目到索引中(URL中的全部内容)"
->once<==>立即<
->load this feed once now<==>立即读取此feed<
+"Add All Items to Index (full content of url)"=="将所有条目添加到索引(地址中的全部内容)"
+>once<==>一次<
+>load this feed once now<==>读取一次此feed<
 >scheduled<==>定时<
 >repeat the feed loading every<==>读取此feed每隔<
 >minutes<==>分钟<
 >hours<==>小时<
 >days<==>天<
+>collection<==>收集器<
 > automatically.==>.
 >List of Scheduled RSS Feed Load Targets<==>定时任务列表<
 >Title<==>标题<
@@ -2930,6 +2947,9 @@ Remote Search:==远端搜索:
 <html lang="en">==<html lang="zh">
 Performance Settings for Memory==内存性能设置
 refresh graph==刷新图表
+>simulate short memory status<==>模拟短期内存状态<
+>use Standard Memory Strategy<==>使用标准内存策略<
+(current==(当前
 Memory Usage==内存使用
 After Startup==启动后
 After Initializations==初始化后
@@ -3744,15 +3764,18 @@ Steering of API Actions<==API动作向导<
 "previous page"=="上一页"
  of #[of]#== 共 #[of]#
 
-Recording&nbsp;Date==正在记录&nbsp;日期
-Last&nbsp;Exec&nbsp;Date==上次&nbsp;执行&nbsp;日期
-Next&nbsp;Exec&nbsp;Date==下次&nbsp;执行&nbsp;日期
+Recording==记录的
+Last&nbsp;Exec==上次执行
+Next&nbsp;Exec==下次执行
+>Date==>日期
+>Event Trigger<==>事件触发器<
 >Scheduler<==>定时器<
 #>URL<==>URL
 >no repetition<==>无安排<
 >activate scheduler<==>激活定时器<
 "Execute Selected Actions"=="执行选中活动"
 "Delete Selected Actions"=="删除选中活动"
+"Delete all Actions which had been created before "=="删除创建于之前的全部活动"
 >Result of API execution==>API执行结果
 #>Status<==>Status>
 #>URL<==>URL<
@@ -3771,7 +3794,7 @@ Table Viewer==表格查看
 The information that is presented on this page can also be retrieved as XML.==此页信息也可表示为XML.
 Click the API icon to see the XML.==点击API图标查看XML.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
->robots.txt table<==>robots.txt 列表<
+>robots.txt table<==>爬虫协议列表<
 #-----------------------------
 
 ### This Tables section is removed in current SVN Versions
@@ -4459,7 +4482,7 @@ Filter &amp; Blacklists==过滤 &amp; 黑名单
 Blacklist Administration==黑名单管理
 Blacklist Cleaner==黑名单整理
 Blacklist Test==黑名单测试
-Import/Export==导入 / 导出
+Import/Export==导入/导出
 Index Cleaner==索引整理
 #-----------------------------
 
@@ -4479,7 +4502,7 @@ System Update==系统升级
 >Performance==>性能
 Advanced Settings==高级设置
 Parser Configuration==解析配置
-Local robots.txt==本地robots.txt
+Local robots.txt==本地爬虫协议
 Advanced Properties==高级设置
 #-----------------------------
 
@@ -4511,7 +4534,7 @@ Surrogate Import==代理导入
 Crawl Results==抓取结果
 Crawler<==爬虫<
 Global==全球
-robots.txt Monitor==robots.txt 监视器
+robots.txt Monitor==爬虫协议监视器
 Remote==远程
 No-Load==空载
 Processing Monitor==进程监视
