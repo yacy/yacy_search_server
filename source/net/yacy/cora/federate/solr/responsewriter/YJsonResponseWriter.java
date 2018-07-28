@@ -109,7 +109,7 @@ public class YJsonResponseWriter implements QueryResponseWriter, EmbeddedSolrRes
         // parse response header
         ResHead resHead = new ResHead();
         NamedList<?> val0 = (NamedList<?>) responseHeader.get("params");
-        resHead.rows = Integer.parseInt((String) val0.get("rows"));
+        resHead.rows = Long.parseLong((String) val0.get("rows"));
         resHead.offset = response.offset(); // equal to 'start'
         resHead.numFound = response.matches();
 
@@ -121,9 +121,9 @@ public class YJsonResponseWriter implements QueryResponseWriter, EmbeddedSolrRes
         
         // write header
         writer.write(("{\"channels\": [{\n").toCharArray());
-        solitaireTag(writer, "totalResults", Integer.toString(resHead.numFound));
-        solitaireTag(writer, "startIndex", Integer.toString(resHead.offset));
-        solitaireTag(writer, "itemsPerPage", Integer.toString(resHead.rows));
+        solitaireTag(writer, "totalResults", Long.toString(resHead.numFound));
+        solitaireTag(writer, "startIndex", Long.toString(resHead.offset));
+        solitaireTag(writer, "itemsPerPage", Long.toString(resHead.rows));
         solitaireTag(writer, "title", this.title);
         solitaireTag(writer, "description", "Search Result");
         writer.write("\"items\": [\n".toCharArray());

@@ -225,6 +225,9 @@ public class SolrSelectServlet extends HttpServlet {
                     CollectionSchema.title.getSolrFieldName() + "," +
                     CollectionSchema.description_txt.getSolrFieldName() + "," +
                     CollectionSchema.id.getSolrFieldName() + "," +
+                    CollectionSchema.author.getSolrFieldName() + "," +
+                    CollectionSchema.publisher_t.getSolrFieldName() + "," +
+                    CollectionSchema.keywords.getSolrFieldName() + "," +
                     CollectionSchema.url_paths_sxt.getSolrFieldName() + "," +
                     CollectionSchema.last_modified.getSolrFieldName() + "," +
                     CollectionSchema.size_i.getSolrFieldName() + "," +
