@@ -119,12 +119,9 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
         
         final Object responseObj = rsp.getResponse();
         
-        assert values.get("responseHeader") != null;
         assert values.get("response") != null;
 
-        final NamedList<Object> responseHeader = rsp.getResponseHeader();
-        
-        write(writer, request, values, responseHeader, responseObj);
+        write(writer, request, values, responseObj);
     }
     
     @Override
@@ -132,11 +129,9 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
         
         final NamedList<Object> values = rsp.getResponse();
         
-        final NamedList<?> responseHeader = rsp.getResponseHeader();
-        
         final SolrDocumentList documents = rsp.getResults();
         	
-        write(writer, request, values, responseHeader, documents);
+        write(writer, request, values, documents);
 	}
     
 	/**
@@ -148,8 +143,10 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
 	 * @throws IOException when a write error occurred
 	 */
 	private void write(final Writer writer, final SolrQueryRequest request, final NamedList<?> values,
-			final NamedList<?> responseHeader, final Object responseObj) throws IOException {
+			final Object responseObj) throws IOException {
         final ResHead resHead = new ResHead();
+        resHead.rows = request.getOriginalParams().getLong("rows", -1);
+        
         final int responseCount;
         
         @SuppressWarnings("unchecked")
@@ -169,7 +166,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
             
             responseCount = documents.size();
             
-            writeHeader(writer, responseHeader, resHead);
+            writeHeader(writer, resHead);
             
             writeDocs(writer, documents, request, responseCount, snippets);
         } else if(responseObj instanceof SolrDocumentList) {
@@ -184,7 +181,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
             
             responseCount = documents.size();
             
-            writeHeader(writer, responseHeader, resHead);
+            writeHeader(writer, resHead);
             
             writeDocs(writer, documents, responseCount, snippets);
         } else {
@@ -239,16 +236,11 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
 	/**
 	 * Append to the writer the header of the OpenSearch RSS representation.
 	 * @param writer an open output writer. Must not be null.
-	 * @param responseHeader the Solr response header. Must not be null.
 	 * @param resHead the calculated results head. Must not be null.
 	 * @throws IOException when an unexpected error occurred while writing
 	 */
-	private void writeHeader(final Writer writer, final NamedList<?> responseHeader, final ResHead resHead)
+	private void writeHeader(final Writer writer, final ResHead resHead)
 			throws IOException {
-		// parse response header
-        final NamedList<?> val0 = (NamedList<?>) responseHeader.get("params");
-        resHead.rows = Integer.parseInt((String) val0.get("rows"));
-
         // write header
         writer.write((
                         "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
