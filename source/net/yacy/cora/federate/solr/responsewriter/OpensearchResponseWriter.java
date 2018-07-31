@@ -69,14 +69,14 @@ import net.yacy.search.schema.CollectionSchema;
 public class OpensearchResponseWriter implements QueryResponseWriter, SolrjResponseWriter {
 
     // define a list of simple YaCySchema -> RSS Token matchings
-    private static final Map<String, String> field2tag = new HashMap<String, String>();
+    private static final Map<String, String> field2tag = new HashMap<>();
 
     // pre-select a set of YaCy schema fields for the solr searcher which should cause a better caching
     private static final CollectionSchema[] extrafields = new CollectionSchema[]{
         CollectionSchema.id, CollectionSchema.title, CollectionSchema.description_txt, CollectionSchema.text_t,
         CollectionSchema.h1_txt, CollectionSchema.h2_txt, CollectionSchema.h3_txt, CollectionSchema.h4_txt, CollectionSchema.h5_txt, CollectionSchema.h6_txt,
         };
-    static final Set<String> SOLR_FIELDS = new HashSet<String>();
+    static final Set<String> SOLR_FIELDS = new HashSet<>();
     static {
         field2tag.put(CollectionSchema.coordinate_p.getSolrFieldName() + "_0_coordinate", Geo.Lat.getURIref());
         field2tag.put(CollectionSchema.coordinate_p.getSolrFieldName() + "_1_coordinate", Geo.Long.getURIref());
@@ -147,8 +147,6 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
         final ResHead resHead = new ResHead();
         resHead.rows = request.getOriginalParams().getLong("rows", -1);
         
-        final int responseCount;
-        
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> facetCounts = (SimpleOrderedMap<Object>) values.get("facet_counts");
         @SuppressWarnings("unchecked")
@@ -164,11 +162,10 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
             resHead.offset = documents.offset(); // equal to 'start' Solr param
             resHead.numFound = documents.matches();
             
-            responseCount = documents.size();
             
             writeHeader(writer, resHead);
             
-            writeDocs(writer, documents, request, responseCount, snippets);
+            writeDocs(writer, documents, request, snippets);
         } else if(responseObj instanceof SolrDocumentList) {
 			/*
 			 * The response object can be a SolrDocumentList when the response is partial,
@@ -179,11 +176,9 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
             resHead.offset = documents.getStart(); // equal to 'start' Solr param
             resHead.numFound = documents.getNumFound();
             
-            responseCount = documents.size();
-            
             writeHeader(writer, resHead);
             
-            writeDocs(writer, documents, responseCount, snippets);
+            writeDocs(writer, documents, snippets);
         } else {
         	throw new IOException("Unable to process Solr response format");
         }
@@ -265,23 +260,20 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
 	/**
 	 * Append to the writer the OpenSearch RSS representation of Solr documents.
 	 * 
-	 * @param writer        an open output writer. Must not be null.
-	 * @param documents     the documents to render. Must not be null.
-	 * @param responseCount the number of documents to process
-	 * @param snippets      snippets Solr computed text snippets (highlighting).
+	 * @param writer    an open output writer. Must not be null.
+	 * @param documents the documents to render. Must not be null.
+	 * @param snippets  snippets Solr computed text snippets (highlighting).
 	 * @throws IOException when an unexpected error occurred while writing
 	 */
-	private void writeDocs(final Writer writer, final SolrDocumentList documents, final int responseCount,
+	private void writeDocs(final Writer writer, final SolrDocumentList documents,
 			final Map<String, LinkedHashSet<String>> snippets) throws IOException {
 		// parse body
         String urlhash = null;
         MultiProtocolURL url = null;
-        final Iterator<SolrDocument> iterator = documents.iterator();
-        for (int i = 0; i < responseCount; i++) {
+        for (SolrDocument doc: documents) {
             openTag(writer, "item");
-            SolrDocument doc = iterator.next();
-            List<String> texts = new ArrayList<String>();
-            List<String> descriptions = new ArrayList<String>();
+            List<String> texts = new ArrayList<>();
+            List<String> descriptions = new ArrayList<>();
             String docTitle = "";
             List<Object> images_protocol_obj = new ArrayList<>();
         	List<String> images_stub = new ArrayList<>();
@@ -407,30 +399,26 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
 	 * 
 	 * @param writer        an open output writer. Must not be null.
 	 * @param documents     the documents to render. Must not be null.
-	 * @param responseCount the number of documents to process
 	 * @param snippets      Solr computed text snippets (highlighting).
 	 * @throws IOException when an unexpected error occurred while writing
 	 */
-	private void writeDocs(final Writer writer, final DocList documents, final SolrQueryRequest request, final int responseCount,
+	private void writeDocs(final Writer writer, final DocList documents, final SolrQueryRequest request, 
 			final Map<String, LinkedHashSet<String>> snippets) throws IOException {
 		// parse body
         SolrIndexSearcher searcher = request.getSearcher();
         String urlhash = null;
         MultiProtocolURL url = null;
         final DocIterator iterator = documents.iterator();
-        for (int i = 0; i < responseCount; i++) {
+        while(iterator.hasNext()) {
             openTag(writer, "item");
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id, SOLR_FIELDS);
-            List<IndexableField> fields = doc.getFields();
-            int fieldc = fields.size();
-            List<String> texts = new ArrayList<String>();
-            List<String> descriptions = new ArrayList<String>();
+            List<String> texts = new ArrayList<>();
+            List<String> descriptions = new ArrayList<>();
             String docTitle = "";
             List<Object> images_protocol_obj = new ArrayList<>();
         	List<String> images_stub = new ArrayList<>();
-            for (int j = 0; j < fieldc; j++) {
-                IndexableField value = fields.get(j);
+            for (final IndexableField value : doc.getFields()) {
                 String fieldName = value.name();
 
                 // apply generic matching rule
@@ -505,11 +493,11 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
 	}
 	
 	/**
-	 * Append the Solr document URL as a RSS link to the writer
-	 * @param writer 
-	 * @param sku
-	 * @return a MultiProtocolURL instance or null
-	 * @throws IOException
+	 * Append information about the Solr document URL to the writer
+	 * @param writer an open output writer. Must no be null.
+	 * @param sku the Solr document URL as a String.
+	 * @return a MultiProtocolURL instance built from the URL string, or null when the URL string is malformed.
+	 * @throws IOException when an unexpected error occurred while writing
 	 */
 	private MultiProtocolURL writeLink(final Writer writer, final String sku)
 			throws IOException {
