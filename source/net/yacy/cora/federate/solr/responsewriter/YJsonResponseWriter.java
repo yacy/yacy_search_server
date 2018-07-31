@@ -30,18 +30,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
-import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.JSONObject;
-import net.yacy.crawler.retrieval.Response;
-import net.yacy.search.schema.CollectionConfiguration;
-import net.yacy.search.schema.CollectionSchema;
+import java.util.Map.Entry;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.request.SolrQueryRequest;
@@ -52,6 +47,15 @@ import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
 
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.JSONObject;
+import net.yacy.crawler.retrieval.Response;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.CollectionSchema;
+
 /**
  * write the opensearch result in YaCys special way to include as much as in opensearch is included.
  * This will also include YaCy facets.
@@ -59,10 +63,10 @@ import org.apache.solr.search.SolrIndexSearcher;
  * example:
  * http://localhost:8090/solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=host_s&facet.field=url_file_ext_s&facet.field=url_protocol_s&facet.field=author_sxt&facet.field=collection_sxt&start=0&rows=10&query=www
  */
-public class YJsonResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
+public class YJsonResponseWriter implements QueryResponseWriter, SolrjResponseWriter {
 
     // define a list of simple YaCySchema -> json Token matchings
-    private static final Map<String, String> field2tag = new HashMap<String, String>();
+    private static final Map<String, String> field2tag = new HashMap<>();
     static {
         field2tag.put(CollectionSchema.url_protocol_s.getSolrFieldName(), "protocol");
         field2tag.put(CollectionSchema.host_s.getSolrFieldName(), "host");
@@ -87,17 +91,41 @@ public class YJsonResponseWriter implements QueryResponseWriter, EmbeddedSolrRes
     @Override
     public void init(@SuppressWarnings("rawtypes") NamedList n) {
     }
-
+    
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
-
-        NamedList<?> values = rsp.getValues();
         
-        assert values.get("responseHeader") != null;
+        final NamedList<?> values = rsp.getValues();
+        
+        final Object responseObj = rsp.getResponse();
+        
+        write(writer, request, values, responseObj);
+    }
+    
+    @Override
+	public void write(Writer writer, SolrQueryRequest request, String coreName, QueryResponse rsp) throws IOException {
+        
+        final NamedList<Object> values = rsp.getResponse();
+        
+        final SolrDocumentList documents = rsp.getResults();
+        	
+        write(writer, request, values, documents);
+	}
+
+	/**
+	 * Append to the writer the YaCy json representation of the Solr results.
+	 * @param writer  an open output writer. Must not be null.
+	 * @param request the initial Solr request. Must not be null.
+	 * @param values  the response values. Must not be null.
+	 * @param rsp     the Solr response header.
+	 * @throws IOException when a write error occurred
+	 */
+	private void write(final Writer writer, final SolrQueryRequest request, final NamedList<?> values,
+			final Object responseObj) throws IOException {
+
+        
         assert values.get("response") != null;
 
-        SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocList response = ((ResultContext) values.get("response")).getDocList();
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> facetCounts = (SimpleOrderedMap<Object>) values.get("facet_counts");
         @SuppressWarnings("unchecked")
@@ -107,151 +135,43 @@ public class YJsonResponseWriter implements QueryResponseWriter, EmbeddedSolrRes
         Map<String, LinkedHashSet<String>> snippets = OpensearchResponseWriter.highlighting(highlighting);
 
         // parse response header
-        ResHead resHead = new ResHead();
-        NamedList<?> val0 = (NamedList<?>) responseHeader.get("params");
-        resHead.rows = Long.parseLong((String) val0.get("rows"));
-        resHead.offset = response.offset(); // equal to 'start'
-        resHead.numFound = response.matches();
-
+        final ResHead resHead = new ResHead();
+        resHead.rows = request.getOriginalParams().getLong("rows", -1);
+        
         String jsonp = request.getParams().get("callback"); // check for JSONP
         if (jsonp != null) {
             writer.write(jsonp.toCharArray());
             writer.write("([".toCharArray());
         }
         
-        // write header
-        writer.write(("{\"channels\": [{\n").toCharArray());
-        solitaireTag(writer, "totalResults", Long.toString(resHead.numFound));
-        solitaireTag(writer, "startIndex", Long.toString(resHead.offset));
-        solitaireTag(writer, "itemsPerPage", Long.toString(resHead.rows));
-        solitaireTag(writer, "title", this.title);
-        solitaireTag(writer, "description", "Search Result");
-        writer.write("\"items\": [\n".toCharArray());
-
-        // parse body
-        final int responseCount = response.size();
-        SolrIndexSearcher searcher = request.getSearcher();
-        DocIterator iterator = response.iterator();
-        for (int i = 0; i < responseCount; i++) {
-            try {
-            writer.write("{\n".toCharArray());
-            int id = iterator.nextDoc();
-            Document doc = searcher.doc(id, OpensearchResponseWriter.SOLR_FIELDS);
-            List<IndexableField> fields = doc.getFields();
-            int fieldc = fields.size();
-            MultiProtocolURL url = null;
-            String urlhash = null;
-            List<String> descriptions = new ArrayList<String>();
-            String title = "";
-            StringBuilder path = new StringBuilder(80);
-            List<Object> images_protocol_obj = new ArrayList<>();
-        	List<String> images_stub = new ArrayList<>();
+        if(responseObj instanceof ResultContext){
+        	/* Regular response object */
+        	final DocList documents = ((ResultContext)responseObj).getDocList();
         	
-            for (int j = 0; j < fieldc; j++) {
-                IndexableField value = fields.get(j);
-                String fieldName = value.name();
-
-                // apply generic matching rule
-                String stag = field2tag.get(fieldName);
-                if (stag != null) {
-                    solitaireTag(writer, stag, value.stringValue());
-                    continue;
-                }
-                // some special handling here
-                if (CollectionSchema.sku.getSolrFieldName().equals(fieldName)) {
-                    String u = value.stringValue();
-                    try {
-                        url = new MultiProtocolURL(u);
-                        String filename = url.getFileName();
-                        solitaireTag(writer, "link", u);
-                        solitaireTag(writer, "file", filename);
-                    } catch (final MalformedURLException e) {}
-                    continue;
-                }
-                if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
-                    title = value.stringValue();
-                    continue;
-                }
-                if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
-                    String description = value.stringValue();
-                    descriptions.add(description);
-                    continue;
-                }
-                if (CollectionSchema.id.getSolrFieldName().equals(fieldName)) {
-                    urlhash = value.stringValue();
-                    solitaireTag(writer, "guid", urlhash);
-                    continue;
-                }
-                if (CollectionSchema.url_paths_sxt.getSolrFieldName().equals(fieldName)) {
-                    path.append('/').append(value.stringValue());
-                    continue;
-                }
-                if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
-                    Date d = new Date(Long.parseLong(value.stringValue()));
-                    solitaireTag(writer, "pubDate", HeaderFramework.formatRFC1123(d));
-                    continue;
-                }
-                if (CollectionSchema.size_i.getSolrFieldName().equals(fieldName)) {
-                    int size = value.stringValue() != null && value.stringValue().length() > 0 ? Integer.parseInt(value.stringValue()) : -1;
-                    int sizekb = size / 1024;
-                    int sizemb = sizekb / 1024;
-                    solitaireTag(writer, "size", value.stringValue());
-                    solitaireTag(writer, "sizename", sizemb > 0 ? (Integer.toString(sizemb) + " mbyte") : sizekb > 0 ? (Integer.toString(sizekb) + " kbyte") : (Integer.toString(size) + " byte"));
-                    continue;
-                }
-                if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
-                    Date d = new Date(Long.parseLong(value.stringValue()));
-                    solitaireTag(writer, "pubDate", HeaderFramework.formatRFC1123(d));
-                    continue;
-                }
-                if (CollectionSchema.images_protocol_sxt.getSolrFieldName().equals(fieldName)) {
-                	images_protocol_obj.add(value.stringValue());
-                    continue;
-                }
-                if (CollectionSchema.images_urlstub_sxt.getSolrFieldName().equals(fieldName)) {
-                	images_stub.add(value.stringValue());
-                    continue;
-                }
-
-                //missing: "code","faviconCode"
-            }
-
-            if (Math.min(images_protocol_obj.size(), images_stub.size()) > 0) {
-            	List<String> images_protocol = CollectionConfiguration.indexedList2protocolList(images_protocol_obj, images_stub.size());
-            	String imageurl = images_protocol.get(0) + "://" + images_stub.get(0);
-            	solitaireTag(writer, "image", imageurl);
-            } else {
-            	if (url != null && Response.docTypeExt(MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase(Locale.ROOT)) == Response.DT_IMAGE) {
-            		solitaireTag(writer, "image", url.toNormalform(true));
-            	}
-            }
+            resHead.offset = documents.offset(); // equal to 'start' Solr param
+            resHead.numFound = documents.matches();
             
-            // compute snippet from texts            
-            solitaireTag(writer, "path", path.toString());
-            solitaireTag(writer, "title", title.length() == 0 ? path.toString() : title.replaceAll("\"", "'"));
-            LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
-            if (snippet == null) {snippet = new LinkedHashSet<>(); snippet.addAll(descriptions);}
-            OpensearchResponseWriter.removeSubsumedTitle(snippet, title);
-            String snippetstring = snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : OpensearchResponseWriter.getLargestSnippet(snippet);
-            if (snippetstring != null && snippetstring.length() > 140) {
-                snippetstring = snippetstring.substring(0, 140);
-                int sp = snippetstring.lastIndexOf(' ');
-                if (sp >= 0) snippetstring = snippetstring.substring(0, sp) + " ..."; else snippetstring = snippetstring + "...";
-            }
-            writer.write("\"description\":"); writer.write(JSONObject.quote(snippetstring)); writer.write("\n}\n");
-            if (i < responseCount - 1) {
-                writer.write(",\n".toCharArray());
-            }
-            } catch (final Throwable ee) {
-                ConcurrentLog.logException(ee);
-                writer.write("\"description\":\"\"\n}\n");
-                if (i < responseCount - 1) {
-                    writer.write(",\n".toCharArray());
-                }
-            }
+            writeHeader(writer, resHead);
+            
+            writeDocs(writer, documents, request, snippets);
+        } else if(responseObj instanceof SolrDocumentList) {
+			/*
+			 * The response object can be a SolrDocumentList when the response is partial,
+			 * for example when the allowed processing time has been exceeded
+			 */
+        	final SolrDocumentList documents = ((SolrDocumentList)responseObj);
+        	
+            resHead.offset = documents.getStart(); // equal to 'start' Solr param
+            resHead.numFound = documents.getNumFound();
+            
+            writeHeader(writer, resHead);
+            
+            writeDocs(writer, documents, snippets);
+        } else {
+        	throw new IOException("Unable to process Solr response format");
         }
+
         writer.write("],\n".toCharArray());
-        
         
         writer.write("\"navigation\":[\n");
 
@@ -282,7 +202,7 @@ public class YJsonResponseWriter implements QueryResponseWriter, EmbeddedSolrRes
         if (filetypes != null) {
             writer.write(facetcount > 0 ? ",\n" : "\n");
             writer.write("{\"facetname\":\"filetypes\",\"displayname\":\"Filetypes\",\"type\":\"String\",\"min\":\"0\",\"max\":\"0\",\"mean\":\"0\",\"elements\":[\n".toCharArray());
-            List<Map.Entry<String, Integer>> l = new ArrayList<Map.Entry<String,Integer>>();
+            List<Map.Entry<String, Integer>> l = new ArrayList<>();
             for (Map.Entry<String, Integer> e: filetypes) {
                 if (e.getKey().length() <= 6) l.add(e);
                 if (l.size() >= 16) break;
@@ -335,6 +255,320 @@ public class YJsonResponseWriter implements QueryResponseWriter, EmbeddedSolrRes
             writer.write("])".toCharArray());
         }
     }
+	
+	/**
+	 * Append to the writer the header of the YaCy json representation.
+	 * @param writer an open output writer. Must not be null.
+	 * @param resHead the calculated results head. Must not be null.
+	 * @throws IOException when an unexpected error occurred while writing
+	 */
+	private void writeHeader(final Writer writer, final ResHead resHead)
+			throws IOException {
+        writer.write(("{\"channels\": [{\n").toCharArray());
+        solitaireTag(writer, "totalResults", Long.toString(resHead.numFound));
+        solitaireTag(writer, "startIndex", Long.toString(resHead.offset));
+        solitaireTag(writer, "itemsPerPage", Long.toString(resHead.rows));
+        solitaireTag(writer, "title", this.title);
+        solitaireTag(writer, "description", "Search Result");
+        writer.write("\"items\": [\n".toCharArray());
+	}
+	
+	/**
+	 * Append to the writer the OpenSearch RSS representation of Solr documents.
+	 * 
+	 * @param writer        an open output writer. Must not be null.
+	 * @param documents     the documents to render. Must not be null.
+	 * @param snippets      Solr computed text snippets (highlighting).
+	 * @throws IOException when an unexpected error occurred while writing
+	 */
+	private void writeDocs(final Writer writer, final DocList documents, final SolrQueryRequest request, 
+			final Map<String, LinkedHashSet<String>> snippets) throws IOException {
+        final SolrIndexSearcher searcher = request.getSearcher();
+        final DocIterator iterator = documents.iterator();
+        int writtenDocs = 0;
+        while(iterator.hasNext()) {
+        	if(writtenDocs > 0) {
+        		writer.write(",\n".toCharArray());
+        	}
+            try {
+            	writer.write("{\n".toCharArray());
+            	int id = iterator.nextDoc();
+            	Document doc = searcher.doc(id, OpensearchResponseWriter.SOLR_FIELDS);
+            	MultiProtocolURL url = null;
+            	String urlhash = null;
+            	List<String> descriptions = new ArrayList<>();
+            	String docTitle = "";
+            	StringBuilder path = new StringBuilder(80);
+            	List<Object> imagesProtocolObjs = new ArrayList<>();
+            	List<String> imagesStubs = new ArrayList<>();
+        	
+            	for (final IndexableField value : doc.getFields()) {
+            		String fieldName = value.name();
+
+            		// apply generic matching rule
+            		String stag = field2tag.get(fieldName);
+            		if (stag != null) {
+            			solitaireTag(writer, stag, value.stringValue());
+            			continue;
+            		}
+            		
+            		// some special handling here
+            		if (CollectionSchema.sku.getSolrFieldName().equals(fieldName)) {
+            			url = writeLink(writer, value.stringValue());
+            			continue;
+            		}
+            		if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
+            			docTitle = value.stringValue();
+            			continue;
+            		}
+            		if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
+            			String description = value.stringValue();
+            			descriptions.add(description);
+            			continue;
+            		}
+            		if (CollectionSchema.id.getSolrFieldName().equals(fieldName)) {
+            			urlhash = value.stringValue();
+                    	solitaireTag(writer, "guid", urlhash);
+                    	continue;
+            		}
+            		if (CollectionSchema.url_paths_sxt.getSolrFieldName().equals(fieldName)) {
+            			path.append('/').append(value.stringValue());
+                    	continue;
+            		}
+            		if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
+            			Date d = new Date(Long.parseLong(value.stringValue()));
+            			solitaireTag(writer, "pubDate", HeaderFramework.formatRFC1123(d));
+            			continue;
+            		}
+            		if (CollectionSchema.size_i.getSolrFieldName().equals(fieldName)) {
+            			int size = value.stringValue() != null && value.stringValue().length() > 0 ? Integer.parseInt(value.stringValue()) : -1;
+            			writeSize(writer, size);
+            			continue;
+            		}
+            		if (CollectionSchema.images_protocol_sxt.getSolrFieldName().equals(fieldName)) {
+            			imagesProtocolObjs.add(value.stringValue());
+            			continue;
+            		}
+            		if (CollectionSchema.images_urlstub_sxt.getSolrFieldName().equals(fieldName)) {
+            			imagesStubs.add(value.stringValue());
+            			continue;
+            		}
+
+            		//missing: "code","faviconCode"
+            	}
+
+            	writeDocEnd(writer, snippets, url, urlhash, descriptions, docTitle, path, imagesProtocolObjs,
+						imagesStubs);
+            } catch (final Exception ee) {
+                ConcurrentLog.logException(ee);
+                writer.write("\"description\":\"\"\n}\n");
+            }
+            writtenDocs++;
+        }
+	}
+
+	/**
+	 * Append to the writer the YaCy json representation of Solr documents.
+	 * 
+	 * @param writer        an open output writer. Must not be null.
+	 * @param documents     the documents to render. Must not be null.
+	 * @param responseCount the number of documents to process
+	 * @param snippets      snippets Solr computed text snippets (highlighting).
+	 * @throws IOException when an unexpected error occurred while writing
+	 */
+	private void writeDocs(final Writer writer, final SolrDocumentList documents,
+			final Map<String, LinkedHashSet<String>> snippets) throws IOException {
+		int writtenDocs = 0;
+        for (final SolrDocument doc : documents) {
+        	if(writtenDocs > 0) {
+        		writer.write(",\n".toCharArray());
+        	}
+            try {
+            	writer.write("{\n".toCharArray());
+            	MultiProtocolURL url = null;
+            	String urlhash = null;
+            	List<String> descriptions = new ArrayList<>();
+            	String docTitle = "";
+            	StringBuilder path = new StringBuilder(80);
+            	List<Object> imagesProtocolObjs = new ArrayList<>();
+            	List<String> imagesStubs = new ArrayList<>();
+        	
+            	for (final Entry<String, Object> fieldEntry : doc) {
+            		final String fieldName = fieldEntry.getKey();
+            		final Object value = fieldEntry.getValue();
+        		
+            		if(value == null) {
+            			continue;
+            		}
+
+            		// apply generic matching rule
+            		String stag = field2tag.get(fieldName);
+            		if (stag != null) {
+            			solitaireTag(writer, stag, value.toString());
+            			continue;
+            		}
+            		// some special handling here
+            		if (CollectionSchema.sku.getSolrFieldName().equals(fieldName)) {
+            			url = writeLink(writer, value.toString());
+            			continue;
+            		}
+            		
+            		if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
+            			if(value instanceof Iterable<?>) {
+            				/* Handle multivalued field */
+            				for(final Object valueItem : (Iterable<?>)value) {
+            					docTitle = valueItem.toString();
+            				}
+            			} else {
+            				docTitle = value.toString();
+            			}
+            			continue;
+            		}
+            		
+            		if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
+            			if(value instanceof Iterable<?>) {
+            				/* Handle multivalued field */
+            				for(final Object valueItem : (Iterable<?>)value) {
+            					final String description = valueItem.toString();
+            					descriptions.add(description);
+            				}
+            			} else {
+            				final String description = value.toString();
+            				descriptions.add(description);
+            			}
+            			continue;
+            		}
+            		
+            		if (CollectionSchema.id.getSolrFieldName().equals(fieldName)) {
+            			urlhash = value.toString();
+            			solitaireTag(writer, "guid", urlhash);
+            			continue;
+            		}
+            		
+            		if (CollectionSchema.url_paths_sxt.getSolrFieldName().equals(fieldName)) {
+            			if(value instanceof Iterable<?>) {
+            				/* Handle multivalued field */
+            				for(final Object valueItem : (Iterable<?>)value) {
+            					path.append('/').append(valueItem.toString());
+            				}
+            			} else {
+            				path.append('/').append(value.toString());
+            			}
+            			continue;
+            		}
+            		
+            		if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)  && value instanceof Date) {
+            			solitaireTag(writer, "pubDate", HeaderFramework.formatRFC1123((Date)value));
+            			continue;
+            		}
+            		
+            		if (CollectionSchema.size_i.getSolrFieldName().equals(fieldName) && value instanceof Integer) {
+            			writeSize(writer, ((Integer)value).intValue());
+            			continue;
+            		}
+            		
+            		if (CollectionSchema.images_protocol_sxt.getSolrFieldName().equals(fieldName)) {
+            			if(value instanceof Iterable<?>) {
+            				/* Handle multivalued field */
+            				for(final Object valueItem : (Iterable<?>)value) {
+            					imagesProtocolObjs.add(valueItem.toString());
+            				}
+            			} else {
+            				imagesProtocolObjs.add(value.toString());
+            			}
+            			continue;
+            		}
+            		
+            		if (CollectionSchema.images_urlstub_sxt.getSolrFieldName().equals(fieldName)) {
+            			if(value instanceof Iterable<?>) {
+            				/* Handle multivalued field */
+            				for(final Object valueItem : (Iterable<?>)value) {
+            					imagesStubs.add(valueItem.toString());
+            				}
+            			} else {
+            				imagesStubs.add(value.toString());
+            			}
+            			continue;
+            		}
+
+            		//missing: "code","faviconCode"
+            	}
+
+            	writeDocEnd(writer, snippets, url, urlhash, descriptions, docTitle, path, imagesProtocolObjs,
+						imagesStubs);
+            } catch (final Exception ee) {
+                ConcurrentLog.logException(ee);
+                writer.write("\"description\":\"\"\n}\n");
+            }
+            writtenDocs++;
+        }
+	}
+
+	/**
+	 * Append information about the Solr document size to the writer
+	 * @param writer an open output writer. Must not be null.
+	 * @param size the size of the indexed document
+	 * @throws IOException when an unexpected error occurred while writing
+	 */
+	private void writeSize(final Writer writer, int size) throws IOException {
+		int sizekb = size / 1024;
+		int sizemb = sizekb / 1024;
+		solitaireTag(writer, "size", Integer.toString(size));
+		solitaireTag(writer, "sizename", sizemb > 0 ? (Integer.toString(sizemb) + " mbyte") : sizekb > 0 ? (Integer.toString(sizekb) + " kbyte") : (Integer.toString(size) + " byte"));
+	}
+	
+	/**
+	 * Append information about the Solr document URL to the writer
+	 * @param writer an open output writer. Must no be null.
+	 * @param sku the Solr document URL as a String.
+	 * @return a MultiProtocolURL instance built from the URL string, or null when the URL string is malformed.
+	 * @throws IOException when an unexpected error occurred while writing
+	 */
+	private MultiProtocolURL writeLink(final Writer writer, final String sku)
+			throws IOException {
+		MultiProtocolURL url;
+        try {
+            url = new MultiProtocolURL(sku);
+            String filename = url.getFileName();
+            solitaireTag(writer, "link", sku);
+            solitaireTag(writer, "file", filename);
+        } catch (final MalformedURLException e) {
+        	url = null;
+        }
+        return url;
+	}
+	
+	/**
+	 * Append to the writer the end of the YaCy json representation of the Solr
+	 * document.
+	 */
+	private void writeDocEnd(final Writer writer, final Map<String, LinkedHashSet<String>> snippets,
+			final MultiProtocolURL url, final String urlhash, final List<String> descriptions, final String docTitle, final StringBuilder path,
+			final List<Object> imagesProtocolObjs, final List<String> imagesStubs) throws IOException {
+		if (Math.min(imagesProtocolObjs.size(), imagesStubs.size()) > 0) {
+			List<String> imagesProtocols = CollectionConfiguration.indexedList2protocolList(imagesProtocolObjs, imagesStubs.size());
+			String imageurl = imagesProtocols.get(0) + "://" + imagesStubs.get(0);
+			solitaireTag(writer, "image", imageurl);
+		} else {
+			if (url != null && Response.docTypeExt(MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase(Locale.ROOT)) == Response.DT_IMAGE) {
+				solitaireTag(writer, "image", url.toNormalform(true));
+			}
+		}
+         
+		// compute snippet from texts            
+		solitaireTag(writer, "path", path.toString());
+		solitaireTag(writer, "title", docTitle.length() == 0 ? path.toString() : docTitle.replaceAll("\"", "'"));
+		LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+		if (snippet == null) {snippet = new LinkedHashSet<>(); snippet.addAll(descriptions);}
+		OpensearchResponseWriter.removeSubsumedTitle(snippet, docTitle);
+		String snippetstring = snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : OpensearchResponseWriter.getLargestSnippet(snippet);
+		if (snippetstring != null && snippetstring.length() > 140) {
+			snippetstring = snippetstring.substring(0, 140);
+			int sp = snippetstring.lastIndexOf(' ');
+			if (sp >= 0) snippetstring = snippetstring.substring(0, sp) + " ..."; else snippetstring = snippetstring + "...";
+		}
+		writer.write("\"description\":"); writer.write(JSONObject.quote(snippetstring)); writer.write("\n}\n");
+	}
 
     public static void solitaireTag(final Writer writer, final String tagname, String value) throws IOException {
         if (value == null) return;
