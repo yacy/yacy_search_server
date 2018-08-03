@@ -130,24 +130,41 @@
 	    <p>With this file it is possible to find locations in Germany using the location (city) name, a zip code, a car sign or a telephone pre-dial number.</p>
         
         <dl>
-          <dt><label>Download from</label></dt>
-          <dd>#[geo1URL]#</dd>
+          #(geo0Status)#::
+          <dt><label>Downloaded from</label></dt>
+          <dd>#[URL]#</dd>
           <dt><label>Storage location</label></dt>
-          <dd>#[geo1Storage]#</dd>
+          <dd>#[Storage]#</dd>
           <dt><label>Status</label></dt>
-          <dd>#(geo1Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::deactivated#(/geo1Status)#</dd>
+          <dd><div class="commit">loaded - can be upgraded using the Load button for the new URL</div></dd>
           <dt>Action</dt>
-          <dd>#(geo1Status)#
-          <input type="submit" name="geo1Load" class="btn btn-sm btn-primary" value="Load" />::
+          <dd>
+          <input type="submit" name="geo0Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />
+          <input type="submit" name="geo0Remove" class="btn btn-sm btn-danger" value="Remove" />
+          </dd>::
+          #(/geo0Status)#
+          #(geo0ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geo0ActionRemoved)#
+          #(geo0ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot de-activate dictionary file: #[error]#</div></dd>
+          #(/geo0ActionDeactivated)#
+          
+          #(geo1Status)#::
+          <dt><label>Downloaded from</label></dt>
+          <dd>#[URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd><div class="commit">loaded - can be upgraded using the Load button for the new URL</div></dd>
+          <dt>Action</dt>
+          <dd>
           <input type="submit" name="geo1Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />
-          <input type="submit" name="geo1Remove" class="btn btn-sm btn-danger" value="Remove" />::
-          <input type="submit" name="geo1Activate" class="btn btn-sm btn-primary" value="Activate" />
           <input type="submit" name="geo1Remove" class="btn btn-sm btn-danger" value="Remove" />
-          #(/geo1Status)#</dd>
-          #(geo1ActionLoaded)#::
-          <dt>Result</dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
-          <dt>Result</dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>
-          #(/geo1ActionLoaded)#
+          </dd>::
+          #(/geo1Status)#
           #(geo1ActionRemoved)#::
           <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
           <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
@@ -156,10 +173,38 @@
           <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
           <dt>Result</dt><dd><div class="error">cannot de-activate dictionary file: #[error]#</div></dd>
           #(/geo1ActionDeactivated)#
-          #(geo1ActionActivated)#::
+          
+          <dt><label>Download from</label></dt>
+          <dd>#[geo2URL]#</dd>
+          <dt><label>Storage location</label></dt>
+          <dd>#[geo2Storage]#</dd>
+          <dt><label>Status</label></dt>
+          <dd>#(geo2Status)#<div class="info">not loaded</div>::<div class="commit">loaded</div>::deactivated#(/geo2Status)#</dd>
+          <dt>Action</dt>
+          <dd>#(geo2Status)#
+          <input type="submit" name="geo2Load" class="btn btn-sm btn-primary" value="Load" />::
+          <input type="submit" name="geo2Deactivate" class="btn btn-sm btn-primary" value="Deactivate" />
+          <input type="submit" name="geo2Remove" class="btn btn-sm btn-danger" value="Remove" />::
+          <input type="submit" name="geo2Activate" class="btn btn-sm btn-primary" value="Activate" />
+          <input type="submit" name="geo2Remove" class="btn btn-sm btn-danger" value="Remove" />
+          #(/geo2Status)#</dd>
+          #(geo2ActionLoaded)#::
+          <dt>Result</dt><dd><div class="commit">loaded and activated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">loading of dictionary file failed: #[error]#</div></dd>::
+          <dt>Result</dt><dd><div class="commit">loaded and upgraded dictionary file</div></dd>
+          #(/geo2ActionLoaded)#
+          #(geo2ActionRemoved)#::
+          <dt>Result</dt><dd><div class="commit">deactivated and removed dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot remove dictionary file: #[error]#</div></dd>
+          #(/geo2ActionRemoved)#
+          #(geo2ActionDeactivated)#::
+          <dt>Result</dt><dd><div class="commit">deactivated dictionary file</div></dd>::
+          <dt>Result</dt><dd><div class="error">cannot de-activate dictionary file: #[error]#</div></dd>
+          #(/geo2ActionDeactivated)#
+          #(geo2ActionActivated)#::
           <dt>Result</dt><dd><div class="commit">activated dictionary file</div></dd>::
           <dt>Result</dt><dd><div class="error">cannot activate dictionary file: #[error]#</div></dd>
-          #(/geo1ActionActivated)#        
+          #(/geo2ActionActivated)#
         </dl>
       </fieldset>
     </form>

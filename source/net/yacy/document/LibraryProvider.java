@@ -52,6 +52,8 @@ import net.yacy.crawler.retrieval.URLRewriterLibrary;
 import net.yacy.kelondro.util.FileUtils;
 
 public class LibraryProvider {
+	
+	private final static ConcurrentLog LOG = new ConcurrentLog(LibraryProvider.class.getSimpleName());
 
     public static final String path_to_source_dictionaries = "source";
     public static final String path_to_did_you_mean_dictionaries = "didyoumean";
@@ -69,8 +71,12 @@ public class LibraryProvider {
     private static File dictRoot = null;
 
     public static enum Dictionary {
+    	/** Old OpenGeoDB dump */
         GEODB0( "geo0", "http://downloads.sourceforge.net/project/opengeodb/Data/0.2.5a/opengeodb-0.2.5a-UTF8-sql.gz" ),
+        /** Old OpenGeoDB dump */
         GEODB1( "geo1", "http://fa-technik.adfc.de/code/opengeodb/dump/opengeodb-02624_2011-10-17.sql.gz" ),
+        /** Latest (2017) OpenGeoDB dump */
+        GEODB2( "geo2", "http://fa-technik.adfc.de/code/opengeodb/dump/opengeodb-02628_2017-02-07.sql.gz" ),
         GEON0( "geon0", "http://download.geonames.org/export/dump/cities1000.zip" ),
         GEON1( "geon1", "http://download.geonames.org/export/dump/cities5000.zip" ),
         GEON2( "geon2", "http://download.geonames.org/export/dump/cities15000.zip" ),
@@ -130,18 +136,24 @@ public class LibraryProvider {
     }
 
     public static void integrateOpenGeoDB() {
+    	final File geo2 = Dictionary.GEODB2.file();
         final File geo1 = Dictionary.GEODB1.file();
         final File geo0 = Dictionary.GEODB0.file();
-        if ( geo1.exists() ) {
-            if ( geo0.exists() ) {
-                geo0.renameTo(Dictionary.GEODB0.fileDisabled());
+		if (geo2.exists()) {
+			if (geo1.exists() && !geo1.renameTo(Dictionary.GEODB1.fileDisabled())) {
+				LOG.warn("Could not rename file " + geo1 + " to " + Dictionary.GEODB1.fileDisabled());
+			}
+			if (geo0.exists() && !geo0.renameTo(Dictionary.GEODB0.fileDisabled())) {
+				LOG.warn("Could not rename file " + geo0 + " to " + Dictionary.GEODB0.fileDisabled());
+			}
+			geoLoc.activateLocation(Dictionary.GEODB2.nickname, new OpenGeoDBLocation(geo2, dymLib));
+		} else if ( geo1.exists() ) {
+            if ( geo0.exists() && !geo0.renameTo(Dictionary.GEODB0.fileDisabled())) {
+            	LOG.warn("Could not rename file " + geo0 + " to " + Dictionary.GEODB0.fileDisabled());
             }
             geoLoc.activateLocation(Dictionary.GEODB1.nickname, new OpenGeoDBLocation(geo1, dymLib));
-            return;
-        }
-        if ( geo0.exists() ) {
+        } else if ( geo0.exists() ) {
             geoLoc.activateLocation(Dictionary.GEODB0.nickname, new OpenGeoDBLocation(geo0, dymLib));
-            return;
         }
     }
 
