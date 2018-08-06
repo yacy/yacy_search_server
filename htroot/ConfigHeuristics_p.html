@@ -100,7 +100,7 @@
         <td align="center"><input type="checkbox" name="ossys_#[title]#" value="checked" #(checked)#::checked="checked"#(/checked)#/></td>
         <td align="left"><b><a href="#[urlhostlink]#" target="_blank">#[title]#</b></a> </td>
         <td align="left">#[comment]#</td>
-        <td align="left"><input type="text" name="ossys_url_#[title]#" value="#[url]#" size="70"/></td>
+        <td align="left"><input type="text" name="ossys_url_#[title]#" value="#[url]#" size="70" required="required"/></td>
         <td align="center"><input type="checkbox" name="ossys_del_#[title]#" value="checked" #(delchecked)#::checked="checked"#(/delchecked)#/></td>
       </tr>
       #{/osdcfg}#
