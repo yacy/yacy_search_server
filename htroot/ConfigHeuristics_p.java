@@ -204,13 +204,15 @@ public class ConfigHeuristics_p {
                 prop.putHTML("osdcfg_" + c + "_title", e.key());
                 prop.putHTML("osdcfg_" + c + "_comment", e.getComment() != null ? e.getComment() : "");
 
-                String tmps = e.getValue();
-                prop.putHTML("osdcfg_" + c + "_url", tmps);
-                final int lastpos = tmps.lastIndexOf("/");
+                String urlStr = e.getValue();
+                prop.putHTML("osdcfg_" + c + "_url", urlStr);
+                final int lastpos = urlStr != null ? urlStr.lastIndexOf("/") : -1;
                 if (lastpos > 6) { // after http://x or ftp://x
-                    tmps = tmps.substring(0, lastpos);
-                    prop.putHTML("osdcfg_" + c + "_urlhostlink", tmps);
-                } else prop.putHTML("osdcfg_" + c + "_urlhostlink", "#");
+                    urlStr = urlStr.substring(0, lastpos);
+                    prop.putHTML("osdcfg_" + c + "_urlhostlink", urlStr);
+                } else {
+                	prop.putHTML("osdcfg_" + c + "_urlhostlink", "#");
+                }
 
                 c++;
             }
