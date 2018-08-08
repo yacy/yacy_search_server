@@ -2461,7 +2461,7 @@ MediaWiki Dump Import==MediaWiki转储导入
 No import thread is running, you can start a new thread here==当前无运行导入任务, 不过您可以在这开始
 Bad input data:==损坏数据:
 MediaWiki Dump File Selection: select a 'bz2' file==MediaWiki备份文件: 选择一个 'bz2' 文件
-You can import MediaWiki dumps here. An example is the file==您可以在这导入MediaWiki副本. 示例
+You can import <a href="https://dumps.wikimedia.org/backup-index-bydb.html" target="_blank">MediaWiki dumps</a> here. An example is the file==您可以在这导入<a href="https://dumps.wikimedia.org/backup-index-bydb.html" target="_blank">MediaWiki副本</a>副本. 示例
 Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==副本文件必须是XML格式并用bz2压缩的.将其放进YaCy目录或其子目录中.
 "Import MediaWiki Dump"=="导入MediaWiki备份"
 When the import is started, the following happens:==:开始导入时, 会进行以下工作

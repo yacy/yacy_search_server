@@ -1764,7 +1764,7 @@ No import thread is running, you can start a new thread here==Ви можете 
 Bad input data:==Неприпустимі вхідні дані:
 #MediaWiki Dump File Selection: select a 'bz2' file==Вибір файлу Dump'у MediaWiki: Виберіть файл "bz2"
 MediaWiki Dump File Selection: select a xml file (which may be bz2- or gz-encoded)==Вибір файлу Dump'у MediaWiki: Виберіть файл xml (може бути запакований bz2 або gz)
-You can import MediaWiki dumps here. An example is the file==Тут ви можете імпортувати dump'и MediaWiki. Приклад файлу
+You can import <a href="https://dumps.wikimedia.org/backup-index-bydb.html" target="_blank">MediaWiki dumps</a> here. An example is the file==Тут ви можете імпортувати <a href="https://dumps.wikimedia.org/backup-index-bydb.html" target="_blank">dump'и MediaWiki</a>. Приклад файлу
 Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==Dump'и повинні бути в XML-форматі і стиснутими bz2. Помістіть файл у каталог YaCy або в його підпапку.
 "Import MediaWiki Dump"=="Імпортувати Dump MediaWiki"
 When the import is started, the following happens:==Коли імпортування запущене, відбувається наступне:

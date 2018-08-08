@@ -5005,7 +5005,7 @@
        <source>MediaWiki Dump File Selection: select an XML file (which may be bz2- or gz-encoded)</source>
     </trans-unit>
     <trans-unit id="ed7c38d1" xml:space="preserve" approved="no" translate="yes">
-       <source>You can import MediaWiki dumps here. An example is the file</source>
+       <source>You can import &lt;a href="https://dumps.wikimedia.org/backup-index-bydb.html" target="_blank"&gt;MediaWiki dumps&lt;/a&gt; here. An example is the file</source>
     </trans-unit>
     <trans-unit id="6e081749" xml:space="preserve" approved="no" translate="yes">
        <source>"Import MediaWiki Dump"</source>
