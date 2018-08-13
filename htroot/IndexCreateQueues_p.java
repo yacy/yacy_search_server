@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.http.conn.util.InetAddressUtils;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
@@ -153,6 +155,9 @@ public class IndexCreateQueues_p {
             for (Map.Entry<String, Integer[]> host: hosts.entrySet()) {
                 String hostnameport = host.getKey();
                 String hostname = Domains.stripToHostName(hostnameport);
+                if(InetAddressUtils.isIPv6Address(hostname)) {
+                	hostname = "[" + hostname + "]"; // HostBalancer.getDomainStackReferences() function requires square brackets around IPV6 addresses
+                }
                 prop.putHTML("crawler_host_" + hc + "_hostnameport", hostnameport);
                 prop.putHTML("crawler_host_" + hc + "_hostname", hostname);
                 prop.put("crawler_host_" + hc + "_embed", embed ? 1 : 0);
