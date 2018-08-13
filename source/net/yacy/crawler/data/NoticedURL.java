@@ -29,6 +29,7 @@ package net.yacy.crawler.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -271,9 +272,9 @@ public class NoticedURL {
         switch (stackType) {
             case LOCAL:     return this.coreStack.getDomainStackReferences(host, maxcount, maxtime);
             case GLOBAL:    return this.limitStack.getDomainStackReferences(host, maxcount, maxtime);
-            case REMOTE:   return (this.remoteStack != null) ? this.remoteStack.getDomainStackReferences(host, maxcount, maxtime) : null;
+            case REMOTE:   return (this.remoteStack != null) ? this.remoteStack.getDomainStackReferences(host, maxcount, maxtime) : Collections.emptyList();
             case NOLOAD:   return this.noloadStack.getDomainStackReferences(host, maxcount, maxtime);
-            default: return null;
+            default: return Collections.emptyList();
         }
     }
 

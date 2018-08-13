@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -543,14 +544,16 @@ public class HostBalancer implements Balancer {
      */
     @Override
     public List<Request> getDomainStackReferences(String host, int maxcount, long maxtime) {
-        if (host == null) return new ArrayList<Request>(0);
+        if (host == null) {
+        	return Collections.emptyList();
+        }
         try {
             HostQueue hq = this.queues.get(DigestURL.hosthash(host, host.startsWith("ftp.") ? 21 : 80));
             if (hq == null) hq = this.queues.get(DigestURL.hosthash(host, 443));
             return hq == null ? new ArrayList<Request>(0) : hq.getDomainStackReferences(host, maxcount, maxtime);
-        } catch (MalformedURLException e) {
+        } catch (final MalformedURLException e) {
             ConcurrentLog.logException(e);
-            return null;
+            return Collections.emptyList();
         }
     }
 

@@ -840,7 +840,7 @@ public class Domains {
      * strip off any parts of an url, address string (containing host/ip:port) or raw IPs/Hosts,
      * considering that the host may also be an (IPv4) IP or a IPv6 IP in brackets.
      * @param target
-     * @return a host name or IP string
+     * @return a domain name or IP string (without square brackets when IPV6)
      */
     public static String stripToHostName(String target) {
         // normalize
