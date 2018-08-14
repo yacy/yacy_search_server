@@ -64,11 +64,11 @@ SetCompressor /SOLID LZMA
 ; at least we need Java 8
 !define JRE_VERSION8 "1.8"
 
-; download links for Oracle Java 8 Update 171 (available at https://java.com/fr/download/manual.jsp)
-; 32 bit / jre-8u171-windows-i586.exe
-!define JRE_32 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=233170_512cd62ec5174c3487ac17c61aaa89e8"
-; 64 bit / jre-8u171-windows-x64.exe
-!define JRE_64 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=233172_512cd62ec5174c3487ac17c61aaa89e8"
+; download links for Oracle Java 8 Update 181 (available at https://java.com/fr/download/manual.jsp)
+; 32 bit / jre-8u181-windows-i586.exe
+!define JRE_32 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=234472_96a7b8442fe848ef90c96a2fad6ed6d1"
+; 64 bit / jre-8u181-windows-x64.exe
+!define JRE_64 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=234474_96a7b8442fe848ef90c96a2fad6ed6d1"
 
 ;!define JRE_32 "http://yacy.berlios.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
 ;!define JRE_64 "http://yacy.berlios.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
