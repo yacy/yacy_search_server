@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="env/bootstrap/js/jquery.min.js"></script>
+    <style>
+
+        #__meta {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            font-family: monospace;
+        }
+
+        #__meta div {
+            position: fixed;
+
+            z-index: 2;
+            opacity: 0.9;
+            /*transform: scale(2);*/
+        }
+
+        #__menu {
+            vertical-align: middle;
+            display: flex;
+        }
+
+        #__icon {
+            opacity: 0.5;
+            text-align: center;
+            line-height: 200%;
+            width: 5%;
+            height: 5%;
+            background-color: gray;
+            transition: all 0.35s ease-out;
+            cursor: crosshair;
+        }
+        #__icon:hover {
+            opacity: 0.9;
+            background-color: orange;
+            transform: scale(1.75) rotate(90deg);
+        }
+        #__icon:active {
+            background-color: orangered;
+            transform: scale(1.8) rotate(100deg);
+        }
+
+        .top_left {
+            left: 1em;
+            top: 1em;
+        }
+        .top_right {
+            right: 1em;
+            top: 1em;
+        }
+
+        .bottom_right {
+            right: 1em;
+            bottom: 1em;
+        }
+
+        #__ {
+
+        }
+
+    </style>
+</head>
+<body>
+<script>
+    'use strict';
+
+    //(function(send) {
+        //open(url?: string, target?: string, features?: string, replace?: boolean): Window | null;
+
+    // const superOpen = XMLHttpRequest.prototype.open;
+    // XMLHttpRequest.prototype.open = function(url, target, features, replace) {
+    //     console.log('open', url, target, features, replace);
+    //     return superOpen.call(this, url, target, features, replace);
+    // };
+    const hijackRequest = $('<script>');
+    hijackRequest.text('$(document).ready(function() { console.log("hijack:"); const superOpen = XMLHttpRequest.prototype.open;\n' +
+    '    XMLHttpRequest.prototype.open = function(url, target, features, replace) {\n' +
+    '        console.log(\'open\', url, target, features, replace);\n' +
+    '        return superOpen.call(this, url, target, features, replace);\n' +
+    '    }; });');
+
+        //const superSend = XMLHttpRequest.prototype.send;
+        // XMLHttpRequest.prototype.send = function(data,x) {
+        //
+        //     // this.addEventListener('readystatechange', function() {
+        //     //
+        //     // }, false);
+        //
+        //     console.log('XMLHttpRequest send', data,x);
+        //     console.log(superSend);
+        //     superSend.call(data,x);
+        // };
+
+    //})(XMLHttpRequest.prototype.send);
+
+    function soon(x) { setTimeout(x, 0); }
+
+    function errorNode(error) {
+        return $('h1').text('error: ' + error);
+    }
+
+    class Content {
+        /** target DOM element */
+        constructor(target) {
+            this.target = target;
+            this.targetShadow = $(target[0].createShadowRoot());
+
+        }
+        async set(content) {
+
+
+            soon(()=> {
+                content = $(content).wrap('body');
+                //content = content.select('script').remove();
+                this.targetShadow.append(/*hijackRequest, */content); //HACK
+            });
+
+        }
+        async nav(url) {
+            //TODO show loading overlay indicator
+
+            $.get("/proxy.html?url=" + url).done((x)=>this.set(x)).error((error)=>{
+                this.set(errorNode(error));
+            });
+        }
+    }
+
+
+
+
+
+    $(document).ready(function() {
+
+        const main = new Content($('#__'));
+
+        $('#__icon').click(()=>{
+            soon(()=>{
+
+            });
+        });
+        $('#omnibox').keypress((e)=>{
+            console.log('key', this, e);
+        });
+
+        main.nav('http://en.wikipedia.org');
+
+    });
+
+
+</script>
+
+<div id="__">
+    <!-- displays the current page -->
+</div>
+
+<div id="__meta">
+    <div id="__menu" class="top_left">
+
+        <input id="omnibox" type="text"/>
+        <button>&blacktriangleright;</button>
+
+    </div>
+
+    <div id="__icon" class="top_right">
+        &dotsquare;
+    </div>
+
+</div>
+
+
+
+
+</body>
+</html>

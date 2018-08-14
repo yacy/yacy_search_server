@@ -907,7 +907,7 @@ text-align: center;
 }
 
 /* other ------------------------------------*/
-ul#menu {
+ul#__meta {
   padding:0;
   margin:0;
   margin-left:1px;
@@ -917,7 +917,7 @@ ul#menu {
   width:12em;
   overflow:hidden;
 }
-ul#menu a.MenuItemLink {
+ul#__meta a.MenuItemLink {
   width:80%;
   padding:1px 5% 1px 15%;
 }

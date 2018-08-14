@@ -5,6 +5,7 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.function.Predicate;
 import java.util.regex.PatternSyntaxException;
 import javax.servlet.*;
 import javax.servlet.http.HttpServlet;
@@ -68,7 +69,7 @@ import org.jsoup.select.Elements;
  */
 public class UrlProxyServlet extends HttpServlet implements Servlet {
     private static final long serialVersionUID = 4900000000000001121L;
-    private String _stopProxyText = null;
+    private String injectedContent = null;
     final private static Document.OutputSettings htmlOutput =
             new Document.OutputSettings().prettyPrint(false);
 
@@ -76,10 +77,10 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
-        String tmps = config.getInitParameter("stopProxyText");
-        if (tmps != null) {
-            _stopProxyText = tmps;
-        }
+        //String tmps = config.getInitParameter("stopProxyText"); //<- TODO remove or rename, its meaning has changed
+
+        injectedContent = "<div id='yacy'></div>";
+
 
     }
     /* ------------------------------------------------------------ */
@@ -176,18 +177,20 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
         response.setContentType(mimeType);
 
         // add some proxy-headers to response header
-        copyHeader(response, proxyResponseHeader, HeaderFramework.SERVER);
-        copyHeader(response, proxyResponseHeader, HeaderFramework.DATE);
-        copyHeader(response, proxyResponseHeader, HeaderFramework.LAST_MODIFIED);
-        copyHeader(response, proxyResponseHeader, HeaderFramework.EXPIRES);
+        copyHeader(response, proxyResponseHeader,
+                HeaderFramework.SERVER,
+                HeaderFramework.DATE,
+                HeaderFramework.LAST_MODIFIED,
+                HeaderFramework.EXPIRES
+        );
 
         if ((httpStatus < HttpServletResponse.SC_BAD_REQUEST) && (mimeType != null) && mimeType.startsWith("text")) {
+
             if (proxyResponseHeader.containsKey(HeaderFramework.TRANSFER_ENCODING) && proxyResponseHeader.get(HeaderFramework.TRANSFER_ENCODING).contains("chunked")) {
                 inFromProxy = new ChunkedInputStream(inFromProxy);
             }
 
             // 7 - modify target content
-            final String servletstub = request.getScheme() + "://" + request.getServerName() + ':' + request.getServerPort() + request.getServletPath() + "?url=";
             Document doc;
             try {
                 doc = Jsoup.parse(inFromProxy,
@@ -198,7 +201,8 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Proxy: parser error on " + proxyurl + "\n\n" + eio.getMessage());
                 return;
             }
-            byte[] sbb = render(request, response, proxyurl, hostwithport, servletstub, doc);
+            byte[] sbb = render(request, response, proxyurl, hostwithport, doc);
+
 
             response.setIntHeader(HeaderFramework.CONTENT_LENGTH, sbb.length);
             ServletOutputStream o = response.getOutputStream();
@@ -223,7 +227,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
         }
     }
 
-    private byte[] render(HttpServletRequest request, HttpServletResponse response, DigestURL proxyurl, String hostwithport, String servletstub, Document doc) {
+    private byte[] render(HttpServletRequest request, HttpServletResponse response, DigestURL proxyurl, String hostwithport, Document doc) {
         // rewrite all href with abs proxy url (must be abs because of <base> head tag
 
         Switchboard sb = Switchboard.getSwitchboard();
@@ -236,57 +240,74 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
 
         boolean logMalformedURL = ConcurrentLog.isFine("PROXY");
 
-        Elements taglist = bde.getElementsByAttribute("href");
-        for (Element e : taglist) {
-            if (e.tagName().equals("a")) { // get <a> tag
-                String absurl = e.absUrl("href"); // get href attribut as abs url
+        {
+            Predicate<String> urlFilter = (absurl)-> {
+
                 if (absurl.startsWith("data:") || absurl.startsWith("#") || absurl.startsWith("mailto:") || absurl.startsWith("javascript:"))
-                    continue;
+                    return false;
 
 
                 if (rewriteURLs_domainlist) try {
                     if (sb.crawlStacker.urlInAcceptedDomain(new DigestURL(absurl)) != null)
-                        continue;
+                        return false;
                 } catch (MalformedURLException ex) {
                     if (logMalformedURL)
                         ConcurrentLog.fine("PROXY", "ProxyServlet: malformed url for url-rewirte " + absurl);
-                    continue;
+                    return false;
                 }
-                e.attr("href", servletstub + absurl); // rewrite with abs proxy-url
-            }
+
+                return true;
+
+            };
+
+            urlRewrite("a", "href", urlFilter, bde, request);
+            urlRewrite("link", "href", urlFilter, bde, request);
+            urlRewrite("script", "src", urlFilter, bde, request);
         }
 
 
         Element hd = doc.head();
-        if (hd != null) {
-            // add a base url if not exist (to make sure relative links point to original)
-            Elements basetags = hd.getElementsByTag("base");
-            if (basetags.isEmpty()) {
-                hd.prependElement("base").attr("href",
-                        proxyurl.getProtocol() + "://" + hostwithport +
-                                proxyurl.getPath() /* + directory */);
-            }
+        if (hd == null) {
+            hd = doc.prependElement("head");
         }
 
+        // add a base url if not exist (to make sure relative links point to original)
+        Elements basetags = hd.getElementsByTag("base");
+        if (basetags.isEmpty()) {
+            hd.prependElement("base").attr("href",
+                    proxyurl.getProtocol() + "://" + hostwithport +
+                            proxyurl.getPath() /* + directory */);
+        }
+        
+        //hd.appendElement("script").attr("src", "UrlProxyServlet.js");
+//        bde.prependElement("script").text(
+//                "$(document).ready(function() { console.log(\"hijack:\"); const superOpen = XMLHttpRequest.prototype.open;\n" +
+//                "    XMLHttpRequest.prototype.open = function(url, target, features, replace) {\n" +
+//                "        console.log(\"open\", url, target, features, replace);\n" +
+//                "        return superOpen.call(this, url, target, features, replace);\n" +
+//                "    }; });");
+
+
         // 8 - add interaction elements (e.g. proxy exit button to switch back to original url)
-        if (_stopProxyText != null) {
+        if (injectedContent != null) {
 
-            String httpsAlertMsg = "";
-            if (proxyurl.getProtocol().equalsIgnoreCase("https") &&
-                    !request.getScheme().equalsIgnoreCase("https"))
-                httpsAlertMsg = " &nbsp;  - <span style='color:red'>(Warning: secure target viewed over normal http)</span>";
+//            String httpsAlertMsg = "";
+//            if (proxyurl.getProtocol().equalsIgnoreCase("https") &&
+//                    !request.getScheme().equalsIgnoreCase("https"))
+//                httpsAlertMsg = " &nbsp;  - <span style='color:red'>(Warning: secure target viewed over normal http)</span>";
+//
+//            // use a template file, to allow full servlet functionallity header as iframe included
+//            String hdrtemplate = request.getScheme() + "://" + request.getServerName() + ':' + request.getServerPort() +
+//                    "/proxymsg/urlproxyheader.html?url=" + proxyurl;
+//
+//            hdrtemplate = "<iframe src='" + hdrtemplate + "' width='98%' height='50px' >"
+//                    // alternative for no-frame supporting browser
+//                    + "<div width='100%' style='padding:5px; background:white; border-bottom: medium solid lightgrey;'>"
+//                    + "<div align='center' style='font-size:11px;'><a style='font-size:11px; color:black;' href='" + proxyurl + "'>" + injectedContent + "</a> "
+//                    + httpsAlertMsg + "</div></div>"
+//                    + "</iframe>";
 
-            // use a template file, to allow full servlet functionallity header as iframe included
-            String hdrtemplate = request.getScheme() + "://" + request.getServerName() + ':' + request.getServerPort() +
-                    "/proxymsg/urlproxyheader.html?url=" + proxyurl;
-
-            hdrtemplate = "<iframe src='" + hdrtemplate + "' width='98%' height='50px' >"
-                    // alternative for no-frame supporting browser
-                    + "<div width='100%' style='padding:5px; background:white; border-bottom: medium solid lightgrey;'>"
-                    + "<div align='center' style='font-size:11px;'><a style='font-size:11px; color:black;' href='" + proxyurl + "'>" + _stopProxyText + "</a> "
-                    + httpsAlertMsg + "</div></div>"
-                    + "</iframe>";
-            bde.prepend(hdrtemplate); // put as 1st element in body
+            bde.prepend(injectedContent); // put as 1st element in body
         }
 
 
@@ -302,9 +323,27 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
         return sbb;
     }
 
-    private void copyHeader(HttpServletResponse response, ResponseHeader proxyResponseHeader, String server) {
-        if (proxyResponseHeader.containsKey(server)) {
-            response.setHeader(server, proxyResponseHeader.get(server));
+    private void urlRewrite(String tag, String attr, Predicate<String> urlFilter, Element body, HttpServletRequest request) {
+        Elements taglist = body.getElementsByAttribute(attr);
+        for (Element e : taglist) {
+            if (e.tagName().equals(tag)) { // get <a> tag
+                String absurl = e.absUrl(attr); // get href attribut as abs url
+                if (urlFilter.test(absurl))
+                    e.attr(attr, proxyURL(request, absurl)); // rewrite with abs proxy-url
+            }
+        }
+    }
+
+    static String proxyURL(HttpServletRequest request, String absurl) {
+        return request.getScheme() + "://" + request.getServerName() + ':' +
+                request.getServerPort() + request.getServletPath() + "?url=" + absurl;
+    }
+
+    private void copyHeader(HttpServletResponse response, ResponseHeader proxyResponse, String... keys) {
+        for (String key : keys) {
+            String x = proxyResponse.get(key);
+            if (x != null)
+                response.setHeader(key, x);
         }
     }
 

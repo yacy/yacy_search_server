@@ -19,3 +19,6 @@ yacy.log
 /target/
 /test/DATA/
 /javadoc/
+hs_err_pid*
+yacycore.iml
+.idea/
