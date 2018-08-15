@@ -380,6 +380,12 @@
             <version>1.17</version>
             <type>jar</type>
         </dependency>
+		<dependency>
+			<!-- Handle XZ compressed archives. It is an optional dependency of commons-compress. -->
+  			<groupId>org.tukaani</groupId>
+  			<artifactId>xz</artifactId>
+  			<version>1.8</version>
+		</dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
