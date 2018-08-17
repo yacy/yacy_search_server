@@ -53,15 +53,17 @@ public class Word {
     public static final Base64Order commonHashOrder  = Base64Order.enhancedCoder;
 
     private static final int hashCacheSize = Math.max(20000, Math.min(200000, (int) (MemoryControl.available() / 40000L)));
-    private static ARC<String, byte[]> hashCache = null;
+    private static final ARC<String, byte[]> hashCache;
     static {
+        ConcurrentARC<String, byte[]> h;
         try {
-            hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Math.min(32, 2 * Runtime.getRuntime().availableProcessors()));
+            h = new ConcurrentARC<>(hashCacheSize, Math.min(32, 2 * Runtime.getRuntime().availableProcessors()));
             ConcurrentLog.info("Word", "hashCache.size = " + hashCacheSize);
         } catch (final OutOfMemoryError e) {
-            hashCache = new ConcurrentARC<String, byte[]>(1000, Math.min(8, 1 + Runtime.getRuntime().availableProcessors()));
+            h = new ConcurrentARC<>(1000, Math.min(8, 1 + Runtime.getRuntime().availableProcessors()));
             ConcurrentLog.info("Word", "hashCache.size = " + 1000);
         }
+        hashCache = h;
     }
 
     // object carries statistics for words and sentences
@@ -94,11 +96,11 @@ public class Word {
     @Override
     public String toString() {
         // this is here for debugging
-        return "{count=" + this.count + ", posInText=" + this.posInText + ", posInPhrase=" + this.posInPhrase + ", numOfPhrase=" + this.numOfPhrase + "}";
+        return "{count=" + this.count + ", posInText=" + this.posInText + ", posInPhrase=" + this.posInPhrase + ", numOfPhrase=" + this.numOfPhrase + '}';
     }
 
     // static methods
-    public static byte[] word2hash(final StringBuilder word) {
+    public static byte[] word2hash(final CharSequence word) {
         return word2hash(word.toString());
     }
 
@@ -113,7 +115,9 @@ public class Word {
     public static final byte[] word2hash(final String word) {
     	final String wordlc = word.toLowerCase(Locale.ENGLISH);
     	byte[] h = hashCache.get(wordlc);
-        if (h != null) return h;
+        if (h != null)
+            return h;
+
         // calculate the hash
     	h = commonHashOrder.encodeSubstring(Digest.encodeMD5Raw(wordlc), commonHashLength);
     	while (h[0] == highByte && h[1] == highByte && h[2] == highByte && h[3] == highByte && h[4] == highByte) {

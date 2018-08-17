@@ -23,6 +23,7 @@
 	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.17.jar"/>
+	<classpathentry kind="lib" path="lib/xz-1.8.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.11.jar"/>
 	<classpathentry kind="lib" path="lib/jcl-over-slf4j-1.7.25.jar"/>

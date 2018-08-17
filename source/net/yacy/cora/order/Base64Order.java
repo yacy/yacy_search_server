@@ -22,6 +22,7 @@ package net.yacy.cora.order;
 
 import java.io.Serializable;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Comparator;
 import java.util.Random;
@@ -29,6 +30,7 @@ import java.util.regex.Pattern;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
+import org.apache.commons.lang.ArrayUtils;
 
 //ATTENTION! THIS CLASS SHALL NOT IMPORT FROM OTHER PACKAGES THAN CORA AND JRE
 //BECAUSE OTHERWISE THE DEBIAN INSTALLER FAILS!
@@ -95,7 +97,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
 
     @Override
     public Order<byte[]> clone() {
-        final Base64Order o = new Base64Order(this.asc, this.rfc1521compliant);
+        final Order<byte[]> o = new Base64Order(this.asc, this.rfc1521compliant);
         o.rotate(this.zero);
         return o;
     }
@@ -210,7 +212,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
     
     public final byte[] encodeSubstring(final byte[] in, final int sublen) {
-        if (in.length == 0) return new byte[0];
+        if (in.length == 0) return ArrayUtils.EMPTY_BYTE_ARRAY;
         assert sublen <= ((in.length + 2) / 3) * 4 : "sublen = " + sublen + ", expected: " + ((in.length + 2) / 3) * 4;
         final byte[] out = new byte[sublen];
         int writepos = 0;
@@ -247,7 +249,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
 
     final static Pattern cr = Pattern.compile("\n");
     public final byte[] decode(String in) {
-        if ((in == null) || (in.isEmpty())) return new byte[0];
+        if ((in == null) || (in.isEmpty())) return ArrayUtils.EMPTY_BYTE_ARRAY;
         in = cr.matcher(in).replaceAll("");
         try {
             int posIn = 0;
@@ -268,7 +270,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             }
             if (posIn < in.length()) {
                 if (in.length() - posIn == 3) {
-                    l = decodeLong(in.substring(posIn) + "A");
+                    l = decodeLong(in.substring(posIn) + 'A');
                     l = l / 256;
                     out[posOut + 1] = (byte) (l % 256);
                     l = l / 256;
@@ -287,16 +289,17 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             // TODO: Throw exception again
             // throw new RuntimeException("input probably not base64");
             System.err.println("wrong string receive: " + in);
-            return new byte[0];
+            return ArrayUtils.EMPTY_BYTE_ARRAY;
         }
     }
 
-    private final long cardinalI(final String key) {
+    private final long cardinalI(final CharSequence key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
         int p = 0;
         byte b;
-        while ((p < 10) && (p < key.length())) {
+        int len = key.length();
+        while ((p < 10) && (p < len)) {
             b = this.ahpla[key.charAt(p++)];
             if (b < 0) return -1;
             c = (c << 6) | b;
@@ -365,7 +368,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
 
     private static final int sig(final int x) {
-        return (x > 0) ? 1 : (x < 0) ? -1 : 0;
+        return Integer.compare(x, 0);
     }
 
     @Override
@@ -505,10 +508,8 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             i++;
         }
         // compare length
-        if (al > bl) return 1;
-        if (al < bl) return -1;
+        return Integer.compare(al, bl);
         // they are equal
-        return 0;
     }
 
     private final int compares(final byte[] a, final byte[] b, final int length) {
@@ -597,10 +598,10 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
                 // "warning: sun.misc.BASE64Encoder is internal proprietary API and may be removed in a future release"
 
                 Class<?> rfc1521Decoder_class = Class.forName("sun.misc.BASE64Decoder");
-                Object rfc1521Decoder = rfc1521Decoder_class.newInstance();
+                Object rfc1521Decoder = rfc1521Decoder_class.getConstructor().newInstance();
                 Method rfc1521Decoder_decodeBuffer = rfc1521Decoder_class.getMethod("decodeBuffer", String.class);
                 Class<?> rfc1521Encoder_class = Class.forName("sun.misc.BASE64Encoder");
-                Object rfc1521Encoder = rfc1521Encoder_class.newInstance();
+                Object rfc1521Encoder = rfc1521Encoder_class.getConstructor().newInstance();
                 Method rfc1521Encoder_encode = rfc1521Encoder_class.getMethod("encode", byte[].class);
 
                 System.out.println("preparing tests..");
@@ -657,7 +658,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             } catch (Throwable e) {
                 e.printStackTrace();
             }
-            
+
         }
     }
 }

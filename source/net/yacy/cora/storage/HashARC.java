@@ -33,54 +33,24 @@ import java.util.Random;
 
 public final class HashARC<K, V> extends SimpleARC<K, V> implements Map<K, V>, Iterable<Map.Entry<K, V>>, ARC<K, V> {
 
-    public final static boolean accessOrder = false; // if false, then a insertion-order is used
+    final static boolean accessOrder = false; // if false, then a insertion-order is used
 
     public HashARC(final int cacheSize) {
         this.cacheSize = cacheSize / 2;
-        super.levelA = Collections.synchronizedMap(new LinkedHashMap<K, V>(1, 0.1f, accessOrder) {
-            private static final long serialVersionUID = 1L;
-            @Override protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
-                return size() > HashARC.this.cacheSize;
-            }
-        });
-        this.levelB = Collections.synchronizedMap(new LinkedHashMap<K, V>(1, 0.1f, accessOrder) {
-            private static final long serialVersionUID = 1L;
-            @Override protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
-                return size() > HashARC.this.cacheSize;
-            }
-        });
+        super.levelA = Collections.synchronizedMap(new LinkedLRUHashMap());
+        this.levelB = Collections.synchronizedMap(new LinkedLRUHashMap());
     }
 
-    public static void main(final String[] args) {
-        final Random r = new Random();
-        final int testsize = 10000;
-        final ARC<String, String> a = new HashARC<String, String>(testsize * 2);
-        final Map<String, String> b = new HashMap<String, String>();
-        String key, value;
-        for (int i = 0; i < testsize; i++) {
-            key = "k" + r.nextInt();
-            value = "v" + r.nextInt();
-            a.insertIfAbsent(key, value);
-            b.put(key, value);
+
+    private final class LinkedLRUHashMap extends LinkedHashMap<K, V> {
+        private static final long serialVersionUID = 1L;
+
+        LinkedLRUHashMap() {
+            super(1, 0.99f, HashARC.accessOrder);
         }
 
-        // now put half of the entries AGAIN into the ARC
-        int h = testsize / 2;
-        for (final Map.Entry<String, String> entry: b.entrySet()) {
-            a.put(entry.getKey(), entry.getValue());
-            if (h-- <= 0) break;
+        @Override protected boolean removeEldestEntry(final Entry<K, V> eldest) {
+            return size() > HashARC.this.cacheSize;
         }
-
-        // test correctness
-        for (final Map.Entry<String, String> entry: b.entrySet()) {
-            if (!a.containsKey(entry.getKey())) {
-                System.out.println("missing: " + entry.getKey());
-                continue;
-            }
-            if (!a.get(entry.getKey()).equals(entry.getValue())) {
-                System.out.println("wrong: a = " + entry.getKey() + "," + a.get(entry.getKey()) + "; v = " + entry.getValue());
-            }
-        }
-        System.out.println("finished test!");
     }
 }

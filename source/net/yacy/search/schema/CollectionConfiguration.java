@@ -46,6 +46,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -1539,7 +1540,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 		}
 		try {
 		    final long start = System.currentTimeMillis();
-		    for (String host: webgraphhosts.keyList(true)) {
+
+		    //for (String host: webgraphhosts.keyList(true)) {
+            Iterator<String> kk = webgraphhosts.keys(true);
+            while (kk.hasNext()) {
+                String host = kk.next();
 		        if (webgraphhosts.get(host) <= 0) continue;
 		        final String hostfinal = host;
 		        // select all webgraph edges and modify their cr value
@@ -1557,6 +1562,7 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 		                );
 		        final AtomicInteger proccount = new AtomicInteger(0);
 		        Thread[] t = new Thread[concurrency];
+		        final CountDownLatch latch = new CountDownLatch(concurrency);
 		        for (int i = 0; i < t.length; i++) {
 		            t[i] = new Thread("CollectionConfiguration.postprocessing.webgraph-" + i) {
 		                @Override
@@ -1600,12 +1606,10 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 		                                    sid.removeField(WebgraphSchema.harvestkey_s.getSolrFieldName());
 		                                    //segment.fulltext().getWebgraphConnector().deleteById((String) sid.getFieldValue(WebgraphSchema.id.getSolrFieldName()));
 		                                    segment.fulltext().getWebgraphConnector().add(sid);
-		                                } catch (SolrException e) {
-		                                    ConcurrentLog.logException(e);
-		                                } catch (IOException e) {
+		                                } catch (SolrException | IOException e) {
 		                                    ConcurrentLog.logException(e);
 		                                }
-		                                proccount.incrementAndGet();
+                                        proccount.incrementAndGet();
 		                                allcount.incrementAndGet();
 		                                if (proccount.get() % 1000 == 0) {
 		                                    postprocessingActivity = "writing cr values to webgraph for host " + hostfinal + "postprocessed " + proccount + " from " + count + " documents; " +
@@ -1620,18 +1624,31 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 		                        }
 		                    } catch (InterruptedException e) {
 		                        ConcurrentLog.warn("CollectionConfiguration", e.getMessage(), e);
-		                    }
+		                    } finally {
+                                latch.countDown();
+                            }
 		                }
+
 		            };
 		            t[i].start();
 		        }
-		        for (int i = 0; i < t.length; i++) try {
-		            t[i].join(10000);
-		            if (t[i].isAlive()) t[i].interrupt();
-		        } catch (InterruptedException e) {}
-		        
-		        if (count != proccount.get()) ConcurrentLog.warn("CollectionConfiguration", "ambiguous webgraph document count for host " + host + ": expected=" + count + ", counted=" + proccount);
-		    }
+
+//		        for (int i = 0; i < t.length; i++) try {
+//		            t[i].join(10000);
+//		            if (t[i].isAlive()) t[i].interrupt();
+//		        } catch (InterruptedException e) {}
+//
+                try {
+                    latch.await();
+                } catch (InterruptedException e) {
+                    ConcurrentLog.warn("CollectionConfiguration", "interrupted: " + e);
+                    e.printStackTrace();
+                }
+                if (count != proccount.get()) ConcurrentLog.warn("CollectionConfiguration", "ambiguous webgraph document count for host " + host + ": expected=" + count + ", counted=" + proccount);
+
+            }
+
+
 		} catch (final IOException e2) {
 		    ConcurrentLog.warn("CollectionConfiguration", e2.getMessage(), e2);
 		}
@@ -1653,7 +1670,11 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             postprocessingActivity = "collecting cr for " + collection1hosts.size() + " hosts, concurrency = " + concurrency;
             ConcurrentLog.info("CollectionConfiguration", postprocessingActivity);
             int countcheck = 0;
-            for (String host: collection1hosts.keyList(true)) {
+
+            //for (String host: collection1hosts.keyList(true)) {
+            Iterator<String> ii = collection1hosts.keys(true);
+            while (ii.hasNext()) {
+                String host = ii.next();
                 // Patch the citation index for links with canonical tags.
                 // This shall fulfill the following requirement:
                 // If a document A links to B and B contains a 'canonical C', then the citation rank computation shall consider that A links to C and B does not link to C.
@@ -1837,7 +1858,9 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
                     sid.setField(countfield.getSolrFieldName(), 1);
                 } else {
                     boolean firstappearance = true;
-                    for (SolrDocument d: docs) {if (uniqueURLs.contains(d.getFieldValue(CollectionSchema.id.getSolrFieldName()))) firstappearance = false; break;}
+                    for (SolrDocument d: docs) {
+                        if (uniqueURLs.contains(d.getFieldValue(CollectionSchema.id.getSolrFieldName()))) firstappearance = false; break;}
+
                     sid.setField(uniquefield.getSolrFieldName(), firstappearance);
                     sid.setField(countfield.getSolrFieldName(), docs.getNumFound() + 1); // the current url was excluded from search but is included in count
                 }

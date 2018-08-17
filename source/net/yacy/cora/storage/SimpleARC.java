@@ -25,6 +25,9 @@
 
 package net.yacy.cora.storage;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 
 /**
@@ -57,8 +61,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      */
     @Override
     public final synchronized void insert(final K s, final V v) {
-        if (this.levelB.containsKey(s)) {
-        	this.levelB.put(s, v);
+        if (this.levelB.computeIfPresent(s, (ss, prev) -> v)==v) {
             assert (this.levelB.size() <= this.cacheSize); // the cache should shrink automatically
         } else {
         	this.levelA.put(s, v);
@@ -74,19 +77,14 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      */
     @Override
     public void insertIfAbsent(final K s, final V v) {
-        if (this.levelB.containsKey(s)) {
-            return;
-        } else if (this.levelA.containsKey(s)) {
+        if (this.levelB.containsKey(s) || this.levelA.containsKey(s)) {
             return;
         } else {
             synchronized (this) {
                 // we must repeat the tests again because we did this in a not synchronized environment
                 if (this.levelB.containsKey(s)) {
                     return;
-                } else if (this.levelA.containsKey(s)) {
-                    return;
-                } else {
-                    this.levelA.put(s, v);
+                } else if (this.levelA.putIfAbsent(s, v) == null) {
                     assert (this.levelA.size() <= this.cacheSize); // the cache should shrink automatically
                 }
             }
@@ -105,9 +103,8 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
         synchronized (this) {
             V o = this.levelB.get(s);
             if (o != null) return o;
-            o = this.levelA.get(s);
+            o = this.levelA.put(s, v);
             if (o != null) return o;
-            this.levelA.put(s, v);
             assert (this.levelA.size() <= this.cacheSize); // the cache should shrink automatically
             return null;
         }
@@ -184,8 +181,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      */
     @Override
     public final boolean containsKey(final Object s) {
-        if (this.levelB.containsKey(s)) return true;
-        return this.levelA.containsKey(s);
+        return this.levelB.containsKey(s) || this.levelA.containsKey(s);
     }
 
 
@@ -197,8 +193,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
     @Override
     public final synchronized V remove(final Object s) {
         final V r = this.levelB.remove(s);
-        if (r != null) return r;
-        return this.levelA.remove(s);
+        return r != null ? r : this.levelA.remove(s);
     }
 
     /**
@@ -224,7 +219,8 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      */
     @Override
     public final Iterator<Map.Entry<K, V>> iterator() {
-        return entrySet().iterator();
+        return Stream.concat(levelA.entrySet().stream(), levelB.entrySet().stream()).distinct().iterator();
+        //return entrySet().iterator();
     }
 
     /**
@@ -236,7 +232,7 @@ abstract class SimpleARC<K, V> extends AbstractMap<K, V> implements Map<K, V>, I
      */
     @Override
     public final synchronized Set<Map.Entry<K, V>> entrySet() {
-        final Set<Map.Entry<K, V>> m = new HashSet<Map.Entry<K, V>>();
+        final Set<Map.Entry<K, V>> m = new HashSet<Map.Entry<K, V>>(size());
         for (final Map.Entry<K, V> entry: this.levelA.entrySet()) m.add(entry);
         for (final Map.Entry<K, V> entry: this.levelB.entrySet()) m.add(entry);
         return m;

@@ -2454,7 +2454,7 @@ public final class Switchboard extends serverSwitch {
     
     public static void clearCaches() {
         // flush caches in used libraries
-        pdfParser.clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes(); // eats up megabytes, see http://markmail.org/thread/quk5odee4hbsauhu
+        pdfParser.clearPdfBoxCaches();
         
         // clear caches
         if (WordCache.sizeCommonWords() > 1000) WordCache.clearCommonWords();

@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Stream;
 
 
 /**
@@ -199,7 +200,8 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
      */
     @Override
     public Iterator<java.util.Map.Entry<K, V>> iterator() {
-        return entrySet().iterator();
+        //return entrySet().iterator();
+        return Stream.of(arc).flatMap((ARC a) -> a.entrySet().stream()).distinct().iterator();
     }
 
     /**
@@ -247,37 +249,5 @@ public final class ConcurrentARC<K, V> extends AbstractMap<K, V> implements Map<
         return p;
     }
 
-    public static void main(final String[] args) {
-        final Random r = new Random();
-        final int testsize = 10000;
-        final ARC<String, String> a = new ConcurrentARC<String, String>(testsize * 3, Runtime.getRuntime().availableProcessors());
-        final Map<String, String> b = new HashMap<String, String>();
-        String key, value;
-        for (int i = 0; i < testsize; i++) {
-            key = "k" + r.nextInt();
-            value = "v" + r.nextInt();
-            a.insertIfAbsent(key, value);
-            b.put(key, value);
-        }
-
-        // now put half of the entries AGAIN into the ARC
-        int h = testsize / 2;
-        for (final Map.Entry<String, String> entry: b.entrySet()) {
-            a.put(entry.getKey(), entry.getValue());
-            if (h-- <= 0) break;
-        }
-
-        // test correctness
-        for (final Map.Entry<String, String> entry: b.entrySet()) {
-            if (!a.containsKey(entry.getKey())) {
-                System.out.println("missing: " + entry.getKey());
-                continue;
-            }
-            if (!a.get(entry.getKey()).equals(entry.getValue())) {
-                System.out.println("wrong: a = " + entry.getKey() + "," + a.get(entry.getKey()) + "; v = " + entry.getValue());
-            }
-        }
-        System.out.println("finished test!");
-    }
 
 }

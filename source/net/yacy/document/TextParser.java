@@ -42,6 +42,7 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.StrictLimitInputStream;
 import net.yacy.document.parser.GenericXMLParser;
+import net.yacy.document.parser.XZParser;
 import net.yacy.document.parser.apkParser;
 import net.yacy.document.parser.audioTagParser;
 import net.yacy.document.parser.bzipParser;
@@ -93,6 +94,7 @@ public final class TextParser {
     static {
         initParser(new apkParser());
         initParser(new bzipParser());
+        initParser(new XZParser());
         initParser(new csvParser());
         initParser(new docParser());
         initParser(new gzipParser());
@@ -380,6 +382,32 @@ public final class TextParser {
 				Integer.MAX_VALUE, Long.MAX_VALUE);
 	}
     
+    /**
+     * Try to limit the parser processing with a maximum total number of links detection (anchors, images links, media links...) 
+     * or a maximum amount of content bytes to parse. Limits apply only when the available parsers for the resource media type support parsing within limits
+     * (see {@link Parser#isParseWithLimitsSupported()}. When available parsers do
+	 * not support parsing within limits, an exception is thrown when
+	 * content size is beyond maxBytes.
+     * @param location the URL of the source
+     * @param mimeType the mime type of the source, if known
+     * @param charset the charset name of the source, if known
+     * @param ignoreClassNames an eventual set of CSS class names whose matching html elements content should be ignored
+     * @param timezoneOffset the local time zone offset
+     * @param depth the current depth of the crawl
+     * @param contentLength the length of the source, if known (else -1 should be used)
+     * @param source a input stream
+     * @param maxLinks the maximum total number of links to parse and add to the result documents
+     * @param maxBytes the maximum number of content bytes to process
+     * @return a list of documents that result from parsing the source, with empty or null text.
+     * @throws Parser.Failure when the parser processing failed
+     */
+	public static Document[] parseWithLimits(final DigestURL location, String mimeType, final String charset, final Set<String> ignoreClassNames,
+			final int timezoneOffset, final int depth, final long contentLength, final InputStream sourceStream, int maxLinks,
+			long maxBytes) throws Parser.Failure{
+		return parseSource(location, mimeType, charset, ignoreClassNames, new VocabularyScraper(), timezoneOffset, depth, contentLength,
+				sourceStream, maxLinks, maxBytes);
+	}
+	
     /**
      * Try to limit the parser processing with a maximum total number of links detection (anchors, images links, media links...) 
      * or a maximum amount of content bytes to parse. Limits apply only when the available parsers for the resource media type support parsing within limits

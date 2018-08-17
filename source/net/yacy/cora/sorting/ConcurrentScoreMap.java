@@ -83,20 +83,7 @@ public class ConcurrentScoreMap<E> extends AbstractScoreMap<E> implements ScoreM
         dispatchUpdateToListener();
     }
 
-    @Override
-    public int shrinkToMaxSize(final int maxsize) {
-        if (this.map.size() <= maxsize) {
-        	return 0;
-        }
-        int deletedNb = 0;
-        int minScore = getMinScore();
-        while (this.map.size() > maxsize) {
-            minScore++;
-            deletedNb += shrinkToMinScore(minScore);
-        }
-        // No need to dispatch to listener, it is already done in shrinkToMinScore()
-        return deletedNb;
-    }
+
 
     @Override
     public int shrinkToMinScore(final int minScore) {

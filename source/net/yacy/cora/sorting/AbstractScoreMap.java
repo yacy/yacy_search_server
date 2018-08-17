@@ -43,7 +43,23 @@ public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
             if (count > 0) this.inc(entry, count);
         }
     }
-    
+
+    abstract protected int getMinScore();
+
+    @Override
+    public int shrinkToMaxSize(final int maxsize) {
+        int s = size();
+        if (s <= maxsize) {
+            return 0;
+        }
+        int deletedNb = 0;
+        int minScore = getMinScore();
+        while (size() > maxsize)
+            deletedNb += shrinkToMinScore(++minScore);
+
+        // No need to dispatch to listener, it is already done in shrinkToMinScore()
+        return deletedNb;
+    }
     /**
      * divide the map into two halve parts using the count of the entries
      * @param score

@@ -1,25 +1,25 @@
 /**
- *  ScoreMap
- *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
- *  First released 14.10.2010 at http://yacy.net
- *
- *  $LastChangedDate$
- *  $LastChangedRevision$
- *  $LastChangedBy$
- *
- *  This library is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU Lesser General Public
- *  License as published by the Free Software Foundation; either
- *  version 2.1 of the License, or (at your option) any later version.
- *
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  Lesser General Public License for more details.
- *
- *  You should have received a copy of the GNU Lesser General Public License
- *  along with this program in the file lgpl21.txt
- *  If not, see <http://www.gnu.org/licenses/>.
+ * ScoreMap
+ * Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
+ * First released 14.10.2010 at http://yacy.net
+ * <p>
+ * $LastChangedDate$
+ * $LastChangedRevision$
+ * $LastChangedBy$
+ * <p>
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ * <p>
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * <p>
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program in the file lgpl21.txt
+ * If not, see <http://www.gnu.org/licenses/>.
  */
 
 package net.yacy.cora.sorting;
@@ -44,7 +44,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
 
     protected final Map<E, AtomicInteger> map; // a mapping from a reference to the cluster key
 
-    public OrderedScoreMap(final Comparator<? super E> comparator)  {
+    public OrderedScoreMap(final Comparator<? super E> comparator) {
         if (comparator == null) {
             this.map = new HashMap<E, AtomicInteger>();
         } else {
@@ -62,31 +62,18 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         this.map.clear();
     }
 
-    @Override
-    public int shrinkToMaxSize(final int maxsize) {
-        if (this.map.size() <= maxsize) {
-        	return 0;
-        }
-        int deletedNb = 0;
-        int minScore = getMinScore();
-        while (this.map.size() > maxsize) {
-            minScore++;
-            deletedNb += shrinkToMinScore(minScore);
-        }
-        return deletedNb;
-    }
 
     @Override
     public int shrinkToMinScore(final int minScore) {
-    	int deletedNb = 0;
+        int deletedNb = 0;
         synchronized (this.map) {
             final Iterator<Map.Entry<E, AtomicInteger>> i = this.map.entrySet().iterator();
             Map.Entry<E, AtomicInteger> entry;
             while (i.hasNext()) {
                 entry = i.next();
                 if (entry.getValue().intValue() < minScore) {
-                	i.remove();
-                	deletedNb++;
+                    i.remove();
+                    deletedNb++;
                 }
             }
         }
@@ -223,32 +210,33 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
         throw new UnsupportedOperationException("map must have comparator");
     }
 
-    private int getMinScore() {
+    protected int getMinScore() {
         if (this.map.isEmpty()) return -1;
         int minScore = Integer.MAX_VALUE;
         synchronized (this.map) {
-            for (final Map.Entry<E, AtomicInteger> entry: this.map.entrySet()) if (entry.getValue().intValue() < minScore) {
-                    minScore = entry.getValue().intValue();
+            for (final AtomicInteger value : this.map.values()) {
+                int score = value.intValue();
+                if (score < minScore) {
+                    minScore = score;
                 }
             }
+        }
         return minScore;
     }
-
-    /**
-     * @return largest score value
-     */
-    public int getMaxScore() {
-        if (this.map.isEmpty()) {
-            return -1;
-        }
+    protected int getMaxScore() {
+        if (this.map.isEmpty()) return -1;
         int maxScore = Integer.MIN_VALUE;
-        for (final Map.Entry<E, AtomicInteger> entry : this.map.entrySet()) {
-            if (entry.getValue().intValue() > maxScore) {
-                maxScore = entry.getValue().intValue();
+        synchronized (this.map) {
+            for (final AtomicInteger value : this.map.values()) {
+                int score = value.intValue();
+                if (score > maxScore) {
+                    maxScore = score;
+                }
             }
         }
         return maxScore;
     }
+
 
     @Override
     public Iterator<E> keys(final boolean up) {
@@ -256,7 +244,7 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
             // re-organize entries
             final TreeMap<Integer, Set<E>> m = new TreeMap<Integer, Set<E>>();
             Set<E> s;
-            for (final Map.Entry<E, AtomicInteger> entry: this.map.entrySet()) {
+            for (final Map.Entry<E, AtomicInteger> entry : this.map.entrySet()) {
                 s = m.get(entry.getValue().intValue());
                 if (s == null) {
                     s = this.map instanceof TreeMap ? new TreeSet<E>(((TreeMap<E, AtomicInteger>) this.map).comparator()) : new HashSet<E>();
@@ -269,8 +257,8 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
 
             // flatten result
             final List<E> l = new ArrayList<E>(this.map.size());
-            for (final Set<E> f: m.values()) {
-                for (final E e: f) l.add(e);
+            for (final Set<E> f : m.values()) {
+                for (final E e : f) l.add(e);
             }
             if (up) return l.iterator();
 
@@ -280,17 +268,6 @@ public class OrderedScoreMap<E> extends AbstractScoreMap<E> implements ScoreMap<
             return r.iterator();
         }
     }
-    
-    public static void main(String[] args) {
-    	OrderedScoreMap<StringBuilder> w = new OrderedScoreMap<StringBuilder>(StringBuilderComparator.CASE_INSENSITIVE_ORDER);
-    	Random r = new Random();
-    	for (int i = 0; i < 10000; i++) {
-    		w.inc(new StringBuilder("a" + ((char) (('a') + r.nextInt(26)))));
-    	}
-    	for (StringBuilder s: w) System.out.println(s + ":" + w.get(s));
-    	System.out.println("--");
-    	w.shrinkToMaxSize(10);
-    	for (StringBuilder s: w) System.out.println(s + ":" + w.get(s));
-    }
-    
+
+
 }
