@@ -110,15 +110,17 @@
         /** target DOM element */
         constructor(target) {
             this.target = target;
-            this.targetShadow = $(target[0].createShadowRoot());
 
         }
         async set(content) {
 
 
+
             soon(()=> {
                 content = $(content).wrap('body');
                 //content = content.select('script').remove();
+                //console.log((this.target)[0]);
+                this.targetShadow = $((this.target)[0].attachShadow({mode: 'open'}));
                 this.targetShadow.append(/*hijackRequest, */content); //HACK
             });
 

@@ -142,7 +142,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
     private static final String FLAGS = "Flags";
     public static final String FLAGSZERO = "    ";
-    
+
     /** the applications version */
     public static final String VERSION = "Version";
 
@@ -153,44 +153,44 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     /** the name of the peer (user-set) */
     public static final String NAME = "Name";
     public static final String HASH = "Hash";
-    
+
     /** Birthday - first startup */
     private static final String BDATE = "BDate";
-    
+
     /** UTC-Offset */
     public static final String UTC = "UTC";
     private static final String PEERTAGS = "Tags";
 
     /** the speed of indexing (pages/minute) of the peer */
     public static final String ISPEED = "ISpeed";
-    
+
     /** the speed of retrieval (queries/minute) of the peer */
     public static final String RSPEED = "RSpeed";
-    
+
     /** the number of minutes that the peer is up in minutes/day (moving average MA30) */
     public static final String UPTIME = "Uptime";
-    
+
     /** the number of links that the peer has stored (LURL's) */
     public static final String LCOUNT = "LCount";
-    
+
     /** the number of links that the peer has noticed, but not loaded (NURL's) */
     public static final String NCOUNT = "NCount";
-    
+
     /** the number of links that the peer provides for remote crawls (ZURL's) */
     public static final String RCOUNT = "RCount";
-    
+
     /** the number of different words the peer has indexed */
     public static final String ICOUNT = "ICount";
-    
+
     /** the number of seeds that the peer has stored */
     public static final String SCOUNT = "SCount";
-    
+
     /** the number of clients that the peer connects (connects/hour as double) */
     public static final String CCOUNT = "CCount";
 
     /** the public IP of this peer (old field, will be used to carry the IPv4) */
     public static final String IP = "IP";
-    
+
     /** more public IPs of this peer, containing only IPv6 addresses. This list of of IPv6 addresses is separated with a vertical bar/pipe '|'.
      *  This list may have zero entries if the host does not have a IPv6 address. It may have more than one IPv6 address if the
      *  Host detects more than one public IPv6 locally but did not get a feedback from other peers if any of these addresses are
@@ -198,14 +198,14 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      *  peer confirmed one of the IPv6 IPs which is then the only entry in this field.
      */
     public static final String IP6 = "IP6";
-    
+
     public static final String PORT = "Port";
     public static final String PORTSSL = "PortSSL"; // https port
     public static final String SEEDLISTURL = "seedURL";
     public static final String NEWS = "news"; // news attachment
     public static final String DCT = "dct"; // disconnect time
     public static final String SOLRAVAILABLE ="SorlAvail"; // field to remember if remotePeer solr interface is avail.
-    
+
     /** zero-value */
     private static final String ZERO = "0";
 
@@ -227,17 +227,17 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     private final ConcurrentMap<String, String> dna;
     private long birthdate; // keep this value in ram since it is often used and may cause lockings in concurrent situations.
     Bitfield bitfield = null;
-    
+
     private static ConcurrentMap<String, String> map2concurrentMap(Map<String, String> dna0) {
         ConcurrentMap<String, String> dna = new ConcurrentHashMap<String, String>();
         dna.putAll(dna0);
         return dna;
     }
-    
+
     public Seed(Map.Entry<byte[], Map<String, String>> dna0) {
         this(UTF8.String(dna0.getKey()), dna0.getValue() instanceof ConcurrentMap ? (ConcurrentMap<String, String>) dna0.getValue() : map2concurrentMap(dna0.getValue()));
     }
-    
+
     public Seed(final String theHash, final ConcurrentMap<String, String> theDna) {
         // create a seed with a pre-defined hash map
         assert theHash != null;
@@ -349,7 +349,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
         return set;
     }
-    
+
     /**
      * try to get the public IP<br>
      *
@@ -359,9 +359,9 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final String getIP() {
         final String ipx = this.dna.get(Seed.IP); // may contain both, IPv4 or IPv6
         if (ipx != null && !ipx.isEmpty()) return Domains.chopZoneID(ipx);
-        
+
         Set<String> ip6s = getIPv6Entries();
-        if (ip6s != null && ip6s.size() > 0) return ip6s.iterator().next(); 
+        if (ip6s != null && ip6s.size() > 0) return ip6s.iterator().next();
         return null;
     }
 
@@ -376,13 +376,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         Set<String> h = new LinkedHashSet<>();
         final String ipx = this.dna.get(Seed.IP); // may contain both, IPv4 or IPv6
         Set<String> ip6s = getIPv6Entries();
-        
+
         // put IPs in h in such a way that we believe the mostfront have more chances to get connected
         if (ipx != null && !ipx.isEmpty()) h.add(Domains.chopZoneID(ipx));
         h.addAll(ip6s);
         return h;
     }
-    
+
     /**
      * count the number of IPs assgined to that peer
      * @return the number of peers in field IP (should be 1 all the time) plus the number of IPs in the IP6 field.
@@ -390,13 +390,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final int countIPs() {
         final String ipx = this.dna.get(Seed.IP); // may contain both, IPv4 or IPv6
         Set<String> ip6s = getIPv6Entries();
-        
+
         if (ip6s == null || ip6s.size() == 0) {
             return (ipx == null || ipx.isEmpty()) ? 0 : 1;
         }
         return (ipx == null || ipx.isEmpty()) ? ip6s.size() : ip6s.size() + 1;
     }
-    
+
     /**
      * remove the given IP from the seed. Be careful not to remove the last IP; maybe call countIPs before calling the method.
      * @param ip
@@ -405,7 +405,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final boolean removeIP(String ip) {
         String ipx = Domains.chopZoneID(this.dna.get(Seed.IP)); // may contain both, IPv4 or IPv6
         Set<String> ip6s = getIPv6Entries();
-                
+
         if (ip6s == null || ip6s.size() == 0) {
             if (ipx != null && !ipx.isEmpty() && ipx.equals(ip)) {
                 this.dna.put(Seed.IP, ""); // DON'T DO THAT! (the line is correct but you should not remove the last IP
@@ -440,7 +440,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
         return false;
     }
-    
+
     /**
      * try to get the peertype<br>
      *
@@ -537,7 +537,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             return dflt;
         }
     }
-    
+
     /**
      * set the Peer ip.
      * This sets the IP and IP6 field according to the current fill state of that fields:
@@ -561,7 +561,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             }
         }
     }
-    
+
     /**
      * Set several local IPs which are good to access this peer.
      * This OVERWRITES ALL ips stored before!
@@ -571,8 +571,13 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         // we must sort IPv4 and IPv6 here
         Set<String> ipv6 = new HashSet<>();
         Set<String> ipv4 = new HashSet<>();
-        for (String ip: ips) if (isProperIP(ip)) {
-            if (ip.indexOf(':') >= 0) ipv6.add(ip); else ipv4.add(ip);
+        for (String ip: ips) {
+            if (isProperIP(ip)) {
+                if (ip.indexOf(':') >= 0)
+                    ipv6.add(ip);
+                else
+                    ipv4.add(ip);
+            }
         }
         if (ipv4.size() == 0) {
             if (ipv6.size() == 1) {
@@ -582,7 +587,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             } else if (ipv6.size() > 1) {
                 this.dna.put(Seed.IP, "");
                 this.dna.put(Seed.IP6, MapTools.set2string(ipv6, "|", false));
-            }  
+            }
         } else {
             this.dna.put(Seed.IP, Domains.chopZoneID(ipv4.iterator().next()));
             this.dna.put(Seed.IP6, MapTools.set2string(ipv6, "|", false));
@@ -734,7 +739,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public final int getRevision() {
         return yacyVersion.revision(get(Seed.VERSION, Seed.ZERO));
     }
-    
+
     /**
      * generate a public address using a given ip. This combines the ip with the port and encloses the ip
      * with square brackets if the ip is of typeIPv6
@@ -759,7 +764,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 
         return sb.toString();
     }
-    
+
     /**
      * generate a public address using a given ip. This combines the ip with the http port and encloses the ip
      * with square brackets if the ip is of typeIPv6
@@ -787,12 +792,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
         return sb.toString();
     }
-    
+
     /**
      * Generate a public URL using a given ip. This combines the ip with the http(s) port and encloses the ip
      * with square brackets if the ip is of typeIPv6
      * @param ip a host name or ip address
-     * @param preferHTTPS when true and https is available on this Seed, use it as the scheme part of the url 
+     * @param preferHTTPS when true and https is available on this Seed, use it as the scheme part of the url
      * @return an URL string for the given peer ip
      * @throws RuntimeException when the ip parameter is null
      */
@@ -827,12 +832,12 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
         return sb.toString();
     }
-    
+
 	/**
 	 * Generate a public URL Multiprotocol instance using a given ip. This combines
 	 * the ip with the http(s) port and encloses the ip with square brackets if the
 	 * ip is of typeIPv6
-	 * 
+	 *
 	 * @param ip
 	 *            a host name or ip address
 	 * @param preferHTTPS
@@ -1065,7 +1070,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * @param value
      */
     public final void setFlagSolrAvailable(final boolean value) {
-         if (value) 
+         if (value)
              this.dna.put(Seed.SOLRAVAILABLE, "OK");
          else
              this.dna.put(Seed.SOLRAVAILABLE, "NA");
@@ -1330,7 +1335,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
            	for(final String ip: ips) {
            		if (!isProperIP(ip)) {
            			Network.log.severe("not a proper IP " + ip + " peer : " + this.getName() + "ips " + ips);
-           			return "not a proper IP " + ip;		
+           			return "not a proper IP " + ip;
                 }
            	}
         }
@@ -1448,7 +1453,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     public boolean equals(Object other) {
     	return this.hash.equals(((Seed) other).hash);
     }
-    		
+
     public static void main(final String[] args) {
         final ScoreMap<Integer> s = new ClusteredScoreMap<Integer>(true);
         for ( int i = 0; i < 10000; i++ ) {

@@ -243,14 +243,16 @@ public class RemoteSearch extends Thread {
         final Collection<Seed> robinsonPeers = DHTSelection.selectExtraTargets(event.peers, event.query.getQueryGoal().getIncludeHashes(), minage, dhtPeers, robinsoncount, random);
         
         if (event.peers != null) {
+            Seed mySeed = event.peers.mySeed();
+
             if (sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_DHT_TESTLOCAL, false)) {
                 dhtPeers.clear();
-                dhtPeers.add(event.peers.mySeed());
+                dhtPeers.add(mySeed);
             }
             
             if (sb.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false)) {
                 robinsonPeers.clear();
-                robinsonPeers.add(event.peers.mySeed());
+                robinsonPeers.add(mySeed);
             }
         }
         

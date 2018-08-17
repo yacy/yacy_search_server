@@ -225,9 +225,25 @@ public final class SeedDB implements AlternativeDomainNames {
         return this.mySeed != null;
     }
 
-    public Seed mySeed() {
+    public synchronized Seed mySeed() {
         if (this.mySeed == null) {
-            if (sizeConnected() == 0) try {Thread.sleep(5000);} catch (final InterruptedException e) {} // wait for init
+
+            int loops = 0;
+            long start = System.nanoTime(), next = start;
+            Network.log.info("waiting for seed activeDB > 0");
+            while (sizeConnected() == 0) {
+
+                long now = System.nanoTime();
+                if ((now - next) > 5 * 1_000_000_000) {
+                    Network.log.info("  still waiting for seed activeDB > 0");
+                    next = now;
+                }
+
+                loops++;
+
+                //wait for init
+                Thread.yield();
+            }
             initMySeed();
         }
         return this.mySeed;

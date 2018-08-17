@@ -389,12 +389,15 @@ public class DHTSelection {
      * @return a hash map of peer hashes to seed object
      */
     public static ConcurrentMap<String, Seed> seedsByAge(final SeedDB seedDB, final boolean up, int count) {
-        if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
+        int n = seedDB.sizeConnected();
+        if (count > n) count = n;
         Seed ys;
         //long age;
-        final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN);
+
         try {
-            final ConcurrentMap<String, Seed> result = new ConcurrentHashMap<String, Seed>();
+            final ConcurrentMap<String, Seed> result = new ConcurrentHashMap<String, Seed>(n, 0.99f);
+
+            final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN);
             while (s.hasNext() && count-- > 0) {
                 ys = s.next();
                 if (ys != null && ys.hash != null) {

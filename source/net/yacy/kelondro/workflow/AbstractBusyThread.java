@@ -171,12 +171,10 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
             if (!(running)) return;
         }
         this.open();
-        if (log != null) {
-            if (startup > 0) 
-                logSystem("thread '" + this.getName() + "' delayed, " + ((this.busyPause < 0) ? "starting now job." : "starting now loop."));
-            else
-                logSystem("thread '" + this.getName() + "' deployed, " + ((this.busyPause < 0) ? "starting job." : "starting loop."));
-        }
+        if (startup > 0)
+            logSystem("thread '" + this.getName() + "' delayed, " + ((this.busyPause < 0) ? "starting now job." : "starting now loop."));
+        else
+            logSystem("thread '" + this.getName() + "' deployed, " + ((this.busyPause < 0) ? "starting job." : "starting loop."));
         long timestamp;
         long memstamp0, memstamp1;
         boolean isBusy;
@@ -237,7 +235,8 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
                 idletime += System.currentTimeMillis() - timestamp;
             } catch (final SocketException e) {
                 // in case that a socket is interrupted, this method must die silently (shutdown)
-                log.fine("socket-job interrupted: " + e.getMessage());
+                if (log.isFine())
+                    log.fine("socket-job interrupted: " + e.getMessage());
             } catch (final Exception e) {
                 // handle exceptions: thread must not die on any unexpected exceptions
                 // if the exception is too bad it should call terminate()
@@ -262,11 +261,12 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
 
     // ratzen: German for to sleep (coll.)
     private void ratz(final long millis) {
+        if (millis == 0)
+            return;
         try {
             Thread.sleep(millis);
         } catch (final InterruptedException e) {
-            if (log != null)
-                log.config("thread '" + this.getName() + "' interrupted because of shutdown.");
+            log.config("thread '" + this.getName() + "' interrupted because of shutdown.");
         }
     }
     

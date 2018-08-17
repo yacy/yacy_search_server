@@ -28,54 +28,54 @@ public interface WorkflowThread {
     
     // -------------------------------------------------------
     // methods inherited from Thread; needed for compatibility
-    public void start();
-    public boolean isAlive();
+    void start();
+    boolean isAlive();
     
     // --------------------------------------------------------------------------
     // these method are implemented by serverThread and do not need to be altered
     // this includes also the run()-Method
     
-    public void setDescription(String shortText, String longText, String monitorURL);
+    void setDescription(String shortText, String longText, String monitorURL);
     // sets a visible description string
     
-    public String getShortDescription();
+    String getShortDescription();
     // returns short description string for online display
     
-    public String getLongDescription();
+    String getLongDescription();
     // returns long description string for online display
     
-    public String getMonitorURL();
+    String getMonitorURL();
     // returns an URL that can be used to monitor the thread and it's queue
     
-    public long getBlockTime();
+    long getBlockTime();
     // returns the total time that this thread has been blocked so far
     
-    public long getExecTime();
+    long getExecTime();
     // returns the total time that this thread has worked so far
     
-    public long getMemoryUse();
+    long getMemoryUse();
     // returns the sum of all memory usage differences before and after one busy job
     
-    public void jobExceptionHandler(Exception e);
+    void jobExceptionHandler(Exception e);
     // handles any action necessary during job execution
     
-    public boolean shutdownInProgress();
+    boolean shutdownInProgress();
     
-    public void terminate(boolean waitFor);
+    void terminate(boolean waitFor);
     // after calling this method, the thread shall terminate
     // if waitFor is true, the method waits until the process has died
     
     // ---------------------------------------------------------------------
     // the following methods are supposed to be implemented by customization
     
-    public void open();
+    void open();
     // this is called right before the job queue is started
     
-    public int getJobCount();
+    int getJobCount();
     // returns how many jobs are in the queue
     // can be used to calculate a busy-state
     
-    public void close();
+    void close();
     // jobs that need to be done after termination
     // terminate must be called before
 }

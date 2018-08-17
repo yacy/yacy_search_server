@@ -115,12 +115,11 @@ public class StrictLimitInputStream extends FilterInputStream {
 	 */
 	@Override
 	public int read() throws IOException {
-		if (this.position >= this.maxBytes) {
+		if (this.position++ >= this.maxBytes) {
+			position--; //undo
 			throw new StreamLimitException(this.limitErrorMessage);
 		}
-		final int result = this.in.read();
-		this.position++;
-		return result;
+		return this.in.read();
 	}
 
 	/**
@@ -136,12 +135,10 @@ public class StrictLimitInputStream extends FilterInputStream {
 
 	/**
 	 * {@inheritDoc}
-	 * 
-	 * @throws StreamLimitException
-	 *             when the maxBytes limit has been reached
+	 *
 	 */
 	@Override
-	public int read(final byte[] b, final int off, final int len) throws IOException, StreamLimitException {
+	public int read(final byte[] b, final int off, final int len) throws IOException {
 		if (this.position >= this.maxBytes) {
 			throw new StreamLimitException(this.limitErrorMessage);
 		}

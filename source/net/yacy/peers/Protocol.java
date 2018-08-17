@@ -225,31 +225,36 @@ public final class Protocol {
             result = null;
         }
 
+        boolean logInfo = Network.log.isInfo();
         if (result == null || result.size() == 0) {
-            Network.log.info("yacyClient.hello result error: "
-                + ((result == null) ? "result null" : ("result=" + result.toString())));
+            if (logInfo)
+                Network.log.info("yacyClient.hello result error: "
+                    + ((result == null) ? "result null" : ("result=" + result.toString())));
             return null;
         }
-        Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "' contacted peer at " + targetBaseURL + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + responseTime + " milliseconds");
+        if (logInfo)
+            Network.log.info("yacyClient.hello thread '" + Thread.currentThread().getName() + "' contacted peer at " + targetBaseURL + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + responseTime + " milliseconds");
 
         // check consistency with expectation
         Seed otherPeer = null;
         String seed;
-        if ( (targetHash != null) && (targetHash.length() > 0) && ((seed = result.get("seed0")) != null) ) {
+        if (targetHash.length() > 0 && (seed = result.get("seed0")) != null) {
             if ( seed.length() > Seed.maxsize ) {
-                Network.log.info("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + Seed.maxsize + ")");
+                if (logInfo)
+                    Network.log.info("hello/client 0: rejected contacting seed; too large (" + seed.length() + " > " + Seed.maxsize + ")");
             } else {
                 try {
                     // patch the remote peer address to avoid that remote peers spoof the network with wrong addresses
                     String host = Domains.stripToHostName(targetBaseURL.getHost());
-                    InetAddress ie = Domains.dnsResolve(host);
-                    otherPeer = Seed.genRemoteSeed(seed, false, ie.getHostAddress());
+                    otherPeer = Seed.genRemoteSeed(seed, false, Domains.dnsResolve(host).getHostAddress());
                     if ( !otherPeer.hash.equals(targetHash) ) {
-                        Network.log.info("yacyClient.hello: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + targetHash);
+                        if (logInfo)
+                            Network.log.info("yacyClient.hello: consistency error: otherPeer.hash = " + otherPeer.hash + ", otherHash = " + targetHash);
                         return null; // no success
                     }
                 } catch (final IOException e ) {
-                    Network.log.info("yacyClient.hello: consistency error: other seed bad:" + e.getMessage() + ", seed=" + seed);
+                    if (logInfo)
+                        Network.log.info("yacyClient.hello: consistency error: other seed bad:" + e.getMessage() + ", seed=" + seed);
                     return null; // no success
                 }
             }
@@ -272,11 +277,15 @@ public final class Protocol {
                 return null; // no success
             }
             // with the IPv6 extension, this may contain several ips, separated by comma ','
-            HashSet<String> h = new HashSet<>();
-            for (String s: CommonPattern.COMMA.split(myIP)) {
-                if (s.length() > 0 && Seed.isProperIP(s)) h.add(s);
+
+            String[] cs = CommonPattern.COMMA.split(myIP);
+            HashSet<String> h = new HashSet<>(cs.length);
+            for (String s: cs) {
+                if (!s.isEmpty() && Seed.isProperIP(s))
+                    h.add(s);
             }
-            if (h.size() > 0) mySeed.setIPs(h);
+            if (!h.isEmpty())
+                mySeed.setIPs(h);
         }
         mySeed.setFlagRootNode(
                 (mytype.equals(Seed.PEERTYPE_SENIOR) || mytype.equals(Seed.PEERTYPE_PRINCIPAL)) &&
@@ -302,9 +311,10 @@ public final class Protocol {
          * If this is true we try to reconnect the sch channel to the remote server now.
          */
         if ( mytype.equalsIgnoreCase(Seed.PEERTYPE_JUNIOR) ) {
-            Network.log.info("yacyClient.hello: Peer '"
-                + ((otherPeer == null) ? "unknown" : otherPeer.getName())
-                + "' reported us as junior.");
+            if (logInfo)
+                Network.log.info("yacyClient.hello: Peer '"
+                    + ((otherPeer == null) ? "unknown" : otherPeer.getName())
+                    + "' reported us as junior.");
         } else if ( (mytype.equalsIgnoreCase(Seed.PEERTYPE_SENIOR))
             || (mytype.equalsIgnoreCase(Seed.PEERTYPE_PRINCIPAL)) ) {
             if ( Network.log.isFine() ) {
@@ -2148,7 +2158,8 @@ public final class Protocol {
         // just standard identification essentials
         if ( sb.peers.mySeed().hash != null ) {
             parts.put("iam", UTF8.StringBody(sb.peers.mySeed().hash));
-            if ( targetHash != null ) parts.put("youare", UTF8.StringBody(targetHash));
+            if ( targetHash != null )
+                parts.put("youare", UTF8.StringBody(targetHash));
         
             // time information for synchronization
             final long myTime = System.currentTimeMillis();
