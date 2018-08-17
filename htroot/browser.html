@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
-    <script src="env/bootstrap/js/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- http://jaukia.github.io/zoomooz/ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zoomooz/1.1.6/jquery.zoomooz.min.js"></script>
     <style>
+
+        body {
+            background-color: black;
+            color: white;
+        }
 
         #__meta {
             position: fixed;
@@ -61,9 +69,8 @@
             bottom: 1em;
         }
 
-        #__ {
 
-        }
+
 
     </style>
 </head>
@@ -79,12 +86,12 @@
     //     console.log('open', url, target, features, replace);
     //     return superOpen.call(this, url, target, features, replace);
     // };
-    const hijackRequest = $('<script>');
-    hijackRequest.text('$(document).ready(function() { console.log("hijack:"); const superOpen = XMLHttpRequest.prototype.open;\n' +
-    '    XMLHttpRequest.prototype.open = function(url, target, features, replace) {\n' +
-    '        console.log(\'open\', url, target, features, replace);\n' +
-    '        return superOpen.call(this, url, target, features, replace);\n' +
-    '    }; });');
+    // const hijackRequest = $('<script>');
+    // hijackRequest.text('$(document).ready(function() { console.log("hijack:"); const superOpen = XMLHttpRequest.prototype.open;\n' +
+    // '    XMLHttpRequest.prototype.open = function(url, target, features, replace) {\n' +
+    // '        console.log(\'open\', url, target, features, replace);\n' +
+    // '        return superOpen.call(this, url, target, features, replace);\n' +
+    // '    }; });');
 
         //const superSend = XMLHttpRequest.prototype.send;
         // XMLHttpRequest.prototype.send = function(data,x) {
@@ -106,29 +113,135 @@
         return $('h1').text('error: ' + error);
     }
 
+
+    function hoverMenu(target) {
+        var B = target[0].getBoundingClientRect();
+        //https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
+        // var rc = {
+        //     x: rect.left,
+        //     y: rect.top…
+        return $('#hoverMenu').css({'left': B.left, 'top': B.top, 'width': B.width, 'height': B.height}).show();
+    }
+
     class Content {
         /** target DOM element */
         constructor(target) {
             this.target = target;
 
         }
-        async set(content) {
 
+        /** decorates a DOM tree.
+          * eventually this will be modular w/ pluggable API
+            a) rewrite links
+            b) attach link mouse hover, click, etc.. event handlers
+            c) apply style overrides: automatic (high conf),  manual (low conf)
+                --size (incl. visibility, size > 0)
+                --color
+                --text/html rewrite
+                --other JS/CSS overrides
+
+            the result is a procedure consisting of at least 2 stages
+                pre: changes applied before displaying any resulting DOM
+                early: changes asynchronously applied from a queue after the DOM has been displayed,
+                       because these are not expected to interrupt the user (progressive updates,
+                       possibly at a slow rate)
+         **/
+        fix(d) {
+
+            /*
+               #hoverMenu {
+                    position: absolute;
+                    z-index: 1;
+                    opacity: 0.9;
+                }
+                #hoverMenuLeft {
+                    left: -2em;
+                }
+                #hoverMenuBelow {
+                    bottom: -1em;
+                }
+             */
+
+
+
+            const tgt = this.target;
+
+            const clickHandler = function(e) {
+                console.log('clicked', $(this).html(), e );
+                return false; //prevent?
+            };
+
+            const contextClickHandler = function(e) {
+                //http://jaukia.github.io/zoomooz/#zoomcontainer
+
+                //console.log($(this), tgt);
+                //$(this).zoomTo({targetsize:0.75, duration:600, root: tgt.find('div').first() });
+
+                //e.stopPropagation();
+
+                soon(()=>{
+                    hoverMenu($(this)).zoomTo({targetsize:0.75, duration:600, root: $(document).body });
+                });
+
+                return false;
+            };
+
+
+            const linkHoverEnter = function(e) {
+                //console.log('over', $(this).html(), e );
+                soon(()=>{
+                    hoverMenu($(this));
+                });
+            };
+            const linkHoverExit = function(e) {
+                //console.log('out', $(this).html(), e );
+                // soon(()=> {
+                //     hoverMenu.detach();
+                // });
+            };
+
+
+            $.each(d.find('a'), (i, v)=>{
+                var a = $(v);
+
+                // const href = a.attr('href');
+                // if (href)
+                //     console.log(href);
+
+
+                a.click(clickHandler).contextmenu(contextClickHandler).hover(linkHoverEnter, linkHoverExit);
+            });
+
+
+        }
+
+        async set(contentRaw) {
+
+            const content = $(contentRaw);
+
+            this.fix(content);
 
 
             soon(()=> {
-                content = $(content).wrap('body');
+
                 //content = content.select('script').remove();
                 //console.log((this.target)[0]);
-                this.targetShadow = $((this.target)[0].attachShadow({mode: 'open'}));
-                this.targetShadow.append(/*hijackRequest, */content); //HACK
+                //const body = content.find('body');
+
+                this.targetShadow =
+                    $((this.target)[0].attachShadow({mode: 'open'}))
+                        .append(/*hijackRequest, */content)
+
             });
 
         }
         async nav(url) {
             //TODO show loading overlay indicator
 
-            $.get("/proxy.html?url=" + url).done((x)=>this.set(x)).error((error)=>{
+            let u =
+                //"/proxy.html?url=" + url;
+                  url;
+            $.get(u).done((x)=>this.set(x)).error((error)=>{
                 this.set(errorNode(error));
             });
         }
@@ -139,6 +252,25 @@
 
 
     $(document).ready(function() {
+
+
+        const hoverMenu = $('<div id="hoverMenu" style="position: fixed; pointer-events: none; background-color:rgba(1,0.75,0,0.25); border: 1px solid gray; opacity: 0.9">').append(
+            $('<div style="position: absolute; left: -1em;">').append(
+                $('<button>x</button>')
+            ),
+            $('<div style="position: absolute; right: -1em;">').append(
+                $('<button>x</button>')
+            ),
+            $('<div style="position: absolute; top: -1em; ">').append(
+                // $('<input type="text">'),
+                // $('<button>x</button>'),
+                $('<button>y</button>')
+            ),
+            $('<div style="position: absolute; bottom: -1em; ">').append(
+                // $('<input type="text">'),
+                $('<button>y</button>')
+            )
+        ).prependTo(document.body).hide();
 
         const main = new Content($('#__'));
 
