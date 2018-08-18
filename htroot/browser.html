@@ -12,19 +12,24 @@
         body {
             background-color: black;
             color: white;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
         }
 
         #__meta {
+            /*position: fixed;*/
             position: fixed;
-            width: 100%;
-            height: 100%;
+
             z-index: 1;
             font-family: monospace;
         }
 
         #__meta div {
+            /*position: fixed;*/
             position: fixed;
-
             z-index: 2;
             opacity: 0.9;
             /*transform: scale(2);*/
@@ -69,6 +74,11 @@
             bottom: 1em;
         }
 
+        #__ {
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+        }
 
 
 
@@ -116,6 +126,7 @@
 
     function hoverMenu(target) {
         var B = target[0].getBoundingClientRect();
+
         //https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect
         // var rc = {
         //     x: rect.left,
@@ -171,16 +182,47 @@
                 return false; //prevent?
             };
 
+            var hoverState = { }; //HACK
             const contextClickHandler = function(e) {
                 //http://jaukia.github.io/zoomooz/#zoomcontainer
 
                 //console.log($(this), tgt);
                 //$(this).zoomTo({targetsize:0.75, duration:600, root: tgt.find('div').first() });
 
-                //e.stopPropagation();
+                e.stopPropagation();
 
                 soon(()=>{
-                    hoverMenu($(this)).zoomTo({targetsize:0.75, duration:600, root: $(document).body });
+
+                    const contexted = $(this);
+                    //console.log(hoverState.zoomed!==contexted[0], contexted[0], hoverState.zoomed);
+                    if (!hoverState.zoomed) { // || hoverState.zoomed!==contexted[0]) {
+                        hoverMenu(contexted).zoomTo({
+                            targetsize: 0.75, duration: 0,
+                            //root: $(document).body,
+                            closeclick: false,
+                            preservescroll: true,
+                            animationendcallback: () => {
+                                hoverState.zoomed = contexted[0];
+                            }
+                        });
+                    } else {
+                        console.log('untransformed');
+                        hoverState.zoomed = undefined;
+                        $('.noScroll').attr('class', '') //HACK remove noScroll
+                        $($(document).find('body')).attr('style', '');
+                            //.css({ 'transform': '', 'transform-origin': '' });
+
+                        // $($(document)).zoomTo({
+                        //     //root: $(document).body,
+                        //     targetsize: 1.0, duration: 100,
+                        //     closeclick: false,
+                        //     preservescroll: true,
+                        //     animationendcallback: () => {
+                        //         hoverMenu.zoomed = undefined;
+                        //     }
+                        // });
+                    }
+
                 });
 
                 return false;
@@ -241,9 +283,10 @@
             let u =
                 //"/proxy.html?url=" + url;
                   url;
-            $.get(u).done((x)=>this.set(x)).error((error)=>{
-                this.set(errorNode(error));
-            });
+            $.get(u).done((x)=>this.set(x));
+            //.error((error)=>{
+            //    this.set(errorNode(error));
+            //});
         }
     }
 
@@ -283,7 +326,10 @@
             console.log('key', this, e);
         });
 
-        main.nav('http://en.wikipedia.org');
+        main.nav(
+            'jslicense.html'
+            //'http://en.wikipedia.org'
+    );
 
     });
 
