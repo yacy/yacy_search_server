@@ -1,6 +1,6 @@
 # Build a docker image from latest YaCy sources on Alpine Linux
 
-# Base image : latest stable official jdk image from Docker based on Alpine Linux 
+# Base image : latest stable official jdk image from Docker based on Alpine Linux
 FROM openjdk:alpine
 
 # trace java version
@@ -35,11 +35,11 @@ RUN apk update && \
 	mv apache-ant-${ANT_VERSION} /opt/ant && \
 	rm -f apache-ant-${ANT_VERSION}-bin.tar.gz && \
 	apk del gnupg
-    
+
 # set ant required environment variables
-ENV ANT_HOME /opt/ant 
+ENV ANT_HOME /opt/ant
 ENV PATH ${PATH}:/opt/ant/bin
-    
+
 # --- End of apache ant install
 
 # set current working dir

@@ -1,14 +1,14 @@
 # Build a docker image from latest YaCy sources
 
-# Base image : latest stable official jdk image from Docker (Debian based) 
+# Base image : latest stable official jdk image from Docker (Debian based)
 FROM openjdk:latest
 
 # Install needed packages not in base image
 RUN apt-get update && apt-get install -yq curl
-	
+
 # trace java version
 RUN java -version
-	
+
 # set current working dir
 WORKDIR /opt
 
@@ -27,7 +27,7 @@ RUN apt-get update && \
 	git clone https://github.com/yacy/yacy_search_server.git && \
 	ant compile -f /opt/yacy_search_server/build.xml && \
 	rm -rf /opt/yacy_search_server/.git && \
-	apt-get purge -yq --auto-remove ant git && \ 
+	apt-get purge -yq --auto-remove ant git && \
 	apt-get clean
 
 
