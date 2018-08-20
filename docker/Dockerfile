@@ -4,7 +4,8 @@
 FROM openjdk:latest
 
 # Install needed packages not in base image
-RUN apt-get update && apt-get install -yq curl
+RUN apt-get update && apt-get install -yq curl && \
+  rm -rf /var/lib/apt/lists/*
 
 # trace java version
 RUN java -version
@@ -28,8 +29,8 @@ RUN apt-get update && \
 	ant compile -f /opt/yacy_search_server/build.xml && \
 	rm -rf /opt/yacy_search_server/.git && \
 	apt-get purge -yq --auto-remove ant git && \
-	apt-get clean
-
+	apt-get clean && \
+	rm -rf /var/lib/apt/lists/*
 
 # Set initial admin password : "docker" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
 RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init

@@ -7,8 +7,7 @@ FROM openjdk:alpine
 RUN java -version
 
 # Install needed packages not in base image
-RUN apk update && \
-	apk add --no-cache curl
+RUN apk add --no-cache curl
 
 # set current working dir
 WORKDIR /tmp
@@ -55,8 +54,7 @@ WORKDIR /opt
 # Possible alternative : copy directly your current sources an remove git clone command from the following RUN
 # COPY . /opt/yacy_search_server/
 
-RUN apk update && \
-	apk add --no-cache git && \
+RUN apk add --no-cache git && \
 	git clone https://github.com/yacy/yacy_search_server.git && \
 	ant compile -f /opt/yacy_search_server/build.xml && \
 	rm -rf /opt/yacy_search_server/.git && \
