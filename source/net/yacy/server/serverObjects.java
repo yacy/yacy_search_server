@@ -302,8 +302,28 @@ public class serverObjects implements Serializable, Cloneable {
         put(key, value == null ? "" : CharacterCoding.unicode2html(UTF8.decodeURL(value), true));
     }
 
+    /**
+     * Add a String UTF-8 encoded bytes to the map. The content of the string is first decoded to removed any URL encoding (application/x-www-form-urlencoded).
+     * Then the content of the String is escaped to be usable in HTML output. 
+     * @param key   key name as String.
+     * @param value the UTF-8 encoded byte array of a String that will be reencoded for HTML output.
+     * @see CharacterCoding#encodeUnicode2html(String, boolean)
+     */
     public void putHTML(final String key, final byte[] value) {
         putHTML(key, value == null ? "" : UTF8.String(value));
+    }
+    
+	/**
+	 * Add a String to the map. The eventual URL encoding
+	 * (application/x-www-form-urlencoded) is retained, but the String is still
+	 * escaped to be usable in HTML output.
+	 * 
+	 * @param key   key name as String.
+	 * @param value a String that will be reencoded for HTML output.
+	 * @see CharacterCoding#encodeUnicode2html(String, boolean)
+	 */
+    public void putUrlEncodedHTML(final String key, final String value) {
+        put(key, value == null ? "" : CharacterCoding.unicode2html(value, true));
     }
 
     /**
@@ -317,17 +337,34 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
     /**
-     * put the key/value pair with a special method according to the given file type
-     * @param fileType
+     * Put the key/value pair, escaping characters depending on the target fileType. When the target is HTML, the content of the string is first decoded to removed any URL encoding (application/x-www-form-urlencoded).
+     * @param fileType the response target file type
      * @param key
      * @param value
-     * @return
      */
     public void put(final RequestHeader.FileType fileType, final String key, final String value) {
         if (fileType == FileType.JSON) putJSON(key, value == null ? "" : value);
         else if (fileType == FileType.XML) putXML(key, value == null ? "" : value);
         else putHTML(key, value == null ? "" : value);
     }
+    
+	/**
+	 * Put the key/value pair, escaping characters depending on the target fileType.
+	 * The eventual URL encoding (application/x-www-form-urlencoded) is retained.
+	 * 
+	 * @param fileType the response target file type
+	 * @param key
+	 * @param value
+	 */
+	public void putUrlEncoded(final RequestHeader.FileType fileType, final String key, final String value) {
+		if (fileType == FileType.JSON) {
+			putJSON(key, value == null ? "" : value);
+		} else if (fileType == FileType.XML) {
+			putXML(key, value == null ? "" : value);
+		} else {
+			putUrlEncodedHTML(key, value == null ? "" : value);
+		}
+	}
 
     /**
      * Add a byte/long/integer to the map. The number will be encoded into a String using

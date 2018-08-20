@@ -156,7 +156,7 @@ public class yacysearchtrailer {
                 count = entry.getValue();
                 prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
-				prop.put(fileType, "nav-topics_element_" + i + "_url", QueryParams
+				prop.putUrlEncoded(fileType, "nav-topics_element_" + i + "_url", QueryParams
 						.navurl(fileType, 0, theSearch.query, name, false, authenticated).toString());
                 prop.put("nav-topics_element_" + i + "_count", count);
                 int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (1 + maxcount - mincount);
@@ -212,7 +212,7 @@ public class yacysearchtrailer {
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
                 prop.put("nav-protocols_element_" + i + "_onclick_url", url);
-                prop.put(fileType, "nav-protocols_element_" + i + "_url", url);
+                prop.putUrlEncoded(fileType, "nav-protocols_element_" + i + "_url", url);
                 prop.put("nav-protocols_element_" + i + "_count", count);
                 prop.put("nav-protocols_element_" + i + "_nl", 1);
                 i++;
@@ -314,7 +314,7 @@ public class yacysearchtrailer {
                         navUrl = QueryParams.navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav, authenticated);
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-					prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", navUrl);
+					prop.putUrlEncoded(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", navUrl);
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_id", "vocabulary_" + navname + "_" + i);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
@@ -376,7 +376,7 @@ public class yacysearchtrailer {
 							authenticated);
                 }
                 prop.put(fileType, "navs_" + ni + "_element_" + i + "_name", navi.getElementDisplayName(name));
-				prop.put(fileType, "navs_" + ni + "_element_" + i + "_url", navUrl);
+				prop.putUrlEncoded(fileType, "navs_" + ni + "_element_" + i + "_url", navUrl);
                 prop.put(fileType, "navs_" + ni + "_element_" + i + "_id", naviname + "_" + i);
                 prop.put("navs_" + ni + "_element_" + i + "_count", count);
                 prop.put("navs_" + ni + "_element_" + i + "_nl", 1);
@@ -419,7 +419,7 @@ public class yacysearchtrailer {
             final String query = theSearch.query.getQueryGoal().getQueryString(false);
             prop.put(fileType, "cat-location_query", query);
             final String queryenc = theSearch.query.getQueryGoal().getQueryString(true).replace(' ', '+');
-            prop.put(fileType, "cat-location_queryenc", queryenc);
+            prop.putUrlEncoded(fileType, "cat-location_queryenc", queryenc);
         }
         prop.put("num-results_totalcount", theSearch.getResultCount());
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "bottomline", 0, 0), false);

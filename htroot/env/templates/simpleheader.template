@@ -17,7 +17,7 @@
       <li id="header_search" class="dropdown">
         <a href="#" data-toggle="dropdown" class="dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">Search Interfaces<b class="caret"></b></a>
         <ul class="dropdown-menu" role="menu">
-          <li id="header_websearch"><a href="index.html#(authorized)#::?auth#(/authorized)#" onclick="this.href='index.html?#(authorized)#::auth&#(/authorized)#former='+document.searchform.search.value">Web Search</a></li>
+          <li id="header_websearch"><a href="index.html#(authorized)#::?auth#(/authorized)#" onclick="this.href='index.html?#(authorized)#::auth&#(/authorized)#former='+encodeURIComponent(document.searchform.search.value)">Web Search</a></li>
           <li id="header_filesearch"><a href="yacyinteractive.html" onclick="this.href='yacyinteractive.html?handover='+document.searchform.search.value">File Search</a></li>
           <li id="header_comparesearch"><a href="compare_yacy.html?display=0">Compare Search</a></li>
           <li id="header_hostbrowser"><a href="HostBrowser.html?hosts=">Index Browser</a></li>

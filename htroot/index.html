@@ -79,7 +79,7 @@
 	        #(searchaudio)#::<label><input type="radio" id="audio" name="contentdom" value="audio" #(check)#::checked="checked"#(/check)# />&nbsp;Audio&nbsp;&nbsp;</label>#(/searchaudio)#
 	        #(searchvideo)#::<label><input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# />&nbsp;Video&nbsp;&nbsp;</label>#(/searchvideo)#
 	        #(searchapp)#::<label><input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# />&nbsp;Applications</label>#(/searchapp)#
-	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1#(authSearch)#::&auth#(/authSearch)#" onclick="this.href='index.html?searchoptions=1#(authSearch)#::&auth#(/authSearch)#&amp;former='+document.getElementById('search').value+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom);">more options...</a>::#(/searchoptions)#
+	        #(searchoptions)#&nbsp;&nbsp;<a href="index.html?searchoptions=1#(authSearch)#::&auth#(/authSearch)#" onclick="this.href='index.html?searchoptions=1#(authSearch)#::&auth#(/authSearch)#&amp;former='+encodeURIComponent(document.getElementById('search').value)+'&amp;contentdom='+radioValue(document.getElementById('searchform').contentdom);">more options...</a>::#(/searchoptions)#
         </div>
         #(/searchdomswitches)#
         <input type="hidden" name="nav" value="#[search.navigation]#" />

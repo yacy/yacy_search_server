@@ -325,7 +325,7 @@ public class yacysearchitem {
                 prop.put("content_showMetadata_urlhash", urlhash);
                 prop.put("content_showParser_urlhash", urlhash);
                 prop.put("content_showCitation_urlhash", urlhash);
-                prop.putHTML("content_showPictures_former", origQ);
+                prop.putUrlEncodedHTML("content_showPictures_former", origQ);
                 prop.put("content_showCache_link", resultUrlstring);
                 prop.put("content_showProxy_link", resultUrlstring);
                 prop.put("content_showHostBrowser_link", resultUrlstring);
@@ -387,11 +387,16 @@ public class yacysearchitem {
             prop.putHTML("content_subject", result.dc_subject());
             final Iterator<String> query = theSearch.query.getQueryGoal().getIncludeStrings();
             final StringBuilder s = new StringBuilder(theSearch.query.getQueryGoal().getIncludeSize() * 20);
-            while (query.hasNext()) s.append('+').append(query.next());
-            final String words = (s.length() > 0) ? s.substring(1) : "";
-            prop.putHTML("content_words", words);
-            prop.putHTML("content_showParser_words", words);
-            prop.putHTML("content_former", origQ);
+            while (query.hasNext()) {
+            	if(s.length() > 0) {
+            		s.append(' ');
+            	}
+            	s.append(query.next());
+            }
+            final String words = MultiProtocolURL.escape(s.toString()).toString();
+            prop.putUrlEncodedHTML("content_words", words);
+            prop.putUrlEncodedHTML("content_showParser_words", words);
+            prop.putUrlEncodedHTML("content_former", origQ);
             final TextSnippet snippet = result.textSnippet();
             final String desc = (snippet == null) ? "" : snippet.descriptionline(theSearch.query.getQueryGoal());
             prop.put("content_description", desc);
