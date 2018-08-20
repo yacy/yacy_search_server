@@ -134,7 +134,7 @@ public class yacysearch {
         final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
         // get query
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
-        String querystring = originalquerystring.replace('+', ' ').trim();
+        String querystring = originalquerystring;
         CacheStrategy snippetFetchStrategy = (post == null) ? null : CacheStrategy.parse(post.get("verify", sb.getConfig("search.verify", "")));
         
         final servletProperties prop = new servletProperties();
