@@ -32,17 +32,15 @@ RUN apt-get update && \
 	apt-get clean && \
 	rm -rf /var/lib/apt/lists/*
 
+RUN \
 # Set initial admin password : "docker" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
-RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init
-
+	sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init && \
 # Intially enable HTTPS : this is the most secure option for remote administrator authentication
-RUN sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init
-
+	sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init && \
 # Create user and group yacy : this user will be used to run YaCy main process
-RUN adduser --system --group --no-create-home --disabled-password yacy
-
+	adduser --system --group --no-create-home --disabled-password yacy && \
 # Set ownership of yacy install directory to yacy user/group
-RUN chown yacy:yacy -R /opt/yacy_search_server
+	chown yacy:yacy -R /opt/yacy_search_server
 
 # Expose HTTP and HTTPS default ports
 EXPOSE 8090 8443
