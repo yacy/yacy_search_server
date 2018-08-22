@@ -44,9 +44,6 @@ import net.yacy.cora.storage.ARC;
 import net.yacy.cora.storage.ConcurrentARC;
 import net.yacy.cora.util.Memory;
 
-// ATTENTION! THIS CLASS SHALL NOT IMPORT FROM OTHER PACKAGES THAN CORA AND JRE
-// BECAUSE OTHERWISE THE DEBIAN INSTALLER FAILS!
-
 public class Digest {
 
 	public static Queue<MessageDigest> digestPool = new ConcurrentLinkedQueue<MessageDigest>();
