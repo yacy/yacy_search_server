@@ -328,3 +328,64 @@ function handleAudioPlaying(event) {
 		}
 	}
 }
+
+/**
+ * Handle a rendering error on a result image thumbnail.
+ * @param imgElem {HTMLImageElement} the html img element that could not be rendered
+ */
+function handleResultThumbError(imgElem) {
+	if (imgElem.parentNode != null && imgElem.parentNode.parentNode != null
+			&& imgElem.parentNode.parentNode.className == "thumbcontainer") {
+		/* Hide the thumbnail container */
+		imgElem.parentNode.parentNode.className = "thumbcontainer thumbError hidden";
+		var errorsInfoElem = document.getElementById("imageErrorsInfo");
+		if (errorsInfoElem != null && errorsInfoElem.className.indexOf("hidden") >= 0) {
+			/* Show the image errors information block */
+			errorsInfoElem.className = errorsInfoElem.className.replace("hidden", "");
+		}
+		var errorsCountElem = document.getElementById("imageErrorsCount");
+		if (errorsCountElem != null) {
+			/* Increase the count of thumbnails rendering errors */
+			errorsCountElem.firstChild.nodeValue = parseInt(errorsCountElem.firstChild.nodeValue) + 1;
+		}
+	}
+}
+
+/**
+ * Show result thumbnails that were hidden because a rendering error occurred.
+ */
+function showErrThumbnails() {
+	var thumbs = document.getElementsByClassName("thumbError hidden");
+	var length = thumbs.length;
+	for (var i = 0; i < length && thumbs.length > 0; i++) {
+		thumbs[0].className = thumbs[0].className.replace("hidden", ""); // after that the element is removed from the thumbs live collection
+	}
+	var showBtn = document.getElementById("showErrorImagesBtn");
+	if(showBtn != null) {
+		showBtn.className = showBtn.className + " hidden";
+	}
+	var hideBtn = document.getElementById("hideErrorImagesBtn");
+	if(hideBtn != null) {
+		hideBtn.className = hideBtn.className.replace("hidden", "");
+	}
+}
+
+/**
+ * Hide result thumbnails that had a rendering error.
+ */
+function hideErrThumbnails() {
+	var thumbs = document.getElementsByClassName("thumbError");
+	for (var i = 0; i < thumbs.length; i++) {
+		if(thumbs[i].className.indexOf("hidden") < 0) {
+			thumbs[i].className = thumbs[i].className + " hidden";	
+		}
+	}
+	var showBtn = document.getElementById("showErrorImagesBtn");
+	if(showBtn != null) {
+		showBtn.className = showBtn.className.replace("hidden", "");
+	}
+	var hideBtn = document.getElementById("hideErrorImagesBtn");
+	if(hideBtn != null) {
+		hideBtn.className = hideBtn.className + " hidden";
+	}
+}

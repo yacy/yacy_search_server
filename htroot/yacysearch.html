@@ -204,6 +204,12 @@ document.getElementById("Enter").innerHTML = "search again";
 <!-- show date histogram if date navigation is active -->
 <div id="datehistogram"></div>
 
+<div id="imageErrorsInfo" class="info hidden">
+	Failed to render <strong id="imageErrorsCount">0</strong> thumbnail(s).
+	<button id="showErrorImagesBtn" class="btn btn-default btn-sm" onclick="showErrThumbnails()" title="Show anyway links to images that could not be rendered">Show</button>
+	<button id="hideErrorImagesBtn" class="btn btn-default btn-sm hidden" onclick="hideErrThumbnails()" title="Hide links to images that could not be rendered">Hide</button>
+</div>
+
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td></tr>
 ::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td>#(embed)#::<td>Player</td>#(/embed)#</tr>#(/resultTable)#
