@@ -1,14 +1,13 @@
 # Build a docker image from latest YaCy sources on Alpine Linux
 
-# Base image : latest stable official jdk image from Docker based on Alpine Linux 
+# Base image : latest stable official jdk image from Docker based on Alpine Linux
 FROM openjdk:alpine
 
 # trace java version
 RUN java -version
 
 # Install needed packages not in base image
-RUN apk update && \
-	apk add --no-cache curl
+RUN apk add --no-cache curl
 
 # set current working dir
 WORKDIR /tmp
@@ -35,11 +34,11 @@ RUN apk update && \
 	mv apache-ant-${ANT_VERSION} /opt/ant && \
 	rm -f apache-ant-${ANT_VERSION}-bin.tar.gz && \
 	apk del gnupg
-    
+
 # set ant required environment variables
-ENV ANT_HOME /opt/ant 
+ENV ANT_HOME /opt/ant
 ENV PATH ${PATH}:/opt/ant/bin
-    
+
 # --- End of apache ant install
 
 # set current working dir
@@ -55,25 +54,22 @@ WORKDIR /opt
 # Possible alternative : copy directly your current sources an remove git clone command from the following RUN
 # COPY . /opt/yacy_search_server/
 
-RUN apk update && \
-	apk add --no-cache git && \
+RUN apk add --no-cache git && \
 	git clone https://github.com/yacy/yacy_search_server.git && \
 	ant compile -f /opt/yacy_search_server/build.xml && \
 	rm -rf /opt/yacy_search_server/.git && \
 	rm -rf /opt/ant && \
 	apk del git
 
+RUN \
 # Set initial admin password : "docker" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
-RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init
-
+	sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init && \
 # Intially enable HTTPS : this is the most secure option for remote administrator authentication
-RUN sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init
-
+	sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init && \
 # Create user and group yacy : this user will be used to run YaCy main process
-RUN addgroup yacy && adduser -S -G yacy -H -D yacy
-
+	addgroup yacy && adduser -S -G yacy -H -D yacy && \
 # Set ownership of yacy install directory to yacy user/group
-RUN chown yacy:yacy -R /opt/yacy_search_server
+	chown yacy:yacy -R /opt/yacy_search_server
 
 # Expose HTTP and HTTPS default ports
 EXPOSE 8090 8443
