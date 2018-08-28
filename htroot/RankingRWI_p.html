@@ -1,33 +1,36 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>YaCy '#[clientname]#': RWI Ranking Configuration</title>
     #%env/templates/metas.template%#
-    
-    <!-- Dependencies for the Slider UI component -->
-	<link media="screen" type="text/css" href="jquery/themes/start/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
-	<script src="jquery/js/jquery-1.7.min.js" type="text/javascript"></script>    
-	<script src="jquery/js/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
 	
-  	<script>
-	$(function() {
-		$("select").each(function(){
-			var name = $(this).attr("name");
-			$("<div style='width:280px; margin-left: 10px; float:left; display: inline;' name='"+name+"' id='slider_"+name+"'></div>").insertAfter($(this)).slider({
-				min: 0,
-				max: 15,
-				range: "min",
-				value: $(this).val(),
-				slide: function(event, ui) {					
-					select = $(ui.handle).parents("dd").children("select");
-					select.val(ui.value);
-				}
-			});
-			$(this).change(function(event) {
-				$(event.target).next().slider("value", this.selectedIndex);
-			});
-		});
-	});
+   	<script>
+   	/**
+   	* Apply the new selected value to the bound slider.
+   	*/
+   	function handleSelectChange(event) {
+   		var selectElem = event.target || event.srcElement;
+   		if(selectElem != null && selectElem.id != null && selectElem.id.length > 7) {
+   			var rangeElem = document.getElementById("slider_" + selectElem.id.substring(7));
+   			if(rangeElem != null) {
+   				rangeElem.value = selectElem.value;
+   			}
+   		}
+   	}
+   	
+   	/**
+   	* Apply the new slider value to the bound select.
+   	*/
+   	function handleSliderChange(event) {
+   		var rangeElem = event.target || event.srcElement;
+   		if(rangeElem != null && rangeElem.id != null && rangeElem.id.length > 7) {
+   			var selectElem = document.getElementById("select_" + rangeElem.id.substring(7));
+   			if(selectElem != null) {
+   				selectElem.value = rangeElem.value;
+   			}
+   		}
+   	}
+   	
 	</script>
   </head>
   <body id="RankingRWI_p">
@@ -43,11 +46,14 @@
       <fieldset>
         <legend>Pre-Ranking</legend>
         <dl>#{attrPre}# 
-          <dt style="width:260px"><label for="#[nameorg]#">#[name]#</label>&nbsp;<span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>#[info]#</span></span></dt>
+          <dt style="width:260px"><label id="label_#[nameorg]#" for="select_#[nameorg]#">#[name]#</label>&nbsp;<span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span id="info_#[nameorg]#">#[info]#</span></span></dt>
           <dd style="width:360px; float:left; display:inline;" id="#[nameorg]#">
-            <select style="float:left; display:inline;" name="#[nameorg]#">#{select}# 
+            <select id="select_#[nameorg]#" aria-describedby="info_#[nameorg]#" style="float:left; display:inline;" name="#[nameorg]#" onchange="handleSelectChange(event)">#{select}# 
 				<option value="#[value]#" #(checked)#:: selected="selected"#(/checked)#>#[value]#</option>#{/select}#
 			</select>
+			<div style="width:280px; margin-left: 10px; float:left; display: inline;">
+				<input id="slider_#[nameorg]#" aria-labelledby="label_#[nameorg]#" aria-describedby="info_#[nameorg]#" type="range" min="0" max="15" value="#[value]#" onchange="handleSliderChange(event)"/>
+			</div>
           </dd>#{/attrPre}# 
         </dl>
       </fieldset>
@@ -57,11 +63,14 @@
       <fieldset>
         <legend>Post-Ranking</legend>
         <dl>#{attrPost}# 
-          <dt style="width:260px"><label for="#[nameorg]#">#[name]#</label>&nbsp;<span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span>#[info]#</span></span></dt>
+          <dt style="width:260px"><label id="label_#[nameorg]#" for="select_#[nameorg]#">#[name]#</label>&nbsp;<span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span id="info_#[nameorg]#">#[info]#</span></span></dt>
           <dd style="width:360px" id="#[nameorg]#">            
-          	<select name="#[nameorg]#">#{select}# 
+          	<select id="select_#[nameorg]#" aria-describedby="info_#[nameorg]#" style="float:left; display:inline;" name="#[nameorg]#" onchange="handleSelectChange(event)">#{select}# 
 				<option value="#[value]#" #(checked)#:: selected="selected"#(/checked)#>#[value]#</option>#{/select}#
 			</select>
+			<div style="width:280px; margin-left: 10px; float:left; display: inline;">
+				<input id="slider_#[nameorg]#" aria-labelledby="label_#[nameorg]#" aria-describedby="info_#[nameorg]#" type="range" min="0" max="15" value="#[value]#" onchange="handleSliderChange(event)"/>
+			</div>
           </dd>#{/attrPost}# 
         </dl>
       </fieldset>
