@@ -184,7 +184,7 @@ function yrun() {
 				$("#ypopup").dialog('close');
 		} else {                                // Else fire up a search request and remeber the current search term
 			ycurr = $("#yquery").getValue();			
-			yacysearch(true);
+			debouncedYacysearch(true);
 		}		
 		return false;		
 	});
@@ -203,6 +203,24 @@ function yrun() {
 		yacysearch(true);		
 		return false;
 	});	
+}
+
+var suggestTimeoutId = null;
+
+/**
+ * Debounce wrapper to limit the rate of calls to the backend search service.
+ * @param clear when true, clear the results popup
+ */
+function debouncedYacysearch(clear) {
+	if(suggestTimeoutId != null) {
+		/* Remove delayed call not yet done */
+		clearTimeout(suggestTimeoutId);
+	}
+	
+	/* Limit the rate of calls to the search API by adding a delay before effective call */
+	suggestTimeoutId = setTimeout(function() {
+		yacysearch(clear);
+	}, 400);
 }
 
 function yacysearch(clear) {	
