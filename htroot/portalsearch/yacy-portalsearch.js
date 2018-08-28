@@ -12,26 +12,36 @@
  * 
  */
 
+var portalsearch = {
+	ynavigators: null,
+	ycurr: '',
+	startRecord: 0,
+	maximumRecords: 10,
+	submit: false,
+	load_status: 0,
+	loading: null
+};
+
 function statuscheck() {
-	if(load_status < 5) {
+	if(portalsearch.load_status < 5) {
 		return;
 	} else {
-		window.clearInterval(loading);
+		window.clearInterval(portalsearch.loading);
 		yrun();
 	}
 }
 
 $(document).ready(function() {
-	ynavigators =  new Array();
+	portalsearch.ynavigators =  new Array();
 	$.ajaxSetup({
 		timeout: 5000,
 		cache: true
-	})
+	});
 	// apply default properties
-	ycurr = '';
-	startRecord = 0;
-	maximumRecords = 10;	
-	submit = false;	
+	portalsearch.ycurr = '';
+	portalsearch.startRecord = 0;
+	portalsearch.maximumRecords = 10;	
+	portalsearch.submit = false;	
 	yconf = $.extend({
 		url      : '',
 		'global' : false,		
@@ -70,8 +80,8 @@ $(document).ready(function() {
 	    	.appendTo(head);
 	}
 
-	load_status = 0;
-	loading = window.setInterval("statuscheck()", 200);    
+	portalsearch.load_status = 0;
+	portalsearch.loading = window.setInterval("statuscheck()", 200);    
     if(yconf.load_js) {
 		var script1 = yconf.url + '/jquery/js/jquery.query-2.1.7.js';
 		var script2 = yconf.url + '/jquery/js/jquery.form-2.73.js';
@@ -79,18 +89,18 @@ $(document).ready(function() {
 		var script4 = yconf.url + '/jquery/js/jquery-ui-1.8.16.custom.min.js';
 		var script5 = yconf.url + '/jquery/js/jquery-ui-combobox.js';
 		
-		$.getScript(script1, function(){ load_status++; });
-		$.getScript(script2, function(){ load_status++; });
-		$.getScript(script3, function(){ load_status++; });
-		$.getScript(script4, function(){ load_status++; });
-		$.getScript(script5, function(){ load_status++; });
+		$.getScript(script1, function(){ portalsearch.load_status++; });
+		$.getScript(script2, function(){ portalsearch.load_status++; });
+		$.getScript(script3, function(){ portalsearch.load_status++; });
+		$.getScript(script4, function(){ portalsearch.load_status++; });
+		$.getScript(script5, function(){ portalsearch.load_status++; });
     } else {
     	yrun();
     }
 });
 
 function yrun() {
-	maximumRecords = parseInt($("#ysearch input[name='maximumRecords']").getValue());
+	portalsearch.maximumRecords = parseInt($("#ysearch input[name='maximumRecords']").getValue());
 	global = yconf.global;
 	
 	$("#ypopup").dialog({			
@@ -151,7 +161,7 @@ function yrun() {
 			$("#ypopup").bind("scroll", function(e){
 				p1 = $("#ypopup h3 :last").position().top;
 				if(p1-$("#ypopup").dialog( "option", "height" ) < 0) {
-					startRecord = startRecord + maximumRecords;
+					portalsearch.startRecord = portalsearch.startRecord + portalsearch.maximumRecords;
 					yacysearch(false);
 				}
 			});
@@ -173,7 +183,7 @@ function yrun() {
 			yacysearch(true);
 		}
 		
-		if(ycurr == $("#yquery").getValue()) {  // Do nothing if search term hasn't changed		
+		if(portalsearch.ycurr == $("#yquery").getValue()) {  // Do nothing if search term hasn't changed		
 			return false;
 		}
 
@@ -183,14 +193,14 @@ function yrun() {
 			if($("#ypopup").dialog('isOpen'))
 				$("#ypopup").dialog('close');
 		} else {                                // Else fire up a search request and remeber the current search term
-			ycurr = $("#yquery").getValue();			
+			portalsearch.ycurr = $("#yquery").getValue();			
 			debouncedYacysearch(true);
 		}		
 		return false;		
 	});
 	
 	$('#ysearch').submit(function() {           // Submit a search request
-		ycurr = $("#yquery").getValue();
+		portalsearch.ycurr = $("#yquery").getValue();
 
 		if (!$("#ypopup").dialog('isOpen'))			
 			$("#ypopup").dialog('open');
@@ -254,13 +264,13 @@ function yacysearch(clear) {
 		}
 		if(item.name == 'query' || item.name == 'search') {
 			item.value = $.trim(item.value);               // remove heading and trailing white spaces from querey
-			if(item.value != ycurr)						   // in case of fast typing ycurr needs to be updated	
-				ycurr = item.value;			
+			if(item.value != portalsearch.ycurr)						   // in case of fast typing ycurr needs to be updated	
+				portalsearch.ycurr = item.value;			
 		}
 		param[i] = item;
 	});
-	param[param.length] = { name : 'startRecord', value : startRecord };
-	ycurr = ycurr.replace("<"," ").replace(">"," ");
+	param[param.length] = { name : 'startRecord', value : portalsearch.startRecord };
+	portalsearch.ycurr = portalsearch.ycurr.replace("<"," ").replace(">"," ");
 	
 	$.ajaxSetup({ 
         timeout: 10000,
@@ -281,7 +291,7 @@ function yacysearch(clear) {
 			if (clear) $('#ypopup').empty();
 			var favicon = "<img src='"+yconf.url+"/yacy/ui/img-2/stop.png' class='favicon'/>";
 			var title = "<h3 class='linktitle'>"+favicon+" "+err+"</h3>";						
-			var url = "<p class='url'><a href=''>Current search terms: "+ycurr+"</a></p>"
+			var url = "<p class='url'><a href=''>Current search terms: "+portalsearch.ycurr+"</a></p>"
 			$(title+url).appendTo("#ypopup");
 		}
     }); 
@@ -295,7 +305,7 @@ function yacysearch(clear) {
 			var searchTerms = "";
 			searchTerms = data.channels[0].searchTerms.replace("<"," ").replace(">"," ");;			
 						
-			if($.trim(ycurr.replace(/ /g,"+")) != searchTerms) {
+			if($.trim(portalsearch.ycurr.replace(/ /g,"+")) != searchTerms) {
 				return false;				
 			}
 			if(clear) {	
@@ -398,7 +408,7 @@ function yacysearch(clear) {
 					selected: function(event, ui) { 
 						var query = unescape($("#yquery").getValue() + " /language/" +ui.item.value);
 						$("#yquery").setValue(query);
-						ynavigators.push("/language/"+ui.item.value);
+						portalsearch.ynavigators.push("/language/"+ui.item.value);
 						$("#yquery").trigger('keyup');
 					}
 				});
@@ -423,7 +433,7 @@ function yacysearch(clear) {
 								selected: function(event, ui) { 
 									var query = unescape($("#yquery").getValue() + " " +ui.item.value);
 									$("#yquery").setValue(query);
-									ynavigators.push(ui.item.value);
+									portalsearch.ynavigators.push(ui.item.value);
 									$("#yquery").trigger('submit');								
 								}
 							});							
@@ -432,28 +442,28 @@ function yacysearch(clear) {
 				);
 				
 				$('<hr />').appendTo("#yside");	
-				if(ynavigators.length > 0) {
+				if(portalsearch.ynavigators.length > 0) {
 					$("<p class='ytxt'>Uncheck to release navigators:</p>").appendTo('#yside');	
 				}
 							
-				cancelNavigators(ynavigators, "#yside");
+				cancelNavigators(portalsearch.ynavigators, "#yside");
 
 				if($("#ypopup .yloading").length == 0) {
 					$(".ynav-cancel").bind("change", function(event) {
 						var query = $("#yquery").getValue();
 						var str = $(event.target).val();
-						var idx = ynavigators.indexOf($.trim(str));
-						if(idx!=-1) ynavigators.splice(idx, 1);
+						var idx = portalsearch.ynavigators.indexOf($.trim(str));
+						if(idx!=-1) portalsearch.ynavigators.splice(idx, 1);
 						var regexp = new RegExp(' '+str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));   // properly escape string for regexp
 						$("#yquery").setValue($.trim(query.replace(regexp,"")));
-						startRecord = 0;
+						portalsearch.startRecord = 0;
 						$("#yquery").trigger('submit');
 					});
 					autoOpenSidebar();
 					if ($("#ypopup").dialog('isOpen')) {					
 						// If you got maximumRecords results, but still have display space, load more results
-						if($("#ypopup h3 :last").position().top < $("#ypopup").dialog( "option", "height" ) && count == maximumRecords) {						
-							startRecord = startRecord + maximumRecords;
+						if($("#ypopup h3 :last").position().top < $("#ypopup").dialog( "option", "height" ) && count == portalsearch.maximumRecords) {						
+							portalsearch.startRecord = portalsearch.startRecord + portalsearch.maximumRecords;
 							yacysearch(false);						
 						}
 					}
@@ -464,7 +474,7 @@ function yacysearch(clear) {
 	function autoOpenSidebar() {	              	
 		window.setTimeout(function() {                      // The delay prevents the sidebar to open on every intermediate search results
 			if($("#ypopup .yloading").length == 0) {        // Check again wether a search result is still loading
-				if(	$("#yquery").getValue() == ycurr) {		// Open side bar only if result matches current search term												
+				if(	$("#yquery").getValue() == portalsearch.ycurr) {		// Open side bar only if result matches current search term												
 					$("#yside").dialog('open');
 					$("#yquery").focus();			
 				}
