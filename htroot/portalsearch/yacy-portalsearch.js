@@ -322,7 +322,7 @@ function yacysearch(clear) {
 				data.channels[0].items,
 				function(i,item) {
 					if (item) {
-						var favicon = "<img src='"+item.faviconUrl+"' class='favicon'/>";
+						var favicon = "<img src='" + yconf.url + "/" +item.faviconUrl+"' class='favicon'/>";
 						var title = "<h3 class='linktitle'>"+favicon+"<a href='"+item.link+"' target='_blank'>"+item.title+"</a></h3>";						
 						var url = "<p class='url'><a href='"+item.link+"' target='_blank'>"+item.link+"</a></p>"
 						var desc = "<p class='desc'>"+item.description+"</p>";
