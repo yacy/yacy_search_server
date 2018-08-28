@@ -19,7 +19,8 @@ var portalsearch = {
 	maximumRecords: 10,
 	submit: false,
 	load_status: 0,
-	loading: null
+	loading: null,
+	fetchingResults: false
 };
 
 function statuscheck() {
@@ -42,6 +43,7 @@ $(document).ready(function() {
 	portalsearch.startRecord = 0;
 	portalsearch.maximumRecords = 10;	
 	portalsearch.submit = false;	
+	portalsearch.fetchingResults = false;
 	yconf = $.extend({
 		url      : '',
 		'global' : false,		
@@ -160,7 +162,7 @@ function yrun() {
 
 			$("#ypopup").bind("scroll", function(e){
 				p1 = $("#ypopup h3 :last").position().top;
-				if(p1-$("#ypopup").dialog( "option", "height" ) < 0) {
+				if(p1-$("#ypopup").dialog( "option", "height" ) < 0 && !portalsearch.fetchingResults) {
 					portalsearch.startRecord = portalsearch.startRecord + portalsearch.maximumRecords;
 					yacysearch(false);
 				}
@@ -275,6 +277,7 @@ function yacysearch(clear) {
 	$.ajaxSetup({ 
         timeout: 10000,
         error: function(x,e,ex) {
+        	portalsearch.fetchingResults = false;
 			var err = 'Unknow Error: '+x.responseText;
         	if(x.status==0) {
 				err = 'Unknown Network Error! I try to reload...';
@@ -296,9 +299,10 @@ function yacysearch(clear) {
 		}
     }); 
 	
+	portalsearch.fetchingResults = true;
 	$.getJSON(url, param,
         function(json, status) {	
-
+			portalsearch.fetchingResults = false;
 			if (json[0]) data = json[0];
 			else data = json;			
 			
