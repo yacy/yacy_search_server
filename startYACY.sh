@@ -58,7 +58,7 @@ then
 		
         options="`getopt hdlptsg: $*`"
 else
-        options="`getopt -n YaCy -o h,d,f,l,p,t,s,g -l help,debug,foreground,logging,print-out,tail-log,startup,gui -- $@`"
+        options="`getopt -u -n YaCy -o h,d,f,l,p,t,s,g -l help,debug,foreground,logging,print-out,tail-log,startup,gui -- $@`"
 fi
 
 if [ $? -ne 0 ];then
