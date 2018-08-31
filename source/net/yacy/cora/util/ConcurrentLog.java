@@ -390,12 +390,24 @@ public final class ConcurrentLog {
 
             // creating the logging directory
             String logPattern = logManager.getProperty("java.util.logging.FileHandler.pattern");
-            int stripPos = logPattern.lastIndexOf(File.separatorChar);
-            if (!new File(logPattern).isAbsolute()) logPattern = new File(dataPath, logPattern).getAbsolutePath();
-            if (stripPos < 0) stripPos = logPattern.lastIndexOf(File.separatorChar);
-            File log = new File(logPattern.substring(0, stripPos));
-            if (!log.isAbsolute()) log = new File(dataPath, log.getPath());
-            if (!log.canRead()) log.mkdir();
+            File logFile = new File(logPattern);
+            if (!logFile.isAbsolute()) {
+            	logFile = new File(dataPath, logPattern);
+            	logPattern = logFile.getAbsolutePath();
+            }
+            File logDirectory = logFile.getParentFile();
+            if(logDirectory != null) {
+            	if (!logDirectory.isAbsolute()) {
+            		logDirectory = new File(dataPath, logDirectory.getPath());
+            	}
+            	if (!logDirectory.exists()) {
+            		if(!logDirectory.mkdir()) {
+            			System.err.println("STARTUP: Could not create the logs directory at " + logDirectory.getAbsolutePath());
+            		}
+            	} else if(!logDirectory.isDirectory()) {
+            		System.err.println("STARTUP: Log file parent path at " + logDirectory.getAbsolutePath() + "is not a directory");
+            	}
+            }
 
             // generating the root logger
             final Logger logger = Logger.getLogger("");
