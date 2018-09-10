@@ -11,7 +11,7 @@ description: |
 
 grade: devel
 confinement: strict
-icon: htroot/env/grafics/yacy.png
+icon: addon/YaCy256x256.png
 
 apps:
   yacy-search:
