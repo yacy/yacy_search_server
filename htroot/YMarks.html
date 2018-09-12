@@ -2,7 +2,47 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<title>YaCy Bookmarks</title>
-		#%env/templates/metas.template%#
+		
+		<!-- the metas.template can not be used here while some JS components (such as flexigrid or treeview) 
+			are not compatible with the main embedded JQuery version (1.12.4) -->
+		
+  		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  		<link rel="shortcut icon" type="image/x-icon" href="#[relativeBase]#favicon.ico" />
+  		<meta name="Content-Language" content="English, Englisch" />
+  		<meta name="keywords" content="YaCy HTTP search engine spider indexer java network open free download Mac Windows Linux Software development" />
+  		<meta name="description" content="Software HTTP Freeware Home Page" />
+  		<meta name="copyright" content="Michael Christen et al." />
+  		<meta name="referrer" content="#[referrer.meta.policy]#"/>
+    
+  		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+  		<!--[if lt IE 9]>
+    		<script src="#[relativeBase]#env/bootstrap/js/html5shiv.min.js"></script>
+    		<script src="#[relativeBase]#env/bootstrap/js/respond.min.js"></script>
+  		<![endif]-->
+
+		<!-- old css styles -->
+  		<link rel="stylesheet" type="text/css" media="all" href="#[relativeBase]#env/base.css" />
+  		<link rel="stylesheet" type="text/css" media="screen" href="#[relativeBase]#env/style.css" />
+  		<!--[if lt IE 6]>
+   		<link rel="stylesheet" type="text/css" media="screen" href="#[relativeBase]#env/oldie.css" />
+  		<![endif]-->
+  		<!--[if lte IE 6.0]>
+   		<link rel="stylesheet" type="text/css" media="screen" href="#[relativeBase]#env/ie6.css" />
+  		<![endif]-->
+  		<!--[if lte IE 7.0]>
+   		<link rel="stylesheet" type="text/css" media="screen" href="#[relativeBase]#env/ie7.css" />
+  		<![endif]-->
+		<!-- (C), Architecture: Michael Peter Christen; Contact: mc <at> yacy.net -->
+
+		
+ 		<script src="jquery/js/jquery-1.7.min.js" type="text/javascript"></script>
+		
+		<link media="screen" type="text/css" href="jquery/themes/start/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+		<script src="jquery/js/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
+		
+		<script src="jquery/js/jquery.form-2.73.js" type="text/javascript"></script>
+		<script src="jquery/js/jquery.field-0.9.2.min.js" type="text/javascript"></script>
+		
 		<link media="screen" type="text/css" href="jquery/flexigrid/css/flexigrid.pack.css" rel="stylesheet" />
 		<script src="jquery/flexigrid/js/flexigrid.pack.js" type="text/javascript"></script>
 		
@@ -28,7 +68,7 @@
 	<body id="ymarks_body">
 	
 
-		#%env/templates/header.template%#
+		#%env/templates/embeddedheader.template%#
 	
 <div id="api">
 <a href="api/table_p.xml?table=admin_bookmarks&count=100&search=" id="apilink"><img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
@@ -391,6 +431,6 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 		     <input type="hidden" value="Start New Crawl" name="crawlingstart">      
     		</form>
 		</div>	
-		#%env/templates/footer.template%#
+		#%env/templates/embeddedfooter.template%#
 	</body>
 </html>
