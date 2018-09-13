@@ -20,6 +20,7 @@
 
 package net.yacy.cora.util;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,9 +30,9 @@ import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -378,46 +379,58 @@ public final class ConcurrentLog {
         }
     }
 
-    public final static void configureLogging(final File dataPath, final File appPath, final File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
-        FileInputStream fileIn = null;
-        try {
-            System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());
-            fileIn = new FileInputStream(loggingConfigFile);
-
-            // loading the logger configuration from file
-            final LogManager logManager = LogManager.getLogManager();
-            logManager.readConfiguration(fileIn);
-
-            // creating the logging directory
-            String logPattern = logManager.getProperty("java.util.logging.FileHandler.pattern");
-            File logFile = new File(logPattern);
-            if (!logFile.isAbsolute()) {
-            	logFile = new File(dataPath, logPattern);
-            	logPattern = logFile.getAbsolutePath();
+    public static final void configureLogging(final File dataPath, final File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
+        System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());
+        try (final FileInputStream fileIn = new FileInputStream(loggingConfigFile);){
+            
+        	final String logFilePatternKey = "java.util.logging.FileHandler.pattern";
+            final Properties logProperties = new Properties();
+            logProperties.load(fileIn);
+            String logFilePattern = logProperties.getProperty(logFilePatternKey, "%h/java%u.log" /* default FileHandler pattern*/);
+            
+            File logFile;
+            if(logFilePattern.startsWith("%h")) {
+            	logFile = new File(System.getProperty("user.home") + logFilePattern.substring(2));
+            } else if(logFilePattern.startsWith("%t")) {
+                String tmpDir = System.getProperty("java.io.tmpdir");
+                if (tmpDir == null) {
+                    tmpDir = System.getProperty("user.home");
+                }
+                logFile = new File(tmpDir, logFilePattern.substring(2));
+            } else {
+            	logFile = new File(logFilePattern);
+                if (!logFile.isAbsolute()) {
+                	logFile = new File(dataPath, logFilePattern);
+                	logFilePattern = logFile.getAbsolutePath();
+                	
+					/*
+					 * Update the file pattern with the absolute path flavor as LogManager and
+					 * FileHandler classes do not offer a way to configure the base parent path when
+					 * using relative path
+					 */
+					logProperties.setProperty(logFilePatternKey, logFilePattern);
+                }
             }
+            
+           
+            // creating the logging directory if necessary
             File logDirectory = logFile.getParentFile();
             if(logDirectory != null) {
-            	if (!logDirectory.isAbsolute()) {
-            		logDirectory = new File(dataPath, logDirectory.getPath());
-            	}
             	if (!logDirectory.exists()) {
-            		if(!logDirectory.mkdir()) {
+            		if(!logDirectory.mkdirs()) {
             			System.err.println("STARTUP: Could not create the logs directory at " + logDirectory.getAbsolutePath());
             		}
             	} else if(!logDirectory.isDirectory()) {
             		System.err.println("STARTUP: Log file parent path at " + logDirectory.getAbsolutePath() + "is not a directory");
             	}
             }
-
-            // generating the root logger
-            final Logger logger = Logger.getLogger("");
-            logger.setUseParentHandlers(false);
-
-            //for (Handler h: logger.getHandlers()) logger.removeHandler(h);
-            if (!dataPath.getAbsolutePath().equals(appPath.getAbsolutePath())) {
-                final FileHandler handler = new FileHandler(logPattern, 1024*1024, 20, true);
-                logger.addHandler(handler);
-            }
+            
+            final ByteArrayOutputStream propsStream = new ByteArrayOutputStream();
+            logProperties.store(propsStream, null);
+            
+            // loading the logger configuration from properties
+            final LogManager logManager = LogManager.getLogManager();
+            logManager.readConfiguration(new ByteArrayInputStream(propsStream.toByteArray()));
 
             // redirect uncaught exceptions to logging
             final ConcurrentLog exceptionLog = new ConcurrentLog("UNCAUGHT-EXCEPTION");
@@ -438,8 +451,6 @@ public final class ConcurrentLog {
                     }
                 }
             });
-        } finally {
-            if (fileIn != null) try {fileIn.close();}catch(final Exception e){}
         }
     }
 

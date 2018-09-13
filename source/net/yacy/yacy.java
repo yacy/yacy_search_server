@@ -166,6 +166,13 @@ public final class yacy {
 				System.err.println("Error creating DATA-directory in " + dataHome.toString() + " . Please check your write-permission for this folder. YaCy will now terminate.");
 				System.exit(-1);
 			}
+			
+            // set jvm tmpdir to a subdir for easy cleanup (as extensive use file.deleteonexit waists memory during long runs, as todelete files names are collected and never cleaned up during runtime)
+			// keep this as earlier as possible, as any other class can use the "java.io.tmpdir" property, even the log manager, when the log file pattern uses "%t" as an alias for the tmp directory 
+            try { 
+                tmpdir = java.nio.file.Files.createTempDirectory("yacy-tmp-").toString(); // creates sub dir in jvm's temp (see System.property "java.io.tempdir")
+                System.setProperty("java.io.tmpdir", tmpdir);
+            } catch (IOException ex) { }
 
             // setting up logging
 			f = new File(dataHome, "DATA/LOG/");
@@ -178,7 +185,7 @@ public final class yacy {
                 System.out.println("could not copy yacy.logging");
             }
             try{
-                ConcurrentLog.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));
+                ConcurrentLog.configureLogging(dataHome, new File(dataHome, "DATA/LOG/yacy.logging"));
             } catch (final IOException e) {
                 System.out.println("could not find logging properties in homePath=" + dataHome);
                 ConcurrentLog.logException(e);
@@ -202,12 +209,6 @@ public final class yacy {
             	channel = new RandomAccessFile(f,"rw").getChannel();
             	lock = channel.tryLock(); // lock yacy.running
             } catch (final Exception e) { }
-
-            // set jvm tmpdir to a subdir for easy cleanup (as extensive use file.deleteonexit waists memory during long runs, as todelete files names are collected and never cleaned up during runtime)
-            try { 
-                tmpdir = java.nio.file.Files.createTempDirectory("yacy-tmp-").toString(); // creates sub dir in jvm's temp (see System.property "java.io.tempdir")
-                System.setProperty("java.io.tmpdir", tmpdir);
-            } catch (IOException ex) { }
 
             try {
                 sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), conf);
