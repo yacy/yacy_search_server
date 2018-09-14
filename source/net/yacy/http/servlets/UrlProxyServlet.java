@@ -127,11 +127,6 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
             proxyurl = new DigestURL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
         }
         
-        if (proxyurl == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
-            return;
-        }
-
         String hostwithport = proxyurl.getHost();
         if (proxyurl.getPort() != -1) {
             hostwithport += ":" + proxyurl.getPort();
