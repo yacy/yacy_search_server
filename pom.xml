@@ -36,7 +36,7 @@
         <!-- the Solr version used in dependency section for all related dependencies -->
         <solr.version>6.6.3</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.4.11.v20180605</jetty.version>
+        <jetty.version>9.4.12.v20180830</jetty.version>
                 
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
