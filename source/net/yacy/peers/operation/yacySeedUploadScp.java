@@ -80,7 +80,7 @@ public class yacySeedUploadScp implements yacySeedUploader {
                 throw new Exception("Seed SCP upload settings not configured properly. Server port is not a vaild integer.");
             }
 
-            return sshc.put(seedScpServer, port, seedFile, seedScpPath, seedScpAccount, seedScpPassword);
+            return sshc.put(seedScpServer, port, seedFile, seedScpPath, "seed.txt", seedScpAccount, seedScpPassword);
         } catch (final Exception e) {
             throw e;
         }
@@ -93,12 +93,34 @@ public class yacySeedUploadScp implements yacySeedUploader {
 
 }
 
+/**
+ * Utility class to copy local files to a remote SSH server.
+ * @see <a href="http://www.jcraft.com/jsch/examples/ScpTo.java.html">JCraft scp to remote file example</a>
+ */
 class sshc {
+	
+	/**
+	 * Copy a local file to a remote SSH server
+	 * 
+	 * @param host                  the target SSH server host (domain name or IP
+	 *                              address)
+	 * @param port                  the target SSH server port
+	 * @param localFile             the local file to copy
+	 * @param remotePath            the file path on the remote SSH server target
+	 * @param defaultTargetFileName the default file name to use when the remotePath
+	 *                              is an existing directory path. Ignored when
+	 *                              remotePath is file path.
+	 * @param account               the user name to use for the SSH connection
+	 * @param password              the password to use for the SSH connection
+	 * @return a message confirming the success of the operation
+	 * @throws Exception when an unexpected error occurred.
+	 */
     public static String put(
             final String host,
             final int port,
             final File localFile,
-            final String remoteName,
+            final String remotePath,
+            final String defaultTargetFileName,
             final String account,
             final String password
     ) throws Exception {
@@ -130,7 +152,7 @@ class sshc {
             // trying to connect ...
             session.connect();
 
-            String command="scp -p -t " + remoteName;
+            String command="scp -p -t " + remotePath;
             final Channel channel = session.openChannel("exec");
             ((ChannelExec)channel).setCommand(command);
 
@@ -144,13 +166,7 @@ class sshc {
 
             // send "C0644 filesize filename", where filename should not include '/'
             final int filesize=(int)(localFile).length();
-            command="C0644 "+filesize+" ";
-            if(localFile.toString().lastIndexOf('/')>0){
-                command+=localFile.toString().substring(localFile.toString().lastIndexOf('/')+1);
-            }
-            else{
-                command+=localFile.toString();
-            }
+            command="C0644 " + filesize + " " + defaultTargetFileName;
             command+="\n";
             out.write(UTF8.getBytes(command)); out.flush();
 
