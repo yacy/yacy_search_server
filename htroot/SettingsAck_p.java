@@ -35,6 +35,7 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.TransactionManager;
 import net.yacy.http.InetPathAccessHandler;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.Network;
@@ -66,6 +67,9 @@ public class SettingsAck_p {
             prop.put("info", "1");//no information submitted
             return prop;
         }
+        
+    	/* Check this is a valid transaction */
+    	TransactionManager.checkPostTransaction(header, post);
 
         // admin password
         if (post.containsKey("adminaccount")) {

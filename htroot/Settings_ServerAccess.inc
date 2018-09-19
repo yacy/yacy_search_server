@@ -1,4 +1,5 @@
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 <fieldset><legend id="general">Server Access Settings</legend>
 <table border="0" cellspacing="5">
   <tr valign="top">

@@ -2,6 +2,7 @@
 <p><strong>Store into filesystem:</strong></p>
 <p>You must configure this if you want to store the seed-list file onto the file system.</p>
 <form action="SettingsAck_p.html" method="post">
+<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 <table border="0" cellspacing="5">
   <tr valign="top">
     <td><label for="fs_path">File Location:</label></td>

@@ -2,6 +2,7 @@
 <p><strong>Uploading via SCP:</strong></p>
 <p>This is the account for a server where you are able to login via ssh.</p>
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 <table border="0" cellspacing="5">
   <tr valign="top">
     <td><label for="scp_serv">Server</label>:</td>

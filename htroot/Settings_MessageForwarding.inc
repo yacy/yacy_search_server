@@ -1,4 +1,5 @@
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 <fieldset><legend id="messageForwarding">Message Forwarding</legend>
 <p>With this settings you can activate or deactivate forwarding of yacy-messages via email.</p>
 <table border="0" cellspacing="5">

@@ -1,5 +1,6 @@
 
 <form id="urlproxysettings" action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
   <fieldset><legend id="urlproxy">URL Proxy Settings</legend>
     <p>
     With this settings you can activate or deactivate URL proxy.

@@ -5,6 +5,7 @@
 </div>
 
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data" class="form-horizontal">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 	<fieldset>
 		<legend>Solr communication</legend>
 		

@@ -1,4 +1,5 @@
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 <fieldset><legend id="admin">Crawler Settings</legend>
 <table border="0" cellspacing="5" width="100%">
   <tr><td colspan="3"><p><strong>Generic Crawler Settings</strong>:</p></td></tr>

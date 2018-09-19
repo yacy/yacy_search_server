@@ -13,6 +13,7 @@ Visited websites can process this information as they whish, so this can become 
 </p>
 
 <form action="SettingsAck_p.html" method="post" class="form-horizontal">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 	<fieldset>
 		<legend>Global policy</legend>
 		

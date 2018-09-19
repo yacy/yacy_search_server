@@ -11,6 +11,7 @@
   but only if there have been changes to the seed-list.
 </p>
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 <table border="0" cellspacing="5">
   <tr valign="top">
     <td><label for="method">Upload Method</label>:</td>
