@@ -82,7 +82,11 @@ public class ConfigProperties_p {
             // only display lines if they are no commment
             if (!key.startsWith("#")) {
                 prop.putHTML("options_" + count + "_key", key);
-                prop.putHTML("options_" + count + "_value", env.getConfig(key, "ERROR"));
+                value = env.getConfig(key, "ERROR");
+                prop.putHTML("options_" + count + "_value", value);
+                /* Hide password values from visible text */
+				prop.putHTML("options_" + count + "_visibleValue",
+						key.endsWith("Password") ? value.replaceAll("\\S", "*") : value);
                 count++;
             }
         }
