@@ -37,8 +37,9 @@
 	<classpathentry kind="lib" path="lib/org.restlet.jar"/>
 	<classpathentry kind="lib" path="lib/fontbox-2.0.11.jar"/>
 	<classpathentry kind="lib" path="lib/pdfbox-2.0.11.jar"/>
-	<classpathentry kind="lib" path="lib/bcmail-jdk15-1.46.jar"/>
-	<classpathentry kind="lib" path="lib/bcprov-jdk15-1.46.jar"/>
+	<classpathentry kind="lib" path="lib/bcmail-jdk15on-1.60.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk15on-1.60.jar"/>
+	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-1.60.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.17.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.17.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.6.jar"/>

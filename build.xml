@@ -171,8 +171,9 @@
     <path id="project.class.path">
         <pathelement location="${build}" />
     	<pathelement location="${lib}/apache-mime4j-0.6.jar" />
-    	<pathelement location="${lib}/bcmail-jdk15-1.46.jar" />
-    	<pathelement location="${lib}/bcprov-jdk15-1.46.jar" />
+    	<pathelement location="${lib}/bcmail-jdk15on-1.60.jar" />
+    	<pathelement location="${lib}/bcprov-jdk15on-1.60.jar" />
+    	<pathelement location="${lib}/bcpkix-jdk15on-1.60.jar" />
     	<pathelement location="${lib}/chardet.jar" />
     	<pathelement location="${lib}/common-image-3.3.2.jar" />
     	<pathelement location="${lib}/common-io-3.3.2.jar" />
