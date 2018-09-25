@@ -147,7 +147,7 @@ public final class crawlReceipt {
             // put new entry into database
             sb.index.fulltext().putMetadata(entry);
             ResultURLs.stack(ASCII.String(entry.url().hash()), entry.url().getHost(), youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
-            sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
+            sb.crawlQueues.delegatedURL.remove(ASCII.String(entry.hash())); // the delegated work has been done
             if (log.isInfo()) log.info("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + ASCII.String(entry.hash()) + ":" + entry.url().toNormalform(false));
 
             // ready for more
@@ -160,7 +160,7 @@ public final class crawlReceipt {
         }
 
         if (sb.crawlQueues.delegatedURL != null) { // the delegated work is transformed into an error case
-            sb.crawlQueues.delegatedURL.remove(entry.hash());
+            sb.crawlQueues.delegatedURL.remove(ASCII.String(entry.hash()));
             sb.crawlQueues.errorURL.push(entry.url(), 997, null, FailCategory.FINAL_LOAD_CONTEXT, result + ":" + reason, -1);
         }
         //switchboard.noticeURL.remove(receivedUrlhash);

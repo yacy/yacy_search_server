@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>YaCy '#[clientname]#': Peer Steering</title>
     
@@ -22,6 +22,16 @@
         document.getElementById ("scheduleeventaction").value = "true";
         document.getElementById("current_pk").value = from;
     	document.getElementById("apilist").submit();
+    }
+    
+    /**
+    * Reset the start record to display first results page
+    */
+    function resetStartRecord() {
+    	var startRecordField = document.getElementById("startRecordField");
+    	if(startRecordField != null) {
+    		startRecordField.value = "0";
+    	}
     }
     </script>
     <script type="text/javascript" src="js/sorttable.js"></script>
@@ -53,30 +63,54 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <span id="resCounter" style="display: inline;">
       #(navigation)#
       ::
-      #(left)#<img src="env/grafics/navdl.gif" alt="no previous page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#" target="_self"><img src="env/grafics/navsl.gif" alt="previous page" /></a>#(/left)#
+      #(left)#<img src="env/grafics/navdl.gif" alt="no previous page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#&amp;sort=#[sort]#" target="_self"><img src="env/grafics/navsl.gif" alt="previous page" /></a>#(/left)#
       #[startRecord]#-#[to]# of #[of]#
-      #(right)#<img src="env/grafics/navdr.gif" alt="no next page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#" target="_self"><img src="env/grafics/navsr.gif" alt="next page" /></a>#(/right)#
+      #(right)#<img src="env/grafics/navdr.gif" alt="no next page" />::<a href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#&amp;sort=#[sort]#" target="_self"><img src="env/grafics/navsr.gif" alt="next page" /></a>#(/right)#
       <img src="env/grafics/nave.gif" alt="" />
       #(/navigation)#
 
-      <input type="hidden" name="startRecord" value="#[startRecord]#" />
+      <input type="hidden" name="startRecord" value="#[startRecord]#" id="startRecordField"/>
       <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
       <input type="hidden" name="inline" value="#(inline)#false::true#(/inline)#" />
       <input type="hidden" name="filter" value="#[filter]#" />
-      <input type="text" name="query" value="#[query]#" style="font-size:16px;float:left;border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;" />
+      <input type="hidden" name="sort" value="#[sort]#" />
+      <input type="text" name="query" value="#[query]#" onchange="resetStartRecord()" style="font-size:16px;float:left;border:0px;height:20px;background-image:url('env/grafics/find.gif');background-repeat:no-repeat;background-position:right top;"/>
 
       </span>
       <br/>
       <div style="clear:both;">
-      <table class="sortable" style="border:0px; padding:2px; border-spacing:1px">
+      <table style="border:0px; padding:2px; border-spacing:1px" role="grid">
         <tr class="TableHeader" valign="bottom">
           <th class="sorttable_nosort"><input type="checkbox" id="allswitch" onclick="checkAll(this.form.id, this.checked);" /></th>
-          <th>Type</th>
-          <th style="width: 100%;">Comment</th>
-          <th>Call<br/>Count</th>
-          <th>Recording<br/>Date</th>
-          <th>Last&nbsp;Exec<br/>Date</th>
-          <th>Next&nbsp;Exec<br/>Date</th>
+          <th #(sortedByType)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByType)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortTypeDesc)#::-#(/nextSortTypeDesc)#type&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortTypeDesc)#ascending::descending#(/nextSortTypeDesc)# types">Type</a>
+          	#(sortedByType)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByType)#
+          </th>
+          <th style="width: 100%;" #(sortedByComment)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByComment)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortCommentDesc)#::-#(/nextSortCommentDesc)#comment&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortCommentDesc)#ascending::descending#(/nextSortCommentDesc)# comments">Comment</a>
+          	#(sortedByComment)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByComment)#
+          </th>
+          <th #(sortedByApiCallCount)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByApiCallCount)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortApiCallCountDesc)#::-#(/nextSortApiCallCountDesc)#apicall_count&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortApiCallCountDesc)#ascending::descending#(/nextSortApiCallCountDesc)# call counts">Call Count</a>
+          	#(sortedByApiCallCount)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByApiCallCount)#
+          </th>
+          <th #(sortedByDateRecording)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByDateRecording)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateRecordingDesc)#::-#(/nextSortDateRecordingDesc)#date_recording&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateRecordingDesc)#ascending::descending#(/nextSortDateRecordingDesc)# recording dates">Recording&nbsp;Date</a>
+          	#(sortedByDateRecording)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByDateRecording)#
+          </th>
+          <th #(sortedByDateLastExec)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByDateLastExec)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateLastExecDesc)#::-#(/nextSortDateLastExecDesc)#date_last_exec&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateLastExecDesc)#ascending::descending#(/nextSortDateLastExecDesc)# last execution dates">Last&nbsp;Exec&nbsp;Date</a>
+          	#(sortedByDateLastExec)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByDateLastExec)#
+          </th>
+          <th #(sortedByDateNextExec)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByDateNextExec)#>
+          	<a class="sortTableLink" href="Table_API_p.html?startRecord=#[startRecord]#&amp;maximumRecords=#[maximumRecords]#&amp;sort=#(nextSortDateNextExecDesc)#::-#(/nextSortDateNextExecDesc)#date_next_exec&amp;inline=#(inline)#false::true#(/inline)#&amp;filter=#[filter]#&amp;query=#[query]#" target="_self" title="Sort by #(nextSortDateNextExecDesc)#ascending::descending#(/nextSortDateNextExecDesc)# last execution dates">Next&nbsp;Exec&nbsp;Date</a>
+          	#(sortedByDateNextExec)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByDateNextExec)#
+          	#(hasEditableNextExecDate)#:: <button type="submit" name="submitNextExecDates" class="btn btn-default btn-xs" title="Apply edited next execution dates">
+          		<span class="glyphicon glyphicon-ok"></span>
+				<span> Apply</span>
+          	</button>
+          	#(/hasEditableNextExecDate)#
+          </th>
           <th class="sorttable_nosort">Event Trigger</th>
           <th class="sorttable_nosort">Scheduler</th>
           #(inline)#<th class="sorttable_nosort">URL</th>::#(/inline)#
@@ -113,7 +147,14 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <td valign="top">#[callcount]#</td>
           <td valign="top">#[dateRecording]#</td>
           <td valign="top">#[dateLastExec]#</td>
-          <td valign="top">#[dateNextExec]#</td>
+          <td valign="top">#(editableDateNext)# #[dateNextExec]# 
+          	::
+    		#(dateFormatError)#::<div class="alert alert-danger" role="alert">Malformed date "#[invalidDate]#".</div>#(/dateFormatError)#
+    		#(dateBeforeNowError)#::<div class="alert alert-danger" role="alert">"#[invalidDate]#" is before the current date.</div>#(/dateBeforeNowError)#
+          	<input name="date_next_exec_#[pk]#" type="text" required="required" 
+          		maxlength="19" minlength="19" pattern="#[dateLastExecPattern]#" 
+          		value="#[dateNextExec]#" size="19" title="yyyy/MM/dd HH:mm:ss"/>#(/editableDateNext)#
+          </td>
           <td valign="top">
           #(event)#
             <select name="event_select_#[pk]#" onchange='submitchange("#[pk]#")'>
@@ -194,14 +235,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <input type="hidden" name="scheduleeventaction" id="scheduleeventaction" value="false" />
       <input type="hidden" name="current_pk" id="current_pk" value="" />
       <input type="hidden" name="num" value="#[num]#" />
-      <p>
-      <div class="form-horizontal">
+      <div class="form-group col-sm-12">
         <input type="submit" name="execrows" value="Execute Selected Actions" class="btn btn-success"/>&nbsp;&nbsp;&nbsp;
         <input type="submit" name="deleterows" value="Delete Selected Actions" class="btn btn-danger" onclick="return confirm('Confirm Deletion')"/>&nbsp;&nbsp;&nbsp;
       </div>
-      </p>
-      <p>
-      <div class="form-group">
+      <div class="form-group col-sm-6">
         <input type="submit" name="deleteold" value="Delete all Actions which had been created before " class="btn btn-warning" style="float:left;" onclick="return confirm('Confirm Deletion')"/>
         <select name="deleteoldtime" class="form-control selectWidth input-sm" style="width:auto;">
           <option value="1">1 day</option><option value="2">2 days</option><option value="3">3 days</option>
@@ -212,7 +250,11 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <option value="365">1 year</option><option value="730">2 years</option>
         </select>
       </div>
-      </p>
+      #(hasEditableNextExecDate)#::
+      <div class="form-group col-sm-6">
+ 		<input type="submit" name="submitNextExecDates" class="btn btn-default" value="Apply edited next execution dates"/>
+      </div>
+      #(/hasEditableNextExecDate)#
       
     </form>
     #(/showtable)#

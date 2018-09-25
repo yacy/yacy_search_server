@@ -29,6 +29,7 @@
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.IDN;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import java.util.Collection;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -101,14 +103,22 @@ public class yacysearch {
         final Switchboard sb = (Switchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
 
-        final boolean authorized = sb.verifyAuthentication(header);
-        final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || authorized;
+        String authenticatedUserName = null;
+        final boolean adminAuthenticated = sb.verifyAuthentication(header);
+        final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || adminAuthenticated;
 
-        boolean authenticated = sb.adminAuthenticated(header) >= 2;
-        if ( !authenticated ) {
+        boolean extendedSearchRights = adminAuthenticated;
+        
+        if(adminAuthenticated) {
+			authenticatedUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+        } else {
         	final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-            authenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
+        	if(user != null) {
+                extendedSearchRights = user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT);
+                authenticatedUserName = user.getUserName();
+        	}
         }
+        
         final boolean localhostAccess = header.accessFromLocalhost();
         final String promoteSearchPageGreeting =
             (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ? env.getConfig(
@@ -118,17 +128,18 @@ public class yacysearch {
         
         // in case that the crawler is running and the search user is the peer admin, we expect that the user wants to check recently crawled document
         // to ensure that recent crawl results are inside the search results, we do a soft commit here. This is also important for live demos!
-        if (authenticated && sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 0) {
+        if (extendedSearchRights && sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 0) {
             sb.index.fulltext().commit(true);
         }
         final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
         // get query
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim();
-        String querystring = originalquerystring.replace('+', ' ').trim();
+        String querystring = originalquerystring;
         CacheStrategy snippetFetchStrategy = (post == null) ? null : CacheStrategy.parse(post.get("verify", sb.getConfig("search.verify", "")));
         
         final servletProperties prop = new servletProperties();
         prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
+		prop.put("authSearch", authenticatedUserName != null);
 
         // produce vocabulary navigation sidebars
         Collection<Tagging> vocabularies = LibraryProvider.autotagging.getVocabularies();
@@ -179,6 +190,7 @@ public class yacysearch {
                 "search.navigation",
                 (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
             prop.put("contentdom", "text");
+            prop.put("strictContentDom", "false");
             prop.put("contentdomCheckText", "1");
             prop.put("contentdomCheckAudio", "0");
             prop.put("contentdomCheckVideo", "0");
@@ -198,7 +210,7 @@ public class yacysearch {
             return prop;
         }
 
-		if (post.containsKey("auth") && !authenticated) {
+		if (post.containsKey("auth") && authenticatedUserName == null) {
 			/*
 			 * Access to authentication protected features is explicitely requested here
 			 * but no authentication is provided : ask now for authentication.
@@ -209,7 +221,7 @@ public class yacysearch {
 			prop.authenticationRequired();
 			return prop;
 		}
-
+		
         // check for JSONP
         if ( post.containsKey("callback") ) {
             final String jsonp = post.get("callback") + "([";
@@ -266,7 +278,7 @@ public class yacysearch {
         if ( !global ) {
             // we count only searches on the local peer here, because global searches
             // are counted on the target peer to preserve privacy of the searcher
-            if ( authenticated ) {
+            if ( extendedSearchRights ) {
                 // local or authenticated search requests are counted separately
                 // because they are not part of a public available peer statistic
                 sb.searchQueriesRobinsonFromLocal++;
@@ -279,6 +291,14 @@ public class yacysearch {
 
         // find search domain
         final Classification.ContentDomain contentdom = post == null || !post.containsKey("contentdom") ? ContentDomain.ALL : ContentDomain.contentdomParser(post.get("contentdom", "all"));
+        
+        // Strict/extended content domain constraint : configured setting may be overriden by request param
+		final boolean strictContentDom = !Boolean.FALSE.toString().equalsIgnoreCase(post.get("strictContentDom",
+				sb.getConfig(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
+						String.valueOf(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT))));
+		
+		/* Maximum number of suggestions to display in the first results page */
+        final int meanMax = post.getInt("meanCount", 0);
 
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
@@ -299,7 +319,7 @@ public class yacysearch {
             ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM "
                 + client
                 + " gets no permission to search");
-        } else if ( !authenticated && !localhostAccess && !intranetMode ) {
+        } else if ( !extendedSearchRights && !localhostAccess && !intranetMode ) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
             synchronized ( trackerHandles ) {
                 final int accInThreeSeconds =
@@ -488,18 +508,34 @@ public class yacysearch {
                 modifier.add("/heuristic");
             }
             
-            final int tldp = querystring.indexOf("tld:", 0);
+            final String tldModifierPrefix = "tld:";
+            final int tldp = querystring.indexOf(tldModifierPrefix, 0);
             if (tldp >= 0) {
                 int ftb = querystring.indexOf(' ', tldp);
-                if (ftb == -1) ftb = querystring.length();
-                tld = querystring.substring(tldp + 4, ftb);
-                querystring = querystring.replace("tld:" + tld, "");
-                modifier.add("tld:" + tld);
+                if (ftb == -1) {
+                	ftb = querystring.length();
+                }
+                tld = querystring.substring(tldp + tldModifierPrefix.length(), ftb);
+                querystring = querystring.replace(tldModifierPrefix + tld, "");
+                modifier.add(tldModifierPrefix + tld);
                 while ( tld.length() > 0 && tld.charAt(0) == '.' ) {
                     tld = tld.substring(1);
                 }
-                if (tld.length() == 0) tld = null;
+                if (tld.length() == 0) {
+                	tld = null;
+                } else {
+                	try {
+                		/* Convert to the same lower case ASCII Compatible Encoding that is used in normalized URLs */
+                		tld = IDN.toASCII(tld, 0);
+                	} catch(final IllegalArgumentException e){
+                		ConcurrentLog.warn("LOCAL_SEARCH", "Failed to convert tld modifier value " + tld + "to ASCII Compatible Encoding (ACE)", e);
+                	}
+                	
+                    /* Domain name in an URL is case insensitive : convert now modifier to lower case for further processing over normalized URLs */
+                    tld = tld.toLowerCase(Locale.ROOT);
+                }
             }
+            
             if (urlmask == null || urlmask.isEmpty()) urlmask = ".*"; //if no urlmask was given
 
             // read the language from the language-restrict option 'lr'
@@ -659,12 +695,14 @@ public class yacysearch {
                     DigestURL.hosthashess(sb.getConfig("search.excludehosth", "")),
                     MultiProtocolURL.TLD_any_zone_filter,
                     client,
-                    authenticated,
+                    extendedSearchRights,
                     indexSegment,
                     ranking,
                     header.get(HeaderFramework.USER_AGENT, ""),
                     lat, lon, rad,
                     sb.getConfigArray("search.navigation", ""));
+            theQuery.setStrictContentDom(strictContentDom);
+            theQuery.setMaxSuggestions(meanMax);
 			theQuery.setStandardFacetsMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
 					QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT));
 			theQuery.setDateFacetMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
@@ -724,7 +762,7 @@ public class yacysearch {
             	theSearch.resortCachedResults();
             }
 
-            if ( startRecord == 0 && authenticated && !stealthmode ) {
+            if ( startRecord == 0 && extendedSearchRights && !stealthmode ) {
                 if ( modifier.sitehost != null && sb.getConfigBool(SwitchboardConstants.HEURISTIC_SITE, false) ) {
                     sb.heuristicSite(theSearch, modifier.sitehost);
                 }
@@ -757,10 +795,10 @@ public class yacysearch {
             AccessTracker.add(AccessTracker.Location.local, theQuery, theSearch.getResultCount());
 
             // check suggestions
-            final int meanMax = (post != null) ? post.getInt("meanCount", 0) : 0;
 
             prop.put("meanCount", meanMax);
-            if ( meanMax > 0 && !json && !rss && sb.index.connectedRWI()) {
+            /* Suggestions ("Did you mean") are only provided in the first html results page */
+            if ( meanMax > 0 && startRecord ==0 && !json && !rss) {
                 final DidYouMean didYouMean = new DidYouMean(indexSegment, querystring);
                 final Iterator<StringBuilder> meanIt = didYouMean.getSuggestions(100, 5, sb.index.fulltext().collectionSize() < 2000000).iterator();
                 int meanCount = 0;
@@ -770,13 +808,9 @@ public class yacysearch {
                         try {
                             suggestion = meanIt.next().toString();
                             prop.put("didYouMean_suggestions_" + meanCount + "_word", suggestion);
-                            prop.put(
-                                "didYouMean_suggestions_" + meanCount + "_url",
-                                QueryParams.navurl(
-                                    RequestHeader.FileType.HTML,
-                                    0,
-                                    theQuery,
-                                    suggestion, true, authenticated).toString());
+							prop.put("didYouMean_suggestions_" + meanCount + "_url",
+									QueryParams.navUrlWithNewQueryString(RequestHeader.FileType.HTML, 0, theQuery,
+											suggestion, authenticatedUserName != null));
                             prop.put("didYouMean_suggestions_" + meanCount + "_sep", "|");
                             meanCount++;
                         } catch (final ConcurrentModificationException e) {
@@ -844,7 +878,7 @@ public class yacysearch {
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
             
-			final boolean jsResort = global && authenticated // for now enable JavaScript resorting only for authenticated users as it requires too much resources per search request  
+			final boolean jsResort = global && extendedSearchRights // for now enable JavaScript resorting only for authenticated users as it requires too much resources per search request  
 					&& (contentdom == ContentDomain.ALL || contentdom == ContentDomain.TEXT) // For now JavaScript resorting can only be applied for text search 
 					&& sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
 			prop.put("jsResort", jsResort);
@@ -854,7 +888,7 @@ public class yacysearch {
 			 * eventually including fetched results with higher ranks from the Solr and RWI stacks */
 			prop.put("resortEnabled", !jsResort && global && !stealthmode && theSearch.resortCacheAllowed.availablePermits() > 0 ? 1 : 0);
 			prop.put("resortEnabled_url",
-					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true, authenticated)
+					QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true, authenticatedUserName != null)
 							.append("&startRecord=").append(startRecord).append("&resortCachedResults=true")
 							.toString());
 
@@ -868,7 +902,8 @@ public class yacysearch {
             }
             prop.put("results", theQuery.itemsPerPage());
             prop.put("jsResort_results", theQuery.itemsPerPage());
-            prop.put("resultTable", (contentdom == ContentDomain.APP || contentdom == ContentDomain.AUDIO || contentdom == ContentDomain.VIDEO) ? 1 : 0);
+            prop.put("resultTable", (contentdom == ContentDomain.APP || contentdom == ContentDomain.VIDEO) ? 1 : (contentdom == ContentDomain.AUDIO ? 2 : 0) );
+            prop.put("resultTable_embed", (contentdom == ContentDomain.AUDIO && extendedSearchRights));
             prop.put("eventID", theQuery.id(false)); // for bottomline
             prop.put("jsResort_eventID", theQuery.id(false));
 
@@ -893,8 +928,26 @@ public class yacysearch {
             prop.put("depth", "0");
             prop.put("localQuery", theSearch.query.isLocal() ? "1" : "0");
             prop.put("jsResort_localQuery", theSearch.query.isLocal() ? "1" : "0");
+            
+            final boolean showLogin = sb.getConfigBool(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+					SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT);
+            if(showLogin) {
+            	if(authenticatedUserName != null) {
+            		/* Show the name of the authenticated user */
+            		prop.put("showLogin", 1);
+            		prop.put("showLogin_userName", authenticatedUserName);
+            	} else {
+            		/* Show a login link */
+            		prop.put("showLogin", 2);
+            		prop.put("showLogin_loginURL",
+            				QueryParams.navurlBase(RequestHeader.FileType.HTML, theQuery, null, true, true).toString());
+            	}
+            } else {
+            	prop.put("showLogin", 0);
+            }
 
         }
+        
         prop.put("focus", focus ? 1 : 0); // focus search field
         prop.put("searchagain", global ? "1" : "0");
         String former = originalquerystring.replaceAll(Segment.catchallString, "*");
@@ -914,6 +967,7 @@ public class yacysearch {
         prop.put("search.verify", snippetFetchStrategy == null ? sb.getConfig("search.verify", "iffresh") : snippetFetchStrategy.toName());
         prop.put("search.navigation", (post == null) ? sb.getConfig("search.navigation", "all") : post.get("nav", "all"));
         prop.putHTML("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
+        prop.putHTML("strictContentDom", String.valueOf(strictContentDom));
 
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", originalquerystring);

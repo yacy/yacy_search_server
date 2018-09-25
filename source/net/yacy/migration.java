@@ -25,11 +25,13 @@ import net.yacy.search.index.ReindexSolrBusyThread;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -41,6 +43,8 @@ import com.google.common.io.Files;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.storage.Configuration.Entry;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.document.TextParser;
+import net.yacy.document.parser.audioTagParser;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -53,6 +57,12 @@ public class migration {
     public static final double NEW_OVERLAYS      =0.56504422;
     public static final double IDX_HOST_VER      =0.99007724; // api for index retrieval: host index
     public static final double SSLPORT_CFG       =1.67009578; // https port in cfg
+    
+	/** Removal of deprecated IPAccessHandler for white list implementation (serverClient setting) */
+	public static final double NEW_IPPATTERNS = 1.92109489;
+	
+	/** Addition of supplementary audio file formats supported by the audioTagParser */
+	public static final double ADDITIONAL_AUDIO_TAG_FORMATS = 1.92109589;
 
     /**
      * Migrates older configuratin to current version
@@ -68,6 +78,12 @@ public class migration {
             if(fromVer < NEW_OVERLAYS){
                 migrateDefaultFiles(sb);
             }
+			if (fromVer < NEW_IPPATTERNS) {
+				migrateServerClientSetting(sb);
+			}
+			if (fromVer < ADDITIONAL_AUDIO_TAG_FORMATS) {
+				migrateDisabledAudioFormats(sb);
+			}
             // use String.format to cut-off small rounding errors
             ConcurrentLog.info("MIGRATION", "Migrating from "+ String.format(Locale.US, "%.8f",fromVer) + " to " + String.format(Locale.US, "%.8f",toVer));
             if (fromVer < 0.47d) {
@@ -292,6 +308,151 @@ public class migration {
             sb.setConfig("update.blacklist", value);
         }
     }
+    
+	/**
+	 * Setting "serverClient" : migrate eventual address patterns using deprecated
+	 * formats previously supported by the IPAccessHandler and IPAddressMap classes.
+	 */
+	public static void migrateServerClientSetting(final Switchboard sb) {
+		final String patternSeparator = ",";
+		final String white = sb.getConfig("serverClient", "*");
+		if (!white.equals("*")) {
+			final StringBuilder migrated = new StringBuilder();
+			boolean hasDeprecated = migrateIPAddressPatterns(patternSeparator, white, migrated);
+
+			if (hasDeprecated) {
+				sb.setConfig("serverClient", migrated.toString());
+				ConcurrentLog.info("MIGRATION", "Migrated serverClient setting from " + white + " to " + migrated);
+			}
+		}
+	}
+	
+	/**
+	 * Convert eventual address patterns using deprecated formats previously
+	 * supported by the IPAccessHandler and IPAddressMap classes. All parameters
+	 * must be not null.
+	 * 
+	 * @param patternSeparator
+	 *            pattern separator
+	 * @param patterns
+	 *            patterns to convert
+	 * @param migrated
+	 *            the result of the conversion. Equals the patterns String when it
+	 *            contained no pattern using a deprecated format.
+	 * @return true when patterns contained at least one pattern using a deprecated
+	 *         format.
+	 */
+	protected static boolean migrateIPAddressPatterns(final String patternSeparator, final String patterns,
+			final StringBuilder migrated) {
+		final StringTokenizer st = new StringTokenizer(patterns, patternSeparator);
+		boolean hasDeprecated = false;
+		while (st.hasMoreTokens()) {
+			final String pattern = st.nextToken();
+			int idx;
+			if (pattern.indexOf('|') > 0) {
+				idx = pattern.indexOf('|');
+			} else {
+				idx = pattern.indexOf('/');
+				if (idx >= 0) {
+					/*
+					 * First "/" character of the URI pattern used to separate it from the internet
+					 * address. But it can now be used in CIDR notation
+					 */
+					final String intPart = pattern.substring(idx + 1);
+					try {
+						int intValue = Integer.parseInt(intPart);
+						if (intValue >= 0 && intValue <= 128) {
+							idx = -1;
+						} else {
+							/* No a valid CIDR notation : maybe a path with only numbers? */
+							hasDeprecated = true;
+						}
+					} catch (final NumberFormatException e) {
+						hasDeprecated = true;
+					}
+				}
+			}
+
+			String addr = idx > 0 ? pattern.substring(0, idx) : pattern;
+			String path = idx > 0 ? pattern.substring(idx) : "/*";
+
+			if (addr.endsWith(".")) {
+				/*
+				 * Migrating prefix wildcard specification range format (e.g. "10.10." becomes
+				 * "10.10.0.0-10.10.255.255") .
+				 */
+				hasDeprecated = true;
+				final String[] parts = addr.split("\\.");
+				final StringBuilder migratedAddr = new StringBuilder(addr.substring(0, addr.length() - 1));
+				for (int i = parts.length; i < 4; i++) {
+					migratedAddr.append(".0");
+				}
+				migratedAddr.append("-").append(addr.substring(0, addr.length() - 1));
+				for (int i = parts.length; i < 4; i++) {
+					migratedAddr.append(".255");
+				}
+				addr = migratedAddr.toString();
+			}
+			if (path.startsWith("|") || path.startsWith("/*.")) {
+				path = path.substring(1);
+			}
+
+			if (migrated.length() > 0) {
+				migrated.append(patternSeparator);
+			}
+			migrated.append(addr);
+			if (!"/*".equals(path)) {
+				migrated.append("|").append(path);
+			}
+		}
+		return hasDeprecated;
+	}
+	
+	/**
+	 * Handle audioTagParser newly supported audio formats. This parser is disabled
+	 * by default, so its supported file extensions and media types are added to the
+	 * deny lists at first install. Therefore, on existing installs, newly supported
+	 * formats must be added to the deny lists if the parser has not been enabled.
+	 * 
+	 * @param sb
+	 *            the main Switchboard instance. Must not be null.
+	 */
+	public static void migrateDisabledAudioFormats(final Switchboard sb) {
+		/*
+		 * Previously supported audio file extensions (formerly in
+		 * audioTagParser.EXTENSIONS constant)
+		 */
+		final Set<String> oldAudioExtensions = new HashSet<>();
+		Collections.addAll(oldAudioExtensions, new String[] { "mp3", "ogg", "oga", "m4a", "m4p", "flac", "wma" });
+		
+		/*
+		 * Previously supported audio media types (formerly in audioTagParser.MIME_TYPES
+		 * constant)
+		 */
+		final Set<String> oldAudioMediaTypes = new HashSet<>();
+		Collections.addAll(oldAudioMediaTypes, new String[] { "audio/mpeg", "audio/MPA", "audio/mpa-robust", "audio/mp4",
+				"audio/flac", "audio/x-flac", "audio/x-ms-wma", "audio/x-ms-asf" });
+		
+		final Set<String> deniedExtensions = sb.getConfigSet(SwitchboardConstants.PARSER_EXTENSIONS_DENY);
+		final Set<String> deniedMediaTypes = sb.getConfigSet(SwitchboardConstants.PARSER_MIME_DENY);
+		
+		if(deniedExtensions.containsAll(oldAudioExtensions) && deniedMediaTypes.containsAll(oldAudioMediaTypes)) {
+			/*
+			 * All old audio file extensions and media types are denied : we add newly
+			 * supported ones to theses deny lists
+			 */
+			deniedExtensions.addAll(audioTagParser.SupportedAudioMediaType.getAllFileExtensions());
+			
+			sb.setConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, deniedExtensions);
+			
+			deniedMediaTypes.addAll(audioTagParser.SupportedAudioMediaType.getAllMediaTypes());
+			
+			sb.setConfig(SwitchboardConstants.PARSER_MIME_DENY, deniedMediaTypes);
+			
+	    	TextParser.setDenyMime(sb.getConfig(SwitchboardConstants.PARSER_MIME_DENY, ""));
+	        TextParser.setDenyExtension(sb.getConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, ""));
+		}
+	}
     
     /**
      * Reindex embedded solr index

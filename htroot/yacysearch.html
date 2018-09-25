@@ -22,25 +22,6 @@
   <link rel="stylesheet" type="text/css" media="screen" href="env/yacysort.css" />
   #(/jsResort)#
   <script type="text/javascript">
-     var suggestMatcher = function() {
-       return function opensearch(q, cb) {
-       	 $.getJSON("suggest.json?q=" + q, function(data) {
-           	var parsed = [];
-            for (var i = 0; i < data[1].length; i++) {
-                var row = data[1][i];
-                if (row) {
-                    parsed[parsed.length] = {
-                        data: [row],
-                        value: row,
-                        result: row
-                    };
-                };
-            };
-            cb(parsed);
-          });
-        };
-      };
-
     $(document).ready(function() {
       #(jsResort)#::
         $.get(
@@ -53,11 +34,36 @@
         );
       #(/jsResort)#
 
-      $('#search').typeahead({hint:false,highlight:true,minLength:1}, {
-    	name: 'states',
-    	displayKey: 'value',
-    	source: suggestMatcher()
-      });
+		var suggestTimeoutId = null;
+
+		/* Configure the search input field to get suggestions on key strokes */
+		$('#search').typeahead({hint:false,highlight:true,minLength:1}, {
+			name: 'states',
+			displayKey: 'value',
+			source: function(query, render) {
+				if(suggestTimeoutId != null) {
+					/* Remove delayed call not yet done */
+					clearTimeout(suggestTimeoutId);
+				}
+				/* Limit the rate of calls to the suggest API by adding a delay before effective call */
+				suggestTimeoutId = setTimeout(function() {
+					$.getJSON("suggest.json?q=" + query, function(data) {
+	    	    		var parsed = [];
+    	    	    	for (var i = 0; i < data[1].length; i++) {
+	    	    	    	var row = data[1][i];
+    	    	        	if (row) {
+	    	    	        	parsed[parsed.length] = {
+    	    	            		data: [row],
+    	    	                	value: row,
+    	    	                	result: row
+								};  
+							};
+						};
+						render(parsed); 
+					});
+				}, 300);
+			}
+		});
     });
   </script>
   <style type="text/css">.twitter-typeahead {margin: 0px;padding: 0px;top:2px;}</style> <!-- fix for input window -->
@@ -109,10 +115,11 @@ Use the RSS search result format to add static searches to your RSS reader, if y
        #(/resortEnabled)#
     </div>
   </div>
-    #(authorized)#::
+    #(authSearch)#::
   	<input type="hidden" name="auth" id="auth" value=""/>
-  	#(/authorized)#
+  	#(/authSearch)#
     <input type="hidden" name="contentdom" id="contentdom" value="#[contentdom]#" />
+    <input type="hidden" name="strictContentDom" id="strictContentDom" value="#[strictContentDom]#" />
     <input type="hidden" name="former" value="#[former]#" />
     <input type="hidden" name="maximumRecords" value="#[count]#" />
     <input type="hidden" name="startRecord" id="startRecord" value="0" />
@@ -185,20 +192,27 @@ document.getElementById("Enter").innerHTML = "search again";
   <a href="osm.png?lon=#[lon]#&amp;lat=#[lat]#&amp;zoom=14" class="thumblink"  style="float:left;" onclick="return hs.expand(this)">
       <img src="osm.png?lon=#[lon]#&amp;lat=#[lat]#&amp;zoom=14" width="192" height="192" alt="map #[lon]#, #[lat]#" />
   </a>
-  <div class="TableCellDark"><a href="http://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">#[name]#</a><br /><a href="http://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">lat=#[lat]#, lon=#[lon]#</a></div> <!-- preview -->
-  <div class="highslide-caption"><a href="http://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">#[name]#</a><br /><a href="http://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">lat=#[lat]#, lon=#[lon]#</a></div> <!-- zoomed -->
+  <div class="TableCellDark"><a href="https://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">#[name]#</a><br /><a href="https://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">lat=#[lat]#, lon=#[lon]#</a></div> <!-- preview -->
+  <div class="highslide-caption"><a href="https://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">#[name]#</a><br /><a href="https://www.openstreetmap.org/?lat=#[lat]#&amp;lon=#[lon]#&amp;zoom=14">lat=#[lat]#, lon=#[lon]#</a></div> <!-- zoomed -->
   </div>
   #{/loc}#
   </p>
-  <p class="urlinfo" style="clear:left;">Map (c) by <a href="http://www.openstreetmap.org">OpenStreetMap</a> and contributors, CC-BY-SA</p>
+  <p class="urlinfo" style="clear:left;">Map (c) by <a href="https://www.openstreetmap.org">OpenStreetMap</a> and contributors, CC-BY-SA</p>
   </div>
 #(/geoinfo)#
 
 <!-- show date histogram if date navigation is active -->
 <div id="datehistogram"></div>
 
+<div id="imageErrorsInfo" class="info hidden">
+	Failed to render <strong id="imageErrorsCount">0</strong> thumbnail(s).
+	<button id="showErrorImagesBtn" class="btn btn-default btn-sm" onclick="showErrThumbnails()" title="Show anyway links to images that could not be rendered">Show</button>
+	<button id="hideErrorImagesBtn" class="btn btn-default btn-sm hidden" onclick="hideErrThumbnails()" title="Hide links to images that could not be rendered">Hide</button>
+</div>
+
 <!-- linklist begin -->
-#(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td></tr>#(/resultTable)#
+#(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td></tr>
+::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td>#(embed)#::<td>Player</td>#(/embed)#</tr>#(/resultTable)#
 #(jsResort)#
   #{results}#
   <!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
@@ -207,7 +221,7 @@ document.getElementById("Enter").innerHTML = "search again";
   <div id="resultscontainer">
   </div>
 #(/jsResort)#
-#(resultTable)#::</table>#(/resultTable)#
+#(resultTable)#::</table>::</table>#(/resultTable)#
 <!-- linklist end -->
 
 #(num-results)#

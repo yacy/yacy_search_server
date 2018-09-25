@@ -482,9 +482,6 @@
     <trans-unit id="8c112b7c" xml:space="preserve" approved="no" translate="yes">
        <source>*.sub.domain.net/*&lt;</source>
     </trans-unit>
-    <trans-unit id="66a3cc34" xml:space="preserve" approved="no" translate="yes">
-       <source>a complete &lt;</source>
-    </trans-unit>
     <trans-unit id="4ac92f20" xml:space="preserve" approved="no" translate="yes">
        <source>(slow)</source>
     </trans-unit>
@@ -859,13 +856,13 @@
        <source>Access from localhost without account</source>
     </trans-unit>
     <trans-unit id="36413877" xml:space="preserve" approved="no" translate="yes">
-       <source>Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.</source>
+       <source>Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.</source>
     </trans-unit>
     <trans-unit id="a5765027" xml:space="preserve" approved="no" translate="yes">
        <source>Access only with qualified account</source>
     </trans-unit>
     <trans-unit id="384d4cfc" xml:space="preserve" approved="no" translate="yes">
-       <source>You need this only if you want a remote access to your peer.</source>
+       <source>This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.</source>
     </trans-unit>
     <trans-unit id="9bceed91" xml:space="preserve" approved="no" translate="yes">
        <source>Peer User:</source>
@@ -932,6 +929,12 @@
     </trans-unit>
     <trans-unit id="7ee6148e" xml:space="preserve" approved="no" translate="yes">
        <source>Save User</source>
+    </trans-unit>
+    <trans-unit id="b26b9832" xml:space="preserve" approved="no" translate="yes">
+       <source>This setting is convenient but less secure than using a qualified admin account.</source>
+    </trans-unit>
+    <trans-unit id="8db59370" xml:space="preserve" approved="no" translate="yes">
+       <source>Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.</source>
     </trans-unit>
   </body>
 </file>
@@ -1482,6 +1485,9 @@
 
 <file original="ConfigNetwork_p.html"  source-language="en"  datatype="html">
   <body>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
     <trans-unit id="a4561a44" xml:space="preserve" approved="no" translate="yes">
        <source>Network Configuration</source>
     </trans-unit>
@@ -2172,7 +2178,7 @@
        <source>View via Proxy</source>
     </trans-unit>
     <trans-unit id="43d1a9cb" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Snapshots&lt;</source>
+       <source>&gt;JPG Snapshot&lt;</source>
     </trans-unit>
     <trans-unit id="f5192903" xml:space="preserve" approved="no" translate="yes">
        <source>"Raw ranking score value"</source>
@@ -2926,13 +2932,13 @@
        <source>This is the 'mirror'-case of process (6).</source>
     </trans-unit>
     <trans-unit id="477bfd45" xml:space="preserve" approved="no" translate="yes">
-       <source>&lt;em&gt;Use Case:&lt;/em&gt; You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the</source>
+       <source>&lt;em&gt;Use Case:&lt;/em&gt; You get entries here, if you start a local crawl on the '&lt;a href="CrawlStartExpert.html"&gt;Advanced Crawler&lt;/a&gt;' page and check the</source>
     </trans-unit>
     <trans-unit id="59986be9" xml:space="preserve" approved="no" translate="yes">
-       <source>'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request</source>
+       <source>'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '&lt;a href="RemoteCrawl_p.html"&gt;Remote Crawling&lt;/a&gt;' page.</source>
     </trans-unit>
     <trans-unit id="7f968d75" xml:space="preserve" approved="no" translate="yes">
-       <source>is reported back and can be monitored here.</source>
+       <source>Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.</source>
     </trans-unit>
     <trans-unit id="c4ada7d6" xml:space="preserve" approved="no" translate="yes">
        <source>(2) Results for Result of Search Queries</source>
@@ -3001,7 +3007,7 @@
        <source>This is the 'mirror'-case of process (1).</source>
     </trans-unit>
     <trans-unit id="7d5fcb88" xml:space="preserve" approved="no" translate="yes">
-       <source>&lt;em&gt;Use Case:&lt;/em&gt; This list may fill if you check the 'Accept remote crawling requests'-flag on the '&lt;a href="RemoteCrawl_p.html"&gt;Index Create&lt;/a&gt;' page</source>
+       <source>&lt;em&gt;Use Case:&lt;/em&gt; This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '&lt;a href="RemoteCrawl_p.html"&gt;Remote Crawling&lt;/a&gt;' page</source>
     </trans-unit>
     <trans-unit id="fa27dad0" xml:space="preserve" approved="no" translate="yes">
        <source>The stack is empty.</source>
@@ -3068,6 +3074,9 @@
 
 <file original="CrawlStartExpert.html"  source-language="en"  datatype="html">
   <body>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
     <trans-unit id="51586213" xml:space="preserve" approved="no" translate="yes">
        <source>Expert Crawl Start</source>
     </trans-unit>
@@ -4996,7 +5005,7 @@
        <source>MediaWiki Dump File Selection: select an XML file (which may be bz2- or gz-encoded)</source>
     </trans-unit>
     <trans-unit id="ed7c38d1" xml:space="preserve" approved="no" translate="yes">
-       <source>You can import MediaWiki dumps here. An example is the file</source>
+       <source>You can import &lt;a href="https://dumps.wikimedia.org/backup-index-bydb.html" target="_blank"&gt;MediaWiki dumps&lt;/a&gt; here. An example is the file</source>
     </trans-unit>
     <trans-unit id="6e081749" xml:space="preserve" approved="no" translate="yes">
        <source>"Import MediaWiki Dump"</source>
@@ -5261,12 +5270,6 @@
     <trans-unit id="7d21764d" xml:space="preserve" approved="no" translate="yes">
        <source>"stop recrawl job"</source>
     </trans-unit>
-    <trans-unit id="c8a1de3a" xml:space="preserve" approved="no" translate="yes">
-       <source>to re-crawl documents with fresh_date_dt before today.</source>
-    </trans-unit>
-    <trans-unit id="35a2988c" xml:space="preserve" approved="no" translate="yes">
-       <source>after starting the recrawl job you can apply a custom Solr query to select documents to be processed</source>
-    </trans-unit>
     <trans-unit id="5c907d7" xml:space="preserve" approved="no" translate="yes">
        <source>Re-Crawl Query Details</source>
     </trans-unit>
@@ -5282,8 +5285,98 @@
     <trans-unit id="ce0038c9" xml:space="preserve" approved="no" translate="yes">
        <source>update</source>
     </trans-unit>
-    <trans-unit id="9a13a76f" xml:space="preserve" approved="no" translate="yes">
-       <source>include failed urls</source>
+    <trans-unit id="bd92c8c3" xml:space="preserve" approved="no" translate="yes">
+       <source>to re-crawl documents selected with the given query.</source>
+    </trans-unit>
+    <trans-unit id="e4b8676f" xml:space="preserve" approved="no" translate="yes">
+       <source>Include failed URLs</source>
+    </trans-unit>
+    <trans-unit id="4d2cc460" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Field&lt;</source>
+    </trans-unit>
+    <trans-unit id="7f052acb" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;count&lt;</source>
+    </trans-unit>
+    <trans-unit id="3c7266be" xml:space="preserve" approved="no" translate="yes">
+       <source>Re-crawl works only with an embedded local Solr index!</source>
+    </trans-unit>
+    <trans-unit id="21136644" xml:space="preserve" approved="no" translate="yes">
+       <source>Simulate</source>
+    </trans-unit>
+    <trans-unit id="72379d4d" xml:space="preserve" approved="no" translate="yes">
+       <source>Check only how many documents would be selected for recrawl</source>
+    </trans-unit>
+    <trans-unit id="217b3471" xml:space="preserve" approved="no" translate="yes">
+       <source>"Browse metadata of the #[rows]# first selected documents"</source>
+    </trans-unit>
+    <trans-unit id="3825d1fa" xml:space="preserve" approved="no" translate="yes">
+       <source>document(s)&lt;/a&gt;#(/showSelectLink)# selected for recrawl.</source>
+    </trans-unit>
+    <trans-unit id="a248104" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Solr query &lt;</source>
+    </trans-unit>
+    <trans-unit id="9d0f3870" xml:space="preserve" approved="no" translate="yes">
+       <source>Set defaults</source>
+    </trans-unit>
+    <trans-unit id="58b79d6f" xml:space="preserve" approved="no" translate="yes">
+       <source>"Reset to default values"</source>
+    </trans-unit>
+    <trans-unit id="cc77a2e1" xml:space="preserve" approved="no" translate="yes">
+       <source>Last #(/jobStatus)#Re-Crawl job report</source>
+    </trans-unit>
+    <trans-unit id="61fbdbe4" xml:space="preserve" approved="no" translate="yes">
+       <source>Automatically refreshing</source>
+    </trans-unit>
+    <trans-unit id="af4ac853" xml:space="preserve" approved="no" translate="yes">
+       <source>An error occurred while trying to refresh automatically</source>
+    </trans-unit>
+    <trans-unit id="20fae44a" xml:space="preserve" approved="no" translate="yes">
+       <source>The job terminated early due to an error when requesting the Solr index.</source>
+    </trans-unit>
+    <trans-unit id="1aada46c" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Status&lt;</source>
+    </trans-unit>
+    <trans-unit id="e664c485" xml:space="preserve" approved="no" translate="yes">
+       <source>"Running"</source>
+    </trans-unit>
+    <trans-unit id="82eba8e2" xml:space="preserve" approved="no" translate="yes">
+       <source>"Shutdown in progress"</source>
+    </trans-unit>
+    <trans-unit id="f6a654dd" xml:space="preserve" approved="no" translate="yes">
+       <source>"Terminated"</source>
+    </trans-unit>
+    <trans-unit id="1e5dd5c0" xml:space="preserve" approved="no" translate="yes">
+       <source>Running::Shutdown in progress::Terminated</source>
+    </trans-unit>
+    <trans-unit id="609b4652" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Query&lt;</source>
+    </trans-unit>
+    <trans-unit id="7a2942b3" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Start time&lt;</source>
+    </trans-unit>
+    <trans-unit id="aa1ad8ec" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;End time&lt;</source>
+    </trans-unit>
+    <trans-unit id="b0c496ca" xml:space="preserve" approved="no" translate="yes">
+       <source>URLs added to the crawler queue for recrawl</source>
+    </trans-unit>
+    <trans-unit id="96c2caad" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Recrawled URLs&lt;</source>
+    </trans-unit>
+    <trans-unit id="7eb5d832" xml:space="preserve" approved="no" translate="yes">
+       <source>URLs rejected for some reason by the crawl stacker or the crawler queue. Please check the logs for more details.</source>
+    </trans-unit>
+    <trans-unit id="ac471974" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Rejected URLs&lt;</source>
+    </trans-unit>
+    <trans-unit id="47a10af5" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt;Malformed URLs&lt;</source>
+    </trans-unit>
+    <trans-unit id="6cf2982f" xml:space="preserve" approved="no" translate="yes">
+       <source>"#[malformedUrlsDeletedCount]# deleted from the index"</source>
+    </trans-unit>
+    <trans-unit id="8bd17283" xml:space="preserve" approved="no" translate="yes">
+       <source>&gt; Refresh&lt;</source>
     </trans-unit>
   </body>
 </file>
@@ -6692,7 +6785,10 @@
        <source>&gt;exhausted&lt;</source>
     </trans-unit>
     <trans-unit id="7ade7e80" xml:space="preserve" approved="no" translate="yes">
-       <source>reset state</source>
+       <source>Reset state</source>
+    </trans-unit>
+    <trans-unit id="6d08abc8" xml:space="preserve" approved="no" translate="yes">
+       <source>Manually reset to 'proper' state</source>
     </trans-unit>
     <trans-unit id="a5c476c2" xml:space="preserve" approved="no" translate="yes">
        <source>Enough memory is available for proper operation.</source>
@@ -8128,6 +8224,12 @@
     <trans-unit id="e24b0b3d" xml:space="preserve" approved="no" translate="yes">
        <source>and set an administration password.</source>
     </trans-unit>
+    <trans-unit id="f6c053fa" xml:space="preserve" approved="no" translate="yes">
+       <source>Access is unrestricted from localhost (this includes administration features).</source>
+    </trans-unit>
+    <trans-unit id="ad48a7e2" xml:space="preserve" approved="no" translate="yes">
+       <source>Please check the &lt;a href="ConfigAccounts_p.html"&gt;accounts configuration&lt;/a&gt; page to ensure that the settings match the security level you need.</source>
+    </trans-unit>
     <trans-unit id="7623b0bd" xml:space="preserve" approved="no" translate="yes">
        <source>You have not published your peer seed yet. This happens automatically, just wait.</source>
     </trans-unit>
@@ -8663,9 +8765,6 @@
     <trans-unit id="1449865e" xml:space="preserve" approved="no" translate="yes">
        <source> of #[of]#</source>
     </trans-unit>
-    <trans-unit id="38a150c" xml:space="preserve" approved="no" translate="yes">
-       <source>&gt;Date</source>
-    </trans-unit>
     <trans-unit id="391b498" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Type</source>
     </trans-unit>
@@ -8673,16 +8772,16 @@
        <source>&gt;Comment</source>
     </trans-unit>
     <trans-unit id="c2a0ac2a" xml:space="preserve" approved="no" translate="yes">
-       <source>Call&lt;br/&gt;Count&lt;</source>
+       <source>Call Count&lt;</source>
     </trans-unit>
     <trans-unit id="a2a91c8b" xml:space="preserve" approved="no" translate="yes">
-       <source>Recording&lt;</source>
+       <source>Recording&amp;nbsp;Date</source>
     </trans-unit>
     <trans-unit id="9c5940cb" xml:space="preserve" approved="no" translate="yes">
-       <source>Last&amp;nbsp;Exec</source>
+       <source>Last&amp;nbsp;Exec&amp;nbsp;Date</source>
     </trans-unit>
     <trans-unit id="409928e8" xml:space="preserve" approved="no" translate="yes">
-       <source>Next&amp;nbsp;Exec</source>
+       <source>Next&amp;nbsp;Exec&amp;nbsp;Date</source>
     </trans-unit>
     <trans-unit id="2ef20848" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Event Trigger&lt;</source>
@@ -9372,6 +9471,9 @@
 
 <file original="Vocabulary_p.html"  source-language="en"  datatype="html">
   <body>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
     <trans-unit id="16c5dae2" xml:space="preserve" approved="no" translate="yes">
        <source>YaCy '#[clientname]#': Federated Index</source>
     </trans-unit>
@@ -10836,6 +10938,9 @@
 
 <file original="index.html"  source-language="en"  datatype="html">
   <body>
+    <trans-unit id="b3979711" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;html lang="en"&gt;</source>
+    </trans-unit>
     <trans-unit id="a0a07773" xml:space="preserve" approved="no" translate="yes">
        <source>YaCy '#[clientname]#': Search Page</source>
     </trans-unit>
@@ -10941,6 +11046,15 @@
     <trans-unit id="82e93926" xml:space="preserve" approved="no" translate="yes">
        <source>only files from a local file system</source>
     </trans-unit>
+    <trans-unit id="76f4dfc3" xml:space="preserve" approved="no" translate="yes">
+       <source>spatial restrictions</source>
+    </trans-unit>
+    <trans-unit id="3c5ae2c9" xml:space="preserve" approved="no" translate="yes">
+       <source>only documents having location metadata (geographical coordinates)</source>
+    </trans-unit>
+    <trans-unit id="de47cea" xml:space="preserve" approved="no" translate="yes">
+       <source>only documents within a square zone embracing a circle of given radius (in decimal degrees) around the specified latitude and longitude (in decimal degrees)</source>
+    </trans-unit>
     <trans-unit id="252ec05d" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;ranking modifier&lt;</source>
     </trans-unit>
@@ -10960,7 +11074,7 @@
        <source>prefer given language</source>
     </trans-unit>
     <trans-unit id="18e0e8d6" xml:space="preserve" approved="no" translate="yes">
-       <source>an ISO639 2-letter code</source>
+       <source>an &lt;a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list"&gt;ISO 639-1&lt;/a&gt; 2-letter code</source>
     </trans-unit>
     <trans-unit id="7efd5ea9" xml:space="preserve" approved="no" translate="yes">
        <source>heuristics</source>
@@ -10972,16 +11086,16 @@
        <source>Search Navigation</source>
     </trans-unit>
     <trans-unit id="29087484" xml:space="preserve" approved="no" translate="yes">
-       <source>keyboard shotcuts</source>
+       <source>keyboard shortcuts</source>
     </trans-unit>
-    <trans-unit id="54da6c7" xml:space="preserve" approved="no" translate="yes">
-       <source>tab or page-up</source>
+    <trans-unit id="de5304cb" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;a href="https://en.wikipedia.org/wiki/Access_key"&gt;Access key&lt;/a&gt; modifier + n</source>
     </trans-unit>
     <trans-unit id="264b7705" xml:space="preserve" approved="no" translate="yes">
        <source>next result page</source>
     </trans-unit>
-    <trans-unit id="31e72520" xml:space="preserve" approved="no" translate="yes">
-       <source>page-down</source>
+    <trans-unit id="de5304cd" xml:space="preserve" approved="no" translate="yes">
+       <source>&lt;a href="https://en.wikipedia.org/wiki/Access_key"&gt;Access key&lt;/a&gt; modifier + p</source>
     </trans-unit>
     <trans-unit id="556fc109" xml:space="preserve" approved="no" translate="yes">
        <source>previous result page</source>

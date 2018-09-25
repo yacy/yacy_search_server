@@ -20,37 +20,34 @@
 
 package net.yacy.document;
 
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.kelondro.index.RowHandleSet;
-
 public class SnippetExtractor {
 
-    String snippetString;
-    HandleSet remainingHashes;
+    private String snippetString;
+    private Set<String> remainingTerms;
 
-    public SnippetExtractor(final Collection<StringBuilder> sentences, final HandleSet queryhashes, int maxLength) throws UnsupportedOperationException {
-        if (sentences == null) throw new UnsupportedOperationException("sentence == null");
-        if (queryhashes == null || queryhashes.isEmpty()) throw new UnsupportedOperationException("queryhashes == null");
-        SortedMap<byte[], Integer> hs;
+    
+    public SnippetExtractor(final Iterable<StringBuilder> sentences, final Set<String> queryTerms, int maxLength) throws UnsupportedOperationException {
+        if (sentences == null) throw new UnsupportedOperationException("sentences == null");
+        if (queryTerms == null || queryTerms.isEmpty()) throw new UnsupportedOperationException("queryTerms == null");
+        SortedMap<String, Integer> hs;
         final TreeMap<Long, StringBuilder> order = new TreeMap<Long, StringBuilder>();
         long uniqCounter = 999L;
         Integer pos;
         TreeSet<Integer> positions;
         int linenumber = 0;
         int fullmatchcounter = 0;
-        lookup: for (final StringBuilder sentence: sentences) {
-            hs = WordTokenizer.hashSentence(sentence.toString(), 100);
+        lookup: for(final StringBuilder sentence : sentences) {
+            hs = WordTokenizer.tokenizeSentence(sentence.toString(), 100);
             positions = new TreeSet<Integer>();
-            for (final byte[] word: queryhashes) {
+            for (final String word: queryTerms) {
                 pos = hs.get(word);
                 if (pos != null) {
                     positions.add(pos);
@@ -65,7 +62,7 @@ public class SnippetExtractor {
             if (!positions.isEmpty()) {
                 order.put(Long.valueOf(-100000000L * (linenumber == 0 ? 1 : 0) + 10000000L * positions.size() + 1000000L * worddistance + 100000L * linelengthKey(sentence.length(), maxLength) - 10000L * linenumber + uniqCounter--), sentence);
                 if (order.size() > 5) order.remove(order.firstEntry().getKey());
-                if (positions.size() == queryhashes.size()) fullmatchcounter++;
+                if (positions.size() == queryTerms.size()) fullmatchcounter++;
                 if (fullmatchcounter >= 3) break lookup;
             }
             linenumber++;
@@ -76,31 +73,31 @@ public class SnippetExtractor {
         while (!order.isEmpty()) {
             sentence = order.remove(order.lastKey()); // sentence with the biggest score
             try {
-                tsr = new SnippetExtractor(sentence.toString(), queryhashes, maxLength);
+                tsr = new SnippetExtractor(sentence.toString(), queryTerms, maxLength);
             } catch (final UnsupportedOperationException e) {
                 continue;
             }
             this.snippetString = tsr.snippetString;
             if (this.snippetString != null && this.snippetString.length() > 0) {
-                this.remainingHashes = tsr.remainingHashes;
-                if (this.remainingHashes.isEmpty()) {
+                this.remainingTerms = tsr.remainingTerms;
+                if (this.remainingTerms.isEmpty()) {
                     // we have found the snippet
                     return; // finished!
-                } else if (this.remainingHashes.size() < queryhashes.size()) {
+                } else if (this.remainingTerms.size() < queryTerms.size()) {
                     // the result has not all words in it.
                     // find another sentence that represents the missing other words
                     // and find recursively more sentences
                     maxLength = maxLength - this.snippetString.length();
                     if (maxLength < 20) maxLength = 20;
                     try {
-                        tsr = new SnippetExtractor(order.values(), this.remainingHashes, maxLength);
+                        tsr = new SnippetExtractor(order.values(), this.remainingTerms, maxLength);
                     } catch (final UnsupportedOperationException e) {
                         throw e;
                     }
                     final String nextSnippet = tsr.snippetString;
                     if (nextSnippet == null) return;
                     this.snippetString = this.snippetString + (" / " + nextSnippet);
-                    this.remainingHashes = tsr.remainingHashes;
+                    this.remainingTerms = tsr.remainingTerms;
                     return;
                 } else {
                     // error
@@ -120,27 +117,24 @@ public class SnippetExtractor {
         return 0;
     }
 
-    private SnippetExtractor(String sentence, final HandleSet queryhashes, final int maxLength) throws UnsupportedOperationException {
+    
+    private SnippetExtractor(String sentence, final Set<String> queryTerms, final int maxLength) throws UnsupportedOperationException {
         try {
             if (sentence == null) throw new UnsupportedOperationException("no sentence given");
-            if (queryhashes == null || queryhashes.isEmpty()) throw new UnsupportedOperationException("queryhashes == null");
-            byte[] hash;
+            if (queryTerms == null || queryTerms.isEmpty()) throw new UnsupportedOperationException("queryTerms == null");
+            String term;
 
             // find all hashes that appear in the sentence
-            final Map<byte[], Integer> hs = WordTokenizer.hashSentence(sentence, 100);
-            final Iterator<byte[]> j = queryhashes.iterator();
+            final Map<String, Integer> hs = WordTokenizer.tokenizeSentence(sentence, 100);
+            final Iterator<String> j = queryTerms.iterator();
             Integer pos;
             int p, minpos = sentence.length(), maxpos = -1;
-            final HandleSet remainingHashes = new RowHandleSet(queryhashes.keylen(), queryhashes.comparator(), 0);
+            final Set<String> remainingTerms = new HashSet<>();
             while (j.hasNext()) {
-                hash = j.next();
-                pos = hs.get(hash);
+                term = j.next();
+                pos = hs.get(term);
                 if (pos == null) {
-                    try {
-                        remainingHashes.put(hash);
-                    } catch (final SpaceExceededException e) {
-                        ConcurrentLog.logException(e);
-                    }
+                   remainingTerms.add(term);
                 } else {
                     p = pos.intValue();
                     if (p > maxpos) maxpos = p;
@@ -185,7 +179,7 @@ public class SnippetExtractor {
                 sentence = sentence.substring(6, 20).trim() + " [..] " + sentence.substring(sentence.length() - 26, sentence.length() - 6).trim();
             }
             this.snippetString = sentence;
-            this.remainingHashes = remainingHashes;
+            this.remainingTerms = remainingTerms;
         } catch (final IndexOutOfBoundsException e) {
             throw new UnsupportedOperationException(e.getMessage());
         }
@@ -195,7 +189,7 @@ public class SnippetExtractor {
         return this.snippetString;
     }
 
-    public HandleSet getRemainingWords() {
-        return this.remainingHashes;
-    }
+    public Set<String> getRemainingTerms() {
+		return this.remainingTerms;
+	}
 }

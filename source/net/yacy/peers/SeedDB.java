@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -973,7 +974,11 @@ public final class SeedDB implements AlternativeDomainNames {
                     seed = this.mySeed;
                 else return null;
             }
-            return seed.getPublicAddress(seed.getIP()) + ((subdom == null) ? "" : ("/" + subdom));
+            final Set<String> ips = seed.getIPs();
+            if(ips.isEmpty()) {
+            	return null;
+            }
+            return seed.getPublicAddress(ips.iterator().next()) + ((subdom == null) ? "" : ("/" + subdom));
         } else if (host.endsWith(".yacy")) {
             // identify subdomain
             p = host.indexOf('.');
@@ -982,15 +987,23 @@ public final class SeedDB implements AlternativeDomainNames {
                 host = host.substring(p + 1); // if ever, the double-dots are here but do not harm
             }
             // identify domain
-            final String domain = host.substring(0, host.length() - 5).toLowerCase();
+            final String domain = host.substring(0, host.length() - 5).toLowerCase(Locale.ROOT);
             seed = lookupByName(domain);
             if (seed == null) return null;
             if (this.mySeed == null) initMySeed();
             if (seed == this.mySeed && !(seed.isOnline())) {
                 // take local ip instead of external
-                return Switchboard.getSwitchboard().myPublicIP() + ":" + Switchboard.getSwitchboard().getLocalPort() + ((subdom == null) ? "" : ("/" + subdom));
+            	final Set<String> ips = Switchboard.getSwitchboard().myPublicIPs();
+            	if(ips.isEmpty()) {
+            		return null;
+            	}
+                return ips.iterator().next() + ":" + Switchboard.getSwitchboard().getLocalPort() + ((subdom == null) ? "" : ("/" + subdom));
             }
-            return seed.getPublicAddress(seed.getIP()) + ((subdom == null) ? "" : ("/" + subdom));
+            final Set<String> ips = seed.getIPs();
+            if(ips.isEmpty()) {
+            	return null;
+            }
+            return seed.getPublicAddress(ips.iterator().next()) + ((subdom == null) ? "" : ("/" + subdom));
         } else {
             return null;
         }

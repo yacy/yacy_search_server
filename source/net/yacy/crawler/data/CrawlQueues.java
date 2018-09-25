@@ -82,6 +82,8 @@ public class CrawlQueues {
 
     public  NoticedURL noticeURL;
     public  ErrorCache errorURL;
+    
+    /** URLs pulled by remote peers in order to crawl them for us */
     public Map<String, DigestURL> delegatedURL;
 
     public CrawlQueues(final Switchboard sb, final File queuePath) {
@@ -107,7 +109,7 @@ public class CrawlQueues {
         if (this.remoteCrawlProviderHashes == null) this.remoteCrawlProviderHashes = new ArrayList<String>();
         if (this.delegatedURL == null) {
             this.delegatedURL = new ConcurrentHashMap<String, DigestURL>();
-            log.config("Finishted Startup of Crawling Management");
+            log.config("Finished Startup of Crawling Management");
         }
     }
     /**
@@ -205,7 +207,9 @@ public class CrawlQueues {
     public void removeURL(final byte[] hash) {
         assert hash != null && hash.length == 12;
         this.noticeURL.removeByURLHash(hash);
-        if (this.delegatedURL != null) this.delegatedURL.remove(hash);
+        if (this.delegatedURL != null) {
+        	this.delegatedURL.remove(ASCII.String(hash));
+        }
     }
     
     public int removeHosts(final Set<String> hosthashes) {
@@ -367,7 +371,7 @@ public class CrawlQueues {
                             + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
                             + ", depth=" + urlEntry.depth()
                             + ", crawlDepth=" + profile.depth()
-                            + ", must-match=" + profile.urlMustMatchPattern().toString()
+                            + ", must-match=" + profile.formattedUrlMustMatchPattern()
                             + ", must-not-match=" + profile.urlMustNotMatchPattern().toString()
                             + ", permission=" + ((this.sb.peers == null) ? "undefined" : (((this.sb.peers.mySeed().isSenior()) || (this.sb.peers.mySeed().isPrincipal())) ? "true" : "false")));
                 }
@@ -520,7 +524,9 @@ public class CrawlQueues {
         }
 
         // we know a peer which should provide remote crawl entries. load them now.
-        final RSSFeed feed = Protocol.queryRemoteCrawlURLs(this.sb.peers, seed, 60, 10000);
+		final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+				SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+        final RSSFeed feed = Protocol.queryRemoteCrawlURLs(this.sb.peers, seed, 60, 10000, preferHttps);
         if (feed == null || feed.isEmpty()) {
             // try again and ask another peer
             return remoteCrawlLoaderJob();

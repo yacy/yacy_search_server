@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.TransactionManager;
 import net.yacy.http.ReferrerPolicy;
 import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
@@ -46,6 +47,9 @@ public final class Settings_p {
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
         final String page = (post == null) ? "general" : post.get("page", "general");
+        
+        /* Acquire a transaction token for the next possible POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header, "/SettingsAck_p.html"));
         
         if (page.equals("ProxyAccess")) {
             prop.put("settingsTables", "Settings_ProxyAccess.inc");
@@ -134,6 +138,11 @@ public final class Settings_p {
 
         // server access filter
         prop.putHTML("serverfilter", env.getConfig("serverClient", "*"));
+        
+        /* gzip compression of HTTP responses */
+		prop.put(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
+				env.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
+						SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT));
         
         // server password
         prop.put("serveruser","server");
@@ -240,6 +249,10 @@ public final class Settings_p {
         prop.put("searchTestLocalSolrChecked", env.getConfigBool(SwitchboardConstants.DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL, false) ? 1 : 0);
         
         prop.put("searchShowRankingChecked", env.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING, SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING_DEFAULT) ? 1 : 0);
+        
+		prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED,
+				sb.getConfigBool(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED,
+						SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED_DEFAULT));
         
         // return rewrite properties
         return prop;

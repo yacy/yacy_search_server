@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html lang="en">
   <head>
     <title>YaCy '#[clientname]#': Network Configuration</title>
     #%env/templates/metas.template%#
@@ -49,6 +49,7 @@
     #(commitDHTNoGlobalSearch)#::<div class="error">Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.</div>#(/commitDHTNoGlobalSearch)#
     #(commitRobinson)#::<div class="commit">For Robinson Mode, index distribution and receive is switched off.</div>#(/commitRobinson)#
     <form id="NetworkForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+     <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
     <fieldset>
       <legend>
         <label>Network and Domain Specification</label>
@@ -73,7 +74,6 @@
         <dt>Remote Network Definition URL</dt>
         <dd>
         <input type="text" id="networkDefinitionURL" name="networkDefinitionURL" value="" size="100">
-        </select>        
         </dd>
         </span>
         <dt>Network Nick</dt>
@@ -101,6 +101,7 @@
       without any data exchange between your peer and other peers.
     </p>
     <form id="ConfigForm" method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
       <fieldset>
       <legend>
         <input type="radio" name="network" id="p2p" onclick="EnableP2P()" value="p2p"#(p2p.checked)#:: checked="checked"#(/p2p.checked)# />
@@ -216,6 +217,32 @@
 	</fieldset>
     </form>
     </fieldset>
+    
+    <form method="post" action="ConfigNetwork_p.html" enctype="multipart/form-data" accept-charset="UTF-8">
+    	<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
+    	<fieldset>
+   			<legend>
+        		<label>Outgoing communications encryption</label>
+      		</legend>
+      		<dl>
+    			<dt>Protocol operations encryption</dt>
+   				<dd>
+    				<label>
+						<input type="checkbox" name="network.unit.protocol.https.preferred" value="true" #(network.unit.protocol.https.preferred)#::checked="checked"#(/network.unit.protocol.https.preferred)# /> 
+						Prefer HTTPS for outgoing connexions to remote peers.
+        			</label>
+        			<p>When <abbr title="Transport Layer Security">TLS</abbr>/<abbr title="Secure Sockets Layer">SSL</abbr> is enabled on remote peers, it should be used to encrypt outgoing communications with them (for operations such as network presence, index transfer, remote crawl...).
+        			Please note that contrary to strict TLS, certificates are not validated against trusted certificate authorities (CA), thus allowing YaCy peers to use self-signed certificates.
+        			</p>
+        			<p>Note also that encryption of remote search queries is configured with a dedicated setting in the <a href="ConfigPortal_p.html">Config Portal</a> page.</p> 
+    			</dd>
+        		<dt></dt>
+        		<dd>
+          			<input type="submit" name="setEncryption" value="Save" class="btn btn-primary"/>
+        		</dd>
+    		</dl>
+    	</fieldset>
+    </form>
     #%env/templates/footer.template%#
   </body>
 </html>

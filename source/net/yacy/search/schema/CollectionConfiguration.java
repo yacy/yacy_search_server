@@ -913,24 +913,28 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
 
         // handle image source meta data
         if (document.getContentDomain() == ContentDomain.IMAGE) {
-            // add image pixel size if known
-            Iterator<ImageEntry> imgit = document.getImages().values().iterator();
-            List<Integer> heights = new ArrayList<>();
-            List<Integer> widths = new ArrayList<>();
-            List<Integer> pixels = new ArrayList<>();
-            while (imgit.hasNext()) {
-                ImageEntry img = imgit.next();
-                int imgpixels = (img.height() < 0 || img.width() < 0) ? -1 : img.height() * img.width();
-                if (imgpixels > 0 && (allAttr || (contains(CollectionSchema.images_height_val) && contains(CollectionSchema.images_width_val) && contains(CollectionSchema.images_pixel_val)))) {
-                    heights.add(img.height());
-                    widths.add(img.width());
-                    pixels.add(imgpixels);
+            // add image pixel sizes if enabled in index
+            // get values if as least one of the size fields is enabled in index
+            if (allAttr || (contains(CollectionSchema.images_height_val) || contains(CollectionSchema.images_width_val)) || contains(CollectionSchema.images_pixel_val)) {
+                // add image pixel size if known
+                Iterator<ImageEntry> imgit = document.getImages().values().iterator();
+                List<Integer> heights = new ArrayList<>();
+                List<Integer> widths = new ArrayList<>();
+                List<Integer> pixels = new ArrayList<>();
+                while (imgit.hasNext()) {
+                    ImageEntry img = imgit.next();
+                    int imgpixels = (img.height() < 0 || img.width() < 0) ? -1 : img.height() * img.width();
+                    if (imgpixels > 0) {
+                        heights.add(img.height());
+                        widths.add(img.width());
+                        pixels.add(imgpixels);
+                    }
                 }
-            }
-            if (heights.size() > 0) {
-                add(doc, CollectionSchema.images_height_val, heights);
-                add(doc, CollectionSchema.images_width_val, widths);
-                add(doc, CollectionSchema.images_pixel_val, pixels);
+                if (heights.size() > 0) { // add to index document
+                    add(doc, CollectionSchema.images_height_val, heights); // add() checks if field is enabled in index
+                    add(doc, CollectionSchema.images_width_val, widths);
+                    add(doc, CollectionSchema.images_pixel_val, pixels);
+                }
             }
 
             if (allAttr || contains(CollectionSchema.images_text_t))  {

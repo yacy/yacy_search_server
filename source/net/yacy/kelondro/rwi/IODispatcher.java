@@ -58,13 +58,13 @@ public class IODispatcher extends Thread {
     private final int                      writeBufferSize;
 
     public IODispatcher(final int dumpQueueLength, final int mergeQueueLength, final int writeBufferSize) {
+    	super("IODispatcher");
         this.termination = new Semaphore(0);
         this.controlQueue = new Semaphore(0);
         this.dumpQueue = new ArrayBlockingQueue<DumpJob<? extends Reference>>(dumpQueueLength);
         this.mergeQueue = new ArrayBlockingQueue<MergeJob>(mergeQueueLength);
         this.writeBufferSize = writeBufferSize;
         this.terminate = false;
-        this.setName("IODispatcher");
     }
 
     public void terminate() {

@@ -40,12 +40,14 @@ import javax.servlet.http.HttpServletResponse;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
+import net.yacy.cora.federate.solr.responsewriter.EmbeddedSolrResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.EnhancedXMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.GrepHTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.HTMLResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.SnapshotImagesReponseWriter;
+import net.yacy.cora.federate.solr.responsewriter.SolrjResponseWriter;
 import net.yacy.cora.federate.solr.responsewriter.YJsonResponseWriter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -60,17 +62,23 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.DisMaxParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
 import org.apache.solr.common.util.NamedList;
+import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
+import org.apache.solr.request.SolrQueryRequestBase;
 import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.BinaryResponseWriter;
+import org.apache.solr.response.CSVResponseWriter;
 import org.apache.solr.response.QueryResponseWriter;
+import org.apache.solr.response.RawResponseWriter;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.response.XSLTResponseWriter;
@@ -99,8 +107,7 @@ public class SolrSelectServlet extends HttpServlet {
         RESPONSE_WRITER.putAll(SolrCore.DEFAULT_RESPONSE_WRITERS);
         XSLTResponseWriter xsltWriter = new XSLTResponseWriter();
         OpensearchResponseWriter opensearchResponseWriter = new OpensearchResponseWriter();
-        @SuppressWarnings("rawtypes")
-        NamedList initArgs = new NamedList();
+        NamedList<?> initArgs = new NamedList<>();
         xsltWriter.init(initArgs);
         RESPONSE_WRITER.put("xslt", xsltWriter); // try i.e. http://localhost:8090/solr/select?q=*:*&start=0&rows=10&wt=xslt&tr=json.xsl
         RESPONSE_WRITER.put("exml", new EnhancedXMLResponseWriter());
@@ -218,6 +225,9 @@ public class SolrSelectServlet extends HttpServlet {
                     CollectionSchema.title.getSolrFieldName() + "," +
                     CollectionSchema.description_txt.getSolrFieldName() + "," +
                     CollectionSchema.id.getSolrFieldName() + "," +
+                    CollectionSchema.author.getSolrFieldName() + "," +
+                    CollectionSchema.publisher_t.getSolrFieldName() + "," +
+                    CollectionSchema.keywords.getSolrFieldName() + "," +
                     CollectionSchema.url_paths_sxt.getSolrFieldName() + "," +
                     CollectionSchema.last_modified.getSolrFieldName() + "," +
                     CollectionSchema.size_i.getSolrFieldName() + "," +
@@ -226,7 +236,7 @@ public class SolrSelectServlet extends HttpServlet {
             }
 
             // get the embedded connector
-            String requestURI = hrequest.getRequestURI();
+            final String requestURI = hrequest.getRequestURI();
             boolean defaultConnector = (requestURI.startsWith("/solr/" + WebgraphSchema.CORE_NAME)) ? false : requestURI.startsWith("/solr/" + CollectionSchema.CORE_NAME) || mmsp.get("core", CollectionSchema.CORE_NAME).equals(CollectionSchema.CORE_NAME);
             mmsp.getMap().remove("core");
             SolrConnector connector = defaultConnector ? sb.index.fulltext().getDefaultEmbeddedConnector() : sb.index.fulltext().getEmbeddedConnector(WebgraphSchema.CORE_NAME);
@@ -238,13 +248,13 @@ public class SolrSelectServlet extends HttpServlet {
             // add default queryfield parameter according to local ranking config (or defaultfield)
             if (ranking != null) { // ranking normally never null
                 final String qf = ranking.getQueryFields();
-                if (qf.length() > 4) { // make sure qf has content (else use df)
+                if (qf.length() > 4 && !mmsp.getMap().containsKey(DisMaxParams.QF)) { // make sure qf has content (else use df)
                     MultiMapSolrParams.addParam(DisMaxParams.QF, qf, mmsp.getMap()); // add QF that we set to be best suited for our index
                             // TODO: if every peer applies a decent QF itself, this can be reverted to getMap().put()
-                } else {
+                } else if(!mmsp.getMap().containsKey(CommonParams.DF)) {
                     mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
                 }
-            } else {
+            } else if(!mmsp.getMap().containsKey(CommonParams.DF)) {
                 mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
             }
 
@@ -252,6 +262,10 @@ public class SolrSelectServlet extends HttpServlet {
             final SolrQueryResponse rsp;
             if (connector instanceof EmbeddedSolrConnector) {
                 req = ((EmbeddedSolrConnector) connector).request(mmsp);
+                
+                /* Add the servlet request URI to the context for eventual computation of relative paths in writers */
+                req.getContext().put("requestURI", requestURI);
+                
                 rsp = ((EmbeddedSolrConnector) connector).query(req);
 
                 // prepare response
@@ -266,10 +280,19 @@ public class SolrSelectServlet extends HttpServlet {
                 }
                 
 
-                NamedList<?> values = rsp.getValues();
-                DocList r = ((ResultContext) values.get("response")).getDocList();
-                int numFound = r.matches();
-                AccessTracker.addToDump(querystring, numFound, new Date(), "sq");
+                final Object responseObj = rsp.getResponse();
+                if(responseObj instanceof ResultContext) {
+                	/* Regular response object */
+                	final DocList r = ((ResultContext) responseObj).getDocList();
+                    AccessTracker.addToDump(querystring, r.matches(), new Date(), "sq");
+                } else if(responseObj instanceof SolrDocumentList){
+					/*
+					 * The response object can be a SolrDocumentList when the response is partial,
+					 * for example when the allowed processing time has been exceeded
+					 */
+                	final SolrDocumentList r = (SolrDocumentList) responseObj;
+                    AccessTracker.addToDump(querystring, r.getNumFound(), new Date(), "sq");
+                }
                 
                 // write response header
                 final String contentType = responseWriter.getContentType(req, rsp);
@@ -288,16 +311,73 @@ public class SolrSelectServlet extends HttpServlet {
                     out.flush();
                 }
             } else {
-                // write a 'faked' response using a call to the backend
-                SolrDocumentList sdl = connector.getDocumentListByQuery(
-                        mmsp.getMap().get(CommonParams.Q)[0],
-                        mmsp.getMap().get(CommonParams.SORT) == null ? null : mmsp.getMap().get(CommonParams.SORT)[0],
-                        Integer.parseInt(mmsp.getMap().get(CommonParams.START)[0]),
-                        Integer.parseInt(mmsp.getMap().get(CommonParams.ROWS)[0]),
-                        mmsp.getMap().get(CommonParams.FL));
-                OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream());
-                EnhancedXMLResponseWriter.write(osw, req, sdl);
-                osw.close();
+				if (responseWriter instanceof EmbeddedSolrResponseWriter || responseWriter instanceof CSVResponseWriter
+						|| responseWriter instanceof XSLTResponseWriter || responseWriter instanceof RawResponseWriter) {
+					/* These writers need a non null req.getSearcher(), req.getSchema() and/or req.getCore() */
+					throw new ServletException("The writer " + responseWriter.getClass().getSimpleName() + " can only process responses from an embedded Solr server.");
+                } 
+            	
+            	QueryResponse queryRsp = connector.getResponseByParams(ModifiableSolrParams.of(mmsp));
+            	
+                /* Create SolrQueryRequestBase and SolrQueryResponse instances as these types are requited by Solr standard writers.
+                 * WARNING : the SolrQueryRequestBase instance will return null for the getSearcher(), getCore() and getSchema() functions.
+                 * Be sure thath the responseWriter instance can handle this properly.  */
+            	req = new SolrQueryRequestBase(null, mmsp) {};
+            	
+            	/* Add the servlet request URI to the context for eventual computation of relative paths in writers */
+            	req.getContext().put("requestURI", requestURI);
+            	
+            	rsp = new SolrQueryResponse();
+                rsp.setHttpCaching(false);
+                rsp.setAllValues(queryRsp.getResponse());
+                
+                if(!mmsp.getBool(CommonParams.OMIT_HEADER, false)) {
+                	NamedList<Object> responseHeader = rsp.getResponseHeader();
+                	if (responseHeader == null) {
+                		/* The remote Solr provided no response header ? Not likely to happen but let's add one */
+                		responseHeader = new SimpleOrderedMap<Object>();
+                		responseHeader.add("params", mmsp.toNamedList());
+                		rsp.addResponseHeader(responseHeader);
+                	} else {
+                		final int paramsIndex = responseHeader.indexOf("params", 0);
+                		if (paramsIndex >= 0) {
+                			/* Write this Solr servlet initial params to the response header and not the params sent to the remote Solr that differ a little (notably the wt param) */
+                			responseHeader.setVal(paramsIndex, mmsp.toNamedList());
+                		} else {
+                			responseHeader.add("params", mmsp.toNamedList());
+                		}
+                	}
+                }
+ 
+                // prepare response
+                hresponse.setHeader("Cache-Control", "no-cache, no-store");
+                
+                final SolrDocumentList documentsList = queryRsp.getResults();
+                long numFound = documentsList.getNumFound();
+                AccessTracker.addToDump(querystring, numFound, new Date(), "sq");
+                
+                // write response header
+                final String contentType = responseWriter.getContentType(req, rsp);
+                if (null != contentType) {
+                	response.setContentType(contentType);
+                }
+
+                if (Method.HEAD == reqMethod) {
+                    return;
+                }
+                
+                // write response body
+                if (responseWriter instanceof SolrjResponseWriter) {
+					out = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8);
+					((SolrjResponseWriter) responseWriter).write(out, req,
+							defaultConnector ? CollectionSchema.CORE_NAME : WebgraphSchema.CORE_NAME, queryRsp);
+                } else if(responseWriter instanceof BinaryResponseWriter) {
+               		((BinaryResponseWriter) responseWriter).write(response.getOutputStream(), req, rsp);
+               	} else {
+               		out = new FastWriter(new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8));
+               		responseWriter.write(out, req, rsp);
+               		out.flush();
+               	}
             }
         } catch (final Throwable ex) {
             sendError(hresponse, ex);
@@ -306,7 +386,14 @@ public class SolrSelectServlet extends HttpServlet {
                 req.close();
             }
             SolrRequestInfo.clearRequestInfo();
-            if (out != null) try {out.close();} catch (final IOException e1) {}
+            if (out != null) {
+				try {
+					out.close();
+				} catch (final IOException e1) {
+					ConcurrentLog.info("SolrSelect", "Could not close output writer."
+							+ (e1.getMessage() != null ? "Cause : " + e1.getMessage() : ""));
+				}
+            }
         }
     }
 

@@ -129,6 +129,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         script(TagType.pair),
         span(TagType.pair),
         div(TagType.pair),
+        nav(TagType.pair),
         article(TagType.pair), // html5
         time(TagType.pair), // html5 <time datetime>
         // tags used to capture tag content
@@ -145,6 +146,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         public String name;
         public Properties opts;
         public CharBuffer content;
+        
+        /** Set to true when this tag should be ignored from scraping */
+        private boolean ignore = false;
+        
         public Tag(final String name) {
             this.name = name;
             this.opts = new Properties();
@@ -174,6 +179,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         public String toString() {
             return "<" + name + " " + opts + ">" + content + "</" + name + ">";
         }
+        
+        /** @return true when this tag should be ignored from scraping */
+        public boolean isIgnore() {
+			return this.ignore;
+		}
+        
+        /**
+         * @param ignore true when this tag should be ignored from scraping
+         */
+        public void setIgnore(final boolean ignore) {
+			this.ignore = ignore;
+		}
     }
 
     // all these tags must be given in lowercase, because the tags from the files are compared in lowercase
@@ -191,6 +208,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final SizeLimitedMap<AnchorURL, EmbedEntry> embeds; // urlhash/embed relation
     private final List<ImageEntry> images; 
     private final SizeLimitedSet<AnchorURL> script, frames, iframes;
+    
+	/**
+	 * URLs of linked data item types referenced from HTML content with standard
+	 * annotations such as RDFa, microdata, microformats or JSON-LD
+	 */
+    private final SizeLimitedSet<DigestURL> linkedDataTypes;
+    
     private final SizeLimitedMap<String, String> metas;
     private final SizeLimitedMap<String, DigestURL> hreflang, navigation;
     private LinkedHashSet<String> titles;
@@ -209,6 +233,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final int maxAnchors;
     
     private final VocabularyScraper vocabularyScraper;
+    
+    /** Set of CSS class names whose matching div elements content should be ignored */
+    private final Set<String> ignoreDivClassNames;
+    
     private final int timezoneOffset;
     private int breadcrumbs;
 
@@ -237,17 +265,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @param root the document root url
      * @param maxAnchors the maximum number of URLs to process and store in the anchors property.
      * @param maxLinks the maximum number of links (other than a, area, and canonical and stylesheet links) to store
+     * @param ignoreDivClassNames an eventual set of CSS class names whose matching div elements content should be ignored
      * @param vocabularyScraper handles maps from class names to vocabulary names and from documents to a map from vocabularies to terms
      * @param timezoneOffset local time zone offset
      */
     @SuppressWarnings("unchecked")
-    public ContentScraper(final DigestURL root, final int maxAnchors, final int maxLinks, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
+    public ContentScraper(final DigestURL root, final int maxAnchors, final int maxLinks, final Set<String> ignoreDivClassNames, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         assert root != null;
         this.root = root;
         this.vocabularyScraper = vocabularyScraper;
+        this.ignoreDivClassNames = ignoreDivClassNames;
         this.timezoneOffset = timezoneOffset;
         this.evaluationScores = new Evaluation();
         this.rss = new SizeLimitedMap<DigestURL, String>(maxLinks);
@@ -258,6 +288,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.embeds = new SizeLimitedMap<AnchorURL, EmbedEntry>(maxLinks);
         this.frames = new SizeLimitedSet<AnchorURL>(maxLinks);
         this.iframes = new SizeLimitedSet<AnchorURL>(maxLinks);
+        this.linkedDataTypes = new SizeLimitedSet<>(maxLinks);
         this.metas = new SizeLimitedMap<String, String>(maxLinks);
         this.hreflang = new SizeLimitedMap<String, DigestURL>(maxLinks);
         this.navigation = new SizeLimitedMap<String, DigestURL>(maxLinks);
@@ -294,8 +325,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * @param vocabularyScraper handles maps from class names to vocabulary names and from documents to a map from vocabularies to terms
      * @param timezoneOffset local time zone offset
      */
-    public ContentScraper(final DigestURL root, final int maxLinks, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
-        this(root, Integer.MAX_VALUE, maxLinks, vocabularyScraper, timezoneOffset);
+    public ContentScraper(final DigestURL root, final int maxLinks, final Set<String> ignore_class_name, final VocabularyScraper vocabularyScraper, int timezoneOffset) {
+        this(root, Integer.MAX_VALUE, maxLinks, ignore_class_name, vocabularyScraper, timezoneOffset);
     }
 
     @Override
@@ -304,9 +335,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     @Override
-    public void scrapeText(final char[] newtext0, final String insideTag) {
-        // System.out.println("SCRAPE: " + UTF8.String(newtext));
-        if (insideTag != null && (TagName.script.name().equals(insideTag) || TagName.style.name().equals(insideTag))) return;
+    public void scrapeText(final char[] newtext0, final Tag insideTag) {
+        if (insideTag != null) {
+        	if(insideTag.ignore) {
+        		return;
+        	}
+			if ((TagName.script.name().equals(insideTag.name) || TagName.style.name().equals(insideTag.name))) {
+				return;
+			}
+        }
         int p, pl, q, s = 0;
         char[] newtext = CharacterCoding.html2unicode(new String(newtext0)).toCharArray();
         
@@ -367,7 +404,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         // find tags inside text
         String b = cleanLine(stripAllTags(newtext));
-        if ((insideTag != null) && (!(insideTag.equals("a")))) {
+        if ((insideTag != null) && (!(insideTag.name.equals(TagName.a.name())))) {
             // texts inside tags sometimes have no punctuation at the line end
             // this is bad for the text semantics, because it is not possible for the
             // condenser to distinguish headlines from text beginnings.
@@ -541,12 +578,49 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
     
-    private void checkOpts(Tag tag) {
+	/**
+	 * Parse the eventual microdata itemtype attribute of a tag and extract its
+	 * valid URL tokens when the itemscope attribute is present.
+	 * 
+	 * @param tagAttributes parsed HTML tag attributes.
+	 * @return a set of URLs eventually empty when no itemtype attribute is present
+	 *         or when its value is not valid
+	 * @see <a href="https://www.w3.org/TR/microdata/#dfn-itemtype">itemtype
+	 *      definition at W3C</a>
+	 * @see <a href=
+	 *      "https://html.spec.whatwg.org/multipage/microdata.html#attr-itemtype">itemtype
+	 *      definition at WHATWG</a>
+	 */
+	private Set<DigestURL> parseMicrodataItemType(final Properties tagAttributes) {
+		final Set<DigestURL> types = new HashSet<>();
+		if (tagAttributes != null) {
+			/*
+			 * The itemtype attribute must not be specified on elements that do not have an
+			 * itemscope attribute specified. So we lazily check here for itemscope boolean
+			 * attribute presence (strictly conforming parsing would also check it has no
+			 * value or the value is the empty string or "itemscope")
+			 */
+			if (tagAttributes.getProperty("itemscope") != null) {
+				final Set<String> itemTypes = parseSpaceSeparatedTokens(tagAttributes.getProperty("itemtype"));
+
+				for (final String itemType : itemTypes) {
+					try {
+						types.add(new DigestURL(itemType));
+					} catch (final MalformedURLException ignored) {
+						/* Each itemtype space-separated token must be a valid absolute URL */
+					}
+				}
+			}
+		}
+		return types;
+	}
+    
+    private void checkOpts(final Tag tag) {
         // vocabulary classes
         final String classprop = tag.opts.getProperty("class", EMPTY_STRING);
         this.vocabularyScraper.check(this.root, classprop, tag.content);
         
-        // itemprop (schema.org)
+        // itemprop microdata property (standard definition at https://www.w3.org/TR/microdata/#dfn-attr-itemprop)
         String itemprop = tag.opts.getProperty("itemprop");
         if (itemprop != null) {
             String propval = tag.opts.getProperty("content"); // value for <meta itemprop="" content=""> see https://html.spec.whatwg.org/multipage/microdata.html#values
@@ -618,7 +692,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 	 *            attribute string, may be null
 	 * @return a set of tokens eventually empty
 	 */
-	public static Set<String> parseSpaceSeparatedTokens(String attr) {
+	public static Set<String> parseSpaceSeparatedTokens(final String attr) {
 		Set<String> tokens = new HashSet<>();
 		/* Check attr string is not empty to avoid adding a single empty string
 		 * in result */
@@ -650,6 +724,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      */
     @Override
     public void scrapeTag0(final Tag tag) {
+    	if(tag.ignore) {
+    		return;
+    	}
         checkOpts(tag);
         if (tag.name.equalsIgnoreCase("img")) {
             final String src = tag.opts.getProperty("src", EMPTY_STRING);
@@ -814,6 +891,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      */
     @Override
     public void scrapeTag1(final Tag tag) {
+    	if(tag.ignore) {
+    		return;
+    	}
         checkOpts(tag);
         // System.out.println("ScrapeTag1: tag.tagname=" + tag.tagname + ", opts=" + tag.opts.toString() + ", text=" + UTF8.String(text));
         if (tag.name.equalsIgnoreCase("a") && tag.content.length() < 2048) {
@@ -835,12 +915,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         final String h;
         if (tag.name.equalsIgnoreCase("div")) {
-            final String id = tag.opts.getProperty("id", EMPTY_STRING);
-            this.evaluationScores.match(Element.divid, id);
-            final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
-            if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
-                breadcrumbs++;
-            }
+	       final String id = tag.opts.getProperty("id", EMPTY_STRING);
+	       this.evaluationScores.match(Element.divid, id);
+	       final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
+	       if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
+	    	   breadcrumbs++;
+	       }
         } else if ((tag.name.equalsIgnoreCase("h1")) && (tag.content.length() < 1024)) {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
             if (h.length() > 0) this.headlines[0].add(h);
@@ -914,6 +994,43 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // fire event
         this.fireScrapeTag1(tag.name, tag.opts, tag.content.getChars());
     }
+    
+	/**
+	 * Scraping operation applied to any kind of tag opening, being either singleton
+	 * or paired tag, not restricted to tags listed in
+	 * {@link ContentScraper#linkTags0} and {@link ContentScraper#linkTags1}.
+	 */
+	@Override
+	public void scrapeAnyTagOpening(final Tag tag) {
+		if (tag != null && !tag.ignore && tag.opts != null) {
+			/*
+			 * HTML microdata can be annotated on any kind of tag, so we don't restrict this
+			 * scraping to the limited sets in linkTags0 and linkTags1
+			 */
+			this.linkedDataTypes.addAll(parseMicrodataItemType(tag.opts));
+		}
+	}
+	
+	@Override
+	public boolean shouldIgnoreTag(final Tag tag, final Tag parentTag) {
+		boolean ignore = false;
+		
+        /* First, inherit ignore property from eventual parent */
+		if(parentTag != null) {
+			ignore = parentTag.ignore;
+		}
+		
+		/* Parent is not marked as ignored : let's check the current tag */
+		if (!ignore &&
+		        this.ignoreDivClassNames != null &&
+		        tag != null &&
+		        (TagName.div.name().equals(tag.name) || TagName.nav.name().equals(tag.name))) {
+			final String classAttr = tag.opts.getProperty("class", EMPTY_STRING);
+			final Set<String> classes = ContentScraper.parseSpaceSeparatedTokens(classAttr);
+			ignore = !Collections.disjoint(this.ignoreDivClassNames, classes);
+		}
+		return ignore;
+	}
     
     /**
      * Add an anchor to the anchors list, and trigger any eventual listener
@@ -1084,6 +1201,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // returns a url (String) / name (String) relation
         return this.iframes;
     }
+    
+	/**
+	 * @return URLs of linked data item types referenced from HTML content with standard
+	 *         annotations such as RDFa, microdata, microformats or JSON-LD
+	 */
+	public SizeLimitedSet<DigestURL> getLinkedDataTypes() {
+		return this.linkedDataTypes;
+	}
 
     public Set<AnchorURL> getScript() {
         return this.script;
@@ -1156,7 +1281,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 		return this.contentSizeLimitExceeded || this.maxAnchorsExceeded || this.css.isLimitExceeded()
 				|| this.rss.isLimitExceeded() || this.embeds.isLimitExceeded() || this.metas.isLimitExceeded()
 				|| this.hreflang.isLimitExceeded() || this.navigation.isLimitExceeded() || this.script.isLimitExceeded()
-				|| this.frames.isLimitExceeded() || this.iframes.isLimitExceeded();
+				|| this.frames.isLimitExceeded() || this.iframes.isLimitExceeded() || this.linkedDataTypes.isLimitExceeded();
 	}
     
     /*
@@ -1376,6 +1501,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.script.clear();
         this.frames.clear();
         this.iframes.clear();
+        this.linkedDataTypes.clear();
         this.embeds.clear();
         this.images.clear();
         this.icons.clear();
@@ -1477,14 +1603,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (page == null) throw new IOException("no content in file " + file.toString());
 
         // scrape document to look up charset
-        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), StandardCharsets.UTF_8.name(), new VocabularyScraper(), new DigestURL("http://localhost"), null, false, maxLinks, timezoneOffset);
+        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page), StandardCharsets.UTF_8.name(), new HashSet<String>(), new VocabularyScraper(), new DigestURL("http://localhost"), false, maxLinks, timezoneOffset);
         String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         htmlFilter.close();
         if (charset == null) charset = Charset.defaultCharset().toString();
 
         // scrape content
-        final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost"), maxLinks, new VocabularyScraper(), timezoneOffset);
-        final Writer writer = new TransformerWriter(null, null, scraper, null, false);
+        final ContentScraper scraper = new ContentScraper(new DigestURL("http://localhost"), maxLinks, new HashSet<String>(), new VocabularyScraper(), timezoneOffset);
+        final Writer writer = new TransformerWriter(null, null, scraper, false);
         FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
         writer.close();
         return scraper;

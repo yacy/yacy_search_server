@@ -25,9 +25,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
@@ -48,9 +52,12 @@ public class IndexExport_p {
         prop.put("otherHosts", "");
         prop.put("reload", 0);
         prop.put("indexdump", 0);
+        prop.put("indexRestore", 0);
         prop.put("lurlexport", 0);
         prop.put("reload", 0);
         prop.put("dumprestore", 1);
+		prop.put("dumprestore_dumpRestoreEnabled", sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
+				SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT));
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
         prop.put("dumprestore_optimizemax", 10);
@@ -132,17 +139,34 @@ public class IndexExport_p {
         }
 
         if (post.containsKey("indexdump")) {
-            final File dump = segment.fulltext().dumpSolr();
-            prop.put("indexdump", 1);
-            prop.put("indexdump_dumpfile", dump.getAbsolutePath());
-            dumpFiles =  segment.fulltext().dumpFiles();
-            prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
-            //sb.tables.recordAPICall(post, "IndexExport_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr dump generation");
+        	try {
+        		final File dump = segment.fulltext().dumpEmbeddedSolr();
+        		prop.put("indexdump", 1);
+        		prop.put("indexdump_dumpfile", dump.getAbsolutePath());
+        		dumpFiles =  segment.fulltext().dumpFiles();
+        		prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
+        		// sb.tables.recordAPICall(post, "IndexExport_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr dump generation");
+        	} catch(final SolrException e) {
+        		if(ErrorCode.SERVICE_UNAVAILABLE.code == e.code()) {
+        			prop.put("indexdump", 2);
+        		} else {
+        			prop.put("indexdump", 3);
+        		}
+        	}
         }
 
         if (post.containsKey("indexrestore")) {
-            final File dump = new File(post.get("dumpfile", ""));
-            segment.fulltext().restoreSolr(dump);
+        	try {
+        		final File dump = new File(post.get("dumpfile", ""));
+        		segment.fulltext().restoreEmbeddedSolr(dump);
+        		prop.put("indexRestore", 1);
+        	} catch(final SolrException e) {
+        		if(ErrorCode.SERVICE_UNAVAILABLE.code == e.code()) {
+        			prop.put("indexRestore", 2);
+        		} else {
+        			prop.put("indexRestore", 3);
+        		}
+        	}
         }
 
         // insert constants

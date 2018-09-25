@@ -30,6 +30,7 @@
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -48,7 +49,6 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.gui.Audio;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -116,6 +116,7 @@ public final class search {
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "all");
+        final boolean strictContentDom = post.getBoolean("strictContentDom");
         final String  filter = post.get("filter", ".*"); // a filter on the url
         final int timezoneOffset = post.getInt("timezoneOffset", 0);
         QueryModifier modifier = new QueryModifier(timezoneOffset);
@@ -255,6 +256,7 @@ public final class search {
                     0.0d,
                     new String[0]
                     );
+            theQuery.setStrictContentDom(strictContentDom);
             Network.log.info("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
 
             final long timer = System.currentTimeMillis();
@@ -319,6 +321,7 @@ public final class search {
                     0.0d,
                     new String[0]
                     );
+            theQuery.setStrictContentDom(strictContentDom);
             Network.log.info("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
             EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()), ""));
             if (sb.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.remotesearch.play(-10.0f);
@@ -365,7 +368,7 @@ public final class search {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
                     indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsMaxCountHash());
                     indexabstract.append("indexabstract.").append(ASCII.String(theSearch.getAbstractsMaxCountHash())).append("=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
-                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(ByteBuffer.equals(theSearch.getAbstractsNearDHTHash(), theSearch.getAbstractsMaxCountHash())))) {
+                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(Arrays.equals(theSearch.getAbstractsNearDHTHash(), theSearch.getAbstractsMaxCountHash())))) {
                         // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
                         indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsNearDHTHash());
                         indexabstract.append("indexabstract.").append(ASCII.String(theSearch.getAbstractsNearDHTHash())).append("=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);

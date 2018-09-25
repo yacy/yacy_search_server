@@ -46,6 +46,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
@@ -66,6 +67,7 @@ import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.cora.sorting.ScoreMap;
+import net.yacy.cora.sorting.ScoreMapUpdatesListener;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.Element;
 import net.yacy.cora.sorting.WeakPriorityBlockingQueue.ReverseElement;
@@ -87,7 +89,6 @@ import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.Bitfield;
-import net.yacy.kelondro.util.ISO639;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.RemoteSearch;
@@ -108,7 +109,7 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.snippet.TextSnippet;
 import net.yacy.search.snippet.TextSnippet.ResultClass;
 
-public final class SearchEvent {
+public final class SearchEvent implements ScoreMapUpdatesListener {
 	
 	/** Supported protocols to be displayed in the protocol navigator.
 	 * (Using here a single String constant is faster than a unmodifiable Set instance) */
@@ -166,9 +167,6 @@ public final class SearchEvent {
     /** a counter for file types */
     public final ConcurrentScoreMap<String> dateNavigator;
     
-    /** a counter for appearance of languages */
-    public final ScoreMap<String> languageNavigator;
-    
     /** counters for Vocabularies; key is metatag.getVocabularyName() */
     public final Map<String, ScoreMap<String>> vocabularyNavigator;
     
@@ -178,10 +176,15 @@ public final class SearchEvent {
     /** map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms) */
     public final Map<String, Navigator> navigatorPlugins;
     
+	/** Holds the total number of successful write operations performed on all the active navigators since their initialization. */
+	private final AtomicLong navGeneration = new AtomicLong();
+    
     private final LoaderDispatcher                        loader;
     
     /** a set of word hashes that are used to match with the snippets */
     private final HandleSet                               snippetFetchWordHashes;
+    /** a set of words that are used to match with the snippets */
+    private final Set<String>                             snippetFetchWords;
     private final boolean                                 deleteIfSnippetFail;
     private long                                          urlRetrievalAllTime;
     private long                                          snippetComputationAllTime;
@@ -263,6 +266,15 @@ public final class SearchEvent {
     
     /** Ensure only one {@link #resortCachedResults()} operation to be performed on this search event */
     public final Semaphore resortCacheAllowed;
+
+	/**
+	 * Called when a search navigator has been updated : update the overall
+	 * navGeneration counter to help then tracking changes and eventually refresh the yacysearchtrailer.
+	 */
+	@Override
+	public void updatedScoreMap() {
+		this.navGeneration.incrementAndGet();
+	}
     
     /**
      * @return the total number of results currently available and filtered (checking doubles and eventual query constraints/modifiers) from the different data sources 
@@ -274,6 +286,13 @@ public final class SearchEvent {
                 imageViewed.size() + sizeSpare()
                );
     }
+    
+    /**
+     * @return the total number of successful write operations performed on all the active navigators since their initialization.
+     */
+    public long getNavGeneration() {
+		return this.navGeneration.get();
+	}
     
     /**
      * Set maximum size allowed (in kbytes) for a remote document result to be stored to local index.
@@ -335,14 +354,18 @@ public final class SearchEvent {
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
         // prepare configured search navigation
         final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
-        this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>() : null;
-        this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>() : null;
-        this.dateNavigator = navcfg.contains("date") ? new ConcurrentScoreMap<String>() : null;
+        this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>(this) : null;
+        this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>(this) : null;
+        this.dateNavigator = navcfg.contains("date") ? new ConcurrentScoreMap<String>(this) : null;
         this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
-        this.languageNavigator = navcfg.contains("language") ? new ConcurrentScoreMap<String>() : null;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
         // prepare configured search navigation (plugins)
         this.navigatorPlugins = NavigatorPlugins.initFromCfgString(navcfg);
+        if(this.navigatorPlugins != null) {
+        	for(final Navigator nav : this.navigatorPlugins.values()) {
+        		nav.setUpdatesListener(this);
+        	}
+        }
 
         this.snippets = new ConcurrentHashMap<String, LinkedHashSet<String>>(); 
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
@@ -378,7 +401,7 @@ public final class SearchEvent {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchInclusion = null;
-        this.ref = new ConcurrentScoreMap<String>();
+        this.ref = new ConcurrentScoreMap<String>(this);
         this.maxtime = query.maxtime;
         this.rwiStack = new WeakPriorityBlockingQueue<WordReferenceVars>(max_results_rwi, false);
         this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
@@ -402,7 +425,7 @@ public final class SearchEvent {
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
         	final boolean useSolrFacets = true;
 			this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
-					this.query.solrQuery(this.query.contentdom, useSolrFacets, this.excludeintext_image), this.query.offset,
+					this.query.solrQuery(this.query.contentdom, this.query.isStrictContentDom(), useSolrFacets, this.excludeintext_image), this.query.offset,
 					this.query.itemsPerPage, null /* this peer */, 0, Switchboard.urlBlacklist, useSolrFacets, true);
         }
         this.localsolroffset = this.query.offset + this.query.itemsPerPage;
@@ -428,11 +451,9 @@ public final class SearchEvent {
                 // start this concurrently because the remote search needs an enumeration
                 // of the remote peers which may block in some cases when i.e. DHT is active
                 // at the same time.
-                new Thread() {
+                new Thread("SearchEvent.primaryRemoteSearches") {
                     @Override
                     public void run() {
-                        this.setName("SearchEvent.init(" + query.getQueryGoal().getQueryString(false) + ")");
-                        Thread.currentThread().setName("SearchEvent.primaryRemoteSearches");
                         RemoteSearch.primaryRemoteSearches(
                         	SearchEvent.this,
                             0, remote_maxcount,
@@ -510,7 +531,7 @@ public final class SearchEvent {
         this.resultList = new WeakPriorityBlockingQueue<URIMetadataNode>(Math.max(max_results_node, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
 
         // snippets do not need to match with the complete query hashes,
-        // only with the query minus the stopwords which had not been used for the search       
+        // only with the query minus the stopwords which had not been used for the search 
         boolean filtered = false;
         // check if query contains stopword
         if (Switchboard.stopwordHashes != null) {
@@ -526,6 +547,10 @@ public final class SearchEvent {
         if (filtered) { // remove stopwords
             this.snippetFetchWordHashes.excludeDestructive(Switchboard.stopwordHashes);
         }
+        
+        this.snippetFetchWords = query.getQueryGoal().getIncludeWordsSet();
+        // remove stopwords
+        this.snippetFetchWords.removeAll(Switchboard.stopwords);
 
         // clean up events
         SearchEventCache.cleanupEvents(false);
@@ -708,13 +733,27 @@ public final class SearchEvent {
                 }
 
                 // check document domain
-                if (this.query.contentdom.getCode() > 0 &&
-                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
-                     (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
-                     (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
-                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp))))) {
-                    if (log.isFine()) log.fine("dropped RWI: contentdom fail");
-                    continue pollloop;
+                if (this.query.contentdom.getCode() > 0) {
+                	boolean domainMatch = true;
+                	if(this.query.isStrictContentDom()) {
+                		if((this.query.contentdom == ContentDomain.AUDIO && iEntry.getType() != Response.DT_AUDIO) || 
+                                (this.query.contentdom == ContentDomain.VIDEO && iEntry.getType() != Response.DT_MOVIE) ||
+                                (this.query.contentdom == ContentDomain.IMAGE && iEntry.getType() != Response.DT_IMAGE) ||
+                                (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
+                                	domainMatch = false;    	
+                                }
+                	} else if((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
+                                (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
+                                (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
+                                (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
+                			domainMatch = false;
+                	}
+                	if(!domainMatch) {
+                		if (log.isFine()) {
+                			log.fine("dropped RWI: contentdom fail");
+                		}
+                		continue pollloop;
+                	}
                 }
                 
                 // check language
@@ -758,14 +797,6 @@ public final class SearchEvent {
                 }
                 // increase counter for statistics
                 if (local) this.local_rwi_available.incrementAndGet(); else this.remote_rwi_available.incrementAndGet();
-                
-                /* Fisrt filtering pass is now complete : update navigator counters that can already be updated */
-                if(this.languageNavigator != null) {
-                	final String lang = iEntry.getLanguageString();
-                	if(ISO639.exists(lang)) {
-                		this.languageNavigator.inc(lang);
-                	}
-                }
                 
                 successcounter++;
             }
@@ -937,8 +968,18 @@ public final class SearchEvent {
         try {
             pollloop: for (URIMetadataNode iEntry: nodeList) {
             	
-                if ( !this.query.urlMask_isCatchall ) {
-                    // check url mask
+                // check url related eventual constraints (protocol, tld, sitehost, and filetype)
+            	final String matchingResult = QueryParams.matchesURL(this.query.modifier, this.query.tld, iEntry.url());
+                if (!matchingResult.isEmpty()) {
+                    if (log.isFine()) {
+                    	log.fine("dropped Node: " + matchingResult);
+                    }
+                    updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
+                    continue pollloop;
+                }
+            	
+                if ( !this.query.urlMask_isCatchall && this.query.urlMaskPattern != null) {
+                    // check url mask, only when not redundant with query modifier and tld constraints
                     if (!iEntry.matches(this.query.urlMaskPattern)) {
                         if (log.isFine()) log.fine("dropped Node: url mask does not match");
                         updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
@@ -967,14 +1008,25 @@ public final class SearchEvent {
                 }
 
                 // check document domain
-                if (this.query.contentdom.getCode() > 0 &&
-                    ((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
+                if (this.query.contentdom.getCode() > 0) {
+                	boolean domainMatch = true;
+                	if(this.query.isStrictContentDom()) {
+                        if(this.query.contentdom != iEntry.getContentDomain()) {
+                        	domainMatch = false;
+                        }
+                	} else if((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
                      (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
                      (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
-                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp))))) {
-                    if (log.isFine()) log.fine("dropped Node: content domain does not match");
-                    updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
-                    continue pollloop;
+                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
+                		domainMatch = false;
+                    }
+                	if(!domainMatch) {
+                		if (log.isFine()) {
+                			log.fine("dropped Node: content domain does not match");
+                		}
+                		updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
+                		continue pollloop;
+                	}
                 }
                 
                 // filter out media links in text search, if wanted
@@ -990,13 +1042,6 @@ public final class SearchEvent {
                 if ( this.query.modifier.sitehash == null ) {
                     if (this.query.siteexcludes != null && this.query.siteexcludes.contains(hosthash)) {
                         if (log.isFine()) log.fine("dropped Node: siteexclude");
-                        updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
-                        continue pollloop;
-                    }
-                } else {
-                    // filter out all domains that do not match with the site constraint
-                    if (iEntry.url().getHost().indexOf(this.query.modifier.sitehost) < 0) {
-                        if (log.isFine()) log.fine("dropped Node: sitehost");
                         updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                         continue pollloop;
                     }
@@ -1093,21 +1138,6 @@ public final class SearchEvent {
 				if (fcts != null) this.dateNavigator.inc(fcts);
 			}
 
-			if (this.languageNavigator != null) {
-				fcts = facets.get(CollectionSchema.language_s.getSolrFieldName());
-				if (fcts != null) {
-					// remove unknown languages
-					Iterator<String> i = fcts.iterator();
-					while (i.hasNext()) {
-						String lang = i.next();
-						if (!ISO639.exists(lang)) {
-							i.remove();
-						}
-					}
-					this.languageNavigator.inc(fcts);
-				}
-			}
-
 			if (this.protocolNavigator != null) {
 				fcts = facets.get(CollectionSchema.url_protocol_s.getSolrFieldName());
 				if (fcts != null) {
@@ -1173,17 +1203,6 @@ public final class SearchEvent {
 			}
 		}
 
-		if (this.languageNavigator != null) {
-			if (facets == null || !facets.containsKey(CollectionSchema.language_s.getSolrFieldName())) {
-				final String lang = doc.language();
-				if (ISO639.exists(lang)) {
-					this.languageNavigator.inc(lang);
-				}
-
-			}
-		}
-		
-
 		if (this.protocolNavigator != null) {
 			if (facets == null || !facets.containsKey(CollectionSchema.url_protocol_s.getSolrFieldName())) {
 				final String protocol = doc.url().getProtocol();
@@ -1204,27 +1223,37 @@ public final class SearchEvent {
 			for (String vocName : genericFacets) {
 				final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName + CollectionSchema.VOCABULARY_TERMS_SUFFIX;
 				if (facets == null || !facets.containsKey(fieldName)) {
-					Object docValue = doc.getFieldValue(fieldName);
-					if(docValue instanceof String) {
-						ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
-						if (vocNav == null) {
-							vocNav = new ConcurrentScoreMap<String>();
-							this.vocabularyNavigator.put(vocName, vocNav);
-						}
-						vocNav.inc((String)docValue);
-					} else if(docValue instanceof Collection) {
-						if (!((Collection<?>) docValue).isEmpty()) {
-							ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
-							if (vocNav == null) {
-								vocNav = new ConcurrentScoreMap<String>();
-								this.vocabularyNavigator.put(vocName, vocNav);
-							}
-							for (Object singleDocValue : (Collection<?>) docValue) {
-								if (singleDocValue instanceof String) {
-									vocNav.inc((String) singleDocValue);
-								}
-							}
-						}
+					incrementVocNavigator(doc, vocName, fieldName);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Increment a vocabulary navigator with the given document
+	 * @param doc a document entry. Must not be null.
+	 * @param vocName the name of the vocabulary. Must not be null.
+	 * @param fieldName the name of the field eventually holding the vocabulary information in the document entry
+	 */
+	protected void incrementVocNavigator(final URIMetadataNode doc, final String vocName, final String fieldName) {
+		final Object docValue = doc.getFieldValue(fieldName);
+		if(docValue instanceof String) {
+			ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+			if (vocNav == null) {
+				vocNav = new ConcurrentScoreMap<String>();
+				this.vocabularyNavigator.put(vocName, vocNav);
+			}
+			vocNav.inc((String)docValue);
+		} else if(docValue instanceof Collection) {
+			if (!((Collection<?>) docValue).isEmpty()) {
+				ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+				if (vocNav == null) {
+					vocNav = new ConcurrentScoreMap<String>();
+					this.vocabularyNavigator.put(vocName, vocNav);
+				}
+				for (final Object singleDocValue : (Collection<?>) docValue) {
+					if (singleDocValue instanceof String) {
+						vocNav.inc((String) singleDocValue);
 					}
 				}
 			}
@@ -1367,8 +1396,20 @@ public final class SearchEvent {
         // returns from the current RWI list the best URL entry and removes this entry from the list
         URIMetadataNode page;
         mainloop: while ((page = pullOneRWI(skipDoubleDom)) != null) {
+        	
+            // check url related eventual constraints (protocol, tld, sitehost, and filetype)
+        	final String matchingResult = QueryParams.matchesURL(this.query.modifier, this.query.tld, page.url());
+            if (!matchingResult.isEmpty()) {
+                if (log.isFine()) {
+                	log.fine("dropped RWI: no match on " + matchingResult);
+                }
+                decrementCounts(page.word());
+                continue;
+            }
 
-            if (!this.query.urlMask_isCatchall && !page.matches(this.query.urlMaskPattern)) {
+			if (!this.query.urlMask_isCatchall && this.query.urlMaskPattern != null
+					&& !page.matches(this.query.urlMaskPattern)) {
+            	// check url mask, only when not redundant with query modifier and tld constraints
                 if (log.isFine()) log.fine("dropped RWI: no match with urlMask");
                 decrementCounts(page.word());
                 continue;
@@ -1401,14 +1442,6 @@ public final class SearchEvent {
             }
 
             // filter query modifiers variables (these are host, filetype, protocol, language, author, collection, dates_in_content(on,from,to,timezone) )
-            // while ( protocol, host, filetype ) currently maybe incorporated in (this.query.urlMaskPattern)  queryparam
-
-            // check modifier constraint filetype (using fileextension)
-            if (this.query.modifier.filetype != null && !this.query.modifier.filetype.equals(ext)) {
-                if (log.isFine()) log.fine("dropped RWI: file type constraint = " + this.query.modifier.filetype);
-                decrementCounts(page.word());
-                continue;
-            }
 
             /* check again modifier constraint (language) with the language in the full metadata, 
              * that may differ from the one in the reverse word reference which is already checked in addRWIs()*/
@@ -1454,12 +1487,12 @@ public final class SearchEvent {
 
             // content control
             if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false)) {
-		FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
-		if (f != null && !f.isListed(page.url(), null)) {
+            	FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
+            	if (f != null && !f.isListed(page.url(), null)) {
                     if (log.isFine()) log.fine("dropped RWI: url is blacklisted in contentcontrol");
-	            decrementCounts(page.word());
+                    decrementCounts(page.word());
                     continue;
-		}
+            	}
             }
 
             final String pageurl = page.url().toNormalform(true);
@@ -1537,17 +1570,6 @@ public final class SearchEvent {
                 }
             }
             
-            if(this.languageNavigator != null) {
-            	if(page.word() == null || page.word().getLanguageString() == null) {
-            		/* Increase the language navigator here only if the word reference 
-            		 * did not include information about language. Otherwise it should be done earlier in addRWIs() */
-            		final String lang = page.language();
-            		if(ISO639.exists(lang)) {
-            			this.languageNavigator.inc(lang);
-            		}
-            	}
-            }
-            
             if(this.protocolNavigator != null && page.url() != null) {
             	final String protocol = page.url().getProtocol();
             	if(protocol != null) {
@@ -1565,6 +1587,20 @@ public final class SearchEvent {
 					}
 				}
             }
+            
+    		// handle the vocabulary navigator
+			if (this.vocabularyNavigator != null) {
+				Set<String> genericFacets = new LinkedHashSet<>();
+				for (Tagging v : LibraryProvider.autotagging.getVocabularies()) {
+					genericFacets.add(v.getName());
+				}
+				genericFacets.addAll(ProbabilisticClassifier.getContextNames());
+				for (final String vocName : genericFacets) {
+					final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName
+							+ CollectionSchema.VOCABULARY_TERMS_SUFFIX;
+					incrementVocNavigator(page, vocName, fieldName);
+				}
+			}
 
             return page; // accept url
         }
@@ -1586,14 +1622,6 @@ public final class SearchEvent {
 		} else {
 			if(this.remote_rwi_available.get() > 0) {
 				this.remote_rwi_available.decrementAndGet();
-			}
-		}
-		
-		/* The language navigator may have been incremented in the addRWIs() function */
-		if (this.languageNavigator != null) {
-			String lang = entry.getLanguageString();
-			if (lang != null && this.languageNavigator.get(lang) > 0) {
-				this.languageNavigator.dec(lang);
 			}
 		}
 	}
@@ -1682,22 +1710,6 @@ public final class SearchEvent {
 								this.dateNavigator.dec(dateStr);
 							}
 						}
-					}
-				}
-			}
-		}
-
-		if (this.languageNavigator != null) {
-			if (navIncrementedWithFacets) {
-				fcts = facets.get(CollectionSchema.language_s.getSolrFieldName());
-			} else {
-				fcts = null;
-			}
-			String lang = entry.language();
-			if (lang != null) {
-				if (navIncrementedEarlier || (fcts != null && fcts.containsKey(lang))) {
-					if (this.languageNavigator.get(lang) > 0) {
-						this.languageNavigator.dec(lang);
 					}
 				}
 			}
@@ -1866,9 +1878,10 @@ public final class SearchEvent {
             LinkedHashSet<String> solrsnippetlines = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
             if (solrsnippetlines != null && solrsnippetlines.size() > 0) {
                 OpensearchResponseWriter.removeSubsumedTitle(solrsnippetlines, node.dc_title());
-                final TextSnippet solrsnippet = new TextSnippet(node.hash(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_CACHE, "");
+                final TextSnippet solrsnippet = new TextSnippet(node.url(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_SOLR, "");
                 final TextSnippet yacysnippet = new TextSnippet(this.loader,
                         node,
+                        this.query.getQueryGoal().getIncludeWordsSet(),
                         this.query.getQueryGoal().getIncludeHashes(),
                         CacheStrategy.CACHEONLY,
                         false,
@@ -1992,6 +2005,7 @@ public final class SearchEvent {
             final TextSnippet snippet = new TextSnippet(
                     null,
                     page,
+                    this.snippetFetchWords,
                     this.snippetFetchWordHashes,
                     null,
                     ((this.query.constraint != null) && (this.query.constraint.get(Tokenizer.flag_cat_indexof))),
@@ -2008,6 +2022,7 @@ public final class SearchEvent {
             final TextSnippet snippet = new TextSnippet(
                     this.loader,
                     page,
+                    this.snippetFetchWords,
                     this.snippetFetchWordHashes,
                     cacheStrategy,
                     ((this.query.constraint != null) && (this.query.constraint.get(Tokenizer.flag_cat_indexof))),
@@ -2024,7 +2039,7 @@ public final class SearchEvent {
                 return page.makeResultEntry(this.query.getSegment(), this.peers, null); // result without snippet
             } else {
                 // problems with snippet fetch
-                if (this.snippetFetchWordHashes.has(Segment.catchallHash)) {
+                if (this.snippetFetchWords.contains(Segment.catchallString)) {
                     // we accept that because the word cannot be on the page
                     return page.makeResultEntry(this.query.getSegment(), this.peers, null);
                 }
@@ -2080,7 +2095,7 @@ public final class SearchEvent {
 				final boolean useSolrFacets = (this.localsolrsearch == null);
 				final boolean incrementNavigators = false;
 				this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
-						this.query.solrQuery(this.query.contentdom, useSolrFacets, this.excludeintext_image),
+						this.query.solrQuery(this.query.contentdom, this.query.isStrictContentDom(), useSolrFacets, this.excludeintext_image),
 						this.localsolroffset, nextitems, null /* this peer */, 0, Switchboard.urlBlacklist, useSolrFacets, incrementNavigators);
 			}
 			this.localsolroffset += nextitems;
@@ -2171,7 +2186,7 @@ public final class SearchEvent {
         return null;
     }
     
-    public ImageResult oneImageResult(final int item, final long timeout) throws MalformedURLException {
+    public ImageResult oneImageResult(final int item, final long timeout, final boolean strictContentDom) throws MalformedURLException {
         if (item < imageViewed.size()) return nthImage(item);
         if (imageSpareGood.size() > 0) return nextSpare(); // first put out all good spare, but no bad spare
         URIMetadataNode doc = oneResult(imagePageCounter++, timeout); // we must use a different counter here because the image counter can be higher when one page filled up several spare
@@ -2200,7 +2215,7 @@ public final class SearchEvent {
                     if (!imageViewed.containsKey(id) && !containsSpare(id)) imageSpareGood.put(id, new ImageResult(doc.url(), doc.url(), doc.mime(), doc.title(), w, h, 0));
                 }
             }
-        } else {
+        } else if(!strictContentDom) {
             Collection<Object> altO = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
             Collection<Object> imgO = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
             if (imgO != null && imgO.size() > 0 && imgO instanceof List<?>) {

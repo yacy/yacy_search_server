@@ -64,7 +64,7 @@ public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
 
         String refererHost;
         // update AccessTracker
-        final String remoteip = request.getRemoteAddr();
+        final String remoteip = RequestHeader.client(request);
         serverAccessTracker.track(remoteip, pathInContext);
         
         try {

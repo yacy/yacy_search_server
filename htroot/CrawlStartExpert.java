@@ -28,13 +28,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.solr.core.SolrCore;
+
+import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.Html2Image;
 import net.yacy.crawler.data.CrawlProfile;
+import net.yacy.crawler.data.CrawlProfile.CrawlAttribute;
 import net.yacy.document.LibraryProvider;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -47,9 +52,11 @@ public class CrawlStartExpert {
         final serverObjects prop = new serverObjects();
         final String defaultCollection = "user";
 
-        // javascript values
+        // javascript constants
         prop.put("matchAllStr", CrawlProfile.MATCH_ALL_STRING);
         prop.put("matchNoneStr", CrawlProfile.MATCH_NEVER_STRING);
+        prop.put("solrQueryMatchAllStr", CrawlProfile.SOLR_MATCH_ALL_QUERY);
+        prop.put("solrEmptyQueryStr", CrawlProfile.SOLR_EMPTY_QUERY);
         prop.put("defaultCollection", defaultCollection);
 
         // ---------- Start point
@@ -299,6 +306,45 @@ public class CrawlStartExpert {
         } else {
             prop.put("indexcontentmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         }
+        
+		// Filter on Media Type of Document: must match
+		if (post != null && post.containsKey(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key)) {
+			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key,
+					post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
+		} else {
+			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING);
+		}
+
+		// Filter on Media Type of Document: must-not-match
+		if (post != null && post.containsKey(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key)) {
+			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key,
+					post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
+		} else {
+			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
+		}
+		
+		// Filter with a Solr syntax query
+		/* Check that the embedded local Solr index is connected, as its schema is required to apply the eventual Solr filter query */
+		final EmbeddedInstance embeddedSolr = sb.index.fulltext().getEmbeddedInstance();
+		final SolrCore embeddedCore = embeddedSolr != null ? embeddedSolr.getDefaultCore() : null;
+		final boolean embeddedSolrConnected = embeddedSolr != null && embeddedCore != null;
+		prop.put("embeddedSolrConnected", embeddedSolrConnected);
+		
+		if(embeddedSolrConnected) {
+			if (post != null && post.containsKey(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key)) {
+				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key,
+						post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY).trim());
+			} else {
+				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY);
+			}
+			
+			if (post != null && post.containsKey(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key)) {
+				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key,
+						post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY).trim());
+			} else {
+				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY);
+			}
+		}
 
 
         // ---------- Clean-Up before Crawl Start
@@ -363,6 +409,19 @@ public class CrawlStartExpert {
             }
         } else {
             prop.put("deleteIfOlderUnitSelect_list_2_default", 1);
+        }
+        
+        
+        // clean up search events cache ?
+        if (post != null && post.containsKey("cleanSearchCache")) {
+        	prop.put("cleanSearchCacheChecked", post.getBoolean("cleanSearchCache"));
+        } else {
+			/*
+			 * no parameter passed : the checkbox is proposed unchecked
+			 * when JavaScript search resort is enabled, as it heavily relies on search events cache
+			 */
+			prop.put("cleanSearchCacheChecked", !sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT,
+					SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT));
         }
 
         // delete any document before the crawl is started?
@@ -513,6 +572,14 @@ public class CrawlStartExpert {
         }
         prop.put("agentSelect_defaultAgentName", ClientIdentification.yacyInternetCrawlerAgentName);
 
+        // ---------- Ignore Class Name
+        if (post != null && post.containsKey("ignoreclassname")) {
+            prop.put("ignoreclassname", 
+                    post.get("ignoreclassname", ""));
+        } else {
+            prop.put("ignoreclassname", "");
+        }
+        
         // ---------- Enrich Vocabulary
         Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
         if (vocs.size() == 0) {
@@ -553,7 +620,10 @@ public class CrawlStartExpert {
             // Do Remote Indexing?
             if (sb.isP2PMode()) {
                 prop.put("remoteindexing", 1);
-                prop.put("remoteindexing_crawlOrderChecked", env.getConfigBool("crawlOrder", true) ? 1 : 0);
+				prop.put("remoteindexing_remoteCrawlerDisabled",
+						!sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
+				prop.put("remoteindexing_remoteCrawlerDisabled_crawlOrderChecked", env.getConfigBool("crawlOrder", true));
+                prop.put("remoteindexing_crawlOrderChecked", env.getConfigBool("crawlOrder", true));
                 prop.put("remoteindexing_intention", "");
             } else {
                 prop.put("remoteindexing", 0);
@@ -565,7 +635,10 @@ public class CrawlStartExpert {
                     post.getBoolean("indexMedia") ? 1 : 0);
             if (sb.isP2PMode()) {
                 prop.put("remoteindexing", 1);
-                prop.put("remoteindexing_crawlOrderChecked", post.getBoolean("crawlOrder") ? 1 : 0);
+				prop.put("remoteindexing_remoteCrawlerDisabled",
+						!sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
+				prop.put("remoteindexing_remoteCrawlerDisabled_crawlOrderChecked", post.getBoolean("crawlOrder"));
+                prop.put("remoteindexing_crawlOrderChecked", post.getBoolean("crawlOrder"));
                 prop.put("remoteindexing_intention", post.get("intention", ""));
             } else {
                 prop.put("remoteindexing", 0);

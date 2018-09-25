@@ -45,7 +45,7 @@ function updatepage(str) {
     html += "<td>URL from index (total results = " + totalResults + ")<\/td>";
     for (var i = 0; i < firstChannel.items.length; i++) {
         item = firstChannel.items[i];
-        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"ViewFile.html?url=" + item.link + "\">" + item.link + "<\/a><\/td>";
+        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"ViewFile.html?viewMode=#[viewModeValue]#&url=" + item.link + "\">" + item.link + "<\/a><\/td>";
     }
     html += "<\/table>";
   }
@@ -77,6 +77,7 @@ function updatepage(str) {
     <h2>View URL Content</h2>
 
     <form method="get" action="ViewFile.html" id="searchform" accept-charset="ascii" onkeyup="xmlhttpPost(); return false;">
+      <input type="hidden" name="viewMode" value="#[viewModeValue]#" />
       <fieldset><legend>Get URL Viewer</legend>
         <dl>
           <dt>URL:</dt>
@@ -103,7 +104,7 @@ function updatepage(str) {
       <fieldset><legend>URL Metadata</legend>
         <dl>
           <dt>URL:</dt><dd><a href="#[url]#">#[url]#</a></dd>
-          <dt>Hash:</dt><dd>#(inurldb)##[hash]#::<a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&q=id:%22#[hash]#%22">#[hash]#</a> (click this for full metadata)#(/inurldb)#</dd>
+          <dt>Hash:</dt><dd>#(inurldb)##[hash]#::<a href="solr/select?defType=edismax&start=0&rows=3&core=collection1&wt=html&omitHeader=true&q=id:%22#[hash]#%22">#[hash]#</a> (click this for full metadata)#(/inurldb)#</dd>
           <dt>In Metadata:</dt><dd>#(inurldb)#no::yes#(/inurldb)#</dd>
           <dt>In Cache:</dt><dd>#(incache)#no::yes#(/incache)#</dd>
           <dt>First Seen:</dt><dd>#[firstSeen]#</dd>

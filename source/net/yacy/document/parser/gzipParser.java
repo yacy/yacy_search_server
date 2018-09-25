@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.compress.compressors.gzip.GzipUtils;
@@ -71,6 +72,7 @@ public class gzipParser extends AbstractParser implements Parser {
             final DigestURL location,
             final String mimeType,
             final String charset,
+            Set<String> ignore_class_name,
             final VocabularyScraper scraper, 
             final int timezoneOffset,
             final InputStream source) throws Parser.Failure, InterruptedException {
@@ -126,7 +128,7 @@ public class gzipParser extends AbstractParser implements Parser {
             // creating a new parser class to parse the unzipped content
             final String contentfilename = GzipUtils.getUncompressedFilename(location.getFileName());
             final String mime = TextParser.mimeOf(MultiProtocolURL.getFileExtension(contentfilename));
-            Document[] docs = TextParser.parseSource(location, mime, null, scraper, timezoneOffset, DEFAULT_DEPTH, tempFile);
+            Document[] docs = TextParser.parseSource(location, mime, null, ignore_class_name, scraper, timezoneOffset, DEFAULT_DEPTH, tempFile);
             if (docs != null) maindoc.addSubDocuments(docs);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;

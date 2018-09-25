@@ -62,7 +62,7 @@ public class suggest {
         
         // get query
         final String originalquerystring = (post == null) ? "" : post.get("query", post.get("q", ""));
-        final String querystring =  originalquerystring.replace('+', ' ').replaceAll("%20", " ");
+        final String querystring =  originalquerystring.trim();
         final int timeout = (post == null) ? 300 : post.getInt("timeout", 300);
         final int count = (post == null) ? 10 : Math.min(30, post.getInt("count", 20));
 
@@ -103,7 +103,7 @@ public class suggest {
         }
 
         // check for JSONP
-        if ( post.containsKey("callback") ) {
+        if (post != null && post.containsKey("callback") ) {
             final String jsonp = post.get("callback") + "([";
             prop.put("jsonp-start", jsonp);
             prop.put("jsonp-end", "])");

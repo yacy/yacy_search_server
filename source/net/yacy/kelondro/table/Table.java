@@ -110,7 +110,9 @@ public class Table implements Index, Iterable<Row.Entry> {
             // make new file
             freshFile = true;
             FileOutputStream fos = null;
-            tablefile.getParentFile().mkdirs();
+            if(tablefile.getParentFile() != null) {
+            	tablefile.getParentFile().mkdirs();
+            }
             try {
                 fos = new FileOutputStream(tablefile);
             } catch (final FileNotFoundException e) {

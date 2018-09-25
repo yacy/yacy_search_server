@@ -10,8 +10,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -98,10 +100,146 @@ public class htmlParserTest extends TestCase {
             		inStream.close();
             	}
             }
-
-
         }
     }
+    
+	/**
+	 * Test the htmlParser.parse() method, with no charset information, neither
+	 * provided by HTTP header nor by meta tags or attributes.
+	 * 
+	 * @throws Exception
+	 *             when an unexpected error occurred
+	 */
+	@Test
+	public void testParseHtmlWithoutCharset() throws Exception {
+		final AnchorURL url = new AnchorURL("http://localhost/test.html");
+		final String mimetype = "text/html";
+		final StringBuilder testHtml = new StringBuilder("<!DOCTYPE html><html><body><p>");
+		/*
+		 * Include some non ASCII characters : once encoded they should make the charset
+		 * detector to detect the exact encoding
+		 */
+		testHtml.append("In München steht ein Hofbräuhaus.\n" + "Dort gibt es Bier aus Maßkrügen.<br>");
+		testHtml.append("<a href=\"http://localhost/doc1.html\">First link</a>");
+		testHtml.append("<a href=\"http://localhost/doc2.html\">Second link</a>");
+		testHtml.append("<a href=\"http://localhost/doc3.html\">Third link</a>");
+		testHtml.append("</p></body></html>");
+
+		final htmlParser parser = new htmlParser();
+
+		final Charset[] charsets = new Charset[] { StandardCharsets.UTF_8, StandardCharsets.ISO_8859_1 };
+
+		for (final Charset charset : charsets) {
+			try (InputStream sourceStream = new ByteArrayInputStream(testHtml.toString().getBytes(charset));) {
+				final Document[] docs = parser.parse(url, mimetype, null, new VocabularyScraper(), 0, sourceStream);
+				final Document doc = docs[0];
+				assertEquals(3, doc.getAnchors().size());
+				assertTrue(doc.getTextString().contains("Maßkrügen"));
+				assertEquals(charset.toString(), doc.getCharset());
+			}
+		}
+	}
+	
+	/**
+	 * Test the htmlParser.parse() method, when filtering out div elements on their CSS class.
+	 * 
+	 * @throws Exception
+	 *             when an unexpected error occurred
+	 */
+	@Test
+	public void testParseHtmlDivClassFilter() throws Exception {
+		final AnchorURL url = new AnchorURL("http://localhost/test.html");
+		final String mimetype = "text/html";
+		final StringBuilder testHtml = new StringBuilder("<!DOCTYPE html><head><title>Test document</title></head>");
+
+		testHtml.append("<div class=\"top\">Top text");
+		testHtml.append("<a href=\"http://localhost/top.html\">Top link</a>");
+		testHtml.append("</div>");
+
+		testHtml.append("<div class=\"optional\">Some optional content");
+		testHtml.append("<a href=\"http://localhost/content.html\">Link from optional block</a>");
+		testHtml.append("</div>");
+
+		testHtml.append("<p class=\"optional\">A paragraph</p>");
+
+		testHtml.append("<div class=\"optional-text\">Text-only optional block</div>");
+		
+		testHtml.append("<div class=\"optional desc\">");
+		testHtml.append("<div class=\"optional child\">");
+		testHtml.append("<div class=\"child\">");
+		testHtml.append("<p>Child text at depth 3</p>");
+		testHtml.append("</div></div></div>");
+
+		testHtml.append("<div class=\"bottom optional media\" itemscope itemtype=\"https://schema.org/LocalBusiness\"><img itemprop=\"logo\" src=\"http://localhost/image.png\" alt=\"Our Company\"></div>");
+		
+		final htmlParser parser = new htmlParser();
+
+		/* No CSS class filter */
+		try (InputStream sourceStream = new ByteArrayInputStream(
+				testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
+			final Document[] docs = parser.parse(url, mimetype, null, new VocabularyScraper(), 0, sourceStream);
+			final Document doc = docs[0];
+			final String parsedDext = doc.getTextString();
+			
+			/* Check everything has been parsed */
+			assertEquals(2, doc.getAnchors().size());
+			assertEquals(1, doc.getImages().size());
+			assertEquals(1, doc.getLinkedDataTypes().size());
+			assertTrue(parsedDext.contains("Top"));
+			assertTrue(parsedDext.contains("Some"));
+			assertTrue(parsedDext.contains("from"));
+			assertTrue(parsedDext.contains("paragraph"));
+			assertTrue(parsedDext.contains("Text-only"));
+			assertTrue(parsedDext.contains("depth"));
+		}
+		
+		/* Filter on CSS classes with no matching elements */
+		try (InputStream sourceStream = new ByteArrayInputStream(
+				testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
+			final Set<String> ignore = new HashSet<>();
+			ignore.add("opt");
+			ignore.add("head");
+			ignore.add("container");
+			final Document[] docs = parser.parse(url, mimetype, null, new VocabularyScraper(), 0, sourceStream);
+			final Document doc = docs[0];
+			final String parsedDext = doc.getTextString();
+			
+			/* Check everything has been parsed */
+			assertEquals(2, doc.getAnchors().size());
+			assertEquals(1, doc.getImages().size());
+			assertEquals(1, doc.getLinkedDataTypes().size());
+			assertTrue(parsedDext.contains("Top"));
+			assertTrue(parsedDext.contains("Some"));
+			assertTrue(parsedDext.contains("from"));
+			assertTrue(parsedDext.contains("paragraph"));
+			assertTrue(parsedDext.contains("Text-only"));
+			assertTrue(parsedDext.contains("depth"));
+		}
+		
+		/* Filter on CSS class with matching elements */
+		try (InputStream sourceStream = new ByteArrayInputStream(
+				testHtml.toString().getBytes(StandardCharsets.UTF_8));) {
+			final Set<String> ignore = new HashSet<>();
+			ignore.add("optional");
+			final Document[] docs = parser.parse(url, mimetype, null, ignore, new VocabularyScraper(), 0, sourceStream);
+			final Document doc = docs[0];
+			final String parsedDext = doc.getTextString();
+			
+			/* Check matching blocks have been ignored */
+			assertEquals(1, doc.getAnchors().size());
+			assertEquals("http://localhost/top.html", doc.getAnchors().iterator().next().toString());
+			assertEquals(0, doc.getLinkedDataTypes().size());
+			assertEquals(0, doc.getImages().size());
+			assertFalse(parsedDext.contains("Some"));
+			assertFalse(parsedDext.contains("from"));
+			assertFalse(parsedDext.contains("depth"));
+			
+			/* Check non-matching blocks have been normally parsed */
+			assertTrue(parsedDext.contains("Top"));
+			assertTrue(parsedDext.contains("Text-only"));
+			assertTrue(parsedDext.contains("paragraph"));
+		}
+	}
     
     /**
      * Test the htmlParser.parseWithLimits() method with test content within bounds.
@@ -230,7 +368,7 @@ public class htmlParserTest extends TestCase {
                 + "<figure><img width=\"550px\" title=\"image as exemple\" alt=\"image as exemple\" src=\"./img/my_image.png\"></figrue>" // + img width 550 (+html5 figure)
                 + "</body></html>";
 
-        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10, 10);
+        ContentScraper scraper = parseToScraper(url, charset, new HashSet<String>(), new VocabularyScraper(), 0, testhtml, 10, 10);
         List<AnchorURL> anchorlist = scraper.getAnchors();
 
         String linktxt = anchorlist.get(0).getTextProperty();
@@ -272,7 +410,7 @@ public class htmlParserTest extends TestCase {
         }
         testHtml.append("</p></body></html>");
         
-        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testHtml.toString(), Integer.MAX_VALUE, Integer.MAX_VALUE);
+        ContentScraper scraper = parseToScraper(url, charset, new HashSet<String>(), new VocabularyScraper(), 0, testHtml.toString(), Integer.MAX_VALUE, Integer.MAX_VALUE);
         assertEquals(nestingDepth, scraper.getAnchors().size());
         assertEquals(1, scraper.getImages().size());
 
@@ -293,7 +431,7 @@ public class htmlParserTest extends TestCase {
                 + "<p>" + textSource + "</p>"
                 + "</body></html>";
 
-        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10, 10);
+        ContentScraper scraper = parseToScraper(url, charset, new HashSet<String>(), new VocabularyScraper(), 0, testhtml, 10, 10);
 
         String txt = scraper.getText();
         System.out.println("ScraperTagTest: [" + textSource + "] = [" + txt + "]");
@@ -322,7 +460,7 @@ public class htmlParserTest extends TestCase {
                 + "</head>\n"
                 + "<body>" + textSource + "</body>\n"
                 + "</html>";
-        ContentScraper scraper = parseToScraper(url, charset, new VocabularyScraper(), 0, testhtml, 10, 10);
+        ContentScraper scraper = parseToScraper(url, charset, new HashSet<String>(), new VocabularyScraper(), 0, testhtml, 10, 10);
 
         String txt = scraper.getText();
         System.out.println("ScraperScriptTagTest: [" + textSource + "] = [" + txt + "]");

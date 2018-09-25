@@ -20,14 +20,19 @@
 
 package net.yacy.document;
 
-import com.ibm.icu.util.DateRule;
-import com.ibm.icu.util.EasterHoliday;
-import com.ibm.icu.util.SimpleDateRule;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -39,6 +44,10 @@ import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.ibm.icu.util.DateRule;
+import com.ibm.icu.util.EasterHoliday;
+import com.ibm.icu.util.SimpleDateRule;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
@@ -53,9 +62,11 @@ import net.yacy.cora.date.GenericFormatter;
  */
 public class DateDetection {
 
-    private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
-    private static final String CONPATT  = "yyyy/MM/dd";
-    private static final SimpleDateFormat CONFORM = new SimpleDateFormat(CONPATT, Locale.US);
+    private static final TimeZone UTC_TIMEZONE = TimeZone.getTimeZone("UTC");
+    private static final String CONPATT  = "uuuu/MM/dd";
+    
+	private static final DateTimeFormatter CONFORM = DateTimeFormatter.ofPattern(CONPATT).withLocale(Locale.US)
+			.withZone(ZoneOffset.UTC);
     private static final LinkedHashMap<Language, String[]> Weekdays = new LinkedHashMap<>();
     private static final LinkedHashMap<Language, String[]> Months = new LinkedHashMap<>();
     private static final int[] MaxDaysInMonth = new int[]{31,29,31,30,31,30,31,31,30,31,30,31};
@@ -66,7 +77,6 @@ public class DateDetection {
     }
     
     static {
-        CONFORM.setTimeZone(TZ_GMT);
         // all names must be lowercase because compared strings are made to lowercase as well
         Weekdays.put(Language.GERMAN,  new String[]{"montag", "dienstag", "mittwoch", "donnerstag", "freitag", "samstag" /*oder: "sonnabend"*/, "sonntag"});
         Weekdays.put(Language.ENGLISH, new String[]{"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"});
@@ -124,8 +134,7 @@ public class DateDetection {
         }
     }
 
-    private final static Date TODAY = new Date();
-    private final static int CURRENT_YEAR  = Integer.parseInt(CONFORM.format(TODAY).substring(0, 4)); // we need that to parse dates without given years, see the ShortStyle class
+    private final static int CURRENT_YEAR  = LocalDate.now().getYear(); // we need that to parse dates without given years, see the ShortStyle class
 
     private final static String BODNCG = "(?:\\s|^)"; // begin of date non-capturing group
     private final static String EODNCG = "(?:[).:;! ]|$)"; // end of date non-capturing group
@@ -145,69 +154,7 @@ public class DateDetection {
     public static Map<Pattern, Date[]> HolidayPattern = new HashMap<>();
     
     static {
-        try {
-            // German
-            Holidays.put("Neujahr",                   sameDayEveryYear(Calendar.JANUARY, 1));
-            Holidays.put("Heilige Drei Könige",       sameDayEveryYear(Calendar.JANUARY, 6));
-            Holidays.put("Valentinstag",              sameDayEveryYear(Calendar.FEBRUARY, 14));
-            Holidays.put("Weiberfastnacht",           new Date[]{CONFORM.parse("2014/02/27"), CONFORM.parse("2015/02/12"), CONFORM.parse("2016/02/04")});
-            Holidays.put("Weiberfasching",            Holidays.get("Weiberfastnacht"));
-            Holidays.put("Rosenmontag",               new Date[]{CONFORM.parse("2014/03/03"), CONFORM.parse("2015/03/16"), CONFORM.parse("2016/02/08")});
-            Holidays.put("Faschingsdienstag",         holiDayEventRule(EasterHoliday.SHROVE_TUESDAY.getRule()));// new Date[]{CONFORM.parse("2014/03/04"), CONFORM.parse("2015/03/17"), CONFORM.parse("2016/02/09")});
-            Holidays.put("Fastnacht",                 Holidays.get("Faschingsdienstag")); // new Date[]{CONFORM.parse("2014/03/04"), CONFORM.parse("2015/03/17"), CONFORM.parse("2016/02/09")});
-            Holidays.put("Aschermittwoch",            holiDayEventRule(EasterHoliday.ASH_WEDNESDAY.getRule()));// new Date[]{CONFORM.parse("2014/03/05"), CONFORM.parse("2015/03/18"), CONFORM.parse("2016/02/10")});
-            Holidays.put("Palmsonntag",               holiDayEventRule(EasterHoliday.PALM_SUNDAY.getRule()));// new Date[]{CONFORM.parse("2014/04/13"), CONFORM.parse("2015/03/29"), CONFORM.parse("2016/04/20")});
-            Holidays.put("Gründonnerstag",            holiDayEventRule(EasterHoliday.MAUNDY_THURSDAY.getRule()));// new Date[]{CONFORM.parse("2014/04/17"), CONFORM.parse("2015/04/02"), CONFORM.parse("2016/04/24")});
-            Holidays.put("Karfreitag",                holiDayEventRule(EasterHoliday.GOOD_FRIDAY.getRule()));// new Date[]{CONFORM.parse("2014/04/18"), CONFORM.parse("2015/04/03"), CONFORM.parse("2016/04/25")});
-            Holidays.put("Karsamstag",                new Date[]{CONFORM.parse("2014/04/19"), CONFORM.parse("2015/04/04"), CONFORM.parse("2016/04/26")});
-            Holidays.put("Ostersonntag",              holiDayEventRule(EasterHoliday.EASTER_SUNDAY.getRule()));// new Date[]{CONFORM.parse("2014/04/20"), CONFORM.parse("2015/04/05"), CONFORM.parse("2016/04/27")});
-            Holidays.put("Ostermontag",               holiDayEventRule(EasterHoliday.EASTER_MONDAY.getRule()));// new Date[]{CONFORM.parse("2014/04/21"), CONFORM.parse("2015/04/06"), CONFORM.parse("2016/04/28")});
-            Holidays.put("Ostern",                    new Date[]{CONFORM.parse("2014/04/20"), CONFORM.parse("2015/04/05"), CONFORM.parse("2016/04/27"),
-                                                                 CONFORM.parse("2014/04/21"), CONFORM.parse("2015/04/06"), CONFORM.parse("2016/04/28")});
-            Holidays.put("Walpurgisnacht",            sameDayEveryYear(Calendar.APRIL, 30));
-            Holidays.put("Tag der Arbeit",            sameDayEveryYear(Calendar.MAY, 1));
-            Holidays.put("Muttertag",                 new Date[]{CONFORM.parse("2014/05/11"), CONFORM.parse("2015/05/10"), CONFORM.parse("2016/05/08")});
-            Holidays.put("Christi Himmelfahrt",       holiDayEventRule(EasterHoliday.ASCENSION.getRule()));// new Date[]{CONFORM.parse("2014/05/29"), CONFORM.parse("2015/05/14"), CONFORM.parse("2016/05/05")});
-            Holidays.put("Pfingstsonntag",            holiDayEventRule(EasterHoliday.WHIT_SUNDAY.getRule()));// new Date[]{CONFORM.parse("2014/06/08"), CONFORM.parse("2015/05/24"), CONFORM.parse("2016/05/15")});
-            Holidays.put("Pfingstmontag",             holiDayEventRule(EasterHoliday.WHIT_MONDAY.getRule()));// new Date[]{CONFORM.parse("2014/06/09"), CONFORM.parse("2015/05/25"), CONFORM.parse("2016/05/16")});
-            Holidays.put("Fronleichnam",              holiDayEventRule(EasterHoliday.CORPUS_CHRISTI.getRule()));// new Date[]{CONFORM.parse("2014/06/19"), CONFORM.parse("2015/06/04"), CONFORM.parse("2016/05/25")});
-            Holidays.put("Mariä Himmelfahrt",         sameDayEveryYear(Calendar.AUGUST, 15));
-            Holidays.put("Tag der Deutschen Einheit", sameDayEveryYear(Calendar.OCTOBER, 3));
-            Holidays.put("Reformationstag",           sameDayEveryYear(Calendar.OCTOBER, 31));
-            Holidays.put("Allerheiligen",             sameDayEveryYear(Calendar.NOVEMBER, 1));
-            Holidays.put("Allerseelen",               sameDayEveryYear(Calendar.NOVEMBER, 2));
-            Holidays.put("Martinstag",                sameDayEveryYear(Calendar.NOVEMBER, 11));
-            Holidays.put("St. Martin",                Holidays.get("Martinstag"));
-            Holidays.put("Volkstrauertag",            new Date[]{CONFORM.parse("2014/11/16"), CONFORM.parse("2015/11/15"), CONFORM.parse("2016/11/13")});
-            Holidays.put("Buß- und Bettag",           holiDayEventRule(new SimpleDateRule(Calendar.NOVEMBER, 22, Calendar.WEDNESDAY, true))); // new Date[]{CONFORM.parse("2014/11/19"), CONFORM.parse("2015/11/18"), CONFORM.parse("2016/11/16")});
-            Holidays.put("Totensonntag",              new Date[]{CONFORM.parse("2014/11/23"), CONFORM.parse("2015/11/22"), CONFORM.parse("2016/11/20")});
-            Holidays.put("Nikolaus",                  sameDayEveryYear(Calendar.DECEMBER, 6));
-            Holidays.put("Heiligabend",               sameDayEveryYear(Calendar.DECEMBER, 24));
-            Holidays.put("1. Weihnachtsfeiertag",     sameDayEveryYear(Calendar.DECEMBER, 25));
-            Holidays.put("2. Weihnachtsfeiertag",     sameDayEveryYear(Calendar.DECEMBER, 26));
-            Holidays.put("1. Advent",                 new Date[]{CONFORM.parse("2014/11/30"), CONFORM.parse("2015/11/29"), CONFORM.parse("2016/11/27")});
-            Holidays.put("2. Advent",                 new Date[]{CONFORM.parse("2014/12/07"), CONFORM.parse("2015/12/06"), CONFORM.parse("2016/12/04")});
-            Holidays.put("3. Advent",                 new Date[]{CONFORM.parse("2014/12/14"), CONFORM.parse("2015/12/13"), CONFORM.parse("2016/12/11")});
-            Holidays.put("4. Advent",                 new Date[]{CONFORM.parse("2014/12/21"), CONFORM.parse("2015/12/20"), CONFORM.parse("2016/12/18")});
-            Holidays.put("Silvester",                 sameDayEveryYear(Calendar.DECEMBER, 31));
-            
-            // English
-            Holidays.put("Eastern",                   Holidays.get("Ostern"));
-            Holidays.put("New Year's Day",            Holidays.get("Neujahr"));
-            Holidays.put("Epiphany",                  Holidays.get("Heilige Drei Könige"));
-            Holidays.put("Valentine's Day",           Holidays.get("Valentinstag"));
-            Holidays.put("Orthodox Christmas",        sameDayEveryYear(Calendar.JANUARY, 7));
-            Holidays.put("St. Patrick's Day",         sameDayEveryYear(Calendar.MARCH, 17));
-            Holidays.put("April Fools' Day",          sameDayEveryYear(Calendar.APRIL, 1));
-            Holidays.put("Independence Day",          sameDayEveryYear(Calendar.JULY, 4));
-            Holidays.put("Halloween",                 Holidays.get("Reformationstag"));
-            Holidays.put("Thanksgiving",              holiDayEventRule(new SimpleDateRule(Calendar.NOVEMBER, 22, Calendar.THURSDAY, true)));
-            Holidays.put("Immaculate Conception of the Virgin Mary", sameDayEveryYear(Calendar.DECEMBER, 8));
-            Holidays.put("Christmas Eve",             Holidays.get("Heiligabend"));
-            Holidays.put("Christmas Day",             Holidays.get("1. Weihnachtsfeiertag"));
-            Holidays.put("Boxing Day",                Holidays.get("2. Weihnachtsfeiertag"));
-            Holidays.put("New Year's Eve",            Holidays.get("Silvester"));
-        } catch (ParseException e) {}
+    	Holidays.putAll(getHolidays(CURRENT_YEAR));
         
         
         for (Map.Entry<String, Date[]> holiday: Holidays.entrySet()) {
@@ -215,16 +162,159 @@ public class DateDetection {
         }
     }
 
+	/**
+	 * @param currentYear
+	 *            the current year reference to use
+	 * @return a new mapping from holiday names to arrays of
+	 *         three or four holiday dates starting from currentYear - 1. Each date time is 00:00:00 on UTC+00:00 time zone.
+	 */
+	public static HolidayMap getHolidays(final int currentYear) {
+		final HolidayMap result = new HolidayMap();
+		
+		/* Date rules from icu4j library used here (SimpleDateRule and EasterRule) use internally the default time zone and this can not be modified (up to icu4j 60.1) */
+		final TimeZone dateRulesTimeZone = TimeZone.getDefault();
+        // German
+        result.put("Neujahr",                   sameDayEveryYear(Calendar.JANUARY, 1, currentYear));
+        result.put("Heilige Drei Könige",       sameDayEveryYear(Calendar.JANUARY, 6, currentYear));
+        result.put("Valentinstag",              sameDayEveryYear(Calendar.FEBRUARY, 14, currentYear));
+        
+        /* Fat Thursday : Thursday (6 days) before Ash Wednesday (52 days before Easter Sunday) */
+        result.put("Weiberfastnacht",           holiDayEventRule(new EasterHoliday(-52, "Weiberfastnacht").getRule(), currentYear, dateRulesTimeZone)); // new Date[]{CONFORM.parse("2014/02/27"), CONFORM.parse("2015/02/12"), CONFORM.parse("2016/02/04")});
+        
+        result.put("Weiberfasching",            result.get("Weiberfastnacht"));
+        
+        /* Rose Monday : Monday before Ash Wednesday (48 days before Easter Sunday) */
+        result.put("Rosenmontag",               holiDayEventRule(new EasterHoliday(-48, "Rosenmontag").getRule(), currentYear, dateRulesTimeZone)); // new Date[]{CONFORM.parse("2014/03/03"), CONFORM.parse("2015/03/16"), CONFORM.parse("2016/02/08")});
+        
+        result.put("Faschingsdienstag",         holiDayEventRule(EasterHoliday.SHROVE_TUESDAY.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/03/04"), CONFORM.parse("2015/03/17"), CONFORM.parse("2016/02/09")});
+        result.put("Fastnacht",                 result.get("Faschingsdienstag")); // new Date[]{CONFORM.parse("2014/03/04"), CONFORM.parse("2015/03/17"), CONFORM.parse("2016/02/09")});
+        result.put("Aschermittwoch",            holiDayEventRule(EasterHoliday.ASH_WEDNESDAY.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/03/05"), CONFORM.parse("2015/03/18"), CONFORM.parse("2016/02/10")});
+        result.put("Palmsonntag",               holiDayEventRule(EasterHoliday.PALM_SUNDAY.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/04/13"), CONFORM.parse("2015/03/29"), CONFORM.parse("2016/04/20")});
+        result.put("Gründonnerstag",            holiDayEventRule(EasterHoliday.MAUNDY_THURSDAY.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/04/17"), CONFORM.parse("2015/04/02"), CONFORM.parse("2016/04/24")});
+        result.put("Karfreitag",                holiDayEventRule(EasterHoliday.GOOD_FRIDAY.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/04/18"), CONFORM.parse("2015/04/03"), CONFORM.parse("2016/04/25")});
+        
+        /* Holy Saturday (also called Easter Eve, Black Saturday) : one day before Easter Sunday */
+        result.put("Karsamstag",                holiDayEventRule(new EasterHoliday(-1, "Karsamstag").getRule(), currentYear, dateRulesTimeZone)); // new Date[]{CONFORM.parse("2014/04/19"), CONFORM.parse("2015/04/04"), CONFORM.parse("2016/04/26")});
+        result.put("Ostersonntag",              holiDayEventRule(EasterHoliday.EASTER_SUNDAY.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/04/20"), CONFORM.parse("2015/04/05"), CONFORM.parse("2016/04/27")});
+        result.put("Ostermontag",               holiDayEventRule(EasterHoliday.EASTER_MONDAY.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/04/21"), CONFORM.parse("2015/04/06"), CONFORM.parse("2016/04/28")});
+        
+        /* Include both Easter Sunday and Monday */
+        result.put("Ostern",                    getOsternEventRule(currentYear, dateRulesTimeZone));
+        
+        result.put("Walpurgisnacht",            sameDayEveryYear(Calendar.APRIL, 30, currentYear));
+        result.put("Tag der Arbeit",            sameDayEveryYear(Calendar.MAY, 1, currentYear));
+        
+        /* Mother's Day : Second sunday of may in Germany */
+        final Date[] mothersDays = new Date[3];
+        int year = currentYear - 1;
+        for (int i = 0; i < 3; i++) {
+         	final LocalDate firstMay = LocalDate.of(year, java.time.Month.MAY, 1);
+           	final LocalDate mothersDay = firstMay.with(TemporalAdjusters.firstInMonth(DayOfWeek.SUNDAY)).with(TemporalAdjusters.next(DayOfWeek.SUNDAY));
+           	mothersDays[i] = toMidnightUTCDate(mothersDay);
+           	year++;
+        }
+        result.put("Muttertag", mothersDays);
+        
+        result.put("Christi Himmelfahrt",       holiDayEventRule(EasterHoliday.ASCENSION.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/05/29"), CONFORM.parse("2015/05/14"), CONFORM.parse("2016/05/05")});
+        result.put("Pfingstsonntag",            holiDayEventRule(EasterHoliday.WHIT_SUNDAY.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/06/08"), CONFORM.parse("2015/05/24"), CONFORM.parse("2016/05/15")});
+        result.put("Pfingstmontag",             holiDayEventRule(EasterHoliday.WHIT_MONDAY.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/06/09"), CONFORM.parse("2015/05/25"), CONFORM.parse("2016/05/16")});
+        result.put("Fronleichnam",              holiDayEventRule(EasterHoliday.CORPUS_CHRISTI.getRule(), currentYear, dateRulesTimeZone));// new Date[]{CONFORM.parse("2014/06/19"), CONFORM.parse("2015/06/04"), CONFORM.parse("2016/05/25")});
+        result.put("Mariä Himmelfahrt",         sameDayEveryYear(Calendar.AUGUST, 15, currentYear));
+        result.put("Tag der Deutschen Einheit", sameDayEveryYear(Calendar.OCTOBER, 3, currentYear));
+        result.put("Reformationstag",           sameDayEveryYear(Calendar.OCTOBER, 31, currentYear));
+        result.put("Allerheiligen",             sameDayEveryYear(Calendar.NOVEMBER, 1, currentYear));
+        result.put("Allerseelen",               sameDayEveryYear(Calendar.NOVEMBER, 2, currentYear));
+        result.put("Martinstag",                sameDayEveryYear(Calendar.NOVEMBER, 11, currentYear));
+        result.put("St. Martin",                result.get("Martinstag"));
+        
+        result.put("Buß- und Bettag",           holiDayEventRule(new SimpleDateRule(Calendar.NOVEMBER, 22, Calendar.WEDNESDAY, true), currentYear, dateRulesTimeZone)); // new Date[]{CONFORM.parse("2014/11/19"), CONFORM.parse("2015/11/18"), CONFORM.parse("2016/11/16")});
+        
+        result.put("Nikolaus",                  sameDayEveryYear(Calendar.DECEMBER, 6, currentYear));
+        result.put("Heiligabend",               sameDayEveryYear(Calendar.DECEMBER, 24, currentYear));
+        result.put("1. Weihnachtsfeiertag",     sameDayEveryYear(Calendar.DECEMBER, 25, currentYear));
+        result.put("2. Weihnachtsfeiertag",     sameDayEveryYear(Calendar.DECEMBER, 26, currentYear));
+        
+		/* Advent : four Sundays before Chritsmas */
+		final Date[] advents1 = new Date[3], advents2 = new Date[3], advents3 = new Date[3], advents4 = new Date[3],
+				volkstrauertagen = new Date[3], sundaysOfTheDead = new Date[3];
+			
+		year = currentYear - 1;
+		final TemporalAdjuster prevSunday = TemporalAdjusters.previous(DayOfWeek.SUNDAY);
+		for (int i = 0; i < 3; i++) {
+			final LocalDate christmas = LocalDate.of(year, java.time.Month.DECEMBER, 25);
+			final LocalDate advent4 = christmas.with(prevSunday);
+			final LocalDate advent3 = advent4.with(prevSunday);
+			final LocalDate advent2 = advent3.with(prevSunday);
+			final LocalDate advent1 = advent2.with(prevSunday);
+			final LocalDate sundayOfTheDead = advent1.with(prevSunday);
+			final LocalDate volkstrauertag = sundayOfTheDead.with(prevSunday);
+			advents4[i] = toMidnightUTCDate(advent4);
+			advents3[i] = toMidnightUTCDate(advent3);
+			advents2[i] = toMidnightUTCDate(advent2);
+			advents1[i] = toMidnightUTCDate(advent1);
+			sundaysOfTheDead[i] = toMidnightUTCDate(sundayOfTheDead);
+			volkstrauertagen[i] = toMidnightUTCDate(volkstrauertag);
+			year++;
+		}
+
+		result.put("1. Advent", advents1);
+		result.put("2. Advent", advents2);
+		result.put("3. Advent", advents3);
+		result.put("4. Advent", advents4);
+
+		/* Sunday of the Dead (also called Eternity Sunday) : last Sunday before Advent */
+        result.put("Totensonntag", sundaysOfTheDead);
+
+        /* "people's day of mourning" : two Sundays before Advent */
+		result.put("Volkstrauertag", volkstrauertagen);
+        
+        result.put("Silvester",                 sameDayEveryYear(Calendar.DECEMBER, 31, currentYear));
+        
+        // English
+        result.put("Eastern",                   result.get("Ostern"));
+        result.put("New Year's Day",            result.get("Neujahr"));
+        result.put("Epiphany",                  result.get("Heilige Drei Könige"));
+        result.put("Valentine's Day",           result.get("Valentinstag"));
+        result.put("Orthodox Christmas",        sameDayEveryYear(Calendar.JANUARY, 7, currentYear));
+        result.put("St. Patrick's Day",         sameDayEveryYear(Calendar.MARCH, 17, currentYear));
+        result.put("April Fools' Day",          sameDayEveryYear(Calendar.APRIL, 1, currentYear));
+        result.put("Independence Day",          sameDayEveryYear(Calendar.JULY, 4, currentYear));
+        result.put("Halloween",                 result.get("Reformationstag"));
+        result.put("Thanksgiving",              holiDayEventRule(new SimpleDateRule(Calendar.NOVEMBER, 22, Calendar.THURSDAY, true), currentYear, dateRulesTimeZone));
+        result.put("Immaculate Conception of the Virgin Mary", sameDayEveryYear(Calendar.DECEMBER, 8, currentYear));
+        result.put("Christmas Eve",             result.get("Heiligabend"));
+        result.put("Christmas Day",             result.get("1. Weihnachtsfeiertag"));
+        result.put("Boxing Day",                result.get("2. Weihnachtsfeiertag"));
+        result.put("New Year's Eve",            result.get("Silvester"));
+		return result;
+	}
+	
+	/**
+	 * Convert a date to an old style java.util.Date instance with time set at
+	 * midnight on UTC time zone.
+	 * 
+	 * @param localDate
+	 *            a simple date with year month and day without time zone
+	 * @return a java.util.Date instance or null when localDate is null
+	 */
+	public static Date toMidnightUTCDate(final LocalDate localDate) {
+		if (localDate == null) {
+			return null;
+		}
+		return Date.from(ZonedDateTime.of(localDate, LocalTime.MIDNIGHT, UTC_TIMEZONE.toZoneId()).toInstant());
+	}
+
     /**
      * @param month value of month (Calendar.month is 0 based)
      * @param day
-     * @return four years of same date starting in last year
+     * @param currentYear the current year reference to use
+     * @return four years of same date starting in last year (currentYear - 1)
      */
-    private static Date[] sameDayEveryYear(int month, int day) {
-        Date[] r = new Date[4];
-        Calendar cal = CONFORM.getCalendar();
+    private static Date[] sameDayEveryYear(final int month, final int day, final int currentYear) {
+        final Date[] r = new Date[4];
+        final Calendar cal = new GregorianCalendar(UTC_TIMEZONE);
         cal.clear();
-        cal.set(CURRENT_YEAR - 1, month, day); // set start in previous year
+        cal.set(currentYear - 1, month, day); // set start in previous year
         r[0] = cal.getTime();
         for (int y = 1; y < 4; y++) {
             cal.add(Calendar.YEAR, 1);
@@ -234,19 +324,46 @@ public class DateDetection {
     }
 
     /**
-     * @param holidayrule
-     * @return 3 years of same holiday starting in last year
+     * @param holidayrule a date rule to calculate a holiday from a reference date
+     * @param ruleTimeZone the time zone of calendar used in the holiday rule
+     * @param currentYear the current year reference to use
+     * @return 3 years of same holiday starting in last year (currentYear - 1)
      */
-    private static Date[] holiDayEventRule(DateRule holidayrule) {
-        Date[] r = new Date[3];
-        Calendar cal = CONFORM.getCalendar();
-        cal.set(CURRENT_YEAR - 1, 1, 1); // set previous year as start year
-        r[0] = holidayrule.firstAfter(cal.getTime());
-        for (int y = 1; y < 3; y++) {
-            cal.add(Calendar.YEAR, 1);
-            r[y] = holidayrule.firstAfter(cal.getTime());
-        }
-        return r;
+    private static Date[] holiDayEventRule(final DateRule holidayrule, final int currentYear, final TimeZone ruleTimeZone) {
+		final Date[] r = new Date[3];
+		final Calendar january1Calendar = new GregorianCalendar(ruleTimeZone);
+		/* Clear all fields to get a 00:00:00:000 time part */
+		january1Calendar.clear();
+		
+		/* Calendar using UTC time zone to produce date results */
+		final Calendar utcCalendar = new GregorianCalendar(UTC_TIMEZONE);
+		
+		/* Calendar using the same time zone as in the holidayrule to extract year,month, and day fields */
+		final Calendar ruleCalendar = new GregorianCalendar(ruleTimeZone);
+
+		int year = currentYear -1; // set previous year as start year
+		for (int y = 0; y < 3; y++) {
+			january1Calendar.set(year, Calendar.JANUARY, 1);
+			Date holiday = holidayrule.firstAfter(january1Calendar.getTime());
+			ruleCalendar.setTime(holiday);
+			utcCalendar.set(ruleCalendar.get(Calendar.YEAR), ruleCalendar.get(Calendar.MONTH),
+					ruleCalendar.get(Calendar.DAY_OF_MONTH));
+			r[y] = utcCalendar.getTime();
+			year++;
+		}
+		return r;
+    }
+    
+    /**
+     * @param currentYear the current year reference to use
+     * @param ruleTimeZone the time zone of calendar used in the holiday rule
+     * @return Easter sunday and monday dates on three years starting from last year
+     */
+    private static Date[] getOsternEventRule(final int currentYear, final TimeZone ruleTimeZone) {
+    	ArrayList<Date> osternDates = new ArrayList<>();
+    	Collections.addAll(osternDates, holiDayEventRule(EasterHoliday.EASTER_SUNDAY.getRule(), currentYear, ruleTimeZone));
+    	Collections.addAll(osternDates, holiDayEventRule(EasterHoliday.EASTER_MONDAY.getRule(), currentYear, ruleTimeZone));
+    	return osternDates.toArray(new Date[osternDates.size()]);
     }
 
     /**
@@ -435,17 +552,41 @@ public class DateDetection {
                 int month = this.firstEntity == EntityType.MONTH ? i1 : this.secondEntity == EntityType.MONTH ? i2 : i3;
                 if (day > MaxDaysInMonth[month - 1]) continue; // validity check of the day number
                 int year = this.firstEntity == EntityType.YEAR ? i1 : this.secondEntity == EntityType.YEAR ? i2 : i3;
-                synchronized (CONFORM) {try {
-                    dates.add(CONFORM.parse(year + "/" + (month < 10 ? "0" : "") + month + "/" + (day < 10 ? "0" : "") + day));
-                } catch (ParseException e) {
-                    continue;
-                }}
+				final Date parsed = parseDateSafely(
+						year + "/" + (month < 10 ? "0" : "") + month + "/" + (day < 10 ? "0" : "") + day, CONFORM);
+                if(parsed != null) {
+                	dates.add(parsed);
+                }
                 if (dates.size() > 100) {dates.clear(); break;} // that does not make sense
             }
             return dates;
         }
         
     }
+    
+	/**
+	 * Safely parse the given string to an instant using the given formatter. Return
+	 * null when the format can not be applied to the given string or when any
+	 * parsing error occurred.
+	 * 
+	 * @param str
+	 *            the string to parse
+	 * @param formatter
+	 *            the formatter to use
+	 * @return an Instant instance or null
+	 */
+	protected static Date parseDateSafely(final String str, final DateTimeFormatter formatter) {
+		Date res = null;
+		if (str != null && !str.isEmpty()) {
+			try {
+				if (formatter != null) {
+					res = Date.from(LocalDate.parse(str, formatter).atStartOfDay().toInstant(ZoneOffset.UTC));
+				}
+			} catch (final RuntimeException ignored) {
+			}
+		}
+		return res;
+	}
     
     public static enum ShortStyle implements StyleParser {
         MD_ENGLISH(EntityType.MONTH, EntityType.DAY, // Big-endian (month, day), e.g. "from october 1st to september 13th"
@@ -502,16 +643,18 @@ public class DateDetection {
                 if (day > MaxDaysInMonth[month - 1]) continue; // validity check of the day number
                 int thisyear = CURRENT_YEAR;
                 int nextyear = CURRENT_YEAR + 1;
-                synchronized (CONFORM) {try {
-                    String datestub = "/" + (month < 10 ? "0" : "") + month + "/" + (day < 10 ? "0" : "") + day;
-                    Date atThisYear = CONFORM.parse(thisyear + datestub);
-                    Date atNextYear = CONFORM.parse(nextyear + datestub);
-                    dates.add(atThisYear);
-                    dates.add(atNextYear);
-                    //dates.add(atThisYear.after(TODAY) ? atThisYear : atNextYear); // we consider these kind of dates as given for the future
-                } catch (ParseException e) {
-                    continue;
-                }}
+                String datestub = "/" + (month < 10 ? "0" : "") + month + "/" + (day < 10 ? "0" : "") + day;
+
+                final Date atThisYear = parseDateSafely(thisyear + datestub, CONFORM);
+                if(atThisYear != null) {
+                	dates.add(atThisYear);
+                }
+                
+                final Date atNextYear = parseDateSafely(nextyear + datestub, CONFORM);
+                if(atNextYear != null) {
+                	dates.add(atNextYear);
+                }
+                //dates.add(atThisYear.after(TODAY) ? atThisYear : atNextYear); // we consider these kind of dates as given for the future
                 if (dates.size() > 100) {dates.clear(); break;} // that does not make sense
             }
             return dates;
@@ -553,12 +696,15 @@ public class DateDetection {
      * @return determined date or null
      */
     public static Date parseLine(final String text, final int timezoneOffset) {
-        Date d = null;
         // check standard date formats
-        try {d = CONFORM.parse(text);} catch (ParseException e) {}
+        Date d = parseDateSafely(text, CONFORM);
         //if (d == null) try {d = GenericFormatter.FORMAT_SHORT_DAY.parse(text);} catch (ParseException e) {} // did not work well and fired for wrong formats; do not use
-        if (d == null) try {d = GenericFormatter.FORMAT_RFC1123_SHORT.parse(text);} catch (ParseException e) {}
-        if (d == null) try {d = GenericFormatter.FORMAT_ANSIC.parse(text);} catch (ParseException e) {}
+        if (d == null) {
+        	d = parseDateSafely(text, GenericFormatter.FORMAT_RFC1123_SHORT);
+        }
+        if (d == null) {
+        	d = parseDateSafely(text, GenericFormatter.FORMAT_ANSIC);
+        }
             
         if (d == null) {
             // check other date formats

@@ -26,6 +26,9 @@ import java.awt.Dimension;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -125,24 +128,12 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         this.lon = (lons == null) ? 0.0d : Double.parseDouble(lons);
         this.lat = (lats == null) ? 0.0d : Double.parseDouble(lats);
 
-        // create new formatters to make concurrency possible
-        final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
-
-        try {
-            this.setField(CollectionSchema.last_modified.name(), formatter.parse(prop.getProperty("mod", "20000101"), 0).getTime());
-        } catch (final ParseException e) {
-            this.setField(CollectionSchema.last_modified.name(), new Date());
-        }
-        try {
-            this.setField(CollectionSchema.load_date_dt.name(), formatter.parse(prop.getProperty("load", "20000101"), 0).getTime());
-        } catch (final ParseException e) {
-            this.setField(CollectionSchema.load_date_dt.name(), new Date());
-        }
-        try {
-            this.setField(CollectionSchema.fresh_date_dt.name(), formatter.parse(prop.getProperty("fresh", "20000101"), 0).getTime());
-        } catch (final ParseException e) {
-            this.setField(CollectionSchema.fresh_date_dt.name(), new Date());
-        }
+        this.setField(CollectionSchema.last_modified.name(), parseShortDayDate(prop.getProperty("mod", "20000101")));
+        
+        this.setField(CollectionSchema.load_date_dt.name(), parseShortDayDate(prop.getProperty("load", "20000101")));
+        
+		this.setField(CollectionSchema.fresh_date_dt.name(), parseShortDayDate(prop.getProperty("fresh", "20000101")));
+        
         this.setField(CollectionSchema.referrer_id_s.name(), prop.getProperty("referrer", ""));
         // this.setField(CollectionSchema.md5_s.name(), prop.getProperty("md5", "")); // always 0 (not used / calculated)
         this.setField(CollectionSchema.size_i.name(), Integer.parseInt(prop.getProperty("size", "0")));
@@ -725,13 +716,55 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             return null;
         }
     }
-
+    
+    /**
+     * Format a date using the short day format.
+     * @param date the date to format. Must not be null.
+     * @return the formatted date
+     * @throws NullPointerException when date is null.
+     */
+	private String formatShortDayDate(final Date date) {
+		String formattedDate;
+		try {
+			/* Prefer using first the thread-safe shared instance of DateTimeFormatter */
+			formattedDate = GenericFormatter.FORMAT_SHORT_DAY.format(date.toInstant());
+		} catch (final DateTimeException e) {
+			/*
+			 * Should not happen, but rather than failing it is preferable to use the old
+			 * formatter which uses synchronization locks
+			 */
+			formattedDate = GenericFormatter.SHORT_DAY_FORMATTER.format(date);
+		}
+		return formattedDate;
+	}
+	
+	/**
+	 * Parse a date string with the short day format.
+	 * 
+	 * @param dateStr
+	 *            a date representation as a String. Must not be null.
+	 * @return the parsed Date or the current date when an parsing error occurred.
+	 */
+	private Date parseShortDayDate(final String dateStr) {
+		Date parsed;
+		try {
+			/* Prefer using first the thread-safe shared instance of DateTimeFormatter */
+			parsed = Date.from(LocalDate.parse(dateStr, GenericFormatter.FORMAT_SHORT_DAY).atStartOfDay()
+					.toInstant(ZoneOffset.UTC));
+		} catch (final RuntimeException e) {
+			/* Retry with the old formatter which uses synchronization locks */
+			try {
+				parsed = GenericFormatter.SHORT_DAY_FORMATTER.parse(dateStr, 0).getTime();
+			} catch (final ParseException pe) {
+				parsed = new Date();
+			}
+		}
+		return parsed;
+	}
+	
     protected StringBuilder corePropList() {
         // generate a parseable string; this is a simple property-list
         final StringBuilder s = new StringBuilder(300);
-
-        // create new formatters to make concurrency possible
-        final GenericFormatter formatter = new GenericFormatter(GenericFormatter.FORMAT_SHORT_DAY, GenericFormatter.time_minute);
 
         try {
             s.append("hash=").append(ASCII.String(this.hash()));
@@ -742,9 +775,9 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             s.append(",publisher=").append(crypt.simpleEncode(this.dc_publisher()));
             s.append(",lat=").append(this.lat());
             s.append(",lon=").append(this.lon());
-            s.append(",mod=").append(formatter.format(this.moddate()));
-            s.append(",load=").append(formatter.format(this.loaddate()));
-            s.append(",fresh=").append(formatter.format(this.freshdate()));
+            s.append(",mod=").append(formatShortDayDate(this.moddate()));
+            s.append(",load=").append(formatShortDayDate(this.loaddate()));
+            s.append(",fresh=").append(formatShortDayDate(this.freshdate()));
             s.append(",referrer=").append(this.referrerHash() == null ? "" : ASCII.String(this.referrerHash()));
             //s.append(",md5=").append(this.md5()); // md5 never calculated / not used, also removed from this(prop) 2015-11-27
             s.append(",size=").append(this.filesize());
@@ -918,7 +951,13 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             final Seed seed = peers.getConnected(hash);
             final String path = this.url().getFile();
             String address = null;
-            if ((seed == null) || ((address = seed.getPublicAddress(seed.getIP())) == null)) {
+            if(seed != null) {
+            	final Set<String> ips = seed.getIPs();
+            	if(!ips.isEmpty()) {
+            		address = seed.getPublicAddress(ips.iterator().next());
+            	}
+            }
+            if (address == null) {
                 // seed is not known from here
                 try {
                     if (indexSegment.termIndex() != null) indexSegment.termIndex().remove(

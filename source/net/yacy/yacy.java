@@ -56,6 +56,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -165,6 +166,13 @@ public final class yacy {
 				System.err.println("Error creating DATA-directory in " + dataHome.toString() + " . Please check your write-permission for this folder. YaCy will now terminate.");
 				System.exit(-1);
 			}
+			
+            // set jvm tmpdir to a subdir for easy cleanup (as extensive use file.deleteonexit waists memory during long runs, as todelete files names are collected and never cleaned up during runtime)
+			// keep this as earlier as possible, as any other class can use the "java.io.tmpdir" property, even the log manager, when the log file pattern uses "%t" as an alias for the tmp directory 
+            try { 
+                tmpdir = java.nio.file.Files.createTempDirectory("yacy-tmp-").toString(); // creates sub dir in jvm's temp (see System.property "java.io.tempdir")
+                System.setProperty("java.io.tmpdir", tmpdir);
+            } catch (IOException ex) { }
 
             // setting up logging
 			f = new File(dataHome, "DATA/LOG/");
@@ -177,7 +185,7 @@ public final class yacy {
                 System.out.println("could not copy yacy.logging");
             }
             try{
-                ConcurrentLog.configureLogging(dataHome, appHome, new File(dataHome, "DATA/LOG/yacy.logging"));
+                ConcurrentLog.configureLogging(dataHome, new File(dataHome, "DATA/LOG/yacy.logging"));
             } catch (final IOException e) {
                 System.out.println("could not find logging properties in homePath=" + dataHome);
                 ConcurrentLog.logException(e);
@@ -201,12 +209,6 @@ public final class yacy {
             	channel = new RandomAccessFile(f,"rw").getChannel();
             	lock = channel.tryLock(); // lock yacy.running
             } catch (final Exception e) { }
-
-            // set jvm tmpdir to a subdir for easy cleanup (as extensive use file.deleteonexit waists memory during long runs, as todelete files names are collected and never cleaned up during runtime)
-            try { 
-                tmpdir = java.nio.file.Files.createTempDirectory("yacy-tmp-").toString(); // creates sub dir in jvm's temp (see System.property "java.io.tempdir")
-                System.setProperty("java.io.tmpdir", tmpdir);
-            } catch (IOException ex) { }
 
             try {
                 sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), conf);
@@ -621,6 +623,8 @@ public final class yacy {
         		} catch (final InterruptedException e1) {
         			e1.printStackTrace();
         		}
+                
+                RemoteInstance.closeConnectionManager();
             	
                 System.exit(-1);
             }
@@ -632,6 +636,7 @@ public final class yacy {
     		} catch (final InterruptedException e1) {
     			e1.printStackTrace();
     		}
+            RemoteInstance.closeConnectionManager();
             
             System.exit(-1);
         }
@@ -641,6 +646,7 @@ public final class yacy {
 		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
+        RemoteInstance.closeConnectionManager();
 
         // finished
         ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
@@ -678,6 +684,7 @@ public final class yacy {
 		} catch (final InterruptedException e) {
 			e.printStackTrace();
 		}
+        RemoteInstance.closeConnectionManager();
 
         // finished
         ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
@@ -707,17 +714,6 @@ public final class yacy {
             try {
                 fis = new FileInputStream(configFile);
                 p.load(fis);
-                // Test for server access restriction (is implemented using Jetty IPaccessHandler which does not support IPv6
-                // try to disable IPv6 
-                String teststr = p.getProperty("serverClient", "*");
-                if (!teststr.equals("*")) {
-                    // testing on Win-8 showed this property has to be set befor Switchboard starts 
-                    // and seems to be sensitive (or time critical) if other code had been executed before this (don't know why ... ?)
-                    System.setProperty("java.net.preferIPv6Addresses", "false");
-                    System.setProperty("java.net.preferIPv4Stack", "true"); // DO NOT PREFER IPv6, i.e. freifunk uses ipv6 only and host resolving does not work
-                    teststr = System.getProperty("java.net.preferIPv4Stack");
-                    System.out.println("set system property java.net.preferIP4Stack=" + teststr);
-                }   
                 
                 // test for yacy already running
                 if (lockFile.exists()) {  // another instance running? VM crash? User will have to care about this
@@ -794,14 +790,26 @@ public final class yacy {
 	        if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-startup") || args[0].equals("-start"))) {
 	            // normal start-up of yacy
 	            if (args.length > 1) {
-	            	dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+	            	if(args[1].startsWith(File.separator)) {
+	            		/* data root folder provided as an absolute path */
+	            		dataRoot = new File(args[1]);
+	            	} else {
+	            		/* data root folder provided as a path relative to the user home folder */
+	            		dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+	            	}
 	            }
                 preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
 	        } else if (args.length >= 1 && args[0].toLowerCase(Locale.ROOT).equals("-gui")) {
 	            // start-up of yacy with gui
 	            if (args.length > 1) {
-	            	dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+	            	if(args[1].startsWith(File.separator)) {
+	            		/* data root folder provided as an absolute path */
+	            		dataRoot = new File(args[1]);
+	            	} else {
+	            		/* data root folder provided as a path relative to the user home folder */
+	            		dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+	            	}
 	            }
                 preReadSavedConfigandInit(dataRoot);
 	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);

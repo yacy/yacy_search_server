@@ -151,13 +151,13 @@ public class AccessTracker {
         return 0;
     }
 
-    private static void addToDump(final QueryParams query, int resultCount) {
+    private static void addToDump(final QueryParams query, long resultCount) {
         String queryString = query.getQueryGoal().getQueryString(false);
         if (queryString == null || queryString.isEmpty()) return;
         addToDump(queryString, resultCount, new Date(query.starttime), "qs");
     }
 
-    public static void addToDump(String querystring, int resultCount) {
+    public static void addToDump(String querystring, long resultCount) {
         addToDump(querystring, resultCount, new Date(), "qs");
     }
 
@@ -169,7 +169,7 @@ public class AccessTracker {
      * @param d start time
      * @param querySyntax used syntax (qs=normal querstring, sq=solr querystring,
      */
-    public static void addToDump(String querystring, int resultcount, Date d, String querySyntax) {
+    public static void addToDump(String querystring, long resultcount, Date d, String querySyntax) {
         //if (query.resultcount == 0) return;
         if (querystring == null || querystring.isEmpty()) return;
         final StringBuilder sb = new StringBuilder(40);

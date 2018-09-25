@@ -65,7 +65,7 @@ public class Status
 
         // check if the basic configuration was accessed before and forward
         prop.put("forwardToConfigBasic", 0);
-        if ((post == null || !post.containsKey("noforward")) && sb.getConfig("server.servlets.called", "").indexOf("ConfigBasic.html", 0) < 0) {
+        if ((post == null || !post.containsKey("noforward")) && sb.getConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, "").indexOf("ConfigBasic.html", 0) < 0) {
             // forward to ConfigBasic
             prop.put("forwardToConfigBasic", 1);
         }
@@ -140,6 +140,10 @@ public class Status
 
         if ( sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false) ) {
             prop.put("unrestrictedLocalAccess", 1);
+            if(sb.getConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, "").indexOf("ConfigAccounts_p.html", 0) < 0) {
+            	/* Encourage checking accounts config page to be sure that unrestricted local access is desired */
+            	prop.put("warningUnrestrictedLocalAccess", true);	
+            }
         }
 
         // resource observer status
@@ -171,10 +175,6 @@ public class Status
 
         if (adminaccess && sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 500) {
             prop.put("hintCrawlMonitor", "1");
-        }
-
-        if (!System.getProperty("java.version").startsWith("1.8")) {
-            prop.put("hintJREVersion", "1");
         }
 
         if (adminaccess && "intranet|webportal|allip".indexOf(env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified")) >= 0) {
@@ -226,12 +226,13 @@ public class Status
             prop.put("peerStatistics", "1");
             prop.put("peerStatistics_uptime", PeerActions.formatInterval(uptime));
             thisHash = sb.peers.mySeed().hash;
-            if ( sb.peers.mySeed().getIPs().size() == 0 ) {
+            final Set<String> myIps = sb.peers.mySeed().getIPs();
+            if ( myIps.size() == 0 ) {
                 prop.put("peerAddress", "0"); // not assigned + instructions
                 prop.put("warningGoOnline", "1");
             } else {
                 prop.put("peerAddress", "1"); // Address
-                prop.put("peerAddress_address", sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()));
+                prop.put("peerAddress_address", sb.peers.mySeed().getPublicAddress(myIps.iterator().next()));
                 prop.putXML("peerAddress_peername", sb.peers.mySeed().getName().toLowerCase());
             }
         }

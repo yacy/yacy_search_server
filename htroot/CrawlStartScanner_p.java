@@ -24,6 +24,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -94,14 +95,26 @@ public class CrawlStartScanner_p
                 } else {
                     ip = Domains.dnsResolve("192.168.0.1");
                 }
-            } else {
-                ip = Domains.myPublicLocalIP();
-                if ( Domains.isThisHostIP(ip) ) {
-                    ip = Domains.dnsResolve(sb.peers.mySeed().getIP());
+                if ( ip != null ) {
+                    hostSet.add(ip.getHostAddress());
                 }
-            }
-            if ( ip != null ) {
-                hostSet.add(ip.getHostAddress());
+            } else {
+            	final Set<InetAddress> myPublicIPs = new HashSet<InetAddress>();
+            	myPublicIPs.addAll(Domains.myPublicIPv4());
+            	myPublicIPs.addAll(Domains.myPublicIPv6());
+            	for(final InetAddress myPublicIP: myPublicIPs) {
+                    if (Domains.isThisHostIP(myPublicIP)) {
+                    	final Set<String> myIPs = sb.peers.mySeed().getIPs();
+                    	for(final String myIP: myIPs) {
+                            ip = Domains.dnsResolve(myIP);
+                            if(ip != null) {
+                            	hostSet.add(ip.getHostAddress());
+                            }
+                    	}
+                    } else {
+                        hostSet.add(myPublicIP.getHostAddress());
+                    }
+            	}
             }
         }
         String hos = ""; for (String s: hostSet) hos += s + "\n";

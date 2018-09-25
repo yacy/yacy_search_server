@@ -59,6 +59,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -301,8 +302,28 @@ public class serverObjects implements Serializable, Cloneable {
         put(key, value == null ? "" : CharacterCoding.unicode2html(UTF8.decodeURL(value), true));
     }
 
+    /**
+     * Add a String UTF-8 encoded bytes to the map. The content of the string is first decoded to removed any URL encoding (application/x-www-form-urlencoded).
+     * Then the content of the String is escaped to be usable in HTML output. 
+     * @param key   key name as String.
+     * @param value the UTF-8 encoded byte array of a String that will be reencoded for HTML output.
+     * @see CharacterCoding#encodeUnicode2html(String, boolean)
+     */
     public void putHTML(final String key, final byte[] value) {
         putHTML(key, value == null ? "" : UTF8.String(value));
+    }
+    
+	/**
+	 * Add a String to the map. The eventual URL encoding
+	 * (application/x-www-form-urlencoded) is retained, but the String is still
+	 * escaped to be usable in HTML output.
+	 * 
+	 * @param key   key name as String.
+	 * @param value a String that will be reencoded for HTML output.
+	 * @see CharacterCoding#encodeUnicode2html(String, boolean)
+	 */
+    public void putUrlEncodedHTML(final String key, final String value) {
+        put(key, value == null ? "" : CharacterCoding.unicode2html(value, true));
     }
 
     /**
@@ -316,17 +337,34 @@ public class serverObjects implements Serializable, Cloneable {
     }
 
     /**
-     * put the key/value pair with a special method according to the given file type
-     * @param fileType
+     * Put the key/value pair, escaping characters depending on the target fileType. When the target is HTML, the content of the string is first decoded to removed any URL encoding (application/x-www-form-urlencoded).
+     * @param fileType the response target file type
      * @param key
      * @param value
-     * @return
      */
     public void put(final RequestHeader.FileType fileType, final String key, final String value) {
         if (fileType == FileType.JSON) putJSON(key, value == null ? "" : value);
         else if (fileType == FileType.XML) putXML(key, value == null ? "" : value);
         else putHTML(key, value == null ? "" : value);
     }
+    
+	/**
+	 * Put the key/value pair, escaping characters depending on the target fileType.
+	 * The eventual URL encoding (application/x-www-form-urlencoded) is retained.
+	 * 
+	 * @param fileType the response target file type
+	 * @param key
+	 * @param value
+	 */
+	public void putUrlEncoded(final RequestHeader.FileType fileType, final String key, final String value) {
+		if (fileType == FileType.JSON) {
+			putJSON(key, value == null ? "" : value);
+		} else if (fileType == FileType.XML) {
+			putXML(key, value == null ? "" : value);
+		} else {
+			putUrlEncodedHTML(key, value == null ? "" : value);
+		}
+	}
 
     /**
      * Add a byte/long/integer to the map. The number will be encoded into a String using
@@ -485,18 +523,42 @@ public class serverObjects implements Serializable, Cloneable {
         return s.equals("true") || s.equals("on") || s.equals("1");
     }
 
-    // returns a set of all values where their key mappes the keyMapper
-    public String[] getAll(final String keyMapper) {
+    /**
+     * @param keyMapper a regular expression for keys matching 
+     * @return a set of all values where their key mappes the keyMapper
+     * @throws PatternSyntaxException when the keyMapper syntax is not valid
+     */
+    public String[] getAll(final String keyMapper) throws PatternSyntaxException {
         // the keyMapper may contain regular expressions as defined in String.matches
         // this method is particulary useful when parsing the result of checkbox forms
         final List<String> v = new ArrayList<String>();
+        final Pattern keyPattern = Pattern.compile(keyMapper);
         for (final Map.Entry<String, String> entry: entrySet()) {
-            if (entry.getKey().matches(keyMapper)) {
+            if (keyPattern.matcher(entry.getKey()).matches()) {
                 v.add(entry.getValue());
             }
         }
 
         return v.toArray(new String[0]);
+    }
+    
+    /**
+     * @param keyMapper a regular expression for keys matching
+     * @return a map of keys/values where keys matches the keyMapper
+     * @throws PatternSyntaxException when the keyMapper syntax is not valid
+     */
+    public Map<String, String> getMatchingEntries(final String keyMapper) throws PatternSyntaxException  {
+        // the keyMapper may contain regular expressions as defined in String.matches
+        // this method is particulary useful when parsing the result of checkbox forms
+    	final Pattern keyPattern = Pattern.compile(keyMapper);
+        final Map<String, String> map = new HashMap<>();
+        for (final Map.Entry<String, String> entry: entrySet()) {
+            if (keyPattern.matcher(entry.getKey()).matches()) {
+            	map.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return map;
     }
 
     // put all elements of another hashtable into the own table

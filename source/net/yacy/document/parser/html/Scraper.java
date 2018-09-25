@@ -26,15 +26,61 @@ package net.yacy.document.parser.html;
 
 public interface Scraper {
 
+	/**
+	 * @param tag
+	 *            a tag name
+	 * @return true when the tag name belongs to the first category of tags
+	 *         according to the Scraper implementation, and is therefore candidate
+	 *         for processing by
+	 *         {@link #scrapeTag0(net.yacy.document.parser.html.ContentScraper.Tag)}
+	 *         implementation
+	 */
     public boolean isTag0(String tag);
 
+	/**
+	 * @param tag
+	 *            a tag name
+	 * @return true when the tag name belongs to the second category of tags
+	 *         according to the Scraper implementation, and is therefore candidate
+	 *         for processing by
+	 *         {@link #scrapeTag0(net.yacy.document.parser.html.ContentScraper.Tag)}
+	 *         implementation
+	 */
     public boolean isTag1(String tag);
 
-    public void scrapeText(char[] text, String insideTag);
+    /**
+     * Process plain text
+     * @param plain text to process
+     * @param insideTag the eventual direct parent tag. May be null.
+     */
+    public void scrapeText(char[] text, ContentScraper.Tag insideTag);
 
+    /**
+     * Process a tag belonging to the first category of tags according to the Scraper implementation
+     * @param tag a parsed tag
+     */
     public void scrapeTag0(ContentScraper.Tag tag);
 
+    /**
+     * Process a tag belonging to the second category of tags according to the Scraper implementation
+     * @param tag a parsed tag
+     */
     public void scrapeTag1(ContentScraper.Tag tag);
+    
+    /**
+     * Processing applied to any kind of tag opening.
+     * @param tag a parsed tag
+     */
+    public void scrapeAnyTagOpening(ContentScraper.Tag tag);
+    
+	/**
+	 * @param tag
+	 *            a parsed tag
+	 * @param parentTag the eventual parent tag
+	 * @return true when the tag should be ignored according to the scraper
+	 *         implementation rules
+	 */
+    public boolean shouldIgnoreTag(final ContentScraper.Tag tag, final ContentScraper.Tag parentTag);
 
     public void scrapeComment(final char[] comment);
 

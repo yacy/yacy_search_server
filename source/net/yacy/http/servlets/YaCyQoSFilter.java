@@ -40,7 +40,7 @@ public class YaCyQoSFilter extends QoSFilter {
     protected int getPriority(ServletRequest request) {
         if (request.getServerName().equalsIgnoreCase(Domains.LOCALHOST)) {
             return 10; // highest priority for "localhost"
-        } else if (Domains.isLocalhost(request.getRemoteHost())) {
+        } else if (Domains.isLocalhost(request.getRemoteAddr())) {
             return 9;
         } else {
             return super.getPriority(request); // standard: authenticated = 2, other = 1 or 0

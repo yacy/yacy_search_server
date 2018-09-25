@@ -162,7 +162,7 @@ public class NewsDB {
     }
 
     // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
+    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.newShortSecondFormat(), GenericFormatter.time_second);
 
     private Record b2r(final Row.Entry b) {
         if (b == null) return null;

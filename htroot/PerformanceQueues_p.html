@@ -160,7 +160,7 @@
 	  </fieldset>
   </form>
   
-  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="ThreadPoolSettings">
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="ThreadPoolSettings" class="col-sm-12 col-md-6">
       <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
 	  <fieldset><legend>Thread Pool Settings:</legend>
 	    <table border="0">
@@ -181,6 +181,50 @@
 	        <input type="submit" name="poolConfig" class="btn btn-sm btn-primary" value="Enter new Threadpool Configuration" />
 	        Changes take effect immediately</td>
 	      </tr>
+	    </table>
+	  </fieldset>
+  </form>
+  
+  <form action="PerformanceQueues_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" id="ConnectionPoolSettings" class="col-sm-12 col-md-6">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#" />
+	  <fieldset><legend>Outgoing connections pools settings :</legend>
+	    <table style="border-width:0px;">
+	      <thead class="TableHeader">
+	      	<tr>
+	        	<th style="padding:0.4em;" rowspan="2">Connection Pool</th>
+	        	<th style="padding:0.4em;" rowspan="2" title="Total maximum number of simultaneously open connections in the pool">Total maximum</th>
+	        	<th style="padding:0.4em;" colspan="3" >Current statistics</th>
+	        </tr>
+	        <tr>
+	        	<th style="padding:0.4em;" title="Number of connections currently being used to execute requests.">Active</th>
+	        	<th style="padding:0.4em;" title="Number of reusable idle connections">Idle</th>
+	        	<th style="padding:0.4em;" title="Number of connection requests being blocked awaiting a free connection">Pending</th>
+	        </tr>
+	      </thead>
+	      <tbody>
+	      	<tr class="TableCellDark">
+	        	<td>General</td>
+	        	<td><input name="http.outgoing.pool.general.maxTotal" type="number" value="#[http.outgoing.pool.general.maxTotal]#" min="1" max="2147483647"/></td>
+	        	<td>#[pool.general.leased]#</td>
+	        	<td>#[pool.general.available]#</td>
+	        	<td>#[pool.general.pending]#</td>
+	      	</tr>
+	      	<tr class="TableCellDark">
+	        	<td>Remote Solr servers</td>
+	        	<td><input name="http.outgoing.pool.remoteSolr.maxTotal" type="number" value="#[http.outgoing.pool.remoteSolr.maxTotal]#" min="1" max="2147483647"/></td>
+	        	<td>#[pool.remoteSolr.leased]#</td>
+	        	<td>#[pool.remoteSolr.available]#</td>
+	        	<td>#[pool.remoteSolr.pending]#</td>
+	      	</tr>
+	      </tbody>
+	      <tfoot>
+	      	<tr class="TableCellLight">
+	        	<td colspan="5">
+	        		<input type="submit" name="connectionPoolConfig" class="btn btn-sm btn-primary" value="Submit New Values" />
+	        		Changes take effect immediately
+	        	</td>
+	        </tr>
+	      </tfoot>
 	    </table>
 	  </fieldset>
   </form>

@@ -32,7 +32,10 @@
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
@@ -234,10 +237,9 @@ public class Blacklist_p {
                 		WorkTables.TABLE_API_TYPE_CONFIGURATION,
                 		"add to blacklist '" + blacklistToUse + "': " + blentry);
 
-                final String temp = BlacklistHelper.addBlacklistEntry(blacklistToUse, blentry, header);
-                if (temp != null) {
-                    prop.put(serverObjects.ACTION_LOCATION, temp);
-                    return prop;
+                if(!BlacklistHelper.addBlacklistEntry(blacklistToUse, blentry, header)) {
+                	prop.put(DISABLED + EDIT + "addError", true);
+                	prop.put(DISABLED + EDIT + "addError_entry", blentry);
                 }
 
                 Switchboard.urlBlacklist.clear();
@@ -270,15 +272,15 @@ public class Blacklist_p {
                         !targetBlacklist.equals(blacklistToUse)) {
                     String temp;
                     for (final String selectedBlacklistEntry : selectedBlacklistEntries) {
-                        if ((temp = BlacklistHelper.addBlacklistEntry(targetBlacklist, selectedBlacklistEntry, header)) != null) {
-                            prop.put(serverObjects.ACTION_LOCATION, temp);
-                            return prop;
-                        }
-
+                    	/* Removal must be done first, otherwise add operation will not be performed because the entry will be detected as already present */
                         if ((temp = BlacklistHelper.deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntry, header)) != null) {
                             prop.put(serverObjects.ACTION_LOCATION, temp);
                             return prop;
-
+                        }
+                        
+                        if (!BlacklistHelper.addBlacklistEntry(targetBlacklist, selectedBlacklistEntry, header)) {
+                        	prop.put(DISABLED + EDIT + "moveError", true);
+                        	break;
                         }
                     }
                 }
@@ -294,30 +296,29 @@ public class Blacklist_p {
 
                 blacklistToUse = post.get("currentBlacklist", "").trim();
 
-                final String[] editedBlacklistEntries = post.getAll("editedBlacklistEntry.*");
+                final Map<String, String> editedBlacklistEntries = post.getMatchingEntries("editedBlacklistEntry.*");
 
                 // if edited entry has been posted, save changes
-                if (editedBlacklistEntries.length > 0) {
+                if (editedBlacklistEntries.size() > 0) {
 
-                    final String[] selectedBlacklistEntries = post.getAll("selectedBlacklistEntry.*");
+                    final Map<String, String> selectedBlacklistEntries = post.getMatchingEntries("selectedBlacklistEntry.*");
 
-                    if (selectedBlacklistEntries.length != editedBlacklistEntries.length) {
+                    if (selectedBlacklistEntries.size() != editedBlacklistEntries.size()) {
                         prop.put(serverObjects.ACTION_LOCATION, "");
                         return prop;
                     }
 
                     String temp = null;
+                    final HashMap<String, String> selected2EditedErrors = new HashMap<>();
+                    for (final Entry<String, String> selectedEntry : selectedBlacklistEntries.entrySet()) {
 
-                    for (int i = 0; i < selectedBlacklistEntries.length; i++) {
+                    	final String editedEntryValue = editedBlacklistEntries.get(selectedEntry.getKey().replace("selectedBlacklistEntry.", "editedBlacklistEntry."));
+                        if (!selectedEntry.getValue().equals(editedEntryValue)) {
 
-                        if (!selectedBlacklistEntries[i].equals(editedBlacklistEntries[i])) {
-
-                            if ((temp = BlacklistHelper.deleteBlacklistEntry(blacklistToUse, selectedBlacklistEntries[i], header)) != null) {
-                                prop.put(serverObjects.ACTION_LOCATION, temp);
-                                return prop;
-                            }
-
-                            if ((temp = BlacklistHelper.addBlacklistEntry(blacklistToUse, editedBlacklistEntries[i], header)) != null) {
+                        	/* Add first, to detect any eventual syntax errors before removing the old entry */
+                            if (!BlacklistHelper.addBlacklistEntry(blacklistToUse, editedEntryValue, header)) {
+                            	selected2EditedErrors.put(selectedEntry.getValue(), editedEntryValue);
+                            } else if ((temp = BlacklistHelper.deleteBlacklistEntry(blacklistToUse, selectedEntry.getValue(), header)) != null) {
                                 prop.put(serverObjects.ACTION_LOCATION, temp);
                                 return prop;
                             }
@@ -326,7 +327,39 @@ public class Blacklist_p {
 
                     Switchboard.urlBlacklist.clear();
                     ListManager.reloadBlacklists();
-                    prop.putHTML(DISABLED + EDIT + "currentBlacklist", blacklistToUse);
+                    if(selected2EditedErrors.isEmpty()) {
+                        prop.putHTML(DISABLED + EDIT + "currentBlacklist", blacklistToUse);
+                    } else {
+                    	/* At least one error occurred : display again entries with errors for edition */
+                    	prop.put(DISABLED + EDIT + "editError", true);
+                    	
+                    	final int maxDisplayedErrors = 10;
+                    	
+                    	int i = 0;
+                        for (final Entry<String, String> selected2Edited : selected2EditedErrors.entrySet()) {
+                        	/* We do not use here putHTML as we don't want '+' characters to be interpreted as application/x-www-form-urlencoded encoding */
+                            prop.put(DISABLED + EDIT + "editList_" + i + "_item", CharacterCoding.unicode2html(selected2Edited.getKey(), true));
+                            prop.put(DISABLED + EDIT + "editList_" + i + "_count", i);
+                            
+                        	/* We do not use here putHTML as we don't want '+' characters to be interpreted as application/x-www-form-urlencoded encoding */
+                            if(i < maxDisplayedErrors) {
+                            	prop.put(DISABLED + EDIT + "editError_list_" + i + "_item", CharacterCoding.unicode2html(selected2Edited.getValue(), true));
+                            }
+                            i++;
+                        }
+						if (selected2EditedErrors.size() > maxDisplayedErrors) {
+							prop.put(DISABLED + EDIT + "editError_hasMore", true);
+							prop.put(DISABLED + EDIT + "editError_hasMore_more",
+									selected2EditedErrors.size() - maxDisplayedErrors);
+						} else {
+							prop.put(DISABLED + EDIT + "editError_hasMore", false);
+						}
+                        prop.putHTML(DISABLED + EDIT + "currentBlacklist", blacklistToUse);
+                        prop.put(DISABLED + "edit", "1");
+                        prop.put(DISABLED + EDIT + "editList", selected2EditedErrors.size());
+                        prop.put(DISABLED + EDIT + "editError_list", Math.min(maxDisplayedErrors, selected2EditedErrors.size()));
+                    }
+                    
 
                 // else return entry to be edited
                 } else {

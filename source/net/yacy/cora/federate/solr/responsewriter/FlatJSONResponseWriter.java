@@ -47,7 +47,7 @@ import org.json.simple.JSONArray;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.util.JSONObject;
 
-public class FlatJSONResponseWriter implements QueryResponseWriter {
+public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
 
     private static final char lb = '\n';
     

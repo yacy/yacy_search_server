@@ -92,6 +92,11 @@ server.maxTrackingCount = 1000
 # maximum number of hosts that are tracked
 server.maxTrackingHostCount = 100
 
+# When set to true, enable gzip compression of HTTP responses when the user-agent (browser, another YaCy peer or any kind of client) 
+# accept gzip encoding (by including gzip in a 'Accept-Encoding' HTTP request header)
+# This adds some processing overhead, but reduces the amount of bytes sent over network.
+server.response.compress.gzip = true
+
 # Global HTTP Referrer policy delivered by meta tag (see https://www.w3.org/TR/referrer-policy/ for available policies)
 # Can be left empty : the browser should then fallback to the default "no-referrer-when-downgrade" policy
 # Be careful, some policies will also affect YaCy internal links : "no-referrer", "same-origin", "origin" and "strict-origin". This can be useful 
@@ -126,6 +131,10 @@ network.unit.domain.nocheck = false
 # this option is only used if the value is non-empty and network.unit.dht = false
 # that means it is not usable in YaCy p2p-configurations, only in private portal configurations
 network.unit.tenant.agent =
+
+# Prefer https for in-protocol operations when available on remote peers
+# A distinct general setting is available to control whether https sould be used for remote search queries : remotesearch.https.preferred
+network.unit.protocol.https.preferred = false
 
 # Update process properties
 # The update server location is given in the network.unit.definition,
@@ -201,6 +210,12 @@ clientTimeout = 10000
 # a limit on the number of concurrent connections
 httpdMaxBusySessions = 200
 
+# maximum number of simultaneously open outgoing HTTP connections in the general pool (net.yacy.cora.protocol.http.HTTPClient)
+http.outgoing.pool.general.maxTotal = 200
+
+# maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool (net.yacy.cora.federate.solr.instance.RemoteInstance)
+http.outgoing.pool.remoteSolr.maxTotal = 100
+
 # default root path for the file server
 # may be overridden by the htdocs parameter
 # users shall be encouraged to use the htdocs path for individual content,
@@ -275,6 +290,11 @@ surrogates.out = DATA/SURROGATES/out
 # this directory also contains subdirectories for input sources, the did-you-mean function and other
 dictionaries = DATA/DICTIONARIES
 
+# Set of comma separated vocabulary names whose terms should only be matched 
+# from linked data types annotations in documents (with microdata, RDFa, microformats...) 
+# instead of cleartext words
+vocabularies.matchLinkedData.names =
+
 # a path to the classification directory
 # each subdirectory is the name of a context (which becomes a navigator) with '.txt' files
 # containing texts to teach a bayesian filter. One of the files must be named 'negative.txt'.
@@ -288,6 +308,8 @@ releases = DATA/RELEASE
 # parser.mime.deny: specifies mime-types that shall not be indexed
 parser.mime.deny=
 parser.extensions.deny=
+# The audioTagParser is disabled by default as it needs to create a temporary file each time an audio resource is parsed
+# Audio file extensions and media types can be enabled in the ConfigParser_p.html page if this is not a problem with your install 
 parser.enableAudioTags=false
 
 # experimental single-page parser for pdf files: split one pdf into individual pages;
@@ -304,7 +326,7 @@ promoteSearchPageGreeting = Web Search by the People, for the People
 # if the following property is set to true, the network name is used as greeting
 promoteSearchPageGreeting.useNetworkName = false
 # the following attributes can be used to define a custom image, alternative text and home page on the search page
-promoteSearchPageGreeting.homepage = http://yacy.net
+promoteSearchPageGreeting.homepage = https://yacy.net
 promoteSearchPageGreeting.imageAlt = YaCy project web site
 promoteSearchPageGreeting.largeImage = env/grafics/YaCyLogo_120ppi.png
 promoteSearchPageGreeting.smallImage = env/grafics/YaCyLogo_60ppi.png
@@ -391,9 +413,9 @@ proxyClient=localhost,127\.0\.0\.1,192\.168\..*,10\..*,0:0:0:0:0:0:0:1.*
 # to prevent that the asked peer knows which peer asks.
 YaCyHop=true
 
-# serverClient: client-ip's that may connect to the web server,
+# serverClient: comma separated client-ip's that may connect to the web server,
 # thus are allowed to use the search service
-# if you set this to another value, search requst from others
+# if you set this to another value, search requests from others
 # are blocked, but you will also be blocked from using others
 # search services.
 serverClient=*
@@ -489,6 +511,8 @@ debug.search.remote.dht.off=false
 debug.search.remote.dht.testlocal=false
 debug.search.remote.solr.off=false
 debug.search.remote.solr.testlocal=false
+# Set to true to enable computation of statistics on text snippets processing 
+debug.snippets.statistics.enabled=false
 
 #staticIP if you have a static IP, you can use this setting
 staticIP=
@@ -839,6 +863,17 @@ search.audio = false
 search.video = false
 search.app = false
 
+# Strict content domain filtering : when false, results can be extended to documents including links to documents
+# of contentdom type, whithout being themselves of that type.
+# Examples :
+# - contentdom search param == image, strictContentDom == true
+#  - jpeg image : acceptable result
+#  - html page embedding images : rejected
+# - contentdom search param == image, strictContentDom == false
+#  - jpeg image : acceptable result
+#  - html page embedding images : acceptable result
+search.strictContentDom = false
+
 # number of search results per page displayed by default
 search.items = 10
 
@@ -859,7 +894,11 @@ search.result.noreferrer=false
 
 # search result lines may show additional information for each search hit
 # these information pieces may be switched on or off
+# When true the favicon (when available) of the website the URL belongs to is fetched and displayed
+search.result.show.favicon = true
 search.result.show.keywords = false
+# Maximum number of keywords initially displayed. The eventual remaining ones can then be expanded.
+search.result.keywords.firstMaxCount = 100
 search.result.show.date = true
 search.result.show.size = false
 search.result.show.metadata = false
@@ -870,6 +909,7 @@ search.result.show.cache = true
 search.result.show.proxy = false
 search.result.show.hostbrowser = true
 search.result.show.vocabulary = false
+# Set of comma separated vocabulary names not to be used as search results facets
 search.result.show.vocabulary.omit = 
 search.result.show.snapshots = false
 # when true, display the raw ranking score value
@@ -923,6 +963,8 @@ remotesearch.result.store=true
 remotesearch.result.store.maxsize=-1
 remotesearch.maxload.rwi=8.0
 remotesearch.maxload.solr=4.0
+# When available on the target peer, whether https should be preferred to perform remote search
+remotesearch.https.preferred = false
 
 # Control whether remote Solr instances responses should be binary encoded. Responses are transferred as XML when set to false. 
 remote.solr.binaryResponse.enabled=true
@@ -1054,6 +1096,9 @@ publicSearchpage = true
 # if this is disabled, then the user must navigate manually from the search page
 # to /Status.html to get the main memu bar back
 publicTopmenu = true
+
+# set to true to include a login link/status in the search page public top navigation bar
+search.publicTopNavBar.login = true
 
 # Wiki access rights
 # the built-in wiki system allows by default only that the administrator is allowed to make changes
@@ -1190,7 +1235,7 @@ content.phpbb3.dumpfile =
 about.headline=Please support YaCy!
 about.body=<iframe src="env/donate.html" width="100%" height="90" border="0" frameborder="0" scrolling="no" hspace="0" vspace="0" name="donate"></iframe><br/><div style="padding:8px;">If you run a YaCy server, feel free to replace our donation plea with your own support message, use the <a href="ConfigPortal_p.html">Portal Configuration</a> servlet.</div>
 
-donation.iframesource=http://yacy.net/include/donate.html
+donation.iframesource=https://yacy.net/include/donate.html
 donation.iframetarget=env/donate.html
 
 # search heuristics
@@ -1243,10 +1288,11 @@ color_searchurlhover = #1c65ba
 # because this default scheme is used the default example scheme can be used as solr configuration
 # to use this, do the following:
 # - set federated.service.solr.indexing.enabled = true
-# - download solr from http://www.apache.org/dyn/closer.cgi/lucene/solr/
-# - extract the solr (3.1) package, 'cd example' and start solr with 'java -jar start.jar'
+# - download a Solr package from http://www.apache.org/dyn/closer.cgi/lucene/solr/ with a version matching the current major Solr version in Yacy (see 'solr.version' in the pom.xml)
+# - extract the solr package, go to the extracted directory and start solr (for example with 'bin/solr start' or 'bin/solr start -cloud')
+# - create the 'collection1' and 'webgraph' collections with the appropriate configuration, for example with 'bin/solr create -c collection1 -d /yacy_src_dir/defaults/solr' 
 # - start yacy and then start a crawler. The crawler will fill both, YaCy and solr indexes.
-# - to check whats in solr after indexing, open http://localhost:8983/solr/admin/
+# - to check what is in solr after indexing, open http://localhost:8983/solr/
 federated.service.solr.indexing.enabled = false
 federated.service.solr.indexing.url = http://127.0.0.1:8983/solr
 federated.service.solr.indexing.sharding = MODULO_HOST_MD5
@@ -1254,6 +1300,8 @@ federated.service.solr.indexing.sharding = MODULO_HOST_MD5
 federated.service.solr.indexing.lazy = true
 federated.service.solr.indexing.timeout = 60000
 federated.service.solr.indexing.writeEnabled = true
+# Set to true when TLS is enabled with a self-signed certificated on a main external Solr with authentication required ( its URL looks like https://user:password@localhost:8984/solr/) 
+federated.service.solr.indexing.authenticated.allowSelfSigned = false
 
 # temporary definition of backend services to use.
 # After the migration a rwi+solr combination is used, the solr contains the content of the previously used metadata-db.

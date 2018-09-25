@@ -31,6 +31,7 @@
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.UserDB;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionSchema;
@@ -52,13 +53,30 @@ public class index {
         }
 
         // access control
-        final boolean authorizedAccess = sb.verifyAuthentication(header);
-        if ((post != null) && (post.containsKey("publicPage"))) {
-            if (!authorizedAccess) {
-            	prop.authenticationRequired();
-                return prop;
-            }
+        String authenticatedUserName = null;
+        final boolean adminAuthenticated = sb.verifyAuthentication(header);
+        
+        if(adminAuthenticated) {
+			authenticatedUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+        } else {
+        	final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
+        	if(user != null) {
+                authenticatedUserName = user.getUserName();
+        	}
         }
+        boolean authenticated = adminAuthenticated || authenticatedUserName != null;
+		if (post != null) {
+			if (post.containsKey("publicPage") && !adminAuthenticated) { // Old style parameter : still in use ?
+				prop.authenticationRequired();
+				return prop;
+			}
+			if (post.containsKey("auth") && !authenticated) { // search with authentication required
+				prop.authenticationRequired();
+				return prop;
+			}
+		}
+		
+        prop.put("authSearch", authenticated);
         
         boolean global = (post == null) ? true : post.get("resource", "global").equals("global");
         final boolean focus  = (post == null) ? true : post.get("focus", "1").equals("1");
@@ -116,6 +134,9 @@ public class index {
         prop.put("searchoptions_prefermaskoptions", "0");
         prop.putHTML("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
         prop.put("searchoptions_indexofChecked", "");
+		prop.put("searchoptions_" + SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
+				sb.getConfigBool(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
+						SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT) ? 1 : 0);
         prop.put("results", "");
         prop.put("type", type);
         prop.put("depth", "0");
@@ -124,6 +145,7 @@ public class index {
         prop.putHTML("constraint", constraint);
         prop.put("searchdomswitches", sb.getConfigBool("search.text", true) || sb.getConfigBool("search.audio", true) || sb.getConfigBool("search.video", true) || sb.getConfigBool("search.image", true) || sb.getConfigBool("search.app", true) ? 1 : 0);
         prop.put("searchdomswitches_searchoptions", searchoptions);
+        prop.put("searchdomswitches_searchoptions_authSearch", authenticated);
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
         prop.put("searchdomswitches_searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
         prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
@@ -136,9 +158,47 @@ public class index {
         prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
         prop.put("search.navigation", sb.getConfig("search.navigation", "all") );
         prop.put("search.verify", sb.getConfig("search.verify", "iffresh") );
+        
+        handleTopNavBarLoginSection(header, sb, prop, authenticatedUserName);
+        
         // online caution timing
         sb.localSearchLastAccess = System.currentTimeMillis();
 
         return prop;
     }
+
+    /**
+     * Add any eventually relevant information to generate the proper login link or status in the top navigation bar
+     * @param header the current request headers
+     * @param sb the server environment
+     * @param prop the servlet answer object
+     * @param authenticatedUserName the name of the currently authenticated user or null
+     */
+	private static void handleTopNavBarLoginSection(final RequestHeader header, final Switchboard sb,
+			final serverObjects prop, final String authenticatedUserName) {
+		final boolean showLogin = sb.getConfigBool(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
+				SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT);
+        if(showLogin) {
+        	if(authenticatedUserName != null) {
+        		/* Show the name of the authenticated user */
+        		prop.put("showLogin", 1);
+        		prop.put("showLogin_userName", authenticatedUserName);
+        	} else {
+        		/* Show a login link */
+        		prop.put("showLogin", 2);
+        		
+        		/* The login link targets the same URL as the current location, just adding the 'auth' parameter to indicates that access to extended search features is desired */
+            	StringBuilder loginURL = new StringBuilder("index.html?auth");
+            	final String query = header.getQueryString();
+            	if(query != null) {
+            		loginURL.append("&").append(query);
+            	}
+            	
+        		
+    			prop.put("showLogin_loginURL", loginURL.toString());
+        	}
+        } else {
+        	prop.put("showLogin", 0);
+        }
+	}
 }

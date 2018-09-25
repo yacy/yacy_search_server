@@ -38,6 +38,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -70,7 +71,7 @@ public class Blacklist {
 
         @Override
         public final String toString () {
-            return super.toString().toLowerCase();
+            return super.toString().toLowerCase(Locale.ROOT);
         }
     }
 
@@ -328,10 +329,11 @@ public class Blacklist {
 	 *            source file
 	 * @param items
 	 *            blacklist host/path items to add
-	 * @throws PunycodeException
+	 * @throws PunycodeException when a entry domain name could not be Punycode encoded
+	 * @throws PatternSyntaxException when an entry regular expression is not valid
 	 */
 	public final void add(final BlacklistType blacklistType, final String blacklistToUse,
-			final Collection<BlacklistHostAndPath> items) throws PunycodeException {
+			final Collection<BlacklistHostAndPath> items) throws PunycodeException, PatternSyntaxException {
 
 		if (items != null) {
 			PrintWriter pw = null;
@@ -367,7 +369,7 @@ public class Blacklist {
 
 					// avoid PatternSyntaxException e
 					final String h = ((!isMatchable(safeHost) && !safeHost.isEmpty() && safeHost.charAt(0) == '*')
-							? "." + safeHost : safeHost).toLowerCase();
+							? "." + safeHost : safeHost).toLowerCase(Locale.ROOT);
 					if (!p.isEmpty() && p.charAt(0) == '*') {
 						p = "." + p;
 					}
@@ -408,9 +410,11 @@ public class Blacklist {
      * @param blacklistToUse source file
      * @param host
      * @param path
-     * @throws PunycodeException
+	 * @throws PunycodeException when a entry domain name could not be Punycode encoded
+	 * @throws PatternSyntaxException when an entry regular expression is not valid
      */
-    public final void add(final BlacklistType blacklistType, final String blacklistToUse, final String host, final String path) throws PunycodeException {
+	public final void add(final BlacklistType blacklistType, final String blacklistToUse, final String host,
+			final String path) throws PunycodeException, PatternSyntaxException {
     	final Collection<BlacklistHostAndPath> oneItemList = new ArrayList<>();
     	oneItemList.add(new BlacklistHostAndPath(host, path));
         this.add(blacklistType, blacklistToUse, oneItemList);
@@ -436,7 +440,7 @@ public class Blacklist {
         String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
 
         // avoid PatternSyntaxException e
-        String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
+        String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase(Locale.ROOT);
         
         h = Punycode.isBasic(h) ? h : MultiProtocolURL.toPunycode(h);
         
@@ -516,7 +520,7 @@ public class Blacklist {
             final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
             // avoid PatternSyntaxException e
-            final String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase();
+            final String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase(Locale.ROOT);
 
             final Set<Pattern> hostList = blacklistMap.get(h);
             if (hostList != null) {
@@ -549,7 +553,7 @@ public class Blacklist {
         HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);
         if (urlHashCache == null) {
             urlHashCache = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0);
-            if (isListed(blacklistType, url.getHost().toLowerCase(), url.getFile())) {
+            if (isListed(blacklistType, url.getHost().toLowerCase(Locale.ROOT), url.getFile())) {
                 try {
                     urlHashCache.put(url.hash());
                 } catch (final SpaceExceededException e) {
@@ -559,7 +563,7 @@ public class Blacklist {
             }
         }
         if (!urlHashCache.has(url.hash())) {
-            final boolean temp = isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
+            final boolean temp = isListed(blacklistType, url.getHost().toLowerCase(Locale.ROOT), url.getFile());
             if (temp) {
                 try {
                     urlHashCache.put(url.hash());

@@ -23,6 +23,7 @@ package net.yacy.cora.federate.solr.responsewriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -32,12 +33,12 @@ import net.yacy.cora.federate.solr.SolrType;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrInputField;
 import org.apache.solr.common.util.NamedList;
-import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.common.util.XML;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
@@ -49,9 +50,11 @@ import org.apache.solr.schema.SchemaField;
 import org.apache.solr.schema.TextField;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
+import org.apache.solr.search.ReturnFields;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.search.SolrReturnFields;
 
-public class EnhancedXMLResponseWriter implements QueryResponseWriter {
+public class EnhancedXMLResponseWriter implements QueryResponseWriter, SolrjResponseWriter {
 
     private static final char lb = '\n';
     private static final char[] XML_START = "<?xml version = \"1.0\" encoding = \"UTF-8\"?>\n<response>\n".toCharArray();
@@ -73,24 +76,38 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
         writer.write(XML_START);
-        NamedList<?> values = rsp.getValues();
+        final NamedList<?> values = rsp.getValues();
         
         assert values.get("responseHeader") != null;
         assert values.get("response") != null;
 
-        SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocList response = ((ResultContext) values.get("response")).getDocList();
-        @SuppressWarnings("unchecked")
-        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
+        final NamedList<Object> responseHeader = rsp.getResponseHeader();
+        final Object responseObj = rsp.getResponse();
         writeProps(writer, "responseHeader", responseHeader); // this.writeVal("responseHeader", responseHeader);
-        writeDocs(writer, request, response); // this.writeVal("response", response);
-        writeProps(writer, "highlighting", highlighting);
+        
+        if(responseObj instanceof ResultContext) {
+        	/* Regular response object */
+        	writeDocs(writer, request, ((ResultContext) responseObj).getDocList(), rsp.getReturnFields());
+        } else if(responseObj instanceof SolrDocumentList) {
+			/*
+			 * The response object can be a SolrDocumentList when the response is partial,
+			 * for example when the allowed processing time has been exceeded
+			 */
+        	writeDocs(writer, (SolrDocumentList)responseObj, rsp.getReturnFields());
+        } else {
+        	throw new IOException("Unable to process Solr response format");
+        }
+        final Object highlightingObj = values.get("highlighting");
+        if(highlightingObj instanceof NamedList ) {
+        	writeProps(writer, "highlighting", (NamedList<?>)highlightingObj);
+        }
         writer.write(XML_STOP);
     }
 
-    public static void write(final Writer writer, final SolrQueryRequest request, final SolrDocumentList sdl) throws IOException {
+    @Override
+    public void write(final Writer writer, final SolrQueryRequest request, final String coreName, final QueryResponse response) throws IOException {
         writer.write(XML_START);
-        writeDocs(writer, request, sdl);
+        writeDocs(writer, response.getResults(), request != null ? new SolrReturnFields(request) : new SolrReturnFields());
         writer.write(XML_STOP);
     }
 
@@ -113,7 +130,7 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         }
     }
 
-    private static final void writeDocs(final Writer writer, final SolrQueryRequest request, final DocList response) throws IOException {
+    private static final void writeDocs(final Writer writer, final SolrQueryRequest request, final DocList response, final ReturnFields returnFields) throws IOException {
         boolean includeScore = false;
         final int sz = response.size();
         writer.write("<result");
@@ -135,13 +152,13 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         for (int i = 0; i < sz; i++) {
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id);
-            writeDoc(writer, schema, null, doc.getFields(), (includeScore ? iterator.score() : 0.0f), includeScore);
+            writeDoc(writer, schema, null, doc.getFields(), (includeScore ? iterator.score() : 0.0f), includeScore, returnFields);
         }
         writer.write("</result>");
         writer.write(lb);
     }
     
-    private static final void writeDocs(final Writer writer, @SuppressWarnings("unused") final SolrQueryRequest request, final SolrDocumentList docs) throws IOException {
+    private static final void writeDocs(final Writer writer, final SolrDocumentList docs, final ReturnFields returnFields) throws IOException {
         boolean includeScore = false;
         final int sz = docs.size();
         writer.write("<result");
@@ -159,18 +176,25 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         Iterator<SolrDocument> iterator = docs.iterator();
         for (int i = 0; i < sz; i++) {
             SolrDocument doc = iterator.next();
-            writeDoc(writer, doc);
+            writeDoc(writer, doc, returnFields);
         }
         writer.write("</result>");
         writer.write(lb);
     }
 
-    private static final void writeDoc(final Writer writer, final IndexSchema schema, final String name, final List<IndexableField> fields, final float score, final boolean includeScore) throws IOException {
+	private static final void writeDoc(final Writer writer, final IndexSchema schema, final String name,
+			final List<IndexableField> fields, final float score, final boolean includeScore,
+			final ReturnFields returnFields) throws IOException {
         startTagOpen(writer, "doc", name);
 
         if (includeScore) {
             writeTag(writer, "float", "score", Float.toString(score), false); // this is the special Solr "score" pseudo-field
         }
+        
+        /* Fields may be renamed in the ouput result, using aliases in the 'fl' parameter 
+         * (see https://lucene.apache.org/solr/guide/6_6/common-query-parameters.html#CommonQueryParameters-FieldNameAliases) */
+		final Map<String, String> fieldRenamings = returnFields == null ? Collections.emptyMap()
+				: returnFields.getFieldRenames();
 
         int sz = fields.size();
         int fidx1 = 0, fidx2 = 0;
@@ -181,30 +205,35 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
             while (fidx2 < sz && fieldName.equals(fields.get(fidx2).name())) {
                 fidx2++;
             }
-            SchemaField sf = schema == null ? null : schema.getFieldOrNull(fieldName);
-            if (sf == null) {
-                sf = new SchemaField(fieldName, new TextField());
-            }
-            FieldType type = sf.getType();
-            if (fidx1 + 1 == fidx2) {
-                if (sf.multiValued()) {
-                    startTagOpen(writer, "arr", fieldName);
-                    writer.write(lb);
-                    String sv = value.stringValue();
-                    writeField(writer, type.getTypeName(), null, sv); //sf.write(this, null, f1);
-                    writer.write("</arr>");
-                } else {
-                    writeField(writer, type.getTypeName(), value.name(), value.stringValue()); //sf.write(this, f1.name(), f1);
-                }
-            } else {
-                startTagOpen(writer, "arr", fieldName);
-                writer.write(lb);
-                for (int i = fidx1; i < fidx2; i++) {
-                    String sv = fields.get(i).stringValue();
-                    writeField(writer, type.getTypeName(), null, sv); //sf.write(this, null, (Fieldable)this.tlst.get(i));
-                }
-                writer.write("</arr>");
-                writer.write(lb);
+            if(returnFields == null || returnFields.wantsField(fieldName)) {
+            	SchemaField sf = schema == null ? null : schema.getFieldOrNull(fieldName);
+            	if (sf == null) {
+            		sf = new SchemaField(fieldName, new TextField());
+            	}
+            	
+            	final String renderedFieldName = fieldRenamings.getOrDefault(fieldName, fieldName);
+            	
+            	FieldType type = sf.getType();
+            	if (fidx1 + 1 == fidx2) {
+            		if (sf.multiValued()) {
+            			startTagOpen(writer, "arr", renderedFieldName);
+            			writer.write(lb);
+            			String sv = value.stringValue();
+            			writeField(writer, type.getTypeName(), null, sv); //sf.write(this, null, f1);
+            			writer.write("</arr>");
+            		} else {
+            			writeField(writer, type.getTypeName(), renderedFieldName, value.stringValue()); //sf.write(this, f1.name(), f1);
+            		}
+            	} else {
+            		startTagOpen(writer, "arr", renderedFieldName);
+            		writer.write(lb);
+            		for (int i = fidx1; i < fidx2; i++) {
+            			String sv = fields.get(i).stringValue();
+            			writeField(writer, type.getTypeName(), null, sv); //sf.write(this, null, (Fieldable)this.tlst.get(i));
+            		}
+            		writer.write("</arr>");
+            		writer.write(lb);
+            	}
             }
             fidx1 = fidx2;
         }
@@ -233,26 +262,67 @@ public class EnhancedXMLResponseWriter implements QueryResponseWriter {
         writer.write(lb);
     }
     
-    public static final void writeDoc(final Writer writer, final SolrDocument doc) throws IOException {
+	/**
+	 * Append XML representation of the given Solr document to the writer
+	 * 
+	 * @param writer
+	 *            an open writer. Must not be null.
+	 * @param doc
+	 *            the solr document to write. Must not be null.
+	 * @param returnFields
+	 *            the eventual fields return configuration, allowing for example to
+	 *            restrict the actually returned fields. May be null.
+	 * @throws IOException
+	 *             when a write error occurred
+	 */
+    private static final void writeDoc(final Writer writer, final SolrDocument doc, final ReturnFields returnFields) throws IOException {
         startTagOpen(writer, "doc", null);
+        
+        /* Fields may be renamed in the ouput result, using aliases in the 'fl' parameter 
+         * (see https://lucene.apache.org/solr/guide/6_6/common-query-parameters.html#CommonQueryParameters-FieldNameAliases) */
+		final Map<String, String> fieldRenamings = returnFields == null ? Collections.emptyMap()
+				: returnFields.getFieldRenames();
+        
         final Map<String, Object> fields = doc.getFieldValueMap();
         for (String key: fields.keySet()) {
-            if (key == null)  continue;
+            if (key == null) {
+            	continue;
+            }
+            if (returnFields != null && !returnFields.wantsField(key)) {
+                continue;
+            }
             Object value = doc.get(key);
+            
+			final String renderedFieldName = fieldRenamings.getOrDefault(key, key);
+            
             if (value == null) {
             } else if (value instanceof Collection<?>) {
-                startTagOpen(writer, "arr", key);
+                startTagOpen(writer, "arr", renderedFieldName);
                 writer.write(lb);
                 for (Object o: ((Collection<?>) value)) {
                     writeField(writer, null, o);
                 }
                 writer.write("</arr>"); writer.write(lb);
             } else {
-                writeField(writer, key, value);
+                writeField(writer, renderedFieldName, value);
             }
         }
         writer.write("</doc>");
         writer.write(lb);
+    }
+    
+	/**
+	 * Append XML representation of the given Solr document to the writer
+	 * 
+	 * @param writer
+	 *            an open writer. Must not be null.
+	 * @param doc
+	 *            the solr document to write. Must not be null.
+	 * @throws IOException
+	 *             when a write error occurred
+	 */
+    public static final void writeDoc(final Writer writer, final SolrDocument doc) throws IOException {
+        writeDoc(writer, doc, null);
     }
 
     private static void writeField(final Writer writer, final String typeName, final String name, final String value) throws IOException {

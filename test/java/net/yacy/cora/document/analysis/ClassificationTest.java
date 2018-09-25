@@ -20,6 +20,7 @@
 package net.yacy.cora.document.analysis;
 
 import java.io.File;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -42,9 +43,55 @@ public class ClassificationTest {
      */
     @Test
     public void testExt2mime_String() {
-        String mime;
-        mime = Classification.ext2mime("Z");
-        assertEquals("application/x-compress", mime);
+        assertEquals("application/x-compress", Classification.ext2mime("Z"));
+        assertEquals("application/x-compress", Classification.ext2mime("z"));
+        
+        assertEquals("image/tiff", Classification.ext2mime("TIFF"));
+        assertEquals("image/tiff", Classification.ext2mime("tiff"));
+        
+        assertEquals("image/tiff", Classification.ext2mime("TIFF", "image/tiff"));
+        assertEquals("image/tiff", Classification.ext2mime("tiff", "image/tiff"));
+    }
+    
+	/**
+	 * Test of isNNNExtension methods with lower and upper case samples, containing
+	 * notably the 'i' character which case conversion is different whith the Turkish
+	 * locale. THis test be successful with any default system locale.
+	 */
+    @Test
+    public void testIsExtension() {
+        assertTrue(Classification.isApplicationExtension("ISO"));
+        assertTrue(Classification.isApplicationExtension("iso"));
+        
+        assertTrue(Classification.isAudioExtension("AIF"));
+        assertTrue(Classification.isAudioExtension("aif"));
+        
+        assertTrue(Classification.isVideoExtension("AVI"));
+        assertTrue(Classification.isVideoExtension("avi"));
+        
+        assertTrue(Classification.isImageExtension("GIF"));
+        assertTrue(Classification.isImageExtension("gif"));
+        
+        assertTrue(Classification.isControlExtension("SHA1"));
+        assertTrue(Classification.isControlExtension("sha1"));
+        
+        assertTrue(Classification.isMediaExtension("GIF"));
+        assertTrue(Classification.isMediaExtension("gif"));
+        
+        assertTrue(Classification.isAnyKnownExtension("GIF"));
+        assertTrue(Classification.isAnyKnownExtension("gif"));
+    }
+    
+    /**
+     * Test of isPictureMime method with some sample media types.
+     */
+    @Test
+    public void testIsPictureMime() {
+        assertTrue(Classification.isPictureMime("image/jpeg"));
+        assertTrue(Classification.isPictureMime("IMAGE/JPEG"));
+        
+        assertFalse(Classification.isPictureMime("text/html"));
+        assertFalse(Classification.isPictureMime("TEXT/HTML"));
     }
 
 }

@@ -38,7 +38,8 @@ Options
   -h, --help		show this help
   -t, --tail-log	show the output of "tail -f DATA/LOG/yacy00.log" after starting YaCy
   -l, --logging		save the output of YaCy to yacy.log
-  -d, --debug		show the output of YaCy on the console
+  -d, --debug		show the output of YaCy on the console and enable remote monitoring with JMX
+  -f, --foreground	run as a foreground process, showing the output of YaCy on the console
   -p, --print-out	only print the command, which would be executed to start YaCy
   -s, --startup [data-path] start YaCy using the specified data folder path, relative to the current user home
   -g, --gui		start a gui for YaCy
@@ -57,7 +58,7 @@ then
 		
         options="`getopt hdlptsg: $*`"
 else
-        options="`getopt -n YaCy -o h,d,l,p,t,s,g -l help,debug,logging,print-out,tail-log,startup,gui -- $@`"
+        options="`getopt -u -n YaCy -o h,d,f,l,p,t,s,g -l help,debug,foreground,logging,print-out,tail-log,startup,gui -- $@`"
 fi
 
 if [ $? -ne 0 ];then
@@ -70,6 +71,7 @@ parameter="" #parameters will be collected here
 
 LOGGING=0
 DEBUG=0
+FOREGROUND=0
 PRINTONLY=0
 TAILLOG=0
 STARTUP=0
@@ -87,6 +89,10 @@ for option in $options;do
 					echo "can not combine -l and -d"
 					exit 1;
 				fi
+				if [ $FOREGROUND -eq 1 ];then
+					echo "can not combine -l and -f"
+					exit 1;
+				fi
 				;;
 			-d|--debug)
 				DEBUG=1
@@ -94,6 +100,13 @@ for option in $options;do
                 JAVA_ARGS="$JAVA_ARGS -ea -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 				if [ $LOGGING -eq 1 ];then
 					echo "can not combine -l and -d"
+					exit 1;
+				fi
+				;;
+			-f|--foreground)
+				FOREGROUND=1
+				if [ $LOGGING -eq 1 ];then
+					echo "can not combine -l and -f"
 					exit 1;
 				fi
 				;;
@@ -209,6 +222,8 @@ fi
 if [ $DEBUG -eq 1 ] #debug
 then
 	cmdline=$cmdline
+elif [ $FOREGROUND -eq 1 ];then # foreground process without remote JMX monitoring
+	cmdline=$cmdline
 elif [ $LOGGING -eq 1 ];then #logging
 	cmdline="$cmdline >> yacy.log & echo \$! > $PIDFILE"
 else
@@ -226,6 +241,9 @@ else
 	echo "*******************************************************************************"
 	if [ $DEBUG -eq 1 ] #debug
 	then
+		# with exec the java process become the main process and will receive signals such as SIGTERM
+		exec $cmdline
+	elif [ $FOREGROUND -eq 1 ];then # foreground process without remote JMX monitoring
 		# with exec the java process become the main process and will receive signals such as SIGTERM
 		exec $cmdline
 	else

@@ -60,6 +60,7 @@
     </form>
     <p><br /></p>
     <form action="IndexReIndexMonitor_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[IndexReIndex_transactionToken]#"/>
       <fieldset>
         <legend><label>Reindex documents</label></legend>  
         <p>If you unselected some fields, old documents in the index still contain the unselected fields.

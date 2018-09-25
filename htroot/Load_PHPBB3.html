@@ -45,6 +45,7 @@
         <input type="hidden" name="mustmatch" value=".*" />
         <input type="hidden" name="mustnotmatch" value=".*memberlist.*|.*previous.*|.*next.*|.*start=.*|.*p=.*" />
         <input type="hidden" name="range" value="subpath" />
+        <input type="hidden" name="cleanSearchCache" id="cleanSearchCache" value=#(cleanSearchCacheChecked)#"off"::"on"#(/cleanSearchCacheChecked)# />
         <input type="hidden" name="crawlingIfOlderCheck" value="on"/>
         <input type="hidden" name="crawlingIfOlderNumber" value="1" />
         <input type="hidden" name="crawlingIfOlderUnit" value="day" />
@@ -76,11 +77,11 @@
       <li>find the line where the default search window is displayed, thats right behind the <pre>&lt;div id="search-box"&gt;</pre> statement</li>
       <li>Insert the following code right behind the div tag:
         <pre>
-&lt;script src="http://#[address]#/yacy/ui/js/jquery-1.3.2.min.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="#[address]#/yacy/ui/js/jquery-1.3.2.min.js" type="text/javascript"&gt;&lt;/script&gt;
 &lt;script&gt;
    $(document).ready(function() {
       yconf = {
-         url : 'http://#[address]#/',
+         url : '#[address]#/',
          title : 'YaCy Forum Search',
          width : 500,
          height : 600,
@@ -90,7 +91,7 @@
    });
 &lt;/script&gt;
 &lt;div id="yacylivesearch"&gt;
-   &lt;form id="ysearch" method="get" accept-charset="UTF-8" action="http://#[address]#/yacysearch.html"&gt;
+   &lt;form id="ysearch" method="get" accept-charset="UTF-8" action="#[address]#/yacysearch.html"&gt;
       &lt;input name="search" id="yquery" type="text" size="16" maxlength="128" title="{L_SEARCH_KEYWORDS}" class="inputbox search" value=""/&gt;
       &lt;input type="hidden" name="verify" value="cacheonly" /&gt;
       &lt;input type="hidden" name="maximumRecords" value="10" /&gt;

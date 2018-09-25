@@ -40,7 +40,6 @@ package net.yacy.peers;
 
 import java.net.MalformedURLException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -49,11 +48,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.feed.RSSFeed;
 import net.yacy.cora.document.feed.RSSMessage;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.peers.operation.yacySeedUploadFile;
@@ -187,34 +188,53 @@ public class Network
         publishMySeed();
     }
 
-    // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_SECOND_FORMATTER = new GenericFormatter(
-        GenericFormatter.FORMAT_SHORT_SECOND,
-        GenericFormatter.time_second);
-
     protected class publishThread extends Thread
     {
-        private Map<String, String> result;
         private final Seed seed;
 
         public publishThread(final ThreadGroup tg, final Seed seed) {
             super(tg, "PublishSeed_" + seed.getName());
             this.seed = seed;
-            this.result = null;
         }
 
         @Override
         public final void run() {
+        	Map<String, String> result = null;
             try {
-                for (String ip: this.seed.getIPs()) {
-                    this.result = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions, this.seed.getPublicAddress(ip), this.seed.hash);
-                    if ( this.result == null ) {
-                        // no or wrong response, delete that address
-                        final String cause = "peer ping to peer resulted in error response (added < 0)";
+				final boolean preferHttps = Network.this.sb.getConfigBool(
+						SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+						SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+                for (final String ip: this.seed.getIPs()) {
+                	try {
+                		MultiProtocolURL targetBaseURL = this.seed.getPublicMultiprotocolURL(ip, preferHttps);
+                        result = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions, targetBaseURL, this.seed.hash);
+						if (result == null && targetBaseURL.isHTTPS()) {
+							/* Failed with https : retry with http on the same address */
+							targetBaseURL = this.seed.getPublicMultiprotocolURL(ip, false);
+							result = Protocol.hello(Network.this.sb.peers.mySeed(), Network.this.sb.peers.peerActions,
+									targetBaseURL, this.seed.hash);
+							if (result != null) {
+								/* Got a result using http : mark SSL as unavailable on the peer */
+								log.info("publish: SSL/TLS unavailable on " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '"
+										+ this.seed.getName() + "' : can be reached using http but not https on address "
+										+ ip);
+	                            this.seed.setFlagSSLAvailable(false);
+	                            Network.this.sb.peers.updateConnected(this.seed);
+							}
+						}
+                        if(result == null) {
+                            // no or wrong response, delete that address
+                            final String cause = "peer ping to peer resulted in error response (added < 0)";
+                            log.info("publish: disconnected " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' from " + this.seed.getIPs() + ": " + cause);
+                            Network.this.sb.peers.peerActions.interfaceDeparture(this.seed, ip);
+                            continue;
+                        }
+                	} catch(final MalformedURLException e) {
+                        final String cause = "malformed peer URL";
                         log.info("publish: disconnected " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' from " + this.seed.getIPs() + ": " + cause);
                         Network.this.sb.peers.peerActions.interfaceDeparture(this.seed, ip);
-                        continue;
-                    }
+                		continue;
+                	}
                     // success! we have published our peer to a senior peer
                     // update latest news from the other peer
                     log.info("publish: handshaked "+ this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs());
@@ -231,13 +251,19 @@ public class Network
                             // update last seed date
                             if ( newSeed.getLastSeenUTC() >= this.seed.getLastSeenUTC() ) {
                                 if ( log.isFine() ) {
-                                    log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " with old LastSeen: '" + my_SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "'");
+									final String newSeedLastSeenStr = GenericFormatter.formatSafely(
+											newSeed.getLastSeenUTC(), GenericFormatter.FORMAT_SHORT_SECOND);
+                                    log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " with old LastSeen: '" + newSeedLastSeenStr + "'");
                                 }
                                 newSeed.setLastSeenUTC();
                                 Network.this.sb.peers.peerActions.peerArrival(newSeed, true);
                             } else {
                                 if ( log.isFine() ) {
-                                    log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " with old LastSeen: '" + my_SHORT_SECOND_FORMATTER.format(new Date(newSeed.getLastSeenUTC())) + "', this is more recent: '" + my_SHORT_SECOND_FORMATTER.format(new Date(this.seed.getLastSeenUTC())) + "'");
+									final String newSeedLastSeenStr = GenericFormatter.formatSafely(
+											newSeed.getLastSeenUTC(), GenericFormatter.FORMAT_SHORT_SECOND);
+									final String thisSeedLastSeenStr = GenericFormatter.formatSafely(
+											newSeed.getLastSeenUTC(), GenericFormatter.FORMAT_SHORT_SECOND);
+                                    log.fine("publish: recently handshaked " + this.seed.get(Seed.PEERTYPE, Seed.PEERTYPE_SENIOR) + " peer '" + this.seed.getName() + "' at " + this.seed.getIPs() + " with old LastSeen: '" + newSeedLastSeenStr + "', this is more recent: '" + thisSeedLastSeenStr + "'");
                                 }
                                 this.seed.setLastSeenUTC();
                                 Network.this.sb.peers.peerActions.peerArrival(this.seed, true);
@@ -347,18 +373,24 @@ public class Network
                 }
                 i++;
 
-                String ip = seed.getIP();
-                final String address = seed.getPublicAddress(ip);
-                if ( log.isFine() ) log.fine("HELLO #" + i + " to peer '" + seed.get(Seed.NAME, "") + "' at " + address); // debug
-                final String seederror = seed.isProper(false);
-                if ( (address == null) || (seederror != null) ) {
-                    // we don't like that address, delete it
-                    this.sb.peers.peerActions.interfaceDeparture(seed, ip);
+                final Set<String> ips = seed.getIPs();
+                if(ips.isEmpty()) {
+                	/* This should not happen : seeds db maintains only seeds with at least one IP */
+                	log.warn("Peer " + seed.getName() + "has no known IP address");
                 } else {
-                    // starting a new publisher thread
-                    publishThread t = new publishThread(Network.publishThreadGroup, seed);
-                    t.start();
-                    syncList.add(t);
+                	String ip = ips.iterator().next();
+                	final String address = seed.getPublicAddress(ip);
+                	if ( log.isFine() ) log.fine("HELLO #" + i + " to peer '" + seed.getName() + "' at " + address); // debug
+                	final String seederror = seed.isProper(false);
+                	if ( (address == null) || (seederror != null) ) {
+                		// we don't like that address, delete it
+                		this.sb.peers.peerActions.interfaceDeparture(seed, ip);
+                	} else {
+                		// starting a new publisher thread
+                		publishThread t = new publishThread(Network.publishThreadGroup, seed);
+                		t.start();
+                		syncList.add(t);
+                	}
                 }
             }
 
@@ -557,7 +589,7 @@ public class Network
             String logt;
 
             // be shure that we have something to say
-            if ( sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()) == null ) {
+            if (sb.peers.mySeed().getIPs().isEmpty()) {
                 final String errorMsg = "We have no valid IP address until now";
                 log.warn("SaveSeedList: " + errorMsg);
                 return errorMsg;
@@ -671,7 +703,10 @@ public class Network
         } finally {
             sb.peers.lastSeedUpload_seedDBSize = sb.peers.sizeConnected();
             sb.peers.lastSeedUpload_timeStamp = System.currentTimeMillis();
-            sb.peers.lastSeedUpload_myIP = sb.peers.mySeed().getIP();
+            final Set<String> myIPs = sb.peers.myIPs();
+            if(!myIPs.isEmpty()) {
+                sb.peers.lastSeedUpload_myIP = myIPs.iterator().next();	
+            }
         }
     }
 

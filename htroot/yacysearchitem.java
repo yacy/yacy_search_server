@@ -33,6 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -102,13 +103,14 @@ public class yacysearchitem {
         final boolean adminAuthenticated = sb.verifyAuthentication(header);
         
 		final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-		final boolean userAuthenticated = (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
-		final boolean authenticated = adminAuthenticated || userAuthenticated;
-        
+		final boolean authenticated = adminAuthenticated || user != null;
+
+        final boolean extendedSearchRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
+		
         final int item = post.getInt("item", -1);
         final RequestHeader.FileType fileType = header.fileType();
 
-		if (post.containsKey("auth") && !authenticated) {
+		if (post.containsKey("auth") && !adminAuthenticated && user == null) {
 			/*
 			 * Access to authentication protected features is explicitely requested here
 			 * but no authentication is provided : ask now for authentication.
@@ -119,7 +121,7 @@ public class yacysearchitem {
 			prop.authenticationRequired();
 			return prop;
 		}
-
+		
         // default settings for blank item
         prop.put("content", "0");
         prop.put("rss", "0");
@@ -177,6 +179,11 @@ public class yacysearchitem {
             prop.putXML("content_title-xml", result.title());
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_showPictures_link", resultUrlstring);
+            prop.put("content_showPictures_authSearch", authenticated);
+            
+            /* Add information about the current search navigators to let browser refresh yacysearchtrailer only if needed */
+            prop.put("content_nav-generation", theSearch.getNavGeneration());
+            
             //prop.putHTML("content_link", resultUrlstring);
             
 // START interaction
@@ -215,9 +222,13 @@ public class yacysearchitem {
             String resultFileName = resultURL.getFileName();
             prop.putHTML("content_target", target);
             DigestURL faviconURL = null;
-            if ((fileType == FileType.HTML || fileType == FileType.JSON) && (resultURL.isHTTP() || resultURL.isHTTPS())) {
-            	faviconURL = getFaviconURL(result, new Dimension(16, 16));
-            }
+			final boolean showFavicon = sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON,
+					SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON_DEFAULT);
+            
+			if (((fileType == FileType.HTML && showFavicon) || fileType == FileType.JSON)
+					&& (resultURL.isHTTP() || resultURL.isHTTPS())) {
+				faviconURL = getFaviconURL(result, new Dimension(16, 16));
+			}
             if(faviconURL == null) {
             	prop.put("content_favicon", 0);
             } else {
@@ -234,12 +245,13 @@ public class yacysearchitem {
                 	prop.putXML("content_image_url", faviconURL.toNormalform(true));
             	}
             } else {
-            	prop.put("content_image", 1);
             	try {
             		prop.putXML("content_image_url", result.imageURL());
-            	} catch(UnsupportedOperationException e) {
+            		prop.put("content_image", 1);
+            	} catch (UnsupportedOperationException e) {
             		/* May occur when the document embedded images information is incomplete to retrieve at least an valid image url*/
-            		prop.put("content_image", 0);
+                	prop.put("content_image", 0);
+
             	}
             }
             
@@ -250,7 +262,8 @@ public class yacysearchitem {
             prop.put("content_showEvent", showEvent ? 1 : 0);
             Collection<File> snapshotPaths = sb.getConfigBool("search.result.show.snapshots", true) ? Transactions.findPaths(result.url(), null, State.ANY) : null;
             if (fileType == FileType.HTML) { // html template specific settings
-                boolean showKeywords = (sb.getConfigBool("search.result.show.keywords", false) && !result.dc_subject().isEmpty());
+				boolean showKeywords = (sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS,
+						SwitchboardConstants.SEARCH_RESULT_SHOW_KEYWORDS_DEFAULT) && !result.dc_subject().isEmpty());
                 prop.put("content_showKeywords", showKeywords);
                 prop.put("content_showDate", sb.getConfigBool("search.result.show.date", true) && !showEvent ? 1 : 0);
                 prop.put("content_showSize", sb.getConfigBool("search.result.show.size", true) ? 1 : 0);
@@ -267,13 +280,16 @@ public class yacysearchitem {
 
                 if (showEvent) prop.put("content_showEvent_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(events[0]));
                 if (showKeywords) { // tokenize keywords
-                    StringTokenizer stoc = new StringTokenizer(result.dc_subject()," ");
+                    final StringTokenizer stoc = new StringTokenizer(result.dc_subject()," ");
                     String rawNavQueryModifier;
                     Navigator navi = theSearch.navigatorPlugins.get("keywords");
                     boolean naviAvail = navi != null;
+                    final int firstMaxKeywords = sb.getConfigInt(SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT,
+							SwitchboardConstants.SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT_DEFAULT);
                     int i = 0;
-                    while (stoc.hasMoreTokens()) {
-                        String word = stoc.nextToken();
+					while (stoc.hasMoreTokens()
+							&& i < firstMaxKeywords) {
+                        final String word = stoc.nextToken();
                         prop.putHTML("content_showKeywords_keywords_" + i + "_tagword", word);
                         if (naviAvail) { // use query modifier if navigator available
                             rawNavQueryModifier = navi.getQueryModifier(word);
@@ -285,13 +301,31 @@ public class yacysearchitem {
                         i++;
                     }
                     prop.put("content_showKeywords_keywords", i);
+                    if(stoc.hasMoreTokens()) {
+                    	prop.put("content_showKeywords_moreKeywords", "1");
+                    	prop.put("content_showKeywords_moreKeywords_urlhash", urlhash);
+                    	i = 0;
+                        while (stoc.hasMoreTokens()) {
+                            final String word = stoc.nextToken();
+                            prop.putHTML("content_showKeywords_moreKeywords_keywords_" + i + "_tagword", word);
+                            if (naviAvail) { // use query modifier if navigator available
+                                rawNavQueryModifier = navi.getQueryModifier(word);
+                            } else { // otherwise just use the keyword as additional query word
+                                rawNavQueryModifier = word;
+                            }
+    						prop.put("content_showKeywords_moreKeywords_keywords_" + i + "_tagurl", QueryParams.navurl(fileType, 0,
+    								theSearch.query, rawNavQueryModifier, naviAvail, authenticated).toString());
+                            i++;
+                        }
+                        prop.put("content_showKeywords_moreKeywords_keywords", i);
+                    }
                 }
                 prop.put("content_showDate_date", GenericFormatter.RFC1123_SHORT_FORMATTER.format(result.moddate()));
                 prop.putHTML("content_showSize_sizename", RSSMessage.sizename(result.filesize()));
                 prop.put("content_showMetadata_urlhash", urlhash);
                 prop.put("content_showParser_urlhash", urlhash);
                 prop.put("content_showCitation_urlhash", urlhash);
-                prop.putHTML("content_showPictures_former", origQ);
+                prop.putUrlEncodedHTML("content_showPictures_former", origQ);
                 prop.put("content_showCache_link", resultUrlstring);
                 prop.put("content_showProxy_link", resultUrlstring);
                 prop.put("content_showHostBrowser_link", resultUrlstring);
@@ -312,7 +346,27 @@ public class yacysearchitem {
                     prop.put("content_showVocabulary", 0);
                 }
                 if (snapshotPaths != null && snapshotPaths.size() > 0) {
-                    prop.put("content_showSnapshots_link", snapshotPaths.iterator().next().getAbsolutePath());
+            		/* Only add a link to the eventual snapshot file in the format it is stored (no resource fetching and conversion here) */
+                	String selectedExt = null, ext;
+                	for(final File snapshot : snapshotPaths) {
+                		ext = MultiProtocolURL.getFileExtension(snapshot.getName());
+                		if("jpg".equals(ext) || "png".equals(ext)) {
+                			/* Prefer snapshots in jpeg or png format */
+                			selectedExt = ext;
+                			break;
+                		} else if("pdf".equals(ext)) {
+                			selectedExt = ext;                			
+                		} else if("xml".equals(ext) && selectedExt == null) {
+                			/* Use the XML metadata snapshot in last resort */
+                			selectedExt = ext;
+                		}
+                	}
+                	if(selectedExt != null) {
+                		prop.putHTML("content_showSnapshots_extension", selectedExt.toUpperCase(Locale.ROOT));
+                		prop.putHTML("content_showSnapshots_link", "api/snapshot." + selectedExt + "?url=" + resultURL);
+                	} else {
+                		prop.put("content_showSnapshots", 0);
+                	}
                 }
                 prop.put("content_showRanking_ranking", Float.toString(result.score()));
                 prop.put("content_ranking", Float.toString(result.score()));
@@ -333,11 +387,16 @@ public class yacysearchitem {
             prop.putHTML("content_subject", result.dc_subject());
             final Iterator<String> query = theSearch.query.getQueryGoal().getIncludeStrings();
             final StringBuilder s = new StringBuilder(theSearch.query.getQueryGoal().getIncludeSize() * 20);
-            while (query.hasNext()) s.append('+').append(query.next());
-            final String words = (s.length() > 0) ? s.substring(1) : "";
-            prop.putHTML("content_words", words);
-            prop.putHTML("content_showParser_words", words);
-            prop.putHTML("content_former", origQ);
+            while (query.hasNext()) {
+            	if(s.length() > 0) {
+            		s.append(' ');
+            	}
+            	s.append(query.next());
+            }
+            final String words = MultiProtocolURL.escape(s.toString()).toString();
+            prop.putUrlEncodedHTML("content_words", words);
+            prop.putUrlEncodedHTML("content_showParser_words", words);
+            prop.putUrlEncodedHTML("content_former", origQ);
             final TextSnippet snippet = result.textSnippet();
             final String desc = (snippet == null) ? "" : snippet.descriptionline(theSearch.query.getQueryGoal());
             prop.put("content_description", desc);
@@ -369,6 +428,7 @@ public class yacysearchitem {
                 prop.put("content_loc_lat", result.lat());
                 prop.put("content_loc_lon", result.lon());
             }
+            
             final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
             final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
             boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
@@ -401,6 +461,20 @@ public class yacysearchitem {
                 final String resultUrlstring = ms.url().toNormalform(true);
                 final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
                 prop.putHTML("content_item_href", resultUrlstring);
+                final String mediaType = ms.mime();
+				if (extendedSearchRights && mediaType != null && mediaType.startsWith("audio/")) {
+					/*
+					 * Display HTML5 embedded audio only :
+					 * - when content-type is known to be audio (each browser has its own set of supported audio subtypes, 
+					 *  so the browser will then handle itself eventual report about unsupported media format)
+					 * - to authenticated users with extended search rights to prevent any media redistribution issue
+					 */
+                    prop.put("content_item_embed", true);
+                    prop.putHTML("content_item_embed_href", resultUrlstring);
+                    prop.putHTML("content_item_embed_mediaType", mediaType);	
+                } else {
+                	prop.put("content_item_embed", false);
+                }
                 prop.put("content_item_noreferrer", noreferrer ? 1 : 0);
                 prop.putHTML("content_item_hrefshort", nxTools.shortenURLString(resultUrlstring, MAX_URL_LENGTH));
                 prop.putHTML("content_item_target", target);
@@ -492,16 +566,10 @@ public class yacysearchitem {
 		// check if url exists in bookmarks
 		boolean bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
 		prop.put("content_authorized_bookmark", !bookmarkexists);
-		// bookmark icon check for YMarks
-		//prop.put("content_authorized_bookmark", sb.tables.bookmarks.hasBookmark("admin", urlhash) ? "0" : "1");
 		
-		/* Bookmark, delete and recommend action links share the same URL prefix */
-		StringBuilder linkBuilder = new StringBuilder();
-		final String actionLinkPrefix = linkBuilder.append("yacysearch.html?query=").append(origQ.replace(' ', '+'))
-				.append("&Enter=Search&count=").append(theSearch.query.itemsPerPage()).append("&offset=")
-				.append((theSearch.query.neededResults() - theSearch.query.itemsPerPage())).append("&resource=")
-				.append(resource).append("&time=3").append("auth").toString();
-		linkBuilder.setLength(0);
+		final StringBuilder linkBuilder = QueryParams.navurl(RequestHeader.FileType.HTML, theSearch.query.offset / theSearch.query.itemsPerPage(),
+				theSearch.query, null, false, true);
+		final int baseUrlLength = linkBuilder.length();
 		
 		String encodedURLString;
 		try {
@@ -510,27 +578,15 @@ public class yacysearchitem {
 			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
 			encodedURLString = crypt.simpleEncode(resultUrlstring);
 		}
-		final String bookmarkLink = linkBuilder.append(actionLinkPrefix).append("&bookmarkref=").append(urlhash)
-				.append("&bookmarkurl=").append(encodedURLString).append("&urlmaskfilter=.*")
-				.toString();
-		linkBuilder.setLength(0);
+		final String bookmarkLink = linkBuilder.append("&bookmarkref=").append(urlhash)
+				.append("&bookmarkurl=").append(encodedURLString).toString();
+		linkBuilder.setLength(baseUrlLength);
 		
-		/* Delete and recommend action links share the same URL suffix */
-		String encodedRanking;
-		try {
-			encodedRanking = URLEncoder.encode(crypt.simpleEncode(theSearch.query.ranking.toExternalString()), StandardCharsets.UTF_8.name());
-		} catch (UnsupportedEncodingException e1) {
-			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
-			encodedRanking = crypt.simpleEncode(resultUrlstring);
-		}
-		String actionLinkSuffix = linkBuilder.append(urlhash)
-				.append("&urlmaskfilter=.*").append("&order=").append(encodedRanking).toString();
-		linkBuilder.setLength(0);
+		String deleteLink = linkBuilder.append("&deleteref=").append(urlhash).toString();
+		linkBuilder.setLength(baseUrlLength);
 		
-		String deleteLink = linkBuilder.append(actionLinkPrefix).append("&deleteref=").append(actionLinkSuffix).toString();
-		linkBuilder.setLength(0);
-		String recommendLink = linkBuilder.append(actionLinkPrefix).append("&recommendref=").append(actionLinkSuffix).toString();
-		linkBuilder.setLength(0);
+		String recommendLink = linkBuilder.append("&recommendref=").append(urlhash).toString();
+		linkBuilder.setLength(baseUrlLength);
 		
 		prop.put("content_authorized_bookmark_bookmarklink", bookmarkLink);
 		prop.put("content_authorized_recommend_deletelink", deleteLink);
@@ -556,7 +612,7 @@ public class yacysearchitem {
 			final SearchEvent theSearch, final String target_special_pattern, long timeout, boolean fullViewingRights, final boolean noreferrer) {
 		prop.put("content", theSearch.query.contentdom.getCode() + 1); // switch on specific content
 		try {
-		    SearchEvent.ImageResult image = theSearch.oneImageResult(item, timeout);
+		    SearchEvent.ImageResult image = theSearch.oneImageResult(item, timeout, theSearch.query.isStrictContentDom());
 		    final String imageUrlstring = image.imageUrl.toNormalform(true);
 		    final String imageUrlExt = MultiProtocolURL.getFileExtension(image.imageUrl.getFileName());
 		    final String target = sb.getConfig(imageUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");

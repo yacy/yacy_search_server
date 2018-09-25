@@ -237,6 +237,7 @@ public final class FileUtils {
      * @param source InputStream instance
      * @param dest File instance
      * @param count the amount of bytes to copy (-1 for all, else must be greater than zero)
+     * @return the number of bytes actually copied (may be lower than count)
      * @throws IOException when a read/write error occurred
      * @throws NullPointerException when a parameter is null
      * @see #copy(InputStream source, OutputStream dest)
@@ -244,7 +245,7 @@ public final class FileUtils {
      * @see #copy(File source, OutputStream dest)
      * @see #copy(File source, File dest)
      */
-    public static void copy(final InputStream source, final File dest, final long count) throws IOException {
+    public static long copy(final InputStream source, final File dest, final long count) throws IOException {
         final String path = dest.getParent();
         if ( path != null && path.length() > 0 ) {
             new File(path).mkdirs();
@@ -252,7 +253,7 @@ public final class FileUtils {
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(dest);
-            copy(source, fos, count);
+            return copy(source, fos, count);
         } finally {
             if ( fos != null ) {
                 try {
@@ -469,6 +470,15 @@ public final class FileUtils {
         return source;
     }
 
+	/**
+	 * Generate a set of strings matching each line of the given file. Lines are
+	 * lower cased and any eventual surrounding space characters are removed. Empty
+	 * lines and lines starting with the '#' character are ignored.
+	 * 
+	 * @param file
+	 *            a file to load
+	 * @return a set of strings eventually empty
+	 */
     public static HashSet<String> loadList(final File file) {
         final HashSet<String> set = new HashSet<String>();
         BufferedReader br = null;
@@ -1019,32 +1029,35 @@ public final class FileUtils {
     }
     
     /**
-     * auto-detect the charset of a file
-     * used code from http://jchardet.sourceforge.net/;
-     * see also: http://www-archive.mozilla.org/projects/intl/chardet.html
-     * @param file
+     * Auto-detect the charset of content in a stream.
+     * Used code from http://jchardet.sourceforge.net/.
+     * Don't forget to close the stream in caller.
+     * @see <a href="http://www-archive.mozilla.org/projects/intl/chardet.html">chardet</a>
+     * @param inStream an open stream
      * @return a list of probable charsets
-     * @throws IOException
+     * @throws IOException when a read error occured
      */
-    public static List<String> detectCharset(File file) throws IOException {
+    public static List<String> detectCharset(final InputStream inStream) throws IOException {
         // auto-detect charset, used code from http://jchardet.sourceforge.net/; see also: http://www-archive.mozilla.org/projects/intl/chardet.html
         List<String> result;
-        try (BufferedInputStream imp = new BufferedInputStream(new FileInputStream(file))) { // try-with-resource to close inputstream
-            nsDetector det = new nsDetector(nsPSMDetector.ALL);
-            byte[] buf = new byte[1024] ;
-            int len;
-            boolean done = false ;
-            boolean isAscii = true ;
-            while ((len = imp.read(buf,0,buf.length)) != -1) {
-                if (isAscii) isAscii = det.isAscii(buf,len);
-                if (!isAscii && !done) done = det.DoIt(buf,len, false);
-            }   det.DataEnd();
-            result = new ArrayList<>();
+        nsDetector det = new nsDetector(nsPSMDetector.ALL);
+        byte[] buf = new byte[1024] ;
+        int len;
+        boolean done = false ;
+        boolean isAscii = true ;
+        while ((len = inStream.read(buf,0,buf.length)) != -1) {
             if (isAscii) {
-                result.add(StandardCharsets.US_ASCII.name());
-            } else {
-                for (String c: det.getProbableCharsets()) result.add(c); // worst case this returns "nomatch"
+            	isAscii = det.isAscii(buf,len);
             }
+            if (!isAscii && !done) {
+            	done = det.DoIt(buf,len, false);
+            }
+        }   det.DataEnd();
+        result = new ArrayList<>();
+        if (isAscii) {
+            result.add(StandardCharsets.US_ASCII.name());
+        } else {
+            for (String c: det.getProbableCharsets()) result.add(c); // worst case this returns "nomatch"
         }
         return result;
     }
@@ -1061,8 +1074,9 @@ public final class FileUtils {
         Thread t = new Thread("FileUtils.checkCharset") {
             @Override
             public void run() {
-                try {
-                    List<String> charsets = FileUtils.detectCharset(file);
+            	try (final FileInputStream fileStream = new FileInputStream(file); 
+            			final BufferedInputStream imp = new BufferedInputStream(fileStream)) { // try-with-resource to close resources
+                    List<String> charsets = FileUtils.detectCharset(imp);
                     if (charsets.contains(givenCharset)) {
                         ConcurrentLog.info("checkCharset", "appropriate charset '" + givenCharset + "' for import of " + file + ", is part one detected " + charsets);
                     } else {

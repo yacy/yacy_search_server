@@ -30,6 +30,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.apache.commons.lang.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
@@ -168,10 +169,33 @@ public class RSSReader extends DefaultHandler {
             }
             this.item = new RSSMessage();
             this.parsingItem = true;
-        } else if (this.parsingItem && this.type == Type.atom && "link".equals(tag) && (atts.getValue("rel") == null || atts.getValue("rel").equals("alternate"))) {
-            // atom link handling (rss link is handled in endElement)
-            final String url = atts.getValue("href");
-            if (url != null && url.length() > 0) this.item.setValue(Token.link, url);
+        } else if (this.parsingItem) {
+        	if(this.type == Type.atom) {
+				if ("link".equals(tag)) {
+					final String linkRelation = atts.getValue("rel");
+					if (linkRelation == null || linkRelation.equals("alternate")) {
+						// atom link handling (rss link is handled in endElement)
+						final String url = atts.getValue("href");
+						if (StringUtils.isNotBlank(url)) {
+							this.item.setValue(Token.link, url);
+						}
+					} else if("enclosure".equals(linkRelation)) {
+						/* Atom rel="enclosure" link type */
+						final String url = atts.getValue("href");
+						if(StringUtils.isNotBlank(url)) {
+							this.item.setEnclosure(url);
+						}
+					}
+				}
+        	} else if(this.type == Type.rss) {
+        		/* RSS 0.92 and 2.0 <enclosure> element */
+    			if ("enclosure".equals(tag)) {
+    				final String url = atts.getValue("url");
+					if(StringUtils.isNotBlank(url)) {
+						this.item.setEnclosure(url);
+					}
+    			}	
+        	}
         } else if ("rss".equals(tag)) {
             this.type = Type.rss;
         }
@@ -189,7 +213,9 @@ public class RSSReader extends DefaultHandler {
         } else if (this.parsingItem)  {
             final String value = this.buffer.toString().trim();
             this.buffer.setLength(0);
-            if (RSSMessage.tags.contains(tag) && value.length() > 0) this.item.setValue(RSSMessage.valueOfNick(tag), value);
+            if (RSSMessage.tags.contains(tag) && value.length() > 0) {
+            	this.item.setValue(RSSMessage.valueOfNick(tag), value);
+            }
         } else if (this.parsingChannel) {
             final String value = this.buffer.toString().trim();
             this.buffer.setLength(0);

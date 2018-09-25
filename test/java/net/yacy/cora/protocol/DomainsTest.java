@@ -34,7 +34,7 @@ public class DomainsTest {
      */
     @Test
     public void testStripToPort() {
-        Map<String, Integer> testHost = new HashMap();
+        Map<String, Integer> testHost = new HashMap<>();
         // key = teststring, value = expected port
         testHost.put("[3ffe:2a00:100:7031::1]:80", 80);
         testHost.put("https://[3ffe:2a00:100:7031::1]:80/test.html", 80);
@@ -56,7 +56,7 @@ public class DomainsTest {
      */
     @Test
     public void testStripToHostName() {
-        Map<String, String> testHost = new HashMap();
+        Map<String, String> testHost = new HashMap<>();
         // key = teststring, value = expected host
         testHost.put("[3ffe:2a00:100:7031::1]:80", "3ffe:2a00:100:7031::1");
         testHost.put("https://[3ffe:2a00:100:7032::1]:80/test.html", "3ffe:2a00:100:7032::1");
@@ -75,6 +75,10 @@ public class DomainsTest {
         testHost.put("test7.org/test.html", "test7.org");
         testHost.put("test8.org:80/test.html", "test8.org");
         testHost.put("test9.org:7777/test.html", "test9.org");
+        
+        /* Check also host name case incensivity */
+        testHost.put("HTTP://TEST10.INFO/test.html", "test10.info");
+        testHost.put("http://TEST11.IN:7777/test.html", "test11.in");
 
         for (String teststr : testHost.keySet()) {
             String host = Domains.stripToHostName(teststr);

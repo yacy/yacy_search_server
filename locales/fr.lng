@@ -44,7 +44,6 @@ Move selected pattern(s) to==Déplacer l(es) entrée(s) sélectionnée(s) vers
 Add new pattern:==Ajouter une nouvelle entrée :
 The right '*', after the '/', can be replaced by a==Le caractère '*' à droite, après le '/', peut être remplacé par une
 >regular expression<==>expression régulière<
-a complete <==une <
 (slow)==(lent)
 Show entries:==Afficher les entrées :
 Entries per page:==Entrées par page :
@@ -302,9 +301,11 @@ No password is set for the administration account.==Aucun mot de passe n'est d&e
 Please define a password for the admin account.==Veuillez d&eacute;finir un mot de passe pour le compte admin.
 Admin Account==Compte admin
 Access from localhost without account==Acc&egrave;s sans compte &agrave; partir d'un navigateur local
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==L'acc&egrave;s &agrave; votre nœud depuis votre ordinateur (acc&egrave;s local) est autorisé. La cr&eacute;ation d'un compte administrateur n'est pas n&eacute;cessaire.
+Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==L'acc&egrave;s &agrave; votre nœud depuis votre propre ordinateur (acc&egrave;s local) vous est donné avec des droits d'aministrateur. La cr&eacute;ation d'un compte administrateur n'est pas n&eacute;cessaire.
+This setting is convenient but less secure than using a qualified admin account.==Ce réglage est pratique mais moins sécurisé qu'un accès limité aux comptes autorisés.
+Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Utilisez-le avec précaution, notamment lorsque vous consultez des sites web non fiables et potentiellement malveillants tout en faisant tourner votre nœud YaCy sur le même ordinateur.
 Access only with qualified account==Acc&egrave;s avec un compte autoris&eacute; uniquement
-You need this only if you want a remote access to your peer.==N&eacute;cessaire uniquement si vous d&eacute;sirez disposer d'un acc&egrave;s &agrave; distance &agrave; votre noeud.
+This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Nécessaire si vous d&eacute;sirez disposer d'un acc&egrave;s &agrave; distance &agrave; votre noeud, mais renforce également les contrôles d'accès aux fonctions d'administration de votre nœud.
 Peer User:==Utilisateur du noeud:
 New Peer Password:==Nouveau mot de passe du nœud:
 Repeat Peer Password:==Entrer &agrave; nouveau le mot de passe du nœud:
@@ -590,7 +591,7 @@ Maximum range (in days)==Période maximale (en jours)
 Maximum days number in the histogram. Beware that a large value may trigger high CPU loads both on the server and on the browser with large result sets.==Nombre maximum de jours de l'histogramme. Veuillez noter qu'une valeur élevée peut déclencher des charges CPU importantes tant sur le serveur que sur le navigateur lorsqu'il y a un grand nombre de résultats.
 keyword subject keyword2 keyword3==mot-clé sujet mot-clé2 mot-clé3
 View via Proxy==Ouvrir via le proxy
->Snapshots<==>Captures<
+>JPG Snapshot<==>Capture JPG<
 "Raw ranking score value"=="Score de classement brut"
 Ranking: 1.12195955E9==Score: 1.12195955E9
 "Delete navigator"=="Supprimer le groupe"
@@ -713,6 +714,7 @@ YaCy: Help==YaCy: Aide
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="fr">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Page de recherche
 Search for #[former]#==Recherche pour  #[former]#
 Search</button>==Rechercher</button>
@@ -746,18 +748,22 @@ only resources from smb servers==uniquement les ressources de serveurs samba
 Intranet Indexing==Indexage d'intranet
 must be selected==doit &ecirc;tre s&eacute;lectionn&eacute;
 only files from a local file system==uniquement les fichiers locaux
+spatial restrictions==contraintes spatiales
+only documents having location metadata (geographical coordinates)==uniquement les documents ayant des méta-données de localisation (coordonnées géographiques)
+only documents within a square zone embracing a circle of given radius (in decimal degrees) around the specified latitude and longitude (in decimal degrees)==uniquement les documents situés dans une zone carrée englobant un cercle de rayon indiqué (en degrés décimaux) autour de la latitude et la longitude spécifiées (en degrés décimaux) 
 ranking modifier</dt>==modificateur de classement</dt>
 sort by date (latest first)==trier par date (les plus r&eacute;cents en premier)
 multiple words shall appear near==les mots recherch&eacute;s doivent &ecirc;tre dans une m&ecirc;me expression
 "" (doublequotes)=="" (guillemets)
-prefer given language (an ISO639 2-letter code)==pr&eacute;f&eacute;rer le langage indiqu&eacute; (code ISO639 &agrave; 2 lettres)
+prefer given language==pr&eacute;f&eacute;rer le langage indiqu&eacute;
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==code <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Liste de référence des codes de langue à deux lettres">ISO 639-1</a> &agrave; 2 lettres
 heuristics==heuristiques
 add search results from external opensearch systems==ajouter les r&eacute;sultats de syst&egrave;mes opensearch externes
 Search Navigation==Navigation dans la recherche
-keyboard shotcuts==raccourcis clavier
-tab or page-up==Tab ou D&eacute;but
+keyboard shortcuts==raccourcis clavier
+<a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + n==Combinaison <a href="https://en.wikipedia.org/wiki/Access_key">"access key"</a> + n
 next result page==page de r&eacute;sultats suivante
-page-down==Page bas
+<a href="https://en.wikipedia.org/wiki/Access_key">Access key</a> modifier + p==Combinaison <a href="https://en.wikipedia.org/wiki/Access_key">"access key"</a> + p
 previous result page==page de r&eacute;sultats pr&eacute;c&eacute;dente
 automatic result retrieval==r&eacute;cup&eacute;ration automatique de r&eacute;sultats
 browser integration==int&eacute;gration navigateur
@@ -828,6 +834,7 @@ Word-Hash:</td>==Mot-Hash:</td>
 
 #File: CrawlStartExpert.html
 #---------------------------
+<html lang="en">==<html lang="fr">
 Index Creation==Cr&eacute;er un index
 Start Crawling Job:==T&acirc;che de d&eacute;marrage du crawl:
 You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".==Vous pouvez  d&eacute;finir les URLs de d&eacute;part et d&eacute;marrer le crawl ici. Crawler signifie que YaCy t&eacute;l&eacute;chargera les sites de d&eacute;part et extraira tous leurs liens ainsi que leur contenu. Cela sera r&eacute;p&eacute;t&eacute; jusqu'a ce que la "profondeur de crawl" soit atteinte.
@@ -1257,6 +1264,63 @@ Title==Titre
 "delete"=="Supprimer"
 #-----------------------------
 
+#File: IndexReIndexMonitor_p.html
+#---------------------------
+Field Re-Indexing<==Ré-indexation de champ<
+In case that an index schema of the embedded/local index has changed, all documents with missing field entries can be indexed again with a reindex job.==Lorsque le schéma de l'index embarqué/local a changé, tous les documents ayant des champs supprimés peuvent être ré-indexés via une tâche de ré-indexation.
+"refresh page"=="Rafraîchir la page"
+Documents in current queue<==Documents de la file courante<
+Documents processed<==Documents traités<
+current select query==Requête de sélection courante
+"start reindex job now"=="Démarrer la tâche maintenant"
+"stop reindexing"=="Arrêter la ré-indexation"
+Remaining field list==Liste de champs restants
+reindex documents containing these fields:==Ré-indexer les documents contenant ces champs :
+Re-Crawl Index Documents==Re-balayage et ré-indexation de documents
+Searches the local index and selects documents to add to the crawler (recrawl the document).==Recherche et sélectionne dans l'index local les documents à ajouter au balayeur (re-télécharge chaque document).
+This runs transparent as background job.==S'exécute en tant que tâche de fond.
+Documents are added to the crawler only if no other crawls are active==Les documents ne sont ajoutés au balayeur que si aucun autre balayage n'est actif,
+and are added in small chunks.==et sont ajoutés par petits paquets.
+"start recrawl job now"=="Démarrer la tâche maintenant"
+"stop recrawl job"=="Arrêter la tâche"
+to re-crawl documents selected with the given query.==pour re-balayer les documents sélectionnés avec la requête indiquée
+Re-Crawl Query Details==Détails du re-balayage
+Documents to process==Documents à traiter
+Current Query==Requête courante
+Edit Solr Query==Modifier la requête Solr
+update==Appliquer
+Include failed URLs==Inclure les URLs en échec
+>Field<==>Champ<
+>count<==>Nombre<
+Re-crawl works only with an embedded local Solr index!==Le re-balayage fonctionne seulement avec un index Solr local!
+Simulate==Simuler
+Check only how many documents would be selected for recrawl==Vérifier seulement combien de documents seraient sélectionnés pour être re-balayés
+"Browse metadata of the #[rows]# first selected documents"=="Parcourir les méta-données des #[rows]# premiers documents sélectionnés"
+document(s)</a>#(/showSelectLink)# selected for recrawl.==document(s)</a>#(/showSelectLink)# sélectionnés pour le re-balayage.
+>Solr query <==>Requête Solr <
+Set defaults==Valeurs par défaut
+"Reset to default values"=="Ré-initialiser avec les valeurs par défaut"
+Last #(/jobStatus)#Re-Crawl job report==Dernier #(/jobStatus)#Rapport de re-balayage
+Automatically refreshing==Rafraîchi automatiquement
+An error occurred while trying to refresh automatically==Une erreur est survenue lors du rafraîchissement automatique
+The job terminated early due to an error when requesting the Solr index.==La tâche s'est terminée de façon précoce suite une erreur d'accès à l'index Solr.
+>Status<==>Statut<
+"Running"=="En cours d'exécution"
+"Shutdown in progress"=="Arrêt en cours"
+"Terminated"=="Terminé"
+Running::Shutdown in progress::Terminated==En cours d'exécution::Arrêt en cours::Terminé
+>Query<==>Requête<
+>Start time<==>Moment de démarrage<
+>End time<==>Moment d'arrêt<
+URLs added to the crawler queue for recrawl==URLs ajoutées à la file de balayage pour re-balayage
+>Recrawled URLs<==>URLs re-balayées<
+URLs rejected for some reason by the crawl stacker or the crawler queue. Please check the logs for more details.==URLs rejetées par le contrôleur d'ajout ou la file de balayage. Veuillez consulter les logs pour plus de détails.
+>Rejected URLs<==>URLs rejetées<
+>Malformed URLs<==>URLs mal formées<
+"#[malformedUrlsDeletedCount]# deleted from the index"=="#[malformedUrlsDeletedCount]# supprimées de l'index"
+> Refresh<==> Rafraîchir<
+#-----------------------------
+
 #File: IndexTransfer_p.html
 #---------------------------
 The local index currently consists of (at least) #[wcount]# reverse word indexes and #[ucount]# URL references.==L'index local consiste actuellement en (au moins) #[wcount]# mots et #[ucount]# URLs.
@@ -1477,7 +1541,8 @@ Resource Observer==Contrôle des ressources
 Memory state==État de la mémoire
 >proper<==>sain<
 >exhausted<==>espace libre insuffisant<
-reset state==réinitialiser l'état
+Reset state==Réinitialiser l'état
+Manually reset to 'proper' state==Réinitialiser manuellement à l'état 'sain'
 Enough memory is available for proper operation.==Il y a suffisamment de mémoire à disposition pour un fonctionnement correct.
 Within the last eleven minutes, at least four operations have tried to request memory that would have reduced free space within the minimum required.==Durant les onze dernières minutes, au moins quatre opérations ont tenté d'obtenir une quantité de mémoire qui aurait réduit l'espace libre en-deçà du minimum requis.
 Minimum required==Minimum requis
@@ -2070,6 +2135,8 @@ Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page 
 and set an administration password.==et d&eacute;finir un mot de passe administrateur.
 You have not published your peer seed yet. This happens automatically, just wait.==Votre noeud n'est pas encore connu du r&eacute;seau. Attendez quelques instants, cela se d&eacute;roule automatiquement.
 Your network configuration is in private mode. Your peer seed will not be published.== La configuration de votre r&eacute;seau est en mode priv&eacute;. Votre noeud restera inconnu du r&eacute;seau.
+Access is unrestricted from localhost (this includes administration features).==Aucune restriction d'accès (cela inclut les fonctions d'administration) n'est définie pour les connexions depuis un navigateur local (localhost).
+Please check the <a href="ConfigAccounts_p.html">accounts configuration</a> page to ensure that the settings match the security level you need.==Veuillez vérifier la page de configuration des <a href="ConfigAccounts_p.html">comptes</a> pour vous assurer que les réglages satisfont le niveau de sécurité souhaité.
 The peer must go online to get a peer address.==Le noeud doit aller en ligne afin de recevoir une adresse.
 You cannot be reached from outside.==Votre noeud ne peut pas &ecirc;tre atteint depuis l'ext&eacute;rieur.
 A possible reason is that you are behind a firewall, NAT or Router.==Il est possible que vous soyez derri&egrave;re un pare-feu, un NAT ou un routeur.

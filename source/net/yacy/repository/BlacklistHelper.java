@@ -2,6 +2,7 @@ package net.yacy.repository;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.protocol.RequestHeader;
@@ -56,50 +57,42 @@ public final class BlacklistHelper {
     /**
      * Adds a new entry to the chosen blacklist.
      * @param blacklistToUse the name of the blacklist the entry is to be added to
-     * @param newEntry the entry that is to be added
-     * @param header
+     * @param entry the entry that is to be added
+     * @param header the current HTTP request headers
      * @param supportedBlacklistTypes
-     * @return null if no error occurred, else a String to put into LOCATION
+     * @return true when no error occurred and the entry was successfully added
      */
-	public static String addBlacklistEntry(
+	public static boolean addBlacklistEntry(
 	        final String blacklistToUse,
 	        final String entry,
 	        final RequestHeader header) {
     	String newEntry = entry;
 
-    	String location = null;
-        if (blacklistToUse == null || blacklistToUse.isEmpty()) {
-        	location = header.getPathInfo();
-        } else if (newEntry == null || newEntry.isEmpty()) {
-        	location = header.getPathInfo() + "?selectList=&selectedListName=" + blacklistToUse;
-        }
+		if (blacklistToUse == null || blacklistToUse.isEmpty() || newEntry == null || newEntry.isEmpty()) {
+			return false;
+		}
         
-    	if(location != null) {
-    		if(location.startsWith("/")) {
-    	    	/* Remove the starting "/" to redirect to a relative location for easier reverse proxy integration */
-    			location = location.substring(1, location.length() -1 );
-    		}
-            return location;
-    	}
-    	
     	newEntry = prepareEntry(newEntry);
 
         int pos = newEntry.indexOf('/',0);
         String host = newEntry.substring(0, pos);
         String path = newEntry.substring(pos + 1);
-        
+
+		boolean success = false;
         for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
         	if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklistToUse)) {
             	try {
                     Switchboard.urlBlacklist.add(supportedBlacklistType, blacklistToUse, host, path);
-                } catch (PunycodeException e) {
-                    ConcurrentLog.warn(APP_NAME, "Unable to add blacklist entry to blacklist " + supportedBlacklistType, e);
+                    success = true;
+                } catch (final PunycodeException | PatternSyntaxException e) {
+					ConcurrentLog.info(APP_NAME, "Unable to add blacklist entry to blacklist " + supportedBlacklistType,
+							e);
                 }
             }
         }
         
         SearchEventCache.cleanupEvents(true);
-        return null;
+        return success;
     }
 	
     /**
@@ -126,7 +119,7 @@ public final class BlacklistHelper {
     	if(location != null) {
     		if(location.startsWith("/")) {
     	    	/* Remove the starting "/" to redirect to a relative location for easier reverse proxy integration */
-    			location = location.substring(1, location.length() -1 );
+    			location = location.substring(1, location.length());
     		}
             return location;
     	}

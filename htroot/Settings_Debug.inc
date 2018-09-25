@@ -5,6 +5,7 @@
 </div>
 
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data" class="form-horizontal">
+	<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 	<fieldset>
 		<legend>Solr communication</legend>
 		
@@ -134,6 +135,26 @@
 			</div>
 			<div class="col-sm-8" id="searchShowRankingInfo">
 	 			When checked, the raw ranking score value is displayed for each text search result in the HTML results page.
+            </div>
+		</div>
+	</fieldset>
+	
+	<fieldset>
+		<legend>Text snippets statistics</legend>
+		
+		<div class="form-group">
+			<div class="col-sm-4">
+				<div class="checkbox">
+					<label>
+						<input name="debug.snippets.statistics.enabled" id="snippetsStatsEnabled" 
+							type="checkbox" #(debug.snippets.statistics.enabled)#::checked#(/debug.snippets.statistics.enabled)#
+							aria-describedby="snippetStatisticsInfo"/>
+						Enable text snippets statistics
+					</label>
+				</div>
+			</div>
+			<div class="col-sm-8" id="snippetStatisticsInfo">
+	 			When checked, statistics are collected on text snippets generation for search results. The are resumed in the <a href="ConfigPortal_p.html">Portal Configuration</a> page.
             </div>
 		</div>
 	</fieldset>

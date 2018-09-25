@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -30,9 +31,9 @@ public class ynetSearch {
             InputStream is = null;
             try {
                 String searchaddress = post.get("url");
-                if (!searchaddress.startsWith("http://")) {
+                if (!searchaddress.startsWith("http://") && !searchaddress.startsWith("https://")) {
                     // a relative path .. this addresses the local peer
-                    searchaddress = "http://" + sb.peers.mySeed().getPublicAddress(sb.peers.mySeed().getIP()) + ((searchaddress.length() > 0 && searchaddress.charAt(0) == '/') ? "" : "/") + searchaddress;
+                    searchaddress = YaCyDefaultServlet.getContext(header, sb) + ((searchaddress.length() > 0 && searchaddress.charAt(0) == '/') ? "" : "/") + searchaddress;
                 }
                 post.remove("url");
                 post.remove("login");

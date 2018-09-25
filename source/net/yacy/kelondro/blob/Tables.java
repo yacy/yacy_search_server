@@ -31,7 +31,9 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +41,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -48,7 +49,6 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.ByteArray;
-import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
@@ -75,7 +75,7 @@ public class Tables implements Iterable<String> {
     private int keymaxlen;
 
     // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_MILSEC_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_MILSEC, 1);
+    private final static GenericFormatter my_SHORT_MILSEC_FORMATTER  = new GenericFormatter(GenericFormatter.newShortMilsecFormat(), 1);
 
     public Tables(final File location, final int keymaxlen) {
         this.location = new File(location.getAbsolutePath());
@@ -481,25 +481,151 @@ public class Tables implements Iterable<String> {
         return new OrderedRowIterator(table, wherePattern, up);
     }
     
-    public static Collection<Row> orderBy(final Iterator<Row> rowIterator, int maxcount, final String sortColumn) {
-        final TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
-        Row row;
-        byte[] r;
-        while ((maxcount < 0 || maxcount-- > 0) && rowIterator.hasNext()) {
-            row = rowIterator.next();
-            r = row.get(sortColumn);
-            if (r == null) {
-                sortTree.put("0000" + UTF8.String(row.pk), row);
-            } else {
-                sortTree.put(UTF8.String(r) + UTF8.String(row.pk), row);
-            }
-        }
-        return sortTree.values();
-    }
+	/**
+	 * @param rowIterator
+	 *            an open iterator on a table. Must not be null.
+	 * @param sortColumn
+	 *            the name of the column to use for sorting.
+	 * @return all the rows of the table sorted in ascending order on the given
+	 *         column name
+	 */
+	public static Collection<Row> orderBy(final Iterator<Row> rowIterator, final String sortColumn) {
+		return orderByString(rowIterator, sortColumn, "", SortDirection.ASC);
+	}
+    
+	/**
+	 * @param rowIterator
+	 *            an open iterator on a table. Must not be null.
+	 * @param sortColumn
+	 *            the name of the column to use for sorting.
+	 * @param defaultValue
+	 *            the default value to use when the column value is null.
+	 * @param sortDir
+	 *            the sorting direction. When null, {@link SortDirection#ASC} is applied.
+	 * @return all the rows of the table sorted on the given column name
+	 */
+	public static Collection<Row> orderByInt(final Iterator<Row> rowIterator, final String sortColumn,
+			final int defaultValue, final SortDirection sortDir) {
+		/* Compare first on the given column */
+		Comparator<Row> comparator = Comparator.<Row>comparingInt(row -> row.get(sortColumn, defaultValue));
+		/*
+		 * Then in case of equality, compare on the primary key. Ensure also that
+		 * eventual null rows do not make the process fail.
+		 */
+		comparator = Comparator.nullsFirst(comparator.thenComparing(row -> UTF8.String(row.pk)));
+		if (sortDir == SortDirection.DESC) {
+			comparator = comparator.reversed();
+		}
+		return orderBy(rowIterator, comparator);
+	}
+	
+	/**
+	 * @param rowIterator
+	 *            an open iterator on a table. Must not be null.
+	 * @param sortColumn
+	 *            the name of the column to use for sorting.
+	 * @param defaultValue
+	 *            the default value to use when the column value is null.
+	 * @param sortDir
+	 *            the sorting direction. When null, {@link SortDirection#ASC} is applied.
+	 * @return all the rows of the table sorted on the given column name
+	 */
+	public static Collection<Row> orderByLong(final Iterator<Row> rowIterator, final String sortColumn,
+			final long defaultValue, final SortDirection sortDir) {
+		/* Compare first on the given column */
+		Comparator<Row> comparator = Comparator.<Row>comparingLong(row -> row.get(sortColumn, defaultValue));
+		/*
+		 * Then in case of equality, compare on the primary key. Ensure also that
+		 * eventual null rows do not make the process fail.
+		 */
+		comparator = Comparator.nullsFirst(comparator.thenComparing(row -> UTF8.String(row.pk)));
+		if (sortDir == SortDirection.DESC) {
+			comparator = comparator.reversed();
+		}
+		return orderBy(rowIterator, comparator);
+	}
+
+	/**
+	 * @param rowIterator
+	 *            an open iterator on a table. Must not be null.
+	 * @param sortColumn
+	 *            the name of the column to use for sorting.
+	 * @param defaultValue
+	 *            the default value to use when the column value is null.
+	 * @param sortDir
+	 *            the sorting direction. When null, {@link SortDirection#ASC} is applied.
+	 * @return all the rows of the table sorted on the given column name
+	 */
+	public static Collection<Row> orderByString(final Iterator<Row> rowIterator, final String sortColumn,
+			final String defaultValue, final SortDirection sortDir) {
+		/* Compare first on the given column */
+		Comparator<Row> comparator = Comparator
+				.nullsFirst(Comparator.<Row, String>comparing(row -> row.get(sortColumn, defaultValue)));
+		/*
+		 * Then in case of equality, compare on the primary key. Ensure also that
+		 * eventual null rows do not make the process fail.
+		 */
+		comparator = Comparator.nullsFirst(comparator.thenComparing(row -> UTF8.String(row.pk)));
+		if (sortDir == SortDirection.DESC) {
+			comparator = comparator.reversed();
+		}
+		return orderBy(rowIterator, comparator);
+	}
+	
+	/**
+	 * @param rowIterator
+	 *            an open iterator on a table. Must not be null.
+	 * @param sortColumn
+	 *            the name of the column to use for sorting.
+	 * @param defaultValue
+	 *            the default value to use when the column value is null.
+	 * @param sortDir
+	 *            the sorting direction. When null, {@link SortDirection#ASC} is applied.
+	 * @return all the rows of the table sorted on the given column name
+	 */
+	public static Collection<Row> orderByDate(final Iterator<Row> rowIterator, final String sortColumn,
+			final Date defaultValue, final SortDirection sortDir) {
+		/* Compare first on the given column */
+		Comparator<Row> comparator = Comparator
+				.nullsFirst(Comparator.<Row, Date>comparing(row -> row.get(sortColumn, defaultValue)));
+		/*
+		 * Then in case of equality, compare on the primary key. Ensure also that
+		 * eventual null rows do not make the process fail.
+		 */
+		comparator = Comparator.nullsFirst(comparator.thenComparing(row -> UTF8.String(row.pk)));
+		if (sortDir == SortDirection.DESC) {
+			comparator = comparator.reversed();
+		}
+		return orderBy(rowIterator, comparator);
+	}
+	
+	/**
+	 * @param rowIterator
+	 *            an open iterator on a table. Must not be null.
+	 * @param comparator
+	 *            the eventual comparator to use.
+	 * @return all the rows of the table sorted using the given comparator, or
+	 *         sorted on rows natural order when comparator is null.
+	 */
+	public static Collection<Row> orderBy(final Iterator<Row> rowIterator, final Comparator<Row> comparator) {
+		final TreeSet<Row> sortTree = new TreeSet<Row>(comparator);
+		while (rowIterator.hasNext()) {
+			sortTree.add(rowIterator.next());
+		}
+		return sortTree;
+	}
 
     public ArrayList<String> columns(final String table) throws IOException {
         final BEncodedHeap heap = getHeap(table);
         return heap.columns();
+    }
+    
+    /** Sort direction for ordering rows */
+    public enum SortDirection {
+    	/** Ascending order */
+    	ASC,
+    	/** Descending order */
+    	DESC
     }
 
     public class HeapRowIterator extends LookAheadIterator<Row> implements Iterator<Row> {
@@ -577,7 +703,9 @@ public class Tables implements Iterable<String> {
             while (this.i.hasNext()) {
                 r = new Row(this.i.next());
                 if (this.whereValue != null) {
-                    if (ByteBuffer.equals(r.get(this.whereColumn), this.whereValue)) return r;
+                    if (Arrays.equals(r.get(this.whereColumn), this.whereValue)) {
+                    	return r;
+                    }
                 } else if (this.wherePattern != null) {
                     if (this.whereColumn == null) {
                         // shall match any column
@@ -681,7 +809,7 @@ public class Tables implements Iterable<String> {
                     if (map == null) continue;
                     r = new Row(pk, map);
                     if (this.whereValue != null) {
-                        if (ByteBuffer.equals(r.get(this.whereColumn), this.whereValue)) return r;
+                        if (Arrays.equals(r.get(this.whereColumn), this.whereValue)) return r;
                     } else if (this.wherePattern != null) {
                         if (this.whereColumn == null) {
                             // shall match any column

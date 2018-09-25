@@ -1,4 +1,5 @@
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 <fieldset><legend id="http">Proxy Settings</legend>
 <table border="0" cellspacing="5">
   <tr valign="top">
@@ -38,6 +39,7 @@
 </fieldset>
 </form>
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 <fieldset><legend id="ProxyAccess">Proxy Access Settings</legend>
 <p>
   These settings configure the access method to your own http proxy and server.

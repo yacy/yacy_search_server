@@ -26,6 +26,7 @@
 //if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ import org.apache.http.entity.mime.content.ContentBody;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.Network;
@@ -42,6 +44,7 @@ import net.yacy.peers.Protocol.Post;
 import net.yacy.peers.Seed;
 import net.yacy.peers.SeedDB;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.crypt;
@@ -77,8 +80,35 @@ public class MessageSend_p {
             // first ask if the other peer is online, and also what kind of document it accepts
             Seed seed = sb.peers.getConnected(ASCII.getBytes(hash));
             if (seed != null) {
-                for (String ip : seed.getIPs()) {
-                    final Map<String, String> result = Protocol.permissionMessage(seed.getPublicAddress(ip), hash);
+                for (final String ip : seed.getIPs()) {
+                	Map<String, String> result = null;
+                	MultiProtocolURL targetBaseURL = null;
+            		final String targetBaseURLStr = seed.getPublicURL(ip,
+            				sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+            						SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT));
+                	try {
+                		targetBaseURL = new MultiProtocolURL(targetBaseURLStr);
+                		result = Protocol.permissionMessage(targetBaseURL, seed, sb);
+                	} catch(final MalformedURLException e) {
+                		Network.log.warn("yacyClient.permissionMessage malformed target peer URL :" + targetBaseURLStr);
+                	} catch(final Exception e) {
+                        // most probably a network time-out exception
+                        Network.log.warn("yacyClient.permissionMessage error:" + e.getMessage());
+                		if(targetBaseURL.isHTTPS()) {
+                			try {
+                				/* Request made over https : retry using http on the same IP as a fallback */
+                				targetBaseURL = seed.getPublicMultiprotocolURL(ip, false);
+                				result = Protocol.permissionMessage(targetBaseURL, seed, sb);
+                				if(result != null) {
+                					/* Got a successfull result with http : mark now SSl as not available ont the target peer */
+                					seed.setFlagSSLAvailable(false);
+                					sb.peers.updateConnected(seed);
+                				}
+                			} catch (final IOException e2) {
+                        		Network.log.warn("yacyClient.postMessage error:" + e2.getMessage());
+                			}
+                		}
+                	}
                     //System.out.println("DEBUG: permission request result = " + result.toString());
                     String peerName;
                     Seed targetPeer = null;
@@ -102,6 +132,7 @@ public class MessageSend_p {
                             sb.peers.peerActions.interfaceDeparture(targetPeer, ip);
                         }
                     } else {
+                    	
                         prop.put("mode_permission", "1");
 
                         // write input form
@@ -146,28 +177,56 @@ public class MessageSend_p {
                 final String salt = crypt.randomSalt();
 
                 // send request
-                final Map<String, ContentBody> parts = Protocol.basicRequestParts(Switchboard.getSwitchboard(), hash, salt);
+                final Map<String, ContentBody> parts = Protocol.basicRequestParts(sb, hash, salt);
                 parts.put("process", UTF8.StringBody("post"));
                 parts.put("myseed", UTF8.StringBody(seedDB.mySeed().genSeedStr(salt)));
                 parts.put("subject", UTF8.StringBody(subject));
                 parts.put("message", UTF8.StringBody(mb));
-                Seed seed = seedDB.getConnected(ASCII.getBytes(hash));
+                final Seed seed = seedDB.getConnected(ASCII.getBytes(hash));
+                boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+						SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
                 Post post1 = null;
-                for (String ip: seed.getIPs()) {
-                    try {
-                        post1 = new Post(seed.getPublicAddress(ip), hash, "/yacy/message.html", parts, 20000);
-                    } catch (IOException e) {
-                        Network.log.warn("yacyClient.postMessage error:" + e.getMessage());
-                        post1 = null;
-                    }
-                    if (post1 != null) break;
-                    seedDB.peerActions.interfaceDeparture(seed, ip);
+                for(final String ip : seed.getIPs()) {
+                	MultiProtocolURL targetBaseURL = null;
+                	try {
+                		targetBaseURL = seed.getPublicMultiprotocolURL(ip, preferHttps);
+                		post1 = new Post(targetBaseURL, seed.hash, "/yacy/message.html", parts, 20000);
+                	} catch(final MalformedURLException e) {
+                		Network.log.warn("yacyClient.postMessage malformed target peer URL when using ip " + ip);
+                	} catch (final IOException e) {
+                		Network.log.warn("yacyClient.postMessage error:" + e.getMessage());
+                		if(targetBaseURL.isHTTPS()) {
+                			try {
+                				/* Request made over https : retry using http on the same IP as a fallback */
+                				targetBaseURL = seed.getPublicMultiprotocolURL(ip, false);
+                				post1 = new Post(targetBaseURL, seed.hash, "/yacy/message.html", parts, 20000);
+                				if(post1 != null) {
+                					/* Got a successfull result with http : mark now SSl as not available ont the target peer */
+                					seed.setFlagSSLAvailable(false);
+                				}
+                			} catch (final IOException e2) {
+                        		Network.log.warn("yacyClient.postMessage error:" + e2.getMessage());
+                			}
+                		}
+                	}
+                	
+                	if (post1 != null) {
+                		break;
+                	}
+                	seedDB.peerActions.interfaceDeparture(seed, ip);
                 }
-                final Map<String, String> result1 = post1 == null ? null : FileUtils.table(post1.result);
+                final Map<String, String> result1 = post1 == null ? null : FileUtils.table(post1.getResult());
                 final Map<String, String> result = result1;
 
-                //message has been sent
-                prop.put("mode_status_response", result.get("response"));
+                if(result != null) {
+                	// message has been sent
+                	prop.put("mode_status_response", result.get("response"));
+                } else {
+                    prop.put("mode_status", "1");
+
+                    // "unresolved pattern", the remote peer is alive but had an exception
+                    prop.putXML("mode_status_message", message);
+                }
 
             } catch (final NumberFormatException e) {
                 prop.put("mode_status", "1");

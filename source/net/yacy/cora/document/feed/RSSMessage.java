@@ -25,6 +25,7 @@
 package net.yacy.cora.document.feed;
 
 import java.text.ParseException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -43,23 +44,58 @@ import net.yacy.cora.lod.vocabulary.YaCyMetadata;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.CommonPattern;
 
+/**
+ * Represents a RSS/Atom feed entry or channel.
+ */
 public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMessage> {
 
+	/**
+	 * Feed entry data tokens, mostly matching Atom and RSS elements.
+	 * @see <a href="http://www.rssboard.org/rss-specification">Latest RSS specification</a>
+	 * @see <a href="https://tools.ietf.org/html/rfc4287">The Atom Syndication Format RFC</a>
+	 */
     public static enum Token {
 
+    	/** Human-readable title for an entry or a feed. */
         title(new String[]{"title","atom:title","rss:title",DublinCore.Title.getURIref()}),
+        
+        /** Reference from an entry or feed to a Web resource URL */
         link(new String[]{"link","atom:link","rss:link"}),
+        
+        /** Human-readable description or subtitle for an entry or a feed. */
         description(new String[]{"description","subtitle","atom:subtitle","rss:description", DublinCore.Description.getURIref()}),
+        
+        /** The publication date for content in a feed or for an antry. */
         pubDate(new String[]{"pubDate","lastBuildDate","updated","rss:lastBuildDate","rss:updated"}),
+        
+        /** Copyright notice for content in the channel. */
         copyright(new String[]{"copyright","publisher",DublinCore.Publisher.getURIref()}),
+        
+        /** The author of an item (Email address) */
         author(new String[]{"author","creator",DublinCore.Creator.getURIref()}),
+        
         subject(new String[]{"subject",DublinCore.Subject.getURIref()}),
+        
+        /** One or more categories a channel or item belongs to */
         category(new String[]{"category"}),
+        
         referrer(new String[]{"referrer","referer"}),
+        
+        /** The language the channel is written in. */
         language(new String[]{"language",DublinCore.Language.getURIref()}),
+        
+        /** A string that uniquely identifies an item (RSS 2.0) */
         guid(new String[]{"guid"}),
+        
+        /** URL describing a media object that is attached to a feed item */
+        enclosure(new String[]{"enclosure"}),
+        
+        /**  Time To Live : number of minutes that indicates how long a channel (RSS 2.0) can be cached before refreshing from the source. */
         ttl(new String[]{"ttl"}),
-        docs(new String[]{"docs"}), // url to the documentation for the format used in the RSS file
+        
+        /** URL to the documentation for the format used in the RSS file (for example http://www.rssboard.org/rss-specification) */
+        docs(new String[]{"docs"}),
+        
         size(new String[]{"size", "length", YaCyMetadata.size.getURIref()}),
         lon(new String[]{Geo.Long.getURIref(), "geo:lon"}), // include possible misspelling geo:lon (instead of geo:long)
         lat(new String[]{Geo.Lat.getURIref()});
@@ -121,7 +157,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         if (title.length() > 0) this.map.put(Token.title.name(), title);
         if (description.length() > 0) this.map.put(Token.description.name(), description);
         if (link.length() > 0) this.map.put(Token.link.name(), link);
-        this.map.put(Token.pubDate.name(), HeaderFramework.FORMAT_RFC1123.format(new Date()));
+        this.map.put(Token.pubDate.name(), HeaderFramework.formatNowRFC1123());
         this.map.put(Token.guid.name(), artificialGuidPrefix + Integer.toHexString((title + description + link).hashCode()));
     }
 
@@ -130,16 +166,20 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         if (title.length() > 0) this.map.put(Token.title.name(), title);
         if (description.length() > 0) this.map.put(Token.description.name(), description);
         this.map.put(Token.link.name(), link.toNormalform(true));
-        this.map.put(Token.pubDate.name(), HeaderFramework.FORMAT_RFC1123.format(new Date()));
-        if (guid.length() > 0) this.map.put(Token.guid.name(), guid);
+        this.map.put(Token.pubDate.name(), HeaderFramework.formatNowRFC1123());
+        if (guid.length() > 0) {
+        	this.map.put(Token.guid.name(), guid);
+        }
     }
 
     public RSSMessage() {
         this.map = new HashMap<String, String>();
     }
-
+    
     public void setValue(final Token token, final String value) {
-        if (value.length() > 0) this.map.put(token.name(), value);
+        if (value.length() > 0) {
+        	this.map.put(token.name(), value);
+        }
     }
 
     @Override
@@ -222,8 +262,8 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         if (!dateString.isEmpty()) { // skip parse exception on empty string
             Date date;
             try {
-                date = HeaderFramework.FORMAT_RFC1123.parse(dateString);
-            } catch (final ParseException e) {
+				date = Date.from(ZonedDateTime.parse(dateString, HeaderFramework.RFC1123_FORMATTER).toInstant());
+            } catch (final RuntimeException e) {
                 try {
                     date = GenericFormatter.SHORT_SECOND_FORMATTER.parse(dateString, 0).getTime();
                 } catch (final ParseException e1) {
@@ -245,7 +285,12 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
         }
         return guid;
     }
-
+    
+    @Override
+    public String getEnclosure() {
+    	return Token.enclosure.valueFrom(this.map, "");
+    }
+    
     public String getTTL() {
         return Token.ttl.valueFrom(this.map, "");
     }
@@ -339,7 +384,12 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
     public void setGuid(final String guid) {
         setValue(Token.guid, guid);
     }
-
+    
+    @Override
+    public void setEnclosure(final String enclosure) {
+    	setValue(Token.enclosure, enclosure);
+    }
+    
     @Override
     public void setLanguage(final String language) {
         setValue(Token.language, language);
@@ -352,7 +402,7 @@ public class RSSMessage implements Hit, Comparable<RSSMessage>, Comparator<RSSMe
 
     @Override
     public void setPubDate(final Date pubdate) {
-        setValue(Token.pubDate, HeaderFramework.FORMAT_RFC1123.format(pubdate));
+        setValue(Token.pubDate, HeaderFramework.formatNowRFC1123());
     }
 
     @Override

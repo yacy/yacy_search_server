@@ -114,11 +114,15 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         return true;
     }
 
+    /**
+     * Try to get the thread dump from a yacy.log file which is available when YaCy is started with
+     * startYACY.sh -l 
+     * @param logFile the log file to read
+     * @throws IOException when a read/write error occurred
+     */
     public ThreadDump(final File logFile) throws IOException {
         super();
 
-        // try to get the thread dump from yacy.log which is available when YaCy is started with
-        // startYACY.sh -l
         long sizeBefore = 0;
         if (canProduceLockedBy(logFile)) {
             sizeBefore = logFile.length();
@@ -126,7 +130,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
             // get the current process PID
             final int pid = OS.getPID();
 
-            // call kill -3 on the pid
+            // call kill -3 (SIGQUIT) on the pid to request a core dump from the current process
             if (pid >= 0) try {OS.execSynchronous("kill -3 " + pid);} catch (final IOException e) {}
         }
 
@@ -134,14 +138,14 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         final long sizeAfter = logFile.length();
         if (sizeAfter <= sizeBefore) return;
 
-        final RandomAccessFile raf = new RandomAccessFile(logFile, "r");
-        raf.seek(sizeBefore);
-        final byte[] b = new byte[(int) (sizeAfter - sizeBefore)];
-        raf.readFully(b);
-        raf.close();
-
-        // import the thread dump;
-        importText(new ByteArrayInputStream(b));
+        try(final RandomAccessFile raf = new RandomAccessFile(logFile, "r");) {
+        	raf.seek(sizeBefore);
+        	final byte[] b = new byte[(int) (sizeAfter - sizeBefore)];
+        	raf.readFully(b);
+        	
+            // import the thread dump;
+            importText(new ByteArrayInputStream(b));
+        }
     }
 
     public ThreadDump(final InputStream is) throws IOException {
@@ -446,9 +450,6 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
 
     public static void main(final String[] args) {
         ThreadDump dump = null;
-        if (args.length == 0) {
-            //dump = new ThreadDump();
-        }
         if (args.length == 2 && args[0].equals("-f")) {
             final File dumpfile = new File(args[1]);
             try {
@@ -456,8 +457,10 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
             } catch (final IOException e) {
                 e.printStackTrace();
             }
+        } else {
+            System.out.println("Usage : java " + ThreadDump.class.getName() + " -f /path/to/yacy.log");
+            return;
         }
-        //dump.print();
         assert dump != null;
         final Map<StackTrace, Integer> locks = dump.countLocks();
         final List<Map.Entry<StackTrace, List<String>>> freerun = dump.freerun();

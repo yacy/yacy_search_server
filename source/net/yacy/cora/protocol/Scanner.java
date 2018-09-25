@@ -152,6 +152,7 @@ public class Scanner {
                     if (access != Access.unknown) Scanner.this.services.put(this, access);
                 }
             } catch (final OutOfMemoryError e) {
+                e.printStackTrace();
             }
         }
         public long age() {

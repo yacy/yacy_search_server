@@ -25,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.UUID;
 
+import org.apache.commons.codec.digest.HmacAlgorithms;
 import org.apache.commons.codec.digest.HmacUtils;
 
 import net.yacy.cora.order.Base64Order;
@@ -133,7 +134,8 @@ public class TransactionManager {
 		 * (no need to store tokens until they are consumed).
 		 * On the other hand, it is supposed to remain hard enough to forge because the secret key and token seed 
 		 * are initialized with a random value at each server startup */
-		final String token = HmacUtils.hmacSha1Hex(SIGNING_KEY, TOKEN_SEED + userName + path);
+		final String token = new HmacUtils(HmacAlgorithms.HMAC_SHA_1, SIGNING_KEY)
+				.hmacHex(TOKEN_SEED + userName + path);
 		
         
         return token;
@@ -168,7 +170,8 @@ public class TransactionManager {
 			throw new TemplateMissingParameterException("Missing transaction token.");
 		}
 		
-		final String token = HmacUtils.hmacSha1Hex(SIGNING_KEY, TOKEN_SEED + userName + header.getPathInfo());
+		final String token = new HmacUtils(HmacAlgorithms.HMAC_SHA_1, SIGNING_KEY)
+				.hmacHex(TOKEN_SEED + userName + header.getPathInfo());
 		
 		/* Compare the server generated token with the one received in the post parameters, 
 		 * using a time constant function */

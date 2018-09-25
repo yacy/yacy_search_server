@@ -47,6 +47,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.retrieval.StreamResponse;
 import net.yacy.data.InvalidURLLicenceException;
 import net.yacy.data.URLLicense;
+import net.yacy.data.UserDB;
 import net.yacy.http.servlets.TemplateMissingParameterException;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.repository.Blacklist.BlacklistType;
@@ -146,9 +147,20 @@ public class ImageViewer {
 	 * @param sb switchboard instance.
 	 * @return true when full image view is allowed for this request
 	 */
-	public static boolean hasFullViewingRights(final RequestHeader header, Switchboard sb) {
-		return header != null && (Domains.isLocalhost(header.getRemoteAddr())
-		|| (sb != null && sb.verifyAuthentication(header)));
+	public static boolean hasFullViewingRights(final RequestHeader header, final Switchboard sb) {
+		boolean extendedSearchRights = false;
+		if(sb != null && header != null) {
+			final boolean adminAuthenticated = sb.verifyAuthentication(header);
+			if (adminAuthenticated) {
+				extendedSearchRights = true;
+			} else {
+				final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
+				if (user != null) {
+					extendedSearchRights = user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT);
+				}
+			}
+		}
+		return header != null && (extendedSearchRights || Domains.isLocalhost(header.getRemoteAddr()));
 	}
 
 	/**

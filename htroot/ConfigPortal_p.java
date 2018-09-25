@@ -30,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.time.Duration;
 import java.util.Properties;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -41,6 +42,7 @@ import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.http.HTTPDFileHandler;
@@ -94,8 +96,17 @@ public class ConfigPortal_p {
                 final boolean oldJsResort = sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
                 final boolean newJsResort = post.getBoolean(SwitchboardConstants.SEARCH_JS_RESORT);
                 /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
-                cleanSearchCache = oldJsResort != newJsResort;
+                cleanSearchCache = cleanSearchCache || oldJsResort != newJsResort;
                 sb.setConfig(SwitchboardConstants.SEARCH_JS_RESORT, newJsResort);
+                
+                final boolean oldStrictContentDom = sb.getConfigBool(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM, SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT);
+                final boolean newStrictContentDom = post.getBoolean(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM);
+                /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
+                cleanSearchCache = cleanSearchCache || oldStrictContentDom != newStrictContentDom;
+                sb.setConfig(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM, newStrictContentDom);
+                
+				sb.setConfig(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+						post.getBoolean(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED));
 
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, post.getBoolean(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
                 
@@ -142,7 +153,7 @@ public class ConfigPortal_p {
                     }
                 }
                 sb.setConfig(SwitchboardConstants.GREETING, config.getProperty(SwitchboardConstants.GREETING,"P2P Web Search"));
-                sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, config.getProperty(SwitchboardConstants.GREETING_HOMEPAGE,"http://yacy.net"));
+                sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, config.getProperty(SwitchboardConstants.GREETING_HOMEPAGE,"https://yacy.net"));
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, config.getProperty(SwitchboardConstants.GREETING_LARGE_IMAGE,"env/grafics/YaCyLogo_120ppi.png"));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, config.getProperty(SwitchboardConstants.GREETING_SMALL_IMAGE,"env/grafics/YaCyLogo_60ppi.png"));
                 sb.setConfig(SwitchboardConstants.GREETING_IMAGE_ALT, config.getProperty(SwitchboardConstants.GREETING_IMAGE_ALT,"YaCy project web site"));
@@ -160,10 +171,19 @@ public class ConfigPortal_p {
                 final boolean oldJsResort = sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
                 final boolean newJsResort = Boolean.parseBoolean(config.getProperty(SwitchboardConstants.SEARCH_JS_RESORT, String.valueOf(SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT)));
                 /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
-                cleanSearchCache = oldJsResort != newJsResort;
+                cleanSearchCache = cleanSearchCache || oldJsResort != newJsResort;
                 sb.setConfig(SwitchboardConstants.SEARCH_JS_RESORT, newJsResort);
                 
+                final boolean oldStrictContentDom = sb.getConfigBool(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM, SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT);
+                final boolean newStrictContentDom = Boolean.parseBoolean(config.getProperty(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM, String.valueOf(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT)));
+                /* When this setting has changed we must clean up the search event cache as it affects how search results are retrieved */
+                cleanSearchCache = cleanSearchCache || oldStrictContentDom != newStrictContentDom;
+                sb.setConfig(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM, newStrictContentDom);
                 
+				sb.setConfig(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+						Boolean.parseBoolean(config.getProperty(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+								String.valueOf(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT))));
+				
                 sb.setConfig(SwitchboardConstants.GREEDYLEARNING_ACTIVE, config.getProperty(SwitchboardConstants.GREEDYLEARNING_ACTIVE));
                 sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE));
                 sb.setConfig(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, config.getProperty(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE));
@@ -193,6 +213,18 @@ public class ConfigPortal_p {
         prop.put(SwitchboardConstants.PUBLIC_SEARCHPAGE, sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, false) ? 1 : 0);
         prop.put("search.options", sb.getConfigBool("search.options", false) ? 1 : 0);
         prop.put(SwitchboardConstants.SEARCH_JS_RESORT, sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT) ? 1 : 0);
+		prop.put(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
+				sb.getConfigBool(SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM,
+						SwitchboardConstants.SEARCH_STRICT_CONTENT_DOM_DEFAULT) ? 1 : 0);
+        
+		prop.put(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+				sb.getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+						SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT) ? 1 : 0);
+		
+		final boolean textSnippetsStatisticsEnabled = sb.getConfigBool(
+				SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED,
+				SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED_DEFAULT);
+		prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED, textSnippetsStatisticsEnabled);
 
         prop.put(SwitchboardConstants.GREEDYLEARNING_ACTIVE, sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) ? 1 : 0);
         prop.put(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, sb.getConfig(SwitchboardConstants.GREEDYLEARNING_LIMIT_DOCCOUNT, "0"));
@@ -204,6 +236,28 @@ public class ConfigPortal_p {
     	} else {
     		prop.put(SwitchboardConstants.REMOTESEARCH_RESULT_STORE_MAXSIZE, "");
     	}
+        
+        /* Provide some basic stats about text snippets generation time to help choosing snippet options */
+        if(textSnippetsStatisticsEnabled) {
+			final long totalSnippets = TextSnippet.statistics.getTotalSnippets();
+			final long totalSnippetsInitTime = TextSnippet.statistics.getTotalInitTime();
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalSnippets", totalSnippets);
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalFromSolr",
+					TextSnippet.statistics.getTotalFromSolr());
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalFromCache",
+					TextSnippet.statistics.getTotalFromCache());
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalFromMetadata",
+					TextSnippet.statistics.getTotalFromMetadata());
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalFromWeb",
+					TextSnippet.statistics.getTotalFromWeb());
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_totalFailures",
+					TextSnippet.statistics.getTotalFailures());
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_snippetsMeanTime",
+					formatDuration(totalSnippets > 0 ? totalSnippetsInitTime / totalSnippets : 0));
+
+			prop.put(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED + "_snippetsMaxTime",
+					formatDuration(TextSnippet.statistics.getMaxInitTime()));
+        }
 
         prop.put("search.verify.nocache", sb.getConfig("search.verify", "").equals("nocache") ? 1 : 0);
         prop.put("search.verify.iffresh", sb.getConfig("search.verify", "").equals("iffresh") ? 1 : 0);
@@ -253,5 +307,21 @@ public class ConfigPortal_p {
         prop.put("myContext", YaCyDefaultServlet.getContext(header, sb));
         return prop;
     }
+
+    /**
+     * @param durationValue a duration in milliseconds
+     * @return the duration value formatted for display with its time unit
+     */
+	private static String formatDuration(final long durationValue) {
+		final Duration duration = Duration.ofMillis(durationValue);
+		
+		final String formattedDuration;
+		if(duration.getSeconds() > 0) {
+			formattedDuration = duration.getSeconds() + "s";
+		} else {
+			formattedDuration = duration.toMillis() + "ms";
+		}
+		return formattedDuration;
+	}
 
 }

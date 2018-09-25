@@ -9,8 +9,15 @@
     <script type="text/javascript">
       <!--
       function element_clicked(element){
-        document.getElementById("key").value=element.id.substring(1);
-        document.getElementById("value").value=element.value;
+    	var key = element.id.substring(1);
+        document.getElementById("key").value = key;
+        var valueField = document.getElementById("value");
+        if(key.endsWith("Password")) {
+        	valueField.type = "password";
+        } else {
+        	valueField.type = "text";
+        }
+        valueField.value=element.value;
       }
 	  function filterList(){
 			  list=document.getElementsByName("options")[0];
@@ -51,7 +58,7 @@
   </p>
   <select name="options" size="36" style="width: 600px">
     #{options}#
-    <option id="k#[key]#" value="#[value]#" onclick="element_clicked(this)">#[key]#: #[value]#</option>
+    <option id="k#[key]#" value="#[value]#" onclick="element_clicked(this)">#[key]#: #[visibleValue]#</option>
     #{/options}#
   </select><br />
   <form action="ConfigProperties_p.html" method="post" accept-charset="UTF-8">

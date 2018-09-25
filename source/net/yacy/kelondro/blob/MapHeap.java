@@ -32,6 +32,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.DateTimeException;
+import java.time.Instant;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.HashMap;
@@ -144,9 +146,6 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
     }
 
 
-    // use our own formatter to prevent concurrency locks with other processes
-    private final static GenericFormatter my_SHORT_SECOND_FORMATTER  = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second);
-
     /**
      * write a whole byte array as Map to the table
      * @param key  the primary key
@@ -159,7 +158,15 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
         assert key.length > 0;
         assert newMap != null;
         key = normalizeKey(key);
-        final String s = map2string(newMap, "W" + my_SHORT_SECOND_FORMATTER.format() + " ");
+		String formattedTime;
+		try {
+			/* Prefer using first the shared and thread-safe DateTimeFormatter instance */
+			formattedTime = GenericFormatter.FORMAT_SHORT_SECOND.format(Instant.now());
+		} catch (final DateTimeException e) {
+			/* This should not happen, but rather than failing we fallback to the old formatter wich uses synchronization locks */
+			formattedTime = GenericFormatter.SHORT_SECOND_FORMATTER.format();
+		}
+		final String s = map2string(newMap, "W" + formattedTime + " ");
         assert s != null;
         final byte[] sb = UTF8.getBytes(s);
         if (this.cache == null) {
@@ -526,10 +533,9 @@ public class MapHeap implements Map<byte[], Map<String, String>> {
     public final static byte[] POISON_QUEUE_ENTRY = "POISON".getBytes();
     public BlockingQueue<byte[]> keyQueue(final int size) {
         final ArrayBlockingQueue<byte[]> set = new ArrayBlockingQueue<byte[]>(size);
-        (new Thread() {
+        (new Thread("MapHeap.keyQueue:" + size) {
             @Override
             public void run() {
-                Thread.currentThread().setName("MapHeap.keyQueue:" + size);
                 try {
                     final Iterator<byte[]> i = MapHeap.this.blob.keys(true, false);
                     while (i.hasNext())

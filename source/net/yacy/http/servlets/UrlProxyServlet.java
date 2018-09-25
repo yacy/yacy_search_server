@@ -30,8 +30,6 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 import net.yacy.server.http.ChunkedInputStream;
 import net.yacy.server.http.HTTPDProxyHandler;
-import org.eclipse.jetty.continuation.Continuation;
-import org.eclipse.jetty.continuation.ContinuationSupport;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -102,7 +100,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
             return;
         }
         
-        final String remoteHost = req.getRemoteHost();
+        final String remoteHost = req.getRemoteAddr();
         if (!Domains.isThisHostIP(remoteHost)) {
             if (!proxyippatternmatch(remoteHost)) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN,
@@ -114,12 +112,7 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
         if ("CONNECT".equalsIgnoreCase(request.getMethod())) {
             return;
         }
-        final Continuation continuation = ContinuationSupport.getContinuation(request);
 
-        if (!continuation.isInitial()) {
-            response.sendError(HttpServletResponse.SC_GATEWAY_TIMEOUT); // Need better test that isInitial
-            return;
-        }
         // 2 -  get target url
         DigestURL proxyurl = null;
         final String strUrl = request.getParameter("url");
@@ -134,11 +127,6 @@ public class UrlProxyServlet extends HttpServlet implements Servlet {
             proxyurl = new DigestURL(URLDecoder.decode(strUrl, StandardCharsets.UTF_8.name()));
         }
         
-        if (proxyurl == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND,"url parameter missing");
-            return;
-        }
-
         String hostwithport = proxyurl.getHost();
         if (proxyurl.getPort() != -1) {
             hostwithport += ":" + proxyurl.getPort();

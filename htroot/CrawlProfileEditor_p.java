@@ -42,8 +42,7 @@ public class CrawlProfileEditor_p {
     private final static String CRAWL_PROFILE_PREFIX = "crawlProfiles_";
     private static final String EDIT_ENTRIES_PREFIX = "edit_entries_";
 
-    public static serverObjects respond(
-            @SuppressWarnings("unused") final RequestHeader header,
+    public static serverObjects respond(final RequestHeader header,
             final serverObjects post,
             final serverSwitch env) {
         final servletProperties prop = new servletProperties();
@@ -160,7 +159,7 @@ public class CrawlProfileEditor_p {
                     prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_checked",
                             val == null ? "0" : Boolean.parseBoolean(val) ? "1" : "0");
                 } else {
-                    prop.put(EDIT_ENTRIES_PREFIX + count + "_readonly_type_value", val == null ? "" : val);
+                	prop.put(header.fileType(), EDIT_ENTRIES_PREFIX + count + "_readonly_type_value", val == null ? "" : val);
                 }
                 count++;
             }

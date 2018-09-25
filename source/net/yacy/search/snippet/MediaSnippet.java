@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -257,7 +258,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
      */
     private static boolean isUrlBlacklisted (final BlacklistType blacklistType, final DigestURL url) {
 
-        final boolean isBlacklisted = Switchboard.urlBlacklist.isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
+        final boolean isBlacklisted = Switchboard.urlBlacklist.isListed(blacklistType, url.getHost().toLowerCase(Locale.ROOT), url.getFile());
 
         if (isBlacklisted) {
             

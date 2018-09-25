@@ -35,6 +35,8 @@ import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.data.TransactionManager;
+import net.yacy.http.InetPathAccessHandler;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.Network;
 import net.yacy.peers.Seed;
@@ -42,6 +44,7 @@ import net.yacy.peers.operation.yacySeedUploader;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
+import net.yacy.search.snippet.TextSnippet;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -64,6 +67,9 @@ public class SettingsAck_p {
             prop.put("info", "1");//no information submitted
             return prop;
         }
+        
+    	/* Check this is a valid transaction */
+    	TransactionManager.checkPostTransaction(header, post);
 
         // admin password
         if (post.containsKey("adminaccount")) {
@@ -231,14 +237,14 @@ public class SettingsAck_p {
                 // testing proxy filter
                 int patternCount = 0;
                 String patternStr = null;
+                final StringTokenizer st = new StringTokenizer(filter,",");
                 try {
-                    final StringTokenizer st = new StringTokenizer(filter,",");
                     while (st.hasMoreTokens()) {
                         patternCount++;
                         patternStr = st.nextToken();
-                        Pattern.compile(patternStr);
+                        InetPathAccessHandler.checkPattern(patternStr);
                     }
-                } catch (final PatternSyntaxException e) {
+                } catch (final IllegalArgumentException e) {
                     prop.put("info", "27");
                     prop.putHTML("info_filter", filter);
                     prop.put("info_nr", patternCount);
@@ -255,6 +261,23 @@ public class SettingsAck_p {
             //prop.put("info_user", user);
             prop.putHTML("info_filter", filter);
             return prop;
+        }
+        
+        /* Compression settings */
+        if (post.containsKey("serverCompression")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=ServerAccess");
+            
+			final boolean oldValue = env.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
+					SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT);
+        	final boolean newValue = post.containsKey(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP);
+            env.setConfig(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP, newValue);
+            
+            prop.put("needsRestart", newValue != oldValue);
+            
+            /* server compression settings saved */
+            prop.put("info", "37");
+        	return prop;
         }
 
         if (post.containsKey("proxysettings")) {
@@ -578,6 +601,10 @@ public class SettingsAck_p {
             
             tickedCheckbox = post.containsKey("searchShowRanking");
             env.setConfig(SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING, tickedCheckbox);
+            
+            tickedCheckbox = post.containsKey(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED);
+			sb.setConfig(SwitchboardConstants.DEBUG_SNIPPETS_STATISTICS_ENABLED, tickedCheckbox);
+			TextSnippet.statistics.setEnabled(tickedCheckbox);
             
             /* For easier user understanding, the following flags controlling data sources selection 
              * are rendered in the UI as checkboxes corresponding to enabled value when ticked */

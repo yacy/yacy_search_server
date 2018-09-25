@@ -34,8 +34,8 @@ import java.io.Writer;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -87,8 +87,16 @@ public class Document {
     // text in image tags.
     private LinkedHashMap<AnchorURL, String> audiolinks, videolinks, applinks, hyperlinks; // TODO: check if redundant value (set to key.getNameProperty()) is needed
     private LinkedHashMap<DigestURL, String> inboundlinks, outboundlinks;
+    
     /** links to icons that belongs to the document (mapped by absolute URL) */
     private Map<DigestURL, IconEntry> icons;
+    
+	/**
+	 * URLs of linked data item types/classes referenced by the document (for example in
+	 * HTML with standard annotations such as RDFa, microdata, microformats or
+	 * JSON-LD)
+	 */
+	private Set<DigestURL> linkedDataTypes;
     private boolean resorted;
     private final Set<String> languages;
     private boolean indexingDenied;
@@ -122,11 +130,15 @@ public class Document {
         this.charset = charset;
         this.parserObject = parserObject;
         this.keywords = new LinkedHashSet<String>();
-        if (keywords != null) this.keywords.addAll(Arrays.asList(keywords));
+        if (keywords != null) {
+        	Collections.addAll(this.keywords, keywords);
+        }
         this.titles = (titles == null) ? new ArrayList<String>(1) : titles;
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
         this.sections =  new LinkedList<String>() ;
-        if (sections != null) this.sections.addAll(Arrays.asList(sections));
+        if (sections != null) {
+        	Collections.addAll(this.sections, sections);
+        }
         this.descriptions = (abstrcts == null) ? new ArrayList<String>() : abstrcts;
         if (lat >= -90.0d && lat <= 90.0d && lon >= -180.0d && lon <= 180.0d) {
             this.lon = lon;
@@ -145,6 +157,7 @@ public class Document {
         this.videolinks = null;
         this.applinks = null;
         this.icons = new HashMap<>();
+        this.linkedDataTypes = new HashSet<>();
         this.resorted = false;
         this.inboundlinks = null;
         this.outboundlinks = null;
@@ -365,6 +378,9 @@ dc_rights
         return this.publisher == null ? "" : this.publisher;
     }
 
+    /**
+     * @return the Media Type (aka MIME Type) of the document
+     */
     public String dc_format() {
         return this.mimeType;
     }
@@ -817,7 +833,7 @@ dc_rights
      * Set links to icons that belongs to the document (mapped by absolute URL)
      * @param icons
      */
-    public void setIcons(Map<DigestURL, IconEntry> icons) {
+    public void setIcons(final Map<DigestURL, IconEntry> icons) {
     	/* Better to ensure now icons property will not be null */
     	if(icons != null) {
     		this.icons = icons;	
@@ -825,6 +841,28 @@ dc_rights
     		this.icons = new HashMap<>();
     	}
 	}
+    
+	/**
+	 * @return URLs of linked data item types/classes referenced by the document (for example in
+	 * HTML with standard annotations such as RDFa, microdata, microformats or
+	 * JSON-LD)
+	 */
+    public Set<DigestURL> getLinkedDataTypes() {
+		return this.linkedDataTypes;
+	}
+    
+	/**
+	 * @return URLs of linked data item types/classes referenced by the document
+	 */
+    public void setLinkedDataTypes(final Set<DigestURL> linkedDataTypes) {
+    	if(linkedDataTypes != null) {
+    		/* Ensure non null property */
+    		this.linkedDataTypes = linkedDataTypes;
+    	} else {
+    		this.linkedDataTypes.clear();
+    	}
+    }
+    
 
     public int inboundLinkNofollowCount() {
         if (this.inboundlinks == null) resortLinks();
@@ -985,8 +1023,8 @@ dc_rights
             }
 
             titles.addAll(doc.titles());
-            sectionTitles.addAll(Arrays.asList(doc.getSectionTitles()));
-            for (String d: doc.dc_description()) descriptions.add(d);
+            Collections.addAll(sectionTitles, doc.getSectionTitles());
+            Collections.addAll(descriptions, doc.dc_description());
 
             if (doc.getTextLength() > 0) {
                 if (docTextLength > 0) content.write('\n');

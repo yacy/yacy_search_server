@@ -42,7 +42,7 @@ public class NavigatorPlugins {
         Map<String, String> defaultnavplugins = new TreeMap<String, String>();
         defaultnavplugins.put("filetype", "Filetype");
         defaultnavplugins.put("hosts", "Provider");
-        // defaultnavplugins.put("language", "Language");
+        defaultnavplugins.put("language", "Language");
         defaultnavplugins.put("authors", "Authors");
         defaultnavplugins.put("collections", "Collection");
         defaultnavplugins.put("namespace", "Wiki Name Space");
@@ -91,11 +91,11 @@ public class NavigatorPlugins {
             if (navname.contains("hosts")) {
                 navigatorPlugins.put("hosts", new HostNavigator("Provider", CollectionSchema.host_s));
             }
-/*
+
             if (navname.contains("language")) {
                 navigatorPlugins.put("language", new LanguageNavigator("Language"));
             }
-*/
+
             if (navname.contains("namespace")) {
                 navigatorPlugins.put("namespace", new NameSpaceNavigator("Wiki Name Space"));
             }

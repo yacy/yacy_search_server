@@ -18,8 +18,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.Date;
 import java.util.Iterator;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.UserDB;
@@ -30,7 +30,7 @@ import net.yacy.server.serverSwitch;
 
 public class ConfigAccountList_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
@@ -54,7 +54,8 @@ public class ConfigAccountList_p {
             prop.putHTML("userlist_" + numUsers + "_firstname", entry.getFirstName());
             prop.putHTML("userlist_" + numUsers + "_address", entry.getAddress());
             if (entry.getLastAccess() != null) {
-                prop.put("userlist_" + numUsers + "_lastaccess", GenericFormatter.FORMAT_SIMPLE.format(new Date(entry.getLastAccess())));
+				prop.put("userlist_" + numUsers + "_lastaccess",
+						GenericFormatter.formatSafely(entry.getLastAccess(), GenericFormatter.FORMAT_SIMPLE));
             } else {
                 prop.put("userlist_" + numUsers + "_lastaccess", "never");
             }

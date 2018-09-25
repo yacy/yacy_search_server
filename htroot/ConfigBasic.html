@@ -28,7 +28,8 @@
       Your YaCy Peer needs some basic information to operate properly
     </p>
     
-    <form action="ConfigBasic.html" method="get" accept-charset="UTF-8">
+    <form action="ConfigBasic.html" method="post" accept-charset="UTF-8">
+      <input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
       <ol>
         <li>
           <img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Select a language for the interface:<br />
@@ -37,20 +38,31 @@
             <input type="radio" name="language" value="default" id="lang_en" onchange="this.form.submit()" #(lang_en)#::checked="checked"#(/lang_en)# /><label for="lang_en" #(active_en)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_en)#>English</label>&nbsp;    
             <input type="radio" name="language" value="de" id="lang_de" onchange="this.form.submit()" #(lang_de)#::checked="checked"#(/lang_de)# /><label for="lang_de" #(active_de)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_de)#>Deutsch</label>&nbsp;
             <input type="radio" name="language" value="fr" id="lang_fr" onchange="this.form.submit()" #(lang_fr)#::checked="checked"#(/lang_fr)# /><label for="lang_fr" #(active_fr)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_fr)#>Fran&ccedil;ais</label>&nbsp;
-            <input type="radio" name="language" value="cn" id="lang_cn" onchange="this.form.submit()" #(lang_cn)#::checked="checked"#(/lang_cn)# /><label for="lang_cn" #(active_cn)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_cn)#>&#27721;&#35821;/&#28450;&#35486</label>
+            <input type="radio" name="language" value="zh" id="lang_zh" onchange="this.form.submit()" #(lang_zh)#::checked="checked"#(/lang_zh)# /><label for="lang_zh" #(active_zh)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_zh)#>&#27721;&#35821;/&#28450;&#35486</label>
             <input type="radio" name="language" value="ru" id="lang_ru" onchange="this.form.submit()" #(lang_ru)#::checked="checked"#(/lang_ru)# /><label for="lang_ru" #(active_ru)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_ru)#>&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</label>
             <input type="radio" name="language" value="uk" id="lang_uk" onchange="this.form.submit()" #(lang_uk)#::checked="checked"#(/lang_uk)# /><label for="lang_uk" #(active_uk)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_uk)#>&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;</label>
             <input type="radio" name="language" value="hi" id="lang_hi" onchange="this.form.submit()" #(lang_hi)#::checked="checked"#(/lang_hi)# /><label for="lang_hi" #(active_hi)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_hi)#>&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;</label>
-            <input type="radio" name="language" value="ja" id="lang_ja" onchange="this.form.submit()" #(lang_ja)#::checked="checked"#(/lang_ja)# /><label for="lang_ja" #(active_ja)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_ja)#>&#26085;&#26412;&#35486;</label>            
+            <input type="radio" name="language" value="ja" id="lang_ja" onchange="this.form.submit()" #(lang_ja)#::checked="checked"#(/lang_ja)# /><label for="lang_ja" #(active_ja)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_ja)#>&#26085;&#26412;&#35486;</label>
+            <input type="radio" name="language" value="el" id="lang_el" onchange="this.form.submit()" #(lang_el)#::checked="checked"#(/lang_el)# /><label for="lang_el" #(active_el)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_el)#>Greek</label>
+			<input type="radio" name="language" value="it" id="lang_it" onchange="this.form.submit()" #(lang_it)#::checked="checked"#(/lang_it)# /><label for="lang_it" #(active_el)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_el)#>Italiano</label>            
           </fieldset>
         </li>
         <!-- take care that no other items are changed, but also change the former if no js is enabled -->
-        <script type="text/javascript"> document.write('</form><form action="ConfigBasic.html" method="get">'); </script>
+        <script type="text/javascript"> document.write('</form><form action="ConfigBasic.html" method="post" accept-charset="UTF-8"><input type="hidden" name="transactionToken" value="#[transactionToken]#"/>');</script>
 
 	#(setUseCase)#::
+	
 	<li>
           <img src="env/grafics/ok.png" height="16" width="16" alt="ok" />&nbsp;Use Case: what do you want to do with YaCy:<br />
           <fieldset>
+          #(switchError)#::<div class="alert alert-danger" role="alert"><p>Can not leave from Intranet Indexing : one or more remote Solr instances are attached and may contain private documents indexed.</p> 
+          <p>Please first delete all index entries (see the <a href="IndexControlURLs_p.html">URL Database Administration</a> page) or disconnect the remote Solr instance(s) from YaCy (see the <a href="IndexFederated_p.html">Index Sources &amp; Targets</a> page).</p></div>
+          #(/switchError)#
+          #(switchWarning)#::<div class="alert alert-warning" role="alert"><p>One or more remote Solr instances are attached and may contain indexed public documents irrelevant to your local domain.</p> 
+          <p>You may want to delete all indexed documents (see the <a href="IndexControlURLs_p.html">URL Database Administration</a> page), disconnect or change the remote Solr instance(s) attached (see the <a href="IndexFederated_p.html">Index Sources &amp; Targets</a> page).</p></div>
+          ::<div class="alert alert-warning" role="alert"><p>One or more remote Solr instances are attached.</p> 
+          <p>Please be sure you want to expose the indexed documents in this new mode. You may want to disconnect or change the remote Solr instance(s) attached (see the <a href="IndexFederated_p.html">Index Sources &amp; Targets</a> page).</p></div>
+          #(/switchWarning)#
           <table border="0">
           <tr>
             <td style="width: 256px;"><input type="radio" name="usecase" value="freeworld" id="usecaseFreeworld" #(freeworldChecked)#::checked="checked"#(/freeworldChecked)# /><label for="usecaseFreeworld">Community-based web search</label></td>

@@ -50,6 +50,70 @@ public abstract class AbstractParser implements Parser {
 	    this.name = name;
 	}
 
+    /*
+     *  The following abstract implementations create a circular call which would cause an endless loop when called.
+     *  They are both here because one of them must be overridden by the implementing class.
+     */
+    
+    @Override
+    public Document[] parse(
+            DigestURL url,
+            String mimeType,
+            String charset,
+            VocabularyScraper scraper,
+            int timezoneOffset,
+            InputStream source
+            ) throws Parser.Failure, InterruptedException {
+    	return parse(url, mimeType, charset, new HashSet<String>(), scraper, timezoneOffset, source);
+    }
+
+    @Override
+    public Document[] parse(
+            DigestURL url,
+            String mimeType,
+            String charset,
+            Set<String> ignore_class_name,
+            VocabularyScraper scraper,
+            int timezoneOffset,
+            InputStream source
+            ) throws Parser.Failure, InterruptedException {
+    	return parse(url, mimeType, charset, scraper, timezoneOffset, source);
+    }
+    
+    
+    /*
+     *  The following abstract implementations create a circular call which would cause an endless loop when called.
+     *  They are both here because one of them must be overridden by the implementing class.
+     */
+
+    @Override
+    public Document[] parseWithLimits(
+    		final DigestURL location,
+    		final String mimeType,
+    		final String charset,
+    		final VocabularyScraper scraper,
+    		final int timezoneOffset,
+    		final InputStream source,
+    		final int maxLinks,
+    		final long maxBytes) throws UnsupportedOperationException, Failure, InterruptedException {
+    	return parseWithLimits(location, mimeType, charset, new HashSet<String>(), scraper, timezoneOffset, source, maxLinks, maxBytes);
+    }
+    
+    @Override
+    public Document[] parseWithLimits(
+    		DigestURL location,
+    		String mimeType,
+    		String charset,
+    		final Set<String> ignore_class_name,
+    		VocabularyScraper scraper,
+    		int timezoneOffset,
+    		InputStream source,
+    		int maxLinks,
+    		long maxBytes)
+    		throws Failure, InterruptedException, UnsupportedOperationException {
+    	return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, maxLinks, maxBytes);
+    }
+    
     /**
      * return the name of the parser
      */
@@ -99,14 +163,6 @@ public abstract class AbstractParser implements Parser {
         List<String> c = new ArrayList<String>(1);
         if (t != null) c.add(t);
         return c;
-    }
-    
-    @Override
-    public Document[] parseWithLimits(DigestURL url, String mimeType, String charset, VocabularyScraper scraper,
-    		int timezoneOffset, InputStream source, int maxLinks, long maxBytes)
-    		throws Failure, InterruptedException, UnsupportedOperationException {
-    	/* Please override on subclasses when implementation is possible */
-    	throw new UnsupportedOperationException();
     }
     
     @Override

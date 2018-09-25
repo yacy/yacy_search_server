@@ -27,10 +27,12 @@
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -42,7 +44,6 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.storage.HandleSet;
-import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.data.ListManager;
@@ -146,7 +147,7 @@ public class IndexControlRWIs_p {
             }
 
             if ( post.containsKey("keyhashsearch") ) {
-                if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                if ( keystring.isEmpty() || !Arrays.equals(Word.word2hash(keystring), keyhash) ) {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final SearchEvent theSearch = genSearchresult(prop, sb, keyhash, null);
@@ -246,7 +247,7 @@ public class IndexControlRWIs_p {
             }
 
             if ( post.containsKey("urllist") ) {
-                if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                if ( keystring.isEmpty() || !Arrays.equals(Word.word2hash(keystring), keyhash) ) {
                     prop.put("keystring", "&lt;" + errmsg + "&gt;");
                 }
                 final Bitfield flags = compileFlags(post);
@@ -261,7 +262,7 @@ public class IndexControlRWIs_p {
             	TransactionManager.checkPostTransaction(header, post);
             	
                 try {
-                    if ( keystring.isEmpty() || !ByteBuffer.equals(Word.word2hash(keystring), keyhash) ) {
+                    if ( keystring.isEmpty() || !Arrays.equals(Word.word2hash(keystring), keyhash) ) {
                         prop.put("keystring", "&lt;" + errmsg + "&gt;");
                     }
 
@@ -334,7 +335,7 @@ public class IndexControlRWIs_p {
                         // transport to other peer
                         final boolean gzipBody = sb.getConfigBool("indexControl.gzipBody", false);
                         final int timeout = (int) sb.getConfigLong("indexControl.timeout", 60000);
-                        final String error = Protocol.transferIndex(sb.peers, seed, icc, knownURLs, segment, gzipBody, timeout);
+                        final String error = Protocol.transferIndex(sb, seed, icc, knownURLs, segment, gzipBody, timeout);
                         prop.put("result", (error == null) ? ("Successfully transferred "
                                 + knownURLs.size()
                                 + " words in "
@@ -448,7 +449,7 @@ public class IndexControlRWIs_p {
                                                 blacklist,
                                                 url.getHost(),
                                                 ".*");
-                                        } catch (PunycodeException e) {
+                                        } catch (final PunycodeException | PatternSyntaxException e) {
                                             ConcurrentLog.warn(APP_NAME,
                                                             "Unable to add blacklist entry to blacklist "
                                                                             + supportedBlacklistType, e);

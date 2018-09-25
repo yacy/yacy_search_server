@@ -72,32 +72,30 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
         this.encnt = 0;
     }
 
-    /**
-     * shrink the cluster to a demanded size
-     * @param maxsize
-     */
     @Override
-    public void shrinkToMaxSize(final int maxsize) {
-        if (maxsize < 0) return;
+    public int shrinkToMaxSize(final int maxsize) {
+        if (maxsize < 0) {
+        	return 0;
+        }
         Long key;
+        int deletedNb = 0;
         synchronized (this) {
             while (this.map.size() > maxsize) {
                 // find and remove smallest objects until cluster has demanded size
                 key = this.pam.firstKey();
                 if (key == null) break;
                 this.map.remove(this.pam.remove(key));
+                deletedNb++;
             }
         }
+        return deletedNb;
     }
 
-    /**
-     * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
-     * @param minScore
-     */
     @Override
-    public void shrinkToMinScore(final int minScore) {
+    public int shrinkToMinScore(final int minScore) {
         int score;
         Long key;
+        int deletedNb = 0;
         synchronized (this) {
             while (!this.pam.isEmpty()) {
                 // find and remove objects where their score is smaller than the demanded minimum score
@@ -106,8 +104,10 @@ public final class ClusteredScoreMap<E> extends AbstractScoreMap<E> implements R
                 score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
                 if (score >= minScore) break;
                 this.map.remove(this.pam.remove(key));
+                deletedNb++;
             }
         }
+        return deletedNb;
     }
 
     private long scoreKey(final int elementNr, final int elementCount) {

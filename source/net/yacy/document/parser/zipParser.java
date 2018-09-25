@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -69,6 +70,7 @@ public class zipParser extends AbstractParser implements Parser {
             final DigestURL location,
             final String mimeType,
             final String charset,
+            final Set<String> ignore_class_name,
             final VocabularyScraper scraper, 
             final int timezoneOffset,
             final InputStream source)
@@ -117,7 +119,7 @@ public class zipParser extends AbstractParser implements Parser {
                     FileUtils.copy(zis, tmp, entry.getSize());
                     final DigestURL virtualURL = DigestURL.newURL(location, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
-                    final Document[] docs = TextParser.parseSource(virtualURL, mime, null, scraper, timezoneOffset, 999, tmp);
+                    final Document[] docs = TextParser.parseSource(virtualURL, mime, null, ignore_class_name, scraper, timezoneOffset, 999, tmp);
                     if (docs == null) continue;
                     maindoc.addSubDocuments(docs);
                 } catch (final Parser.Failure e) {

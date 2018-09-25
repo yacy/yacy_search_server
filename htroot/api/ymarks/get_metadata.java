@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.Locale;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
@@ -38,7 +39,7 @@ public class get_metadata {
         	String url = post.get(YMarkEntry.BOOKMARK.URL.key(),YMarkEntry.BOOKMARK.URL.deflt());
         	boolean hasProtocol = false;
 			for (final YMarkTables.PROTOCOLS p : YMarkTables.PROTOCOLS.values()) {
-				if(url.toLowerCase().startsWith(p.protocol())) {
+				if(url.toLowerCase(Locale.ROOT).startsWith(p.protocol())) {
 					hasProtocol = true;
 					break;
 				}

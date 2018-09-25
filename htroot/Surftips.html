@@ -55,19 +55,22 @@
     </p>
     
     <form action="Surftips.html" method="get" class="PeerControl" accept-charset="UTF-8"><div>
-      <button type="submit" name="publicPage" class="btn btn-primary" value="0">
-        <img src="env/grafics/lock.gif" alt="authentication required" />
-          Hide surftips for users without autorization
-      </button>
+      #(publicSurftips)#
       <button type="submit" name="publicPage" class="btn btn-primary" value="1">
         <img src="env/grafics/lock.gif" alt="authentication required" />
           Show surftips to everyone
       </button>
+      ::
+      <button type="submit" name="publicPage" class="btn btn-primary" value="0">
+        <img src="env/grafics/lock.gif" alt="authentication required" />
+          Hide surftips for users without autorization
+      </button>
+      #(/publicSurftips)#
     </div></form>
     <script type="text/javascript">
       addHover();
     </script>
-	#(/surftips)#
+    #(/surftips)#
     
     #%env/templates/footer.template%#
   </body>

@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.solr.common.SolrInputDocument;
@@ -84,6 +85,15 @@ public class Transactions {
         archiveDir = new File(transactionDir, State.ARCHIVE.dirname);
         archive = new Snapshots(archiveDir);
     }
+    
+    public static synchronized void migrateIPV6Snapshots() {
+    	executor.shutdown();
+    	try {
+			executor.awaitTermination(10, TimeUnit.SECONDS);
+		} catch (final InterruptedException e) {
+			return;
+		}
+    }
 
     /**
      * get the number of entries for each of the transaction states
@@ -118,7 +128,7 @@ public class Transactions {
     
     /**
      * list the snapshots for a given host name
-     * @param hostport the <host>.<port> identifier for the domain
+     * @param hostport the <host>.<port> identifier for the domain (with the same format as applied by the Snapshots.pathToHostPortDir() function).
      * @param depth restrict the result to the given depth or if depth == -1 do not restrict to a depth
      * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
      * @return a map with a set for each depth in the domain of the host name
@@ -199,7 +209,9 @@ public class Transactions {
         // CLEAN UP OLD DATA (if wanted)
         Collection<File> oldPaths = Transactions.findPaths(url, depth, null, Transactions.State.INVENTORY);
         if (replaceOld && oldPaths != null) {
-            for (File oldPath: oldPaths) oldPath.delete();
+            for (File oldPath: oldPaths) {
+            	oldPath.delete();
+            }
         }
         
         // STORE METADATA FOR THE IMAGE
@@ -211,10 +223,9 @@ public class Transactions {
         final String urls = url.toNormalform(true);
         final File pdfPath = Transactions.definePath(url, depth, date, "pdf", Transactions.State.INVENTORY);
         if (concurrency && executorRunning.intValue() < Runtime.getRuntime().availableProcessors()) {
-            Thread t = new Thread(){
+            Thread t = new Thread("Transactions.store"){
                 @Override
                 public void run() {
-                	this.setName("Transactions.store");
                     executorRunning.incrementAndGet();
                     try {
                         Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath);

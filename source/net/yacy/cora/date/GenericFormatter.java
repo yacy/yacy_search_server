@@ -27,6 +27,13 @@ package net.yacy.cora.date;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -44,33 +51,159 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     public static final String PATTERN_ANSIC   = "EEE MMM d HH:mm:ss yyyy";
     public static final String PATTERN_SIMPLE  = "yyyy/MM/dd HH:mm:ss";
     
-    public static final SimpleDateFormat FORMAT_SHORT_DAY     = new SimpleDateFormat(PATTERN_SHORT_DAY, Locale.US);
-    public static final SimpleDateFormat FORMAT_SHORT_MINUTE  = new SimpleDateFormat(PATTERN_SHORT_MINUTE, Locale.US);
-    public static final SimpleDateFormat FORMAT_SHORT_SECOND  = new SimpleDateFormat(PATTERN_SHORT_SECOND, Locale.US);
-    public static final SimpleDateFormat FORMAT_SHORT_MILSEC  = new SimpleDateFormat(PATTERN_SHORT_MILSEC, Locale.US);
-    public static final SimpleDateFormat FORMAT_RFC1123_SHORT = new SimpleDateFormat(PATTERN_RFC1123_SHORT, Locale.US);
-    public static final SimpleDateFormat FORMAT_ANSIC         = new SimpleDateFormat(PATTERN_ANSIC, Locale.US);
-    public static final SimpleDateFormat FORMAT_SIMPLE        = new SimpleDateFormat(PATTERN_SIMPLE, Locale.US);
+	/**
+	 * A regular expression matching the PATTERN_SIMPLE pattern (does not control
+	 * last day of month (30/31 or 28/29 for february). Can be used as a HTML5 input
+	 * field validation pattern
+	 */
+	public static final String PATTERN_SIMPLE_REGEX = "[0-9]{4}/(0[1-9]|1[012])/(0[1-9]|1[0-9]|2[0-9]|3[01]) (0[0-9]|1[0-9]|2[0-3])(:[0-5][0-9]){2}";
 
-    static {
-        // we want GMT times on the formats as well as they don't support any timezone
-        FORMAT_SHORT_DAY.setTimeZone(UTCtimeZone);
-        FORMAT_SHORT_SECOND.setTimeZone(UTCtimeZone);
-        FORMAT_SHORT_MILSEC.setTimeZone(UTCtimeZone);
-    }
+	/**
+	 * A thread-safe date formatter using the
+	 * {@link GenericFormatter#PATTERN_SHORT_DAY} pattern with the US locale on the
+	 * UTC time zone.
+	 */
+	public static final DateTimeFormatter FORMAT_SHORT_DAY = DateTimeFormatter
+			.ofPattern(PATTERN_SHORT_DAY.replace("yyyy", "uuuu"), Locale.US).withZone(ZoneOffset.UTC);
+
+	/**
+	 * A thread-safe date formatter using the
+	 * {@link GenericFormatter#PATTERN_SHORT_MINUTE} pattern with the US locale on
+	 * the system time zone.
+	 */
+	public static final DateTimeFormatter FORMAT_SHORT_MINUTE = DateTimeFormatter
+			.ofPattern(PATTERN_SHORT_MINUTE.replace("yyyy", "uuuu"), Locale.US).withZone(ZoneId.systemDefault());
+
+	
+	/**
+	 * A thread-safe date formatter using the
+	 * {@link GenericFormatter#PATTERN_SHORT_SECOND} pattern with the US locale on
+	 * the UTC time zone.
+	 */
+	public static final DateTimeFormatter FORMAT_SHORT_SECOND = DateTimeFormatter
+			.ofPattern(PATTERN_SHORT_SECOND.replace("yyyy", "uuuu"), Locale.US).withZone(ZoneOffset.UTC);
+
+	/**
+	 * A thread-safe date formatter using the
+	 * {@link GenericFormatter#PATTERN_SHORT_MILSEC} pattern with the US locale on
+	 * the UTC time zone.
+	 */
+	public static final DateTimeFormatter FORMAT_SHORT_MILSEC = new DateTimeFormatterBuilder()
+			.appendPattern(PATTERN_SHORT_MILSEC.replace("yyyy", "uuuu").replaceAll("SSS", ""))
+			.appendValue(ChronoField.MILLI_OF_SECOND, 3).toFormatter().withLocale(Locale.US)
+			.withZone(ZoneOffset.UTC);/* we can not use here the 'SSS' pattern for milliseconds on JDK 8 (see https://bugs.openjdk.java.net/browse/JDK-8031085) */
+
+	/**
+	 * A thread-safe date formatter using the
+	 * {@link GenericFormatter#PATTERN_RFC1123_SHORT} pattern with the US locale on
+	 * the system time zone.
+	 */
+	public static final DateTimeFormatter FORMAT_RFC1123_SHORT = DateTimeFormatter
+			.ofPattern(PATTERN_RFC1123_SHORT.replace("yyyy", "uuuu"), Locale.US).withZone(ZoneId.systemDefault());
+
+	/**
+	 * A thread-safe date formatter using the {@link GenericFormatter#PATTERN_ANSIC}
+	 * pattern with the US locale on the system time zone.
+	 */
+	public static final DateTimeFormatter FORMAT_ANSIC = DateTimeFormatter.ofPattern(PATTERN_ANSIC.replace("yyyy", "uuuu"), Locale.US)
+			.withZone(ZoneId.systemDefault());
+
+	/**
+	 * A thread-safe date formatter using the
+	 * {@link GenericFormatter#PATTERN_SIMPLE} pattern (adapted for the DateTimeFormatter class) with the US locale on the
+	 * system time zone.
+	 */
+	public static final DateTimeFormatter FORMAT_SIMPLE = DateTimeFormatter.ofPattern(PATTERN_SIMPLE.replace("yyyy", "uuuu"), Locale.US)
+			.withZone(ZoneId.systemDefault());
+
+	/**
+	 * @return a new SimpleDateFormat instance using the
+	 *         {@link GenericFormatter#PATTERN_SHORT_DAY} pattern with the US
+	 *         locale.
+	 */
+	public static SimpleDateFormat newShortDayFormat() {
+		final SimpleDateFormat dateFormat = new SimpleDateFormat(GenericFormatter.PATTERN_SHORT_DAY, Locale.US);
+
+		// we want GMT times on the formats as well as they don't support any timezone
+		dateFormat.setTimeZone(UTCtimeZone);
+
+		return dateFormat;
+	}
+
+	/**
+	 * @return a new SimpleDateFormat instance using the
+	 *         {@link GenericFormatter#PATTERN_SHORT_MINUTE} pattern with the US
+	 *         locale.
+	 */
+	public static SimpleDateFormat newShortMinuteFormat() {
+		return new SimpleDateFormat(GenericFormatter.PATTERN_SHORT_MINUTE, Locale.US);
+	}
+
+	/**
+	 * @return a new SimpleDateFormat instance using the
+	 *         {@link GenericFormatter#PATTERN_SHORT_SECOND} pattern with the US
+	 *         locale.
+	 */
+	public static SimpleDateFormat newShortSecondFormat() {
+		final SimpleDateFormat dateFormat = new SimpleDateFormat(GenericFormatter.PATTERN_SHORT_SECOND, Locale.US);
+
+		// we want GMT times on the formats as well as they don't support any timezone
+		dateFormat.setTimeZone(UTCtimeZone);
+
+		return dateFormat;
+	}
+
+	/**
+	 * @return a new SimpleDateFormat instance using the
+	 *         {@link GenericFormatter#PATTERN_SHORT_MILSEC} pattern with the US
+	 *         locale.
+	 */
+	public static SimpleDateFormat newShortMilsecFormat() {
+		final SimpleDateFormat dateFormat = new SimpleDateFormat(GenericFormatter.PATTERN_SHORT_MILSEC, Locale.US);
+
+		// we want GMT times on the formats as well as they don't support any timezone
+		dateFormat.setTimeZone(UTCtimeZone);
+
+		return dateFormat;
+	}
+
+	/**
+	 * @return a new SimpleDateFormat instance using the
+	 *         {@link GenericFormatter#PATTERN_RFC1123_SHORT} pattern with the US
+	 *         locale.
+	 */
+	public static SimpleDateFormat newRfc1123ShortFormat() {
+		return new SimpleDateFormat(GenericFormatter.PATTERN_RFC1123_SHORT, Locale.US);
+	}
+
+	/**
+	 * @return a new SimpleDateFormat instance using the
+	 *         {@link GenericFormatter#PATTERN_ANSIC} pattern with the US locale.
+	 */
+	public static SimpleDateFormat newAnsicFormat() {
+		return new SimpleDateFormat(GenericFormatter.PATTERN_ANSIC, Locale.US);
+	}
+
+	/**
+	 * @return a new SimpleDateFormat instance using the
+	 *         {@link GenericFormatter#PATTERN_SIMPLE} pattern with the US locale.
+	 */
+	public static SimpleDateFormat newSimpleDateFormat() {
+		return new SimpleDateFormat(GenericFormatter.PATTERN_SIMPLE, Locale.US);
+	}
 
     public static final long time_second =  1000L;
     public static final long time_minute = 60000L;
     public static final long time_hour   = 60 * time_minute;
     public static final long time_day    = 24 * time_hour;
 
-    public static final GenericFormatter SHORT_DAY_FORMATTER     = new GenericFormatter(FORMAT_SHORT_DAY, time_minute);
-    public static final GenericFormatter SHORT_MINUTE_FORMATTER  = new GenericFormatter(FORMAT_SHORT_MINUTE, time_second);
-    public static final GenericFormatter SHORT_SECOND_FORMATTER  = new GenericFormatter(FORMAT_SHORT_SECOND, time_second);
-    public static final GenericFormatter SHORT_MILSEC_FORMATTER  = new GenericFormatter(FORMAT_SHORT_MILSEC, 1);
-    public static final GenericFormatter RFC1123_SHORT_FORMATTER = new GenericFormatter(FORMAT_RFC1123_SHORT, time_minute);
-    public static final GenericFormatter ANSIC_FORMATTER         = new GenericFormatter(FORMAT_ANSIC, time_second);
-    public static final GenericFormatter SIMPLE_FORMATTER        = new GenericFormatter(FORMAT_SIMPLE, time_second);
+    public static final GenericFormatter SHORT_DAY_FORMATTER     = new GenericFormatter(newShortDayFormat(), time_minute);
+    public static final GenericFormatter SHORT_MINUTE_FORMATTER  = new GenericFormatter(newShortMinuteFormat(), time_second);
+    public static final GenericFormatter SHORT_SECOND_FORMATTER  = new GenericFormatter(newShortSecondFormat(), time_second);
+    public static final GenericFormatter SHORT_MILSEC_FORMATTER  = new GenericFormatter(newShortMilsecFormat(), 1);
+    public static final GenericFormatter RFC1123_SHORT_FORMATTER = new GenericFormatter(newRfc1123ShortFormat(), time_minute);
+    public static final GenericFormatter ANSIC_FORMATTER         = new GenericFormatter(newAnsicFormat(), time_second);
+    public static final GenericFormatter SIMPLE_FORMATTER        = new GenericFormatter(newSimpleDateFormat(), time_second);
 
     private final SimpleDateFormat dateFormat;
     private final long maxCacheDiff;
@@ -157,7 +290,7 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
         else throw new IllegalArgumentException("UTC String malformed (wrong sign):" + diffString);
         final int oh = NumberTools.parseIntDecSubstring(diffString, 1, 3);
         final int om = NumberTools.parseIntDecSubstring(diffString, 3);
-        return (int) ( ((ahead) ? 1 : -1) * (oh * 60 + om));
+        return ((ahead) ? 1 : -1) * (oh * 60 + om);
     }
     
     /**
@@ -197,6 +330,59 @@ public class GenericFormatter extends AbstractFormatter implements DateFormatter
     }
 
     private final static DecimalFormat D2 = new DecimalFormat("00");
+    
+	/**
+	 * Safely format the given time value using the given formatter. Fallback to
+	 * ISO-8601 representation or to raw time value without exception when the
+	 * format can not be applied.
+	 * 
+	 * @param time
+	 *            a time value as millisecnods from Epoch (1970-01-01T00:00:00Z)
+	 * @param formatter
+	 *            the formatter to use
+	 * @return a String representation of the time value
+	 */
+	public static String formatSafely(final long time, final DateTimeFormatter formatter) {
+		String res;
+		try {
+			res = formatSafely(Instant.ofEpochMilli(time), formatter);
+		} catch (final DateTimeException e) {
+			/*
+			 * Can occur on Instant.ofEpochMilli when the time value is greater than
+			 * Instant.MAX.toEpochMilli() or lower than Instant.MIN.toEpochMilli()
+			 */
+			res = String.valueOf(time);
+		}
+		return res;
+	}
+	
+	/**
+	 * Safely format the given instant using the given formatter. Fallback to
+	 * ISO-8601 representation without exception when the format can not be applied.
+	 * 
+	 * @param instant
+	 *            the instant to format
+	 * @param formatter
+	 *            the formatter to use
+	 * @return a String representation of the time value
+	 */
+	public static String formatSafely(final Instant instant, final DateTimeFormatter formatter) {
+		String res;
+		if (instant == null) {
+			res = "";
+		} else {
+			try {
+				if (formatter != null) {
+					res = formatter.format(instant);
+				} else {
+					res = instant.toString();
+				}
+			} catch (final DateTimeException e) {
+				res = instant.toString();
+			}
+		}
+		return res;
+	}
 
     public static void main(String[] args) {
         System.out.println(UTCDiffString());

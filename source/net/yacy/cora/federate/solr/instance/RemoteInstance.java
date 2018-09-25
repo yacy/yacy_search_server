@@ -21,22 +21,16 @@
 package net.yacy.cora.federate.solr.instance;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.util.CommonPattern;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.search.schema.CollectionSchema;
-import net.yacy.search.schema.WebgraphSchema;
+import javax.net.ssl.SSLContext;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
@@ -48,38 +42,179 @@ import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.GzipDecompressingEntity;
+import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.protocol.ClientContext;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
+import org.apache.solr.client.solrj.impl.HttpClientUtil;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.update.UpdateShardHandler.IdleConnectionsEvictor;
 
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.http.StrictSizeLimitResponseInterceptor;
+import net.yacy.cora.util.CommonPattern;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.cora.util.Memory;
+import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.search.schema.WebgraphSchema;
+
+/**
+ * Handle access to a remote Solr instance.
+ */
 @SuppressWarnings("deprecation")
 public class RemoteInstance implements SolrInstance {
-    
+	
+	/** Default maximum time in seconds to keep alive an idle connection in the pool */
+	private static final int DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE = 30;
+	
+	/** Default sleep time in seconds between each run of the connection evictor */
+	private static final int DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME = 5;
+	
+	/** Default total maximum number of connections in the pool */
+	private static final int DEFAULT_POOL_MAX_TOTAL = 100;
+	
+	/** The connection manager holding the HTTP connections pool shared between remote Solr clients. */
+	public static final org.apache.http.impl.conn.PoolingClientConnectionManager CONNECTION_MANAGER = buildConnectionManager();
+	
+	/**
+	 * Background daemon thread evicting expired idle connections from the pool.
+	 * This may be eventually already done by the pool itself on connection request,
+	 * but this background task helps when no request is made to the pool for a long
+	 * time period.
+	 */
+	private static final IdleConnectionsEvictor EXPIRED_CONNECTIONS_EVICTOR = new IdleConnectionsEvictor(
+			CONNECTION_MANAGER, DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME, TimeUnit.SECONDS,
+			DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
+	
+	static {
+		EXPIRED_CONNECTIONS_EVICTOR.start();
+	}
+	
+	/** A custom scheme registry allowing https connections to servers using self-signed certificate */
+	private static final SchemeRegistry SCHEME_REGISTRY = buildTrustSelfSignedSchemeRegistry();
+	
+	/** Solr server URL */
     private String solrurl;
-    private final Object client; // not declared as org.apache.http.impl.client.DefaultHttpClient to avoid warnings during compilation. TODO: switch to org.apache.http.impl.client.HttpClientBuilder
+    
+    /** HTTP client used to request the Solr server */
+    private final HttpClient client;
+    
+    /** Default Solr core name */
     private final String defaultCoreName;
-    private final ConcurrentUpdateSolrClient defaultServer;
+    
+    /** Solr client for the default core */
+    private final SolrClient defaultServer;
+    
+    /** Solr core names for the main collection and the webgraph */
     private final Collection<String> coreNames;
-    private final Map<String, ConcurrentUpdateSolrClient> server;
+    
+    /** Map from Solr core names to SolrClient instances */
+    private final Map<String, SolrClient> server;
+    
+    /** Connection timeout in milliseconds */
     private final int timeout;
     
-    public static ArrayList<RemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames, String defaultCoreName, final int timeout) throws IOException {
+	/**
+	 * When true, the instance will be used for update operations. The Solr client
+	 * is adjusted for better performance of multiple updates.
+	 */
+	private final boolean concurrentUpdates;
+    
+	/**
+	 * @param urlList
+	 *            the list of URLs of remote Solr shard instances. Must not be null.
+	 * @param coreNames
+	 *            the Solr core names for the main collection and the webgraph
+	 * @param defaultCoreName
+	 *            the core name of the main collection
+	 * @param timeout
+	 *            the connection timeout in milliseconds
+	 * @param trustSelfSignedOnAuthenticatedServer
+	 *            when true, self-signed certificates are accepcted for an https
+	 *            connection to a remote server with authentication credentials
+	 * @throws IOException
+	 *             when a connection could not be opened to a remote Solr instance
+	 */
+	public static ArrayList<RemoteInstance> getShardInstances(final String urlList, Collection<String> coreNames,
+			String defaultCoreName, final int timeout, final boolean trustSelfSignedOnAuthenticatedServer)
+			throws IOException {
         urlList.replace(' ', ',');
         String[] urls = CommonPattern.COMMA.split(urlList);
         ArrayList<RemoteInstance> instances = new ArrayList<RemoteInstance>();
         for (final String u: urls) {
-            RemoteInstance instance = new RemoteInstance(u, coreNames, defaultCoreName, timeout);
+            RemoteInstance instance = new RemoteInstance(u, coreNames, defaultCoreName, timeout, trustSelfSignedOnAuthenticatedServer);
             instances.add(instance);
         }
         return instances;
     }
+	
+	/**
+	 * Build a new instance optimized for concurrent updates, with no limit on responses size.
+	 *  
+	 * @param url
+	 *            the remote Solr URL. A default localhost URL is assumed when null.
+	 * @param coreNames
+	 *            the Solr core names for the main collection and the webgraph
+	 * @param defaultCoreName
+	 *            the core name of the main collection
+	 * @param timeout
+	 *            the connection timeout in milliseconds
+	 * @param trustSelfSignedOnAuthenticatedServer
+	 *            when true, self-signed certificates are accepcted for an https
+	 *            connection to a remote server with authentication credentials
+	 * @throws IOException
+	 *             when a connection could not be opened to the remote Solr instance
+	 */
+	public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName,
+			final int timeout, final boolean trustSelfSignedOnAuthenticatedServer) throws IOException {
+		this(url, coreNames, defaultCoreName, timeout, trustSelfSignedOnAuthenticatedServer, Long.MAX_VALUE, true);
+	}
     
-    public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName, final int timeout) throws IOException {
+	/**
+	 * @param url
+	 *            the remote Solr URL. A default localhost URL is assumed when null.
+	 * @param coreNames
+	 *            the Solr core names for the main collection and the webgraph
+	 * @param defaultCoreName
+	 *            the core name of the main collection
+	 * @param timeout
+	 *            the connection timeout in milliseconds
+	 * @param trustSelfSignedOnAuthenticatedServer
+	 *            when true, self-signed certificates are accepcted for an https
+	 *            connection to a remote server with authentication credentials
+	 * @param maxBytesPerReponse
+	 *            maximum acceptable decompressed size in bytes for a response from
+	 *            the remote Solr server. Negative value or Long.MAX_VALUE means no
+	 *            limit.
+	 * @param concurrentUpdates
+	 *            when true, the instance will be used for update operations. The
+	 *            Solr client is adjusted for better performance of multiple
+	 *            updates.
+	 * @throws IOException
+	 *             when a connection could not be opened to the remote Solr instance
+	 */
+	public RemoteInstance(final String url, final Collection<String> coreNames, final String defaultCoreName,
+			final int timeout, final boolean trustSelfSignedOnAuthenticatedServer, final long maxBytesPerResponse, final boolean concurrentUpdates) throws IOException {
         this.timeout = timeout;
-        this.server= new HashMap<String, ConcurrentUpdateSolrClient>();
+        this.concurrentUpdates = concurrentUpdates;
+        this.server= new HashMap<String, SolrClient>();
         this.solrurl = url == null ? "http://127.0.0.1:8983/solr/" : url; // that should work for the example configuration of solr 4.x.x
         this.coreNames = coreNames == null ? new ArrayList<String>() : coreNames;
         if (this.coreNames.size() == 0) {
@@ -129,62 +264,189 @@ public class RemoteInstance implements SolrInstance {
             }
         }
         if (solraccount.length() > 0) {
-            org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(); // try also: ThreadSafeClientConnManager
-            cm.setMaxTotal(100);
-            cm.setDefaultMaxPerRoute(100);
-            
-            this.client = new org.apache.http.impl.client.DefaultHttpClient(cm) {
-                @Override
-                protected HttpContext createHttpContext() {
-                    HttpContext context = super.createHttpContext();
-                    AuthCache authCache = new org.apache.http.impl.client.BasicAuthCache();
-                    BasicScheme basicAuth = new BasicScheme();
-                    HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
-                    authCache.put(targetHost, basicAuth);
-                    context.setAttribute(org.apache.http.client.protocol.HttpClientContext.AUTH_CACHE, authCache);
-                    this.setHttpRequestRetryHandler(new org.apache.http.impl.client.DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
-                    return context;
-                }
-            };
-            org.apache.http.params.HttpParams params = ((org.apache.http.impl.client.DefaultHttpClient) this.client).getParams();
-            org.apache.http.params.HttpConnectionParams.setConnectionTimeout(params, timeout);
-            org.apache.http.params.HttpConnectionParams.setSoTimeout(params, timeout);
-            ((org.apache.http.impl.client.DefaultHttpClient) this.client).addRequestInterceptor(new HttpRequestInterceptor() {
-                @Override
-                public void process(final HttpRequest request, final HttpContext context) throws IOException {
-                    if (!request.containsHeader(HeaderFramework.ACCEPT_ENCODING)) request.addHeader(HeaderFramework.ACCEPT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
-                    if (!request.containsHeader(HTTP.CONN_DIRECTIVE)) request.addHeader(HTTP.CONN_DIRECTIVE, "close"); // prevent CLOSE_WAIT
-                }
-
-            });
-            ((org.apache.http.impl.client.DefaultHttpClient) this.client).addResponseInterceptor(new HttpResponseInterceptor() {
-                @Override
-                public void process(final HttpResponse response, final HttpContext context) throws IOException {
-                    HttpEntity entity = response.getEntity();
-                    if (entity != null) {
-                        Header ceheader = entity.getContentEncoding();
-                        if (ceheader != null) {
-                            HeaderElement[] codecs = ceheader.getElements();
-                            for (HeaderElement codec : codecs) {
-                                if (codec.getName().equalsIgnoreCase(HeaderFramework.CONTENT_ENCODING_GZIP)) {
-                                    response.setEntity(new GzipDecompressingEntity(response.getEntity()));
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-            org.apache.http.impl.client.BasicCredentialsProvider credsProvider = new org.apache.http.impl.client.BasicCredentialsProvider();
-            credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
-            ((org.apache.http.impl.client.DefaultHttpClient) this.client).setCredentialsProvider(credsProvider);
+            this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, trustSelfSignedOnAuthenticatedServer, maxBytesPerResponse);
+        } else if(u.isHTTPS()){
+        	/* Here we must trust self-signed certificates as most peers with SSL enabled use such certificates */
+        	this.client = buildCustomHttpClient(timeout, u, solraccount, solrpw, host, true, maxBytesPerResponse);
         } else {
-            this.client = null;
+        	/* Build a http client using the Solr utils as in the HttpSolrClient constructor implementation. 
+        	 * The main difference is that a shared connection manager is used (configured in the buildConnectionManager() function) */
+            final ModifiableSolrParams params = new ModifiableSolrParams();
+            params.set(HttpClientUtil.PROP_FOLLOW_REDIRECTS, false);
+            /* Accept gzip compression of responses to reduce network usage */
+            params.set(HttpClientUtil.PROP_ALLOW_COMPRESSION, true);
+            
+            /* Set the maximum time to establish a connection to the remote server */
+            params.set(HttpClientUtil.PROP_CONNECTION_TIMEOUT, this.timeout);
+            /* Set the maximum time between data packets reception once a connection has been established */
+            params.set(HttpClientUtil.PROP_SO_TIMEOUT, this.timeout);
+            
+            
+            this.client = HttpClientUtil.createClient(params, CONNECTION_MANAGER);
+            if(this.client instanceof DefaultHttpClient) {
+            	if(this.client.getParams() != null) {
+            		/* Set the maximum time to get a connection from the shared connections pool */
+            		HttpClientParams.setConnectionManagerTimeout(this.client.getParams(), timeout);
+            	}
+            	
+        		if (maxBytesPerResponse >= 0 && maxBytesPerResponse < Long.MAX_VALUE) {
+        			/*
+        			 * Add in last position the eventual interceptor limiting the response size, so
+        			 * that this is the decompressed amount of bytes that is considered
+        			 */
+        			((DefaultHttpClient)this.client).addResponseInterceptor(new StrictSizeLimitResponseInterceptor(maxBytesPerResponse),
+        					((DefaultHttpClient)this.client).getResponseInterceptorCount());
+        		}
+            }
         }
         
-        this.defaultServer = (ConcurrentUpdateSolrClient) getServer(this.defaultCoreName);
+        this.defaultServer = getServer(this.defaultCoreName);
         if (this.defaultServer == null) throw new IOException("cannot connect to url " + url + " and connect core " + defaultCoreName);
     }
+	
+	/**
+	 * Initialize the maximum connections for the given pool
+	 * 
+	 * @param pool
+	 *            a pooling connection manager. Must not be null.
+	 * @param maxConnections.
+	 *            The new maximum connections values. Must be greater than 0.
+	 * @throws IllegalArgumentException
+	 *             when pool is null or when maxConnections is lower than 1
+	 */
+	public static void initPoolMaxConnections(final org.apache.http.impl.conn.PoolingClientConnectionManager pool, int maxConnections) {
+		if (pool == null) {
+			throw new IllegalArgumentException("pool parameter must not be null");
+		}
+		if (maxConnections <= 0) {
+			throw new IllegalArgumentException("maxConnections parameter must be greater than zero");
+		}
+		pool.setMaxTotal(maxConnections);
+		
+        /* max connections per host */
+        pool.setDefaultMaxPerRoute((int) (2 * Memory.cores()));
+	}
+	
+	/**
+	 * @return a connection manager with a HTTP connection pool
+	 */
+	private static org.apache.http.impl.conn.PoolingClientConnectionManager buildConnectionManager() {
+		/* Important note : use of deprecated Apache classes is required because SolrJ still use them internally (see HttpClientUtil). 
+		 * Upgrade only when Solr implementation will become compatible */
+		
+		final org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(
+				SchemeRegistryFactory.createDefault(), DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
+		initPoolMaxConnections(cm, DEFAULT_POOL_MAX_TOTAL);
+		return cm;
+	}
+	
+	/**
+	 * @return a custom scheme registry allowing https connections to servers using
+	 *         a self-signed certificate
+	 */
+	private static SchemeRegistry buildTrustSelfSignedSchemeRegistry() {
+		/* Important note : use of deprecated Apache classes is required because SolrJ still use them internally (see HttpClientUtil). 
+		 * Upgrade only when Solr implementation will become compatible */
+		SchemeRegistry registry = null;
+		SSLContext sslContext;
+		try {
+			sslContext = SSLContextBuilder.create().loadTrustMaterial(TrustSelfSignedStrategy.INSTANCE).build();
+			registry = new SchemeRegistry();
+			registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+			registry.register(
+					new Scheme("https", 443, new SSLSocketFactory(sslContext, AllowAllHostnameVerifier.INSTANCE)));
+		} catch (final Exception e) {
+			// Should not happen
+			ConcurrentLog.warn("RemoteInstance",
+					"Error when initializing SSL context trusting self-signed certificates.", e);
+			registry = null;
+		}
+		return registry;
+	}
+
+    /**
+     * @param solraccount eventual user name used to authenticate on the target Solr
+     * @param solraccount eventual password used to authenticate on the target Solr
+     * @param trustSelfSignedCertificates when true, https connections to an host providing a self-signed certificate are accepted
+	 * @param maxBytesPerReponse
+	 *            maximum acceptable decompressed size in bytes for a response from
+	 *            the remote Solr server. Negative value or Long.MAX_VALUE means no
+	 *            limit.
+     * @return a new apache HttpClient instance usable as a custom http client by SolrJ
+     */
+	private static HttpClient buildCustomHttpClient(final int timeout, final MultiProtocolURL u, final String solraccount, final String solrpw,
+			final String host, final boolean trustSelfSignedCertificates, final long maxBytesPerResponse) {
+		
+		/* Important note : use of deprecated Apache classes is required because SolrJ still use them internally (see HttpClientUtil). 
+		 * Upgrade only when Solr implementation will become compatible */
+		
+		
+		org.apache.http.impl.client.DefaultHttpClient result = new org.apache.http.impl.client.DefaultHttpClient(CONNECTION_MANAGER) {
+		    @Override
+		    protected HttpContext createHttpContext() {
+		        HttpContext context = super.createHttpContext();
+		        AuthCache authCache = new org.apache.http.impl.client.BasicAuthCache();
+		        BasicScheme basicAuth = new BasicScheme();
+		        HttpHost targetHost = new HttpHost(u.getHost(), u.getPort(), u.getProtocol());
+		        authCache.put(targetHost, basicAuth);
+		        context.setAttribute(org.apache.http.client.protocol.HttpClientContext.AUTH_CACHE, authCache);
+				if (trustSelfSignedCertificates && SCHEME_REGISTRY != null) {
+					context.setAttribute(ClientContext.SCHEME_REGISTRY, SCHEME_REGISTRY);
+				}
+		        this.setHttpRequestRetryHandler(new org.apache.http.impl.client.DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
+		        return context;
+		    }
+		};
+		org.apache.http.params.HttpParams params = result.getParams();
+		/* Set the maximum time to establish a connection to the remote server */
+		org.apache.http.params.HttpConnectionParams.setConnectionTimeout(params, timeout);
+		/* Set the maximum time between data packets reception one a connection has been established */
+		org.apache.http.params.HttpConnectionParams.setSoTimeout(params, timeout);
+		/* Set the maximum time to get a connection from the shared connections pool */
+		HttpClientParams.setConnectionManagerTimeout(params, timeout);
+		result.addRequestInterceptor(new HttpRequestInterceptor() {
+		    @Override
+		    public void process(final HttpRequest request, final HttpContext context) throws IOException {
+		        if (!request.containsHeader(HeaderFramework.ACCEPT_ENCODING)) request.addHeader(HeaderFramework.ACCEPT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
+		        if (!request.containsHeader(HTTP.CONN_DIRECTIVE)) request.addHeader(HTTP.CONN_DIRECTIVE, "close"); // prevent CLOSE_WAIT
+		    }
+
+		});
+		result.addResponseInterceptor(new HttpResponseInterceptor() {
+		    @Override
+		    public void process(final HttpResponse response, final HttpContext context) throws IOException {
+		        HttpEntity entity = response.getEntity();
+		        if (entity != null) {
+		            Header ceheader = entity.getContentEncoding();
+		            if (ceheader != null) {
+		                HeaderElement[] codecs = ceheader.getElements();
+		                for (HeaderElement codec : codecs) {
+		                    if (codec.getName().equalsIgnoreCase(HeaderFramework.CONTENT_ENCODING_GZIP)) {
+		                        response.setEntity(new GzipDecompressingEntity(response.getEntity()));
+		                        return;
+		                    }
+		                }
+		            }
+		        }
+		    }
+		});
+		if(solraccount != null && !solraccount.isEmpty()) {
+			org.apache.http.impl.client.BasicCredentialsProvider credsProvider = new org.apache.http.impl.client.BasicCredentialsProvider();
+			credsProvider.setCredentials(new AuthScope(host, AuthScope.ANY_PORT), new UsernamePasswordCredentials(solraccount, solrpw));
+			result.setCredentialsProvider(credsProvider);
+		}
+		
+		if (maxBytesPerResponse >= 0 && maxBytesPerResponse < Long.MAX_VALUE) {
+			/*
+			 * Add in last position the eventual interceptor limiting the response size, so
+			 * that this is the decompressed amount of bytes that is considered
+			 */
+			result.addResponseInterceptor(new StrictSizeLimitResponseInterceptor(maxBytesPerResponse),
+					result.getResponseInterceptorCount());
+		}
+		
+		return result;
+	}
 
     @Override
     public int hashCode() {
@@ -196,16 +458,35 @@ public class RemoteInstance implements SolrInstance {
         return o instanceof RemoteInstance && ((RemoteInstance) o).solrurl.equals(this.solrurl);
     }
 
-    public String getAdminInterface() {
-        final InetAddress localhostExternAddress = Domains.myPublicLocalIP();
-        final String localhostExtern = localhostExternAddress == null ? "127.0.0.1" : localhostExternAddress.getHostAddress();
-        String u = this.solrurl;
-        int p = u.indexOf("localhost",0);
-        if (p < 0) p = u.indexOf("127.0.0.1",0);
-        if (p < 0) p = u.indexOf("0:0:0:0:0:0:0:1",0);
-        if (p >= 0) u = u.substring(0, p) + localhostExtern + u.substring(p + 9);
-        return u + (u.endsWith("/") ? "admin/" : "/admin/");
-    }
+	/**
+	 * @param toExternalAddress
+	 *            when true, try to replace the eventual loopback host part of the
+	 *            Solr URL with the external host name of the hosting machine
+	 * @param externalHost
+	 *            the eventual external host name or address to use when
+	 *            toExternalAddress is true
+	 * @return the administration URL of the remote Solr instance
+	 */
+	public String getAdminInterface(final boolean toExternalAddress, final String externalHost) {
+		String u = this.solrurl;
+		if (toExternalAddress && externalHost != null && !externalHost.trim().isEmpty()) {
+			try {
+				MultiProtocolURL url = new MultiProtocolURL(u);
+
+				if(url.isLocal()) {
+					url = url.ofNewHost(externalHost);
+					u = url.toString();
+				}
+
+			} catch (final MalformedURLException ignored) {
+				/*
+				 * This should not happen as the solrurl attribute has already been parsed in
+				 * the constructor
+				 */
+			}
+		}
+		return u;
+	}
 
     @Override
     public String getDefaultCoreName() {
@@ -222,41 +503,89 @@ public class RemoteInstance implements SolrInstance {
         return this.defaultServer;
     }
 
+    /**
+     * @param name the name of the Solr core
+     */
     @Override
-    public SolrClient getServer(String name) {
+    public SolrClient getServer(final String name) {
         // try to get the server from the cache
-        ConcurrentUpdateSolrClient s = this.server.get(name);
+    	SolrClient s = this.server.get(name);
         if (s != null) return s;
         // create new http server
-        if (this.client != null) {
-            final MultiProtocolURL u;
-            try {
-                u = new MultiProtocolURL(this.solrurl + name);
-            } catch (final MalformedURLException e) {
-                return null;
-            }
+        final MultiProtocolURL u;
+        try {
+            u = new MultiProtocolURL(this.solrurl + name);
+        } catch (final MalformedURLException e) {
+            return null;
+        }
+        final String solrServerURL;
+        if(StringUtils.isNotEmpty(u.getUserInfo())) {
+        	/* Remove user authentication info from the URL, as authentication will be handled by the custom http client */
             String host = u.getHost();
             int port = u.getPort();
             String solrpath = u.getPath();
-            String p = "http://" + host + ":" + port + solrpath;
-            ConcurrentLog.info("RemoteSolrConnector", "connecting Solr authenticated with url:" + p);
-            s = new ConcurrentUpdateSolrClient(p, ((org.apache.http.impl.client.DefaultHttpClient) this.client), 10, Runtime.getRuntime().availableProcessors());
+            solrServerURL = u.getProtocol() + "://" + host + ":" + port + solrpath;
+            ConcurrentLog.info("RemoteSolrConnector", "connecting Solr authenticated with url : " + u);        		
         } else {
-            ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url:" + this.solrurl + name);
-            s = new ConcurrentUpdateSolrClient(this.solrurl + name, queueSizeByMemory(), Runtime.getRuntime().availableProcessors());
+        	solrServerURL = u.toString();
+        	ConcurrentLog.info("RemoteSolrConnector", "connecting Solr with url : " + u);
         }
-        //s.setAllowCompression(true);
-        s.setSoTimeout(this.timeout);
-        //s.setMaxRetries(1); // Solr-Doc: No more than 1 recommended (depreciated)
-        s.setSoTimeout(this.timeout);
+        if(this.concurrentUpdates) {
+        	final ConcurrentUpdateSolrClient.Builder builder = new ConcurrentUpdateSolrClient.Builder(solrServerURL);
+        	builder.withHttpClient(this.client);
+        	builder.withQueueSize(queueSizeByMemory());
+        	builder.withThreadCount(Runtime.getRuntime().availableProcessors());
+        	s = builder.build();
+        } else {
+        	final HttpSolrClient.Builder builder = new HttpSolrClient.Builder(solrServerURL);
+        	builder.withHttpClient(this.client);
+        	s = builder.build();
+        }
         this.server.put(name, s);
         return s;
     }
 
-    @Override
-    public void close() {
-    	if (this.client != null) ((org.apache.http.impl.client.DefaultHttpClient) this.client).getConnectionManager().shutdown();
-    }
+	/**
+	 * Closes each eventually open Solr client and its associated resources. The
+	 * common connections manager is not closed here as it will be reused for other
+	 * RemoteInstances. The shutdown the connection manager at YaCy shutdown, use
+	 * the {@link #closeConnectionManager()} function.
+	 */
+	@Override
+	public void close() {
+		for (final SolrClient solrClient : this.server.values()) {
+			/*
+			 * Close every open Solr client : this is important as it shutdowns client's
+			 * internal asynchronous tasks executor. To release the common connection
+			 * manager, see closeConnectionManager().
+			 */
+			try {
+				solrClient.close();
+			} catch (final IOException ignored) {
+			}
+		}
+	}
+    
+	/**
+	 * Shutdown the connection manager and close all its active and inactive HTTP
+	 * connections. Must be called at the end of the application.
+	 */
+	public static void closeConnectionManager() {
+		try {
+			if (EXPIRED_CONNECTIONS_EVICTOR != null) {
+				// Shut down the evictor thread
+				EXPIRED_CONNECTIONS_EVICTOR.shutdown();
+				try {
+					EXPIRED_CONNECTIONS_EVICTOR.awaitTermination(1L, TimeUnit.SECONDS);
+				} catch (final InterruptedException ignored) {
+				}
+			}
+		} finally {
+			if (CONNECTION_MANAGER != null) {
+				CONNECTION_MANAGER.shutdown();
+			}
+		}
+	}
 
     public static int queueSizeByMemory() {
         return (int) Math.min(30, Math.max(1, MemoryControl.maxMemory() / 1024 / 1024 / 12));

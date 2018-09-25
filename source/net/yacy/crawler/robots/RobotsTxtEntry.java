@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import net.yacy.cora.document.encoding.ASCII;
@@ -62,7 +63,7 @@ public class RobotsTxtEntry {
     private String info; // this is filled if robots disallowed access; then the reason is noted there;
 
     protected RobotsTxtEntry(final String hostName, final Map<String, byte[]> mem) {
-        this.hostName = hostName.toLowerCase();
+        this.hostName = hostName.toLowerCase(Locale.ROOT);
         this.mem = mem;
         this.info = "";
 
@@ -100,7 +101,7 @@ public class RobotsTxtEntry {
     ) {
         if (theURL == null) throw new IllegalArgumentException("The url is missing");
 
-        this.hostName = RobotsTxt.getHostPort(theURL).toLowerCase();
+        this.hostName = RobotsTxt.getHostPort(theURL).toLowerCase(Locale.ROOT);
         this.allowPathList = new LinkedList<String>();
         this.denyPathList = new LinkedList<String>();
         this.sitemapList = new LinkedList<String>();

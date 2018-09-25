@@ -85,14 +85,13 @@ Move selected pattern(s) to==सलेक्टेड पैटर्न (ओं
 #You can select them here for deletion==आप इन्हें देलेतिओन के लिए सेलेक्ट कर सकते हैं 
 Add new pattern:==नया पैटर्न जोड़े :
 "Add URL pattern"=="नया यूआरएल पैटर्न जोड़े "
-The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.== दाहिने"*" के बाद "/" बदला जा सकता है <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">रेगेक्स के द्वारा </a>.
+The right '*', after the '/', can be replaced by a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a>.== दाहिने"*" के बाद "/" बदला जा सकता है <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">रेगेक्स के द्वारा </a>.
 domain.net/fullpath<==डोमेन .नेट /फुल्ल्पथ <
 >domain.net/*<==>डोमेन .नेट /* <
 *.domain.net/*<==*.डोमेन .नेट /*<
 *.sub.domain.net/*<==*.सुब .डोमेन .दे /*<
 #sub.domain.*/*<==सुब .डोमेन .*/*<
 #domain.*/*<==डोमेन .*/*<
-a complete <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a> (slow)==एक पूरा   <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">रेगेक्स</a> (मगर धीरे )
 #was removed from blacklist==ब्लैकलिस्ट से हटा दिया गया था 
 #was added to the blacklist==ब्लैकलिस्ट में जोड़ा गया था 
 Activate this list for==इस लिस्ट को सक्रिय करें
@@ -299,9 +298,7 @@ No password is set for the administration account.== एडमिनिस्ट
 Please define a password for the admin account.==एडमिनिस्ट्रेशन खाते के लिए एक पासवर्ड को परिभाषित करें.
 Admin Account==एडमिनिस्ट्रेशन खाता
 Access from localhost without account==खाते के बिना लोकलहोस्ट से एक्सेस करे.
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==अपने पीअर के लिए प्रवेश अपने कंप्यूटर से प्रदान किया जाता है  (localhost access). एडमिनिस्ट्रेशन खाता कॉन्फ़िगर करने के लिए कोई ज़रूरत नहीं है .
 Access only with qualified account==योग्य खाते के साथ ही प्रवेश है .
-You need this only if you want a remote access to your peer.== अगर आप अपने पीअर के लिए रिमोट एक्सेस करना चाहते हैं  तब ही इसका इस्तेमाल करे.
 Peer User:==पीयर यूज़र:
 New Peer Password:==नया पीयर पासवर्ड :
 Repeat Peer Password:==पीयर पासवर्ड दोहराएँ :
@@ -509,6 +506,7 @@ your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/t
 
 #File: ConfigNetwork_p.html
 #---------------------------
+<html lang="en">==<html lang="hi">
 Network Configuration==संजाल विन्यास
 No changes were made!==कोई परिवर्तन नहीं किया गया
 Accepted Changes==स्वीकृत परिवर्तन
@@ -894,9 +892,9 @@ Some processes occur double to document the complex index migration structure.==
 This is the list of web pages that this peer initiated to crawl,==यह इस सहकर्मी क्रॉल करने के लिए शुरू की है कि वेब पृष्ठों की सूची है,
 but had been crawled by <em>other</em> peers.==लेकिन <em> अन्य </ em> साथियों द्वारा क्रॉल किया गया था.
 This is the 'mirror'-case of process (6).==इस प्रक्रिया के 'mirror' मामले है  (6 )
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em> प्रयोग करें प्रकरण: </ em> आप 'सूचकांक Creation'-पृष्ठ पर एक स्थानीय क्रॉल शुरू, यहाँ प्रविष्टियों मिलता है और जाँच
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request=='Indexing' झंडा रिमोट करो. हर पृष्ठ कि इस सहकर्मी के अनुरोध पर एक दूरस्थ सहकर्मी अनुक्रमित
-is reported back and can be monitored here.==वापस सूचना दी है और यहाँ पर नजर रखी जा सकती है.
+<em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the==<em> प्रयोग करें प्रकरण: </ em> आप '<a href="CrawlStartExpert.html">सूचकांक Creation</a>' page पृष्ठ पर एक स्थानीय क्रॉल शुरू, यहाँ प्रविष्टियों मिलता है और जाँच
+'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.=='Indexing' झंडा रिमोट करो,  and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.
+Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.==हर पृष्ठ कि इस सहकर्मी के अनुरोध पर एक दूरस्थ सहकर्मी अनुक्रमित वापस सूचना दी है और यहाँ पर नजर रखी जा सकती है.
 (2) Results for Result of Search Queries==(2) खोज प्रश्नों का रिजल्ट के लिए परिणाम
 This index transfer was initiated by your peer by doing a search query.==इस सूचकांक में स्थानांतरण एक खोज क्वेरी कर रही द्वारा अपने साथियों के द्वारा शुरू किया गया था
 The index was crawled and contributed by other peers.==सूचकांक अन्य साथियों द्वारा क्रॉल और योगदान था.
@@ -920,7 +918,7 @@ These web pages had been crawled by your own crawl task.==इन वेब प�
 (6) Results for Global Crawling==(6) ग्लोबल रेंगने के लिए परिणाम
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==इन पृष्ठों के अपने साथियों द्वारा अनुक्रमित किया गया था, लेकिन क्रॉल एक दूरस्थ सहकर्मी से शुरू किया गया था
 This is the 'mirror'-case of process (1).==इस प्रक्रिया के 'mirror' मामले है (1).
-<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em> प्रयोग करें प्रकरण: </ em> आप जाँच अगर इस सूची में भर सकते हैं 'स्वीकार रिमोट पर requests' झंडा रेंगने' सूचकांक टोकरा 'पेज
+<em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the 'Index Crate' page==<em> प्रयोग करें प्रकरण: </ em> आप जाँच अगर इस सूची में भर सकते हैं 'स्वीकार रिमोट पर requests' झंडा रेंगने' सूचकांक टोकरा 'पेज
 The stack is empty.==ढेर खाली है.
 Statistics about #[domains]# domains in this stack:==इस ढेर में  #  [डोमेन ]  # डोमेन के बारे में सांख्यिकी:
 (7) Results from surrogates import==(7) Surrogates के आयात से का परिणाम
@@ -944,6 +942,7 @@ Showing latest #[count]# lines from a stack of #[all]# entries.==नवीनत
 
 #File: CrawlStartExpert.html
 #---------------------------
+<html lang="en">==<html lang="hi">
 Expert Crawl Start==विशेषज्ञ क्रॉल प्रारंभ
 Start Crawling Job:==नौकरी रेंगने प्रारंभ:
 You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".==आप वेब पेज रेंगने के लिए प्रारंभ बिंदु के रूप में यूआरएल को परिभाषित करने और यहां रेंगने शुरू कर सकते हैं.  "क्रॉलिंग " YaCy, किसी वेबसाइट डाउनलोड कर इसमें सभी लिंक निकालें और फिर इन कड़ियों के पीछे सामग्री डाउनलोड जाएगा. लंबे समय के रूप में  "क्रॉलिंग गहराई के तहत निर्दिष्ट के रूप में यह दोहराया है.
@@ -988,7 +987,7 @@ Use filter==फिल्टर का प्रयोग करें
 Restrict to start domain==डोमेन शुरू करने के लिए प्रतिबंधित
 Restrict to sub-path==उप पथ के लिए प्रतिबंधित
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==फिल्टर क्रॉल करने के लिए उपयोग किया जाता है जो यूआरएल के साथ मैच चाहिए कि एक ईमैक्स की तरह नियमित अभिव्यक्ति है
-The filter is a <b><a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression==फिल्टर एक<b> <a href="https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html" target="_blank"> नियमित अभिव्यक्ति है 
+The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression==फिल्टर एक<b> <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank"> नियमित अभिव्यक्ति है 
 that must match with the URLs which are used to be crawled; default is 'catch all'.==कि क्रॉल करने के लिए उपयोग किया जाता है जो यूआरएल के साथ मेल खाना चाहिए, डिफ़ॉल्ट है  'सभी को पकड़ने '
 Example: to allow only urls that contain the word 'science', set the filter to '.*science.*'.==उदाहरण: '.. * विज्ञान * ' शब्द शामिल है केवल यूआरएल  'विज्ञान ', फिल्टर सेट की अनुमति देने के लिए 
 You can also use an automatic domain-restriction to fully crawl a single domain.==आप यह भी पूरी तरह से एक ही डोमेन क्रॉल करने के लिए डोमेन प्रतिबंध एक स्वत: उपयोग कर सकते हैं.

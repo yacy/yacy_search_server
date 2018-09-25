@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
@@ -94,7 +95,7 @@ public final class LoaderDispatcher {
 
     public boolean isSupportedProtocol(final String protocol) {
         if ((protocol == null) || (protocol.isEmpty())) return false;
-        return this.supportedProtocols.contains(protocol.trim().toLowerCase());
+        return this.supportedProtocols.contains(protocol.trim().toLowerCase(Locale.ROOT));
     }
 
     @SuppressWarnings("unchecked")
@@ -208,7 +209,7 @@ public final class LoaderDispatcher {
         final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.get(UTF8.getBytes(request.profileHandle()));
         
         // check if url is in blacklist
-        if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {
+        if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(Locale.ROOT), url.getFile())) {
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
@@ -266,7 +267,11 @@ public final class LoaderDispatcher {
         final String storeError = response.shallStoreCacheForCrawler();
         if (storeError == null) {
             try {
-                Cache.store(url, response.getResponseHeader(), response.getContent());
+            	/* Important : we associate here the loaded content with the URL response.url(). 
+            	 * On eventual redirection(s), response.url() provides the last redirection location. 
+            	 * If instead we associated content with the initial url (beginning of the redirection(s) chain),
+            	 * the parsers would then have a wrong base URL when following links with relative URLs. */
+                Cache.store(response.url(), response.getResponseHeader(), response.getContent());
             } catch (final IOException e) {
                 LoaderDispatcher.log.warn("cannot write " + response.url() + " to Cache (3): " + e.getMessage(), e);
             }
@@ -362,7 +367,7 @@ public final class LoaderDispatcher {
         final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.get(UTF8.getBytes(request.profileHandle()));
         
         // check if url is in blacklist
-        if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(), url.getFile())) {
+        if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(Locale.ROOT), url.getFile())) {
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
@@ -688,7 +693,12 @@ public final class LoaderDispatcher {
      * @return a map from URLs to the anchor texts of the urls
      * @throws IOException
      */
-    public final Map<AnchorURL, String> loadLinks(final DigestURL url, final CacheStrategy cacheStrategy, BlacklistType blacklistType, final ClientIdentification.Agent agent, final int timezoneOffset) throws IOException {
+    public final Map<AnchorURL, String> loadLinks(
+    		final DigestURL url,
+    		final CacheStrategy cacheStrategy,
+    		BlacklistType blacklistType,
+    		final ClientIdentification.Agent agent,
+    		final int timezoneOffset) throws IOException {
         final Response response = load(request(url, true, false), cacheStrategy, Integer.MAX_VALUE, blacklistType, agent);
         if (response == null) throw new IOException("response == null");
         final ResponseHeader responseHeader = response.getResponseHeader();
@@ -699,7 +709,7 @@ public final class LoaderDispatcher {
         final String supportError = TextParser.supports(url, responseHeader.getContentType());
         if (supportError != null) throw new IOException("no parser support: " + supportError);
         try {
-            documents = TextParser.parseSource(url, responseHeader.getContentType(), responseHeader.getCharacterEncoding(), response.profile().scraper(), timezoneOffset, response.depth(), response.getContent());
+            documents = TextParser.parseSource(url, responseHeader.getContentType(), responseHeader.getCharacterEncoding(), response.profile().ignoreDivClassName(), response.profile().scraper(), timezoneOffset, response.depth(), response.getContent());
             if (documents == null) throw new IOException("document == null");
         } catch (final Exception e) {
             throw new IOException("parser error: " + e.getMessage());

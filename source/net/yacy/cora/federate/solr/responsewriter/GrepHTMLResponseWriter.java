@@ -52,7 +52,7 @@ import org.apache.solr.search.SolrIndexSearcher;
  * text part and each sentence is shown as separate line. grep attributes can be used to
  * show leading and trainling lines.
  */
-public class GrepHTMLResponseWriter implements QueryResponseWriter {
+public class GrepHTMLResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
 
     private static final Set<String> DEFAULT_FIELD_LIST = new HashSet<String>();
     private static final Pattern dqp = Pattern.compile("\"");

@@ -292,6 +292,7 @@ YaCy: Help==YaCy: Pomoc
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="sk">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Vyhladavacia stranka
 # NOT USED
 #P2P WEB SEARCH==P2P Internetov&eacute; Vyhlad&aacute;vanie
@@ -451,6 +452,7 @@ Word-Hash:</td>==Hash-slovo:</td>
 
 #File: CrawlStartExpert.html
 #---------------------------
+<html lang="en">==<html lang="sk">
 Index Creation==Tvorba indexu
 Start Crawling Job:==Odstartuj crawling:
 You can define URLs as start points for Web page crawling and start crawling here. "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under "Crawling Depth".==Tu mozete zadat URL adresy web stranok ktore budu preliezane (crawled) a z ktorych sa preliezanie (crawling) odstartuje. "Crawling" znamena, ze YaCy siahne zvolenu web stranku, extrahuje vsetky odkazy a nasledne stiahne web stranky pod tymito odkazmi. Toto sa opakuje do hlbky zadanej v policku "Hlbka crawlingu".

@@ -31,6 +31,7 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,7 +42,6 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.ByteBuffer;
 import net.yacy.data.Diff;
 import net.yacy.data.wiki.WikiBoard;
 import net.yacy.peers.NewsPool;
@@ -118,7 +118,7 @@ public class Wiki {
             final Map<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
-            if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !ByteBuffer.equals(page.page(), content)) {
+            if (!sb.isRobinsonMode() && post.get("content", "").trim().length() > 0 && !Arrays.equals(page.page(), content)) {
                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_WIKI_UPDATE, map);
             }
             page = newEntry;

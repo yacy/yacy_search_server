@@ -27,6 +27,7 @@ package net.yacy.crawler.retrieval;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
@@ -119,7 +120,7 @@ public final class HTTPLoader {
 			port = (ssl) ? 443 : 80;
 
 		// check if url is in blacklist
-		final String hostlow = host.toLowerCase();
+		final String hostlow = host.toLowerCase(Locale.ROOT);
 		if (blacklistType != null && Switchboard.urlBlacklist.isListed(blacklistType, hostlow, path)) {
 			this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT,
 					"url in blacklist", -1);
@@ -337,7 +338,7 @@ public final class HTTPLoader {
         if (port < 0) port = (ssl) ? 443 : 80;
 
         // check if url is in blacklist
-        final String hostlow = host.toLowerCase();
+        final String hostlow = host.toLowerCase(Locale.ROOT);
         if (blacklistType != null && Switchboard.urlBlacklist.isListed(blacklistType, hostlow, path)) {
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
@@ -466,7 +467,7 @@ public final class HTTPLoader {
         if (port < 0) port = (ssl) ? 443 : 80;
 
         // check if url is in blacklist
-        final String hostlow = host.toLowerCase();
+        final String hostlow = host.toLowerCase(Locale.ROOT);
         if (Switchboard.urlBlacklist != null && Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, hostlow, path)) {
             throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }

@@ -22,6 +22,7 @@
 
 package net.yacy.crawler.retrieval;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -34,7 +35,7 @@ import net.yacy.document.TextParser;
 /**
  * A crawler load response, holding content as a stream.
  */
-public class StreamResponse {
+public class StreamResponse implements Closeable {
 
 	/** Logger */
 	private final static ConcurrentLog log = new ConcurrentLog(StreamResponse.class.getSimpleName());
@@ -78,6 +79,13 @@ public class StreamResponse {
 	 */
 	public Response getResponse() {
 		return this.response;
+	}
+	
+	@Override
+	public void close() throws IOException {
+		if(this.contentStream != null) {
+			this.contentStream.close();
+		}
 	}
 
 	/**

@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
@@ -82,6 +83,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.core.SolrInfoMBean;
 import org.apache.lucene.util.Version;
 
@@ -95,6 +97,10 @@ public final class Fulltext {
     private final File                    archivePath;
     private       Export                  exportthread; // will have a export thread assigned if exporter is running
     private       InstanceMirror          solrInstances;
+    
+    /** Synchronization lock for solrInstances property */
+    private ReentrantLock solrInstancesLock;
+    
     private final CollectionConfiguration collectionConfiguration;
     private final WebgraphConfiguration   webgraphConfiguration;
     private       boolean                 writeWebgraph;
@@ -105,6 +111,7 @@ public final class Fulltext {
         this.archivePath = archivePath;
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.solrInstances = new InstanceMirror();
+        this.solrInstancesLock = new ReentrantLock();
         this.collectionConfiguration = collectionConfiguration;
         this.webgraphConfiguration = webgraphConfiguration;
         this.writeWebgraph = false;
@@ -197,22 +204,35 @@ public final class Fulltext {
     }
     
     public EmbeddedInstance getEmbeddedInstance() {
-        synchronized (this.solrInstances) {
-            if (this.solrInstances.isConnectedEmbedded()) return this.solrInstances.getEmbedded();
+    	this.solrInstancesLock.lock();
+        try {
+            if (this.solrInstances.isConnectedEmbedded()) {
+            	return this.solrInstances.getEmbedded();
+            }
             return null;
+        } finally {
+        	this.solrInstancesLock.unlock();	
         }
     }
     
     public SolrConnector getDefaultConnector() {
-        synchronized (this.solrInstances) {
+    	this.solrInstancesLock.lock();
+        try {
             return this.solrInstances.getDefaultMirrorConnector();
+        } finally {
+        	this.solrInstancesLock.unlock();	
         }
     }
     
     public SolrConnector getWebgraphConnector() {
-        if (!this.writeWebgraph) return null;
-        synchronized (this.solrInstances) {
+        if (!this.writeWebgraph) {
+        	return null;
+        }
+    	this.solrInstancesLock.lock();
+        try {
             return this.solrInstances.getGenericMirrorConnector(WebgraphSchema.CORE_NAME);
+        } finally {
+        	this.solrInstancesLock.unlock();
         }
     }
     
@@ -231,8 +251,11 @@ public final class Fulltext {
     }
 
     public void clearLocalSolr() throws IOException {
-        if (this.exportthread != null) this.exportthread.interrupt();
-        synchronized (this.solrInstances) {
+        if (this.exportthread != null) {
+        	this.exportthread.interrupt();
+        }
+    	this.solrInstancesLock.lock();
+        try {
             EmbeddedInstance instance = this.solrInstances.getEmbedded();
             if (instance != null) {
                 for (String name: instance.getCoreNames()) {
@@ -241,11 +264,14 @@ public final class Fulltext {
                 this.commit(false);
             }
             this.solrInstances.clearCaches();
+        } finally {
+        	this.solrInstancesLock.unlock();
         }
     }
 
     public void clearRemoteSolr() throws IOException {
-        synchronized (this.solrInstances) {
+    	this.solrInstancesLock.lock();
+        try {
             ShardInstance instance = this.solrInstances.getRemote();
             if (instance != null) {
                 for (String name: instance.getCoreNames()) {
@@ -253,6 +279,8 @@ public final class Fulltext {
                 }
             }
             this.solrInstances.clearCaches();
+        } finally {
+        	this.solrInstancesLock.unlock();
         }
     }
 
@@ -581,14 +609,19 @@ public final class Fulltext {
     }
     
     /**
-     * create a dump file from the current solr directory
+     * Create a dump file from the current embedded solr directory
      * @return file reference to the dump
+     * @throws SolrException when no embedded Solr is available
      */
-    public File dumpSolr() {
-        EmbeddedInstance esc = this.solrInstances.getEmbedded();
-        File storagePath = esc.getContainerPath();
-        File zipOut = new File(this.archivePath, storagePath.getName() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
-        synchronized (this.solrInstances) {
+    public File dumpEmbeddedSolr() throws SolrException {
+        final EmbeddedInstance esc = this.solrInstances.getEmbedded();
+        if(esc == null) {
+        	throw new SolrException(ErrorCode.SERVICE_UNAVAILABLE, "No embedded Solr available.");
+        }
+        final File storagePath = esc.getContainerPath();
+        final File zipOut = new File(this.archivePath, storagePath.getName() + "_" + GenericFormatter.SHORT_DAY_FORMATTER.format() + ".zip");
+    	this.solrInstancesLock.lock();
+        try {
             this.disconnectLocalSolr();
             try {
                 ZIPWriter.zip(storagePath, zipOut);
@@ -601,18 +634,25 @@ public final class Fulltext {
                     ConcurrentLog.logException(e);
                 }
             }
+        } finally {
+        	this.solrInstancesLock.unlock();
         }
         return zipOut;
     }
     
     /**
-     * restore a solr dump to the current solr directory
-     * @param solrDumpZipFile
+     * Restore a solr dump to the current embedded solr directory
+     * @param solrDumpZipFile the dump file to use
+     * @throws SolrException when no embedded Solr is available
      */
-    public void restoreSolr(File solrDumpZipFile) {
-        EmbeddedInstance esc = this.solrInstances.getEmbedded();
-        File storagePath = esc.getContainerPath();
-        synchronized (this.solrInstances) {
+    public void restoreEmbeddedSolr(final File solrDumpZipFile) {
+        final EmbeddedInstance esc = this.solrInstances.getEmbedded();
+        if(esc == null) {
+        	throw new SolrException(ErrorCode.SERVICE_UNAVAILABLE, "No embedded Solr available.");
+        }
+        final File storagePath = esc.getContainerPath();
+    	this.solrInstancesLock.lock();
+        try {
             // this.disconnectLocalSolr(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances.close();
             try {
@@ -627,6 +667,8 @@ public final class Fulltext {
                     ConcurrentLog.logException(e);
                 }
             }
+        } finally {
+        	this.solrInstancesLock.unlock();
         }
     }
 
@@ -641,10 +683,12 @@ public final class Fulltext {
     }
     
     /**
-     * reboot solr (experimental to check resource management)
+     * Reboot the local embedded Solr (experimental to check resource management).
+     * Please check before that the local embedded Solr is enabled and no external remote Solr is attached.
      */
-    public void rebootSolr() {
-        synchronized (this.solrInstances) {
+    public void rebootEmbeddedLocalSolr() {
+    	this.solrInstancesLock.lock();
+        try {
             this.disconnectLocalSolr();
             // this.solrInstances.close(); // moved to (InstanceMirror) sorlInstances.close()
             this.solrInstances = new InstanceMirror();
@@ -653,6 +697,8 @@ public final class Fulltext {
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
+        } finally {
+        	this.solrInstancesLock.unlock();
         }
     }
 
@@ -731,9 +777,9 @@ public final class Fulltext {
         
 
         String s = new File(path, yacy_dump_prefix +
-                "f" + GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate) + "_" +
-                "l" + GenericFormatter.FORMAT_SHORT_MINUTE.format(lastdate) + "_" +
-                "n" + GenericFormatter.FORMAT_SHORT_MINUTE.format(new Date(now)) + "_" +
+                "f" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate) + "_" +
+                "l" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(lastdate) + "_" +
+                "n" + GenericFormatter.SHORT_MINUTE_FORMATTER.format(new Date(now)) + "_" +
                 "c" + String.format("%1$012d", doccount)).getAbsolutePath() + "_tc"; // the name ends with the transaction token ('c' = 'created')
         
         // create export file name
@@ -757,7 +803,7 @@ public final class Fulltext {
     
     public static void main(String args[]) {
     	Date firstdate = null;
-    	System.out.println(GenericFormatter.FORMAT_SHORT_MINUTE.format(firstdate));
+    	System.out.println(GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate));
     }
 
     public Export export() {

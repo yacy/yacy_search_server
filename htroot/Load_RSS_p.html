@@ -26,7 +26,7 @@
       This does not load the rss file as such into the index but all the messages inside the RSS feeds as individual documents.
     </p>
     
-    <form action="Load_RSS_p.html" method="get" accept-charset="UTF-8">
+    <form action="Load_RSS_p.html" method="post" accept-charset="UTF-8">
        <fieldset>
         <dl>
           <dt><b>URL of the RSS feed</b></dt>
@@ -130,7 +130,7 @@
 	#(/shownewfeeds)#
 	
 	#(showitems)#::
-	<form id="rssfeed" action="Load_RSS_p.html"><fieldset>
+	<form id="rssfeed" method="post" action="Load_RSS_p.html"><fieldset>
 	  <legend>RSS Feed of #[rss]#</legend>
       <dl>
 		<dt>Title</dt><dd>#[title]#</dd>
@@ -154,14 +154,14 @@
         </tr>
         #{item}#
         <tr class="TableCellLight">
-          <td align="left">#(state)#<input type="checkbox" name="item_#[count]#" value="mark_#[guid]#" />::&nbsp;::&nbsp;#(/state)#</td>
+          <td align="left">#(indexable)#&nbsp;::<input type="checkbox" name="item_#[count]#" value="#[inputValue]#" />#(/indexable)#</td>
           #(state)#<td>new</td>::<td class="info">enqueued</td>::<td class="commit">indexed</td>#(/state)#
-          <td><a href="#[link]#">#[title]#</a></td>
-          <td><a href="#[link]#">#[link]#</a></td>
+          <td>#(hasLink)#::<a href="#[link]#">#(/hasLink)##[title]##(hasLink)#::</a>#(/hasLink)#</td>
+          <td>#(hasLink)#::<a href="#[link]#">#[link]#</a>#(/hasLink)#</td>
           <td>#[author]#</td>
           <td>#[language]#</td>
           <td>#[date]#</td>
-          <td>#[description]#</td>
+          <td>#[description]##(defaultMediaDesc)#::Attached media#(/defaultMediaDesc)#</td>
         </tr>
         #{/item}#
       </table>

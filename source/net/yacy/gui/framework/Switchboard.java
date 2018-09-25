@@ -124,7 +124,7 @@ public class Switchboard {
                     // waiting for the main thread to finish execution
                     log.info("Waiting for GUI thread to finish.");
                     this.mainThread.interrupt();
-                    if (this.mainThread != null && this.mainThread.isAlive()) {
+                    if (this.mainThread.isAlive()) {
                         this.mainThread.join();
                     }
                     // wait until everything is written
@@ -227,8 +227,7 @@ public class Switchboard {
     public static File getFile(String key) {
         String s = properties.getProperty(key);
         if (s == null) return null;
-        s.replace("/", File.separator);
-        return new File(s);
+        return new File(s.replace("/", File.separator));
     }
     
     /**

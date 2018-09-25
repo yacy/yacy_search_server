@@ -25,6 +25,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -194,7 +197,7 @@ public class Snapshots {
     
     /**
      * list the snapshots for a given host name
-     * @param hostport the <host>.<port> identifier for the domain
+     * @param hostport the <host>.<port> identifier for the domain (with the same format as applied by the Snapshots.pathToHostPortDir() function)
      * @param depth restrict the result to the given depth or if depth == -1 do not restrict to a depth
      * @return a map with a set for each depth in the domain of the host name
      */
@@ -244,8 +247,7 @@ public class Snapshots {
     public File definePath(final DigestURL url, final int depth, final Date date, final String ext) {
         String id = ASCII.String(url.hash());
         String ds = GenericFormatter.SHORT_MINUTE_FORMATTER.format(date);
-        File path = new File(pathToShard(url, depth), id + "." + ds + "." + ext);
-        return path;
+        return new File(pathToShard(url, depth), id + "." + ds + "." + ext);
     }
 
     /**
@@ -268,7 +270,7 @@ public class Snapshots {
 
     /**
      * Delete information about the storage of a snapshot to the Snapshot-internal index.
-     * The actual deletion of files in the target directory must be done elsewehre, this method does not store the snapshot files.
+     * The actual deletion of files in the target directory must be done elsewhere, this method does not store the snapshot files.
      * @param url
      * @param depth
      * @param date
@@ -335,18 +337,30 @@ public class Snapshots {
             }
         }
         if (host != null && depth == null) {
-            String hostport = pathToHostPortDir(host,80);
+            String hostport = pathToHostPortDir(host, 80);
             TreeMap<Integer, TreeSet<String>> depthIdsMap = this.directory.get(hostport);
-            if (depthIdsMap != null) loop: for (Map.Entry<Integer, TreeSet<String>> depthIds: depthIdsMap.entrySet()) {
-                for (String id: depthIds.getValue()) {
-                    dateIdResult.put(id, new String[]{hostport, Integer.toString(depthIds.getKey())});
-                    if (order == Order.ANY && dateIdResult.size() >= maxcount) break loop;
-                }
+            if(depthIdsMap == null && isIpv6AddrHost(host)) {
+            	/* If the host is a raw IPV6 address, we check also if a snapshot was recorded with the old format (without percent-encoding) */
+                hostport = pathToHostPortDir(host, 80, false);
+                depthIdsMap = this.directory.get(hostport);            	
+            }
+            if (depthIdsMap != null) {
+            	loop: for (Map.Entry<Integer, TreeSet<String>> depthIds: depthIdsMap.entrySet()) {
+            		for (String id: depthIds.getValue()) {
+            			dateIdResult.put(id, new String[]{hostport, Integer.toString(depthIds.getKey())});
+            			if (order == Order.ANY && dateIdResult.size() >= maxcount) break loop;
+            		}
+            	}
             }
         }
         if (host != null && depth != null) {
-            String hostport = pathToHostPortDir(host,80);
+            String hostport = pathToHostPortDir(host, 80);
             TreeMap<Integer, TreeSet<String>> domaindepth = this.directory.get(hostport);
+            if(domaindepth == null && isIpv6AddrHost(host)) {
+            	/* If the host is a raw IPV6 address, we check also if a snapshot was recorded with the old format (without percent-encoding) */
+                hostport = pathToHostPortDir(host, 80, false);
+                domaindepth = this.directory.get(hostport);            	
+            }
             if (domaindepth != null) {
                 TreeSet<String> ids = domaindepth.get(depth);
                 if (ids != null) loop: for (String id: ids) {
@@ -430,6 +444,10 @@ public class Snapshots {
     public Collection<File> findPaths(final DigestURL url, final int depth, final String ext) {
         String id = ASCII.String(url.hash());
         File pathToShard = pathToShard(url, depth);
+        if(!pathToShard.exists() && isIpv6AddrHost(url.getHost())) {
+        	/* If the host is a raw IPV6 address, we check also if a snapshot was recorded with the old format (without percent-encoding) */
+        	pathToShard = pathToShard(pathToHostPortDir(url.getHost(), url.getPort(), false), ASCII.String(url.hash()), depth);
+        }
         String[] list = pathToShard.exists() && pathToShard.isDirectory() ? pathToShard.list() : null; // may be null if path does not exist
         ArrayList<File> paths = new ArrayList<>();
         if (list != null) {
@@ -450,9 +468,41 @@ public class Snapshots {
         File pathToShard = new File(pathToDepthDir, pathToShard(urlhash));
         return pathToShard;
     }
-
+    
+    /**
+     * @param host a domain name or IP address
+     * @return true when the host string is a raw IPV6 address (with square brackets)
+     */
+    private boolean isIpv6AddrHost(final String host) {
+    	return (host != null && host.startsWith("[") && host.endsWith("]") && host.contains(":"));
+    }
+    
+    /**
+     * @param host a domain name or IP address
+     * @param port a port number
+     * @return a representation of the host and port encoding IPV6 addresses for better support accross file systems (notably FAT or NTFS)
+     */
     private String pathToHostPortDir(final String host, final int port) {
-        return host + "." + port;
+    	return pathToHostPortDir(host, port, true);
+    }
+
+    /**
+     * @param host a domain name or IP address
+     * @param port a port number
+     * @param encodeIpv6 when true, encode the host for better support accross file systems (notably FAT or NTFS)
+     * @return a representation of the host and port
+     */
+    private String pathToHostPortDir(final String host, final int port, final boolean encodeIpv6) {
+    	String encodedHost = host;
+        if(encodeIpv6 && isIpv6AddrHost(host)) {
+        	/* Percent-encode the host name when it is an IPV6 address, as the ':' character is illegal in a file name on MS Windows FAT32 and NTFS file systems */
+        	try {
+        		encodedHost = URLEncoder.encode(host, StandardCharsets.UTF_8.name());
+			} catch (final UnsupportedEncodingException e) {
+				/* This should not happen has UTF-8 encoding support is required for any JVM implementation */
+			}
+        }
+        return encodedHost + "." + port;
     }
     
     private String pathToDepthDir(final int depth) {

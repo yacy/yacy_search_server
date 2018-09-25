@@ -52,6 +52,19 @@
           <input type="radio" name="search.options" value="false" #(search.options)#checked="checked"::#(/search.options)# />do not show Advanced Search
           </dd>
           
+          <dt>Media Search</dt>
+          <dd>
+          	<label>
+          		<input type="radio" name="search.strictContentDom" value="false" #(search.strictContentDom)#checked="checked"::#(/search.strictContentDom)# />Extended
+          	</label>
+          	<label>
+          		<input type="radio" name="search.strictContentDom" value="true" #(search.strictContentDom)#::checked="checked"#(/search.strictContentDom)# />Strict
+          	</label>
+          	<p>Control whether media search results are as default strictly limited to indexed documents matching exactly the desired content domain  (images, videos or applications specific), 
+          		or extended to pages including such medias (provide generally more results, but eventually less relevant).
+          	</p>
+          </dd>
+          
           <dt>Remote results resorting</dt>
           <dd>
           	<label title="Remote results resorting can be triggered once the 'Refresh sorting' button (near the 'Search' button) becomes available.">
@@ -62,9 +75,35 @@
           	</label>
           </dd>
           
+          <dt>Remote search encryption</dt>
+          <dd>
+          	<label>
+          		<input type="checkbox" name="remotesearch.https.preferred" value="true" #(remotesearch.https.preferred)#::checked="checked"#(/remotesearch.https.preferred)# />Prefer https for search queries on remote peers.
+          	</label>
+          	When SSL/TLS is enabled on remote peers, https should be used to encrypt data exchanged with them when performing peer-to-peer searches. 
+          	Please note that contrary to strict TLS, certificates are not validated against trusted certificate authorities (CA), thus allowing YaCy peers to use self-signed certificates. 
+          </dd>
+          
           <dt>Snippet Fetch Strategy &amp; Link Verification</dt>
           <dd>
           <img src="env/grafics/idea.png" width="32" height="32" alt="idea" align="center"/>Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)<br/>
+          #(debug.snippets.statistics.enabled)#<i>Statistics on text snippets generation can be enabled in the <a href="Settings_p.html?page=debug">Debug/Analysis Settings</a> page.</i>
+          ::<div class="info" style="float:left; margin-right : 0.1em;">
+        	<img src="env/grafics/i16.gif" width="16" height="16" alt="Detailed statistics"/>
+        	<div class="infobox">
+        		Counts by origin :
+        		<ul>
+        			<li>#[totalFromSolr]# provided by Solr</li>
+        			<li>#[totalFromCache]# from cache</li>
+        			<li>#[totalFromMetadata]# computed from indexed metadata</li>
+        			<li>#[totalFromWeb]# from original documents fetched and parsed</li>
+        			<li>#[totalFailures]# failures</li>
+        		</ul>
+        	</div>
+          </div>
+          <i>#[totalSnippets]# text snippets were generated since last server startup, in a mean time of #[snippetsMeanTime]# and a maximum of #[snippetsMaxTime]#.</i>
+          #(/debug.snippets.statistics.enabled)#
+          <br/>
           <input type="radio" name="search.verify" value="nocache" #(search.verify.nocache)#::checked="checked"#(/search.verify.nocache)# onclick="document.getElementById('search_verify_delete').disabled=false;document.getElementById('search_verify_delete').checked=true;"/> NOCACHE: no use of web cache, load all snippets online<br/>
           <input type="radio" name="search.verify" value="iffresh" #(search.verify.iffresh)#::checked="checked"#(/search.verify.iffresh)# onclick="document.getElementById('search_verify_delete').disabled=false;document.getElementById('search_verify_delete').checked=true;"/> IFFRESH: use the cache if the cache exists and is fresh otherwise load online<br/>
           <input type="radio" name="search.verify" value="ifexist" #(search.verify.ifexist)#::checked="checked"#(/search.verify.ifexist)# onclick="document.getElementById('search_verify_delete').disabled=false;document.getElementById('search_verify_delete').checked=true;"/> IFEXIST: use the cache if the cache exist or load online<br/>

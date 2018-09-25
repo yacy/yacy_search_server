@@ -49,6 +49,10 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -68,6 +72,7 @@ import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.yacy.Distribution;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.Digest;
@@ -756,10 +761,11 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
     }
     
     /**
-     * generate a public address using a given ip. This combines the ip with the port and encloses the ip
+     * generate a public address using a given ip. This combines the ip with the http port and encloses the ip
      * with square brackets if the ip is of typeIPv6
      * @param ip
      * @return an address string which can be used as host:port part of an url (if no port avail returns just host)
+     * @ŧhrows RuntimeException when the ip parameter is null
      */
     public final String getPublicAddress(final String ip) {
         if (ip == null) throw new RuntimeException("ip == NULL"); // that should not happen in Peer-to-Peer mode (but can in Intranet mode)
@@ -781,6 +787,67 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         }
         return sb.toString();
     }
+    
+    /**
+     * Generate a public URL using a given ip. This combines the ip with the http(s) port and encloses the ip
+     * with square brackets if the ip is of typeIPv6
+     * @param ip a host name or ip address
+     * @param preferHTTPS when true and https is available on this Seed, use it as the scheme part of the url 
+     * @return an URL string for the given peer ip
+     * @throws RuntimeException when the ip parameter is null
+     */
+    public final String getPublicURL(final String ip, final boolean preferHTTPS) throws RuntimeException {
+        if (ip == null) {
+        	throw new RuntimeException("ip == NULL"); // that should not happen in Peer-to-Peer mode (but can in Intranet mode)
+        }
+        final String scheme;
+        final String port;
+        if(preferHTTPS && getFlagSSLAvailable()) {
+        	scheme = "https://";
+        	port = this.dna.get(Seed.PORTSSL);
+        } else {
+        	scheme = "http://";
+        	port = this.dna.get(Seed.PORT);
+        }
+        final StringBuilder sb = new StringBuilder(scheme.length() + ip.length() + 8); // / = surplus for port
+        sb.append(scheme);
+        if (ip.indexOf(':') >= 0) {
+            if (!ip.startsWith("[")) sb.append('[');
+            sb.append(ip);
+            if (!ip.endsWith("]")) sb.append(']');
+        } else {
+            sb.append(ip);
+        }
+        if (port == null || port.length() < 2 || port.length() > 5) {
+            //just skip port if peer didn't report it..... may finally depart
+            Network.log.severe(preferHTTPS ? "https" : "http " + " port not wellformed for peer" + this.getName() + ": " + port == null ? "null" : port);
+        } else {
+            sb.append(':');
+            sb.append(port);
+        }
+        return sb.toString();
+    }
+    
+	/**
+	 * Generate a public URL Multiprotocol instance using a given ip. This combines
+	 * the ip with the http(s) port and encloses the ip with square brackets if the
+	 * ip is of typeIPv6
+	 * 
+	 * @param ip
+	 *            a host name or ip address
+	 * @param preferHTTPS
+	 *            when true and https is available on this Seed, use it as the
+	 *            scheme part of the url
+	 * @return an MultiProtocolURL instance for the given peer ip
+	 * @throws RuntimeException
+	 *             when the ip parameter is null
+	 * @throws MalformedURLException
+	 *             when the ip and port could not make a well formed URL
+	 */
+	public final MultiProtocolURL getPublicMultiprotocolURL(final String ip, final boolean preferHTTPS)
+			throws RuntimeException, MalformedURLException {
+		return new MultiProtocolURL(getPublicURL(ip, preferHTTPS));
+	}
 
     /** @return the port number of this seed or <code>-1</code> if not present */
     public final int getPort() {
@@ -792,14 +859,15 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         return Integer.parseInt(port);
     }
 
-    /** puts the current time into the lastseen field and cares about the time differential to UTC */
+    /** puts the current UTC time into the lastseen field */
     public final void setLastSeenUTC() {
-        // because java thinks it must apply the UTC offset to the current time,
-        // to create a string that looks like our current time, it adds the local UTC offset to the
-        // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        final GenericFormatter my_SHORT_SECOND_FORMATTER = new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
-        final String ls = my_SHORT_SECOND_FORMATTER.format(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
-        this.dna.put(Seed.LASTSEEN, ls);
+    	try {
+    		/* Prefer using first the shared and thread-safe DateTimeFormatter instance */
+    		this.dna.put(Seed.LASTSEEN, GenericFormatter.FORMAT_SHORT_SECOND.format(Instant.now()));
+    	} catch(final DateTimeException e) {
+    		/* This should not happen, but rather than failing we fallback to the old formatter wich uses synchronization locks */
+    		this.dna.put(Seed.LASTSEEN, GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date()));
+    	}
     }
 
     /**
@@ -807,9 +875,17 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      */
     public final long getLastSeenUTC() {
         try {
-            final GenericFormatter my_SHORT_SECOND_FORMATTER =
-                new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
-            final long t = my_SHORT_SECOND_FORMATTER.parse(get(Seed.LASTSEEN, "20040101000000"), 0).getTime().getTime();
+        	final String lastSeenStr = get(Seed.LASTSEEN, "20040101000000");
+        	long t;
+        	try {
+        		/* Prefer using first the shared and thread-safe DateTimeFormatter instance */
+        		t = LocalDateTime.parse(lastSeenStr, GenericFormatter.FORMAT_SHORT_SECOND).toInstant(ZoneOffset.UTC).toEpochMilli();
+        	} catch(final RuntimeException e) {
+        		/* Retry with the old date API parser */
+        		final GenericFormatter my_SHORT_SECOND_FORMATTER =
+        				new GenericFormatter(GenericFormatter.newShortSecondFormat(), GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
+        		t = my_SHORT_SECOND_FORMATTER.parse(lastSeenStr, 0).getTime().getTime();
+        	}
             // getTime creates a UTC time number. But in this case java thinks, that the given
             // time string is a local time, which has a local UTC offset applied.
             // Therefore java subtracts the local UTC offset, to get a UTC number.
@@ -840,13 +916,20 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             return this.birthdate;
         }
         long b;
-        try {
-            final GenericFormatter my_SHORT_SECOND_FORMATTER =
-                new GenericFormatter(GenericFormatter.FORMAT_SHORT_SECOND, GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
-            b = my_SHORT_SECOND_FORMATTER.parse(get(Seed.BDATE, "20040101000000"), 0).getTime().getTime();
-        } catch (final ParseException e ) {
-            b = System.currentTimeMillis();
-        }
+        final String bdateStr = get(Seed.BDATE, "20040101000000");
+    	try {
+    		/* Prefer using first the shared and thread-safe DateTimeFormatter instance */
+    		b = LocalDateTime.parse(bdateStr, GenericFormatter.FORMAT_SHORT_SECOND).toInstant(ZoneOffset.UTC).toEpochMilli();
+    	} catch(final RuntimeException e) {
+    		/* Retry with the old date API parser */
+    		try {
+    			final GenericFormatter my_SHORT_SECOND_FORMATTER =
+    					new GenericFormatter(GenericFormatter.newShortSecondFormat(), GenericFormatter.time_second); // use our own formatter to prevent concurrency locks with other processes
+    			b = my_SHORT_SECOND_FORMATTER.parse(bdateStr, 0).getTime().getTime();
+    		} catch (final ParseException pe) {
+    			b = System.currentTimeMillis();
+    		}
+    	}
         this.birthdate = b;
         return this.birthdate;
     }
@@ -1240,8 +1323,16 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         // check IP
         if ( !checkOwnIP ) {
             // checking of IP is omitted if we read the own seed file
-            final String ip = getIP();
-            if (!isProperIP(ip)) return "not a proper IP " + ip;
+            final Set<String> ips = getIPs();
+            if(ips.isEmpty()) {
+            	return "no IP at all";
+            }
+           	for(final String ip: ips) {
+           		if (!isProperIP(ip)) {
+           			Network.log.severe("not a proper IP " + ip + " peer : " + this.getName() + "ips " + ips);
+           			return "not a proper IP " + ip;		
+                }
+           	}
         }
 
         // seedURL

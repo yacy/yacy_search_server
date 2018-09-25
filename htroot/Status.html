@@ -82,6 +82,12 @@
    
     <!-- warnings -->
     
+    #(warningUnrestrictedLocalAccess)#::
+    <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
+    <dd class="hint">Access is unrestricted from localhost (this includes administration features). 
+    	Please check the <a href="ConfigAccounts_p.html">accounts configuration</a> page to ensure that the settings match the security level you need.</dd>
+    #(/warningUnrestrictedLocalAccess)#
+    
     #(warningGoOnline)#::
     <dt class="hintIcon"><img src="env/grafics/bad.png" width="32" height="32" alt="bad"/></dt>
     <dd class="hint">The peer must go online to get a peer address.
@@ -169,15 +175,6 @@
 	<dd class="hint">Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.
     </dd>
     #(/hintCrawlMonitor)#
-    
-    #(hintJREVersion)#::
-    <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>
-	<dd class="hint">
-	Your Java version is old. YaCy currently needs Java 1.7 but we want to migrate to Java 1.8 in the future.
-	Migration to 1.8 won't happen until end of 2016, but we want to join code with YaCy's sister project <a href="http://loklak.org">loklak.org</a>
-	and with a possible re-construction of YaCy in the <a href="http://kaskelix.de">kaskelix</a> architecture which will be using Java 1.8
-    </dd>
-    #(/hintJREVersion)#
     
     #(hintSupport)#::
     <dt class="hintIcon"><img src="env/grafics/idea.png" width="32" height="32" alt="idea"/></dt>

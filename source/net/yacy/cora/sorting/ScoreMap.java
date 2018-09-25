@@ -34,15 +34,17 @@ public interface ScoreMap<E> extends Iterable<E> {
     
     /**
      * shrink the cluster to a demanded size
-     * @param maxsize
+     * @param maxsize the new expected size
+     * @return the number of deleted entries, zero when maxsize is greater than the current map size
      */
-    public void shrinkToMaxSize(int maxsize);
+    public int shrinkToMaxSize(int maxsize);
     
     /**
      * shrink the cluster in such a way that the smallest score is equal or greater than a given minScore
-     * @param minScore
+     * @param minScore the new expected minimum score
+     * @return the number of deleted entries or zero when minScore is lower than the currently minimum score of the map
      */
-    public void shrinkToMinScore(int minScore);
+    public int shrinkToMinScore(int minScore);
     
 
     /**
@@ -58,6 +60,11 @@ public interface ScoreMap<E> extends Iterable<E> {
     
     public void set(final E obj, final int newScore);
     
+    /**
+     * Delete a given entry and return its previous score
+     * @param obj the entry to delete
+     * @return the score of the deleted entry, or zero when the map did not contain that entry
+     */
     public int delete(final E obj);
 
     public boolean containsKey(final E obj);

@@ -290,6 +290,12 @@ public final class SwitchboardConstants {
     /** Default maximum system load allowing remote Solr searches */
     public static final float REMOTESEARCH_MAXLOAD_SOLR_DEFAULT = 4.0f;
     
+    /** Key of the setting controlling whether https should be preferred for remote searches, when available on the target peer */
+    public static final String REMOTESEARCH_HTTPS_PREFERRED = "remotesearch.https.preferred";
+    
+    /** Default setting value controlling whether https should be preferred for remote searches, when available on the target peer */
+    public static final boolean REMOTESEARCH_HTTPS_PREFERRED_DEFAULT = false;
+    
 	/**
 	 * Setting key to configure whether responses from remote Solr instances
 	 * should be binary encoded :
@@ -304,14 +310,31 @@ public final class SwitchboardConstants {
     /** Default configuration setting for remote Solr responses binary encoding */
     public static final boolean REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT            = true;
 
+    /** Key of the setting controlling whether to use or not remote Solr server(s) */
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_ENABLED      = "federated.service.solr.indexing.enabled";
+    
+    /** Default setting value controlling whether to use or not remote Solr server(s) */
+    public static final boolean FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT = false;
+    
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_URL          = "federated.service.solr.indexing.url";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_SHARDING     = "federated.service.solr.indexing.sharding";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_LAZY         = "federated.service.solr.indexing.lazy";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_TIMEOUT      = "federated.service.solr.indexing.timeout";
     public static final String FEDERATED_SERVICE_SOLR_INDEXING_WRITEENABLED = "federated.service.solr.indexing.writeEnabled";
+    
+    /** Setting key controlling whether a self-signed certificate is acceptable from a remote Solr instance requested with authentication credentials. 
+     * This has no impact on connections to remote Solr instances used in p2p search for which self-signed certificates are always accepted. */
+    public static final String FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED = "federated.service.solr.indexing.authenticated.allowSelfSigned";
 
+    /** Default value controlling whether a self-signed certificate is acceptable from a remote Solr instance with authentication credentials. */
+    public static final boolean FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT = false;
+
+    /** Key of the setting controlling wheter to use or not an embedded Solr instance */
     public static final String CORE_SERVICE_FULLTEXT            = "core.service.fulltext";
+    
+    /** Default setting value controlling wheter to use or not an embedded Solr instance */
+    public static final boolean CORE_SERVICE_FULLTEXT_DEFAULT   = true;
+    
     public static final String CORE_SERVICE_RWI                 = "core.service.rwi.tmp";
     public static final String CORE_SERVICE_CITATION            = "core.service.citation.tmp";
     public static final String CORE_SERVICE_WEBGRAPH            = "core.service.webgraph.tmp";
@@ -350,6 +373,12 @@ public final class SwitchboardConstants {
     
     /** when set to true : do not use dht, search local peer in a shortcut to the own server */
     public static final String DEBUG_SEARCH_REMOTE_SOLR_TESTLOCAL= "debug.search.remote.solr.testlocal";
+    
+    /** Key of the setting controlling whether text snippets statistics should be computed */
+    public static final String DEBUG_SNIPPETS_STATISTICS_ENABLED = "debug.snippets.statistics.enabled";
+    
+    /** Default value for the setting controlling whether text snippets statistics should be computed */
+    public static final boolean DEBUG_SNIPPETS_STATISTICS_ENABLED_DEFAULT = false;
     
     /**
      * <p><code>public static final String <strong>WORDCACHE_MAX_COUNT</strong> = "wordCacheMaxCount"</code></p>
@@ -405,6 +434,11 @@ public final class SwitchboardConstants {
     public static final String DICTIONARY_SOURCE_PATH         = "dictionaries";
     public static final String DICTIONARY_SOURCE_PATH_DEFAULT = "DATA/DICTIONARIES";
     
+    /** Setting key for a set of comma separated vocabulary names whose terms should only be matched 
+    * from linked data types annotations in documents (with microdata, RDFa, microformats...) 
+    * instead of cleartext words */
+    public static final String VOCABULARIES_MATCH_LINKED_DATA_NAMES = "vocabularies.matchLinkedData.names";
+    
     public static final String CLASSIFICATION_SOURCE_PATH         = "classification";
     public static final String CLASSIFICATION_SOURCE_PATH_DEFAULT = "DATA/CLASSIFICATION";
 
@@ -447,6 +481,28 @@ public final class SwitchboardConstants {
      */
     public static final String WORK_PATH                = "workPath";
     public static final String WORK_PATH_DEFAULT        = "DATA/WORK";
+    
+    /** Setting key of the property that collects the names of all servlets that have been used so far. */
+    public static final String SERVER_SERVLETS_CALLED    = "server.servlets.called";
+    
+    /** Key of the setting controlling whether HTTP responses should be compressed with gzip when the user-agent accepts it (by including gzip in a 'Accept-Encoding' HTTP request header) */
+    public static final String SERVER_RESPONSE_COMPRESS_GZIP = "server.response.compress.gzip";
+    
+    /** Default setting value controlling whether HTTP responses should be compressed */
+    public static final boolean SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT = true;
+    
+    
+    /** Key of the setting controlling the maximum number of simultaneously open outgoing HTTP connections in the general pool (net.yacy.cora.protocol.http.HTTPClient) */
+    public static final String HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL = "http.outgoing.pool.general.maxTotal";
+    
+    /** Default setting value controlling the maximum number of simultaneously open outgoing HTTP connections in the general pool */
+    public static final int HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL_DEFAULT = 200;
+    
+    /** Key of the setting controlling the maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool (net.yacy.cora.federate.solr.instance.RemoteInstance) */
+    public static final String HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL = "http.outgoing.pool.remoteSolr.maxTotal";
+    
+    /** Default setting value controlling the maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool */
+    public static final int HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT = 100;
 
 
     /*
@@ -514,6 +570,13 @@ public final class SwitchboardConstants {
     public static final String NETWORK_BOOTSTRAP_SEEDLIST_STUB = "network.unit.bootstrap.seedlist";
 
     public static final String NETWORK_SEARCHVERIFY = "network.unit.inspection.searchverify";
+    
+    /** Key of the setting controlling whether https should be preferred for in-protocol operations when available on remote peers.
+     * A distinct general setting is available to control whether https sould be used for remote search queries : see {@link #REMOTESEARCH_HTTPS_PREFERRED} */
+    public static final String NETWORK_PROTOCOL_HTTPS_PREFERRED = "network.unit.protocol.https.preferred";
+    
+    /** Default setting value controlling whether https should be preferred for in-protocol operations when available on remote peers */
+    public static final boolean NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT = false;
 
     /**
      * appearance
@@ -547,11 +610,27 @@ public final class SwitchboardConstants {
     public static final String SEARCH_VERIFY  = "search.verify";
     public static final String SEARCH_VERIFY_DELETE = "search.verify.delete";
     
+	/**
+	 * Key of the setting controlling whether content domain filtering is strict :
+	 * when false, results can be extended to documents including links to documents
+	 * of contentdom type, whithout being themselves of that type.
+	 */
+    public static final String SEARCH_STRICT_CONTENT_DOM = "search.strictContentDom";
+    
+	/** Default setting value controlling whether content domain filtering is strict. */
+    public static final boolean SEARCH_STRICT_CONTENT_DOM_DEFAULT = false;
+    
     /** Key of the setting controlling whether search results resorting by browser JavaScript is enabled */
     public static final String SEARCH_JS_RESORT = "search.jsresort";
     
     /** Default setting value controlling whether search results resorting by browser JavaScript is enabled */
     public static final boolean SEARCH_JS_RESORT_DEFAULT = false;
+    
+    /** Key of the setting controlling whether the search public top navigation bar includes a login link/status */
+    public static final String SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN = "search.publicTopNavBar.login";
+    
+    /** Default setting value controlling whether the search public top navigation bar includes a login link/status */
+    public static final boolean SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN_DEFAULT = true;
 
     /** Key of the setting controlling the max lines displayed in standard search navigators/facets */
     public static final String SEARCH_NAVIGATION_MAXCOUNT = "search.navigation.maxcount";
@@ -570,6 +649,26 @@ public final class SwitchboardConstants {
     
     /** Default setting value controlling whether the ranking score value should be displayed for each search result in the HTML results page */
     public static final boolean SEARCH_RESULT_SHOW_RANKING_DEFAULT = false;
+    
+    /** Key of the setting controlling whether a tags/keywords list should be displayed for each search result in the HTML results page */
+    public static final String SEARCH_RESULT_SHOW_KEYWORDS = "search.result.show.keywords";
+    
+    /** Default setting value controlling whether the ranking score value should be displayed for each search result in the HTML results page */
+    public static final boolean SEARCH_RESULT_SHOW_KEYWORDS_DEFAULT = false;
+    
+    /** Key of the setting controlling the maximum number of tags/keywords initially displayed for each search result in the HTML results page (the eventual remaining ones can then be expanded) */
+    public static final String SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT = "search.result.keywords.firstMaxCount";
+    
+    /** Default setting value controlling the maximum number of tags/keywords initially displayed for each search result in the HTML results page (the eventual remaining ones can then be expanded) */
+    public static final int SEARCH_RESULT_KEYWORDS_FISRT_MAX_COUNT_DEFAULT = 100;
+    
+    /** Key of the setting controlling whether the eventual website favicon should be fetched and displayed for each search result in the HTML results page */
+    public static final String SEARCH_RESULT_SHOW_FAVICON = "search.result.show.favicon";
+    
+    /** Default setting value controlling whether the eventual website favicon should be fetched and displayed for each search result in the HTML results page */
+    public static final boolean SEARCH_RESULT_SHOW_FAVICON_DEFAULT = true;
+    
+    
 
     /**
      * ranking+evaluation

@@ -30,6 +30,10 @@
 		<indexURLMustNotMatch>#[indexURLMustNotMatch]#</indexURLMustNotMatch>
 		<indexContentMustMatch>#[indexContentMustMatch]#</indexContentMustMatch>
 		<indexContentMustNotMatch>#[indexContentMustNotMatch]#</indexContentMustNotMatch>
+		<indexMediaTypeMustMatch>#[indexMediaTypeMustMatch]#</indexMediaTypeMustMatch>
+		<indexMediaTypeMustNotMatch>#[indexMediaTypeMustNotMatch]#</indexMediaTypeMustNotMatch>
+		<indexSolrQueryMustMatch>#[indexSolrQueryMustMatch]#</indexSolrQueryMustMatch>
+		<indexSolrQueryMustNotMatch>#[indexSolrQueryMustNotMatch]#</indexSolrQueryMustNotMatch>
 		<status>#(status)#terminated::active::system#(/status)#</status>
 		<crawlingDomFilterContent>
 		#{crawlingDomFilterContent}#

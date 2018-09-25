@@ -44,11 +44,13 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.kelondro.workflow.WorkflowTask;
+import net.yacy.peers.Transmission.Chunk;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
 
-public class Dispatcher {
+public class Dispatcher implements WorkflowTask<Transmission.Chunk> {
 
     /**
      * the dispatcher class accumulates indexContainerCache objects before they are transfered
@@ -88,44 +90,42 @@ public class Dispatcher {
      */
     private Map<String, Transmission.Chunk> transmissionBuffer;
 
-    // the segment backend is used to store the remaining indexContainers in case that the object is closed
+    /** the segment backend is used to store the remaining indexContainers in case that the object is closed */
     private final Segment segment;
 
-    // the seed database
+    /** the seed database */
     private final SeedDB seeds;
 
-    // the log
+    /** the log */
     private final ConcurrentLog log;
 
-    // transmission process
+    /** transmission process */
     private WorkflowProcessor<Transmission.Chunk> indexingTransmissionProcessor;
 
-    // transmission object
+    /** transmission object */
     private final Transmission transmission;
+    
+    /** The Switchboard instance holding the server environment */
+    private final Switchboard env;
 
     public Dispatcher(
-            final Segment segment,
-            final SeedDB seeds,
+            final Switchboard env,
             final boolean gzipBody,
             final int timeout
             ) {
+        this.env = env;
         this.transmissionBuffer = new ConcurrentHashMap<String, Transmission.Chunk>();
-        this.segment = segment;
-        this.seeds = seeds;
+        this.segment = env.index;
+        this.seeds = env.peers;
         this.log = new ConcurrentLog("INDEX-TRANSFER-DISPATCHER");
-        this.transmission = new Transmission(
-            this.log,
-            segment,
-            seeds,
-            gzipBody,
-            timeout);
+		this.transmission = new Transmission(env, this.log, gzipBody, timeout);
 
         final int concurrentSender = Math.min(8, WorkflowProcessor.availableCPU);
         this.indexingTransmissionProcessor = new WorkflowProcessor<Transmission.Chunk>(
                 "transferDocumentIndex",
                 "This is the RWI transmission process",
                 new String[]{"RWI/Cache/Collections"},
-                this, "transferDocumentIndex", concurrentSender * 3, null, concurrentSender);
+                this, concurrentSender * 3, null, concurrentSender);
     }
 
     public int bufferSize() {
@@ -177,7 +177,7 @@ public class Dispatcher {
         int refcount = 0;
 
         // first select the container
-        final long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+        final long timeout = maxtime == Integer.MAX_VALUE ? Long.MAX_VALUE : (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         while (
                 (containers.size() < maxContainerCount) &&
                 (refcount < maxReferenceCount) &&
@@ -352,21 +352,22 @@ public class Dispatcher {
         this.indexingTransmissionProcessor.enQueue(chunk);
         return true;
     }
+    
+    @Override
+    public Chunk process(final Transmission.Chunk chunk) throws Exception {
+    	return transferDocumentIndex(chunk);
+    }
 
     /**
-     * transfer job: this method is called using reflection from the switchboard
-     * the method is called as a Workflow process. That means it is always called whenever
-     * a job is placed in the workflow queue. This happens in dequeueContainer()
-     * @param chunk
-     * @return
+     * Transfer job implementation
      */
-    public Transmission.Chunk transferDocumentIndex(final Transmission.Chunk chunk) {
+    private Transmission.Chunk transferDocumentIndex(final Transmission.Chunk chunk) {
 
         // try to keep the system healthy; sleep as long as System load is too high
         while (Protocol.metadataRetrievalRunning.get() > 0) try {Thread.sleep(1000);} catch (InterruptedException e) {break;}
         
         // we must test this here again
-        while (Memory.load() > Switchboard.getSwitchboard().getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f)) try {Thread.sleep(10000);} catch (InterruptedException e) {break;}
+        while (Memory.load() > this.env.getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f)) try {Thread.sleep(10000);} catch (InterruptedException e) {break;}
         
         // do the transmission
         final boolean success = chunk.transmit();

@@ -140,7 +140,6 @@ domain.net/fullpath<==domain.de/vollerpfad<
 *.sub.domain.net/*<==*.sub.domain.de/*<
 #sub.domain.*/*<==sub.domain.*/*<
 #domain.*/*<==domain.*/*<
-a complete <==ein ganzer <
 (slow)==(langsam)
 #was removed from blacklist==wurde aus Blacklist entfernt
 #was added to the blacklist==wurde zur Blacklist hinzugefügt
@@ -354,9 +353,9 @@ No password is set for the administration account.==Für den Administrator Zugan
 Please define a password for the admin account.==Bitte setzen Sie ein Passwort für das admin Konto.
 Admin Account==Admin Konto
 Access from localhost without account==Zugriff von localhost ohne Konto
-Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.==Der Zugriff von Ihrem Computer (localhost Zugang) ist garantiert. Sie brauchen kein Administratorkonto erstellen.
+Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==Der Zugriff von Ihrem Computer (localhost Zugang) ist garantiert mit Administratorrechten gewährt. Sie brauchen kein Administratorkonto erstellen.
 Access only with qualified account==Zugriff nur mit berechtigtem Konto
-You need this only if you want a remote access to your peer.==Sie benötigen dies nur, wenn Sie Fernzugriff auf Ihren Peer haben wollen.
+This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Das ist erforderlich, wenn Sie Fernzugriff auf Ihren Peer haben wollen, aber es härtet auch aus die Zugriffskontrolle auf Ihre Peer-Administrations-Operationen.
 Peer User:==Peer Benutzer:
 New Peer Password:==Neues Peer Passwort:
 Repeat Peer Password:==Wiederhole Peer Passwort:
@@ -622,6 +621,7 @@ YaCy ships with 'start' and 'smoothness' themes pre-installed.==YaCy kommt vorin
 
 #File: ConfigNetwork_p.html
 #---------------------------
+<html lang="en">==<html lang="de">
 Network Configuration==Netzwerk Einstellungen
 No changes were made!==Es wurden keine Änderungen vorgenommen!
 Accepted Changes==Änderungen wurden gespeichert
@@ -1123,9 +1123,9 @@ Some processes occur double to document the complex index migration structure.==
 This is the list of web pages that this peer initiated to crawl,==Dies ist eine Liste von Internetseiten, bei der Ihr Peer den Crawl initiiert hat,
 but had been crawled by <em>other</em> peers.==die aber von <em>anderen</em> Peers gecrawlt wurden.
 This is the 'mirror'-case of process (6).==Dies ist der 'Gegensatz' Prozess zu (6)
-<em>Use Case:</em> You get entries here, if you start a local crawl on the 'Index Creation'-Page and check the==<em>Anwendungsfall:</em> Sie erhalten hier Einträge, wenn Sie einen lokalen Crawl auf der 'Index erzeugen' Seite starten und
-'Do Remote Indexing'-flag. Every page that a remote peer indexes upon this peer's request==die 'Remote Indexierung' aktivieren. Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde,
-is reported back and can be monitored here.==wird nun zurück gemeldet und hier angezeigt.
+<em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the==<em>Anwendungsfall:</em> Sie erhalten hier Einträge, wenn Sie einen lokalen Crawl auf der '<a href="CrawlStartExpert.html">Experten Crawl Start</a>' Seite starten und
+'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.==die 'Remote Indexierung' aktivieren, und wenn Sie auf der Seite '<a href="RemoteCrawl_p.html">Remote Crawling</a>' das Kennzeichen'Akzeptiere Remote Crawl Anfragen' gesetzt haben.
+Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.==Jede Seite, die von einem remote Peer durch Ihre Anfrage indexiert wurde, wird nun zurück gemeldet und hier angezeigt.
 (2) Results for Result of Search Queries==(2) Ergebnisse der Resultate bei Suchanfragen
 This index transfer was initiated by your peer by doing a search query.==Dieser Index Transfer wurde von Ihrem Peer dadurch initiiert, dass Sie eine Suchanfrage gestartet haben.
 The index was crawled and contributed by other peers.==Der Index wurde von anderen Peers gecrawlt und nun Ihnen breitgestellt.
@@ -1149,7 +1149,7 @@ These web pages had been crawled by your own crawl task.==Diese Internetseiten w
 (6) Results for Global Crawling==(6) Ergebnisse des globalen Crawlens
 These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==Diese Seiten wurden von Ihrem Peer indexiert, der Crawl wurde aber von einem anderen Peer initiiert (remote-Crawl).
 This is the 'mirror'-case of process (1).==Dies ist der 'Gegensatz' Prozess zu (1).
-<em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste füllt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
+<em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==<em>Anwendung:</em> Diese Liste füllt sich, wenn Sie 'Akzeptiere Remote Crawl Anfragen' auf der '<a href="RemoteCrawl_p.html">Remote Crawling</a>' Seite aktiviert haben.
 The stack is empty.==Die Liste ist leer.
 Statistics about #[domains]# domains in this stack:==Statistiken über #[domains]# Domains in diesem Bereich:
 (7) Results from surrogates import==(7) Ergebnisse aus dem Surrogat Import
@@ -1173,6 +1173,7 @@ Showing latest #[count]# lines from a stack of #[all]# entries.==Zeigt die letzt
 
 #File: CrawlStartExpert.html
 #---------------------------
+<html lang="en">==<html lang="de">
 Expert Crawl Start==Experten Crawl Start
 Start Crawling Job:==Starte Crawling Job:
 You can define URLs as start points for Web page crawling and start crawling here.==Sie können hier URLs angeben, die gecrawlt werden sollen und dann das Crawling starten.
@@ -1480,6 +1481,7 @@ from index==vom Index
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="de">
 YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Suchseite
 #kiosk mode==Kiosk Modus
 "Search"=="Suchen"
@@ -1533,14 +1535,12 @@ latest first==Neuste zuerst
 multiple words shall appear near==Mehrere Wörter sollen nah zusammen stehen
 doublequotes==Anführungszeichen
 prefer given language==Angegebene Sprache bevorzugen
-an ISO639 2-letter code==2-Buchstaben-Ländercode nach ISO639
+an <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a> 2-letter code==2-Buchstaben-Ländercode nach <a href="http://www.loc.gov/standards/iso639-2/php/English_list.php" title="Reference alpha-2 language codes list">ISO 639-1</a>
 heuristics==Heuristiken
 add search results from external opensearch systems==Benutze zusätzliche Ergebnisse von externen Opensearchsystemen
 Search Navigation==Such-Navigation
-keyboard shotcuts==Tastatur-Kürzel
-tab or page-up==Tab oder Bild hoch
+keyboard shortcuts==Tastatur-Kürzel
 next result page==Nächste Ergebnisseite
-page-down==Bild nach unten
 previous result page==Vorherige Ergebnisseite
 automatic result retrieval==Automatische Ergebnis-Abfrage
 browser integration==Browserintegration
@@ -2009,7 +2009,7 @@ Various stack files that belong to the crawling queue==Verschiedene Stack-Dateie
 No import thread is running, you can start a new thread here==Sie können hier einen neuen Thread starten, da aktuell kein Import Thread läuft
 Bad input data:==Ungültige Eingabedaten:
 MediaWiki Dump File Selection: select an XML file (which may be bz2- or gz-encoded)==MediaWiki Dump Datei Auswahl: Wähle eine XML Datei (die auch bz2 oder gzip komprimiert sein darf)
-You can import MediaWiki dumps here. An example is the file==Hier können Sie MediaWiki Dumps importieren. Als Beispiel dient die Datei
+You can import <a href="https://dumps.wikimedia.org/backup-index-bydb.html" target="_blank">MediaWiki dumps</a> here. An example is the file==Hier können Sie <a href="https://dumps.wikimedia.org/backup-index-bydb.html" target="_blank">MediaWiki dumps</a> importieren. Als Beispiel dient die Datei
 Dumps must be in XML format and may be compressed in gz or bz2. Place the file in the YaCy folder or in one of its sub-folders.==Dumps müssen im XML Format vorliegen und bz2 komprimiert sein. Legen Sie die Datei im YaCy-Verzeichnis oder einem Unterordner ab.
 "Import MediaWiki Dump"=="Importiere MediaWiki Dump"
 When the import is started, the following happens:==Wenn der Import gestartet wird passiert Folgendes:
@@ -2095,14 +2095,12 @@ Documents are added to the crawler only if no other crawls are active==Dokumente
 and are added in small chunks.==und wird in kleinen Blöcken verarbeitet.
 "start recrawl job now"=="Starte Re-Crawl-Job jetzt"
 "stop recrawl job"=="Beende Re-Crawl-Job"
-to re-crawl documents with fresh_date_dt before today.==um Dokumente mit fresh_date_dt vor Heute erneut zu crawlen.
-after starting the recrawl job you can apply a custom Solr query to select documents to be processed==nach dem Start des Re-Crawl-Jobs kann die Solr Abfrage bearbeitet werden um gewünschte Dokumente zu verarbeiten
 Re-Crawl Query Details==Re-Crawl Abfrage Details
 Documents to process==Dokumente in Warteschlange
 Current Query==Aktuelle Abfrage
 Edit Solr Query==Edit Solr Abfrage
 update==aktualisieren
-include failed urls==inklusive Fehler-Urls
+Include failed URLs==inklusive Fehler-Urls
 #-----------------------------
 
 #File: Load_MediawikiWiki.html
@@ -2434,7 +2432,7 @@ Memory Settings==Speicher Einstellungen
 Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==Für <abbr title="Java Virtual Machine">JVM</abbr> reservierter Speicher
 "Set"=="Setzen"
 Resource Observer==Ressourcen Beobachter
-reset state==Status zurücksetzen
+Reset state==Status zurücksetzen
 > free space==> freiem Speicher
 disable <abbr title="Distributed Hash Table">DHT</abbr>-in below==Deaktivere eingehende <abbr title="Distributed Hash Table">DHT</abbr> Transfers unter
 <abbr title="Random Access Memory">RAM</abbr>==Arbeitsspeicher
@@ -3296,13 +3294,12 @@ to a scheduler for a periodic execution.==einem Scheduler für periodische Ausf�
 "next page"=="Keine nächste Seite"
 "previous page"=="Keine vorherige Seite"
  of #[of]#== von #[of]#
->Date==>Datum
 >Type==>Typ
 >Comment==>Kommentar
-Call<br/>Count<==Aufruf<br/>Zähler<
-Recording<==Aufzeichnungs<
-Last&nbsp;Exec==Letzte&nbsp;Ausführung
-Next&nbsp;Exec==Nächste&nbsp;Ausführung
+Call Count<==Aufruf Zähler<
+Recording&nbsp;Date==Aufzeichnungs&nbsp;Datum
+Last&nbsp;Exec&nbsp;Date==Letzte&nbsp;Ausführung&nbsp;Datum
+Next&nbsp;Exec&nbsp;Date==Nächste&nbsp;Ausführung&nbsp;Datum
 #>URL<==>URL<
 >Event Trigger<==>Ereignis Auslöser<
 "clone"=="Ereignis klonen"
@@ -3559,6 +3556,7 @@ You can edit your profile <a href="ConfigProfile_p.html">here</a>==Sie können I
 
 #File: Vocabulary_p.html
 #---------------------------
+<html lang="en">==<html lang="de">
 The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
 Click the API icon to see the RDF Ontology definition for this vocabulary.==Klicken Sie auf das API Symbol, um die RDF Ontology Definition für diese Vokabelliste anzuzeigen.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.

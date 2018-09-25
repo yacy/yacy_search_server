@@ -30,22 +30,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
-
-import net.yacy.cora.document.feed.RSSMessage;
-import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.lod.vocabulary.DublinCore;
-import net.yacy.cora.lod.vocabulary.Geo;
-import net.yacy.cora.lod.vocabulary.YaCyMetadata;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.crawler.retrieval.Response;
-import net.yacy.search.schema.CollectionConfiguration;
-import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexableField;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.common.util.XML;
@@ -57,17 +52,31 @@ import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
 
-public class OpensearchResponseWriter implements QueryResponseWriter {
+import net.yacy.cora.document.feed.RSSMessage;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.lod.vocabulary.DublinCore;
+import net.yacy.cora.lod.vocabulary.Geo;
+import net.yacy.cora.lod.vocabulary.YaCyMetadata;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.crawler.retrieval.Response;
+import net.yacy.search.schema.CollectionConfiguration;
+import net.yacy.search.schema.CollectionSchema;
+
+/**
+ * Solr response writer producing an OpenSearch representation in RSS 2.0 format.
+ * @see <a href="https://github.com/dewitt/opensearch/blob/master/opensearch-1-1-draft-6.md#example-of-opensearch-response-elements-in-rss-20">Example of OpenSearch response elements in RSS 2.0</a>
+ */
+public class OpensearchResponseWriter implements QueryResponseWriter, SolrjResponseWriter {
 
     // define a list of simple YaCySchema -> RSS Token matchings
-    private static final Map<String, String> field2tag = new HashMap<String, String>();
+    private static final Map<String, String> field2tag = new HashMap<>();
 
     // pre-select a set of YaCy schema fields for the solr searcher which should cause a better caching
     private static final CollectionSchema[] extrafields = new CollectionSchema[]{
         CollectionSchema.id, CollectionSchema.title, CollectionSchema.description_txt, CollectionSchema.text_t,
         CollectionSchema.h1_txt, CollectionSchema.h2_txt, CollectionSchema.h3_txt, CollectionSchema.h4_txt, CollectionSchema.h5_txt, CollectionSchema.h6_txt,
         };
-    static final Set<String> SOLR_FIELDS = new HashSet<String>();
+    static final Set<String> SOLR_FIELDS = new HashSet<>();
     static {
         field2tag.put(CollectionSchema.coordinate_p.getSolrFieldName() + "_0_coordinate", Geo.Lat.getURIref());
         field2tag.put(CollectionSchema.coordinate_p.getSolrFieldName() + "_1_coordinate", Geo.Long.getURIref());
@@ -80,7 +89,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
     private String title;
 
     public static class ResHead {
-        public int offset, rows, numFound;
+        public long offset, rows, numFound;
         //public int status, QTime;
         //public String df, q, wt;
         //public float maxScore;
@@ -106,177 +115,72 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
         
-        NamedList<?> values = rsp.getValues();
+        final NamedList<?> values = rsp.getValues();
         
-        assert values.get("responseHeader") != null;
+        final Object responseObj = rsp.getResponse();
+        
         assert values.get("response") != null;
 
-        SimpleOrderedMap<Object> responseHeader = (SimpleOrderedMap<Object>) rsp.getResponseHeader();
-        DocList response = ((ResultContext) values.get("response")).getDocList();
+        write(writer, request, values, responseObj);
+    }
+    
+    @Override
+	public void write(Writer writer, SolrQueryRequest request, String coreName, QueryResponse rsp) throws IOException {
+        
+        final NamedList<Object> values = rsp.getResponse();
+        
+        final SolrDocumentList documents = rsp.getResults();
+        	
+        write(writer, request, values, documents);
+	}
+    
+	/**
+	 * Append to the writer the OpenSearch RSS representation of the Solr results.
+	 * @param writer  an open output writer. Must not be null.
+	 * @param request the initial Solr request. Must not be null.
+	 * @param values  the response values. Must not be null.
+	 * @param rsp     the Solr response header.
+	 * @throws IOException when a write error occurred
+	 */
+	private void write(final Writer writer, final SolrQueryRequest request, final NamedList<?> values,
+			final Object responseObj) throws IOException {
+        final ResHead resHead = new ResHead();
+        resHead.rows = request.getOriginalParams().getLong("rows", -1);
+        
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> facetCounts = (SimpleOrderedMap<Object>) values.get("facet_counts");
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> facetFields = facetCounts == null || facetCounts.size() == 0 ? null : (SimpleOrderedMap<Object>) facetCounts.get("facet_fields");
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
-        Map<String, LinkedHashSet<String>> snippets = highlighting(highlighting);
-
-        // parse response header
-        ResHead resHead = new ResHead();
-        NamedList<?> val0 = (NamedList<?>) responseHeader.get("params");
-        resHead.rows = Integer.parseInt((String) val0.get("rows"));
-        resHead.offset = response.offset(); // equal to 'start'
-        resHead.numFound = response.matches();
-        //resHead.df = (String) val0.get("df");
-        //resHead.q = (String) val0.get("q");
-        //resHead.wt = (String) val0.get("wt");
-        //resHead.status = (Integer) responseHeader.get("status");
-        //resHead.QTime = (Integer) responseHeader.get("QTime");
-        //resHead.maxScore = response.maxScore();
-
-        // write header
-        writer.write((
-                        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
-                        "<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>\n" +
-                        "<rss version=\"2.0\"\n" +
-                        "    xmlns:yacy=\"http://www.yacy.net/\"\n" +
-                        "    xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\"\n" +
-                        "    xmlns:media=\"http://search.yahoo.com/mrss/\"\n" +
-                        "    xmlns:atom=\"http://www.w3.org/2005/Atom\"\n" +
-                        "    xmlns:dc=\"" + DublinCore.NAMESPACE + "\"\n" +
-                        "    xmlns:geo=\"" + Geo.NAMESPACE + "\"\n" +
-                        ">\n").toCharArray());
-        openTag(writer, "channel");
-        solitaireTag(writer, "opensearch:totalResults", Integer.toString(resHead.numFound));
-        solitaireTag(writer, "opensearch:startIndex", Integer.toString(resHead.offset));
-        solitaireTag(writer, "opensearch:itemsPerPage", Integer.toString(resHead.rows));
-        solitaireTag(writer, RSSMessage.Token.title.name(), this.title);
-        writer.write("<atom:link rel=\"search\" href=\"/opensearchdescription.xml\" type=\"application/opensearchdescription+xml\"/>");
-        solitaireTag(writer, "description", "Search Result");
-        //solitaireTag(writer, "link", "");
-        //solitaireTag(writer, "image", "");
-
-        // parse body
-        final int responseCount = response.size();
-        SolrIndexSearcher searcher = request.getSearcher();
-        DocIterator iterator = response.iterator();
-        String urlhash = null;
-        MultiProtocolURL url = null;
-        for (int i = 0; i < responseCount; i++) {
-            openTag(writer, "item");
-            int id = iterator.nextDoc();
-            Document doc = searcher.doc(id, SOLR_FIELDS);
-            List<IndexableField> fields = doc.getFields();
-            int fieldc = fields.size();
-            List<String> texts = new ArrayList<String>();
-            List<String> descriptions = new ArrayList<String>();
-            String title = "";
-            List<Object> images_protocol_obj = new ArrayList<>();
-        	List<String> images_stub = new ArrayList<>();
-            for (int j = 0; j < fieldc; j++) {
-                IndexableField value = fields.get(j);
-                String fieldName = value.name();
-
-                // apply generic matching rule
-                String stag = field2tag.get(fieldName);
-                if (stag != null) {
-                    solitaireTag(writer, stag, value.stringValue());
-                    continue;
-                }
-                
-                // take apart the url
-                if (CollectionSchema.sku.getSolrFieldName().equals(fieldName)) {
-                    String u = value.stringValue();
-                    solitaireTag(writer, RSSMessage.Token.link.name(), u);
-                    try {
-                        url = new MultiProtocolURL(u);
-                        solitaireTag(writer, YaCyMetadata.host.getURIref(), url.getHost());
-                        solitaireTag(writer, YaCyMetadata.path.getURIref(), url.getPath());
-                        solitaireTag(writer, YaCyMetadata.file.getURIref(), url.getFileName());
-                    } catch (final MalformedURLException e) {}
-                    continue;
-                }
-                
-                // if the rule is not generic, use the specific here
-                if (CollectionSchema.id.getSolrFieldName().equals(fieldName)) {
-                    urlhash = value.stringValue();
-                    solitaireTag(writer, RSSMessage.Token.guid.name(), urlhash, "isPermaLink=\"false\"");
-                    continue;
-                }
-                if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
-                    title = value.stringValue();
-                    texts.add(title);
-                    continue;
-                }
-                if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
-                    Date d = new Date(Long.parseLong(value.stringValue()));
-                    solitaireTag(writer, RSSMessage.Token.pubDate.name(), HeaderFramework.formatRFC1123(d));
-                    continue;
-                }
-                if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
-                    String description = value.stringValue();
-                    descriptions.add(description);
-                    solitaireTag(writer, DublinCore.Description.getURIref(), description);
-                    texts.add(description);
-                    continue;
-                }
-                if (CollectionSchema.text_t.getSolrFieldName().equals(fieldName)) {
-                    texts.add(value.stringValue());
-                    continue;
-                }
-                if (CollectionSchema.size_i.getSolrFieldName().equals(fieldName)) {
-                    int size = value.numericValue().intValue();
-                    solitaireTag(writer, YaCyMetadata.size.getURIref(), Integer.toString(size));
-                    solitaireTag(writer, YaCyMetadata.sizename.getURIref(), RSSMessage.sizename(size));
-                    continue;
-                }
-                if (CollectionSchema.h1_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h2_txt.getSolrFieldName().equals(fieldName) ||
-                    CollectionSchema.h3_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h4_txt.getSolrFieldName().equals(fieldName) ||
-                    CollectionSchema.h5_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h6_txt.getSolrFieldName().equals(fieldName)) {
-                    // because these are multi-valued fields, there can be several of each
-                    texts.add(value.stringValue());
-                    continue;
-                }
-                if (CollectionSchema.images_protocol_sxt.getSolrFieldName().equals(fieldName)) {
-                	images_protocol_obj.add(value.stringValue());
-                    continue;
-                }
-                if (CollectionSchema.images_urlstub_sxt.getSolrFieldName().equals(fieldName)) {
-                	images_stub.add(value.stringValue());
-                    continue;
-                }
-            }
+        final Map<String, LinkedHashSet<String>> snippets = highlighting(highlighting);
+        
+        if(responseObj instanceof ResultContext){
+        	/* Regular response object */
+        	final DocList documents = ((ResultContext)responseObj).getDocList();
+        	
+            resHead.offset = documents.offset(); // equal to 'start' Solr param
+            resHead.numFound = documents.matches();
             
-            if (Math.min(images_protocol_obj.size(), images_stub.size()) > 0) {
-            	List<String> images_protocol = CollectionConfiguration.indexedList2protocolList(images_protocol_obj, images_stub.size());
-            	String imageurl = images_protocol.get(0) + "://" + images_stub.get(0);
-                 writer.write("<media:content medium=\"image\" url=\"");
-                 XML.escapeCharData(imageurl, writer); writer.write("\"/>\n");
-            } else {
-            	if (url != null && Response.docTypeExt(MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase()) == Response.DT_IMAGE) {
-            		writer.write("<media:content medium=\"image\" url=\"");
-                    XML.escapeCharData(url.toNormalform(true), writer); writer.write("\"/>\n");
-            	}
-            }
             
-            // compute snippet from texts
-            solitaireTag(writer, RSSMessage.Token.title.name(), title.length() == 0 ? (texts.size() == 0 ? "" : texts.get(0)) : title);
-            LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
-            String tagname = RSSMessage.Token.description.name();
-            if (snippet == null || snippet.size() == 0) {
-                writer.write("<"); writer.write(tagname); writer.write('>');
-                for (String d: descriptions) {
-                    XML.escapeCharData(d, writer);
-                }
-                writer.write("</"); writer.write(tagname); writer.write(">\n");
-            } else {
-                removeSubsumedTitle(snippet, title);
-                solitaireTag(writer, tagname, getLargestSnippet(snippet)); // snippet may be size=0
-            }
-
-            solitaireTag(writer, DublinCore.Subject.getURIref(), doc.get(CollectionSchema.keywords.getSolrFieldName()));
+            writeHeader(writer, resHead);
             
-            closeTag(writer, "item");
+            writeDocs(writer, documents, request, snippets);
+        } else if(responseObj instanceof SolrDocumentList) {
+			/*
+			 * The response object can be a SolrDocumentList when the response is partial,
+			 * for example when the allowed processing time has been exceeded
+			 */
+        	final SolrDocumentList documents = ((SolrDocumentList)responseObj);
+        	
+            resHead.offset = documents.getStart(); // equal to 'start' Solr param
+            resHead.numFound = documents.getNumFound();
+            
+            writeHeader(writer, resHead);
+            
+            writeDocs(writer, documents, snippets);
+        } else {
+        	throw new IOException("Unable to process Solr response format");
         }
 
         openTag(writer, "yacy:navigation");
@@ -323,6 +227,334 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
         closeTag(writer, "channel");
         writer.write("</rss>\n".toCharArray());
     }
+    
+	/**
+	 * Append to the writer the header of the OpenSearch RSS representation.
+	 * @param writer an open output writer. Must not be null.
+	 * @param resHead the calculated results head. Must not be null.
+	 * @throws IOException when an unexpected error occurred while writing
+	 */
+	private void writeHeader(final Writer writer, final ResHead resHead)
+			throws IOException {
+        // write header
+        writer.write((
+                        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<?xml-stylesheet type='text/xsl' href='/yacysearch.xsl' version='1.0'?>\n" +
+                        "<rss version=\"2.0\"\n" +
+                        "    xmlns:yacy=\"http://www.yacy.net/\"\n" +
+                        "    xmlns:opensearch=\"http://a9.com/-/spec/opensearch/1.1/\"\n" +
+                        "    xmlns:media=\"http://search.yahoo.com/mrss/\"\n" +
+                        "    xmlns:atom=\"http://www.w3.org/2005/Atom\"\n" +
+                        "    xmlns:dc=\"" + DublinCore.NAMESPACE + "\"\n" +
+                        "    xmlns:geo=\"" + Geo.NAMESPACE + "\"\n" +
+                        ">\n").toCharArray());
+        openTag(writer, "channel");
+        solitaireTag(writer, "opensearch:totalResults", Long.toString(resHead.numFound));
+        solitaireTag(writer, "opensearch:startIndex", Long.toString(resHead.offset));
+        solitaireTag(writer, "opensearch:itemsPerPage", Long.toString(resHead.rows));
+        solitaireTag(writer, RSSMessage.Token.title.name(), this.title);
+        writer.write("<atom:link rel=\"search\" href=\"/opensearchdescription.xml\" type=\"application/opensearchdescription+xml\"/>");
+        solitaireTag(writer, "description", "Search Result");
+	}
+
+	/**
+	 * Append to the writer the OpenSearch RSS representation of Solr documents.
+	 * 
+	 * @param writer    an open output writer. Must not be null.
+	 * @param documents the documents to render. Must not be null.
+	 * @param snippets  snippets Solr computed text snippets (highlighting).
+	 * @throws IOException when an unexpected error occurred while writing
+	 */
+	private void writeDocs(final Writer writer, final SolrDocumentList documents,
+			final Map<String, LinkedHashSet<String>> snippets) throws IOException {
+		// parse body
+        String urlhash = null;
+        MultiProtocolURL url = null;
+        for (SolrDocument doc: documents) {
+            openTag(writer, "item");
+            List<String> texts = new ArrayList<>();
+            List<String> descriptions = new ArrayList<>();
+            String docTitle = "";
+            List<Object> images_protocol_obj = new ArrayList<>();
+        	List<String> images_stub = new ArrayList<>();
+			for (final Entry<String, Object> fieldEntry : doc) {
+				final String fieldName = fieldEntry.getKey();
+        		final Object value = fieldEntry.getValue();
+        		
+        		if(value == null) {
+        			continue;
+        		}
+
+                // apply generic matching rule
+                String stag = field2tag.get(fieldName);
+                if (stag != null) {
+                    solitaireTag(writer, stag, value.toString());
+                    continue;
+                }
+                
+                // take apart the url
+                if (CollectionSchema.sku.getSolrFieldName().equals(fieldName)) {
+                    url = writeLink(writer, value.toString());
+                    continue;
+                }
+                
+                // if the rule is not generic, use the specific here
+                if (CollectionSchema.id.getSolrFieldName().equals(fieldName)) {
+                    urlhash = value.toString();
+                    solitaireTag(writer, RSSMessage.Token.guid.name(), urlhash, "isPermaLink=\"false\"");
+                    continue;
+                }
+                if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
+                	if(value instanceof Iterable<?>) {
+                        /* Handle multivalued field */
+                		for(final Object valueItem : (Iterable<?>)value) {
+                            docTitle = valueItem.toString();
+                            texts.add(docTitle);                			
+                		}
+                	} else {
+                        docTitle = value.toString();
+                        texts.add(docTitle);        		
+                	}
+                    continue;
+                }
+                if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName) && value instanceof Date) {
+                    solitaireTag(writer, RSSMessage.Token.pubDate.name(), HeaderFramework.formatRFC1123((Date)value));
+                    continue;
+                }
+                if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
+                	if(value instanceof Iterable<?>) {
+                        /* Handle multivalued field */
+                		for(final Object valueItem : (Iterable<?>)value) {
+                            final String description = valueItem.toString();
+                            descriptions.add(description);
+                            texts.add(description);
+                            solitaireTag(writer, DublinCore.Description.getURIref(), description);                			
+                		}
+                	} else {
+                        final String description = value.toString();
+                        descriptions.add(description);
+                        texts.add(description);
+                        solitaireTag(writer, DublinCore.Description.getURIref(), description);                		
+                	}
+
+                    continue;
+                }
+                if (CollectionSchema.text_t.getSolrFieldName().equals(fieldName)) {
+                    texts.add(value.toString());
+                    continue;
+                }
+                if (CollectionSchema.size_i.getSolrFieldName().equals(fieldName) && value instanceof Integer) {
+                    int size = ((Integer)value).intValue();
+                    solitaireTag(writer, YaCyMetadata.size.getURIref(), Integer.toString(size));
+                    solitaireTag(writer, YaCyMetadata.sizename.getURIref(), RSSMessage.sizename(size));
+                    continue;
+                }
+                if (CollectionSchema.h1_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h2_txt.getSolrFieldName().equals(fieldName) ||
+                    CollectionSchema.h3_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h4_txt.getSolrFieldName().equals(fieldName) ||
+                    CollectionSchema.h5_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h6_txt.getSolrFieldName().equals(fieldName)) {
+                	if(value instanceof Iterable<?>) {
+                        // because these are multi-valued fields, there can be several of each
+                		for(final Object valueItem : (Iterable<?>)value) {
+                			texts.add(valueItem.toString());                			
+                		}
+                	} else {
+                		texts.add(value.toString());       		
+                	}
+                    continue;
+                }
+                if (CollectionSchema.images_protocol_sxt.getSolrFieldName().equals(fieldName)) {
+                	if(value instanceof Iterable<?>) {
+                        /* Handle multivalued field */
+                		for(final Object valueItem : (Iterable<?>)value) {
+                        	images_protocol_obj.add(valueItem.toString());            			
+                		}
+                	} else {
+                    	images_protocol_obj.add(value.toString());       		
+                	}
+                    continue;
+                }
+                if (CollectionSchema.images_urlstub_sxt.getSolrFieldName().equals(fieldName)) {
+                	if(value instanceof Iterable<?>) {
+                        /* Handle multivalued field */
+                		for(final Object valueItem : (Iterable<?>)value) {
+                        	images_stub.add(valueItem.toString());            			
+                		}
+                	} else {
+                    	images_stub.add(value.toString());       		
+                	}
+                    continue;
+                }
+            }
+			
+			final Object keywordsObj = doc.get(CollectionSchema.keywords.getSolrFieldName());
+			final String keywords = (keywordsObj instanceof String) ? (String)keywordsObj : null;
+            
+            writeDocEnd(writer, snippets, urlhash, url, keywords, texts, descriptions, docTitle, images_protocol_obj,
+					images_stub);
+        }
+	}
+
+	/**
+	 * Append to the writer the OpenSearch RSS representation of Solr documents.
+	 * 
+	 * @param writer        an open output writer. Must not be null.
+	 * @param documents     the documents to render. Must not be null.
+	 * @param snippets      Solr computed text snippets (highlighting).
+	 * @throws IOException when an unexpected error occurred while writing
+	 */
+	private void writeDocs(final Writer writer, final DocList documents, final SolrQueryRequest request, 
+			final Map<String, LinkedHashSet<String>> snippets) throws IOException {
+		// parse body
+        SolrIndexSearcher searcher = request.getSearcher();
+        String urlhash = null;
+        MultiProtocolURL url = null;
+        final DocIterator iterator = documents.iterator();
+        while(iterator.hasNext()) {
+            openTag(writer, "item");
+            int id = iterator.nextDoc();
+            Document doc = searcher.doc(id, SOLR_FIELDS);
+            List<String> texts = new ArrayList<>();
+            List<String> descriptions = new ArrayList<>();
+            String docTitle = "";
+            List<Object> images_protocol_obj = new ArrayList<>();
+        	List<String> images_stub = new ArrayList<>();
+            for (final IndexableField value : doc.getFields()) {
+                String fieldName = value.name();
+
+                // apply generic matching rule
+                String stag = field2tag.get(fieldName);
+                if (stag != null) {
+                    solitaireTag(writer, stag, value.stringValue());
+                    continue;
+                }
+                
+                // take apart the url
+                if (CollectionSchema.sku.getSolrFieldName().equals(fieldName)) {
+                	url = writeLink(writer, value.stringValue());
+                    continue;
+                }
+                
+                // if the rule is not generic, use the specific here
+                if (CollectionSchema.id.getSolrFieldName().equals(fieldName)) {
+                    urlhash = value.stringValue();
+                    solitaireTag(writer, RSSMessage.Token.guid.name(), urlhash, "isPermaLink=\"false\"");
+                    continue;
+                }
+                if (CollectionSchema.title.getSolrFieldName().equals(fieldName)) {
+                    docTitle = value.stringValue();
+                    texts.add(docTitle);
+                    continue;
+                }
+                if (CollectionSchema.last_modified.getSolrFieldName().equals(fieldName)) {
+                    Date d = new Date(Long.parseLong(value.stringValue()));
+                    solitaireTag(writer, RSSMessage.Token.pubDate.name(), HeaderFramework.formatRFC1123(d));
+                    continue;
+                }
+                if (CollectionSchema.description_txt.getSolrFieldName().equals(fieldName)) {
+                    String description = value.stringValue();
+                    descriptions.add(description);
+                    solitaireTag(writer, DublinCore.Description.getURIref(), description);
+                    texts.add(description);
+                    continue;
+                }
+                if (CollectionSchema.text_t.getSolrFieldName().equals(fieldName)) {
+                    texts.add(value.stringValue());
+                    continue;
+                }
+                if (CollectionSchema.size_i.getSolrFieldName().equals(fieldName)) {
+                    int size = value.numericValue().intValue();
+                    solitaireTag(writer, YaCyMetadata.size.getURIref(), Integer.toString(size));
+                    solitaireTag(writer, YaCyMetadata.sizename.getURIref(), RSSMessage.sizename(size));
+                    continue;
+                }
+                if (CollectionSchema.h1_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h2_txt.getSolrFieldName().equals(fieldName) ||
+                    CollectionSchema.h3_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h4_txt.getSolrFieldName().equals(fieldName) ||
+                    CollectionSchema.h5_txt.getSolrFieldName().equals(fieldName) || CollectionSchema.h6_txt.getSolrFieldName().equals(fieldName)) {
+                    // because these are multi-valued fields, there can be several of each
+                    texts.add(value.stringValue());
+                    continue;
+                }
+                if (CollectionSchema.images_protocol_sxt.getSolrFieldName().equals(fieldName)) {
+                	images_protocol_obj.add(value.stringValue());
+                    continue;
+                }
+                if (CollectionSchema.images_urlstub_sxt.getSolrFieldName().equals(fieldName)) {
+                	images_stub.add(value.stringValue());
+                    continue;
+                }
+            }
+            
+			final Object keywordsObj = doc.get(CollectionSchema.keywords.getSolrFieldName());
+			final String keywords = (keywordsObj instanceof String) ? (String)keywordsObj : null;
+            
+            writeDocEnd(writer, snippets, urlhash, url, keywords, texts, descriptions, docTitle, images_protocol_obj,
+					images_stub);
+        }
+	}
+	
+	/**
+	 * Append information about the Solr document URL to the writer
+	 * @param writer an open output writer. Must no be null.
+	 * @param sku the Solr document URL as a String.
+	 * @return a MultiProtocolURL instance built from the URL string, or null when the URL string is malformed.
+	 * @throws IOException when an unexpected error occurred while writing
+	 */
+	private MultiProtocolURL writeLink(final Writer writer, final String sku)
+			throws IOException {
+		solitaireTag(writer, RSSMessage.Token.link.name(), sku);
+		MultiProtocolURL url; 
+		try {
+		    url = new MultiProtocolURL(sku);
+		    solitaireTag(writer, YaCyMetadata.host.getURIref(), url.getHost());
+		    solitaireTag(writer, YaCyMetadata.path.getURIref(), url.getPath());
+		    solitaireTag(writer, YaCyMetadata.file.getURIref(), url.getFileName());
+		} catch (final MalformedURLException e) {
+			url = null;
+		}
+		return url;
+	}
+
+	/**
+	 * Append to the writer the end of the RSS OpenSearch representation of the Solr
+	 * document.
+	 */
+	private void writeDocEnd(final Writer writer, final Map<String, LinkedHashSet<String>> snippets, final String urlhash,
+			final MultiProtocolURL url, final String keywords, final List<String> texts, final List<String> descriptions, final String docTitle,
+			final List<Object> imagesProtocolObjs, final List<String> imagesStubs) throws IOException {
+		if (Math.min(imagesProtocolObjs.size(), imagesStubs.size()) > 0) {
+			List<String> imagesProtocols = CollectionConfiguration.indexedList2protocolList(imagesProtocolObjs, imagesStubs.size());
+			String imageurl = imagesProtocols.get(0) + "://" + imagesStubs.get(0);
+		     writer.write("<media:content medium=\"image\" url=\"");
+		     XML.escapeCharData(imageurl, writer); writer.write("\"/>\n");
+		} else {
+			if (url != null && Response.docTypeExt(MultiProtocolURL.getFileExtension(url.getFile()).toLowerCase(Locale.ROOT)) == Response.DT_IMAGE) {
+				writer.write("<media:content medium=\"image\" url=\"");
+		        XML.escapeCharData(url.toNormalform(true), writer); writer.write("\"/>\n");
+			}
+		}
+		
+		// compute snippet from texts
+		solitaireTag(writer, RSSMessage.Token.title.name(), docTitle.length() == 0 ? (texts.size() == 0 ? "" : texts.get(0)) : docTitle);
+		LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+		String tagname = RSSMessage.Token.description.name();
+		if (snippet == null || snippet.size() == 0) {
+		    writer.write("<"); writer.write(tagname); writer.write('>');
+		    for (String d: descriptions) {
+		        XML.escapeCharData(d, writer);
+		    }
+		    writer.write("</"); writer.write(tagname); writer.write(">\n");
+		} else {
+		    removeSubsumedTitle(snippet, docTitle);
+		    solitaireTag(writer, tagname, getLargestSnippet(snippet)); // snippet may be size=0
+		}
+
+		if(keywords != null) {
+			solitaireTag(writer, DublinCore.Subject.getURIref(), keywords);
+		}
+		
+		closeTag(writer, "item");
+	}
+	
     
     /**
      * produce snippets from solr (they call that 'highlighting')
@@ -372,11 +604,15 @@ public class OpensearchResponseWriter implements QueryResponseWriter {
      * @param snippets snippets list eventually empty
      * @return the largest snippet containing at least a space character among the list, or null
      */
-    public static String getLargestSnippet(LinkedHashSet<String> snippets) {
-        if (snippets == null || snippets.size() == 0) return null;
+    public static String getLargestSnippet(final LinkedHashSet<String> snippets) {
+        if (snippets == null || snippets.size() == 0) {
+        	return null;
+        }
         String l = null;
-        for (String s: snippets) {
-            if ((l == null || s.length() > l.length()) && s.indexOf(' ') > 0) l = s;
+        for (final String s: snippets) {
+			if ((l == null || s.length() > l.length()) && s.length() > 1 && s.indexOf(' ', 1) > 0) {
+				l = s;
+			}
         }
         if(l != null) {
         	l = l.replaceAll("\"", "'");

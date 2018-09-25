@@ -38,6 +38,7 @@ import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -52,7 +53,9 @@ public class rct_p {
             if (post.containsKey("retrieve")) {
                 final String peerhash = post.get("peer", null);
                 final Seed seed = (peerhash == null) ? null : sb.peers.getConnected(peerhash);
-                final RSSFeed feed = (seed == null) ? null : Protocol.queryRemoteCrawlURLs(sb.peers, seed, 20, 60000);
+        		final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+        				SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+                final RSSFeed feed = (seed == null) ? null : Protocol.queryRemoteCrawlURLs(sb.peers, seed, 20, 60000, preferHttps);
                 if (feed != null) {
                     for (final Hit item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());

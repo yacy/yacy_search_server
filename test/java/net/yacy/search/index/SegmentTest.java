@@ -23,36 +23,53 @@ import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.Bitfield;
 import net.yacy.search.query.QueryGoal;
+
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class SegmentTest {
 
-    static Segment index;
+    Segment index;
 
     /**
      * Setup RWI index
      *
      * @throws IOException
      */
-    @BeforeClass
-    public static void setUpClass() throws IOException {
+    @Before
+    public void setUp() throws IOException {
         // setup a index segment
         index = new Segment(new ConcurrentLog("SegmentTest"),
                 new File("test/DATA/INDEX/webportal/SEGMENTS"),
                 new File("test/DATA/INDEX/webportal/ARCHIVE"),
                 null, null);
+        
+        /* Warning : ensure the size is larger than the maximum number of test terms added to the index, otherwise
+         * query tests might randomly fail depending on when the index dump job (IndexCell.FlushThread) is run */
+        final int entityCacheMaxSize = 20;
 
         // connect RWI index
-        index.connectRWI(10, 1024);
+        index.connectRWI(entityCacheMaxSize, 1024);
     }
 
+    @After
+    public void tearDown() {
+    	if(index != null) {
+    		try {
+    			index.clear();
+    		} finally {
+    			index.close();
+    		}
+    	}
+    }
+    
     @AfterClass
     public static void tearDownClass() {
-        index.close();
         ConcurrentLog.shutdown();
     }
 

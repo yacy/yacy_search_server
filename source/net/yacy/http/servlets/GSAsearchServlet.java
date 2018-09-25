@@ -24,8 +24,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -36,21 +37,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import net.yacy.cora.date.ISO8601Formatter;
-import net.yacy.cora.federate.solr.Ranking;
-import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
-import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.data.UserDB;
-import net.yacy.search.Switchboard;
-import net.yacy.search.query.AccessTracker;
-import net.yacy.search.query.QueryGoal;
-import net.yacy.search.query.QueryModifier;
-import net.yacy.search.query.SearchEvent;
-import net.yacy.search.schema.CollectionSchema;
-import net.yacy.server.serverObjects;
 
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
@@ -63,6 +49,22 @@ import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.util.FastWriter;
 
+import net.yacy.cora.date.ISO8601Formatter;
+import net.yacy.cora.federate.solr.Ranking;
+import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.federate.solr.responsewriter.GSAResponseWriter;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.UserDB;
+import net.yacy.search.Switchboard;
+import net.yacy.search.query.AccessTracker;
+import net.yacy.search.query.QueryGoal;
+import net.yacy.search.query.QueryModifier;
+import net.yacy.search.query.SearchEvent;
+import net.yacy.search.schema.CollectionSchema;
+import net.yacy.server.serverObjects;
+
 
 /**
  * This is a gsa result formatter for solr search results.
@@ -73,9 +75,11 @@ public class GSAsearchServlet extends HttpServlet {
 
     private static final long serialVersionUID = 7835985518515673885L;
 
-    // GSA date formatter (short form of ISO8601 date format)
-    private static final String PATTERN_GSAFS = "yyyy-MM-dd";
-    public static final SimpleDateFormat FORMAT_GSAFS = new SimpleDateFormat(PATTERN_GSAFS, Locale.US);
+    /** GSA date formatter (short form of ISO8601 date format) */
+    private static final String PATTERN_GSAFS = "uuuu-MM-dd";
+    
+	public static final DateTimeFormatter FORMAT_GSAFS = DateTimeFormatter.ofPattern(PATTERN_GSAFS)
+			.withLocale(Locale.US).withZone(ZoneId.systemDefault());
 
     private final static GSAResponseWriter responseWriter = new GSAResponseWriter();
 
@@ -102,7 +106,7 @@ public class GSAsearchServlet extends HttpServlet {
     private void respond(final HttpServletRequest header, final Switchboard sb, final OutputStream out) {
 
         // remember the peer contact for peer statistics
-        String clientip = header.getRemoteAddr();
+        String clientip = RequestHeader.client(header);
         if (clientip == null) clientip = "<unknown>"; // read an artificial header addendum
         String userAgent = header.getHeader(HeaderFramework.USER_AGENT);
         if (userAgent == null) userAgent = "<unknown>";
@@ -272,10 +276,11 @@ public class GSAsearchServlet extends HttpServlet {
      * @see ISO8601Formatter
      */
     public final Date parseGSAFS(final String datestring) {
-        try {
-            return FORMAT_GSAFS.parse(datestring);
-        } catch (final ParseException e) {
-            return null;
-        }
+		try {
+			return Date
+					.from(LocalDate.parse(datestring, FORMAT_GSAFS).atStartOfDay(ZoneId.systemDefault()).toInstant());
+		} catch (final RuntimeException e) {
+			return null;
+		}
     }
 }

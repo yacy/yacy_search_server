@@ -20,10 +20,16 @@
 
 package net.yacy.crawler;
 
+import static net.yacy.kelondro.util.FileUtils.deletedelete;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -51,7 +57,6 @@ import net.yacy.kelondro.index.OnDemandOpenFileIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.table.Table;
-import static net.yacy.kelondro.util.FileUtils.deletedelete;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
@@ -93,7 +98,19 @@ public class HostQueue implements Balancer {
         this.port = hostUrl.getPort();
         this.hostHash = hostUrl.hosthash(); // hosthash is calculated by protocol + hostname + port
         // hostName/port included just for human readability (& historically), "-#" marker used to define begin of hosthash in directoryname
-        this.hostPath = new File(hostsPath, this.hostName + "-#"+ this.hostHash + "." + this.port);
+        if(this.hostName.startsWith("[") && this.hostName.endsWith("]") && this.hostName.contains(":")) {
+        	/* Percent-encode the host name when it is an IPV6 address, as the ':' character is illegal in a file name on MS Windows FAT32 and NTFS file systems */
+        	File path;
+        	try {
+        		path = new File(hostsPath, URLEncoder.encode(this.hostName, StandardCharsets.UTF_8.name()) + "-#"+ this.hostHash + "." + this.port);
+			} catch (final UnsupportedEncodingException e) {
+				/* This should not happen has UTF-8 encoding support is required for any JVM implementation */
+				path = new File(hostsPath, this.hostName + "-#"+ this.hostHash + "." + this.port);
+			}
+        	this.hostPath = path;
+        } else {
+            this.hostPath = new File(hostsPath, this.hostName + "-#"+ this.hostHash + "." + this.port);
+        }
         init();
     }
 
@@ -120,7 +137,18 @@ public class HostQueue implements Balancer {
         this.port = Integer.parseInt(filename.substring(pdot + 1)); // consider "host.com" contains dot but no required port -> will throw exception
         int p1 = filename.lastIndexOf("-#");
         if (p1 >= 0) {
-            this.hostName = filename.substring(0,p1);
+            String hostNameInFile = filename.substring(0,p1);
+            if(hostNameInFile.startsWith("%5B") && hostNameInFile.endsWith("%5D") && hostNameInFile.contains("%3A")) {
+            	/* Host name is a percent-encoded IPV6 address */
+            	try {
+            		hostNameInFile = URLDecoder.decode(hostNameInFile, StandardCharsets.UTF_8.name());
+				} catch (final UnsupportedEncodingException | RuntimeException ignored) {
+					/* This should not happen has UTF-8 encoding support is required for any JVM implementation */
+				}
+            	this.hostName = hostNameInFile;
+            } else {
+            	this.hostName = hostNameInFile;
+            }
             this.hostHash = filename.substring(p1+2,pdot);
         } else throw new RuntimeException("hostPath name must contain -# followd by hosthash: " + filename);
         init();

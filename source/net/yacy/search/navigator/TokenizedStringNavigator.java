@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.StringTokenizer;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.Switchboard;
+import net.yacy.search.query.QueryModifier;
 import net.yacy.search.schema.CollectionSchema;
 
 /**
@@ -76,5 +77,18 @@ public class TokenizedStringNavigator  extends StringNavigator implements Naviga
                 }
             }
         }
+    }
+
+    /**
+     * Checks if query parameter/modifier with specific key is active.
+     * The comparison is case insensitive.
+     * 
+     * @param modifier querymodifier to check
+     * @param key the key/term to check for
+     * @return true if the modifier contains the 'modifiername:key'
+     */
+    @Override
+    public boolean modifieractive(final QueryModifier modifier, final String key) {
+        return modifier.toString().toLowerCase().contains(getQueryModifier(key));
     }
 }

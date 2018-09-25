@@ -56,6 +56,7 @@ import net.yacy.repository.Blacklist;
 import net.yacy.repository.BlacklistHostAndPath;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.query.SearchEventCache;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -140,11 +141,29 @@ public class sharedBlacklist_p {
                 if( sb.peers != null ){ //no nullpointer error..
                     final Seed seed = sb.peers.getConnected(hash);
                     if (seed != null) {
-                        final String IP = seed.getIP();
-                        final String Port = seed.get(Seed.PORT, "8090");
-                        final String peerName = seed.get(Seed.NAME, "<" + IP + ":" + Port + ">");
-                        prop.putHTML("page_source", peerName);
-                        downloadURLOld = "http://" + IP + ":" + Port + "/yacy/list.html?col=black";
+                    	final Set<String> ips = seed.getIPs();
+                    	if(!ips.isEmpty()) {
+                            final String IP = ips.iterator().next();
+                            final String Port = seed.get(Seed.PORT, "8090");
+                            final String peerName = seed.get(Seed.NAME, "<" + IP + ":" + Port + ">");
+                            prop.putHTML("page_source", peerName);
+                            
+    						downloadURLOld = seed.getPublicURL(IP,
+    								sb.getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+    										SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT)) + "/yacy/list.html?col=black";
+    						
+    		                   // download the blacklist
+    	                    try {
+    	                        // get List
+    	                        final DigestURL u = new DigestURL(downloadURLOld);
+
+    	                        otherBlacklist = FileUtils.strings(u.get(agent, null, null));
+    	                    } catch (final Exception e) {
+    	                        prop.put("status", STATUS_PEER_UNKNOWN);
+    	                        prop.putHTML("status_name", hash);
+    	                        prop.put("page", "1");
+    	                    }
+                    	}
                     } else {
                         prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
                         prop.putHTML("status_name", hash);
@@ -154,20 +173,6 @@ public class sharedBlacklist_p {
                     prop.put("status", STATUS_PEER_UNKNOWN);//YaCy-Peer not found
                     prop.putHTML("status_name", hash);
                     prop.put("page", "1");
-                }
-
-                if (downloadURLOld != null) {
-                    // download the blacklist
-                    try {
-                        // get List
-                        final DigestURL u = new DigestURL(downloadURLOld);
-
-                        otherBlacklist = FileUtils.strings(u.get(agent, null, null));
-                    } catch (final Exception e) {
-                        prop.put("status", STATUS_PEER_UNKNOWN);
-                        prop.putHTML("status_name", hash);
-                        prop.put("page", "1");
-                    }
                 }
             } else if (post.containsKey("url")) {
                 /* ======================================================

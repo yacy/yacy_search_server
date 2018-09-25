@@ -26,6 +26,8 @@
 // javac -classpath .:../Classes goto_p.java
 // if the shell's current path is HTROOT
 
+import java.util.Set;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
@@ -56,11 +58,19 @@ public class goto_p {
             Seed seed = sb.peers.getConnected(hash);
 
             if (seed != null) {
-                String peersUrl = seed.getPublicAddress(seed.getIP());
+            	final Set<String> ips = seed.getIPs();
+            	String peersUrl = null;
+            	if(!ips.isEmpty()) {
+					peersUrl = seed.getPublicURL(ips.iterator().next(), false);
+            	}
                 if (peersUrl != null) {
                     String path = post.get("path", "/");
-                    if (!path.startsWith("/")) path = "/" + path;
-                    prop.put(serverObjects.ACTION_LOCATION, "http://" + peersUrl + path); // redirect command
+                    if (!path.startsWith("/")) {
+                    	path = "/" + path;
+                    }
+                    prop.put(serverObjects.ACTION_LOCATION, peersUrl + path); // redirect command
+                } else {
+                    prop.put("msg", "peer not available");
                 }
             } else {
                 prop.put("msg", "peer not available");

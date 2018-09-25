@@ -80,10 +80,9 @@ public class Files {
 		final BlockingQueue<String> q = new LinkedBlockingQueue<String>();
 		final InputStream is = read(f);
 		final BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
-		Thread t = new Thread() {
+		Thread t = new Thread("Files.concurrentLineReader:" + f) {
 			@Override
             public void run() {
-                Thread.currentThread().setName("Files.concurrentLineReader:" + f);
 				String line;
 				try {
 					while ((line = br.readLine()) != null) {

@@ -221,7 +221,7 @@ public class DigestURL extends MultiProtocolURL implements Serializable {
     /**
      * calculated YaCy-Hash of this URI
      *
-     * @note needs DNS lookup to check if the addresses domain is local
+     * @note needs DNS lookup to check if the addresses domain is local (when the top-level domain part in the host name is unknown)
      * that causes that this method may be very slow
      *
      * @return hash

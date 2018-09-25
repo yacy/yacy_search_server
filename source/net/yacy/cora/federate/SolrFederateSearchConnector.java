@@ -96,7 +96,14 @@ public class SolrFederateSearchConnector extends AbstractFederateSearchConnector
         msp.add(CommonParams.QT, "/"); // important to override default append of /select
         msp.add(CommonParams.ROWS, Integer.toString(query.itemsPerPage));
         try {
-            RemoteInstance instance = new RemoteInstance(baseurl, remotecorename, corename, 20000);
+			boolean trustSelfSignedOnAuthenticatedServer = SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT;
+			if (Switchboard.getSwitchboard() != null) {
+				trustSelfSignedOnAuthenticatedServer = Switchboard.getSwitchboard().getConfigBool(
+						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
+						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT);
+			}
+			RemoteInstance instance = new RemoteInstance(baseurl, remotecorename, corename, 20000,
+					trustSelfSignedOnAuthenticatedServer, Long.MAX_VALUE, false);
             try {
 				boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
 				if (Switchboard.getSwitchboard() != null) {

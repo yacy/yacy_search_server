@@ -20,12 +20,14 @@
 			$(document).ready(function() {
 				if ($("#yacylivesearch").length ) {
 					yconf = {
-						url      : 'http://search.yacy.net/',
+						url      : '..', /* URL of the backend YaCy peer : 
+							'..' is used as a default relative prefix when this widget is deployed directly on a YaCy peer.
+							Otherwise should be something like 'https://peerdomain:port' */
 						global   : true,
 						width    : 500,	
 						height   : 600,			
 						theme    : 'start',
-						title    : 'YaCy Search Widget: search.yacy.net',
+						title    : 'YaCy Search Widget: local peer',
 						load_js  : false,
 						load_css : false
 					};

@@ -216,7 +216,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 p = 4;
             }
         }
-        this.protocol = url.substring(0, p).toLowerCase().trim().intern();
+        this.protocol = url.substring(0, p).toLowerCase(Locale.ROOT).trim().intern();
         if (url.length() < p + 4) throw new MalformedURLException("URL not parseable: '" + url + "'");
         if (!this.protocol.equals("file") && url.substring(p + 1, p + 3).equals("//")) {
             // identify host, userInfo and file for http and ftp protocol
@@ -228,6 +228,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     q = url.indexOf("?", p + 3);
                 }
             }
+            if (q < 0) { // check for www.test.com#fragment
+                q = url.indexOf("#", p + 3);
+            } 
             int r;
             if (q < 0) {
                 if ((r = url.indexOf('@', p + 3)) < 0) {
@@ -417,7 +420,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             // a relative path that uses the protocol from the base url
             relPath = baseURL.protocol + ":" + relPath;
         }
-        if (relPath.toLowerCase().startsWith("javascript:")) {
+        if (relPath.toLowerCase(Locale.ROOT).startsWith("javascript:")) {
             this.path = baseURL.path;
         } else if (
                 isHTTP(relPath) ||
@@ -426,7 +429,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 isFile(relPath) ||
                 isSMB(relPath)) {
             this.path = baseURL.path;
-        } else if (relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()) { // discards also any unknown protocol from previous if
+        } else if (relPath.contains(":") && patternMail.matcher(relPath.toLowerCase(Locale.ROOT)).find()) { // discards also any unknown protocol from previous if
             throw new MalformedURLException("relative path malformed: " + relPath);
         } else if (relPath.length() > 0 && relPath.charAt(0) == '/') {
             this.path = relPath;
@@ -478,6 +481,33 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         identAnchor();
         identSearchpart();
         escape();
+    }
+    
+    /**
+     * @param host the new host to apply to the copy
+     * @return an exact copy of this URL instance but with a new host. The original instance remains unchanged.
+     * @throws IllegalArgumentException when the host parameter is null or empty.
+     */
+    public MultiProtocolURL ofNewHost(final String host) throws IllegalArgumentException {
+    	if(host == null || host.trim().isEmpty()) {
+    		throw new IllegalArgumentException("Host parameter must not be null");
+    	}
+    	MultiProtocolURL copy = new MultiProtocolURL(this);
+    	
+    	if (host.indexOf(':') >= 0 && host.charAt(0) != '[') {
+    		copy.host = '[' + host + ']'; // IPv6 host must be enclosed in square brackets
+    	} else {
+        	copy.host = host;	
+    	}
+    	
+        if (!Punycode.isBasic(this.host)) try {
+            this.host = toPunycode(this.host);
+        } catch (final PunycodeException e) {
+        	ConcurrentLog.logException(e);
+        }
+    	
+    	return copy;
+    	
     }
 
     /**
@@ -647,7 +677,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     sbuf.append("%25");      // '%' RFC 1738 2.2 unsafe char shall be encoded
                 }
             } else if (ch == '&') { 
-                if (i < len - 6 && "amp;".equals(s.substring(i + 1, i + 5).toLowerCase())) {
+                if (i < len - 6 && "amp;".equals(s.substring(i + 1, i + 5).toLowerCase(Locale.ROOT))) {
                     sbuf.append((char)ch);   // leave it that way, it is used the right way
                 } else {
                     sbuf.append("%26");    // this must be urlencoded
@@ -799,7 +829,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         String q = this.searchpart;
         if (removeSessionID) {
             for (final String sid: sessionIDnames.keySet()) {
-                if (q.toLowerCase().startsWith(sid.toLowerCase() + "=")) {
+                if (q.toLowerCase(Locale.ROOT).startsWith(sid.toLowerCase(Locale.ROOT) + "=")) {
                     final int p = q.indexOf('&');
                     if (p < 0) {
                         if (excludeAnchor || this.anchor == null) return this.path;
@@ -812,7 +842,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                     q = q.substring(p + 1);
                     continue;
                 }
-                final int p = q.toLowerCase().indexOf("&" + sid.toLowerCase() + "=",0);
+                final int p = q.toLowerCase(Locale.ROOT).indexOf("&" + sid.toLowerCase(Locale.ROOT) + "=",0);
                 if (p < 0) continue;
                 final int p1 = q.indexOf('&', p+1);
                 if (p1 < 0) {
@@ -852,14 +882,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         if (p < 0) return "";
         final int q = fileName.lastIndexOf('?');
         if (q < 0) {
-            return fileName.substring(p + 1).toLowerCase();
+            return fileName.substring(p + 1).toLowerCase(Locale.ROOT);
         }
         // check last dot in query part
         if (p > q) {
             p = fileName.lastIndexOf('.', q);
             if (p < 0) return "";
         }
-        return fileName.substring(p + 1, q).toLowerCase();
+        return fileName.substring(p + 1, q).toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -909,7 +939,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     /**
-     * @return the host part of this URL, Punycode encoded for Internationalized Domain Names
+     * @return the host part of this URL, Punycode encoded for Internationalized Domain Names. Can be null, for example for file URLs such as "file:///path/file.ext"
      */
     public String getHost() {
         return this.host;
@@ -923,6 +953,9 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return orga;
     }
 
+    /**
+     * @return the top-level domain name part of this url host name, or the empty string.
+     */
     public String getTLD() {
         if (this.host == null) return "";
         int p = this.host.lastIndexOf('.');
@@ -933,7 +966,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public InetAddress getInetAddress() {
         if (this.hostAddress != null) return this.hostAddress;
         if (this.host == null) return null; // this may happen for file:// urls
-        this.hostAddress = Domains.dnsResolve(this.host.toLowerCase());
+        this.hostAddress = Domains.dnsResolve(this.host.toLowerCase(Locale.ROOT));
         return this.hostAddress;
     }
 
@@ -945,6 +978,11 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         return this.protocol;
     }
 
+    /**
+     * @return this URL fragment or null if has no fragment
+     * @see <a href="https://url.spec.whatwg.org/#concept-url-fragment">URL fragment concept at WHATWG</a>
+     * @see <a href="https://tools.ietf.org/html/rfc3986#section-3.5">URL fragment section in RFC 3986</a> 
+     */
     public String getRef() {
         return this.anchor;
     }
@@ -1117,7 +1155,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 u.append(this.userInfo);
                 u.append("@");
             }
-            u.append(h.toLowerCase());
+            u.append(h.toLowerCase(Locale.ROOT));
         }
         if (!defaultPort) {
             u.append(":");
@@ -1165,7 +1203,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                 u.append(this.userInfo);
                 u.append("@");
             }
-            u.append(h.toLowerCase());
+            u.append(h.toLowerCase(Locale.ROOT));
         }
         if (!defaultPort) {
             u.append(":");
@@ -1224,7 +1262,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     public static final boolean isCGI(final String extension) {
-        return extension != null && extension.length() > 0 && "cgi.exe".indexOf(extension.toLowerCase()) >= 0;
+        return extension != null && extension.length() > 0 && "cgi.exe".indexOf(extension.toLowerCase(Locale.ROOT)) >= 0;
     }
 
     /**
@@ -1232,14 +1270,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      */
     @Deprecated
     public static final boolean isImage(final String extension) {
-        return extension != null && extension.length() > 0 && Response.docTypeExt(extension.toLowerCase()) == Response.DT_IMAGE;
+        return extension != null && extension.length() > 0 && Response.docTypeExt(extension.toLowerCase(Locale.ROOT)) == Response.DT_IMAGE;
     }
 
     public final boolean isIndividual() {
-        final String q = unescape(this.path.toLowerCase());
+        final String q = unescape(this.path.toLowerCase(Locale.ROOT));
         for (final String sid: sessionIDnames.keySet()) {
-            if (q.startsWith(sid.toLowerCase() + "=")) return true;
-            final int p = q.indexOf("&" + sid.toLowerCase() + "=",0);
+            if (q.startsWith(sid.toLowerCase(Locale.ROOT) + "=")) return true;
+            final int p = q.indexOf("&" + sid.toLowerCase(Locale.ROOT) + "=",0);
             if (p >= 0) return true;
         }
         int pos;
@@ -1273,7 +1311,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         String language = "en";
         if (this.host == null) return language;
         final int pos = this.host.lastIndexOf('.');
-        String host_tld = this.host.substring(pos + 1).toLowerCase();
+        String host_tld = this.host.substring(pos + 1).toLowerCase(Locale.ROOT);
         if (pos == 0) return language;
         int length = this.host.length() - pos - 1;
         switch (length) {
@@ -2395,6 +2433,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     public static String[] urlComps(String normalizedURL) {
         final int p = normalizedURL.indexOf("//",0);
         if (p > 0) normalizedURL = normalizedURL.substring(p + 2);
+        // TODO lowering case in a locale sensitive manner makes sense here, but the used language locale should not dependant on the default system locale
         return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }
     

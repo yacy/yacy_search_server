@@ -28,8 +28,12 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.http.pool.PoolStats;
+
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.data.TransactionManager;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.rwi.IndexCell;
@@ -62,54 +66,56 @@ public class PerformanceQueues_p {
         	/* Check the transaction is valid : validation apply then for every uses of this post parameter */
         	TransactionManager.checkPostTransaction(header, post);
         	
-        	if(post.containsKey("defaultFile")){
-	            // TODO check file-path!
-	            final File value = new File(sb.getAppPath(), post.get("defaultFile", "defaults/yacy.init"));
-	            // check if value is readable file
-	            if(value.exists() && value.isFile() && value.canRead()) {
-	                defaultSettingsFile = value;
-	            }
-        	}
-            if (post.containsKey("Xmx")) {
-                int xmx = post.getInt("Xmx", 600); // default maximum heap size
-                if (OS.isWin32) xmx = Math.min(2000, xmx);
-                int xms = xmx; //Math.min(xmx, Math.max(90, xmx / 10));
-	            sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
-	            sb.setConfig("javastart_Xms", "Xms" + xms + "m");
-	            prop.put("setStartupCommit", "1");
-	            
-	            /* Acquire a transaction token for the restart operation */
-	            prop.put("setStartupCommit_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header, "/Steering.html"));
-            }
-            if(post.containsKey("diskFree")) {
-            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, post.getLong("diskFree", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT));
-            }
-            if(post.containsKey("diskFreeHardlimit")) {
-            	sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, post.getLong("diskFreeHardlimit", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT_DEFAULT));
-            	
-            	/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
-            	 * so we take only in account when the relate diskFreeHardlimit is set */
-				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE,
-						post.getBoolean("diskFreeAutoregulate"));
-            }
-			if (post.containsKey("diskUsed")) {
-				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE,
-						post.getLong("diskUsed", SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT));
-			}
-			if (post.containsKey("diskUsedHardlimit")) {
-				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT, post.getLong("diskUsedHardlimit",
-						SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT));
-				
-				/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
-				 * so we take only in account when the related diskFreeHardlimit is set */
-				sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE,
-						post.getBoolean("diskUsedAutoregulate"));
-			}
-            if(post.containsKey("memoryAcceptDHT")) {
-            	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, post.getInt("memoryAcceptDHT", 50));
-            }
             if(post.containsKey("resetObserver")) {
+            	/* The the reset state button is pushed, we only perform this action and do not save other form field values at the same time */
             	MemoryControl.resetProperState();
+            } else {
+            	if(post.containsKey("defaultFile")){
+            		// TODO check file-path!
+            		final File value = new File(sb.getAppPath(), post.get("defaultFile", "defaults/yacy.init"));
+            		// check if value is readable file
+            		if(value.exists() && value.isFile() && value.canRead()) {
+            			defaultSettingsFile = value;
+            		}
+            	}
+            	if (post.containsKey("Xmx")) {
+            		int xmx = post.getInt("Xmx", 600); // default maximum heap size
+            		if (OS.isWin32) xmx = Math.min(2000, xmx);
+            		int xms = xmx; //Math.min(xmx, Math.max(90, xmx / 10));
+            		sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
+            		sb.setConfig("javastart_Xms", "Xms" + xms + "m");
+            		prop.put("setStartupCommit", "1");
+	            
+            		/* Acquire a transaction token for the restart operation */
+            		prop.put("setStartupCommit_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header, "/Steering.html"));
+            	}
+            	if(post.containsKey("diskFree")) {
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE, post.getLong("diskFree", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_STEADYSTATE_DEFAULT));
+            	}
+            	if(post.containsKey("diskFreeHardlimit")) {
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT, post.getLong("diskFreeHardlimit", SwitchboardConstants.RESOURCE_DISK_FREE_MIN_UNDERSHOT_DEFAULT));
+            	
+            		/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
+            		 * so we take only in account when the relate diskFreeHardlimit is set */
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_FREE_AUTOREGULATE,
+            				post.getBoolean("diskFreeAutoregulate"));
+            	}
+            	if (post.containsKey("diskUsed")) {
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE,
+            				post.getLong("diskUsed", SwitchboardConstants.RESOURCE_DISK_USED_MAX_STEADYSTATE_DEFAULT));
+            	}
+            	if (post.containsKey("diskUsedHardlimit")) {
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT, post.getLong("diskUsedHardlimit",
+            				SwitchboardConstants.RESOURCE_DISK_USED_MAX_OVERSHOT_DEFAULT));
+				
+            		/* This is a checkbox in Performance_p.html : when not checked the value is not in post parameters, 
+            		 * so we take only in account when the related diskFreeHardlimit is set */
+            		sb.setConfig(SwitchboardConstants.RESOURCE_DISK_USED_AUTOREGULATE,
+            				post.getBoolean("diskUsedAutoregulate"));
+            	}
+            	if(post.containsKey("memoryAcceptDHT")) {
+            		sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, post.getInt("memoryAcceptDHT", 50));
+            	}
             }
         }
         final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : FileUtils.loadMap(defaultSettingsFile);
@@ -217,7 +223,7 @@ public class PerformanceQueues_p {
                 idlesleep = Long.parseLong(d(defaultSettings.get(threadName + "_idlesleep"), String.valueOf(idlesleep)));
                 busysleep = Long.parseLong(d(defaultSettings.get(threadName + "_busysleep"), String.valueOf(busysleep)));
                 memprereq = Long.parseLong(d(defaultSettings.get(threadName + "_memprereq"), String.valueOf(memprereq)));
-                loadprereq = Double.parseDouble(d(defaultSettings.get(threadName + "_loadprereq"), String.valueOf(memprereq)));
+                loadprereq = Double.parseDouble(d(defaultSettings.get(threadName + "_loadprereq"), String.valueOf(loadprereq)));
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
                 //if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
@@ -305,6 +311,25 @@ public class PerformanceQueues_p {
             sb.setConfig("httpdMaxBusySessions",maxBusy);
 
         }
+        
+		if ((post != null) && (post.containsKey("connectionPoolConfig"))) {
+
+			/* Configure the general outgoing HTTP connection pool */
+			int maxTotal = post.getInt(SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL,
+					SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL_DEFAULT);
+			if (maxTotal > 0) {
+				sb.setConfig(SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL, maxTotal);
+				HTTPClient.initPoolMaxConnections(HTTPClient.CONNECTION_MANAGER, maxTotal);
+			}
+
+			/* Configure the remote Solr outgoing HTTP connection pool */
+			maxTotal = post.getInt(SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL,
+					SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT);
+			if (maxTotal > 0) {
+				sb.setConfig(SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL, maxTotal);
+				RemoteInstance.initPoolMaxConnections(RemoteInstance.CONNECTION_MANAGER, maxTotal);
+			}
+		}
 
         if ((post != null) && (post.containsKey("onlineCautionSubmit"))) {
             sb.setConfig(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseProxy", 30000)));
@@ -341,6 +366,24 @@ public class PerformanceQueues_p {
         prop.put("pool_2_numActive", ConnectionInfo.getServerCount());
 
         prop.put("pool", "3");
+        
+        /* Connection pools settings */
+		prop.put(SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL,
+				sb.getConfigInt(SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL,
+						SwitchboardConstants.HTTP_OUTGOING_POOL_GENERAL_MAX_TOTAL_DEFAULT));
+		prop.put(SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL,
+				sb.getConfigInt(SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL,
+						SwitchboardConstants.HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT));
+		/* Connection pools stats */
+		PoolStats stats = HTTPClient.CONNECTION_MANAGER.getTotalStats();
+		prop.put("pool.general.leased", stats.getLeased());
+		prop.put("pool.general.available", stats.getAvailable());
+		prop.put("pool.general.pending", stats.getPending());
+		
+		stats = RemoteInstance.CONNECTION_MANAGER.getTotalStats();
+		prop.put("pool.remoteSolr.leased", stats.getLeased());
+		prop.put("pool.remoteSolr.available", stats.getAvailable());
+		prop.put("pool.remoteSolr.pending", stats.getPending());
         
         /* Remote searches max loads settings */
 		prop.put("remoteSearchRWIMaxLoad", sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI,

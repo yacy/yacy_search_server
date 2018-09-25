@@ -36,7 +36,11 @@
             <input type="radio" name="access" id="access_localhost" value="localhost"#(localhost.checked)#:: checked="checked"#(/localhost.checked)# />
             <label for="access_localhost">Access from localhost without account</label>
             </legend>
-            Access to your peer from your own computer (localhost access) is granted. No need to configure an administration account.
+            Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.
+            	<div class="alert alert-warning" role="alert">
+					This setting is convenient but less secure than using a qualified admin account. 
+					Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.
+				</div>
             </fieldset>
             
             <fieldset>
@@ -44,7 +48,7 @@
             <input type="radio" name="access" id="access_account" value="account"#(account.checked)#:: checked="checked"#(/account.checked)# />
             <label for="access_account">Access only with qualified account</label>
             </legend>
-            You need this only if you want a remote access to your peer.
+            This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.
             <dl class="userConfig">
               <dt><label for="adminuser">Peer User:</label></dt>
               <dd><input type="text" name="adminuser" id="adminuser" value="#[defaultUser]#" size="16" maxlength="32" onFocus="document.getElementById('access_account').checked = true;"/></dd>

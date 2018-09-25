@@ -27,15 +27,13 @@ package net.yacy.http;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.security.KeyStore;
 import java.util.StringTokenizer;
+
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.http.servlets.YaCyDefaultServlet;
-import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
-import net.yacy.utils.PKCS12Tool;
+
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
@@ -49,11 +47,18 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.DefaultHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.IPAccessHandler;
+import org.eclipse.jetty.server.handler.InetAccessHandler;
+import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
+
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.http.servlets.YaCyDefaultServlet;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.utils.PKCS12Tool;
 
 /**
  * class to embedded Jetty 9 http server into YaCy
@@ -138,6 +143,19 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         sholder.setAsyncSupported(true); // needed for YaCyQoSFilter
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         htrootContext.addServlet(sholder, "/*");
+        
+        /* Handle gzip compression of responses to user agents accepting it */
+		final GzipHandler gzipHandler;
+		if (sb.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
+				SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT)) {
+			gzipHandler = new GzipHandler();
+			/*
+			 * Ensure decompression of requests body is disabled : it is already handled by
+			 * the GZIPRequestWrapper in the YaCyDefaultServlet
+			 */
+			gzipHandler.setInflateBufferSize(0);
+			htrootContext.setGzipHandler(gzipHandler);
+		}
 
         // -----------------------------------------------------------------------------
         // here we set and map the mandatory servlets, needed for typical YaCy operation
@@ -196,33 +214,44 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
         // wrap all handlers
         Handler crashHandler = new CrashProtectionHandler(server, allrequesthandlers);
-        // check server access restriction and add IPAccessHandler if restrictions are needed
+        // check server access restriction and add InetAccessHandler if restrictions are needed
         // otherwise don't (to save performance)
-        String white = sb.getConfig("serverClient", "*");
-        if (!white.equals("*")) { // full ip (allowed ranges 0-255 or prefix  10.0-255,0,0-100  or 127.)
+        final String white = sb.getConfig("serverClient", "*");
+        if (!white.equals("*")) { // full ip (allowed ranges 0-255 or prefix  10.0-255,0,0-100  or CIDR notation 192.168.1.0/24)
             final StringTokenizer st = new StringTokenizer(white, ",");
-            IPAccessHandler iphandler = new IPAccessHandler();
-            int i=0;
+            final InetAccessHandler whiteListHandler;
+			if (white.contains("|")) {
+				/*
+				 * At least one pattern includes a path definition : we must use the
+				 * InetPathAccessHandler as InetAccessHandler doesn't support path patterns
+				 */
+				whiteListHandler = new InetPathAccessHandler();
+			} else {
+				whiteListHandler = new InetAccessHandler();
+			}
+            int i = 0;
             while (st.hasMoreTokens()) {
-                String ip = st.nextToken();
+                final String pattern = st.nextToken();
                 try {
-                    iphandler.addWhite(ip); // accepts only ipv4
-                } catch (IllegalArgumentException nex) { // catch number format exception on non ipv4 input
+                	whiteListHandler.include(pattern);
+                } catch (final IllegalArgumentException nex) { // catch format exception on wrong ip address pattern
                     ConcurrentLog.severe("SERVER", "Server Access Settings - IP filter: " + nex.getMessage());
                     continue;
                 }
                 i++;
             }          
             if (i > 0) {
-                iphandler.addWhite("127.0.0.1"); // allow localhost (loopback addr)
-                iphandler.setHandler(crashHandler);
-                server.setHandler(iphandler);
-                ConcurrentLog.info("SERVER","activated IP access restriction to: [127.0.0.1," + white +"] (this works only correct with start parameter -Djava.net.preferIPv4Stack=true)");
+            	final String loopbackAddress = InetAddress.getLoopbackAddress().getHostAddress();
+            	whiteListHandler.include(loopbackAddress);
+                whiteListHandler.setHandler(crashHandler);
+                this.server.setHandler(whiteListHandler);
+                
+                ConcurrentLog.info("SERVER","activated IP access restriction to: [" + loopbackAddress + "," + white +"]");
             } else {
-                server.setHandler(crashHandler); // iphandler not needed
+                server.setHandler(crashHandler); // InetAccessHandler not needed
             }
         } else {
-            server.setHandler(crashHandler); // iphandler not needed
+            server.setHandler(crashHandler); // InetAccessHandler not needed
         }        
     }
 
@@ -283,11 +312,10 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
     @Override
     public void reconnect(final int milsec) {
 
-        new Thread() {
+        new Thread("Jetty8HttpServer.reconnect") {
 
             @Override
             public void run() {
-                this.setName("Jetty8HttpServer.reconnect");
                 try {
                     Thread.sleep(milsec);
                 } catch (final InterruptedException e) {

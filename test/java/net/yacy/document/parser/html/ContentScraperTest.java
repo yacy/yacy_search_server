@@ -29,7 +29,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -145,8 +149,8 @@ public class ContentScraperTest {
                 + "<time datetime='2016-12-23'>23. Dezember 2016</time>" // html5 time tag
                 + "</body></html>";
 
-        ContentScraper scraper = new ContentScraper(root, 10, new VocabularyScraper(), 0);
-        final Writer writer = new TransformerWriter(null, null, scraper, null, false);
+        ContentScraper scraper = new ContentScraper(root, 10, new HashSet<String>(), new VocabularyScraper(), 0);
+        final Writer writer = new TransformerWriter(null, null, scraper, false);
 
         FileUtils.copy(new StringReader(page), writer);
         writer.close();
@@ -336,6 +340,81 @@ public class ContentScraperTest {
     	Assert.assertEquals("{abc}", ContentScraper.removeUnpairedBrackets("{abc}", '{', '}'));
     	Assert.assertEquals("{abc}{def}", ContentScraper.removeUnpairedBrackets("{abc}{def}", '{', '}'));
     	Assert.assertEquals("{{abc}{def}}", ContentScraper.removeUnpairedBrackets("{{abc}{def}}", '{', '}'));
+    }
+    
+    /**
+     * Test microdata itemtype attribute parsing
+     * @throws IOException 
+     */
+    @Test
+    public void testParseMicroDataItemType() throws IOException {
+    	final String htmlHeader = "<!DOCTYPE html><head><title>Test document</title></head>";
+        final DigestURL docUrl = new DigestURL("http://example.org/microdata.html");
+        
+        
+        final Map<String, String[]> html2Results = new HashMap<>();
+        /* Basic microdata syntax example with no item type */
+    	String html = htmlHeader + "<div itemscope><p>My name is <span itemprop=\"name\">Elizabeth</span>.</p></div>";
+    	String[] expectedUrls = {};
+    	html2Results.put(html, expectedUrls);
+    	
+    	/* Nested items with no item type */
+    	html = "<div itemscope>\n" + 
+    	" <p>Name: <span itemprop=\"name\">Amanda</span></p>\n" + 
+    	" <p>Band: <span itemprop=\"band\" itemscope> <span itemprop=\"name\">Jazz Band</span> (<span itemprop=\"size\">12</span> players)</span></p>\n" + 
+    	"</div>";
+    	expectedUrls = new String[0];
+    	html2Results.put(html, expectedUrls);
+    	
+    	/* One typed item */
+    	html = htmlHeader + "<div itemscope itemtype=\"https://schema.org/LocalBusiness\"><img itemprop=\"logo\" src=\"our-logo.png\" alt=\"Our Company\"></div>";
+    	expectedUrls = new String[]{"https://schema.org/LocalBusiness"};
+    	html2Results.put(html, expectedUrls);
+    	
+    	/* more than one type per item */
+    	html = htmlHeader + "<dl itemscope itemtype=\"https://md.example.com/loco https://md.example.com/lighting\">" + 
+    	" <dt>Name:\n" + 
+    	" <dd itemprop=\"name\">Tank Locomotive (DB 80)\n" + 
+    	" <dt>Product code:\n" + 
+    	" <dd itemprop=\"product-code\">33041\n" + 
+    	" <dt>Scale:\n" + 
+    	" <dd itemprop=\"scale\">HO\n" + 
+    	" <dt>Digital:\n" + 
+    	" <dd itemprop=\"digital\">Delta\n" + 
+    	"</dl>";
+    	expectedUrls = new String[]{"https://md.example.com/loco", "https://md.example.com/lighting"};
+    	html2Results.put(html, expectedUrls);
+    	
+    	/* Nested typed items */
+    	html = htmlHeader + "<div itemscope itemtype=\"http://schema.org/Product\">\n" + 
+    	" <span itemprop=\"name\">Panasonic White 60L Refrigerator</span>\n" + 
+    	" <img src=\"panasonic-fridge-60l-white.jpg\" alt=\"\">\n" + 
+    	"  <div itemprop=\"aggregateRating\"\n" + 
+    	"       itemscope itemtype=\"http://schema.org/AggregateRating\">\n" + 
+    	"   <meter itemprop=\"ratingValue\" min=0 value=3.5 max=5>Rated 3.5/5</meter>\n" + 
+    	"   (based on <span itemprop=\"reviewCount\">11</span> customer reviews)\n" + 
+    	"  </div>\n" + 
+    	"</div>";
+    	expectedUrls = new String[]{"http://schema.org/Product", "http://schema.org/AggregateRating"};
+    	html2Results.put(html, expectedUrls);
+  
+
+		for (final Entry<String, String[]> html2Result : html2Results.entrySet()) {
+			ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), new VocabularyScraper(), 0);
+			try (final Writer writer = new TransformerWriter(null, null, scraper, false)) {
+				FileUtils.copy(new StringReader(html2Result.getKey()), writer);
+
+				final Set<DigestURL> expected = new HashSet<>();
+				for (final String url : html2Result.getValue()) {
+					expected.add(new DigestURL(url));
+				}
+
+				Assert.assertEquals(expected.size(), scraper.getLinkedDataTypes().size());
+				Assert.assertTrue(expected.containsAll(scraper.getLinkedDataTypes()));
+			} finally {
+				scraper.close();
+			}
+		}
     }
 
 }

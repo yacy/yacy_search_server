@@ -33,6 +33,7 @@ import java.util.Set;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
+import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MapTools;
@@ -45,12 +46,16 @@ public class ConfigNetwork_p
 {
 
     public static serverObjects respond(
-        @SuppressWarnings("unused") final RequestHeader header,
+        final RequestHeader header,
         final serverObjects post,
         final serverSwitch env) throws FileNotFoundException, IOException {
 
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
+        
+        /* Acquire a transaction token for the next POST form submission */
+        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        
         int commit = 0;
 
         // load all options for network definitions
@@ -68,6 +73,9 @@ public class ConfigNetwork_p
                 "network settings");
 
             if ( post.containsKey("changeNetwork") ) {
+            	/* Settings will be modified : check this is a valid transaction using HTTP POST method */
+            	TransactionManager.checkPostTransaction(header, post);
+            	
                 String networkDefinition = post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");
                 final String networkDefinitionURL = post.get("networkDefinitionURL", "");
                 if ( !networkDefinitionURL.equals("")) {
@@ -83,8 +91,30 @@ public class ConfigNetwork_p
                     sb.switchNetwork(networkDefinition);
                 }
             }
+            
+			if (post.containsKey("setEncryption")) {
+				/*
+				 * Settings will be modified : check this is a valid transaction using HTTP POST
+				 * method
+				 */
+				TransactionManager.checkPostTransaction(header, post);
+
+				final boolean httpsPreferred = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+						SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+				final boolean newHttpsPreferred = post
+						.getBoolean(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED);
+				if (httpsPreferred == newHttpsPreferred) {
+					// no change
+					commit = 3;
+				} else {
+					commit = 1;
+					sb.setConfig(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED, newHttpsPreferred);
+				}
+			}
 
             if ( post.containsKey("save") ) {
+            	/* Settings will be modified : check this is a valid transaction using HTTP POST method */
+            	TransactionManager.checkPostTransaction(header, post);
 
                 // DHT control
                 boolean indexDistribute = "on".equals(post.get("indexDistribute", ""));
@@ -201,6 +231,11 @@ public class ConfigNetwork_p
             prop.put("networks_" + c++ + "_network", s);
         }
         prop.put("networks", c);
+        
+        // set encryption setting
+		prop.put(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+				sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+						SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT));
 
         return prop;
     }

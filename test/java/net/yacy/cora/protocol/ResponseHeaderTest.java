@@ -1,8 +1,10 @@
 package net.yacy.cora.protocol;
 
+import static org.junit.Assert.assertTrue;
+
 import java.util.Date;
+
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class ResponseHeaderTest {
 
@@ -30,17 +32,17 @@ public class ResponseHeaderTest {
         testhdr2.date();
         testhdr3.lastModified();
 
-        assertEquals("access-sequence 1 date=null lastmod=null AGE="+age1, 0, age1);
+        assertTrue("access-sequence 1 date=null lastmod=null AGE="+age1, age1 >= 0);
 
         testhdr2.lastModified();
 
         long age2 = testhdr2.age();
-        assertEquals("access-sequence 2 date=null lastmod=null AGE="+age2, 0, age2);
+        assertTrue("access-sequence 2 date=null lastmod=null AGE="+age2, age2 >= 0);
 
         testhdr3.date();
 
         long age3 = testhdr3.age();
-        assertEquals("access-sequence 3 date=null lastmod=null AGE="+age3, 0, age3);
+        assertTrue("access-sequence 3 date=null lastmod=null AGE="+age3, age3 >= 0);
 
         Date past = new Date(System.currentTimeMillis() / 2);
         Date future = new Date(System.currentTimeMillis() * 2);

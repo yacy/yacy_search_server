@@ -244,7 +244,18 @@ public class AutoSearch extends AbstractBusyThread {
      * @param seed the peer to ask
      */
     private void processSingleTarget(Seed seed) {
-        ConcurrentLog.fine(AutoSearch.class.getName(), "ask " + seed.getIP() + " " + seed.getName() + " for query=" + currentQuery);
+    	final Set<String> ips = seed.getIPs();
+    	if(ips.isEmpty()) {
+    		ConcurrentLog.warn(AutoSearch.class.getName(), "no known IP address for peer " + seed.getName());
+    		return;
+    	}
+    	final String ip = ips.iterator().next();
+        ConcurrentLog.fine(AutoSearch.class.getName(), "ask " + ip + " " + seed.getName() + " for query=" + currentQuery);
+        
+		final boolean preferHttps = this.sb.getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+				SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT);
+        
+        final String targetBaseURL = seed.getPublicURL(ip, preferHttps);
 
         if (seed.getFlagSolrAvailable()) { // do a solr query
             SolrDocumentList docList = null;
@@ -255,7 +266,11 @@ public class AutoSearch extends AbstractBusyThread {
             solrQuery.set(CommonParams.ROWS, sb.getConfig(SwitchboardConstants.REMOTESEARCH_MAXCOUNT_USER, "20"));
             this.setName("Protocol.solrQuery(" + solrQuery.getQuery() + " to " + seed.hash + ")");
             try {
-                RemoteInstance instance = new RemoteInstance("http://" + seed.getPublicAddress(seed.getIP()) + "/solr/", null, null, 10000); // this is a 'patch configuration' which considers 'solr' as default collection
+				final boolean trustSelfSignedOnAuthenticatedServer = this.sb.getConfigBool(
+						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
+						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT);
+        		
+                RemoteInstance instance = new RemoteInstance(targetBaseURL + "/solr/", null, null, 10000, trustSelfSignedOnAuthenticatedServer, Long.MAX_VALUE, false); // this is a 'patch configuration' which considers 'solr' as default collection
                 try {
 					SolrConnector solrConnector = new RemoteSolrConnector(instance,
 							sb.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
@@ -284,7 +299,7 @@ public class AutoSearch extends AbstractBusyThread {
             } catch (Throwable eee) {
             }
         } else { // do a yacysearch.rss query
-            final String rssSearchServiceURL = "http://" + seed.getPublicAddress(seed.getIP()) + "/yacysearch.rss";
+            final String rssSearchServiceURL = targetBaseURL + "/yacysearch.rss";
             try {
                 RSSFeed feed = loadSRURSS(
                         rssSearchServiceURL,

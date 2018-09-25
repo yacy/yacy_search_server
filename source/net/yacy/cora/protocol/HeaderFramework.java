@@ -26,6 +26,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -230,10 +234,33 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
     private static final String PATTERN_RFC1123 = "EEE, dd MMM yyyy HH:mm:ss Z"; // with numeric time zone indicator as defined in RFC5322
     private static final String PATTERN_RFC1036 = "EEEE, dd-MMM-yy HH:mm:ss zzz";
-    public  static final SimpleDateFormat FORMAT_RFC1123 = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
-    public  static final SimpleDateFormat FORMAT_RFC1036 = new SimpleDateFormat(PATTERN_RFC1036, Locale.US);
+    private static final SimpleDateFormat FORMAT_RFC1123 = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
     private static final TimeZone TZ_GMT = TimeZone.getTimeZone("GMT");
     private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
+    
+	/**
+	 * A thread-safe date formatter using the
+	 * {@link HeaderFramework#PATTERN_RFC1123} pattern with the US locale on the UTC
+	 * time zone.
+	 */
+	public static final DateTimeFormatter RFC1123_FORMATTER = DateTimeFormatter
+			.ofPattern(PATTERN_RFC1123.replace("yyyy", "uuuu")).withLocale(Locale.US).withZone(ZoneOffset.UTC);
+    
+	/**
+	 * @return a new SimpleDateFormat instance using the
+	 *         {@link HeaderFramework#PATTERN_RFC1123} pattern with the US locale.
+	 */
+	public static SimpleDateFormat newRfc1123Format() {
+		return new SimpleDateFormat(HeaderFramework.PATTERN_RFC1123, Locale.US);
+	}
+
+	/**
+	 * @return a new SimpleDateFormat instance using the
+	 *         {@link HeaderFramework#PATTERN_RFC1036} pattern with the US locale.
+	 */
+	public static SimpleDateFormat newRfc1036Format() {
+		return new SimpleDateFormat(HeaderFramework.PATTERN_RFC1036, Locale.US);
+	}
 
     /**
      * RFC 2616 requires that HTTP clients are able to parse all 3 different
@@ -241,11 +268,11 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
      */
     private static final SimpleDateFormat[] FORMATS_HTTP = new SimpleDateFormat[] {
             // RFC 1123/822 (Standard) "Mon, 12 Nov 2007 10:11:12 GMT"
-            FORMAT_RFC1123,
+    		newRfc1123Format(),
             // RFC 1036/850 (old)      "Monday, 12-Nov-07 10:11:12 GMT"
-            FORMAT_RFC1036,
+    		newRfc1036Format(),
             // ANSI C asctime()        "Mon Nov 12 10:11:12 2007"
-            GenericFormatter.FORMAT_ANSIC,
+            GenericFormatter.newAnsicFormat(),
     };
 
 
@@ -265,6 +292,34 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             return s;
         }
     }
+    
+	/**
+	 * @param epochMilli
+	 *            a time value as the number of milliseconds from Epoch
+	 *            (1970-01-01T00:00:00Z)
+	 * @return the time formatted using the {@link HeaderFramework#PATTERN_RFC1123}
+	 *         pattern.
+	 */
+	public static final String formatRFC1123(final long epochMilli) {
+		try {
+			/* Prefer first using the thread-safe DateTimeFormatter shared instance */
+			return RFC1123_FORMATTER.format(Instant.ofEpochMilli(epochMilli));
+		} catch (final DateTimeException e) {
+			/*
+			 * This should not happen, but rather than failing we prefer here to use
+			 * formatting function using the synchronized SimpleDateFormat
+			 */
+			return formatRFC1123(new Date(epochMilli));
+		}
+	}
+	
+	/**
+	 * @return the current time formatted using the
+	 *         {@link HeaderFramework#PATTERN_RFC1123} pattern.
+	 */
+	public static final String formatNowRFC1123() {
+		return formatRFC1123(System.currentTimeMillis());
+	}
 
     /** Initialization of static formats */
     static {
@@ -277,6 +332,9 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             format.setTimeZone(TZ_GMT);
             format.set2DigitYearStart(CAL_GMT.getTime());
         }
+        
+        FORMAT_RFC1123.setTimeZone(TZ_GMT);
+        FORMAT_RFC1123.set2DigitYearStart(CAL_GMT.getTime());
     }
 
     /**

@@ -48,10 +48,9 @@ public class SecondarySearchSuperviser extends Thread {
             return;
         }
         // extend the abstracts in the cache: join the single abstracts
-        new Thread() {
+        new Thread("SecondarySearch.addAbstract:" + wordhash) {
             @Override
             public void run() {
-                Thread.currentThread().setName("SecondarySearch.addAbstract:" + wordhash);
                 for ( final Map.Entry<String, Set<String>> oneref : singleAbstract.entrySet() ) {
                     final String urlhash = oneref.getKey();
                     final Set<String> peerlistNew = oneref.getValue();

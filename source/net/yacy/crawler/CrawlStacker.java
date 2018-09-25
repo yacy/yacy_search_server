@@ -55,16 +55,20 @@ import net.yacy.crawler.retrieval.Request;
 import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.document.TextParser;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.kelondro.workflow.WorkflowTask;
 import net.yacy.peers.SeedDB;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.repository.FilterEngine;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 
-public final class CrawlStacker {
+public final class CrawlStacker implements WorkflowTask<Request>{
     
     public static String ERROR_NO_MATCH_MUST_MATCH_FILTER = "url does not match must-match filter ";
     public static String ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER = "url matches must-not-match filter ";
+    
+    /** Crawl reject reason prefix having specific processing */
+    public static final String CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX = "double in";
     
     private final static ConcurrentLog log = new ConcurrentLog("STACKCRAWL");
     
@@ -96,7 +100,7 @@ public final class CrawlStacker {
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
         this.domainList = domainList;
-        this.requestQueue = new WorkflowProcessor<Request>("CrawlStacker", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, WorkflowProcessor.availableCPU);
+        this.requestQueue = new WorkflowProcessor<Request>("CrawlStacker", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, 10000, null, WorkflowProcessor.availableCPU);
         CrawlStacker.log.info("STACKCRAWL thread initialized.");
     }
 
@@ -127,7 +131,8 @@ public final class CrawlStacker {
         clear();
     }
 
-    public Request job(final Request entry) {
+    @Override
+    public Request process(final Request entry) {
         // this is the method that is called by the busy thread from outside
         if (entry == null) return null;
         
@@ -135,7 +140,7 @@ public final class CrawlStacker {
             final String rejectReason = stackCrawl(entry);
 
             // if the url was rejected we store it into the error URL db
-            if (rejectReason != null && !rejectReason.startsWith("double in")) {
+            if (rejectReason != null && !rejectReason.startsWith(CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX)) {
                 final CrawlProfile profile = this.crawler.get(UTF8.getBytes(entry.profileHandle()));
                 this.nextQueue.errorURL.push(entry.url(), entry.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT, rejectReason, -1);
             }
@@ -266,10 +271,9 @@ public final class CrawlStacker {
         final String host = ftpURL.getHost();
         final int port = ftpURL.getPort();
         final int pathParts = ftpURL.getPaths().length;
-        new Thread() {
+        new Thread("enqueueEntriesFTP") {
             @Override
             public void run() {
-                Thread.currentThread().setName("enqueueEntriesFTP");
                 BlockingQueue<FTPClient.entryInfo> queue;
                 try {
                     queue = FTPClient.sitelist(host, port, user, pw, ftpURL.getPath(), profile.depth());
@@ -411,7 +415,7 @@ public final class CrawlStacker {
         // check if the url is double registered
         final HarvestProcess dbocc = this.nextQueue.exists(url.hash()); // returns the name of the queue if entry exists
         if (dbocc != null) {
-            return "double in: " + dbocc.name();
+            return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": " + dbocc.name();
         }
         String urlhash = ASCII.String(url.hash());
         LoadTimeURL oldEntry = null;
@@ -452,7 +456,9 @@ public final class CrawlStacker {
                 CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
                     ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
         } else {
-            return "double in: local index, oldDate = " + ISO8601Formatter.FORMATTER.format(new Date(oldDate));
+			return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": local index, recrawl rejected. Document date = "
+					+ ISO8601Formatter.FORMATTER.format(new Date(oldDate)) + " is not older than crawl profile recrawl minimum date = "
+					+ ISO8601Formatter.FORMATTER.format(new Date(profile.recrawlIfOlder()));
         }
 
         return null;
@@ -490,8 +496,11 @@ public final class CrawlStacker {
 
         // filter with must-match for URLs
         if ((depth > 0) && !profile.urlMustMatchPattern().matcher(urlstring).matches()) {
-            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urlstring + "' does not match must-match crawling filter '" + profile.urlMustMatchPattern().toString() + "'.");
-            return ERROR_NO_MATCH_MUST_MATCH_FILTER + profile.urlMustMatchPattern().toString();
+        	final String patternStr = profile.formattedUrlMustMatchPattern();
+            if (CrawlStacker.log.isFine()) {
+            	CrawlStacker.log.fine("URL '" + urlstring + "' does not match must-match crawling filter '" + patternStr + "'.");
+            }
+            return ERROR_NO_MATCH_MUST_MATCH_FILTER + patternStr;
         }
 
         // filter with must-not-match for URLs

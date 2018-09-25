@@ -26,6 +26,6 @@
   <Query role="example" searchTerms="yacy+free+software" />
   <Tags>YaCy Free Software Open Source P2P Peer-to-Peer Uncensored Distributed Web Search Engine</Tags>
   <Contact>See #[thisContext]#/ViewProfile.html?hash=localhash</Contact>
-  <Attribution>http://yacy.net YaCy Software &amp;copy; 2004-2014 by Michael Christen et al., YaCy.net; Content: ask peer owner</Attribution>
+  <Attribution>https://yacy.net YaCy Software &amp;copy; 2004-2018 by Michael Christen et al., YaCy.net; Content: ask peer owner</Attribution>
   <SyndicationRight>open</SyndicationRight>
 </OpenSearchDescription>

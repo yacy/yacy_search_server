@@ -15,7 +15,7 @@
 ## "global classes"                          ##
 # i.e. ".strong"; ".left"; ".error";
 ###############################################
-## "privat classes"                          ##
+## "private classes"                          ##
 # all HTML-elements with a specific class
 # i.e. "div.content"; "span.left";
 # and
@@ -423,6 +423,22 @@ p.tags {
   line-height: 1.4;
 }
 
+/* Button to expand/collapse tags beyond the initial number of tags display limit */
+.expandKeywordsBtn {
+	margin-top: 0.2em;
+}
+
+.expandKeywordsBtn[aria-expanded="true"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-left class */
+	content: "\e079\e079";
+}
+
+.expandKeywordsBtn[aria-expanded="false"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-right class */
+	content: "\e080\e080";
+}
+
+
 div.bookmark p {
   margin:1px;
 }
@@ -589,6 +605,12 @@ a.thumblink {
   line-height: 128px;
   text-align: center;
   overflow: hidden;
+}
+
+/* Link in a table header that triggers server-side table sorting */
+a.sortTableLink, a.sortTableLink:link, a.sortTableLink:visited, a.sortTableLink:hover {
+	text-decoration: none; 
+	color: white;
 }
 
 /*----------
@@ -1111,6 +1133,24 @@ div#tagcloud {
 }
 
 /******* yacysearchtrailer.html end ***********/
+
+/******* yacysearchitem.html **********/
+
+/* Mark audio element with media playing error */
+.audioError {
+	border-style: solid;
+	border-color: orange;
+}
+
+/******* yacysearchitem.html end ***********/ 
+
+/******* Vocabulary_p.html **********/
+
+#Vocabulary_p label {
+	font-weight: bold;
+}
+
+/******* Vocabulary_p.html end ***********/ 
 
 /************* header.template ****************/
 /* Specific styles for the header template */

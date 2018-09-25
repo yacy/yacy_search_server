@@ -177,10 +177,9 @@ public class PhpBB3Dao implements Dao {
     private BlockingQueue<DCEntry> toQueue(final StringBuilder sql, int queueSize) {
         // execute the query and push entries to a queue concurrently
         final BlockingQueue<DCEntry> queue = new ArrayBlockingQueue<DCEntry>(queueSize);
-        Thread dbreader = new Thread() {
+        Thread dbreader = new Thread("PhpBB3Dao.toQueue") {
             @Override
             public void run() {
-                Thread.currentThread().setName("PhpBB3Dao.toQueue");
                 Statement stmt = null;
                 ResultSet rs = null;
                 try {

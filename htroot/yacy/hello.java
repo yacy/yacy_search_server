@@ -29,10 +29,12 @@
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
@@ -43,6 +45,7 @@ import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -153,11 +156,14 @@ public final class hello {
         }
         final int connectedBefore = sb.peers.sizeConnected();
         //ConcurrentLog.info("**hello-DEBUG**", "peer " + remoteSeed.getName() + " challenged us with IPs " + reportedips);
+    	final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+				SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+    	final int totalTimeout = preferHttps ? 13000 : 6500;
         int callbackRemain = Math.min(5, reportedips.size());
-        long callbackStart = System.currentTimeMillis();
-        if (callbackRemain > 0 && reportedips.size() > 0) { 
+        final long callbackStart = System.currentTimeMillis();
+        if (callbackRemain > 0 && reportedips.size() > 0) {
             for (String reportedip: reportedips) {
-                int partialtimeout = ((int) (callbackStart + 6500 - System.currentTimeMillis())) / callbackRemain; // bad hack until a concurrent version is implemented
+                int partialtimeout = ((int) (callbackStart + totalTimeout - System.currentTimeMillis())) / callbackRemain; // bad hack until a concurrent version is implemented
                 if (partialtimeout <= 0) break;
                 //ConcurrentLog.info("**hello-DEBUG**", "reportedip = " + reportedip + " is handled");
                 if (Seed.isProperIP(reportedip)) {
@@ -165,11 +171,24 @@ public final class hello {
                     prop.put("yourip", reportedip);
                     remoteSeed.setIP(reportedip);
                     time = System.currentTimeMillis();
-                    callback = Protocol.queryRWICount(remoteSeed.getPublicAddress(reportedip), remoteSeed.hash, partialtimeout);
+                    try {
+                    	MultiProtocolURL remoteBaseURL = remoteSeed.getPublicMultiprotocolURL(reportedip, preferHttps);
+                    	callback = Protocol.queryRWICount(remoteBaseURL, remoteSeed, partialtimeout);
+                        if (callback[0] < 0 && remoteBaseURL.isHTTPS()) { 
+                        	/* Failed using https : retry using http */
+                        	remoteBaseURL = remoteSeed.getPublicMultiprotocolURL(reportedip, false);
+        					callback = Protocol.queryRWICount(remoteBaseURL, remoteSeed, partialtimeout);
+                        }
+                    } catch(final MalformedURLException e) {
+                    	callback = new long[] {-1, -1};
+                    }
                     //ConcurrentLog.info("**hello-DEBUG**", "reportedip = " + reportedip + " returns callback " + (callback == null ? "NULL" : callback[0]));
                     time_backping = System.currentTimeMillis() - time;
                     backping_method = "reportedip=" + reportedip;
-                    if (callback[0] >= 0) { success = true; break; }
+                    if (callback[0] >= 0) { 
+                    	success = true; 
+                    	break; 
+                    }
                     if (--callbackRemain <= 0) break; // no more tries left / restrict to a limited number of ips
                 }
             }

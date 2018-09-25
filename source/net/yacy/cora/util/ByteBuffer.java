@@ -23,6 +23,7 @@ package net.yacy.cora.util;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -221,10 +222,20 @@ public final class ByteBuffer extends OutputStream {
         return sb;
     }
 
-    public static boolean equals(final byte[] buffer, final byte[] pattern) {
-        // compares two byte arrays: true, if pattern appears completely at offset position
-        if (buffer.length < pattern.length) return false;
-        for (int i = 0; i < pattern.length; i++) if (buffer[i] != pattern[i]) return false;
+    /**
+     * @param buffer the buffer to test. Must not be null.
+     * @param pattern a pattern to check for presence at the beginning of the buffer. Must not be null.
+     * @return true when the buffer starts with the given pattern
+     */
+    public static boolean startsWith(final byte[] buffer, final byte[] pattern) {
+        if (buffer.length < pattern.length) {
+        	return false;
+        }
+        for (int i = 0; i < pattern.length; i++) {
+        	if (buffer[i] != pattern[i]) {
+        		return false;
+        	}
+        }
         return true;
     }
 
@@ -241,7 +252,7 @@ public final class ByteBuffer extends OutputStream {
 
     public static boolean contains(final Collection<byte[]> collection, final byte[] key) {
         for (final byte[] v: collection) {
-            if (equals(v, key)) return true;
+            if (Arrays.equals(v, key)) return true;
         }
         return false;
     }
@@ -252,7 +263,7 @@ public final class ByteBuffer extends OutputStream {
         int c = 0;
         while (i.hasNext()) {
             v = i.next();
-            if (equals(v, key)) {
+            if (Arrays.equals(v, key)) {
                 i.remove();
                 c++;
             }

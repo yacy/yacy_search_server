@@ -32,6 +32,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.RequestHeader;
 
 import org.eclipse.jetty.io.Connection;
 import org.eclipse.jetty.server.Request;
@@ -58,7 +59,7 @@ public class MonitorHandler extends AbstractHandler {
 		final Connection connection = baseRequest.getHttpChannel().getEndPoint().getConnection();
 		final ConnectionInfo info = new ConnectionInfo(
 				baseRequest.getScheme(),
-				baseRequest.getRemoteAddr() + ":" + baseRequest.getRemotePort(),
+				RequestHeader.client(baseRequest) + ":" + baseRequest.getRemotePort(),
 				baseRequest.getMethod() + " " + baseRequest.getHttpURI().getPathQuery(),
 				connection.hashCode(),
 				baseRequest.getTimeStamp(),

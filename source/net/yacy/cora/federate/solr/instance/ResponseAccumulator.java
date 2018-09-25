@@ -49,13 +49,17 @@ public class ResponseAccumulator {
     
     public void addResponse(NamedList<Object> response) {
         // set the header; this is mostly always the same (well this is not evaluated much)
-        @SuppressWarnings("unchecked")
-        SimpleOrderedMap<Object> header = (SimpleOrderedMap<Object>) response.get("responseHeader");
-        //Integer status = (Integer) header.get("status");
-        //Integer QTime = (Integer) header.get("QTime");
-        //SimpleOrderedMap<Object> params = (SimpleOrderedMap<Object>) header.get("params");
-        if (headerAcc.size() == 0) {
-            for (Map.Entry<String, Object> e: header) headerAcc.add(e.getKey(), e.getValue());
+        final Object headerObj = response.get("responseHeader");
+        if(headerObj instanceof SimpleOrderedMap) {
+        	//Integer status = (Integer) header.get("status");
+        	//Integer QTime = (Integer) header.get("QTime");
+        	//SimpleOrderedMap<Object> params = (SimpleOrderedMap<Object>) header.get("params");
+        	final SimpleOrderedMap<?> header = (SimpleOrderedMap<?>) headerObj;
+        	if (headerAcc.size() == 0) {
+        		for (final Map.Entry<String, ?> e: header) {
+        			headerAcc.add(e.getKey(), e.getValue());
+        		}
+        	}
         }
         
         // accumulate the results

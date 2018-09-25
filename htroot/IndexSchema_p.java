@@ -26,6 +26,7 @@ import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.TransactionManager;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
@@ -39,7 +40,7 @@ public class IndexSchema_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
-
+        
         String schemaName = CollectionSchema.CORE_NAME;
         if (post != null) schemaName = post.get("core", schemaName); 
         SchemaConfiguration cs = schemaName.equals(CollectionSchema.CORE_NAME) ? sb.index.fulltext().getDefaultConfiguration() : sb.index.fulltext().getWebgraphConfiguration();
@@ -100,6 +101,10 @@ public class IndexSchema_p {
                 ConcurrentLog.warn("IndexSchema", "file " + solrInitFile.getAbsolutePath() + " not found");
             }
         }
+        
+		/* Acquire a transaction token for the next possible POST IndexReIndeMonitor_p form submission */
+		prop.put("IndexReIndex_" + TransactionManager.TRANSACTION_TOKEN_PARAM,
+				TransactionManager.getTransactionToken(header, "/IndexReIndexMonitor_p.html"));
         
         int c = 0;
         boolean dark = false;

@@ -139,11 +139,11 @@ public class FileCrawlStarterTask extends Thread {
 		 * This is the listener which makes possible the push of links to the
 		 * crawl stacker without waiting the complete end of content scraping
 		 */
-		CrawlStarterFromSraper anchorListener = new CrawlStarterFromSraper(this.crawlStacker, this.initiatorHash,
+		CrawlStarterFromScraper anchorListener = new CrawlStarterFromScraper(this.crawlStacker, this.initiatorHash,
 				this.profile, true);
 		this.scraper.registerHtmlFilterEventListener(anchorListener);
 
-		final Writer writer = new TransformerWriter(null, null, this.scraper, null, false);
+		final Writer writer = new TransformerWriter(null, null, this.scraper, false);
 		FileInputStream inStream = null;
 
 		try {

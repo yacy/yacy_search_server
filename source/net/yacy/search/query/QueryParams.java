@@ -44,8 +44,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.util.automaton.Automata;
 import org.apache.lucene.util.automaton.Automaton;
+import org.apache.lucene.util.automaton.RegExp;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.SortClause;
 import org.apache.solr.common.params.DisMaxParams;
@@ -55,6 +57,7 @@ import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.AnchorURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
@@ -112,20 +115,58 @@ public final class QueryParams {
         //missing: namespace
     }
     
+    /** List of Solr fields used to extract text snippets when requesting the Solr index */
+    private final static CollectionSchema[] SOLR_SNIPPET_FIELDS = new CollectionSchema[]{CollectionSchema.description_txt, CollectionSchema.h4_txt, CollectionSchema.h3_txt, CollectionSchema.h2_txt, CollectionSchema.h1_txt, CollectionSchema.text_t};
+    
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Pattern catchall_pattern = Pattern.compile(".*");
 
     private final QueryGoal queryGoal;
     public int itemsPerPage;
     public int offset;
+    
+    /** The URL mask pattern compiled from the urlMasString. 
+     * Null when the urlMaskString is not user provided but generated from the query modifiers */
     public Pattern urlMaskPattern;
     public Automaton urlMaskAutomaton;
     public String urlMaskString;
 
     public final Pattern prefer;
     public final String tld, inlink;
+    
+    /** true when the urlMasString is just a catch all pattern such as ".*" */
     boolean urlMask_isCatchall;
+    
+    /** Content-Type classification of expected results */
     public final Classification.ContentDomain contentdom;
+    
+	/**
+	 * <p>When false, results can be extended to documents including links to documents
+	 * of {@link #contentdom} type, whithout being themselves of that type.</p>
+	 * Examples :
+	 * <ul>
+	 * <li>contentdom == IMAGE, strictContentDom == true
+	 *  <ul>
+	 *   <li>jpeg image : acceptable result</li>
+	 * 	 <li>html page embedding images : rejected</li>
+	 *  </ul>
+	 * </li>
+	 * <li>contentdom == IMAGE, strictContentDom == false
+	 *  <ul>
+	 *   <li>jpeg image : acceptable result</li>
+	 * 	 <li>html page embedding images : acceptable result</li>
+	 *  </ul>
+	 * </li>
+	 * </ul> 
+	 */
+    private boolean strictContentDom = false;
+    
+	/**
+	 * The maximum number of suggestions ("Did you mean") to display at the top of
+	 * the first search results page
+	 */
+    private int maxSuggestions = 0;
+    
     public final String targetlang;
     protected final Collection<Tagging.Metatag> metatags;
     public final Searchdom domType;
@@ -217,19 +258,14 @@ public final class QueryParams {
         }
         this.urlMask_isCatchall = this.urlMaskString.equals(catchall_pattern.toString());
         if (this.urlMask_isCatchall) {
-            String protocolfilter = modifier.protocol == null ? ".*" : modifier.protocol;
-            String defaulthostprefix = modifier.protocol == null ? "www" : modifier.protocol;
-            String hostfilter = modifier.sitehost == null && tld == null ? ".*" : modifier.sitehost == null ? ".*\\." + tld : modifier.sitehost.startsWith(defaulthostprefix + ".") ? "(" + defaulthostprefix + "\\.)?" + modifier.sitehost.substring(4) : "(" + defaulthostprefix + "\\.)?" + modifier.sitehost;
-            String filefilter = modifier.filetype == null ? ".*" : ".*" + modifier.filetype + ".*"; // TODO: should be ".ext" but while/comment above suggests not -> add filetype contrain pullOneFilteredFromRWI()
-            String filter = protocolfilter + "..." + hostfilter + "." + filefilter;
-            if (!filter.equals(".*....*..*")) {
-                Pattern r = Pattern.compile("(\\.|(\\.\\*))\\.\\*");
-                Matcher m;
-                while ((m = r.matcher(filter)).find()) filter = m.replaceAll(".*");
+            final String filter = QueryParams.buildApproximateURLFilter(modifier, tld);
+            if (!QueryParams.catchall_pattern.toString().equals(filter)) {
                 this.urlMaskString = filter;
                 this.urlMaskAutomaton = Automata.makeString(filter);
                 this.urlMask_isCatchall = false;
-                this.urlMaskPattern = Pattern.compile(filter);
+                /* We let here the urlMaskPattern null :
+                 * final URL match checking will be made with the more accurate matchesURL function */
+                this.urlMaskPattern = null;
             }
         }
         this.tld = tld;
@@ -283,6 +319,50 @@ public final class QueryParams {
         this.dateFacetMaxCount = FACETS_DATE_MAXCOUNT_DEFAULT;
     }
 
+	/**
+	 * Generate an URL filter from the query modifier and eventual tld, usable as a
+	 * first approximation for filtering, and compatible with the yacy/search
+	 * API.<br/>
+	 * For truly accurate filtering, checking constraints against parsed URLs in 
+	 * MultiprotocolURL instances is easier and more reliable than building a complex regular
+	 * expression that must be both compatible with the JDK {@link Pattern} and with Lucene {@link RegExp}.
+	 * 
+	 * @param modifier
+	 *            query modifier with eventual protocol, sitehost and filetype
+	 *            constraints. The modifier parameter itselft must not be null.
+	 * @param tld
+	 *            an eventual Top Level Domain name
+	 * @return an URL filter regular expression from the provided modifier and tld
+	 *         constraints, matching anything when there are no constraints at all.
+	 */
+	protected static String buildApproximateURLFilter(final QueryModifier modifier, final String tld) {
+		final String protocolfilter = modifier.protocol == null ? ".*" : modifier.protocol;
+		final String defaulthostprefix = "www";
+		final String hostfilter;
+		if(modifier.sitehost == null && tld == null) {
+			hostfilter = ".*";
+		} else if(modifier.sitehost == null) {
+			hostfilter = ".*\\." + tld;
+		} else if(modifier.sitehost.startsWith(defaulthostprefix + ".")){
+			hostfilter = "(" + defaulthostprefix + "\\.)?" + modifier.sitehost.substring(4);
+		} else {
+			hostfilter = "(" + defaulthostprefix + "\\.)?" + modifier.sitehost;
+		}
+		final String filefilter = modifier.filetype == null ? ".*" : ".*" + modifier.filetype + ".*"; // TODO: should be ".ext" but while/comment above suggests not -> add filetype contrain pullOneFilteredFromRWI()
+		String filter = protocolfilter + "..." + hostfilter + "." + filefilter;
+        if (!filter.equals(".*....*..*")) {
+        	/* Remove redundant sequences of catch all expressions */
+            Pattern r = Pattern.compile("(\\.|(\\.\\*))\\.\\*");
+            Matcher m;
+            while ((m = r.matcher(filter)).find()) {
+            	filter = m.replaceAll(".*");
+            }
+        } else {
+			filter = QueryParams.catchall_pattern.toString();
+		}
+		return filter;
+	}
+
     private double kmNormal = 100.d; // 100 =ca 40000.d / 360.d == 111.11 - if lat/lon is multiplied with this, rounded and diveded by this, the location is normalized to a 1km grid
 
     public Segment getSegment() {
@@ -333,6 +413,37 @@ public final class QueryParams {
      */
     public void setDateFacetMaxCount(final int dateFacetMaxCount) {
 		this.dateFacetMaxCount = dateFacetMaxCount;
+	}
+    
+    /**
+     * @return false when results can be extended to documents including links to documents ot contentdom type.
+     */
+    public boolean isStrictContentDom() {
+		return this.strictContentDom;
+	}
+    
+    /**
+     * @param strictContentDom when false, results can be extended to documents including links to documents ot contentdom type.
+     */
+    public void setStrictContentDom(final boolean strictContentDom) {
+		this.strictContentDom = strictContentDom;
+	}
+    
+	/**
+	 * @return The maximum number of suggestions ("Did you mean") to display at the
+	 *         top of the first search results page
+	 */
+	public int getMaxSuggestions() {
+		return this.maxSuggestions;
+	}
+
+	/**
+	 * @param maxSuggestions
+	 *            The maximum number of suggestions ("Did you mean") to display at
+	 *            the top of the first search results page
+	 */
+	public void setMaxSuggestions(final int maxSuggestions) {
+		this.maxSuggestions = maxSuggestions;
 	}
 
     public static HandleSet hashes2Set(final String query) {
@@ -386,6 +497,65 @@ public final class QueryParams {
         sb.append("]");
         return sb.toString();
     }
+    
+	/**
+	 * Check wheter the given URL matches the eventual modifier and top-level domain
+	 * constraints. Should be preferred as more accurate than the url mask pattern generated with
+	 * {@link #buildApproximateURLFilter(QueryModifier, String)}.
+	 * 
+	 * @param modifier
+	 *            the query modifier with eventual constraints on protocoln, host
+	 *            name or file extension
+	 * @param tld
+	 *            an eventual top-level domain name to filter on
+	 * @param url
+	 *            the url to check
+	 * @return the constraint that did not match ("url" when url is null,
+	 *         "protocol", "sitehost", "tld", or "filetype"), or the empty string
+	 *         when the url matches
+	 */
+	public static String matchesURL(final QueryModifier modifier, final String tld, final MultiProtocolURL url) {
+		if (url == null) {
+			return "url";
+		}
+		if (modifier != null) {
+			if (modifier.protocol != null) {
+				if (!modifier.protocol.equalsIgnoreCase(url.getProtocol())) {
+					return "protocol";
+				}
+			}
+			if (modifier.sitehost != null) {
+				/*
+				 * consider to search for hosts with 'www'-prefix, if not already part of the
+				 * host name
+				 */
+				final String wwwPrefix = "www.";
+				final String host;
+				final String hostWithWwwPrefix;
+				if (modifier.sitehost.startsWith(wwwPrefix)) {
+					hostWithWwwPrefix = modifier.sitehost;
+					host = modifier.sitehost.substring(wwwPrefix.length());
+				} else {
+					hostWithWwwPrefix = wwwPrefix + modifier.sitehost;
+					host = modifier.sitehost;
+				}
+				if (!host.equalsIgnoreCase(url.getHost()) && !hostWithWwwPrefix.equals(url.getHost())) {
+					return "sitehost";
+				}
+			}
+			if (tld != null) {
+				if (!tld.equalsIgnoreCase(url.getTLD())) {
+					return "tld";
+				}
+			}
+			if (modifier.filetype != null) {
+				if (!modifier.filetype.equalsIgnoreCase(MultiProtocolURL.getFileExtension(url.getFileName()))) {
+					return "filetype";
+				}
+			}
+		}
+		return "";
+	}
 
     /**
      * check if the given text matches with the query
@@ -408,20 +578,20 @@ public final class QueryParams {
         return SetTools.anymatchByTest(keywords, textwords);
     }
 
-    public SolrQuery solrQuery(final ContentDomain cd, final boolean getFacets, final boolean excludeintext_image) {
+    public SolrQuery solrQuery(final ContentDomain cd, final boolean strictContentDom, final boolean getFacets, final boolean excludeintext_image) {
         if (cd == ContentDomain.IMAGE) {
-        	return solrImageQuery(getFacets);
+        	return solrImageQuery(getFacets, strictContentDom);
         }
         final List<String> filterQueries;
 		switch (cd) {
 		case AUDIO:
-			filterQueries = this.queryGoal.collectionAudioFilterQuery();
+			filterQueries = this.queryGoal.collectionAudioFilterQuery(strictContentDom);
 			break;
 		case VIDEO:
-			filterQueries = this.queryGoal.collectionVideoFilterQuery();
+			filterQueries = this.queryGoal.collectionVideoFilterQuery(strictContentDom);
 			break;
 		case APP:
-			filterQueries = this.queryGoal.collectionApplicationFilterQuery();
+			filterQueries = this.queryGoal.collectionApplicationFilterQuery(strictContentDom);
 			break;
 		default:
 			filterQueries = this.queryGoal.collectionTextFilterQuery(excludeintext_image);
@@ -468,13 +638,28 @@ public final class QueryParams {
         if (bq.length() > 0) params.setParam(DisMaxParams.BQ, bq.split("[\\r\\n]+")); // split on any sequence consisting of CR and/or LF
         if (bf.length() > 0) params.setParam("boost", bf); // a boost function extension, see http://wiki.apache.org/solr/ExtendedDisMax#bf_.28Boost_Function.2C_additive.29
         
+        // set highlighting query attributes
+        if (this.contentdom == Classification.ContentDomain.TEXT || this.contentdom == Classification.ContentDomain.ALL) {
+        	params.setHighlight(true);
+        	params.setHighlightFragsize(SearchEvent.SNIPPET_MAX_LENGTH);
+            //params.setHighlightRequireFieldMatch();
+        	params.setHighlightSimplePost("</b>");
+        	params.setHighlightSimplePre("<b>");
+        	params.setHighlightSnippets(5);
+            for (final CollectionSchema field: SOLR_SNIPPET_FIELDS) {
+            	params.addHighlightField(field.getSolrFieldName());
+            }
+        } else {
+            params.setHighlight(false);
+        }
+        
         // prepare result
         ConcurrentLog.info("Protocol", "SOLR QUERY: " + params.toString());
         this.cachedQuery = params;
         return params;
     }
     
-    private SolrQuery solrImageQuery(boolean getFacets) {
+    private SolrQuery solrImageQuery(final boolean getFacets, final boolean strictContentDom) {
         if (this.cachedQuery != null) {
             this.cachedQuery.setStart(this.offset);
             if (!getFacets) this.cachedQuery.setFacet(false);
@@ -482,16 +667,18 @@ public final class QueryParams {
         }
         
         // construct query
-        final SolrQuery params = getBasicParams(getFacets, this.queryGoal.collectionImageFilterQuery());
+        final SolrQuery params = getBasicParams(getFacets, this.queryGoal.collectionImageFilterQuery(strictContentDom));
         params.setQuery(this.queryGoal.collectionImageQuery(this.modifier).toString());
         
-        // set boosts
-        StringBuilder bq = new StringBuilder();
-        bq.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"jpg\"");
-        bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tif\"");
-        bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tiff\"");
-        bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"png\"");
-        params.setParam(DisMaxParams.BQ, bq.toString());
+        if(!strictContentDom) {
+        	// set boosts
+        	StringBuilder bq = new StringBuilder();
+        	bq.append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"jpg\"");
+        	bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tif\"");
+        	bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"tiff\"");
+        	bq.append(" OR ").append(CollectionSchema.url_file_ext_s.getSolrFieldName()).append(":\"png\"");
+        	params.setParam(DisMaxParams.BQ, bq.toString());
+        }
         
         // prepare result
         ConcurrentLog.info("Protocol", "SOLR QUERY: " + params.toString());
@@ -621,7 +808,8 @@ public final class QueryParams {
         }
         
         if (this.tld != null) {
-            fqs.add(CollectionSchema.host_dnc_s.getSolrFieldName() + ":\"" + this.tld + '\"');
+        	/* Use the host_s field which is mandatory, rather than the optional host_dnc_s field */
+            fqs.add(CollectionSchema.host_s.getSolrFieldName() + ":*." + this.tld);
         }
         
         if (this.modifier.filetype != null) {
@@ -632,8 +820,8 @@ public final class QueryParams {
             fqs.add(CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName() + ":\"" + this.inlink + '\"');
         }
         
-        if (!this.urlMask_isCatchall) {
-            // add a filter query on urls
+        if (!this.urlMask_isCatchall && this.urlMaskPattern != null) {
+            // add a filter query on urls only if user custom and not generated from other modifiers
             fqs.add(CollectionSchema.sku.getSolrFieldName() + ":/" + this.urlMaskString + "/");
         }
         
@@ -704,6 +892,7 @@ public final class QueryParams {
             //context.append(this.domType);
             context.append(asterisk);
             context.append(this.contentdom).append(asterisk);
+            context.append(this.strictContentDom).append(asterisk);
             context.append(this.zonecode).append(asterisk);
             context.append(ASCII.String(Word.word2hash(this.ranking.toExternalString()))).append(asterisk);
             context.append(Base64Order.enhancedCoder.encodeString(this.prefer.toString())).append(asterisk);
@@ -723,6 +912,9 @@ public final class QueryParams {
             context.append(this.inlink).append(asterisk);
             context.append(this.lat).append(asterisk).append(this.lon).append(asterisk).append(this.radius).append(asterisk);
             context.append(this.snippetCacheStrategy == null ? "null" : this.snippetCacheStrategy.name());
+            
+            // Note : this.maxSuggestions search parameter do not need to be part of this id, as it has no impact on results themselves
+            
             String result = context.toString();
             if (anonymized) {
                 this.idCacheAnon = result;
@@ -734,23 +926,101 @@ public final class QueryParams {
     }
 
     /**
-	 * make a query anchor tag
+	 * Build a search query URL from the given parameters.
 	 * 
+	 * @param ext extension of the servlet to request (e.g. "html", "rss", "json"...)
+	 * @param page index of the wanted page (first page is zero)
+	 * @param theQuery holds the main query parameters. Must not be null.
+	 * @param newModifier a eventual new modifier to append to the eventual ones already defined in theQuery QueryParams. Can be null.
+	 * @param newModifierReplacesOld when newModifier is not null, it is appended in addition
+	 *            to existing modifier(s) - if it is empty it overwrites (clears) existing
+	 *            modifier(s)
 	 * @param authenticatedFeatures
 	 *            when true, access to authentication protected search features is
 	 *            wanted
-	 * @return the anchor url builder
+	 * @return a StringBuilder instance with the URL to the new search result page
 	 */
 	public static StringBuilder navurl(final RequestHeader.FileType ext, final int page, final QueryParams theQuery,
-			final String newQueryString, boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
+			final String newModifier, boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
 
-		final StringBuilder sb = navurlBase(ext, theQuery, newQueryString, newModifierReplacesOld,
+		final StringBuilder sb = navurlBase(ext, theQuery, newModifier, newModifierReplacesOld,
 				authenticatedFeatures);
 
         sb.append("&startRecord=");
         sb.append(page * theQuery.itemsPerPage());
 
         return sb;
+    }
+	
+    /**
+	 * Build a search query URL from the given parameters, removing only the given single query modifier.
+	 * 
+	 * @param ext extension of the servlet to request (e.g. "html", "rss", "json"...)
+	 * @param page index of the wanted page (first page is zero)
+	 * @param theQuery holds the main query parameters. Must not be null.
+	 * @param modifierToRemove the query modifier to remove (e.g. "keyword:word", "/language/en", "site:example.org"...)
+	 * @param authenticatedFeatures
+	 *            when true, access to authentication protected search features is
+	 *            wanted
+	 * @return the URL to the new search result page
+	 */
+	public static String navUrlWithSingleModifierRemoved(final RequestHeader.FileType ext, final int page, final QueryParams theQuery,
+			final String modifierToRemove, final boolean authenticatedFeatures) {
+
+        final StringBuilder sb = new StringBuilder(120);
+        sb.append("yacysearch.");
+        sb.append(ext.name().toLowerCase(Locale.ROOT));
+        sb.append("?query=");
+
+        sb.append(theQuery.getQueryGoal().getQueryString(true));
+        
+        if (!theQuery.modifier.isEmpty()) {
+        	String modifierString = theQuery.modifier.toString();
+        	if(StringUtils.isNotBlank(modifierToRemove)) {
+        		if(modifierString.startsWith(modifierToRemove)) {
+        			modifierString = modifierString.substring(modifierToRemove.length());
+        		} else {
+        			modifierString = modifierString.replace(" " + modifierToRemove, "");
+        		}
+        	}
+        	if(StringUtils.isNotBlank(modifierString)) {
+        		sb.append("+" + modifierString.trim());
+        	}
+        }
+        
+        appendNavUrlQueryParams(sb, theQuery, authenticatedFeatures);
+
+        return sb.toString();
+    }
+	
+    /**
+	 * Build a search query URL with a new search query string, but keeping any already defined eventual modifiers.
+	 * 
+	 * @param ext extension of the servlet to request (e.g. "html", "rss", "json"...)
+	 * @param page index of the wanted page (first page is zero)
+	 * @param theQuery holds the main query parameters. Must not be null.
+	 * @param authenticatedFeatures
+	 *            when true, access to authentication protected search features is
+	 *            wanted
+	 * @return the URL to the new search result page
+	 */
+	public static String navUrlWithNewQueryString(final RequestHeader.FileType ext, final int page, final QueryParams theQuery,
+			final String newQueryString, final boolean authenticatedFeatures) {
+
+        final StringBuilder sb = new StringBuilder(120);
+        sb.append("yacysearch.");
+        sb.append(ext.name().toLowerCase(Locale.ROOT));
+        sb.append("?query=");
+
+        sb.append(new QueryGoal(newQueryString).getQueryString(true));
+        
+        if (!theQuery.modifier.isEmpty()) {
+        	sb.append("+" + theQuery.modifier.toString());
+        }
+        
+        appendNavUrlQueryParams(sb, theQuery, authenticatedFeatures);
+
+        return sb.toString();
     }
 
      /**
@@ -760,11 +1030,11 @@ public final class QueryParams {
 	 *            extension of servlet (e.g. html, rss)
 	 * @param theQuery
 	 *            search query
-	 * @param newModifier
-	 *            optional new modifier. - if null existing modifier of theQuery is
+	 * @param newModifier optional new modifier. - if null existing modifier(s) of theQuery are
 	 *            appended - if not null this new modifier is appended in addition
-	 *            to existing modifier - if isEmpty overwrites (clears) existing
-	 *            modifier
+	 *            to eventually existing modifier(s) - if isEmpty overwrites (clears) any eventual existing
+	 *            modifier(s)
+	 * @param newModifierReplacesOld considered only when newModifier is not null and not empty. When true, any existing modifiers with the same name are replaced with the new one.
 	 * @param authenticatedFeatures
 	 *            when true, access to authentication protected search features is
 	 *            wanted
@@ -773,25 +1043,24 @@ public final class QueryParams {
 	public static StringBuilder navurlBase(final RequestHeader.FileType ext, final QueryParams theQuery,
 			final String newModifier, final boolean newModifierReplacesOld, final boolean authenticatedFeatures) {
 
-        StringBuilder sb = new StringBuilder(120);
+        final StringBuilder sb = new StringBuilder(120);
         sb.append("yacysearch.");
         sb.append(ext.name().toLowerCase(Locale.ROOT));
         sb.append("?query=");
 
         sb.append(theQuery.getQueryGoal().getQueryString(true));
-        if (newModifier == null) {
-            if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
+        
+		if (newModifier == null) {
+            if (!theQuery.modifier.isEmpty()) {
+            	sb.append("+" + theQuery.modifier.toString());
+            }
         } else {
             if (!newModifier.isEmpty()) {
-                if (!theQuery.modifier.isEmpty()) sb.append("+" + theQuery.modifier.toString());
+                if (!theQuery.modifier.isEmpty()) {
+                	sb.append("+" + theQuery.modifier.toString());
+                }
                 if (newModifierReplacesOld) {
-                    int nmpi = newModifier.indexOf(":");
-                    if (nmpi > 0) {
-                        String nmp = newModifier.substring(0, nmpi) + ":";
-                        int i = sb.indexOf(nmp);
-                        if (i > 0) sb = new StringBuilder(sb.substring(0, i).trim());
-                        if (sb.charAt(sb.length() - 1) == '+') sb.setLength(sb.length() - 1);
-                    }
+                    removeOldModifiersFromNavUrl(sb, newModifier);
                 }
                 try {
                 	sb.append("+" + URLEncoder.encode(newModifier, StandardCharsets.UTF_8.name()));
@@ -800,7 +1069,23 @@ public final class QueryParams {
                 }
             }
         }
+		
+        appendNavUrlQueryParams(sb, theQuery, authenticatedFeatures);
 
+        return sb;
+    }
+
+    /**
+	 * Append search query parameters to the URL builder already filled with the beginning of the URL.
+	 * 
+	 * @param sb the URL string builder to fill. Must not be null.
+	 * @param theQuery holds the main query parameters. Must not be null.
+	 * @param authenticatedFeatures
+	 *            when true, access to authentication protected search features is
+	 *            wanted
+	 */
+	protected static void appendNavUrlQueryParams(final StringBuilder sb, final QueryParams theQuery,
+			final boolean authenticatedFeatures) {
         sb.append("&maximumRecords=");
         sb.append(theQuery.itemsPerPage());
 
@@ -820,6 +1105,12 @@ public final class QueryParams {
 
         sb.append("&contentdom=");
         sb.append(theQuery.contentdom.toString());
+        
+        sb.append("&strictContentDom=");
+        sb.append(String.valueOf(theQuery.isStrictContentDom()));
+        
+        sb.append("&meanCount=");
+        sb.append(theQuery.getMaxSuggestions());
 
         sb.append("&former=");
         sb.append(theQuery.getQueryGoal().getQueryString(true));
@@ -827,8 +1118,40 @@ public final class QueryParams {
         if(authenticatedFeatures) {
         	sb.append("&auth");
         }
+	}
 
-        return sb;
-    }
+	/**
+	 * Remove from the URL builder any query modifiers with the same name that the new modifier 
+	 * @param sb
+	 *            a StringBuilder holding the search URL navigation being built.
+	 *            Must not be null and contain the URL base and the query string
+	 *            with its eventual modifiers
+	 * @param newModifier
+	 *            a new modifier of form key:value. Must not be null.
+	 */
+	protected static void removeOldModifiersFromNavUrl(final StringBuilder sb, final String newModifier) {
+		int nmpi = newModifier.indexOf(":");
+		if (nmpi > 0) {
+		    final String newModifierKey = newModifier.substring(0, nmpi) + ":";
+		    int sameModifierIndex = sb.indexOf(newModifierKey);
+		    while (sameModifierIndex > 0) {
+		    	final int spaceModifierIndex = sb.indexOf(" ", sameModifierIndex);
+		    	if(spaceModifierIndex > sameModifierIndex) {
+		    		/* There are other modifiers after the matching one : we only remove the old matching modifier */
+		    		sb.delete(sameModifierIndex, spaceModifierIndex + 1);
+		    	} else {
+		    		/* The matching modifier is the last : we truncate the builder */
+		        	sb.setLength(sameModifierIndex);	
+		    	}
+		    	sameModifierIndex = sb.indexOf(newModifierKey);
+		    }
+		    if (sb.charAt(sb.length() - 1) == '+') {
+		    	sb.setLength(sb.length() - 1);
+		    }
+		    if (sb.charAt(sb.length() - 1) == ' ') {
+		    	sb.setLength(sb.length() - 1);
+		    }
+		}
+	}
 
 }

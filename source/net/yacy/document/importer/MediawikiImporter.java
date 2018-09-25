@@ -40,6 +40,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -534,7 +535,7 @@ public class MediawikiImporter extends Thread implements Importer {
         public void genDocument() throws Parser.Failure {
             try {
 				this.url = new AnchorURL(this.urlStub + this.title);
-				final Document[] parsed = TextParser.parseSource(this.url, "text/html", StandardCharsets.UTF_8.name(), new VocabularyScraper(), 0, 1, UTF8.getBytes(this.html));
+				final Document[] parsed = TextParser.parseSource(this.url, "text/html", StandardCharsets.UTF_8.name(), new HashSet<String>(), new VocabularyScraper(), 0, 1, UTF8.getBytes(this.html));
 				this.document = Document.mergeDocuments(this.url, "text/html", parsed);
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				this.document.setTitle(this.title);

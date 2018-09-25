@@ -34,9 +34,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <!-- the Solr version used in dependency section for all related dependencies -->
-        <solr.version>6.6.1</solr.version> 
+        <solr.version>6.6.5</solr.version> 
         <!-- the Jetty version used in dependency section for all related dependencies -->
-        <jetty.version>9.4.7.v20170914</jetty.version>
+        <jetty.version>9.4.12.v20180830</jetty.version>
                 
         <!-- properties used for filtering yacyBuildProperties.java -->       
         <REPL_DATE>${DSTAMP}</REPL_DATE>
@@ -342,35 +342,59 @@
         </profile>
     </profiles>
 
+	<repositories>
+    	<repository>
+    		<!-- After version 2.0.3 JAudioTagger library is no more archived on Maven Central repository -->
+        	<id>jaudiotagger-repository</id>
+        	<url>https://dl.bintray.com/ijabz/maven</url>
+    	</repository>
+	</repositories>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>4.12</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
+        	<!-- Optional dependency of pdfbox for Encrypting and signing PDFs 
+        	see https://pdfbox.apache.org/2.0/dependencies.html#encryption-and-signing-->
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk15</artifactId>
-            <version>1.46</version>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.60</version>
         </dependency>
         <dependency>
+        	<!-- Optional dependency of pdfbox for Encrypting and signing PDFs -->
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcmail-jdk15</artifactId>
-            <version>1.46</version>
-        </dependency>        
+            <artifactId>bcmail-jdk15on</artifactId>
+            <version>1.60</version>
+        </dependency>
+        <dependency>
+        	<!-- Optional dependency of pdfbox for Encrypting and signing PDFs -->
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>1.60</version>
+        </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.10</version>
+            <version>1.11</version>
+            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.14</version>
+            <version>1.17</version>
             <type>jar</type>
         </dependency>
+		<dependency>
+			<!-- Handle XZ compressed archives. It is an optional dependency of commons-compress. -->
+  			<groupId>org.tukaani</groupId>
+  			<artifactId>xz</artifactId>
+  			<version>1.8</version>
+		</dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
@@ -380,7 +404,8 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.5</version>
+            <version>2.6</version>
+            <type>jar</type>
         </dependency>        
         <dependency>
             <groupId>commons-jxpath</groupId>
@@ -405,43 +430,43 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.3</version>
+            <version>4.5.5</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.4.6</version>
+            <version>4.4.9</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
-            <version>4.5.3</version>
+            <version>4.5.5</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.ibm.icu</groupId>
             <artifactId>icu4j</artifactId>
-            <version>59.1</version>
+            <version>62.1</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-bmp</artifactId>
-            <version>3.3.1</version>
+            <version>3.3.2</version>
             <type>jar</type>
         </dependency> 
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-tiff</artifactId>
-            <version>3.3.1</version>
+            <version>3.3.2</version>
             <type>jar</type>
         </dependency>        
         <dependency>
-            <groupId>org</groupId>
+            <groupId>net.jthink</groupId>
             <artifactId>jaudiotagger</artifactId>
-            <version>2.0.3</version>
+            <version>2.2.5</version>
         </dependency>
         <dependency>
             <groupId>net.sourceforge.jchardet</groupId>
@@ -456,7 +481,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
-            <version>1.7.21</version>
+            <version>1.7.25</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -473,13 +498,13 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.10.3</version>
+            <version>1.11.3</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.jwat</groupId>
             <artifactId>jwat-warc</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
             <type>jar</type>
         </dependency>        
         <dependency>
@@ -490,13 +515,13 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>log4j-over-slf4j</artifactId>
-            <version>1.7.24</version>
+            <version>1.7.25</version>
             <type>jar</type>
         </dependency>        
         <dependency>
             <groupId>com.drewnoakes</groupId>
             <artifactId>metadata-extractor</artifactId>
-            <version>2.10.1</version>
+            <version>2.11.0</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -507,19 +532,19 @@
         <dependency>
             <groupId>org.apache.pdfbox</groupId>
             <artifactId>pdfbox</artifactId>
-            <version>2.0.7</version>
+            <version>2.0.11</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>3.16</version>
+            <version>3.17</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
-            <version>3.16</version>
+            <version>3.17</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -601,11 +626,11 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-deploy</artifactId>
             <version>${jetty.version}</version>
-        </dependency>
+        </dependency>       
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.21</version>
+            <version>1.7.25</version>
             <type>jar</type>
         </dependency>       
         <dependency>

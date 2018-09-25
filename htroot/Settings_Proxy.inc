@@ -1,4 +1,5 @@
 <form action="SettingsAck_p.html" method="post" enctype="multipart/form-data">
+<input type="hidden" name="transactionToken" value="#[transactionToken]#"/>
 <fieldset><legend id="proxy">Remote Proxy (optional)</legend>
 <p>YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:</p>
 

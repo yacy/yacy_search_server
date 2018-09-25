@@ -32,7 +32,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +39,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 
+import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
@@ -79,10 +79,6 @@ public class pdfParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("applications/vnd.pdf");
         this.SUPPORTED_MIME_TYPES.add("text/pdf");
         this.SUPPORTED_MIME_TYPES.add("text/x-pdf");
-    }
-
-    static {
-        clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes(); // must be called here to get that into the class loader; it will block other threads otherwise;
     }
 
     @Override
@@ -206,10 +202,9 @@ public class pdfParser extends AbstractParser implements Parser {
                     stripper.setEndPage(Integer.MAX_VALUE); // set to default
                     // we start the pdf parsing in a separate thread to ensure that it can be terminated
                     final PDDocument pdfDocC = pdfDoc;
-                    final Thread t = new Thread() {
+                    final Thread t = new Thread("pdfParser.getText:" + location) {
                         @Override
                         public void run() {
-                            Thread.currentThread().setName("pdfParser.getText:" + location);
                             try {
                                 writer.append(stripper.getText(pdfDocC));
                             } catch (final Throwable e) {}
@@ -250,18 +245,9 @@ public class pdfParser extends AbstractParser implements Parser {
             try {pdfDoc.close();} catch (final Throwable e) {}
         }
 
-        // clear resources in pdfbox. they say that is resolved but it's not. see:
-        // https://issues.apache.org/jira/browse/PDFBOX-313
-        // https://issues.apache.org/jira/browse/PDFBOX-351
-        // https://issues.apache.org/jira/browse/PDFBOX-441
-        // the pdfbox still generates enormeous number of object allocations and don't delete these
-        // the following Object are statically stored and never flushed:
-        // COSFloat, COSArray, COSInteger, COSObjectKey, COSObject, COSDictionary,
-        // COSStream, COSString, COSName, COSDocument, COSInteger[], COSNull
-        // the great number of these objects can easily be seen in Java Visual VM
-        // we try to get this shit out of the memory here by forced clear calls, hope the best the rubbish gets out.
+        // clear cached resources in pdfbox.
         pdfDoc = null;
-        clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes();
+        clearPdfBoxCaches();
         
         return result;
     }
@@ -296,55 +282,35 @@ public class pdfParser extends AbstractParser implements Parser {
         return linkCollections;
     }
 
-    public static void clean_up_idiotic_PDFParser_font_cache_which_eats_up_tons_of_megabytes() {
-        // thank you very much, PDFParser hackers, this font cache will occupy >80MB RAM for a single pdf and then stays forever
-        // AND I DO NOT EVEN NEED A FONT HERE TO PARSE THE TEXT!
-        // Don't be so ignorant, just google once "PDFParser OutOfMemoryError" to feel the pain.
-        ResourceCleaner cl = new ResourceCleaner();
-        cl.clearClassResources("org.apache.pdfbox.cos.COSName");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDFont");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDType1Font");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDTrueTypeFont");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDType0Font");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDType1AfmPfbFont");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDType3Font");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDType1CFont");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDCIDFont");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDCIDFontType0Font");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDCIDFontType2Font");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDMMType1Font");
-        cl.clearClassResources("org.apache.pdfbox.pdmodel.font.PDSimpleFont");
+    /**
+     * Clean up cache resources allocated by PDFBox that would otherwise not be released.
+     */
+    public static void clearPdfBoxCaches() {
+		/*
+		 * Prior to pdfbox 2.0.0 font cache occupied > 80MB RAM for a single pdf and
+		 * then stayed forever (detected in YaCy with pdfbox version 1.2.1). The
+		 * situation is now from far better, but one (unnecessary?) cache structure in
+		 * the COSName class still needs to be explicitely cleared.
+		 */
+    	
+		// History of related issues :
+    	// http://markmail.org/thread/quk5odee4hbsauhu
+		// https://issues.apache.org/jira/browse/PDFBOX-313 
+		// https://issues.apache.org/jira/browse/PDFBOX-351
+		// https://issues.apache.org/jira/browse/PDFBOX-441
+    	// https://issues.apache.org/jira/browse/PDFBOX-2200
+    	// https://issues.apache.org/jira/browse/PDFBOX-2149
+    	
+        COSName.clearResources();
+        
+		/*
+		 * Prior to PDFBox 2.0.0, clearResources() function had to be called on the
+		 * org.apache.pdfbox.pdmodel.font.PDFont class and its children. After version
+		 * 2.0.0, there is no more such a function in PDFont class as font cache is
+		 * handled differently and hopefully more properly.
+		 */
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static class ResourceCleaner {
-        Method findLoadedClass;
-        private ClassLoader sys;
-        public ResourceCleaner() {
-            try {
-                this.findLoadedClass = ClassLoader.class.getDeclaredMethod("findLoadedClass", new Class[] { String.class });
-                this.findLoadedClass.setAccessible(true);
-                this.sys = ClassLoader.getSystemClassLoader();
-            } catch (Throwable e) {
-                e.printStackTrace();
-                this.findLoadedClass = null;
-                this.sys = null;
-            }
-        }
-        public void clearClassResources(String name) {
-            if (this.findLoadedClass == null) return;
-            try {
-                Object pdfparserpainclass = this.findLoadedClass.invoke(this.sys, name);
-                if (pdfparserpainclass != null) {
-                    Method clearResources = ((Class) pdfparserpainclass).getDeclaredMethod("clearResources", new Class[] {});
-                    if (clearResources != null) clearResources.invoke(null);
-                }
-            } catch (Throwable e) {
-                //e.printStackTrace();
-            }
-        }
-    }
-    
     /**
      * test
      * @param args

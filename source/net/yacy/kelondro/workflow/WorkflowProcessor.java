@@ -47,27 +47,26 @@ public class WorkflowProcessor<J extends WorkflowJob> {
     private BlockingQueue<J> input;
     private final WorkflowProcessor<J> output;
     private final int maxpoolsize;
-    private final Object environment;
-    private final String processName, methodName, description;
+    private final WorkflowTask<J> task;
+    private final String processName, description;
     private final String[] childs;
     private long blockTime, execTime, passOnTime;
     private long execCount;
 
     public WorkflowProcessor(
             final String name, final String description, final String[] childnames,
-            final Object env, final String jobExecMethod,
+            final WorkflowTask<J> task,
             final int inputQueueSize, final WorkflowProcessor<J> output,
             final int maxpoolsize) {
         // start a fixed number of executors that handle entries in the process queue
-        this.environment = env;
         this.processName = name;
         this.description = description;
-        this.methodName = jobExecMethod;
+        this.task = task;
         this.childs = childnames;
         this.maxpoolsize = maxpoolsize;
         this.input = new LinkedBlockingQueue<J>(Math.max(maxpoolsize + 1, inputQueueSize));
         this.output = output;
-        this.executor = Executors.newCachedThreadPool(new NamePrefixThreadFactory(this.methodName));
+        this.executor = Executors.newCachedThreadPool(new NamePrefixThreadFactory(name));
         this.executorRunning = new AtomicInteger(0);
         /*
         for (int i = 0; i < this.maxpoolsize; i++) {
@@ -85,13 +84,9 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         processMonitor.add(this);
     }
 
-    public Object getEnvironment() {
-        return this.environment;
-    }
-    
-    public String getMethodName() {
-        return this.methodName;
-    }
+    public WorkflowTask<J> getTask() {
+		return this.task;
+	}
     
     public int getQueueSize() {
         if (this.input == null) return 0;
@@ -169,14 +164,13 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         this.input = i;
     }
 
-    @SuppressWarnings("unchecked")
     public void enQueue(final J in) {
         // ensure that enough job executors are running
         if (this.input == null || this.executor == null || this.executor.isShutdown() || this.executor.isTerminated()) {
             // execute serialized without extra thread
             //Log.logWarning("PROCESSOR", "executing job " + environment.getClass().getName() + "." + methodName + " serialized");
             try {
-                final J out = (J) InstantBlockingThread.execMethod(this.environment, this.methodName).invoke(this.environment, new Object[]{in});
+                final J out = this.task.process(in);
                 if (out != null && this.output != null) {
                     this.output.enQueue(out);
                 }
