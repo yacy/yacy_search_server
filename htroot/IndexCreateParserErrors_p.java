@@ -81,7 +81,7 @@ public class IndexCreateParserErrors_p {
                 url = entry.getDigestURL();
                 if (url == null) continue;
                 
-                prop.putHTML("rejected_list_"+j+"_time", GenericFormatter.SIMPLE_FORMATTER.format(new Date()));
+                prop.putHTML("rejected_list_"+j+"_time", GenericFormatter.SIMPLE_FORMATTER.format(entry.getFailDate()));
                 prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false));
                 
                 String cause = entry.getFailReason();
