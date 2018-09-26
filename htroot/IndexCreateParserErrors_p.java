@@ -24,7 +24,6 @@
 
 
 import java.util.ArrayList;
-import java.util.Date;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.id.DigestURL;
