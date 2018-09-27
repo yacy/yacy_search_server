@@ -127,6 +127,7 @@ Used Blacklist engine:==Motor de lista negra utilizado:
 Import blacklist items from...==Importar elementos de la lista negra desde...
 other YaCy peers:==otros pares YaCy:
 "Load new blacklist items"==«Cargar nuevos elementos de la lista negra»
+URL:==URL:
 plain text file:<==archivo de texto plano:<
 XML file:==archivo XML:
 Upload a regular text file which contains one blacklist entry per line.==Subir un archivo de texto regular que contenga una entrada de lista negra por línea.
@@ -138,6 +139,18 @@ information about which cases a blacklist is activated for.==adicional sobre los
 Here you can export a blacklist as a regular text file with one blacklist entry per line.==Aquí puedes exportar una lista negra como un archivo de texto regular con una entrada de lista negra por línea.
 This file will not contain any additional information==Este archivo no contendrá información adicional
 "Export list as text"==«Exportar lista como texto»
+#-----------------------------
+
+#File: BlacklistTest_p.html
+#---------------------------
+Blacklist Test==Prueba de lista negra
+Used Blacklist engine:==Motor de lista negra utilizado:
+Test list:==Lista de prueba:
+"Test"==«Prueba»
+The tested URL was==La URL probada fue
+It is blocked for the following cases:==Está bloqueada en los siguientes casos:
+Search==Buscar
+Surftips==Consejos de navegación
 #-----------------------------
 
 #File: Settings_UrlProxyAccess.inc
