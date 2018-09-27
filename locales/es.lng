@@ -98,6 +98,28 @@ Index media:==Indexar multimedia:
 "Save"==«Guardar»
 #-----------------------------
 
+#File: BlacklistCleaner_p.html
+#---------------------------
+Blacklist Cleaner==Limpiador de lista negra
+Here you can remove or edit illegal or double blacklist-entries.==Aquí puedes eliminar o editar entradas ilegales o duplicadas en la lista negra.
+Check list==Lista de comprobación
+"Check"==«Comprobar»
+Allow regular expressions in host part of blacklist entries.==Permitir expresiones regulares en la parte del host de las entradas de la lista negra.
+The blacklist-cleaner only works for the following blacklist-engines up to now:==El limpiador de la lista negra solo funciona hasta ahora para los siguientes motores de listas negras:
+Illegal Entries in #[blList]# for==Entradas ilegales en #[blList]# para
+Deleted #[delCount]# entries==#[delCount]# entradas eliminadas
+Altered #[alterCount]# entries!==!#[alterCount]# entradas modificadas!
+Two wildcards in host-part==Dos caracteres comodín en la parte del host
+Either subdomain <u>or</u> wildcard==De cualquier subdominio <u>o</u> carácter comodín
+Path is invalid Regex==La ruta es una expresión regular inválida
+Wildcard not on begin or end==El comodín no está al principio ni al final
+Host contains illegal chars==El host contiene caracteres ilegales
+Double==Doble
+"Change Selected"==«Cambiar selección»
+"Delete Selected"==«Borrar selección»
+No Blacklist selected==No se ha seleccionado una lista negra
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
@@ -162,28 +184,6 @@ Entries per page:==Einträge pro Seite:
 "set"=="Setzen"
 Edit existing pattern(s):==Bearbeite existierende Einträge:
 "Save URL pattern(s)"=="URL Einträge speichern"
-#-----------------------------
-
-#File: BlacklistCleaner_p.html
-#---------------------------
-Blacklist Cleaner==Blacklist aufräumen
-Here you can remove or edit illegal or double blacklist-entries.==Hier können Sie ungültige oder doppelte Einträge auf der Blacklist entfernen oder bearbeiten.
-Check list==Liste testen
-"Check"=="Testen"
-Allow regular expressions in host part of blacklist entries.==Erlaube reguläre Ausdrücke im Hostnamen Teil der Blacklist Einträge.
-The blacklist-cleaner only works for the following blacklist-engines up to now:==Der Blacklist-Cleaner arbeitet zur Zeit nur mit den folgenden Blacklist-Engines:
-Illegal Entries in #[blList]# for==Ungültige Einträge in #[blList]# für
-Deleted #[delCount]# entries==#[delCount]# Einträge gelöscht
-Altered #[alterCount]# entries!==#[alterCount]# Einträge geändert
-Two wildcards in host-part==Zwei Wildcards im Host-Teil
-Either subdomain <u>or</u> wildcard==Entweder Subdomain <u>oder</u> Wildcard
-Path is invalid Regex==Pfad ist ungültige Regex
-Wildcard not on begin or end==Wildcard nicht am Beginn oder Ende
-Host contains illegal chars==Host enthält ungültige Zeichen
-Double==Doppelt
-"Change Selected"=="Markierte bearbeiten"
-"Delete Selected"=="Markierte löschen"
-No Blacklist selected==Es wurde keine Blacklist ausgewählt
 #-----------------------------
 
 #File: BlacklistImpExp_p.html
