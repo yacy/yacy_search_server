@@ -77,6 +77,27 @@ This is a list of searches that had been requested from remote peer search inter
 This is a list of requests (max. 1000) to the local http server within the last hour.==Esta es una lista de las peticiones (máx. 1000) al servidor http local durante la última hora.
 #-----------------------------
 
+#File: Autocrawl_p.html
+#---------------------------
+>Autocrawler<==>Rastreador automático<
+Autocrawler automatically selects and adds tasks to the local crawl queue.==El rastreador automático selecciona y añade tareas a la cola de rastreo.
+This will work best when there are already quite a few domains in the index.==Esto funcionará mejor cuando haya algunos dominios en el índice.
+Autocralwer Configuration==Configuración del rastreador automático
+You need to restart for some settings to be applied==Necesitas reiniciar para que se apliquen algunos ajustes
+Enable Autocrawler:==Activar el rastreador automático:
+Deep crawl every:==Rastreo profundo cada
+Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.==Atención: si esta cifra es mayor que la de «Filas a buscar» solo se ejecutarán rastreos superficiales.
+Rows to fetch at once:==Filas a buscar de una vez:
+Recrawl only older than # days:==Volver a rastrear solo los de más de # días de antigüedad:
+Get hosts by query:==Obtener hosts por consulta:
+Can be any valid Solr query.==Se puede utilizar cualquier consulta Solr válida.
+Shallow crawl depth (0 to 2):==Profundidad del rastreo superficial (de 0 a 2):
+Deep crawl depth (1 to 5):==Profundida del rastreo exhaustivo (de 1 a 5):
+Index text:==Indexar texto:
+Index media:==Indexar multimedia:
+"Save"==«Guardar»
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
@@ -94,11 +115,6 @@ URL substitution:==Ersetzen von URLs:
 Define URL substitution rules which allow navigating in proxy environment. Possible values: all, domainlist. Default: domainlist.==Definiere die Regeln zum Ersetzen von URLs die Navigation in der Proxy Umgebung erlauben. Mögliche Werte: all, domainlist. Standardeinstellung: domainlist.
 "Submit"=="Absenden"
 #>Enabled<==>Aktiviert<
-#-----------------------------
-
-#File: Autocrawl_p.html
-#---------------------------
-"Save"=="Speichern"
 #-----------------------------
 
 #File: Blacklist_p.html
