@@ -38,45 +38,43 @@ This images shows incoming connections to your YaCy peer and outgoing connection
 
 #File: AccessTracker_p.html
 #---------------------------
-Access Tracker==Zugriffe
-Server Access Overview==Server Zugriff Überblick
-This is a list of #[num]# requests to the local http server within the last hour.==Dies ist eine Liste von #[num]# Anfragen, die an den lokalen HTTP Server innerhalb der letzten Stunde gestellt wurden.
-This is a list of requests (max. 1000) to the local http server within the last hour.==Dies ist eine Liste von Anfragen (max. 1000), die innerhalb der letzten Stunde an den lokalen HTTP Server gestellt wurden.
-Showing #[num]# requests.==Gezeigt werden #[num]# Anfragen.
-#>Host<==>Host<
->Path<==>Pfad<
-Date<==Datum<
-Access Count During==Erfasster Zugriff während der
-last Second==letzte Sekunde
-last Minute==letzte Minute
-last 10 Minutes==letzten 10 Minuten
-last Hour==letzte Stunde
-The following hosts are registered as source for brute-force requests to protected pages==Die folgenden Hosts wurden als Quelle von Brute-Force Attacken auf geschützte Seiten erkannt
-#>Host==>Host
-Access Times==Zugriffszeiten
-Server Access Details==Server Zugriffs Details
-Local Search Log==Lokale Suche Log
-Local Search Host Tracker==Lokale Suche Host Tracker
-Remote Search Log==Remote Suche Log
-#Total:==Total:
-Success:==Erfolgreich:
-Remote Search Host Tracker==Remote Suche Host Tracker
-This is a list of searches that had been requested from this' peer search interface==Dies ist eine Liste aller Suchanfragen, die von diesem Peer ausgeführt wurden.
-Showing #[num]# entries from a total of #[total]# requests.==Es werden #[num]# Einträge von insgesamt #[total]# Anfragen angezeigt.
-Requesting Host==Anfragender Host
-Offset==Versatz
-Expected Results==Erwartete Ergebnisse
-Returned Results==Gefundene Ergebnisse
-Used Time (ms)==Gebrauchte Zeit (in ms)
-URL fetch (ms)==URL Abruf (in ms)
-Snippet comp (ms)==Vorschau Erzeugung (in ms)
-Query==Suchwort
-#>User Agent<==>User Agent<
-Search Word Hashes==Suchwort Hash
-Count</td>==Anzahl</td>
-Queries Per Last Hour==Suchanfragen pro letzter Stunde
-Access Dates==Zugriffszeiten
-This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
+Access Tracker==Rastreador de acceso
+Server Access Overview==Información general de acceso al servidor
+This is a list of #[num]# requests to the local http server within the last hour.==Esta es una lista de #[num]# peticiones al servidor http local durante la última hora.
+Showing #[num]# requests.==Mostrando #[num]# peticiones.
+>Host<==>Host<
+>Path<==>Ruta<
+Date<==Fecha<
+Access Count During==Número de accesos durante
+last Second==el último segundo
+last Minute==el último minuto
+last 10 Minutes==los últimos 10 minuto
+last Hour==la última hora
+The following hosts are registered as source for brute-force requests to protected pages==Los siguientes hosts están registrados como fuentes para peticiones de fuerza bruta a páginas protegidas
+Access Times==Número de accesos
+Server Access Details==Detalles de acceso al servidor
+Local Search Log==Registro de búsqueda local
+Top Search Words (last 7 Days)==Las palabras más buscadas (últimos 7 días)
+Local Search Host Tracker==Rastreador de host de búsqueda local
+Remote Search Log==Registro de búsqueda remota
+Success:==Exitos:
+Remote Search Host Tracker==Rastreador de host de búsqueda remota
+This is a list of searches that had been requested from this' peer search interface==Esta es una lista de búsquedas que han sido solicitadas desde esta interfaz de búsqueda de pares
+Showing #[num]# entries from a total of #[total]# requests.==Mostrando #[num]# entradas de un total de #[total]# peticiones.
+Requesting Host==Solicitando host
+Offset==Offset
+Expected Results==Resultados esperados
+Returned Results==Resultados devueltos
+Used Time (ms)==Tiempo utilizado (en ms)
+URL fetch (ms)==Extracción de la URL (en ms)
+Snippet comp (ms)==Generación de vista previa (en ms)
+Query==Consulta
+Search Word Hashes==Hashes de las palabras de búsqueda
+Count</td>==Cantidad</td>
+Queries Per Last Hour==Consultas durante la última hora
+Access Dates==Fechas de acceso
+This is a list of searches that had been requested from remote peer search interface==Esta es una lista de las búsquedas que han sido solicitadas desde una interfaz de búsqueda de pares remota
+This is a list of requests (max. 1000) to the local http server within the last hour.==Esta es una lista de las peticiones (máx. 1000) al servidor http local durante la última hora.
 #-----------------------------
 
 #File: Settings_UrlProxyAccess.inc
