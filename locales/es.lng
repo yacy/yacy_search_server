@@ -120,6 +120,26 @@ Double==Doble
 No Blacklist selected==No se ha seleccionado una lista negra
 #-----------------------------
 
+#File: BlacklistImpExp_p.html
+#---------------------------
+Blacklist Import==Importación de lista negra
+Used Blacklist engine:==Motor de lista negra utilizado:
+Import blacklist items from...==Importar elementos de la lista negra desde...
+other YaCy peers:==otros pares YaCy:
+"Load new blacklist items"==«Cargar nuevos elementos de la lista negra»
+plain text file:<==archivo de texto plano:<
+XML file:==archivo XML:
+Upload a regular text file which contains one blacklist entry per line.==Subir un archivo de texto regular que contenga una entrada de lista negra por línea.
+Upload an XML file which contains one or more blacklists.==Subir un archivo XML que contenga una o más listas negras.
+Export blacklist items to...==Exportar elementos de la lista negra a...
+Here you can export a blacklist as an XML file. This file will contain additional==Aquí puedes exportar una lista negra como un archivo XML. Este archivo contendrá información
+information about which cases a blacklist is activated for.==adicional sobre los casos en los que se activa una lista negra.
+"Export list as XML"==«Exportar lista como XML»
+Here you can export a blacklist as a regular text file with one blacklist entry per line.==Aquí puedes exportar una lista negra como un archivo de texto regular con una entrada de lista negra por línea.
+This file will not contain any additional information==Este archivo no contendrá información adicional
+"Export list as text"==«Exportar lista como texto»
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
