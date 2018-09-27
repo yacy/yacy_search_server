@@ -153,6 +153,47 @@ Search==Buscar
 Surftips==Consejos de navegación
 #-----------------------------
 
+#File: Blacklist_p.html
+#---------------------------
+Blacklist Administration==Administración de las listas negras
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==Esta función proporciona un filtro de URL para el proxy; cualquier URL en la lista negra está bloqueada
+from being loaded. You can define several blacklists and activate them separately.==y no se cargará. Puedes definir varias listas negras y activarlas por separado.
+You may also provide your blacklist to other peers by sharing them; in return you may==También puedes proporcionar tu lista negra a otros pares compartiéndola con ellos; a cambio puedes
+collect blacklist entries from other peers.==recopilar entradas de lista negra de otros pares.
+Active list:==Lista activa:
+No blacklist selected==No se ha seleccionado una lista negra
+Select list to edit:==Seleccionar lista para editarla:
+not shared::shared==no compartida::compartida
+"select"==«Seleccionar»
+Create new list:==Crear una lista nueva:
+"create"==«Crear»
+Settings for this list==Configuración para esta lista
+"Save"==«Guardar»
+Share/don't share this list==Compartir/no compartir esta lista
+Delete this list==Borrar esta lista
+Edit list==Editar lista
+These are the domain name/path patterns in==Estos son los patrones de nombre de dominio/ruta en
+Blacklist Pattern==en los patrones de lista negra
+Edit selected pattern(s)==Editar patrones seleccionados
+Delete selected pattern(s)==Borrar patrones seleccioandos
+Move selected pattern(s) to==Mover patrones seleccionados a
+Add new pattern:==Añadir patrón nuevo:
+Add URL pattern==Añadir patrón de URL
+The right '*', after the '/', can be replaced by a==El asterico '*' derecho, después de la '/', puede reemplazarse por una
+>regular expression<==>expresión regular<
+domain.net/fullpath<==dominio.net/rutacompleta<
+>domain.net/*<==>dominio.net/*<
+*.domain.net/*<==*.dominio.net/*<
+*.sub.domain.net/*<==*.sub.dominio.net/*<
+(slow)==(lento)
+Activate this list for==Activar esta lista para
+Show entries:==Mostrar entradas:
+Entries per page:==Entradas por página:
+"set"==«asignar»
+Edit existing pattern(s):==Editar patrones existentes:
+"Save URL pattern(s)"==«Guardar patrones de URL»
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
