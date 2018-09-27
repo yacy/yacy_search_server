@@ -1,4 +1,4 @@
-# es.ln
+# es.lng
 # English-->Spanish
 # -----------------------
 # This is a part of YaCy, a peer-to-peer based web search engine
@@ -26,14 +26,14 @@
 # Thank you for your help!
 <!-- lang -->default(english)==español
 <!-- author -->==Iván Hernández Cazorla
-<!-- maintainer -->==&lt;ivan@ivanhercaz.com&gt;
+<!-- maintainer -->==Iván Hernández Cazorla
 #-----------------------------
 
 #File: AccessGrid_p.html
 #---------------------------
-YaCy Network Access==YaCy Netzwerk Zugriff
-Server Access Grid==Server Zugriffsnetz
-This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Diese Bilder zeigen eingehende Verbindungen zu Ihrem YaCy Peer und ausgehende Verbindungen von Ihrem Peer zu anderen Peers und Webservern.
+YaCy Network Access==Acceso a la red YaCy
+Server Access Grid==Red de acceso al servidor
+This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Esta imagen muestra las conexiones entrante a tu par YaCy y las conexiones salientes desde tu par a otros pares y servidores web.
 #-----------------------------
 
 #File: AccessTracker_p.html
