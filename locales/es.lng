@@ -194,6 +194,46 @@ Edit existing pattern(s):==Editar patrones existentes:
 "Save URL pattern(s)"==«Guardar patrones de URL»
 #-----------------------------
 
+#File: Blog.html
+#---------------------------
+by==por
+Comments</a>==Comentarios</a>
+>edit==>editar
+>delete==>borrar
+Edit<==Editar<
+previous entries==entradas anteriores
+next entries==siguientes entradas
+new entry==nueva entrada
+import XML-File==importar archivo XML
+export as XML==exportar como XML
+Blog-Home==Blog-Inicio
+Author:==Autor:
+Subject:==Título:
+You can use==Puedes utilizar
+Yacy-Wiki Code==código wiki-Yacy
+here.==aquí.
+Comments:==Comentarios:
+deactivated==desactivado
+>activated==>activado
+moderated==moderado
+"Submit"==«Enviar»
+"Preview"==«Previsualizar»
+"Discard"==«Descartar»
+>Preview==>Previsualizar
+No changes have been submitted so far!==¡No se han enviado cambios hasta el momento!
+Access denied==Acceso denegado
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Para editar o crear entradas en el blog necesitas estar conectado como administrador o usuarios con privilegios de «Blog»
+Are you sure==¿Estás seguro
+Confirm deletion==Confirmar borrado
+that you want to delete==de que quieres borrarla?
+Yes, delete it.==Sí, bórrala.
+No, leave it.==No, déjala.
+Import was successful!==¡La importación fue un éxito!
+Import failed, maybe the supplied file was no valid blog-backup?==La importación falló, ¿puede ser que el archivo suministrado no fue una copia de seguridad de blog válida?
+Please select the XML-file you want to import:==Por favor, selecciona el archivo XML que quieres importar:
+Text:==Texto
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
