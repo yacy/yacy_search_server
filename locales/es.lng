@@ -234,6 +234,24 @@ Please select the XML-file you want to import:==Por favor, selecciona el archivo
 Text:==Texto
 #-----------------------------
 
+#File: BlogComments.html
+#---------------------------
+by==por
+Comments</a>==Comentarios</a>
+Login==Iniciar sesión
+Blog-Home==Blog-Inicio
+delete</a>==borrar</a>
+allow</a>==permitir</a>
+Author:==Autor:
+Subject:==Título:
+You can use==Puedes utilizar
+Yacy-Wiki Code==código wiki-Yacy
+here.==aquí.
+"Submit"==«Enviar»
+"Preview"==«Previsualizar»
+"Discard"==«Descartar»
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
@@ -375,25 +393,6 @@ No, leave it.==Nein, belassen.
 Import was successful!==Import war erfolgreich!
 Import failed, maybe the supplied file was no valid blog-backup?==Import fehlgeschlagen, unter Umständen war die angegebene Datei keine gültige Blog-Sicherung?
 Please select the XML-file you want to import:==Bitte wählen Sie die XML-Datei die Sie importieren wollen:
-#-----------------------------
-
-#File: BlogComments.html
-#---------------------------
-by==von
-Comments</a>==Kommentare</a>
-Login==Einloggen
-Blog-Home==Blog-Startseite
-delete</a>==löschen</a>
-allow</a>==erlauben</a>
-Author:==Autor:
-Subject:==Titel:
-#Text:==Text:
-You can use==Sie können hier
-Yacy-Wiki Code==YaCy-Wiki Befehle
-here.==benutzen.
-"Submit"=="Absenden"
-"Preview"=="Vorschau"
-"Discard"=="Verwerfen"
 #-----------------------------
 
 #File: Bookmarks.html
