@@ -4377,21 +4377,4 @@ I am currently changing the backend to a more application friendly format and ge
 For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==Aktuell können Sie sich die Lesezeichen ansehen - Die Performance hat sich signifikant gebessert durch die Verwendung von JSON und Flexigrid!
 #-----------------------------
 
-#File: Translator_p.html
-#---------------------------
-Translation Editor==Editor de traducción
-Translate untranslated text of the user interface (current language).==Traduce texto de la interfaz de usuario sin traducir (idioma actual).
-The modified translation file is stored in DATA/LOCALE directory.==La traducción modificada se almacenará en el directorio DATA/LOCALE.
-UI Translation==Traducción de la interfaz de usuario
-Target Language:==Idioma al que traducir:
-activate a different language==activar un idioma diferente
-Source File==Archivo fuente
-view it==ver página
-filter untranslated==filtrar texto sin traducir
-Source Text==Texto fuente
-Translated Text==Texto traducido
-Save translation==Guardar traducción
-Check for remote translation proposals and/or share your own added translations==Comprobar las propuestas de traducción remota o comparta sus propias traducciones agregadas
-#-----------------------------
-
 # EOF
