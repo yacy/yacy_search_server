@@ -86,7 +86,7 @@ Autocralwer Configuration==Configuración del rastreador automático
 You need to restart for some settings to be applied==Necesitas reiniciar para que se apliquen algunos ajustes
 Enable Autocrawler:==Activar el rastreador automático:
 Deep crawl every:==Rastreo profundo cada
-Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.==Atención: si esta cifra es mayor que la de «Filas a buscar» solo se ejecutarán rastreos superficiales.
+Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.==Atención: si esta cifra es mayor que la de "Filas a buscar" solo se ejecutarán rastreos superficiales.
 Rows to fetch at once:==Filas a buscar de una vez:
 Recrawl only older than # days:==Volver a rastrear solo los de más de # días de antigüedad:
 Get hosts by query:==Obtener hosts por consulta:
@@ -95,7 +95,7 @@ Shallow crawl depth (0 to 2):==Profundidad del rastreo superficial (de 0 a 2):
 Deep crawl depth (1 to 5):==Profundida del rastreo exhaustivo (de 1 a 5):
 Index text:==Indexar texto:
 Index media:==Indexar multimedia:
-"Save"==«Guardar»
+"Save"=="Guardar"
 #-----------------------------
 
 #File: BlacklistCleaner_p.html
@@ -103,7 +103,7 @@ Index media:==Indexar multimedia:
 Blacklist Cleaner==Limpiador de lista negra
 Here you can remove or edit illegal or double blacklist-entries.==Aquí puedes eliminar o editar entradas ilegales o duplicadas en la lista negra.
 Check list==Lista de comprobación
-"Check"==«Comprobar»
+"Check"=="Comprobar"
 Allow regular expressions in host part of blacklist entries.==Permitir expresiones regulares en la parte del host de las entradas de la lista negra.
 The blacklist-cleaner only works for the following blacklist-engines up to now:==El limpiador de la lista negra solo funciona hasta ahora para los siguientes motores de listas negras:
 Illegal Entries in #[blList]# for==Entradas ilegales en #[blList]# para
@@ -115,8 +115,8 @@ Path is invalid Regex==La ruta es una expresión regular inválida
 Wildcard not on begin or end==El comodín no está al principio ni al final
 Host contains illegal chars==El host contiene caracteres ilegales
 Double==Doble
-"Change Selected"==«Cambiar selección»
-"Delete Selected"==«Borrar selección»
+"Change Selected"=="Cambiar selección"
+"Delete Selected"=="Borrar selección"
 No Blacklist selected==No se ha seleccionado una lista negra
 #-----------------------------
 
@@ -126,7 +126,7 @@ Blacklist Import==Importación de lista negra
 Used Blacklist engine:==Motor de lista negra utilizado:
 Import blacklist items from...==Importar elementos de la lista negra desde...
 other YaCy peers:==otros pares YaCy:
-"Load new blacklist items"==«Cargar nuevos elementos de la lista negra»
+"Load new blacklist items"=="Cargar nuevos elementos de la lista negra"
 URL:==URL:
 plain text file:<==archivo de texto plano:<
 XML file:==archivo XML:
@@ -135,10 +135,10 @@ Upload an XML file which contains one or more blacklists.==Subir un archivo XML 
 Export blacklist items to...==Exportar elementos de la lista negra a...
 Here you can export a blacklist as an XML file. This file will contain additional==Aquí puedes exportar una lista negra como un archivo XML. Este archivo contendrá información
 information about which cases a blacklist is activated for.==adicional sobre los casos en los que se activa una lista negra.
-"Export list as XML"==«Exportar lista como XML»
+"Export list as XML"=="Exportar lista como XML"
 Here you can export a blacklist as a regular text file with one blacklist entry per line.==Aquí puedes exportar una lista negra como un archivo de texto regular con una entrada de lista negra por línea.
 This file will not contain any additional information==Este archivo no contendrá información adicional
-"Export list as text"==«Exportar lista como texto»
+"Export list as text"=="Exportar lista como texto"
 #-----------------------------
 
 #File: BlacklistTest_p.html
@@ -146,7 +146,7 @@ This file will not contain any additional information==Este archivo no contendr�
 Blacklist Test==Prueba de lista negra
 Used Blacklist engine:==Motor de lista negra utilizado:
 Test list:==Lista de prueba:
-"Test"==«Prueba»
+"Test"=="Prueba"
 The tested URL was==La URL probada fue
 It is blocked for the following cases:==Está bloqueada en los siguientes casos:
 Search==Buscar
@@ -164,11 +164,11 @@ Active list:==Lista activa:
 No blacklist selected==No se ha seleccionado una lista negra
 Select list to edit:==Seleccionar lista para editarla:
 not shared::shared==no compartida::compartida
-"select"==«Seleccionar»
+"select"=="Seleccionar"
 Create new list:==Crear una lista nueva:
-"create"==«Crear»
+"create"=="Crear"
 Settings for this list==Configuración para esta lista
-"Save"==«Guardar»
+"Save"=="Guardar"
 Share/don't share this list==Compartir/no compartir esta lista
 Delete this list==Borrar esta lista
 Edit list==Editar lista
@@ -189,9 +189,9 @@ domain.net/fullpath<==dominio.net/rutacompleta<
 Activate this list for==Activar esta lista para
 Show entries:==Mostrar entradas:
 Entries per page:==Entradas por página:
-"set"==«asignar»
+"set"=="asignar"
 Edit existing pattern(s):==Editar patrones existentes:
-"Save URL pattern(s)"==«Guardar patrones de URL»
+"Save URL pattern(s)"=="Guardar patrones de URL"
 #-----------------------------
 
 #File: Blog.html
@@ -216,13 +216,13 @@ Comments:==Comentarios:
 deactivated==desactivado
 >activated==>activado
 moderated==moderado
-"Submit"==«Enviar»
-"Preview"==«Previsualizar»
-"Discard"==«Descartar»
+"Submit"=="Enviar"
+"Preview"=="Previsualizar"
+"Discard"=="Descartar"
 >Preview==>Previsualizar
 No changes have been submitted so far!==¡No se han enviado cambios hasta el momento!
 Access denied==Acceso denegado
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Para editar o crear entradas en el blog necesitas estar conectado como administrador o usuarios con privilegios de «Blog»
+To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Para editar o crear entradas en el blog necesitas estar conectado como administrador o usuarios con privilegios de "Blog"
 Are you sure==¿Estás seguro
 Confirm deletion==Confirmar borrado
 that you want to delete==de que quieres borrarla?
@@ -247,9 +247,9 @@ Subject:==Título:
 You can use==Puedes utilizar
 Yacy-Wiki Code==código wiki-Yacy
 here.==aquí.
-"Submit"==«Enviar»
-"Preview"==«Previsualizar»
-"Discard"==«Descartar»
+"Submit"=="Enviar"
+"Preview"=="Previsualizar"
+"Discard"=="Descartar"
 #-----------------------------
 
 #File: Bookmarks.html
@@ -265,7 +265,7 @@ Add Bookmark==Añadir marcador
 Import Bookmarks==Importar marcadores
 Import XML Bookmarks==Importar marcadores en XML
 Import HTML Bookmarks==Importar marcadores en HTML
-"import"==«Importar»
+"import"=="Importar"
 Default Tags:==Etiquetas por defecto:
 imported==importado
 Title:==Título:
@@ -275,13 +275,13 @@ Tags (comma separated):==Etiquetas (separadas por comas)
 >Public:==>Público:
 yes==sí
 Bookmark is a newsfeed==El marcador es un suministro de noticias
-"create"==«crear»
+"create"=="crear"
 File:==Archivo:
 import as Public==importar como público
-"private bookmark"==«marcador privado»
-"public bookmark"==«marcador público»
+"private bookmark"=="marcador privado"
+"public bookmark"=="marcador público"
 Tagged with==Etiquetado con
-'Confirm deletion'==«Confirmar borrado»
+'Confirm deletion'=="Confirmar borrado"
 Edit==Editar
 Delete==Eliminar
 Folders==Carpetas
@@ -295,7 +295,7 @@ Show==Mostrar
 Bookmarks per page.==Marcadores por página.
 start autosearch of new bookmarks==comenzar la búsqueda automatica de nuevos marcadores
 This starts a serach of new or modified bookmarks since startup==Esto iniciará una búsqueda de marcadores nuevos o modificados desde el inicio
-in folder "search" with "query=&lt;original_search_term&gt;"==en la carpeta «search» con «query=&lt;original_search_term&gt;»
+in folder "search" with "query=&lt;original_search_term&gt;"==en la carpeta "search" con "query=&lt;original_search_term&gt;"
 Every peer online will be ask for results.==Se pedirán resultados a cada uno de los pares en línea.
 #-----------------------------
 
@@ -326,9 +326,9 @@ This is required if you want a remote access to your peer, but it also hardens a
 Peer User:==Usuario par:
 New Peer Password:==Nueva contraseña par:
 Repeat Peer Password:==Repite la contraseña par:
-"Define Administrator"==«Definir administrador»
+"Define Administrator"=="Definir administrador"
 >Access Rules<==>Reglas de acceso<
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Protección de todas las páginas: si está activo, el acceso a todas las páginas necesitará autorización; si está desactivado, solo las páginas con la extensión «_p» están protegidas.
+Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Protección de todas las páginas: si está activo, el acceso a todas las páginas necesitará autorización; si está desactivado, solo las páginas con la extensión "_p" están protegidas.
 Set Access Rules==Establecer reglas de acceso
 Select user==Seleccionar usuario
 New user==Nuevo usuario
@@ -359,12 +359,12 @@ The path where the cache is stored==La ruta en la que se almacena la caché
 The current size of the cache==El tamaño actual de la caché
 >#[actualCacheSize]# MB for #[actualCacheDocCount]# files, #[docSizeAverage]# KB / file in average==>#[actualCacheSize]# MB para #[actualCacheDocCount]# archivos, #[docSizeAverage]# KB / archivo de media.
 The maximum size of the cache==El tamaño máximo de la caché
-"Set"==«Establecer»
+"Set"=="Establecer"
 Cleanup==Limpiar
 Cache Deletion==Borrado de la caché
 Delete HTTP &amp; FTP Cache==Borrar la caché HTTP y FTP
 Delete robots.txt Cache==Borrar la caché de robots.txt
-"Delete"==«Borrar»
+"Delete"=="Borrar"
 #-----------------------------
 
 #File: ConfigHeuristics_p.html
@@ -383,11 +383,11 @@ The search result was discovered by a heuristic, not previously known by YaCy==E
 'site'-operator: instant shallow crawl==sitio-operador: rastreo superficial instantáneo
 When a search is made using a 'site'-operator (like: 'download site:yacy.net') then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Cuando se realiza una búsqueda utilizando 'sitio'-operador (por ej. 'download site:yacy.net') el host del sitio-operador es rastreado instantáneamente con un rastreo de host restringido de profundidad 1.
 That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Esto significa que justo después de la petición de búsqueda se carga la página del portal del host y cada página que está enlazada en esta página y que apunta a una página en el mismo host.
-Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).==Debido a que este «rastreo instantáneo» debe atenerse a los robots.txt y a un mínimo de tiempo de acceso entre dos páginas consecutivas, esta heurística es bastante lenta, pero puede descubrir todas los resultados de búsqueda deseadas usando una segunda búsqueda (después de una pequeña pausa de algunos segundos).
+Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).==Debido a que este "rastreo instantáneo" debe atenerse a los robots.txt y a un mínimo de tiempo de acceso entre dos páginas consecutivas, esta heurística es bastante lenta, pero puede descubrir todas los resultados de búsqueda deseadas usando una segunda búsqueda (después de una pequeña pausa de algunos segundos).
 search-result: shallow crawl on all displayed search results==buscar-resultado: rastreo superficial de todos los resultados de búsqueda mostrados
 When a search is made then all displayed result links are crawled with a depth-1 crawl.==Cuando se realiza una búsqueda se rastrean todos los enlaces de los resultados mostrados con un rastreo de profundidad 1.
 This means: right after the search request every page is loaded and every page that is linked on this page.==Esto significa que justo después de la petición de búsqueda se carga cada página y cada página que está enlazada en esa página.
-If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==Si seleccionas «añadir como tarea de rastreo global» las páginas que se rastreen son añadidas a la cola de rastreo global (los pares remotos puede coger páginas para rastrearlas).
+If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==Si seleccionas "añadir como tarea de rastreo global" las páginas que se rastreen son añadidas a la cola de rastreo global (los pares remotos puede coger páginas para rastrearlas).
 Default is to add the links to the local crawl queue (your peer crawls the linked pages).==Por defecto se añaden los enlaces a la cola de rastreo local (tu par rastrea las páginas enlazadas).
 add as global crawl job==añadir como tarea de rastreo global
 opensearch load external search result list from active systems below==la búsqueda abierta (OpenSearch) carga una lista de resultados de búsqueda externos a partir de los sistemas activos mostrados abajo
@@ -402,18 +402,18 @@ Url <small>(format opensearch==URL <small>(formato de búsqueda abierta
 Url template syntax==Sintáxis de la plantilla de la URL
 >delete<==>borrar<
 >new<==>nuevo<
-"add"==«añadir»
-"Save"==«Guardar»
-"reset to default list"==«Restablecer a la lista por defecto»
-"discover from index" class==la clase «descubrir a partir del índice»
+"add"=="añadir"
+"Save"=="Guardar"
+"reset to default list"=="Restablecer a la lista por defecto"
+"discover from index" class==la clase "descubrir a partir del índice"
 start background task, depending on index size this may run a long time==inicia una tarea en segundo plano, dependiendo del tamaño del índice esto puede durar mucho tiempo
-With the button "discover from index" you can search within the metadata of your local index (Web Structure Index) to find systems which support the Opensearch specification.==Con el botón «descubrir a partir del índice» puedes buscar en los metadatos de tu índice local (Web Structure Index) para encontrar sistemas que admitan la especificación OpenSearch.
+With the button "discover from index" you can search within the metadata of your local index (Web Structure Index) to find systems which support the Opensearch specification.==Con el botón "descubrir a partir del índice" puedes buscar en los metadatos de tu índice local (Web Structure Index) para encontrar sistemas que admitan la especificación OpenSearch.
 The task is started in the background. It may take some minutes before new entries appear (after refreshing the page).==La tarea se ha iniciado en segundo plano. Puede que tarde unos minutos antes de que aparezcan las nuevas entradas (después de refrescar la página).
 Alternatively you may==Como alternativa, tu puedes
 >copy &amp; paste a example config file<==>copiar y pegar un archivo de configuración de ejemplo<
 located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==ubicado en <i>defaults/heuristicopensearch.conf</i> en el directorio DATA/SETTINGS.
 For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.==Para la función de descubrimiento la opción <i>web graph</i> del índice de la estructura web y los campos <i>target_rel_s</i>, <i>target_protocol_s</i> y <i>target_urlstub_s</i> tienen que ser activados en el <a href="IndexSchema_p.html"?core=webgraph">esquema Solr webgraph</a>. 
-"switch Solr fields on"==«activar campos Solr»
+"switch Solr fields on"=="activar campos Solr"
 ('modify Solr Schema')==('modificar esquema Solr')
 #-----------------------------
 
