@@ -299,6 +299,13 @@ in folder "search" with "query=&lt;original_search_term&gt;"==en la carpeta «se
 Every peer online will be ask for results.==Se pedirán resultados a cada uno de los pares en línea.
 #-----------------------------
 
+#File: Collage.html
+#---------------------------
+Image Collage==Collage de imagen
+Private Queue==Cola privada
+Public Queue==Cola pública
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
