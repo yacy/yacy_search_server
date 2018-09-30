@@ -306,6 +306,49 @@ Private Queue==Cola privada
 Public Queue==Cola pública
 #-----------------------------
 
+#File: ConfigAccounts_p.html
+#---------------------------
+User Accounts==Cuentas de usuario
+User Administration==Administración de usuario
+User created:==Usuario creado:
+User changed:==Usuario cambiado:
+Generic error.==Error genérico.
+Passwords do not match.==Las contraseñas no coinciden.
+Username too short. Username must be &gt;= 4 Characters.==El nombre de usuario es demasiado corto. Debe ser &gt;= a 4 caracteres.
+Username already used (not allowed).==El nombre de usuario está en uso (no permitido).
+No password is set for the administration account.==No se ha establecido una contraseña para la cuenta de administración.
+Please define a password for the admin account.==Por favor, define una contraseña para la cuenta de administrador.
+Admin Account==Cuenta de administrador
+Access from localhost without account==Acceder desde localhost sin cuenta
+Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==El acceso a tu par desde tu propio ordenador (acceso localhost) se concede con permisos de administrador. No es necesario configurar una cuenta de administración.
+Access only with qualified account==Solo acceso con una cuenta cualificada
+This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Esto es necesario si quieres acceder remotamente a tu par, pero también endurece los controles de acceso a las operaciones administrativas de tu par.
+Peer User:==Usuario par:
+New Peer Password:==Nueva contraseña par:
+Repeat Peer Password:==Repite la contraseña par:
+"Define Administrator"==«Definir administrador»
+>Access Rules<==>Reglas de acceso<
+Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Protección de todas las páginas: si está activo, el acceso a todas las páginas necesitará autorización; si está desactivado, solo las páginas con la extensión «_p» están protegidas.
+Set Access Rules==Establecer reglas de acceso
+Select user==Seleccionar usuario
+New user==Nuevo usuario
+Edit User==Editar usuario
+Delete User==Borrar usuario
+Edit current user:==Editar usuario actual:
+Username</label>==Nombre de usuario</label>
+Password</label>==Contraseña</label>
+Repeat password==Repetir contraseña
+First name==Nombre
+Last name==Apellidos
+Address==Dirección
+Rights==Derechos
+Timelimit==Tiempo límite
+Time used==Tiempo utilizado
+Save User==Guardar usuario
+This setting is convenient but less secure than using a qualified admin account.==Este ajuste es conveniente pero menos seguro que usar una cuenta cualificada de administrador.
+Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Por favor, utilízalo con cuidado, especialmente cuando navegues por sitios web inseguros o potencialmente maliciosos mientras tu par YaCy esté funcionando en el mismo ordenador.
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
