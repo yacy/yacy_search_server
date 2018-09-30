@@ -252,6 +252,53 @@ here.==aquí.
 "Discard"==«Descartar»
 #-----------------------------
 
+#File: Bookmarks.html
+#---------------------------
+YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': marcadores
+The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Esta lista de marcadores puede ser consultada como un feed RSS. Esto también se puede hacer cuando seleccionas una etiqueta específica.
+Click the API icon to load the RSS from the current selection.==Clica el icono API para cargar el RSS de la selección actual.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Para ver la lista de todas las API, por favor visita la <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">página API de la wiki</a>.
+<h3>Bookmarks==<h3>Marcadores
+Bookmarks (==Marcadores (
+List Bookmarks==Lista de marcadores
+Add Bookmark==Añadir marcador
+Import Bookmarks==Importar marcadores
+Import XML Bookmarks==Importar marcadores en XML
+Import HTML Bookmarks==Importar marcadores en HTML
+"import"==«Importar»
+Default Tags:==Etiquetas por defecto:
+imported==importado
+Title:==Título:
+Description:==Descripción:
+Folder (/folder/subfolder):==Carpeta (/carpeta/subcarpeta):
+Tags (comma separated):==Etiquetas (separadas por comas)
+>Public:==>Público:
+yes==sí
+Bookmark is a newsfeed==El marcador es un suministro de noticias
+"create"==«crear»
+File:==Archivo:
+import as Public==importar como público
+"private bookmark"==«marcador privado»
+"public bookmark"==«marcador público»
+Tagged with==Etiquetado con
+'Confirm deletion'==«Confirmar borrado»
+Edit==Editar
+Delete==Eliminar
+Folders==Carpetas
+Bookmark Folder==Carpeta de marcadores
+Tags==Etiquetas
+Bookmark List==Lista de marcadores
+previous page==página anterior
+next page==siguiente página
+All==Todo
+Show==Mostrar
+Bookmarks per page.==Marcadores por página.
+start autosearch of new bookmarks==comenzar la búsqueda automatica de nuevos marcadores
+This starts a serach of new or modified bookmarks since startup==Esto iniciará una búsqueda de marcadores nuevos o modificados desde el inicio
+in folder "search" with "query=&lt;original_search_term&gt;"==en la carpeta «search» con «query=&lt;original_search_term&gt;»
+Every peer online will be ask for results.==Se pedirán resultados a cada uno de los pares en línea.
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
