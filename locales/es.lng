@@ -349,6 +349,24 @@ This setting is convenient but less secure than using a qualified admin account.
 Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Por favor, utilízalo con cuidado, especialmente cuando navegues por sitios web inseguros o potencialmente maliciosos mientras tu par YaCy esté funcionando en el mismo ordenador.
 #-----------------------------
 
+#File: ConfigHTCache_p.html
+#---------------------------
+Hypertext Cache Configuration==Configuración de la caché de hipertexto
+The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==La cacheHT almacena contenido recuperado con los protocolos HTTP y FTP.
+The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==La caché es una caché rotativa: si está completa las entradas más antiguas son eliminadas, de manera que una nueva puede ocupar su espacio.
+HTCache Configuration==Configuración de la HTCache
+The path where the cache is stored==La ruta en la que se almacena la caché
+The current size of the cache==El tamaño actual de la caché
+>#[actualCacheSize]# MB for #[actualCacheDocCount]# files, #[docSizeAverage]# KB / file in average==>#[actualCacheSize]# MB para #[actualCacheDocCount]# archivos, #[docSizeAverage]# KB / archivo de media.
+The maximum size of the cache==El tamaño máximo de la caché
+"Set"==«Establecer»
+Cleanup==Limpiar
+Cache Deletion==Borrado de la caché
+Delete HTTP &amp; FTP Cache==Borrar la caché HTTP y FTP
+Delete robots.txt Cache==Borrar la caché de robots.txt
+"Delete"==«Borrar»
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
