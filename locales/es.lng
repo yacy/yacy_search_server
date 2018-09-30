@@ -367,6 +367,56 @@ Delete robots.txt Cache==Borrar la caché de robots.txt
 "Delete"==«Borrar»
 #-----------------------------
 
+#File: ConfigHeuristics_p.html
+#---------------------------
+Heuristics Configuration==Configuración heurística
+A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==La <a href="https://es.wikipedia.org/wiki/Heur%C3%ADstica" target="_blank">heurística</a> es una técnica basa en la experiencia que ayuda a aprender, a descubrir y resolver problemas.
+The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==La búsqueda heurística que puede ser seleccionada aquí consiste en técnica que ayuda al descubrimiento de posibles resultados de búsqueda basados en adivinación de enlaces, rastreo durante la búsqueda y peticiones a otros motores de búsqueda.
+When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Cuando se usa una búsqueda heurística los enlaces resultantes no son utilizados directamente como resultados de búsqueda, sino que las páginas cargadas son indexadas y almacenadas como cualquier otro contenido.
+This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Esto asegura que las listas negras puedan ser usadas y que la palabra buscada aparezca realmente en la página que fue descubierta a partir de la heurística.
+The success of heuristics are marked with an image==El éxito de las heurísticas está marcado con una imagen.
+heuristic:&lt;name&gt;==heurística:&lt;nombre&gt;
+(new link)==(nuevo enlace)
+below the favicon left from the search result entry:==debajo el favicon a la izquierda de la entrada de los resultados de búsqueda.
+The search result was discovered by a heuristic, but the link was already known by YaCy==El resultado de búsqueda fue descubierto a partir de una heurística, pero el enlace ya era conocido por YaCy
+The search result was discovered by a heuristic, not previously known by YaCy==El resultado de búsqueda fue descubierto a partir de una heurística, no era conocido previamente por YaCy
+'site'-operator: instant shallow crawl==sitio-operador: rastreo superficial instantáneo
+When a search is made using a 'site'-operator (like: 'download site:yacy.net') then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Cuando se realiza una búsqueda utilizando 'sitio'-operador (por ej. 'download site:yacy.net') el host del sitio-operador es rastreado instantáneamente con un rastreo de host restringido de profundidad 1.
+That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Esto significa que justo después de la petición de búsqueda se carga la página del portal del host y cada página que está enlazada en esta página y que apunta a una página en el mismo host.
+Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).==Debido a que este «rastreo instantáneo» debe atenerse a los robots.txt y a un mínimo de tiempo de acceso entre dos páginas consecutivas, esta heurística es bastante lenta, pero puede descubrir todas los resultados de búsqueda deseadas usando una segunda búsqueda (después de una pequeña pausa de algunos segundos).
+search-result: shallow crawl on all displayed search results==buscar-resultado: rastreo superficial de todos los resultados de búsqueda mostrados
+When a search is made then all displayed result links are crawled with a depth-1 crawl.==Cuando se realiza una búsqueda se rastrean todos los enlaces de los resultados mostrados con un rastreo de profundidad 1.
+This means: right after the search request every page is loaded and every page that is linked on this page.==Esto significa que justo después de la petición de búsqueda se carga cada página y cada página que está enlazada en esa página.
+If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==Si seleccionas «añadir como tarea de rastreo global» las páginas que se rastreen son añadidas a la cola de rastreo global (los pares remotos puede coger páginas para rastrearlas).
+Default is to add the links to the local crawl queue (your peer crawls the linked pages).==Por defecto se añaden los enlaces a la cola de rastreo local (tu par rastrea las páginas enlazadas).
+add as global crawl job==añadir como tarea de rastreo global
+opensearch load external search result list from active systems below==la búsqueda abierta (OpenSearch) carga una lista de resultados de búsqueda externos a partir de los sistemas activos mostrados abajo
+When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==Cuando se utiliza esta heurística cada nueva línea de petición de búsqueda es utilizada para una llamada a los sistemas de búsqueda abierta listados.
+20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 resultados son tomados del sistema remoto y cargados simultáneamente, analizados e indexados inmediatamente.
+To find out more about OpenSearch see==Para saber más sobre OpenSearch vea
+Available/Active Opensearch System==Disponible/Sistema de búsqueda abierta activo
+>Active<==>Activo<
+>Title<==>Título<
+>Comment<==>Comentario<
+Url <small>(format opensearch==URL <small>(formato de búsqueda abierta
+Url template syntax==Sintáxis de la plantilla de la URL
+>delete<==>borrar<
+>new<==>nuevo<
+"add"==«añadir»
+"Save"==«Guardar»
+"reset to default list"==«Restablecer a la lista por defecto»
+"discover from index" class==la clase «descubrir a partir del índice»
+start background task, depending on index size this may run a long time==inicia una tarea en segundo plano, dependiendo del tamaño del índice esto puede durar mucho tiempo
+With the button "discover from index" you can search within the metadata of your local index (Web Structure Index) to find systems which support the Opensearch specification.==Con el botón «descubrir a partir del índice» puedes buscar en los metadatos de tu índice local (Web Structure Index) para encontrar sistemas que admitan la especificación OpenSearch.
+The task is started in the background. It may take some minutes before new entries appear (after refreshing the page).==La tarea se ha iniciado en segundo plano. Puede que tarde unos minutos antes de que aparezcan las nuevas entradas (después de refrescar la página).
+Alternatively you may==Como alternativa, tu puedes
+>copy &amp; paste a example config file<==>copiar y pegar un archivo de configuración de ejemplo<
+located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==ubicado en <i>defaults/heuristicopensearch.conf</i> en el directorio DATA/SETTINGS.
+For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.==Para la función de descubrimiento la opción <i>web graph</i> del índice de la estructura web y los campos <i>target_rel_s</i>, <i>target_protocol_s</i> y <i>target_urlstub_s</i> tienen que ser activados en el <a href="IndexSchema_p.html"?core=webgraph">esquema Solr webgraph</a>. 
+"switch Solr fields on"==«activar campos Solr»
+('modify Solr Schema')==('modificar esquema Solr')
+#-----------------------------
+
 #File: Settings_UrlProxyAccess.inc
 #---------------------------
 URL Proxy Settings<==URL Proxy Einstellungen<
