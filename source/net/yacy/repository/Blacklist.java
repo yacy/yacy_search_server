@@ -236,7 +236,10 @@ public class Blacklist {
                     	log.warn("ignored blacklist path to prevent 'Dangling meta character' exception: " + a);
                         continue;
                     }
-                    loadedPathsPattern.add(Pattern.compile(a, Pattern.CASE_INSENSITIVE)); // add case insesitive regex
+                    /* We ensure now that any necessary percent-encoding is applied, as the blacklist file may have been manually edited.
+                     * (when using the web interface, encoding should already have been applied in the add() function) */
+                    final String normalizedPattern = MultiProtocolURL.escapePathPattern(a);
+                    loadedPathsPattern.add(Pattern.compile(normalizedPattern, Pattern.CASE_INSENSITIVE)); // add case insesitive regex
                 }
 
                 // create new entry if host mask unknown, otherwise merge
@@ -348,8 +351,9 @@ public class Blacklist {
 					final String host = itemToAdd.getHost();
 					final String path = itemToAdd.getPath();
 					final String safeHost = Punycode.isBasic(host) ? host : MultiProtocolURL.toPunycode(host);
+					final String safePath = MultiProtocolURL.escapePathPattern(path);
 
-					if (contains(blacklistType, safeHost, path)) {
+					if (contains(blacklistType, safeHost, safePath)) {
 						/* Continue to the next item */
 						continue;
 					}
@@ -364,7 +368,7 @@ public class Blacklist {
 						continue;
 					}
 
-					String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
+					String p = (!safePath.isEmpty() && safePath.charAt(0) == '/') ? safePath.substring(1) : safePath;
 					final Map<String, Set<Pattern>> blacklistMap = getBlacklistMap(blacklistType, isMatchable(host));
 
 					// avoid PatternSyntaxException e
@@ -376,7 +380,7 @@ public class Blacklist {
 
 					Set<Pattern> hostList;
 					if (!(blacklistMap.containsKey(h) && ((hostList = blacklistMap.get(h)) != null))) {
-						blacklistMap.put(h, (hostList = new HashSet<Pattern>()));
+						blacklistMap.put(h, (hostList = new HashSet<>()));
 					}
 
 					Pattern pattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE);
@@ -438,6 +442,7 @@ public class Blacklist {
         }
         
         String p = (!path.isEmpty() && path.charAt(0) == '/') ? path.substring(1) : path;
+        p = MultiProtocolURL.escapePathPattern(p);
 
         // avoid PatternSyntaxException e
         String h = ((!isMatchable(host) && !host.isEmpty() && host.charAt(0) == '*') ? "." + host : host).toLowerCase(Locale.ROOT);

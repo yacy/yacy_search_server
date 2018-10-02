@@ -81,8 +81,22 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     private static final Pattern patternMail = Pattern.compile("^[a-z]+:.*?");
     //private static final Pattern patternSpace = Pattern.compile("%20");
 
-    private final static BitSet UNRESERVED_RFC1738 = new BitSet(128); // register unreserved chars (never escaped in url)
-    private final static BitSet UNRESERVED_PATH    = new BitSet(128); // register unreserved chars for path part (not escaped in path)
+    /** Register unreserved chars (never escaped in url) */
+    private final static BitSet UNRESERVED_RFC1738 = new BitSet(128);
+    
+    /** Register unreserved chars for path part (not escaped in path) */
+    private final static BitSet UNRESERVED_PATH    = new BitSet(128);
+    
+	/**
+	 * Register regular expressions metacharacters used by the {@link Pattern}
+	 * class.
+	 * 
+	 * @see <a href=
+	 *      "https://docs.oracle.com/javase/tutorial/essential/regex/literals.html">Regular
+	 *      expressions string literals documentation</a>
+	 */
+	private static final BitSet PATTERN_METACHARACTERS = new BitSet(128);
+    
     static {
         // unreserved characters (chars not to escape in url)
         for (int i = 'A'; i <= 'Z'; i++) { // hialpha RFC1738 Section 5
@@ -119,6 +133,27 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
         UNRESERVED_PATH.set('@');
         UNRESERVED_PATH.set('&');
         UNRESERVED_PATH.set('=');
+        
+        /* Pattern metacharacters : <([{\^-=$!|]})?*+.> */
+        PATTERN_METACHARACTERS.set('<');
+        PATTERN_METACHARACTERS.set('(');
+        PATTERN_METACHARACTERS.set('[');
+        PATTERN_METACHARACTERS.set('{');
+        PATTERN_METACHARACTERS.set('\\');
+        PATTERN_METACHARACTERS.set('^');
+        PATTERN_METACHARACTERS.set('-');
+        PATTERN_METACHARACTERS.set('=');
+        PATTERN_METACHARACTERS.set('$');
+        PATTERN_METACHARACTERS.set('!');
+        PATTERN_METACHARACTERS.set('|');
+        PATTERN_METACHARACTERS.set(']');
+        PATTERN_METACHARACTERS.set('}');
+        PATTERN_METACHARACTERS.set(')');
+        PATTERN_METACHARACTERS.set('?');
+        PATTERN_METACHARACTERS.set('*');
+        PATTERN_METACHARACTERS.set('+');
+        PATTERN_METACHARACTERS.set('.');
+        PATTERN_METACHARACTERS.set('>');
     }
 
     // session id handling
@@ -552,45 +587,135 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
      * </ul>
      */
     private void escape() {
-        if (this.path != null && this.path.indexOf('%') == -1) escapePath();
+        if (this.path != null && this.path.indexOf('%') == -1) {
+        	this.path = escapePath(this.path);
+        }
         if (this.searchpart != null && this.searchpart.indexOf('%') == -1) escapeSearchpart();
         if (this.anchor != null) this.anchor = escape(this.anchor).toString();
     }
 
-    /**
-     * Url encode/escape the path part according to the allowed characters
-     * (RFC1738 & RFC2396)
-     * uses UTF-8 character codes for non-ASCII
-     */
-    private void escapePath() {
-        final StringBuilder ptmp = new StringBuilder(this.path.length() + 10);
-        boolean modified = false;
-        final int len = this.path.length();
-        for (int i = 0; i < len; i++) {
-            int ch = this.path.charAt(i);
-            if (ch <= 0x7F) {
-                if (UNRESERVED_PATH.get(ch)) {
-                    ptmp.append((char) ch);
-                } else {
-                    ptmp.append(hex[ch]);
-                    modified = true;
-                }
-            } else if (ch <= 0x07FF) {              // non-ASCII <= 0x7FF
-                ptmp.append(hex[0xc0 | (ch >> 6)]);
-                ptmp.append(hex[0x80 | (ch & 0x3F)]);
-                modified = true;
-            } else {                                // 0x7FF < ch <= 0xFFFF
-                ptmp.append(hex[0xe0 | (ch >> 12)]);
-                ptmp.append(hex[0x80 | ((ch >> 6) & 0x3F)]);
-                ptmp.append(hex[0x80 | (ch & 0x3F)]);
-                modified = true;
-            }
-        }
-        if (modified) {
-            this.path = ptmp.toString();
-        }
+	/**
+	 * <p>Percent-encode/escape an URL path part according to the allowed characters
+	 * (see RFC3986, and formerly RFC1738 & RFC2396). Uses UTF-8 character codes for
+	 * non-ASCII.</p>
+	 * <p>Important : already percent-encoded characters are not re-encoded</p>
+	 * 
+	 * @param pathToEscape the path part to escape.
+	 * @return an escaped path with only ASCII characters, or null when pathToEscape
+	 *         is null.
+	 * @see <a href="https://tools.ietf.org/html/rfc3986#section-2.1">RFC3986
+	 *      percent-encoding section</a>
+	 * @see <z href="https://tools.ietf.org/html/rfc3986#appendix-A">RFC3986 path
+	 *      definition</a>
+	 */
+    public static String escapePath(final String pathToEscape) {
+    	return escapePath(pathToEscape, false);
     }
+    
+	/**
+	 * <p>Percent-encode/escape an URL path regular expression according to the allowed
+	 * characters in an URL path (see RFC3986) and in the {@link Pattern} regular
+	 * expressions. Uses UTF-8 character codes for non-ASCII.</p>
+	 * <p>Important : already percent-encoded characters are not re-encoded</p>
+	 * 
+	 * @param pathPattern the URL path regular expression to escape.
+	 * @return an escaped path regular expression with only allowed ASCII
+	 *         characters, or null when pathPattern is null.
+	 * @see <a href="https://tools.ietf.org/html/rfc3986#section-2.1">RFC3986
+	 *      percent-encoding section</a>
+	 * @see <z href="https://tools.ietf.org/html/rfc3986#appendix-A">RFC3986 path
+	 *      definition</a>
+	 */
+	public static String escapePathPattern(final String pathPattern) {
+		return escapePath(pathPattern, true);
+	}
+    
+	/**
+	 * <p>
+	 * Percent-encode/escape an URL path part according to the allowed characters
+	 * specified in RFC3986 (formerly RFC1738 and RFC2396). Uses UTF-8 character
+	 * codes for non-ASCII.
+	 * </p>
+	 * <p>
+	 * When isPattern is true, the string is processed as a regular expression, and
+	 * therefore meta-characters used by the {@link Pattern} class are not
+	 * percent-encoded.
+	 * </p>
+	 * 
+	 * @param pathToEscape the path part to escape.
+	 * @param isPattern    when true, regular meta-characters are not escaped
+	 * @return an escaped path regular expression with only allowed ASCII
+	 *         characters, or null when pathPattern is null.
+	 * @see <a href="https://tools.ietf.org/html/rfc3986#section-2.1">RFC3986
+	 *      percent-encoding section</a>
+	 * @see <z href="https://tools.ietf.org/html/rfc3986#appendix-A">RFC3986 path
+	 *      definition</a>
+	 */
+	private static String escapePath(final String pathToEscape, final boolean isPattern) {
+		if (pathToEscape == null) {
+			return pathToEscape;
+		}
+		final StringBuilder ptmp = new StringBuilder(pathToEscape.length() + 10);
+		boolean modified = false;
+		final int len = pathToEscape.length();
+		int i = 0;
+		while (i < len) {
+			int ch = pathToEscape.charAt(i);
+			if (ch == '%' && (i + 2) < len) {
+				final char digit1 = pathToEscape.charAt(i + 1);
+				final char digit2 = pathToEscape.charAt(i + 2);
+				if (isHexDigit(digit1) && isHexDigit(digit2)) {
+					/* Already percent-encoded character */
+					ptmp.append((char) ch);
+					/* Normalize hexadecimal digits to upper case */
+					if (Character.isLowerCase(digit1) || Character.isLowerCase(digit2)) {
+						modified = true;
+					}
+					ptmp.append(Character.toUpperCase(digit1));
+					ptmp.append(Character.toUpperCase(digit2));
+					i += 2;
+				} else {
+					/* Not a valid percent-encoded character : we encode it now */
+					ptmp.append(hex[ch]);
+					modified = true;
+				}
+			} else if (isPattern && PATTERN_METACHARACTERS.get(ch)) {
+				ptmp.append((char) ch);
+			} else if (ch <= 0x7F) {
+				if (UNRESERVED_PATH.get(ch)) {
+					ptmp.append((char) ch);
+				} else {
+					ptmp.append(hex[ch]);
+					modified = true;
+				}
+			} else if (ch <= 0x07FF) { // non-ASCII <= 0x7FF
+				ptmp.append(hex[0xc0 | (ch >> 6)]);
+				ptmp.append(hex[0x80 | (ch & 0x3F)]);
+				modified = true;
+			} else { // 0x7FF < ch <= 0xFFFF
+				ptmp.append(hex[0xe0 | (ch >> 12)]);
+				ptmp.append(hex[0x80 | ((ch >> 6) & 0x3F)]);
+				ptmp.append(hex[0x80 | (ch & 0x3F)]);
+				modified = true;
+			}
+			i++;
+		}
 
+		if (modified) {
+			return ptmp.toString();
+		}
+		return pathToEscape;
+	}
+    
+	/**
+	 * @param character a character to test
+	 * @return true when the character is a valid hexadecimal digit
+	 */
+	private static boolean isHexDigit(final int character) {
+		return (character >= '0' && character <= '9') || (character >= 'a' && character <= 'f')
+				|| (character >= 'A' && character <= 'F');
+	}
+	
     private void escapeSearchpart() {
         final StringBuilder qtmp = new StringBuilder(this.searchpart.length() + 10);
         for (final Map.Entry<String, String> element: getAttributes().entrySet()) {

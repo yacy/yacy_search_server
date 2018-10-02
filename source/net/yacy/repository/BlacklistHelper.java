@@ -29,7 +29,7 @@ public final class BlacklistHelper {
 	 * @param entry a blacklist entry. Must not be null.
 	 * @return the entry eventually modified to be ready to use by the Blacklist engine
 	 */
-	protected static String prepareEntry(final String entry) {
+	public static String prepareEntry(final String entry) {
 		String newEntry = entry;
     	/* Remove the eventual unnecessary Regex line beginning char '^' and URL scheme (protocol) part */
     	Matcher schemeMatcher = URL_SCHEME_PATTERN.matcher(newEntry);
