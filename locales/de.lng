@@ -318,7 +318,7 @@ Show==Zeige
 Bookmarks per page.==Lesezeichen pro Seite.
 #unsorted==unsortiert
 start autosearch of new bookmarks==Starte Autosearch für neue Lesezeichen
-This starts a serach of new or modified bookmarks since startup==Startet eine Suche mit neuen oder geänderten Lesezeichen seit Programmstart
+This starts a search of new or modified bookmarks since startup==Startet eine Suche mit neuen oder geänderten Lesezeichen seit Programmstart
 in folder "search" with "query=&lt;original_search_term&gt;"==in Ordner "search" mit "query=&lt;original_search_term&gt;"
 Every peer online will be ask for results.==Jeder Peer online wird nach Suchergebnissen gefragt.
 #-----------------------------

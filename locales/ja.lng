@@ -337,7 +337,7 @@ Show==表示する
 Bookmarks per page.==ページ毎のブックマーク.
 #unsorted==ソートされていないもの
 start autosearch of new bookmarks==新しいブックマークの自動検索を開始する
-This starts a serach of new or modified bookmarks since startup==これは "search" フォルダー内で "query=&lt;original_search_term&gt;" で
+This starts a search of new or modified bookmarks since startup==これは "search" フォルダー内で "query=&lt;original_search_term&gt;" で
 in folder "search" with "query=&lt;original_search_term&gt;"==起動してからの新しいまたは編集されたブックマークの検索を開始します
 Every peer online will be ask for results.==全てのオンラインのピアは結果を要求されるでしょう.
 #-----------------------------
