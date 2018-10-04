@@ -419,10 +419,21 @@ public class Blacklist_p {
             }
 
             for (int j = offset; j < to; ++j){
-                final String nextEntry = sortedlist[j];
+                String nextEntry = sortedlist[j];
 
-                if (nextEntry.isEmpty()) continue;
-                if (nextEntry.charAt(0) == '#') continue;
+                if (nextEntry.isEmpty()) {
+                	continue;
+                }
+                if (nextEntry.charAt(0) == '#') {
+                	continue;
+                }
+                
+                /** Decode the entry for easier reading of paths with non ascii characters */
+        		final int slashPos = nextEntry.indexOf('/', 0);
+        		if(slashPos > 0) {
+        			nextEntry = nextEntry.substring(0, slashPos + 1) + MultiProtocolURL.unescapePath(nextEntry.substring(slashPos + 1));
+        		}
+                
                 prop.put(DISABLED + EDIT + "Itemlist_" + entryCount + "_dark", dark ? "1" : "0");
                 dark = !dark;
                 /* We do not use here putHTML as we don't want '+' characters to be interpreted as application/x-www-form-urlencoded encoding */

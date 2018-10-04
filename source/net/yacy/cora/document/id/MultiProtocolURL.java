@@ -37,6 +37,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.BitSet;
 import java.util.LinkedHashMap;
@@ -705,6 +706,60 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
 			return ptmp.toString();
 		}
 		return pathToEscape;
+	}
+	
+	/**
+	 * Decode UTF-8 percent-encoded characters eventually found in the given path.
+	 * <ul>
+	 * Differences with {@link URLDecoder#decode(String, String)} :
+	 * <li>the '+' character is not decoded to space character</li>
+	 * <li>no exception is thrown when invalid hexadecimal digits are found after a '%' character</li>
+	 * </ul>
+	 * 
+	 * @param path an URL path eventually escaped
+	 * @return return the unescaped path or null when path is null.
+	 */
+	public static final String unescapePath(final String escaped) {
+		if (escaped == null) {
+			return escaped;
+		}
+		boolean modified = false;
+		final int len = escaped.length();
+		final StringBuilder unescaped = new StringBuilder(len > 500 ? len / 2 : len);
+		ByteBuffer utf8Bytes = null;
+		int i = 0;
+		while (i < len) {
+			final char ch = escaped.charAt(i);
+			if (ch == '%' && (i + 2) < len) {
+				final char digit1 = escaped.charAt(i + 1);
+				final char digit2 = escaped.charAt(i + 2);
+				if (isHexDigit(digit1) && isHexDigit(digit2)) {
+					if (utf8Bytes == null) {
+						utf8Bytes = ByteBuffer.allocate((len - i) / 3);
+					}
+					/* Percent-encoded character UTF-8 byte */
+					int hexaValue = Integer.parseInt(escaped.substring(i + 1, i + 3), 16);
+					utf8Bytes.put((byte) hexaValue);
+					modified = true;
+					i += 2;
+				} else {
+					/* Not a valid percent-encoded character : we append it as is */
+					unescaped.append(ch);
+				}
+			} else {
+				if (utf8Bytes != null && utf8Bytes.position() > 0) {
+					unescaped.append(new String(utf8Bytes.array(), 0, utf8Bytes.position(), StandardCharsets.UTF_8));
+					utf8Bytes.position(0);
+				}
+				unescaped.append(ch);
+			}
+			i++;
+		}
+		if (utf8Bytes != null && utf8Bytes.position() > 0) {
+			unescaped.append(new String(utf8Bytes.array(), 0, utf8Bytes.position(), StandardCharsets.UTF_8));
+		}
+
+		return modified ? unescaped.toString() : escaped;
 	}
     
 	/**

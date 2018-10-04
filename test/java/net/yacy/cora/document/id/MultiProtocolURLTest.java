@@ -392,6 +392,36 @@ public class MultiProtocolURLTest {
 	}
 	
 	/**
+	 * Unit tests for {@link MultiProtocolURL#unescapePath(String)}
+	 */
+	@Test
+	public void testUnescapePath() {
+		String[][] testStrings = new String[][] {
+				// "test string", "expected unescaped result"
+				new String[] { "", "" }, new String[] { "/", "/" }, new String[] { "/ascii/path", "/ascii/path" },
+				new String[] { "/latin/chars/%C3%A0%C3%A4%C3%A2%C3%A9%C3%A8%C3%AF%C3%AE%C3%B4%C3%B6%C3%B9",
+						"/latin/chars/àäâéèïîôöù" },
+				new String[] { "/wiki/%25", "/wiki/%" },
+				new String[] { "/logograms/%E6%AD%A3%E9%AB%94%E5%AD%97/%E7%B9%81%E9%AB%94%E5%AD%97",
+						"/logograms/正體字/繁體字" },
+				new String[] { "/bad/hexaDigits/%GH%-1%èà/file", "/bad/hexaDigits/%GH%-1%èà/file" },
+				new String[] { "/missing/hexaDigit/%2", "/missing/hexaDigit/%2" },
+				new String[] { "/missing/hexaDigits/%", "/missing/hexaDigits/%" },
+				new String[] { "/unescaped/logograms/正體字/繁體字", "/unescaped/logograms/正體字/繁體字" },
+				new String[] { "/unescaped/rfc3986/unreserved/path/chars/-._~",
+						"/unescaped/rfc3986/unreserved/path/chars/-._~" },
+				new String[] { "/unescaped/rfc3986/subdelims/!$&'()*+,;=", "/unescaped/rfc3986/subdelims/!$&'()*+,;=" },
+				new String[] { "/unescaped/rfc3986/pchar/additional/:@", "/unescaped/rfc3986/pchar/additional/:@" },
+				new String[] { "/unescaped/regex/metacharacters/<([{\\^-=$!|]})?*+.>",
+						"/unescaped/regex/metacharacters/<([{\\^-=$!|]})?*+.>" } };
+		for (int i = 0; i < testStrings.length; i++) {
+			String[] testString = testStrings[i];
+			final String decoded = MultiProtocolURL.unescapePath(testString[0]);
+			assertEquals(testString[1], decoded);
+		}
+	}
+	
+	/**
 	 * Unit tests for {@link MultiProtocolURL#escapePathPattern(String)}
 	 */
 	@Test
