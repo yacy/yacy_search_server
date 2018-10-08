@@ -45,6 +45,7 @@ import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.BlacklistHostAndPath;
@@ -123,9 +124,7 @@ public class BlacklistCleaner_p {
                 }
 
                 // list illegal entries
-                final Map<String, BlacklistError> illegalEntries = getIllegalEntries(
-                                blacklistToUse, Switchboard.urlBlacklist,
-                                allowRegex);
+				final Map<String, BlacklistError> illegalEntries = getIllegalEntries(blacklistToUse, allowRegex);
                 prop.put(RESULTS + "blList", blacklistToUse);
                 prop.put(RESULTS + "entries", illegalEntries.size());
                 prop.putHTML(RESULTS + "blEngine", Blacklist.getEngineInfo());
@@ -141,8 +140,9 @@ public class BlacklistCleaner_p {
                         key = entry.getKey();
                         prop.put(RESULTS + DISABLED + ENTRIES + i + "_error",
                                         entry.getValue().getLong());
-                        prop.putHTML(RESULTS + DISABLED + ENTRIES + i
-                                        + "_entry", key);
+                        /* We do not use here putHTML as we don't want '+' characters to be decoded as spaces by application/x-www-form-urlencoded encoding */
+                        prop.put(RESULTS + DISABLED + ENTRIES + i
+                                + "_entry", CharacterCoding.unicode2html(key, true));
                         i++;
                     }
                 }
@@ -284,8 +284,6 @@ public class BlacklistCleaner_p {
      * 
      * @param blacklistToUse
      *            The blacklist to be checked.
-     * @param blEngine
-     *            The blacklist engine which is used to check
      * @param allowRegex
      *            Set to true to allow regular expressions in host part of
      *            blacklist entry.
@@ -294,18 +292,17 @@ public class BlacklistCleaner_p {
      *         error code as value.
      */
     private static Map<String, BlacklistError> getIllegalEntries(
-                    final String blacklistToUse, final Blacklist blEngine,
+                    final String blacklistToUse, 
                     final boolean allowRegex) {
-        final Map<String, BlacklistError> illegalEntries = new HashMap<String, BlacklistError>();
-        final Set<String> legalEntries = new HashSet<String>();
+        final Map<String, BlacklistError> illegalEntries = new HashMap<>();
+        final Set<String> legalEntries = new HashSet<>();
 
         final List<String> list = FileUtils.getListArray(new File(
                         ListManager.listsPath, blacklistToUse));
-        final Map<String, String> properties = new HashMap<String, String>();
+        final Map<String, String> properties = new HashMap<>();
         properties.put("allowRegex", String.valueOf(allowRegex));
 
-        BlacklistError err = BlacklistError.NO_ERROR;
-
+        BlacklistError err;
         for (String element : list) {
             element = element.trim();
 
