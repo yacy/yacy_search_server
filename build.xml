@@ -702,6 +702,8 @@
       <!-- <jvmarg line="-XX:+HeapDumpOnOutOfMemoryError"/> -->
       <!-- Dump path -->
       <!-- <jvmarg line="-XX:HeapDumpPath=/your_path/"/> -->
+      <!-- Display an error popup when the JVM crashes, allowing to plug a debugger before its termination -->
+      <!-- <jvmarg line="-XX:+ShowMessageBoxOnError"/> -->
       <!-- Log JAXP XML parsers Debug information -->
       <!-- <jvmarg line="-Djaxp.debug=1"/> -->
     </java>
