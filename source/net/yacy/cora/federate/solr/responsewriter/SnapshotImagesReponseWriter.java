@@ -5,8 +5,6 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
-import net.yacy.search.schema.CollectionSchema;
-
 import org.apache.lucene.document.Document;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
@@ -17,6 +15,8 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
+
+import net.yacy.search.schema.CollectionSchema;
 
 /**
  * this writer is supposed to be used to generate iframes. It generates links for the /api/snapshot.jpg servlet.
@@ -48,6 +48,20 @@ public class SnapshotImagesReponseWriter implements QueryResponseWriter, Embedde
     @Override
     public void init(@SuppressWarnings("rawtypes") NamedList n) {
     }
+    
+    /**
+     * Append the response HTML head to the writer.
+     * @param writer an open output writer. Must not be null.
+     * @throws IOException when a write error occurred
+     */
+	private void writeHtmlHead(final Writer writer) throws IOException {
+		writer.write("<!DOCTYPE html>\n");
+		writer.write("<html lang=\"en\">");
+		writer.write("<head>\n");
+		writer.write("<meta charset=\"UTF-8\">");
+		writer.write("<title>Documents snapshots</title>\n");
+		writer.write("</head>\n");
+	}
 
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
@@ -55,8 +69,8 @@ public class SnapshotImagesReponseWriter implements QueryResponseWriter, Embedde
             assert values.get("responseHeader") != null;
             assert values.get("response") != null;
 
-            writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
-            writer.write("<head></head><body>\n");
+            writeHtmlHead(writer);
+            writer.write("<body>\n");
             final SolrParams originalParams = request.getOriginalParams();
             
             final int width = originalParams.getInt("width", DEFAULT_WIDTH);
