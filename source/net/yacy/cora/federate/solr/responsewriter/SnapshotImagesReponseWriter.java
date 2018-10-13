@@ -8,6 +8,7 @@ import java.util.Set;
 import net.yacy.search.schema.CollectionSchema;
 
 import org.apache.lucene.document.Document;
+import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.QueryResponseWriter;
@@ -28,6 +29,12 @@ public class SnapshotImagesReponseWriter implements QueryResponseWriter, Embedde
         DEFAULT_FIELD_LIST.add(CollectionSchema.id.getSolrFieldName());
         DEFAULT_FIELD_LIST.add(CollectionSchema.sku.getSolrFieldName());
     }
+    
+    /** Default width for each snapshot image */
+    private static final int DEFAULT_WIDTH = 256;
+    
+    /** Default height for each snapshot image */
+    private static final int DEFAULT_HEIGTH = 256;
     
     public SnapshotImagesReponseWriter() {
         super();
@@ -50,8 +57,10 @@ public class SnapshotImagesReponseWriter implements QueryResponseWriter, Embedde
 
             writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n");
             writer.write("<head></head><body>\n");
-            NamedList<Object> paramsList = request.getOriginalParams().toNamedList();
-            paramsList.remove("wt");
+            final SolrParams originalParams = request.getOriginalParams();
+            
+            final int width = originalParams.getInt("width", DEFAULT_WIDTH);
+            final int heigth = originalParams.getInt("height", DEFAULT_HEIGTH);
             
             DocList response = ((ResultContext) values.get("response")).getDocList();
             final int sz = response.size();
@@ -63,7 +72,17 @@ public class SnapshotImagesReponseWriter implements QueryResponseWriter, Embedde
                     Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
                     String urlhash = doc.getField(CollectionSchema.id.getSolrFieldName()).stringValue();
                     String url = doc.getField(CollectionSchema.sku.getSolrFieldName()).stringValue();
-                    writer.write("<a href=\"" + url + "\"><img src=\"/api/snapshot.jpg?urlhash=" + urlhash + "&amp;width=256&amp;height=256\" alt=\"" + url + "\"></a>\n");
+                    writer.write("<a href=\"");
+                    writer.write(url);
+                    writer.write("\"><img src=\"/api/snapshot.jpg?urlhash=");
+                    writer.write(urlhash);
+                    writer.write("&amp;width=");
+                    writer.write(String.valueOf(width));
+                    writer.write("&amp;height=");
+                    writer.write(String.valueOf(heigth));
+                    writer.write("\" alt=\"");
+                    writer.write(url);
+                    writer.write("\"></a>\n");
                 }
             }
             
