@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.http.HttpStatus;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -46,9 +47,10 @@ import net.yacy.cora.util.Html2Image;
 import net.yacy.cora.util.JSONException;
 import net.yacy.cora.util.JSONObject;
 import net.yacy.crawler.data.Snapshots;
-import net.yacy.crawler.data.Transactions;
 import net.yacy.crawler.data.Snapshots.Revisions;
+import net.yacy.crawler.data.Transactions;
 import net.yacy.document.ImageParser;
+import net.yacy.http.servlets.TemplateProcessingException;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.graphics.EncodedImage;
 import net.yacy.search.Switchboard;
@@ -289,16 +291,24 @@ public class snapshot {
                 String imageFileStub = pdfFile.getAbsolutePath(); imageFileStub = imageFileStub.substring(0, imageFileStub.length() - 3); // cut off extension
                 File imageFile = new File(imageFileStub + DEFAULT_WIDTH + "." + DEFAULT_HEIGHT + "." + ext);
                 if (!imageFile.exists() && authenticated) {
-                    Html2Image.pdf2image(pdfFile, imageFile, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_DENSITY, DEFAULT_QUALITY);
+                    if(!Html2Image.pdf2image(pdfFile, imageFile, DEFAULT_WIDTH, DEFAULT_HEIGHT, DEFAULT_DENSITY, DEFAULT_QUALITY)) {
+						throw new TemplateProcessingException(
+								"Could not generate the " + ext + " image snapshot file.");
+                    }
                 }
-                if (!imageFile.exists()) return null;
+                if (!imageFile.exists()) {
+					throw new TemplateProcessingException(
+							"Could not find the " + ext
+									+ " image snapshot file. You must be authenticated to generate one on the fly.",
+							HttpStatus.SC_NOT_FOUND);
+                }
                 if (width == DEFAULT_WIDTH && height == DEFAULT_HEIGHT) {
                     try {
                         byte[] imageBinary = FileUtils.read(imageFile);
                         return new ByteArrayInputStream(imageBinary);
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         ConcurrentLog.logException(e);
-                        return null;
+						throw new TemplateProcessingException("Could not read the " + ext + " image snapshot file.");
                     }
                 }
                 // lets read the file and scale
@@ -306,8 +316,7 @@ public class snapshot {
                 try {
                     image = ImageParser.parse(imageFile.getAbsolutePath(), FileUtils.read(imageFile));
                     if(image == null) {
-                    	/* Should not happen. If so, ImageParser.parse() should already have logged about the error */
-                    	return null;
+                    	throw new TemplateProcessingException("Could not parse the " + ext + " image snapshot file.");
                     }
                     final Image scaled = image.getScaledInstance(width, height, Image.SCALE_AREA_AVERAGING);
                     final MediaTracker mediaTracker = new MediaTracker(new Container());
@@ -321,9 +330,9 @@ public class snapshot {
 					BufferedImage scaledBufferedImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                     scaledBufferedImg.createGraphics().drawImage(scaled, 0, 0, width, height, null);
                     return new EncodedImage(scaledBufferedImg, ext, true);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
-                    return null;
+					throw new TemplateProcessingException("Could not scale the " + ext + " image snapshot file.");
                 }
     
             }

@@ -895,11 +895,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 			+ " If you sent this request with a web browser, please refresh the origin page.");
                 	return;
                 }
-            	if(e.getCause() instanceof TemplateMissingParameterException) {
-                	/* A template is used but miss some required parameter */
-                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
-                	return;
-                }
+				if (e.getCause() instanceof TemplateProcessingException) {
+					/* A template processing error occurred, and the HTTP status and message have been set */
+					response.sendError(((TemplateProcessingException) e.getCause()).getStatus(),
+							e.getCause().getMessage());
+					return;
+				}
             	if(e.getCause() instanceof DisallowedMethodException) {
                 	/* The request was sent using an disallowed HTTP method */
                 	response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getCause().getMessage());

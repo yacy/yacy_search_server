@@ -21,27 +21,31 @@
 
 package net.yacy.http.servlets;
 
+import org.eclipse.jetty.http.HttpStatus;
+
 /**
- * Use this to indicates a required parameter is missing for a template. Allows finer grained exception handling.
+ * Use this to indicates a required parameter is missing for a servlet template,
+ * and render a HTTP status 400 - bad Request. Allows finer grained exception
+ * handling.
+ *
  * @author luc
  *
  */
-public class TemplateMissingParameterException extends IllegalArgumentException {
-
-	private static final long serialVersionUID = -3443324572847193267L;
+@SuppressWarnings("serial")
+public class TemplateMissingParameterException extends TemplateProcessingException {
 
 	/**
 	 * Default constructor : use generic message.
 	 */
 	public TemplateMissingParameterException() {
-		super("Missing required parameters");
+		super("Missing required parameters", HttpStatus.BAD_REQUEST_400);
 	}
 
 	/**
 	 * @param message detail message
 	 */
-	public TemplateMissingParameterException(String message) {
-		super(message);
+	public TemplateMissingParameterException(final String message) {
+		super(message, HttpStatus.BAD_REQUEST_400);
 	}
 
 }
