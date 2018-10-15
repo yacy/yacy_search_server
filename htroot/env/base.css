@@ -906,6 +906,14 @@ div.BlogCommentPrevNext {
 text-align: center;
 }
 
+/* SnapshotImagesReponseWriter.java */
+body#SnapshotImagesReponseWriter img {
+	word-break: break-all; /* prevent snapshot image alternate text (original URL) to overflow over image width */
+	overflow: hidden; /* prevent snapshot image alternate text (original URL) to overflow over image height */
+	display: inline-block; /* constant width and heigth even for snapshot image in error */
+	background-color: #eeeeee; /* light background colour to distinguish snapshots images in error */
+}
+
 /* other ------------------------------------*/
 ul#menu {
   padding:0;
