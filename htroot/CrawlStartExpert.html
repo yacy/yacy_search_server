@@ -597,7 +597,12 @@
           <dt><label for="snapshotsMustnotmatch">must-not-match filter for snapshot generation</label></dt>
           <dd><input name="snapshotsMustnotmatch" id="snapshotsMustnotmatch" type="text" size="55" maxlength="100000" value="#[snapshotsMustnotmatch]#" /></dd>
           #(snapshotEnableImages)#
-          <input type="hidden" name="snapshotsLoadImage" id="snapshotsLoadImage" value="false"/>::
+          <input type="hidden" name="snapshotsLoadImage" id="snapshotsLoadImage" value="false"/>
+          <dt><label>Image Creation</label></dt>
+          <dd>
+            <div class="info">Only XML snapshots can be generated. as the <a href="https://wkhtmltopdf.org/" target="_blank">wkhtmltopdf</a> util is not found by YaCy on your system.
+		    				It is required to generate PDF snapshots from crawled pages that can then be converted to images.</div>
+          </dd>::
           <dt><label>Image Creation</label></dt>
           <dd>
             <input type="checkbox" name="snapshotsLoadImage" id="snapshotsLoadImage"#(snapshotsLoadImageChecked)#:: checked="checked"#(/snapshotsLoadImageChecked)#/>
