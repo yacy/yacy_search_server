@@ -1,13 +1,15 @@
 # Build a docker image from latest YaCy sources on Alpine Linux
 
-# Base image : latest stable official jdk image from Docker based on Alpine Linux
-FROM openjdk:alpine
+# Base image : latest stable official jdk 8 image from Docker based on Alpine Linux
+FROM openjdk:8-alpine
 
 # trace java version
 RUN java -version
 
 # Install needed packages not in base image
-RUN apk add --no-cache curl
+# (curl for sh scripts in /bin, and wkhtmltopdf,imagemagick,xvfb and ghostscript to enable PDF and image snapshot generation)
+RUN apk add --no-cache curl imagemagick xvfb ghostscript && \
+	apk add wkhtmltopdf --no-cache --repository https://dl-3.alpinelinux.org/alpine/edge/testing/
 
 # set current working dir
 WORKDIR /tmp
