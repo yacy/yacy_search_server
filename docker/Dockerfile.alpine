@@ -17,7 +17,7 @@ WORKDIR /tmp
 # --- Begin of apache ant install : from binary distribution because ant is not in alpine packages
 
 # set ant version once in a environment variable
-ENV ANT_VERSION 1.10.1
+ENV ANT_VERSION 1.10.5
 
 # All in one step to reduce image size growth :
 # - add gnupg package
