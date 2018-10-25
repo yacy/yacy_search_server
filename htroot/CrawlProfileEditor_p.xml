@@ -20,6 +20,7 @@
 		<storeHTCache>#(storeHTCache)#false::true#(/storeHTCache)#</storeHTCache>
 		<remoteIndexing>#(remoteIndexing)#false::true#(/remoteIndexing)#</remoteIndexing>
 		<cacheStrategy>#[cacheStrategy]#</cacheStrategy>
+		<crawlerAlwaysCheckMediaType>#(crawlerAlwaysCheckMediaType)#false::true#(/crawlerAlwaysCheckMediaType)#</crawlerAlwaysCheckMediaType>
 		<crawlerURLMustMatch>#[crawlerURLMustMatch]#</crawlerURLMustMatch>
 		<crawlerURLMustNotMatch>#[crawlerURLMustNotMatch]#</crawlerURLMustNotMatch>
 		<crawlerIPMustMatch>#[crawlerIPMustMatch]#</crawlerIPMustMatch>

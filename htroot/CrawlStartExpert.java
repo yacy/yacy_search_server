@@ -213,6 +213,13 @@ public class CrawlStartExpert {
             prop.put("obeyHtmlRobotsNoindexChecked", post.getBoolean("obeyHtmlRobotsNoindex") ? 1 : 0);
             prop.put("obeyHtmlRobotsNofollowChecked", post.getBoolean("obeyHtmlRobotsNofollow") ? 1 : 0);
         }
+        
+        // always cross-check URL file extension against actual Media Type ?
+		if (post == null) {
+			prop.put("crawlerAlwaysCheckMediaType", true);
+		} else {
+			prop.put("crawlerAlwaysCheckMediaType", post.getBoolean("crawlerAlwaysCheckMediaType"));
+		}
 
         // Load Filter on URLs (range)
         if (post != null && post.containsKey("range")) {

@@ -55,10 +55,18 @@ public class NoticedURL {
         LOCAL, GLOBAL, REMOTE, NOLOAD;
     }
 
-    private Balancer coreStack;      // links found by crawling to depth-1
-    private Balancer limitStack;     // links found by crawling at target depth
-    private Balancer remoteStack;    // links from remote crawl orders (init on demand)
-    private Balancer noloadStack;    // links that are not passed to a loader; the index will be generated from the Request entry
+    /** links found by crawling to depth-1 */
+    private Balancer coreStack;
+    
+    /** links found by crawling at target depth */
+    private Balancer limitStack;
+    
+    /** links from remote crawl orders (init on demand) */
+    private Balancer remoteStack;
+    
+    /** links that are not passed to a loader; the index will be generated from the Request entry */
+    private Balancer noloadStack;
+    
     private final File cachePath;
 
     protected NoticedURL(

@@ -2071,8 +2071,12 @@ public final class Switchboard extends serverSwitch {
             noIndexReason = response.shallIndexCacheForCrawler();
         }
 
-        // check if the parser supports the mime type
-        if ( noIndexReason == null ) {
+		/*
+		 * Eventually check if a parser supports the media type. Depending on the crawl
+		 * profile, the indexingDocumentProcessor can eventually index only URL metadata
+		 * using the generic parser for unsupported media types
+		 */
+        if ( noIndexReason == null && !response.profile().isIndexNonParseableUrls()) {
             noIndexReason = TextParser.supports(response.url(), response.getMimeType());
         }
 
@@ -3009,18 +3013,40 @@ public final class Switchboard extends serverSwitch {
             }
         }
         assert response.getContent() != null;
+        
         try {
-            // parse the document
-            documents =
-                TextParser.parseSource(
-                    new AnchorURL(response.url()),
-                    response.getMimeType(),
-                    response.getCharacterEncoding(),
-                    response.profile().ignoreDivClassName(),
-                    response.profile().scraper(),
-                    response.profile().timezoneOffset(),
-                    response.depth(),
-                    response.getContent());
+            final String supportError = TextParser.supports(response.url(), response.getMimeType());
+    		if (supportError != null) {
+    			/* No parser available or format is denied */
+    			if(response.profile().isIndexNonParseableUrls()) {
+    				/* Apply the generic parser add the URL as a simple link (no content metadata) to the index */
+    				documents = TextParser.genericParseSource(new AnchorURL(response.url()),
+                        response.getMimeType(),
+                        response.getCharacterEncoding(),
+                        response.profile().ignoreDivClassName(),
+                        response.profile().scraper(),
+                        response.profile().timezoneOffset(),
+                        response.depth(),
+                        response.getContent());
+    			} else {
+    	            this.log.warn("Resource '" + response.url().toNormalform(true) + "' is not supported. " + supportError);
+    	            // create a new errorURL DB entry
+    	            this.crawlQueues.errorURL.push(response.url(), response.depth(), response.profile(), FailCategory.FINAL_PROCESS_CONTEXT, supportError, -1);
+    				return null;
+    			}
+    		} else {
+    			// parse the document
+    			documents =
+    					TextParser.parseSource(
+    							new AnchorURL(response.url()),
+    							response.getMimeType(),
+    							response.getCharacterEncoding(),
+    							response.profile().ignoreDivClassName(),
+    							response.profile().scraper(),
+    							response.profile().timezoneOffset(),
+    							response.depth(),
+    							response.getContent());
+    		}
             if ( documents == null ) {
                 throw new Parser.Failure("Parser returned null.", response.url());
             }
@@ -3070,22 +3096,39 @@ public final class Switchboard extends serverSwitch {
             // get the hyperlinks
             final Map<AnchorURL, String> hl = Document.getHyperlinks(documents, !response.profile().obeyHtmlRobotsNofollow());
             
-            if (response.profile().indexMedia()) {
-                for (Map.Entry<DigestURL, String> entry: Document.getImagelinks(documents).entrySet()) {
-                    if (TextParser.supportsExtension(entry.getKey()) == null) hl.put(new AnchorURL(entry.getKey()), entry.getValue());
-                }
-            }
+			final boolean addAllLinksToCrawlStack = response.profile().isIndexNonParseableUrls() /* unsupported resources have to be indexed as pure links if no parser support them */
+					|| response.profile().isCrawlerAlwaysCheckMediaType() /* the crawler must always load resources to double-check the actual Media Type even on unsupported file extensions */;
+			
+			/* Handle media links */
+			
+			for (Map.Entry<DigestURL, String> entry : Document.getImagelinks(documents).entrySet()) {
+				if (addAllLinksToCrawlStack
+						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
+					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
+				}
+			}
+			
+			for (Map.Entry<DigestURL, String> entry : Document.getApplinks(documents).entrySet()) {
+				if (addAllLinksToCrawlStack
+						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
+					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
+				}
+			}
+			
+			for (Map.Entry<DigestURL, String> entry : Document.getVideolinks(documents).entrySet()) {
+				if (addAllLinksToCrawlStack
+						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
+					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
+				}
+			}
+			
+			for (Map.Entry<DigestURL, String> entry : Document.getAudiolinks(documents).entrySet()) {
+				if (addAllLinksToCrawlStack
+						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
+					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
+				}
+			}
             
-            // add all media links also to the crawl stack. They will be re-sorted to the NOLOAD queue and indexed afterwards as pure links
-            if (response.profile().directDocByURL()) {
-                for (Map.Entry<DigestURL, String> entry: Document.getImagelinks(documents).entrySet()) {
-                    if (TextParser.supportsExtension(entry.getKey()) != null) hl.put(new AnchorURL(entry.getKey()), entry.getValue());
-                }
-                for (Map.Entry<DigestURL, String> d: Document.getApplinks(documents).entrySet()) hl.put(new AnchorURL(d.getKey()), d.getValue());
-                for (Map.Entry<DigestURL, String> d: Document.getVideolinks(documents).entrySet()) hl.put(new AnchorURL(d.getKey()), d.getValue());
-                for (Map.Entry<DigestURL, String> d: Document.getAudiolinks(documents).entrySet()) hl.put(new AnchorURL(d.getKey()), d.getValue());
-            }
-
             // insert those hyperlinks to the crawler
             MultiProtocolURL nextUrl;
             for ( final Map.Entry<AnchorURL, String> nextEntry : hl.entrySet() ) {

@@ -332,7 +332,7 @@ public class Crawler_p {
                 env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                 if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
 
-                boolean directDocByURL = "on".equals(post.get("directDocByURL", "off")); // catch also all linked media documents without loading them
+                boolean directDocByURL = "on".equals(post.get("directDocByURL", "off")); // catch also all linked media documents even when no parser is available
                 env.setConfig("crawlingDirectDocByURL", directDocByURL);
 
                 final String collection = post.get("collection", "user");
@@ -633,6 +633,8 @@ public class Crawler_p {
 							.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
 					profile.put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, solrQueryMustMatch);
 					profile.put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, solrQueryMustNotMatch);
+					profile.put(CrawlAttribute.CRAWLER_ALWAYS_CHECK_MEDIA_TYPE.key,
+							post.getBoolean("crawlerAlwaysCheckMediaType"));
 					
                     
                     handle = ASCII.getBytes(profile.handle());
