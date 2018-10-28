@@ -232,7 +232,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
     </fieldset>
     
     #(linkgraph)#<div style="text-align:center"><form><input name="showlinkstructure" onClick="location.href = location.toString() + '&showlinkstructure=';" class="btn btn-default btn-xs" value="show link structure graph"/></form></div>::
-    <script src="js/d3.v3.min.js"></script>
+    <script src="js/d3.v5.min.js"></script>
     <script src="js/hypertree.js"></script>
     <div id="linkstructure"></div>
     <script>$(document).ready(linkstructure("#[host]#", "#linkstructure", 1280, 720, 3000, 700));</script>
