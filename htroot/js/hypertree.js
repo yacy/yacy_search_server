@@ -64,10 +64,20 @@ function linkstructure(hostname, element, width, height, maxtime, maxnodes) {
 			.attr("class",function(d) {return "hypertree-link " + d.type; })
 			.attr("marker-end", function(d) { return "url(#" + d.type + ")";});
 		var circle = svg.append("g").selectAll("circle").data(simulation.nodes()).enter().append("circle").attr("r", 4).call(d3.drag());
+		var maxTextLength = 40;
 		var text = svg.append("g")
 			.selectAll("text").data(simulation.nodes()).enter().append("text").attr("x", 8).attr("y", ".31em")
 			.attr("style", function(d) {return d.type == "Outbound" ? "fill:#888888;" : "fill:#000000;";})
-			.text(function(d) {return d.name;});
+			.text(function(d) {/* Limit the length of nodes visible text to improve readability */ return d.name.substring(0, Math.min(d.name.length, maxTextLength));});
+		text.append("tspan")
+			.attr("class", "truncated")
+			.text(function(d) {/* The end of large texts is wraped in a tspan, made visible on mouse overing */return d.name.length > maxTextLength ? d.name.substring(maxTextLength) : ""});
+		
+		text.append("tspan")
+			.attr("class", "ellipsis")
+			.text(function(d) {/* Add an ellipsis to mark long texts that are truncated */ return d.name.length > maxTextLength ? "..." : ""});
+
+		
 		function ticked() {
 		  path.attr("d", linkArc);
 		  circle.attr("transform", transform);
