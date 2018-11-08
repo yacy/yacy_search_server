@@ -72,7 +72,7 @@ public class ClientIdentification {
     public final static String yacyIntranetCrawlerAgentName = "YaCy Intranet (greedy)";
     public static Agent yacyIntranetCrawlerAgent = null; // defined later in static
     public final static String googleAgentName = "Googlebot";
-    public final static Agent googleAgentAgent = new Agent("Googlebot/2.1 (+http://www.google.com/bot.html)", new String[]{"Googlebot", "Googlebot-Mobile"}, minimumGlobalDeltaInit / 2, clientTimeoutInit);
+    public final static Agent googleAgentAgent = new Agent("Googlebot/2.1 (+http://www.google.com/bot.html)", new String[]{"Googlebot", "Googlebot-Mobile"}, minimumGlobalDeltaInit / 10, clientTimeoutInit);
     public final static String yacyProxyAgentName = "YaCyProxy";
     public final static Agent yacyProxyAgent = new Agent("yacy - this is a proxy access through YaCy from a browser, not a robot (the yacy bot user agent is 'yacybot')", new String[]{"yacy"}, minimumGlobalDeltaInit, clientTimeoutInit);
     public final static String customAgentName = "Custom Agent";
