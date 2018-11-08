@@ -317,6 +317,27 @@
             Obey html-robots-nofollow: <input type="checkbox" name="obeyHtmlRobotsNofollow" id="obeyHtmlRobotsNofollow" #(obeyHtmlRobotsNofollowChecked)#::checked="checked"#(/obeyHtmlRobotsNofollowChecked)# /><!--<br/>
             Follow Frames: <input type="checkbox" name="followFrames" id="followFrames" #(followFramesChecked)#::checked="checked"#(/followFramesChecked)# />-->
           </dd>
+ 	        <dt>Media Type detection</dt>
+	        <dd>
+            	<div class="info" style="float:right">
+            		<img src="env/grafics/i16.gif" width="16" height="16" alt="Media Type checking info"/>
+            		<span style="right:0px; width:30em;" id="mediaTypeCheckingInfo">
+            			Not loading URLs with unsupported file extension is faster but less accurate. 
+            			Indeed, for some web resources the actual Media Type is not consistent with the URL file extension. Here are some examples:
+            			<ul>
+            				<li><a href="https://en.wikipedia.org/wiki/.de"  target="_blank">https://en.wikipedia.org/wiki/.de</a> : the .de extension is unknown, but the actual Media Type of this page is text/html</li>
+            				<li><a href="https://en.wikipedia.org/wiki/Ask.com"  target="_blank">https://en.wikipedia.org/wiki/Ask.com</a> : the .com extension is not supported (executable file format), but the actual Media Type of this page is text/html</li>
+            				<li><a href="https://commons.wikimedia.org/wiki/File:YaCy_logo.png"  target="_blank">https://commons.wikimedia.org/wiki/File:YaCy_logo.png</a> : the .png extension is a supported image format, but the actual Media Type of this page is text/html</li>
+            			</ul> 
+            		</span>
+            	</div>
+            	<label>
+          			<input type="radio" aria-describedby="mediaTypeCheckingInfo" name="crawlerAlwaysCheckMediaType" value="false" #(crawlerAlwaysCheckMediaType)#checked="checked"::#(/crawlerAlwaysCheckMediaType)# /> Do not load URLs with an unsupported file extension
+	          	</label>
+    	      	<label>
+        	  		<input type="radio" name="crawlerAlwaysCheckMediaType" value="true" #(crawlerAlwaysCheckMediaType)#::checked="checked"#(/crawlerAlwaysCheckMediaType)# /> Always cross check file extension against Content-Type header
+          		</label>
+	        </dd>
 	        <dt>Load Filter on URLs</dt>
 	        <dd><span class="info" style="float:right"><img src="env/grafics/i16.gif" width="16" height="16" alt="info"/><span style="right:0px;">
             The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>.

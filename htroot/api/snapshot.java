@@ -50,6 +50,7 @@ import net.yacy.crawler.data.Snapshots;
 import net.yacy.crawler.data.Snapshots.Revisions;
 import net.yacy.crawler.data.Transactions;
 import net.yacy.document.ImageParser;
+import net.yacy.http.servlets.TemplateMissingParameterException;
 import net.yacy.http.servlets.TemplateProcessingException;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.peers.graphics.EncodedImage;
@@ -69,14 +70,25 @@ public class snapshot {
 
     public static Object respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
+        
+    	final serverObjects defaultResponse = new serverObjects();
+    	
 
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final String ext = header.get(HeaderFramework.CONNECTION_PROP_EXT, "");
         
+        if(ext.isEmpty()) {
+			throw new TemplateProcessingException("Missing extension. Try with rss, xml, json, pdf, png or jpg." + ext,
+					HttpStatus.SC_BAD_REQUEST);
+        }
+        
         
         if (ext.equals("rss")) {
             // create a report about the content of the snapshot directory
-            if (!authenticated) return null;
+            if (!authenticated) {
+            	defaultResponse.authenticationRequired();
+            	return defaultResponse;
+            }
             int maxcount = post == null ? 10 : post.getInt("maxcount", 10);
             int depthx = post == null ? -1 : post.getInt("depth", -1);
             Integer depth = depthx == -1 ? null : depthx;
@@ -108,7 +120,10 @@ public class snapshot {
         if (post == null) post = new serverObjects();
         final boolean xml = ext.equals("xml");
         final boolean pdf = ext.equals("pdf");
-        if (pdf && !authenticated) return null;
+        if (pdf && !authenticated) {
+        	defaultResponse.authenticationRequired();
+        	return defaultResponse;
+        }
         final boolean pngjpg = ext.equals("png") || ext.equals(DEFAULT_EXT);
         String urlhash = post.get("urlhash", "");
         String url = post.get("url", "");
@@ -127,7 +142,6 @@ public class snapshot {
                 ConcurrentLog.logException(e);
             }
         }
-        if (url.length() == 0 && durl != null) url = durl.toNormalform(true);
 
         if (ext.equals("json")) {
             // command interface: view and change a transaction state, get metadata about transactions in the past
@@ -141,7 +155,10 @@ public class snapshot {
                     for (Map.Entry<String, Integer> state: Transactions.sizes().entrySet()) sizes.put(state.getKey(), state.getValue());
                     result.put("size", sizes);
                 } else if (command.equals("list")) {
-                    if (!authenticated) return null;
+                    if (!authenticated) {
+                    	defaultResponse.authenticationRequired();
+                    	return defaultResponse;
+                    }
                     // return a status of the transaction archive
                     String host = post.get("host");
                     String depth = post.get("depth");
@@ -179,7 +196,10 @@ public class snapshot {
                         }
                     }
                 } else if (command.equals("commit")) {
-                    if (!authenticated) return null;
+                    if (!authenticated) {
+                    	defaultResponse.authenticationRequired();
+                    	return defaultResponse;
+                    }
                     Revisions r = Transactions.commit(urlhash);
                     if (r != null) {
                         result.put("result", "success");
@@ -191,7 +211,10 @@ public class snapshot {
                     }
                     result.put("urlhash", urlhash);
                 } else if (command.equals("rollback")) {
-                    if (!authenticated) return null;
+                    if (!authenticated) {
+                    	defaultResponse.authenticationRequired();
+                    	return defaultResponse;
+                    }
                     Revisions r = Transactions.rollback(urlhash);
                     if (r != null) {
                         result.put("result", "success");
@@ -235,30 +258,36 @@ public class snapshot {
         }
         
         // for the following methods we always need the durl to fetch data
-        if (durl == null) return null;
+        if (durl == null) {
+        	throw new TemplateMissingParameterException("Missing valid url or urlhash parameter");
+        }
         
         if (xml) {
             Collection<File> xmlSnapshots = Transactions.findPaths(durl, "xml", Transactions.State.ANY);
             File xmlFile = null;
-            if (xmlSnapshots.size() == 0) {
-                return null;
+            if (xmlSnapshots.isEmpty()) {
+				throw new TemplateProcessingException("Could not find the xml snapshot file.", HttpStatus.SC_NOT_FOUND);
             }
             xmlFile = xmlSnapshots.iterator().next();
             try {
                 byte[] xmlBinary = FileUtils.read(xmlFile);
                 return new ByteArrayInputStream(xmlBinary);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
-                return null;
+                throw new TemplateProcessingException("Could not read the xml snapshot file.");
             }
         }
         
         if (pdf || pngjpg) {
             Collection<File> pdfSnapshots = Transactions.findPaths(durl, "pdf", Transactions.State.INVENTORY);
             File pdfFile = null;
-            if (pdfSnapshots.size() == 0) {
+            if (pdfSnapshots.isEmpty()) {
                 // if the client is authenticated, we create the pdf on the fly!
-                if (!authenticated) return null;
+                if (!authenticated) {
+					throw new TemplateProcessingException(
+							"Could not find the pdf snapshot file. You must be authenticated to generate one on the fly.",
+							HttpStatus.SC_NOT_FOUND);
+                }
                 SolrDocument sd = sb.index.fulltext().getMetadata(durl.hash());
                 boolean success = false;
                 if (sd == null) {
@@ -269,19 +298,25 @@ public class snapshot {
                 }
                 if (success) {
                     pdfSnapshots = Transactions.findPaths(durl, "pdf", Transactions.State.ANY);
-                    if (pdfSnapshots.size() != 0) pdfFile = pdfSnapshots.iterator().next();
+                    if (!pdfSnapshots.isEmpty()) {
+                    	pdfFile = pdfSnapshots.iterator().next();
+                    }
                 }
             } else {
                 pdfFile = pdfSnapshots.iterator().next();
             }
-            if (pdfFile == null) return null;
+            if (pdfFile == null) {
+				throw new TemplateProcessingException(
+						"Could not find the pdf snapshot file and could not generate one on the fly.",
+						HttpStatus.SC_NOT_FOUND);
+            }
             if (pdf) {
                 try {
                     byte[] pdfBinary = FileUtils.read(pdfFile);
                     return new ByteArrayInputStream(pdfBinary);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
-                    return null;
+					throw new TemplateProcessingException("Could not read the pdf snapshot file.");
                 }
             }
             
@@ -338,6 +373,8 @@ public class snapshot {
             }
         }
         
-        return null;
+		throw new TemplateProcessingException(
+				"Unsupported extension : " + ext + ". Try with rss, xml, json, pdf, png or jpg.",
+				HttpStatus.SC_BAD_REQUEST);
     }
 }

@@ -43,6 +43,9 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.ImageView;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.protocol.ClientIdentification;
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.document.ImageParser;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
@@ -58,10 +61,16 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 public class Html2Image {
     
     // Mac
-    // to install wkhtmltopdf, download wkhtmltox-0.12.1_osx-cocoa-x86-64.pkg from http://wkhtmltopdf.org/downloads.html
+	/**
+	 * Path to wkhtmltopdf executable on Mac OS when installed using
+	 * wkhtmltox-n.n.n.macos-cocoa.pkg from https://wkhtmltopdf.org/downloads.html.
+	 * This can also be a path on Debian or another Gnu/Linux distribution.
+	 */
+	private final static File wkhtmltopdfMac = new File("/usr/local/bin/wkhtmltopdf");
+    
     // to install imagemagick, download from http://cactuslab.com/imagemagick/assets/ImageMagick-6.8.9-9.pkg.zip
     // the convert command from imagemagick needs ghostscript, if not present on older macs, download a version of gs from http://pages.uoregon.edu/koch/
-    private final static File wkhtmltopdfMac = new File("/usr/local/bin/wkhtmltopdf");  // sometimes this is also the path on debian
+    
     private final static File convertMac1 = new File("/opt/local/bin/convert");
     private final static File convertMac2 = new File("/opt/ImageMagick/bin/convert");
     
@@ -69,11 +78,27 @@ public class Html2Image {
     // to install: apt-get install wkhtmltopdf imagemagick xvfb ghostscript
     private final static File wkhtmltopdfDebian = new File("/usr/bin/wkhtmltopdf"); // there is no wkhtmltoimage, use convert to create images
     private final static File convertDebian = new File("/usr/bin/convert");
+    
+	/**
+	 * Path to wkhtmltopdf executable on Windows, when installed with default
+	 * settings using wkhtmltox-n.n.n.msvc2015-win64.exe from
+	 * https://wkhtmltopdf.org/downloads.html
+	 */
+	private static final File WKHTMLTOPDF_WINDOWS = new File("C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe");
+
+	/**
+	 * Path to wkhtmltopdf executable on Windows, when installed with default
+	 * settings using wkhtmltox-n.n.n.msvc2015-win32.exe from
+	 * https://wkhtmltopdf.org/downloads.html
+	 */
+	private static final File WKHTMLTOPDF_WINDOWS_X86 = new File(
+			"C:\\Program Files (x86)\\wkhtmltopdf\\bin\\wkhtmltopdf.exe");
 
     private static boolean usexvfb = false;
 
     public static boolean wkhtmltopdfAvailable() {
-        return wkhtmltopdfMac.exists() || wkhtmltopdfDebian.exists();
+		return OS.isWindows ? (WKHTMLTOPDF_WINDOWS.exists() || WKHTMLTOPDF_WINDOWS_X86.exists())
+				: (wkhtmltopdfMac.exists() || wkhtmltopdfDebian.exists());
     }
     
     public static boolean convertAvailable() {
@@ -107,7 +132,9 @@ public class Html2Image {
     }
     
     private static boolean writeWkhtmltopdfInternal(final String url, final String proxy, final File destination, final String userAgent, final String acceptLanguage, final boolean ignoreErrors) {
-        final File wkhtmltopdf = wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian;
+		final File wkhtmltopdf = OS.isWindows
+				? (WKHTMLTOPDF_WINDOWS.exists() ? WKHTMLTOPDF_WINDOWS : WKHTMLTOPDF_WINDOWS_X86)
+				: (wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian);
         String commandline =
                 wkhtmltopdf.getAbsolutePath() + " -q --title '" + url + "' " +
                 //acceptLanguage == null ? "" : "--custom-header 'Accept-Language' '" + acceptLanguage + "' " + 
@@ -285,12 +312,54 @@ public class Html2Image {
         ImageIO.write(img, destination.getName().endsWith("jpg") ? "jpg" : "png", destination);
     }
     
-    public static void main(String[] args) {
-        try {
-            Html2Image.writeSwingImage(args[0], new Dimension(1200, 2000), new File(args[1]));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+    /**
+     * Test PDF or image snapshot generation for a given URL.
+     * @param args main arguments list:
+     * <ol>
+     * 	<li>Source remote URL (required)</li>
+     * 	<li>Target local file path (required)</li>
+     * 	<li>Snapshot generation method identifier (optional) :
+     * 		<ul>
+     * 			<li>"wkhtmltopdf" (default): generate a PDF snapshot using external wkhtmltopdf tool.</li>
+     * 			<li>"swing" : use JRE provided Swing to generate a jpg or png image snapshot.</li>
+     * 		</ul>
+     * 	</li>
+     * </ol>
+     */
+	public static void main(String[] args) {
+		try {
+			if (args.length < 2) {
+				System.out.println("Missing required parameter(s).");
+				System.out.println("Usage : java " + Html2Image.class.getName()
+						+ " <url> <target-file[.pdf|.jpg|.png]> [wkhtmltopdf|swing]");
+				return;
+			}
+			if (args.length < 3 || "wkhtmltopdf".equals(args[2])) {
+				if(Html2Image.wkhtmltopdfAvailable()) {
+					Html2Image.writeWkhtmltopdf(args[0], null, ClientIdentification.yacyInternetCrawlerAgent.userAgent,
+							"en-us,en;q=0.5", new File(args[1]));					
+				} else {
+					System.out.println("Unable to locate wkhtmltopdf executable on this system!");
+				}
+			} else if ("swing".equals(args[2])) {
+				try {
+					Html2Image.writeSwingImage(args[0], new Dimension(1200, 2000), new File(args[1]));
+				} catch (final IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				System.out.println("Unknown method : please specify either wkhtmltopdf or swing");
+			}
+		} finally {
+			/* Shutdown running threads */
+			Domains.close();
+			try {
+				HTTPClient.closeConnectionManager();
+			} catch (final InterruptedException e) {
+				Thread.currentThread().interrupt(); // restore interrupted state
+			}
+			ConcurrentLog.shutdown();
+		}
+	}
     
 }

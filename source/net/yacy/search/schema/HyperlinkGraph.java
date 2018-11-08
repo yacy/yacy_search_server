@@ -21,11 +21,14 @@
 package net.yacy.search.schema;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import net.yacy.cora.document.id.DigestURL;
@@ -62,7 +65,11 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         if (hostname.startsWith("www.")) hostname = hostname.substring(4);
         StringBuilder q = new StringBuilder();
         q.append(CollectionSchema.host_s.getSolrFieldName()).append(':').append(hostname).append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(':').append("www.").append(hostname);
-        BlockingQueue<SolrDocument> docs = solrConnector.concurrentDocumentsByQuery(q.toString(), CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, maxnodes, maxtime, 100, 1, true,
+        final int pageSize = 100;
+        final BlockingQueue<SolrDocument> docs = new ArrayBlockingQueue<>(pageSize);
+        final List<String> queries = new ArrayList<>();
+        queries.add(q.toString());
+        final Thread solrQueryTask = new Thread(solrConnector.newDocumentsByQueriesTask(docs, queries, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, maxnodes, maxtime, pageSize, 1, 
                 CollectionSchema.id.getSolrFieldName(),
                 CollectionSchema.sku.getSolrFieldName(),
                 CollectionSchema.failreason_s.getSolrFieldName(),
@@ -71,7 +78,8 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                 CollectionSchema.inboundlinks_urlstub_sxt.getSolrFieldName(),
                 CollectionSchema.outboundlinks_protocol_sxt.getSolrFieldName(),
                 CollectionSchema.outboundlinks_urlstub_sxt.getSolrFieldName()
-                );
+                ));
+        solrQueryTask.start();
         SolrDocument doc;
         Map<String, FailType> errorDocs = new HashMap<String, FailType>();
         HyperlinkEdges inboundEdges = new HyperlinkEdges();
@@ -80,7 +88,12 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
         try {
             retrieval: while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
                 String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                MultiProtocolURL from = new MultiProtocolURL(u);
+                MultiProtocolURL from;
+				try {
+					from = new MultiProtocolURL(u);
+				} catch (final MalformedURLException e1) {
+					continue;
+				}
                 String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
                 FailType error = errortype == null ? null : FailType.valueOf(errortype);
                 if (error != null) {
@@ -94,7 +107,9 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                             HyperlinkEdge.Target linkurl = new HyperlinkEdge.Target(link, HyperlinkType.Inbound);
                             inboundEdges.addEdge(from, linkurl);
                             if (stopURL != null && linkurl.equals(stopURL)) break retrieval;
-                        } catch (MalformedURLException e) {}
+                        } catch (final MalformedURLException e) {
+                        	/* Continue on the next link */
+                        }
                     }
                     links = URIMetadataNode.getLinks(doc, false); // outbound
                     while (links.hasNext()) {
@@ -103,42 +118,49 @@ public class HyperlinkGraph implements Iterable<HyperlinkEdge> {
                             HyperlinkEdge.Target linkurl = new HyperlinkEdge.Target(link, HyperlinkType.Outbound);
                             outboundEdges.addEdge(from, linkurl);
                             if (stopURL != null && linkurl.equals(stopURL)) break retrieval;
-                        } catch (MalformedURLException e) {}
+                        } catch (final MalformedURLException e) {
+                        	/* Continue on the next link */
+                        }
                     }
                 }
                 if (inboundEdges.size() + outboundEdges.size() > maxnodes) {
                     break retrieval;
                 }
             }
-        } catch (InterruptedException e) {
-        } catch (MalformedURLException e) {
+        } catch (final InterruptedException e) {
+        	Thread.currentThread().interrupt(); // preserve interrupted thread state
+        } finally {
+        	/* Ensure termination and proper resources release of the query thread */
+        	solrQueryTask.interrupt();
         }
-        // we use the errorDocs to mark all edges with endpoint to error documents
-        Iterator<HyperlinkEdge> i = inboundEdges.iterator();
-        HyperlinkEdge edge;
-        while (i.hasNext()) {
-            edge = i.next();
-            if (errorDocs.containsKey(edge.target.toNormalform(true))) {
-                i.remove();
-                edge.target.type = HyperlinkType.Dead;
-                errorEdges.add(edge);
-            }
+        if(!Thread.currentThread().isInterrupted()) {
+        	// we use the errorDocs to mark all edges with endpoint to error documents
+        	Iterator<HyperlinkEdge> i = inboundEdges.iterator();
+        	HyperlinkEdge edge;
+        	while (i.hasNext()) {
+        		edge = i.next();
+        		if (errorDocs.containsKey(edge.target.toNormalform(true))) {
+        			i.remove();
+        			edge.target.type = HyperlinkType.Dead;
+        			errorEdges.add(edge);
+        		}
+        	}
+        	i = outboundEdges.iterator();
+        	while (i.hasNext()) {
+        		edge = i.next();
+        		if (errorDocs.containsKey(edge.target.toNormalform(true))) {
+        			i.remove();
+        			edge.target.type = HyperlinkType.Dead;
+        			errorEdges.add(edge);
+        		}
+        	}
+        	// we put all edges together in a specific order which is used to create nodes in a svg display:
+        	// notes that appear first are possible painted over by nodes coming later.
+        	// less important nodes shall appear therefore first
+        	this.edges.addAll(outboundEdges);
+        	this.edges.addAll(inboundEdges);
+        	this.edges.addAll(errorEdges);
         }
-        i = outboundEdges.iterator();
-        while (i.hasNext()) {
-            edge = i.next();
-            if (errorDocs.containsKey(edge.target.toNormalform(true))) {
-                i.remove();
-                edge.target.type = HyperlinkType.Dead;
-                errorEdges.add(edge);
-            }
-        }
-        // we put all edges together in a specific order which is used to create nodes in a svg display:
-        // notes that appear first are possible painted over by nodes coming later.
-        // less important nodes shall appear therefore first
-        this.edges.addAll(outboundEdges);
-        this.edges.addAll(inboundEdges);
-        this.edges.addAll(errorEdges);
     }
     
     public void path(final Segment segment, DigestURL from, DigestURL to, final int maxtime, final int maxnodes) {

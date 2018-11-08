@@ -187,8 +187,8 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
       <table class="sortable" style="float:left; border-width: 0">
       <thead>
       	<tr>
-        	<th style="text-align:center; width:32"></th>
-        	<th style="text-align:left; width: 600" class="listing">Path</th>
+        	<th style="text-align:center; width:32px"></th>
+        	<th style="text-align:left; width: 600px" class="listing">Path</th>
         	<th style="text-align:right; padding:2px;" class="listingem">stored</th>
         	<th style="text-align:right; padding:2px;" class="listingem">linked</th>
         	<th style="text-align:right; padding:2px;" class="listingem">pending</th>
@@ -196,6 +196,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
         	<th style="text-align:right; padding:2px;" class="listingem">failed</th>
       	</tr>
       </thead>
+      <tbody>
       #(root)#
       <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
         <td style="text-align:center"></td>
@@ -226,11 +227,12 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
         </tr>
         #(/type)#
       #{/list}#
+      </tbody>
       </table>
     </fieldset>
     
     #(linkgraph)#<div style="text-align:center"><form><input name="showlinkstructure" onClick="location.href = location.toString() + '&showlinkstructure=';" class="btn btn-default btn-xs" value="show link structure graph"/></form></div>::
-    <script src="js/d3.v3.min.js"></script>
+    <script src="js/d3.v5.min.js"></script>
     <script src="js/hypertree.js"></script>
     <div id="linkstructure"></div>
     <script>$(document).ready(linkstructure("#[host]#", "#linkstructure", 1280, 720, 3000, 700));</script>

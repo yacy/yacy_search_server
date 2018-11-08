@@ -42,52 +42,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.zip.GZIPInputStream;
 
-import javax.servlet.ReadListener;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-
-import net.yacy.cora.date.GenericFormatter;
-import net.yacy.cora.document.analysis.Classification;
-import net.yacy.cora.order.Base64Order;
-import net.yacy.cora.protocol.Domains;
-import net.yacy.cora.protocol.HeaderFramework;
-import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.protocol.ResponseHeader;
-import net.yacy.cora.util.ByteBuffer;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.data.BadTransactionException;
-import net.yacy.data.InvalidURLLicenceException;
-import net.yacy.data.TransactionManager;
-import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.util.NamePrefixThreadFactory;
-import net.yacy.peers.Seed;
-import net.yacy.peers.graphics.EncodedImage;
-import net.yacy.peers.operation.yacyBuildProperties;
-import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
-import net.yacy.server.http.HTTPDFileHandler;
-import net.yacy.server.http.TemplateEngine;
-import net.yacy.server.serverClassLoader;
-import net.yacy.server.serverObjects;
-import net.yacy.server.serverSwitch;
-import net.yacy.server.servletProperties;
-import net.yacy.visualization.RasterPlotter;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -103,9 +68,33 @@ import org.eclipse.jetty.util.URIUtil;
 import org.eclipse.jetty.util.resource.Resource;
 
 import com.google.common.net.HttpHeaders;
-import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.google.common.util.concurrent.TimeLimiter;
-import com.google.common.util.concurrent.UncheckedTimeoutException;
+
+import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.document.analysis.Classification;
+import net.yacy.cora.order.Base64Order;
+import net.yacy.cora.protocol.Domains;
+import net.yacy.cora.protocol.HeaderFramework;
+import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.ResponseHeader;
+import net.yacy.cora.util.ByteBuffer;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.BadTransactionException;
+import net.yacy.data.InvalidURLLicenceException;
+import net.yacy.data.TransactionManager;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.peers.Seed;
+import net.yacy.peers.graphics.EncodedImage;
+import net.yacy.peers.operation.yacyBuildProperties;
+import net.yacy.search.Switchboard;
+import net.yacy.search.SwitchboardConstants;
+import net.yacy.server.serverClassLoader;
+import net.yacy.server.serverObjects;
+import net.yacy.server.serverSwitch;
+import net.yacy.server.servletProperties;
+import net.yacy.server.http.HTTPDFileHandler;
+import net.yacy.server.http.TemplateEngine;
+import net.yacy.visualization.RasterPlotter;
 
 /**
  * YaCyDefaultServlet based on Jetty DefaultServlet.java 
@@ -152,8 +141,6 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
     protected static final int SIZE_FILE_THRESHOLD = 1024 * 1024 * 1024; // 1GB is a lot but appropriate for multi-document pushed using the push_p.json servlet
     protected static final FileItemFactory DISK_FILE_ITEM_FACTORY = new DiskFileItemFactory(SIZE_FILE_THRESHOLD, TMPDIR);
-	private final static TimeLimiter timeLimiter = new SimpleTimeLimiter(Executors.newCachedThreadPool(
-			new NamePrefixThreadFactory(YaCyDefaultServlet.class.getSimpleName() + ".timeLimiter")));
     /* ------------------------------------------------------------ */
     @Override
     public void init() throws UnavailableException {
@@ -866,12 +853,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
             // add multipart-form fields to parameter
             if (ServletFileUpload.isMultipartContent(request)) {
-                final String bodyEncoding = request.getHeader(HeaderFramework.CONTENT_ENCODING);
-                if (HeaderFramework.CONTENT_ENCODING_GZIP.equalsIgnoreCase(bodyEncoding)) {
-                    parseMultipart(new GZIPRequestWrapper(request),args);
-                } else {
-                    parseMultipart(request, args);
-                }
+                parseMultipart(request, args);
             }
             // eof modification to read attribute
             Object tmp;
@@ -1335,123 +1317,5 @@ public class YaCyDefaultServlet extends HttpServlet  {
         } catch (Exception ex) {
             ConcurrentLog.info("FILEHANDLER", ex.getMessage());
         }
-    }
-
-    /**
-     * wraps request to uncompress gzip'ed input stream
-     */
-    private class GZIPRequestWrapper extends HttpServletRequestWrapper {
-
-        private final ServletInputStream is;
-
-        public GZIPRequestWrapper(HttpServletRequest request) throws IOException {
-            super(request);
-            this.is = new GZIPRequestStream(request);
-        }
-
-        @Override
-        public ServletInputStream getInputStream() throws IOException {
-            return is;
-        }
-
-    }
-
-    private class GZIPRequestStream extends ServletInputStream {
-
-    	private final GZIPInputStream in;
-        private final ServletInputStream sin;
-
-        public GZIPRequestStream(HttpServletRequest request) throws IOException {
-        	sin = request.getInputStream();
-        	in = new GZIPInputStream(sin);
-        }
-
-        @Override
-        public int read() throws IOException {
-        	return in.read();
-        }
-
-        @Override
-        public int read(byte[] b) throws IOException {
-        	return read(b, 0, b.length);
-        }
-
-        @Override
-        public int read(byte[] b, int off, int len) throws IOException {
-        	try {
-        		return timeLimiter.callWithTimeout(new CallableReader(in, b, off, len), len + 600, TimeUnit.MILLISECONDS, false);
-        	} catch (final UncheckedTimeoutException e) {
-        		return -1;
-        	} catch (Exception e) {
-				throw new IOException(e);
-			}
-        }
-
-        @Override
-        public void close() throws IOException {
-        	in.close();
-        }
-        
-        @Override
-        public int available() throws IOException {
-        	return in.available();
-        }
-        
-        @Override
-        public synchronized void mark(int readlimit) {
-        	in.mark(readlimit);
-        }
-        
-        @Override
-        public boolean markSupported() {
-        	return in.markSupported();
-        }
-        
-        @Override
-        public synchronized void reset() throws IOException {
-        	in.reset();
-        }
-        
-        @Override
-        public long skip(long n) throws IOException {
-        	return in.skip(n);
-        }
-
-        @Override
-        public boolean isFinished() {
-        	try {
-            	return available() < 1;
-            } catch (final IOException ex) {
-                return true;
-            }
-        }
-
-        @Override
-        public boolean isReady() {
-            return sin.isReady() && !isFinished();
-        }
-
-        @Override
-        public void setReadListener(ReadListener rl) {
-        	sin.setReadListener(rl);
-        }
-    }
-    
-    private class CallableReader implements Callable<Integer> {
-    	private int off, len;
-    	private byte[] b;
-    	private GZIPInputStream in;
-    	
-    	public CallableReader(final GZIPInputStream in, byte[] b, int off, int len) {
-    		this.in = in;
-    		this.b = b;
-    		this.off = off;
-    		this.len = len;
-    	}
-    	
-    	@Override
-		public Integer call() throws Exception {
-			return in.read(b, off, len);
-		}
     }
  }

@@ -78,6 +78,13 @@ public class ClientIdentification {
     public final static String customAgentName = "Custom Agent";
     public final static String browserAgentName = "Random Browser";
     public static Agent browserAgent;
+
+    /**
+     * provide system information (this is part of YaCy protocol)
+     */
+    public static final String yacySystem = System.getProperty("os.arch", "no-os-arch") + " " +
+            System.getProperty("os.name", "no-os-name") + " " + System.getProperty("os.version", "no-os-version") +
+            "; " + "java " + System.getProperty("java.version", "no-java-version") + "; " + generateLocation(); // keep this before the following static initialization block as this constant is used by generateYaCyBot()
     
     static {
         generateYaCyBot("new");
@@ -87,13 +94,6 @@ public class ClientIdentification {
         agents.put(yacyProxyAgentName, yacyProxyAgent);
     }
     
-    /**
-     * provide system information (this is part of YaCy protocol)
-     */
-    public static final String yacySystem = System.getProperty("os.arch", "no-os-arch") + " " +
-            System.getProperty("os.name", "no-os-name") + " " + System.getProperty("os.version", "no-os-version") +
-            "; " + "java " + System.getProperty("java.version", "no-java-version") + "; " + generateLocation();
-
     /**
      * produce a YaCy user agent string
      * @param addinfo

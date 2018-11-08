@@ -20,15 +20,26 @@
 function linkstructure(hostname, element, width, height, maxtime, maxnodes) {
 	var nodes = {};
 	var links = [];
-	var linkstructure = {};
 	$.getJSON("api/linkstructure.json?about=" + hostname + "&maxtime=" + maxtime + "&maxnodes=" + maxnodes, function(linkstructure) {
 		links = linkstructure.graph;
 		links.forEach(function(link) {
 			  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source, type:"Inbound"});
 			  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target, type:link.type});
 		});
-		var force = d3.layout.force().nodes(d3.values(nodes)).links(links).size([width, height]).linkDistance(60).charge(-800).on("tick", tick).start();
-		force.gravity(0.7);
+		
+		/* attract nodes to the center - was set with force.gravity(0.7) in d3v3 */
+		var forceX = d3.forceX(width / 2).strength(0.7);
+		var forceY = d3.forceY(height / 2).strength(0.7);
+		
+		var link = d3.forceLink(links).distance(60).strength(1);
+		var simulation = d3.forceSimulation()
+			.nodes(d3.values(nodes))
+			.force('link', link)
+			.force("center", d3.forceCenter(width / 2, height / 2)) // center elements - was set with size([width, height]) in d3v3
+			.force('charge', d3.forceManyBody().strength(-800))
+			.force('x', forceX)
+			.force('y',  forceY)
+			.on("tick", ticked);
 		var svg = d3.select(element).append("svg").attr("id", "hypertree").attr("width", width).attr("height", height);
 		svg.append("defs").selectAll("marker")
 		    .data(["Dead", "Outbound", "Inbound"])
@@ -49,15 +60,25 @@ function linkstructure(hostname, element, width, height, maxtime, maxnodes) {
 		svg.append("text").attr("x", 10).attr("y", height - 10).text("blue: links to other domains").attr("style", "font-size:9px").attr("fill", "lightblue");
 		svg.append("text").attr("x", 10).attr("y", height).text("red: dead links").attr("style", "font-size:9px").attr("fill", "red");
 		var path = svg.append("g")
-			.selectAll("path").data(force.links()).enter().append("path")
+			.selectAll("path").data(link.links()).enter().append("path")
 			.attr("class",function(d) {return "hypertree-link " + d.type; })
 			.attr("marker-end", function(d) { return "url(#" + d.type + ")";});
-		var circle = svg.append("g").selectAll("circle").data(force.nodes()).enter().append("circle").attr("r", 4).call(force.drag);
+		var circle = svg.append("g").selectAll("circle").data(simulation.nodes()).enter().append("circle").attr("r", 4).call(d3.drag());
+		var maxTextLength = 40;
 		var text = svg.append("g")
-			.selectAll("text").data(force.nodes()).enter().append("text").attr("x", 8).attr("y", ".31em")
+			.selectAll("text").data(simulation.nodes()).enter().append("text").attr("x", 8).attr("y", ".31em")
 			.attr("style", function(d) {return d.type == "Outbound" ? "fill:#888888;" : "fill:#000000;";})
-			.text(function(d) {return d.name;});
-		function tick() {
+			.text(function(d) {/* Limit the length of nodes visible text to improve readability */ return d.name.substring(0, Math.min(d.name.length, maxTextLength));});
+		text.append("tspan")
+			.attr("class", "truncated")
+			.text(function(d) {/* The end of large texts is wraped in a tspan, made visible on mouse overing */return d.name.length > maxTextLength ? d.name.substring(maxTextLength) : ""});
+		
+		text.append("tspan")
+			.attr("class", "ellipsis")
+			.text(function(d) {/* Add an ellipsis to mark long texts that are truncated */ return d.name.length > maxTextLength ? "..." : ""});
+
+		
+		function ticked() {
 		  path.attr("d", linkArc);
 		  circle.attr("transform", transform);
 		  text.attr("transform", transform);

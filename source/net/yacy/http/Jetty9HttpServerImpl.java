@@ -34,6 +34,7 @@ import java.util.StringTokenizer;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 
+import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Handler;
@@ -144,18 +145,20 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         htrootContext.addServlet(sholder, "/*");
         
-        /* Handle gzip compression of responses to user agents accepting it */
-		final GzipHandler gzipHandler;
-		if (sb.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
+		final GzipHandler gzipHandler = new GzipHandler();
+		/*
+		 * Decompression of incoming requests body is required for index distribution
+		 * APIs /yacy/transferRWI.html and /yacy/transferURL.html This was previously
+		 * handled by a GZIPRequestWrapper in the YaCyDefaultServlet.
+		 */
+		gzipHandler.setInflateBufferSize(4096);
+		
+		if (!sb.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
 				SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT)) {
-			gzipHandler = new GzipHandler();
-			/*
-			 * Ensure decompression of requests body is disabled : it is already handled by
-			 * the GZIPRequestWrapper in the YaCyDefaultServlet
-			 */
-			gzipHandler.setInflateBufferSize(0);
-			htrootContext.setGzipHandler(gzipHandler);
+			/* Gzip compression of responses can be disabled by user configuration */
+			gzipHandler.setExcludedMethods(HttpMethod.GET.asString(), HttpMethod.POST.asString());
 		}
+		htrootContext.setGzipHandler(gzipHandler);
 
         // -----------------------------------------------------------------------------
         // here we set and map the mandatory servlets, needed for typical YaCy operation

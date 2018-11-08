@@ -742,8 +742,12 @@ public class Response {
         // -ranges in request
         // we checked that in shallStoreCache
 
-        // check if document can be indexed
-        if (this.responseHeader != null) {
+		/*
+		 * Eventually check if a parser supports the media yype. Depending on the crawl
+		 * profile, the indexingDocumentProcessor can eventually index only URL metadata
+		 * using the generic parser for unsupported media types
+		 */
+        if (this.responseHeader != null && !profile().isIndexNonParseableUrls()) {
             final String mimeType = this.responseHeader.getContentType();
             final String parserError = TextParser.supportsMime(mimeType);
             if (parserError != null && TextParser.supportsExtension(url()) != null)  return "no parser available: " + parserError;
