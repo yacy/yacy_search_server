@@ -24,17 +24,28 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 public class CircleTool {
 
-    private static List<int[]> circles = new ArrayList<>();
+	/** Cache of calculated circles */
+    private static final List<int[]> CIRCLES_CACHE = new ArrayList<>();
+    
+    /** Synchronization lock for cache access */
+    private static final ReentrantLock CIRCLES_CACHE_LOCK = new ReentrantLock();
     
     public static void clearcache() {
-        circles.clear();
+    	CIRCLES_CACHE_LOCK.lock();
+    	try {
+    		CIRCLES_CACHE.clear();
+    	} finally {
+    		CIRCLES_CACHE_LOCK.unlock();
+    	}
     }
 
-    private static int[] getCircleCoords(final short radius) {
+    private static int[] getCircleCoords(final short radius, final List<int[]> circles) {
         if (radius - 1 < circles.size()) return circles.get(radius - 1);
 
         // read some lines from known circles
@@ -90,10 +101,23 @@ public class CircleTool {
     }
 
     public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, final int intensity) {
-        if (radius == 0) {
-            //matrix.plot(xc, yc, 100);
-        } else {
-            final int[] c = getCircleCoords((short) radius);
+        if (radius != 0) {
+			final int[] c;
+			try {
+				if (CIRCLES_CACHE_LOCK.tryLock(1, TimeUnit.SECONDS)) {
+					try {
+						c = getCircleCoords((short) radius, CIRCLES_CACHE);
+					} finally {
+						CIRCLES_CACHE_LOCK.unlock();
+					}
+				} else {
+					/* Cache is too busy : let's calculate without it */
+					c = getCircleCoords((short) radius, new ArrayList<>());
+				}
+			} catch (final InterruptedException e) {
+				Thread.currentThread().interrupt(); // preserve thread interrupted state
+				return;
+			}
             short x, y;
             short limit = (short) c.length;
             int co;
@@ -116,11 +140,23 @@ public class CircleTool {
         while (fromArc < 0  ) fromArc +=360;
         while (  toArc > 360)   toArc -=360;
         while (  toArc < 0  )   toArc +=360;
-        if (radius == 0) {
-            //matrix.plot(xc, yc, 100);
-        } else {
-            int[] c = getCircleCoords((short) radius);
-            if (c == null) c = getCircleCoords((short) radius);
+        if (radius != 0) {
+			final int[] c;
+			try {
+				if (CIRCLES_CACHE_LOCK.tryLock(1, TimeUnit.SECONDS)) {
+					try {
+						c = getCircleCoords((short) radius, CIRCLES_CACHE);
+					} finally {
+						CIRCLES_CACHE_LOCK.unlock();
+					}
+				} else {
+					/* Cache is too busy : let's calculate without it */
+					c = getCircleCoords((short) radius, new ArrayList<>());
+				}
+			} catch (final InterruptedException e) {
+				Thread.currentThread().interrupt(); // preserve thread interrupted state
+				return;
+			}
             final short q = (short) c.length;
             final short q2 = (short) (q * 2);
             final short q3 = (short) (q * 3);
