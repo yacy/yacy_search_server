@@ -31,7 +31,7 @@ upnp.remoteHost =
 #(of course you need to customize the ips)
 bindPort = 
 
-# SSL support:
+# TLS/SSL support:
 #
 # For a German manual see http://yacy-websuche.de/wiki/index.php/De:Interface%C3%9CberHTTPS
 #
@@ -55,22 +55,33 @@ bindPort =
 # 2) Import an existing certificate:
 # 
 #    Alternatively you can import an existing certificate in pkcs12 format into
-#    the keystore.
+#    the Java keystore.
 #    
-#    This can be done by setting the pkcs12XXX properties accordingly, e.g.
+#    This can be done by setting the pkcs12XXX and keyStoreXXXX properties accordingly, e.g.
 #    pkcs12ImportFile = c:/temp/keystore.pkcs12
 #    pkcs12ImportPwd = test
+#    keyStore = DATA/SETTINGS/keystore.jks 
+#    keyStorePassword = mypwd
 #
 #    If the property keyStore is not specified, then a new keystore file 
 #    DATA/SETTINGS/myPeerKeystore will be created.
 
+# Path to the Java KeyStore (JKS) holding the certificate to use when TLS/SSL is enabled on the server (server.https=true)
 keyStore=defaults/freeworldKeystore
+
+# Password to access the Java KeyStore (JKS)
 keyStorePassword=freeworld
-pkcs12ImportFile = 
+
+# Path to a PKCS #12 keystore holding a certificate to import into the Java KeyStore
+# This property is automatically reset to empty once the import has been successfully completed
+pkcs12ImportFile =
+
+# Password to access a PKCS #12 keystore holding a certificate to import
+# This property is automatically reset to empty once the import has been successfully completed
 pkcs12ImportPwd = 
 
-# the keyStore is only used, if server.https is set to true
-# if server.https=true, then the YaCy web interface is available at
+# The Java KeyStore is only used, if server.https is set to true.
+# If server.https=true, then the YaCy web interface is available at
 # https://localhost:<port.ssl>/ and at http://localhost:<port>/
 server.https=false
 
