@@ -915,7 +915,10 @@ class shutdownHookThread extends Thread {
                 
                 /* Main thread will release the shutdownSemaphore once completely terminated.
                  * We do not wait indefinitely as the application is supposed here to quickly terminate */
-                this.shutdownSemaphore.tryAcquire(30, TimeUnit.SECONDS);
+                final int maxWaitTime = 30;
+                if(!this.shutdownSemaphore.tryAcquire(maxWaitTime, TimeUnit.SECONDS)) {
+                    System.out.println("Shutting down JVM. Main thread did not completely finish within " + maxWaitTime + " seconds.");
+                }
             }
         } catch (final Exception e) {
             ConcurrentLog.severe("SHUTDOWN","Unexpected error. " + e.getClass().getName(),e);
