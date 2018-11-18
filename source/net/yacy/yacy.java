@@ -790,10 +790,8 @@ public final class yacy {
 	        if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-startup") || args[0].equals("-start"))) {
 	            // normal start-up of yacy
 	            if (args.length > 1) {
-	            	if(args[1].startsWith(File.separator)) {
-	            		/* data root folder provided as an absolute path */
-	            		dataRoot = new File(args[1]);
-	            	} else {
+            		dataRoot = new File(args[1]);
+	            	if(!dataRoot.isAbsolute()) {
 	            		/* data root folder provided as a path relative to the user home folder */
 	            		dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
 	            	}
@@ -803,10 +801,8 @@ public final class yacy {
 	        } else if (args.length >= 1 && args[0].toLowerCase(Locale.ROOT).equals("-gui")) {
 	            // start-up of yacy with gui
 	            if (args.length > 1) {
-	            	if(args[1].startsWith(File.separator)) {
-	            		/* data root folder provided as an absolute path */
-	            		dataRoot = new File(args[1]);
-	            	} else {
+	            	dataRoot = new File(args[1]);
+	            	if(!dataRoot.isAbsolute()) {
 	            		/* data root folder provided as a path relative to the user home folder */
 	            		dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
 	            	}
