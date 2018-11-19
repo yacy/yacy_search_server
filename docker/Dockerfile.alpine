@@ -9,7 +9,7 @@ RUN java -version
 # Install needed packages not in base image
 # (curl for sh scripts in /bin, and wkhtmltopdf,imagemagick,xvfb and ghostscript to enable PDF and image snapshot generation)
 RUN apk add --no-cache curl imagemagick xvfb ghostscript && \
-	apk add wkhtmltopdf --no-cache --repository https://dl-3.alpinelinux.org/alpine/edge/testing/
+	apk add wkhtmltopdf --no-cache --repository https://uk.alpinelinux.org/alpine/edge/testing/
 
 # set current working dir
 WORKDIR /tmp
