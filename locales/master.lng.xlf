@@ -792,7 +792,7 @@
        <source>start autosearch of new bookmarks</source>
     </trans-unit>
     <trans-unit id="921ed3bf" xml:space="preserve" approved="no" translate="yes">
-       <source>This starts a serach of new or modified bookmarks since startup</source>
+       <source>This starts a search of new or modified bookmarks since startup</source>
     </trans-unit>
     <trans-unit id="43a806ea" xml:space="preserve" approved="no" translate="yes">
        <source>in folder "search" with "query=&amp;lt;original_search_term&amp;gt;"</source>

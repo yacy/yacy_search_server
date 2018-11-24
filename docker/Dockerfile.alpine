@@ -1,13 +1,15 @@
 # Build a docker image from latest YaCy sources on Alpine Linux
 
-# Base image : latest stable official jdk image from Docker based on Alpine Linux
-FROM openjdk:alpine
+# Base image : latest stable official jdk 8 image from Docker based on Alpine Linux
+FROM openjdk:8-alpine
 
 # trace java version
 RUN java -version
 
 # Install needed packages not in base image
-RUN apk add --no-cache curl
+# (curl for sh scripts in /bin, and wkhtmltopdf,imagemagick,xvfb and ghostscript to enable PDF and image snapshot generation)
+RUN apk add --no-cache curl imagemagick xvfb ghostscript && \
+	apk add wkhtmltopdf --no-cache --repository https://uk.alpinelinux.org/alpine/edge/testing/
 
 # set current working dir
 WORKDIR /tmp
@@ -15,7 +17,7 @@ WORKDIR /tmp
 # --- Begin of apache ant install : from binary distribution because ant is not in alpine packages
 
 # set ant version once in a environment variable
-ENV ANT_VERSION 1.10.1
+ENV ANT_VERSION 1.10.5
 
 # All in one step to reduce image size growth :
 # - add gnupg package

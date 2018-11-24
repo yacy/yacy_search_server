@@ -32,7 +32,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
@@ -417,7 +419,11 @@ public class HostBrowser {
                         q.append(" AND ").append(CollectionSchema.url_paths_sxt.getSolrFieldName()).append(AbstractSolrConnector.CATCHALL_DTERM);
                     }
                 }
-                BlockingQueue<SolrDocument> docs = fulltext.getDefaultConnector().concurrentDocumentsByQuery(q.toString(), CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000, TIMEOUT, 100, 1, false,
+                final int pageSize = 100;
+                final BlockingQueue<SolrDocument> docs = new ArrayBlockingQueue<>(pageSize);
+                final List<String> queries = new ArrayList<>();
+                queries.add(q.toString());
+                final Thread solrQueryTask = new Thread(fulltext.getDefaultConnector().newDocumentsByQueriesTask(docs, queries, CollectionSchema.url_chars_i.getSolrFieldName() + " asc", 0, 100000, TIMEOUT, pageSize, 1,
                         CollectionSchema.id.getSolrFieldName(),
                         CollectionSchema.sku.getSolrFieldName(),
                         CollectionSchema.failreason_s.getSolrFieldName(),
@@ -433,8 +439,8 @@ public class HostBrowser {
                         CollectionSchema.references_exthosts_i.getSolrFieldName(),
                         CollectionSchema.cr_host_chance_d.getSolrFieldName(),
                         CollectionSchema.cr_host_norm_i.getSolrFieldName()   
-                        );
-                SolrDocument doc;
+                        ));
+                solrQueryTask.start();
                 Set<String> storedDocs = new HashSet<String>();
                 Map<String, FailType> errorDocs = new HashMap<String, FailType>();
                 Set<String> inboundLinks = new HashSet<String>();
@@ -445,60 +451,72 @@ public class HostBrowser {
                 final Collection<String> reloadURLs = new ArrayList<String>();
                 final Set<String> reloadURLCollection = new HashSet<String>();
                 long timeoutList = System.currentTimeMillis() + TIMEOUT;
+                long remainingTime = TIMEOUT;
                 long timeoutReferences = System.currentTimeMillis() + 6000;
                 ReferenceReportCache rrCache = sb.index.getReferenceReportCache();
-                while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                    String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                    String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
-                    FailType error = errortype == null ? null : FailType.valueOf(errortype);
-                    String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                    infoCache.put(ids, new InfoCacheEntry(sb.index.fulltext(), rrCache, doc, ids, System.currentTimeMillis() < timeoutReferences));
-                    if (u.startsWith(path)) {
-                        if (delete) {
-                            deleteIDs.add(ids);
-                        } else {
-                            if (error == null) storedDocs.add(u); else {
-                                if (reload404 && error == FailType.fail) {
-                                    ArrayList<String> collections = (ArrayList<String>) doc.getFieldValue(CollectionSchema.collection_sxt.getSolrFieldName());
-                                    if (collections != null) reloadURLCollection.addAll(collections);
-                                    reloadURLs.add(u);
-                                }
-                                if (authorized) errorDocs.put(u, error);
-                            }
-                        }
-                    } else if (complete) {
-                        if (error == null) storedDocs.add(u); else {
-                            if (authorized) errorDocs.put(u, error);
-                        }
-                    }
-                    if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u); // add the current link
-                    if (error == null) {
-                        hostsize++;
-                        // collect inboundlinks to browse the host
-                        Iterator<String> links = URIMetadataNode.getLinks(doc, true);
-                        while (links.hasNext()) {
-                            u = links.next();
-                            if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u);
-                        }
+                try {
+                	SolrDocument doc = docs.poll(remainingTime, TimeUnit.MILLISECONDS);
+                	while (doc != AbstractSolrConnector.POISON_DOCUMENT && doc != null) {
+                		String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                		String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
+                		FailType error = errortype == null ? null : FailType.valueOf(errortype);
+                		String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                		infoCache.put(ids, new InfoCacheEntry(sb.index.fulltext(), rrCache, doc, ids, System.currentTimeMillis() < timeoutReferences));
+                		if (u.startsWith(path)) {
+                			if (delete) {
+                				deleteIDs.add(ids);
+                			} else {
+                				if (error == null) storedDocs.add(u); else {
+                					if (reload404 && error == FailType.fail) {
+                						ArrayList<String> collections = (ArrayList<String>) doc.getFieldValue(CollectionSchema.collection_sxt.getSolrFieldName());
+                						if (collections != null) reloadURLCollection.addAll(collections);
+                						reloadURLs.add(u);
+                					}
+                					if (authorized) errorDocs.put(u, error);
+                				}
+                			}
+                		} else if (complete) {
+                			if (error == null) storedDocs.add(u); else {
+                				if (authorized) errorDocs.put(u, error);
+                			}
+                		}
+                		if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u); // add the current link
+                		if (error == null) {
+                			hostsize++;
+                			// collect inboundlinks to browse the host
+                			Iterator<String> links = URIMetadataNode.getLinks(doc, true);
+                			while (links.hasNext()) {
+                				u = links.next();
+                				if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u);
+                			}
                         
-                        // collect referrer links
-                        links = URIMetadataNode.getLinks(doc, false);
-                        while (links.hasNext()) {
-                            u = links.next();
-                            try {
-                                MultiProtocolURL mu = new MultiProtocolURL(u);
-                                if (mu.getHost() != null) {
-                                    ReversibleScoreMap<String> lks = outboundHosts.get(mu.getHost());
-                                    if (lks == null) {
-                                        lks = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
-                                        outboundHosts.put(mu.getHost(), lks);
-                                    }
-                                    lks.set(u, u.length());
-                                }
-                            } catch (final MalformedURLException e) {}
-                        }
-                    }
-                    if (System.currentTimeMillis() > timeoutList) break;
+                			// collect referrer links
+                			links = URIMetadataNode.getLinks(doc, false);
+                			while (links.hasNext()) {
+                				u = links.next();
+                				try {
+                					MultiProtocolURL mu = new MultiProtocolURL(u);
+                					if (mu.getHost() != null) {
+                						ReversibleScoreMap<String> lks = outboundHosts.get(mu.getHost());
+                						if (lks == null) {
+                							lks = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+                							outboundHosts.put(mu.getHost(), lks);
+                						}
+                						lks.set(u, u.length());
+                					}
+                				} catch (final MalformedURLException e) {}
+                			}
+                		}
+                		
+                		remainingTime = timeoutList - System.currentTimeMillis();
+                		if (remainingTime <= 0) {
+                			break;
+                		}
+                		doc = docs.poll(remainingTime, TimeUnit.MILLISECONDS);
+                	}
+                } finally {
+                	/* Ensure termination and proper resources release of the query thread */
+               		solrQueryTask.interrupt();
                 }
                 if (deleteIDs.size() > 0) sb.remove(deleteIDs);
                 if (reloadURLs.size() > 0) {

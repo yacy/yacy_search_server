@@ -285,9 +285,9 @@ public class sharedBlacklist_p {
                 while (otherBlacklist.hasNext()) {
                     final String tmp = otherBlacklist.next();
                     if( !Blacklist.contains(tmp) && (!tmp.equals("")) ){
-                        //newBlacklist.add(tmp);
                         prop.put("page_urllist_" + count + "_dark", count % 2 == 0 ? "0" : "1");
-                        prop.putHTML("page_urllist_" + count + "_url", tmp);
+                        /* We do not use here putHTML as we don't want '+' characters to be decoded as spaces by application/x-www-form-urlencoded encoding */
+                        prop.put("page_urllist_" + count + "_url", CharacterCoding.unicode2html(tmp, true));
                         prop.put("page_urllist_" + count + "_count", count);
                         count++;
                     }
@@ -310,9 +310,9 @@ public class sharedBlacklist_p {
                     for (final String element : sortedlist) {
                         final String tmp = element;
                         if(!tmp.equals("")){
-                            //newBlacklist.add(tmp);
                             prop.put("page_urllist_" + count + "_dark", count % 2 == 0 ? "0" : "1");
-                            prop.putHTML("page_urllist_" + count + "_url", tmp);
+                            /* We do not use here putHTML as we don't want '+' characters to be decoded as spaces by application/x-www-form-urlencoded encoding */
+                            prop.put("page_urllist_" + count + "_url", CharacterCoding.unicode2html(tmp, true));
                             prop.put("page_urllist_" + count + "_count", count);
                             count++;
                         }

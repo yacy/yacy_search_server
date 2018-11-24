@@ -224,9 +224,11 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     public LinkedHashMap<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException;
     
     /**
-     * Get results from a solr query as a stream of documents.
+     * <p>Get results from solr queries as a stream of documents.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.
-     * The method returns immediately and feeds the search results into the queue
+     * The method returns immediately and feeds the search results into the queue.</p>
+     * <p><strong>Important</strong> : be careful if the consumer thread(s) terminate before taking the poison document(s) from the queue, 
+     * as the producer thread(s) may indefinitely block on their last step (adding poison element) because the queue would be full.</p>
      * @param querystring the solr query string
      * @param sort the solr sort string, may be null to be not used
      * @param offset first result offset
@@ -248,6 +250,27 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
             final int concurrency,
             final boolean prefetchIDs,
             final String ... fields);
+    
+	/**
+	 * Creates a new runnable task to run a given list of Solr queries and fill a
+	 * results queue by packets of a limited number of results.
+	 * 
+	 * @param queue        the results queue. Must not be null.
+	 * @param querystrings a list of Solr queries
+	 * @param sort         an eventual Solr sort criteria
+	 * @param offset       the results offset position for each query
+	 * @param maxcount     the maximum number of documents per query to retrieve
+	 * @param maxtime      the total maximum time to spend. Unlimited when the value
+	 *                     is negative or equals to Long.MAX_VALUE
+	 * @param buffersize   this is the maximum size of a page of results to retrieve
+	 *                     in one step when running a query
+	 * @param concurrency  the number of consuming threads
+	 * @param fields       the indexed fields to retrieve
+	 * @return a ready to run task
+	 */
+	public Runnable newDocumentsByQueriesTask(final BlockingQueue<SolrDocument> queue, final List<String> querystrings,
+			final String sort, final int offset, final int maxcount, final long maxtime, final int buffersize,
+			final int concurrency, final String... fields);
     
     /**
      * Get results from solr queries as a stream of documents.

@@ -609,7 +609,7 @@ here.==在这里.
 #File: Bookmarks.html
 #---------------------------
 start autosearch of new bookmarks==开始自动搜索新书签
-This starts a serach of new or modified bookmarks since startup==开始搜索自从启动以来新的或修改的书签
+This starts a search of new or modified bookmarks since startup==开始搜索自从启动以来新的或修改的书签
 Every peer online will be ask for results.==每个在线的节点都会被索要结果。
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==要查看所有API的列表，请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>。
 To see a list of all APIs==要查看所有API的列表，请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>。

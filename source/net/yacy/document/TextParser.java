@@ -241,6 +241,29 @@ public final class TextParser {
         return docs;
     }
     
+    /**
+     * Apply only the generic parser to the given content from location.
+     */
+    public static Document[] genericParseSource(
+            final DigestURL location,
+            String mimeType,
+            final String charset,
+            final Set<String> ignoreClassNames,
+            final VocabularyScraper scraper,
+            final int timezoneOffset,
+            final int depth,
+            final byte[] content
+        ) throws Parser.Failure {
+        if (AbstractParser.log.isFine()) {
+        	AbstractParser.log.fine("Parsing '" + location + "' from byte-array, applying only the generic parser");
+        }
+        mimeType = normalizeMimeType(mimeType);
+        Set<Parser> idioms = new HashSet<>();
+        idioms.add(TextParser.genericIdiom);
+
+        return parseSource(location, mimeType, idioms, charset, ignoreClassNames, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE);
+    }
+    
     private static Document[] parseSource(
             final DigestURL location,
             String mimeType,
@@ -644,7 +667,7 @@ public final class TextParser {
      * @param url the given url
      * @param mimeType the given mime type
      * @return a list of Idiom parsers that may be appropriate for the given criteria
-     * @throws Parser.Failure
+     * @throws Parser.Failure when the file extension or the MIME type is denied
      */
     private static Set<Parser> parsers(final MultiProtocolURL url, String mimeType1) throws Parser.Failure {
         final Set<Parser> idioms = new LinkedHashSet<Parser>(2); // LinkedSet to maintain order (genericParser should be last)
@@ -661,7 +684,12 @@ public final class TextParser {
         // check extension and add as backup (in case no, wrong or unknown/unsupported mime was supplied)
         String ext = MultiProtocolURL.getFileExtension(url.getFileName());
         if (ext != null && ext.length() > 0) {
-            if (denyExtensionx.containsKey(ext)) throw new Parser.Failure("file extension '" + ext + "' is denied (1)", url);
+        	/* We do not throw here an exception when the media type is provided and inconsistent with the extension (if it is not supported an exception has already beeen thrown). 
+        	 * Otherwise we would reject URLs with an apparently unsupported extension but whose actual Media Type is supported (for example text/html).
+        	 * Notable example : wikimedia commons pages, such as https://commons.wikimedia.org/wiki/File:YaCy_logo.png */
+            if (denyExtensionx.containsKey(ext) && (mimeType1 == null || mimeType1.equals(mimeOf(ext)))) {
+            	throw new Parser.Failure("file extension '" + ext + "' is denied (1)", url);
+            }
             idiom = ext2parser.get(ext);
             if (idiom != null && !idioms.containsAll(idiom)) { // use containsAll -> idiom is a Set of parser
                 idioms.addAll(idiom);

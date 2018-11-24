@@ -1,10 +1,11 @@
 # Build a docker image from latest YaCy sources
 
-# Base image : latest stable official jdk image from Docker (Debian based)
-FROM openjdk:latest
+# Base image : latest Debian stable official jdk 8 image from Docker
+FROM openjdk:8-stretch
 
-# Install needed packages not in base image
-RUN apt-get update && apt-get install -yq curl && \
+# Install needed packages not in base image 
+# (curl for sh scripts in /bin, and wkhtmltopdf,imagemagick,xvfb and ghostscript to enable PDF and image snapshot generation)
+RUN apt-get update && apt-get install -yq curl wkhtmltopdf imagemagick xvfb ghostscript && \
   rm -rf /var/lib/apt/lists/*
 
 # trace java version

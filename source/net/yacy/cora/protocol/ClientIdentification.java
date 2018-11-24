@@ -72,12 +72,19 @@ public class ClientIdentification {
     public final static String yacyIntranetCrawlerAgentName = "YaCy Intranet (greedy)";
     public static Agent yacyIntranetCrawlerAgent = null; // defined later in static
     public final static String googleAgentName = "Googlebot";
-    public final static Agent googleAgentAgent = new Agent("Googlebot/2.1 (+http://www.google.com/bot.html)", new String[]{"Googlebot", "Googlebot-Mobile"}, minimumGlobalDeltaInit / 2, clientTimeoutInit);
+    public final static Agent googleAgentAgent = new Agent("Googlebot/2.1 (+http://www.google.com/bot.html)", new String[]{"Googlebot", "Googlebot-Mobile"}, minimumGlobalDeltaInit / 10, clientTimeoutInit);
     public final static String yacyProxyAgentName = "YaCyProxy";
     public final static Agent yacyProxyAgent = new Agent("yacy - this is a proxy access through YaCy from a browser, not a robot (the yacy bot user agent is 'yacybot')", new String[]{"yacy"}, minimumGlobalDeltaInit, clientTimeoutInit);
     public final static String customAgentName = "Custom Agent";
     public final static String browserAgentName = "Random Browser";
     public static Agent browserAgent;
+
+    /**
+     * provide system information (this is part of YaCy protocol)
+     */
+    public static final String yacySystem = System.getProperty("os.arch", "no-os-arch") + " " +
+            System.getProperty("os.name", "no-os-name") + " " + System.getProperty("os.version", "no-os-version") +
+            "; " + "java " + System.getProperty("java.version", "no-java-version") + "; " + generateLocation(); // keep this before the following static initialization block as this constant is used by generateYaCyBot()
     
     static {
         generateYaCyBot("new");
@@ -87,13 +94,6 @@ public class ClientIdentification {
         agents.put(yacyProxyAgentName, yacyProxyAgent);
     }
     
-    /**
-     * provide system information (this is part of YaCy protocol)
-     */
-    public static final String yacySystem = System.getProperty("os.arch", "no-os-arch") + " " +
-            System.getProperty("os.name", "no-os-name") + " " + System.getProperty("os.version", "no-os-version") +
-            "; " + "java " + System.getProperty("java.version", "no-java-version") + "; " + generateLocation();
-
     /**
      * produce a YaCy user agent string
      * @param addinfo

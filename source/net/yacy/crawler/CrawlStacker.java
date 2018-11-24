@@ -374,13 +374,20 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             return error;
         }
 
-        // check availability of parser and maxfilesize
         String warning = null;
-        //ContentDomain contentDomain = entry.url().getContentDomainFromExt();
-        if (TextParser.supportsExtension(entry.url()) != null) {
-            warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry, profile, this.robots);
-            //if (warning != null && this.log.isFine()) this.log.logFine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true, false) + " - not pushed: " + warning);
-            return null;
+        if (!profile.isCrawlerAlwaysCheckMediaType() && TextParser.supportsExtension(entry.url()) != null) {
+        	if(profile.isIndexNonParseableUrls()) {
+        		/* Unsupported file extension and no cross-checking of Media Type : add immediately to the noload stack to index only URL metadata */
+        		warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry, profile, this.robots);
+        		if (warning != null && CrawlStacker.log.isFine()) {
+        			CrawlStacker.log.fine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed to " + NoticedURL.StackType.NOLOAD + " stack : " + warning);
+        		}
+        		return null;
+        	}
+        	
+            error = "URL '" + entry.url().toString() + "' file extension is not supported and indexing of linked non-parsable documents is disabled.";
+            CrawlStacker.log.info(error);
+            return error;
         }
 
         if (global) {

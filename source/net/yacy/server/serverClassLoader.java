@@ -70,7 +70,7 @@ public final class serverClassLoader extends ClassLoader {
 
     /**
      * A special loadClass using file as argument to find and load a class
-     * This methode is directly called by the application and not part of the
+     * This method is directly called by the application and not part of the
      * normal loadClass chain (= never called by JVM)
      *
      * @param classfile
@@ -84,22 +84,30 @@ public final class serverClassLoader extends ClassLoader {
         if (p < 0) throw new ClassNotFoundException("wrong class name: " + classfile.getName());
         final String classname = classfile.getName().substring(0, p);
 
-        // load the file from the file system
-        byte[] b;
-        try {
-            //System.out.println("*** DEBUG CLASSLOADER: " + classfile + "; file " + (classfile.exists() ? "exists": "does not exist"));
-            b = FileUtils.read(classfile);
-            // make a class out of the stream
-            c = this.defineClass(null, b, 0, b.length);
-            resolveClass(c);
-        } catch (final LinkageError ee) {
+        synchronized (this) {
+        	/* Important : we must first synchronize any concurrent access AND then check if the class was not already loaded.
+        	 * Otherwise, trying to define again the same class (with the defineClass function) may lead to a JVM crash on some platforms, 
+        	 * notably when running on Java 11 (on earlier JVMs, a LinkageError was only triggered and gracefully catched in that case) */
         	c = findLoadedClass(classname);
-        	if (c != null) return c;
-            throw new ClassNotFoundException("linkageError, " + ee.getMessage() + ":" + classfile.toString());
-        } catch (final IOException ee) {
-            throw new ClassNotFoundException(ee.getMessage() + ":" + classfile.toString());
-        }
-        return c;
+        	if (c != null) {
+        		return c;
+        	}
+        	
+            // load the file from the file system
+            byte[] b;
+            try {
+                b = FileUtils.read(classfile);
+                // make a class out of the stream
+                c = this.defineClass(null, b, 0, b.length);
+                resolveClass(c);
+            } catch (final LinkageError ee) {
+            	/* This error could occur when two threads try to define concurrently the same class. Should not occur here */
+                throw new ClassNotFoundException("linkageError, " + ee.getMessage() + ":" + classfile.toString());
+            } catch (final IOException ee) {
+                throw new ClassNotFoundException(ee.getMessage() + ":" + classfile.toString());
+            }
+            return c;
+		}
     }
 
 }

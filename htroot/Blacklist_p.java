@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.document.id.Punycode;
+import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
@@ -313,7 +316,10 @@ public class Blacklist_p {
                     for (final Entry<String, String> selectedEntry : selectedBlacklistEntries.entrySet()) {
 
                     	final String editedEntryValue = editedBlacklistEntries.get(selectedEntry.getKey().replace("selectedBlacklistEntry.", "editedBlacklistEntry."));
-                        if (!selectedEntry.getValue().equals(editedEntryValue)) {
+                    	
+                    	final String preparedNewEntry = prepareNormalizedEntry(editedEntryValue);
+                        
+                        if (!normalizeEntry(selectedEntry.getValue()).equals(preparedNewEntry)) {
 
                         	/* Add first, to detect any eventual syntax errors before removing the old entry */
                             if (!BlacklistHelper.addBlacklistEntry(blacklistToUse, editedEntryValue, header)) {
@@ -413,10 +419,21 @@ public class Blacklist_p {
             }
 
             for (int j = offset; j < to; ++j){
-                final String nextEntry = sortedlist[j];
+                String nextEntry = sortedlist[j];
 
-                if (nextEntry.isEmpty()) continue;
-                if (nextEntry.charAt(0) == '#') continue;
+                if (nextEntry.isEmpty()) {
+                	continue;
+                }
+                if (nextEntry.charAt(0) == '#') {
+                	continue;
+                }
+                
+                /** Decode the entry for easier reading of paths with non ascii characters */
+        		final int slashPos = nextEntry.indexOf('/', 0);
+        		if(slashPos > 0) {
+        			nextEntry = nextEntry.substring(0, slashPos + 1) + MultiProtocolURL.unescapePath(nextEntry.substring(slashPos + 1));
+        		}
+                
                 prop.put(DISABLED + EDIT + "Itemlist_" + entryCount + "_dark", dark ? "1" : "0");
                 dark = !dark;
                 /* We do not use here putHTML as we don't want '+' characters to be interpreted as application/x-www-form-urlencoded encoding */
@@ -539,5 +556,34 @@ public class Blacklist_p {
         prop.put("disabled", (blacklistToUse == null) ? "1" : "0");
         return prop;
     }
+
+	/**
+	 * @param entry a blacklist entry. Must not be null.
+	 * @return a prepared and normalized entry as done internally in
+	 *         BlacklistHelper.addBlacklistEntry()
+	 */
+	private static String prepareNormalizedEntry(final String entry) {
+		return normalizeEntry(BlacklistHelper.prepareEntry(entry));
+	}
+
+	/**
+	 * @param entry a blacklist entry. Must not be null.
+	 * @return a normalized entry (punycode encoded host and percent-encoded path)
+	 *         as done internally in BlacklistHelper.addBlacklistEntry()
+	 */
+	private static String normalizeEntry(final String entry) {
+		final int slashPos = entry.indexOf('/', 0);
+		String host = entry.substring(0, slashPos);
+		try {
+			host = Punycode.isBasic(host) ? host : MultiProtocolURL.toPunycode(host);
+		} catch (final PunycodeException ignored) {
+			/*
+			 * Punycode encoding error will be handled in
+			 * BlacklistHelper.addBlacklistEntry()
+			 */
+		}
+		String path = MultiProtocolURL.escapePathPattern(entry.substring(slashPos + 1));
+		return host + "/" + path;
+	}
 
 }

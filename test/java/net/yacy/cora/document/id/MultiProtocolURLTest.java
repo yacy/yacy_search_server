@@ -364,6 +364,99 @@ public class MultiProtocolURLTest {
 	}
 	
 	/**
+	 * Unit tests for {@link MultiProtocolURL#escapePath(String)}
+	 */
+	@Test
+	public void testEscapePath() {
+		String[][] testStrings = new String[][] {
+				// "test string" , "expected escaped result"
+				new String[] { "", "" }, new String[] { "/", "/" }, new String[] { "/ascii/path", "/ascii/path" },
+				new String[] { "/latin/chars/àäâéèïîôöù",
+						"/latin/chars/%C3%A0%C3%A4%C3%A2%C3%A9%C3%A8%C3%AF%C3%AE%C3%B4%C3%B6%C3%B9" },
+				new String[] { "/with%char", "/with%25char" }, new String[] { "/wiki/%", "/wiki/%25" },
+				new String[] { "/already/percent-encoded/%C3%9f", "/already/percent-encoded/%C3%9F" },
+				new String[] { "/logograms/正體字/繁體字",
+						"/logograms/%E6%AD%A3%E9%AB%94%E5%AD%97/%E7%B9%81%E9%AB%94%E5%AD%97" },
+				new String[] { "/rfc3986/unreserved/path/chars/-._~", "/rfc3986/unreserved/path/chars/-._~" },
+				new String[] { "/rfc3986/subdelims/!$&'()*+,;=", "/rfc3986/subdelims/!$&'()*+,;=" },
+				new String[] { "/rfc3986/pchar/additional/:@", "/rfc3986/pchar/additional/:@" },
+				new String[] { "/regex/metacharacters/<([{\\^-=$!|]})?*+.>",
+						"/regex/metacharacters/%3C(%5B%7B%5C%5E-=$!%7C%5D%7D)%3F*+.%3E" } };
+		for (int i = 0; i < testStrings.length; i++) {
+			String[] testString = testStrings[i];
+			final String encoded = MultiProtocolURL.escapePath(testString[0]);
+			assertTrue("Encoded string contains only ascii chars",
+					StandardCharsets.US_ASCII.newEncoder().canEncode(encoded));
+			assertEquals(testString[1], encoded);
+		}
+	}
+	
+	/**
+	 * Unit tests for {@link MultiProtocolURL#unescapePath(String)}
+	 */
+	@Test
+	public void testUnescapePath() {
+		String[][] testStrings = new String[][] {
+				// "test string", "expected unescaped result"
+				new String[] { "", "" }, new String[] { "/", "/" }, new String[] { "/ascii/path", "/ascii/path" },
+				new String[] { "/latin/chars/%C3%A0%C3%A4%C3%A2%C3%A9%C3%A8%C3%AF%C3%AE%C3%B4%C3%B6%C3%B9",
+						"/latin/chars/àäâéèïîôöù" },
+				new String[] { "/wiki/%25", "/wiki/%" },
+				new String[] { "/logograms/%E6%AD%A3%E9%AB%94%E5%AD%97/%E7%B9%81%E9%AB%94%E5%AD%97",
+						"/logograms/正體字/繁體字" },
+				new String[] { "/bad/hexaDigits/%GH%-1%èà/file", "/bad/hexaDigits/%GH%-1%èà/file" },
+				new String[] { "/missing/hexaDigit/%2", "/missing/hexaDigit/%2" },
+				new String[] { "/missing/hexaDigits/%", "/missing/hexaDigits/%" },
+				new String[] { "/unescaped/logograms/正體字/繁體字", "/unescaped/logograms/正體字/繁體字" },
+				new String[] { "/unescaped/rfc3986/unreserved/path/chars/-._~",
+						"/unescaped/rfc3986/unreserved/path/chars/-._~" },
+				new String[] { "/unescaped/rfc3986/subdelims/!$&'()*+,;=", "/unescaped/rfc3986/subdelims/!$&'()*+,;=" },
+				new String[] { "/unescaped/rfc3986/pchar/additional/:@", "/unescaped/rfc3986/pchar/additional/:@" },
+				new String[] { "/unescaped/regex/metacharacters/<([{\\^-=$!|]})?*+.>",
+						"/unescaped/regex/metacharacters/<([{\\^-=$!|]})?*+.>" } };
+		for (int i = 0; i < testStrings.length; i++) {
+			String[] testString = testStrings[i];
+			final String decoded = MultiProtocolURL.unescapePath(testString[0]);
+			assertEquals(testString[1], decoded);
+		}
+	}
+	
+	/**
+	 * Unit tests for {@link MultiProtocolURL#escapePathPattern(String)}
+	 */
+	@Test
+	public void testEscapePathPattern() {
+		String[][] testStrings = new String[][] {
+				// "test string" , "expected escaped result"
+				new String[] { "", "" }, new String[] { "/", "/" }, new String[] { "/ascii/path", "/ascii/path" },
+				new String[] { "/latin/chars/àäâéèïîôöù",
+						"/latin/chars/%C3%A0%C3%A4%C3%A2%C3%A9%C3%A8%C3%AF%C3%AE%C3%B4%C3%B6%C3%B9" },
+				new String[] { "/with%char", "/with%25char" }, new String[] { "/wiki/%", "/wiki/%25" },
+				new String[] { "/already/percent-encoded/%C3%9f", "/already/percent-encoded/%C3%9F" },
+				new String[] { "/logograms/正體字/繁體字",
+						"/logograms/%E6%AD%A3%E9%AB%94%E5%AD%97/%E7%B9%81%E9%AB%94%E5%AD%97" },
+				new String[] { "/rfc3986/unreserved/path/chars/-._~", "/rfc3986/unreserved/path/chars/-._~" },
+				new String[] { "/rfc3986/subdelims/!$&'()*+,;=", "/rfc3986/subdelims/!$&'()*+,;=" },
+				new String[] { "/rfc3986/pchar/additional/:@", "/rfc3986/pchar/additional/:@" },
+				new String[] { "/regex/metacharacters/<([{\\^-=$!|]})?*+.>",
+						"/regex/metacharacters/<([{\\^-=$!|]})?*+.>" },
+				new String[] {
+						"/regex/char/classes/[abc]/[^abc]/[a-zA-Z]/[a-d[m-p]]/[a-z&&[def]]/[a-z&&[^bc]]/[a-z&&[^m-p]]",
+						"/regex/char/classes/[abc]/[^abc]/[a-zA-Z]/[a-d[m-p]]/[a-z&&[def]]/[a-z&&[^bc]]/[a-z&&[^m-p]]" },
+				new String[] { "/regex/predefined/char/class/.\\d\\D\\h\\H\\s\\S\\v\\V\\w\\W",
+						"/regex/predefined/char/class/.\\d\\D\\h\\H\\s\\S\\v\\V\\w\\W" },
+				new String[] { "/regex/boundary/matchers/^$\\b\\B\\A\\G\\Z\\z",
+						"/regex/boundary/matchers/^$\\b\\B\\A\\G\\Z\\z" } };
+		for (int i = 0; i < testStrings.length; i++) {
+			String[] testString = testStrings[i];
+			final String encoded = MultiProtocolURL.escapePathPattern(testString[0]);
+			assertTrue("Encoded string contains only ascii chars",
+					StandardCharsets.US_ASCII.newEncoder().canEncode(encoded));
+			assertEquals(testString[1], encoded);
+		}
+	}
+	
+	/**
 	 * Unit tests for {@link MultiProtocolURL#unescape(String)}
 	 */
 	@Test

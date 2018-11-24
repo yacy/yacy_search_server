@@ -96,6 +96,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         FOLLOW_FRAMES                ("followFrames",               false, CrawlAttribute.BOOLEAN, "Flag if frames shall be followed (no by default)"),
         OBEY_HTML_ROBOTS_NOINDEX     ("obeyHtmlRobotsNoindex",      false, CrawlAttribute.BOOLEAN, "Obey html-robots-noindex"),
         OBEY_HTML_ROBOTS_NOFOLLOW    ("obeyHtmlRobotsNofollow",     false, CrawlAttribute.BOOLEAN, "Obey html-robots-nofollow"),
+        CRAWLER_ALWAYS_CHECK_MEDIA_TYPE("crawlerAlwaysCheckMediaType", false, CrawlAttribute.BOOLEAN, "Always cross check file extension against actual Media Type"),
         CRAWLER_URL_MUSTMATCH        ("crawlerURLMustMatch",        false, CrawlAttribute.STRING,  "URL Must-Match Filter"),
         CRAWLER_URL_MUSTNOTMATCH     ("crawlerURLMustNotMatch",     false, CrawlAttribute.STRING,  "URL Must-Not-Match Filter"),
         CRAWLER_IP_MUSTMATCH         ("crawlerIPMustMatch",         false, CrawlAttribute.STRING,  "IP Must-Match Filter"),
@@ -239,6 +240,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(CrawlAttribute.HANDLE.key,           handle);
         put(CrawlAttribute.NAME.key,             name);
         put(CrawlAttribute.AGENT_NAME.key, userAgentName);
+        put(CrawlAttribute.CRAWLER_ALWAYS_CHECK_MEDIA_TYPE.key, true);
         put(CrawlAttribute.CRAWLER_URL_MUSTMATCH.key,     (crawlerUrlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerUrlMustMatch);
         put(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key,  (crawlerUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerUrlMustNotMatch);
         put(CrawlAttribute.CRAWLER_IP_MUSTMATCH.key,      (crawlerIpMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerIpMustMatch);
@@ -673,11 +675,29 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
     }
 
-    public boolean directDocByURL() {
+	/**
+	 * @return true when URLs of unsupported resources (no parser available or denied format) should
+	 *         be indexed as links (with metadata only on URL and not on content).
+	 */
+    public boolean isIndexNonParseableUrls() {
         final String r = get(CrawlAttribute.DIRECT_DOC_BY_URL.key);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
+    
+	/**
+	 * @return true when the crawler must always cross check the eventual URL file
+	 *         extension against the actual Media Type, even when file extension is
+	 *         unknown or unsupported. False when the crawler should not load URLs
+	 *         with an unknown or unsupported file extension.
+	 */
+	public boolean isCrawlerAlwaysCheckMediaType() {
+		final String r = get(CrawlAttribute.CRAWLER_ALWAYS_CHECK_MEDIA_TYPE.key);
+		if (r == null) {
+			return false;
+		}
+		return (r.equals(Boolean.TRUE.toString()));
+	}
 
     public CacheStrategy cacheStrategy() {
         final String r = get(CrawlAttribute.CACHE_STRAGEGY.key);
@@ -889,7 +909,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_agentName", this.get(CrawlAttribute.AGENT_NAME.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_userAgent", this.getAgent().userAgent);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", this.depth());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_directDocByURL", this.directDocByURL() ? 1 : 0);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_directDocByURL", this.isIndexNonParseableUrls() ? 1 : 0);
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_recrawlIfOlder", this.recrawlIfOlder() == Long.MAX_VALUE ? "eternity" : (new Date(this.recrawlIfOlder()).toString()));
         prop.put(CRAWL_PROFILE_PREFIX + count + "_domMaxPages", this.domMaxPages());
         //prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (this.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(this.domMaxPages())); // TODO: remove, replace with 'domMaxPages'
@@ -903,6 +923,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.put(CRAWL_PROFILE_PREFIX + count + "_storeHTCache", this.storeHTCache() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", this.remoteIndexing() ? 1 : 0);
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_cacheStrategy", this.get(CrawlAttribute.CACHE_STRAGEGY.key));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlerAlwaysCheckMediaType", this.isCrawlerAlwaysCheckMediaType());
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerURLMustMatch", this.get(CrawlAttribute.CRAWLER_URL_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerURLMustNotMatch", this.get(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerIPMustMatch", this.get(CrawlAttribute.CRAWLER_IP_MUSTMATCH.key));

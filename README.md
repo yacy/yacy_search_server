@@ -1,4 +1,5 @@
 # YaCy
+[![Gitter](https://badges.gitter.im/yacy/yacy_search_server.svg)](https://gitter.im/yacy/yacy_search_server?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/yacy/yacy_search_server.svg?branch=master)](https://travis-ci.org/yacy/yacy_search_server)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
@@ -76,12 +77,12 @@ NO OTHER SOFTWARE IS REQUIRED!
 Startup and Shutdown of YaCy:
 
 - on GNU/Linux and OpenBSD:
-to start: execute ./startYACY.sh
-to stop : execute ./stopYACY.sh
+   - to start: execute `./startYACY.sh`
+   - to stop : execute `./stopYACY.sh`
 
 - on Windows:
-to start: double-click startYACY.bat
-to stop : double-click stopYACY.bat
+   - to start: double-click `startYACY.bat`
+   - to stop : double-click `stopYACY.bat`
 
 - on Mac OS X:
 please use the Mac Application and start or stop it like any
@@ -135,10 +136,14 @@ More details for YaCy on Heroku in [Heroku.md](Heroku.md).
 ## Port 8090 is bad, people are not allowed to access that port
 
 You can forward port 80 to 8090 with iptables:
+```bash
 iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8090
-On some operation systems, you must first enable access to the ports you are using like:
-iptables -I INPUT -m tcp -p tcp --dport 8090 -j ACCEPT
+```
 
+On some operation systems, you must first enable access to the ports you are using like:
+```bash
+iptables -I INPUT -m tcp -p tcp --dport 8090 -j ACCEPT
+```
 
 ## How can I scale this; how much ram is needed; disk space?
 
