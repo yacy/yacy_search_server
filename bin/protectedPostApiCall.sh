@@ -3,6 +3,8 @@
 # $1 : API path
 # $2 : POST parameters (example : "param1=value1&param2=value2")
 #
+# $YACY_DATA_PATH : path to the YaCy DATA folder to use. When not set, the relative ../DATA path is used as a default.
+#
 # Authentication options :
 # - enable unauthenticated local access as administrator : set adminAccountForLocalhost=true in the DATA/SETTINGS/yacy.conf file
 # - OR use the legacy Basic HTTP authentication mode (unsecured for remote access): set the "auth-method" to BASIC in the defaults/web.xml file
@@ -13,13 +15,15 @@
 # 
 
 cd "`dirname $0`"
-port=$(grep ^port= ../DATA/SETTINGS/yacy.conf |cut -d= -f2)
-admin=$(grep ^adminAccountUserName= ../DATA/SETTINGS/yacy.conf |cut -d= -f2)
-adminAccountForLocalhost=$(grep ^adminAccountForLocalhost= ../DATA/SETTINGS/yacy.conf | cut -d= -f2)
+. ./checkDataFolder.sh
 
-if grep "<auth-method>BASIC</auth-method>" ../defaults/web.xml > /dev/null; then
+port=$(grep ^port= "$YACY_DATA_PATH/SETTINGS/yacy.conf" |cut -d= -f2)
+admin=$(grep ^adminAccountUserName= "$YACY_DATA_PATH/SETTINGS/yacy.conf" |cut -d= -f2)
+adminAccountForLocalhost=$(grep ^adminAccountForLocalhost= "$YACY_DATA_PATH/SETTINGS/yacy.conf" | cut -d= -f2)
+
+if grep "<auth-method>BASIC</auth-method>" "$YACY_APP_PATH/defaults/web.xml" > /dev/null; then
 	# When authentication method is in basic mode, use directly the password hash from the configuration file 
-	YACY_ADMIN_PASSWORD=$(grep ^adminAccountBase64MD5= ../DATA/SETTINGS/yacy.conf |cut -d= -f2)
+	YACY_ADMIN_PASSWORD=$(grep ^adminAccountBase64MD5= "$YACY_DATA_PATH/SETTINGS/yacy.conf" |cut -d= -f2)
 fi
 
 if which curl > /dev/null; then
