@@ -15,6 +15,7 @@
 
 cd "`dirname $0`"
 . ./checkDataFolder.sh
+. ./checkConfFile.sh
 
 port=$(grep ^port= "$YACY_DATA_PATH/SETTINGS/yacy.conf" |cut -d= -f2)
 admin=$(grep ^adminAccountUserName= "$YACY_DATA_PATH/SETTINGS/yacy.conf" |cut -d= -f2)
