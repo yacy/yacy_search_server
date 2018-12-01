@@ -19,13 +19,23 @@ apps:
     # Interfaces authorizations requirements
     # network-bind - to allow acting as an HTTP server and client
     # desktop - to launch the default desktop navigator when starting (with xdg-open command) - not strictly necessary
-    # home - not strictly necessary but can be conventient for some features to have read/write access to files outside the snap data folders, notably 
+    # home - not strictly necessary but can be convenient for some features to have read/write access to files outside the snap data folders, notably 
     #  - to index files in Intranet mode
     #  - for index, dump, vocabulary import/export features
     plugs: [network-bind, desktop, home]
+  passwd: # set the YaCy administrator password
+    environment: 
+      YACY_DATA_PATH: "$SNAP_USER_DATA/DATA"
+    command: sh "$SNAP/yacy/bin/passwd.sh"
+    # Interfaces authorizations requirements
+    # network - to allow requesting the ConfigAccounts_p HTTP API when the server is running
+    plugs: [network]
 
 parts:
   yacy-search:
+    # Additional packages
+    # curl : needed by the passwd.sh script to call a YaCy API when the server is running
+    stage-packages: [curl]
     plugin: ant
     ant-build-targets: 
       - clean
