@@ -48,7 +48,6 @@ else
 		echo "Password setting failed."
 		exit 1
 	fi	
-	echo "B64MD5 $B64MD5"
 	PASSWORD_HASH="MD5:$B64MD5"
 
 	(sed "/adminAccountBase64MD5=/c\adminAccountBase64MD5=$PASSWORD_HASH" "$YACY_CONF_FILE" > "$YACY_CONF_FILE".tmp && \
