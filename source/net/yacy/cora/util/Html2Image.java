@@ -31,6 +31,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
 import javax.swing.JEditorPane;
@@ -74,8 +75,10 @@ public class Html2Image {
     private final static File convertMac1 = new File("/opt/local/bin/convert");
     private final static File convertMac2 = new File("/opt/ImageMagick/bin/convert");
     
-    // debian
-    // to install: apt-get install wkhtmltopdf imagemagick xvfb ghostscript
+    /* Debian packages to install: apt-get install wkhtmltopdf imagemagick xvfb ghostscript
+     The imagemagick policy at /etc should also be checked :
+     if it contains a line such as <policy domain="coder" rights="none" pattern="PDF" /> it must be edited with rights="read" at minimum
+    */
     private final static File wkhtmltopdfDebian = new File("/usr/bin/wkhtmltopdf"); // there is no wkhtmltoimage, use convert to create images
     private final static File convertDebian = new File("/usr/bin/convert");
     
@@ -93,17 +96,102 @@ public class Html2Image {
 	 */
 	private static final File WKHTMLTOPDF_WINDOWS_X86 = new File(
 			"C:\\Program Files (x86)\\wkhtmltopdf\\bin\\wkhtmltopdf.exe");
+	
+	/** Command to use when wkhtmltopdf is included in the system Path */
+	private static final String WKHTMLTOPDF_COMMAND = "wkhtmltopdf";
+	
+	/** Command to use when imagemagick convert is included in the system Path */
+	private static final String CONVERT_COMMAND = "convert";
 
     private static boolean usexvfb = false;
 
+    /**
+     * @return when the wkhtmltopdf command is detected as available in the system
+     */
     public static boolean wkhtmltopdfAvailable() {
-		return OS.isWindows ? (WKHTMLTOPDF_WINDOWS.exists() || WKHTMLTOPDF_WINDOWS_X86.exists())
-				: (wkhtmltopdfMac.exists() || wkhtmltopdfDebian.exists());
+    	/* Check wkhtmltopdf common installation paths and system Path */
+		return wkhtmltopdfExecutable() != null || wkhtmltopdfAvailableInPath();
     }
     
-    public static boolean convertAvailable() {
-        return convertMac1.exists() || convertMac2.exists() || convertDebian.exists();
+    /**
+     * @return a wkhtmltopdf executable file when one can be found, null otherwise
+     */
+    private static File wkhtmltopdfExecutable() {
+    	File executable = null;
+    	if(OS.isWindows) {
+    		if(WKHTMLTOPDF_WINDOWS.exists()) {
+    			executable = WKHTMLTOPDF_WINDOWS; 
+    		} else if(WKHTMLTOPDF_WINDOWS_X86.exists()) {
+    			executable = WKHTMLTOPDF_WINDOWS_X86;
+    		}
+    	} else {
+    		if(wkhtmltopdfMac.exists()) {
+    			executable = wkhtmltopdfMac;
+    		} else if(wkhtmltopdfDebian.exists()) {
+    			executable = wkhtmltopdfDebian;
+    		}
+    	}
+    	return executable;
     }
+
+    /**
+     * @return true when wkhtmltopdf is available in system path
+     */
+	private static boolean wkhtmltopdfAvailableInPath() {
+		boolean available = false;
+		try {
+			final Process p = Runtime.getRuntime().exec(WKHTMLTOPDF_COMMAND + " -V");
+			available = p.waitFor(2, TimeUnit.SECONDS) && p.exitValue() == 0;
+		} catch (final IOException e) {
+			ConcurrentLog.fine("Html2Image", "wkhtmltopdf is not included in system path.");
+		} catch (final InterruptedException e) {
+			Thread.currentThread().interrupt(); // preserve thread interrupted state
+		}
+		return available;
+	}
+	
+    /**
+     * @return a imagemagick convert executable file when one can be found, null otherwise
+     */
+    private static File convertExecutable() {
+    	File executable = null;
+    	if(!OS.isWindows) {
+    		if(convertMac1.exists()) {
+    			executable = convertMac1; 
+    		} else if(convertMac2.exists()) {
+    			executable = convertMac2;
+    		} else if(convertDebian.exists()) {
+    			executable = convertDebian;
+    		}
+    	}
+    	return executable;
+    }
+    
+    /**
+     * @return when the imagemagick convert command is detected as available in the system
+     */
+    public static boolean convertAvailable() {
+    	/* Check convert common installation paths and system Path */
+        return convertExecutable() != null || convertAvailableInPath();
+    }
+
+    /**
+     * @return when imagemagick convert is available in system path
+     */
+	private static boolean convertAvailableInPath() {
+		boolean available = false;
+		if(!OS.isWindows) { // on MS Windows convert is a system tool to convert volumes from FAT to NTFS
+			try {
+				final Process p = Runtime.getRuntime().exec(CONVERT_COMMAND + " -version");
+				available = p.waitFor(2, TimeUnit.SECONDS) && p.exitValue() == 0;
+			} catch (final IOException e) {
+				ConcurrentLog.fine("Html2Image", "convert is not included in system path.");
+			} catch (final InterruptedException e) {
+				Thread.currentThread().interrupt(); // preserve thread interrupted state
+			}
+		}
+		return available;
+	}
     
     /**
      * write a pdf of a web page
@@ -132,11 +220,18 @@ public class Html2Image {
     }
     
     private static boolean writeWkhtmltopdfInternal(final String url, final String proxy, final File destination, final String userAgent, final String acceptLanguage, final boolean ignoreErrors) {
-		final File wkhtmltopdf = OS.isWindows
-				? (WKHTMLTOPDF_WINDOWS.exists() ? WKHTMLTOPDF_WINDOWS : WKHTMLTOPDF_WINDOWS_X86)
-				: (wkhtmltopdfMac.exists() ? wkhtmltopdfMac : wkhtmltopdfDebian);
+		final String wkhtmltopdfCmd;
+		final File wkhtmltopdf = wkhtmltopdfExecutable();
+		if(wkhtmltopdf != null) {
+			wkhtmltopdfCmd = wkhtmltopdf.getAbsolutePath();
+		} else if(wkhtmltopdfAvailableInPath()) {
+			wkhtmltopdfCmd = WKHTMLTOPDF_COMMAND;
+		} else {
+			ConcurrentLog.warn("Html2Pdf", "Unable to locate wkhtmltopdf executable on this system!");
+			return false;
+		}
         String commandline =
-                wkhtmltopdf.getAbsolutePath() + " -q --title '" + url + "' " +
+        		wkhtmltopdfCmd + " -q --title '" + url + "' " +
                 //acceptLanguage == null ? "" : "--custom-header 'Accept-Language' '" + acceptLanguage + "' " + 
                 //(userAgent == null ? "" : "--custom-header \"User-Agent\" \"" + userAgent + "\" --custom-header-propagation ") + 
                 (proxy == null ? "" : "--proxy " + proxy + " ") +
@@ -185,24 +280,36 @@ public class Html2Image {
     		/* Use JPEG as a default fallback */
     		imageFormat = "jpg";
     	}
-        final File convert = convertMac1.exists() ? convertMac1 : convertMac2.exists() ? convertMac2 : convertDebian;
+		String convertCmd = null;
+		final File convert = convertExecutable();
+		if(convert != null) {
+			convertCmd = convert.getAbsolutePath();
+		} else if(convertAvailableInPath()) {
+			convertCmd = CONVERT_COMMAND;
+		} else {
+			ConcurrentLog.info("Html2Image", "Unable to locate convert executable on this system!");
+		}
 
         // convert pdf to jpg using internal pdfbox capability
-        if (OS.isWindows || !convert.exists()) {
+        if (convertCmd == null) {
             try {
                 PDDocument pdoc = PDDocument.load(pdf);
                 BufferedImage bi = new PDFRenderer(pdoc).renderImageWithDPI(0, density, ImageType.RGB);
 
                 return ImageIO.write(bi, imageFormat, image);
 
-            } catch (IOException ex) { }
+            } catch (final IOException ex) {
+				ConcurrentLog.warn("Html2Image", "Failed to create image with pdfbox"
+						+ (ex.getMessage() != null ? " : " + ex.getMessage() : ""));
+            	return false;
+            }
         }
 
-        // convert on mac or linux using external command line utility
+        // convert using external command line utility
         try {
             // i.e. convert -density 300 -trim yacy.pdf[0] -trim -resize 1024x -crop x1024+0+0 -quality 75% yacy-convert-300.jpg
             // note: both -trim are necessary, otherwise it is trimmed only on one side. The [0] selects the first page of the pdf
-            String command = convert.getAbsolutePath() + " -alpha remove -density " + density + " -trim " + pdf.getAbsolutePath() + "[0] -trim -resize " + width + "x -crop x" + height + "+0+0 -quality " + quality + "% " + image.getAbsolutePath();
+            String command = convertCmd + " -alpha remove -density " + density + " -trim " + pdf.getAbsolutePath() + "[0] -trim -resize " + width + "x -crop x" + height + "+0+0 -quality " + quality + "% " + image.getAbsolutePath();
             List<String> message = OS.execSynchronous(command);
             if (image.exists()) return true;
             ConcurrentLog.warn("Html2Image", "failed to create image with command: " + command);
@@ -327,28 +434,73 @@ public class Html2Image {
      * </ol>
      */
 	public static void main(String[] args) {
+		final String usageMessage = "Usage : java " + Html2Image.class.getName()
+				+ " <url> <target-file[.pdf|.jpg|.png]> [wkhtmltopdf|swing]";
+		int exitStatus = 0;
 		try {
 			if (args.length < 2) {
 				System.out.println("Missing required parameter(s).");
-				System.out.println("Usage : java " + Html2Image.class.getName()
-						+ " <url> <target-file[.pdf|.jpg|.png]> [wkhtmltopdf|swing]");
+				System.out.println(usageMessage);
+				exitStatus = 1;
 				return;
 			}
+			final String targetPath = args[1];
 			if (args.length < 3 || "wkhtmltopdf".equals(args[2])) {
 				if(Html2Image.wkhtmltopdfAvailable()) {
-					Html2Image.writeWkhtmltopdf(args[0], null, ClientIdentification.yacyInternetCrawlerAgent.userAgent,
-							"en-us,en;q=0.5", new File(args[1]));					
+					final File targetPdfFile;
+					if(targetPath.endsWith(".jpg") || targetPath.endsWith(".png")) {
+						targetPdfFile = new File(targetPath.substring(0, targetPath.length() - 4) + ".pdf");
+					} else if(targetPath.endsWith(".pdf")) {
+						targetPdfFile = new File(targetPath);
+					} else {
+						System.out.println("Unsupported output format");
+						System.out.println(usageMessage);
+						exitStatus = 1;
+						return;
+					}
+					if(Html2Image.writeWkhtmltopdf(args[0], null, ClientIdentification.yacyInternetCrawlerAgent.userAgent,
+							"en-us,en;q=0.5", targetPdfFile)) {
+						if(targetPath.endsWith(".jpg") || targetPath.endsWith(".png")) {
+							if(Html2Image.pdf2image(targetPdfFile, new File(targetPath), 1024, 1024, 300, 75)) {
+								ConcurrentLog.info("Html2Image", "wrote " + targetPath + " converted from " + targetPdfFile);
+							} else {
+								exitStatus = 1;
+								return;
+							}
+						}
+					} else {
+						exitStatus = 1;
+						return;
+					}
 				} else {
 					System.out.println("Unable to locate wkhtmltopdf executable on this system!");
+					exitStatus = 1;
+					return;
 				}
 			} else if ("swing".equals(args[2])) {
+				if(targetPath.endsWith(".pdf")) {
+					System.out.println("Pdf output format is not supported with swing method.");
+					exitStatus = 1;
+					return;
+				}
+				if(!targetPath.endsWith(".jpg") && !targetPath.endsWith(".png")) {
+					System.out.println("Unsupported output format");
+					System.out.println(usageMessage);
+					exitStatus = 1;
+					return;
+				}
+				
 				try {
-					Html2Image.writeSwingImage(args[0], new Dimension(1200, 2000), new File(args[1]));
+					Html2Image.writeSwingImage(args[0], new Dimension(1200, 2000), new File(targetPath));
 				} catch (final IOException e) {
 					e.printStackTrace();
+					exitStatus = 1;
+					return;
 				}
 			} else {
-				System.out.println("Unknown method : please specify either wkhtmltopdf or swing");
+				System.out.println("Unknown method : please specify either wkhtmltopdf or swing.");
+				exitStatus = 1;
+				return;
 			}
 		} finally {
 			/* Shutdown running threads */
@@ -359,6 +511,9 @@ public class Html2Image {
 				Thread.currentThread().interrupt(); // restore interrupted state
 			}
 			ConcurrentLog.shutdown();
+			if(exitStatus != 0) {
+				System.exit(exitStatus);
+			}
 		}
 	}
     
