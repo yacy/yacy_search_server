@@ -744,9 +744,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } catch (final NumberFormatException e) {}
             this.evaluationScores.match(Element.imgpath, src);
         } else if(tag.name.equalsIgnoreCase("base")) {
-            try {
-                this.root = new DigestURL(tag.opts.getProperty("href", EMPTY_STRING));
-            } catch (final MalformedURLException e) {}
+        	final String baseHref = tag.opts.getProperty("href", EMPTY_STRING);
+        	if(!baseHref.isEmpty()) {
+        		/* We must use here AnchorURL.newAnchor as the base href may also be an URL relative to the document URL */
+        		try {
+        			this.root = AnchorURL.newAnchor(this.root, baseHref);
+        		} catch (final MalformedURLException | RuntimeException ignored) {
+        			/* Nothing more to do when the base URL is malformed */
+        		}
+        	}
         } else if (tag.name.equalsIgnoreCase("frame")) {
             final AnchorURL src = absolutePath(tag.opts.getProperty("src", EMPTY_STRING));
             if(src != null) {
