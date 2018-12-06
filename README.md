@@ -203,7 +203,7 @@ the upper right of some web pages in the YaCy web interface. Just click on it an
 you will see the xml/json version of the information you just have seen at the web
 page.
 A different approach is the usage of the shell script provided in the /bin
-subdirectory. The web interface also call the same shell scripts. By cloning some of those
+subdirectory. The shell scripts also call the YaCy web interface. By cloning some of those
 scripts you can create more shell api access methods easily.
 
 ## Contact
