@@ -770,7 +770,8 @@ public final class Switchboard extends serverSwitch {
 				getConfigInt(SwitchboardConstants.HTCACHE_COMPRESSION_LEVEL,
 						SwitchboardConstants.HTCACHE_COMPRESSION_LEVEL_DEFAULT));
         final File transactiondir = new File(this.htCachePath, "snapshots");
-        Transactions.init(transactiondir);
+		Transactions.init(transactiondir, getConfigLong(SwitchboardConstants.SNAPSHOTS_WKHTMLTOPDF_TIMEOUT,
+				SwitchboardConstants.SNAPSHOTS_WKHTMLTOPDF_TIMEOUT_DEFAULT));
 
         // create the surrogates directories
         this.surrogatesInPath =

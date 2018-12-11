@@ -166,19 +166,29 @@ public final class OS {
         // runs a unix/linux command and returns output as Vector of Strings
         // this method blocks until the command is executed
         final Process p = Runtime.getRuntime().exec(command);
-        return execSynchronousProcess(p);
+        return readStreams(p);
     }
     
     public static List<String> execSynchronous(final String[] command) throws IOException {
         // runs a unix/linux command and returns output as Vector of Strings
         // this method blocks until the command is executed
         final Process p = Runtime.getRuntime().exec(command);
-        return execSynchronousProcess(p);
+        return readStreams(p);
     }
 
-    private static List<String> execSynchronousProcess(Process p) throws IOException {
+    /**
+     * Read all lines from both standard and error output from the given process
+     * @param p a process
+     * @return all the lines from the process standard and error ouput
+     * @throws IOException when an unexpected error occurred
+     */
+    public static List<String> readStreams(final Process p) throws IOException {
         String line;
-		final List<String> output = new ArrayList<String>();
+		final List<String> output = new ArrayList<>();
+		
+		if(p == null) {
+			return output;
+		}
 		
 		try (final InputStreamReader streamReader = new InputStreamReader(p.getInputStream());
 				final BufferedReader in = new BufferedReader(streamReader);) {

@@ -329,10 +329,10 @@ public final class SwitchboardConstants {
     /** Default value controlling whether a self-signed certificate is acceptable from a remote Solr instance with authentication credentials. */
     public static final boolean FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT = false;
 
-    /** Key of the setting controlling wheter to use or not an embedded Solr instance */
+    /** Key of the setting controlling whether to use or not an embedded Solr instance */
     public static final String CORE_SERVICE_FULLTEXT            = "core.service.fulltext";
     
-    /** Default setting value controlling wheter to use or not an embedded Solr instance */
+    /** Default setting value controlling whether to use or not an embedded Solr instance */
     public static final boolean CORE_SERVICE_FULLTEXT_DEFAULT   = true;
     
     public static final String CORE_SERVICE_RWI                 = "core.service.rwi.tmp";
@@ -353,6 +353,12 @@ public final class SwitchboardConstants {
     public static final String CRAWLER_USER_AGENT_STRING        = "crawler.userAgent.string";
     public static final String CRAWLER_USER_AGENT_MINIMUMDELTA  = "crawler.userAgent.minimumdelta";
     public static final String CRAWLER_USER_AGENT_CLIENTTIMEOUT = "crawler.userAgent.clienttimeout";
+    
+    /** Key of the setting controlling the maximum time to wait for each wkhtmltopdf call when rendering PDF snapshots */
+    public static final String SNAPSHOTS_WKHTMLTOPDF_TIMEOUT          = "snapshots.wkhtmltopdf.timeout";
+    
+    /** Default maximum time in seconds to wait for each wkhtmltopdf call when rendering PDF snapshots*/
+    public static final long SNAPSHOTS_WKHTMLTOPDF_TIMEOUT_DEFAULT   = 30;
     
     /* --- debug flags ---  */
     

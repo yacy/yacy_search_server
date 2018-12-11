@@ -858,6 +858,10 @@ crawler.latencyFactor = 0.5
 # defined here
 crawler.onDemandLimit = 1000
 
+# The maximum time in seconds to wait for each wkhtmltopdf call when rendering PDF snapshots
+# Beyond that limit the process is killed
+snapshots.wkhtmltopdf.timeout = 30
+
 # maximum size of indexing queue
 indexer.slots = 100
 

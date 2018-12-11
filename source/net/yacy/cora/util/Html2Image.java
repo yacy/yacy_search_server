@@ -193,21 +193,30 @@ public class Html2Image {
 		return available;
 	}
     
-    /**
-     * write a pdf of a web page
-     * @param url
-     * @param proxy must be of the form http://host:port; use YaCy here as proxy which is mostly http://localhost:8090
-     * @param destination
-     * @return
-     */
-    public static boolean writeWkhtmltopdf(String url, String proxy, String userAgent, final String acceptLanguage, File destination) {
+	/**
+	 * Run the wkhtmltopdf external tool to fetch and render to PDF a web resource.
+	 * wKhtmltopdf may be called multiple times with various parameters flavors in
+	 * case of failure.
+	 * 
+	 * @param url         the URL of a web resource to fetch, render and convert to
+	 *                    a pdf file. Must not be null.
+	 * @param proxy       the eventual proxy address to use. Can be null. Must be of
+	 *                    the form http://host:port; use YaCy here as proxy which is
+	 *                    mostly http://localhost:8090
+	 * @param destination the destination PDF file that should be written. Must not
+	 *                    be null.
+	 * @param maxSeconds  the maximum time in seconds to wait for each wkhtmltopdf
+	 *                    call termination. Beyond this limit the process is killed.
+	 * @return true when the destination file was successfully written
+	 */
+    public static boolean writeWkhtmltopdf(String url, String proxy, String userAgent, final String acceptLanguage, final File destination, final long maxSeconds) {
         boolean success = false;
         for (boolean ignoreErrors: new boolean[]{false, true}) {
-            success = writeWkhtmltopdfInternal(url, proxy, destination, userAgent, acceptLanguage, ignoreErrors);
+            success = writeWkhtmltopdfInternal(url, proxy, destination, userAgent, acceptLanguage, ignoreErrors, maxSeconds);
             if (success) break;
             if (!success && proxy != null) {
                 ConcurrentLog.warn("Html2Image", "trying to load without proxy: " + url);
-                success = writeWkhtmltopdfInternal(url, null, destination, userAgent, acceptLanguage, ignoreErrors);
+                success = writeWkhtmltopdfInternal(url, null, destination, userAgent, acceptLanguage, ignoreErrors, maxSeconds);
                 if (success) break;
             }
         }
@@ -219,7 +228,23 @@ public class Html2Image {
         return success;
     }
     
-    private static boolean writeWkhtmltopdfInternal(final String url, final String proxy, final File destination, final String userAgent, final String acceptLanguage, final boolean ignoreErrors) {
+	/**
+	 * Run wkhtmltopdf in a separate process to fetch and render to PDF a web
+	 * resource.
+	 * 
+	 * @param url          the URL of a web resource to fetch, render and convert to
+	 *                     a pdf file. Must not be null.
+	 * @param proxy        the eventual proxy address to use. Can be null.
+	 * @param destination  the destination PDF file that should be written. Must not
+	 *                     be null.
+	 * @param ignoreErrors when true wkhtmltopdf is instructed to ignore load errors
+	 * @param maxSeconds   the maximum time in seconds to wait for the wkhtmltopdf
+	 *                     dedicated process termination. Beyond this limit the
+	 *                     process is killed.
+	 * @return true when the destination file was successfully written
+	 */
+	private static boolean writeWkhtmltopdfInternal(final String url, final String proxy, final File destination,
+			final String userAgent, final String acceptLanguage, final boolean ignoreErrors, final long maxSeconds) {
 		final String wkhtmltopdfCmd;
 		final File wkhtmltopdf = wkhtmltopdfExecutable();
 		if(wkhtmltopdf != null) {
@@ -241,26 +266,57 @@ public class Html2Image {
                 url + " " + destination.getAbsolutePath();
         try {
             ConcurrentLog.info("Html2Pdf", "creating pdf from url " + url + " with command: " + commandline); 
-            List<String> message;
-            if (!usexvfb) {
-                message = OS.execSynchronous(commandline);
-                if (destination.exists()) return true;
-                ConcurrentLog.warn("Html2Image", "failed to create pdf " + (proxy == null ? "" : "using proxy " + proxy) + " with command: " + commandline);
-                for (String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);
+            if (!usexvfb && execWkhtmlToPdf(proxy, destination, commandline, maxSeconds)) {
+           		return true;
             }
             // if this fails, we should try to wrap the X server with a virtual screen using xvfb, this works on headless servers
             commandline = "xvfb-run -a " + commandline;
-            message = OS.execSynchronous(commandline);
-            if (destination.exists()) {usexvfb = true; return true;}
-            ConcurrentLog.warn("Html2Pdf", "failed to create pdf " + (proxy == null ? "" : "using proxy " + proxy) + " and xvfb with command: " + commandline);
-            for (String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
-            ConcurrentLog.warn("Html2Pdf", "exception while creation of pdf with command: " + commandline);
+            return execWkhtmlToPdf(proxy, destination, commandline, maxSeconds);
+        } catch (final IOException e) {
+            ConcurrentLog.warn("Html2Pdf", "exception while creation of pdf with command: " + commandline, e);
             return false;
         }
     }
+
+	/**
+	 * Run a wkhtmltopdf commandline in a separate process.
+	 * 
+	 * @param proxy       the eventual proxy address to use. Can be null.
+	 * @param destination the destination PDF file that should be written. Must not
+	 *                    be null.
+	 * @param commandline the wkhtmltopdf command line to execute. Must not be null.
+	 * @param maxSeconds  the maximum time in seconds to wait for the process
+	 *                    termination. Beyond this limit the process is killed.
+	 * @return true when the destination file was successfully written
+	 * @throws IOException when an unexpected error occurred
+	 */
+	private static boolean execWkhtmlToPdf(final String proxy, final File destination, final String commandline, final long maxSeconds)
+			throws IOException {
+		final Process p = Runtime.getRuntime().exec(commandline);
+
+		try {
+			p.waitFor(maxSeconds, TimeUnit.SECONDS);
+		} catch (final InterruptedException e) {
+			p.destroyForcibly();
+			ConcurrentLog.warn("Html2Pdf", "Interrupted creation of pdf. Killing the process started with command : " + commandline);
+			Thread.currentThread().interrupt(); // Keep the thread interrupted state
+			return false;
+		}
+		if(p.isAlive()) {
+			ConcurrentLog.warn("Html2Pdf", "Creation of pdf did not terminate within " + maxSeconds + " seconds. Killing the process started with command : " + commandline);
+			p.destroyForcibly();
+			return false;
+		}
+		if (p.exitValue() == 0 && destination.exists()) {
+			return true;
+		}
+		final List<String> messages = OS.readStreams(p);
+		ConcurrentLog.warn("Html2Image", "failed to create pdf " + (proxy == null ? "" : "using proxy " + proxy) + " with command : " + commandline);
+		for (final String message : messages) {
+			ConcurrentLog.warn("Html2Image", ">> " + message);
+		}
+		return false;
+	}
     
     /**
      * Convert a pdf (first page) to an image. Proper values are i.e. width = 1024, height = 1024, density = 300, quality = 75
@@ -459,7 +515,7 @@ public class Html2Image {
 						return;
 					}
 					if(Html2Image.writeWkhtmltopdf(args[0], null, ClientIdentification.yacyInternetCrawlerAgent.userAgent,
-							"en-us,en;q=0.5", targetPdfFile)) {
+							"en-us,en;q=0.5", targetPdfFile, 30)) {
 						if(targetPath.endsWith(".jpg") || targetPath.endsWith(".png")) {
 							if(Html2Image.pdf2image(targetPdfFile, new File(targetPath), 1024, 1024, 300, 75)) {
 								ConcurrentLog.info("Html2Image", "wrote " + targetPath + " converted from " + targetPdfFile);
