@@ -1,4 +1,4 @@
-// rwilist_p
+// termlist_p
 // ------------
 // (C) 2011 by Michael Peter Christen; mc@yacy.net
 // first published 25.08.2011 on http://yacy.net
@@ -29,7 +29,8 @@ import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.Rating;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 import net.yacy.server.serverObjects;
@@ -46,51 +47,53 @@ public class termlist_p {
         Segment segment = sb.index;
         final boolean delete = post != null && post.containsKey("delete");
         final long mincount = post == null ? 10000 : post.getLong("mincount", 10000);
-        final Iterator<Rating<byte[]>> i = segment.termIndex().referenceCountIterator(null, false, false);
         Rating<byte[]> e;
         int c = 0, termnumber = 0;
         byte[] termhash, maxterm = null;
         long count, mem, maxcount = 0, totalmemory = 0;
         String hstring;
-        final Row referenceRow = segment.termIndex().referenceRow();
-        final int rowsize = referenceRow.objectsize;
         final ArrayList<byte[]> deleteterms = new ArrayList<byte[]>();
         long over1000 = 0, over10000 = 0, over100000 = 0, over1000000 = 0, over10000000 = 0, over100000000 = 0;
-        while (i.hasNext()) {
-            e = i.next();
-            termnumber++;
-            count = e.getScore();
-            if (count >= 1000) over1000++;
-            if (count >= 10000) over10000++;
-            if (count >= 100000) over100000++;
-            if (count >= 1000000) over1000000++;
-            if (count >= 10000000) over10000000++;
-            if (count >= 100000000) over100000000++;
-            if (count > maxcount) {
-                maxcount = count;
-                maxterm = e.getObject();
-            }
-            if (count < mincount) continue;
-            termhash = e.getObject();
-            if (delete) deleteterms.add(termhash);
-            hstring = ASCII.String(termhash);
-            mem = 20 + count * rowsize;
-            prop.put("terms_" + c + "_termhash", hstring);
-            prop.put("terms_" + c + "_count", count);
-            prop.put("terms_" + c + "_memory", mem);
-            //log.logWarning("termhash: " + hstring + " | count: " + count + " | memory: " + mem);
-            c++;
-            totalmemory += mem;
-        }
-        if (delete) {
-            for (final byte[] t: deleteterms) {
-                try {
-                    segment.termIndex().delete(t);
-                } catch (final IOException e1) {
-                	log.warn("Error deleting " + ASCII.String(t), e1);
-                    e1.printStackTrace();
-                }
-            }
+        
+        final IndexCell<WordReference> termIndex = segment.termIndex();
+        int rowsize = 0;
+        if(termIndex != null) {
+        	rowsize = termIndex.referenceRow().objectsize;
+        	final Iterator<Rating<byte[]>> i = termIndex.referenceCountIterator(null, false, false);
+        	while (i.hasNext()) {
+        		e = i.next();
+        		termnumber++;
+        		count = e.getScore();
+        		if (count >= 1000) over1000++;
+        		if (count >= 10000) over10000++;
+        		if (count >= 100000) over100000++;
+        		if (count >= 1000000) over1000000++;
+        		if (count >= 10000000) over10000000++;
+        		if (count >= 100000000) over100000000++;
+        		if (count > maxcount) {
+        			maxcount = count;
+        			maxterm = e.getObject();
+        		}
+        		if (count < mincount) continue;
+        		termhash = e.getObject();
+        		if (delete) deleteterms.add(termhash);
+        		hstring = ASCII.String(termhash);
+        		mem = 20 + count * rowsize;
+        		prop.put("terms_" + c + "_termhash", hstring);
+        		prop.put("terms_" + c + "_count", count);
+        		prop.put("terms_" + c + "_memory", mem);
+        		c++;
+        		totalmemory += mem;
+        	}
+        	if (delete) {
+        		for (final byte[] t: deleteterms) {
+        			try {
+        				termIndex.delete(t);
+        			} catch (final IOException e1) {
+        				log.warn("Error deleting " + ASCII.String(t), e1);
+        			}
+        		}
+        	}
         }
         prop.put("terms", c);
         prop.put("maxterm", maxterm == null ? "" : ASCII.String(maxterm));
