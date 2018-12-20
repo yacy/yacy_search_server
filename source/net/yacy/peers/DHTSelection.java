@@ -130,25 +130,33 @@ public class DHTSelection {
         return extraSeeds;
     }
 
-    public static Set<Seed> selectDHTSearchTargets(final SeedDB seedDB, final HandleSet wordhashes, final int minage, final int redundancy, final int maxredundancy, final Random random) {
+    /**
+     * @param seedDB the seeds database.
+     * @param wordhashes hashes of the words we are searching for
+     * @param minage the minimum age of each seed in days
+     * @param minWordCount the minimum RWI words count of each seed
+     * @param random a random generator instance
+     * @return a list of matching candidate seeds for remote RWI search
+     */
+    public static Set<Seed> selectDHTSearchTargets(final SeedDB seedDB, final HandleSet wordhashes, final int minage, final int minWordCount, final int redundancy, final int maxredundancy, final Random random) {
 
         // put in seeds according to dht
-        Set<Seed> seeds = new LinkedHashSet<Seed>(); // dht position seeds
+        Set<Seed> seeds = new LinkedHashSet<>(); // dht position seeds
         if (seedDB != null) {
             Iterator<byte[]> iter = wordhashes.iterator();
             while (iter.hasNext()) {
-                seeds.addAll(collectHorizontalDHTPositions(seedDB, iter.next(), minage, redundancy, maxredundancy, random));
+                seeds.addAll(collectHorizontalDHTPositions(seedDB, iter.next(), minage, minWordCount, redundancy, maxredundancy, random));
             }
         }
         
         return seeds;
     }
 
-    private static ArrayList<Seed> collectHorizontalDHTPositions(final SeedDB seedDB, final byte[] wordhash, final int minage, final int redundancy, final int maxredundancy, Random random) {
+    private static ArrayList<Seed> collectHorizontalDHTPositions(final SeedDB seedDB, final byte[] wordhash, final int minage, final int minWordCount, final int redundancy, final int maxredundancy, final Random random) {
         // this method is called from the search target computation
-        ArrayList<Seed> collectedSeeds = new ArrayList<Seed>(redundancy * seedDB.scheme.verticalPartitions());
+        ArrayList<Seed> collectedSeeds = new ArrayList<>(redundancy * seedDB.scheme.verticalPartitions());
         for (int verticalPosition = 0; verticalPosition < seedDB.scheme.verticalPartitions(); verticalPosition++) {
-            ArrayList<Seed> seeds = selectVerticalDHTPositions(seedDB, wordhash, minage, maxredundancy, verticalPosition);
+            ArrayList<Seed> seeds = selectVerticalDHTPositions(seedDB, wordhash, minage, minWordCount, maxredundancy, verticalPosition);
             if (seeds.size() <= redundancy) {
                 collectedSeeds.addAll(seeds);
             } else {
@@ -163,12 +171,19 @@ public class DHTSelection {
         return collectedSeeds;
     }
     
+    /**
+     * @param seedDB the seeds database. Must not be null.
+     * @param wordhash the word we are searching for
+     * @param minage the minimum age of each seed in days
+     * @param redundancy the number of redundant peer position for this parition, minimum is 1
+     * @return a list of matching candidate seeds for DHT distribution
+     */
     @SuppressWarnings("unchecked")
     public static List<Seed>[] selectDHTDistributionTargets(final SeedDB seedDB, final byte[] wordhash, final int minage, final int redundancy) {
         // this method is called from the distribution target computation
         List<Seed>[] seedlists = (List<Seed>[]) Array.newInstance(ArrayList.class, seedDB.scheme.verticalPartitions());
         for (int verticalPosition = 0; verticalPosition < seedDB.scheme.verticalPartitions(); verticalPosition++) {
-            seedlists[verticalPosition] = selectVerticalDHTPositions(seedDB, wordhash, minage, redundancy, verticalPosition);
+            seedlists[verticalPosition] = selectVerticalDHTPositions(seedDB, wordhash, minage, Integer.MIN_VALUE, redundancy, verticalPosition);
         }
         return seedlists;
     }
@@ -178,13 +193,14 @@ public class DHTSelection {
      * @param seedDB the database of seeds
      * @param wordhash the word we are searching for
      * @param minage the minimum age of a seed in days (to prevent that too young seeds which cannot have results yet are asked)
+     * @param minWordCount the minimum RWI words count of each seed
      * @param redundancy the number of redundant peer position for this parition, minimum is 1
      * @param verticalPosition the verical position, thats the number of the partition 0 <= verticalPosition < seedDB.scheme.verticalPartitions()
      * @return a list of seeds for the redundant positions
      */
-    private static ArrayList<Seed> selectVerticalDHTPositions(final SeedDB seedDB, final byte[] wordhash, final int minage, final int redundancy, int verticalPosition) {
+    private static ArrayList<Seed> selectVerticalDHTPositions(final SeedDB seedDB, final byte[] wordhash, final int minage, final int minWordCount, final int redundancy, int verticalPosition) {
         // this method is called from the search target computation
-        ArrayList<Seed> seeds = new ArrayList<Seed>(redundancy);
+        ArrayList<Seed> seeds = new ArrayList<>(redundancy);
         final long dhtVerticalTarget = seedDB.scheme.verticalDHTPosition(wordhash, verticalPosition);
         final byte[] verticalhash = Distribution.positionToHash(dhtVerticalTarget);
         final Iterator<Seed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, verticalhash, redundancy, false);
@@ -195,6 +211,10 @@ public class DHTSelection {
             if (seed == null || seed.hash == null) continue;
             if (!seed.getFlagAcceptRemoteIndex()) continue; // probably a robinson peer
             if (seed.getAge() < minage) continue; // prevent bad results because of too strong network growth
+            if(seed.getWordCount() < minWordCount) {
+            	/* Even if the peer is not a robinson and has the required minimum age, it may have an empty or disabled RWI */
+            	continue;
+            }
             if (RemoteSearch.log.isInfo()) RemoteSearch.log.info("selectPeers/DHTorder: " + seed.hash + ":" + seed.getName() + "/ score " + c);
             seeds.add(seed);
             c--;
@@ -380,6 +400,33 @@ public class DHTSelection {
         }
 
     }
+    
+    /**
+     * get either the youngest or oldest peers from the seed db. Count as many as requested
+     * @param seedDB
+     * @param up if up = true then get the most recent peers, if up = false then get oldest
+     * @param count number of wanted peers
+     * @param minWordCount the minimum RWI words count of each seed
+     * @return a hash map of peer hashes to seed object
+     */
+    public static ConcurrentMap<String, Seed> seedsByAge(final SeedDB seedDB, final boolean up, int count, final int minWordCount) {
+        if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
+        Seed ys;
+        final Iterator<Seed> seeds = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN);
+        try {
+            final ConcurrentMap<String, Seed> result = new ConcurrentHashMap<String, Seed>();
+            while (seeds.hasNext() && count-- > 0) {
+                ys = seeds.next();
+                if (ys != null && ys.hash != null && ys.getWordCount() >= minWordCount) {
+                    result.put(ys.hash, ys);
+                }
+            }
+            return result;
+        } catch (final kelondroException e) {
+            Network.log.severe("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
+            return null;
+        }
+    }
 
     /**
      * get either the youngest or oldest peers from the seed db. Count as many as requested
@@ -389,25 +436,7 @@ public class DHTSelection {
      * @return a hash map of peer hashes to seed object
      */
     public static ConcurrentMap<String, Seed> seedsByAge(final SeedDB seedDB, final boolean up, int count) {
-        if (count > seedDB.sizeConnected()) count = seedDB.sizeConnected();
-        Seed ys;
-        //long age;
-        final Iterator<Seed> s = seedDB.seedsSortedConnected(!up, Seed.LASTSEEN);
-        try {
-            final ConcurrentMap<String, Seed> result = new ConcurrentHashMap<String, Seed>();
-            while (s.hasNext() && count-- > 0) {
-                ys = s.next();
-                if (ys != null && ys.hash != null) {
-                    //age = (System.currentTimeMillis() - ys.getLastSeenUTC()) / 1000 / 60;
-                    //System.out.println("selected seedsByAge up=" + up + ", age/min = " + age);
-                    result.put(ys.hash, ys);
-                }
-            }
-            return result;
-        } catch (final kelondroException e) {
-            Network.log.severe("Internal Error at yacySeedDB.seedsByAge: " + e.getMessage(), e);
-            return null;
-        }
+        return seedsByAge(seedDB, up, count, Integer.MIN_VALUE);
     }
 
 }
