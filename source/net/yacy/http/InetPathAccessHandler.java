@@ -31,6 +31,7 @@ import org.eclipse.jetty.http.pathmap.PathMappings;
 import org.eclipse.jetty.http.pathmap.PathSpec;
 import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.util.InetAddressSet;
+import org.eclipse.jetty.util.component.DumpableCollection;
 
 /**
  * InetPathAccessHandler Access Handler
@@ -167,7 +168,9 @@ public class InetPathAccessHandler extends InetAccessHandler {
 
 	@Override
 	public void dump(final Appendable out, final String indent) throws IOException {
-		this.dumpBeans(out, indent, this.white.getMappings(), this.black.getMappings());
+		dumpObjects(out, indent,
+	            DumpableCollection.from("white", this.white.getMappings()),
+	            DumpableCollection.from("black", this.black.getMappings()));
 	}
 
 }
