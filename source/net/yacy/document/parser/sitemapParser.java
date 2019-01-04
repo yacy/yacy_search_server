@@ -41,7 +41,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
@@ -187,6 +186,12 @@ public class sitemapParser extends AbstractParser implements Parser {
                 }
             } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
+            } finally {
+            	try {
+					this.source.close();
+				} catch (IOException e) {
+					ConcurrentLog.logException(e);
+				}
             }
 
             try {
