@@ -72,7 +72,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     private boolean includefailed;
     
     private int chunkstart = 0;
-    private final int chunksize;
+    private final int chunksize = 100;
     private final Switchboard sb;
     
     /** buffer of urls to recrawl */
@@ -129,8 +129,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         this.urlstack = new HashSet<DigestURL>();
         // workaround to prevent solr exception on existing index (not fully reindexed) since intro of schema with docvalues
         // org.apache.solr.core.SolrCore java.lang.IllegalStateException: unexpected docvalues type NONE for field 'load_date_dt' (expected=NUMERIC). Use UninvertingReader or index with docvalues.
-        this.solrSortBy = null; // CollectionSchema.load_date_dt.getSolrFieldName() + " asc";
-        this.chunksize = sb.getConfigInt(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 200);
+        solrSortBy = CollectionSchema.load_date_dt.getSolrFieldName() + " asc";
         
         final SolrConnector solrConnector = this.sb.index.fulltext().getDefaultConnector();
         if (solrConnector != null && !solrConnector.isClosed()) {
