@@ -19,7 +19,7 @@ apps:
       # needed to run wkhtmltopdf from YaCy within the Snap for Snapshots generation
       # with wkhtmltopdf 0.12.2.4 included with Ubuntu 16.04 LTS (recommended minimum system to build Snaps in 2018)
       QT_QPA_PLATFORM_PLUGIN_PATH: "$SNAP/usr/lib/x86_64-linux-gnu/qt5/plugins/platforms"
-    command: sh "$SNAP/yacy/startYACY.sh" -f -s "$SNAP_USER_DATA"
+    command: sh "$SNAP/yacy/addon/snap/snapStartYACY.sh"
     # Interfaces authorizations requirements
     # network-bind - to allow acting as an HTTP server and client
     # desktop - to launch the default desktop navigator when starting (with xdg-open command) - not strictly necessary
@@ -29,9 +29,7 @@ apps:
     # x11 - needed by wkhtmltopdf to generate Snapshots using WebKit engine - not necessary when Snapshots feature is not used
     plugs: [network-bind, desktop, home, x11]
   passwd: # set the YaCy administrator password
-    environment: 
-      YACY_DATA_PATH: "$SNAP_USER_DATA/DATA"
-    command: sh "$SNAP/yacy/bin/passwd.sh"
+    command: sh "$SNAP/yacy/addon/snap/snapPasswd.sh"
     # Interfaces authorizations requirements
     # network - to allow requesting the ConfigAccounts_p HTTP API when the server is running
     plugs: [network]

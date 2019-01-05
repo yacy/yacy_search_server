@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+
+# Snap configuration hook script
+# Even if empty, its presence is required to enable the Snap specific "data.versioned" configuration key
+
+echo "Configuring yacy-search"
