@@ -56,9 +56,8 @@ public class TransNews_p {
             prop.put("errmsg", 1); // msg: activate diff lng
             prop.put("transsize", 0);
             return prop;
-        } else {
-            prop.put("errmsg", 0);
         }
+		prop.put("errmsg", 0);
 
         TranslationManager transMgr = new TranslationManager();
         File locallangFile = transMgr.getScratchFile(new File(currentlang + ".lng"));

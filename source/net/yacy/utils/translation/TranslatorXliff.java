@@ -169,9 +169,8 @@ public class TranslatorXliff extends Translator {
                 Map<String, Map<String, String>> mergedList = loadTranslationsListsFromXliff(xliffFile);
                 Map<String, Map<String, String>> tmplist = loadTranslationsListsFromXliff(locallng);
                 return mergeTranslationLists(mergedList, tmplist);
-            } else {
-                return loadTranslationsListsFromXliff(xliffFile);
             }
+			return loadTranslationsListsFromXliff(xliffFile);
         } else if (locallng.exists()) {
             Map<String, Map<String, String>> mergedList = super.loadTranslationsLists(xliffFile);
             Map<String, Map<String, String>> tmplist = super.loadTranslationsLists(locallng);
@@ -382,10 +381,8 @@ public class TranslatorXliff extends Translator {
     public File getScratchFile(final File langFile) {
         if (Switchboard.getSwitchboard() != null) { // for debug and testing were switchboard is null
             File f = Switchboard.getSwitchboard().getDataPath("locale.translated_html", "DATA/LOCALE");
-            f = new File(f.getParentFile(), langFile.getName());
-            return f;
-        } else {
-            return langFile;
+            return new File(f.getParentFile(), langFile.getName());
         }
+		return langFile;
     }
 }

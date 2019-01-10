@@ -69,8 +69,7 @@ public class YearNavigator extends StringNavigator implements Navigator {
     public String getQueryModifier(final String key) {
         if (this.field == CollectionSchema.dates_in_content_dts)
             return "from:" + key +"-01-01 to:" + key + "-12-31 ";
-        else
-            return key;
+		return key;
     }
 
     /**

@@ -128,9 +128,8 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
         String longname = ISO639.country(lng);
         if (longname == null) {
             return lng;
-        } else {
-            return longname;
         }
+		return longname;
     }
 
     /**
@@ -141,10 +140,6 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
      */
     @Override
     public boolean modifieractive(final QueryModifier modifier, final String name) {
-        if (modifier.language != null && modifier.language.contains(name)) {
-            return true;
-        } else {
-            return false;
-        }
+        return modifier.language != null && modifier.language.contains(name);
     }
 }

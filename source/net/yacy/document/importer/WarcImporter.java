@@ -242,10 +242,9 @@ public class WarcImporter extends Thread implements Importer {
     public long remainingTime() {
         if (this.consumed == 0) {
             return 0;
-        } else {
-            long speed = this.consumed / runningTime();
-            return (this.sourceSize - this.consumed) / speed;
         }
+		long speed = this.consumed / runningTime();
+		return (this.sourceSize - this.consumed) / speed;
     }
 
     @Override
