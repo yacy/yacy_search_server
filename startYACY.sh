@@ -47,7 +47,8 @@ USAGE
 }
 
 #startup YaCy
-cd "`dirname $0`"
+YACY_PARENT_DATA_PATH="`dirname $0`"
+cd "$YACY_PARENT_DATA_PATH"
 
 if [ $OS = "OpenBSD" ] || [ $OS = "Darwin" ]
 then
@@ -116,7 +117,7 @@ for option in $options;do
 			-t|--tail-log)
 				TAILLOG=1
 				;;
-			-s|-startup)
+			-s|--startup)
 				STARTUP=1
 				isparameter=1
 				;;
@@ -138,6 +139,16 @@ for option in $options;do
 		fi
 	fi #parameter or option?
 done
+
+if [ ! -z "$parameter" ] && [ "$STARTUP" -eq 1 -o "$GUI" -eq 1 ]; then
+	# The data path is explicitely provided with startup or gui option
+	YACY_PARENT_DATA_PATH="`echo $parameter | cut -d' ' -f1`"
+	if [ ! "`echo $YACY_PARENT_DATA_PATH | cut -c1`" = "/" ]; then
+		# Parent DATA path is relative to the user home
+		YACY_PARENT_DATA_PATH="$HOME/$YACY_PARENT_DATA_PATH"
+	fi
+	CONFIGFILE="$YACY_PARENT_DATA_PATH/DATA/SETTINGS/yacy.conf"
+fi
 
 #echo $options;exit 0 #DEBUG for getopts
 
@@ -172,10 +183,10 @@ fi
 #turn on MMap for Solr if OS is a 64bit OS
 if [ -n "`uname -m | grep 64`" ]; then JAVA_ARGS="$JAVA_ARGS -Dsolr.directoryFactory=solr.MMapDirectoryFactory"; fi
 
-if [ ! -f $CONFIGFILE -a -f DATA/SETTINGS/httpProxy.conf ]
+if [ ! -f $CONFIGFILE -a -f "$YACY_PARENT_DATA_PATH/DATA/SETTINGS/httpProxy.conf" ]
 then
 	# old config if new does not exist
-	CONFIGFILE="DATA/SETTINGS/httpProxy.conf"
+	CONFIGFILE="$YACY_PARENT_DATA_PATH/DATA/SETTINGS/httpProxy.conf"
 fi
 if [ -f $CONFIGFILE ]
 then
