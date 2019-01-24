@@ -37,8 +37,8 @@ public class RestrictedStringNavigator extends StringNavigator implements Naviga
     Set<String> allowed; // complete list of keys, if empty all keys are allowed
     Set<String> forbidden; // keys to exclude
 
-    public RestrictedStringNavigator(String title, CollectionSchema field) {
-        super(title, field);
+    public RestrictedStringNavigator(final String title, final CollectionSchema field, final NavigatorSort sort) {
+        super(title, field, sort);
         this.allowed = new HashSet<String>();
         this.forbidden = new HashSet<String>();
     }

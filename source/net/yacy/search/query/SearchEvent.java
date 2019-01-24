@@ -352,15 +352,34 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
+        
         // prepare configured search navigation
-        final String navcfg = Switchboard.getSwitchboard().getConfig("search.navigation", "");
-        this.locationNavigator = navcfg.contains("location") ? new ConcurrentScoreMap<String>(this) : null;
-        this.protocolNavigator = navcfg.contains("protocol") ? new ConcurrentScoreMap<String>(this) : null;
-        this.dateNavigator = navcfg.contains("date") ? new ConcurrentScoreMap<String>(this) : null;
-        this.topicNavigatorCount = navcfg.contains("topics") ? MAX_TOPWORDS : 0;
+        final Set<String> navConfigs = Switchboard.getSwitchboard().getConfigSet("search.navigation");
+        
+        boolean locationNavEnabled = false;
+        boolean protocolNavEnabled = false;
+        boolean topicsNavEnabled = false;
+        boolean dateNavEnabled = false;
+        for(final String navConfig : navConfigs) {
+        	final String navName = NavigatorPlugins.getNavName(navConfig);
+        	if("location".equals(navName)) {
+        		locationNavEnabled = true;
+        	} else if("protocol".equals(navName)) {
+        		protocolNavEnabled = true;
+        	} else if("topics".equals(navName)) {
+        		topicsNavEnabled = true;
+        	} else if("date".equals(navName)) {
+        		dateNavEnabled = true;
+        	}
+        }
+        
+        this.locationNavigator = locationNavEnabled ? new ConcurrentScoreMap<>(this) : null;
+        this.protocolNavigator = protocolNavEnabled ? new ConcurrentScoreMap<>(this) : null;
+        this.dateNavigator = dateNavEnabled ? new ConcurrentScoreMap<>(this) : null;
+        this.topicNavigatorCount = topicsNavEnabled ? MAX_TOPWORDS : 0;
         this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
         // prepare configured search navigation (plugins)
-        this.navigatorPlugins = NavigatorPlugins.initFromCfgString(navcfg);
+        this.navigatorPlugins = NavigatorPlugins.initFromCfgStrings(navConfigs);
         if(this.navigatorPlugins != null) {
         	for(final Navigator nav : this.navigatorPlugins.values()) {
         		nav.setUpdatesListener(this);

@@ -38,8 +38,8 @@ import net.yacy.search.schema.CollectionSchema;
  */
 public class FileTypeNavigator extends StringNavigator implements Navigator {
 
-    public FileTypeNavigator(String title, CollectionSchema field) {
-        super(title, field);
+    public FileTypeNavigator(final String title, final CollectionSchema field, final NavigatorSort sort) {
+        super(title, field, sort);
     }
 
     @Override

@@ -39,13 +39,11 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
      * Default constructor, using the default YaCy Solr field language_s.
      *
      * @param title the navigator display name
+	 * @param sort the sort properties to apply when iterating over keys with the
+	 * {@link #navigatorKeys()} function
      */
-    public LanguageNavigator(String title) {
-        super(title, CollectionSchema.language_s);
-    }
-
-    public LanguageNavigator(String title, CollectionSchema field) {
-        super(title, field);
+    public LanguageNavigator(final String title, final NavigatorSort sort) {
+        super(title, CollectionSchema.language_s, sort);
     }
 
     /**

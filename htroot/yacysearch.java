@@ -700,7 +700,7 @@ public class yacysearch {
                     ranking,
                     header.get(HeaderFramework.USER_AGENT, ""),
                     lat, lon, rad,
-                    sb.getConfigArray("search.navigation", ""));
+                    sb.getConfigSet("search.navigation"));
             theQuery.setStrictContentDom(strictContentDom);
             theQuery.setMaxSuggestions(meanMax);
 			theQuery.setStandardFacetsMaxCount(sb.getConfigInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,

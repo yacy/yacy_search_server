@@ -30,8 +30,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
@@ -42,7 +44,11 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.navigator.Navigator;
 import net.yacy.search.navigator.NavigatorPlugins;
+import net.yacy.search.navigator.NavigatorSort;
+import net.yacy.search.navigator.NavigatorSortDirection;
+import net.yacy.search.navigator.NavigatorSortType;
 import net.yacy.search.query.QueryParams;
+import net.yacy.search.query.SearchEventCache;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -55,6 +61,10 @@ public class ConfigSearchPage_p {
         if (post != null) {
         	/* Check this is a valid transaction */
         	TransactionManager.checkPostTransaction(header, post);
+        	
+        	final int initialNavMaxCOunt = sb.getConfigInt(
+    				SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT);
+        	final String initialNavConf = sb.getConfig("search.navigation", "");
         	
             if (post.containsKey("searchpage_set")) {
                 final String newGreeting = post.get(SwitchboardConstants.GREETING, "");
@@ -96,24 +106,33 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.snapshots", post.getBoolean("search.result.show.snapshots"));
 
                 // construct navigation String
-                String nav = "";
-                if (post.getBoolean("search.navigation.location")) nav += "location,";
-                // if (post.getBoolean("search.navigation.filetype")) nav += "filetype,";
-                if (post.getBoolean("search.navigation.protocol")) nav += "protocol,";
-                // if (post.getBoolean("search.navigation.hosts")) nav += "hosts,";
-                // if (post.getBoolean("search.navigation.language")) nav += "language,";
-                // if (post.getBoolean("search.navigation.authors")) nav += "authors,";
-                // if (post.getBoolean("search.navigation.collections")) nav += "collections,";
-                // if (post.getBoolean("search.navigation.namespace")) nav += "namespace,";
-                if (post.getBoolean("search.navigation.topics")) nav += "topics,";
-                if (post.getBoolean("search.navigation.date")) nav += "date,";
-                // append active navigator plugins
-                String[] navplugins = post.getAll("search.navigation.active");
-                for (String navname:navplugins) {
-                    nav += navname + ",";
+                Set<String> navConfigs = new HashSet<>();
+                if (post.getBoolean("search.navigation.location")) {
+                	navConfigs.add("location");
                 }
-                if (nav.endsWith(",")) nav = nav.substring(0, nav.length() - 1);
-                sb.setConfig("search.navigation", nav);
+                if (post.getBoolean("search.navigation.protocol")) {
+                	navConfigs.add("protocol");
+                }
+                if (post.getBoolean("search.navigation.topics")) {
+                	navConfigs.add("topics");
+                }
+                if (post.getBoolean("search.navigation.date")) {
+                	navConfigs.add("date");
+                }
+                // append active navigator plugins
+                String[] activeNavNames = post.getAll("search.navigation.active");
+				for (final String navName : activeNavNames) {
+					String navConfig = navName;
+                	final String navSortConfig = post.get("search.navigation." + navName + ".navSort");
+					final NavigatorSort defaultSort = NavigatorPlugins.getDefaultSort(navName);
+					if (NavigatorPlugins.parseNavSortConfig(
+							navName + NavigatorPlugins.NAV_PROPS_CONFIG_SEPARATOR + navSortConfig,
+							defaultSort) != defaultSort) {
+						navConfig += NavigatorPlugins.NAV_PROPS_CONFIG_SEPARATOR + navSortConfig;
+					}
+					navConfigs.add(navConfig);
+                }
+                sb.setConfig("search.navigation", navConfigs);
                 // maxcount nav entries, default
                 int navmaxcnt = post.getInt(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT);
                 if (navmaxcnt > 5) {
@@ -131,16 +150,15 @@ public class ConfigSearchPage_p {
             if (post.containsKey("add.nav")) { // button: add navigator plugin to ative list
                 String navname = post.get("search.navigation.navname");
                 if (navname != null && !navname.isEmpty()) {
-                    String naviconf = sb.getConfig("search.navigation", "");
-                    naviconf += "," + navname;
-                    sb.setConfig("search.navigation", naviconf);
+                    final Set<String> navConfigs = sb.getConfigSet("search.navigation");
+                    navConfigs.add(navname);
+                    sb.setConfig("search.navigation", navConfigs);
                 }
             } else if (post.containsKey("del.nav")) { // button: delete navigator plugin from active list
-                String navname = post.get("del.nav");
-                String naviconf = sb.getConfig("search.navigation", "");
-                naviconf = naviconf.replace(navname, "");
-                naviconf = naviconf.replace(",,", ",");
-                sb.setConfig("search.navigation", naviconf);
+                final String navToDelete = post.get("del.nav");
+                final Set<String> navConfigs = sb.getConfigSet("search.navigation");
+                navConfigs.removeIf(navConfig -> NavigatorPlugins.getNavName(navConfig).equals(navToDelete));
+                sb.setConfig("search.navigation", navConfigs);
             }
 
             if (post.containsKey("searchpage_default")) {
@@ -203,6 +221,12 @@ public class ConfigSearchPage_p {
 						config.getProperty(SwitchboardConstants.SEARCH_NAVIGATION_DATES_MAXCOUNT,
 								String.valueOf(QueryParams.FACETS_DATE_MAXCOUNT_DEFAULT)));
             }
+            
+            if(!initialNavConf.equals(sb.getConfig("search.navigation", "")) || initialNavMaxCOunt != sb.getConfigInt(
+    				SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT, QueryParams.FACETS_STANDARD_MAXCOUNT_DEFAULT)) {
+            	/* Clean up search events cache when necessary */
+                SearchEventCache.cleanupEvents(true);
+            }
         }
         
         /* Acquire a transaction token for the next POST form submission */
@@ -252,24 +276,54 @@ public class ConfigSearchPage_p {
         prop.put("search.result.show.snapshots", sb.getConfigBool("search.result.show.snapshots", false) ? 1 : 0);
         prop.put("search.result.show.ranking", sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING, SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING_DEFAULT) ? 1 : 0);
 
-        prop.put("search.navigation.location", sb.getConfig("search.navigation", "").indexOf("location",0) >= 0 ? 1 : 0);
-        // prop.put("search.navigation.filetype", sb.getConfig("search.navigation", "").indexOf("filetype",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.protocol", sb.getConfig("search.navigation", "").indexOf("protocol",0) >= 0 ? 1 : 0);
-        // prop.put("search.navigation.hosts", sb.getConfig("search.navigation", "").indexOf("hosts",0) >= 0 ? 1 : 0);
-        // prop.put("search.navigation.language", sb.getConfig("search.navigation", "").indexOf("language",0) >= 0 ? 1 : 0);
-        // prop.put("search.navigation.authors", sb.getConfig("search.navigation", "").indexOf("authors",0) >= 0 ? 1 : 0);
-        // prop.put("search.navigation.collections", sb.getConfig("search.navigation", "").indexOf("collections",0) >= 0 ? 1 : 0);
-        // prop.put("search.navigation.namespace", sb.getConfig("search.navigation", "").indexOf("namespace",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.topics", sb.getConfig("search.navigation", "").indexOf("topics",0) >= 0 ? 1 : 0);
-        prop.put("search.navigation.date", sb.getConfig("search.navigation", "").indexOf("date",0) >= 0 ? 1 : 0);
+        final Set<String> navConfigs = sb.getConfigSet("search.navigation");
+        boolean locationNavEnabled = false;
+        boolean protocolNavEnabled = false;
+        boolean topicsNavEnabled = false;
+        boolean dateNavEnabled = false;
+        for(final String navConfig : navConfigs) {
+        	final String navName = NavigatorPlugins.getNavName(navConfig);
+        	if("location".equals(navName)) {
+        		locationNavEnabled = true;
+        	} else if("protocol".equals(navName)) {
+        		protocolNavEnabled = true;
+        	} else if("topics".equals(navName)) {
+        		topicsNavEnabled = true;
+        	} else if("date".equals(navName)) {
+        		dateNavEnabled = true;
+        	}
+        }
+
+        prop.put("search.navigation.location", locationNavEnabled);
+        prop.put("search.navigation.protocol", protocolNavEnabled);
+        prop.put("search.navigation.topics", topicsNavEnabled);
+        prop.put("search.navigation.date", dateNavEnabled);
         // list active navigator plugins
-        String naviconf = sb.getConfig("search.navigation", "");
-        Map<String, Navigator> navplugins = NavigatorPlugins.initFromCfgString(naviconf);
+        Map<String, Navigator> navplugins = NavigatorPlugins.initFromCfgStrings(navConfigs);
         int i = 0;
-        for (String navname:navplugins.keySet()) {
+		for (final String navname : navplugins.keySet()) {
             Navigator nav = navplugins.get(navname);
             prop.put("search.navigation.plugin_" + i + "_name", navname);
             prop.put("search.navigation.plugin_" + i + "_displayname", nav.getDisplayName());
+			final int navSort;
+            if(nav.getSort() == null) {
+            	navSort = 0;
+            } else {
+            	if(nav.getSort().getSortType() == NavigatorSortType.COUNT) {
+            		if(nav.getSort().getSortDir() == NavigatorSortDirection.DESC) {
+            			navSort = 0;		
+            		} else {
+            			navSort = 1;
+            		}
+            	} else {
+            		if(nav.getSort().getSortDir() == NavigatorSortDirection.DESC) {
+            			navSort = 2;		
+            		} else {
+            			navSort = 3;
+            		}            		
+            	}
+            }
+            prop.put("search.navigation.plugin_" + i + "_navSort", navSort);
             i++;
         }
         prop.put("search.navigation.plugin", i);

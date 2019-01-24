@@ -189,7 +189,15 @@ function toggleVisibility(name, count) {
 
 #{navs}#
 <ul id="nav-#[name]#" class="nav nav-sidebar menugroup">
-<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('#[name]#', #[count]#);">#[displayname]# [#[count]#] <span style="float:right" id="chevron-#[name]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;">
+	<h3 onclick="toggleVisibility('#[name]#', #[count]#);">#[displayname]# [#[count]#]
+	#(navSort)#<span class="glyphicon glyphicon-sort-by-attributes-alt" title="Sorted by descending counts"></span>
+	::<span class="glyphicon glyphicon-sort-by-attributes" title="Sorted by ascending counts"></span>
+	::<span class="glyphicon glyphicon glyphicon-sort-by-alphabet-alt" title="Sorted by descending labels"></span>
+	::<span class="glyphicon glyphicon-sort-by-alphabet" title="Sorted by ascending labels"></span>#(/navSort)#
+	<span style="float:right" id="chevron-#[name]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span>
+	</h3>
+</li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>
@@ -198,7 +206,12 @@ function toggleVisibility(name, count) {
 
 #{nav-vocabulary}#
 <ul id="nav-vocabulary" class="nav nav-sidebar menugroup">
-<li style="cursor: pointer; cursor: hand;"><h3 onclick="toggleVisibility('vocabulary_#[navname]#', #[count]#);">#[navname]# [#[count]#] <span style="float:right" id="chevron-vocabulary_#[navname]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span></h3></li>
+<li style="cursor: pointer; cursor: hand;">
+	<h3 onclick="toggleVisibility('vocabulary_#[navname]#', #[count]#);">#[navname]# [#[count]#]
+	<span class="glyphicon glyphicon-sort-by-attributes-alt" title="Sorted by descending counts"></span>
+	<span style="float:right" id="chevron-vocabulary_#[navname]#" class="glyphicon glyphicon-chevron-down" title="click to expand facet"></span>
+	</h3>
+</li>
 #{element}#
 <li style="display:none" id="#[id]#"><a href="#[url]#" class="MenuItemLink"><input type="checkbox" onchange="window.location.href='#[url]#'"#(on)# checked="checked"::#(/on)#/> #[name]# (#[count]#)</a></li>
 #{/element}#</ul>

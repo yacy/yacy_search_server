@@ -34,9 +34,9 @@ import net.yacy.search.schema.CollectionSchema;
  * www.host.org and host.org as same url
  */
 public class HostNavigator extends StringNavigator implements Navigator {
-
-    public HostNavigator(String title, CollectionSchema field) {
-        super(title, field);
+	
+    public HostNavigator(final String title, final CollectionSchema field, final NavigatorSort sort) {
+        super(title, field, sort);
     }
 
     @Override

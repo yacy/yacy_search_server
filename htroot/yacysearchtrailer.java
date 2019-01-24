@@ -44,6 +44,8 @@ import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.navigator.Navigator;
+import net.yacy.search.navigator.NavigatorSortDirection;
+import net.yacy.search.navigator.NavigatorSortType;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
@@ -343,8 +345,28 @@ public class yacysearchtrailer {
             prop.put("navs_" + ni + "_displayname", navi.getDisplayName());
             prop.put("navs_" + ni + "_name", naviname);
             prop.put("navs_" + ni + "_count", navi.size());
+            
+			final int navSort;
+            if(navi.getSort() == null) {
+            	navSort = 0;
+            } else {
+            	if(navi.getSort().getSortType() == NavigatorSortType.COUNT) {
+            		if(navi.getSort().getSortDir() == NavigatorSortDirection.DESC) {
+            			navSort = 0;		
+            		} else {
+            			navSort = 1;
+            		}
+            	} else {
+            		if(navi.getSort().getSortDir() == NavigatorSortDirection.DESC) {
+            			navSort = 2;		
+            		} else {
+            			navSort = 3;
+            		}            		
+            	}
+            }
+        	prop.put("navs_" + ni + "_navSort", navSort);
 
-            navigatorIterator = navi.keys(false);
+           	navigatorIterator = navi.navigatorKeys();
             int i = 0, pos = 0, neg = 0;
             String nav, rawNav;
             while (i < theSearch.getQuery().getStandardFacetsMaxCount() && navigatorIterator.hasNext()) {

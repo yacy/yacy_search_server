@@ -446,8 +446,7 @@ public class serverSwitch {
 
     /**
      * get a configuration parameter set
-     * @param key
-     * @param dflt a default list
+     * @param key name of the configuration parameter
      * @return a set of strings which had been separated by comma in the setting
      */
     public Set<String> getConfigSet(final String key) {

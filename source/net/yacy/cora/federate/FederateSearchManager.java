@@ -222,7 +222,7 @@ public class FederateSearchManager {
                 this.switchboard.getRanking(),
                 "",//userAgent
                 0.0d, 0.0d, 0.0d,
-                new String[0]);
+                new HashSet<>());
 
         return query(query);
     }

@@ -139,16 +139,36 @@
                       #{search.navigation.plugin}#
                       <tr>
                         <td><button class="btn btn-xs" title="Delete navigator" aria-label="Delete navigator" aria-describedby="title-#[name]#" name="del.nav" value="#[name]#"><span class="glyphicon glyphicon-remove" style="color: red"></span></button></td>
-                        <td><ul class="nav nav-sidebar menugroup"  style="padding-left:15px; padding-right:10px;">
-                          <li><h3 id="title-#[name]#">#[displayname]#</h3></li>
-                          </ul><input type="hidden" name="search.navigation.active" value="#[name]#" />
+                        <td>
+                        	<ul class="nav nav-sidebar menugroup"  style="padding-left:15px; padding-right:10px;">
+                          		<li>
+                          			<h3 id="title-#[name]#">#[displayname]#
+                          					#(navSort)#<span class="glyphicon glyphicon-sort-by-attributes-alt" title="Sorted by descending counts"></span>
+											::<span class="glyphicon glyphicon-sort-by-attributes" title="Sorted by ascending counts"></span>
+											::<span class="glyphicon glyphicon glyphicon-sort-by-alphabet-alt" title="Sorted by descending labels"></span>
+											::<span class="glyphicon glyphicon-sort-by-alphabet" title="Sorted by ascending labels"></span>
+											#(/navSort)#
+									</h3>
+						  		</li>
+						  		<li>
+						  			<label>Sort by 
+						  				<select name="search.navigation.#[name]#.navSort">
+						  					<option value="count:desc" #(navSort)#selected="selected"::#(/navSort)#>Descending counts</option>
+						  					<option value="count:asc" #(navSort)#::selected="selected"#(/navSort)#>Ascending counts</option>
+						  					<option value="label:desc" #(navSort)#::::selected="selected"#(/navSort)#>Descending labels</option>
+						  					<option value="label:asc" #(navSort)#::::::selected="selected"#(/navSort)#>Ascending labels</option>
+						  				</select>
+						  			</label>
+						  		</li>
+                        	</ul>
+                        	<input type="hidden" name="search.navigation.active" value="#[name]#" />
                         </td>
                       </tr>
                       #{/search.navigation.plugin}#
                       <tr>
                         <td></td>
                         <td><ul class="nav nav-sidebar menugroup" id="vocabulary" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Vocabulary</h3></li>
+                          <li><h3>Vocabulary <span class="glyphicon glyphicon-sort-by-attributes-alt" title="Sorted by descending counts"></span></h3></li>
                           </ul></td>
                       </tr>
                       <tr>    

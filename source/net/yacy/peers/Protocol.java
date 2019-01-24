@@ -1296,7 +1296,7 @@ public final class Protocol {
 
             // evaluate facets
             if(useSolrFacets) {
-            	for (String field: event.query.facetfields) {
+            	for (String field: event.query.facetfields.keySet()) {
             		FacetField facet = rsp[0].getFacetField(field);
             		ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
             		List<Count> values = facet == null ? null : facet.getValues();

@@ -22,6 +22,7 @@
  */
 package net.yacy.search.navigator;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -105,4 +106,16 @@ public interface Navigator extends ScoreMap<String> {
      * @param listener an eventual object which wants to listen to successful updates on this navigator score map
      */
     public void setUpdatesListener(final ScoreMapUpdatesListener listener);
+    
+	/**
+	 * Creates and returns a sorted view of this navigator keys, sorted by the navigator order (for example by descending counts, or by ascending display names)
+	 * 
+	 * @return an iterator accessing the navigator keys
+	 */
+	public Iterator<String> navigatorKeys();
+	
+	/**
+	 * @return the sort properties of the navigator
+	 */
+	public NavigatorSort getSort();
 }
