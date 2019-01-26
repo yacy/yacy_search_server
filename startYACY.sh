@@ -193,17 +193,16 @@ then
 	# startup memory
 	for i in Xmx Xms; do
 		j="`grep javastart_$i $CONFIGFILE | sed 's/^[^=]*=//'`";
-		if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
+		if [ -n "$j" ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
 	done
 	
 	# Priority
 	j="`grep javastart_priority $CONFIGFILE | sed 's/^[^=]*=//'`";
 
-	if [ ! -z "$j" ];then
-		if [ -n $j ]; then JAVA="nice -n $j $JAVA"; fi;
-	fi
+	if [ -n "$j" ]; then JAVA="nice -n $j $JAVA"; fi;
 
-        PORT="`grep ^port= $CONFIGFILE | sed 's/^[^=]*=//'`";
+    PORT="`grep ^port= $CONFIGFILE | sed 's/^[^=]*=//'`";
+    if [ -z "$PORT" ]; then PORT="8090"; fi;
 	
 #	for i in `grep javastart $CONFIGFILE`;do
 #		i="${i#javastart_*=}";
