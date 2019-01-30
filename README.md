@@ -208,8 +208,10 @@ scripts you can create more shell api access methods easily.
 
 ## Contact
 
-Our primary point of contact is the German forum at http://forum.yacy.net
+Our primary point of contact was the German forum at http://forum.yacy.net
 We encourage you to start a YaCy forum in your own language.
+
+A chat room is available on [Gitter](https://gitter.im/yacy/yacy_search_server), which can also be reached from [Matrix.org](https://matrix.to/#/#yacy:matrix.org).
 
 If you have any questions, please do not hesitate to contact the maintainer:
 Send an email to Michael Christen (mc@yacy.net) with a meaningful subject
