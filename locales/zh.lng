@@ -40,11 +40,11 @@ The following hosts are registered as source for brute-force requests to protect
 Access Times==访问时间
 Server Access Details==服务器访问细节
 Local Search Log==本地搜索日志
-Local Search Host Tracker==本地搜索主机跟踪
+Local Search Host Tracker==本地搜索主机跟踪器
 Remote Search Log==远端搜索日志
 #Total:==Total:
 Success:==成功:
-Remote Search Host Tracker==远端搜索跟踪
+Remote Search Host Tracker==远端搜索主机跟踪器
 This is a list of searches that had been requested from this' peer search interface==此列表显示从远端节点所进行的搜索
 Showing #[num]# entries from a total of #[total]# requests.==显示 #[num]# 条目,共 #[total]# 个请求.
 Requesting Host==请求主机
@@ -2286,12 +2286,20 @@ inbox==收件箱
 #File: Network.html
 #---------------------------
 YaCy Search Network==YaCy搜索网络
+YaCy Network<==YaCy网络<
+The information that is presented on this page can also be retrieved as XML.==此页信息也可表示为XML.
+Click the API icon to see the XML.==点击API图标查看XML.
+To see a list of all APIs==获取所有API
+please visit the==请访问
+API wiki page==API百科页面
 Network Overview==网络一览
+Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers==主动骨干高级节点
+Passive&nbsp;Senior&nbsp;Peers==被动高级节点
+Junior&nbsp;(fragment)&nbsp;Peers==初级(片段)节点
+Network History==网络历史
 Active Senior==主动高级
 Passive Senior==被动高级
 Junior (fragment)==初级(片段)
-Network History==网络历史
-YaCy Network<==YaCy网络<
 >Network<==>网络<
 >Online Peers<==>在线节点<
 >Number of<br/>Documents<==>文件<br/>数目<
@@ -2308,11 +2316,6 @@ Queries Per Hour (QPH)==请求/小时(QPH)
 >Passive<==>被动<
 >Potential<==>潜在<
 >This Peer<==>本机节点<
-The information that is presented on this page can also be retrieved as XML.==此页信息也可表示为XML.
-Click the API icon to see the XML.==点击API图标查看XML.
-To see a list of all APIs==获取所有API
-please visit the==请访问
-API wiki page==API百科页面
 Active Peers in '#[networkName]#' Network=='#[networkName]#'网络中的主动节点
 Passive Peers in '#[networkName]#' Network=='#[networkName]#'网络中的被动节点
 Potential Peers in '#[networkName]#' Network=='#[networkName]#'网络中的潜在节点
@@ -3796,8 +3799,8 @@ Search Result==结果
 #File: env/templates/header.template
 #---------------------------
 ### FIRST STEPS ###
-First Steps==初步
-Use Case &amp; Account==用例 &amp; 账号
+First Steps==第一步
+Use Case &amp; Account==用法 &amp; 账号
 Load Web Pages, Crawler==加载网页，爬虫
 RAM/Disk Usage &amp; Updates==内存/硬盘 使用 &amp;更新
 Load Web Pages==加载网页
@@ -3843,11 +3846,11 @@ Search Portal Integration==搜索门户集成
 You just started a YaCy peer!==你刚开启了YaCy节点！
 As a first-time-user you see only basic functions. Set a use case or name your peer to see more options. Start a first web crawl to see all monitoring options.==作为初次使用者, 您只能看到基本的功能. 请命名您的Yacy节点来看更多的选项. 开始第一个网页爬取, 查看所有监视选项.
 You do not see all monitoring options here, because some belong to crawl result monitoring. Start a web crawl to see that!==您不会在这里看到所有的监控选项,因为有些属于爬取结果监控. 开始网络爬取看看！
-Use Case ==用例 
+Use Case ==用法 
 "You do not see all monitoring options here=="您不会在这里看到所有的监控选项, 因为有些属于爬取结果监控. 开始网络爬取看看！"
 You do not see all monitoring options here==您不会在这里看到所有的监控选项, 因为有些属于爬取结果监控. 开始网络爬取看看！
 RAM/Disk Usage==内存/硬盘 使用
-Use Case==用例
+Use Case==用法
 YaCy - Distributed Search Engine==YaCy - 分布式搜索引擎
 ### SEARCH & BROWSE ###
 >Search==>搜索
@@ -3879,7 +3882,7 @@ Customization==自定义
 Monitoring==监视
 YaCy Network==YaCy网络
 Web Visualization==网页元素外观
-Access Tracker==访问跟踪
+Access Tracker==访问跟踪器
 #Server Log==Server Log
 >Messages==>消息
 >Terminal==>终端
@@ -3951,7 +3954,7 @@ Incoming&nbsp;Cookies==传入&nbsp;Cookies
 Outgoing&nbsp;Cookies==传出&nbsp;Cookies
 Incoming==传入
 Outgoing==传出
-Access Tracker==访问跟踪
+Access Tracker==访问跟踪器
 Server Access==服务器访问
 Overview==概述
 #Details==Details
@@ -4195,9 +4198,9 @@ Regex Test==正则表达式测试
 
 #File: env/templates/submenuUseCaseAccount.template
 #---------------------------
-Use Case &amp; Accounts==用例 &amp; 账号
-Use Case ==用例 
-Use Case==用例
+Use Case &amp; Accounts==用法 &amp; 账号
+Use Case ==用法 
+Use Case==用法
 Basic Configuration==基本设置
 >Accounts<==>账户<
 Network Configuration==网络设置
@@ -4213,6 +4216,8 @@ Image Collage==图像拼贴
 
 #File: index.html
 #---------------------------
+<html lang="en">==<html lang="zh">
+YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': 搜索页面
 >Search<==>搜索<
 Text==文本
 Audio==音频
@@ -4229,9 +4234,6 @@ this works good in combination with the '/date' ranking modifier.==这与“/ da
 click on the red icon in the upper right after a search.==搜索后点击右上角的红色图标.
 only pages with ==仅内容包含
 add search results from==从中添加搜索结果
-<html lang="en">==<html lang="zh">
-YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': 搜索页面
-#kiosk mode==Kiosk Modus
 "Search"=="搜索"
 advanced parameters==高级参数
 Max. number of results==搜索结果最多有
@@ -4247,7 +4249,6 @@ disabled.#(==禁用.#(
 URL mask==URL过滤
 restrict on==限制
 show all==显示所有
-#überarbeiten!!!
 Prefer mask==首选过滤
 Constraints==约束
 only index pages==仅索引页面
