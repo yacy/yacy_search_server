@@ -726,7 +726,7 @@ Property Name==属性名
 Integration of a Search Portal==搜索门户设置
 If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==如果您想将YaCy作为您的网站搜索门户, 您可能需要在这改变搜索页面的图标和信息.
 The search page may be customized.==搜索页面可以自由定制.
-You can change the 'corporate identity'-images, the greeting line==您可以改变'企业标志'图像,问候语
+You can change the 'corporate identity'-images, the greeting line==您可以改变'企业标志'图片,问候语
 and a link to a home page that is reached when the 'corporate identity'-images are clicked.==和一个指向首页的'企业标志'图像链接.
 To change also colours and styles use the <a href="ConfigAppearance_p.html">Appearance Servlet</a> for different skins and languages.==若要改变颜色和风格,请到<a href="ConfigAppearance_p.html">外观选项</a>选择您喜欢的皮肤和语言.
 Greeting Line<==问候语<
@@ -747,7 +747,7 @@ Media Search==媒体搜索
 >Extended==>拓展
 >Strict==>严格
 Control whether media search results are as default strictly limited to indexed documents matching exactly the desired content domain==控制媒体搜索结果是否默认严格限制为与所需内容域完全匹配的索引文档
-(images, videos or applications specific)==(图像,视频或具体应用)
+(images, videos or applications specific)==(图片,视频或具体应用)
 or extended to pages including such medias (provide generally more results, but eventually less relevant).==或扩展到包括此类媒体的网页(通常提供更多结果,但相关性更弱)
 Remote results resorting==远程搜索结果排序
 >On demand, server-side==>按需,服务器端
@@ -805,7 +805,7 @@ Show Information Links for each Search Result Entry==显示搜索结果的链接
 >Size&==>大小&
 >Metadata&==>元数据&
 >Parser&==>解析器&
->Pictures==>图像
+>Pictures==>图片
 >Status Page==>状态页面
 >Search Front Page==>搜索首页
 >Search Page (small header)==>搜索页面(二级标题)
@@ -1754,7 +1754,7 @@ document type</td>==文件类型</td>
 <td>subject</td>==<td>主题</td>
 <td>url</td>==<td>URL</td>
 <td>emphasized</td>==<td>高亮</td>
-<td>image</td>==<td>图像</td>
+<td>image</td>==<td>图片</td>
 <td>audio</td>==<td>音频</td>
 <td>video</td>==<td>视频</td>
 <td>app</td>==<td>应用</td>
@@ -2297,6 +2297,14 @@ Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers==主动骨干高级节点
 Passive&nbsp;Senior&nbsp;Peers==被动高级节点
 Junior&nbsp;(fragment)&nbsp;Peers==初级(片段)节点
 Network History==网络历史
+<b>Count of Connected Senior Peers</b> in the last two days, scale = 1h==<b>过去两天连接的高级节点数</b>, 尺度 = 1小时
+<b>Count of all Active Peers Per Day</b> in the last week, scale = 1d==<b>过去1周内每天所有主动节点数</b>, 尺度 = 1天
+<b>Count of all Active Peers Per Week</b> in the last 30d, scale = 7d==<b>过去30天内每周所有主动节点数</b>, 尺度 = 7天
+<b>Count of all Active Peers Per Month</b> in the last 365d, scale = 30d==<b>过去365天中每月所有主动节点数</b>, 尺度 = 30天
+Active Principal and Senior Peers in '#[networkName]#' Network== '#[networkName]#' 网络中的主动骨干高级节点
+Passive Senior Peers in '#[networkName]#' Network== '#[networkName]#' 网络中的被动高级节点
+Junior Peers (a fragment) in '#[networkName]#' Network=='#[networkName]#' 网络中的初级(片段)节点
+Manually contacting Peer==手动联系节点
 Active Senior==主动高级
 Passive Senior==被动高级
 Junior (fragment)==初级(片段)
@@ -2316,10 +2324,6 @@ Queries Per Hour (QPH)==请求/小时(QPH)
 >Passive<==>被动<
 >Potential<==>潜在<
 >This Peer<==>本机节点<
-Active Peers in '#[networkName]#' Network=='#[networkName]#'网络中的主动节点
-Passive Peers in '#[networkName]#' Network=='#[networkName]#'网络中的被动节点
-Potential Peers in '#[networkName]#' Network=='#[networkName]#'网络中的潜在节点
-Manually contacting Peer==手动联系节点
 no remote #[peertype]# peer for this list known==当前列表中无远端 #[peertype]# 节点.
 Showing #[num]# entries from a total of #[total]# peers.==显示全部 #[total]# 个节点中的 #[num]# 个.
 send&nbsp;<strong>M</strong>essage/<br/>show&nbsp;<strong>P</strong>rofile/<br/>edit&nbsp;<strong>W</strong>iki/<br/>browse&nbsp;<strong>B</strong>log==发送消息(<strong>m</strong>)/<br/>显示资料(<strong>p</strong>)/<br/>编辑百科(<strong>w</strong>)/<br/>浏览博客(<strong>b</strong>)
@@ -2338,15 +2342,10 @@ Send message to peer==发送消息至节点
 View profile of peer==查看节点资料
 Read and edit wiki on peer==查看并编辑百科
 Browse blog of peer==查看博客
-#"Ranking Receive: no"=="接收排名: 否"
-#"no ranking receive"=="无接收排名"
-#"Ranking Receive: yes"=="接收排名: 是"
-#"Ranking receive enabled"=="打开排名接收"
 "DHT Receive: yes"=="接收DHT: 是"
 "DHT receive enabled"=="打开DHT接收"
 "DHT Receive: no; #[peertags]#"=="接收DHT: 否; #[peertags]#"
 "DHT Receive: no"=="接收DHT: 否"
-#no tags given==keine Tags angegeben
 "no DHT receive"=="无接收DHT"
 "Accept Crawl: no"=="接受爬取: 否"
 "no crawl"=="无爬取"
@@ -2357,7 +2356,6 @@ Contact: direct==通信: 直接
 Seed download: possible==种子下载: 可用
 runtime:==运行时间:
 Peers==节点
-#YaCy Cluster==YaCy Cluster
 URLs for<br/>Remote Crawl==远端<br/>爬取的地址
 "The YaCy Network"=="YaCy网络"
 Indexing<br/>PPM==索引<br/>PPM
@@ -2385,7 +2383,6 @@ Known<br/>Seeds==已知种子
 Sent<br/>Words==已发送词语
 Received<br/>Words==已接收词语
 Connects<br/>per hour==连接/小时
-#Own/Other==Eigene/Andere
 >dark green font<==>深绿色字<
 senior/principal peers==高级/主要节点
 >light green font<==>浅绿色字<
@@ -2402,10 +2399,6 @@ this peer==本机节点
 >DHT-out<==>DHT输出<
 >green lines<==>绿线<
 >DHT-in<==>DHT输入<
-#You are in online mode, but probably no internet resource is available.==Sie befinden sich im Online-Modus, aber zur Zeit besteht keine Internetverbindung.You are in online mode, but probably no internet resource is available.
-#Please check your internet connection.==Bitte überprüfen Sie Ihre Internetverbindung.
-#You are not in online mode. To get online, press this button:==Sie sind nicht im Online-Modus. Um Online zu gehen, drücken Sie diesen Knopf:
-#"go online"=="online gehen"
 #-----------------------------
 
 #File: News.html
@@ -2748,7 +2741,7 @@ The ranking coefficient grows exponentially with the ranking levels given in the
 If you increase a single value by one, then the strength of the parameter doubles.==如果将单个值增加1,则参数的影响效果加倍.
 #Pre-Ranking
 >Pre-Ranking<==>预排名<
-</body>==<script>window.onload = function () {$("label:contains('Appearance In Emphasized Text')").text('出现在强调的文本中');$("label:contains('Appearance In URL')").text('出现在地址中'); $("label:contains('Appearance In Author')").text('出现在作者中'); $("label:contains('Appearance In Reference/Anchor Name')").text('出现在参考/锚点名称中'); $("label:contains('Appearance In Tags')").text('出现在标签中'); $("label:contains('Appearance In Title')").text('出现在标题中'); $("label:contains('Authority of Domain')").text('域名权威'); $("label:contains('Category App, Appearance')").text('类别:出现在应用中'); $("label:contains('Category Audio Appearance')").text('类别:出现在音频中'); $("label:contains('Category Image Appearance')").text('类别:出现在图像中'); $("label:contains('Category Video Appearance')").text('类别:出现在视频中'); $("label:contains('Category Index Page')").text('类别:索引页面'); $("label:contains('Date')").text('日期'); $("label:contains('Domain Length')").text('域名长度'); $("label:contains('Hit Count')").text('命中数'); $("label:contains('Preferred Language')").text('倾向的语言'); $("label:contains('Links To Local Domain')").text('本地域名链接'); $("label:contains('Links To Other Domain')").text('其他域名链接'); $("label:contains('Phrases In Text')").text('文本中短语');$("label:contains('Position In Phrase')").text('在短语中位置');$("label:contains('Position In Text')").text('在文本中位置');$("label:contains('Position Of Phrase')").text('短语的位置'); $("label:contains('Term Frequency')").text('术语频率'); $("label:contains('URL Components')").text('地址组件'); $("label:contains('Term Frequency')").text('术语频率'); $("label:contains('URL Length')").text('地址长度'); $("label:contains('Word Distance')").text('词汇距离'); $("label:contains('Words In Text')").text('文本词汇'); $("label:contains('Words In Title')").text('标题词汇');}</script></body>
+</body>==<script>window.onload = function () {$("label:contains('Appearance In Emphasized Text')").text('出现在强调的文本中');$("label:contains('Appearance In URL')").text('出现在地址中'); $("label:contains('Appearance In Author')").text('出现在作者中'); $("label:contains('Appearance In Reference/Anchor Name')").text('出现在参考/锚点名称中'); $("label:contains('Appearance In Tags')").text('出现在标签中'); $("label:contains('Appearance In Title')").text('出现在标题中'); $("label:contains('Authority of Domain')").text('域名权威'); $("label:contains('Category App, Appearance')").text('类别:出现在应用中'); $("label:contains('Category Audio Appearance')").text('类别:出现在音频中'); $("label:contains('Category Image Appearance')").text('类别:出现在图片中'); $("label:contains('Category Video Appearance')").text('类别:出现在视频中'); $("label:contains('Category Index Page')").text('类别:索引页面'); $("label:contains('Date')").text('日期'); $("label:contains('Domain Length')").text('域名长度'); $("label:contains('Hit Count')").text('命中数'); $("label:contains('Preferred Language')").text('倾向的语言'); $("label:contains('Links To Local Domain')").text('本地域名链接'); $("label:contains('Links To Other Domain')").text('其他域名链接'); $("label:contains('Phrases In Text')").text('文本中短语');$("label:contains('Position In Phrase')").text('在短语中位置');$("label:contains('Position In Text')").text('在文本中位置');$("label:contains('Position Of Phrase')").text('短语的位置'); $("label:contains('Term Frequency')").text('术语频率'); $("label:contains('URL Components')").text('地址组件'); $("label:contains('Term Frequency')").text('术语频率'); $("label:contains('URL Length')").text('地址长度'); $("label:contains('Word Distance')").text('词汇距离'); $("label:contains('Words In Text')").text('文本词汇'); $("label:contains('Words In Title')").text('标题词汇');}</script></body>
 #>Appearance In Emphasized Text<==>出现在强调的文本中<
 #a higher ranking level prefers documents where the search word is emphasized==较高的排名级别更倾向强调搜索词的文档
 #>Appearance In URL<==>出现在地址中<
@@ -2767,7 +2760,7 @@ If you increase a single value by one, then the strength of the parameter double
 #a higher ranking level prefers documents with embedded links to applications==更高的排名级别更喜欢带有嵌入式应用程序链接的文档
 #>Category Audio Appearance<==>类别:出现在音频中<
 #a higher ranking level prefers documents with embedded links to audio content==较高的排名级别更喜欢具有嵌入音频内容链接的文档
-#>Category Image Appearance<==>类别:出现在图像中<
+#>Category Image Appearance<==>类别:出现在图片中<
 #>Category Video Appearance<==>类别:出现在视频中<
 #>Category Index Page<==>类别:索引页面<
 #a higher ranking level prefers 'index of' (directory listings) pages==较高的排名级别更喜欢(目录列表)页面的索引
@@ -3127,16 +3120,16 @@ Message Forwarding (optional)==消息发送(可选)
 
 #File: Status.html
 #---------------------------
->forum<==>论坛<
-Your settings are _not_ protected!==您的设置_不_受保护！
 Console Status==控制台状态
 Log-in as administrator to see full status==登录管理用户以查看完整状态
 Welcome to YaCy!==欢迎使用YaCy!
-Your settings are _not_ protected!</strong>==您的设置未受保护!</strong>
+Your settings are _not_ protected!</strong>==您的设置 _未_ 受保护!</strong>
 Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page <strong>immediately</strong>==请打开<a href="ConfigAccounts_p.html">账户设置</a> <strong>页面</strong>
 and set an administration password.==并设置管理密码.
+Access is unrestricted from localhost (this includes administration features).==访问权限在localhost不受限制（这包括管理功能）。
+Please check the <a href="ConfigAccounts_p.html">accounts configuration</a> page to ensure that the settings match the security level you need.==请检查<a href="ConfigAccounts_p.html">帐户配置</a>页面，确保设置符合您所需的安全级别。
 You have not published your peer seed yet. This happens automatically, just wait.==尚未发布您的节点种子. 将会自动发布, 请稍候.
-The peer must go online to get a peer address.==节点必须上线获得节点地址.
+The peer must go online to get a peer address.==节点必须上线以获得节点地址.
 You cannot be reached from outside.==外部不能访问您的节点.
 A possible reason is that you are behind a firewall, NAT or Router.==很可能是您在防火墙, NAT或者路由的后面.
 But you can <a href="index.html">search the internet</a> using the other peers'==但是您依然能进行<a href="index.html">搜索</a>
@@ -3151,20 +3144,20 @@ Please be fair, contribute your own index to the global index.==请公平地贡�
 Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==空闲磁盘空间低于 #[minSpace]#. 爬取已被关闭,
 it as soon as possible and restart YaCy.==请尽快修复并重启YaCy.
 Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix==空闲内存低于 #[minSpace]#. DHT-in已被关闭,
+Crawling is paused! If the crawling was paused automatically, please check your disk space.==爬取暂停！ 如果这是自动暂停的，请检查您的磁盘空间。
 Latest public version is==最新版本为
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==您可以下载最新版本YaCy, 点此进行升级并重启:
-"Update YaCy"=="更新YaCy"
 Install YaCy==安装YaCy
+You can download the latest releases here:==您可以在此处下载最新版本：
 You are running a server in senior mode and you support the global internet index,==服务器运行在高级模式, 并支持全球索引,
 which you can also <a href="index.html">search yourself</a>.==您也能进行<a href="index.html">本地搜索</a>.
-You have a principal peer because you publish your seed-list to a public accessible server==您拥有一个主要节点, 因为您向公共服务器公布了您的种子列表,
+You have a principal peer because you publish your seed-list to a public accessible server==您是一个骨干节点, 因为您向公共服务器公布了您的种子列表,
 where it can be retrieved using the URL==可使用此URL进行接收:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite.html">here</a>==网页索引器当前空闲. 可以点击<a href="CrawlStartSite.html">这里</a>开始爬取网页
 Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here==网页索引器当前忙碌. 点击<a href="Crawler_p.html">这里</a>查看状态
-If you need professional support==如果你需要专业级支持
-please write to==请EMAIL来信
-For community support==如果需要社区支持
-please visit our==请访问我们的
+If you need professional support, please write to==如果你需要专业级支持, 请EMAIL来信
+For community support, please visit our==如果只是社区支持, 请访问我们的
+>forum<==>论坛<
 #-----------------------------
 
 #File: Status_p.inc
@@ -3172,77 +3165,59 @@ please visit our==请访问我们的
 System Status==系统状态
 System==系统
 YaCy version==YaCy版本
-Tray-Icon==任务栏图标
-Java version:==Java版本:
-YaCy version:==YaCy版本:
-Max:==最大:
-Crawler:==爬虫:
-Proxy:==代理:
->Reset==>重置
-Traffic ==流量
-Experimental<==实验<
-Remote:==远程:
-Enabled==开启
-RAM used:==占用内存:
-RAM max:==最大内存:
-DISK used:==占用硬盘:
-DISK free:==硬盘可用:
-on::off==开::关
-If you do this without YaCy running on a desktop-pc, this will possibly break startup.==如果您没在运行于桌面PC的YaCy上操作这个，这很可能会破坏启动。
-broken::connected==已损坏::已连接
-Transparent ==透明
-Proxy</dt>==代理</dt>
-Host:==主机:
-Threads:==线程:
-Traffic==流量
-If you do this without YaCy running on a desktop-pc==如果您没在运行于桌面PC的YaCy上操作这个，这很可能会破坏启动。
-Transparent==透明
-Load:==负载:
-Uptime:==运行时间:
-peak:==峰值:
-Process</dt>==进程</dt>
 Unknown==未知
-Uptime==运行时间
-System Resources==系统资源
+Uptime:==运行时间:
 Processors:==处理器:
+Load:==负载:
+Threads:==线程:
+peak:==峰值:
+total:==全部:
 Protection==保护
 Password is missing==无密码
 password-protected==受密码保护
 Unrestricted access from localhost==本地无限制访问
 Address</dt>==地址</dt>
 peer address not assigned==未分配节点地址
+Host:==主机:
 Public Address:==公共地址:
 YaCy Address:==YaCy地址:
-Peer Host==节点主机
-Port Forwarding Host==端口转发主机
+Proxy</dt>==代理</dt>
+Transparent ==透明
 not used==未使用
-broken==已损坏
+broken::connected==断开::连接
+broken==已断开
 connected==已连接
-Remote Proxy==远程代理
-not used==未使用
 Used for YaCy -> YaCy communication:==用于YaCy -> YaCy通信:
 WARNING:==警告:
 You do this on your own risk.==此动作危险.
 If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==如果您不是在台式机上或者已安装Java6的机器上运行, 可能会破坏开机程序.
 In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==在此情况下, 您需要手动修改配置文件 DATA/SETTINGS/yacy.conf
->Experimental<==>实验性<
+Remote:==远程:
+Tray-Icon==任务栏图标
+Experimental<==实验性的<
 Yes==是
 No==否
 Auto-popup on start-up==启动时自动弹出
 Disabled==关闭
 Enable]==打开]
-Enabled <a==打开 <a
+Enabled==开启
 Disable]==关闭]
 Memory Usage==内存使用
-free:==空闲:
-total:==全部:
-max:==最大:
+RAM used:==占用内存:
+RAM max:==最大内存:
+DISK used:==占用硬盘:
+(approx.)==(大约)
+DISK free:==可用硬盘:
+on::off==开::关
 Configure==配置
-Reset</a>==重启</a>
+max:==最大:
+Traffic ==流量
+>Reset==>重置
+Proxy:==代理:
+Crawler:==爬虫:
 Incoming Connections==流入连接
 Active:==活动:
-#Max:Max:
-#Indexing Queue==Indexier Puffer
+Max:==最大:
 Loader Queue==加载器队列
 paused==已暂停
 >Queues<==>队列<
@@ -3250,10 +3225,14 @@ Local Crawl==本地爬取
 Remote triggered Crawl==远端触发的爬取
 Pre-Queueing==预排序
 Seed server==种子服务器
-Configure==配置
-Enabled: Updating to server==已打开, 与服务器同步:
-Last upload: #[lastUpload]# ago.==Letzte Aktualisierung vor: #[lastUpload]#
-Enabled: Updating to file==已打开: 与文件同步
+Enabled: Updating to server==开启: 与服务器同步
+Last upload: #[lastUpload]# ago.==最后上传: #[lastUpload]# 以前.
+Enabled: Updating to file==开启: 与文件同步
+YaCy version:==YaCy版本:
+Java version:==Java版本:
+>Experimental<==>实验性的<
+Enabled <a==开启 <a
+Reset</a>==重启</a>
 #-----------------------------
 
 #File: Steering.html
@@ -3349,7 +3328,7 @@ Next&nbsp;Exec&nbsp;Date==下次执行日期
 >activate event<==>激活事件<
 >no repetition<==>不重复<
 >activate scheduler<==>激活定时器<
->off<==>off<
+>off<==>关闭<
 >run once<==>执行一次<
 >run regular<==>定期执行<
 >after start-up<==>在启动后<
@@ -3994,7 +3973,7 @@ Thread Dump==线程转储
 >Outgoing&nbsp;News<==>传出的新闻<
 >Published&nbsp;News<==>发布的新闻<
 >Community Data<==>社区数据<
->Surftips<==>冲浪提示<
+>Surftips<==>上网技巧<
 >Local Peer Wiki<==>本地节点百科 <
 UI Translations==用户界面翻译
 >Published==>已发布的
@@ -4090,45 +4069,26 @@ Crawl Start (Expert)==爬取开始（专家模式）
 Network Scanner==网络扫描仪
 Crawling of MediaWikis==MediaWikis爬取
 Remote Crawling==远程爬取
-Scraping Proxy==刮痧代理
+Scraping Proxy==收割代理
 >Autocrawl<==>自动爬取<
 Advanced Crawler==高级爬虫
 >Crawling of phpBB3 Forums<==>phpBB3论坛爬取<
-#Web Crawler Control==Web 爬虫 Steuerung
 Start a Web Crawl==开启网页爬取
-#Crawl Start==Crawl starten
-#Crawl Profile Editor==Crawl Profil Editor
 Crawler Queues==爬虫队列
-#Indexing<==Indexierung<
-#Loader<==Lader<
-#URLs to be processed==zu verarbeitende URLs
-#Processing Queues==Warteschlangen
-#Local<==Lokal<
-#Global<==Global<
-#Remote<==Remote<
-#Overhang<==Überhang<
-#Media Crawl Queues==Medien Crawl-Puffer
-#>Images==>Bilder
-#>Movies==>Filme
-#>Music==>Musik
-#--- New menu items ---
 Index Creation==索引创建
 Full Site Crawl==全站爬取
 Sitemap Loader==网站地图加载
 Crawl Start<br/>(Expert)==开始爬取<br/>(专家模式)
 Network<br/>Scanner==网络<br/>扫描仪
-#>Intranet<br/>Scanner<==>Intranet<br/>Scanner<
 Crawling of==正在爬取
-#MediaWikis==MediaWikis
 >phpBB3 Forums<==>phpBB3论坛<
 Content Import<==导入内容<
 Network Harvesting<==网络采集<
 Remote<br/>Crawling==远程<br/>爬取
-Scraping<br/>Proxy==刮痧<br/>代理
+Scraping<br/>Proxy==收割<br/>代理
 Database Reader<==数据库读取<
 for phpBB3 Forums==对于phpBB3论坛
 Dump Reader for==Dump阅读器为
-#MediaWiki dumps==MediaWiki dumps
 #-----------------------------
 
 #File: env/templates/submenuIndexImport.template
@@ -4221,7 +4181,7 @@ YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': 搜索页面
 >Search<==>搜索<
 Text==文本
 Audio==音频
-Images==图像
+Images==图片
 Video==视频
 Applications==应用程序
 more options...==更多设置...
@@ -4412,10 +4372,10 @@ Loading&#8230;==正在加载&#8230;
 YaCy P2P Websearch==YaCy P2P搜索
 "Search"=="搜索"
 >Text==>文本
->Images==>图像
+>Images==>图片
 >Audio==>音频
 >Video==>视频
->Applications==>程序
+>Applications==>应用
 Search term:==搜索条目:
 # do not translate class="help" which only has technical html semantics
 alt="help"==alt="帮助"
@@ -4449,7 +4409,6 @@ title="help"==title="帮助"
 #---------------------------
 Peer Control==节点控制
 "Login"=="登录"
-#Login==Anmelden
 Themes==主题
 Messages==消息
 Re-Start==重启
@@ -4471,13 +4430,8 @@ Accounts==账户
 >YaCy Project==>YaCy项目
 "YaCy Project Home"=="YaCy项目主页"
 	Project==	项目
-"YaCy Statistics"=="YaCy数据"
-	Statistics==	数据
 "YaCy Forum"=="YaCy论坛"
-Forum==论坛
 "Help"=="帮助"
-#"YaCy Wiki"=="YaCy Wiki"
-Wiki==百科
 #-----------------------------
 
 #File: yacy/ui/yacyui-bookmarks.html
@@ -4488,15 +4442,10 @@ Wiki==百科
 'Delete'=='删除'
 'Rename'=='重命名'
 'Help'=='帮助'
-#"public bookmark"=="öffentliches Lesezeichen"
-#"private bookmark"=="privates Lesezeichen"
-"delete bookmark"=="删除书签"
 "YaCy Bookmarks"=="YaCy书签"
->Title==>标题
-'Tags'=='标签'
-#'Hash'=='Hash'
 'Public'=='公有'
 'Title'=='题目'
+'Tags'=='标签'
 'Folders'=='目录'
 'Date'=='日期'
 #-----------------------------
@@ -4512,48 +4461,38 @@ For now have a look at the bookmarks, performance has increased significantly, d
 
 #File: yacyinteractive.html
 #---------------------------
-API wiki page==API 百科页面
-"Search..."=="搜索中..."
-e="Search"==e="搜索"
-loading from local index...==从本地索引加载...
-To see a list of all APIs, please visit the==要查看所有API的列表，请访问
-The query format is similar to==查询格式类似于
-This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.==此搜索结果也可以作为RSS / <a href="http://www.opensearch.org" target="_blank"> opensearch </a>输出检索.
-To see a list of all APIs==要查看所有API的列表
 YaCy Interactive Search==YaCy交互搜索
 This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.==此搜索结果能以RSS/<a href="http://www.opensearch.org">opensearch</a>形式表示.
 The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==请求的格式与<a href="http://www.loc.gov/standards/sru/">SRU</a>相似.
 Click the API icon to see an example call to the search rss API.==点击API图标查看示例.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
+To see a list of all APIs, please visit the==查看所有API, 请访问
+API wiki page==API 百科页面
+loading from local index...==从本地索引加载...
+e="Search"==e="搜索"
+"Search..."=="搜索中..."
 #-----------------------------
 
 #File: yacysearch.html
 #---------------------------
 # Do not translate id="search" and rel="search" which only have technical html semantics
->search<==>搜索<
-Illegal URL mask:==非法网址掩码:
->Media<==>媒体<
-g> remote),==g> 远程),
->log in<==>登录<
-length of search words must be at least 1 character==搜索文本最少一个字符
-Search Page==搜索网页
+Search Page==搜索页面
 This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.==此搜索结果能以RSS/<a href="http://www.opensearch.org">opensearch</a>形式表示.
-The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==请求的格式<a href="http://www.loc.gov/standards/sru/">SRU</a>相似.
-Click the API icon to see an example call to the search rss API.==点击API图标查看示例.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
-Did you mean:==是否搜索:
-"Search"=="搜索"
-'Search'=='搜索'
-"search again"=="再次搜索" 
-more options==更多选项
-Text==文本
-Images==图片
-Audio==音频
-Video==视频
-Applications==程序
+"search"=="搜索"
+"search again"=="再次搜索"
+Illegal URL mask:==非法网址掩码:
+(not a valid regular expression), mask ignored.==(不是一个有效的正则表达式),掩码忽略.
+Illegal prefer mask:==Illegal prefer mask:
+Did you mean:==您想搜:
 The following words are stop-words and had been excluded from the search:==以下关键字是休止符, 已从搜索中排除:
 No Results.==未找到.
-length of search words must be at least 3 characters==搜索关键字至少为3个字符
+length of search words must be at least 1 character==搜索文本最少一个字符
+Searching the web with this peer is disabled for unauthorized users. Please==对于未经授权的用户，将禁用使用此节点搜索Web。 请
+>log in<==>登录<
+as administrator to use the search function==作为管理员使用搜索功能
+Location -- click on map to enlarge==位置 -- 点击地图放大
+Map (c) by <==Map (c) by <
+and contributors, CC-BY-SA==and contributors, CC-BY-SA
+>Media<==>媒体<
 > of==> 共
 > local,==> 本地,
 remote from==远端 来自
@@ -4565,32 +4504,30 @@ YaCy peers).==YaCy 节点).
 "bookmark"=="书签"
 "recommend"=="推荐"
 "delete"=="删除"
-Pictures==图像
+Pictures==图片
 #-----------------------------
 
 #File: yacysearchtrailer.html
 #---------------------------
+show search results for "#[query]#" on map==在地图上显示 "#[query]#" 的搜索结果
 >Provider==>提供者
+>Name Space==>命名空间
+>Author==>作者
 >Filetype==>文件类型
 >Language==>语言
-&nbsp;&nbsp;&nbsp;&nbsp;Stealth&nbsp;Mode&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;&nbsp;隐身&nbsp;模式&nbsp;&nbsp;&nbsp;
 &nbsp;&nbsp;&nbsp;Peer-to-Peer&nbsp;&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;P2P&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;Stealth&nbsp;Mode&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;&nbsp;隐身&nbsp;模式&nbsp;&nbsp;&nbsp;
 "Privacy"=="隐私"
-Context Ranking==上下文排序
+Context Ranking==按内容排名
 Sort by Date==按日期排序
 Documents==文件
-Images==图像
->Documents==>文件
->Images==>图像
+Images==图片
 "Your search is done using peers in the YaCy P2P network."=="您的搜索是靠YaCy P2P网络中的节点完成的。"
 "You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used."=="您可以切换到'隐形模式'，这将关闭P2P，给你完全的隐私。期待较少的结果，因为那时只有您自己的搜索索引被使用。"
 "Your search is done using only your own peer, locally."=="你的搜索是靠在本地的YaCy节点完成的。"
 "You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network."=="您可以切换到'P2P'，这将让您的搜索使用YaCy网络中的YaCy节点。"
-"Your search is done using only your own peer=="你的搜索是靠在本地的YaCy节点完成的。"
-"You can switch to 'Stealth Mode' which will switch off P2P=="您可以切换到'隐形模式'，这将关闭P2P，给你完全的隐私。期待较少的结果，因为那时只有您自己的搜索索引被使用。"
-show search results for "#[query]#" on map==显示 "#[query]#" 的搜索结果
->Name Space==>命名空间导航
->Author==>作者
+>Documents==>文件
+>Images==>图片
 #-----------------------------
 
 # EOF
