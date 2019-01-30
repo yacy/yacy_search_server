@@ -287,51 +287,10 @@ function toggleMoreTags(button, moreTagsId) {
 }
 
 /**
- * Handle embedded audio result load error.
- * 
- * @param event
- *            {ErrorEvent} the error event triggered
- */
-function handleAudioLoadError(event) {
-	if (event != null && event.target != null) {
-		/* Fill the title attribute to provide some feedback about the error without need for looking at the console */
-		if (event.target.error != null && event.target.error.message) {
-			event.target.title = "Cannot play ("
-					+ event.target.error.message + ")";
-		} else {
-			event.target.title = "Cannot play";
-		}
-		
-		/* Apply CSS class marking error for visual feedback*/
-		event.target.className = "audioError";
-	}
-}
-
-/**
- * Handle embedded audio result 'playing' event : pauses any other currently
- * playing audio.
- * 
- * @param event
- *            {Event} a 'playing' event
- */
-function handleAudioPlaying(event) {
-	if (event != null && event.target != null) {
-		var audioElems = document.getElementsByTagName("audio");
-		if(audioElems != null) {
-			for (var i = 0; i < audioElems.length; i++) {
-				var audioElem = audioElems[i];
-				if (audioElem != event.target && audioElem.pause
-						&& !audioElem.paused) {
-					audioElem.pause();
-				}
-			}
-		}
-	}
-}
-
-/**
  * Handle a rendering error on a result image thumbnail.
- * @param imgElem {HTMLImageElement} the html img element that could not be rendered
+ * 
+ * @param imgElem
+ *            {HTMLImageElement} the html img element that could not be rendered
  */
 function handleResultThumbError(imgElem) {
 	if (imgElem.parentNode != null && imgElem.parentNode.parentNode != null

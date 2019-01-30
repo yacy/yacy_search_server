@@ -1089,6 +1089,29 @@ div#tagcloud {
   z-index: 100;
  }
  
+ 
+ /******* yacysearch.html ********** 
+ 
+ /* Higlight overall audio controls when playing all results */
+#audioControls:not([data-current-track="-1"]) {
+	border-style: solid;
+	border-color: #1e90ff;
+}
+
+#stopAllBtn:hover {
+	color: red;
+}
+
+#playAllBtn:hover .glyphicon-play {
+	color: #32cd32;
+}
+
+#playAllBtn:hover .glyphicon-pause {
+	color: #ff8c00;
+}
+
+/******* yacysearch.html end ***********/ 
+ 
 /******* yacysearchtrailer.html ********** 
  Styling for the resource switch button, to avoid overlapping at various screen sizes */ 
  

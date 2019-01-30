@@ -65,7 +65,14 @@
   <tr class="#(col)#TableCellLight::TableCellDark#(/col)#">
   	<td>#[name]#</td>
   	<td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a>
-  	<td class="text-center">#(embed)#::<audio src="#[href]#" preload="none" controls="controls" onplaying="handleAudioPlaying(event)" onerror="handleAudioLoadError(event)">Not supported</audio>#(/embed)#</td>
+  	<td class="text-center">#(embed)#::<audio src="#[href]#"
+			preload="none" controls="controls"
+			onplaying="handleAudioPlaying(event)"
+			onpause="handleAudioPause(event)"
+			onerror="handleAudioLoadError(event)"
+			onended="handleAudioEnded(event)">Not supported
+		</audio>#(/embed)#
+	</td>
   </tr>#(/item)#
   ::
   #(item)#::<tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a></tr>#(/item)#

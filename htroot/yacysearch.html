@@ -9,6 +9,9 @@
   <script type="text/javascript" src="js/ajax.js"></script>
   <script type="text/javascript" src="js/xml.js"></script>
   <script type="text/javascript" src="js/yacysearch.js"></script>
+  #(resultTable)#::::
+  	#(embed)#::<script type="text/javascript" src="js/yacysearchAudio.js"></script>#(/embed)#
+  #(/resultTable)#
   <script type="text/javascript" src="js/highslide/highslide.js"></script>
   <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
   <script type="text/javascript" src="env/bootstrap/js/typeahead.jquery.min.js"></script>
@@ -23,6 +26,18 @@
   #(/jsResort)#
   <script type="text/javascript">
     $(document).ready(function() {
+    	
+    #(resultTable)#::::
+    	#(embed)#::
+    	/* Show the overall audio play control buttons only when JavaScript is enabled as they are useless without it */
+    	var audioElems = document.getElementsByTagName("audio");
+    	var audioControls = document.getElementById("audioControls");
+        if(audioElems != null &&  audioElems.length > 0 && audioControls != null && audioControls.className.indexOf("hidden") >= 0) {
+        	audioControls.className = audioControls.className.replace("hidden", "");
+        }
+		#(/embed)#
+    #(/resultTable)#
+    	
       #(jsResort)#::
         $.get(
           "yacysearchitem.html",
@@ -212,7 +227,28 @@ document.getElementById("Enter").innerHTML = "search again";
 
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td></tr>
-::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td>#(embed)#::<td>Player</td>#(/embed)#</tr>#(/resultTable)#
+::<table width="100%">
+	<tr class="TableHeader">
+		<td width="30%">Media</td>
+		<td width="70%">URL</td>
+		#(embed)#::<td>Player
+			<div id="audioControls" class="btn-group btn-group-xs col-xs-offset-3 hidden" role="group" data-current-track="-1">
+				<button id="playAllBtn" type="button"
+					class="btn btn-default btn-xs" title="Play all"
+					data-playAll-title="Play all"
+					data-pause-title="Pause"
+					onclick="handlePlayAllBtnClick()">
+						<span id="playAllIcon" class="glyphicon glyphicon-play"></span>
+				</button>
+				<button id="stopAllBtn"
+					class="btn btn-default btn-xs" title="Stop all"
+					onclick="handleStopAllBtnClick()">
+						<span id="stopAllIcon" class="glyphicon glyphicon-stop"></span>
+				</button>
+			</div>
+		</td>#(/embed)#
+	</tr>
+#(/resultTable)#
 #(jsResort)#
   #{results}#
   <!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
