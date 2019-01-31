@@ -883,26 +883,23 @@ Replace the word "MySearch" with your own message==用您想显示的信息替�
 
 #File: ConfigSearchPage_p.html
 #---------------------------
+Search Page<==搜索页<
 >Search Result Page Layout Configuration<==>搜索结果页面布局配置<
 Below is a generic template of the search result page. Mark the check boxes for features you would like to be displayed.==以下是搜索结果页面的通用模板.选中您希望显示的功能复选框.
 To change colors and styles use the ==要改变颜色和样式使用 
 >Appearance<==>外观<
 menu for different skins==不同皮肤的菜单
-Other portal settings can be adjusted in==其他门户网站设置可以在这调整
->Generic Search Portal<==>通用搜索门户<
-menu.==菜单.
+Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic Search Portal</a> menu.==其他门户网站设置可以在<a href="ConfigPortal_p.html">通用搜索门户</a>菜单中调整.
 >Page Template<==>页面模板<
->Tag<==>标签<
->Topics<==>主题<
->Cloud<==>云<
 >Text<==>文本<
 >Images<==>图片<
 >Audio<==>音频<
 >Video<==>视频<
 >Applications<==>应用<
 >more options<==>更多选项<
->Location<==>位置<
-Search Page<==搜索页<
+>Tag<==>标签<
+>Topics<==>主题<
+>Cloud<==>云<
 >Protocol<==>协议<
 >Filetype<==>文件类型<
 >Wiki Name Space<==>百科名称空间<
@@ -913,18 +910,33 @@ Search Page<==搜索页<
 >Collection<==>收藏<
 >Title of Result<==>结果标题<
 Description and text snippet of the search result==搜索结果的描述和文本片段
-42 kbyte<==42千字节<
+42 kbyte<==42kb<
 >Metadata<==>元数据<
->Parser<==>分析器<
->Citation<==>引用<
->Pictures<==>图片<
->Cache<==>高速缓存<
->Augmented Browsing<==>增强浏览<
+>Parser<==>解析器<
+>Cache<==>缓存<
+<html lang="en">==<html lang="zh">
+"Date"=="日期"
+"Size"=="大小"
+"Browse index"=="浏览索引"
 For this option URL proxy must be enabled==对于这个选项，必须启用URL代理
->Add Navigators<==>添加导航器<
->append==>附加
+max. items==最大条目数
 "Save Settings"=="保存设置"
-"Set Default Values"=="设置默认值"
+"Set Default Values"=="设置为默认值"
+"Top navigation bar"=="顶部导航栏"
+>Location<==>位置<
+show search results on map==在地图上显示搜索结果
+Date Navigation==日期导航
+Maximum range (in days)==最大范围 (按照天算)
+Maximum days number in the histogram. Beware that a large value may trigger high CPU loads both on the server and on the browser with large result sets.==直方图中的最大天数. 请注意, 较大的值可能会在服务器和具有大结果集的浏览器上触发高CPU负载.
+keyword subject keyword2 keyword3==关键字 主题 关键字2 关键字3
+View via Proxy==通过代理查看
+>JPG Snapshot<==>JPG快照<
+"Raw ranking score value"=="原始排名得分值"
+Ranking: 1.12195955E9==排名: 1.12195955E9
+"Delete navigator"=="删除导航器"
+Add Navigators==添加导航器
+"Add navigator"=="添加导航器"
+>append==>附加
 #-----------------------------
 
 #File: ConfigUpdate_p.html
@@ -1670,32 +1682,53 @@ To learn how to do that, watch one of the demonstration videos below==观看以�
 
 #File: HostBrowser.html
 #---------------------------
->Index Browser<==>索引浏览器<
-Browse the index of==浏览索引来自
-documents.==文档.
+Index Browser==索引浏览器
+Browse the index of #[ucount]# documents.== 浏览来自 #[ucount]# 篇文档的索引.
 Enter a host or an URL for a file list or view a list of==输入主机或者地址来查看文件列表,它们来自
 >all hosts<==>全部主机<
 >only hosts with urls pending in the crawler<==>只是在爬虫中地址待处理的主机<
->only with load errors<==>只有加载错误<
->Host/URL<==>主机/地址<
->Browse Host<==>浏览主机<
+> or <==> 或 <
+>only with load errors<==>只有加载错误的主机<
+Host/URL==主机/地址
+Browse Host==浏览主机
+"Delete Subpath"=="删除子路径"
+Browser for==浏览器关于
+"Re-load load-failure docs (404s etc)"=="重新加载具有错误的文档(404s 等)"
+Confirm Deletion==确认删除
 >Host List<==>主机列表<
->Count Colors:<==>颜色表示:<
-Documents without Errors<==没有错误的文档<
-Pending in Crawler<==在爬虫中待处理<
+>Count Colors:<==>计数颜色:<
+Documents without Errors==没有错误的文档
+Pending in Crawler==在爬虫中待处理
 Crawler Excludes<==爬虫排除<
 Load Errors<==加载错误<
-#Administration Options==管理选项
-#"Delete Load Errors"=="删除加载错误项"
+documents stored for host: #[hostsize]#==该主机储存的文档: #[hostsize]#
+documents stored for subpath: #[subpathloadsize]#==该子路径储存的文档: #[subpathloadsize]#
+unloaded documents detected in subpath: #[subpathdetectedsize]#==子路径中探测到但未加载的文档: #[subpathdetectedsize]#
+>Path<==>路径<
+>stored<==>储存的<
+>linked<==>连接的<
+>pending<==>带处理的<
+>excluded<==>排除的<
+>failed<==>失败的<
+Show Metadata==显示元数据
+link, detected from context==从内容中探测到的连接
+>indexed<==>索引的<
+>loading<==>加载中<
+Outbound Links, outgoing from #[host]# - Host List==出站链接，从#[host]#中传出 - 主机列表
+Inbound Links, incoming to #[host]# - Host List==入站链接，传入#[host]# - 主机列表
+<html lang="en">==<html lang="zh">
+'number of documents about this date'=='在这个日期的文件数量'
+"show link structure graph"=="展示连接结构图"
+Host has load error(s)==主机有加载错误项
 #-----------------------------
 
 #File: HostBrowserAdmin_p.html
 #---------------------------
-Administration Options==Administration Options
-Delete all==Delete all
->Load Errors<==>Load Errors<
-from index==from index
-"Delete Load Errors"=="Delete Load Errors"
+Administration Options==管理选项
+Delete all==全部删除
+>Load Errors<==>加载错误<
+from index==来自索引
+"Delete Load Errors"=="删除加载错误项"
 #-----------------------------
 
 #File: IndexCleaner_p.html
