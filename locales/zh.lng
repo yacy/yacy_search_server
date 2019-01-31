@@ -680,40 +680,15 @@ Inapplicable Setting Combination==设置未被应用
 
 #File: ConfigParser_p.html
 #---------------------------
-Parser Configuration==解析配置
-#Content Parser Settings
-Content Parser Settings==内容解析设置
-With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==此设置能开启/关闭依据文件类型(MIME)的内容解析.
+Parser Configuration==解析器配置
+Content Parser Settings==内容解析器设置
+With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==此设置能根据文件类型(MIME)开启/关闭额外的内容解析.
 For a detailed description of the various MIME-types take a look at==关于MIME的详细描述请参考
 If you want to test a specific parser you can do so using the==如果要测试特定的解析器,可以使用
-enable/disable Parser==开启/关闭解析器
-# --- Parser Names are hard-coded BEGIN ---
-##Mime-Type==MIME Typ
-##Microsoft Powerpoint Parser==Microsoft Powerpoint Parser
-#Torrent Metadata Parser==Torrent Metadaten Parser
-##HTML Parser==HTML Parser
-#GNU Zip Compressed Archive Parser==GNU Zip Komprimiertes Archiv Parser
-##Adobe Flash Parser==Adobe Flash Parser
-#Word Document Parser==Word Dokument Parser
-##vCard Parser==vCard Parser
-#Bzip 2 UNIX Compressed File Parser==bzip2 UNIX Komprimierte Datei Parser
-#OASIS OpenDocument V2 Text Document Parser==OASIS OpenDocument V2 Text Dokument Parser
-##Microsoft Excel Parser==Microsoft Excel Parser
-#ZIP File Parser==ZIP Datei Parser
-##Rich Site Summary/Atom Feed Parser==Rich Site Summary / Atom Feed Parser
-#Comma Separated Value Parser==Comma Separated Value (CSV) Parser
-##Microsoft Visio Parser==Microsoft Visio Parser
-#Tape Archive File Parser==Bandlaufwerk Archiv Datei Parser
-#7zip Archive Parser==7zip Archiv Parser
-##Acrobat Portable Document Parser==Adobe Acrobat Portables Dokument Format Parser
-##Rich Text Format Parser==Rich Text Format Parser
-#Generic Image Parser==Generischer Bild Parser
-#PostScript Document Parser==PostScript Dokument Parser
-#Open Office XML Document Parser==Open Office XML Dokument Parser
-#BMP Image Parser==BMP Bild Parser
-# --- Parser Names are hard-coded END ---
+>File Viewer<==>文件查看器<
+>Extension<==>拓展名<
+>Mime-Type<==>Mime-类型<
 "Submit"=="提交"
-#PDF Parser Attributes
 PDF Parser Attributes==PDF解析器属性
 This is an experimental setting which makes it possible to split PDF documents into individual index entries==这是一个实验设置，可以将PDF文档拆分为单独的索引条目
 Every page will become a single index hit and the url is artifically extended with a post/get attribute value containing the page number as value==每个页面都将成为单个索引匹配，并且使用包含页码作为值的post/get属性值人为扩展url
@@ -1102,32 +1077,30 @@ Import failed:==导入失败:
 
 #File: CookieMonitorIncoming_p.html
 #---------------------------
-Incoming Cookies Monitor==进入缓存监视
-Cookie Monitor: Incoming Cookies==缓存监视: 进入缓存
-This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Web服务器已向YaCy代理客户端发送的缓存:
-Showing #[num]# entries from a total of #[total]# Cookies.==显示 #[num]# 个条目, 总共 #[total]# 条缓存.
-Sending Host==发送主机
+Incoming Cookies Monitor==进入Cookies监视器
+Cookie Monitor: Incoming Cookies==Cookies监视器: 进入Cookies
+This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Web服务器已向YaCy代理客户端发送的Cookie:
+Showing #[num]# entries from a total of #[total]# Cookies.==显示 #[num]# 个条目, 总共 #[total]# 条Cookies.
+Sending Host==发送中的主机
 Date</td>==日期</td>
-Receiving Client==接收主机
->Cookie<==>缓存<
-Cookie==缓存
-"Enable Cookie Monitoring"=="开启缓存监视"
-"Disable Cookie Monitoring"=="关闭缓存监视"
+Receiving Client==接收中的客户端
+>Cookie<==>Cookie<
+"Enable Cookie Monitoring"=="开启Cookie监视"
+"Disable Cookie Monitoring"=="关闭Cookie监视"
 #-----------------------------
 
 #File: CookieMonitorOutgoing_p.html
 #---------------------------
-Outgoing Cookies Monitor==外出缓存监视
-Cookie Monitor: Outgoing Cookies==缓存监视: 外出缓存
-This is a list of cookies that browsers using the YaCy proxy sent to webservers:==YaCy代理以通过浏览器向Web服务器发送的缓存:
-Showing #[num]# entries from a total of #[total]# Cookies.==显示 #[num]# 个条目,  总共 #[total]# 条缓存.
-Receiving Host==接收主机
+Outgoing Cookies Monitor==外出Cookie监视器
+Cookie Monitor: Outgoing Cookies==Cookie监视器: 外出Cookie
+This is a list of cookies that browsers using the YaCy proxy sent to webservers:==YaCy代理以通过浏览器向Web服务器发送的Cookie:
+Showing #[num]# entries from a total of #[total]# Cookies.==显示 #[num]# 个条目,  总共 #[total]# 条Cookie.
+Receiving Host==接收中的主机
 Date</td>==日期</td>
-Sending Client==发送主机
->Cookie<==>缓存<
-Cookie==缓存
-"Enable Cookie Monitoring"=="开启缓存监视"
-"Disable Cookie Monitoring"=="关闭缓存监视"
+Sending Client==发送中的客户端
+>Cookie<==>Cookie<
+"Enable Cookie Monitoring"=="开启Cookie监视"
+"Disable Cookie Monitoring"=="关闭Cookie监视"
 #-----------------------------
 
 #File: CookieTest_p.html
@@ -1284,7 +1257,7 @@ Showing latest #[count]# lines from a stack of #[all]# entries.==显示栈中 #[
 #File: CrawlStartExpert.html
 #---------------------------
 <html lang="en">==<html lang="zh">
-Expert Crawl Start==爬取高级设置
+Expert Crawl Start==高级爬取设置
 Start Crawling Job:==开始爬取任务:
 You can define URLs as start points for Web page crawling and start crawling here==您可以将指定地址作为爬取网页的起始点
 "Crawling" means that YaCy will download the given website, extract all links in it and then download the content behind these links== "爬取中"意即YaCy会下载指定的网站, 并解析出网站中链接的所有内容
@@ -1328,6 +1301,11 @@ URLs pointing to dynamic content should usually not be crawled.==通常不会爬
 However, there are sometimes web pages with static content that==然而,也有些含有静态内容的页面用问号标记.
 is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==如果您不确定,不要选中此项以防爬取时陷入死循环.
 Accept URLs with query-part ('?')==接受具有查询格式('?')的地址
+Obey html-robots-noindex:==遵守html-robots-noindex:
+Obey html-robots-nofollow:==遵守html-robots-nofollow:
+Media Type detection==媒体类型探测
+Do not load URLs with an unsupported file extension==不加载具有不支持文件拓展名的地址
+Always cross check file extension against Content-Type header==始终针对Content-Type标头交叉检查文件扩展名
 >Load Filter on URLs<==>对地址加载过滤器<
 > must-match<==>必须匹配<
 The filter is a <==这个过滤器是一个<
@@ -1417,6 +1395,7 @@ cache&nbsp;only==仅缓存
 replace old snapshots with new one==用新快照代替老快照
 add new versions for each crawl==每次爬取添加新版本
 >must-not-match filter for snapshot generation<==>快照产生排除过滤器<
+Image Creation==生成快照
 #Index Attributes
 >Index Attributes==>索引属性
 >Indexing<==>创建索引<
@@ -1429,7 +1408,7 @@ Only senior and principal peers can initiate or receive remote crawls.==仅高�
 A YaCyNews message will be created to inform all peers about a global crawl==YaCy新闻消息中会将这个全球爬取通知其他节点,
 so they can omit starting a crawl with the same start point.==然后他们才能以相同起始点进行爬取.
 Describe your intention to start this global crawl (optional)==在这填入您要进行全球爬取的目的(可选)
-This message will appear in the 'Other Peer Crawl Start' table of other peers.==此消息会显示在其他节点的'其他节点爬取起始'列表中.
+This message will appear in the 'Other Peer Crawl Start' table of other peers.==此消息会显示在其他节点的'其他节点爬取起始列表'中.
 >Add Crawl result to collection(s)<==>添加爬取结果到收集器<
 >Time Zone Offset<==>时区偏移<
 Start New Crawl Job==开始新爬取工作
@@ -2220,43 +2199,43 @@ the <a href="ConfigLiveSearch.html">configuration for live search</a>.==der Seit
 #File: Load_RSS_p.html
 #---------------------------
 Configuration of a RSS Search==RSS搜索配置
-Loading of RSS Feeds<==加载RSS Feeds<
-RSS feeds can be loaded into the YaCy search index.==YaCy能够读取RSS feeds.
-This does not load the rss file as such into the index but all the messages inside the RSS feeds as individual documents.==但不是直接读取RSS文件, 而是将RSS feed中的所有信息分别当作单独的文件来读取.
-URL of the RSS feed==RSS feed地址
+Loading of RSS Feeds<==加载RSS饲料<
+RSS feeds can be loaded into the YaCy search index.==YaCy能够读取RSS饲料.
+This does not load the rss file as such into the index but all the messages inside the RSS feeds as individual documents.==但不是直接读取RSS文件, 而是将RSS饲料中的所有信息分别当作单独的文件来读取.
+URL of the RSS feed==RSS饲料地址
 >Preview<==>预览<
 "Show RSS Items"=="显示RSS条目"
 >Indexing<==>创建索引<
-Available after successful loading of rss feed in preview==仅在读取rss feed后有效
+Available after successful loading of rss feed in preview==仅在读取rss饲料后有效
 "Add All Items to Index (full content of url)"=="将所有条目添加到索引(地址中的全部内容)"
 >once<==>一次<
->load this feed once now<==>读取一次此feed<
+>load this feed once now<==>读取一次此饲料<
 >scheduled<==>定时<
->repeat the feed loading every<==>读取此feed每隔<
+>repeat the feed loading every<==>读取此饲料每隔<
 >minutes<==>分钟<
 >hours<==>小时<
 >days<==>天<
 >collection<==>收集器<
 > automatically.==>.
->List of Scheduled RSS Feed Load Targets<==>定时任务列表<
+>List of Scheduled RSS Feed Load Targets<==>定时RSS饲料读取目标列表<
 >Title<==>标题<
-#>URL/Referrer<==>URL/Referrer<
+>URL/Referrer<==>地址/参照网址<
 >Recording<==>正在记录<
 >Last Load<==>上次读取<
 >Next Load<==>将要读取<
 >Last Count<==>目前计数<
 >All Count<==>全部计数<
 >Avg. Update/Day<==>每天平均更新次数<
-"Remove Selected Feeds from Scheduler"=="删除选中feed"
-"Remove All Feeds from Scheduler"=="删除所有feed"
->Available RSS Feed List<==>可用RSS feed列表<
-"Remove Selected Feeds from Feed List"=="删除选中feed"
-"Remove All Feeds from Feed List"=="删除所有feed"
-"Add Selected Feeds to Scheduler"=="添加选中feed到定时任务"
+"Remove Selected Feeds from Scheduler"=="删除选中饲料"
+"Remove All Feeds from Scheduler"=="删除所有饲料"
+>Available RSS Feed List<==>可用RSS饲料列表<
+"Remove Selected Feeds from Feed List"=="删除选中饲料"
+"Remove All Feeds from Feed List"=="删除所有饲料"
+"Add Selected Feeds to Scheduler"=="添加选中饲料到定时任务"
 >new<==>新<
 >enqueued<==>已加入队列<
 >indexed<==>已索引<
->RSS Feed of==>RSS Feed
+>RSS Feed of==>RSS饲料
 >Author<==>作者<
 >Description<==>描述<
 >Language<==>语言<
@@ -3131,24 +3110,14 @@ Advanced Settings==高级设置
 If you want to restore all settings to the default values,==如果要恢复所有默认设置,
 but <strong>forgot your administration password</strong>, you must stop the proxy,==但是忘记了<strong>管理员密码</strong>, 则您必须首先停止代理,
 delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==删除YaCy根目录下的 'DATA/SETTINGS/yacy.conf' 并重启.
-#Performance Settings of Queues and Processes==Performanceeinstellungen für Puffer und Prozesse
-Performance Settings of Busy Queues==忙碌队列性能设置
-Performance of Concurrent Processes==并行进程性能
-Performance Settings for Memory==内存性能设置
-Performance Settings of Search Sequence==搜索时间性能设置
-### --- Those 3 items are removed in latest SVN BEGIN
-Viewer and administration for database tables==查看与管理数据库表格
-Viewer for Peer-News==查看节点新闻
-Viewer for Cookies in Proxy==查看代理cookie
-### --- Those 3 items are removed in latest SVN END
 Server Access Settings==服务器访问设置
->Transparent Proxy Access Settings==>透明代理访问设置
-#Content Parser Settings==Inhalt Parser Einstellungen
+Proxy Access Settings==代理访问设置
 Crawler Settings==爬虫设置
-HTTP Networking==HTTP网络
 Remote Proxy (optional)==远程代理(可选)
 Seed Upload Settings==种子上传设置
 Message Forwarding (optional)==消息发送(可选)
+Referrer Policy Settings==引荐策略设置
+Debug/Analysis Settings==调试/分析设置
 #-----------------------------
 
 #File: Status.html
