@@ -9,7 +9,7 @@ description: |
   YaCy nodes can also be placed in intranet environment 
   which makes YaCy a replacement for commercial enterprise search solutions. 
 
-grade: devel
+grade: stable
 confinement: strict
 icon: addon/YaCy256x256.png
 
@@ -45,7 +45,7 @@ parts:
     ant-build-targets: 
       - clean
       - dist
-    source: .
+    source: https://github.com/yacy/yacy_search_server.git
     build-packages:
       - openjdk-8-jdk
     override-build: |
