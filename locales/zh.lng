@@ -821,24 +821,23 @@ For explanation please look into defaults/yacy.init==详细内容请参考defaul
 
 #File: ConfigRobotsTxt_p.html
 #---------------------------
->Exclude Web-Spiders<==>拒绝网页爬虫<
+Exclude Web-Spiders==拒绝网络爬虫
 Here you can set up a robots.txt for all webcrawlers that try to access the webinterface of your peer.==在这里您可以创建一个爬虫协议, 以阻止试图访问您节点网络接口的网络爬虫.
->is a volunteer agreement most search-engines==>是一个大多数搜索引擎
-(including YaCy) follow==(包括YaCy)都遵守的协议
+is a voluntary agreement most search-engines (including YaCy) follow.==是一个大多数搜索引擎(包括YaCy)都遵守的协议.
 It disallows crawlers to access webpages or even entire domains.==它会阻止网络爬虫进入网页甚至是整个域.
-Deny access to==禁止访问以下页面
+Deny access to==禁止访问
 Entire Peer==整个节点
 Status page==状态页面
 Network pages==网络页面
-Surftips==建议
+Surftips==上网技巧
 News pages==新页面
 Blog==博客
-Wiki==维基
 Public bookmarks==公共书签
 Home Page==首页
-File Share==共享文件
->Impressum<==>公司信息<
+File Share==文件共享
+Impressum==公司信息
 "Save restrictions"=="保存"
+Wiki==维基
 #-----------------------------
 
 #File: ConfigSearchBox.html
@@ -1980,7 +1979,6 @@ When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES
 You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==您可以将文件从/DATA/SURROGATES/out 移动到 /DATA/SURROGATES/in 以重复索引.
 Import Process==导入进程
 Thread:==线程:
-#Dump:==Dump:
 Processed:==已完成:
 Wiki Entries==百科条目
 Speed:==速度:
@@ -1989,8 +1987,6 @@ Running Time:==运行时间:
 hours,==小时,
 minutes<==分<
 Remaining Time:==剩余时间:
-#hours,==Stunden,
-#minutes<==Minuten<
 #-----------------------------
 
 #File: IndexImportOAIPMHList_p.html
@@ -2031,24 +2027,24 @@ Bad input data:==损坏数据:
 
 #File: IndexImportWarc_p.html
 #---------------------------
-Warc Import==Warc Import
-Web Archive File Import==Web Archive File Import
-No import thread is running, you can start a new thread here==No import thread is running, you can start a new thread here
-Warc File Selection: select an warc file (which may be gz compressed)==Warc File Selection: select an warc file (which may be gz compressed)
-You can download warc archives for example here==You can download warc archives for example here
-Internet Archive==Internet Archive
-Import Warc File==Import Warc File
-Import Process==Import Process
-Thread:==Thread:
-Warc File:==Warc File:
-Processed:==Processed:
-Entries==Entries
-Speed:==Speed:
-pages per second==pages per second
-Running Time:==Running Time:
-hours,==hours,
-minutes<==minutes<
-Remaining Time:==Remaining Time:
+Warc Import==Warc 导入
+Web Archive File Import==Web存档文件导入
+No import thread is running, you can start a new thread here==没有正在运行的导入线程，您可以在此处启动新线程
+Warc File Selection: select an warc file (which may be gz compressed)==Warc文件选择：选择一个warc文件(可能是gz压缩的)
+You can download warc archives for example here==您可以在此处下载warc档案
+Internet Archive==互联网档案
+Import Warc File==导入Warc文件
+Import Process==导入流程
+Thread:==线程:
+Warc File:==Warc文件:
+Processed:==处理好的:
+Entries==条目
+Speed:==速度:
+pages per second==页/秒
+Running Time:==运行时间:
+hours,==小时,
+minutes<==分钟<
+Remaining Time:==剩余时间:
 #-----------------------------
 
 #File: IndexReIndexMonitor_p.html
