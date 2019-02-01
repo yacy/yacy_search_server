@@ -881,7 +881,7 @@ Other portal settings can be adjusted in <a href="ConfigPortal_p.html">Generic S
 >Author<==>作者<
 >Vocabulary<==>词汇<
 >Provider<==>提供商<
->Collection<==>收藏<
+>Collection<==>集合<
 >Title of Result<==>结果标题<
 Description and text snippet of the search result==搜索结果的描述和文本片段
 42 kbyte<==42kb<
@@ -1233,7 +1233,7 @@ Showing latest #[count]# lines from a stack of #[all]# entries.==显示栈中 #[
 >Words==>单词
 >Title==>标题
 "delete"=="删除"
->Collection==>收藏
+>Collection==>集合
 Blacklist to use==使用的黑名单
 "del & blacklist"=="删除并拉黑"
 on the 'Settings'-page in the 'Proxy and Administration Port' field.==在'设置'-页面的'代理和管理端口'字段的上。
@@ -1394,7 +1394,7 @@ A YaCyNews message will be created to inform all peers about a global crawl==YaC
 so they can omit starting a crawl with the same start point.==然后他们才能以相同起始点进行爬取.
 Describe your intention to start this global crawl (optional)==在这填入您要进行全球爬取的目的(可选)
 This message will appear in the 'Other Peer Crawl Start' table of other peers.==此消息会显示在其他节点的'其他节点爬取起始列表'中.
->Add Crawl result to collection(s)<==>添加爬取结果到收集器<
+>Add Crawl result to collection(s)<==>添加爬取结果到集合<
 >Time Zone Offset<==>时区偏移<
 Start New Crawl Job==开始新爬取工作
 Attribute<==属性<
@@ -1913,11 +1913,43 @@ Crawl Queue<==爬取队列<
 
 #File: IndexDeletion_p.html
 #---------------------------
->Index Deletion<==>索引删除<
-The search index contains==搜索索引包含了
-documents.==文档.
-You can delete them here.==你可以在这儿删除它们.
-Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.==删除是同时进行的,这可能导致最近删除的文档尚未反映在文档计数中.
+Index Deletion<==索引删除<
+The search index contains #[doccount]# documents. You can delete them here.==搜索索引包含了 #[doccount]# 篇文档. 你可以在这儿删除它们.
+Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.==删除是同时进行的,这可能导致最近删除的文档还没有反映在文档计数中.
+Delete by URL Matching<==通过URL匹配删除<
+Delete all documents within a sub-path of the given urls. That means all documents must start with one of the url stubs as given here.==删除给定网址的子路径中的所有文档. 这意味着所有文档必须以此处给出的其中一个url存根开头.
+One URL stub, a list of URL stubs<br/>or a regular expression==一个URL存根, 一个URL存根列表<br/> 或一条正则表达式
+Matching Method<==匹配方法<
+sub-path of given URLs==给定URL的子路径
+matching with regular expression==与正则表达式匹配
+"Simulate Deletion"=="模拟删除"
+"no actual deletion, generates only a deletion count"=="没有实际删除，只生成删除计数"
+"Engage Deletion"=="真正删除"
+"simulate a deletion first to calculate the deletion count"=="首先请模拟删除以计算删除数量"
+"engaged"=="删除了"
+selected #[count]# documents for deletion==选择 #[count]# 篇文档以删除
+deleted #[count]# documents==删除了 #[count]# 篇文档
+Delete by Age<==按年龄删除<
+Delete all documents which are older than a given time period.==删除所有超过给定时间段的文档.
+Time Period<==时间段<
+All documents older than==所有文件年龄超过
+years<==年<
+months<==月<
+days<==日<
+hours<==小时<
+Age Identification<==年龄识别<
+>load date==>加载日期
+>last-modified==>上次修改
+Delete Collections<==删除集合<
+Delete all documents which are inside specific collections.==删除特定集合中的所有文档.
+Not Assigned<==未分配<
+Delete all documents which are not assigned to any collection==删除未分配给任何集合的所有文档
+, separated by ',' (comma) or '|' (vertical bar); or==, 分隔按','(逗号)或'|'(垂直条); 或
+>generate the collection list...==>生成集合列表...
+Assigned<==分配的<
+Delete all documents which are assigned to the following collection(s)==删除分配给以下集合的所有文档
+Delete by Solr Query<==通过Solr查询删除<
+This is the most generic option: select a set of documents using a solr query.==这是最通用的选项: 使用solr查询选择一组文档.
 #-----------------------------
 
 #File: IndexExport_p.html
@@ -2201,7 +2233,7 @@ Available after successful loading of rss feed in preview==仅在读取rss饲料
 >minutes<==>分钟<
 >hours<==>小时<
 >days<==>天<
->collection<==>收集器<
+>collection<==>集合<
 > automatically.==>.
 >List of Scheduled RSS Feed Load Targets<==>定时RSS饲料读取目标列表<
 >Title<==>标题<
@@ -3484,7 +3516,7 @@ See the page info about the url.==查看关于此地址的页面信息。
 "Show Metadata"=="显示元数据"
 "Browse Host"=="浏览主机"
 Citation Report==引用报告
-Collections==收藏
+Collections==集合
 MimeType:==Mime类型
 Search in Document:==在文档中搜索:
 "Show Snippet"=="显示摘录"
