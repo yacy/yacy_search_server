@@ -1486,7 +1486,7 @@ load only files in a sub-path of given url==仅载入给定网址子路径中文
 >Limitation<==>限制<
 not more than <==不超过<
 >documents<==>文件<
->Collection<==>搜集器<
+>Collection<==>集合<
 >Start<==>启动<
 "Start New Crawl"=="开始新的爬取"
 >Scheduler<==>定时器<
