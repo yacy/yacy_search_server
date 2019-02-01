@@ -362,7 +362,7 @@ Access to your peer from your own computer (localhost access) is granted with ad
 This setting is convenient but less secure than using a qualified admin account.==此设置很方便，但比使用合格的管理员帐户安全性低.
 Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==请谨慎使用，尤其是在计算机上运行YaCy节点并浏览不受信任和可能有恶意的网站时.
 Access only with qualified account==只允许授权用户访问
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==如果您希望远程访问你的节点,则这是必需的,但它也会加强节点管理操作的访问控制.
+This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==如果您希望远端访问你的节点,则这是必需的,但它也会加强节点管理操作的访问控制.
 Peer User:==节点用户:
 New Peer Password:==新节点密码:
 Repeat Peer Password:==重复节点密码:
@@ -540,10 +540,10 @@ When a search is made then all displayed result links are crawled with a depth-1
 >copy &amp; paste a example config file<==>复制&amp; 粘贴一个示例配置文件<
 Alternatively you may==或者你可以
 To find out more about OpenSearch see==要了解关于OpenSearch的更多信息，请参阅
-20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20个结果从远程系统中获取并同时加载,立即解析并创建索引.
+20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20个结果从远端系统中获取并同时加载,立即解析并创建索引.
 When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
 This means: right after the search request every page is loaded and every page that is linked on this page.==这意味着：在搜索请求之后，就开始加载每个页面上的链接。
-If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中“添加为全局爬取作业”，则要爬网的页面将被添加到全局爬取队列（远程YaCy节点可以爬取要爬取的页面）。
+If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中“添加为全局爬取作业”，则要爬网的页面将被添加到全局爬取队列（远端YaCy节点可以爬取要爬取的页面）。
 Default is to add the links to the local crawl queue (your peer crawls the linked pages).==默认是将链接添加到本地爬网队列（您的YaCy爬取链接的页面）。
 add as global crawl job==添加为全球爬取作业
 opensearch load external search result list from active systems below==opensearch从下面的活动系统加载外部搜索结果列表
@@ -559,7 +559,7 @@ The task is started in the background. It may take some minutes before new entri
 ('modify Solr Schema')==（'修改Solr模式'）
 located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==位于DATA / SETTINGS目录的<i> defaults / heuristicopensearch.conf </i>中。
 For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.==对于发现功能，Web结构索引的<i> web图表</i>选项和字段<i> target_rel_s，target_protocol_s，target_urlstub_s </i>必须在<a href="IndexSchema_p.html?core=webgraph">webgraph Solr模式</a>。
-20 results are taken from remote system and loaded simultanously==20个结果从远程系统中获取，并同时加载，立即解析并索引
+20 results are taken from remote system and loaded simultanously==20个结果从远端系统中获取，并同时加载，立即解析并索引
 >copy ==>复制＆amp; 粘贴一个示例配置文件<
 When using this heuristic==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
 For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s==对于发现功能，Web结构索引的<i> web图表</ i>选项和字段<i> target_rel_s，target_protocol_s，target_urlstub_s </ i>必须在<a href =“IndexSchema_p.html ？core = webgraph“> webgraph Solr模式</a>。
@@ -615,7 +615,7 @@ To control that all participants within a web indexing domain have access to the
 this network definition must be equal to all members of the same YaCy network.==且此设置对同一YaCy网络内的所有节点有效.
 >Network Definition<==>网络定义<
 Enter custom URL...==输入自定义网址...
-Remote Network Definition URL==远程网络定义地址
+Remote Network Definition URL==远端网络定义地址
 Network Nick==网络别名
 Long Description==描述
 Indexing Domain==索引域
@@ -635,12 +635,12 @@ This enables automated, DHT-ruled Index Transmission to other peers==自动向�
 disabled during crawling==关闭 在爬取时
 disabled during indexing==关闭 在索引时
 >Index Receive==>接收索引
-Accept remote Index Transmissions==接受远程索引传递
+Accept remote Index Transmissions==接受远端索引传递
 This works only if you have a senior peer. The DHT-rules do not work without this function==仅当您拥有更上级节点时有效. 如果未设置此项, DHT规则不生效
 >reject==>拒绝
 accept transmitted URLs that match your blacklist==接受 与您黑名单匹配的传来的地址
 >allow==>允许
-deny remote search==拒绝 远程搜索
+deny remote search==拒绝 远端搜索
 #Robinson Mode
 >Robinson Mode==>漂流模式
 If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==如果您的节点运行在'漂流模式', 您能在不与其他节点交换数据的情况下进行搜索
@@ -664,14 +664,14 @@ If you leave the field empty, no peer asks your peer. If you fill in a '*', your
 #Outgoing communications encryption
 Outgoing communications encryption==出色的通信加密
 Protocol operations encryption==协议操作加密
-Prefer HTTPS for outgoing connexions to remote peers==更喜欢以HTTPS作为输出连接到远程节点
+Prefer HTTPS for outgoing connexions to remote peers==更喜欢以HTTPS作为输出连接到远端节点
 When==当
 is enabled on remote peers==在远端节点开启时
-it should be used to encrypt outgoing communications with them (for operations such as network presence, index transfer, remote crawl==它应该被用来加密与它们的传出通信（操作:网络存在、索引传输、远程爬行
+it should be used to encrypt outgoing communications with them (for operations such as network presence, index transfer, remote crawl==它应该被用来加密与它们的传出通信（操作:网络存在、索引传输、远端爬行
 Please note that contrary to strict TLS==请注意，与严格的TLS相反
 certificates are not validated against trusted certificate authorities==证书向受信任的证书颁发机构进行验证
 thus allowing YaCy peers to use self-signed certificates==从而允许YaCy节点使用自签名证书
-Note also that encryption of remote search queries is configured with a dedicated setting in the==另请注意，远程搜索查询加密的专用设置配置请使用
+Note also that encryption of remote search queries is configured with a dedicated setting in the==另请注意，远端搜索查询加密的专用设置配置请使用
 page==页面
 No changes were made!==未作出任何改变!
 Accepted Changes==接受改变
@@ -724,13 +724,13 @@ Media Search==媒体搜索
 Control whether media search results are as default strictly limited to indexed documents matching exactly the desired content domain==控制媒体搜索结果是否默认严格限制为与所需内容域完全匹配的索引文档
 (images, videos or applications specific)==(图片,视频或具体应用)
 or extended to pages including such medias (provide generally more results, but eventually less relevant).==或扩展到包括此类媒体的网页(通常提供更多结果,但相关性更弱)
-Remote results resorting==远程搜索结果排序
+Remote results resorting==远端搜索结果排序
 >On demand, server-side==>按需,服务器端
 Automated, with JavaScript in the browser==自动化,在浏览器中使用JavaScript
 >for authenticated users only<==>仅限经过身份验证的用户<
-Remote search encryption==远程搜索加密
-Prefer https for search queries on remote peers.==首选https用于远程节点上的搜索查询.
-When SSL/TLS is enabled on remote peers, https should be used to encrypt data exchanged with them when performing peer-to-peer searches.==在远程节点上启用SSL/TLS时,应使用https来加密在执行P2P搜索时与它们交换的数据.
+Remote search encryption==远端搜索加密
+Prefer https for search queries on remote peers.==首选https用于远端节点上的搜索查询.
+When SSL/TLS is enabled on remote peers, https should be used to encrypt data exchanged with them when performing peer-to-peer searches.==在远端节点上启用SSL/TLS时,应使用https来加密在执行P2P搜索时与它们交换的数据.
 Please note that contrary to strict TLS, certificates are not validated against trusted certificate authorities (CA), thus allowing YaCy peers to use self-signed certificates.==请注意,与严格TLS相反,证书不会针对受信任的证书颁发机构(CA)进行验证,因此允许YaCy节点使用自签名证书.
 >Snippet Fetch Strategy==>摘要提取策略
 Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==使用此选项加快搜索结果!(使用CACHEONLY或FALSE关闭验证)
@@ -748,11 +748,11 @@ will be deactivated automatically when index size==将自动停用当索引大�
  (see==(见
 >Heuristics: search-result<==>启发式:搜索结果<
  to use this permanent)==使得它永久性)
-Index remote results==索引远程结果
-add remote search results to the local index==将远程搜索结果添加到本地索引
+Index remote results==索引远端结果
+add remote search results to the local index==将远端搜索结果添加到本地索引
 ( default=on, it is recommended to enable this option ! )==(默认=开启,建议启用此选项!)
-Limit size of indexed remote results==现在远程索引结果容量
-maximum allowed size in kbytes for each remote search result to be added to the local index==每个远程搜索结果的最大允许大小(以KB为单位)添加到本地索引
+Limit size of indexed remote results==现在远端索引结果容量
+maximum allowed size in kbytes for each remote search result to be added to the local index==每个远端搜索结果的最大允许大小(以KB为单位)添加到本地索引
 for example, a 1000kbytes limit might be useful if you are running YaCy with a low memory setup==例如,如果运行具有低内存设置的YaCy,则1000KB限制可能很有用
 Default Pop-Up Page<==默认弹出页面<
 Default maximum number of results per page==默认每页最大结果数
@@ -773,7 +773,7 @@ with the search result page==搜索结果页侧栏
 (Headline)==(标题)
 (Content)==(内容)
 >You have to==>你必须
->set a remote user/password<==>设置一个远程用户/密码<
+>set a remote user/password<==>设置一个远端用户/密码<
 to change this options.<==来改变设置.<
 Show Information Links for each Search Result Entry==显示搜索结果的链接信息
 >Date&==>日期&
@@ -1158,7 +1158,7 @@ URLs<==地址<
 >Fill Proxy Cache<==>填充代理缓存<
 >Local Text Indexing<==>本地文本索引<
 >Local Media Indexing<==>本地媒体索引<
->Remote Indexing<==>远程索引<
+>Remote Indexing<==>远端索引<
 MaxAge<==最长寿命<
 no::yes==否::是
 Running==运行中
@@ -1175,82 +1175,68 @@ Edit Profile==修改文件
 
 #File: CrawlResults.html
 #---------------------------
->Collection==>收藏
-"del & blacklist"=="删除并拉黑"
-"del =="删除
 Crawl Results<==爬取结果<
-Overview</a>==概况</a>
-Receipts</a>==回执</a>
-Queries</a>=请求</a>
-DHT Transfer==DHT转移
-Proxy Use==Proxy使用 
-Local Crawling</a>==本地爬取</a>
-Global Crawling</a>==全球爬取</a>
-Surrogate Import</a>==导入备份</a>
 >Crawl Results Overview<==>爬取结果概述<
-These are monitoring pages for the different indexing queues.==创建索引队列的监视页面.
-YaCy knows 5 different ways to acquire web indexes. The details of these processes (1-5) are described within the submenu's listed==YaCy使用5种不同的方式来获取网络索引. 进程(1-5)的细节在子菜单中显示
-above which also will show you a table with indexing results so far. The information in these tables is considered as private,==以上列表也会显示目前的索引结果. 表中的信息应该视为隐私, 
-so you need to log-in with your administration password.==所以您最好设置一个有密码的管理员账户来查看.
-Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private==事件(6)与事件(1)相反, 显示本地回执. 它也包含索引结果, 但不属于隐私
-since it shows crawl requests from other peers.==因为它含有来自其他节点的请求.
-Case (7) occurs if surrogate files are imported==如果备份被导入, 则事件(7)发生.
-The image above illustrates the data flow initiated by web index acquisition.==上图为网页索引的数据流.
-Some processes occur double to document the complex index migration structure.==一些进程可能出现双重文件索引结构混合的情况.
-(1) Results of Remote Crawl Receipts==(1) 远程爬取回执结果 
-This is the list of web pages that this peer initiated to crawl,==这是节点初始化时爬取的网页列表,
-but had been crawled by <em>other</em> peers.==但是先前它们已被<em>其他</em>节点爬取.
-This is the 'mirror'-case of process (6).==这是进程(6)的'镜像'实例
-<em>Use Case:</em>==<em>用法:</em>
-You get entries here==你在此得到条目
-if you start a local crawl on the 'Index Creation'-Page==如果您在'索引创建'页面上启动本地爬取
-and check the==并检查
-'Do Remote Indexing'-flag=='执行远程索引'标记
-#Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here==远程节点根据此节点的请求编制索引的每个页面都会被报告回来，并且可以在此处进行监视
+These are monitoring pages for the different indexing queues.==这是索引创建队列的监视页面.
+YaCy knows 5 different ways to acquire web indexes. The details of these processes (1-5) are described within the submenu's listed==YaCy使用5种不同的方式来获取网络索引. 详细描述显示在子菜单的进程(1-5)中, 
+above which also will show you a table with indexing results so far. The information in these tables is considered as private,==以上列表也会显示目前的索引结果. 表中的信息是私有的, 
+so you need to log-in with your administration password.==所以您需要以管理员账户来查看.
+Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private==事件(6)是本地回执生成器的监视器, (1)的相反事件. 它也包含一个索引结果监视器, 但不是私有的. 
+since it shows crawl requests from other peers.==因为它显示了来自其他节点的爬取请求.
+Case (7) occurs if surrogate files are imported==事件(7)发生在导入备份文件时
+The image above illustrates the data flow initiated by web index acquisition.==上图解释了由网页索引查询发起的数据流.
+Some processes occur double to document the complex index migration structure.==某些进程发生了两次以记录复杂的索引迁移结构.
+(1) Results of Remote Crawl Receipts==(1) 远端爬取回执的结果 
+This is the list of web pages that this peer initiated to crawl,==这是此节点发起爬取的网页列表,
+but had been crawled by <em>other</em> peers.==但它们早已被 <em>其他</em> 节点爬取了.
+This is the 'mirror'-case of process (6).==这是进程(6)的'镜像'事件.
+<em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the==<em>用法:</em> 你可在此获得条目, 当你在 '<a href="CrawlStartExpert.html">高级爬虫页面</a> 上启动本地爬取并勾选
+'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.=='执行远端索引'-标志时, 这需要你确保在 '<a href="RemoteCrawl_p.html">远端爬取/a>' 页面中勾选了'接受远端爬取请求'-标志.
+Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.==远端节点根据此节点的请求编制索引的每个页面都会被报告回来，并且可以在此处进行监视.
 (2) Results for Result of Search Queries==(2) 搜索查询结果报告页
-This index transfer was initiated by your peer by doing a search query.==通过搜索, 此索引转移能被初始化.
+This index transfer was initiated by your peer by doing a search query.==通过搜索, 此索引转移能被发起.
 The index was crawled and contributed by other peers.==这个索引是被其他节点贡献与爬取的.
-This list fills up if you do a search query on the 'Search Page'==当您在'搜索页面'进行搜索时, 此表会被填充.
->Domain<==>域名<
->URLs<==>地址数<
+<em>Use Case:</em> This list fills up if you do a search query on the 'Search Page'==<em>用法:</em> 如果您在'搜索页面'上执行搜索查询，此列表将填满
 (3) Results for Index Transfer==(3) 索引转移结果
-The url fetch was initiated and executed by other peers.==被其他节点初始化并爬取的地址.
-These links here have been transmitted to you because your peer is the most appropriate for storage according to==这些链接已经被传递给你, 因为根据全球分布哈希表的计算,
+The url fetch was initiated and executed by other peers.==这些取回本地的地址是被其他节点发起并爬取.
+These links here have been transmitted to you because your peer is the most appropriate for storage according to==程序已将这些地址传递给你, 因为根据全球分布哈希表的逻辑,
 the logic of the Global Distributed Hash Table.==您的节点是最适合存储它们的.
-This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==当您选中了在'索引控制'里的'接收索引'时, 这个表会被填充.
+<em>Use Case:</em> This list may fill if you check the 'Index Receive'-flag on the 'Index Control' page==<em>用法:</em> 如果您在'索引控制'页面上选中'索引接收'-标志, 则此列表会填写
 (4) Results for Proxy Indexing==(4) 代理索引结果
 These web pages had been indexed as result of your proxy usage.==以下是由于使用代理而索引的网页.
 No personal or protected page is indexed==不包括私有或受保护网页
 such pages are detected by Cookie-Use or POST-Parameters (either in URL or as HTTP protocol)==通过检测cookie用途和提交参数(链接或者HTTP协议)能够识别出此类网页,
 and automatically excluded from indexing.==并在索引时自动排除.
-You must use YaCy as proxy to fill up this table.==必须把YaCy用作代理才能填充此表格.
+<em>Use Case:</em> You must use YaCy as proxy to fill up this table.==<em>用法:</em> 必须把YaCy用作代理才能填充此表格.
 Set the proxy settings of your browser to the same port as given==将浏览器代理端口设置为
 on the 'Settings'-page in the 'Proxy and Administration Port' field.=='设置'页面'代理和管理端口'选项中的端口.
 (5) Results for Local Crawling==(5)本地爬取结果
-These web pages had been crawled by your own crawl task.==您的爬虫任务已经爬取了这些网页.
-start a crawl by setting a crawl start point on the 'Index Create' page.==在'索引创建'页面设置爬取起始点以开始爬取.
+These web pages had been crawled by your own crawl task.==这些网页按照您的爬虫任务已被爬取.
+<em>Use Case:</em> start a crawl by setting a crawl start point on the 'Index Create' page.==<em>用法:</em> 在'索引创建'页面设置爬取起始点以开始爬取.
 (6) Results for Global Crawling==(6)全球爬取结果
-These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==这些网页已经被您的节点索引, 但是它们是被远端节点爬取的.
-This is the 'mirror'-case of process (1).==这是进程(1)的'镜像'实例.
-The stack is empty.==栈为空.
+These pages had been indexed by your peer, but the crawl was initiated by a remote peer.==这些网页已被您的节点创建了索引, 但它们是被远端节点爬取的.
+This is the 'mirror'-case of process (1).==这是进程(1)的'镜像'事件.
+<em>Use Case:</em> This list may fill if you check the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page==<em>用法:</em> 如果你在 '<a href="RemoteCrawl_p.html">远端爬取</a>' 页面勾选'接受远端爬取请求'-标记，此列表会填写
+The stack is empty.==此栈为空.
 Statistics about #[domains]# domains in this stack:==此栈显示有关 #[domains]# 域的数据:
-This list may fill if you check the 'Accept remote crawling requests'-flag on the==如果您选中“接受远程爬取请求”标记，请填写列表在
-page<==页面<
 (7) Results from surrogates import==(7) 备份导入结果
 These records had been imported from surrogate files in DATA/SURROGATES/in==这些记录从 DATA/SURROGATES/in 中的备份文件中导入
-place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==将包含Dublin核心元数据的文件放在 DATA/SURROGATES/in 中, 或者使用索引导入方式
+<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==将包含Dublin核心元数据的文件放在 DATA/SURROGATES/in 中, 或者使用索引导入方式
 (i.e. <a href="IndexImportMediawiki_p.html">MediaWiki import</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>)==(例如 <a href="IndexImportMediawiki_p.html">MediaWiki 导入</a>, <a href="IndexImportOAIPMH_p.html">OAI-PMH 导入</a>)
+>Domain==>域名
 "delete all"=="全部删除"
 Showing all #[all]# entries in this stack.==显示栈中所有 #[all]# 条目.
-Showing latest #[count]# lines from a stack of #[all]# entries.==显示栈中 #[all]# 条目的最近 #[count]# 行.
+Showing latest #[count]# lines from a stack of #[all]# entries.==显示栈中 #[all]# 条目的最近 
 "clear list"=="清除列表"
-#Initiator==Initiator
->Executor==>执行
->Modified==>已改变
+>Executor==>执行者
+>Modified==>已修改
 >Words==>单词
 >Title==>标题
-#URL==URL
 "delete"=="删除"
+>Collection==>收藏
+Blacklist to use==使用的黑名单
+"del & blacklist"=="删除并拉黑"
+on the 'Settings'-page in the 'Proxy and Administration Port' field.==在'设置'-页面的'代理和管理端口'字段的上。
 #-----------------------------
 
 #File: CrawlStartExpert.html
@@ -1400,10 +1386,10 @@ Image Creation==生成快照
 >Indexing<==>创建索引<
 index text==索引文本
 index media==索引媒体
-Do Remote Indexing==远程索引
-If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果选中, 爬虫会联系其他节点, 并将其作为此次爬取的远程索引器.
+Do Remote Indexing==远端索引
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果选中, 爬虫会联系其他节点, 并将其作为此次爬取的远端索引器.
 If you need your crawling results locally, you should switch this off.==如果您仅想爬取本地内容, 请关闭此设置.
-Only senior and principal peers can initiate or receive remote crawls.==仅高级节点和主节点能初始化或者接收远程爬取.
+Only senior and principal peers can initiate or receive remote crawls.==仅高级节点和主节点能发起或者接收远端爬取.
 A YaCyNews message will be created to inform all peers about a global crawl==YaCy新闻消息中会将这个全球爬取通知其他节点,
 so they can omit starting a crawl with the same start point.==然后他们才能以相同起始点进行爬取.
 Describe your intention to start this global crawl (optional)==在这填入您要进行全球爬取的目的(可选)
@@ -1802,7 +1788,7 @@ word distance</td>==字间距离</td>
 words in title</td>==标题字数</td>
 words in text</td>==内容字数</td>
 local links</td>==本地链接</td>
-remote links</td>==远程链接</td>
+remote links</td>==远端链接</td>
 hitcount</td>==命中数</td>
 #props</td>==</td>
 unresolved URL Hash==未解析URL Hash值
@@ -1906,19 +1892,23 @@ Fail-Reason==错误原因
 
 #File: IndexCreateQueues_p.html
 #---------------------------
-#Crawl Queue<==Crawl Queue<
-#Click on this API button to see an XML with information about the crawler latency and other statistics.==Click on this API button to see an XML with information about the crawler latency and other statistics.
-#This crawler queue is empty==This crawler queue is empty
-Delete Entries:==已删除条目:
+This crawler queue is empty==爬取队列为空
+Click on this API button to see an XML with information about the crawler latency and other statistics.==单击此API按钮以查看包含有关爬虫程序延迟和其他统计信息的XML。
+Delete Entries:==删除条目:
+Initiator==发起者
+Profile==资料
+Depth==深度
+Modified Date==修改日期
+Anchor Name==祖先名
+Count==计数
+Delta/ms==延迟/ms
+Host==主机
 "Delete"=="删除"
-#>Count<==>Count<
+Crawl Queue<==爬取队列<
+>Count<==>计数<
 >Initiator<==>发起者<
 >Profile<==>资料<
 >Depth<==>深度<
-Modified Date==修改日期
-Anchor Name==祖先名
-This crawler queue is empty==爬取队列为空
-Crawl Queue<==爬取队列<
 #-----------------------------
 
 #File: IndexDeletion_p.html
@@ -1958,7 +1948,7 @@ documents.<==文档<
 #---------------------------
 >Index Sources & Targets<==>索引来源&目标<
 YaCy supports multiple index storage locations.==YaCy支持多地索引储存.
-As an internal indexing database a deep-embedded multi-core Solr is used and it is possible to attach also a remote Solr.==内部索引数据库使用了深度嵌入式多核Solr,并且还可以附加远程Solr.
+As an internal indexing database a deep-embedded multi-core Solr is used and it is possible to attach also a remote Solr.==内部索引数据库使用了深度嵌入式多核Solr,并且还可以附加远端Solr.
 #-----------------------------
 
 #File: IndexImportMediawiki_p.html
@@ -2368,7 +2358,7 @@ URLs for<br/>Remote Crawl==远端<br/>爬取的地址
 "The YaCy Network"=="YaCy网络"
 Indexing<br/>PPM==索引<br/>PPM
 (public&nbsp;local)==(公共/本地)
-(remote)==(远程)
+(remote)==(远端)
 Your Peer:==您的节点:
 >Name<==>名称<
 >Info<==>信息<
@@ -2418,7 +2408,7 @@ Overview==概述
 >Published&nbsp;News<==>发布的新闻<
 This is the YaCyNews system (currently under testing).==这是YaCy新闻系统(测试中).
 The news service is controlled by several entry points:==新闻服务会因为下面的操作产生:
-A crawl start with activated remote indexing will automatically create a news entry.==由远程创建索引激活的一次爬取会自动创建一个新闻条目.
+A crawl start with activated remote indexing will automatically create a news entry.==由远端创建索引激活的一次爬取会自动创建一个新闻条目.
 Other peers may use this information to prevent double-crawls from the same start point.==其他的节点能利用此信息以防止相同起始点的二次爬取.
 A table with recently started crawls is presented on the Index Create - page=="索引创建"-页面会显示最近启动的爬取.
 A change in the personal profile will create a news entry. You can see recently made changes of==个人信息的改变会创建一个新闻条目, 可以在网络个人信息页面查看,
@@ -2696,10 +2686,10 @@ Do Local Text-Indexing==进行本地文本索引
 If this is on, all pages (except private content) that passes the proxy is indexed.==如果打开此项设置, 所有通过代理的网页(除了私有内容)都会被索引.
 Do Local Media-Indexing==进行本地媒体索引
 This is the same as for Local Text-Indexing, but switches only the indexing of media content on.==与本地文本索引类似, 但是仅当'索引媒体内容'打开时有效.
-Do Remote Indexing==进行远程索引
-If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果被选中, 爬虫会联系其他节点并将之作为远程索引器.
+Do Remote Indexing==进行远端索引
+If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==如果被选中, 爬虫会联系其他节点并将之作为远端索引器.
 If you need your crawling results locally, you should switch this off.==如果仅需要本地索引结果, 可以关闭此项.
-Only senior and principal peers can initiate or receive remote crawls.==只有高级节点和主要节点能初始化和接收远端crawl.
+Only senior and principal peers can initiate or receive remote crawls.==只有高级节点和主要节点能发起和接收远端crawl.
 Please note that this setting only take effect for a prefetch depth greater than 0.==请注意, 此设置仅在预读深度大于0时有效.
 Proxy generally==代理杂项设置
 Path==路径
@@ -2713,7 +2703,7 @@ Pre-fetch is now set to depth==预读深度现为
 Caching is now #(caching)#off::on#(/caching)#.==缓存现已 #(caching)#关闭::打开#(/caching)#.
 Local Text Indexing is now #(indexingLocalText)#off::on==本地文本索引现已 #(indexingLocalText)#关闭::打开
 Local Media Indexing is now #(indexingLocalMedia)#off::on==本地媒体索引现已 #(indexingLocalMedia)#关闭::打开
-Remote Indexing is now #(indexingRemote)#off::on==远程索引现已 #(indexingRemote)#关闭::打开
+Remote Indexing is now #(indexingRemote)#off::on==远端索引现已 #(indexingRemote)#关闭::打开
 Cachepath is now set to '#[return]#'.</strong> Please move the old data in the new directory.==缓存路径现为 '#[return]#'.</strong> 请将旧文件移至此目录.
 Cachesize is now set to #[return]#MB.==缓存大小现为 #[return]#MB.
 Changes will take effect after restart only.==改变仅在重启后生效.
@@ -2774,7 +2764,7 @@ If you increase a single value by one, then the strength of the parameter double
 #a higher ranking level prefers 'index of' (directory listings) pages==较高的排名级别更喜欢(目录列表)页面的索引
 #>Date<==>日期<
 #a higher ranking level prefers younger documents.==更高的排名水平更喜欢最新的文件.
-#The age of a document is measured using the date submitted by the remote server as document date==使用远程服务器提交的日期作为文档日期来测量文档的年龄
+#The age of a document is measured using the date submitted by the remote server as document date==使用远端服务器提交的日期作为文档日期来测量文档的年龄
 #>Domain Length<==>域名长度<
 #a higher ranking level prefers documents with a short domain name==较高的排名级别更喜欢具有短域名的文档
 #>Hit Count<==>命中数<
@@ -2792,7 +2782,7 @@ The two stages are separated because they need statistical information from the 
 #---------------------------
 >Solr Ranking Configuration<==>Solr排名配置<
 These are ranking attributes for Solr.==这些是Solr的排名属性.
-This ranking applies for internal and remote (P2P or shard) Solr access.==此排名适用于内部和远程(P2P或分片)Solr访问.
+This ranking applies for internal and remote (P2P or shard) Solr access.==此排名适用于内部和远端(P2P或分片)Solr访问.
 Select a profile:==选择配置文件:
 >Boost Function<==>提升功能<
 >Boost Query<==>提升查询<
@@ -2816,9 +2806,9 @@ Select a profile:==选择配置文件:
 #File: RemoteCrawl_p.html
 #---------------------------
 Remote Crawl Configuration==远端爬取配置
->Remote Crawler<==>远程爬虫<
+>Remote Crawler<==>远端爬虫<
 The remote crawler is a process that requests urls from other peers.==远端爬虫是一个处理来自其他节点链接请求的进程.
-Peers offer remote-crawl urls if the flag 'Do Remote Indexing'==如果选中了'进行远程索引', 则节点在开始爬取时
+Peers offer remote-crawl urls if the flag 'Do Remote Indexing'==如果选中了'进行远端索引', 则节点在开始爬取时
 is switched on when a crawl is started.==能够进行远端爬取.
 Remote Crawler Configuration==远端爬虫配置
 >Accept Remote Crawl Requests<==>接受远端爬取请求<
@@ -2897,7 +2887,7 @@ Seed Settings changed.#(success)#::You are now a principal peer.==seed设置已�
 Seed Settings changed, but something is wrong.==seed设置已改变, 但是未完全成功.
 Seed Uploading was deactivated automatically.==seed上传自动关闭. 
 Please return to the settings page and modify the data.==请返回设置页面修改参数.
-The remote-proxy setting has been changed==远程代理设置已改变.
+The remote-proxy setting has been changed==远端代理设置已改变.
 The new setting is effective immediately, you don't need to re-start.==新设置立即生效.
 The submitted peer name is already used by another peer. Please choose a different name.</strong> The Peer name has not been changed.==提交的节点名已存在, 请更改.</strong> 节点名未改变.
 Your Peer Language is:==节点语言:
@@ -2961,21 +2951,21 @@ Changes will take effect immediately.==改变立即生效.
 
 #File: Settings_Proxy.inc
 #---------------------------
-Remote Proxy (optional)==远程代理（可选）
-YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy能够通过第二代理连接到网络, 在此输入远程代理地址.
-Use remote proxy</label>==使用远程代理</label>
-Enables the usage of the remote proxy by yacy==打开以支持远程代理
+Remote Proxy (optional)==远端代理（可选）
+YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy能够通过第二代理连接到网络, 在此输入远端代理地址.
+Use remote proxy</label>==使用远端代理</label>
+Enables the usage of the remote proxy by yacy==打开以支持远端代理
 Use remote proxy for yacy &lt;-&gt; yacy communication==为YaCy &lt;-&gt; YaCy 通信使用代理
-Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==选此指定远程代理是否支持YaCy节点间通信.
+Specifies if the remote proxy should be used for the communication of this peer to other yacy peers.==选此指定远端代理是否支持YaCy节点间通信.
 <em>Hint:</em> Enabling this option could cause this peer to remain in junior status.==<em>提示:</em> 打开此选项后本地节点会被置为初级节点.
-Use remote proxy for HTTPS==为HTTPS使用远程代理
+Use remote proxy for HTTPS==为HTTPS使用远端代理
 Specifies if YaCy should forward ssl connections to the remote proxy.==选此指定YaCy是否使用SSL代理.
-Remote proxy host==远程代理主机
-The ip address or domain name of the remote proxy==远程代理的IP地址或者域名
-Remote proxy port==远程代理端口
-the port of the remote proxy==远程代理使用的端口
-Remote proxy user==远程代理用户
-Remote proxy password==远程代理用户密码
+Remote proxy host==远端代理主机
+The ip address or domain name of the remote proxy==远端代理的IP地址或者域名
+Remote proxy port==远端代理端口
+the port of the remote proxy==远端代理使用的端口
+Remote proxy user==远端代理用户
+Remote proxy password==远端代理用户密码
 No-proxy adresses==无代理地址
 IP addresses for which the remote proxy should not be used==指定不使用代理的IP地址
 "Submit"=="提交"
@@ -3109,7 +3099,7 @@ delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder an
 Server Access Settings==服务器访问设置
 Proxy Access Settings==代理访问设置
 Crawler Settings==爬虫设置
-Remote Proxy (optional)==远程代理(可选)
+Remote Proxy (optional)==远端代理(可选)
 Seed Upload Settings==种子上传设置
 Message Forwarding (optional)==消息发送(可选)
 Referrer Policy Settings==引荐策略设置
@@ -3190,7 +3180,7 @@ WARNING:==警告:
 You do this on your own risk.==此动作危险.
 If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==如果您不是在台式机上或者已安装Java6的机器上运行, 可能会破坏开机程序.
 In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==在此情况下, 您需要手动修改配置文件 DATA/SETTINGS/yacy.conf
-Remote:==远程:
+Remote:==远端:
 Tray-Icon==任务栏图标
 Experimental<==实验性的<
 Yes==是
@@ -3432,7 +3422,7 @@ Threaddump<==线程Dump<
 Translation News for Language==语言翻译新闻
 Translation News==翻译新闻
 You can share your local addition to translations and distribute it to other peers.==你可以分享你的本地翻译，并分发给其他节点。
-The remote peer can vote on your translation and add it to the own local translation.==远程节点可以对您的翻译进行投票并将其添加到他们的本地翻译中。
+The remote peer can vote on your translation and add it to the own local translation.==远端节点可以对您的翻译进行投票并将其添加到他们的本地翻译中。
 entries available==可用的条目
 "Publish"=="发布"
 You can check your outgoing messages==你可以检查你的传出消息
@@ -3445,7 +3435,7 @@ negative vote==反对票
 positive vote==赞成票
 Vote on this translation==对这个翻译投票
 If you vote positive the translation is added to your local translation list==如果您投赞成票，翻译将被添加到您的本地翻译列表中
->Originator<==>发起人<
+>Originator<==>启动人<
 #-----------------------------
 
 #File: Translator_p.html
@@ -3925,7 +3915,7 @@ Incoming Requests Overview==传入请求概述
 Incoming Requests Details==传入的请求详细信息
 All Connections<==所有连接<
 Local Search<==本地搜索<
-Remote Search<==远程搜索<
+Remote Search<==远端搜索<
 Cookie Menu==Cookie菜单
 Incoming&nbsp;Cookies==传入&nbsp;Cookies
 Outgoing&nbsp;Cookies==传出&nbsp;Cookies
@@ -3939,7 +3929,7 @@ Connections</a>==连接</a>
 Local Search==本地搜索
 Log==日志
 Host Tracker==主机跟踪器
-Remote&nbsp;Search==远程搜索
+Remote&nbsp;Search==远端搜索
 #-----------------------------
 
 #File: env/templates/submenuBlacklist.template
@@ -4003,7 +3993,7 @@ Advanced Properties==高级设置
 #File: env/templates/submenuCrawlMonitor.template
 #---------------------------
 Overview</a>==概述</a>
-Receipts</a>==收据</a>
+Receipts</a>==回执</a>
 Queries</a>==查询</a>
 DHT Transfer==DHT 传输
 Proxy Use==代理使用
@@ -4014,7 +4004,7 @@ Crawl Results==爬取结果
 Crawler<==爬虫<
 Global==全球
 robots.txt Monitor==爬虫协议监视器
-Remote==远程
+Remote==远端
 No-Load==空载
 Processing Monitor==进程监视
 Crawler Queues==爬虫队列
@@ -4066,7 +4056,7 @@ Crawler/Spider<==爬虫/蜘蛛<
 Crawl Start (Expert)==爬取开始（专家模式）
 Network Scanner==网络扫描仪
 Crawling of MediaWikis==MediaWikis爬取
-Remote Crawling==远程爬取
+Remote Crawling==远端爬取
 Scraping Proxy==收割代理
 >Autocrawl<==>自动爬取<
 Advanced Crawler==高级爬虫
@@ -4082,7 +4072,7 @@ Crawling of==正在爬取
 >phpBB3 Forums<==>phpBB3论坛<
 Content Import<==导入内容<
 Network Harvesting<==网络采集<
-Remote<br/>Crawling==远程<br/>爬取
+Remote<br/>Crawling==远端<br/>爬取
 Scraping<br/>Proxy==收割<br/>代理
 Database Reader<==数据库读取<
 for phpBB3 Forums==对于phpBB3论坛
