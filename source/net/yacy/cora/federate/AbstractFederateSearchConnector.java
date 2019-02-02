@@ -58,11 +58,21 @@ import net.yacy.search.schema.CollectionSchema;
  * Subclasses should/need to override query() and maybe toYaCySchema() if more
  * is needed as a basic field mapping
  */
-abstract public class AbstractFederateSearchConnector implements FederateSearchConnector {
+public abstract class AbstractFederateSearchConnector implements FederateSearchConnector {
+	
+	/** Logger for this class */
+	private static final ConcurrentLog LOG = new ConcurrentLog(AbstractFederateSearchConnector.class.getName());
 
-    public String instancename; // just a identifying name
-    protected SchemaConfiguration localcfg; // the schema conversion cfg for each fieldname, yacyname = remote fieldname
-    public long lastaccesstime = -1; // last time accessed, used for search delay calculation
+	/** Just a identifying name */
+    public String instancename;
+    
+    /** The schema conversion cfg for each fieldname, yacyname = remote fieldname */
+    protected SchemaConfiguration localcfg;
+    
+    /** Last time accessed, used for search delay calculation */
+    public long lastaccesstime = -1;
+    
+    /** The search URL template */
     protected String baseurl;
 
     /**
@@ -84,14 +94,14 @@ abstract public class AbstractFederateSearchConnector implements FederateSearchC
             try {
                 this.localcfg = new SchemaConfiguration(instanceCfgFile);
             } catch (IOException ex) {
-                ConcurrentLog.config(this.instancename, "error reading schema " + cfgFileName);
+            	LOG.config("Error reading schema " + cfgFileName + " for connector " + this.instancename);
                 return false;
             }
             // mandatory to contain a mapping for "sku" or alternatively "cfg_skufieldname" for a conversion to a final url
             if (this.localcfg.contains(CollectionSchema.sku) || this.localcfg.contains("_skufieldname")) {
                 return true;
             }
-            ConcurrentLog.config(this.instancename, "mandatory mapping for sku or _skufieldname missing in " + cfgFileName);
+            LOG.config("Mandatory mapping for sku or _skufieldname missing in " + cfgFileName + " for connector " + this.instancename);
             return false;
         }
         this.localcfg = null;
@@ -111,26 +121,26 @@ abstract public class AbstractFederateSearchConnector implements FederateSearchC
             @Override
             public void run() {
                 Thread.currentThread().setName("heuristic:" + instancename);
-                ConcurrentLog.info("YACY SEARCH (federated)", "Send search query to " +  instancename);
+                LOG.info("Send search query to " +  instancename);
                 theSearch.oneFeederStarted();
                 List<URIMetadataNode> doclist = query(theSearch.getQuery());
                 if (doclist != null) {
-                    ConcurrentLog.info("YACY SEARCH (federated)", "Got " + doclist.size() + " documents from " +  instancename);
-                    Map<String, LinkedHashSet<String>> snippets = new HashMap<String, LinkedHashSet<String>>(); // add nodes doesn't allow null
+                	LOG.info("Got " + doclist.size() + " documents from " +  instancename);
+                    Map<String, LinkedHashSet<String>> snippets = new HashMap<>(); // add nodes doesn't allow null
                     theSearch.addNodes(doclist, null, snippets, false, instancename, doclist.size(), true);
                     
                     for (URIMetadataNode doc : doclist) {
                         theSearch.addHeuristic(doc.hash(), instancename, false);
                     }
                 } else {
-                	ConcurrentLog.info("YACY SEARCH (federated)", "Got no results from " +  instancename);
+                	LOG.info("Got no results from " +  instancename);
                 }
                 // that's all we need to display serach result
                 theSearch.oneFeederTerminated();
 
                 // optional: add to crawler to get the full resource (later)
                 if (doclist != null && !doclist.isEmpty() && theSearch.addResultsToLocalIndex) {
-                    Collection<DigestURL> urls = new ArrayList<DigestURL>();
+                    Collection<DigestURL> urls = new ArrayList<>();
                     for (URIMetadataNode doc : doclist) {
                         urls.add(doc.url());
                     }

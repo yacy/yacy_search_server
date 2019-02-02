@@ -59,6 +59,9 @@ import net.yacy.search.schema.WebgraphSchema;
  * Handling of queries to configured remote OpenSearch systems.
  */
 public class FederateSearchManager {
+	
+	/** Logger for this class */
+	private static final ConcurrentLog LOG = new ConcurrentLog(FederateSearchManager.class.getName());
 
 	/** Delay between connects (in ms) */
     private final int accessDelay = 15000;
@@ -121,7 +124,7 @@ public class FederateSearchManager {
                                     conlist.add(sfc);
                                 }
                             } else {
-                                ConcurrentLog.config("FederateSearchManager", "Error in configuration of: " + url);
+                                LOG.config("Error in configuration of: " + url);
                             }
                         } else { // handle opensearch url template
                             OpenSearchConnector osc = new OpenSearchConnector(url);
@@ -131,8 +134,8 @@ public class FederateSearchManager {
                         }
                     }
                 }
-            } catch (IOException ex) {
-                ConcurrentLog.logException(ex);
+            } catch (final IOException ex) {
+            	LOG.config("Unexpected error when reading configuration file : " + this.confFile, ex);
             }
         }
         manager = this; // reference for static access via .getManager()
@@ -257,12 +260,12 @@ public class FederateSearchManager {
                         }
                     }
                 } catch (final IOException ex) {
-                    ConcurrentLog.warn("FederateSearchManager", "config file write error");
+                    LOG.warn("config file write error");
                 }
                 return true;
             }
         } catch (final IOException e1) {
-            ConcurrentLog.logException(e1);
+        	LOG.severe("Unexpected error when writing configuration file : " + confFile, e1);
             return false;
         }
         return false;
@@ -288,7 +291,7 @@ public class FederateSearchManager {
         	try {
 				connectorURL = new MultiProtocolURL(fsc.baseurl);
 			} catch (MalformedURLException e) {
-				ConcurrentLog.warn("FederateSearchManager", "Malformed connector URL : " + fsc.baseurl);
+				LOG.warn("Malformed connector URL : " + fsc.baseurl);
 				continue;
 			}
         	RobotsTxtEntry robotsEntry = null;
@@ -310,8 +313,7 @@ public class FederateSearchManager {
                     // also check robots.txt exclusion
     				retset.add(fsc);
     			} else {
-    				ConcurrentLog.warn("FederateSearchManager",
-    						"Connector URL is disallowed by robots.txt : " + fsc.baseurl);
+    				LOG.warn("Connector URL is disallowed by robots.txt : " + fsc.baseurl);
     			}
             }
 
@@ -333,7 +335,7 @@ public class FederateSearchManager {
         }
         // check if needed Solr fields are available (selected)
         if (!sb.index.fulltext().useWebgraph()) {
-            ConcurrentLog.severe("FederateSearchManager", "Error on connecting to embedded Solr webgraph index");
+            LOG.severe("Error on connecting to embedded Solr webgraph index");
             return false;
         }
         final SolrConnector connector = sb.index.fulltext().getWebgraphConnector();
@@ -341,7 +343,7 @@ public class FederateSearchManager {
                 && (sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_protocol_s.name()) && sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.target_urlstub_s.name()))
                 && sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_WEBGRAPH, false);
         if (!metafieldavailable) {
-            ConcurrentLog.warn("FederateSearchManager", "webgraph option and webgraph Schema fields target_rel_s, target_protocol_s and target_urlstub_s must be switched on");
+            LOG.warn("webgraph option and webgraph Schema fields target_rel_s, target_protocol_s and target_urlstub_s must be switched on");
             return false;
         }
         // the solr search
@@ -354,12 +356,12 @@ public class FederateSearchManager {
             SolrDocumentList docList = connector.getDocumentListByQuery(webgraphquerystr, null, 0, 1, webgraphqueryfields);
             numfound = docList.getNumFound();
             if (numfound == 0) {
-                ConcurrentLog.info("FederateSearchManager", "no results found, abort discover job");
+                LOG.info("no results found, abort discover job");
                 return true;
             }
-            ConcurrentLog.info("FederateSearchManager", "start checking " + Long.toString(numfound) + " found index results");
+            LOG.info("start checking " + Long.toString(numfound) + " found index results");
         } catch (final IOException ex) {
-            ConcurrentLog.logException(ex);
+        	LOG.severe("Error on Solr webgraph core query", ex);
             return false;
         }
 
@@ -375,12 +377,12 @@ public class FederateSearchManager {
                     int loopnr = 0;
                     Set<String> dblmem = new HashSet<String>(); // temp memory for already checked url
                     while (doloop) {
-                        ConcurrentLog.info("FederateSearchManager", "start Solr query loop at " + Integer.toString(loopnr * 20) + " of " + Long.toString(numfound));
+                        LOG.info("start Solr query loop at " + Integer.toString(loopnr * 20) + " of " + Long.toString(numfound));
                         SolrDocumentList docList = connector.getDocumentListByQuery(webgraphquerystr, null, loopnr * 20, 20, webgraphqueryfields); // check chunk of 20 result documents
                         loopnr++;
                         if (stoptime < System.currentTimeMillis()) {// stop after max 1h
                             doloop = false;
-                            ConcurrentLog.info("FederateSearchManager", "long running discover task aborted");
+                            LOG.info("long running discover task aborted");
                         }
                         if (docList != null && docList.size() > 0) {
                             Iterator<SolrDocument> docidx = docList.iterator();
@@ -392,7 +394,7 @@ public class FederateSearchManager {
                                 try {
                                     url = new URL(hrefurltxt);
                                 } catch (final MalformedURLException ex) {
-                                	ConcurrentLog.warn("FederateSearchManager", "OpenSearch description URL is malformed : " + hrefurltxt);
+                                	LOG.warn("OpenSearch description URL is malformed : " + hrefurltxt);
                                 	continue;
                                 }
                                 //TODO: check Blacklist
@@ -405,7 +407,7 @@ public class FederateSearchManager {
                                        	try {
                                        		templateURL = new MultiProtocolURL(os.getRSSorAtomUrl());
                                        	} catch (final MalformedURLException ex) {
-                                           	ConcurrentLog.warn("FederateSearchManager", "OpenSearch description URL is malformed : " + hrefurltxt);
+                                           	LOG.warn("OpenSearch description URL is malformed : " + hrefurltxt);
                                            	continue;
                                         }
                                        	if(sb.robots != null) {
@@ -413,14 +415,14 @@ public class FederateSearchManager {
                                        	}
 
                                    		if(robotsEntry != null && robotsEntry.isDisallowed(templateURL)) {
-                                   			ConcurrentLog.info("FederateSearchManager", "OpenSearch description template URL is disallowed by robots.xt");
+                                   			LOG.info("OpenSearch description template URL is disallowed by robots.xt");
                                    		} else {
                                    			// add found system to config file
                                             addOpenSearchTarget(os.getShortName(), os.getRSSorAtomUrl(), false, os.getItem("LongName"));
-                                            ConcurrentLog.info("FederateSearchManager", "added " + os.getShortName() + " " + hrefurltxt);
+                                            LOG.info("added " + os.getShortName() + " " + hrefurltxt);
                                     	}
                                     } else {
-                                    	ConcurrentLog.info("FederateSearchManager", "osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
+                                    	LOG.info("osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
                                     }
                                 }
                             }
@@ -428,9 +430,9 @@ public class FederateSearchManager {
                             doloop = false;
                         }
                     }
-                    ConcurrentLog.info("FederateSearchManager", "finisched Solr query (checked " + Integer.toString(dblmem.size()) + " unique opensearchdescription links found in " + Long.toString(numfound) + " results)");
+                    LOG.info("finisched Solr query (checked " + Integer.toString(dblmem.size()) + " unique opensearchdescription links found in " + Long.toString(numfound) + " results)");
                 } catch (final IOException ex) {
-                    ConcurrentLog.logException(ex);
+                	LOG.severe("Unexpected error", ex);
                 }
             }
         };
@@ -467,7 +469,7 @@ public class FederateSearchManager {
                                         conlist.add(sfc);
                                     }
                                 } else {
-                                    ConcurrentLog.config("FederateSearchManager", "Init error in configuration of: " + url);
+                                    LOG.config("Init error in configuration of: " + url);
                                 }
                             } else { // handle opensearch url template
                                 OpenSearchConnector osd = new OpenSearchConnector(url);
@@ -478,8 +480,8 @@ public class FederateSearchManager {
                         }
                     }
                 }
-            } catch (IOException ex) {
-                ConcurrentLog.logException(ex);
+            } catch (final IOException ex) {
+            	LOG.config("Unexpected error when reading configuration file : " + cfgFileName);
             }
         }
         return true;
