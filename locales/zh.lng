@@ -45,7 +45,7 @@ Remote Search Log==远端搜索日志
 #Total:==Total:
 Success:==成功:
 Remote Search Host Tracker==远端搜索主机跟踪器
-This is a list of searches that had been requested from this' peer search interface==此列表显示从远端节点所进行的搜索
+This is a list of searches that had been requested from this' peer search interface==此列表显示来自本节点搜索界面发出请求的搜索
 Showing #[num]# entries from a total of #[total]# requests.==显示 #[num]# 条目,共 #[total]# 个请求.
 Requesting Host==请求主机
 Peer Name==节点名称
@@ -63,7 +63,7 @@ Search Word Hashes==搜索字哈希值
 Count</td>==计数</td>
 Queries Per Last Hour==查询/小时
 Access Dates==访问日期
-This is a list of searches that had been requested from remote peer search interface==此列表显示从远端节点所进行的搜索. 
+This is a list of searches that had been requested from remote peer search interface==此列表显示来自远端节点搜索界面发出请求的搜索. 
 This is a list of requests (max. 1000) to the local http server within the last hour==这是最近一小时内本地http服务器的请求列表(最多1000个)
 #-----------------------------
 
@@ -1507,7 +1507,7 @@ No more that two pages are loaded from the same host in one second (not more tha
 A second crawl for a different host increases the throughput to a maximum of 240 documents per minute since the crawler balances the load over all hosts.==对于不同主机的第二次爬取, 会上升到每分钟最多240个文件, 因为爬虫会自动平衡所有主机的负载.
 >High Speed Crawling<==>高速爬取<
 A 'shallow crawl' which is not limited to a single host (or site)==当目标主机很多时, 用于多个主机(或站点)的'浅爬取'方式,
-can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.==会增加每秒页面数(ppm).
+can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.==会增加每分钟页面数(ppm).
 This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a> servlet.==对应设置<a href="CrawlStartExpert.html">专家模式起始爬取</a>选项.
 >Scheduler Steering<==>定时器向导<
 The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering</a>.==可以使用<a href="Table_API_p.html">API向导</a>改变或删除爬取定时器.
