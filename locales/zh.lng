@@ -2839,30 +2839,30 @@ Select a profile:==选择配置文件:
 #---------------------------
 Remote Crawl Configuration==远端爬取配置
 >Remote Crawler<==>远端爬虫<
-The remote crawler is a process that requests urls from other peers.==远端爬虫是一个处理来自其他节点链接请求的进程.
+The remote crawler is a process that requests urls from other peers.==远端爬虫是一个进程, 该进程可用于处理来自其他节点的地址.
 Peers offer remote-crawl urls if the flag 'Do Remote Indexing'==如果选中了'进行远端索引', 则节点在开始爬取时
 is switched on when a crawl is started.==能够进行远端爬取.
 Remote Crawler Configuration==远端爬虫配置
+Your peer cannot accept remote crawls because you need senior or principal peer status for that!==您的节点无法接受远端爬取, 因为您需要高级或骨干节点状态！
 >Accept Remote Crawl Requests<==>接受远端爬取请求<
 Perform web indexing upon request of another peer.==收到另一节点请求时进行网页索引.
-Load with a maximum of==最多每分钟读取
+Load with a maximum of==最多帮助爬取
 pages per minute==页面/分钟
 "Save"=="保存"
 Crawl results will appear in the==爬取会出现在
->Crawl Result Monitor<==>爬取结果监视<
-Peers offering remote crawl URLs==提供远端爬取的节点
-If the remote crawl option is switched on, then this peer will load URLs from the following remote peers:==如果选中了远端爬取选项, 则本机节点会从以下远端节点读取链接:
-#>Name<==>Name<
-#>Remote<br/>Crawl<==>Remote<br/>Crawl<
-#>Release/<br/>SVN<==>Version/<br/>SVN<
->PPM<==>页面/分钟(PPM)<
->QPH<==>请求/小时(QPH)<
+>Crawl Result Monitor<==>爬取结果监视器<
+Peers offering remote crawl URLs==提供远端爬取地址的节点
+If the remote crawl option is switched on, then this peer will load URLs from the following remote peers:==如果勾选了远端爬取选项, 则本机节点会帮助爬取来自远端节点提供的链接:
+>Name<==>名字<
+URLs for<br/>Remote<br/>Crawl==来自远端爬取的地址
+>Release<==>版本号<
+>PPM<==>PPM<
+>QPH<==>QPH<
 >Last<br/>Seen<==>上次<br/>出现<
 >UTC</strong><br/>Offset<==>UTC</strong><br/>时区<
-#>Uptime<==>Uptime<
-#>Links<==>Links<
-#>RWIs<==>RWIs<
->Age<==>寿命<
+>Uptime<==>在线时长<
+>Links<==>链接<
+>Age<==>年龄<
 #-----------------------------
 
 #File: ServerScannerList.html
