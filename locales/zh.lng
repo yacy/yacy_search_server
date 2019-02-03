@@ -1191,7 +1191,7 @@ This is the list of web pages that this peer initiated to crawl,==这是此节�
 but had been crawled by <em>other</em> peers.==但它们早已被 <em>其他</em> 节点爬取了.
 This is the 'mirror'-case of process (6).==这是进程(6)的'镜像'事件.
 <em>Use Case:</em> You get entries here, if you start a local crawl on the '<a href="CrawlStartExpert.html">Advanced Crawler</a>' page and check the==<em>用法:</em> 你可在此获得条目, 当你在 '<a href="CrawlStartExpert.html">高级爬虫页面</a> 上启动本地爬取并勾选
-'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.=='执行远端索引'-标志时, 这需要你确保在 '<a href="RemoteCrawl_p.html">远端爬取/a>' 页面中勾选了'接受远端爬取请求'-标志.
+'Do Remote Indexing'-flag, and if you checked the 'Accept Remote Crawl Requests'-flag on the '<a href="RemoteCrawl_p.html">Remote Crawling</a>' page.=='执行远端索引'-标志时, 这需要你确保在 '<a href="RemoteCrawl_p.html">远端爬取</a>' 页面中勾选了'接受远端爬取请求'-标志.
 Every page that a remote peer indexes upon this peer's request is reported back and can be monitored here.==远端节点根据此节点的请求编制索引的每个页面都会被报告回来，并且可以在此处进行监视.
 (2) Results for Result of Search Queries==(2) 搜索查询结果报告页
 This index transfer was initiated by your peer by doing a search query.==通过搜索, 此索引转移能被发起.
