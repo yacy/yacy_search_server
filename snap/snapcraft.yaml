@@ -33,6 +33,11 @@ apps:
     # Interfaces authorizations requirements
     # network - to allow requesting the ConfigAccounts_p HTTP API when the server is running
     plugs: [network]
+  stop: # stop the YaCy server
+    command: sh "$SNAP/yacy/addon/snap/snapStopYACY.sh"
+    # Interfaces authorizations requirements
+    # network - to allow requesting the Steering.html API
+    plugs: [network]
 
 parts:
   yacy-search:
