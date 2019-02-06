@@ -636,7 +636,7 @@ disabled during crawling==关闭 在爬取时
 disabled during indexing==关闭 在索引时
 >Index Receive==>接收索引
 Accept remote Index Transmissions==接受远端索引传递
-This works only if you have a senior peer. The DHT-rules do not work without this function==仅当您拥有更上级节点时有效. 如果未设置此项, DHT规则不生效
+This works only if you have a senior peer. The DHT-rules do not work without this function==仅当您是高级节点时有效. 如果未设置此项, DHT规则不会工作
 >reject==>拒绝
 accept transmitted URLs that match your blacklist==接受 与您黑名单匹配的传来的地址
 >allow==>允许
