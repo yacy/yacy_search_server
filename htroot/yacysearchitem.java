@@ -31,10 +31,13 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
@@ -461,18 +464,12 @@ public class yacysearchitem {
                 final String resultUrlstring = ms.url().toNormalform(true);
                 final String target = sb.getConfig(resultUrlstring.matches(target_special_pattern) ? SwitchboardConstants.SEARCH_TARGET_SPECIAL : SwitchboardConstants.SEARCH_TARGET_DEFAULT, "_self");
                 prop.putHTML("content_item_href", resultUrlstring);
-                final String mediaType = ms.mime();
-				if (extendedSearchRights && mediaType != null && mediaType.startsWith("audio/")) {
-					/*
-					 * Display HTML5 embedded audio only :
-					 * - when content-type is known to be audio (each browser has its own set of supported audio subtypes, 
-					 *  so the browser will then handle itself eventual report about unsupported media format)
-					 * - to authenticated users with extended search rights to prevent any media redistribution issue
-					 */
-                    prop.put("content_item_embed", true);
-                    prop.putHTML("content_item_embed_href", resultUrlstring);
-                    prop.putHTML("content_item_embed_mediaType", mediaType);	
-                } else {
+                if(theSearch.query.contentdom == ContentDomain.AUDIO && extendedSearchRights) {
+            		/*
+            		 * Display HTML5 embedded audio only to authenticated users with extended search rights to prevent any media redistribution issue
+            		 */
+            		processEmbedAudio(prop, theSearch, ms);
+                }else {
                 	prop.put("content_item_embed", false);
                 }
                 prop.put("content_item_noreferrer", noreferrer ? 1 : 0);
@@ -489,6 +486,126 @@ public class yacysearchitem {
 
         return prop;
     }
+
+	/**
+	 * 
+	 * @param prop      the target properties
+	 * @param theSearch the search event
+	 * @param result    a result entry
+	 */
+	private static void processEmbedAudio(final serverObjects prop, final SearchEvent theSearch,
+			final URIMetadataNode result) {
+		final String mediaType = result.mime();
+
+		if (mediaType != null && mediaType.startsWith("audio/")) {
+			/*
+			 * content-type is known to be audio : each browser has its own set of supported
+			 * audio subtypes, so the browser will then handle itself eventual report about
+			 * unsupported media format
+			 */
+			prop.put("content_item_embed", true);
+			prop.put("content_item_embed_list", false);
+			prop.put("content_item_embed_audioSources", 1);
+			appendEmbeddedAudio(result, result.url(), prop, "content_item_embed_audioSources_0");
+			prop.put("content_item_embed_audioSources_0_list", false);
+		} else if (result.laudio() > 0 && !theSearch.query.isStrictContentDom()) {
+			/*
+			 * The result media type is not audio, but there are some links to audio
+			 * resources : render a limited list of embedded audio elements
+			 */
+			final TreeSet<MultiProtocolURL> audioLinks = new TreeSet<>(
+					Comparator.comparing(MultiProtocolURL::getHost).thenComparing(MultiProtocolURL::getFile));
+			final int firstAudioLinksLimit = 3;
+			final int secondAudioLinksLimit = 50;
+
+			filterAudioLinks(URIMetadataNode.getLinks(result, false), audioLinks, result.laudio());
+			filterAudioLinks(URIMetadataNode.getLinks(result, true), audioLinks, result.laudio());
+
+			if (!audioLinks.isEmpty()) {
+				prop.put("content_item_embed", true);
+				final boolean hasMoreThanOne = audioLinks.size() > 1;
+				prop.put("content_item_embed_list", hasMoreThanOne);
+				prop.put("content_item_embed_audioSources", Math.min(audioLinks.size(), firstAudioLinksLimit));
+				final Iterator<MultiProtocolURL> linksIter = audioLinks.iterator();
+				for (int i = 0; linksIter.hasNext() && i < firstAudioLinksLimit; i++) {
+					appendEmbeddedAudio(result, linksIter.next(), prop, "content_item_embed_audioSources_" + i);
+					prop.put("content_item_embed_audioSources_" + i + "_list", hasMoreThanOne);
+				}
+				if (audioLinks.size() > firstAudioLinksLimit) {
+					prop.put("content_item_embed_moreAudios", true);
+					prop.put("content_item_embed_moreAudios_firstLimit", firstAudioLinksLimit);
+					prop.put("content_item_embed_moreAudios_hiddenCount",
+							String.valueOf(audioLinks.size() - firstAudioLinksLimit));
+					prop.put("content_item_embed_moreAudios_expandableCount",
+							String.valueOf(Math.min(audioLinks.size(), secondAudioLinksLimit) - firstAudioLinksLimit));
+					prop.put("content_item_embed_moreAudios_urlhash", ASCII.String(result.hash()));
+
+					prop.put("content_item_embed_moreAudios_audioSources",
+							Math.min(audioLinks.size(), secondAudioLinksLimit) - firstAudioLinksLimit);
+					for (int i = 0; linksIter.hasNext() && i < (secondAudioLinksLimit - firstAudioLinksLimit); i++) {
+						appendEmbeddedAudio(result, linksIter.next(), prop,
+								"content_item_embed_moreAudios_audioSources_" + i);
+					}
+				} else {
+					prop.put("content_item_embed_moreAudios", false);
+				}
+				prop.put("content_item_embed_moreAudios_evenMore", audioLinks.size() > secondAudioLinksLimit);
+				if (audioLinks.size() > secondAudioLinksLimit) {
+					prop.put("content_item_embed_moreAudios_evenMore_count",
+							String.valueOf(audioLinks.size() - secondAudioLinksLimit));
+					prop.put("content_item_embed_moreAudios_evenMore_urlhash", ASCII.String(result.hash()));
+				}
+			} else {
+				prop.put("content_item_embed", false);
+			}
+		}
+	}
+
+    /**
+     * Write the properties of an embedded audio element to prop. All parameters must not be null.
+     * @param mainResult the result entry to which the audio link belongs
+     * @param audioLink an audio link URL
+     * @param prop the target properties
+     * @param propPrefix the prefix to use when appending prop
+     */
+	private static void appendEmbeddedAudio(final URIMetadataNode mainResult,
+			final MultiProtocolURL audioLink, final serverObjects prop, final String propPrefix) {
+		prop.putHTML(propPrefix + "_href", audioLink.toString());
+		
+		/* Add a title to help user distinguish embedded elements of the list */
+		final String title;
+		if(audioLink.getHost().equals(mainResult.url().getHost())) {
+			/* Inbound link : the file name is sufficient */
+			title = shorten(audioLink.getFileName(), MAX_NAME_LENGTH);
+		} else {
+			/* Outbound link : it may help to know where the file is hosted without having to inspect the html element */
+			title = nxTools.shortenURLString(audioLink.toString(), MAX_URL_LENGTH);
+		}
+		prop.putHTML(propPrefix+ "_title", title);
+	}
+    
+	/**
+	 * Add to the target set, valid URLs from the iterator that are classified as
+	 * audio from their file name extension.
+	 * 
+	 * @param linksIter     an iterator on URL strings
+	 * @param target        the target set to fill
+	 * @param targetMaxSize the maximum target set size
+	 */
+	protected static void filterAudioLinks(final Iterator<String> linksIter, final Set<MultiProtocolURL> target,
+			final int targetMaxSize) {
+		while (linksIter.hasNext() && target.size() < targetMaxSize) {
+			final String linkStr = linksIter.next();
+			try {
+				final MultiProtocolURL url = new MultiProtocolURL(linkStr);
+				if (Classification.isAudioExtension(MultiProtocolURL.getFileExtension(url.getFileName()))) {
+					target.add(url);
+				}
+			} catch (final MalformedURLException ignored) {
+				/* Continue to next link */
+			}
+		}
+	}
 
 	/**
 	 * Tries to retrieve favicon url from solr result document, or generates

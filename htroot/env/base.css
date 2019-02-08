@@ -1110,6 +1110,22 @@ div#tagcloud {
 	color: #ff8c00;
 }
 
+.embeddedAudios {
+	/* Remove bootstrap ul bottom margin so that there is no interval with the expandable list */
+	margin-bottom: 0px;
+}
+
+/* Button to expand/collapse audio results beyond the initial number of elements display limit */
+.expandAudiosBtn[aria-expanded="true"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-left class */
+	content: "\e079\e079";
+}
+
+.expandAudiosBtn[aria-expanded="false"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-right class */
+	content: "\e080\e080";
+}
+
 /******* yacysearch.html end ***********/ 
  
 /******* yacysearchtrailer.html ********** 

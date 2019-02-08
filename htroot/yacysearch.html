@@ -29,12 +29,7 @@
     	
     #(resultTable)#::::
     	#(embed)#::
-    	/* Show the overall audio play control buttons only when JavaScript is enabled as they are useless without it */
-    	var audioElems = document.getElementsByTagName("audio");
-    	var audioControls = document.getElementById("audioControls");
-        if(audioElems != null &&  audioElems.length > 0 && audioControls != null && audioControls.className.indexOf("hidden") >= 0) {
-        	audioControls.className = audioControls.className.replace("hidden", "");
-        }
+    	showJSAudioControls();
 		#(/embed)#
     #(/resultTable)#
     	

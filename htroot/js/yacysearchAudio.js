@@ -20,6 +20,24 @@
 /* Functions dedicated to control playing of YaCy audio search results */
 
 /**
+ * Show elements that are only useful when JavaScript is enabled
+ */
+function showJSAudioControls() {
+	var audioElems = document.getElementsByTagName("audio");
+	var audioControls = document.getElementById("audioControls");
+    if(audioElems != null &&  audioElems.length > 0 && audioControls != null && audioControls.className.indexOf("hidden") >= 0) {
+    	audioControls.className = audioControls.className.replace("hidden", "");
+    }
+    
+    var expandAudioButtons = document.getElementsByClassName("expandAudiosBtn");
+    if(expandAudioButtons != null) {
+    	for(var i = 0; i < expandAudioButtons.length; i++) {
+    		expandAudioButtons[i].className = expandAudioButtons[i].className.replace("hidden", "");
+    	}
+    }
+}
+
+/**
  * Handle embedded audio result load error.
  * 
  * @param event
@@ -28,11 +46,15 @@
 function handleAudioLoadError(event) {
 	if (event != null && event.target != null) {
 		/* Fill the title attribute to provide some feedback about the error without need for looking at the console */
+		var titleAddition;
 		if (event.target.error != null && event.target.error.message) {
-			event.target.title = "Cannot play ("
+			titleAddition = " - Cannot play ("
 					+ event.target.error.message + ")";
 		} else {
-			event.target.title = "Cannot play";
+			titleAddition = " - Cannot play";
+		}
+		if(event.target.title == null || event.target.title.indexOf(titleAddition) < 0) {
+			event.target.title += titleAddition;
 		}
 		
 		/* Apply CSS class marking error for visual feedback*/
@@ -165,7 +187,7 @@ function playAllNext(playerElem) {
 			while (nextTrack < audioElems.length) {
 				var audioElem = audioElems[nextTrack];
 				if (audioElem != null && audioElem.error == null
-						&& audioElem.play) {
+						&& audioElem.play && audioElem.className.indexOf("hidden") < 0) {
 					if(audioElem.currentTime > 0) {
 						audioElem.currentTime = 0;
 					}
@@ -177,8 +199,23 @@ function playAllNext(playerElem) {
 				/* Go to the next element when not playable */
 				nextTrack++;
 			}
+			if(nextTrack >= audioElems.length) {
+				/* No other result to play */
+				if (currentTrack >= 0 && currentTrack < audioElems.length
+						&& !audioElems[currentTrack].paused
+						&& audioElems[currentTrack].pause) {
+					audioElems[currentTrack].pause();
+				}
+				playerElem.setAttribute("data-current-track", -1);
+				updatePlayAllButton(false);
+			}
 		} else {
 			/* No other result to play */
+			if (currentTrack >= 0 && currentTrack < audioElems.length
+					&& !audioElems[currentTrack].paused
+					&& audioElems[currentTrack].pause) {
+				audioElems[currentTrack].pause();
+			}
 			playerElem.setAttribute("data-current-track", -1);
 			updatePlayAllButton(false);
 		}
@@ -224,7 +261,7 @@ function handlePlayAllBtnClick() {
 	var audioElems = document.getElementsByTagName("audio");
 	var playerElem = document.getElementById("audioControls");
 	var playAllIcon = document.getElementById("playAllIcon");
-	if (playerElem != null && audioElems != null) {
+	if (playerElem != null && audioElems != null && playAllIcon != null) {
 		if (playAllIcon.className == "glyphicon glyphicon-play" && audioElems.length > 0) {
 			var currentTrack = parseInt(playerElem
 					.getAttribute("data-current-track"));
@@ -243,7 +280,7 @@ function handlePlayAllBtnClick() {
 			while (currentTrack < audioElems.length) {
 				var currentAudioElem = audioElems[currentTrack];
 				if (currentAudioElem != null && currentAudioElem.error == null
-						&& currentAudioElem.play) {
+						&& currentAudioElem.play && currentAudioElem.className.indexOf("hidden") < 0) {
 					currentAudioElem.play();
 					updatePlayAllButton(true);
 					break;
@@ -290,5 +327,81 @@ function handleStopAllBtnClick() {
 	var playerElem = document.getElementById("audioControls");
 	if (playerElem != null) {
 		playerElem.setAttribute("data-current-track", -1);
+	}
+}
+
+/**
+ * Toggle visibility on a list of audio elements beyond the initial limit of elements to display.
+ * @param {HTMLButtonElement} button the button used to expand the audio elements
+ * @param {String} expandableAudiosId the id of the container of audio elements which visibility has to be toggled
+ * @param {String} hiddenCountId the id of the element containing the number of hidden elements when expandable audios are collapsed
+ * @param {String} evenMoreCountId the id of the eventual element containing the number of hidden elements remaining when audios are expanded
+ */
+function toggleExpandableAudios(button, expandableAudiosId, hiddenCountId, evenMoreCountId) {
+	var expandableAudiosContainer = document.getElementById(expandableAudiosId);
+	var hiddenCountElem = document.getElementById(hiddenCountId);
+	var evenMoreElem = document.getElementById(evenMoreCountId);
+	if(button != null && expandableAudiosContainer != null) {
+		var childrenAudioElems = expandableAudiosContainer.getElementsByTagName("audio");
+		var playerElem = document.getElementById("audioControls");
+		var playAllIcon = document.getElementById("playAllIcon");
+		var currentPlayAllTrack = playerElem != null ? parseInt(playerElem
+				.getAttribute("data-current-track")) : -1;
+		if(button.getAttribute("aria-expanded") == "true") {
+			var currentPlayAllAudioElem = null;
+			if(!isNaN(currentPlayAllTrack) && currentPlayAllTrack >= 0) {
+				/* Currently playing all audio results */
+				var audioElems = document.getElementsByTagName("audio");
+				if(audioElems != null && audioElems.length > currentPlayAllTrack) {
+					currentPlayAllAudioElem = audioElems[currentPlayAllTrack];
+				}
+			}
+			/* Additionnaly we modify the aria-expanded state for improved accessiblity */
+			button.setAttribute("aria-expanded", "false");
+			button.title = button.getAttribute("data-title-collapsed");
+			expandableAudiosContainer.className += " hidden";
+			if(hiddenCountElem != null) {
+				hiddenCountElem.className = hiddenCountElem.className.replace("hidden", "");
+			}
+			if(evenMoreElem != null) {
+				evenMoreElem.className += " hidden";
+			}
+			var hidingPlayAll = false;
+			for(var i = 0; i < childrenAudioElems.length; i++) {
+				var audioElem = childrenAudioElems[i];
+				if(currentPlayAllAudioElem == audioElem) {
+					/* Playing all results, and the currently playing element will be hidden*/
+					hidingPlayAll = true;
+				} else if (audioElem.pause && !audioElem.paused) {
+					/* Pause this as it will be hidden */
+					audioElem.pause();
+				}
+				audioElem.className += " hidden";
+			}
+			if(hidingPlayAll) {
+				if (playAllIcon.className == "glyphicon glyphicon-play") {
+					/* Stop playing all */
+					updatePlayAllButton(false);
+					playerElem.setAttribute("data-current-track", -1);
+				} else {
+					/* Continue playing all to an element that is not hidden */
+					playAllNext(playerElem);
+				}
+			}
+		} else {
+			/* Additionnaly we modify the aria-expanded state for improved accessiblity */
+			button.setAttribute("aria-expanded", "true");
+			button.title = button.getAttribute("data-title-expanded");
+			expandableAudiosContainer.className = expandableAudiosContainer.className.replace("hidden", "");
+			if(hiddenCountElem != null) {
+				hiddenCountElem.className += " hidden";
+			}
+			if(evenMoreElem != null) {
+				evenMoreElem.className = evenMoreElem.className.replace("hidden", "");
+			}
+			for(var j = 0; j < childrenAudioElems.length; j++) {
+				childrenAudioElems[j].className = childrenAudioElems[j].className.replace("hidden", "");
+			}
+		}
 	}
 }

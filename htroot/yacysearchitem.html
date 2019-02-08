@@ -65,13 +65,48 @@
   <tr class="#(col)#TableCellLight::TableCellDark#(/col)#">
   	<td>#[name]#</td>
   	<td><a href="#[href]#" target="#[target]#" #(noreferrer)#::rel="noreferrer"#(/noreferrer)#>#[hrefshort]#</a>
-  	<td class="text-center">#(embed)#::<audio src="#[href]#"
-			preload="none" controls="controls"
-			onplaying="handleAudioPlaying(event)"
-			onpause="handleAudioPause(event)"
-			onerror="handleAudioLoadError(event)"
-			onended="handleAudioEnded(event)">Not supported
-		</audio>#(/embed)#
+  	<td class="text-center">#(embed)#::#(list)#::<ul class="embeddedAudios list-unstyled">#(/list)#
+  		#{audioSources}#
+  			#(list)#::<li>#(/list)#
+  			<audio src="#[href]#"
+  				title="#[title]#"
+				preload="none" controls="controls"
+				onplaying="handleAudioPlaying(event)"
+				onpause="handleAudioPause(event)"
+				onerror="handleAudioLoadError(event)"
+				onended="handleAudioEnded(event)">Not supported
+			</audio>
+			#(list)#::</li>#(/list)#
+		#{/audioSources}#
+		#(list)#::</ul>#(/list)#
+  		#(moreAudios)#::
+  			<ul id="expandableAudios_#[urlhash]#" class="list-unstyled hidden">
+			#{audioSources}#<li>
+  			<audio src="#[href]#"
+  				title="#[title]#"
+  				class="hidden"
+				preload="none" controls="controls"
+				onplaying="handleAudioPlaying(event)"
+				onpause="handleAudioPause(event)"
+				onerror="handleAudioLoadError(event)"
+				onended="handleAudioEnded(event)">Not supported
+			</audio></li>#{/audioSources}#
+			</ul>
+			<ul class="list-unstyled">
+				<li>
+					<span id="hiddenCount_#[urlhash]#">#[hiddenCount]# more...</span>
+  					<button class="expandAudiosBtn btn btn-default btn-xs hidden" type="button"
+  						aria-controls="expandableAudios_#[urlhash]#" aria-expanded="false" 
+  						title="Show #[expandableCount]# more" 
+  						data-title-collapsed="Show #[expandableCount]# more" 
+  						data-title-expanded="Show only the first #[firstLimit]#"
+  						onclick="toggleExpandableAudios(this, 'expandableAudios_#[urlhash]#', 'hiddenCount_#[urlhash]#', 'evenMoreCount_#[urlhash]#')">
+  						<span class="glyphicon"></span>
+  					</button>
+					#(evenMore)#<span id="evenMoreCount_#[urlhash]#" class="hidden">#[count]# more...</span>#(/evenMore)#
+				</li>
+			</ul>
+  		#(/moreAudios)##(/embed)#
 	</td>
   </tr>#(/item)#
   ::
