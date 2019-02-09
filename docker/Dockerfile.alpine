@@ -62,7 +62,7 @@ RUN apk update && \
 	curl -fSL https://www.apache.org/dist/ant/KEYS | gpg --import && \
 	gpg --verify apache-ant-${ANT_VERSION}-bin.tar.gz.asc && \
 	tar xzf apache-ant-${ANT_VERSION}-bin.tar.gz && \
-	mkdir /opt && \
+	mkdir -p /opt && \
 	mv apache-ant-${ANT_VERSION} /opt/ant && \
 	rm -f apache-ant-${ANT_VERSION}-bin.tar.gz && \
 	apk del gnupg
