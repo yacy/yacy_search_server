@@ -4496,8 +4496,7 @@ e="Search"==e="搜索"
 #---------------------------
 # Do not translate id="search" and rel="search" which only have technical html semantics
 Search Page==搜索页面
-This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.==此搜索结果能以RSS/<a href="http://www.opensearch.org">opensearch</a>形式表示.
-"search"=="搜索"
+This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.==此搜索结果能以RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a>形式表示.
 "search again"=="再次搜索"
 Illegal URL mask:==非法网址掩码:
 (not a valid regular expression), mask ignored.==(不是一个有效的正则表达式),掩码忽略.
