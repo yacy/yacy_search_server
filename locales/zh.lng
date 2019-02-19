@@ -608,6 +608,11 @@ might overwrite existing data if a file of the same name exists already.==, 旧�
 #---------------------------
 <html lang="en">==<html lang="zh">
 Network Configuration==网络设置
+No changes were made!==未作出任何改变!
+Accepted Changes==接受改变
+Inapplicable Setting Combination==设置未被应用
+For P2P operation, at least DHT distribution or DHT receive (or both) must be set. You have thus defined a Robinson configuration==关于P2P操作，必须至少勾选DHT分发或DHT接收（或两者）。 因此，您已被确定为漂流配置
+Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==P2P配置中的全局搜索仅在打开接受索引时才被允许。您已有P2P配置，但不被允许搜索其他节点。
 #Network and Domain Specification
 Network and Domain Specification==确定网络和域
 YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==Yacy能够以一群YaCy节点组成的计算网络或作为一个孤立节点运行.
@@ -628,7 +633,7 @@ or if you want your own separate search cluster with or without connection to th
 Enable 'Robinson Mode' for a completely independent search engine instance,==开启漂流模式获得完全独立的搜索引擎实例，
 without any data exchange between your peer and other peers.==且不会与其他节点有任何数据交换。
 #Peer-to-Peer Mode
-Peer-to-Peer Mode==点对点模式
+Peer-to-Peer Mode==P2P模式
 >Index Distribution==>索引分发
 This enables automated, DHT-ruled Index Transmission to other peers==自动向其他节点传递服从DHT规则的索引
 >enabled==>开启
@@ -673,9 +678,6 @@ certificates are not validated against trusted certificate authorities==证书�
 thus allowing YaCy peers to use self-signed certificates==从而允许YaCy节点使用自签名证书
 Note also that encryption of remote search queries is configured with a dedicated setting in the==另请注意，远端搜索查询加密的专用设置配置请使用
 page==页面
-No changes were made!==未作出任何改变!
-Accepted Changes==接受改变
-Inapplicable Setting Combination==设置未被应用
 #-----------------------------
 
 #File: ConfigParser_p.html
