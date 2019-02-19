@@ -727,15 +727,15 @@ Control whether media search results are as default strictly limited to indexed 
 (images, videos or applications specific)==(图片,视频或具体应用)
 or extended to pages including such medias (provide generally more results, but eventually less relevant).==或扩展到包括此类媒体的网页(通常提供更多结果,但相关性更弱)
 Remote results resorting==远端搜索结果排序
->On demand, server-side==>按需,服务器端
-Automated, with JavaScript in the browser==自动化,在浏览器中使用JavaScript
->for authenticated users only<==>仅限经过身份验证的用户<
+>On demand, server-side==>根据需要, 服务器侧
+Automated, with JavaScript in the browser==自动化, 基于嵌入浏览器的JavaScript代码
+>for authenticated users only<==>(仅限经过身份验证的用户)<
 Remote search encryption==远端搜索加密
 Prefer https for search queries on remote peers.==首选https用于远端节点上的搜索查询.
 When SSL/TLS is enabled on remote peers, https should be used to encrypt data exchanged with them when performing peer-to-peer searches.==在远端节点上启用SSL/TLS时,应使用https来加密在执行P2P搜索时与它们交换的数据.
 Please note that contrary to strict TLS, certificates are not validated against trusted certificate authorities (CA), thus allowing YaCy peers to use self-signed certificates.==请注意,与严格TLS相反,证书不会针对受信任的证书颁发机构(CA)进行验证,因此允许YaCy节点使用自签名证书.
 >Snippet Fetch Strategy==>摘要提取策略
-Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==使用此选项加快搜索结果!(使用CACHEONLY或FALSE关闭验证)
+Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==使用此选项加速搜索结果!(使用CACHEONLY或FALSE来关闭验证)
 NOCACHE: no use of web cache, load all snippets online==NOCACHE:不使用网络缓存,在线加载所有网页摘要
 IFFRESH: use the cache if the cache exists and is fresh otherwise load online==IFFRESH:如果缓存存在则使用最新的缓存,否则在线加载
 IFEXIST: use the cache if the cache exist or load online==IFEXIST:如果缓存存在则使用缓存,或在线加载
@@ -758,7 +758,7 @@ maximum allowed size in kbytes for each remote search result to be added to the 
 for example, a 1000kbytes limit might be useful if you are running YaCy with a low memory setup==例如,如果运行具有低内存设置的YaCy,则1000KB限制可能很有用
 Default Pop-Up Page<==默认弹出页面<
 Default maximum number of results per page==默认每页最大结果数
-Default index.html Page (by forwarder)==默认index.html(前者指定)
+Default index.html Page (by forwarder)==默认index.html页面(通过转发器)
 Target for Click on Search Results==点击搜索结果时
 "_blank" (new window)=="_blank" (新窗口)
 "_self" (same window)=="_self" (同一窗口)
