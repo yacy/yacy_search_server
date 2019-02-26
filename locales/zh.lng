@@ -542,8 +542,8 @@ Alternatively you may==或者你可以
 To find out more about OpenSearch see==要了解关于OpenSearch的更多信息，请参阅
 20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20个结果从远端系统中获取并同时加载,立即解析并创建索引.
 When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
-This means: right after the search request every page is loaded and every page that is linked on this page.==这意味着：在搜索请求之后，就开始加载每个页面上的链接。
-If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中“添加为全局爬取作业”，则要爬网的页面将被添加到全局爬取队列（远端YaCy节点可以爬取要爬取的页面）。
+This means: right after the search request every page is loaded and every page that is linked on this page.==这意味着：在搜索请求之后，就开始加载结果的每个页面及每个页面上的链接。
+If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中'添加为全球爬取作业'，则要爬取的页面将被添加到全球爬取队列中（其他远端YaCy节点可能会帮助爬取这些页面）。
 Default is to add the links to the local crawl queue (your peer crawls the linked pages).==默认是将链接添加到本地爬网队列（您的YaCy爬取链接的页面）。
 add as global crawl job==添加为全球爬取作业
 opensearch load external search result list from active systems below==opensearch从下面的活动系统加载外部搜索结果列表
@@ -1124,7 +1124,7 @@ Architecture (C) by==Architecture (C) by
 #---------------------------
 Crawl Check==爬取检查
 This pages gives you an analysis about the possible success for a web crawl on given addresses.==通过本页面，您可以分析在特定地址上进行网络爬取的可能性。
-List of possible crawl start URLs==可行的起始抓行网址列表
+List of possible crawl start URLs==可能的起始爬取地址列表
 "Check given urls"=="检查给定的网址"
 >Analysis<==>分析<
 >Access<==>访问<
