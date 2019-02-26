@@ -2637,28 +2637,38 @@ Performance Settings==性能设置
 refresh graph==刷新图表
 #Memory Settings
 Memory Settings==内存设置
-Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==<abbr title="Java Virtual Machine">JVM</abbr>内存设置
+Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==为<abbr title="Java Virtual Machine">JVM</abbr>保留的内存
 "Set"=="设置"
 #Resource Observer
-Resource Observer==资源查看
-Free space disk==空闲硬盘空间
-Used space disk==使用硬盘空间
-Steady-state minimum==稳态最小值
-Steady-state maximum==稳态最大值
-Disable crawls==停止爬取
-when free space is below==当空闲空间过低时
-when used space is over==当使用空间过高时
-Absolute minimum==绝对最小值
-Absolute maximum==绝对最大值
-Disable==关闭
->Autoregulate<==>自动调节<
-when absolute minimum limit has been reached==当达到绝对最小值时
-when absolute maximum limit has been reached==当达到绝对最大值时
-RAM==内存
+Resource Observer==资源查看器
 Memory state==内存状态
-Enough memory is available for proper operation==运行有足够的空间
-proper==合适
->Minimum required<==>最小要求<
+>proper<==>合适<
+>exhausted<==>耗尽<
+Reset state==重置状态
+Manually reset to 'proper' state==手动设置到'合适'状态
+Enough memory is available for proper operation.==有足够内存保证正常运行.
+Within the last eleven minutes, at least four operations have tried to request memory that would have reduced free space within the minimum required.==在过去的11分钟内，至少有四次操作尝试请求内存，这将减少所需的最低可用空间。
+Minimum required==最低要求
+Amount of memory (in Mebibytes) that should at least be free for proper operation==为保证正常运行的最低内存量（以MB为单位）
+Disable <abbr title="Distributed Hash Table">DHT</abbr>-in below.==当低于其值时，关闭<abbr title="Distributed Hash Table">DHT</abbr>输入.
+Free space disk==空闲硬盘量
+Steady-state minimum==稳态最小值
+Amount of space (in Mebibytes) that should be kept free as steady state==为保持稳定状态所需的空闲硬盘量（以MB为单位）
+Disable crawls when free space is below.==当空闲硬盘低于其值时，停止爬取。
+Absolute minimum==绝对最小值
+Amount of space (in Mebibytes) that should at least be kept free as hard limit==最小限制空闲硬盘量（以MB为单位）
+Disable <abbr title="Distributed Hash Table">DHT</abbr>-in when free space is below.==当空闲硬盘低于其值时，关闭<abbr title="Distributed Hash Table">DHT</abbr>输入。
+>Autoregulate<==>自动调节<
+when absolute minimum limit has been reached==当达到绝对最小限制值时
+Used space disk==已用硬盘量
+Steady-state maximum==稳态最大值
+Maximum amount of space (in Mebibytes) that should be used as steady state==为保持稳定状态最大可用的硬盘量（以MB为单位）
+Disable crawls when used space is over.==当使用硬盘高于其值时，停止爬取。
+Absolute maximum==绝对最大值
+Maximum amount of space (in Mebibytes) that should be used as hard limit==最大限制已用硬盘量（以MB为单位）
+Disable <abbr title="Distributed Hash Table">DHT</abbr>-in when used space is over.==当已用硬盘量超过其值时，关闭<abbr title="Distributed Hash Table">DHT</abbr>输入。
+when absolute maximum limit has been reached.==当达到绝对最大限制值时。
+RAM==内存
 free space==空闲空间
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==已接受改变. 在YaCy<strong>重启</strong>后生效
 restart now</a>==立即重启</a>
@@ -2676,7 +2686,6 @@ Below normal==低于普通
 Idle</option>==空闲</option>
 "Set new Priority"=="置为新优先级"
 Changes take effect after <strong>restart</strong> of YaCy==在YaCy<strong>重启</strong>后生效.
-Reset state==重置
 #Online Caution Settings
 Online Caution Settings==在线警告设置
 This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==这是代理被访问或者搜索完成后的一段爬取空闲时间.
