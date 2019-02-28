@@ -255,19 +255,7 @@ document.getElementById("Enter").innerHTML = "search again";
 #(resultTable)#::</table>::</table>#(/resultTable)#
 <!-- linklist end -->
 
-#(num-results)#
-	::
-	::
-	::
-	<span id="resNav" class="col-sm-12  col-md-12" style="display: inline;">
-		<ul id="paginationButtons" class="pagination hidden">
-			<li id="prevpage" class="disabled"><a title="Previous page" href="#">&laquo;</a></li>
-			<li class="active"><a href="#">1</a></li>
-			<li id="nextpage" class="disabled"><a title="Next page" href="#">&raquo;</a></li>
-		</ul>
-	</span>
-	::
-#(/num-results)#
+<!--#include virtual="yacysearchpagination.html?eventID=#[eventID]#&maximumRecords=#[count]#&jsResort=#(jsResort)#false::true#(/jsResort)##(authSearch)#::&auth#(/authSearch)#" -->
 
 </div> <!-- close main -->
 
@@ -306,9 +294,9 @@ function latestinfo() {
       
     	if(rsp && rsp.offset != null) {
 			#(jsResort)#
-			  statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, false);
+			  statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, false, true);
 			::
-			  statistics($("#resultscontainer .searchresults.earlierpage").length + 1, $("#resultscontainer .searchresults.earlierpage").length + $("#resultscontainer .searchresults.currentpage").length, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, true);
+			  statistics($("#resultscontainer .searchresults.earlierpage").length + 1, $("#resultscontainer .searchresults.earlierpage").length + $("#resultscontainer .searchresults.currentpage").length, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, true, false);
 			#(/jsResort)#
 			if(rsp.feedRunning) {
 				/* Refresh statistics while server feeders are still running */
