@@ -1342,8 +1342,14 @@ public final class Protocol {
         }
         
         // evaluate result
-        if (docList == null || docList[0].size() == 0) {
+        final int numFound = (int) docList[0].getNumFound();
+        if (docList == null || docList[0].isEmpty()) {
             Network.log.info("SEARCH (solr), returned 0 out of 0 documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())) + " query = " + solrQuery.toString()) ;
+            if(localsearch && offset > 0) {
+            	/* No documents were returned from Solr because the offset is too high, but we have to keep the total number of matching documents for accurate pagination.
+            	 * This case can notably happen on latest results pages, when mixing results from local RWI and local Solr ("Stealth Mode") */
+            	event.local_solr_stored.set(numFound);
+            }
             return 0;
         }
         
@@ -1427,7 +1433,6 @@ public final class Protocol {
             // add the url entry to the checked results
             resultContainer.add(urlEntry);
         }
-        final int numFound = (int) docList[0].getNumFound();
         docList[0].clear();
         docList[0] = null;
         if (localsearch) {
