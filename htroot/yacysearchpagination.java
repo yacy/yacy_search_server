@@ -81,7 +81,7 @@ public class yacysearchpagination {
 				prop.put("pagination_pages", 0);
 				prop.put("pagination_nextDisabled", true);
 			} else {
-				final int startRecord = post.getInt("startRecord", post.getInt("offset", post.getInt("start", 0)));
+				final int startRecord = post.getInt("offset", 0);
 				final int totalCount = theSearch.getResultCount();
 
 				final int activePage = (int) Math.floor(startRecord / (double) itemsPerPage);
