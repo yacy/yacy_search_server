@@ -32,6 +32,7 @@ import java.util.Map;
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
@@ -43,6 +44,7 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Segment;
 import net.yacy.search.navigator.Navigator;
 import net.yacy.search.navigator.NavigatorSortDirection;
 import net.yacy.search.navigator.NavigatorSortType;
@@ -112,6 +114,25 @@ public class yacysearchtrailer {
                 || sb.getConfigBool("search.video", true)
                 || sb.getConfigBool("search.image", true)
                 || sb.getConfigBool("search.app", true) ? 1 : 0);
+        
+        final String originalquerystring = post.get("query", post.get("search", "")).trim();
+        final String former = originalquerystring.replaceAll(Segment.catchallString, "*");
+        final CacheStrategy snippetFetchStrategy = CacheStrategy.parse(post.get("verify", sb.getConfig("search.verify", "")));
+		final String snippetFetchStrategyName = snippetFetchStrategy == null
+				? sb.getConfig("search.verify", CacheStrategy.IFFRESH.toName())
+				: snippetFetchStrategy.toName();
+        final int startRecord = post.getInt("startRecord", post.getInt("offset", post.getInt("start", 0)));
+		/* Maximum number of suggestions to display in the first results page */
+        final int meanMax = post.getInt("meanCount", 0);
+        
+        appendSearchFormValues("", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
+        prop.put("contextRanking", !former.contains(" /date"));
+        prop.put("contextRanking_formerWithoutDate", former.replace(" /date", ""));
+        prop.put("dateRanking", former.contains(" /date"));
+        prop.put("dateRanking_former", former);
+        
+        appendSearchFormValues("searchdomswitches_", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
+        
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
         prop.put("searchdomswitches_searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
         prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
@@ -122,6 +143,8 @@ public class yacysearchtrailer {
         prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
         prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
         prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
+        
+        appendSearchFormValues("searchdomswitches_strictContentDomSwitch_", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
         prop.put("searchdomswitches_strictContentDomSwitch", (contentdom != ContentDomain.TEXT && contentdom != ContentDomain.ALL) ? 1 : 0);
         prop.put("searchdomswitches_strictContentDomSwitch_strictContentDom", theSearch.getQuery().isStrictContentDom() ? 1 : 0);
 
@@ -447,6 +470,36 @@ public class yacysearchtrailer {
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "bottomline", 0, 0), false);
         return prop;
     }
+
+    /**
+     * Append search input fields values to the prop object. All parameters are required and must not be null.
+     * @param templatePrefix the template prefix to append before each template key
+     * @param post request parameters
+     * @param prop the servlet answer object to be filled
+     * @param global when true the search scope is blobal (not limited to this peer local index)
+     * @param theSearch the search object
+     * @param former the previous search terms
+     * @param snippetFetchStrategyName the snippet fetching strategy name to apply
+     * @param startRecord the zero based index of the first record to return
+     * @param meanMax the maximum number of suggestions ("Did you mean") to propose
+     */
+	private static void appendSearchFormValues(final String templatePrefix, final serverObjects post, final serverObjects prop, 
+			boolean global, final SearchEvent theSearch, final String former, final String snippetFetchStrategyName,
+			final int startRecord, final int meanMax) {
+		prop.putHTML(templatePrefix + "former", former);
+        prop.put(templatePrefix + "authSearch", post.containsKey("auth"));
+        prop.put(templatePrefix + "contentdom", post.get("contentdom", "text"));
+        prop.put(templatePrefix + "strictContentDom", String.valueOf(theSearch.getQuery().isStrictContentDom()));
+        prop.put(templatePrefix + "maximumRecords", theSearch.getQuery().itemsPerPage);
+        prop.put(templatePrefix + "startRecord", startRecord);
+        prop.put(templatePrefix + "search.verify", snippetFetchStrategyName);
+        prop.put(templatePrefix + "resource", global ? "global" : "local");
+        prop.put(templatePrefix + "search.navigation", post.get("nav", "all"));
+        prop.putHTML(templatePrefix + "prefermaskfilter", theSearch.getQuery().prefer.pattern());
+        prop.put(templatePrefix + "depth", "0");
+        prop.put(templatePrefix + "constraint", (theSearch.getQuery().constraint == null) ? "" : theSearch.getQuery().constraint.exportB64());
+        prop.put(templatePrefix + "meanCount", meanMax);
+	}
 
 }
 //http://localhost:8090/yacysearch.html?query=java+&amp;maximumRecords=10&amp;resource=local&amp;verify=cacheonly&amp;nav=hosts,authors,namespace,topics,filetype,protocol&amp;urlmaskfilter=ftp://.*&amp;prefermaskfilter=&amp;constraint=&amp;contentdom=text&amp;former=java+%2Fftp&amp;startRecord=0
