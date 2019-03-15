@@ -7,40 +7,54 @@
   }
 </script>  
 
-#(resource-select)#::
+#(resource-switches)#::
 <form
   action="yacysearch.html" method="get" accept-charset="UTF-8" id="resource-switch-form"
   data-trigger="hover" data-placement="right" data-container="body"
-  data-original-title="Your search is done using peers in the YaCy P2P network."
-  data-content="You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used."
-  >
-<input checked="checked"
-  data-label-text="Privacy"
-  data-on-text="<span>&nbsp;&nbsp;&nbsp;Peer-to-Peer&nbsp;&nbsp;&nbsp;&nbsp;</span>"
-  data-off-text="<span>&nbsp;&nbsp;&nbsp;&nbsp;Stealth&nbsp;Mode&nbsp;&nbsp;&nbsp;</span>"
-  data-on-color="warning" data-off-color="success"
-  data-animate="false"
-  type="checkbox" name="resource-switch" value="local" data-size="large"
-  onchange="document.getElementById('resource').value='local';document.searchform.submit();">
+  title="#(global)#Your search is done using only your own peer, locally.::Your search is done using peers in the YaCy P2P network.#(/global)#"
+  data-content="#(global)#You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.::You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.#(/global)#"
+  onsubmit="document.getElementById('resourceSwitchFormQuery').value = document.getElementById('search').value;">
+    <input type="hidden" id="resourceSwitchFormQuery" name="query" value="#[former]#"/>
+    #(authSearch)#::
+  	<input type="hidden" name="auth" value=""/>
+  	#(/authSearch)#
+  	<input type="hidden" name="contentdom" value="#[contentdom]#" />
+    <input type="hidden" name="strictContentDom" value="#[strictContentDom]#" />
+    <input type="hidden" name="former" value="#[former]#" />
+    <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
+    <input type="hidden" name="startRecord" value="#[startRecord]#" />
+    <input type="hidden" name="verify" value="#[search.verify]#" />
+    <input type="hidden" name="nav" value="#[search.navigation]#" />
+    <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
+    <input type="hidden" name="depth" value="#[depth]#" />
+    <input type="hidden" name="constraint" value="#[constraint]#" />
+    <input type="hidden" name="meanCount" value="#[meanCount]#" />
+    <input id="contentDomTimezoneOffset" type="hidden" name="timezoneOffset" value=""><script>document.getElementById("contentDomTimezoneOffset").value = new Date().getTimezoneOffset();</script>
+	<div class="btn-group btn-group-justified hidden-sm hidden-md">
+		<div class="btn-group">
+			<button type="#(global)#submit::button#(/global)#" name="resource" value="global"
+				class="btn btn-lg #(global)#btn-default::btn-warning#(/global)#">Peer-to-Peer</button>
+		</div>
+		<div class="btn-group">
+			<button type="#(global)#button::submit#(/global)#" name="resource" value="local" 
+				class="btn btn-lg #(global)#btn-success::btn-default#(/global)#">#(global)#Stealth Mode::Privacy#(/global)#</button>
+		</div>
+	</div>
+	<div class="btn-group btn-group-justified hidden-lg">
+		<div class="btn-group">
+			<button type="#(global)#submit::button#(/global)#" name="resource" value="global"
+				class="btn btn-xs #(global)#btn-default::btn-warning#(/global)#">Peer-to-Peer</button>
+		</div>
+		<div class="btn-group">
+			<button type="#(global)#button::submit#(/global)#" name="resource" value="local" 
+				class="btn btn-xs #(global)#btn-success::btn-default#(/global)#">#(global)#Stealth&nbsp;Mode::Privacy#(/global)#</button>
+		</div>
+	</div>
 </form>
-<script>$("#resource-switch-form").popover(); $("[name='resource-switch']").bootstrapSwitch();</script>
-::
-<form action="yacysearch.html" method="get" accept-charset="UTF-8" id="resource-switch-form"
-  data-trigger="hover" data-placement="right" data-container="body"
-  data-original-title="Your search is done using only your own peer, locally."
-  data-content="You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network."
-  >
-<input
-  data-label-text="Peer-to-Peer"
-  data-on-text="<span>&nbsp;&nbsp;&nbsp;Peer-to-Peer&nbsp;&nbsp;&nbsp;&nbsp;</span>"
-  data-off-text="<span>&nbsp;&nbsp;&nbsp;&nbsp;Stealth&nbsp;Mode&nbsp;&nbsp;&nbsp;</span>"
-  data-on-color="warning" data-off-color="success"
-  data-animate="false"
-  type="checkbox" name="resource-switch" value="global" data-size="large"
-  onchange="document.getElementById('resource').value='global';document.searchform.submit();">
-</form>
-<script>$("#resource-switch-form").popover(); $("[name='resource-switch']").bootstrapSwitch();</script>
-#(/resource-select)#
+<script>
+$('#resource-switch-form').popover()
+</script>
+#(/resource-switches)#
 
 <p class="navbutton"></p>
 <form action="yacysearch.html" method="get" accept-charset="UTF-8" name="rankingSwitchForm">

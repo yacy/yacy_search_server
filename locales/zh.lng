@@ -4529,22 +4529,22 @@ Pictures==图片
 #File: yacysearchtrailer.html
 #---------------------------
 show search results for "#[query]#" on map==在地图上显示 "#[query]#" 的搜索结果
+Your search is done using peers in the YaCy P2P network.==您的搜索是靠YaCy P2P网络中的节点完成的。
+You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.==您可以切换到'隐形模式'，这将关闭P2P，给你完全的隐私。期待较少的结果，因为那时只有您自己的搜索索引被使用。
+Your search is done using only your own peer, locally.==你的搜索是靠在本地的YaCy节点完成的。
+You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.==您可以切换到'P2P'，这将让您的搜索使用YaCy网络中的YaCy节点。
 >Provider==>提供者
 >Name Space==>命名空间
 >Author==>作者
 >Filetype==>文件类型
 >Language==>语言
-&nbsp;&nbsp;&nbsp;Peer-to-Peer&nbsp;&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;P2P&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;Stealth&nbsp;Mode&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;&nbsp;隐身&nbsp;模式&nbsp;&nbsp;&nbsp;
-"Privacy"=="隐私"
+>Peer-to-Peer<==>P2P<
+Stealth Mode==隐身 模式
+Privacy==隐私
 Context Ranking==按内容排名
 Sort by Date==按日期排序
 Documents==文件
 Images==图片
-"Your search is done using peers in the YaCy P2P network."=="您的搜索是靠YaCy P2P网络中的节点完成的。"
-"You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used."=="您可以切换到'隐形模式'，这将关闭P2P，给你完全的隐私。期待较少的结果，因为那时只有您自己的搜索索引被使用。"
-"Your search is done using only your own peer, locally."=="你的搜索是靠在本地的YaCy节点完成的。"
-"You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network."=="您可以切换到'P2P'，这将让您的搜索使用YaCy网络中的YaCy节点。"
 >Documents==>文件
 >Images==>图片
 #-----------------------------

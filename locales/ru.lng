@@ -4101,6 +4101,10 @@ Pictures==Изображения
 #File: yacysearchtrailer.html
 #---------------------------
 show search results for "#[query]#" on map==Показать результат поиска "#[query]#" на карте
+Your search is done using peers in the YaCy P2P network.==Ваш поиск выполняется с использованием узлов P2P-сети YaCy.
+You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.==Вы можете перейти в режим Стелс, который отключит использование P2P, но обеспечит вашу полную анонимность. В этом случае результатов поиска будет меньше, потому что поиск будет осуществляться только в локальном индексе.
+Your search is done using only your own peer, locally.==Поиск выполняется только в вашем локальном индексе.
+You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.==Вы можете перейти в режим P2P, который позволит производить поиск с использованием  других узлов сети YaCy.
 >Provider==>Домен
 >Name Space==>Имя
 >Author==>Автор
@@ -4108,17 +4112,13 @@ show search results for "#[query]#" on map==Показать результат 
 >Filetype==>Тип файла
 >Language==>Язык
 >Please support YaCy!==>Пожалуйста, поддержите YaCy!
-&nbsp;&nbsp;&nbsp;Peer-to-Peer&nbsp;&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;P2P&nbsp;&nbsp;&nbsp;&nbsp;
-&nbsp;&nbsp;&nbsp;&nbsp;Stealth&nbsp;Mode&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;&nbsp;&nbsp;Режим&nbsp;стелс&nbsp;&nbsp;&nbsp;
-"Privacy"=="Частный"
+>Peer-to-Peer<==>P2P<
+Stealth Mode==Режим стелс
+Privacy==Частный
 Context Ranking==Фильтр по рейтингу
 Sort by Date==Фильтр по дате
 Documents==Документы
 Images==Изображения
-"Your search is done using peers in the YaCy P2P network."=="Ваш поиск выполняется с использованием узлов P2P-сети YaCy."
-"You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used."=="Вы можете перейти в режим Стелс, который отключит использование P2P, но обеспечит вашу полную анонимность. В этом случае результатов поиска будет меньше, потому что поиск будет осуществляться только в локальном индексе."
-"Your search is done using only your own peer, locally."=="Поиск выполняется только в вашем локальном индексе."
-"You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network."=="Вы можете перейти в режим P2P, который позволит производить поиск с использованием  других узлов сети YaCy."
 #-----------------------------
 
 ### Subdirectory api ###

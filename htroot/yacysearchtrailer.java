@@ -89,12 +89,6 @@ public class yacysearchtrailer {
 			return prop;
 		}
         
-        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
-        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
-        boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
-        boolean global = post == null || (!post.get("resource-switch", post.get("resource", "global")).equals("local") && p2pmode);
-        boolean stealthmode = p2pmode && !global;
-        prop.put("resource-select", !adminAuthenticated ? 0 : stealthmode ? 2 : global ? 1 : 0);
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
         if (theSearch == null) {
@@ -102,6 +96,13 @@ public class yacysearchtrailer {
             return prop;
         }
         final RequestHeader.FileType fileType = header.fileType();
+        
+        
+        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
+        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
+        boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
+        boolean global = post == null || (!post.get("resource-switch", post.get("resource", "global")).equals("local") && p2pmode);
+        boolean stealthmode = p2pmode && !global;
         
         /* Add information about the current navigators generation (number of updates since their initialization) */
         prop.put("nav-generation", theSearch.getNavGeneration());
@@ -124,6 +125,10 @@ public class yacysearchtrailer {
         final int startRecord = post.getInt("startRecord", post.getInt("offset", post.getInt("start", 0)));
 		/* Maximum number of suggestions to display in the first results page */
         final int meanMax = post.getInt("meanCount", 0);
+        
+        prop.put("resource-switches", adminAuthenticated && (stealthmode || global));
+        prop.put("resource-switches_global", adminAuthenticated && global);
+        appendSearchFormValues("resource-switches_", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
         
         appendSearchFormValues("", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
         prop.put("contextRanking", !former.contains(" /date"));

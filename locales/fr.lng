@@ -2611,12 +2611,11 @@ and contributors, CC-BY-SA==et ses contributeurs, CC-BY-SA
 #---------------------------
 Your search is done using peers in the YaCy P2P network.==Recherche effectu&eacute;e gr&acirc;ce aux noeuds du r&eacute;seau P2P YaCy.
 You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.==Vous pouvez passer en 'Mode furtif' ce qui d&eacute;sactivera le r&eacute;seau pair &agrave; pair et vous offrira une privatisation compl&egrave;te. Cependant vous obtiendrez probablement moins de r&eacute;sultats car la recherche sera alors bas&eacute;e uniquement sur votre propre index.
-"Privacy"=="Privé"
-&nbsp;Peer-to-Peer&nbsp;==&nbsp;Pair&nbsp;&agrave;&nbsp;pair&nbsp;
-Stealth&nbsp;Mode==Mode&nbsp;furtif
+Privacy==Privé
+>Peer-to-Peer<==>Pair&nbsp;&agrave;&nbsp;pair<
+Stealth Mode==Mode furtif
 Your search is done using only your own peer, locally.==La recherche est r&eacute;alis&eacute;e uniquement sur les donn&eacute;es locales de votre noeud.
 You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.==Vous pouvez passer en mode 'Pair &agrave; pair' dans lequel votre recherche sera bas&eacute;e sur les autres noeuds du r&eacute;seau YaCy.
-"Peer-to-Peer"==Pair&nbsp;&agrave;&nbsp;pair
 Context Ranking==Classement contextuel
 Sort by Date==Trier par date
 Video==Vid&eacute;o

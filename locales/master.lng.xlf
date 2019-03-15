@@ -11758,13 +11758,13 @@
        <source>&gt;Language</source>
     </trans-unit>
     <trans-unit id="2683fc85" xml:space="preserve" approved="no" translate="yes">
-       <source>&amp;nbsp;&amp;nbsp;&amp;nbsp;Peer-to-Peer&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;</source>
+       <source>&gt;Peer-to-Peer&lt;</source>
     </trans-unit>
     <trans-unit id="93dee466" xml:space="preserve" approved="no" translate="yes">
-       <source>&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;Stealth&amp;nbsp;Mode&amp;nbsp;&amp;nbsp;&amp;nbsp;</source>
+       <source>Stealth Mode</source>
     </trans-unit>
     <trans-unit id="6fd46fdc" xml:space="preserve" approved="no" translate="yes">
-       <source>"Privacy"</source>
+       <source>Privacy</source>
     </trans-unit>
     <trans-unit id="75b7ce85" xml:space="preserve" approved="no" translate="yes">
        <source>Context Ranking</source>
@@ -11779,16 +11779,16 @@
        <source>Images</source>
     </trans-unit>
     <trans-unit id="264da238" xml:space="preserve" approved="no" translate="yes">
-       <source>"Your search is done using peers in the YaCy P2P network."</source>
+       <source>Your search is done using peers in the YaCy P2P network.</source>
     </trans-unit>
     <trans-unit id="1847f5e2" xml:space="preserve" approved="no" translate="yes">
-       <source>"You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used."</source>
+       <source>You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.</source>
     </trans-unit>
     <trans-unit id="8ec15852" xml:space="preserve" approved="no" translate="yes">
-       <source>"Your search is done using only your own peer, locally."</source>
+       <source>Your search is done using only your own peer, locally.</source>
     </trans-unit>
     <trans-unit id="f970327e" xml:space="preserve" approved="no" translate="yes">
-       <source>"You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network."</source>
+       <source>You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.</source>
     </trans-unit>
     <trans-unit id="d978d81a" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Documents</source>

@@ -1127,58 +1127,12 @@ div#tagcloud {
 }
 
 /******* yacysearch.html end ***********/ 
- 
-/******* yacysearchtrailer.html ********** 
- Styling for the resource switch button, to avoid overlapping at various screen sizes */ 
- 
-/* When screen size is too small, reduce font-size and padding as done in the bootstrap-switch-mini class */
-@media (max-width: 1449px) {
-#resource-switch-form .bootstrap-switch-handle-on,
-#resource-switch-form .bootstrap-switch-handle-off,
-#resource-switch-form .bootstrap-switch-label {
-  	padding: 1px 1px !important;
-  	font-size: 12px !important;
-  	line-height: 1.5 !important;
-  }
-}
 
-/* When screen size is large enough, us the same values as the bootstrap-switch-large class, 
-  except padding wich is reduced to handle the quite long text */
-@media (min-width: 1450px) {
-#resource-switch-form .bootstrap-switch-handle-on,
-#resource-switch-form .bootstrap-switch-handle-off,
-#resource-switch-form .bootstrap-switch-label {
-  padding: 6px 1px !important;
-  font-size: 18px !important;
-  line-height: 1.3333333 !important;
-  }
+/******* yacysearchtrailer.html **********/
+#resource-switch-form .btn-lg {
+	/* Reduce bootstrap btn-lg padding to avoid text overlapping */
+	padding: 6px 1px;
 }
-
-/* override bootstrap-switch wrapper to use 100% of the parent available size */
-#resource-switch-form,
-.bootstrap-switch-large {
-	width: 100% !important;
-}
-
-/* override bootstrap-switch-container to use 155% of the parent available size 
-  (only 100% is displayed, hiding the switched off part) */
-#resource-switch-form .bootstrap-switch-container {
-	width: 155% !important;
-}
-
-/* override bootstrap-switch-container to use a percent margin value 
-  (when resource switch is "Privacy" position) */
-#resource-switch-form div[class~="bootstrap-switch-container"][style*="margin-left: -"] {
-	margin-left: -52% !important;
-}
-
-/* override bootstrap-switch elements to use percent widths */
-#resource-switch-form .bootstrap-switch-handle-on,
-#resource-switch-form .bootstrap-switch-handle-off,
-#resource-switch-form .bootstrap-switch-label {
-	width: 33.333% !important;
-}
-
 /******* yacysearchtrailer.html end ***********/
 
 /******* yacysearchitem.html **********/
