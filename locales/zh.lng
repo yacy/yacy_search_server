@@ -456,21 +456,21 @@ However: if you fail to open a router port==但是，如果您无法打开路由
 you can see instruction videos everywhere in the internet==您可以在互联网上的任何地方查看说明视频，只需搜索<a href="http://www.youtube.com/results?search_query=Open Ports on a Router">Open Ports on a 
 Access Configuration==访问设置
 Basic Configuration==基本设置
-Your YaCy Peer needs some basic information to operate properly==您的YaCy 节点需要一些基本信息才能工作
+Your YaCy Peer needs some basic information to operate properly==您的YaCy节点需要一些基本信息才能有效工作
 Select a language for the interface==选择界面语言
 &#27721;&#35821;/&#28450;&#35486==中文
-Use Case: what do you want to do with YaCy:==用途: 您用YaCy做什么:
-Community-based web search==基于社区的网络搜索
-Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==加入并支持全球网络 'freeworld', 自由地搜索.
-Search portal for your own web pages==属于您自己的搜索引擎
-Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==本机YaCy的节点创建与索引过程独立于其他节点, 即您可以定义自己的搜索偏向.
+Use Case: what do you want to do with YaCy:==用法: 您想将YaCy当作:
+Community-based web search==全球网络搜索
+Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==加入并支持全球网络 'freeworld', 开启自由搜索.
+Search portal for your own web pages==个人网页搜索门户
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==您的YaCy安装独立于其他节点，您可以通过开始自己的网络爬虫来创建自己的网络索引。 这可用于搜索您自己的网页或创建具有特定主题的搜索门户。
 Files may also be shared with the YaCy server, assign a path here:==您也能与YaCy服务器共享内容, 在这里指定路径:
 This path can be accessed at ==可以通过以下链接访问
 Use that path as crawl start point.==将此路径作为索引起点.
-Intranet Indexing==局域网索引
-Create a search portal for your intranet or web pages or your (shared) file system.==创建您自己的局域网, 网页或者您共享的文件系统.
-URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==适合http/https/ftp协议的链接/主机名/IP
-or smb:==或者服务器信息块(SMB):
+Intranet Indexing==内网索引
+Create a search portal for your intranet or web pages or your (shared) file system.==为内网或网页或（共享）文件系统创建搜索门户。
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==URL可以是http/https/ftp以及本地域名或IP，也可以是下面形式的URL
+or smb:==或者smb:
 Your peer name has not been customized; please set your own peer name==您的节点尚未命名, 请命名它
 You may change your peer name==您可以改变您的节点名称
 Peer Name:==节点名称:
@@ -486,7 +486,7 @@ What you should do next:==下一步您该做的:
 Your basic configuration is complete! You can now (for example)==配置成功, 您现在可以
 just <==开始<
 start an uncensored search==自由地搜索了
-start your own crawl</a> and contribute to the global index, or create your own private web index==开始您的索引</a>, 并将其贡献给全球索引, 或者创建一个您自己的私有搜索网页
+start your own crawl</a> and contribute to the global index, or create your own private web index==开始您的索引</a>并将其贡献给全球索引, 或者创建您的私有索引
 set a personal peer profile</a> (optional settings)==设置个人节点资料</a> (可选项)
 monitor at the network page</a> what the other peers are doing==监视网络页面</a>, 以及其他节点的活动
 Your Peer name is a default name; please set an individual peer name.==您的节点名称为系统默认,请另外设置一个名称.
@@ -542,8 +542,8 @@ Alternatively you may==或者你可以
 To find out more about OpenSearch see==要了解关于OpenSearch的更多信息，请参阅
 20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20个结果从远端系统中获取并同时加载,立即解析并创建索引.
 When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==使用这种启发式时，每个新的搜索请求行都用于调用列出的opensearch系统。
-This means: right after the search request every page is loaded and every page that is linked on this page.==这意味着：在搜索请求之后，就开始加载每个页面上的链接。
-If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中“添加为全局爬取作业”，则要爬网的页面将被添加到全局爬取队列（远端YaCy节点可以爬取要爬取的页面）。
+This means: right after the search request every page is loaded and every page that is linked on this page.==这意味着：在搜索请求之后，就开始加载结果的每个页面及每个页面上的链接。
+If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==如果选中'添加为全球爬取作业'，则要爬取的页面将被添加到全球爬取队列中（其他远端YaCy节点可能会帮助爬取这些页面）。
 Default is to add the links to the local crawl queue (your peer crawls the linked pages).==默认是将链接添加到本地爬网队列（您的YaCy爬取链接的页面）。
 add as global crawl job==添加为全球爬取作业
 opensearch load external search result list from active systems below==opensearch从下面的活动系统加载外部搜索结果列表
@@ -608,39 +608,44 @@ might overwrite existing data if a file of the same name exists already.==, 旧�
 #---------------------------
 <html lang="en">==<html lang="zh">
 Network Configuration==网络设置
+No changes were made!==未作出任何改变!
+Accepted Changes==接受改变
+Inapplicable Setting Combination==设置未被应用
+For P2P operation, at least DHT distribution or DHT receive (or both) must be set. You have thus defined a Robinson configuration==关于P2P操作，必须至少勾选DHT分发或DHT接收（或两者）。 因此，您已被确定为漂流配置
+Global Search in P2P configuration is only allowed, if index receive is switched on. You have a P2P configuration, but are not allowed to search other peers.==P2P配置中的全局搜索仅在打开接受索引时才被允许。您已有P2P配置，但不被允许搜索其他节点。
 #Network and Domain Specification
 Network and Domain Specification==确定网络和域
-YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==您可以操作由YaCy节点组成的计算网格或者一个单独节点.
-To control that all participants within a web indexing domain have access to the same domain,==进行索引的域需要具有访问权限才能控制相同域内的所有节点,
-this network definition must be equal to all members of the same YaCy network.==且此设置对同一YaCy网络内的所有节点有效.
+YaCy can operate a computing grid of YaCy peers or as a stand-alone node.==Yacy能够以一群YaCy节点组成的计算网络或作为一个孤立节点运行.
+To control that all participants within a web indexing domain have access to the same domain,==要控制Web索引域中的所有参与者都可以访问同一个域，
+this network definition must be equal to all members of the same YaCy network.==此网络定义必须与同一YaCy网络的成员相同。
 >Network Definition<==>网络定义<
 Enter custom URL...==输入自定义网址...
 Remote Network Definition URL==远端网络定义地址
 Network Nick==网络别名
-Long Description==描述
+Long Description==详细描述
 Indexing Domain==索引域
 #DHT==DHT
 "Change Network"=="改变网络"
 #Distributed Computing Network for Domain
 Distributed Computing Network for Domain==域内分布式计算网络.
-Enable Peer-to-Peer Mode to participate in the global YaCy network==开启点对点模式从而加入全球YaCy网
-or if you want your own separate search cluster with or without connection to the global network==或者不论加不加入全球YaCy网，你都可以打造个人搜索群
-Enable 'Robinson Mode' for a completely independent search engine instance==开启漂流模式获得完全独立的搜索引擎
-without any data exchange between your peer and other peers==本节点不会与其他节点有任何数据交换
+Enable Peer-to-Peer Mode to participate in the global YaCy network==开启点对点模式从而加入全球搜索网
+or if you want your own separate search cluster with or without connection to the global network.==或者不论加不加入全球YaCy网，你都可以打造个人搜索群。
+Enable 'Robinson Mode' for a completely independent search engine instance,==开启漂流模式获得完全独立的搜索引擎实例，
+without any data exchange between your peer and other peers.==且不会与其他节点有任何数据交换。
 #Peer-to-Peer Mode
-Peer-to-Peer Mode==点对点模式
+Peer-to-Peer Mode==P2P模式
 >Index Distribution==>索引分发
-This enables automated, DHT-ruled Index Transmission to other peers==自动向其他节点传递DHT规则的索引
+This enables automated, DHT-ruled Index Transmission to other peers==自动向其他节点传递服从DHT规则的索引
 >enabled==>开启
-disabled during crawling==关闭 在爬取时
-disabled during indexing==关闭 在索引时
+disabled during crawling==关闭 (在爬取时)
+disabled during indexing==关闭 (在索引时)
 >Index Receive==>接收索引
-Accept remote Index Transmissions==接受远端索引传递
-This works only if you have a senior peer. The DHT-rules do not work without this function==仅当您是高级节点时有效. 如果未设置此项, DHT规则不会工作
+Accept remote Index Transmissions==允许远端索引输入
+This works only if you have a senior peer. The DHT-rules do not work without this function==仅当您是高级节点时有效。 如果没有勾选, 服从DHT规则的索引不会输入
 >reject==>拒绝
-accept transmitted URLs that match your blacklist==接受 与您黑名单匹配的传来的地址
+accept transmitted URLs that match your blacklist==允许 (您黑名单中的地址)
 >allow==>允许
-deny remote search==拒绝 远端搜索
+deny remote search==拒绝 (远端搜索)
 #Robinson Mode
 >Robinson Mode==>漂流模式
 If your peer runs in 'Robinson Mode' you run YaCy as a search engine for your own search portal without data exchange to other peers==如果您的节点运行在'漂流模式', 您能在不与其他节点交换数据的情况下进行搜索
@@ -673,9 +678,6 @@ certificates are not validated against trusted certificate authorities==证书�
 thus allowing YaCy peers to use self-signed certificates==从而允许YaCy节点使用自签名证书
 Note also that encryption of remote search queries is configured with a dedicated setting in the==另请注意，远端搜索查询加密的专用设置配置请使用
 page==页面
-No changes were made!==未作出任何改变!
-Accepted Changes==接受改变
-Inapplicable Setting Combination==设置未被应用
 #-----------------------------
 
 #File: ConfigParser_p.html
@@ -725,15 +727,15 @@ Control whether media search results are as default strictly limited to indexed 
 (images, videos or applications specific)==(图片,视频或具体应用)
 or extended to pages including such medias (provide generally more results, but eventually less relevant).==或扩展到包括此类媒体的网页(通常提供更多结果,但相关性更弱)
 Remote results resorting==远端搜索结果排序
->On demand, server-side==>按需,服务器端
-Automated, with JavaScript in the browser==自动化,在浏览器中使用JavaScript
->for authenticated users only<==>仅限经过身份验证的用户<
+>On demand, server-side==>根据需要, 服务器侧
+Automated, with JavaScript in the browser==自动化, 基于嵌入浏览器的JavaScript代码
+>for authenticated users only<==>(仅限经过身份验证的用户)<
 Remote search encryption==远端搜索加密
 Prefer https for search queries on remote peers.==首选https用于远端节点上的搜索查询.
 When SSL/TLS is enabled on remote peers, https should be used to encrypt data exchanged with them when performing peer-to-peer searches.==在远端节点上启用SSL/TLS时,应使用https来加密在执行P2P搜索时与它们交换的数据.
 Please note that contrary to strict TLS, certificates are not validated against trusted certificate authorities (CA), thus allowing YaCy peers to use self-signed certificates.==请注意,与严格TLS相反,证书不会针对受信任的证书颁发机构(CA)进行验证,因此允许YaCy节点使用自签名证书.
 >Snippet Fetch Strategy==>摘要提取策略
-Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==使用此选项加快搜索结果!(使用CACHEONLY或FALSE关闭验证)
+Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==使用此选项加速搜索结果!(使用CACHEONLY或FALSE来关闭验证)
 NOCACHE: no use of web cache, load all snippets online==NOCACHE:不使用网络缓存,在线加载所有网页摘要
 IFFRESH: use the cache if the cache exists and is fresh otherwise load online==IFFRESH:如果缓存存在则使用最新的缓存,否则在线加载
 IFEXIST: use the cache if the cache exist or load online==IFEXIST:如果缓存存在则使用缓存,或在线加载
@@ -756,7 +758,7 @@ maximum allowed size in kbytes for each remote search result to be added to the 
 for example, a 1000kbytes limit might be useful if you are running YaCy with a low memory setup==例如,如果运行具有低内存设置的YaCy,则1000KB限制可能很有用
 Default Pop-Up Page<==默认弹出页面<
 Default maximum number of results per page==默认每页最大结果数
-Default index.html Page (by forwarder)==默认index.html(前者指定)
+Default index.html Page (by forwarder)==默认index.html页面(通过转发器)
 Target for Click on Search Results==点击搜索结果时
 "_blank" (new window)=="_blank" (新窗口)
 "_self" (same window)=="_self" (同一窗口)
@@ -1122,7 +1124,7 @@ Architecture (C) by==Architecture (C) by
 #---------------------------
 Crawl Check==爬取检查
 This pages gives you an analysis about the possible success for a web crawl on given addresses.==通过本页面，您可以分析在特定地址上进行网络爬取的可能性。
-List of possible crawl start URLs==可行的起始抓行网址列表
+List of possible crawl start URLs==可能的起始爬取地址列表
 "Check given urls"=="检查给定的网址"
 >Analysis<==>分析<
 >Access<==>访问<
@@ -2635,28 +2637,38 @@ Performance Settings==性能设置
 refresh graph==刷新图表
 #Memory Settings
 Memory Settings==内存设置
-Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==<abbr title="Java Virtual Machine">JVM</abbr>内存设置
+Memory reserved for <abbr title="Java Virtual Machine">JVM</abbr>==为<abbr title="Java Virtual Machine">JVM</abbr>保留的内存
 "Set"=="设置"
 #Resource Observer
-Resource Observer==资源查看
-Free space disk==空闲硬盘空间
-Used space disk==使用硬盘空间
-Steady-state minimum==稳态最小值
-Steady-state maximum==稳态最大值
-Disable crawls==停止爬取
-when free space is below==当空闲空间过低时
-when used space is over==当使用空间过高时
-Absolute minimum==绝对最小值
-Absolute maximum==绝对最大值
-Disable==关闭
->Autoregulate<==>自动调节<
-when absolute minimum limit has been reached==当达到绝对最小值时
-when absolute maximum limit has been reached==当达到绝对最大值时
-RAM==内存
+Resource Observer==资源查看器
 Memory state==内存状态
-Enough memory is available for proper operation==运行有足够的空间
-proper==合适
->Minimum required<==>最小要求<
+>proper<==>合适<
+>exhausted<==>耗尽<
+Reset state==重置状态
+Manually reset to 'proper' state==手动设置到'合适'状态
+Enough memory is available for proper operation.==有足够内存保证正常运行.
+Within the last eleven minutes, at least four operations have tried to request memory that would have reduced free space within the minimum required.==在过去的11分钟内，至少有四次操作尝试请求内存，这将减少所需的最低可用空间。
+Minimum required==最低要求
+Amount of memory (in Mebibytes) that should at least be free for proper operation==为保证正常运行的最低内存量（以MB为单位）
+Disable <abbr title="Distributed Hash Table">DHT</abbr>-in below.==当低于其值时，关闭<abbr title="Distributed Hash Table">DHT</abbr>输入.
+Free space disk==空闲硬盘量
+Steady-state minimum==稳态最小值
+Amount of space (in Mebibytes) that should be kept free as steady state==为保持稳定状态所需的空闲硬盘量（以MB为单位）
+Disable crawls when free space is below.==当空闲硬盘低于其值时，停止爬取。
+Absolute minimum==绝对最小值
+Amount of space (in Mebibytes) that should at least be kept free as hard limit==最小限制空闲硬盘量（以MB为单位）
+Disable <abbr title="Distributed Hash Table">DHT</abbr>-in when free space is below.==当空闲硬盘低于其值时，关闭<abbr title="Distributed Hash Table">DHT</abbr>输入。
+>Autoregulate<==>自动调节<
+when absolute minimum limit has been reached==当达到绝对最小限制值时
+Used space disk==已用硬盘量
+Steady-state maximum==稳态最大值
+Maximum amount of space (in Mebibytes) that should be used as steady state==为保持稳定状态最大可用的硬盘量（以MB为单位）
+Disable crawls when used space is over.==当使用硬盘高于其值时，停止爬取。
+Absolute maximum==绝对最大值
+Maximum amount of space (in Mebibytes) that should be used as hard limit==最大限制已用硬盘量（以MB为单位）
+Disable <abbr title="Distributed Hash Table">DHT</abbr>-in when used space is over.==当已用硬盘量超过其值时，关闭<abbr title="Distributed Hash Table">DHT</abbr>输入。
+when absolute maximum limit has been reached.==当达到绝对最大限制值时。
+RAM==内存
 free space==空闲空间
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==已接受改变. 在YaCy<strong>重启</strong>后生效
 restart now</a>==立即重启</a>
@@ -2674,7 +2686,6 @@ Below normal==低于普通
 Idle</option>==空闲</option>
 "Set new Priority"=="置为新优先级"
 Changes take effect after <strong>restart</strong> of YaCy==在YaCy<strong>重启</strong>后生效.
-Reset state==重置
 #Online Caution Settings
 Online Caution Settings==在线警告设置
 This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==这是代理被访问或者搜索完成后的一段爬取空闲时间.
