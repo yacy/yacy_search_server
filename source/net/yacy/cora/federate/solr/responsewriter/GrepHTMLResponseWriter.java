@@ -28,10 +28,10 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import net.yacy.document.SentenceReader;
-import net.yacy.search.schema.CollectionSchema;
-
 import org.apache.lucene.document.Document;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
@@ -43,7 +43,12 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
+import org.apache.solr.search.ReturnFields;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.apache.solr.search.SolrReturnFields;
+
+import net.yacy.document.SentenceReader;
+import net.yacy.search.schema.CollectionSchema;
 
 /**
  * this response writer shows a list of documents with the lines containing matches
@@ -52,9 +57,9 @@ import org.apache.solr.search.SolrIndexSearcher;
  * text part and each sentence is shown as separate line. grep attributes can be used to
  * show leading and trainling lines.
  */
-public class GrepHTMLResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
+public class GrepHTMLResponseWriter implements QueryResponseWriter, SolrjResponseWriter {
 
-    private static final Set<String> DEFAULT_FIELD_LIST = new HashSet<String>();
+    private static final Set<String> DEFAULT_FIELD_LIST = new HashSet<>();
     private static final Pattern dqp = Pattern.compile("\"");
     static {
         DEFAULT_FIELD_LIST.add(CollectionSchema.id.getSolrFieldName());
@@ -63,10 +68,6 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter, EmbeddedSolr
         DEFAULT_FIELD_LIST.add(CollectionSchema.text_t.getSolrFieldName());
     }
     
-    public GrepHTMLResponseWriter() {
-        super();
-    }
-
     @Override
     public String getContentType(final SolrQueryRequest request, final SolrQueryResponse response) {
         return "text/html";
@@ -78,70 +79,214 @@ public class GrepHTMLResponseWriter implements QueryResponseWriter, EmbeddedSolr
 
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
-        NamedList<?> values = rsp.getValues();
-        assert values.get("responseHeader") != null;
-        assert values.get("response") != null;
-
-        writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n");
-        writer.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
-        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"../env/base.css\" />\n");
-        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/style.css\" />\n");
-        SolrParams params = request.getOriginalParams();
-        String grep = params.get("grep");
-        String query = "";
-        String q = params.get(CommonParams.Q); if (q == null) q = "";
-        int p = q.indexOf(':');
-        if (p >= 0) {
-            int r = q.charAt(p + 1) == '"' ? q.indexOf(p + 2, '"') : q.indexOf(' ');
-            if (r < 0) r = q.length();
-            query = q.substring(p + 1, r);
-            if (query.length() > 0) {
-                if (query.charAt(0) == '"') query = query.substring(1);
-                if (query.charAt(query.length() - 1) == '"') query = query.substring(0, query.length() - 1);
-            }
-        }
-        if (grep == null && query.length() > 0) grep = query;
-        if (grep.length() > 0) {
-            if (grep.charAt(0) == '"') grep = grep.substring(1);
-            if (grep.charAt(grep.length() - 1) == '"') grep = grep.substring(0, grep.length() - 1);
-        }
-        NamedList<Object> paramsList = params.toNamedList();
-        paramsList.remove("wt");
-        String xmlquery = dqp.matcher("select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
+        writeHtmlHead(writer);
         
-        DocList response = ((ResultContext) values.get("response")).getDocList();
-        final int sz = response.size();
-        if (sz > 0) {
-            SolrIndexSearcher searcher = request.getSearcher();
-            DocIterator iterator = response.iterator();
-            IndexSchema schema = request.getSchema();
-            String h1 = "Document Grep for query \"" + query + "\" and grep phrase \"" + grep + "\"";
-            writer.write("<title>" + h1 + "</title>\n</head><body>\n<h1>" + h1 + "</h1>\n");
-            writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
-            writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see an example call to the search rss API.</span></div>\n");
-            for (int i = 0; i < sz; i++) {
-                int id = iterator.nextDoc();
-                Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
-                LinkedHashMap<String, String> tdoc = HTMLResponseWriter.translateDoc(schema, doc);
-                String sku = tdoc.get(CollectionSchema.sku.getSolrFieldName());
-                String title = tdoc.get(CollectionSchema.title.getSolrFieldName());
-                String text = tdoc.get(CollectionSchema.text_t.getSolrFieldName());
+        final SolrParams params = request.getOriginalParams();
+        
+        final String query = getQueryParam(params);
+        final String grep = getGrepParam(params, query);
 
-                ArrayList<String> sentences = new ArrayList<String>();
-                if (title != null) sentences.add(title);
-                SentenceReader sr = new SentenceReader(text);
-                StringBuilder line;
-                while (sr.hasNext()) {
-                    line = sr.next();
-                    if (line.length() > 0) sentences.add(line.toString());
+        
+        final Object responseObj = rsp.getResponse();
+        
+        if(responseObj instanceof SolrDocumentList) {
+			/*
+			 * The response object can be a SolrDocumentList when the response is partial,
+			 * for example when the allowed processing time has been exceeded
+			 */
+        	final SolrDocumentList docList = ((SolrDocumentList)responseObj);
+        	
+            writeSolrDocumentList(writer, params, query, grep, docList);
+        	
+        } else if(responseObj instanceof ResultContext) {
+        	/* Regular response object */
+        	final DocList documents = ((ResultContext)responseObj).getDocList();
+        	
+            final int sz = documents.size();
+            if (sz > 0) {
+                final SolrIndexSearcher searcher = request.getSearcher();
+                final DocIterator iterator = documents.iterator();
+                final IndexSchema schema = request.getSchema();
+                writeTitleAndHeadeing(writer, grep, query);
+                writeApiLink(writer, params);
+                for (int i = 0; i < sz; i++) {
+                    int id = iterator.nextDoc();
+                    final Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
+                    final LinkedHashMap<String, String> tdoc = HTMLResponseWriter.translateDoc(schema, doc);
+                    final String sku = tdoc.get(CollectionSchema.sku.getSolrFieldName());
+                    final String title = tdoc.get(CollectionSchema.title.getSolrFieldName());
+                    final String text = tdoc.get(CollectionSchema.text_t.getSolrFieldName());
+
+                    final ArrayList<String> sentences = extractSentences(title, text);
+                    writeDoc(writer, sku, sentences, grep);
                 }
-                writeDoc(writer, sku, sentences, grep);
+            } else {
+                writer.write("<title>No Document Found</title>\n</head><body>\n");
             }
         } else {
-            writer.write("<title>No Document Found</title>\n</head><body>\n");
+        	writer.write("<title>Unable to process Solr response</title>\n</head><body>\n");
         }
         
         writer.write("</body></html>\n");
+    }
+
+    /**
+     * Process the solr documents list and append a representation to the output writer.
+     * @param writer an open output writer. Must not be null.
+     * @param params the original Solr parameters
+     * @param query the query parameter value
+     * @param grep the grep parameter value
+     * @param docList the solr documents list
+     * @throws IOException when a write error occurred
+     */
+	private void writeSolrDocumentList(final Writer writer, final SolrParams params, final String query,
+			final String grep, final SolrDocumentList docList) throws IOException {
+		if (docList == null || docList.isEmpty()) {
+		    writer.write("<title>No Document Found</title>\n</head><body>\n");
+		} else {
+		    writeTitleAndHeadeing(writer, grep, query);
+		    writeApiLink(writer, params);
+		    
+		    final ReturnFields fieldsToReturn = new SolrReturnFields();
+		    for (final SolrDocument doc : docList) {
+		        final LinkedHashMap<String, String> tdoc = HTMLResponseWriter.translateDoc(doc, fieldsToReturn);
+		        final String sku = tdoc.get(CollectionSchema.sku.getSolrFieldName());
+		        final String title = tdoc.get(CollectionSchema.title.getSolrFieldName());
+		        final String text = tdoc.get(CollectionSchema.text_t.getSolrFieldName());
+
+		        final ArrayList<String> sentences = extractSentences(title, text);
+		        writeDoc(writer, sku, sentences, grep);
+		    }
+		}
+	}
+
+    /**
+     * Write the html header beginning
+     * @param writer an open output writer
+     * @throws IOException when a write error occurred
+     */
+	private void writeHtmlHead(final Writer writer) throws IOException {
+		writer.write("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n");
+        writer.write("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n");
+        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"all\" href=\"../env/base.css\" />\n");
+        writer.write("<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"../env/style.css\" />\n");
+	}
+
+	/**
+	 * @param params the original request parameters. Must not be null.
+	 * @param query the query parameter value
+	 * @return the grep parameter value
+	 */
+	private String getGrepParam(final SolrParams params, String query) {
+		String grep = params.get("grep");
+        if (grep == null) {
+        	if(query.length() > 0) {
+        		grep = query;
+        	} else {
+        		grep = "";
+        	}
+        }
+        if (grep.length() > 0) {
+            if (grep.charAt(0) == '"') {
+            	grep = grep.substring(1);
+            }
+            if (grep.charAt(grep.length() - 1) == '"') {
+            	grep = grep.substring(0, grep.length() - 1);
+            }
+        }
+		return grep;
+	}
+
+	/**
+	 * @param params the original request parameters. Must not be null.
+	 * @return the query parameter value
+	 */
+	private String getQueryParam(final SolrParams params) {
+		final String q = params.get(CommonParams.Q, "");
+        String query = "";
+        int p = q.indexOf(':');
+        if (p >= 0) {
+            int r = q.charAt(p + 1) == '"' ? q.indexOf(p + 2, '"') : q.indexOf(' ');
+            if (r < 0) {
+            	r = q.length();
+            }
+            query = q.substring(p + 1, r);
+            if (query.length() > 0) {
+                if (query.charAt(0) == '"') {
+                	query = query.substring(1);
+                }
+                if (query.charAt(query.length() - 1) == '"') {
+                	query = query.substring(0, query.length() - 1);
+                }
+            }
+        }
+		return query;
+	}
+
+    /**
+     * Append the response title and level 1 html heading
+     * @param writer an open output writer. Must not be null.
+     * @param grep the grep phrase
+     * @param query the search query
+     * @throws IOException when a write error occurred
+     */
+	private void writeTitleAndHeadeing(final Writer writer, final String grep, final String query) throws IOException {
+		final String h1 = "Document Grep for query \"" + query + "\" and grep phrase \"" + grep + "\"";
+		writer.write("<title>" + h1 + "</title>\n</head><body>\n<h1>" + h1 + "</h1>\n");
+	}
+
+	/**
+	 * Append a link to the related Solr api
+	 * @param writer an open output writer. Must not be null.
+	 * @param solrParams the original request parameters. Must not be null.
+	 * @throws IOException when a write error occurred
+	 */
+	private void writeApiLink(final Writer writer, final SolrParams solrParams) throws IOException {
+        final NamedList<Object> paramsList = solrParams.toNamedList();
+        paramsList.remove("wt");
+        String xmlquery = dqp.matcher("select?" + SolrParams.toSolrParams(paramsList).toString()).replaceAll("%22");
+        
+		writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");
+		writer.write("<span>This search result can also be retrieved as XML. Click the API icon to see an example call to the search rss API.</span></div>\n");
+	}
+
+	/**
+	 * @param title
+	 * @param text
+	 * @return a list of sentences extracted from the given document text and title 
+	 */
+	private ArrayList<String> extractSentences(final String title, final String text) {
+		final ArrayList<String> sentences = new ArrayList<>();
+		if (title != null) {
+			sentences.add(title);
+		}
+		if(text != null) {
+			final SentenceReader sr = new SentenceReader(text);
+			StringBuilder line;
+			while (sr.hasNext()) {
+				line = sr.next();
+				if (line.length() > 0) {
+					sentences.add(line.toString());
+				}
+			}
+		}
+		return sentences;
+	}
+    
+    @Override
+    public void write(Writer writer, SolrQueryRequest request, String coreName, QueryResponse rsp) throws IOException {
+        writeHtmlHead(writer);
+        
+        final SolrParams params = request.getOriginalParams();
+        
+        final String query = getQueryParam(params);
+        final String grep = getGrepParam(params, query);
+
+        writeSolrDocumentList(writer, params, query, grep, rsp.getResults());
+        	
+        
+        writer.write("</body></html>\n");
+    	
     }
 
     private static final void writeDoc(Writer writer, String url, ArrayList<String> sentences, String grep) throws IOException {

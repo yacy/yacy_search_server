@@ -72,10 +72,6 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 
     public static final Pattern dqp = Pattern.compile("\"");
     
-    public HTMLResponseWriter() {
-        super();
-    }
-
     @Override
     public String getContentType(final SolrQueryRequest request, final SolrQueryResponse response) {
         return "text/html";
@@ -288,10 +284,6 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
-        NamedList<?> values = rsp.getValues();
-        assert values.get("responseHeader") != null;
-        assert values.get("response") != null;
-
         writeHtmlHead(writer, request);
 
         final String coreName = request.getCore().getName();
@@ -643,7 +635,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
 	 *            restrict the actually returned fields. May be null.
 	 * @return a map of field names to field values
 	 */
-	private static final LinkedHashMap<String, String> translateDoc(final SolrDocument doc,
+	public static final LinkedHashMap<String, String> translateDoc(final SolrDocument doc,
 			final ReturnFields returnFields) {
 		LinkedHashMap<String, String> kv = new LinkedHashMap<String, String>();
 		for (final Entry<String, Object> entry : doc) {
