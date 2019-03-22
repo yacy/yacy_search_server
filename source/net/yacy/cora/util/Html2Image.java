@@ -348,8 +348,8 @@ public class Html2Image {
 
         // convert pdf to jpg using internal pdfbox capability
         if (convertCmd == null) {
-            try {
-                PDDocument pdoc = PDDocument.load(pdf);
+            try (final PDDocument pdoc = PDDocument.load(pdf);) {
+                
                 BufferedImage bi = new PDFRenderer(pdoc).renderImageWithDPI(0, density, ImageType.RGB);
 
                 return ImageIO.write(bi, imageFormat, image);
