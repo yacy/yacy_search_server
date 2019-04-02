@@ -25,10 +25,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.sql.Date;
 import java.util.HashSet;
 import java.util.Map;
@@ -37,7 +33,6 @@ import java.util.Set;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.TransactionManager;
 import net.yacy.data.WorkTables;
 import net.yacy.search.Switchboard;
@@ -163,27 +158,7 @@ public class ConfigSearchPage_p {
 
             if (post.containsKey("searchpage_default")) {
                 // load defaults from defaults/yacy.init file
-                final Properties config = new Properties();
-                final String mes = "ConfigSearchPage_p";
-                FileInputStream fis = null;
-                try {
-                    fis = new FileInputStream(new File(sb.appPath, "defaults/yacy.init"));
-                    config.load(fis);
-                } catch (final FileNotFoundException e) {
-                    ConcurrentLog.severe(mes, "could not find configuration file.");
-                    return prop;
-                } catch (final IOException e) {
-                    ConcurrentLog.severe(mes, "could not read configuration file.");
-                    return prop;
-                } finally {
-                    if (fis != null) {
-                        try {
-                            fis.close();
-                        } catch (final IOException e) {
-                            ConcurrentLog.logException(e);
-                        }
-                    }
-                }
+                final Properties config = sb.loadDefaultConfig();
                 sb.setConfig("publicTopmenu", config.getProperty("publicTopmenu","true"));
 				sb.setConfig(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,
 						config.getProperty(SwitchboardConstants.SEARCH_PUBLIC_TOP_NAV_BAR_LOGIN,

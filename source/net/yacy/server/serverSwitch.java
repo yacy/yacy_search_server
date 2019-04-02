@@ -24,6 +24,7 @@ package net.yacy.server;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -36,6 +37,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
@@ -511,6 +513,23 @@ public class serverSwitch {
 	 */
 	public ConcurrentMap<String, String> getRemoved() {
 		return this.configRemoved;
+	}
+	
+	/**
+	 * @return the default configuration properties loaded form the
+	 *         defaults/yacy.init file. The properties are empty when the file can
+	 *         not be read for some reason.
+	 */
+	public Properties loadDefaultConfig() {
+        final Properties config = new Properties();
+        try (final FileInputStream fis = new FileInputStream(new File(this.appPath, "defaults/yacy.init"))) {
+            config.load(fis);
+        } catch (final FileNotFoundException e) {
+            log.severe("Could not find default configuration file defaults/yacy.init.");
+        } catch (final IOException | IllegalArgumentException e) {
+            log.severe("Could not read configuration file.");
+        }
+        return config;
 	}
 
 	public void deployThread(final String threadName,

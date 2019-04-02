@@ -78,6 +78,7 @@ import net.yacy.peers.EventChannel;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
+import net.yacy.search.SearchAccessRateConstants;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
@@ -321,48 +322,28 @@ public class yacysearch {
                 + " gets no permission to search");
         } else if ( !extendedSearchRights && !localhostAccess && !intranetMode ) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
+        	final int accInThreeSeconds;
+        	final int accInOneMinute;
+        	final int accInTenMinutes;
             synchronized ( trackerHandles ) {
-                final int accInThreeSeconds =
+                accInThreeSeconds =
                     trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size();
-                final int accInOneMinute =
+                accInOneMinute =
                     trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size();
-                final int accInTenMinutes =
+                accInTenMinutes =
                     trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size();
-                // protections against too strong YaCy network load, reduces remote search
-                if ( global ) {
-                    if ( accInTenMinutes >= 60 || accInOneMinute >= 6 || accInThreeSeconds >= 1 ) {
-                        global = false;
-                        ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
-                            + client
-                            + ": "
-                            + accInThreeSeconds
-                            + "/3s, "
-                            + accInOneMinute
-                            + "/60s, "
-                            + accInTenMinutes
-                            + "/600s, "
-                            + " requests, disallowed global search");
-                    }
-                }
-                // protection against too many remote server snippet loads (protects traffic on server)
-                if ( snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ) {
-                    if ( accInTenMinutes >= 20 || accInOneMinute >= 4 || accInThreeSeconds >= 1 ) {
-                        snippetFetchStrategy = CacheStrategy.CACHEONLY;
-                        ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
-                            + client
-                            + ": "
-                            + accInThreeSeconds
-                            + "/3s, "
-                            + accInOneMinute
-                            + "/60s, "
-                            + accInTenMinutes
-                            + "/600s, "
-                            + " requests, disallowed remote snippet loading");
-                    }
-                }
-                // general load protection
-                if ( accInTenMinutes >= 3000 || accInOneMinute >= 600 || accInThreeSeconds >= 60 ) {
-                    block = true;
+            }
+            // protections against too strong YaCy network load, reduces remote search
+            if ( global ) {
+				if (accInTenMinutes >= sb.getConfigInt(SearchAccessRateConstants.PUBLIC_MAX_P2P_ACCESS_10MN.getKey(),
+						SearchAccessRateConstants.PUBLIC_MAX_P2P_ACCESS_10MN.getDefaultValue())
+						|| accInOneMinute >= sb.getConfigInt(
+								SearchAccessRateConstants.PUBLIC_MAX_P2P_ACCESS_1MN.getKey(),
+								SearchAccessRateConstants.PUBLIC_MAX_P2P_ACCESS_1MN.getDefaultValue())
+						|| accInThreeSeconds >= sb.getConfigInt(
+								SearchAccessRateConstants.PUBLIC_MAX_P2P_ACCESS_3S.getKey(),
+								SearchAccessRateConstants.PUBLIC_MAX_P2P_ACCESS_3S.getDefaultValue())) {
+                    global = false;
                     ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
                         + client
                         + ": "
@@ -372,8 +353,51 @@ public class yacysearch {
                         + "/60s, "
                         + accInTenMinutes
                         + "/600s, "
-                        + " requests, disallowed search");
+                        + " requests, disallowed global search");
                 }
+            }
+            // protection against too many remote server snippet loads (protects traffic on server)
+            if ( snippetFetchStrategy != null && snippetFetchStrategy.isAllowedToFetchOnline() ) {
+				if (accInTenMinutes >= sb.getConfigInt(
+						SearchAccessRateConstants.PUBLIC_MAX_REMOTE_SNIPPET_ACCESS_10MN.getKey(),
+						SearchAccessRateConstants.PUBLIC_MAX_REMOTE_SNIPPET_ACCESS_10MN.getDefaultValue())
+						|| accInOneMinute >= sb.getConfigInt(
+								SearchAccessRateConstants.PUBLIC_MAX_REMOTE_SNIPPET_ACCESS_1MN.getKey(),
+								SearchAccessRateConstants.PUBLIC_MAX_REMOTE_SNIPPET_ACCESS_1MN.getDefaultValue())
+						|| accInThreeSeconds >= sb.getConfigInt(
+								SearchAccessRateConstants.PUBLIC_MAX_REMOTE_SNIPPET_ACCESS_3S.getKey(),
+								SearchAccessRateConstants.PUBLIC_MAX_REMOTE_SNIPPET_ACCESS_3S.getDefaultValue())) {
+                    snippetFetchStrategy = CacheStrategy.CACHEONLY;
+                    ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                        + client
+                        + ": "
+                        + accInThreeSeconds
+                        + "/3s, "
+                        + accInOneMinute
+                        + "/60s, "
+                        + accInTenMinutes
+                        + "/600s, "
+                        + " requests, disallowed remote snippet loading");
+                }
+            }
+            // general load protection
+			if (accInTenMinutes >= sb.getConfigInt(SearchAccessRateConstants.PUBLIC_MAX_ACCESS_10MN.getKey(),
+					SearchAccessRateConstants.PUBLIC_MAX_ACCESS_10MN.getDefaultValue())
+					|| accInOneMinute >= sb.getConfigInt(SearchAccessRateConstants.PUBLIC_MAX_ACCESS_1MN.getKey(),
+							SearchAccessRateConstants.PUBLIC_MAX_ACCESS_1MN.getDefaultValue())
+					|| accInThreeSeconds >= sb.getConfigInt(SearchAccessRateConstants.PUBLIC_MAX_ACCESS_3S.getKey(),
+							SearchAccessRateConstants.PUBLIC_MAX_ACCESS_3S.getDefaultValue())) {
+                block = true;
+                ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                    + client
+                    + ": "
+                    + accInThreeSeconds
+                    + "/3s, "
+                    + accInOneMinute
+                    + "/60s, "
+                    + accInTenMinutes
+                    + "/600s, "
+                    + " requests, disallowed search");
             }
         }
 

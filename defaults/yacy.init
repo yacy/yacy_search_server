@@ -930,6 +930,21 @@ search.result.show.snapshots = false
 # when true, display the raw ranking score value
 search.result.show.ranking = false
 
+# Maximum numbers of accesses within a given time period to the search interface for unauthenticated users and authenticated users with no extended search right
+search.public.max.access.3s = 60
+search.public.max.access.1mn = 600
+search.public.max.access.10mn = 3000
+
+# Maximum numbers of accesses within a given time period to the search interface in P2P mode for unauthenticated users and authenticated users with no extended search right
+search.public.max.p2p.access.3s = 1
+search.public.max.p2p.access.1mn = 6
+search.public.max.p2p.access.10mn = 60
+
+# Maximum number of accesses within a given time period to the search interface to support fetching remote results snippets for unauthenticated users and authenticated users with no extended search right
+search.public.max.remoteSnippet.access.3s = 1
+search.public.max.remoteSnippet.access.1mn = 4
+search.public.max.remoteSnippet.access.10mn = 20
+
 
 # search navigators: comma-separated list of default values for search navigation.
 # By default navigators keys are sorted by descending counts. To sort by ascending displayed labels, add the :label suffix (example : hosts:label). 
