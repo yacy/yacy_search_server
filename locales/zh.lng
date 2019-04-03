@@ -729,7 +729,6 @@ or extended to pages including such medias (provide generally more results, but 
 Remote results resorting==远端搜索结果排序
 >On demand, server-side==>根据需要, 服务器侧
 Automated, with JavaScript in the browser==自动化, 基于嵌入浏览器的JavaScript代码
->for authenticated users only<==>(仅限经过身份验证的用户)<
 Remote search encryption==远端搜索加密
 Prefer https for search queries on remote peers.==首选https用于远端节点上的搜索查询.
 When SSL/TLS is enabled on remote peers, https should be used to encrypt data exchanged with them when performing peer-to-peer searches.==在远端节点上启用SSL/TLS时,应使用https来加密在执行P2P搜索时与它们交换的数据.

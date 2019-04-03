@@ -73,6 +73,30 @@ public enum SearchAccessRateConstants {
 
 	/**
 	 * Configuration for the maximum number of accesses within three seconds to the
+	 * search interface in P2P mode with browser-side JavaScript results resorting
+	 * enabled for unauthenticated users and authenticated users with no extended
+	 * search right
+	 */
+	PUBLIC_MAX_P2P_JSRESORT_ACCESS_3S("search.public.max.p2p.jsresort.access.3s", 1),
+
+	/**
+	 * Configuration for the maximum number of accesses within one minute to the
+	 * search interface in P2P mode with browser-side JavaScript results resorting
+	 * enabled for unauthenticated users and authenticated users with no extended
+	 * search right
+	 */
+	PUBLIC_MAX_P2P_JSRESORT_ACCESS_1MN("search.public.max.p2p.jsresort.access.1mn", 1),
+
+	/**
+	 * Configuration for the maximum number of accesses within ten minutes to the
+	 * search interface in P2P mode with browser-side JavaScript results resorting
+	 * enabled for unauthenticated users and authenticated users with no extended
+	 * search right
+	 */
+	PUBLIC_MAX_P2P_JSRESORT_ACCESS_10MN("search.public.max.p2p.jsresort.access.10mn", 10),
+
+	/**
+	 * Configuration for the maximum number of accesses within three seconds to the
 	 * search interface to support fetching remote results snippets for
 	 * unauthenticated users and authenticated users with no extended search right
 	 */

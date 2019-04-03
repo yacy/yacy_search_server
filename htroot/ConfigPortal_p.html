@@ -71,8 +71,11 @@
           		<input type="radio" name="search.jsresort" value="false" #(search.jsresort)#checked="checked"::#(/search.jsresort)# />On demand, server-side
           	</label>
           	<label title="This usually improves ranking accuracy, but doesn't work well for users who have Javascript disabled, are using screen readers, or are on slow computers.">
-          		<input type="radio" name="search.jsresort" value="true" #(search.jsresort)#::checked="checked"#(/search.jsresort)# />Automated, with JavaScript in the browser <strong>for authenticated users only</strong>.
+          		<input type="radio" name="search.jsresort" value="true" #(search.jsresort)#::checked="checked"#(/search.jsresort)# />Automated, with JavaScript in the browser.
           	</label>
+          	<p>Automated results resorting with JavaScript makes the browser load the full result set of each search request.
+          	This may lead to high system loads on the server. 
+          	Please check the 'Peer-to-peer search with JavaScript results resorting' section in the <a href="SearchAccessRate_p.html">Local Search access rate</a> configuration page to set up proper limitations on this mode by unauthenticated users.</p>
           </dd>
           
           <dt>Remote search encryption</dt>

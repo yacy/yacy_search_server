@@ -300,6 +300,10 @@ public class yacysearch {
 		
 		/* Maximum number of suggestions to display in the first results page */
         final int meanMax = post.getInt("meanCount", 0);
+        
+		boolean jsResort = global  
+				&& (contentdom == ContentDomain.ALL || contentdom == ContentDomain.TEXT) // For now JavaScript resorting can only be applied for text search 
+				&& sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
 
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
@@ -344,6 +348,7 @@ public class yacysearch {
 								SearchAccessRateConstants.PUBLIC_MAX_P2P_ACCESS_3S.getKey(),
 								SearchAccessRateConstants.PUBLIC_MAX_P2P_ACCESS_3S.getDefaultValue())) {
                     global = false;
+                    jsResort = false;
                     ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
                         + client
                         + ": "
@@ -354,6 +359,25 @@ public class yacysearch {
                         + accInTenMinutes
                         + "/600s, "
                         + " requests, disallowed global search");
+                } else if (accInTenMinutes >= sb.getConfigInt(SearchAccessRateConstants.PUBLIC_MAX_P2P_JSRESORT_ACCESS_10MN.getKey(),
+						SearchAccessRateConstants.PUBLIC_MAX_P2P_JSRESORT_ACCESS_10MN.getDefaultValue())
+						|| accInOneMinute >= sb.getConfigInt(
+								SearchAccessRateConstants.PUBLIC_MAX_P2P_JSRESORT_ACCESS_1MN.getKey(),
+								SearchAccessRateConstants.PUBLIC_MAX_P2P_JSRESORT_ACCESS_1MN.getDefaultValue())
+						|| accInThreeSeconds >= sb.getConfigInt(
+								SearchAccessRateConstants.PUBLIC_MAX_P2P_JSRESORT_ACCESS_3S.getKey(),
+								SearchAccessRateConstants.PUBLIC_MAX_P2P_JSRESORT_ACCESS_3S.getDefaultValue())) {
+                    jsResort = false;
+                    ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
+                        + client
+                        + ": "
+                        + accInThreeSeconds
+                        + "/3s, "
+                        + accInOneMinute
+                        + "/60s, "
+                        + accInTenMinutes
+                        + "/600s, "
+                        + " requests, disallowed JavaScript resorting of global search results");
                 }
             }
             // protection against too many remote server snippet loads (protects traffic on server)
@@ -870,7 +894,7 @@ public class yacysearch {
                 prop.put("geoinfo_loc", i);
                 prop.put("geoinfo", "1");
             }
-
+            
             // update the search tracker
             try {
                 synchronized ( trackerHandles ) {
@@ -902,9 +926,6 @@ public class yacysearch {
             prop.put("num-results_globalresults_remoteIndexCount", Formatter.number(theSearch.remote_rwi_available.get() + theSearch.remote_solr_available.get(), true));
             prop.put("num-results_globalresults_remotePeerCount", Formatter.number(theSearch.remote_rwi_peerCount.get() + theSearch.remote_solr_peerCount.get(), true));
             
-			final boolean jsResort = global && extendedSearchRights // for now enable JavaScript resorting only for authenticated users as it requires too much resources per search request  
-					&& (contentdom == ContentDomain.ALL || contentdom == ContentDomain.TEXT) // For now JavaScript resorting can only be applied for text search 
-					&& sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
 			prop.put("jsResort", jsResort);
             prop.put("num-results_jsResort", jsResort);
             
