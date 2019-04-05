@@ -92,7 +92,10 @@
 <div id="api" style="top:58px;">
 <script type="text/javascript">
 //<![CDATA[
-document.write("\<a href=\"yacysearch.rss?" + window.location.search.substring(1) + "\" id=\"apilink\" target=\"_blank\"\><img src=\"env/grafics/rss.png\" width=\"16\" height=\"16\" alt=\"RSS\" /></a>")
+	var showRSSIcon = #(num-results)#false::true::true::true::false::false#(/num-results)#;
+	if(showRSSIcon) {
+		document.write("\<a href=\"yacysearch.rss?" + window.location.search.substring(1) + "\" id=\"apilink\" target=\"_blank\"\><img src=\"env/grafics/rss.png\" width=\"16\" height=\"16\" alt=\"RSS\" /></a>");
+	}
 //]]>
 </script>
 <span>This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.
@@ -160,7 +163,17 @@ Use the RSS search result format to add static searches to your RSS reader, if y
       </div>
     </div>
 	::
-	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
+	<p class="alert alert-danger" role="alert">Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
+	::
+	<p class="alert alert-danger col-sm-10" role="alert">
+		#(blockReason)#::You are not allowed to search the web with this peer.
+		::You have reached the maximum allowed number of accesses to this search page within ten minutes.
+		Please try again later or log in as administrator or as a user with extended search right.
+		::You have reached the maximum allowed number of accesses to this search page within one minute.
+		Please try again later or log in as administrator or as a user with extended search right.
+		::You have reached the maximum allowed number of accesses to this search page within three seconds.
+		Please try again later or log in as administrator or as a user with extended search right.
+	</p>
 #(/num-results)#
 
 #(urlmaskerror)#::

@@ -104,9 +104,6 @@ public class yacysearchtrailer {
         boolean global = post == null || (!post.get("resource-switch", post.get("resource", "global")).equals("local") && p2pmode);
         boolean stealthmode = p2pmode && !global;
         
-        /* Add information about the current navigators generation (number of updates since their initialization) */
-        prop.put("nav-generation", theSearch.getNavGeneration());
-
         // compose search navigation
         ContentDomain contentdom = theSearch.getQuery().contentdom;
         prop.put("searchdomswitches",
@@ -130,11 +127,17 @@ public class yacysearchtrailer {
         prop.put("resource-switches_global", adminAuthenticated && global);
         appendSearchFormValues("resource-switches_", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
         
-        appendSearchFormValues("", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
-        prop.put("contextRanking", !former.contains(" /date"));
-        prop.put("contextRanking_formerWithoutDate", former.replace(" /date", ""));
-        prop.put("dateRanking", former.contains(" /date"));
-        prop.put("dateRanking_former", former);
+        /* The search event has been found : we can render ranking switches */
+        prop.put("ranking-switches", true);
+        appendSearchFormValues("ranking-switches_", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
+        
+        /* Add information about the current navigators generation (number of updates since their initialization) */
+        prop.put("ranking-switches_nav-generation", theSearch.getNavGeneration());
+        
+        prop.put("ranking-switches_contextRanking", !former.contains(" /date"));
+        prop.put("ranking-switches_contextRanking_formerWithoutDate", former.replace(" /date", ""));
+        prop.put("ranking-switches_dateRanking", former.contains(" /date"));
+        prop.put("ranking-switches_dateRanking_former", former);
         
         appendSearchFormValues("searchdomswitches_", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
         

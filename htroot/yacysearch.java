@@ -44,6 +44,8 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.apache.http.HttpStatus;
+
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.encoding.UTF8;
@@ -67,6 +69,7 @@ import net.yacy.data.UserDB;
 import net.yacy.data.ymark.YMarkTables;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Tokenizer;
+import net.yacy.http.servlets.TemplateProcessingException;
 import net.yacy.http.servlets.YaCyDefaultServlet;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.util.Bitfield;
@@ -321,9 +324,15 @@ public class yacysearch {
                 snippetFetchStrategy = null;
             }
             block = true;
+            prop.put("num-results_blockReason", 1);
             ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: BLACKLISTED CLIENT FROM "
                 + client
                 + " gets no permission to search");
+			if (!"html".equals(EXT)) {
+				/* API request : return the relevant HTTP status */
+				throw new TemplateProcessingException("You are not allowed to search the web with this peer.",
+						HttpStatus.SC_FORBIDDEN);
+			}
         } else if ( !extendedSearchRights && !localhostAccess && !intranetMode ) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
         	final int accInThreeSeconds;
@@ -405,13 +414,24 @@ public class yacysearch {
                 }
             }
             // general load protection
+            String timePeriodMsg = "";
 			if (accInTenMinutes >= sb.getConfigInt(SearchAccessRateConstants.PUBLIC_MAX_ACCESS_10MN.getKey(),
-					SearchAccessRateConstants.PUBLIC_MAX_ACCESS_10MN.getDefaultValue())
-					|| accInOneMinute >= sb.getConfigInt(SearchAccessRateConstants.PUBLIC_MAX_ACCESS_1MN.getKey(),
-							SearchAccessRateConstants.PUBLIC_MAX_ACCESS_1MN.getDefaultValue())
-					|| accInThreeSeconds >= sb.getConfigInt(SearchAccessRateConstants.PUBLIC_MAX_ACCESS_3S.getKey(),
-							SearchAccessRateConstants.PUBLIC_MAX_ACCESS_3S.getDefaultValue())) {
-                block = true;
+					SearchAccessRateConstants.PUBLIC_MAX_ACCESS_10MN.getDefaultValue())) {
+				block = true;
+				timePeriodMsg = "ten minutes";
+				prop.put("num-results_blockReason", 2);
+			} else if (accInOneMinute >= sb.getConfigInt(SearchAccessRateConstants.PUBLIC_MAX_ACCESS_1MN.getKey(),
+					SearchAccessRateConstants.PUBLIC_MAX_ACCESS_1MN.getDefaultValue())) {
+				block = true;
+				timePeriodMsg = "one minute";
+				prop.put("num-results_blockReason", 3);
+			} else if (accInThreeSeconds >= sb.getConfigInt(SearchAccessRateConstants.PUBLIC_MAX_ACCESS_3S.getKey(),
+					SearchAccessRateConstants.PUBLIC_MAX_ACCESS_3S.getDefaultValue())) {
+				block = true;
+				timePeriodMsg = "three seconds";
+				prop.put("num-results_blockReason", 4);
+			}
+        	if(block) {
                 ConcurrentLog.warn("LOCAL_SEARCH", "ACCESS CONTROL: CLIENT FROM "
                     + client
                     + ": "
@@ -422,10 +442,22 @@ public class yacysearch {
                     + accInTenMinutes
                     + "/600s, "
                     + " requests, disallowed search");
+				if (!"html".equals(EXT)) {
+					/*
+					 * API request : return the relevant HTTP status (429 - Too Many Requests - see
+					 * https://tools.ietf.org/html/rfc6585#section-4)
+					 */
+					throw new TemplateProcessingException(
+							"You have reached the maximum allowed number of accesses to this search service within "
+									+ timePeriodMsg + ". Please try again later or log in as administrator or as a user with extended search right.",
+							429);
+				}
             }
         }
 
-        if ( !block ) {
+        if (block) {
+        	prop.put("num-results", 5);
+        } else {
             String urlmask = (post == null) ? ".*" : post.get("urlmaskfilter", ".*"); // the expression must be a subset of the java Match syntax described in http://lucene.apache.org/core/4_4_0/core/org/apache/lucene/util/automaton/RegExp.html
             String tld = null;
             String inlink = null;
