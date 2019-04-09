@@ -887,8 +887,8 @@ public final class Switchboard extends serverSwitch {
     	
     	/* audioTagParser is disabled by default as it needs a temporary file (because of the JAudiotagger implementation) for each parsed document */
     	if (!enableAudioTags) {
-			denyExt.addAll(audioTagParser.SupportedAudioMediaType.getAllFileExtensions());
-			denyMime.addAll(audioTagParser.SupportedAudioMediaType.getAllMediaTypes());
+			denyExt.addAll(audioTagParser.SupportedAudioFormat.getAllFileExtensions());
+			denyMime.addAll(audioTagParser.SupportedAudioFormat.getAllMediaTypes());
         	
         	setConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, denyExt);
         	setConfig(SwitchboardConstants.PARSER_MIME_DENY, denyMime);

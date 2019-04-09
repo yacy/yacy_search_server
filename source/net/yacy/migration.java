@@ -441,11 +441,11 @@ public class migration {
 			 * All old audio file extensions and media types are denied : we add newly
 			 * supported ones to theses deny lists
 			 */
-			deniedExtensions.addAll(audioTagParser.SupportedAudioMediaType.getAllFileExtensions());
+			deniedExtensions.addAll(audioTagParser.SupportedAudioFormat.getAllFileExtensions());
 			
 			sb.setConfig(SwitchboardConstants.PARSER_EXTENSIONS_DENY, deniedExtensions);
 			
-			deniedMediaTypes.addAll(audioTagParser.SupportedAudioMediaType.getAllMediaTypes());
+			deniedMediaTypes.addAll(audioTagParser.SupportedAudioFormat.getAllMediaTypes());
 			
 			sb.setConfig(SwitchboardConstants.PARSER_MIME_DENY, deniedMediaTypes);
 			

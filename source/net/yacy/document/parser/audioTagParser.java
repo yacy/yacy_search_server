@@ -63,9 +63,9 @@ import net.yacy.kelondro.util.FileUtils;
 public class audioTagParser extends AbstractParser implements Parser {
 	
 	/**
-	 * Enumeration of internet media types supported by the {@link audioTagParser}.
+	 * Enumeration of audio formats supported by the {@link audioTagParser}.
 	 */
-	public enum SupportedAudioMediaType {
+	public enum SupportedAudioFormat {
 
 		AIF("audio/aiff", new String[] { "audio/x-aiff" }, new String[] { SupportedFileFormat.AIF.getFilesuffix(),
 				SupportedFileFormat.AIFC.getFilesuffix(), SupportedFileFormat.AIFF.getFilesuffix() }),
@@ -118,7 +118,7 @@ public class audioTagParser extends AbstractParser implements Parser {
 		 * @param mediaType the media type, formatted as "type/subtype"
 		 * @param fileExtensions a set of file extensions matching the given media type
 		 */
-		private SupportedAudioMediaType(final String mediaType, final String[] fileExtensions) {
+		private SupportedAudioFormat(final String mediaType, final String[] fileExtensions) {
 			this(mediaType, new String[] {}, fileExtensions);
 		}
 
@@ -127,7 +127,7 @@ public class audioTagParser extends AbstractParser implements Parser {
 		 * @param alternateMediaTypes alternate flavors the the main media type, all formatted as "type/subtype"
 		 * @param fileExtensions a set of file extensions matching the given media type
 		 */
-		private SupportedAudioMediaType(final String mediaType, final String[] alternateMediaTypes, final String[] fileExtensions) {
+		private SupportedAudioFormat(final String mediaType, final String[] alternateMediaTypes, final String[] fileExtensions) {
 			this.mediaType = mediaType.toLowerCase(Locale.ROOT);
 			Set<String> alternates = new HashSet<>();
 			for (final String alternateMediaType : alternateMediaTypes) {
@@ -179,7 +179,7 @@ public class audioTagParser extends AbstractParser implements Parser {
 		 */
 		public static Set<String> getAllMediaTypes() {
 			final Set<String> mediaTypes = new HashSet<>();
-			for(final SupportedAudioMediaType mediaType : SupportedAudioMediaType.values()) {
+			for(final SupportedAudioFormat mediaType : SupportedAudioFormat.values()) {
 				mediaTypes.add(mediaType.getMediaType());
 				for(final String mediaTypeString : mediaType.getAlternateMediaTypes()) {
 					mediaTypes.add(mediaTypeString);	
@@ -193,15 +193,18 @@ public class audioTagParser extends AbstractParser implements Parser {
 		 */
 		public static Set<String> getAllFileExtensions() {
 			final Set<String> extensions = new HashSet<>();
-			for(final SupportedAudioMediaType mediaType : SupportedAudioMediaType.values()) {
+			for(final SupportedAudioFormat mediaType : SupportedAudioFormat.values()) {
 				extensions.addAll(mediaType.getFileExtensions());
 			}
 			return extensions;
 		}
 	}
 	
-	/** Map from each supported audio file extensions to a single audio media type */
-	private final Map<String, SupportedAudioMediaType> ext2NormalMediaType;
+	/** Map from each supported audio file extensions to audio format */
+	private final Map<String, SupportedAudioFormat> ext2Format;
+	
+	/** Map from each supported audio media type to audio format */
+	private final Map<String, SupportedAudioFormat> mediaType2Format;
 	
 	/** Space character */
 	private static final char SPACE_CHAR = ' ';
@@ -217,18 +220,25 @@ public class audioTagParser extends AbstractParser implements Parser {
     public audioTagParser() {
         super("Audio File Meta-Tag Parser");
         
-        final Map<String, SupportedAudioMediaType> normalMap = new HashMap<>();
+        final Map<String, SupportedAudioFormat> ext2Formats = new HashMap<>();
         
-        for(final SupportedAudioMediaType mediaType : SupportedAudioMediaType.values()) {
+        final Map<String, SupportedAudioFormat> mediaType2Formats = new HashMap<>();
+        
+        for(final SupportedAudioFormat mediaType : SupportedAudioFormat.values()) {
         	this.SUPPORTED_MIME_TYPES.add(mediaType.getMediaType());
         	this.SUPPORTED_MIME_TYPES.addAll(mediaType.getAlternateMediaTypes());
         	this.SUPPORTED_EXTENSIONS.addAll(mediaType.getFileExtensions());
         	for(final String fileExtension : mediaType.getFileExtensions()) {
-        		normalMap.put(fileExtension, mediaType);
+        		ext2Formats.put(fileExtension, mediaType);
+        	}
+        	mediaType2Formats.put(mediaType.getMediaType(), mediaType);
+        	for(final String mediaTypeStr : mediaType.getAlternateMediaTypes()) {
+        		mediaType2Formats.put(mediaTypeStr, mediaType);
         	}
         }
         
-        this.ext2NormalMediaType = Collections.unmodifiableMap(normalMap);
+        this.ext2Format = Collections.unmodifiableMap(ext2Formats);
+        this.mediaType2Format = Collections.unmodifiableMap(mediaType2Formats);
     }
 
     @Override
@@ -246,9 +256,34 @@ public class audioTagParser extends AbstractParser implements Parser {
     @Override
     public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String charset, final VocabularyScraper scraper,
     		final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes)
-    		throws UnsupportedOperationException, Failure, InterruptedException {
+    		throws Failure, InterruptedException {
         String filename = location.getFileName();
-        final String fileext = MultiProtocolURL.getFileExtension(filename);
+        String fileExt = MultiProtocolURL.getFileExtension(filename);
+        
+
+        SupportedAudioFormat audioFormat = null;
+        if(fileExt != null) {
+        	audioFormat = this.ext2Format.get(fileExt);
+        }
+        if(audioFormat == null) {
+        	audioFormat =  this.mediaType2Format.get(mimeType);
+        }
+        
+        String normalizedMediaType = mimeType;
+    	if(audioFormat != null) {
+        	/* normalize to a single Media Type. Advantages : 
+        	 * - index document with the right media type when HTTP response header "Content-Type" is missing or has a wrong value
+        	 * - for easier search by CollectionSchema.content_type in the index
+             */
+    		normalizedMediaType = audioFormat.getMediaType();
+    		
+            if(fileExt.isEmpty() || !ext2Format.containsKey(fileExt)) {
+            	/* Normalize extension to a one known by jaudiotagger */
+            	fileExt = audioFormat.getFileExtensions().iterator().next();
+            }
+    	}
+        
+        
         filename = filename.isEmpty() ? location.toTokens() : MultiProtocolURL.unescape(filename);
    	    
     	File tempFile = null;
@@ -260,7 +295,7 @@ public class audioTagParser extends AbstractParser implements Parser {
         		f = AudioFileIO.read(location.getFSFile());
         	} else {
             	// create a temporary file, as jaudiotagger requires a file rather than an input stream 
-        		tempFile = File.createTempFile(filename, "." + fileext);
+        		tempFile = File.createTempFile(filename, "." + fileExt);
         		long bytesCopied = FileUtils.copy(source, tempFile, maxBytes);
         		partiallyParsed = bytesCopied == maxBytes && source.read() != -1;
                 f = AudioFileIO.read(tempFile);
@@ -316,21 +351,9 @@ public class audioTagParser extends AbstractParser implements Parser {
 				detectedUrls = Collections.emptySet();
 			}
             
-        	/* normalize to a single Media Type. Advantages : 
-        	 * - index document with the right media type when HTTP response header "Content-Type" is missing or has a wrong value
-        	 * - for easier search by CollectionSchema.content_type in the index
-             */
-            String mime = mimeType;
-            if(fileext != null && !fileext.isEmpty() ) {
-            	final SupportedAudioMediaType mediaType = this.ext2NormalMediaType.get(fileext);
-            	if(mediaType != null) {
-            		mime = mediaType.getMediaType();
-            	}
-            }
-
             final Document doc = new Document(
                     location,
-                    mime,
+                    normalizedMediaType,
                     charset,
                     this,
                     lang, // languages
