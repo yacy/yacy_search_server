@@ -24,11 +24,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocket;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -92,6 +96,15 @@ public class RemoteInstance implements SolrInstance {
 	
 	/** The connection manager holding the HTTP connections pool shared between remote Solr clients. */
 	public static final org.apache.http.impl.conn.PoolingClientConnectionManager CONNECTION_MANAGER = buildConnectionManager();
+	
+	/** Default setting to apply when the JVM system option jsse.enableSNIExtension is not defined */
+	public static final boolean ENABLE_SNI_EXTENSION_DEFAULT = true;
+	
+	/** When true, Server Name Indication (SNI) extension is enabled on outgoing TLS connections.
+	 * @see <a href="https://tools.ietf.org/html/rfc6066#section-3">RFC 6066 definition</a> 
+	 * @see <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=7127374">JDK 1.7 bug</a> on "unrecognized_name" warning for SNI */
+	public static final AtomicBoolean ENABLE_SNI_EXTENSION = new AtomicBoolean(
+			Boolean.parseBoolean(System.getProperty("jsse.enableSNIExtension", Boolean.toString(ENABLE_SNI_EXTENSION_DEFAULT))));
 	
 	/**
 	 * Background daemon thread evicting expired idle connections from the pool.
@@ -354,7 +367,18 @@ public class RemoteInstance implements SolrInstance {
 			registry = new SchemeRegistry();
 			registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
 			registry.register(
-					new Scheme("https", 443, new SSLSocketFactory(sslContext, AllowAllHostnameVerifier.INSTANCE)));
+					new Scheme("https", 443, new SSLSocketFactory(sslContext, AllowAllHostnameVerifier.INSTANCE) {
+						@Override
+						protected void prepareSocket(SSLSocket socket) throws IOException {
+			        		if(!ENABLE_SNI_EXTENSION.get()) {
+			        			/* Set the SSLParameters server names to empty so we don't use SNI extension.
+			        			 * See https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#ClientSNIExamples */
+			        			final SSLParameters sslParams = socket.getSSLParameters();
+			        			sslParams.setServerNames(Collections.emptyList());
+			        			socket.setSSLParameters(sslParams);
+			        		}
+						}
+					}));
 		} catch (final Exception e) {
 			// Should not happen
 			ConcurrentLog.warn("RemoteInstance",

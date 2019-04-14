@@ -509,6 +509,13 @@ public final class SwitchboardConstants {
     
     /** Default setting value controlling the maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool */
     public static final int HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT = 100;
+    
+    /** Key of the setting controlling whether TLS Server Name Indication (SNI) extension is enabled on outgoing HTTP connections in the general http client (net.yacy.cora.protocol.http.HTTPClient) */
+    public static final String HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED = "http.outgoing.general.tls.sniExtension.enabled";
+    
+    /** Key of the setting controlling whether TLS Server Name Indication (SNI) extension is enabled on outgoing HTTP connections in the remote Solr http client (net.yacy.cora.federate.solr.instance.RemoteInstance) */
+    public static final String HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED = "http.outgoing.remoteSolr.tls.sniExtension.enabled";
+    
 
 
     /*

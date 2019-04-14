@@ -477,6 +477,9 @@ public final class Switchboard extends serverSwitch {
         final int wordCacheMaxCount = (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
         setConfig(SwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
         
+        /* Init outgoing connections clients with user defined settings */
+        initOutgoingConnectionSettings();
+        
         /* Init outgoing connections pools with user defined settings */
 		initOutgoingConnectionPools();
 
@@ -1279,6 +1282,22 @@ public final class Switchboard extends serverSwitch {
 
         this.log.config("Finished Switchboard Initialization");
     }
+    
+	/**
+	 * Initialize outgoing connections custom settings
+	 */
+	public void initOutgoingConnectionSettings() {
+		final String systemEnableSniExt = System.getProperty("jsse.enableSNIExtension");
+		if(systemEnableSniExt == null) {
+			/* Only apply custom configuration when the JVM system option jsse.enableSNIExtension is not defined */
+			HTTPClient.ENABLE_SNI_EXTENSION
+					.set(getConfigBool(SwitchboardConstants.HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED,
+							HTTPClient.ENABLE_SNI_EXTENSION_DEFAULT));
+			
+			RemoteInstance.ENABLE_SNI_EXTENSION.set(getConfigBool(SwitchboardConstants.HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED,
+							RemoteInstance.ENABLE_SNI_EXTENSION_DEFAULT));
+		}
+	}
 
 	/**
 	 * Initialize outgoing connections pools with user defined settings

@@ -6,8 +6,7 @@ PIDFILE="yacy.pid"
 OS="`uname`"
 
 #get javastart args
-JAVA_ARGS="-server -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djsse.enableSNIExtension=false";
-#rem    -Djsse.enableSNIExtension=false  fix a ssl problem in Java 1.7, see http://teknosrc.com/javax-net-ssl-sslprotocolexception-handshake-alert-unrecognized_name-solved/
+JAVA_ARGS="-server -Djava.awt.headless=true -Dfile.encoding=UTF-8";
 
 #JAVA_ARGS="-verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails $JAVA_ARGS";
 

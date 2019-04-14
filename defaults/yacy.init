@@ -227,6 +227,19 @@ http.outgoing.pool.general.maxTotal = 200
 # maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool (net.yacy.cora.federate.solr.instance.RemoteInstance)
 http.outgoing.pool.remoteSolr.maxTotal = 100
 
+
+# TLS Server Name Indication (SNI) extension support for outgoing HTTP connections
+# Must be enabled to load some https URLs (for websites deployed with different certificats and host names on the same shared IP address), otherwise loading fails with errors such as "Received fatal alert: handshake_failure" 
+# It can be necessary to disable it to load some https URLs served by old and misconfigured web servers, otherwise loading fails with the exception javax.net.ssl.SSLProtocolException: "handshake alert:  unrecognized_name"
+# In 2019, this last error should occur less frequently as in the early days of the extension implementation as its standard definition has evolved from RFC 4366 to RFC 6066 which revised how server implementations should handle the unrecognized_name(112) alert. 
+# Can also be configured with the JVM option jsse.enableSNIExtension, but in that case a server restart is required when you want to modify the setting and it is not customizable per http client (general or for remote Solr)
+
+# Set to true to enable TLS Server Name Indication (SNI) extension on outgoing HTTP connections in the general http client (net.yacy.cora.protocol.http.HTTPClient)
+http.outgoing.general.tls.sniExtension.enabled = true
+
+# Set to true to enable TLS Server Name Indication (SNI) extension on outgoing HTTP connections in the remote Solr http client (net.yacy.cora.federate.solr.instance.RemoteInstance)
+http.outgoing.remoteSolr.tls.sniExtension.enabled = true
+
 # default root path for the file server
 # may be overridden by the htdocs parameter
 # users shall be encouraged to use the htdocs path for individual content,

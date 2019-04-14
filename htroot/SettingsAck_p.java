@@ -642,6 +642,25 @@ public class SettingsAck_p {
             prop.put("info", "35");
             return prop;
         }
+        
+        // HTTP client settings
+        if (post.containsKey("httpClientSettings")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=httpClient");
+            
+            if(System.getProperty("jsse.enableSNIExtension") == null) {
+            	/* Only apply custom SNI extension settings when the JVM system option jsse.enableSNIExtension is not defined */
+            	env.setConfig(SwitchboardConstants.HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED,
+            			post.containsKey(SwitchboardConstants.HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED));
+			
+            	env.setConfig(SwitchboardConstants.HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED,
+            			post.containsKey(SwitchboardConstants.HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED));
+            }
+            sb.initOutgoingConnectionSettings();
+            
+            prop.put("info", "38");
+            return prop;
+        }
 
         // nothing made
         prop.put("info", "1");//no information submitted

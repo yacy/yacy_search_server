@@ -34,6 +34,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,8 +45,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocket;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
@@ -131,6 +135,15 @@ public class HTTPClient {
 	
 	/** The connection manager holding the configured connection pool for this client */
 	public static final PoolingHttpClientConnectionManager CONNECTION_MANAGER = initPoolingConnectionManager();
+	
+	/** Default setting to apply when the JVM system option jsse.enableSNIExtension is not defined */
+	public static final boolean ENABLE_SNI_EXTENSION_DEFAULT = true;
+	
+	/** When true, Server Name Indication (SNI) extension is enabled on outgoing TLS connections.
+	 * @see <a href="https://tools.ietf.org/html/rfc6066#section-3">RFC 6066 definition</a> 
+	 * @see <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=7127374">JDK 1.7 bug</a> on "unrecognized_name" warning for SNI */
+	public static final AtomicBoolean ENABLE_SNI_EXTENSION = new AtomicBoolean(
+			Boolean.parseBoolean(System.getProperty("jsse.enableSNIExtension", Boolean.toString(ENABLE_SNI_EXTENSION_DEFAULT))));
 	
 	/**
 	 * Background daemon thread evicting expired idle connections from the pool.
@@ -1086,10 +1099,21 @@ public class HTTPClient {
             // e.printStackTrace();
         }
 
-        final SSLConnectionSocketFactory sslSF = new SSLConnectionSocketFactory(
+        return new SSLConnectionSocketFactory(
                 sslContext,
-                new NoopHostnameVerifier());
-    	return sslSF;
+                new NoopHostnameVerifier()) {
+        	
+        	@Override
+        	protected void prepareSocket(SSLSocket socket) throws IOException {
+        		if(!ENABLE_SNI_EXTENSION.get()) {
+        			/* Set the SSLParameters server names to empty so we don't use SNI extension.
+        			 * See https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#ClientSNIExamples */
+        			final SSLParameters sslParams = socket.getSSLParameters();
+        			sslParams.setServerNames(Collections.emptyList());
+        			socket.setSSLParameters(sslParams);
+        		}
+        	}
+        };
     }
 
     /**
