@@ -24,6 +24,8 @@
 
 package net.yacy.cora.document.encoding;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 
@@ -268,5 +270,22 @@ public class UTF8 implements Comparator<String> {
 
         return (needToChange? sb.toString() : s);
     }
+    
+	/**
+	 * Utility wrapper around the standard JDK {@link URLEncoder#encode(String)}
+	 * function, using the UTF-8 character set and catching
+	 * {@link UnsupportedEncodingException} exception.
+	 * 
+	 * @param str a string to encode. Must not be null.
+	 * @return str encoded in application/x-www-form-urlencoded format
+	 */
+	public static String encodeUrl(final String str) {
+		try {
+			return URLEncoder.encode(str, StandardCharsets.UTF_8.name());
+		} catch (final UnsupportedEncodingException e) {
+			/* Should not happen : UTF-8 support is required for any Java platform */
+			return str;
+		}
+	}
 
 }
