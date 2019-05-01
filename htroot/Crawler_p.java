@@ -626,7 +626,11 @@ public class Crawler_p {
                             ignoreclassname,
                             new VocabularyScraper(vocabulary_scraper),
                             timezoneOffset);
-                    
+
+					profile.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key,
+							post.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
+					profile.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key, post
+							.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
 					profile.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key,
 							post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
 					profile.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, post

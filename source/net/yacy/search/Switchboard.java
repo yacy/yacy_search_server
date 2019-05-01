@@ -3111,95 +3111,112 @@ public final class Switchboard extends serverSwitch {
             )
            ) {
             
-            for (Document d: documents) d.setDepth(response.depth());
-            
-            // get the hyperlinks
-            final Map<AnchorURL, String> hl = Document.getHyperlinks(documents, !response.profile().obeyHtmlRobotsNofollow());
-            
-			final boolean addAllLinksToCrawlStack = response.profile().isIndexNonParseableUrls() /* unsupported resources have to be indexed as pure links if no parser support them */
-					|| response.profile().isCrawlerAlwaysCheckMediaType() /* the crawler must always load resources to double-check the actual Media Type even on unsupported file extensions */;
-			
-			/* Handle media links */
-			
-			for (Map.Entry<DigestURL, String> entry : Document.getImagelinks(documents).entrySet()) {
-				if (addAllLinksToCrawlStack
-						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
-					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
-				}
-			}
-			
-			for (Map.Entry<DigestURL, String> entry : Document.getApplinks(documents).entrySet()) {
-				if (addAllLinksToCrawlStack
-						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
-					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
-				}
-			}
-			
-			for (Map.Entry<DigestURL, String> entry : Document.getVideolinks(documents).entrySet()) {
-				if (addAllLinksToCrawlStack
-						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
-					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
-				}
-			}
-			
-			for (Map.Entry<DigestURL, String> entry : Document.getAudiolinks(documents).entrySet()) {
-				if (addAllLinksToCrawlStack
-						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
-					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
-				}
-			}
-            
-            // insert those hyperlinks to the crawler
-            MultiProtocolURL nextUrl;
-            for ( final Map.Entry<AnchorURL, String> nextEntry : hl.entrySet() ) {
-                // check for interruption
-                checkInterruption();
+			final Pattern crawlerOriginUrlMustMatch = response.profile().getCrawlerOriginUrlMustMatchPattern();
+			final Pattern crawlerOriginUrlMustNotMatch = response.profile().getCrawlerOriginUrlMustNotMatchPattern();
+			if (!(crawlerOriginUrlMustMatch == CrawlProfile.MATCH_ALL_PATTERN
+					|| crawlerOriginUrlMustMatch.matcher(response.url().toNormalform(true)).matches())
+					|| (crawlerOriginUrlMustNotMatch != CrawlProfile.MATCH_NEVER_PATTERN
+							&& crawlerOriginUrlMustNotMatch.matcher(response.url().toNormalform(true)).matches())) {
+				if (this.log.isInfo()) {
+					this.log.info("CRAWL: Ignored links from document at " + response.url().toNormalform(true)
+							+ " : prevented by regular expression on URL origin of links, "
+							+ CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH + " = " + crawlerOriginUrlMustMatch.pattern()
+							+ ", " + CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH + " = "
+							+ crawlerOriginUrlMustNotMatch.pattern());
+	            }
+			} else {
+                for (Document d: documents) {
+                	d.setDepth(response.depth());
+                }
+                
+                // get the hyperlinks
+                final Map<AnchorURL, String> hl = Document.getHyperlinks(documents, !response.profile().obeyHtmlRobotsNofollow());
+                
+    			final boolean addAllLinksToCrawlStack = response.profile().isIndexNonParseableUrls() /* unsupported resources have to be indexed as pure links if no parser support them */
+    					|| response.profile().isCrawlerAlwaysCheckMediaType() /* the crawler must always load resources to double-check the actual Media Type even on unsupported file extensions */;
+    			
+    			/* Handle media links */
+    			
+    			for (Map.Entry<DigestURL, String> entry : Document.getImagelinks(documents).entrySet()) {
+    				if (addAllLinksToCrawlStack
+    						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
+    					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
+    				}
+    			}
+    			
+    			for (Map.Entry<DigestURL, String> entry : Document.getApplinks(documents).entrySet()) {
+    				if (addAllLinksToCrawlStack
+    						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
+    					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
+    				}
+    			}
+    			
+    			for (Map.Entry<DigestURL, String> entry : Document.getVideolinks(documents).entrySet()) {
+    				if (addAllLinksToCrawlStack
+    						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
+    					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
+    				}
+    			}
+    			
+    			for (Map.Entry<DigestURL, String> entry : Document.getAudiolinks(documents).entrySet()) {
+    				if (addAllLinksToCrawlStack
+    						|| (response.profile().indexMedia() && TextParser.supportsExtension(entry.getKey()) == null)) {
+    					hl.put(new AnchorURL(entry.getKey()), entry.getValue());
+    				}
+    			}
+                
+                // insert those hyperlinks to the crawler
+                MultiProtocolURL nextUrl;
+                for ( final Map.Entry<AnchorURL, String> nextEntry : hl.entrySet() ) {
+                    // check for interruption
+                    checkInterruption();
 
-                // process the next hyperlink
-                nextUrl = nextEntry.getKey();
-                String u = nextUrl.toNormalform(true, true);
-                if ( !(u.startsWith("http://")
-                    || u.startsWith("https://")
-                    || u.startsWith("ftp://")
-                    || u.startsWith("smb://") || u.startsWith("file://")) ) {
-                    continue;
+                    // process the next hyperlink
+                    nextUrl = nextEntry.getKey();
+                    String u = nextUrl.toNormalform(true, true);
+                    if ( !(u.startsWith("http://")
+                        || u.startsWith("https://")
+                        || u.startsWith("ftp://")
+                        || u.startsWith("smb://") || u.startsWith("file://")) ) {
+                        continue;
+                    }
+                    
+                    // rewrite the url
+                    String u0 = LibraryProvider.urlRewriter.apply(u);
+                    if (!u.equals(u0)) {
+                        log.info("REWRITE of url = \"" + u + "\" to \"" + u0 + "\"");
+                        u = u0;
+                    }
+                    //Matcher m = rewritePattern.matcher(u);
+                    //if (m.matches()) u = m.replaceAll("");
+                    
+                    // enqueue the hyperlink into the pre-notice-url db
+                    int nextdepth = nextEntry.getValue() != null && nextEntry.getValue().equals(Document.CANONICAL_MARKER) ? response.depth() : response.depth() + 1; // canonical documents are on the same depth
+                    try {
+                        this.crawlStacker.enqueueEntry(new Request(
+                            response.initiator(),
+                            new DigestURL(u),
+                            response.url().hash(),
+                            nextEntry.getValue(),
+                            new Date(),
+                            response.profile().handle(),
+                            nextdepth,
+                            response.profile().timezoneOffset()));
+                    } catch (final MalformedURLException e ) {
+                        ConcurrentLog.logException(e);
+                    }
                 }
-                
-                // rewrite the url
-                String u0 = LibraryProvider.urlRewriter.apply(u);
-                if (!u.equals(u0)) {
-                    log.info("REWRITE of url = \"" + u + "\" to \"" + u0 + "\"");
-                    u = u0;
-                }
-                //Matcher m = rewritePattern.matcher(u);
-                //if (m.matches()) u = m.replaceAll("");
-                
-                // enqueue the hyperlink into the pre-notice-url db
-                int nextdepth = nextEntry.getValue() != null && nextEntry.getValue().equals(Document.CANONICAL_MARKER) ? response.depth() : response.depth() + 1; // canonical documents are on the same depth
-                try {
-                    this.crawlStacker.enqueueEntry(new Request(
-                        response.initiator(),
-                        new DigestURL(u),
-                        response.url().hash(),
-                        nextEntry.getValue(),
-                        new Date(),
-                        response.profile().handle(),
-                        nextdepth,
-                        response.profile().timezoneOffset()));
-                } catch (final MalformedURLException e ) {
-                    ConcurrentLog.logException(e);
-                }
-            }
-            final long stackEndTime = System.currentTimeMillis();
-            if ( this.log.isInfo() ) {
-                this.log.info("CRAWL: ADDED "
-                    + hl.size()
-                    + " LINKS FROM "
-                    + response.url().toNormalform(true)
-                    + ", STACKING TIME = "
-                    + (stackEndTime - stackStartTime)
-                    + ", PARSING TIME = "
-                    + (parsingEndTime - parsingStartTime));
+                final long stackEndTime = System.currentTimeMillis();
+                if ( this.log.isInfo() ) {
+                    this.log.info("CRAWL: ADDED "
+                        + hl.size()
+                        + " LINKS FROM "
+                        + response.url().toNormalform(true)
+                        + ", STACKING TIME = "
+                        + (stackEndTime - stackStartTime)
+                        + ", PARSING TIME = "
+                        + (parsingEndTime - parsingStartTime));
+                }            	
             }
         }
         return documents;

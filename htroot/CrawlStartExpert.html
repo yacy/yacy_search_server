@@ -174,6 +174,7 @@
 
                 // remove if MATCH_NEVER_STRING
                 disableIf('mustnotmatch', defaultMatchNone);
+                disableIf('crawlerOriginURLMustNotMatch', defaultMatchNone);
                 disableIf('ipMustnotmatch', defaultMatchNone);
                 disableIf('indexmustnotmatch', defaultMatchNone);
                 disableIf('indexcontentmustnotmatch', defaultMatchNone);
@@ -183,6 +184,7 @@
 
                 // remove if MATCH_ALL_STRING
                 disableIf('mustmatch', defaultMatchAll);
+                disableIf('crawlerOriginURLMustMatch', defaultMatchAll);
                 disableIf('ipMustmatch', defaultMatchAll);
                 disableIf('indexmustmatch', defaultMatchAll);
                 disableIf('indexcontentmustmatch', defaultMatchAll);
@@ -354,6 +356,29 @@
             <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="mustnotmatch" id="mustnotmatch" type="text" size="55" maxlength="100000" value="#[mustnotmatch]#" /></td></tr>
 			</table>
 	        </dd>
+	        
+	        <dt>Load Filter on URL origin of links</dt>
+	        <dd>
+	        	<span class="info" style="float:right">
+	        		<img src="env/grafics/i16.gif" width="16" height="16" alt="info"/>
+	        		<span style="right:0px;">
+            			The filter is a <b><a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html" target="_blank">regular expression</a></b>.
+            			Example: to allow loading only links from pages on example.org domain, set the must-match filter to '.*example.org.*'. 
+            			Attention: you can test the functionality of your regular expressions using the <a href="RegexTest.html">Regular Expression Tester</a> within YaCy.
+            		</span>
+            	</span>
+            	<table style="border-width: 0px">
+            		<tr>
+            			<td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td>
+            			<td><input name="crawlerOriginURLMustMatch" id="crawlerOriginURLMustMatch" type="text" size="55" maxlength="100000" value="#[crawlerOriginURLMustMatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td>
+            		</tr>
+		    		<tr>
+		    			<td><img src="env/grafics/minus.gif" alt=""> must-not-match</td>
+		    			<td><input name="crawlerOriginURLMustNotMatch" id="crawlerOriginURLMustNotMatch" type="text" size="55" maxlength="100000" value="#[crawlerOriginURLMustNotMatch]#" /></td>
+		    		</tr>
+				</table>
+	        </dd>
+	        
 	        <dt>Load Filter on IPs</dt>
 	        <dd>
             <table style="border-width: 0px">

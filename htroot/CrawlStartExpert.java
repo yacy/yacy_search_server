@@ -248,6 +248,22 @@ public class CrawlStartExpert {
         } else {
             prop.put("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         }
+        
+		// Filter on URL origin of links: must match
+		if (post != null && post.containsKey(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key)) {
+			prop.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key,
+					post.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
+		} else {
+			prop.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING);
+		}
+
+		// Filter on URL origin of links: must-not-match
+		if (post != null && post.containsKey(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key)) {
+			prop.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key,
+					post.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
+		} else {
+			prop.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
+		}
 
         // Load Filter on IPs: must match
         if (post != null && post.containsKey("ipMustmatch")) {
