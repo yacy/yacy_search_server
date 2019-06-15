@@ -163,9 +163,22 @@ open http://localhost:8090/ConfigHTCache_p.html and set a new size.
 
 ## Join the development!
 
-YaCy was created with the help of many. About 30 programmers have helped,
-a list of some of them can be seen here: https://yacy.net/en/Join.html
-Please join us!
+YaCy was created with the love of a community.
+A large number of programmers have helped, please join us!
+
+Here is a rough hint how to start developing YaCy in eclipse:
+
+- Clone https://github.com/yacy/yacy_search_server.git
+- File -> Import as Git -> Projects from Git -> Existing local repository
+- -> add -> your git clone of yacy_search_server
+- "Import existing Eclipse projects" -> finish
+- Run -> External Tools -> External Tools Configuration -> double-click Ant Build
+- -> Name: "YaCy Build" -> Buildfile: Browse Workspace -> build.xml -> Run
+- In Package Explorer, right-click on yacy -> Run as -> Java Application -> Select "yacy - net.yacy" -> Ok
+
+To join our development community, got to https://searchlab.eu
+
+If you implemented something amazing we welcome your pull request at https://github.com/yacy/yacy_search_server
 
 
 ## How to get the source code and how to compile YaCy yourself?
@@ -208,10 +221,8 @@ scripts you can create more shell api access methods easily.
 
 ## Contact
 
-Our primary point of contact was the German forum at http://forum.yacy.net
-We encourage you to start a YaCy forum in your own language.
-
-A chat room is available on [Gitter](https://gitter.im/yacy/yacy_search_server), which can also be reached from [Matrix.org](https://matrix.to/#/#yacy:matrix.org).
+Our primary point of contact is the international YaCy forum at https://searchlab.eu
+We encourage you to start a discussion there in your own language.
 
 If you have any questions, please do not hesitate to contact the maintainer:
 Send an email to Michael Christen (mc@yacy.net) with a meaningful subject
