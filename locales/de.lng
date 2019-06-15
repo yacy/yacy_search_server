@@ -1815,7 +1815,7 @@ deselect the partial import flag==Den teilweisen Import Flag abschalten
 When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==Wenn ein Export gestartet wird werden Hilfsdateien in DATA/SURROGATE/in erzeugt, die automatisch von einem Indexer Thread geholt und verarbeitet werden.
 All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/SURROGATE/out verschoben und können recycelt werden wenn ein Index gelöscht wird.
 The URL stub==Der Teil der URL
-like http://forum.yacy-websuche.de==wie z.B. http://forum.yacy-websuche.de
+like https://searchlab.eu==wie z.B. https://searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==dies muss den kompletten Pfad vor '/viewtopic.php?' enthalten
 Type==Typ
 > of database<==> der Datenbank<

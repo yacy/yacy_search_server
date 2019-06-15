@@ -1942,7 +1942,7 @@ deselect the partial import flag==снимите флаг частичного �
 When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==После начала экспорта, замещающие файлы создаются в DATA/SURROGATE/in и автоматически добавляются в индексатор.
 All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Все проиндексированные замещающие файлы перемещаются в DATA/SURROGATE/out и могут быть использованы повторно в случае удаления индекса.
 The URL stub==Часть ссылки
-like http://forum.yacy-websuche.de==например, http://forum.yacy-websuche.de
+like https://searchlab.eu==например, https://searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==(путь до '/viewtopic.php?')
 Type==Тип
 > of database<==> базы данных<

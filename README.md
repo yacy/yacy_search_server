@@ -50,11 +50,11 @@ The source code is inside the release package (see /source and /htroot).
 ## Where is the documentation?
 
 Documentation can be found at:
-- (Home Page)        https://yacy.net/
-- (German Forum)     http://forum.yacy.de/
-- (Wiki:de)          http://www.yacy-websuche.de/wiki/index.php/De:Start
-- (Wiki:en)          http://www.yacy-websearch.net/wiki/index.php/En:Start
-- (Tutorial Videos)  https://yacy.net/en/Tutorials.html and https://yacy.net/de/Lehrfilme.html
+- (Home Page)           https://yacy.net/
+- (International Forum) https://searchlab.eu
+- (Wiki:de)             http://www.yacy-websuche.de/wiki/index.php/De:Start
+- (Wiki:en)             http://www.yacy-websearch.net/wiki/index.php/En:Start
+- (Tutorial Videos)     https://yacy.net/en/Tutorials.html and https://yacy.net/de/Lehrfilme.html
 
 Every of these locations has a (YaCy) search functionality which combines
 all these locations into one search result.

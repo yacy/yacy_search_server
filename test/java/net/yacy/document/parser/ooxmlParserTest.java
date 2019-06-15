@@ -153,7 +153,7 @@ public class ooxmlParserTest {
 			assertNotNull("Detected URLs must not be null", anchors);
 			assertEquals("2 URLs should be detected", 2, anchors.size());
 			assertTrue("YaCy home page URL should have been parsed", anchors.contains(new AnchorURL("http://yacy.net")));
-			assertTrue("YaCy forum URL should have been parsed", anchors.contains(new AnchorURL("http://forum.yacy-websuche.de/")));
+			assertTrue("YaCy forum URL should have been parsed", anchors.contains(new AnchorURL("https://searchlab.eu")));
 		}
 	}
 

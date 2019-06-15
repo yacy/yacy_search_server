@@ -2527,7 +2527,7 @@
        <source>The URL stub</source>
     </trans-unit>
     <trans-unit id="8bafb5ec" xml:space="preserve" approved="no" translate="yes">
-       <source>like http://forum.yacy-websuche.de</source>
+       <source>like https://searchlab.eu</source>
     </trans-unit>
     <trans-unit id="6d4ca1b5" xml:space="preserve" approved="no" translate="yes">
        <source>this must be the path right in front of '/viewtopic.php?'</source>

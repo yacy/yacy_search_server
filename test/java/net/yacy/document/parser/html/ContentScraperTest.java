@@ -173,7 +173,7 @@ public class ContentScraperTest {
      */
     @Test
     public void testFindAbsoluteURLs() throws MalformedURLException {
-		final String[] urlStrings = { "http://yacy.net", "http://forum.yacy.de", "https://en.wikipedia.org" };
+		final String[] urlStrings = { "http://yacy.net", "https://searchlab.eu", "https://en.wikipedia.org" };
 		final List<AnchorURL> urls = new ArrayList<>();
 		for (String urlString : urlStrings) {
 			urls.add(new AnchorURL(urlString));
@@ -277,7 +277,7 @@ public class ContentScraperTest {
      */
     @Test
     public void testFindAbsoluteURLsMaxURLs() throws MalformedURLException {
-    	final String text = "Some test URLS : http://yacy.net - http://forum.yacy.de - https://en.wikipedia.org";
+    	final String text = "Some test URLS : http://yacy.net - https://searchlab.eu - https://en.wikipedia.org";
     	
     	/* No limit */
     	ArrayList<AnchorURL> detectedURLs = new ArrayList<>();

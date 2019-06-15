@@ -279,7 +279,7 @@ public class GenericXMLParserTest {
 				+ "<html xmlns=\"http://www.w3.org/1999/xhtml\">" + "<head>"
 				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"
 				+ "<title>XHTML attributes URLs test</title>" + "</head>" + "<body>"
-				+ "Here are YaCy<a href=\"http://yacy.net\">home page</a> and <a href=\"http://forum.yacy.de\">International Forum</a>."
+				+ "Here are YaCy<a href=\"http://yacy.net\">home page</a> and <a href=\"https://searchlab.eu\">International Forum</a>."
 				+ "And this is a relative link to a <a href=\"/document.html\">sub document</a>." + "</body>"
 				+ "</html>";
 
@@ -296,7 +296,7 @@ public class GenericXMLParserTest {
 			assertEquals(3, detectedAnchors.size());
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://yacy.net")));
-			assertTrue(detectedAnchors.contains(new AnchorURL("http://forum.yacy.de")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("https://searchlab.eu")));
 		} finally {
 			inStream.close();
 		}
@@ -316,7 +316,7 @@ public class GenericXMLParserTest {
 				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"
 				+ "<title>XHTML content URLs test</title>" + "</head>" + "<body>" + "Here are some YaCy links:" + "<dl>"
 				+ "<dt>Home page</dt>" + "<dd>http://yacy.net</dd>" + "<dt>International Forum</dt>"
-				+ "<dd>http://forum.yacy.de</dd>" + "</dl>"
+				+ "<dd>https://searchlab.eu</dd>" + "</dl>"
 				+ "And this is a mention to a relative link : /document.html " + "</body>" + "</html>";
 
 		InputStream inStream = new ByteArrayInputStream(xhtml.getBytes(StandardCharsets.UTF_8.name()));
@@ -332,7 +332,7 @@ public class GenericXMLParserTest {
 			assertEquals(3, detectedAnchors.size());
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://yacy.net")));
-			assertTrue(detectedAnchors.contains(new AnchorURL("http://forum.yacy.de")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("https://searchlab.eu")));
 		} finally {
 			inStream.close();
 		}
@@ -374,7 +374,7 @@ public class GenericXMLParserTest {
 				+ "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />"
 				+ "<title>XHTML content URLs test</title>" + "</head>" + "<body>" + "<p>Here are some YaCy URLs: "
 				+ "Home page : http://yacy.net - International Forum : "
-				+ "http://forum.yacy.de "
+				+ "https://searchlab.eu "
 				+ "and this is a mention to a relative URL : /document.html</p>"
 				+ "<p>Here are YaCy<a href=\"http://mantis.tokeek.de\">bug tracker</a> and <a href=\"http://www.yacy-websearch.net/wiki/\">Wiki</a>."
 				+ "And this is a relative link to another <a href=\"/document2.html\">sub document</a></p>"
@@ -397,7 +397,7 @@ public class GenericXMLParserTest {
 			assertEquals(5, detectedAnchors.size());
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://yacy.net")));
-			assertTrue(detectedAnchors.contains(new AnchorURL("http://forum.yacy.de")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("https://searchlab.eu")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://mantis.tokeek.de")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.yacy-websearch.net/wiki/")));
 		} finally {
@@ -434,7 +434,7 @@ public class GenericXMLParserTest {
 				.append("</head>")
 				.append("<body><p>Here are some YaCy URLs: ")
 				.append("Home page : http://yacy.net - International Forum : ")
-				.append("http://forum.yacy.de ")
+				.append("https://searchlab.eu ")
 				.append("and this is a mention to a relative URL : /document.html</p>");
 		
 		/* Add some filler text to reach a total size beyond SAX parser internal input stream buffers */
@@ -460,7 +460,7 @@ public class GenericXMLParserTest {
 			assertEquals(3, detectedAnchors.size());
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.w3.org/1999/xhtml")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://yacy.net")));
-			assertTrue(detectedAnchors.contains(new AnchorURL("http://forum.yacy.de")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("https://searchlab.eu")));
 		} finally {
 			inStream.close();
 		}

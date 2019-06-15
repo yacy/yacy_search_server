@@ -1042,7 +1042,7 @@ deselect the partial import flag==取消部分导入
 When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==导出过程开始时, 在 DATA/SURROGATE/in 目录下自动生成备份文件, 并且会被索引器自动爬取.
 All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==所有被索引的备份文件都在 DATA/SURROGATE/out 目录下, 并被索引器循环利用.
 The URL stub==URL根域名
-like http://forum.yacy-websuche.de==比如链接 http://forum.yacy-websuche.de
+like https://searchlab.eu==比如链接 https://searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==必须在'/viewtopic.php?'前面
 Type==数据库
 > of database<==> 类型<
