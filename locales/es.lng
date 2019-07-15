@@ -6,9 +6,10 @@
 # (C) by Michael Peter Christen; mc@anomic.de
 # first published on http://www.anomic.de
 # Frankfurt, Germany, 2005
-# 
+#
 # This file is maintained by Iván Hernández Cazorla <ivan@ivanhercaz.com>
 # This file is written by (chronological order) Iván Hernández Cazorla <ivan@ivanhercaz.com>
+# This file is written by Jesús E. <heckyel@hyperbola.info>
 
 # If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
@@ -17,119 +18,92 @@
 # Only part 1.
 # Contributors are in chronological order, not how much they did absolutely.
 # Thank you for your help!
-<!-- lang -->default(english)==español
+<!-- lang -->default(english)==Español
 <!-- author -->==Iván Hernández Cazorla
 <!-- maintainer -->==Iván Hernández Cazorla
+<!-- contributor -->==Jesús E.
 #-----------------------------
 
 #File: AccessGrid_p.html
 #---------------------------
 YaCy Network Access==Acceso a la red YaCy
-Server Access Grid==Red de acceso al servidor
-This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Esta imagen muestra las conexiones entrante a tu par YaCy y las conexiones salientes desde tu par a otros pares y servidores web.
 #-----------------------------
 
 #File: AccessTracker_p.html
 #---------------------------
-Access Tracker==Rastreador de acceso
+#Access Tracker==Rastreador de acceso
 Server Access Overview==Información general de acceso al servidor
-This is a list of #[num]# requests to the local http server within the last hour.==Esta es una lista de #[num]# peticiones al servidor http local durante la última hora.
-Showing #[num]# requests.==Mostrando #[num]# peticiones.
 >Host<==>Host<
 >Path<==>Ruta<
 Date<==Fecha<
-Access Count During==Número de accesos durante
 last Second==el último segundo
 last Minute==el último minuto
-last 10 Minutes==los últimos 10 minuto
+last 10 Minutes==los últimos 10 minutos
 last Hour==la última hora
-The following hosts are registered as source for brute-force requests to protected pages==Los siguientes hosts están registrados como fuentes para peticiones de fuerza bruta a páginas protegidas
-Access Times==Número de accesos
-Server Access Details==Detalles de acceso al servidor
-Local Search Log==Registro de búsqueda local
-Top Search Words (last 7 Days)==Las palabras más buscadas (últimos 7 días)
-Local Search Host Tracker==Rastreador de host de búsqueda local
-Remote Search Log==Registro de búsqueda remota
+>Host==>Host
+Total:==Total:
 Success:==Exitos:
-Remote Search Host Tracker==Rastreador de host de búsqueda remota
-This is a list of searches that had been requested from this' peer search interface==Esta es una lista de búsquedas que han sido solicitadas desde esta interfaz de búsqueda de pares
-Showing #[num]# entries from a total of #[total]# requests.==Mostrando #[num]# entradas de un total de #[total]# peticiones.
-Requesting Host==Solicitando host
 Offset==Offset
 Expected Results==Resultados esperados
 Returned Results==Resultados devueltos
-Used Time (ms)==Tiempo utilizado (en ms)
-URL fetch (ms)==Extracción de la URL (en ms)
-Snippet comp (ms)==Generación de vista previa (en ms)
 Query==Consulta
-Search Word Hashes==Hashes de las palabras de búsqueda
-Count</td>==Cantidad</td>
+>User Agent<==>User agent<
 Queries Per Last Hour==Consultas durante la última hora
-Access Dates==Fechas de acceso
-This is a list of searches that had been requested from remote peer search interface==Esta es una lista de las búsquedas que han sido solicitadas desde una interfaz de búsqueda de pares remota
-This is a list of requests (max. 1000) to the local http server within the last hour.==Esta es una lista de las peticiones (máx. 1000) al servidor http local durante la última hora.
+#-----------------------------
+
+#File: Settings_UrlProxyAccess.inc
+#---------------------------
+URL proxy:==URL del proxy:
+>Enabled<==>Activado<
+"Submit"=="Enviar"
+>Enabled<==>Activado<
 #-----------------------------
 
 #File: Autocrawl_p.html
 #---------------------------
->Autocrawler<==>Rastreador automático<
-Autocrawler automatically selects and adds tasks to the local crawl queue.==El rastreador automático selecciona y añade tareas a la cola de rastreo.
-This will work best when there are already quite a few domains in the index.==Esto funcionará mejor cuando haya algunos dominios en el índice.
-Autocralwer Configuration==Configuración del rastreador automático
-You need to restart for some settings to be applied==Necesitas reiniciar para que se apliquen algunos ajustes
-Enable Autocrawler:==Activar el rastreador automático:
-Deep crawl every:==Rastreo profundo cada
-Warning: if this is bigger than "Rows to fetch" only shallow crawls will run.==Atención: si esta cifra es mayor que la de "Filas a buscar" solo se ejecutarán rastreos superficiales.
-Rows to fetch at once:==Filas a buscar de una vez:
-Recrawl only older than # days:==Volver a rastrear solo los de más de # días de antigüedad:
-Get hosts by query:==Obtener hosts por consulta:
-Can be any valid Solr query.==Se puede utilizar cualquier consulta Solr válida.
-Shallow crawl depth (0 to 2):==Profundidad del rastreo superficial (de 0 a 2):
-Deep crawl depth (1 to 5):==Profundida del rastreo exhaustivo (de 1 a 5):
-Index text:==Indexar texto:
-Index media:==Indexar multimedia:
 "Save"=="Guardar"
+#-----------------------------
+
+#File: Blacklist_p.html
+#---------------------------
+Blacklist Manager==Gestione blacklist
+Blacklist==Blacklist
+This function provides an URL filter to the proxy; any blacklisted URL is blocked==Questa funzione fornisce al proxy un filtro per le URL; le URL nella blacklist non vengono caricate
+from being loaded. You can define several blacklists and activate them separately.== Puoi definire diverse blacklist e acctivarle separatamente.
+You may also provide your blacklist to other peers by sharing them; in return you may==Puoi fornire la tua blacklist agli altri peers rendendola condivisa; in ritorno puoi
+collect blacklist entries from other peers.==collezionare le entrate nelle blacklist degli altri peers.
+No blacklist selected==Nessuna blacklist selezionata
+"select"=="Seleccionar"
+"create"=="crear"
+"Save"=="Guardar"
+Delete this list==Borrar esta lista
+Edit list==Editar lista
+These are the domain name / path patterns in this blacklist:==Estos son los patrones de nombre de dominio/ruta en blacklist:
+>regular expression<==>expresión regular<
+domain.net/fullpath<==dominio.net/rutacompleta<
+>domain.net/*<==>dominio.net/*<
+*.domain.net/*<==*.dominio.net/*<
+*.sub.domain.net/*<==*.sub.dominio.net/*<
+sub.domain.*/*<==sub.dominio.*/*<
+domain.*/*<==dominio.*/*<
+(slow)==(lento)
+was removed from blacklist==remover desde el blacklist
+was added to the blacklist==agregar al blacklist
+"set"=="asignar"
 #-----------------------------
 
 #File: BlacklistCleaner_p.html
 #---------------------------
-Blacklist Cleaner==Limpiador de lista negra
-Here you can remove or edit illegal or double blacklist-entries.==Aquí puedes eliminar o editar entradas ilegales o duplicadas en la lista negra.
-Check list==Lista de comprobación
-"Check"=="Comprobar"
-Allow regular expressions in host part of blacklist entries.==Permitir expresiones regulares en la parte del host de las entradas de la lista negra.
-The blacklist-cleaner only works for the following blacklist-engines up to now:==El limpiador de la lista negra solo funciona hasta ahora para los siguientes motores de listas negras:
-Illegal Entries in #[blList]# for==Entradas ilegales en #[blList]# para
-Deleted #[delCount]# entries==#[delCount]# entradas eliminadas
-Altered #[alterCount]# entries!==!#[alterCount]# entradas modificadas!
-Two wildcards in host-part==Dos caracteres comodín en la parte del host
-Either subdomain <u>or</u> wildcard==De cualquier subdominio <u>o</u> carácter comodín
-Path is invalid Regex==La ruta es una expresión regular inválida
-Wildcard not on begin or end==El comodín no está al principio ni al final
-Host contains illegal chars==El host contiene caracteres ilegales
-Double==Doble
-"Change Selected"=="Cambiar selección"
-"Delete Selected"=="Borrar selección"
-No Blacklist selected==No se ha seleccionado una lista negra
 #-----------------------------
 
 #File: BlacklistImpExp_p.html
 #---------------------------
 Blacklist Import==Importación de lista negra
-Used Blacklist engine:==Motor de lista negra utilizado:
 Import blacklist items from...==Importar elementos de la lista negra desde...
 other YaCy peers:==otros pares YaCy:
-"Load new blacklist items"=="Cargar nuevos elementos de la lista negra"
 URL:==URL:
 plain text file:<==archivo de texto plano:<
 XML file:==archivo XML:
-Upload a regular text file which contains one blacklist entry per line.==Subir un archivo de texto regular que contenga una entrada de lista negra por línea.
-Upload an XML file which contains one or more blacklists.==Subir un archivo XML que contenga una o más listas negras.
-Export blacklist items to...==Exportar elementos de la lista negra a...
-Here you can export a blacklist as an XML file. This file will contain additional==Aquí puedes exportar una lista negra como un archivo XML. Este archivo contendrá información
-information about which cases a blacklist is activated for.==adicional sobre los casos en los que se activa una lista negra.
-"Export list as XML"=="Exportar lista como XML"
-Here you can export a blacklist as a regular text file with one blacklist entry per line.==Aquí puedes exportar una lista negra como un archivo de texto regular con una entrada de lista negra por línea.
 This file will not contain any additional information==Este archivo no contendrá información adicional
 "Export list as text"=="Exportar lista como texto"
 #-----------------------------
@@ -137,277 +111,1719 @@ This file will not contain any additional information==Este archivo no contendr�
 #File: BlacklistTest_p.html
 #---------------------------
 Blacklist Test==Prueba de lista negra
-Used Blacklist engine:==Motor de lista negra utilizado:
 Test list:==Lista de prueba:
 "Test"=="Prueba"
-The tested URL was==La URL probada fue
-It is blocked for the following cases:==Está bloqueada en los siguientes casos:
+Crawling==Crawling
+DHT==DHT
+Proxy==Proxy
 Search==Buscar
-Surftips==Consejos de navegación
-#-----------------------------
-
-#File: Blacklist_p.html
-#---------------------------
-Blacklist Administration==Administración de las listas negras
-This function provides an URL filter to the proxy; any blacklisted URL is blocked==Esta función proporciona un filtro de URL para el proxy; cualquier URL en la lista negra está bloqueada
-from being loaded. You can define several blacklists and activate them separately.==y no se cargará. Puedes definir varias listas negras y activarlas por separado.
-You may also provide your blacklist to other peers by sharing them; in return you may==También puedes proporcionar tu lista negra a otros pares compartiéndola con ellos; a cambio puedes
-collect blacklist entries from other peers.==recopilar entradas de lista negra de otros pares.
-Active list:==Lista activa:
-No blacklist selected==No se ha seleccionado una lista negra
-Select list to edit:==Seleccionar lista para editarla:
-not shared::shared==no compartida::compartida
-"select"=="Seleccionar"
-Create new list:==Crear una lista nueva:
-"create"=="Crear"
-Settings for this list==Configuración para esta lista
-"Save"=="Guardar"
-Share/don't share this list==Compartir/no compartir esta lista
-Delete this list==Borrar esta lista
-Edit list==Editar lista
-These are the domain name/path patterns in==Estos son los patrones de nombre de dominio/ruta en
-Blacklist Pattern==en los patrones de lista negra
-Edit selected pattern(s)==Editar patrones seleccionados
-Delete selected pattern(s)==Borrar patrones seleccioandos
-Move selected pattern(s) to==Mover patrones seleccionados a
-Add new pattern:==Añadir patrón nuevo:
-Add URL pattern==Añadir patrón de URL
-The right '*', after the '/', can be replaced by a==El asterico '*' derecho, después de la '/', puede reemplazarse por una
->regular expression<==>expresión regular<
-domain.net/fullpath<==dominio.net/rutacompleta<
->domain.net/*<==>dominio.net/*<
-*.domain.net/*<==*.dominio.net/*<
-*.sub.domain.net/*<==*.sub.dominio.net/*<
-(slow)==(lento)
-Activate this list for==Activar esta lista para
-Show entries:==Mostrar entradas:
-Entries per page:==Entradas por página:
-"set"=="asignar"
-Edit existing pattern(s):==Editar patrones existentes:
-"Save URL pattern(s)"=="Guardar patrones de URL"
 #-----------------------------
 
 #File: Blog.html
 #---------------------------
 by==por
-Comments</a>==Comentarios</a>
->edit==>editar
 >delete==>borrar
 Edit<==Editar<
-previous entries==entradas anteriores
-next entries==siguientes entradas
-new entry==nueva entrada
-import XML-File==importar archivo XML
-export as XML==exportar como XML
-Blog-Home==Blog-Inicio
 Author:==Autor:
 Subject:==Título:
-You can use==Puedes utilizar
-Yacy-Wiki Code==código wiki-Yacy
+Text:==Texto:
 here.==aquí.
-Comments:==Comentarios:
-deactivated==desactivado
->activated==>activado
-moderated==moderado
 "Submit"=="Enviar"
-"Preview"=="Previsualizar"
-"Discard"=="Descartar"
 >Preview==>Previsualizar
-No changes have been submitted so far!==¡No se han enviado cambios hasta el momento!
 Access denied==Acceso denegado
-To edit or create blog-entries you need to be logged in as Admin or User who has Blog rights.==Para editar o crear entradas en el blog necesitas estar conectado como administrador o usuarios con privilegios de "Blog"
 Are you sure==¿Estás seguro?
-Confirm deletion==Confirmar borrado
-that you want to delete==de que quieres borrarla?
-Yes, delete it.==Sí, bórrala.
-No, leave it.==No, déjala.
-Import was successful!==¡La importación fue un éxito!
-Import failed, maybe the supplied file was no valid blog-backup?==La importación falló, ¿puede ser que el archivo suministrado no fue una copia de seguridad de blog válida?
-Please select the XML-file you want to import:==Por favor, selecciona el archivo XML que quieres importar:
-Text:==Texto
+that you want to delete==de que quieres borrarla?:
 #-----------------------------
 
 #File: BlogComments.html
 #---------------------------
 by==por
-Comments</a>==Comentarios</a>
 Login==Iniciar sesión
-Blog-Home==Blog-Inicio
 delete</a>==borrar</a>
 allow</a>==permitir</a>
 Author:==Autor:
 Subject:==Título:
 You can use==Puedes utilizar
-Yacy-Wiki Code==código wiki-Yacy
 here.==aquí.
 "Submit"=="Enviar"
 "Preview"=="Previsualizar"
-"Discard"=="Descartar"
 #-----------------------------
 
 #File: Bookmarks.html
 #---------------------------
-YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': marcadores
-The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Esta lista de marcadores puede ser consultada como un feed RSS. Esto también se puede hacer cuando seleccionas una etiqueta específica.
-Click the API icon to load the RSS from the current selection.==Clica el icono API para cargar el RSS de la selección actual.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Para ver la lista de todas las API, por favor visita la <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">página API de la wiki</a>.
-<h3>Bookmarks==<h3>Marcadores
+#YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Marcadores
+<h2>Bookmarks==<h2>Marcadores
 Bookmarks (==Marcadores (
+Login==Iniciar sesión
 List Bookmarks==Lista de marcadores
 Add Bookmark==Añadir marcador
 Import Bookmarks==Importar marcadores
 Import XML Bookmarks==Importar marcadores en XML
 Import HTML Bookmarks==Importar marcadores en HTML
-"import"=="Importar"
+"import"=="importar"
 Default Tags:==Etiquetas por defecto:
 imported==importado
+Edit Bookmark==Editar Marcador
+URL:==URL:
 Title:==Título:
 Description:==Descripción:
-Folder (/folder/subfolder):==Carpeta (/carpeta/subcarpeta):
-Tags (comma separated):==Etiquetas (separadas por comas)
+Tags (comma separated):==Etiquetas (separadas por comas):
 >Public:==>Público:
-yes==sí
-Bookmark is a newsfeed==El marcador es un suministro de noticias
+yes==sì
+no==no
 "create"=="crear"
+"edit"=="editar"
 File:==Archivo:
-import as Public==importar como público
+import as Public==importar como Público
 "private bookmark"=="marcador privado"
 "public bookmark"=="marcador público"
 Tagged with==Etiquetado con
-'Confirm deletion'=="Confirmar borrado"
 Edit==Editar
 Delete==Eliminar
-Folders==Carpetas
-Bookmark Folder==Carpeta de marcadores
+Folders==Directorios
 Tags==Etiquetas
-Bookmark List==Lista de marcadores
-previous page==página anterior
-next page==siguiente página
+next áage==siguiente página
 All==Todo
-Show==Mostrar
-Bookmarks per page.==Marcadores por página.
-start autosearch of new bookmarks==comenzar la búsqueda automatica de nuevos marcadores
-This starts a serach of new or modified bookmarks since startup==Esto iniciará una búsqueda de marcadores nuevos o modificados desde el inicio
-in folder "search" with "query=&lt;original_search_term&gt;"==en la carpeta "search" con "query=&lt;original_search_term&gt;"
-Every peer online will be ask for results.==Se pedirán resultados a cada uno de los pares en línea.
 #-----------------------------
 
 #File: Collage.html
 #---------------------------
-Image Collage==Collage de imagen
-Private Queue==Cola privada
-Public Queue==Cola pública
+#-----------------------------
+
+
+#File: compare_yacy.html
+#---------------------------
+Websearch Comparison==Comparación de búsqueda web
+Left Search Engine==Motor de búsqueda izquierdo
+Right Search Engine==Motor de búsqueda derecho
+"Compare"=="Comparar"
+Search Result==Resultado de búsqueda
 #-----------------------------
 
 #File: ConfigAccounts_p.html
 #---------------------------
-User Accounts==Cuentas de usuario
-User Administration==Administración de usuario
+User Accounts==Cuenta de usuario
+User Administration==Administración de Usuario
 User created:==Usuario creado:
-User changed:==Usuario cambiado:
-Generic error.==Error genérico.
+User changed:==Usuario modificado:
+Generic error.==Error generico.
 Passwords do not match.==Las contraseñas no coinciden.
-Username too short. Username must be &gt;= 4 Characters.==El nombre de usuario es demasiado corto. Debe ser &gt;= a 4 caracteres.
-Username already used (not allowed).==El nombre de usuario está en uso (no permitido).
-No password is set for the administration account.==No se ha establecido una contraseña para la cuenta de administración.
-Please define a password for the admin account.==Por favor, define una contraseña para la cuenta de administrador.
 Admin Account==Cuenta de administrador
-Access from localhost without account==Acceder desde localhost sin cuenta
-Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==El acceso a tu par desde tu propio ordenador (acceso localhost) se concede con permisos de administrador. No es necesario configurar una cuenta de administración.
-Access only with qualified account==Solo acceso con una cuenta cualificada
-This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Esto es necesario si quieres acceder remotamente a tu par, pero también endurece los controles de acceso a las operaciones administrativas de tu par.
-Peer User:==Usuario par:
-New Peer Password:==Nueva contraseña par:
-Repeat Peer Password:==Repite la contraseña par:
-"Define Administrator"=="Definir administrador"
->Access Rules<==>Reglas de acceso<
-Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Protección de todas las páginas: si está activo, el acceso a todas las páginas necesitará autorización; si está desactivado, solo las páginas con la extensión "_p" están protegidas.
+Access from localhost without account==Acceder desde el localhost sin cuenta
+Access to your peer from your own computer (localhost access) is granted with administrator rights. No need to configure an administration account.==El acceso a su nodo desde su propia computadora (acceso localhost) se otorga con derechos de administrador. No es necesario configurar una cuenta de administración.
+This setting is convenient but less secure than using a qualified admin account.==Esta configuración es conveniente pero menos segura que usar una cuenta de administrador calificada.
+Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Úselo con cuidado, especialmente cuando navega por sitios web no confiables y potencialmente maliciosos mientras ejecuta su nodo YaCy en la misma computadora.
+Access only with qualified account==Acceso solo con cuenta calificada
+This is required if you want a remote access to your peer, but it also hardens access controls on administration operations of your peer.==Esto es necesario si desea un acceso remoto a su nodo, pero también fortalece los controles de acceso en las operaciones de administración de su nodo.
+Peer User:==Usuario del Nodo
+New Peer Password:==Nueva contraseña del Nodo:
+Repeat Peer Password:==Repita la contraseña del Nodo:
+"Define Administrator"=="Definir Administrador"
+<Access Rules>==<Reglas de Acceso>
 Set Access Rules==Establecer reglas de acceso
+Protection of all pages: if set to on, access to all pages need authorization; if off, only pages with "_p" extension are protected.==Protección de todas las páginas: si está activada, el acceso a todas las páginas necesita autorización; Si está desactivado, solo las páginas con extensión "_p" están protegidas.
 Select user==Seleccionar usuario
 New user==Nuevo usuario
 Edit User==Editar usuario
-Delete User==Borrar usuario
+Delete User==Eliminar usuario
 Edit current user:==Editar usuario actual:
 Username</label>==Nombre de usuario</label>
 Password</label>==Contraseña</label>
-Repeat password==Repetir contraseña
+Repeat password==Repite la contraseña
 First name==Nombre
-Last name==Apellidos
+Last name==Apellido
 Address==Dirección
-Rights==Derechos
-Timelimit==Tiempo límite
+Rights==Privilegios
 Time used==Tiempo utilizado
 Save User==Guardar usuario
-This setting is convenient but less secure than using a qualified admin account.==Este ajuste es conveniente pero menos seguro que usar una cuenta cualificada de administrador.
-Please use with care, notably when you browse untrusted and potentially malicious websites while running your YaCy peer on the same computer.==Por favor, utilízalo con cuidado, especialmente cuando navegues por sitios web inseguros o potencialmente maliciosos mientras tu par YaCy esté funcionando en el mismo ordenador.
 #-----------------------------
 
-#File: ConfigHTCache_p.html
+#File: ConfigAppearance_p.html
 #---------------------------
-Hypertext Cache Configuration==Configuración de la caché de hipertexto
-The HTCache stores content retrieved by the HTTP and FTP protocol. Documents from smb:// and file:// locations are not cached.==La cacheHT almacena contenido recuperado con los protocolos HTTP y FTP.
-The cache is a rotating cache: if it is full, then the oldest entries are deleted and new one can fill the space.==La caché es una caché rotativa: si está completa las entradas más antiguas son eliminadas, de manera que una nueva puede ocupar su espacio.
-HTCache Configuration==Configuración de la HTCache
-The path where the cache is stored==La ruta en la que se almacena la caché
-The current size of the cache==El tamaño actual de la caché
->#[actualCacheSize]# MB for #[actualCacheDocCount]# files, #[docSizeAverage]# KB / file in average==>#[actualCacheSize]# MB para #[actualCacheDocCount]# archivos, #[docSizeAverage]# KB / archivo de media.
-The maximum size of the cache==El tamaño máximo de la caché
-"Set"=="Establecer"
-Cleanup==Limpiar
-Cache Deletion==Borrado de la caché
-Delete HTTP &amp; FTP Cache==Borrar la caché HTTP y FTP
-Delete robots.txt Cache==Borrar la caché de robots.txt
-"Delete"=="Borrar"
+Appearance and Integration==Apariencia e integración
+Skin Selection==Seleccione Tema
+Current skin==Tema actual
+Available Skins==Temas disponibles
+"Use"=="Usar"
+"Delete"=="Eliminar"
+>Skin Color Definition<==>Definir el color del Tema<
+>Background<==>Sfondo<
+>Text<==>Texto<
+>Legend<==>Leyenda<
+>Border&nbsp;Line<==>Borde&nbsp;Línea<
+>Search&nbsp;URL==>Buscar&nbsp;URL
+"Set Colors"=="Establecer colores"
+>Skin Download<==>Descargar Temas<
+Skins can be installed from download locations==Los Temas se pueden instalar desde ubicaciones de descarga
+Install new skin from URL==Instalar nuevo Tema desde URL
+Use this skin==Activar tema subido
+"Install"=="Instalar"
+Make sure that you only download data from trustworthy sources. The new Skin file==Asegúrese de que solo descarga datos de fuentes confiables. El nuevo archivo de Tema
+might overwrite existing data if a file of the same name exists already.==podría sobrescribir los datos existentes si ya existe un archivo con el mismo nombre.
+>Unable to get URL:==>No se puede obtener la URL:
+Error saving the skin.==Error al guardar el tema.
+#-----------------------------
+
+#File: ConfigBasic.html
+#---------------------------
+Access Configuration==Configuración de acceso
+Basic Configuration==Configuración básica
+Your YaCy Peer needs some basic information to operate properly==Tu Nodo YaCy necesita información básica para funcionar correctamente
+Select a language for the interface==Seleccione un idioma para la interfaz
+English==Inglés
+Deutsch==Alemán
+Fran&ccedil;ais==Francés
+&#27721;&#35821;/&#28450;&#35486==Chino
+&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;==Ruso
+&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;==Ucranio
+&#2361;&#2367;&#2344;&#2381;&#2342;&#2368;==Hindú
+&#26085;&#26412;&#35486;==Japonés
+Use Case: what do you want to do with YaCy:==Modo de uso: ¿qué quieres hacer con YaCy?
+Community-based web search==Búsqueda web basada en la comunidad
+Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==Únase y apoye la red global 'freeworld', busque en la web con una red de búsqueda sin censura controlado por el usuario
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==Su instalación de YaCy se comporta de manera independiente de otros pares y usted define su propio índice web al iniciar su propio rastreo web. Esto se puede usar para buscar en sus propias páginas web o para definir un portal de búsqueda orientado a temas.
+Search portal for your own web pages==Portal de búsqueda para sus propias páginas web
+Your peer cannot be reached from outside==Su nodo no puede ser alcanzado desde el exterior
+which is not fatal, but would be good for the YaCy network==lo cual no es grave, pero sería bueno para la red YaCy
+please open your firewall for this port and/or set a virtual server option in your router to allow connections on this port==por favor abra su firewall para este puerto y/o configure una opción de servidor virtual en su enrutador para permitir conexiones en este puerto
+Opening a router port is <i>not</i> a YaCy-specific task;==Abrir un puerto de enrutador <i>no</i> es una tarea específica de YaCy;
+you can see instruction videos everywhere in the internet, just search for <a href="http://www.youtube.com/results?search_query=Open+Ports+on+a+Router">Open Ports on a &lt;our-router-type&gt; Router</a> and add your router type as search term.==Puede ver videos de instrucciones en cualquier lugar de Internet, solo busque <a href="http://www.youtube.com/results?search_query=Open+Ports+on+a+Router">Open Ports on a &lt;our-router-type&gt; Router</a> y agregue su tipo de enrutador como término de búsqueda.
+However: if you fail to open a router port, you can nevertheless use YaCy with full functionality, the only function that is missing is on the side of the other YaCy users because they cannot see your peer.==Sin embargo: si no puede abrir un puerto de enrutador, puede usar YaCy con funcionalidad completa, la única función que falta está en el lado de los otros usuarios de YaCy porque no pueden ver a su nodo.
+Intranet Indexing==Indización de Intranet
+Create a search portal for your intranet or web pages or your (shared) file system.==Cree un portal de búsqueda para su intranet o páginas web o su sistema de archivos (compartido).
+URLs may be used with http/https/ftp and a local domain name or IP, or with an URL of the form==Las URL pueden utilizarse con http/https/ftp y un nombre de dominio local o IP, o con una URL del formulario
+or smb:==o smb:
+You may change your peer name==Puedes cambiar tu nombre de Nodo
+Peer Name:==Nombre de Nodo:
+Your peer can be reached by other peers==Tu nodo puede ser contactado por otros compañeros
+Peer Port:==Puerto del nodo:
+with SSL== con SSL
+https enabled==https habilitado
+on port==en el puerto
+Configure your router for YaCy using UPnP:==Configure su enrutador para YaCy usando UPnP:
+Configuration was not successful. This may take a moment.==La configuración no fue exitosa. Esto puede tomar un momento.
+Set Configuration==Establecer configuración
+What you should do next:==Lo que debes hacer a continuación:
+Your basic configuration is complete! You can now (for example)==¡Su configuración básica está completa! Ahora puedes (por ejemplo)
+You did not open a port in your firewall or your router does not forward the server port to your peer==No abrió un puerto en su firewall o su enrutador no reenvía el puerto del servidor a su par
+You can also use your peer without opening it, but this is not recomended==También puede usar su nodo sin abrirlo, pero no se recomienda
+just <==simplemente <
+start an uncensored search==iniciar una búsqueda sin censura
+monitor at the network page</a> what the other peers are doing==monitorear en la página de la red </a> lo que hacen los otros compañeros
+Your Peer name is a default name; please set an individual peer name.==Tu nombre de Nodo es un nombre predeterminado; por favor, establezca un nombre de nodo individual.
+This is needed if you want to fully participate in the YaCy network.==Esto es necesario si desea participar plenamente en la red de YaCy.
 #-----------------------------
 
 #File: ConfigHeuristics_p.html
 #---------------------------
-Heuristics Configuration==Configuración heurística
-A <a href="http://en.wikipedia.org/wiki/Heuristic" target="_blank">heuristic</a> is an 'experience-based technique that help in problem solving, learning and discovery' (wikipedia).==La <a href="https://es.wikipedia.org/wiki/Heur%C3%ADstica" target="_blank">heurística</a> es una técnica basa en la experiencia que ayuda a aprender, a descubrir y resolver problemas.
-The search heuristics that can be switched on here are techniques that help the discovery of possible search results based on link guessing, in-search crawling and requests to other search engines.==La búsqueda heurística que puede ser seleccionada aquí consiste en técnica que ayuda al descubrimiento de posibles resultados de búsqueda basados en adivinación de enlaces, rastreo durante la búsqueda y peticiones a otros motores de búsqueda.
-When a search heuristic is used, the resulting links are not used directly as search result but the loaded pages are indexed and stored like other content.==Cuando se usa una búsqueda heurística los enlaces resultantes no son utilizados directamente como resultados de búsqueda, sino que las páginas cargadas son indexadas y almacenadas como cualquier otro contenido.
-This ensures that blacklists can be used and that the searched word actually appears on the page that was discovered by the heuristic.==Esto asegura que las listas negras puedan ser usadas y que la palabra buscada aparezca realmente en la página que fue descubierta a partir de la heurística.
-The success of heuristics are marked with an image==El éxito de las heurísticas está marcado con una imagen.
-heuristic:&lt;name&gt;==heurística:&lt;nombre&gt;
-(new link)==(nuevo enlace)
-below the favicon left from the search result entry:==debajo el favicon a la izquierda de la entrada de los resultados de búsqueda.
-The search result was discovered by a heuristic, but the link was already known by YaCy==El resultado de búsqueda fue descubierto a partir de una heurística, pero el enlace ya era conocido por YaCy
-The search result was discovered by a heuristic, not previously known by YaCy==El resultado de búsqueda fue descubierto a partir de una heurística, no era conocido previamente por YaCy
-'site'-operator: instant shallow crawl==sitio-operador: rastreo superficial instantáneo
-When a search is made using a 'site'-operator (like: 'download site:yacy.net') then the host of the site-operator is instantly crawled with a host-restricted depth-1 crawl.==Cuando se realiza una búsqueda utilizando 'sitio'-operador (por ej. 'download site:yacy.net') el host del sitio-operador es rastreado instantáneamente con un rastreo de host restringido de profundidad 1.
-That means: right after the search request the portal page of the host is loaded and every page that is linked on this page that points to a page on the same host.==Esto significa que justo después de la petición de búsqueda se carga la página del portal del host y cada página que está enlazada en esta página y que apunta a una página en el mismo host.
-Because this 'instant crawl' must obey the robots.txt and a minimum access time for two consecutive pages, this heuristic is rather slow, but may discover all wanted search results using a second search (after a small pause of some seconds).==Debido a que este "rastreo instantáneo" debe atenerse a los robots.txt y a un mínimo de tiempo de acceso entre dos páginas consecutivas, esta heurística es bastante lenta, pero puede descubrir todas los resultados de búsqueda deseadas usando una segunda búsqueda (después de una pequeña pausa de algunos segundos).
-search-result: shallow crawl on all displayed search results==buscar-resultado: rastreo superficial de todos los resultados de búsqueda mostrados
-When a search is made then all displayed result links are crawled with a depth-1 crawl.==Cuando se realiza una búsqueda se rastrean todos los enlaces de los resultados mostrados con un rastreo de profundidad 1.
-This means: right after the search request every page is loaded and every page that is linked on this page.==Esto significa que justo después de la petición de búsqueda se carga cada página y cada página que está enlazada en esa página.
-If you check 'add as global crawl job' the pages to be crawled are added to the global crawl queue (remote peers can pickup pages to be crawled).==Si seleccionas "añadir como tarea de rastreo global" las páginas que se rastreen son añadidas a la cola de rastreo global (los pares remotos puede coger páginas para rastrearlas).
-Default is to add the links to the local crawl queue (your peer crawls the linked pages).==Por defecto se añaden los enlaces a la cola de rastreo local (tu par rastrea las páginas enlazadas).
-add as global crawl job==añadir como tarea de rastreo global
-opensearch load external search result list from active systems below==la búsqueda abierta (OpenSearch) carga una lista de resultados de búsqueda externos a partir de los sistemas activos mostrados abajo
-When using this heuristic, then every new search request line is used for a call to listed opensearch systems.==Cuando se utiliza esta heurística cada nueva línea de petición de búsqueda es utilizada para una llamada a los sistemas de búsqueda abierta listados.
-20 results are taken from remote system and loaded simultanously, parsed and indexed immediately.==20 resultados son tomados del sistema remoto y cargados simultáneamente, analizados e indexados inmediatamente.
-To find out more about OpenSearch see==Para saber más sobre OpenSearch vea
-Available/Active Opensearch System==Disponible/Sistema de búsqueda abierta activo
->Active<==>Activo<
->Title<==>Título<
->Comment<==>Comentario<
-Url <small>(format opensearch==URL <small>(formato de búsqueda abierta
-Url template syntax==Sintáxis de la plantilla de la URL
->delete<==>borrar<
->new<==>nuevo<
-"add"=="añadir"
+(new link)==(nuevo link)
+>Title<==Título
+>Comment<==Comentario
+"add"=="agregar"
+"Save"=="guardar"
+#-----------------------------
+
+#File: ConfigHTCache_p.html
+#---------------------------
+HTCache Configuration==Configuración de HTCache
+The path where the cache is stored==La ruta donde se almacena el caché
+The current size of the cache==El tamaño actual de la caché
+>#[actualCacheSize]# MB for #[actualCacheDocCount]# files, #[docSizeAverage]# KB / file in average==> #[actualCacheSize]# MB para #[actualCacheDocCount]# archivos, #[docSizeAverage]# KB / archivo en promedio
+The maximum size of the cache==El tamaño máximo de la caché
+"Set"=="Establecer"
+Cache Deletion==Eliminación de caché
+Delete HTTP &amp; FTP Cache==Elimina cache HTTP & FTP
+Delete robots.txt Cache==Eliminar Caché de robots.txt
+"Delete"=="Eliminar"
+#-----------------------------
+
+#File: ConfigLanguage_p.html
+#---------------------------
+Language selection==Selección de idioma
+You can change the language of the YaCy-webinterface with translation files.==Puede cambiar el idioma de la interfaz web de YaCy con archivos de traducción.
+Current language</label>==Idioma actual</label>
+Author(s) (chronological)</label>==Autor(es) (orden cronológico)</label>
+Send additions to maintainer</em>==Enviar adiciones al mantenedor</em>
+Available Languages</label>==Idiomas disponibles</label>
+Download Language File==Descargar archivo de idioma
+Supported formats are the internal language file (extension .lng) or XLIFF (extension .xlf) format.==Los formatos admitidos son el archivo de idioma interno (extensión .lng) o el formato XLIFF (extensión .xlf).
+Install new language from URL==Instalar nuevo idioma desde la URL
+Use this language==Usa este idioma
+"Use"=="Usa"
+"Delete"=="Desinstalar"
+"Install"=="Instalar"
+Unable to get URL:==No se puede obtener la URL:
+Error saving the language file.==Error al guardar el archivo de idioma.
+Simple Editor==Editor simple
+to add untranslated text==agregar texto sin traducir
+#-----------------------------
+
+#File: ConfigLiveSearch.html
+#---------------------------
+Advantages:==Ventajas:
+Disadvantages:==Desventajas:
+"Search"=="Buscar"
+Defaults<==Valores predeterminados<
+url<==url<
+>Themes<==>Tema<
+#-----------------------------
+
+#File: ConfigNetwork_p.html
+#---------------------------
+Network Configuration==Configuración de la Red
+No changes were made!==¡No se hicieron cambios!
+Accepted Changes==Cambios Aceptados
+DHT==DHT
+"Change Network"=="Cambiar red"
+Peer-to-Peer Mode==Modo de Nodo a Nodo
+>Index Distribution==>Distribución del índice
+>Index Receive==>Índice de recepción
+pages per minute==páginas por minuto
+>Robinson Mode==>Modo Robinson
 "Save"=="Guardar"
-"reset to default list"=="Restablecer a la lista por defecto"
-value="discover from index"==value="descubrir a partir del índice"
-start background task, depending on index size this may run a long time==inicia una tarea en segundo plano, dependiendo del tamaño del índice esto puede durar mucho tiempo
-With the button "discover from index" you can search within the metadata of your local index (Web Structure Index) to find systems which support the Opensearch specification.==Con el botón "descubrir a partir del índice" puedes buscar en los metadatos de tu índice local (Web Structure Index) para encontrar sistemas que admitan la especificación OpenSearch.
-The task is started in the background. It may take some minutes before new entries appear (after refreshing the page).==La tarea se ha iniciado en segundo plano. Puede que tarde unos minutos antes de que aparezcan las nuevas entradas (después de refrescar la página).
-Alternatively you may==Como alternativa, tu puedes
->copy &amp; paste a example config file<==>copiar y pegar un archivo de configuración de ejemplo<
-located in <i>defaults/heuristicopensearch.conf</i> to the DATA/SETTINGS directory.==ubicado en <i>defaults/heuristicopensearch.conf</i> en el directorio DATA/SETTINGS.
-For the discover function the <i>web graph</i> option of the web structure index and the fields <i>target_rel_s, target_protocol_s, target_urlstub_s</i> have to be switched on in the <a href="IndexSchema_p.html?core=webgraph">webgraph Solr schema</a>.==Para la función de descubrimiento la opción <i>web graph</i> del índice de la estructura web y los campos <i>target_rel_s</i>, <i>target_protocol_s</i> y <i>target_urlstub_s</i> tienen que ser activados en el <a href="IndexSchema_p.html"?core=webgraph">esquema Solr webgraph</a>. 
-"switch Solr fields on"=="activar campos Solr"
-('modify Solr Schema')==('modificar esquema Solr')
+#-----------------------------
+
+#File: ConfigParser_p.html
+#---------------------------
+Parser Configuration==Configuración del analizador
+> enable/disable<==> ativado/desactivado<
+>Extension<==>Extensión<
+>Mime-Type<==>Tipo MIME<
+"Submit"=="Enviar"
+#-----------------------------
+
+#File: ConfigPortal_p.html
+#---------------------------
+Greeting Line<==Mensaje de bienvenida<
+URL of Home Page<==URL de la Página de Inicio<
+Enable Search for Everyone?==¿Habilitar búsqueda para todos?
+Search is available for everyone==La búsqueda está disponible para todos
+Only the administrator is allowed to search==Solo el administrador tiene permitido buscar
+Pattern:<==Modelo:<
+>Exclude Hosts<==>Excluir Hosts<
+#-----------------------------
+
+#File: ConfigProfile_p.html
+#---------------------------
+Your Personal Profile==Tu perfil personal
+You can create a personal profile here, which can be seen by other YaCy-members==Puede crear un perfil personal aquí, que puede ser visto por otros miembros de YaCy
+Name==Nombre
+Nick Name==Nickname
+eMail==email
+ICQ==ICQ
+Jabber==Jabber
+Yahoo!==Yahoo!
+MSN==MSN
+Skype==Skype
+Comment==Comentario
+"Save"=="Guardar"
+You can use <==Puedes usar <
+> here.==> aquí.
+#-----------------------------
+
+#File: ConfigProperties_p.html
+#---------------------------
+Advanced Config==Configuración avanzada
+"Save"=="Guardar"
+#-----------------------------
+
+#File: ConfigRobotsTxt_p.html
+#---------------------------
+Blog==Blog
+Wiki==Wiki
+Home Page==Homepage
+#-----------------------------
+
+#File: ConfigSearchBox.html
+#---------------------------
+"Search"=="Buscar"
+#-----------------------------
+
+#File: ConfigSearchPage_p.html
+#---------------------------
+<html lang="en">==<html lang="it">
+Search Page<==Página de búsqueda<
+>Appearance<==>Apariencia<
+>Page Template<==>Plantilla de página<
+>Administration<==>Administración<
+>Web Search<==>Búsqueda Web<
+>File Search<==>Búsqueda de archivos<
+>Help / YaCy Wiki<==>Ayuda / Wiki de YaCy<
+"Search"=="Buscar"
+>Text<==>Texto<
+>Images<==>Imágenes<
+>Audio<==>Audio<
+>Video<==>Vídeo<
+>Applications<==>Aplicaciones<
+>more options<==>más opciones<
+>Tag<==>Tag<
+>Topics<==Temas
+>Cloud<==>Nube<
+>Protocol<==>Protocolo<
+>Filetype<==>Tipo de archivo<
+>Provider<==>Proveedor<
+>Language<==>Idioma<
+>Author<==>Autor<
+>Vocabulary<==>Vocabulario<
+42 kbyte<==42 KB<
+>Metadata<==>Metadata<
+>Parser<==>Parser<
+>Citation<==Citación
+>Pictures<==>Imágenes<
+>Cache<==>Cache<
+"Save Settings"=="Guardar configuración"
+"Set Default Values"=="Establecer valores por defecto"
+#-----------------------------
+
+
+#File: ConfigUpdate_p.html
+#---------------------------
+Manual System Update==Actualización manual del sistema
+Current installed Release==Versión actual instalada
+Available Releases==Versiones disponibles
+>changelog<==>changelog<
+> and <==> y <
+> RSS feed<==> feed RSS<
+(unsigned)==(no firmado)
+(signed)==(firmado)
+"Download Release"=="Descargar versión"
+"Check for new Release"=="Comprobar si hay nuevas versiones"
+Downloaded Releases==Versiones descargadas
+"Install Release"=="Instalar versión"
+"Delete Release"=="Eliminar versión"
+Automatic Update==Actualización automática
+"Check + Download + Install Release Now"=="Comprobar + Descargar + Instalar versión"
+No more recent release found.==No se ha encontrado ningúna versión más reciente.
+Release will be installed. Please wait.==La versión será instalada. Por favor espera.
+You installed YaCy with a package manager.==Has instalado YaCy con un gestor de paquetes.
+To update YaCy, use the package manager:==Para actualizar YaCy, use el administrador de paquetes:
+Automated System Update==Actualización automatizada del sistema
+manual update==actualización manual
+automatic update==actualizacion automática
+Time between lookup==Tiempo entre búsquedas
+hours==horas
+Release type==Tipo de versión
+only main releases==solo versiones estables
+any release including developer releases==cualquier versión incluyendo versiones de desarrollo
+only accept signed files==solo acepta archivos firmados
+"Submit"=="Enviar"
+Accepted Changes.==Cambios aceptados.
+System Update Statistics==Estadísticas de actualización del sistema
+Last System Lookup==Último sistema de búsqueda
+never==nunca
+#-----------------------------
+
+#File: Connections_p.html
+#---------------------------
+Incoming Connections==Conexiones entrantes
+Showing #[numActiveRunning]# active, #[numActivePending]# pending connections from a max. of #[numMax]# allowed incoming connections.==Mostrando #[numActiveRunning]# activo, #[numActivePending]# pendiente de conexiones de un máximo. of #[numMax]# permitió conexiones entrantes.
+Protocol</td>==Protocolo</td>
+Duration==Duración
+Source IP[:Port]==IP origen[:Port]
+Dest. IP[:Port]==IP destino.[:Port]
+Command</td>==Comando</td>
+Used==Usado
+Close==Cerrar
+Waiting for new request nr.==Esperando nueva solicitud nr.
+Outgoing Connections==Conexiones salientes
+Duration==Duración
+ID==ID
+#-----------------------------
+
+#File: ContentControl_p.html
+#---------------------------
+Content Control<==Control de contenido<
+>Enabled<==>Habilitado
+"Submit"=="Enviar"
+#-----------------------------
+
+
+#File: CookieMonitorIncoming_p.html
+#---------------------------
+This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Esta es una lista de cookies que un servidor web ha enviado a los clientes del proxy de YaCy:
+Date</td>==Fecha</td>
+Cookies==Cookie
+"Enable Cookie Monitoring"=="Habilitar monitoreo de cookies"
+"Disable Cookie Monitoring"=="Deshabilitar el monitoreo de cookies"
+#-----------------------------
+
+#File: CookieMonitorOutgoing_p.html
+#---------------------------
+Outgoing Cookies Monitor==Monitor de cookies salientes
+Date</td>==Fecha</td>
+Cookie==Cookie
+"Enable Cookie Monitoring"=="Habilitar monitoreo de cookies"
+"Disable Cookie Monitoring"=="Deshabilitar el monitoreo de cookies"
+#-----------------------------
+
+#File: CrawlCheck_p.html
+#---------------------------
+"Check given urls"=="Comprobar las URLs"
+>Analysis<==>Análisis<
+>URL<==>URL<
+>Access<==>Acceso<
+>Robots<==>Robots<
+#-----------------------------
+
+#File: Crawler_p.html
+#---------------------------
+Crawler==Crawler
+and restart.==y reiniciar.
+Error:==Error:
+filter. ::==filtro. ::
+Crawling of==Rastreo de
+failed. Reason:==ha fallado. Razón:
+started.==Activado.
+Please wait some seconds,==Por favor espere unos segundos,
+>Size==>Tamaño
+>Progress<==>Progreso<
+>Index Size<==>Tamaño del índice<
+>Documents<==>Documentos<
+Local Crawler==Crawler Local
+Remote Crawler==Crawler Remoto
+Speed / PPM<br/>(Pages Per Minute)==Velocidad / PPM<br/>(Páginas por minuto)
+Database==Base de datos
+Entries==Entradas
+#-----------------------------
+
+#File: CrawlProfileEditor_p.html
+#---------------------------
+Status==Estado
+Start URL==URL de inicio
+no::yes==no::sì
+Running==En ejecución
+"Terminate"=="Terminado"
+Finished==Completado
+"Delete"=="Eliminado"
+Select the profile to edit==Seleccione el perfil para editar
+"Edit profile"=="Editar perfil"
+Edit Profile==Editar perfil
+"Submit changes"=="Enviar cambios"
+#-----------------------------
+
+#File: CrawlResults.html
+#---------------------------
+Crawl Results<==Resultados de rastreo<
+>Crawl Results Overview<==>Resumen de resultados de rastreo<
+Domain==Dominio
+URLs=URL
+"delete all"=="eliminar todo"
+>Title==>Título
+URL==URL
+"delete"=="Eliminar"
+#-----------------------------
+
+#File: CrawlStartExpert.html
+#---------------------------
+One Start URL or a list of URLs:<br/>(must start with http:// https:// ftp:// smb:// file://)==Una URL de inicio o una lista de URL:<br/> (debe comenzar con http:// https:// ftp:// smb:// file://)
+index text==indizar texto
+index media==índice de medios
+#-----------------------------
+
+#File: CrawlStartScanner_p.html
+#---------------------------
+Network Scanner==Network Scanner
+Please wait...==Espere por favor...
+Time-Out<==Timeout<
+>ftp==>FTP
+>smb==>SMB
+>http==>HTTP
+>https==>HTTPS
+>Scheduler<==>Scheduler<
+>minutes<==>minutos<
+>hours<==>horas<
+>days<==>días<
+"Scan"=="Scan"
+#-----------------------------
+
+#File: CrawlStartSite.html
+#---------------------------
+>Site Crawling<==>Rastreo de sitios<
+Site Crawler:==Rastreador de sitios:
+Start URL&nbsp;(must start with==URL de inicio (debe comenzar con
+>Site Crawl Start<==>Inizia crawling sito<
+>Site<==>Sitio<
+>Scheduler<==>Scheduler<
+>minutes<==>minutos<
+>hours<==>horas<
+>days<==>días<
+>Path<==>Ruta<
+>Limitation<==>Limitación<
+not more than <==no más que <
+>documents<==>documentos<
+allow <==permitir <
+Collection<==Colección<
+>Start<==>Iniciar<
+"Start New Crawl"=="Iniciar nuevo rastreo"
+Hints<==Sugerencias<
+>Crawl Speed Limitation<==>Limitar la velocidad de rastreo<
+#-----------------------------
+
+#File: Help.html
+#---------------------------
+YaCy: Help==YaCy: Ayuda
+YaCy: Tutorial==YaCy: Tutorial
+twitter this video==twittea este video
+Download from Vimeo==Descargar desde vimeo
+More Tutorials==Más tutoriales
+#-----------------------------
+
+#File: HostBrowser.html
+#---------------------------
+>all hosts<==>todos los hosts<
+> or <==> o <
+Host/URL:==Host/URL:
+"Delete Subpath"=="Eliminar Subruta"
+>Host List<==>Lista de Host<
+Documents without Errors==Documentos sin errores
+>Path<==>Ruta<
+Administration Options==Opciones de Administración
+<html lang="en">==<html lang="es">
+#-----------------------------
+
+#File: HostBrowserAdmin_p.html
+#---------------------------
+Administration Options==Opciones de Administración
+Delete all==Eliminar todo
+>Load Errors<==>Errores de carga<
+from index==desde index
+"Delete Load Errors"=="Elimina los errores de carga"
+#-----------------------------
+
+#File: index.html
+#---------------------------
+<html lang="en">==<html lang="es">
+YaCy '#[clientname]#': Search Page==YaCy '#[clientname]#': Página de búsqueda
+kiosk mode==Modo kiosco
+"Search"=="Buscar"
+Text==Texto
+Images==Imágenes
+Audio==Archivo de Audio
+Video==Archivo de Vídeo
+Applications==Aplicaciones
+more options...==más opciones...
+advanced parameters==parámetros avanzados
+Max. number of results==Nº máximo de resultados
+Results per page==Resultados por página
+Resource==Recursos
+global==global
+>local==>local
+"authentication required"=="autentificación requerida"
+Disable search function for users without authorization==Deshabilitar la función de búsqueda para usuarios no autorizados
+Enable web search to everyone==Habilitar la búsqueda web para todos
+the peer-to-peer network==la red peer-to-peer
+Query Operators==Operadores de Consulta
+restrictions==restricciones
+only resources from http or https servers==recursos solo desde servidores http o https
+only resources from ftp servers==recursos solo desde servidores ftp
+ranking modifier==modificadores de ranking
+sort by date==ordenar por fecha
+latest first==Más reciente
+doublequotes==doble comillas
+prefer given language==idioma preferido
+keyboard shortcuts==Atajos de teclado
+See an==Ver un
+>example==>ejemplo
+#-----------------------------
+
+#File: IndexControlRWIs_p.html
+#---------------------------
+document type</td>==tipo de documento</td>
+<td>description</td>==<td>descripción</td>
+<td>title</td>==<td>título</td>
+<td>creator</td>==<td>autor</td>
+<td>subject</td>==<td>asunto</td>
+<td>url</td>==<td>url</td>
+<td>image</td>==<td>imagen</td>
+<td>audio</td>==<td>audio</td>
+<td>video</td>==<td>video</td>
+hash</td>==hash</td>
+url length</td>==longitud de URL</td>
+<td>date</td>==<td>fecha</td>
+#-----------------------------
+
+#File: IndexControlURLs_p.html
+#---------------------------
+URL Retrieval==Recuperar
+Retrieve by URL:<==Recuperar por URL:<
+"Show Details for URL"=="Mostrar detalles del URL"
+Retrieve by URL-Hash==Recuperar por URL-Hash
+"Show Details for URL-Hash"=="Mostrar detalles por URL-Hash"
+"Generate List"=="Generar lista"
+"Delete"==Eliminar
+"Generate Statistics"==Generar Estadísticas
+Dump File==Archivo Dump
+"Create Dump"=="Crear dump"
+"Restore Dump"=="Restaurar dump"
+> segments==> segmentos
+Domain==Dominio
+URLs==URLs
+Export File==Exportar archivo
+XML (RSS)==XML (RSS)
+"Export URLs"=="Exportar URLs"
+Hash</td>==Hash</td>
+Description</td>==Descripción</td>
+Modified-Date</td>==Fecha de modificación</td>
+Loaded-Date</td>==Fecha de carga</td>
+Language</td>==Idioma</td>
+Size</td>==Tamaño</td>
+#-----------------------------
+
+#File: IndexCreateLoaderQueue_p.html
+#---------------------------
+Depth==Profundidad
+URL==URL
+#-----------------------------
+
+#File: IndexCreateParserErrors_p.html
+#---------------------------
+URL==URL
+Fail-Reason==Causa de falla
+#-----------------------------
+
+#File: IndexExport_p.html
+#---------------------------
+URL Database Administration==URL de Administración de base de datos
+HTML (URLs with title)==HTML (URLs con título)
+>Only Text:==>Solo texto:
+"Create Dump"=="Crear dump"
+Dump File==Archivo dump
+"Restore Dump"=="Restaurar dump"
+#-----------------------------
+
+#File: ContentIntegrationPHPBB3_p.html
+#---------------------------
+> of database<==> de base de datos<
+> of the database<==> de la base de datos<
+Password==Contraseña
+Export failed:==Exportación fallida:
+Import successful!==Importación realizada correctamente!
+Import failed:==Importación fallida:
+#-----------------------------
+
+#File: DictionaryLoader_p.html
+#---------------------------
+>Geolocalization<==>Geolocalización<
+>GeoNames<==>Nombres Geográficos<
+>Download from<==>Descargar desde<
+>not loaded<==>no cargado<
+>loaded<==>cargado<
+:deactivated==:desactivado
+>Action<==>Acción<
+>Result<==>Resultado<
+"Load"=="Carga"
+"Deactivate"=="Desactivar"
+"Remove"=="Eliminar"
+"Activate"=="Activar"
+Suggestions<==Sugerencias<
+#-----------------------------
+
+#File: IndexCreateQueues_p.html
+#---------------------------
+"Delete"=="Eliminar"
+>Profile<==>Perfil<
+>Depth<==>Profundidad<
+#-----------------------------
+
+#File: IndexDeletion_p.html
+#---------------------------
+Index Deletion<==Indice de eliminaciones<
+All documents older than==Todos los documentos anteriores a
+years<==años<
+months<==meses<
+days<==días<
+hours<==horas<
+#-----------------------------
+
+#File: IndexImportMediawiki_p.html
+#---------------------------
+"Import MediaWiki Dump"=="Importar dump MediaWiki"
+Thread:==Thread:
+Dump:==Dump:
+hours,==horas,
+minutes<==minutos<
+Remaining Time:==Tiempo restante:
+hours,==horas,
+minutes<==minutos<
+#-----------------------------
+
+#File: IndexImportOAIPMH_p.html
+#---------------------------
+#-----------------------------
+
+#File: IndexImportOAIPMHList_p.html
+#---------------------------
+
+>Thread<==>Thread<
+#-----------------------------
+
+#File: IndexReIndexMonitor_p.html
+#---------------------------
+Documents processed<==Documentos procesados<
+Current Query==Consulta actual
+update==actualizar
+#-----------------------------
+
+#File: Load_MediawikiWiki.html
+#---------------------------
+#-----------------------------
+
+#File: Load_PHPBB3.html
+#---------------------------
+#-----------------------------
+
+#File: Load_RSS_p.html
+#---------------------------
+>minutes<==>minutos<
+>hours<==>horas<
+>days<==>días<
+> automatically.==> automáticamente
+>Title<==>Título<
+>Author<==>Autor<
+>Description<==>Descripción<
+>Language<==>Idioma<
+>Date<==>Fecha<
+>URL<==>URL<
+#-----------------------------
+
+#File: Messages_p.html
+#---------------------------
+>Messages==>Mensajes
+Date</td>==Fecha</td>
+From</td>==De</td>
+To</td>==A</td>
+>Subject==>Asunto
+Action==Acción
+From:==De:
+To:==A:
+Date:==Fecha:
+Subject:==Asunto:
+>view==>vista
+reply==responder
+>delete==>eliminar
+Compose Message==Redactar Mensaje
+Send message to peer==Enviar mensaje al nodo
+"Compose"=="Redactar"
+Message:==Mensaje:
+inbox==Entrada
+#-----------------------------
+
+#File: MessageSend_p.html
+#---------------------------
+Send message==Enviar mensaje
+Subject:==Asunto:
+Text:==Texto:
+"Preview"=="Previsualizar"
+#-----------------------------
+
+#File: Network.html
+#---------------------------
+YaCy Network<==Red YaCy<
+Network Overview==Resumen de la Red
+Active&nbsp;Peers==Nodo&nbsp;Activo
+Passive&nbsp;Peers==Nodo&nbsp;Pasivo
+Potential&nbsp;Peers==Nodo&nbsp;Potencial
+Name==Nombre
+Address==Dirección
+Hash==Hash
+Type==Tipo
+Release<==Lanzamiento YaCy<
+>PPM<==>PPM<
+>QPH<==>QPH<
+Peers==Nodo
+YaCy Cluster==Cluster YaCy
+>Network<==>Red<
+>Online Peers<==>Nodos en línea<
+>Number of<br/>Documents<==>Número de <br/>documentos<
+Indexing Speed:==Velocidad de indexación
+Pages Per Minute (PPM)==Páginas Por Minuto (PPM)
+Queries Per Hour (QPH)==Consultas Por Hora (QPH)
+>Today<==>Hoy<
+>Last&nbsp;Week<==>Última&nbsp;semana<
+>Last&nbsp;Month<==>Último&nbsp;mes<
+Last Hour==Última hora
+>Now<==>Ahora<
+>Active<==>Activo<
+>Passive<==>Pasivo<
+>Potential<==>Potencial<
+>This Peer<==>Este nodo<
+"The YaCy Network"=="La Red YaCy"
+Your Peer:==Tú nodo:
+>Name<==>Nombre<
+>Info<==>Info<
+>Version<==>Versión<
+>UTC<==>UTC<
+>Uptime<==>Uptime<
+>Links<==>Link<
+>RWIs<==>RWI<
+Received<br/>URLs==<br/>URL recibidas
+Version==Versión
+>dark green font<==>fuente verde oscuro<
+senior/principal peers==nodo senior/principal
+>light green font<==>fuente verde claro<
+>passive peers<==>nodo pasivo<
+>pink font<==>fuente rosa<
+junior peers==Nodo junior
+red point==punto rojo
+this peer==este nodo
+>crawling activity<==>crawling<
+>green radiation<==>radiación verde<
+>red lines<==>líneas rosas<
+>DHT-out<==>DHT-out<
+>green lines<==>líneas verdes<
+>DHT-in<==>DHT-in<
+Please check your internet connection.==Por favor, compruebe su conexión a Internet.
+"go online"=="En línea"
+Network History==Historial de Red
+#-----------------------------
+
+#File: News.html
+#---------------------------
+Overview==Resumen
+Category==Categoría
+Attributes==Atributos
+#-----------------------------
+
+#File: Performance_p.html
+#---------------------------
+<html lang="en">==<html lang="es">
+Performance Settings==Configuración del rendimiento
+Memory Settings==Ajustes de memoria
+Memory reserved for JVM==Memoria reservada por JVM
+"Set"=="Define"
+free space==Espacio Libre
+restart now</a>==reiniciar ahora</a>
+Confirm Restart==Confirmar reinicio
+refresh graph==refrezcar graph
+Save==Guardar
+Normal==Normal
+Proxy:==Proxy:
+#-----------------------------
+
+#File: PerformanceMemory_p.html
+#---------------------------
+<html lang="en">==<html lang="es">
+Memory Usage:==Uso de memoria:
+>Statistics<==>Estadísticas<
+Table</td>==Tabla</td>
+#-----------------------------
+
+#File: PerformanceQueues_p.html
+#---------------------------
+milliseconds<==milisegundos<
+kbytes<==KByte<
+#-----------------------------
+
+#File: PerformanceConcurrency_p.html
+#---------------------------
+Thread==Thread
+#-----------------------------
+
+#File: PerformanceSearch_p.html
+#---------------------------
+Query==Consulta
+Event<==Evento<
+#-----------------------------
+
+#File: ProxyIndexingMonitor_p.html
+#---------------------------
+Path==Ruta
+#-----------------------------
+
+#File: QuickCrawlLink_p.html
+#---------------------------
+Status:==Estado:
+#-----------------------------
+
+#File: RankingRWI_p.html
+#---------------------------
+#-----------------------------
+
+#File: RankingSolr_p.html
+#---------------------------
+#-----------------------------
+
+#File: RegexTest.html
+#---------------------------
+Regular Expression==Expresiones regulares
+Java Pattern==Pattern Java
+Result<==Resultado<
+#-----------------------------
+
+#File: RemoteCrawl_p.html
+#---------------------------
+>Links<==>Link<
+>RWIs<==>RWI<
+#-----------------------------
+
+#File: ServerScannerList.html
+#------------------------------
+>Protocol<==>Protocolo<
+IP=IP
+URL==URL
+>inaccessible<==>inaccesible<
+>empty<==>vacío<
+>granted<==>concedido<
+>denied<==>denegado<
+>not in index<==>no en índice<
+>indexed<==>indexado<
+#------------------------------
+
+#File: Settings_p.html
+#---------------------------
+Advanced Settings==Configuraciones Avanzadas
+Crawler Settings==Configuración de Rastreador
+#-----------------------------
+
+#File: Settings_Crawler.inc
+#---------------------------
+>Crawler Settings<==>Configuración de Rastreador<
+Submit==Enviar
+#-----------------------------
+
+#File: Settings_ProxyAccess.inc
+#---------------------------
+"Submit"=="Enviar"
+#-----------------------------
+
+#File: Settings_Proxy.inc
+#---------------------------
+"Submit"=="Enviar"
+#-----------------------------
+
+#File: Settings_ProxyAccess.inc
+#---------------------------
+"Submit"=="Enviar"
+#-----------------------------
+
+#File: Settings_Seed.inc
+#---------------------------
+"Submit"=="Enviar"
+#-----------------------------
+
+#File: Settings_Seed_UploadFile.inc
+#---------------------------
+File Location==Localización de Archivo
+"Submit"=="Enviar"
+#-----------------------------
+
+#File: Settings_Seed_UploadFtp.inc
+#---------------------------
+Uploading via FTP:==Subir por FTP:
+Path</label>==Ruta</label>
+Username==Nombre de Usuario
+Password</label>==Contraseña</label>
+The password==La contraseña
+"Submit"=="Enviar"
+#-----------------------------
+
+#File: Settings_Seed_UploadScp.inc
+#---------------------------
+Uploading via SCP:==Subir por SCP:
+Server==Servidor
+Path</label>==Ruta</label>
+Username==Nombre de Usuario
+Password</label>==Contraseña</label>
+The password==La contraseña
+"Submit"=="Enviar"
+#-----------------------------
+
+#File: Settings_ServerAccess.inc
+#---------------------------
+value="Submit"==value="Enviar"
+#-----------------------------
+
+#File: SettingsAck_p.html
+#---------------------------
+#Your Peer Language is:==#Idioma del Nodo:
+#-----------------------------
+
+#File: Settings_MessageForwarding.inc
+#---------------------------
+"Submit"=="Enviar"
+#-----------------------------
+
+#File: sharedBlacklist_p.html
+#---------------------------
+value="add"==value="agregar"
+#-----------------------------
+
+#File: Status.html
+#---------------------------
+Welcome to YaCy!==Bienvenido a YaCy!
+"Follow YaCy on Twitter"=="Sígue a Yacy en Twitter"
+"Update YaCy"=="Actualiza YaCy"
+Install YaCy==Instala YaCy
+>forum<==>forum<
+#-----------------------------
+
+#File: Status_p.inc
+#---------------------------
+System Status==Estado del sistema
+Unknown==Desconocido
+YaCy version:==Versión de YaCy:
+Uptime:==Tiempo de operación:
+Java version:==Version de Java:
+Processors:==Procesadores:
+total:==total:
+Protection==Protección
+password-protected==Contraseña protegida
+Address</dt>==Dirección</dt>
+Public Address:==Dirección Pública:
+YaCy Address:==Dirección YaCy:
+not used==no utilizado
+connected==conectado
+not used==no utilizado
+WARNING:==Atención:
+>Experimental<==>Experimental<
+Yes==Sí
+No==No
+Disabled==Desactivado
+Enable]==Activar
+Enabled <a==Activado <a
+Disable]==Desactivar]
+Memory Usage==Consumo de Memoria
+RAM used:==Consumo de RAM:
+RAM max:==Máximo de RAM:
+DISK used:==Consumo de DISCO:
+(approx.)==(aprox.)
+DISK free:==Espacio libre del DISCO:
+on::off==on::off
+Configure==Configurar
+Reset</a>==Restablecer</a>
+Incoming Connections==Conexiones entrantes
+Active:==Activo:
+Loader Queue==Carga
+paused==en pausa
+>Queues<==>Cola<
+Configure==Configurar
+Last upload: #[lastUpload]# ago.==Última subida: #[lastUpload]#.
+#-----------------------------
+
+#File: Steering.html
+#---------------------------
+See you soon!==¡Hasta pronto!
+Just a moment, please!==¡Un momento, por favor!
+>anonymous message<==>mensaje anónimo<
+web forums==forum
+>bug report<==>Bug report<
+>Professional Support<==>Soporte profesional<
+Then YaCy will restart.==Entonces YaCy se reiniciará.
+YaCy will be restarted after installation==YaCy se reiniciará después de la instalación
+#-----------------------------
+
+#File: Supporter.html
+#---------------------------
+Supporter<==Soporte<
+"positive vote"=="voto positivo"
+"Give positive vote"=="Dar voto positivo"
+"negative vote"=="voto negativo"
+"Give negative vote"=="Dar voto negativo"
+#-----------------------------
+
+#File: Surftips.html
+#---------------------------
+YaCy Supporters<==Soporte de YaCy<
+>a list of home pages of yacy users<==>una lista de páginas de inicio de usuarios de yacy<
+"authentication required"=="Se requiere autenticación"
+#-----------------------------
+
+#File: Table_API_p.html
+#---------------------------
+>Process Scheduler<==>Procesador de procesos<
+"next page"=="página siguiente"
+"previous page"=="página anterior"
+"next page"=="página siguiente"
+"previous page"=="página anterior"
+# of #[of]#== de #[of]#
+&nbsp;Date==&nbsp;Fecha
+>URL<==>URL<
+"clone"=="clonar"
+>Scheduler<==Proceso<
+>no event<==>sin evento<
+>activate event<==>evento activo<
+>Scheduler<==Proceso<
+>no repetition<==>sin repetición<
+>activate scheduler<==>proceso activo<
+>off<==>off<
+>run once<==>Ejecutar una vez<
+>run regular<==>Ejecutar regularmente<
+>after start-up<==>después de iniciar<
+at 00:00h==alle 00:00
+at 01:00h==alle 01:00
+at 02:00h==alle 02:00
+at 03:00h==alle 03:00
+at 04:00h==alle 04:00
+at 05:00h==alle 05:00
+at 06:00h==alle 06:00
+at 07:00h==alle 07:00
+at 08:00h==alle 08:00
+at 09:00h==alle 09:00
+at 10:00h==alle 10:00
+at 11:00h==alle 11:00
+at 12:00h==alle 12:00
+at 13:00h==alle 13:00
+at 14:00h==alle 14:00
+at 15:00h==alle 15:00
+at 16:00h==alle 16:00
+at 17:00h==alle 17:00
+at 18:00h==slle 18:00
+at 19:00h==alle 19:00
+at 20:00h==alle 20:00
+at 21:00h==alle 21:00
+at 22:00h==alle 22:00
+at 23:00h==alle 23:00
+"Execute Selected Actions"=="Ejecutar acciones seleccionadas"
+"Delete Selected Actions"=="Eliminar acciones seleccionadas"
+day<==día<
+days<==días<
+week<==semana<
+weeks<==semanas<
+month<==mes<
+months<==meses<
+year<==año<
+years<==años<
+>Status<==>Estado>
+>URL<==>URL<
+>minutes<==>minutos<
+>hours<==>horas<
+>days<==>días<
+#-----------------------------
+
+#File: Table_RobotsTxt_p.html
+#---------------------------
+#-----------------------------
+
+### This Tables section is removed in current SVN Versions
+#File: Tables_p.html
+#---------------------------
+#-----------------------------
+
+#File: Table_YMark_p.html
+#---------------------------
+>Tags<==>Tag<
+>Folders<==>Directorios<
+>select a folder<==>selecciona un directorio<
+#-----------------------------
+
+#File: terminal_p.html
+#---------------------------
+Status Page==Página de Estado
+Confirm Shutdown==Confirmar Cierre
+>&lt;Shutdown==>&lt;Cierre
+#-----------------------------
+
+#File: Threaddump_p.html
+#---------------------------
+#-----------------------------
+
+#File: Translator_p.html
+#---------------------------
+Translation Editor==Editor de Traducción
+UI Translation==Traducción UI
+Target Language:==Idioma de Destino
+Source File==Archivo Fuente
+view it==ver
+filter untranslated==filtrar sin traducir
+Source Text==Texto Original
+Translated Text==Texto Traducido
+Save translation==Guardar traducción
+#-----------------------------
+
+#File: User.html
+#---------------------------
+User Page==Página de Usuario
+You are not logged in.<br />==No has iniciado sesión.<br />
+Username:==Nombre de Usuario:
+Password: <input==Contraseña: <input
+"login"=="Iniciar sesión"
+You are currently logged in as #[username]#.==Conectado como #[username]#.
+old Password==contraseña anterior
+new Password<==nueva contraseña<
+new Password(repetition)==nueva contraseña (confirmar)
+"Change"=="Modificar"
+#-----------------------------
+
+#File: ViewFile.html
+#---------------------------
+URL==URL
+Hash==Hash
+Original==Original
+Plain Text==Texto Plano
+"Show"=="Mostrar"
+Unsupported protocol.==Protocolo no soportado.
+#-----------------------------
+
+#File: ViewLog_p.html
+#---------------------------
+"refresh"=="actualizar"
+#-----------------------------
+
+#File: ViewProfile.html
+#---------------------------
+is not online.==no esta en línea.
+This is the Profile of==Este es el Perfil de
+Name==Nombre
+Nick Name==Nickname
+Homepage==Sitio
+eMail==eMail
+ICQ==ICQ
+Jabber==Jabber
+Yahoo!==Yahoo!
+MSN==MSN
+Skype==Skype
+Comment==Comentario
+> or==> o
+vCard==vCard
+#-----------------------------
+
+#File: Vocabulary_p.html
+#---------------------------
+#Vocabulary Name==#Nombre del Vocabulario
+"Create"=="Crear"
+>Modify<==>Modificar<
+>Delete<==>Eliminar<
+>Synonyms<==>Sinónimos<
+>add<==>agregar<
+"Submit"=="Enviar"
+#-----------------------------
+
+#File: WatchWebStructure_p.html
+#---------------------------
+host<==host<
+nodes<==nodos<
+>Background<==>Fondo<
+>Text<==>Texto<
+>Color <==>Color <
+#-----------------------------
+
+#File: Wiki.html
+#---------------------------
+# !!! Do not translate the input buttons because that breaks the function to switch rights !!!
+Index==Indice
+Versions==Versiones
+Author:==Autor:
+Text:==Texto:
+"edit"=="modificar"
+"Submit"=="Enviar"
+"Preview"=="Previsualizar"
+>Preview==>Previsualizar
+Subject==Asunto
+Last Author==Último Autor
+"Show"=="Mostrar"
+"current"=="actual"
+"Compare"=="Comparar"
+#-----------------------------
+
+#File: WikiHelp.html
+#---------------------------
+YaCy Wiki==Wiki de YaCy
+Description==Descripción
+text==texto
+point==punto
+:definition==:definición
+description]]==descripción]]
+#-----------------------------
+
+#File: yacyinteractive.html
+#---------------------------
+SRU==SRU
+#-----------------------------
+
+#File: yacysearch.html
+#---------------------------
+Search Page==Página de Búsqueda
+SRU==SRU
+"Search"=="Buscar"
+'Search'=="Buscar"
+"search again"=="Buscar de nuevo"
+Text==Texto
+Images==Imágenes
+Audio==Audio
+Video==Vídeo
+Applications==Aplicaciones
+more options==más opciones
+Did you mean:==Quizás quizo decir:
+No Results.==Sin resultados.
+Map (c) by <==Mapa © por <
+>OpenStreetMap<==>OpenStreetMap<
+and contributors, CC-BY-SA==y colaboradores, licencia CC-BY-SA
+>Media<==>Media<
+>URL<==>URL<
+> of==> de
+#-----------------------------
+
+#File: yacysearchitem.html
+#---------------------------
+"bookmark"=="marcador"
+"recommend"=="recomendar"
+"delete"=="eliminar"
+Pictures==Imágenes
+#-----------------------------
+
+#File: yacysearchtrailer.html
+#---------------------------
+>Documents==>Documentos
+>Images==>Imágenes
+>Protocol==>Protocolo
+>Provider==>Proveedor
+>Filetype==>Tipo de archivo
+>Language==>Idioma
+>Name Space==>Namespace
+>Author==>Autor
+#-----------------------------
+
+### Subdirectory api ###
+#File: api/table_p.html
+#---------------------------
+#-----------------------------
+
+#File: api/yacydoc.html
+#---------------------------
+>Title<==>Título<
+>Author<==>Autor<
+>Description<==>Descripción<
+>Subject<==>Asunto<
+>Date<==>Fecha<
+>Type<==>Tipo<
+>Language==>Idioma
+>Document size<==>Tamaño de Documento<
+#-----------------------------
+
+#File: env/templates/metas.template
+#---------------------------
+English, Englisch==Spanish, Español
+
+#-----------------------------
+
+### Subdirectory env/templates ###
+#File: env/templates/header.template
+#---------------------------
+YaCy - Distributed Search Engine==YaCy - Motor de búsqueda distribuido
+### FIRST STEPS ###
+First Steps==Primeros pasos
+Use Case &amp; Account==Modo de uso &amp; Cuenta
+Load Web Pages, Crawler==Cargando Páginas, Crawler
+RAM/Disk Usage &amp; Updates==Consumo de RAM/HDD &amp; Actualizaciones
+You just started a YaCy peer!==Usted acaba de comenzar un nodo YaCy!
+### MONITORING ###
+Monitoring==Monitoreo
+System Status==Estado del Sistema
+Peer-to-Peer Network==Red Peer-to-Peer
+Network Access==Acceso a la red
+Web Visualization==Visualización Web
+Crawler Monitor==Monitor crawler
+### PRODUCTION ###
+Production==Producción
+Advanced Crawler==Crawler Avanzado
+Index Export/Import==Importar/Exportar Índice
+Target Analysis==Análisis target
+Process Scheduler==Procesador de Procesos
+### ADMINISTRATION ###
+System Admiistration==Administración del Sistema
+Index Administration==Administración del Índice
+Filter &amp; Blacklists==Filtro &amp; Blacklists
+Content Semantic==Contenido Semántico
+### SEARCH PORTAL INTEGRATION ###
+Search Portal Integration==Integración del portal de Búsqueda
+Configuration==Configuración
+Design==Diseño
+Ranking and Heuristics==Ranking y Heurísticas
+#-----------------------------
+
+#File: env/templates/simpleheader.template
+#---------------------------
+Administration &raquo;==Administración &raquo;
+Web Search<==Búscar Web<
+File Search<==Búscar Archivo<
+Compare Search<==Comparar Búsqueda<
+#-----------------------------
+
+#File: env/templates/submenuAccessTracker.template
+#---------------------------
+Log==Log
+#-----------------------------
+
+#File: env/templates/submenuBlacklist.template
+#---------------------------
+Filter &amp; Blacklists==Filtro &amp; Blacklist
+Blacklist Administration==Administración de Blacklist
+Import/Export==Importar/exportar
+Content Control==Control de contenido
+#-----------------------------
+
+#File: env/templates/submenuComputation.template
+#---------------------------
+## Processes Submenu
+>Processes<==>Procesos<
+>Server Log<==>Log del servidor<
+>Concurrent Indexing<==>Indexación concurrente<
+>Memory Usage<==>Consumo de Memoria<
+## Messages Submenu
+>Messages<==>Mensajes<
+>Overview<==>Resumen<
+## Community Data Submenu
+#-----------------------------
+
+#File: env/templates/submenuConfig.template
+#---------------------------
+System Administration==Administración del Sistema
+Network Configuration==Configuración de Red
+Download System Update==Descarga de actualizaciones del Sistema
+>Performance==>Rendimiento
+Advanced Settings==Configuración Avanzada
+Advanced Properties==Propiedades Avanzadas
+#-----------------------------
+
+#File: env/templates/submenuContentIntegration.template
+#---------------------------
+Import phpBB3 forum==Importar forum phpBB3
+Import Mediawiki dumps==Importar dump Mediawiki
+#-----------------------------
+
+#File: env/templates/submenuCrawlMonitor.template
+#---------------------------
+Overview</a>==Resumen</a>
+Queries</a>==Consultas</a>
+DHT Transfer==Trasferencia DHT
+Proxy Use==Proxy
+Local Crawling</a>==Crawling local</a>
+Global Crawling</a>==Crawling global</a>
+Rejected URLs==URL rechazadas
+>Queues<==>Cargas<
+Local<==Locale<
+Global==Global
+Remote==Remoto
+robots.txt Monitor==Monitor robots.txt
+#-----------------------------
+
+#File: env/templates/submenuCrawler.template
+#---------------------------
+Load Web Pages==Páginas Web Cargadas
+Site Crawling==Crawling
+Parser Configuration==Configuración de parser
+#-----------------------------
+
+#File: env/templates/submenuDesign.template
+#-----------------------------
+>Appearance==>Apariencia
+>Language==>Idioma
+Search Page Layout==Diseño de página de búsqueda
+#-----------------------------
+
+#File: env/templates/submenuIndexControl.template
+#---------------------------
+Index Administration==Administración del índice
+Index Deletion==Eliminación de índice
+Web Cache==Web Cache
+Parser Configuration==Configuración parser
+#-----------------------------
+
+#File: env/templates/submenuIndexCreate.template
+#---------------------------
+Advanced Crawler==Crawler Avanzado
+Crawling of MediaWikis==Crawling de MediaWiki
+Crawling of phpBB3 Forums==Crawling de forum phpBB3
+Network Scanner==Explorador de red
+Remote Crawling==Crawling Remoto
+>Autocrawl<==>Autocrawl<
+#-----------------------------
+
+#File: env/templates/submenuPortalIntegration.template
+#---------------------------
+Search Portal Integration==Integración del portal de búsqueda
+Generic Search Portal==Portal de búsqueda genérico
+#-----------------------------
+
+#File: env/templates/submenuPublication.template
+#---------------------------
+Wiki==Wiki
+Blog==Blog
+File Hosting==File hosting
+#-----------------------------
+
+#File: env/templates/submenuRanking.template
+#---------------------------
+Ranking and Heuristics==Ranking y Heurísticas
+>Heuristics<==>Heurísticas<
+#---------------------------
+
+#File: env/templates/submenuSearchIntegration.template
+#---------------------------
+#-----------------------------
+
+#File: env/templates/submenuSemantic.template
+#---------------------------
+Content Semantic==Contenido Semántico
+#-----------------------------
+
+#File: env/templates/submenuTargetAnalysis.template
+#---------------------------
+Target Analysis==Análisis de Destino
+#-----------------------------
+
+#File: env/templates/submenuUseCaseAccount.template
+#---------------------------
+Use Case &amp; Accounts==Modo de uso &amp; Cuenta
+Basic Configuration==Configuración Básica
+>Accounts<==>Cuentas<
+Network Configuration==Configuración de la Red
+#-----------------------------
+
+#File: env/templates/submenuViewLog.template
+#---------------------------
+Server Log==Log del server
+#-----------------------------
+
+#File: env/templates/submenuWebStructure.template
+#---------------------------
+#-----------------------------
+
+#File: proxymsg/authfail.inc
+#---------------------------
+Username</label>==Nombre de Usuario</label>
+Password</label>==Contraseña</label>
+"login"=="Iniciar sesión"
+#-----------------------------
+
+#File: proxymsg/error.html
+#---------------------------
+YaCy: Error Message==YaCy: Mensaje de Error
+request:==solicitud:
+unspecified error==error no especificado
+#-----------------------------
+
+#File: proxymsg/proxylimits.inc
+#---------------------------
+#-----------------------------
+
+#File: proxymsg/unknownHost.inc
+#---------------------------
+The server==El servidor
+could not be found.==no se ha podido encontrar.
+Did you mean:==Quizás quizo decir:
+#-----------------------------
+
+#File: www/welcome.html
+#---------------------------
+#-----------------------------
+
+#File: js/Crawler.js
+#---------------------------
+#-----------------------------
+
+#File: js/yacyinteractive.js
+#---------------------------
+>total results==>resultados totales
+>Name==>Nombre
+>Size==>Tamaño
+>Date==>Fecha
+#-----------------------------
+
+#File: yacy/ui/js/jquery-flexigrid.js
+#---------------------------
+#-----------------------------
+
+#File: yacy/ui/js/jquery-ui-1.7.2.min.js
+#---------------------------
+Loading&#8230;==Cargando&#8230;
+#-----------------------------
+
+#File: yacy/ui/js/jquery.ui.all.min.js
+#---------------------------
+Loading&#8230;==Cargando&#8230;
+#-----------------------------
+
+#File: yacy/ui/index.html
+#---------------------------
+About YaCy-UI==Acerca de YaCy-UI
+Admin Console==Consola de Administración
+Server Log==Log del servidor
+#-----------------------------
+
+#File: yacy/ui/yacyui-admin.html
+#---------------------------
+"Login"=="Iniciar Sesión"
+Login==Iniciar Sesión
+Themes==Temas
+Messages==Mensajes
+Re-Start==Re-Iniciar
+Shutdown==Cerrar
+Web Indexing==Indexación web
+Monitoring==Monitoreo
+YaCy Network==Red de YaCy
+>Settings==>Configuraciones
+"Basic Settings"=="Configuraciones Básicas"
+	Basic==	Básico
+Accounts==Cuentas
+"Network"=="Red"
+	Network==	Red
+"Advanced Settings"=="Configuraciones Avanzadas"
+	Advanced==	Avanzado
+"Update Settings"=="Configuración de Actualizaciones"
+	Update==	Actualizar
+>YaCy Project==>Proyecto YaCy
+"YaCy Project Home"=="Sito del Proyecto YaCy"
+	Project==	Proyecto
+"YaCy Statistics"=="Estadísticas de YaCy"
+	Statistics==	Estadísticas
+"YaCy Forum"=="Forum de YaCy"
+Forum==Forum
+"Help"=="Ayuda"
+"YaCy Wiki"=="Wiki de YaCy"
+Wiki==Wiki
+#-----------------------------
+
+#File: yacy/ui/yacyui-bookmarks.html
+#---------------------------
+'Add'=='Agregar'
+'Crawl'=='Crawl'
+'Edit'=='Modificar'
+'Delete'=='Eliminar'
+'Rename'=='Renombrar'
+'Help'=='Ayuda
+"YaCy Bookmarks"=="Marcadores de YaCy"
+>Title==>Título
+>Tags==>Tag
+>Date==>Fecha
+'Hash'=='Hash'
+'Title'=='Título'
+'Tags'=='Tag'
+'Folders'=='Directorios'
+'Date'=='Fecha'
+#-----------------------------
+
+#File: yacy/ui/sidebar/sidebar_1.html
+#---------------------------
+YaCy P2P Websearch==YaCy P2P Websearch
+"Search"=="Búscar"
+>Text==>Texto
+>Images==>Imágenes
+>Audio==>Audio
+>Video==>Vídeo
+>Applications==>Aplicaciones
+"help"=="Ayuda"
+Resource/Network:==Recurso/Red:
+freeworld==mundolibre
+sciencenet==reddeciencia
+>Language:==>Idioma:
+any language==cualquier idioma
+#-----------------------------
+
+#File: yacy/ui/sidebar/sidebar_2.html
+#---------------------------
+Search Options==Opciones de Búsqueda
+all pages==todas las páginas
+index pages==índice de páginas
+URL mask:==Máscara de URL:
+alt="help"==alt="ayuda"
+title="help"==title="ayuda"
+#-----------------------------
+
+#File: yacy/ui/yacyui-welcome.html
+#---------------------------
+>Overview==>Resumen
+#YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI è un client YaCy scritto in JavaScript basato sulle API XML già esistenti e su chiamate JSON.
 #-----------------------------
 
 # EOF
