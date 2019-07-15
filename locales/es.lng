@@ -31,7 +31,7 @@ YaCy Network Access==Acceso a la red YaCy
 
 #File: AccessTracker_p.html
 #---------------------------
-#Access Tracker==Rastreador de acceso
+Access Tracker==Rastreador de acceso
 Server Access Overview==Información general de acceso al servidor
 >Host<==>Host<
 >Path<==>Ruta<
