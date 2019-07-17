@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xliff version='1.2' xmlns='urn:oasis:names:tc:xliff:document:1.2'> 
-    <!-- part of YaCy 
+<xliff version='1.2' xmlns='urn:oasis:names:tc:xliff:document:1.2'>
+    <!-- part of YaCy
     This is a translation master list containing source text to be translated in
     the language files of the supported languages.
     -->
@@ -70,7 +70,7 @@
     </trans-unit>
     <trans-unit id="37711023" xml:space="preserve" approved="no" translate="yes">
        <source>Top Search Words (last 7 Days)</source>
-    </trans-unit>      
+    </trans-unit>
     <trans-unit id="c7f1f7c3" xml:space="preserve" approved="no" translate="yes">
        <source>Local Search Host Tracker</source>
     </trans-unit>
@@ -203,7 +203,7 @@
     </trans-unit>
     <trans-unit id="ef85f111" xml:space="preserve" approved="no" translate="yes">
        <source>Autocralwer Configuration</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="45fd99f0" xml:space="preserve" approved="no" translate="yes">
        <source>You need to restart for some settings to be applied</source>
     </trans-unit>
@@ -242,7 +242,7 @@
     </trans-unit>
     <trans-unit id="3ec44343" xml:space="preserve" approved="no" translate="yes">
        <source>"Save"</source>
-    </trans-unit>    
+    </trans-unit>
   </body>
 </file>
 
@@ -1095,7 +1095,7 @@
     </trans-unit>
     <trans-unit id="54e2ea5e" xml:space="preserve" approved="no" translate="yes">
        <source>&amp;#26085;&amp;#26412;&amp;#35486;</source>
-    </trans-unit>   
+    </trans-unit>
     <trans-unit id="9a6fa219" xml:space="preserve" approved="no" translate="yes">
        <source>Use Case: what do you want to do with YaCy:</source>
     </trans-unit>
@@ -1149,7 +1149,7 @@
     </trans-unit>
     <trans-unit id="b40e882c" xml:space="preserve" approved="no" translate="yes">
        <source>However: if you fail to open a router port, you can nevertheless use YaCy with full functionality, the only function that is missing is on the side of the other YaCy users because they cannot see your peer.</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="36323d62" xml:space="preserve" approved="no" translate="yes">
        <source>Your peer can be reached by other peers</source>
     </trans-unit>
@@ -1479,7 +1479,7 @@
     </trans-unit>
     <trans-unit id="d88098da" xml:space="preserve" approved="no" translate="yes">
        <source>to add untranslated text</source>
-    </trans-unit>        
+    </trans-unit>
   </body>
 </file>
 
@@ -1730,7 +1730,7 @@
        <source>Search is available for everyone</source>
     </trans-unit>
     <trans-unit id="d70b19cb" xml:space="preserve" approved="no" translate="yes">
-       <source>Only the administator is allowed to search</source>
+       <source>Only the administrator is allowed to search</source>
     </trans-unit>
     <trans-unit id="33940efa" xml:space="preserve" approved="no" translate="yes">
        <source>Snippet Fetch Strategy &amp;amp; Link Verification</source>
@@ -1944,7 +1944,7 @@
     </trans-unit>
     <trans-unit id="Line0013" xml:space="preserve" approved="no" translate="yes">
        <source>is a voluntary agreement most search-engines (including YaCy) follow.</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="19b9bf10" xml:space="preserve" approved="no" translate="yes">
        <source>It disallows crawlers to access webpages or even entire domains.</source>
     </trans-unit>
@@ -2146,7 +2146,7 @@
     </trans-unit>
     <trans-unit id="a0b7e36a" xml:space="preserve" approved="no"  translate="yes">
        <source>max. items</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="2f43be1e" xml:space="preserve" approved="no" translate="yes">
        <source>"Save Settings"</source>
     </trans-unit>
@@ -2274,7 +2274,7 @@
     </trans-unit>
     <trans-unit id="3c7a4df9" xml:space="preserve" approved="no" translate="yes">
        <source>You installed YaCy with a package manager.</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="20240fb3" xml:space="preserve" approved="no" translate="yes">
        <source>To update YaCy, use the package manager:</source>
     </trans-unit>
@@ -2621,7 +2621,7 @@
     </trans-unit>
     <trans-unit id="ed612a4b" xml:space="preserve" approved="no" translate="yes">
        <source>&gt; of the database&lt;</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="7430e46d" xml:space="preserve" approved="no" translate="yes">
        <source>Table prefix string</source>
     </trans-unit>
@@ -4816,7 +4816,7 @@
     </trans-unit>
     <trans-unit id="278a95e3" xml:space="preserve" approved="no" translate="yes">
        <source>Export Format</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="94b11a3d" xml:space="preserve" approved="no" translate="yes">
        <source>Full Data Records:</source>
     </trans-unit>
@@ -5165,7 +5165,7 @@
     </trans-unit>
     <trans-unit id="Line013" xml:space="preserve" approved="no" translate="yes">
        <source>Web Archive File Import</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="Line0016" xml:space="preserve" approved="no" translate="yes">
        <source>No import thread is running, you can start a new thread here</source>
     </trans-unit>
@@ -5889,7 +5889,7 @@
   <body>
     <trans-unit id="ff8b8258" xml:space="preserve" approved="no" translate="yes">
        <source>YaCy Search Network</source>
-    </trans-unit>      
+    </trans-unit>
     <trans-unit id="1f205c10" xml:space="preserve" approved="no" translate="yes">
        <source>YaCy Network&lt;</source>
     </trans-unit>
@@ -6257,10 +6257,10 @@
     </trans-unit>
     <trans-unit id="f7855dbc" xml:space="preserve" approved="no" translate="yes">
        <source>translation editor</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="7e95942a" xml:space="preserve" approved="no" translate="yes">
        <source>to add a translation and publish it afterwards.</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="ac7ecc34" xml:space="preserve" approved="no" translate="yes">
        <source>Above you can see four menues:</source>
     </trans-unit>
@@ -6320,7 +6320,7 @@
     </trans-unit>
     <trans-unit id="30aa4d37" xml:space="preserve" approved="no" translate="yes">
        <source>Abort Publication of All News</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="8c39153f" xml:space="preserve" approved="no" translate="yes">
        <source>"#(page)#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News#(/page)#"</source>
     </trans-unit>
@@ -7259,7 +7259,7 @@
     </trans-unit>
     <trans-unit id="47e46c2" xml:space="preserve" approved="no" translate="yes">
        <source>"Set Filter Query"</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="14f04b0f" xml:space="preserve" approved="no" translate="yes">
        <source>&gt;Boost Query&lt;</source>
     </trans-unit>
@@ -7274,7 +7274,7 @@
     </trans-unit>
     <trans-unit id="c6803af7" xml:space="preserve" approved="no" translate="yes">
        <source>"Set Boost Query"</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="c50afe39" xml:space="preserve" approved="no" translate="yes">
        <source>field not in local index (boost has no effect)</source>
     </trans-unit>
@@ -7283,10 +7283,10 @@
     </trans-unit>
     <trans-unit id="369809bc" xml:space="preserve" approved="no" translate="yes">
        <source>with values</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="abdacdba" xml:space="preserve" approved="no" translate="yes">
        <source>You can also boost on logarithmic occurrence counters of the fields</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="af04244c" xml:space="preserve" approved="no" translate="yes">
        <source>"Set Field Boosts"</source>
     </trans-unit>
@@ -7663,8 +7663,8 @@
     </trans-unit>
     <trans-unit id="0000033" xml:space="preserve" approved="no" translate="yes">
        <source>URL Proxy settings have been saved.</source>
-    </trans-unit>    
-    
+    </trans-unit>
+
   </body>
 </file>
 
@@ -8165,7 +8165,7 @@
     </trans-unit>
     <trans-unit id="b2287092" xml:space="preserve" approved="no" translate="yes">
        <source>This is the local port on the loopback address (127.0.0.1 or :1) to listen for a shutdown signal to stop the YaCy server (-1 disables the shutdown port, recommended default is 8005).</source>
-    </trans-unit>                   
+    </trans-unit>
   </body>
 </file>
 
@@ -8643,7 +8643,7 @@
     </trans-unit>
     <trans-unit id="853ccb62" xml:space="preserve" approved="no" translate="yes">
        <source>Your Vote is also considered without a comment.</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="9a640c04" xml:space="preserve" approved="no" translate="yes">
        <source>Supporter are switched off for users without authorization</source>
     </trans-unit>
@@ -9146,7 +9146,7 @@
     </trans-unit>
     <trans-unit id="Line0018" xml:space="preserve" approved="no" translate="yes">
        <source>To edit or add local translations you can use</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="40bca1e" xml:space="preserve" approved="no" translate="yes">
        <source>File:</source>
     </trans-unit>
@@ -10164,7 +10164,7 @@
     </trans-unit>
     <trans-unit id="74cccb8f" xml:space="preserve" approved="no" translate="yes">
        <source>Similar documents from different hosts:</source>
-    </trans-unit>   
+    </trans-unit>
   </body>
 </file>
 
@@ -10590,7 +10590,7 @@
     </trans-unit>
     <trans-unit id="cf394e0e" xml:space="preserve" approved="no" translate="yes">
        <source>UI Translations</source>
-    </trans-unit>    
+    </trans-unit>
   </body>
 </file>
 
@@ -11024,7 +11024,7 @@
     </trans-unit>
     <trans-unit id="7fae2eb1" xml:space="preserve" approved="no" translate="yes">
        <source>only pages with &amp;lt;date&amp;gt; in content</source>
-    </trans-unit>    
+    </trans-unit>
     <trans-unit id="f0ec5b4f" xml:space="preserve" approved="no" translate="yes">
        <source>only resources from http or https servers</source>
     </trans-unit>
