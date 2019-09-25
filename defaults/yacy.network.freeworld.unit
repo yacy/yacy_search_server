@@ -57,11 +57,14 @@ network.unit.remotecrawl.speed = 300
 # addresses of seed-list bootstrap locations
 network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
 network.unit.bootstrap.seedlist1 = http://sixcooler.de/yacy/seed.txt
-network.unit.bootstrap.seedlist2 = http://yacyseed.underworld.fr/seed.txt
-network.unit.bootstrap.seedlist3 = http://yacycalou.net:8090/seed.txt
-network.unit.bootstrap.seedlist4 = http://freenode.homeunix.org/yacy/seed.txt
+network.unit.bootstrap.seedlist2 = http://esfbc.com/seed.txt
+network.unit.bootstrap.seedlist3 = http://rptr.me/yacy/seed.txt
+network.unit.bootstrap.seedlist4 = https://yacy.tschability.ch/seed.txt
 network.unit.bootstrap.seedlist5 = http://yacy.tschability.ch/seed.txt
 network.unit.bootstrap.seedlist6 = http://www1.isg.hamshack.info/seed.txt
+network.unit.bootstrap.seedlist7 = http://5.45.105.16/yacyseed
+network.unit.bootstrap.seedlist8 = http://berndkwasnik.de/yacy/seed.txt
+network.unit.bootstrap.seedlist9 = http://yacy.1a-referenzen.de/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
