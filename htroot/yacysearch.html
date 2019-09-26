@@ -89,7 +89,7 @@
     </script>
     #(/topmenu)#
 
-<div id="api" style="top:58px;">
+<div id="api" style="top:81px;">
 <script type="text/javascript">
 //<![CDATA[
 	var showRSSIcon = #(num-results)#false::true::true::true::false::false#(/num-results)#;
@@ -154,7 +154,7 @@ Use the RSS search result format to add static searches to your RSS reader, if y
 	<p>No Results. (length of search words must be at least 1 character)</p>
 	::
 	<div id="results"></div>
-    <div class="progress">
+    <div class="progress" style="margin-top:10px;">
       <div class="progress-bar progress-bar-info" id="progressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:0%;">
         <span style="position:absolute;display:block;text-align:left;width:85%;color:black;">&nbsp;&nbsp;&nbsp;<strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> 
         #(globalresults)#::; (<strong id="localIndexCount">#[localIndexCount]#</strong> local, <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> remote from <strong id="remotePeerCount">#[remotePeerCount]#</strong> YaCy peers).#(/globalresults)# 

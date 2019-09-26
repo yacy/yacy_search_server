@@ -23,26 +23,31 @@ a:hover {
 /* Menu */
 
 .menugroup h3 {
-  -webkit-border-top-left-radius: 5px;
-  -webkit-border-top-right-radius: 5px;
-  -khtml-border-top-left-radius: 5px;
-  -khtml-border-top-right-radius: 5px;
-  -moz-border-radius-topleft: 5px;
-  -moz-border-radius-topright: 5px;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
+  -webkit-border-top-left-radius: 3px;
+  -webkit-border-top-right-radius: 3px;
+  -khtml-border-top-left-radius: 3px;
+  -khtml-border-top-right-radius: 3px;
+  -moz-border-radius-topleft: 3px;
+  -moz-border-radius-topright: 3px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
  
   background-color: #5090D0;
+  font-weight: bold;
+  padding-bottom:3px;
   color:white;
 }
 
 .SubMenugroup h3, .SubMenu h3 {
-  -webkit-border-radius: 5px;
-  -khtml-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
+  -webkit-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
 
   background-color: #5090D0;
+  font-weight: bold;
+  padding-top:2px;
+  padding-bottom:2px;
   color:white;
 }
 
@@ -180,10 +185,10 @@ div.ProgressBarFill {
 
 fieldset.maininput, fieldset.yacys { 
   background-color:#DEE6F3;
-  -webkit-border-radius: 5px;
-  -khtml-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
+  -webkit-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
 }
 
 form.search.small h2 {
@@ -260,10 +265,10 @@ fieldset {
   background-color:#DEE6F3;
   color:#18294A;
   border:0px solid #DEE6F3;
-  -webkit-border-radius: 5px;
-  -khtml-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
+  -webkit-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
 }
 
 /* input, select, textarea, button {
@@ -273,11 +278,12 @@ fieldset {
 
 legend {
   background-color:#65AC2A;
-  -webkit-border-radius: 5px;
-  -khtml-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
+  -webkit-border-radius: 3px;
+  -khtml-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
   text-align:left;
+  font-weight: bold;
   color:white;
 }
 

@@ -115,7 +115,7 @@ fieldset {
 
 legend {
   font-size:1.2em;
-  padding:0.2em;
+  padding:0.3em 0.8em;
   text-align:center;
 }
 
@@ -504,22 +504,20 @@ form.search.small h2 {
 }
 
 li.menugroup h3 {
-	font-size: 1em; font-weight: bold;
+	font-size: 1em;
 	margin: 0; padding: 1px 10px;
 }
 
 div.SubMenugroup h3 {
-  font-size:1em;
-  font-weight:bold;
+  font-size:1.1em;
   margin:0;
-  padding:1px 10px;
+  padding:3px 10px;
 }
 div.SubMenu h3 {
-  font-size:1em;
-  font-weight:bold;
+  font-size:1.1em;
   margin:0;
   margin-bottom:1px;
-  padding:1px 10px;
+  padding:3px 10px;
   clear: both;
 }
 
@@ -546,7 +544,7 @@ a.BookmarkLink {
   padding-left:15px;
 }
 
-a.MenuItemLink{
+a.MenuItemLink {
   text-decoration:none;
   margin-top:1px;
   margin-bottom:1px;
@@ -554,13 +552,13 @@ a.MenuItemLink{
   font-size:1.0em;
 }
 
-a.MenuItemLink.lock{
+a.MenuItemLink.lock {
   background-image:url(grafics/lock.gif);
   background-position:2px center;
   background-repeat:no-repeat;
 }
 
-a.MenuItemLink.unlock{
+a.MenuItemLink.unlock {
   background-image:url(grafics/lockopen.gif);
   background-position:2px center;
   background-repeat:no-repeat;
@@ -739,7 +737,9 @@ form.search {
 }
 form.search.small {
   text-align:left;
-  margin-bottom:5px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  margin-left: -15px;
   white-space:nowrap;
 }
 
