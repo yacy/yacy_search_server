@@ -154,7 +154,6 @@ public class serverSwitch {
 	 * 
 	 * @return the public IP of this peer, if known
 	 */
-	@Deprecated
 	public String myPublicIP() {
 		// if a static IP was configured, we have to return it here ...
 		final String staticIP = getConfig(SwitchboardConstants.SERVER_STATICIP, "");

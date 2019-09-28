@@ -1064,7 +1064,6 @@ public class Domains {
      * Please use myPublicIPv4() or (preferred) myPublicIPv6() instead.
      * @return
      */
-    @Deprecated
     public static InetAddress myPublicLocalIP() {
         // for backward compatibility, we try to select a IPv4 address here.
         // future methods should use myPublicIPs() and prefer IPv6
