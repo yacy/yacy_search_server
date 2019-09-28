@@ -200,23 +200,34 @@ form.search.small h2 {
 }
 
 .searchresults h4 a {
-  font-size:1.2em;
+  font-size:1.3em;
   font-weight:normal;
-  color:#2200CC;
+  color:#2840A8;
+  text-decoration: none;
+  margin-bottom: 5px;
 }
 .searchresults h4 a:hover {
-  color:#2200CC;
+  color:#2840A8;
+  text-decoration: underline;
 }
 
+.snippetLoaded {
+  font-size:1.2em;
+  line-height: 1.2;
+}
 .snippetLoaded strong {
   color:black;
 }
 
 .searchresults .url a {
-  color:#008000;
+  font-size:1.2em;
+  color:#086020;
+  text-decoration: none;
+  line-height: 1.2;
 }
 .searchresults .url a:hover {
-  color:#008000;
+  color:#086020;
+  text-decoration: underline;
 }
 
 
