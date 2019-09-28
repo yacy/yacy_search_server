@@ -97,14 +97,31 @@
             <input type="hidden" name="shutdown" value="" />
           </form>
           <form action="Steering.html" method="get">
-            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="confirmShutdown(); return false;" title="Shutdown">
+            <button accesskey="h" type="submit" class="btn btn-inverse navbar-btn label-danger" onclick="confirmShutdown(); return false;" title="Shutdown">
             	<span class="glyphicon glyphicon-off"></span>
             	<span class="hidden-sm"> Shutdown</span>
             </button>
           </form>
         </li>
+        <li>&nbsp;</li>
+        <li id="header_community">
+          <form action="https://searchlab.eu" target="_blank" method="get">
+            <button accesskey="f" type="submit" class="btn btn-inverse navbar-btn label-info" title="Community">
+                <span class="glyphicon glyphicon-user"></span>
+                <span class="hidden-sm"> Community</span>
+            </button>
+          </form>
+        </li>
+        <li>&nbsp;</li>
         <li id="header_help" class="dropdown">
-          <a href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button" aria-haspopup="true" aria-expanded="false"><span class="glyphicon glyphicon-question-sign"></span></a>
+          <div href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button" aria-haspopup="true" aria-expanded="false">
+          <form action="#" method="get">
+            <button accesskey="f" type="submit" class="btn btn-inverse navbar-btn label-success" title="Help">
+                <span class="glyphicon glyphicon-question-sign"></span>
+                <span class="hidden-sm"> Help</span>
+            </button>
+          </form>
+          </div>
           <ul class="dropdown-menu">
           <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About This Page</a></li>
           <li id="header_tutorial"><a href="https://yacy.net/tutorials/">YaCy Tutorials</a></li>
@@ -115,8 +132,9 @@
           <li id="header_wiki"><a href="http://wiki.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Project Wiki</a></li>
           <li id="header_git"><a href="https://github.com/yacy/yacy_search_server/commits/master" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
           <li id="header_bugs"><a href="http://bugs.yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker</a></li>
-        </ul>
+          </ul>
         </li>
+        <li>&nbsp;</li>
         <li id="header_administration">
           <form action="index.html" method="get">
     		#(authorized)#::
