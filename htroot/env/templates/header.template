@@ -15,7 +15,7 @@
         <span class="icon-bar"></span>
       </button>
       <form id="header-search-form" class="navbar-form" method="get" accept-charset="UTF-8" action="yacysearch.html">
-        <input name="query" placeholder="Search..." class="form-control" type="text" size="30" maxlength="200" value=""/>
+        <input name="query" placeholder="Search..." class="form-control" type="text" size="21" maxlength="200" value=""/>
         <input type="hidden" name="resource" value="global" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
@@ -108,7 +108,7 @@
           <form action="https://searchlab.eu" target="_blank" method="get">
             <button accesskey="f" type="submit" class="btn btn-inverse navbar-btn label-info" title="Community">
                 <span class="glyphicon glyphicon-user"></span>
-                <span class="hidden-sm"> Community</span>
+                <span class="hidden-sm"> Forum</span>
             </button>
           </form>
         </li>
@@ -124,14 +124,30 @@
           </div>
           <ul class="dropdown-menu">
           <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About This Page</a></li>
-          <li id="header_tutorial"><a href="https://yacy.net/tutorials/">YaCy Tutorials</a></li>
           <li id="header_jslicense"><a href="jslicense.html" data-jslicense="1">JavaScript information</a></li>
           <li class="divider" role="separator"></li>
+          <li id="header_tutorial"><a href="https://www.youtube.com/user/YaCyTutorials/videos" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;YaCy Tutorials</a></li>
           <li id="header_download"><a href="https://yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
           <li id="header_community"><a href="https://searchlab.eu" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
           <li id="header_wiki"><a href="http://wiki.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Project Wiki</a></li>
-          <li id="header_git"><a href="https://github.com/yacy/yacy_search_server/commits/master" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
-          <li id="header_bugs"><a href="http://bugs.yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker</a></li>
+          <li id="header_git"><a href="https://github.com/yacy/yacy_search_server" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
+          </ul>
+        </li>
+        <li>&nbsp;</li>
+        <li id="header_sponsor" class="dropdown">
+          <div href="#" data-toggle="dropdown" class="dropdown-toggle" aria-label="Help" role="button" aria-haspopup="true" aria-expanded="false">
+          <form action="#" method="get">
+            <button accesskey="f" type="submit" class="btn btn-inverse navbar-btn label-warning" title="Help">
+                <span class="glyphicon glyphicon-heart"></span>
+                <span class="hidden-sm"> Sponsor</span>
+            </button>
+          </form>
+          </div>
+          <ul class="dropdown-menu">
+          <li><a href="#">YaCy is free software, so we need the help of many to support the development.<br/><b>You</b> can help by joining a sponsoring plan:</a></li>
+          <li><a href="https://github.com/users/Orbiter/sponsorship" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;<b>become a Github Sponsor</b></a></li>
+          <li><a href="https://www.patreon.com/0rb1t3r" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;<b>become a YaCy Patreon</b></a></li>
+          <li><a href="#">Please help! We need financial help to move on with the development!</a></li>
           </ul>
         </li>
         <li>&nbsp;</li>
@@ -140,9 +156,9 @@
     		#(authorized)#::
   				<input type="hidden" name="auth" value=""/>
   			#(/authorized)#
-            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary" title="Search Interface">
+            <button accesskey="s" type="submit" class="btn btn-inverse navbar-btn label-primary" title="Search">
             	<span class="glyphicon glyphicon-search"></span>
-            	<span class="hidden-sm hidden-md"> Search Interface &raquo;</span>
+            	<span class="hidden-sm"> Search</span>
             </button>
           </form>
         </li>
