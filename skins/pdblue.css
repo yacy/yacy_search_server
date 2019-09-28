@@ -197,6 +197,7 @@ form.search.small h2 {
 
 .searchresults {
   /*border-top:1px #000 dashed;*/
+  margin-top: 15px;
 }
 
 .searchresults h4 a {
