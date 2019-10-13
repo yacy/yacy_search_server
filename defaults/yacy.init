@@ -1135,7 +1135,7 @@ Version=
 # old version value (keep to allow conversion of .conf, until next main releas > 1.83)
 svnRevision=0
 
-currentSkin=pdbootstrap
+currentSkin=pdblue
 
 # flag to show if pages shall be usable for non-admin users
 # this can be applied to the Surftips.html, yacysearch.html and HostBrowser.html pages
