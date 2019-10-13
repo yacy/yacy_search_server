@@ -66,10 +66,9 @@ SetCompressor /SOLID LZMA
 
 ; download links for Oracle Java 8 Update 191 (available at https://java.com/en/download/manual.jsp)
 ; 32 bit / jre-8u191-windows-i586.exe
-!define JRE_32 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=239856_230deb18db3e4014bb8e3e8324f81b43"
+!define JRE_32 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=235725_2787e4a523244c269598db4e85c51e0c"
 ; 64 bit / jre-8u191-windows-x64.exe
-!define JRE_64 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=239858_230deb18db3e4014bb8e3e8324f81b43"
-
+!define JRE_64 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=235727_2787e4a523244c269598db4e85c51e0c"
 
 ; ----------------------------------------
 ; GENERAL APPEARANCE
