@@ -64,14 +64,12 @@ SetCompressor /SOLID LZMA
 ; at least we need Java 8
 !define JRE_VERSION8 "1.8"
 
-; download links for Oracle Java 8 Update 191 (available at https://java.com/fr/download/manual.jsp)
+; download links for Oracle Java 8 Update 191 (available at https://java.com/en/download/manual.jsp)
 ; 32 bit / jre-8u191-windows-i586.exe
-!define JRE_32 "https://javadl.oracle.com/webapps/download/AutoDL?BundleId=235725_2787e4a523244c269598db4e85c51e0c"
+!define JRE_32 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=239856_230deb18db3e4014bb8e3e8324f81b43"
 ; 64 bit / jre-8u191-windows-x64.exe
-!define JRE_64 "https://javadl.oracle.com/webapps/download/AutoDL?BundleId=235727_2787e4a523244c269598db4e85c51e0c"
+!define JRE_64 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=239858_230deb18db3e4014bb8e3e8324f81b43"
 
-;!define JRE_32 "http://yacy.berlios.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
-;!define JRE_64 "http://yacy.berlios.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
 
 ; ----------------------------------------
 ; GENERAL APPEARANCE
