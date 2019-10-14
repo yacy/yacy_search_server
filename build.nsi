@@ -103,7 +103,7 @@ ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
 !insertmacro MUI_PAGE_INSTFILES
 
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW SHOW_PageFinish_custom
-!define MUI_FINISHPAGE_SHOWREADME http://www.yacy-websuche.de/wiki/index.php/InstallerFinished
+!define MUI_FINISHPAGE_SHOWREADME https://www.youtube.com/yacy_tutorials
 !define MUI_FINISHPAGE_SHOWREADME_TEXT $(finishPage)
 !insertmacro MUI_PAGE_FINISH
 
