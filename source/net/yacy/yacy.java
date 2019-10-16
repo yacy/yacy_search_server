@@ -260,9 +260,6 @@ public final class yacy {
             mkdirIfNeseccary(htDocsPath);
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
-            // copy the donate iframe (better to copy this once here instead of doing this in an actual iframe in the search result)
-            importDonationIFrame(sb, htDocsPath);
-            
             // create default notifier picture
             File notifierFile = new File(htDocsPath, "notifier.gif");
             if (!notifierFile.exists()) try {Files.copy(new File(htRootPath, "env/grafics/empty.gif"), notifierFile);} catch (final IOException e) {}
@@ -428,59 +425,6 @@ public final class yacy {
             System.exit(0);
         } catch (final Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
     }
-
-    /**
-     * Concurrently import the donation iframe content to serve it directly from this peer.
-     * @param switchBoard the SwitchBoard instance. Must not be null.
-     * @param htDocsDirectory the custom htdocs directory. Must not be null.
-     */
-	private static void importDonationIFrame(final Switchboard switchBoard, final File htDocsDirectory) {
-		final File wwwEnvPath = new File(htDocsDirectory, "env");
-		mkdirIfNeseccary(wwwEnvPath);
-		final String iframesource = switchBoard.getConfig("donation.iframesource", "");
-		final String iframetarget = switchBoard.getConfig("donation.iframetarget", "");
-		final File iframefile = new File(htDocsDirectory, iframetarget);
-		if (!iframefile.exists()) new Thread("yacy.importDonationIFrame") {
-		    @Override
-		    public void run() {
-		        final ClientIdentification.Agent agent = ClientIdentification.getAgent(ClientIdentification.yacyInternetCrawlerAgentName);
-		        Response documentResponse;
-		        try {
-		        	/* Load the donation html frame content */
-		        	documentResponse = switchBoard.loader == null ? null : switchBoard.loader.load(switchBoard.loader.request(new DigestURL(iframesource), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
-		            if (documentResponse != null) {
-		            	Document[] documents = documentResponse.parse();
-		            	if(documents != null && documents.length > 0 && documents[0] != null) {
-		            		Document donateDocument = documents[0];
-		            		String donateDocContent = new String(documentResponse.getContent(), donateDocument.getCharset());
-		            		/* Load image resources contained in the page */
-		            		if(donateDocument.getImages() != null) {
-		            			for(DigestURL imgURL : donateDocument.getImages().keySet()) {
-		            				try {
-		            					Response response = switchBoard.loader.load(switchBoard.loader.request(imgURL, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
-		            					if (response != null) {
-		            						String imgFileName = imgURL.getFileName();
-		            						/* Store each image in the same directory as the iframe target file */
-		            						FileUtils.copy(response.getContent(), new File(iframefile.getParentFile(), imgFileName));
-		                        	
-		            						/* Transform the original image URL to a relative one */
-		            						donateDocContent = donateDocContent.replace(imgURL.getURL().toString(), imgFileName);
-		            					}
-		            				} catch(IOException e) {
-		            					/* Failing to load one image should not stop the whole task */
-		            					ConcurrentLog.warn("STARTUP", "Donation frame retrieval : could not get an image resource.", e);
-		            				}
-		            			}
-		            		}
-			            	FileUtils.copy(donateDocContent.getBytes(donateDocument.getCharset()), iframefile);
-		            	}
-		            }
-		        } catch (Exception e) {
-		        	ConcurrentLog.warn("STARTUP", "Could not retrieve donation frame content.", e);
-		        }
-		    }
-		}.start();
-	}
 
 	/**
 	 * @param f
