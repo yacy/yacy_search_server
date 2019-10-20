@@ -4,14 +4,14 @@
 
     <groupId>net.yacy</groupId>
     <artifactId>yacycore</artifactId>
-    <version>1.921</version>
+    <version>1.922</version>
     <packaging>jar</packaging>
     <description>YaCy - a Peer to Peer Web Search Engine</description>
     <name>YaCy Search Server</name>
     <url>http://www.yacy.net</url>
     <issueManagement>
         <system>YaCy Bugtracker</system>
-        <url>http://bugs.yacy.net</url>
+        <url>https://github.com/yacy/yacy_search_server/issues</url>
     </issueManagement>
     <scm>
         <connection>scm:git:https://github.com/yacy/yacy_search_server.git</connection>

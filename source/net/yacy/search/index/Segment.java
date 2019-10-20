@@ -704,7 +704,7 @@ public class Segment {
         }
         
         if (error != null) {
-            ConcurrentLog.severe("SOLR", error + ", PLEASE REPORT TO bugs.yacy.net");
+            ConcurrentLog.severe("SOLR", error + ", PLEASE REPORT TO https://github.com/yacy/yacy_search_server/issues");
             //Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, error);
             //Switchboard.getSwitchboard().pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, error);
         }
