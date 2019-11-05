@@ -24,7 +24,7 @@
     "seedurl": "#[type_url]#",
     "age": #[age]#,
     "seeds": #[seeds]#,
-    "connects": #[connects]#,
+    "connects": "#[connects]#",
     #{ips}#"ip": "#(c)##[ip]#::#[ip]##(/c)#",#{/ips}#
 
     #{ips}#"address": "#(c)##(ipv6)#::[#(/ipv6)##[ip]##(ipv6)#::]#(/ipv6)#:#[port]#::#(/c)#",#{/ips}#
