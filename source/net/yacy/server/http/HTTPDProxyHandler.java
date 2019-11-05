@@ -668,7 +668,7 @@ public final class HTTPDProxyHandler {
                 cachedResponseHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(0));
 
                 // send cached header with replaced date and added length
-                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,304,cachedResponseHeader);
+                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,304,null,cachedResponseHeader);
                 //respondHeader(respond, "304 OK", cachedResponseHeader); // respond with 'not modified'
             } else {
                 // unconditional request: send content of cache
@@ -679,7 +679,7 @@ public final class HTTPDProxyHandler {
                 cachedResponseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(cacheEntry.length));
 
                 // send cached header with replaced date and added length
-                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,203,cachedResponseHeader);
+                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,203,null,cachedResponseHeader);
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
 
                 // send also the complete body now from the cache

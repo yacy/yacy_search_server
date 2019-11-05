@@ -841,7 +841,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
             response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
             response.setDateHeader(HeaderFramework.EXPIRES, now); // expires now
         }
-        
+
+        if (target.endsWith(".json")) {
+            response.setHeader(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
+        }
+
         if ((targetClass != null)) {
             serverObjects args = new serverObjects();
             Enumeration<String> argNames = request.getParameterNames(); // on ssi jetty dispatcher merged local ssi query parameters
