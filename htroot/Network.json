@@ -3,7 +3,7 @@
   {
     "hash": "#[hash]#",
     "fullname": "#[fullname]#",
-    "version>": "#[version]#",
+    "version": "#[version]#",
     "ppm": #[ppm]#,
     "qph": #[qph]#,
     "uptime": "#[uptime]#",
