@@ -72,7 +72,8 @@ public class Network {
         prop.put("menu", post == null ? 2 : (post.get("menu", "").equals("embed")) ? 0 : (post.get("menu","").equals("simple")) ? 1 : 2);
         if (sb.peers.mySeed() != null) prop.put("menu_newpeer_peerhash", sb.peers.mySeed().hash);
 
-        prop.setLocalized(!requestHeader.getPathInfo().endsWith(".xml"));
+        String pathInfo = requestHeader.getPathInfo();
+        prop.setLocalized(!pathInfo.endsWith(".xml") && !pathInfo.endsWith(".json"));
         prop.putHTML("page_networkTitle", sb.getConfig("network.unit.description", "unspecified"));
         prop.putHTML("page_networkName", sb.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
