@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="source"/>
 	<classpathentry kind="src" path="test/java"/>
-	<classpathentry excluding="api/|env/|processing/domaingraph/applet/|yacy/|api/bookmarks/|api/ymarks/|api/bookmarks/posts/|api/bookmarks/tags/|api/bookmarks/xbel/|solr/|gsa/|solr/collection1/|api/blacklists/|proxymsg/" kind="src" path="htroot"/>
+	<classpathentry excluding="api/|env/|processing/domaingraph/applet/|yacy/|api/bookmarks/|api/ymarks/|api/bookmarks/posts/|api/bookmarks/tags/|api/bookmarks/xbel/|solr/|gsa/|solr/collection1/|api/blacklists/|proxymsg/|p2p/" kind="src" path="htroot"/>
 	<classpathentry excluding="bookmarks/|ymarks/|bookmarks/posts/|bookmarks/tags/|bookmarks/xbel/|blacklists/" kind="src" path="htroot/api"/>
 	<classpathentry kind="src" path="htroot/env"/>
 	<classpathentry kind="src" path="htroot/yacy"/>
@@ -13,6 +13,7 @@
 	<classpathentry kind="src" path="htroot/api/bookmarks/xbel"/>
 	<classpathentry kind="src" path="htroot/api/blacklists"/>
 	<classpathentry kind="src" path="htroot/proxymsg"/>
+	<classpathentry kind="src" path="htroot/p2p"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
