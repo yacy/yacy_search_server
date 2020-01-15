@@ -498,7 +498,7 @@
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
-            <version>1.11.3</version>
+            <version>1.12.1</version>
             <type>jar</type>
         </dependency>
         <dependency>
