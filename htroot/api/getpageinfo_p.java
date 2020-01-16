@@ -27,8 +27,8 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -193,7 +193,8 @@ public class getpageinfo_p {
                     prop.putXML("lang", (languages == null || languages.size() == 0) ? "unknown" : languages.iterator().next());
 
                     // get links and put them into a semicolon-separated list
-                    final Collection<AnchorURL> uris = scraper.getAnchors();
+                    final LinkedHashSet<AnchorURL> uris = new LinkedHashSet<>();
+                    uris.addAll(scraper.getAnchors());
                     final StringBuilder links = new StringBuilder(uris.size() * 80);
                     final StringBuilder filter = new StringBuilder(uris.size() * 40);
                     count = 0;
