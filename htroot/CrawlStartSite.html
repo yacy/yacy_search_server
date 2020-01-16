@@ -38,7 +38,7 @@
             <td valign="top"><input type="radio" name="crawlingMode" id="url" value="url" checked="checked"
             onmousedown="document.getElementById('rangeDomain').disabled=false;document.getElementById('rangeSubpath').disabled=false;document.getElementById('crawlingDomMaxCheck').disabled=false;document.getElementById('crawlingDomMaxPages').disabled=false;"/>Start URL&nbsp;(must start with<br/>http:// https:// ftp:// smb:// file://)</td>
             <td valign="top">
-            <input name="crawlingURL" id="crawlingURL" type="text" size="50" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" style="font-size:16px"/><br/>
+            <input name="crawlingURL" id="crawlingURL" type="text" size="50" maxlength="256" value="#[starturl]#" onkeydown="changed()" onfocus="check('url')" style="font-size:16px"/><br/>
             <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
             </td>
 	        <td>

@@ -245,7 +245,7 @@
             Other already visited URLs are sorted out as "double", if they are not allowed using the re-crawl option.
           </span></span>
               <input type="radio" style="vertical-align: top" name="crawlingMode" id="url" value="url" #(crawlingMode_url)#::checked="checked"#(/crawlingMode_url)# />
-              <textarea name="crawlingURL" id="crawlingURL" cols="64" rows="3" onkeypress="changed()">#[starturl]#</textarea>
+              <textarea name="crawlingURL" id="crawlingURL" cols="64" rows="3" onkeydown="changed()">#[starturl]#</textarea>
                 &nbsp;
                 <span id="robotsOK"></span>
 	            <span id="title"><br/></span>

@@ -135,6 +135,6 @@ function loadInfos(loadAll) {
 	
 	var url=document.getElementById("crawlingURL").value;
 	if (url.indexOf("ftp") == 0 || url.indexOf("smb") == 0) document.getElementById("crawlingQ").checked = true; // since the pdf parser update for page separation, we need to set this
-	sndReq('api/getpageinfo_p.xml?actions=title,robots' + (loadAll ? '' : '&maxLinks=50') + '&url='+url);
+	sndReq('api/getpageinfo_p.xml?actions=title,robots' + (loadAll ? '' : '&maxLinks=50') + '&url=' + encodeURIComponent(url));
 	document.getElementById("api").innerHTML = "<a href='api/getpageinfo_p.xml?actions=title,robots&url=" + url + "' id='apilink'><img src='env/grafics/api.png' width='60' height='40' alt='API'/></a><span>See the page info about the start url.</span>";
 }
