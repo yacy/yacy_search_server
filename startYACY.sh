@@ -49,17 +49,18 @@ USAGE
 YACY_PARENT_DATA_PATH="`dirname $0`"
 cd "$YACY_PARENT_DATA_PATH"
 
-if [ $OS = "OpenBSD" ] || [ $OS = "Darwin" ]
-then
+case "$OS" in
+	*"BSD"|"Darwin")
 		if [ $(echo $@ | grep -o "\-\-" | wc -l) -ne 0  ]
 		then
 			echo "WARNING: Unfortunately this script does not support long options in $OS."
 		fi
 		
         options="`getopt hdlptsg: $*`"
-else
+case *)
         options="`getopt -u -n YaCy -o h,d,f,l,p,t,s,g -l help,debug,foreground,logging,print-out,tail-log,startup,gui -- $@`"
-fi
+;;
+esac
 
 if [ $? -ne 0 ];then
 
