@@ -57,7 +57,8 @@ case "$OS" in
 		fi
 		
         options="`getopt hdlptsg: $*`"
-case *)
+;;
+  *)
         options="`getopt -u -n YaCy -o h,d,f,l,p,t,s,g -l help,debug,foreground,logging,print-out,tail-log,startup,gui -- $@`"
 ;;
 esac
