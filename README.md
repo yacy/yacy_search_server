@@ -43,20 +43,20 @@ The (GPLv2+) source code used to build YaCy is distributed with the package (in 
 
 ## Where is the documentation?
 
-- [https://yacy.net](Homepage)
-- [https://searchlab.eu](International Forum)
-- [https://wiki.yacy.net/index.php/De:Start](German wiki)
-- [https://wiki.yacy.net/index.php/Eo:Start](Esperanto wiki)
-- [https://wiki.yacy.net/index.php/Fr:Start](French wiki)
-- [https://wiki.yacy.net/index.php/Es:Start](Spanish wiki)
-- [https://wiki.yacy.net/index.php/Ru:Start](Russian wiki)
-- [https://yacy.net/en/Tutorials.html and https://yacy.net/de/Lehrfilme.html](Video tutorials)
+- [Homepage](https://yacy.net)
+- [International Forum](https://searchlab.eu)
+- [German wiki](https://wiki.yacy.net/index.php/De:Start)
+- [Esperanto wiki](https://wiki.yacy.net/index.php/Eo:Start)
+- [French wiki](https://wiki.yacy.net/index.php/Fr:Start)
+- [Spanish wiki](https://wiki.yacy.net/index.php/Es:Start)
+- [Russian wiki](https://wiki.yacy.net/index.php/Ru:Start)
+- [Video tutorials in English](https://yacy.net/en/Tutorials.html) and [video tutorials in German](https://yacy.net/de/Lehrfilme.html)
 
 All these have (YaCy) search functionality combining all these locations into one search result.
 
 ## Dependencies? What other software do I need?
 
-You need Java 1.8 or later to run YaCy. (No Apache, Tomcat or mySQL or anything else)
+You need Java 1.8 or later to run YaCy. (No Apache, Tomcat or MySQL or anything else)
 
 YaCy also runs on IcedTea 3.
 See https://icedtea.classpath.org
@@ -97,7 +97,7 @@ a remote location. If you install YaCy on a server that is not your
 workstation you must set an admin account immediately after the first start-up.
 Open:
 
-http://<remote-server-address>:8090/ConfigAccounts_p.html
+    http://<remote-server-address>:8090/ConfigAccounts_p.html
 
 and set an admin account.
 
@@ -170,17 +170,17 @@ git clone https://github.com/yacy/yacy_search_server
 
 Compiling YaCy:
 - You need Java 1.8 or later and [Apache Ant](https://ant.apache.org/).
-- Compile: "ant clean all" - then you can "./startYACY.sh" or "./startYACY.bat".
-- Create a release tarball: "ant dist".
-- Create a macOS release: "ant distMacApp" (only works on macOS).
-- Create a Debian release: "ant deb".
+- Compile: `ant clean all` - then you can `./startYACY.sh` or `./startYACY.bat`.
+- Create a release tarball: `ant dist`.
+- Create a macOS release: `ant distMacApp` (only works on macOS).
+- Create a Debian release: `ant deb`.
 - Work with Eclipse: Within Eclipse you also need to start the ant build process.
   because the servlet pages are not compiled by the Eclipse build process.
 after the dist procedure, the release can be found in the RELEASE subdirectory.
 
 Build with Maven:
 - For the first time go to the subdirectory libbuild (which contains the Maven parent POM).
-- Compile with "mvn clean install -DskipTests", this will create all needed modules.
+- Compile with `mvn clean install -DskipTests`, this will create all needed modules.
 - After this you can use just use the POM in the main directory to build YaCy with Maven.
 
 ## APIs and attaching software
@@ -195,7 +195,7 @@ scripts you can easily create more shell API access methods.
 
 ## Contact
 
-Visit the international YaCy forum](https://searchlab.eu)
+[Visit the international YaCy forum](https://searchlab.eu)
 where you can start a discussion there in your own language.
 
 Questions and requests for paid customization and integration into enterprise solutions.
