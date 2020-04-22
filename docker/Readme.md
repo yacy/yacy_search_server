@@ -7,9 +7,9 @@
 
 ## Getting built image from Docker Hub
 
-	docker pull luccioman/yacy
+	docker pull yacy/yacy_search_server
 	
-Repository URL : (https://hub.docker.com/r/luccioman/yacy/)
+Repository URL : (https://hub.docker.com/r/yacy/yacy_search_server/)
 
 ## Building image yourself
 
@@ -25,11 +25,11 @@ To build the Alpine variant :
 	
 ## Image variants
 
-`luccioman/yacy:latest`
+`yacy/yacy_search_server:latest`
 
 This image is based on latest stable official Debian stable [openjdk](https://hub.docker.com/_/openjdk/) 8 image provided by Docker. Embed Yacy compiled from latest git repository sources.
 
-`luccioman/yacy:latest-alpine`
+`yacy/yacy_search_server:latest-alpine`
 
 This image is based on latest stable official Alpine Linux [openjdk](https://hub.docker.com/_/openjdk/) 8 image provided by Docker. Embed Yacy compiled from latest git repository sources.
 	
@@ -47,14 +47,14 @@ You should modify this default password with page /ConfigAccounts_p.html when ex
 
 #### Most basic
 
-	docker run luccioman/yacy
+	docker run yacy/yacy_search_server
 
 YaCy web interface is then exposed at http://[container_ip]:8090.	
 You can retrieve the container IP address with `docker inspect`.
 
 #### Easier to handle
 
-	docker run --name yacy -p 8090:8090 -p 8443:8443 --log-opt max-size=200m --log-opt max-file=2 luccioman/yacy
+	docker run --name yacy -p 8090:8090 -p 8443:8443 --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server
 	
 ##### Options detail
 	
@@ -71,11 +71,11 @@ As configured in the Dockerfile, by default yacy data (in /opt/yacy_search_serve
 
 But you may map a host directory to hold yacy data in container :
 
-	docker run -v [/your_host/data/directory]:/opt/yacy_search_server/DATA luccioman/yacy
+	docker run -v [/your_host/data/directory]:/opt/yacy_search_server/DATA yacy/yacy_search_server
 	
 Or just use a volume label to help identify it later
 
-	docker run -v yacy_volume:/opt/yacy_search_server/DATA luccioman/yacy
+	docker run -v yacy_volume:/opt/yacy_search_server/DATA yacy/yacy_search_server
 
 Note that you can list all docker volumes with :
 
@@ -83,7 +83,7 @@ Note that you can list all docker volumes with :
 
 #### Start as background process
 
-	docker run -d luccioman/yacy
+	docker run -d yacy/yacy_search_server
 	
 ### HTTPS support
 
@@ -150,13 +150,13 @@ You can upgrade your YaCy container the Docker way with the following commands s
 
 Get latest Docker image :
 
-	docker pull luccioman/yacy:latest
+	docker pull yacy/yacy_search_server:latest
 OR 
-	docker pull luccioman/yacy:latest-alpine
+	docker pull yacy/yacy_search_server:latest-alpine
 	
 Create new container based on pulled image, using volume data from old container :
 	
-	docker create --name [tmp-container_name] -p 8090:8090 -p 8443:8443 --volumes-from=[container_name] --log-opt max-size=100m --log-opt max-file=2 luccioman/yacy:latest
+	docker create --name [tmp-container_name] -p 8090:8090 -p 8443:8443 --volumes-from=[container_name] --log-opt max-size=100m --log-opt max-file=2 yacy/yacy_search_server:latest
 	
 Stop old container :
 
@@ -178,3 +178,4 @@ Rename new container to reuse same container name :
 ## License
 
 View [license](https://github.com/yacy/yacy_search_server/blob/master/COPYRIGHT) information for the software contained in this image.
+
