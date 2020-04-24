@@ -34,6 +34,8 @@ import java.util.TreeMap;
 import org.apache.http.HttpStatus;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -44,8 +46,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Html2Image;
-import net.yacy.cora.util.JSONException;
-import net.yacy.cora.util.JSONObject;
 import net.yacy.crawler.data.Snapshots;
 import net.yacy.crawler.data.Snapshots.Revisions;
 import net.yacy.crawler.data.Transactions;

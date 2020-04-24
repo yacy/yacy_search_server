@@ -38,6 +38,8 @@ import java.util.regex.PatternSyntaxException;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.search.SyntaxError;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.encoding.ASCII;
@@ -50,8 +52,6 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.JSONException;
-import net.yacy.cora.util.JSONObject;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.FileCrawlStarterTask;
@@ -506,9 +506,14 @@ public class Crawler_p {
                                     props = vocabulary_scraper.getJSONObject(vocabulary);
                                 } catch (JSONException e) {
                                     props = new JSONObject();
-                                    vocabulary_scraper.put(vocabulary, props);
+                                    try {
+                                        vocabulary_scraper.put(vocabulary, props);
+                                    } catch (JSONException ee) {}
                                 }
-                                props.put("class", value);
+                                try {
+                                    props.put("class", value);
+                                } catch (JSONException e) {
+                                }
                             }
                         }
                     }

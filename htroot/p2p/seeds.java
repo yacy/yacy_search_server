@@ -4,9 +4,10 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
+import org.json.JSONObject;
+
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.cora.util.JSONObject;
 import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverCore;

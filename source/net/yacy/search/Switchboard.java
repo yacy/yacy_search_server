@@ -95,6 +95,10 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.search.SyntaxError;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;
@@ -133,9 +137,6 @@ import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.JSONArray;
-import net.yacy.cora.util.JSONObject;
-import net.yacy.cora.util.JSONTokener;
 import net.yacy.cora.util.Memory;
 import net.yacy.crawler.CrawlStacker;
 import net.yacy.crawler.CrawlSwitchboard;
@@ -2192,7 +2193,7 @@ public final class Switchboard extends serverSwitch {
                 while ((line = br.readLine()) != null) {
                     JSONTokener jt = new JSONTokener(line);
                     JSONObject json = new JSONObject(jt);
-                    if ((json.has("index") && json.length() == 1) || json.length() == 0) continue;
+                    if ((json.opt("index") != null && json.length() == 1) || json.length() == 0) continue;
                     SolrInputDocument surrogate = new SolrInputDocument();
                     for (String key: json.keySet()) {
                         Object o = json.get(key);
@@ -2262,7 +2263,7 @@ public final class Switchboard extends serverSwitch {
                 br = null;
                 fis = null;
                 moved = infile.renameTo(outfile);
-            } catch (IOException ex) {
+            } catch (IOException | JSONException  ex) {
                 log.warn("IO Error processing flatjson file " + infile);
             } finally {
             	/* Properly release file system resources even in failure cases */
