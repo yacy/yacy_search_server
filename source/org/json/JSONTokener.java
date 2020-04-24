@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
+/*
+ * This class was taken from
+ * https://android.googlesource.com/platform/libcore/+/refs/heads/master/json/src/main/java/org/json
+ * and slightly modified (by mc@yacy.net):
+ * - removed dependency from other libraries (i.e. android.compat.annotation)
+ * - fixed "statement unnecessary nested" warnings
+ * - added class initialization with reader object
+ */
+
 package org.json;
 
-import android.compat.annotation.UnsupportedAppUsage;
+import java.io.IOException;
+import java.io.Reader;
 
 // Note: this class was written without inspecting the non-free org.json sourcecode.
 
@@ -64,15 +74,27 @@ import android.compat.annotation.UnsupportedAppUsage;
 public class JSONTokener {
 
     /** The input JSON. */
-    @UnsupportedAppUsage
     private final String in;
 
     /**
      * The index of the next character to be returned by {@link #next}. When
      * the input is exhausted, this equals the input's length.
      */
-    @UnsupportedAppUsage
     private int pos;
+
+    public JSONTokener(Reader reader) throws IOException {
+        final char[] buffer = new char[2048];
+        final StringBuilder out = new StringBuilder();
+        int charsRead;
+        while((charsRead = reader.read(buffer, 0, buffer.length)) > 0) {
+            out.append(buffer, 0, charsRead);
+        }
+        String in = out.toString();
+        if (in != null && in.startsWith("\ufeff")) {
+            in = in.substring(1);
+        }
+        this.in = in;
+    }
 
     /**
      * @param in JSON encoded string. Null is not permitted and will yield a
@@ -116,7 +138,6 @@ public class JSONTokener {
         }
     }
 
-    @UnsupportedAppUsage
     private int nextCleanInternal() throws JSONException {
         while (pos < in.length()) {
             int c = in.charAt(pos++);
@@ -176,7 +197,6 @@ public class JSONTokener {
      * is terminated by "\r\n", the '\n' must be consumed as whitespace by the
      * caller.
      */
-    @UnsupportedAppUsage
     private void skipToEndOfLine() {
         for (; pos < in.length(); pos++) {
             char c = in.charAt(pos);
@@ -212,10 +232,9 @@ public class JSONTokener {
                 if (builder == null) {
                     // a new string avoids leaking memory
                     return new String(in.substring(start, pos - 1));
-                } else {
-                    builder.append(in, start, pos - 1);
-                    return builder.toString();
                 }
+                builder.append(in, start, pos - 1);
+                return builder.toString();
             }
 
             if (c == '\\') {
@@ -240,7 +259,6 @@ public class JSONTokener {
      * been read. This supports both unicode escapes "u000A" and two-character
      * escapes "\n".
      */
-    @UnsupportedAppUsage
     private char readEscapeCharacter() throws JSONException {
         char escaped = in.charAt(pos++);
         switch (escaped) {
@@ -284,7 +302,6 @@ public class JSONTokener {
      * values will be returned as an Integer, Long, or Double, in that order of
      * preference.
      */
-    @UnsupportedAppUsage
     private Object readLiteral() throws JSONException {
         String literal = nextToInternal("{}[]/\\:,=;# \t\f");
 
@@ -313,9 +330,8 @@ public class JSONTokener {
                 long longValue = Long.parseLong(number, base);
                 if (longValue <= Integer.MAX_VALUE && longValue >= Integer.MIN_VALUE) {
                     return (int) longValue;
-                } else {
-                    return longValue;
                 }
+                return longValue;
             } catch (NumberFormatException e) {
                 /*
                  * This only happens for integral numbers greater than
@@ -339,7 +355,6 @@ public class JSONTokener {
      * Returns the string up to but not including any of the given characters or
      * a newline character. This does not consume the excluded character.
      */
-    @UnsupportedAppUsage
     private String nextToInternal(String excluded) {
         int start = pos;
         for (; pos < in.length(); pos++) {
@@ -355,7 +370,6 @@ public class JSONTokener {
      * Reads a sequence of key/value pairs and the trailing closing brace '}' of
      * an object. The opening brace '{' should have already been read.
      */
-    @UnsupportedAppUsage
     private JSONObject readObject() throws JSONException {
         JSONObject result = new JSONObject();
 
@@ -372,10 +386,9 @@ public class JSONTokener {
             if (!(name instanceof String)) {
                 if (name == null) {
                     throw syntaxError("Names cannot be null");
-                } else {
-                    throw syntaxError("Names must be strings, but " + name
-                            + " is of type " + name.getClass().getName());
                 }
+                throw syntaxError("Names must be strings, but " + name
+                        + " is of type " + name.getClass().getName());
             }
 
             /*
@@ -411,7 +424,6 @@ public class JSONTokener {
      * "[]" yields an empty array, but "[,]" returns a two-element array
      * equivalent to "[null,null]".
      */
-    @UnsupportedAppUsage
     private JSONArray readArray() throws JSONException {
         JSONArray result = new JSONArray();
 
@@ -585,9 +597,8 @@ public class JSONTokener {
         if (index != -1) {
             pos = index;
             return to;
-        } else {
-            return '\0';
         }
+        return '\0';
     }
 
     /**

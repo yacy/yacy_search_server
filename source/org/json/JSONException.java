@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/*
+ * This class was taken from
+ * https://android.googlesource.com/platform/libcore/+/refs/heads/master/json/src/main/java/org/json
+ * and slightly modified (by mc@yacy.net):
+ * - removed dependency from other libraries (i.e. android.compat.annotation)
+ * - added generated serialVersionUID
+ */
+
 package org.json;
 
 // Note: this class was written without inspecting the non-free org.json sourcecode.
@@ -42,6 +50,8 @@ package org.json;
  * }</pre>
  */
 public class JSONException extends Exception {
+
+    private static final long serialVersionUID = -325665605382928224L;
 
     public JSONException(String s) {
         super(s);

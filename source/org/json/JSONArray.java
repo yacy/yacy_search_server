@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
+/*
+ * This class was taken from
+ * https://android.googlesource.com/platform/libcore/+/refs/heads/master/json/src/main/java/org/json
+ * and slightly modified (by mc@yacy.net):
+ * - removed dependency from other libraries (i.e. android.compat.annotation)
+ * - fixed "statement unnecessary nested" warnings
+ * - fixed raw type declarations
+ * - added initializer with capacity and trimToSize to reduce memory usage
+ */
+
 package org.json;
 
-import android.compat.annotation.UnsupportedAppUsage;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 // Note: this class was written without inspecting the non-free org.json sourcecode.
 
@@ -49,14 +57,33 @@ import java.util.List;
  */
 public class JSONArray {
 
-    @UnsupportedAppUsage
-    private final List<Object> values;
+    private final ArrayList<Object> values;
 
     /**
      * Creates a {@code JSONArray} with no values.
      */
     public JSONArray() {
         values = new ArrayList<Object>();
+    }
+
+    /**
+     * Creates a {@code JSONArray} with no values and the specified initial capacity.
+     *
+     * @param  initialCapacity  the initial capacity of the list
+     * @throws IllegalArgumentException if the specified initial capacity
+     *         is negative
+     */
+    public JSONArray(int initialCapacity) {
+        values = new ArrayList<Object>(initialCapacity);
+    }
+
+    /**
+     * Trims the capacity of this <tt>JSONArray</tt> instance to be the
+     * list's current size.  An application can use this operation to minimize
+     * the storage of an <tt>JSONArray</tt> instance.
+     */
+    public void trimToSize() {
+        this.values.trimToSize();
     }
 
     /**
@@ -68,10 +95,10 @@ public class JSONArray {
      *     inconsistent state.
      */
     /* Accept a raw type for API compatibility */
-    public JSONArray(Collection copyFrom) {
-        this();
+    public JSONArray(Collection<?> copyFrom) {
+        this(copyFrom == null ? 0 : copyFrom.size());
         if (copyFrom != null) {
-            for (Iterator it = copyFrom.iterator(); it.hasNext();) {
+            for (Iterator<?> it = copyFrom.iterator(); it.hasNext();) {
                 put(JSONObject.wrap(it.next()));
             }
         }
@@ -498,9 +525,8 @@ public class JSONArray {
         Object object = get(index);
         if (object instanceof JSONArray) {
             return (JSONArray) object;
-        } else {
-            throw JSON.typeMismatch(index, object, "JSONArray");
         }
+        throw JSON.typeMismatch(index, object, "JSONArray");
     }
 
     /**
@@ -523,9 +549,8 @@ public class JSONArray {
         Object object = get(index);
         if (object instanceof JSONObject) {
             return (JSONObject) object;
-        } else {
-            throw JSON.typeMismatch(index, object, "JSONObject");
         }
+        throw JSON.typeMismatch(index, object, "JSONObject");
     }
 
     /**
@@ -609,7 +634,6 @@ public class JSONArray {
         return stringer.toString();
     }
 
-    @UnsupportedAppUsage
     void writeTo(JSONStringer stringer) throws JSONException {
         stringer.array();
         for (Object value : values) {

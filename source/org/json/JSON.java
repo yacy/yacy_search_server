@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
+/*
+ * This class was taken from
+ * https://android.googlesource.com/platform/libcore/+/refs/heads/master/json/src/main/java/org/json
+ * and slightly modified (by mc@yacy.net):
+ * - fixed "statement unnecessary nested" warnings
+ * - added asserts
+ */
+
 package org.json;
 
 class JSON {
@@ -28,6 +36,7 @@ class JSON {
     }
 
     static Boolean toBoolean(Object value) {
+        assert value != null;
         if (value instanceof Boolean) {
             return (Boolean) value;
         } else if (value instanceof String) {
@@ -42,6 +51,7 @@ class JSON {
     }
 
     static Double toDouble(Object value) {
+        assert value != null;
         if (value instanceof Double) {
             return (Double) value;
         } else if (value instanceof Number) {
@@ -56,6 +66,7 @@ class JSON {
     }
 
     static Integer toInteger(Object value) {
+        assert value != null;
         if (value instanceof Integer) {
             return (Integer) value;
         } else if (value instanceof Number) {
@@ -70,6 +81,7 @@ class JSON {
     }
 
     static Long toLong(Object value) {
+        assert value != null;
         if (value instanceof Long) {
             return (Long) value;
         } else if (value instanceof Number) {
@@ -84,6 +96,7 @@ class JSON {
     }
 
     static String toString(Object value) {
+        assert value != null;
         if (value instanceof String) {
             return (String) value;
         } else if (value != null) {
@@ -96,21 +109,20 @@ class JSON {
             String requiredType) throws JSONException {
         if (actual == null) {
             throw new JSONException("Value at " + indexOrName + " is null.");
-        } else {
-            throw new JSONException("Value " + actual + " at " + indexOrName
-                    + " of type " + actual.getClass().getName()
-                    + " cannot be converted to " + requiredType);
         }
+        throw new JSONException("Value " + actual + " at " + indexOrName
+                + " of type " + actual.getClass().getName()
+                + " cannot be converted to " + requiredType);
+
     }
 
     public static JSONException typeMismatch(Object actual, String requiredType)
             throws JSONException {
         if (actual == null) {
             throw new JSONException("Value is null.");
-        } else {
-            throw new JSONException("Value " + actual
-                    + " of type " + actual.getClass().getName()
-                    + " cannot be converted to " + requiredType);
         }
+        throw new JSONException("Value " + actual
+                + " of type " + actual.getClass().getName()
+                + " cannot be converted to " + requiredType);
     }
 }
