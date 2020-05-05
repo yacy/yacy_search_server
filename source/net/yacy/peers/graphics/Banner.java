@@ -14,12 +14,13 @@ import net.yacy.visualization.RasterPlotter;
 public final class Banner {
 
     private static final String QUERIES_HOUR = " QUERIES/HOUR";
-    private static final String PAGES_MINUTE = " PAGES/MINUTE";
+    private static final String PAGES_MINUTE = " PAGES/MIN";
     private static final String QUERIES = "QUERIES:";
     private static final String WORDS = "WORDS:";
     private static final String LINKS = "LINKS:";
     private static final String NETWORK = "NETWORK:";
-    private static final String SPEED = "SPEED:";
+    private static final String SPEED_CRAWLING = "CRAWLING:";
+    private static final String SPEED_INDEXING = "INDEXING:";
     private static final String TYPE = "TYPE:";
     private static final String DHT_WORDS = "DHT WORDS:";
     private static final String DOCUMENTS = "DOCUMENTS:";
@@ -97,13 +98,13 @@ public final class Banner {
         PrintTool.print(bannerPicture, 100, 22, 0, DOCUMENTS + addBlanksAndDots(data.getLinks(), DOCUMENTS.length()), -1, 80);
         PrintTool.print(bannerPicture, 100, 32, 0, DHT_WORDS + addBlanksAndDots(data.getWords(), DHT_WORDS.length()), -1, 80);
         PrintTool.print(bannerPicture, 100, 42, 0, TYPE + addBlanks(data.getType(), TYPE.length()), -1, 80);
-        PrintTool.print(bannerPicture, 100, 52, 0, SPEED + addBlanks(data.getPpm() + PAGES_MINUTE, SPEED.length()), -1, 80);
+        PrintTool.print(bannerPicture, 100, 52, 0, SPEED_INDEXING + addBlanks(data.getPpm() + PAGES_MINUTE, SPEED_INDEXING.length()), -1, 80);
 
         PrintTool.print(bannerPicture, 290, 12, 0, NETWORK + addBlanks(data.getNetwork() + " [" + data.getPeers() + "]", NETWORK.length()), -1, 80);
         PrintTool.print(bannerPicture, 290, 22, 0, LINKS + addBlanksAndDots(data.getNlinks(), LINKS.length()), -1, 80);
         PrintTool.print(bannerPicture, 290, 32, 0, WORDS + addBlanksAndDots(data.getNwords(), WORDS.length()), -1, 80);
         PrintTool.print(bannerPicture, 290, 42, 0, QUERIES + addBlanks(formatQpm(data.getNqph()) + QUERIES_HOUR, QUERIES.length()), -1, 80);
-        PrintTool.print(bannerPicture, 290, 52, 0, SPEED + addBlanks(data.getNppm() + PAGES_MINUTE, SPEED.length()), -1, 80);
+        PrintTool.print(bannerPicture, 290, 52, 0, SPEED_CRAWLING + addBlanks(data.getNppm() + PAGES_MINUTE, SPEED_CRAWLING.length()), -1, 80);
 
         final int height = data.getHeight();
         final int width = data.getWidth();
