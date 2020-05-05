@@ -36,12 +36,15 @@ import net.yacy.server.servletProperties;
 public class compare_yacy {
 
     public static final String defaultsearchL = "YaCy";
-    public static final String defaultsearchR = "startpage.com";
+    public static final String defaultsearchR = "swisscows.ch";
     private static final Map<String, String> searchengines = new LinkedHashMap<String, String>();
     static {
         searchengines.put(defaultsearchL, "yacysearch.html?display=2&resource=global&query=");
         searchengines.put("YaCy (local)", "yacysearch.html?display=2&resource=local&query=");
         //searchengines.put("google.com", "https://www.google.com/#q=");
+        searchengines.put("swisscows.ch", "https://swisscows.ch/web?query=");
+        searchengines.put("mojeek.com", "https://www.mojeek.com/search?q=");
+        searchengines.put("duckduckgo.com", "https://duckduckgo.com/?q=");
         searchengines.put("startpage.com", "https://startpage.com/do/search?cat=web&query=");
         searchengines.put("bing.com", "https://www.bing.com/search?q=");
         searchengines.put("metager.de", "https://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
