@@ -21,7 +21,7 @@
 	<classpathentry kind="lib" path="lib/jsch-0.1.54.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/commons-fileupload-1.3.3.jar"/>
-	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/json-simple-2.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.17.jar"/>
 	<classpathentry kind="lib" path="lib/xz-1.8.jar"/>
