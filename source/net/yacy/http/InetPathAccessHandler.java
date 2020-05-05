@@ -127,7 +127,6 @@ public class InetPathAccessHandler extends InetAccessHandler {
 		new InetPathAccessHandler().include(pattern);
 	}
 
-	@Override
 	protected boolean isAllowed(final InetAddress address, final HttpServletRequest request) {
 		return isAllowed(address, request.getPathInfo());
 	}

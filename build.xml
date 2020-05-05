@@ -201,7 +201,7 @@
         <pathelement location="${lib}/J7Zip-modified.jar" />
         <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
     	<pathelement location="${lib}/jaudiotagger-2.2.5.jar" />
-        <pathelement location="${lib}/javax.servlet-api-3.1.0.jar" />
+        <pathelement location="${lib}/javax.servlet-api-4.0.1.jar" />
     	<pathelement location="${lib}/jcifs-1.3.17.jar" />
     	<pathelement location="${lib}/jcl-over-slf4j-1.7.25.jar" />
         <pathelement location="${lib}/jetty-client-9.4.17.v20190418.jar" />
