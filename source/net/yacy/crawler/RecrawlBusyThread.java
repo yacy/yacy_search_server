@@ -26,8 +26,10 @@ package net.yacy.crawler;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.solr.common.SolrDocument;
@@ -44,7 +46,6 @@ import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.Switchboard;
-import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.schema.CollectionSchema;
 
 /**
@@ -64,12 +65,18 @@ public class RecrawlBusyThread extends AbstractBusyThread {
     
     /** Default value for inclusion or not of documents with a https status different from 200 (success) */
     public static final boolean DEFAULT_INCLUDE_FAILED = false;
+    
+    /** The default value whether to delete on Recrawl */
+    public static final boolean DEFAULT_DELETE_ON_RECRAWL = false;
 
     /** The current query selecting documents to recrawl */
     private String currentQuery;
     
     /** flag if docs with httpstatus_i <> 200 shall be recrawled */
     private boolean includefailed;
+    
+    /** flag whether to delete on Recrawl */
+    private boolean deleteOnRecrawl;
     
     private int chunkstart = 0;
     private final int chunksize = 100;
@@ -116,16 +123,17 @@ public class RecrawlBusyThread extends AbstractBusyThread {
 	 *            set to true when documents with a https status different from 200
 	 *            (success) must be included
 	 */
-    public RecrawlBusyThread(final Switchboard xsb, final String query, final boolean includeFailed) {
+    public RecrawlBusyThread(final Switchboard xsb, final String query, final boolean includeFailed, final boolean deleteOnRecrawl) {
         super(3000, 1000); // set lower limits of cycle delay
         setName(THREAD_NAME);
         this.setIdleSleep(10*60000); // set actual cycle delays
         this.setBusySleep(2*60000);
         this.setPriority(Thread.MIN_PRIORITY);
-
+        this.setLoadPreReqisite(1);
         this.sb = xsb;
         this.currentQuery = query;
         this.includefailed = includeFailed;
+        this.deleteOnRecrawl = deleteOnRecrawl;
         this.urlstack = new HashSet<DigestURL>();
         // workaround to prevent solr exception on existing index (not fully reindexed) since intro of schema with docvalues
         // org.apache.solr.core.SolrCore java.lang.IllegalStateException: unexpected docvalues type NONE for field 'load_date_dt' (expected=NUMERIC). Use UninvertingReader or index with docvalues.
@@ -143,10 +151,12 @@ public class RecrawlBusyThread extends AbstractBusyThread {
      * and resets the counter to start a fresh query loop
      * @param q select query
      * @param includefailedurls true=all http status docs are recrawled, false=httpstatus=200 docs are recrawled
+     * @param deleteOnRecrawl
      */
-    public void setQuery(String q, boolean includefailedurls) {
+    public void setQuery(String q, boolean includefailedurls, final boolean deleteOnRecrawl) {
         this.currentQuery = q;
         this.includefailed = includefailedurls;
+        this.deleteOnRecrawl = deleteOnRecrawl;
         this.chunkstart = 0;
     }
 
@@ -179,6 +189,14 @@ public class RecrawlBusyThread extends AbstractBusyThread {
 
     public boolean getIncludeFailed () {
         return this.includefailed;
+    }
+    
+    public void setDeleteOnRecrawl(final boolean deleteOnRecrawl) {
+        this.deleteOnRecrawl = deleteOnRecrawl;
+    }
+    
+    public boolean getDeleteOnRecrawl() {
+        return this.deleteOnRecrawl;
     }
 
     /**
@@ -290,21 +308,27 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         }
 
         if (docList != null) {
+            List<String> tobedeletedIDs = new ArrayList<>();
             for (final SolrDocument doc : docList) {
                 try {
                     this.urlstack.add(new DigestURL((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName())));
+                    if (deleteOnRecrawl) tobedeletedIDs.add((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                 } catch (final MalformedURLException ex) {
                 	this.malformedUrlsCount++;
-                    try { // if index entry hasn't a valid url (useless), delete it
-                        solrConnector.deleteById((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
-                        this.malformedUrlsDeletedCount++;
-                        ConcurrentLog.severe(THREAD_NAME, "deleted index document with invalid url " + (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
-                    } catch (final IOException ex1) {
-                        ConcurrentLog.severe(THREAD_NAME, ex1.getMessage());
-                    }
+                    // if index entry hasn't a valid url (useless), delete it
+                    tobedeletedIDs.add((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                    this.malformedUrlsDeletedCount++;
+                    ConcurrentLog.severe(THREAD_NAME, "deleted index document with invalid url " + (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
                 }
             }
-            this.chunkstart = this.chunkstart + this.chunksize;
+            
+            if (!tobedeletedIDs.isEmpty()) try {
+                solrConnector.deleteByIds(tobedeletedIDs);
+            } catch (IOException e) {
+                ConcurrentLog.severe(THREAD_NAME, "error deleting IDs ", e);
+            }
+            
+            this.chunkstart = deleteOnRecrawl? 0 : this.chunkstart + this.chunksize;
         }
         
         if (docList == null || docList.size() < this.chunksize) {

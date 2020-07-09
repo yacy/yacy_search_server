@@ -123,6 +123,7 @@ public class IndexReIndexMonitor_p {
         
     	String recrawlQuery = RecrawlBusyThread.DEFAULT_QUERY;
         boolean inclerrdoc = RecrawlBusyThread.DEFAULT_INCLUDE_FAILED;
+        boolean deleteOnRecrawl = RecrawlBusyThread.DEFAULT_DELETE_ON_RECRAWL;
         // to signal that a setting shall change the form provides a fixed parameter setup=recrawljob, if not present return status only
         if (post != null && "recrawljob".equals(post.get("setup"))) { // it's a command to recrawlThread
         	
@@ -136,13 +137,17 @@ public class IndexReIndexMonitor_p {
             if (post.containsKey("includefailedurls")) {
                 inclerrdoc = post.getBoolean("includefailedurls");
             }
+            
+            if (post.containsKey("deleteOnRecrawl")) {
+                deleteOnRecrawl = post.getBoolean("deleteOnRecrawl");
+            }
 
             if (recrawlbt == null || recrawlbt.shutdownInProgress()) {
                 prop.put("recrawljobrunning_simulationResult", 0);
                 prop.put("recrawljobrunning_error", 0);
             	if (post.containsKey("recrawlnow")) {
             		sb.deployThread(RecrawlBusyThread.THREAD_NAME, "ReCrawl", "recrawl existing documents", null,
-            				new RecrawlBusyThread(Switchboard.getSwitchboard(), recrawlQuery, inclerrdoc), 1000);
+            				new RecrawlBusyThread(Switchboard.getSwitchboard(), recrawlQuery, inclerrdoc, deleteOnRecrawl), 1000);
             		recrawlbt = sb.getThread(RecrawlBusyThread.THREAD_NAME);
                 
             		/* store this call as an api call for easy scheduling possibility */
@@ -192,6 +197,7 @@ public class IndexReIndexMonitor_p {
                 if(post.containsKey("recrawlDefaults")) {
                 	recrawlQuery = RecrawlBusyThread.DEFAULT_QUERY;
                     inclerrdoc = RecrawlBusyThread.DEFAULT_INCLUDE_FAILED;
+                    deleteOnRecrawl = RecrawlBusyThread.DEFAULT_DELETE_ON_RECRAWL;
                 }
             } else {
                 if (post.containsKey("stoprecrawl")) {
@@ -204,9 +210,10 @@ public class IndexReIndexMonitor_p {
 
             if (recrawlbt != null && !recrawlbt.shutdownInProgress()) {
                 if (post.containsKey("updquery") && post.containsKey("recrawlquerytext")) {
-                    ((RecrawlBusyThread) recrawlbt).setQuery(recrawlQuery, inclerrdoc);
+                    ((RecrawlBusyThread) recrawlbt).setQuery(recrawlQuery, inclerrdoc, deleteOnRecrawl);
                 } else {
                     ((RecrawlBusyThread) recrawlbt).setIncludeFailed(inclerrdoc);
+                    ((RecrawlBusyThread) recrawlbt).setDeleteOnRecrawl(deleteOnRecrawl);
                 }
             }
         }
@@ -219,10 +226,12 @@ public class IndexReIndexMonitor_p {
             prop.put("recrawljobrunning_docCount", ((RecrawlBusyThread) recrawlbt).getUrlsToRecrawl());
             prop.put("recrawljobrunning_recrawlquerytext", ((RecrawlBusyThread) recrawlbt).getQuery());
             prop.put("recrawljobrunning_includefailedurls", ((RecrawlBusyThread) recrawlbt).getIncludeFailed());
+            prop.put("recrawljobrunning_deleteOnRecrawl", ((RecrawlBusyThread) recrawlbt).getDeleteOnRecrawl());
         } else {
 			prop.put("recrawljobrunning", 0);
             prop.put("recrawljobrunning_recrawlquerytext", recrawlQuery);
             prop.put("recrawljobrunning_includefailedurls", inclerrdoc);
+            prop.put("recrawljobrunning_deleteOnRecrawl", deleteOnRecrawl);
         }
 
         // return rewrite properties
