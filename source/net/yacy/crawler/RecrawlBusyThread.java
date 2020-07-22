@@ -26,10 +26,8 @@ package net.yacy.crawler;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.apache.solr.common.SolrDocument;
@@ -300,7 +298,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         try {
             // query all or only httpstatus=200 depending on includefailed flag
             docList = solrConnector.getDocumentListByQuery(RecrawlBusyThread.buildSelectionQuery(this.currentQuery, this.includefailed),
-                this.solrSortBy, this.chunkstart, this.chunksize, CollectionSchema.sku.getSolrFieldName());
+                this.solrSortBy, this.chunkstart, this.chunksize, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
             this.urlsToRecrawl = docList.getNumFound();
         } catch (final Throwable e) {
         	this.urlsToRecrawl = 0;
@@ -308,7 +306,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
         }
 
         if (docList != null) {
-            List<String> tobedeletedIDs = new ArrayList<>();
+            Set<String> tobedeletedIDs = new HashSet<>();
             for (final SolrDocument doc : docList) {
                 try {
                     this.urlstack.add(new DigestURL((String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName())));
@@ -324,6 +322,7 @@ public class RecrawlBusyThread extends AbstractBusyThread {
             
             if (!tobedeletedIDs.isEmpty()) try {
                 solrConnector.deleteByIds(tobedeletedIDs);
+                solrConnector.commit(false);
             } catch (IOException e) {
                 ConcurrentLog.severe(THREAD_NAME, "error deleting IDs ", e);
             }
