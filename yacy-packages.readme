@@ -7,7 +7,6 @@ Packages:
 
 net.yacy.kelondro
 -----------------
-Depends on commons-logging.
 The core class for efficient I/O:
 - Record-based stream writing.
 - Blob-based stream writing.
