@@ -237,6 +237,8 @@ public class Html2Image {
 	 * @param proxy        the eventual proxy address to use. Can be null.
 	 * @param destination  the destination PDF file that should be written. Must not
 	 *                     be null.
+	 * @param userAgent    TODO: implement
+	 * @param acceptLanguage TODO: implement
 	 * @param ignoreErrors when true wkhtmltopdf is instructed to ignore load errors
 	 * @param maxSeconds   the maximum time in seconds to wait for the wkhtmltopdf
 	 *                     dedicated process termination. Beyond this limit the

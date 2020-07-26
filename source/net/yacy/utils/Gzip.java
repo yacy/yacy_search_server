@@ -43,7 +43,7 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.util.ConcurrentLog;
 
 
-public class gzip {
+public class Gzip {
 
     private final static ConcurrentLog logger = new ConcurrentLog("GZIP");
 
@@ -109,7 +109,7 @@ public class gzip {
 	    return UTF8.String(gunzip(in));
     }
     
-    public static byte[] gzip(byte[] b) {
+    public static byte[] gzip(final byte[] b) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream(b.length);
             GZIPOutputStream out = new GZIPOutputStream(baos, Math.min(65536, b.length)){{def.setLevel(Deflater.BEST_COMPRESSION);}};
@@ -215,13 +215,13 @@ public class gzip {
 	    } else {
 		target = s[2];
 	    }
-	    gzip.gunzipFile(new File(s[1]), new File(target));
+	    Gzip.gunzipFile(new File(s[1]), new File(target));
 	    System.exit(0);
 	}
 	if ((s.length < 1) || (s.length > 2)) {help(); System.exit(-1);}
 	String target;
 	if (s.length == 1) target = s[0] + ".gz"; else target = s[1];
-	gzip.gzipFile((s[0]), target);
+	Gzip.gzipFile((s[0]), target);
 	System.exit(0);
     }
 

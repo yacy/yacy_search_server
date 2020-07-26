@@ -261,7 +261,7 @@ public class YaCyDigestScheme extends DigestScheme {
             sb.append(checksum).append(':').append(nonce).append(':').append(cnonce);
             a1 = sb.toString();*/
             sb.append(pwd).append(':').append(nonce).append(':').append(cnonce);
-            hasha1 = encode(digester.digest(EncodingUtils.getBytes(sb.toString(), charset)));;
+            hasha1 = encode(digester.digest(EncodingUtils.getBytes(sb.toString(), charset)));
         } else {
             // unq(username-value) ":" unq(realm-value) ":" passwd
             /* Modification for YaCy Digest Authentication : the pwd value is already the result of MD5(userName:realm:password)

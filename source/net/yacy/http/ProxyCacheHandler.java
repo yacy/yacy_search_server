@@ -31,15 +31,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Request;
+
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.retrieval.Response;
-import net.yacy.http.servlets.YaCyDefaultServlet;
-
-import org.eclipse.jetty.server.Handler;
-import org.eclipse.jetty.server.Request;
 
 /**
  * jetty http handler serves pages from cache if available and valid

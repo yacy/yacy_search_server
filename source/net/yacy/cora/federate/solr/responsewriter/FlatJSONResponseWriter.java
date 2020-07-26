@@ -52,10 +52,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
 
     private static final char lb = '\n';
     
-    private boolean elasticsearchBulkRequest;
-    
-    public FlatJSONResponseWriter(boolean elasticsearchBulkRequest) {
-        this.elasticsearchBulkRequest = elasticsearchBulkRequest;
+    public FlatJSONResponseWriter() {
     }
     
     @Override

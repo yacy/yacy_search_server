@@ -254,6 +254,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                     }
                 }
                 final String threaddump = sb.toString();
+                @SuppressWarnings("unlikely-arg-type")
                 List<String> threads = get(threaddump);
                 if (threads == null) threads = new ArrayList<String>();
                 Thread.State state = null;

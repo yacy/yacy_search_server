@@ -252,7 +252,7 @@ public final class TransformerWriter extends Writer {
             // we have a new tag
             if (opening) {
                 // case (2):
-                return filterTagOpening(tagname, content, quotechar);
+                return filterTagOpening(tagname, content);
             }
 
             // its a close tag where no should be
@@ -267,7 +267,7 @@ public final class TransformerWriter extends Writer {
         // it's a tag! which one?
         if (opening) {
             // case (5): the opening should not be here. But we keep the order anyway
-            this.tagStack.lastElement().content.append(filterTagOpening(tagname, content, quotechar));
+            this.tagStack.lastElement().content.append(filterTagOpening(tagname, content));
             return new char[0];
         }
 
@@ -281,7 +281,7 @@ public final class TransformerWriter extends Writer {
         return filterTagCloseing(quotechar);
     }
 
-    private char[] filterTagOpening(final String tagname, final char[] content, final char quotechar) {
+    private char[] filterTagOpening(final String tagname, final char[] content) {
         final CharBuffer charBuffer = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
         ContentScraper.Tag tag = new ContentScraper.Tag(tagname, charBuffer.propParser());
         charBuffer.close();

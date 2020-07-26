@@ -45,7 +45,7 @@ public class NewsPoolTest {
         Seed myseed = new Seed(ASCII.String(hash), dna);
 
         // generate 3 test messages and simulate publish (put in outgoing queuq
-        Map<String, String> msgattr = new HashMap();
+        Map<String, String> msgattr = new HashMap<>();
         for (int i = 1; i <= 3; i++) {
             msgattr.put("text", "message " + Integer.toString(i));
             msgattr.put("#", Integer.toString(i)); // use id modificator attribute (to generate unique id for same creation second, used in id)
@@ -53,7 +53,7 @@ public class NewsPoolTest {
         }
 
         // test the distribution process
-        Set<String> resultmemory = new LinkedHashSet();
+        Set<String> resultmemory = new LinkedHashSet<>();
         NewsDB.Record rec = newsPool.myPublication();
         int cnt = 3 * 30 + 5; // end condition (3 msg * 30 distribution) for loop (+5 > as expected count)
         while (rec != null && cnt > 0) {

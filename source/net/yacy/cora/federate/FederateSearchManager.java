@@ -163,7 +163,7 @@ public class FederateSearchManager {
     public void search(SearchEvent theSearch) {
         if (theSearch != null) {
             if (!theSearch.query.isLocal() && !MemoryControl.shortStatus()) {
-                Set<AbstractFederateSearchConnector> picklist = getBest(theSearch.getQuery());
+                Set<AbstractFederateSearchConnector> picklist = getBest();
                 for (AbstractFederateSearchConnector fsc : picklist) {
                     fsc.search(theSearch);
                 }
@@ -180,7 +180,7 @@ public class FederateSearchManager {
     public List<URIMetadataNode> query(QueryParams query) {
         if (!query.isLocal() && !MemoryControl.shortStatus()) {
             List<URIMetadataNode> sdl = new ArrayList<URIMetadataNode>();
-            Set<AbstractFederateSearchConnector> picklist = getBest(query);
+            Set<AbstractFederateSearchConnector> picklist = getBest();
             for (AbstractFederateSearchConnector fsc : picklist) {
                 sdl.addAll(fsc.query(query));
             }
@@ -279,12 +279,11 @@ public class FederateSearchManager {
     }
 
     /**
-     * Get best systems from configured targets for this search
-     *
-     * @param theSearch
+     * Get best systems from configured targets
+     * 
      * @return list of searchtargetconnectors
      */
-    protected Set<AbstractFederateSearchConnector> getBest(final QueryParams query) {
+    protected Set<AbstractFederateSearchConnector> getBest() {
         HashSet<AbstractFederateSearchConnector> retset = new HashSet<AbstractFederateSearchConnector>();
         MultiProtocolURL connectorURL;
         for (AbstractFederateSearchConnector fsc : conlist) {

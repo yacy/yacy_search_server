@@ -673,6 +673,7 @@ public class DateDetection {
     /**
      * get all dates in the text
      * @param text
+     * @param timezoneOffset TODO: implement
      * @return a set of dates, ordered by time. first date in the ordered set is the oldest time.
      */
     public static LinkedHashSet<Date> parse(String text, int timezoneOffset) {
@@ -692,7 +693,7 @@ public class DateDetection {
      * This is used by the query parser for query date modifier on:, from: or to:
      *
      * @param text
-     * @param timezoneOffset
+     * @param timezoneOffset TODO: implement
      * @return determined date or null
      */
     public static Date parseLine(final String text, final int timezoneOffset) {

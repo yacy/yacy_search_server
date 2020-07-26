@@ -1044,8 +1044,10 @@ public final class HTTPDProxyHandler {
         String orgHostName = orgurl.getHost();
         if (orgHostName == null) orgHostName = "unknown";
         orgHostName = orgHostName.toLowerCase(Locale.ROOT);
-        String orgHostPath = orgurl.getPath(); if (orgHostPath == null) orgHostPath = "";
-        String orgHostArgs = orgurl.getSearchpart();; if (orgHostArgs == null) orgHostArgs = "";
+        String orgHostPath = orgurl.getPath();
+        if (orgHostPath == null) orgHostPath = "";
+        String orgHostArgs = orgurl.getSearchpart();
+        if (orgHostArgs == null) orgHostArgs = "";
         if (orgHostArgs.length() > 0) orgHostArgs = "?" + orgHostArgs;
         detailedErrorMsgMap.put("hostName", orgHostName);
 

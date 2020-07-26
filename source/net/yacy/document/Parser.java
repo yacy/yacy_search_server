@@ -28,7 +28,6 @@ import java.util.Set;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.document.Parser.Failure;
 
 public interface Parser {
 
