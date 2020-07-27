@@ -351,12 +351,24 @@
 	</repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
+		    <dependency>
+		        <groupId>org.hamcrest</groupId>
+		        <artifactId>hamcrest</artifactId>
+		        <version>2.2</version>
+		        <scope>test</scope>
+		    </dependency>
+		    <dependency>
+		        <groupId>org.hamcrest</groupId>
+		        <artifactId>hamcrest-library</artifactId>
+		        <version>2.2</version>
+		        <scope>test</scope>
+		    </dependency>
+		    <dependency>
+		        <groupId>junit</groupId>
+		        <artifactId>junit</artifactId>
+		        <version>4.13</version>
+		        <scope>test</scope>
+		    </dependency>
 
         <dependency>
         	<!-- Optional dependency of pdfbox for Encrypting and signing PDFs 

@@ -20,20 +20,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.ClientIdentification;
-
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.WarcImporter;
-import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class IndexImportWarc_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-        final Switchboard sb = (Switchboard) env;
 
         if (WarcImporter.job != null && WarcImporter.job.isAlive()) {
             // one import is running, no option to insert anything

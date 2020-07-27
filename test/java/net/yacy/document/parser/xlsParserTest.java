@@ -1,17 +1,20 @@
 package net.yacy.document.parser;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+
+import org.junit.Test;
+
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.VocabularyScraper;
-import static org.hamcrest.CoreMatchers.containsString;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 public class xlsParserTest {
 
