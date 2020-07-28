@@ -81,11 +81,11 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
         for (int i = 0; i < sz; i++) {
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id);
-            writeDoc(writer, schema, null, doc.getFields(), (includeScore ? iterator.score() : 0.0f), includeScore);
+            writeDoc(writer, schema, doc.getFields());
         }
     }
 
-    private static final void writeDoc(final Writer writer, final IndexSchema schema, final String name, final List<IndexableField> fields, final float score, final boolean includeScore) throws IOException {
+    private static final void writeDoc(final Writer writer, final IndexSchema schema, final List<IndexableField> fields) throws IOException {
         JSONObject json = new JSONObject();
         
         int sz = fields.size();
@@ -110,7 +110,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
                     JSONObject j = new JSONObject();
                     String sv = value.stringValue();
                     setValue(j, type.getTypeName(), "x", sv); //sf.write(this, null, f1);
-                    a.put(j.get("x"));
+                    a.put(j.opt("x"));
                 } else {
                     setValue(json, type.getTypeName(), value.name(), value.stringValue());
                 }
@@ -121,7 +121,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
                     String sv = fields.get(i).stringValue();
                     JSONObject j = new JSONObject();
                     setValue(j, type.getTypeName(), "x", sv); //sf.write(this, null, f1);
-                    a.put(j.get("x"));
+                    a.put(j.opt("x"));
                 }
             }
             fidx1 = fidx2;

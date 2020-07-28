@@ -2196,7 +2196,8 @@ public final class Switchboard extends serverSwitch {
                     if ((json.opt("index") != null && json.length() == 1) || json.length() == 0) continue;
                     SolrInputDocument surrogate = new SolrInputDocument();
                     for (String key: json.keySet()) {
-                        Object o = json.get(key);
+                        Object o = json.opt(key);
+                        if (o == null) continue;
                         if (o instanceof JSONArray) {
                             // transform this into a list
                             JSONArray a = (JSONArray) o;
@@ -3913,10 +3914,6 @@ public final class Switchboard extends serverSwitch {
                 this.log.info("addToCrawler: failed to add " + url.toNormalform(true) + ": " + s);
             }
         }
-    }
-
-    public void initBookmarks(@SuppressWarnings("unused") boolean b) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public class receiptSending implements Runnable

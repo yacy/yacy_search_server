@@ -611,6 +611,7 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public String getScheme() {
         // here we can directly check original request first, as scheme is not expected to be changed
         if (_request != null) {
