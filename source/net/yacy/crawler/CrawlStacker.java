@@ -620,6 +620,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         // returns true if the url can be accepted according to network.unit.domain
         if (urlhash == null) return "url is null";
         // check if this is a local address and we are allowed to index local pages:
+        @SuppressWarnings("deprecation")
         final boolean local = DigestURL.isLocal(urlhash);
         if (this.acceptLocalURLs && local) return null;
         if (this.acceptGlobalURLs && !local) return null;

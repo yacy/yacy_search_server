@@ -1976,6 +1976,9 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 break;
             case APP:
                 r += rentry.lapp() << this.query.ranking.coeff_cathasapp;
+                break;
+            default:
+                break;
         }
 
         // apply citation count

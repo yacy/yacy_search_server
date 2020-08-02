@@ -1488,12 +1488,12 @@ public final class Protocol {
     		this.docs = docs;
     	}
     	
-    	/**
-    	 * Use this to stop writing operation. This thread will not stop immediately as Solr might be writing something.
-    	 */
-    	public void stopWriting() {
-    		this.stop.set(true);
-    	}
+//    	/**
+//    	 * Use this to stop writing operation. This thread will not stop immediately as Solr might be writing something.
+//    	 */
+//    	public void stopWriting() {
+//    		this.stop.set(true);
+//    	}
 		
         @Override
         public void run() {

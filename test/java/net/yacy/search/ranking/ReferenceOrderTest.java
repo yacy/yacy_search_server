@@ -1,16 +1,18 @@
 package net.yacy.search.ranking;
 
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+
+import org.apache.solr.common.SolrInputDocument;
+import org.junit.Test;
+
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.search.schema.CollectionConfiguration;
-import org.apache.solr.common.SolrInputDocument;
-import static org.junit.Assert.assertTrue;
-import org.junit.Test;
 
 public class ReferenceOrderTest {
 
@@ -20,7 +22,7 @@ public class ReferenceOrderTest {
      * (only used if no Solr score supplied)
      */
     @Test
-    public void testCardinal_URIMetadataNode() throws MalformedURLException, IOException, SpaceExceededException {
+    public void testCardinal_URIMetadataNode() throws MalformedURLException, IOException {
         File config = new File("defaults/solr.collection.schema");
         CollectionConfiguration cc = new CollectionConfiguration(config, true);
 

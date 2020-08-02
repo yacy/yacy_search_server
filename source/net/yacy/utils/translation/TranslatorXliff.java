@@ -27,6 +27,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 package net.yacy.utils.translation;
 
+import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
+import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,10 +40,10 @@ import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
+
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.stream.events.XMLEvent;
 
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.Translator;
@@ -97,7 +100,7 @@ public class TranslatorXliff extends Translator {
             while (xmlreader.hasNext()) {
                 int eventtype = xmlreader.next();
 
-                if (eventtype == XMLEvent.START_ELEMENT) {
+                if (eventtype == START_ELEMENT) {
                     String ename = xmlreader.getLocalName();
 
                     // setup for 'file' section (get or add translationlist for this file)
@@ -120,7 +123,7 @@ public class TranslatorXliff extends Translator {
                         state = xmlreader.getAttributeValue(null, "state");
                         target = xmlreader.getElementText(); // TODO: in full blown xliff, target may contain sub-xml elements (but we use only text)
                     }
-                } else if (eventtype == XMLEvent.END_ELEMENT) {
+                } else if (eventtype == END_ELEMENT) {
                     String ename = xmlreader.getLocalName();
 
                     // store source/target on finish of trans-unit

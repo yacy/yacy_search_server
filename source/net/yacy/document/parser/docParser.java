@@ -32,18 +32,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.poi.hwpf.HWPFDocumentCore;
+import org.apache.poi.hwpf.OldWordFileFormatException;
+import org.apache.poi.hwpf.extractor.Word6Extractor;
+import org.apache.poi.hwpf.extractor.WordExtractor;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.VocabularyScraper;
-
-import org.apache.poi.hwpf.HWPFDocument;
-import org.apache.poi.hwpf.OldWordFileFormatException;
-import org.apache.poi.hwpf.extractor.Word6Extractor;
-import org.apache.poi.hwpf.extractor.WordExtractor;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 public class docParser extends AbstractParser implements Parser {
 
@@ -74,7 +74,7 @@ public class docParser extends AbstractParser implements Parser {
         final WordExtractor extractor;
         POIFSFileSystem poifs = null;
         try {
-            poifs = HWPFDocument.verifyAndBuildPOIFS(source); // to be able to delegate to parseOldWordDoc w/o source.ioException
+            poifs = HWPFDocumentCore.verifyAndBuildPOIFS(source); // to be able to delegate to parseOldWordDoc w/o source.ioException
             extractor = new WordExtractor(poifs);
         } catch (final OldWordFileFormatException isOldWordDoc) {
             // if old version (Word6/Word95) delegate to old parser (as long as available in poi package)
