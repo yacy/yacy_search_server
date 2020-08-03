@@ -10,7 +10,7 @@ import net.yacy.server.serverSwitch;
  */
 public class urlproxyheader {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader requestHeader, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
