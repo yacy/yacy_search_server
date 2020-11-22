@@ -26,9 +26,7 @@ import java.nio.charset.Charset;
 import org.apache.http.annotation.Contract;
 import org.apache.http.annotation.ThreadingBehavior;
 import org.apache.http.auth.AuthScheme;
-import org.apache.http.auth.AuthSchemeFactory;
 import org.apache.http.auth.AuthSchemeProvider;
-import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 
 /**
@@ -37,7 +35,7 @@ import org.apache.http.protocol.HttpContext;
  * instead of clear-text password.
  */
 @Contract(threading = ThreadingBehavior.IMMUTABLE)
-public class YaCyDigestSchemeFactory implements AuthSchemeFactory, AuthSchemeProvider {
+public class YaCyDigestSchemeFactory implements AuthSchemeProvider {
 
     private final Charset charset;
 
@@ -51,11 +49,6 @@ public class YaCyDigestSchemeFactory implements AuthSchemeFactory, AuthSchemePro
 
     public YaCyDigestSchemeFactory() {
         this(null);
-    }
-
-    @Override
-    public AuthScheme newInstance(final HttpParams params) {
-        return new YaCyDigestScheme();
     }
 
     @Override

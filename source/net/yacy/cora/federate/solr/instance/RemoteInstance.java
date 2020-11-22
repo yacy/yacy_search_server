@@ -48,17 +48,8 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.GzipDecompressingEntity;
-import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -121,7 +112,7 @@ public class RemoteInstance implements SolrInstance {
 	}
 	
 	/** A custom scheme registry allowing https connections to servers using self-signed certificate */
-	private static final SchemeRegistry SCHEME_REGISTRY = buildTrustSelfSignedSchemeRegistry();
+	private static final org.apache.http.conn.scheme.SchemeRegistry SCHEME_REGISTRY = buildTrustSelfSignedSchemeRegistry();
 	
 	/** Solr server URL */
     private String solrurl;
@@ -296,10 +287,10 @@ public class RemoteInstance implements SolrInstance {
             
             
             this.client = HttpClientUtil.createClient(params, CONNECTION_MANAGER);
-            if(this.client instanceof DefaultHttpClient) {
+            if(this.client instanceof org.apache.http.impl.client.DefaultHttpClient) {
             	if(this.client.getParams() != null) {
             		/* Set the maximum time to get a connection from the shared connections pool */
-            		HttpClientParams.setConnectionManagerTimeout(this.client.getParams(), timeout);
+            	    org.apache.http.client.params.HttpClientParams.setConnectionManagerTimeout(this.client.getParams(), timeout);
             	}
             	
         		if (maxBytesPerResponse >= 0 && maxBytesPerResponse < Long.MAX_VALUE) {
@@ -307,8 +298,8 @@ public class RemoteInstance implements SolrInstance {
         			 * Add in last position the eventual interceptor limiting the response size, so
         			 * that this is the decompressed amount of bytes that is considered
         			 */
-        			((DefaultHttpClient)this.client).addResponseInterceptor(new StrictSizeLimitResponseInterceptor(maxBytesPerResponse),
-        					((DefaultHttpClient)this.client).getResponseInterceptorCount());
+        			((org.apache.http.impl.client.DefaultHttpClient)this.client).addResponseInterceptor(new StrictSizeLimitResponseInterceptor(maxBytesPerResponse),
+        					((org.apache.http.impl.client.DefaultHttpClient)this.client).getResponseInterceptorCount());
         		}
             }
         }
@@ -348,7 +339,7 @@ public class RemoteInstance implements SolrInstance {
 		 * Upgrade only when Solr implementation will become compatible */
 		
 		final org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(
-				SchemeRegistryFactory.createDefault(), DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
+		        org.apache.http.impl.conn.SchemeRegistryFactory.createDefault(), DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
 		initPoolMaxConnections(cm, DEFAULT_POOL_MAX_TOTAL);
 		return cm;
 	}
@@ -357,17 +348,17 @@ public class RemoteInstance implements SolrInstance {
 	 * @return a custom scheme registry allowing https connections to servers using
 	 *         a self-signed certificate
 	 */
-	private static SchemeRegistry buildTrustSelfSignedSchemeRegistry() {
+	private static org.apache.http.conn.scheme.SchemeRegistry buildTrustSelfSignedSchemeRegistry() {
 		/* Important note : use of deprecated Apache classes is required because SolrJ still use them internally (see HttpClientUtil). 
 		 * Upgrade only when Solr implementation will become compatible */
-		SchemeRegistry registry = null;
+	    org.apache.http.conn.scheme.SchemeRegistry registry = null;
 		SSLContext sslContext;
 		try {
 			sslContext = SSLContextBuilder.create().loadTrustMaterial(TrustSelfSignedStrategy.INSTANCE).build();
-			registry = new SchemeRegistry();
-			registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+			registry = new org.apache.http.conn.scheme.SchemeRegistry();
+			registry.register(new org.apache.http.conn.scheme.Scheme("http", 80, org.apache.http.conn.scheme.PlainSocketFactory.getSocketFactory()));
 			registry.register(
-					new Scheme("https", 443, new SSLSocketFactory(sslContext, AllowAllHostnameVerifier.INSTANCE) {
+					new org.apache.http.conn.scheme.Scheme("https", 443, new org.apache.http.conn.ssl.SSLSocketFactory(sslContext, org.apache.http.conn.ssl.AllowAllHostnameVerifier.INSTANCE) {
 						@Override
 						protected void prepareSocket(SSLSocket socket) throws IOException {
 			        		if(!ENABLE_SNI_EXTENSION.get()) {
@@ -415,7 +406,7 @@ public class RemoteInstance implements SolrInstance {
 		        authCache.put(targetHost, basicAuth);
 		        context.setAttribute(org.apache.http.client.protocol.HttpClientContext.AUTH_CACHE, authCache);
 				if (trustSelfSignedCertificates && SCHEME_REGISTRY != null) {
-					context.setAttribute(ClientContext.SCHEME_REGISTRY, SCHEME_REGISTRY);
+					context.setAttribute(org.apache.http.client.protocol.ClientContext.SCHEME_REGISTRY, SCHEME_REGISTRY);
 				}
 		        this.setHttpRequestRetryHandler(new org.apache.http.impl.client.DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
 		        return context;
@@ -427,7 +418,7 @@ public class RemoteInstance implements SolrInstance {
 		/* Set the maximum time between data packets reception one a connection has been established */
 		org.apache.http.params.HttpConnectionParams.setSoTimeout(params, timeout);
 		/* Set the maximum time to get a connection from the shared connections pool */
-		HttpClientParams.setConnectionManagerTimeout(params, timeout);
+		org.apache.http.client.params.HttpClientParams.setConnectionManagerTimeout(params, timeout);
 		result.addRequestInterceptor(new HttpRequestInterceptor() {
 		    @Override
 		    public void process(final HttpRequest request, final HttpContext context) throws IOException {
