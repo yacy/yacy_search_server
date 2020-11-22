@@ -135,4 +135,14 @@ public abstract class MemoryStrategy {
      */
     protected void setProperMbyte(@SuppressWarnings("unused") final long mbyte) {
     }
+
+    public static void main(String[] args) {
+        MemoryStrategy sms = new StandardMemoryStrategy();
+        System.out.println("StandardMemoryStrategy   / memoryFree  : " + sms.free());
+        System.out.println("StandardMemoryStrategy   / memoryTotal : " + sms.total());
+
+        MemoryStrategy gms = new GenerationMemoryStrategy();
+        System.out.println("GenerationMemoryStrategy / memoryFree  : " + sms.free());
+        System.out.println("GenerationMemoryStrategy / memoryTotal : " + sms.total());
+    }
 }
