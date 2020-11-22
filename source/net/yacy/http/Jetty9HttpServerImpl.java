@@ -85,7 +85,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         boolean useSSL = sb.getConfigBool("server.https", false);
       
         if (useSSL) {
-            final SslContextFactory sslContextFactory = new SslContextFactory();
+            final SslContextFactory sslContextFactory = new SslContextFactory.Server();
             final SSLContext sslContext = initSslContext(sb);
             if (sslContext != null) {
 
