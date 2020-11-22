@@ -90,17 +90,17 @@ public class PerformanceMemory_p {
         prop.putNum("memoryAvailAfterInitBGC", (MemoryControl.maxMemory() - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / MB);
         prop.putNum("memoryAvailAfterInitAGC", (MemoryControl.maxMemory() - memoryTotalAfterInitAGC + memoryFreeAfterInitAGC) / MB);
         prop.putNum("memoryAvailNow", MemoryControl.available() / MB);
-        prop.putNum("memoryTotalAfterStartup", memoryTotalAfterStartup / KB);
-        prop.putNum("memoryTotalAfterInitBGC", memoryTotalAfterInitBGC / KB);
-        prop.putNum("memoryTotalAfterInitAGC", memoryTotalAfterInitAGC / KB);
+        prop.putNum("memoryTotalAfterStartup", memoryTotalAfterStartup / MB);
+        prop.putNum("memoryTotalAfterInitBGC", memoryTotalAfterInitBGC / MB);
+        prop.putNum("memoryTotalAfterInitAGC", memoryTotalAfterInitAGC / MB);
         prop.putNum("memoryTotalNow", MemoryControl.total() / MB);
-        prop.putNum("memoryFreeAfterStartup", memoryFreeAfterStartup / KB);
-        prop.putNum("memoryFreeAfterInitBGC", memoryFreeAfterInitBGC / KB);
-        prop.putNum("memoryFreeAfterInitAGC", memoryFreeAfterInitAGC / KB);
+        prop.putNum("memoryFreeAfterStartup", memoryFreeAfterStartup / MB);
+        prop.putNum("memoryFreeAfterInitBGC", memoryFreeAfterInitBGC / MB);
+        prop.putNum("memoryFreeAfterInitAGC", memoryFreeAfterInitAGC / MB);
         prop.putNum("memoryFreeNow", MemoryControl.free() / MB);
-        prop.putNum("memoryUsedAfterStartup", (memoryTotalAfterStartup - memoryFreeAfterStartup) / KB);
-        prop.putNum("memoryUsedAfterInitBGC", (memoryTotalAfterInitBGC - memoryFreeAfterInitBGC) / KB);
-        prop.putNum("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / KB);
+        prop.putNum("memoryUsedAfterStartup", (memoryTotalAfterStartup - memoryFreeAfterStartup) / MB);
+        prop.putNum("memoryUsedAfterInitBGC", (memoryTotalAfterInitBGC - memoryFreeAfterInitBGC) / MB);
+        prop.putNum("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / MB);
         prop.putNum("memoryUsedNow", MemoryControl.used() / MB);
 
         
