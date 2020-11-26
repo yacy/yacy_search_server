@@ -3,7 +3,7 @@
 ## Supported tags and respective Dockerfiles
 
 * latest (Dockerfile)
-* lastet-alpine (Dockerfile.alpine)
+* latest-alpine (Dockerfile.alpine)
 
 ## Getting built image from Docker Hub
 
