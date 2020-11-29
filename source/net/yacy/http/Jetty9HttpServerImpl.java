@@ -51,6 +51,7 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ProcessorUtils;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -75,10 +76,15 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         Switchboard sb = Switchboard.getSwitchboard();
         
         server = new Server();
-        ServerConnector connector = new ServerConnector(server);
+
+        int cores = ProcessorUtils.availableProcessors();
+        int acceptors = Math.max(1, Math.min(4, cores/2)); // original: Math.max(1, Math.min(4,cores/8));
+        HttpConnectionFactory hcf = new HttpConnectionFactory();
+        ServerConnector connector = new ServerConnector(server, null, null, null, acceptors, -1, hcf);
         connector.setPort(port);
         connector.setName("httpd:"+Integer.toString(port));
         connector.setIdleTimeout(9000); // timout in ms when no bytes send / received
+        connector.setAcceptQueueSize(128);
         server.addConnector(connector);
         
         // add ssl/https connector
