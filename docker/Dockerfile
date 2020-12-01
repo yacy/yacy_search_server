@@ -35,6 +35,7 @@ RUN apt-get update && \
 
 RUN \
 # Set initial admin password : "docker" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
+# > java -classpath classes net.yacy.cora.order.Digest -strfhex "admin:The YaCy access is limited to administrators. If you don't know the password, you can change it using <yacy-home>/bin/passwd.sh <new-password>:docker"
 	sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:e672161ffdce91be4678605f4f4e6786" /opt/yacy_search_server/defaults/yacy.init && \
 # Intially enable HTTPS : this is the most secure option for remote administrator authentication
 	sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init && \
@@ -46,7 +47,7 @@ RUN \
 # Expose HTTP and HTTPS default ports
 EXPOSE 8090 8443
 
-# Set data volume : yacy data and configuration will persist aven after container stop or destruction
+# Set data volume : yacy data and configuration will persist even after container stop or destruction
 VOLUME ["/opt/yacy_search_server/DATA"]
 
 # Next commands run as yacy as non-root user for improved security

@@ -26,6 +26,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Queue;
@@ -132,7 +133,7 @@ public class Digest {
     	    digest.reset(); // they should all be reseted but anyway; this is safe
     	}
         byte[] keyBytes;
-        keyBytes = UTF8.getBytes(key);
+        keyBytes = key.getBytes(StandardCharsets.UTF_8);
         digest.update(keyBytes);
         final byte[] result = digest.digest();
         digest.reset(); // to be prepared for next
