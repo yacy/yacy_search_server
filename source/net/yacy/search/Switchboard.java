@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -193,6 +194,7 @@ import net.yacy.kelondro.blob.Tables.SortDirection;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.GuiHandler;
+import net.yacy.kelondro.logging.ThreadDump;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -2593,10 +2595,21 @@ public final class Switchboard extends serverSwitch {
     }
 
     public boolean cleanupJob() {
-        
+
         ConcurrentLog.ensureWorkerIsRunning();
         try {
             clearCaches();
+
+            // write a thread dump to log path
+            try {
+                File tdlog = new File(dataPath, "DATA/LOG/threaddump.txt");
+                PrintWriter out = new PrintWriter(tdlog);
+                String threaddump = ThreadDump.threaddump(this, true, 0, false, 0);
+                out.println(threaddump);
+                out.close();
+            } catch (IOException e) {
+                log.info("cannot write threaddump", e);
+            }
 
             // clear caches if necessary
             if ( !MemoryControl.request(128000000L, false) ) {
@@ -2621,7 +2634,7 @@ public final class Switchboard extends serverSwitch {
                     log.info("finishing greedy learning phase, size=" +cs);
                 }
             }
-            
+
             // refresh recrawl dates
             try {
                 CrawlProfile selentry;
