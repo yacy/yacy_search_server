@@ -325,14 +325,19 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
             @Override
             public void run() {
-                try {
+                if (milsec > 0) try {
                     Thread.sleep(milsec);
                 } catch (final InterruptedException e) {
                     ConcurrentLog.logException(e);
                 } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                 }
-                try { // reconnect with new settings (instead to stop/start server, just manipulate connectors
+                try {
+                    if (!server.isRunning() || server.isStopped()) {
+                        server.start();
+                    }
+
+                    // reconnect with new settings (instead to stop/start server, just manipulate connectors
                     final Connector[] cons = server.getConnectors();
                     final int port = Switchboard.getSwitchboard().getLocalPort();
                     final int sslport = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.SERVER_SSLPORT, 8443);
@@ -511,5 +516,10 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             System.out.println(errorMsg);
             return null;
         }
+    }
+    
+    @Override
+    public String toString() {
+        return this.server.dump() + "\n\n" + this.server.getState();
     }
 }

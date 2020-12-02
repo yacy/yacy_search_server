@@ -173,8 +173,8 @@ public class ConfigBasic {
             //yacyAccessible.setNewPortBat(Integer.parseInt(port));
             //yacyAccessible.setNewPortLink(Integer.parseInt(port));
 
-            // force reconnection in 5 seconds
-            theServerCore.reconnect(5000);
+            // force reconnection in 2 seconds
+            theServerCore.reconnect(2000);
         } else {
             reconnect = false;
             prop.put("reconnect", "0");
