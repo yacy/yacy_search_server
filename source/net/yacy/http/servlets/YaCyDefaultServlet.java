@@ -1216,7 +1216,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             p = buffer.indexOf(inctxt, offset);
         }
         out.write(in, offset, in.length - offset);
-        out.close();
+        //DO NOT out.close(); because that would interrupt the server stream - it causes that the content is cut off from here on
         buffer.close();
     }
 

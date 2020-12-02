@@ -45,20 +45,6 @@
 	<classpathentry kind="lib" path="lib/commons-io-2.7.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="lib" path="lib/chardet.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-client-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-continuation-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-deploy-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-http-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-io-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-jmx-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-proxy-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-security-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-server-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-servlet-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-servlets-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-util-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-webapp-9.4.17.v20190418.jar"/>
-	<classpathentry kind="lib" path="lib/jetty-xml-9.4.17.v20190418.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient-4.5.12.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.5.12.jar"/>
 	<classpathentry kind="lib" path="lib/noggit-0.6.jar"/>
@@ -87,6 +73,20 @@
 	<classpathentry kind="lib" path="lib/metrics-core-3.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.12.1.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-client-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-continuation-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-deploy-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-http-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-io-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-jmx-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-proxy-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-security-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-server-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlet-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-servlets-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-util-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-webapp-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/jetty-xml-9.4.35.v20201120.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-63.1.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar"/>
