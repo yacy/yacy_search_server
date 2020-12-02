@@ -126,12 +126,6 @@ public class InetPathAccessHandler extends InetAccessHandler {
 	public static void checkPattern(final String pattern) throws IllegalArgumentException {
 		new InetPathAccessHandler().include(pattern);
 	}
-
-	@Override
-	protected boolean isAllowed(final InetAddress address, final HttpServletRequest request) {
-		return isAllowed(address, request.getPathInfo());
-	}
-
 	/**
 	 * Check whether the given address and path are allowed by current rules.
 	 * 
