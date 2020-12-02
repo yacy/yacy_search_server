@@ -303,7 +303,7 @@ public final class yacy {
                 ConnectionInfo.setServerMaxcount(sb.getConfigInt("connectionsMax", ConnectionInfo.getMaxcount()));
 
                 ConcurrentLog.info("STARTUP",httpServer.getVersion());
-                
+
                 // open the browser window
                 final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
                 if (browserPopUpTrigger) try {
@@ -395,7 +395,6 @@ public final class yacy {
                     ConcurrentLog.severe("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
                 }
                 // shut down
-                Array.terminate();
                 ConcurrentLog.config("SHUTDOWN", "caught termination signal");
                 httpServer.stop();
 

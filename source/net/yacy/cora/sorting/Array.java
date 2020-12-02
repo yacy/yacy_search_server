@@ -39,132 +39,68 @@ import java.util.concurrent.LinkedBlockingQueue;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class Array {
 
-    private final static int SORT_JOBS = Math.max(1, Runtime.getRuntime().availableProcessors() / 2);
-    private final static SortJob<?> POISON_JOB_WORKER = new SortJob(null, 0, 0, 0, 0, null);
-    private static BlockingQueue<SortJob<?>> sortJobs = null;
-
-    static {
-        if (SORT_JOBS > 1) {
-            for (int i = 0; i < SORT_JOBS; i++) {
-                new SortJobWorker().start();
-            }
-            sortJobs = new LinkedBlockingQueue();
-        }
-    }
-
-    public static void terminate() {
-        if (SORT_JOBS > 1 && sortJobs != null) {
-            for (int i = 0; i < SORT_JOBS; i++) {
-                try {
-                    sortJobs.put(POISON_JOB_WORKER);
-                } catch (final InterruptedException e) {}
-            }
-        }
-    }
-
-    private static class SortJobWorker extends Thread {
-    	
-    	public SortJobWorker() {
-    		super("Array.SortJobWorker");
-    	}
-    	
-        @Override
-        public void run() {
-            SortJob<?> job;
-            try {
-                while ((job = sortJobs.take()) != POISON_JOB_WORKER) {
-                    sort(job, job.depth < 8);
-                    job.latch.countDown();
-                }
-            } catch (final InterruptedException e) {
-            }
-        }
-    }
-
     public static <A> void sort(final Sortable<A> x) {
-        UpDownLatch latch;
-        final boolean threaded = false;//x.size() > 100000;
-        sort(new SortJob<A>(x, 0, x.size(), x.buffer(), 0, latch = new UpDownLatch(0)), threaded);
-        //for (int i = 0; i < 100; i++) {System.out.println("latch = " + latch.getCount());try {Thread.sleep(10);} catch (final InterruptedException e) {}}
-        if (threaded) try {latch.await();} catch (final InterruptedException e) {}
+        sort(x, 0, x.size(), x.buffer(), 0);
     }
 
-    private static class SortJob<A> {
-        final Sortable<A> x; final int o; final int l; final A f; final int depth; UpDownLatch latch;
-        public SortJob(final Sortable<A> x, final int o, final int l, final A f, final int depth, final UpDownLatch latch) {
-            this.x = x; this.o = o; this.l = l; this.f = f; this.depth = depth; this.latch = latch;
-        }
-    }
 
-    private static <A> void sort(final SortJob<A> job, final boolean threaded) {
+    private static <A> void sort(final Sortable<A> x, final int o, final int l, final A f, final int depth) {
 
         // in case of small arrays we do not need a quicksort
-        if (job.l < 7) {
-            for (int i = job.o; i < job.l + job.o; i++) {
-                for (int j = i; j > job.o && job.x.compare(job.x.get(j, false), job.x.get(j - 1, false)) < 0; j--) job.x.swap(j, j - 1, job.f);
+        if (l < 7) {
+            for (int i = o; i < l + o; i++) {
+                for (int j = i; j > o && x.compare(x.get(j, false), x.get(j - 1, false)) < 0; j--) x.swap(j, j - 1, f);
             }
             return;
         }
 
         // find the pivot element
-        int m = job.o + (job.l >> 1);
-        if (job.l > 7) {
-            int k = job.o;
-            int n = job.o + job.l - 1;
-            if (job.l > 40) {
-                final int s = job.l / 8;
-                k = med3(job.x, k        , k + s, k + 2 * s);
-                m = med3(job.x, m - s    , m    , m + s    );
-                n = med3(job.x, n - 2 * s, n - s, n        );
+        int m = o + (l >> 1);
+        if (l > 7) {
+            int k = o;
+            int n = o + l - 1;
+            if (l > 40) {
+                final int s = l / 8;
+                k = med3(x, k        , k + s, k + 2 * s);
+                m = med3(x, m - s    , m    , m + s    );
+                n = med3(x, n - 2 * s, n - s, n        );
             }
-            m = med3(job.x, k, m, n);
+            m = med3(x, k, m, n);
         }
-        final A p = job.x.get(m, true);
+        final A p = x.get(m, true);
 
         // do a partitioning of the sequence
-        int a = job.o, b = a, c = job.o + job.l - 1, d = c;
+        int a = o, b = a, c = o + l - 1, d = c;
         A _v;
         while (true) {
-            while (c >= b && job.x.compare(p, (_v = job.x.get(b, false))) >= 0) {
-                if (job.x.compare(_v, p) == 0) job.x.swap(a++, b, job.f);
+            while (c >= b && x.compare(p, (_v = x.get(b, false))) >= 0) {
+                if (x.compare(_v, p) == 0) x.swap(a++, b, f);
                 b++;
             }
-            while (c >= b && job.x.compare((_v = job.x.get(c, false)), p) >= 0) {
-                if (job.x.compare(_v, p) == 0) job.x.swap(c, d--, job.f);
+            while (c >= b && x.compare((_v = x.get(c, false)), p) >= 0) {
+                if (x.compare(_v, p) == 0) x.swap(c, d--, f);
                 c--;
             }
             if (b > c) break;
-            job.x.swap(b++, c--, job.f);
+            x.swap(b++, c--, f);
         }
 
         // swap all
         int s;
-        final int n = job.o + job.l;
-        s = Math.min(a - job.o, b - a );
-        swap(job.x, job.o, b - s, s, job.f);
+        final int n = o + l;
+        s = Math.min(a - o, b - a );
+        swap(x, o, b - s, s, f);
         s = Math.min(d - c, n - d - 1);
-        swap(job.x, b, n - s, s, job.f);
+        swap(x, b, n - s, s, f);
 
         // recursively sort partitions
-        if ((s = b - a) > 1) {
-            final SortJob<A> nextJob = new SortJob<A>(job.x, job.o, s, job.f, job.depth + 1, job.latch);
-            if (threaded) try {
-                sortJobs.put(nextJob);
-                job.latch.countUp();
-            } catch (final InterruptedException e) {
-            } else {
-                sort(nextJob, false);
-            }
+        final int s0 = b - a;
+        if (s0 > 1) {
+            sort(x, o, s0, f, depth + 1);
         }
-        if ((s = d - c) > 1) {
-            final SortJob<A> nextJob = new SortJob<A>(job.x, n - s, s, job.x.buffer(), job.depth + 1, job.latch);
-            if (threaded) try {
-                sortJobs.put(nextJob);
-                job.latch.countUp();
-            } catch (final InterruptedException e) {
-            } else {
-                sort(nextJob, false);
-            }
+        final int s1 = d - c;
+        if (s1 > 1) {
+            sort(x, n - s1, s1, x.buffer(), depth + 1);
         }
     }
 
@@ -256,7 +192,6 @@ public class Array {
         final long t2 = System.currentTimeMillis();
         System.out.println("uniq = " + (t2 - t1) + "ms");
         System.out.println("result: " + test.size());
-        terminate();
     }
 
 }

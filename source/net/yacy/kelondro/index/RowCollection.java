@@ -1097,7 +1097,6 @@ public class RowCollection implements Sortable<Row.Entry>, Iterable<Row.Entry>, 
             //test(100000);
             //test(1000000);
             ConcurrentLog.shutdown();
-            Array.terminate();
         } catch (final SpaceExceededException e) {
             e.printStackTrace();
         }
