@@ -134,7 +134,7 @@ public class RasterPlotter {
      * background color.
      */
     public final void clear() {
-    	// fill grid with background color
+        // fill grid with background color
         final int bgR = (int) (this.backgroundCol >> 16);
         final int bgG = (int) ((this.backgroundCol >> 8) & 0xff);
         final int bgB = (int) (this.backgroundCol & 0xff);
@@ -212,22 +212,22 @@ public class RasterPlotter {
     }
 
     public void setColor(final long c) {
-    	if (this.defaultMode == DrawMode.MODE_SUB) {
+        if (this.defaultMode == DrawMode.MODE_SUB) {
             final int r = (int) (c >> 16);
             final int g = (int) ((c >> 8) & 0xff);
             final int b = (int) (c & 0xff);
             this.defaultColR = (g + b) >>> 1; // / 2;
             this.defaultColG = (r + b) >>> 1; // / 2;
             this.defaultColB = (r + g) >>> 1; // / 2;
-    	} else {
+        } else {
             this.defaultColR = (int) (c >> 16);
             this.defaultColG = (int) ((c >> 8) & 0xff);
             this.defaultColB = (int) (c & 0xff);
-    	}
+        }
     }
 
     public void plot(final int x, final int y) {
-    	plot(x, y, 100);
+        plot(x, y, 100);
     }
 
     public void plot(final int x, final int y, final int intensity) {
@@ -880,12 +880,12 @@ public class RasterPlotter {
             cmap[i++] = cc.intValue();
             if (i > 255) break;
         }
-     
+
         int bitCount = 1;
         while ((colors.size() - 1) >> bitCount != 0) bitCount *= 2;
-     
+
         IndexColorModel cm = new IndexColorModel(bitCount, colors.size(), cmap, 0, DataBuffer.TYPE_BYTE, null);
-        
+
         /*
         byte [] data = null;
         int bytesPerRow = this.getWidth()/8 + (this.getWidth()%8!=0?1:0);
@@ -894,12 +894,12 @@ public class RasterPlotter {
         WritableRaster wr = Raster.createPackedRaster(db, this.getWidth(), this.getHeight(), 1, null);  
         BufferedImage dest = new BufferedImage(cm, wr, false, null);  
         */
-        
+
         BufferedImage dest = new BufferedImage(this.getWidth(), this.getHeight(), cm.getPixelSize() < 8 ? BufferedImage.TYPE_BYTE_BINARY : BufferedImage.TYPE_BYTE_INDEXED, cm);
         dest.createGraphics().drawImage(this.getImage(), 0, 0, null);
         return dest;
     }
-    
+
     public static BufferedImage convertToIndexed(BufferedImage src) {
         BufferedImage dest = new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_BYTE_INDEXED);
         dest.createGraphics().drawImage(src,0,0, null);
@@ -913,18 +913,18 @@ public class RasterPlotter {
      * @return a ByteBuffer instance containing encoded data, or empty if an error occured or target format is not supported.
      */
     public static ByteBuffer exportImage(final BufferedImage image, final String targetExt) {
-    	// generate an byte array from the given image
-    	final ByteBuffer baos = new ByteBuffer();
-    	ImageIO.setUseCache(false); // because we write into ram here
-    	try {
-    		/* When no ImageIO writer is found image might no be written*/
-    		ImageIO.write(image, targetExt, baos);
-    		return baos;
-    	} catch (final IOException e) {
-    		// should not happen
-    	    ConcurrentLog.logException(e);
-    		return null;
-    	}
+        // generate an byte array from the given image
+        final ByteBuffer baos = new ByteBuffer();
+        ImageIO.setUseCache(false); // because we write into ram here
+        try {
+            /* When no ImageIO writer is found image might no be written*/
+            ImageIO.write(image, targetExt, baos);
+            return baos;
+        } catch (final IOException e) {
+            // should not happen
+            ConcurrentLog.logException(e);
+            return null;
+        }
     }
     
     public ByteBuffer exportPng() {
@@ -950,12 +950,12 @@ public class RasterPlotter {
      * @throws IOException
      */
     public void save(File file, String type) throws IOException {
-    	try (
-    		/* Automatically closed by this try-with-resources statement */	
-    		final FileOutputStream fos = new FileOutputStream(file);
-    	) {
-    		ImageIO.write(this.image, type, fos);
-    	}
+        try (
+            /* Automatically closed by this try-with-resources statement */    
+            final FileOutputStream fos = new FileOutputStream(file);
+        ) {
+            ImageIO.write(this.image, type, fos);
+        }
     }
 
     /**
@@ -969,9 +969,10 @@ public class RasterPlotter {
         f.pack();
         f.setVisible(true);
     }
-    
+
     /*
      * The following code was transformed from a library, coded by J. David Eisenberg, version 1.5, 19 Oct 2003 (C) LGPL
+     * see: http://catcode.com/pngencoder/index.html
      * This code was very strongly transformed into the following very short method for an ultra-fast png generation.
      * These changes had been made 23.10.2012 by [MC] to the original code:
      * For the integration into YaCy this class was adopted to YaCy graphics by Michael Christen:
@@ -986,7 +987,7 @@ public class RasterPlotter {
      * - after all enhancements all class objects were removed; result is just one short static method
      * - made objects final where possible
      * - removed the PixelGrabber call and replaced it with a call to this.frame which is just a byte[]
-     * - added more speed woodoo like a buffer around the deflater which makes this much faster
+     * - added more speed voodoo like a buffer around the deflater which makes this much faster
      */
 
     private static final byte IHDR[] = {73, 72, 68, 82};
@@ -997,10 +998,10 @@ public class RasterPlotter {
         if (this.frame == null) return exportImage(this.getImage(), "png").getBytes();
         final int width = image.getWidth(null);
         final int height = image.getHeight(null);
-        
+
         final Deflater scrunch = new Deflater(compressionLevel);
         ByteBuffer outBytes = new ByteBuffer(1024);
-        final OutputStream compBytes = new BufferedOutputStream(new DeflaterOutputStream(outBytes, scrunch));
+        final OutputStream compBytes = new BufferedOutputStream(new DeflaterOutputStream(outBytes, scrunch, 2048, false), 16384);
         int i = 0;
         for (int row = 0; row < height; row++) {
             compBytes.write(0);
@@ -1013,44 +1014,48 @@ public class RasterPlotter {
 
         // finally write the result of the concurrent calculation into an DeflaterOutputStream to compress the png
         final int nCompressed = outBytes.length();
-        final byte[] pngBytes = new byte[nCompressed + 57]; // yes thats the exact size, not too less, not too much. No resizing needed.
-        int bytePos = writeBytes(pngBytes, new byte[]{-119, 80, 78, 71, 13, 10, 26, 10}, 0);
-        final int startPos = bytePos = writeInt4(pngBytes, 13, bytePos);
-        bytePos = writeBytes(pngBytes, IHDR, bytePos);
-        bytePos = writeInt4(pngBytes, width, bytePos);
-        bytePos = writeInt4(pngBytes, height, bytePos);
-        bytePos = writeBytes(pngBytes, new byte[]{8, 2, 0, 0, 0}, bytePos);
+        final byte[] png = new byte[nCompressed + 57]; // yes thats the exact size, not too less, not too much. No resizing needed.
+        int next = writeBytes(png, new byte[]{-119, 80, 78, 71, 13, 10, 26, 10}, 0);
+        final int startPos = next = writeInt4(png, 13, next);
+        next = writeBytes(png, IHDR, next);
+        next = writeInt4(png, width, next);
+        next = writeInt4(png, height, next);
+        next = writeBytes(png, new byte[]{8, 2, 0, 0, 0}, next);
         final CRC32 crc = new CRC32();
         crc.reset();
-        crc.update(pngBytes, startPos, bytePos - startPos);
-        bytePos = writeInt4(pngBytes, (int) crc.getValue(), bytePos);
+        crc.update(png, startPos, next - startPos);
+        next = writeInt4(png, (int) crc.getValue(), next);
         crc.reset();
-        bytePos = writeInt4(pngBytes, nCompressed, bytePos);
-        bytePos = writeBytes(pngBytes, IDAT, bytePos);
+        next = writeInt4(png, nCompressed, next);
+        next = writeBytes(png, IDAT, next);
         crc.update(IDAT);
-        outBytes.copyTo(pngBytes, bytePos);
+        outBytes.copyTo(png, next);
         outBytes.close();
         outBytes = null;
-        crc.update(pngBytes, bytePos, nCompressed);
-        bytePos += nCompressed;
-        bytePos = writeInt4(pngBytes, (int) crc.getValue(), bytePos);
-        bytePos = writeInt4(pngBytes, 0, bytePos);
-        bytePos = writeBytes(pngBytes, IEND, bytePos);
+        crc.update(png, next, nCompressed);
+        next += nCompressed;
+        next = writeInt4(png, (int) crc.getValue(), next);
+        next = writeInt4(png, 0, next);
+        next = writeBytes(png, IEND, next);
         crc.reset();
         crc.update(IEND);
-        bytePos = writeInt4(pngBytes, (int) crc.getValue(), bytePos);
-        return pngBytes;
-    }
-    
-    private final static int writeInt4(final byte[] target, final int n, final int offset) {
-        return writeBytes(target, new byte[]{(byte) ((n >> 24) & 0xff), (byte) ((n >> 16) & 0xff), (byte) ((n >> 8) & 0xff), (byte) (n & 0xff)}, offset);
+        next = writeInt4(png, (int) crc.getValue(), next);
+        return png;
     }
 
-    private final static int writeBytes(final byte[] target, final byte[] data, final int offset) {
-        System.arraycopy(data, 0, target, offset, data.length);
-        return offset + data.length;
+    private final static int writeInt4(final byte[] target, final int n, int pos) {
+        target[pos++] = (byte) ((n >> 24) & 0xff);
+        target[pos++] = (byte) ((n >> 16) & 0xff);
+        target[pos++] = (byte) ((n >>  8) & 0xff);
+        target[pos++] = (byte) ( n        & 0xff);
+        return pos;
     }
-    
+
+    private final static int writeBytes(final byte[] target, final byte[] data, final int pos) {
+        System.arraycopy(data, 0, target, pos, data.length);
+        return pos + data.length;
+    }
+
     public static void main(final String[] args) {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
@@ -1060,14 +1065,14 @@ public class RasterPlotter {
         final File file = new File(System.getProperty("java.io.tmpdir") + File.separator + "testimage.png");
         try ( /* Automatically closed by this try-with-resources statement */
             final FileOutputStream fos = new FileOutputStream(file);
-     	) {
-        	System.out.println("Writing file " + file);
+         ) {
+            System.out.println("Writing file " + file);
             ImageIO.write(m.getImage(), "png", fos);
         } catch (final IOException e) {
-        	e.printStackTrace();
+            e.printStackTrace();
         }
         ConcurrentLog.shutdown();
-        
+
         // open file automatically, works only on Mac OS X
         /*
         Process p = null;
