@@ -145,6 +145,11 @@ public class HTTPClient {
 	public static final AtomicBoolean ENABLE_SNI_EXTENSION = new AtomicBoolean(
 			Boolean.parseBoolean(System.getProperty("jsse.enableSNIExtension", Boolean.toString(ENABLE_SNI_EXTENSION_DEFAULT))));
 	
+
+    // digest factories
+    private final BasicSchemeFactory BASIC_SCHEME_FACTORY = new BasicSchemeFactory();
+    private final YaCyDigestSchemeFactory YACY_DIGEST_SCHEME_FACTORY = new YaCyDigestSchemeFactory();
+
 	/**
 	 * Background daemon thread evicting expired idle connections from the pool.
 	 * This may be eventually already done by the pool itself on connection request,
@@ -443,11 +448,10 @@ public class HTTPClient {
         
         /* Use the custom YaCyDigestScheme for HTTP Digest Authentication */
         final Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
-                .register(AuthSchemes.BASIC, new BasicSchemeFactory())
-                .register(AuthSchemes.DIGEST, new YaCyDigestSchemeFactory())
+                .register(AuthSchemes.BASIC, BASIC_SCHEME_FACTORY)
+                .register(AuthSchemes.DIGEST, YACY_DIGEST_SCHEME_FACTORY)
                 .build();
-        
-        
+
 		CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
 				.setDefaultAuthSchemeRegistry(authSchemeRegistry).build();
         byte[] content = null;
@@ -651,14 +655,13 @@ public class HTTPClient {
         credsProvider.setCredentials(
                 new AuthScope("localhost", url.getPort()),
                 new UsernamePasswordCredentials(userName, password));
-        
+
         /* Use the custom YaCyDigestScheme for HTTP Digest Authentication */
         final Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
-                .register(AuthSchemes.BASIC, new BasicSchemeFactory())
-                .register(AuthSchemes.DIGEST, new YaCyDigestSchemeFactory())
+                .register(AuthSchemes.BASIC, BASIC_SCHEME_FACTORY)
+                .register(AuthSchemes.DIGEST, YACY_DIGEST_SCHEME_FACTORY)
                 .build();
-        
-        
+
 		CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
 				.setDefaultAuthSchemeRegistry(authSchemeRegistry).build();
 		
