@@ -448,13 +448,17 @@ serverClient=*
 #use User_p.html to create some Users.
 use_proxyAccounts=true
 
-# adminAccountBase64MD5: a encoded user:password - pair for administration of
-# settings through the web interface
-# should be set to a secret. By default it is without a password
+# adminAccountBase64MD5: a encoded user:password - pair
+# For the administration of settings through the web interface.
+# Should be set to a secret.
 # but you are encouraged to set it to another value on the page
 # http://localhost:8090/ConfigAccounts_p.html
+# The hash is calculated with net.yacy.cora.order.Digest, i.e.
+# > java -classpath classes net.yacy.cora.order.Digest -strfhex "admin:<realm>:<pw>"
 #adminAccountBase64=MD5:{admin:realm:mysecretpassword}
 adminAccountBase64MD5=
+# If you want a default password, use this setting, it sets the pw to "yacy"
+#adminAccountBase64MD5=8cffbc0d66567a0987a4aba1ec46d63c
 adminAccountUserName=admin
 
 # special access handling for users from localhost:
