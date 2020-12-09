@@ -3968,11 +3968,12 @@ public final class Switchboard extends serverSwitch {
 
     /**
      * check authentication status for request access shall be granted if return value >= 2; these are the
-     * cases where an access is granted to protected pages: - a password is not configured: auth-level 2 -
-     * access from localhost is granted and access comes from localhost: auth-level 3 - a password is
-     * configured and access comes from localhost and the realm-value of a http-authentify String is equal to
-     * the stored base64MD5: auth-level 3 - a password is configured and access comes with matching
-     * http-authentify: auth-level 4
+     * cases where an access is granted to protected pages:
+     * - a password is not configured: auth-level 2
+     * - access from localhost is granted and access comes from localhost: auth-level 3
+     * - a password is configured and access comes from localhost and the realm-value
+     *   of a http-authentify String is equal to the stored base64MD5: auth-level 3
+     * - a password is configured and access comes with matching http-authentify: auth-level 4
      *
      * @param requestHeader
      *  - requestHeader.AUTHORIZATION = B64encode("adminname:password") or = B64encode("adminname:valueOf_Base64MD5cft")
