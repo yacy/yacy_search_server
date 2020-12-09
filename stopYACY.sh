@@ -20,7 +20,7 @@ if [ ! -f "$YACY_DATA_PATH/yacy.running" ]; then
 	exit 1
 fi
 
-(bin/protectedPostApiCall.sh "Steering.html" "shutdown=true" && \
+(bin/apicall.sh "Steering.html" "shutdown=true" && \
 echo "Please wait until the YaCy daemon process terminates [wget]" && \
 echo "You can monitor this with 'tail -f $YACY_DATA_PATH/LOG/yacy00.log' and 'fuser $YACY_DATA_PATH/LOG/yacy00.log'") || \
 exit $?

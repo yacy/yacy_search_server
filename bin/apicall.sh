@@ -21,10 +21,11 @@ port=$(grep ^port= "$YACY_DATA_PATH/SETTINGS/yacy.conf" |cut -d= -f2)
 admin=$(grep ^adminAccountUserName= "$YACY_DATA_PATH/SETTINGS/yacy.conf" |cut -d= -f2)
 adminAccountForLocalhost=$(grep ^adminAccountForLocalhost= "$YACY_DATA_PATH/SETTINGS/yacy.conf" | cut -d= -f2)
 
-if grep "<auth-method>BASIC</auth-method>" "$YACY_APP_PATH/defaults/web.xml" > /dev/null; then
-	# When authentication method is in basic mode, use directly the password hash from the configuration file 
-	YACY_ADMIN_PASSWORD=$(grep ^adminAccountBase64MD5= "$YACY_DATA_PATH/SETTINGS/yacy.conf" |cut -d= -f2)
-fi
+# Use directly the password hash from the configuration file. This is accepted as PW when the call comes from localhost.
+# This exception in authorization handling makes it possible that users with access to the YaCy configuration files can administrate
+# a peer without manual authentication input. This works only with Basic auth method.
+# This is not a huge security problem because the target address is always localhost.
+YACY_ADMIN_PASSWORD=$(grep ^adminAccountBase64MD5= "$YACY_DATA_PATH/SETTINGS/yacy.conf" |cut -d= -f2)
 
 if which curl > /dev/null; then
 	if [ "$adminAccountForLocalhost" = "true" ]; then
@@ -32,21 +33,21 @@ if which curl > /dev/null; then
 		curl -sSf "http://127.0.0.1:$port/$1"
 	elif [ -n "$YACY_ADMIN_PASSWORD" ]; then
 		# admin password is provided as environment variable : let's use it
-		curl -sSf --anyauth -u "$admin:$YACY_ADMIN_PASSWORD" "http://127.0.0.1:$port/$1"
+		curl -sSf --basic -u "$admin:$YACY_ADMIN_PASSWORD" "http://127.0.0.1:$port/$1"
 	else
 		# no password environment variable : it will be asked interactively
-		curl -sSf --anyauth -u "$admin" "http://127.0.0.1:$port/$1"
+		curl -sSf --basic -u "$admin" "http://127.0.0.1:$port/$1"
 	fi
 elif which wget > /dev/null; then
 	if [ "$adminAccountForLocalhost" = "true" ]; then
 		# localhost access as administrator without authentication is enabled
-		wget -nv -t 1 --timeout=120 "http://127.0.0.1:$port/$1" -O -
+		wget -nv --auth-no-challenge -t 1 --timeout=120 "http://127.0.0.1:$port/$1" -O -
 	elif [ -n "$YACY_ADMIN_PASSWORD" ]; then
 		# admin password is provided as environment variable : let's use it
-		wget -nv -t 1 --timeout=120 --http-user "$admin" --http-password "$YACY_ADMIN_PASSWORD" "http://127.0.0.1:$port/$1" -O -
+		wget -nv --auth-no-challenge -t 1 --timeout=120 --http-user "$admin" --http-password "$YACY_ADMIN_PASSWORD" "http://127.0.0.1:$port/$1" -O -
 	else
 		# no password environment variable : it will be asked interactively
-		wget -nv -t 1 --timeout=120 --http-user "$admin" --ask-password "http://127.0.0.1:$port/$1" -O -
+		wget -nv --auth-no-challenge -t 1 --timeout=120 --http-user "$admin" --ask-password "http://127.0.0.1:$port/$1" -O -
 	fi
 else
 	echo "Please install curl or wget" > /dev/stderr
