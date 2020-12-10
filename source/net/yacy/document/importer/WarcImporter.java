@@ -27,8 +27,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
+
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -60,39 +64,30 @@ public class WarcImporter extends Thread implements Importer {
 
     static public WarcImporter job; // static object to assure only one importer is running (if started from a servlet, this object is used to store the thread)
 
-    private final InputStream source; // current input warc archive
+    private InputStream source; // current input warc archive
     private String name; // file name of input source
-    
+
     private int recordCnt; // number of responses indexed (for statistic)
     private long startTime; // (for statistic)
     private final long sourceSize; // length of the input source (for statistic)
     private long consumed; // bytes consumed from input source (for statistic)
     private boolean abort = false; // flag to signal stop of import
 
-    public WarcImporter(InputStream f) {
-    	super("WarcImporter - from InputStream");
-        source = f;
-        recordCnt = 0;
-        sourceSize = -1;
+    public WarcImporter(MultiProtocolURL url) throws IOException {
+        super("WarcImporter - from InputStream");
+        this.recordCnt = 0;
+        this.sourceSize = -1;
+        this.name = url.toNormalform(true);
+        this.source = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
+        if (this.name.endsWith(".gz")) this.source = new GZIPInputStream(this.source);
     }
 
-    /**
-     * Init the WarcImporter with input stream with a informational filename or
-     * url als info for calls to the importer methode source() which returns
-     * the urlinfo. Otherwise this methode is equivalent to WarchImporter(inputstream)
-     * @param f the input stream to read the warc archive from
-     * @param urlinfo a info like the url or the filename
-     */
-    public WarcImporter (InputStream f, String urlinfo) {
-        this(f);
-        name = urlinfo;
-    }
-
-    public WarcImporter(File f) throws FileNotFoundException{
+    public WarcImporter(File f) throws IOException {
        super("WarcImporter - from file " + f.getName());
-       name = f.getName();
-       sourceSize = f.length();
-       source = new FileInputStream(f);
+       this.name = f.getName();
+       this.sourceSize = f.length();
+       this.source = new FileInputStream(f);
+       if (this.name.endsWith(".gz")) this.source = new GZIPInputStream(this.source);
     }
 
     /**
@@ -167,7 +162,8 @@ public class WarcImporter extends Thread implements Importer {
                                 content
                         );
 
-                        Switchboard.getSwitchboard().toIndexer(response);
+                        String error = Switchboard.getSwitchboard().toIndexer(response);
+                        if (error != null) ConcurrentLog.info("WarcImporter", "error: " + error);
                         recordCnt++;
                     }
                 }
@@ -188,7 +184,7 @@ public class WarcImporter extends Thread implements Importer {
             ConcurrentLog.info("WarcImporter", ex.getMessage());
         }
     }
-    
+
     /**
      * Set the flag to stop import
      */
@@ -243,8 +239,8 @@ public class WarcImporter extends Thread implements Importer {
         if (this.consumed == 0) {
             return 0;
         }
-		long speed = this.consumed / runningTime();
-		return (this.sourceSize - this.consumed) / speed;
+        long speed = this.consumed / runningTime();
+        return (this.sourceSize - this.consumed) / speed;
     }
 
     @Override
