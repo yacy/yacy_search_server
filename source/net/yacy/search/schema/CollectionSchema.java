@@ -49,7 +49,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     httpstatus_i(SolrType.num_integer, true, true, false, false, false, "html status return code (i.e. \"200\" for ok), -1 if not loaded", true),
     url_file_ext_s(SolrType.string, true, true, false, false, true, "the file name extension", true),
     host_organization_s(SolrType.string, true, true, false, false, true, "either the second level domain or, if a ccSLD is used, the third level domain", true), // needed to search in the url
-    inboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "internal links, the url only without the protocol", true), // needed for HostBrowser
+    inboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "internal links, the url only without the protocol", true), // needed for IndexBrowser
     inboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "internal links, only the protocol", true), // for correct assembly of inboundlinks  inboundlinks_protocol_sxt + inboundlinks_urlstub_sxt is needed
     outboundlinks_protocol_sxt(SolrType.string, true, true, true, false, false, "external links, only the protocol", true), // for correct assembly of outboundlinks  outboundlinks_protocol_sxt + outboundlinks_urlstub_sxt is needed
     outboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "external links, the url only without the protocol", true), // needed to enhance the crawler

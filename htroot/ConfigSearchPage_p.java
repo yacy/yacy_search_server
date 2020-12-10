@@ -97,7 +97,7 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.pictures", post.getBoolean("search.result.show.pictures"));
                 sb.setConfig("search.result.show.cache", post.getBoolean("search.result.show.cache"));
                 sb.setConfig("search.result.show.proxy", post.getBoolean("search.result.show.proxy"));
-                sb.setConfig("search.result.show.hostbrowser", post.getBoolean("search.result.show.hostbrowser"));
+                sb.setConfig("search.result.show.indexbrowser", post.getBoolean("search.result.show.indexbrowser"));
                 sb.setConfig("search.result.show.snapshots", post.getBoolean("search.result.show.snapshots"));
 
                 // construct navigation String
@@ -187,7 +187,7 @@ public class ConfigSearchPage_p {
                 sb.setConfig("search.result.show.pictures", config.getProperty("search.result.show.pictures","false"));
                 sb.setConfig("search.result.show.cache", config.getProperty("search.result.show.cache","true"));
                 sb.setConfig("search.result.show.proxy", config.getProperty("search.result.show.proxy","false"));
-                sb.setConfig("search.result.show.hostbrowser", config.getProperty("search.result.show.hostbrowser","true"));
+                sb.setConfig("search.result.show.indexbrowser", config.getProperty("search.result.show.indexbrowser","true"));
                 sb.setConfig("search.result.show.snapshots", config.getProperty("search.result.show.snapshots","true"));
 				sb.setConfig(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
 						config.getProperty(SwitchboardConstants.SEARCH_NAVIGATION_MAXCOUNT,
@@ -247,7 +247,7 @@ public class ConfigSearchPage_p {
         prop.put("search.result.show.pictures", sb.getConfigBool("search.result.show.pictures", false) ? 1 : 0);
         prop.put("search.result.show.cache", sb.getConfigBool("search.result.show.cache", false) ? 1 : 0);
         prop.put("search.result.show.proxy", sb.getConfigBool("search.result.show.proxy", false) ? 1 : 0);
-        prop.put("search.result.show.hostbrowser", sb.getConfigBool("search.result.show.hostbrowser", false) ? 1 : 0);
+        prop.put("search.result.show.indexbrowser", sb.getConfigBool("search.result.show.indexbrowser", false) ? 1 : 0);
         prop.put("search.result.show.snapshots", sb.getConfigBool("search.result.show.snapshots", false) ? 1 : 0);
         prop.put("search.result.show.ranking", sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING, SwitchboardConstants.SEARCH_RESULT_SHOW_RANKING_DEFAULT) ? 1 : 0);
 

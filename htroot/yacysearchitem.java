@@ -276,7 +276,7 @@ public class yacysearchitem {
                 prop.put("content_showPictures", sb.getConfigBool("search.result.show.pictures", true) ? 1 : 0);
                 prop.put("content_showCache", sb.getConfigBool("search.result.show.cache", true) && Cache.has(resultURL.hash()) ? 1 : 0);
                 prop.put("content_showProxy", sb.getConfigBool("search.result.show.proxy", true) && sb.getConfigBool("proxyURL", false) ? 1 : 0);
-                prop.put("content_showHostBrowser", sb.getConfigBool("search.result.show.hostbrowser", true) ? 1 : 0);
+                prop.put("content_showIndexBrowser", sb.getConfigBool("search.result.show.indexbrowser", true) ? 1 : 0);
                 prop.put("content_showSnapshots", snapshotPaths != null && snapshotPaths.size() > 0 && sb.getConfigBool("search.result.show.snapshots", true) ? 1 : 0);
                 prop.put("content_showVocabulary", sb.getConfigBool("search.result.show.vocabulary", true) ? 1 : 0);
                 prop.put("content_showRanking", sb.getConfigBool("search.result.show.ranking", false) ? 1 : 0);
@@ -331,7 +331,7 @@ public class yacysearchitem {
                 prop.putUrlEncodedHTML("content_showPictures_former", origQ);
                 prop.put("content_showCache_link", resultUrlstring);
                 prop.put("content_showProxy_link", resultUrlstring);
-                prop.put("content_showHostBrowser_link", resultUrlstring);
+                prop.put("content_showIndexBrowser_link", resultUrlstring);
                 if (sb.getConfigBool("search.result.show.vocabulary", true)) {
                     int c = 0;
                     for (String key: result.getFieldNames()) {

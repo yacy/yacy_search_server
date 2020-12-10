@@ -668,7 +668,7 @@ Download from Vimeo==Descargar desde vimeo
 More Tutorials==Más tutoriales
 #-----------------------------
 
-#File: HostBrowser.html
+#File: IndexBrowser_p.html
 #---------------------------
 >all hosts<==>todos los hosts<
 > or <==> o <
@@ -679,10 +679,6 @@ Documents without Errors==Documentos sin errores
 >Path<==>Ruta<
 Administration Options==Opciones de Administración
 <html lang="en">==<html lang="es">
-#-----------------------------
-
-#File: HostBrowserAdmin_p.html
-#---------------------------
 Administration Options==Opciones de Administración
 Delete all==Eliminar todo
 >Load Errors<==>Errores de carga<

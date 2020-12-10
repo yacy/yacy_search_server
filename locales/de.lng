@@ -1427,7 +1427,7 @@ More Tutorials==Mehr Tutorials
 Please see the tutorials on==Bitte besuchen Sie auch die Anleitungen auf
 #-----------------------------
 
-#File: HostBrowser.html
+#File: IndexBrowser_p.html
 #---------------------------
 #Index Browser==Index Browser
 Browse the index of #[ucount]# documents.==Durchsuchen Sie den Index von #[ucount]# Dokumenten.
@@ -1468,10 +1468,6 @@ Inbound Links, incoming to #[host]# - Host List==Eingehende Links, eingehend auf
 ##[count]# URLs==#[count]# URL(s)
 #Administration Options==Administration Optionen
 <html lang="en">==<html lang="de">
-#-----------------------------
-
-#File: HostBrowserAdmin_p.html
-#---------------------------
 Administration Options==Administrator Optionen
 Delete all==Lösche alle
 >Load Errors<==>Ladefehler<

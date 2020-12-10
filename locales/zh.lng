@@ -1645,7 +1645,7 @@ You can create your own search index with YaCy==您可以用YaCy创建属于自�
 To learn how to do that, watch one of the demonstration videos below==观看以下demo视频以了解更多
 #-----------------------------
 
-#File: HostBrowser.html
+#File: IndexBrowser_p.html
 #---------------------------
 Index Browser==索引浏览器
 Browse the index of #[ucount]# documents.== 浏览来自 #[ucount]# 篇文档的索引.
@@ -1685,10 +1685,6 @@ Inbound Links, incoming to #[host]# - Host List==入站链接，传入#[host]# -
 'number of documents about this date'=='在这个日期的文件数量'
 "show link structure graph"=="展示连接结构图"
 Host has load error(s)==主机有加载错误项
-#-----------------------------
-
-#File: HostBrowserAdmin_p.html
-#---------------------------
 Administration Options==管理选项
 Delete all==全部删除
 >Load Errors<==>加载错误<

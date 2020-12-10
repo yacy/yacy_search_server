@@ -1000,7 +1000,7 @@ This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a
 The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering==Le planificateur de balayage peut &ecirc;tre modifi&eacute; ou supprim&eacute; au moyen de la <a href="Table_API_p.html">commande de l'API
 #---------------------------
 
-#File: HostBrowser.html
+#File: IndexBrowser_p.html
 #---------------------------
 Browse the index of #[ucount]# documents.==Naviguer dans les #[ucount]# documents de l'index.
 Enter a host or an URL for a file list or view a list of==Saisir un nom de domaine ou une URL pour obtenir une liste de fichiers, ou visualiser la liste de
@@ -1041,10 +1041,6 @@ Inbound Links, incoming to #[host]# - Host List==Liens entrants, vers #[host]# -
 'number of documents about this date'=='Nombre de documents liés à cette date'
 "show link structure graph"=="Afficher le graphique d'arborescence de liens"
 Host has load error(s)==Erreur(s) de chargement sur ce domaine
-#-----------------------------
-
-#File: HostBrowserAdmin_p.html
-#---------------------------
 Administration Options==Options d'administration
 Delete all==Supprimer toutes les
 >Load Errors<==>erreurs de chargement<

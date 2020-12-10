@@ -1,5 +1,5 @@
 /**
- *  HostBrowser
+ *  IndexBrowser
  *  Copyright 2012 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
  *  First released 27.09.2012 at http://yacy.net
  *
@@ -71,14 +71,14 @@ import net.yacy.server.serverSwitch;
 /**
  * Browser for indexed resources
  */
-public class HostBrowser {
-    
+public class IndexBrowser_p {
+
     final static long TIMEOUT = 10000L;
-    
+
     public static enum StoreType {
         LINK, INDEX, EXCLUDED, FAILED, RELOAD;
     }
-    
+
     /**
      * <p>Retrieve local index entries for a path, or for hosts with the most references. Also allow some maintaining operations on entries with load errors.</p>
      * <p>Some parameters need administrator authentication or unauthenticated local host requests to be allowed : load, deleteLoadErrors, delete, reload404, 
@@ -87,36 +87,34 @@ public class HostBrowser {
      * <p>
      * Configuration settings :
      * <ul>
-     * 	<li>browser.autoload : allow the administrator to stack URLs to the local crawl queue, manually with the "load" parameter, 
-     * 		or automatically when the "path" parameter is filled with an unknown URL</li>
+     *     <li>browser.autoload : allow the administrator to stack URLs to the local crawl queue, manually with the "load" parameter, 
+     *         or automatically when the "path" parameter is filled with an unknown URL</li>
      *  <li>browser.load4everyone : allow everyone to stack URLs to the local crawl queue. 
-     *  		"browser.autoload" has also to be set to true to enable automatic loading on an unknown path</li>
+     *          "browser.autoload" has also to be set to true to enable automatic loading on an unknown path</li>
      *  <li>publicSearchpage : set to false to restrict use of this servlet to authenticated administrator only</li>
-     *  <li>publicTopmenu : set to false to hide the top navigation bar to non authenticated users</li>
      *  <li>decoration.hostanalysis : add supplementary hosts information for debug/analysis purpose</li>
      *  <li>decoration.grafics.linkstructure : display a link structure graph when the path parameter is filled</li>
      * </ul>
      * </p>
      * @param header servlet request header
      * @param post request parameters. Supported keys :<ul>
-     * 				<li>admin : when "true", display in the html page render the administration context (menu and top navbar)</li>
-     * 				<li>path : root URL or host name to browse (ignored when the hosts parameter is filled). When not yet locally indexed, this URL can be automatically crawled and indexed 
-     * 					when "browser.autoload" or "browser.load4everyone" configuration settings are set to true.</li>
-     * 				<li>load : URL to crawl and index.</li>
-     * 				<li>deleteLoadErrors : delete from the local index documents with load error (HTTP status different from 200 or any other failure).</li>
-     * 				<li>hosts : generate hosts with most references list. Supported values : 
-     * 					<ul>
-     * 						<li>"crawling" : restrict to host currently crawled</li>
-     * 						<li>"error" : restrict to hosts with having at least one resource load error</li>
-     * 					</ul>
-     * 				</li>
-     * 				<li>delete : delete from the index whole documents tree matching the path prefix</li>
-     * 				<li>reload404 : reload documents matching the path prefix and which previously failed to load due to a network error</li>
-     * 				<li>facetcount : </li>
-     * 				<li>complete : we want only root paths for complete lists</li>
-     *				<li>nepr :</li>
-     *				<li>showlinkstructure : when present, display a link graph for path</li>
-     * 			</ul>
+     *                 <li>path : root URL or host name to browse (ignored when the hosts parameter is filled). When not yet locally indexed, this URL can be automatically crawled and indexed 
+     *                     when "browser.autoload" or "browser.load4everyone" configuration settings are set to true.</li>
+     *                 <li>load : URL to crawl and index.</li>
+     *                 <li>deleteLoadErrors : delete from the local index documents with load error (HTTP status different from 200 or any other failure).</li>
+     *                 <li>hosts : generate hosts with most references list. Supported values : 
+     *                     <ul>
+     *                         <li>"crawling" : restrict to host currently crawled</li>
+     *                         <li>"error" : restrict to hosts with having at least one resource load error</li>
+     *                     </ul>
+     *                 </li>
+     *                 <li>delete : delete from the index whole documents tree matching the path prefix</li>
+     *                 <li>reload404 : reload documents matching the path prefix and which previously failed to load due to a network error</li>
+     *                 <li>facetcount : </li>
+     *                 <li>complete : we want only root paths for complete lists</li>
+     *                <li>nepr :</li>
+     *                <li>showlinkstructure : when present, display a link graph for path</li>
+     *             </ul>
      * @param env server environment
      * @return the servlet answer object
      */
@@ -125,53 +123,23 @@ public class HostBrowser {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         Fulltext fulltext = sb.index.fulltext();
-        final boolean authorized = sb.verifyAuthentication(header);
-        final boolean autoload = authorized && sb.getConfigBool("browser.autoload", true);
+        final boolean autoload = sb.getConfigBool("browser.autoload", true);
         final boolean load4everyone = sb.getConfigBool("browser.load4everyone", false);
         final boolean loadRight = autoload || load4everyone; // add config later
-        final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || authorized;
 
         final serverObjects prop = new serverObjects();
-        
+
         // set default values
         prop.put("path", "");
         prop.put("result", "");
         prop.put("hosts", 0);
         prop.put("files", 0);
         prop.put("hostanalysis", 0);
-        
-        prop.put("admin", "false");
-        boolean admin = false;
 
         String referer = header.get("Referer", "");
-        if ((post != null && post.getBoolean("admin")) || referer.contains("HostBrowser.html?admin=true")) {
-            prop.put("topmenu", 2);
-            prop.put("admin", "true");
-            admin = true;
-        } else if (authorized) { // show top nav to admins
-            prop.put("topmenu", 1);
-        } else { // for other respect setting in Search Design Configuration
-            prop.put("topmenu", sb.getConfigBool("publicTopmenu", true) ? 1 : 0);
-        }
-        final String promoteSearchPageGreeting =
-                (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) ?
-                    env.getConfig("network.unit.description", "") :
-                    env.getConfig(SwitchboardConstants.GREETING, "");
-        prop.put("topmenu_promoteSearchPageGreeting", promoteSearchPageGreeting);
-
-        if (!searchAllowed) {
-            prop.put("result", "You are not allowed to use this page. Please ask an administrator for permission.");
-            prop.putNum("ucount", 0);
-            return prop;
-        }
-        
-        if(authorized) {
-        	/* Fill the "admin" parameter for authorized links */
-        	prop.put("authorized_admin", Boolean.toString(admin));
-        }
 
         String path = post == null ? "" : post.get("path", "").trim();
-        if (authorized) sb.index.fulltext().commit(true);
+        sb.index.fulltext().commit(true);
         if (post == null || env == null) {
             prop.putNum("ucount", fulltext.collectionSize());
             return prop;
@@ -186,8 +154,8 @@ public class HostBrowser {
             !path.startsWith("smb://") &&
             !path.startsWith("file://"))) { path = "http://" + path; }
         prop.putHTML("path", path);
-        prop.put("delete", authorized && path.length() > 0 ? 1 : 0);
-        
+        prop.put("delete", path.length() > 0 ? 1 : 0);
+
         DigestURL pathURI = null;
         try {pathURI = new DigestURL(path);} catch (final MalformedURLException e) {}
 
@@ -231,61 +199,60 @@ public class HostBrowser {
             }
         }
 
-        if (authorized && post.containsKey("deleteLoadErrors")) {
+        if (post.containsKey("deleteLoadErrors")) {
             try {
                 fulltext.getDefaultConnector().deleteByQuery("-" + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " 
                         + CollectionSchema.httpstatus_i.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM); // make sure field exists
-                ConcurrentLog.info ("HostBrowser:", "delete documents with httpstatus_i <> 200");
+                ConcurrentLog.info ("IndexBrowser_p:", "delete documents with httpstatus_i <> 200");
                 fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failtype_s.getSolrFieldName() + ":\"" + FailType.fail.name() + "\"" );
-                ConcurrentLog.info ("HostBrowser:", "delete documents with failtype_s = fail");
+                ConcurrentLog.info ("IndexBrowser_p:", "delete documents with failtype_s = fail");
                 fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failtype_s.getSolrFieldName() + ":\"" + FailType.excl.name() + "\"" );
-                ConcurrentLog.info ("HostBrowser:", "delete documents with failtype_s = excl");
+                ConcurrentLog.info ("IndexBrowser_p:", "delete documents with failtype_s = excl");
                 prop.putNum("ucount", fulltext.collectionSize());
                 return prop;
             } catch (final IOException ex) {
                 ConcurrentLog.logException(ex);
             }
         }
-        
+
         if (post.containsKey("hosts")) {
             // generate host list
             try {
                 boolean onlyCrawling = "crawling".equals(post.get("hosts", ""));
                 boolean onlyErrors = "error".equals(post.get("hosts", ""));
-                
-                int maxcount = authorized ? 2 * 3 * 2 * 5 * 7 * 2 * 3 : 360; // which makes nice matrixes for 2, 3, 4, 5, 6, 7, 8, 9 rows/colums
-                
+
+                int maxcount = 2 * 3 * 2 * 5 * 7 * 2 * 3; // which makes nice matrixes for 2, 3, 4, 5, 6, 7, 8, 9 rows/colums
+
                 // collect hosts from index
                 ReversibleScoreMap<String> hostscore = fulltext.getDefaultConnector().getFacets(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", maxcount, CollectionSchema.host_s.getSolrFieldName()).get(CollectionSchema.host_s.getSolrFieldName());
                 if (hostscore == null) hostscore = new ClusteredScoreMap<String>(true);
-                
+
                 // collect hosts from crawler
-                final Map<String, Integer[]> crawler = (authorized) ? sb.crawlQueues.noticeURL.getDomainStackHosts(StackType.LOCAL, sb.robots) : new HashMap<String, Integer[]>();
+                final Map<String, Integer[]> crawler = sb.crawlQueues.noticeURL.getDomainStackHosts(StackType.LOCAL, sb.robots);
 
                 final Map<String, Integer> hostNameToPendingCount = new HashMap<>();
                 for(Entry<String, Integer[]>crawlerEntry: crawler.entrySet()) {
                     /* The local stack returns keys composed of "hostname:port" : we now sum pending URLs counts by host name */
-                	String hostName = Domains.stripToHostName(crawlerEntry.getKey());
-                	Integer pendingCount = hostNameToPendingCount.get(hostName);
-                	if(pendingCount == null) {
-                		pendingCount = 0;
-                	}
-                	pendingCount += crawlerEntry.getValue()[0];
-                	hostNameToPendingCount.put(hostName, pendingCount);
+                    String hostName = Domains.stripToHostName(crawlerEntry.getKey());
+                    Integer pendingCount = hostNameToPendingCount.get(hostName);
+                    if(pendingCount == null) {
+                        pendingCount = 0;
+                    }
+                    pendingCount += crawlerEntry.getValue()[0];
+                    hostNameToPendingCount.put(hostName, pendingCount);
                 }
-                
+
                 // collect the errorurls
-                Map<String, ReversibleScoreMap<String>> exclfacets = authorized ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
+                Map<String, ReversibleScoreMap<String>> exclfacets = fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.excl.name(), maxcount, CollectionSchema.host_s.getSolrFieldName());
                 ReversibleScoreMap<String> exclscore = exclfacets == null ? new ClusteredScoreMap<String>(true) : exclfacets.get(CollectionSchema.host_s.getSolrFieldName());
-                Map<String, ReversibleScoreMap<String>> failfacets = authorized ? fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.fail.name(), maxcount, CollectionSchema.host_s.getSolrFieldName()) : null;
+                Map<String, ReversibleScoreMap<String>> failfacets = fulltext.getDefaultConnector().getFacets(CollectionSchema.failtype_s.getSolrFieldName() + ":" + FailType.fail.name(), maxcount, CollectionSchema.host_s.getSolrFieldName());
                 ReversibleScoreMap<String> failscore = failfacets == null ? new ClusteredScoreMap<String>(true) : failfacets.get(CollectionSchema.host_s.getSolrFieldName());
-                
+
                 int c = 0;
                 Iterator<String> i = hostscore.keys(false);
                 String host;
                 while (i.hasNext() && c < maxcount) {
                     host = i.next();
-                    prop.put("hosts_list_" + c + "_admin", admin ? "true" : "false");
                     prop.putHTML("hosts_list_" + c + "_host", host);
                     boolean inCrawler = hostNameToPendingCount.containsKey(host);
                     int exclcount = exclscore.get(host);
@@ -294,7 +261,7 @@ public class HostBrowser {
                     prop.put("hosts_list_" + c + "_count", hostscore.get(host));
                     prop.put("hosts_list_" + c + "_crawler", inCrawler ? 1 : 0);
                     if (inCrawler) {
-                    	prop.put("hosts_list_" + c + "_crawler_pending", hostNameToPendingCount.get(host));
+                        prop.put("hosts_list_" + c + "_crawler_pending", hostNameToPendingCount.get(host));
                     }
                     prop.put("hosts_list_" + c + "_errors", errors > 0 ? 1 : 0);
                     if (errors > 0) {
@@ -311,18 +278,18 @@ public class HostBrowser {
                     }
                 }
                 prop.put("hosts_list", c);
-                prop.put("hosts_authorized", authorized ? 1 : 0);
+                prop.put("hosts_authorized", 1);
                 prop.put("hosts", 1);
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
         }
-        
+
         if (path.length() > 0) {
             try {
                 DigestURL uri = new DigestURL(path);
                 String host = uri.getHost();
-                
+
                 // write host analysis if path after host is empty
                 if (uri.getPath().length() <= 1 && host != null && host.length() > 0 && sb.getConfigBool("decoration.hostanalysis", false)) {
                     //how many documents per crawldepth_i; get crawldepth_i facet for host
@@ -364,27 +331,25 @@ public class HostBrowser {
                     prop.put("hostanalysis_facets", fc);
                     prop.put("hostanalysis", 1);
                 }
-            
-            
+
                 // write file list for subpath
                 boolean delete = false;
                 boolean reload404 = false;
-                if (authorized && post.containsKey("delete")) {
+                if (post.containsKey("delete")) {
                     // delete the complete path!! That includes everything that matches with this prefix.
                     delete = true;
                 }
-                if (authorized && post.containsKey("reload404")) {
+                if (post.containsKey("reload404")) {
                     // try to re-load all urls that have load errors and matches with this prefix.
                     reload404 = true;
                 }
-                int facetcount=post.getInt("facetcount", 0);
+                int facetcount = post.getInt("facetcount", 0);
                 boolean complete = post.getBoolean("complete");
                 if (complete) { // we want only root paths for complete lists
                     p = path.indexOf('/', 10);
                     if (p > 0) path = path.substring(0, p + 1);
                 }
                 prop.put("files_complete", complete ? 1 : 0);
-                prop.put("files_complete_admin", admin ? "true" : "false");
                 prop.putHTML("files_complete_path", path);
                 p = path.substring(0, path.length() - 1).lastIndexOf('/');
                 if (p < 8) {
@@ -392,15 +357,13 @@ public class HostBrowser {
                 } else {
                     prop.put("files_root", 0);
                     prop.putHTML("files_root_path", path.substring(0, p + 1));
-                    prop.put("files_root_admin", admin ? "true" : "false");
                 }
                 // generate file list from path
                 prop.putHTML("outbound_host", host);
-                if (authorized) prop.putHTML("outbound_admin_host", host); //used for WebStructurePicture_p link
                 prop.putHTML("inbound_host", host);
                 String hosthash = uri.hosthash();
                 String[] pathparts = uri.getPaths();
-                
+
                 // get all files for a specific host from the index
                 StringBuilder q = new StringBuilder();
                 if (host == null) {
@@ -438,7 +401,7 @@ public class HostBrowser {
                         CollectionSchema.references_external_i.getSolrFieldName(),
                         CollectionSchema.references_exthosts_i.getSolrFieldName(),
                         CollectionSchema.cr_host_chance_d.getSolrFieldName(),
-                        CollectionSchema.cr_host_norm_i.getSolrFieldName()   
+                        CollectionSchema.cr_host_norm_i.getSolrFieldName()
                         ));
                 solrQueryTask.start();
                 Set<String> storedDocs = new HashSet<String>();
@@ -455,68 +418,68 @@ public class HostBrowser {
                 long timeoutReferences = System.currentTimeMillis() + 6000;
                 ReferenceReportCache rrCache = sb.index.getReferenceReportCache();
                 try {
-                	SolrDocument doc = docs.poll(remainingTime, TimeUnit.MILLISECONDS);
-                	while (doc != AbstractSolrConnector.POISON_DOCUMENT && doc != null) {
-                		String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
-                		String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
-                		FailType error = errortype == null ? null : FailType.valueOf(errortype);
-                		String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-                		infoCache.put(ids, new InfoCacheEntry(sb.index.fulltext(), rrCache, doc, ids, System.currentTimeMillis() < timeoutReferences));
-                		if (u.startsWith(path)) {
-                			if (delete) {
-                				deleteIDs.add(ids);
-                			} else {
-                				if (error == null) storedDocs.add(u); else {
-                					if (reload404 && error == FailType.fail) {
-                						ArrayList<String> collections = (ArrayList<String>) doc.getFieldValue(CollectionSchema.collection_sxt.getSolrFieldName());
-                						if (collections != null) reloadURLCollection.addAll(collections);
-                						reloadURLs.add(u);
-                					}
-                					if (authorized) errorDocs.put(u, error);
-                				}
-                			}
-                		} else if (complete) {
-                			if (error == null) storedDocs.add(u); else {
-                				if (authorized) errorDocs.put(u, error);
-                			}
-                		}
-                		if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u); // add the current link
-                		if (error == null) {
-                			hostsize++;
-                			// collect inboundlinks to browse the host
-                			Iterator<String> links = URIMetadataNode.getLinks(doc, true);
-                			while (links.hasNext()) {
-                				u = links.next();
-                				if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u);
-                			}
-                        
-                			// collect referrer links
-                			links = URIMetadataNode.getLinks(doc, false);
-                			while (links.hasNext()) {
-                				u = links.next();
-                				try {
-                					MultiProtocolURL mu = new MultiProtocolURL(u);
-                					if (mu.getHost() != null) {
-                						ReversibleScoreMap<String> lks = outboundHosts.get(mu.getHost());
-                						if (lks == null) {
-                							lks = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
-                							outboundHosts.put(mu.getHost(), lks);
-                						}
-                						lks.set(u, u.length());
-                					}
-                				} catch (final MalformedURLException e) {}
-                			}
-                		}
-                		
-                		remainingTime = timeoutList - System.currentTimeMillis();
-                		if (remainingTime <= 0) {
-                			break;
-                		}
-                		doc = docs.poll(remainingTime, TimeUnit.MILLISECONDS);
-                	}
+                    SolrDocument doc = docs.poll(remainingTime, TimeUnit.MILLISECONDS);
+                    while (doc != AbstractSolrConnector.POISON_DOCUMENT && doc != null) {
+                        String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                        String errortype = (String) doc.getFieldValue(CollectionSchema.failtype_s.getSolrFieldName());
+                        FailType error = errortype == null ? null : FailType.valueOf(errortype);
+                        String ids = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                        infoCache.put(ids, new InfoCacheEntry(sb.index.fulltext(), rrCache, doc, ids, System.currentTimeMillis() < timeoutReferences));
+                        if (u.startsWith(path)) {
+                            if (delete) {
+                                deleteIDs.add(ids);
+                            } else {
+                                if (error == null) storedDocs.add(u); else {
+                                    if (reload404 && error == FailType.fail) {
+                                        ArrayList<String> collections = (ArrayList<String>) doc.getFieldValue(CollectionSchema.collection_sxt.getSolrFieldName());
+                                        if (collections != null) reloadURLCollection.addAll(collections);
+                                        reloadURLs.add(u);
+                                    }
+                                    errorDocs.put(u, error);
+                                }
+                            }
+                        } else if (complete) {
+                            if (error == null) storedDocs.add(u); else {
+                                errorDocs.put(u, error);
+                            }
+                        }
+                        if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u); // add the current link
+                        if (error == null) {
+                            hostsize++;
+                            // collect inboundlinks to browse the host
+                            Iterator<String> links = URIMetadataNode.getLinks(doc, true);
+                            while (links.hasNext()) {
+                                u = links.next();
+                                if ((complete || u.startsWith(path)) && !storedDocs.contains(u)) inboundLinks.add(u);
+                            }
+
+                            // collect referrer links
+                            links = URIMetadataNode.getLinks(doc, false);
+                            while (links.hasNext()) {
+                                u = links.next();
+                                try {
+                                    MultiProtocolURL mu = new MultiProtocolURL(u);
+                                    if (mu.getHost() != null) {
+                                        ReversibleScoreMap<String> lks = outboundHosts.get(mu.getHost());
+                                        if (lks == null) {
+                                            lks = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+                                            outboundHosts.put(mu.getHost(), lks);
+                                        }
+                                        lks.set(u, u.length());
+                                    }
+                                } catch (final MalformedURLException e) {}
+                            }
+                        }
+
+                        remainingTime = timeoutList - System.currentTimeMillis();
+                        if (remainingTime <= 0) {
+                            break;
+                        }
+                        doc = docs.poll(remainingTime, TimeUnit.MILLISECONDS);
+                    }
                 } finally {
-                	/* Ensure termination and proper resources release of the query thread */
-               		solrQueryTask.interrupt();
+                    /* Ensure termination and proper resources release of the query thread */
+                       solrQueryTask.interrupt();
                 }
                 if (deleteIDs.size() > 0) sb.remove(deleteIDs);
                 if (reloadURLs.size() > 0) {
@@ -524,19 +487,19 @@ public class HostBrowser {
                     for (String collection: reloadURLCollection) cm.put(collection, QueryParams.catchall_pattern);
                     sb.reload(reloadURLs, cm.size() > 0 ? cm : CrawlProfile.collectionParser("user"), false);
                 }
-                
+
                 // collect from crawler
-                List<Request> domainStackReferences = (authorized) ? sb.crawlQueues.noticeURL.getDomainStackReferences(StackType.LOCAL, host, 1000, 3000) : new ArrayList<Request>(0);
+                List<Request> domainStackReferences = sb.crawlQueues.noticeURL.getDomainStackReferences(StackType.LOCAL, host, 1000, 3000);
                 Set<String> loadingLinks = new HashSet<String>();
                 for (Request crawlEntry: domainStackReferences) loadingLinks.add(crawlEntry.url().toNormalform(true));
-                
+
                 // now combine all lists into one
                 Map<String, StoreType> files = new HashMap<String, StoreType>();
                 for (String u: storedDocs) files.put(u, StoreType.INDEX);
                 for (Map.Entry<String, FailType> e: errorDocs.entrySet()) files.put(e.getKey(), e.getValue() == FailType.fail ? StoreType.FAILED : StoreType.EXCLUDED);
                 for (String u: inboundLinks) if (!files.containsKey(u)) files.put(u, StoreType.LINK);
                 for (String u: loadingLinks) if (u.startsWith(path) && !files.containsKey(u)) files.put(u, StoreType.LINK);
-                ConcurrentLog.info("HostBrowser", "collected " + files.size() + " urls for path " + path);
+                ConcurrentLog.info("IndexBrowser_p", "collected " + files.size() + " urls for path " + path);
 
                 // distinguish files and folders
                 Map<String, Object> list = new TreeMap<String, Object>(); // a directory list; if object is boolean, its a file; if its a int[], then its a folder
@@ -575,7 +538,7 @@ public class HostBrowser {
                         }
                     }
                 }
-                
+
                 int maxcount = 1000;
                 int c = 0;
                 // first list only folders
@@ -587,7 +550,6 @@ public class HostBrowser {
                         // this is a folder
                         prop.put("files_list_" + c + "_type", 1);
                         prop.putHTML("files_list_" + c + "_type_url", entry.getKey());
-                        prop.putHTML("files_list_" + c + "_type_admin", admin ? "true" : "false");
                         int linked = ((int[]) entry.getValue())[0];
                         int stored = ((int[]) entry.getValue())[1];
                         int crawler = ((int[]) entry.getValue())[2];
@@ -610,7 +572,6 @@ public class HostBrowser {
                         // this is a file
                         prop.put("files_list_" + c + "_type", 0);
                         prop.putHTML("files_list_" + c + "_type_url", entry.getKey());
-                        prop.putHTML("files_list_" + c + "_type_admin", admin ? "true" : "false");
                         StoreType type = (StoreType) entry.getValue();
                         try {uri = new DigestURL(entry.getKey());} catch (final MalformedURLException e) {uri = null;}
                         HarvestProcess process = uri == null ? null : sb.crawlQueues.exists(uri.hash()); // todo: cannot identify errors
@@ -640,7 +601,6 @@ public class HostBrowser {
                             if (loadRight) {
                                 prop.putHTML("files_list_" + c + "_type_stored_load_url", entry.getKey());
                                 prop.putHTML("files_list_" + c + "_type_stored_load_path", path);
-                                prop.putHTML("files_list_" + c + "_type_stored_load_admin", Boolean.toString(admin));
                             }
                             if (++c >= maxcount) break;
                         }
@@ -669,7 +629,6 @@ public class HostBrowser {
                     Iterator<String> i = score.keys(false);
                     while (i.hasNext() && c < maxcount) {
                         host = i.next();
-                        prop.put("inbound_list_" + c + "_admin", admin ? "true" : "false");
                         prop.putHTML("inbound_list_" + c + "_host", sb.webStructure.hostHash2hostName(host));
                         prop.put("inbound_list_" + c + "_count", score.get(host));
                         c++;
@@ -679,7 +638,7 @@ public class HostBrowser {
                 } else {
                     prop.put("inbound", 0);
                 }
-                
+
                 // generate outbound-links table
                 if (outboundHosts.size() > 0) {
                     maxcount = 200;
@@ -692,7 +651,6 @@ public class HostBrowser {
                         prop.putHTML("outbound_list_" + c + "_host", host);
                         prop.put("outbound_list_" + c + "_count", score.get(host));
                         prop.put("outbound_list_" + c + "_link", outboundHosts.get(host).getMinKey());
-                        prop.put("outbound_list_" + c + "_admin", admin ? "true" : "false");
                         c++;
                     }
                     prop.put("outbound_list", c);
@@ -700,7 +658,7 @@ public class HostBrowser {
                 } else {
                     prop.put("outbound", 0);
                 }
-                
+
             } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
             }

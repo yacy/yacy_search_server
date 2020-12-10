@@ -3987,7 +3987,7 @@
   </body>
 </file>
 
-<file original="HostBrowser.html"  source-language="en"  datatype="html">
+<file original="IndexBrowser_p.html"  source-language="en"  datatype="html">
   <body>
     <trans-unit id="c472c59a" xml:space="preserve" approved="no" translate="yes">
        <source>Index Browser</source>
@@ -4106,11 +4106,6 @@
     <trans-unit id="9c0d6fd2" xml:space="preserve" approved="no" translate="yes">
        <source>Host has load error(s)</source>
     </trans-unit>
-  </body>
-</file>
-
-<file original="HostBrowserAdmin_p.html"  source-language="en"  datatype="html">
-  <body>
     <trans-unit id="dfa6a8dc" xml:space="preserve" approved="no" translate="yes">
        <source>Administration Options</source>
     </trans-unit>

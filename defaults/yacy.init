@@ -939,7 +939,7 @@ search.result.show.citation = true
 search.result.show.pictures = false
 search.result.show.cache = true
 search.result.show.proxy = false
-search.result.show.hostbrowser = true
+search.result.show.indexbrowser = true
 search.result.show.vocabulary = false
 # Set of comma separated vocabulary names not to be used as search results facets
 search.result.show.vocabulary.omit = 
@@ -1142,7 +1142,7 @@ svnRevision=0
 currentSkin=pdblue
 
 # flag to show if pages shall be usable for non-admin users
-# this can be applied to the Surftips.html, yacysearch.html and HostBrowser.html pages
+# this can be applied to the Surftips.html, yacysearch.html and IndexBrowser_p.html pages
 publicSurftips = true
 publicSearchpage = true
 

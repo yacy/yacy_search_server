@@ -294,7 +294,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="picturesLink" href="yacysearch.html" target="LayouTest">Pictures</a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="cacheLink" href="CacheResource_p.html" target="LayouTest">Cache</a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="proxyLink" href="proxy.html" target="LayouTest">View via Proxy</a></td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="browseIndexLink" href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="browseIndexLink" href="IndexBrowser_p.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="snapshotsLink" href="yacysearch.html" target="LayouTest">JPG Snapshot</a></td>
                           #(search.result.show.ranking)#::<td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><span title="Raw ranking score value">Ranking: 1.12195955E9</span>#(/search.result.show.ranking)#
                         </tr>
@@ -314,7 +314,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                               menu: System Administration > Advanced Settings
                             </span></span>
                           </td>
-                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.hostbrowser" aria-labelledby="browseIndexLink" value="true" #(search.result.show.hostbrowser)#::checked="checked" #(/search.result.show.hostbrowser)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.indexbrowser" aria-labelledby="browseIndexLink" value="true" #(search.result.show.indexbrowser)#::checked="checked" #(/search.result.show.indexbrowser)# /></td>
                           <td style="text-align:center;"><input type="checkbox" name="search.result.show.snapshots" aria-labelledby="snapshotsLink" value="true" #(search.result.show.snapshots)#::checked="checked" #(/search.result.show.snapshots)# /></td>
                           #(search.result.show.ranking)#::<td style="text-align:center;">
                             <span class="info" style="padding-left: 10px"><img src="env/grafics/i16.gif" alt="info"/><span>

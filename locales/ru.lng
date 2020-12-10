@@ -1546,7 +1546,7 @@ More Tutorials==Больше инструкций
 Please see the tutorials on==Пожалуйста, смотрите больше инструкций на
 #-----------------------------
 
-#File: HostBrowser.html
+#File: IndexBrowser_p.html
 #---------------------------
 Index Browser==Просмотр хостов
 Browse the index of #[ucount]# documents.==В индексе находится #[ucount]# документов.
@@ -1590,10 +1590,6 @@ Inbound Links, incoming to #[host]# - Host List==Внутренние ссылк
 #browse #[host]#==просмотр #[host]#
 ##[count]# URLs==#[count]# ссылок
 <html lang="en">==<html lang="ru">
-#-----------------------------
-
-#File: HostBrowserAdmin_p.html
-#---------------------------
 Administration Options==Расширенные опции
 Delete all==Удалить все
 >Load Errors<==>ошибки загрузки<
