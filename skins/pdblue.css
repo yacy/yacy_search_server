@@ -34,7 +34,8 @@ a:hover {
  
   background-color: #5090D0;
   font-weight: bold;
-  padding-bottom:3px;
+  padding-top:6px;
+  padding-bottom:6px;
   color:white;
 }
 
@@ -54,6 +55,10 @@ a:hover {
 a.MenuItemLink, ul.SubMenu em {
   background-color: #DEE6F3;
   color:#18294A;
+}
+
+div.SubMenu h3 {
+    padding: 6px 10px;
 }
 
 a:hover.MenuItemLink {
