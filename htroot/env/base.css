@@ -553,15 +553,17 @@ a.MenuItemLink {
 }
 
 a.MenuItemLink.lock {
-  background-image:url(grafics/lock.gif);
-  background-position:2px center;
+  background-image:url(grafics/lockclose.png);
+  background-position:1px center;
   background-repeat:no-repeat;
+  background-size: 16px 16px;
 }
 
 a.MenuItemLink.unlock {
-  background-image:url(grafics/lockopen.gif);
-  background-position:2px center;
+  background-image:url(grafics/lockopen.png);
+  background-position:1px center;
   background-repeat:no-repeat;
+  background-size: 16px 16px;
 }
 
 a:hover.MenuItemLink {
