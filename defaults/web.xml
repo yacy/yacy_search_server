@@ -50,12 +50,6 @@
         <servlet-class>net.yacy.http.servlets.SolrServlet</servlet-class>
     </servlet>
     
-    <!-- servlet to provide Google Search Appliance (GSA) formatted search results -->
-    <servlet>
-        <servlet-name>GSAServlet</servlet-name>
-        <servlet-class>net.yacy.http.servlets.GSAsearchServlet</servlet-class>
-    </servlet>
-    
     <!-- servlet to provide searchresults via proxy -->
     <servlet>
         <servlet-name>URLProxyServlet</servlet-name>
@@ -73,11 +67,6 @@
         <url-pattern>/solr/select</url-pattern>
         <url-pattern>/solr/collection1/select</url-pattern>
         <url-pattern>/solr/webgraph/select</url-pattern>
-    </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>GSAServlet</servlet-name>
-        <url-pattern>/gsa/search</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>

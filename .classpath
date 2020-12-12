@@ -47,29 +47,10 @@
 	<classpathentry kind="lib" path="lib/chardet.jar"/>
 	<classpathentry kind="lib" path="lib/httpclient-4.5.12.jar"/>
 	<classpathentry kind="lib" path="lib/httpmime-4.5.12.jar"/>
-	<classpathentry kind="lib" path="lib/noggit-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/woodstox-core-asl-4.4.1.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/commons-math3-3.4.1.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-analyzers-common-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-backward-codecs-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-classification-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-codecs-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-core-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-grouping-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-highlighter-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-join-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-memory-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-misc-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-queries-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-queryparser-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-spatial-extras-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/lucene-suggest-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/solr-core-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/solr-solrj-6.6.6.jar"/>
-	<classpathentry kind="lib" path="lib/zookeeper-3.4.10.jar"/>
 	<classpathentry kind="lib" path="lib/metrics-core-3.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.12.1.jar"/>
@@ -87,6 +68,28 @@
 	<classpathentry kind="lib" path="lib/jetty-util-9.4.35.v20201120.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-webapp-9.4.35.v20201120.jar"/>
 	<classpathentry kind="lib" path="lib/jetty-xml-9.4.35.v20201120.jar"/>
+	<classpathentry kind="lib" path="lib/zookeeper-3.4.14.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-analyzers-common-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/solr-core-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/solr-solrj-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/noggit-0.8.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-backward-codecs-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-classification-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-codecs-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-core-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-grouping-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-highlighter-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-join-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-memory-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-misc-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-queries-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-queryparser-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-spatial-extras-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/lucene-suggest-7.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/langdetect.jar"/>
+	<classpathentry kind="lib" path="lib/rrd4j-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-collections-3.2.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="lib" path="lib/icu4j-63.1.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar"/>
@@ -99,12 +102,10 @@
 	<classpathentry kind="lib" path="lib/imageio-tiff-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/imageio-bmp-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/jsonic-1.3.10.jar"/>
-	<classpathentry kind="lib" path="lib/langdetect.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-common-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-gzip-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-archive-common-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-warc-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-collections4-4.1.jar"/>
 	<classpathentry kind="lib" path="lib/jaudiotagger-2.2.5.jar"/>
 	<classpathentry kind="lib" path="libt/hamcrest-2.2.jar"/>
 	<classpathentry kind="lib" path="libt/hamcrest-core-2.2.jar"/>

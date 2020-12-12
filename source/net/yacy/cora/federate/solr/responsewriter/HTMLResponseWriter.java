@@ -125,6 +125,7 @@ public class HTMLResponseWriter implements QueryResponseWriter, SolrjResponseWri
         final NamedList<Object> paramsList = solrParams.toNamedList();
         paramsList.remove("wt");
 		
+        @SuppressWarnings("deprecation")
         final String xmlquery = dqp.matcher("select?" + SolrParams.toSolrParams(paramsList).toString() + "&core=" + coreName).replaceAll("%22");
         
         writer.write("<div id=\"api\"><a href=\"" + xmlquery + "\"><img src=\"../env/grafics/api.png\" width=\"60\" height=\"40\" alt=\"API\" /></a>\n");

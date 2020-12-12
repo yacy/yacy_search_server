@@ -84,7 +84,6 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrException.ErrorCode;
-import org.apache.solr.core.SolrInfoMBean;
 import org.apache.lucene.util.Version;
 
 public final class Fulltext {
@@ -234,12 +233,6 @@ public final class Fulltext {
         } finally {
         	this.solrInstancesLock.unlock();
         }
-    }
-    
-    public Map<String, SolrInfoMBean> getSolrInfoBeans() {
-        EmbeddedSolrConnector esc = this.solrInstances.getDefaultEmbeddedConnector();
-        if (esc == null) return new HashMap<String, SolrInfoMBean>();
-        return esc.getSolrInfoBeans();
     }
     
     public int bufferSize() {

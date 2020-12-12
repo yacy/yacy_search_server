@@ -58,7 +58,6 @@ import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.apache.solr.client.solrj.impl.HttpClientUtil;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.solr.update.UpdateShardHandler.IdleConnectionsEvictor;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -96,20 +95,6 @@ public class RemoteInstance implements SolrInstance {
 	 * @see <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=7127374">JDK 1.7 bug</a> on "unrecognized_name" warning for SNI */
 	public static final AtomicBoolean ENABLE_SNI_EXTENSION = new AtomicBoolean(
 			Boolean.parseBoolean(System.getProperty("jsse.enableSNIExtension", Boolean.toString(ENABLE_SNI_EXTENSION_DEFAULT))));
-	
-	/**
-	 * Background daemon thread evicting expired idle connections from the pool.
-	 * This may be eventually already done by the pool itself on connection request,
-	 * but this background task helps when no request is made to the pool for a long
-	 * time period.
-	 */
-	private static final IdleConnectionsEvictor EXPIRED_CONNECTIONS_EVICTOR = new IdleConnectionsEvictor(
-			CONNECTION_MANAGER, DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME, TimeUnit.SECONDS,
-			DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
-	
-	static {
-		EXPIRED_CONNECTIONS_EVICTOR.start();
-	}
 	
 	/** A custom scheme registry allowing https connections to servers using self-signed certificate */
 	private static final org.apache.http.conn.scheme.SchemeRegistry SCHEME_REGISTRY = buildTrustSelfSignedSchemeRegistry();
@@ -286,7 +271,7 @@ public class RemoteInstance implements SolrInstance {
             params.set(HttpClientUtil.PROP_SO_TIMEOUT, this.timeout);
             
             
-            this.client = HttpClientUtil.createClient(params, CONNECTION_MANAGER);
+            this.client = HttpClientUtil.createClient(params);
             if(this.client instanceof org.apache.http.impl.client.DefaultHttpClient) {
             	if(this.client.getParams() != null) {
             		/* Set the maximum time to get a connection from the shared connections pool */
@@ -587,14 +572,6 @@ public class RemoteInstance implements SolrInstance {
 	 */
 	public static void closeConnectionManager() {
 		try {
-			if (EXPIRED_CONNECTIONS_EVICTOR != null) {
-				// Shut down the evictor thread
-				EXPIRED_CONNECTIONS_EVICTOR.shutdown();
-				try {
-					EXPIRED_CONNECTIONS_EVICTOR.awaitTermination(1L, TimeUnit.SECONDS);
-				} catch (final InterruptedException ignored) {
-				}
-			}
 		} finally {
 			if (CONNECTION_MANAGER != null) {
 				CONNECTION_MANAGER.shutdown();

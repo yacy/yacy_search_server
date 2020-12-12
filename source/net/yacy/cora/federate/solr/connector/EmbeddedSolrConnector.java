@@ -53,7 +53,6 @@ import org.apache.solr.common.util.NamedList;
 import org.apache.solr.common.util.SimpleOrderedMap;
 import org.apache.solr.core.SolrConfig;
 import org.apache.solr.core.SolrCore;
-import org.apache.solr.core.SolrInfoMBean;
 import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
@@ -122,10 +121,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         return 0;
     }
 
-    public Map<String, SolrInfoMBean> getSolrInfoBeans() {
-        return this.core.getInfoRegistry();
-    }
-    
     @Override
     public void clearCaches() {
         SolrConfig solrConfig = this.core.getSolrConfig();
@@ -141,10 +136,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         @SuppressWarnings("unchecked")
         SolrCache<Integer, Document> documentCache = solrConfig.documentCacheConfig == null ? null : solrConfig.documentCacheConfig.newInstance();
         if (documentCache != null) documentCache.clear();
-        for (SolrInfoMBean ib: this.core.getInfoRegistry().values()) {
-            // clear 'lost' caches
-            if (ib instanceof SolrCache) ((SolrCache<?,?>) ib).clear();
-        }
     }
     
     public SolrInstance getInstance() {
@@ -405,7 +396,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     
     @Override
     public long getCountByQuery(String querystring) {
-    	int numFound = 0;
+    	long numFound = 0;
     	DocListSearcher docListSearcher = null;
         try {
         	docListSearcher = new DocListSearcher(querystring, null, 0, 0, CollectionSchema.id.getSolrFieldName());

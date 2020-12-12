@@ -30,7 +30,6 @@
           <li><a href="solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / JSON</a></li>
           <li><a href="solr/collection1/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / XML</a></li>
           <li><a href="solr/webgraph/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Webgraph Core / XML</a></li>
-          <li><a href="gsa/search?q=www&num=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Google Appliance API / XML</a></li>
         </ul>
       </li>
       <li id="header_help" class="dropdown">
