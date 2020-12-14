@@ -10,21 +10,33 @@
     #%env/templates/submenuDesign.template%#
 
     <script type="text/javascript" src="yacy/ui/js/jquery.colorpicker.js"></script>
-	<script type="text/javascript">
+    <script type="text/javascript">
       $(document).ready(function(){
         $('#color_background, #color_text, #color_legend, #color_tableheader, #color_tableitem, #color_tableitem2, #color_tablebottom, #color_borderline, #color_signbad, #color_signgood, #color_signother, #color_searchheadline, #color_searchurl, #color_searchurlhover').ColorPicker({
-			onSubmit: function(hsb, hex, rgb, el) {
-				$(el).val(hex);
-				$(el).ColorPickerHide();
-			},
-			onBeforeShow: function () {
-				$(this).ColorPickerSetColor(this.value);
-			}
-		})
-		.bind('keyup', function(){
-			$(this).ColorPickerSetColor(this.value);
-		});
+            onSubmit: function(hsb, hex, rgb, el) {
+                $(el).val(hex);
+                $(el).ColorPickerHide();
+            },
+            onBeforeShow: function () {
+                $(this).ColorPickerSetColor(this.value);
+            }
+        })
+        .bind('keyup', function(){
+            $(this).ColorPickerSetColor(this.value);
+        });
       });
+
+      // force reload of css
+      var a = document.getElementsByTagName('link');
+      var h;
+      for (h = 0; h < a.length; h++) {
+          var f = a[h];
+          if (f.href && f.href.endsWith("/style.css")) {
+              var g = f.href.replace(/(&|\?)rnd=\d+/, '');
+              f.href = g + (g.match(/\?/) ? '&' : '?');
+              f.href += 'rnd=' + (new Date().valueOf());
+          }
+      }
     </script>
 
     <h2>Appearance and Integration</h2>
@@ -34,19 +46,19 @@
       If you <a href="ConfigPortal_p.html">create a search portal with YaCy</a> then you can
       change the appearance of the search page here.
     </p>
-    
+
     <form action="ConfigAppearance_p.html" accept-charset="UTF-8">
       <fieldset>
       <legend>Skin Selection</legend>
-        <p>Select one of the default skins, download new skins, or create your own skin.</p>
+        <p>Select one of the default skins. <b>After selection it might be required to reload the web page while holding the shift key to refresh cached style files.</b></p>
         <dl>
           <dt><label for="cur_skin">Current skin</label>:</dt>
           <dd id="cur_skin">#[currentskin]#&nbsp;</dd>
-          
+
           <dt><label for="skins">Available Skins</label>:</dt>
           <dd>
             <select id="skins" name="skin">#{skinlist}#
-              <option value="#[file]#">#[name]#</option>#{/skinlist}#
+              <option value="#[file]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>#{/skinlist}#
             </select>
           </dd>
           <dt>&nbsp;</dt>
@@ -57,7 +69,7 @@
         </dl>
       </fieldset>
     </form>
-    
+
     <form action="ConfigAppearance_p.html" accept-charset="UTF-8">
       <fieldset>
       <legend>Skin Color Definition</legend>
@@ -90,7 +102,7 @@
         </td></tr></table>
       </fieldset>
     </form>
-    
+
     <form action="ConfigAppearance_p.html" accept-charset="UTF-8">
       <fieldset>
         <legend>Skin Download</legend>
@@ -98,7 +110,7 @@
         <dl>
           <dt><label for="url">Install new skin from URL</label>:</dt>
           <dd><input type="text" name="url" id="url" size="30" /></dd>
-          
+
           <dt><label for="use_url">Use this skin</label></dt>
           <dd><input type="checkbox" name="use_skin" id="use_url" value="on" checked="checked" /></dd>
           <dt>&nbsp;</dt>
@@ -108,8 +120,7 @@
            might overwrite existing data if a file of the same name exists already.</p>
       </fieldset>
     </form>
-    
-    
+
     #(status)#
     ::<p><strong>Unable to get URL: #[url]#</strong></p>
     ::<p><strong>Error saving the skin.</strong></p>
