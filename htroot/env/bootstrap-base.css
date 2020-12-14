@@ -54,8 +54,8 @@ body {
 .nav-sidebar > li > a {
   padding-right: 10px;
   padding-left: 18px;
-  padding-top: 2px;
-  padding-bottom: 1px;
+  padding-top: 4px;
+  padding-bottom: 3px;
 }
 .nav-sidebar > li {
   padding: 0px;

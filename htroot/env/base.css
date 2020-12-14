@@ -57,6 +57,7 @@ h1 {
 }
 
 h2 {
+  margin-top:40px;
   font-size:1.6em;
   clear:left; /* The heading after the submenu has to be left again */
 }
@@ -504,8 +505,8 @@ form.search.small h2 {
 }
 
 li.menugroup h3 {
-	font-size: 1em;
-	margin: 0; padding: 1px 10px;
+  font-size: 1em;
+  margin: 0; padding: 1px 10px;
 }
 
 div.SubMenugroup h3 {
@@ -548,8 +549,8 @@ a.MenuItemLink {
   text-decoration:none;
   margin-top:1px;
   margin-bottom:1px;
-  padding:1px 10px 1px 15px;
-  font-size:1.0em;
+  padding:5px 10px 4px 15px;
+  font-size:1.1em;
 }
 
 a.MenuItemLink.lock {
@@ -644,12 +645,11 @@ ul.tagList {
   margin-left:0;
 }
 
-
-
 ul.menu, ul.SubMenu {
   clear:left;
   padding:0;
   margin:0;
+  margin-top:6px;
 }
 
 ul.menu li, ul.SubMenu li {
