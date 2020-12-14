@@ -16,9 +16,6 @@ port.ssl = 8443
 # port to listen for a shutdown signal ( -1 = disable use of a shutdown port, 8005 = recommended default )
 port.shutdown = -1
 
-# prefix for new default peer names
-peernameprefix=_anon
-
 # use UPnP [true/false]
 upnp.enabled = true
 # remote host on UPnP device (for more than one connection)

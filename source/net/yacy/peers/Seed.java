@@ -92,7 +92,7 @@ import net.yacy.utils.crypt;
 public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
 {
 
-    public static String ANON_PREFIX = "_anon";
+    public static String ANON_PREFIX = "agent";
 
     public static final int maxsize = 16000;
     /**
@@ -319,10 +319,17 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * @return
      */
     private static String defaultPeerName() {
-        return ANON_PREFIX
-            + OS.infoKey()
+        Random r = new Random(System.currentTimeMillis());
+        char[] n = new char[7];
+        for (int i = 0; i < 7; i++) {
+            n[i] = i % 2 == 1 ? "aeiou".charAt(r.nextInt(5)) : "bdfghklmnprst".charAt(r.nextInt(13));
+        }
+        return
+            ANON_PREFIX
             + "-"
-            + (System.currentTimeMillis() % 77777777L)
+            + new String(n)
+            + "-"
+            + OS.infoKey()
             + "-"
             + Network.speedKey;
     }

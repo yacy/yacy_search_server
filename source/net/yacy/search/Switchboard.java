@@ -340,9 +340,6 @@ public final class Switchboard extends serverSwitch {
         setLog(new ConcurrentLog("SWITCHBOARD"));
         AccessTracker.setDumpFile(new File(dataPath, "DATA/LOG/queries.log"));
 
-        // set default peer name
-        Seed.ANON_PREFIX = getConfig("peernameprefix", "_anon");
-
         // set timeoutrequests
         boolean timeoutrequests = getConfigBool("timeoutrequests", true);
         TimeoutRequest.enable = timeoutrequests;
