@@ -33,7 +33,7 @@ public class ClientIdentification {
 
     public static final int clientTimeoutInit = 10000;
     public static final int minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
-    public static final int minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
+    public static final int minimumGlobalDeltaInit = 250; // the minimum time difference between access of the same global domain
     
     public static class Agent {
         public final String userAgent;    // the name that is send in http request to identify the agent
