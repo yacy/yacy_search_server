@@ -399,7 +399,7 @@ public final class LoaderDispatcher {
         // load resource from the internet
         StreamResponse response;
         if (protocol.equals("http") || protocol.equals("https")) {
-        	response = this.httpLoader.openInputStream(request, crawlProfile, 1, maxFileSize, blacklistType, agent);
+        	response = this.httpLoader.openInputStream(request, crawlProfile, 2, maxFileSize, blacklistType, agent);
         } else if (protocol.equals("ftp")) {
         	response = this.ftpLoader.openInputStream(request, true);
         } else if (protocol.equals("smb")) {
