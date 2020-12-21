@@ -61,7 +61,7 @@ public class TransactionManager {
 	 * @throws NullPointerException
 	 *             when header parameter is null.
 	 */
-    private static String getCurrentUserName(final RequestHeader header) {
+    private static String getUserName(final RequestHeader header) {
         String userName = header.getRemoteUser();
         
 		if (userName == null && header.accessFromLocalhost() && Switchboard.getSwitchboard() != null) {
@@ -124,7 +124,7 @@ public class TransactionManager {
         }
         
         /* Check this comes from an authenticated user */
-        final String userName = getCurrentUserName(header);
+        final String userName = getUserName(header);
 		if (userName == null) {
 			throw new IllegalArgumentException("User is not authenticated");
 		}
@@ -152,23 +152,24 @@ public class TransactionManager {
      * @throws BadTransactionException when a condition for valid transaction is not met.
      */
 	public static void checkPostTransaction(final RequestHeader header, final serverObjects post) {
-        if (header == null || post == null) {
-        	throw new IllegalArgumentException("Missing required parameters.");
-        }
+        if (header == null)
+            throw new IllegalArgumentException("Missing required header parameters.");
         
-		if(!HeaderFramework.METHOD_POST.equals(header.getMethod())) {
+        if (header.accessFromLocalhost()) return; // this is one exception that we accept if basc authentication is gven
+        
+        if (post == null) // non-local requests must use POST parameters
+            throw new IllegalArgumentException("Missing required post parameters.");
+        
+		if (!HeaderFramework.METHOD_POST.equals(header.getMethod())) // non-local users must use POST protocol
 			throw new DisallowedMethodException("HTTP POST method is the only one authorized.");
-		}
 		
-        String userName = getCurrentUserName(header);
-		if (userName == null) {
+        String userName = getUserName(header);
+		if (userName == null)
 			throw new BadTransactionException("User is not authenticated.");
-		}
 		
 		final String transactionToken = post.get(TRANSACTION_TOKEN_PARAM);
-		if(transactionToken == null) {
+		if (transactionToken == null)
 			throw new TemplateMissingParameterException("Missing transaction token.");
-		}
 		
 		final String token = new HmacUtils(HmacAlgorithms.HMAC_SHA_1, SIGNING_KEY)
 				.hmacHex(TOKEN_SEED + userName + header.getPathInfo());

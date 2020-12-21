@@ -38,7 +38,7 @@ if [ -f "$YACY_DATA_PATH/yacy.running" ]; then
 	echo "YaCy server appears to be running. Calling the ConfigAccounts_p API..." 
 	# When the server is running we can not directly modify the yacy.conf file so we use the ConfigAccounts_p API.
 	# Otherwise the new password provided here could be overwritten by the server when it saves its in-memory configuration to the yacy.conf file 
-	(./apicall.sh "ConfigAccounts_p.html" "setAdmin=&adminuser=$YACY_ADMIN_USER_NAME&adminpw1=$YACY_ADMIN_PASSWORD&adminpw2=$YACY_ADMIN_PASSWORD&access=" && \
+	(./apicall.sh "ConfigAccounts_p.html?setAdmin=&adminuser=$YACY_ADMIN_USER_NAME&adminpw1=$YACY_ADMIN_PASSWORD&adminpw2=$YACY_ADMIN_PASSWORD&access=" > /dev/null && \
 	echo "Password successfully changed for User Name '$YACY_ADMIN_USER_NAME'.") || \
 	(echo "Password setting failed." && exit 1)
 else
