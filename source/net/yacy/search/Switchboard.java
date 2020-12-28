@@ -2418,7 +2418,13 @@ public final class Switchboard extends serverSwitch {
         }
         int count = 0;
         for ( final String s : surrogatelist ) {
-            if ( s.endsWith(".xml") ) {
+            if ( s.endsWith(".xml")
+                || s.endsWith(".xml.gz")
+                || s.endsWith(".xml.zip")
+                || s.endsWith(".warc")
+                || s.endsWith(".warc.gz")
+                || s.endsWith(".jsonlist")
+                || s.endsWith(".flatjson") ) {
                 count++;
             }
             if ( count >= 100 ) {
