@@ -38,13 +38,11 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.Properties;
-import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -735,30 +733,6 @@ public class serverSwitch {
 		if (f.exists())
 			return new FileReader(f);
 		throw new FileNotFoundException(f.toString());
-	}
-
-	private static Random pwGenerator = new Random();
-
-	/**
-	 * Generates a random password.
-	 * 
-	 * @return random password which is 20 characters long.
-	 */
-	public String genRandomPassword() {
-		return genRandomPassword(20);
-	}
-
-	/**
-	 * Generates a random password of a given length.
-	 * 
-	 * @param length
-	 *            length o password
-	 * @return password of given length
-	 */
-	public String genRandomPassword(final int length) {
-		byte[] bytes = new byte[length];
-		pwGenerator.nextBytes(bytes);
-		return Digest.encodeMD5Hex(bytes);
 	}
 
 	/**

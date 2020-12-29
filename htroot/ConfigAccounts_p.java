@@ -97,14 +97,7 @@ public class ConfigAccounts_p {
 
             if (inputerror == 0) {
                 if (localhostAccess) {
-
                     sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, true);
-                    // if an localhost access is configured, check if a local password is given
-                    // if not, set a random password
-                    if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty()) {
-                        // make a 'random' password
-                        env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "0000" + sb.genRandomPassword());
-                    }
                 } else {
                     sb.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false);
                     if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
