@@ -171,14 +171,13 @@ public final class yacy {
             } catch (IOException ex) { }
 
             // setting up logging
-			f = new File(dataHome, "DATA/LOG/");
-            mkdirsIfNeseccary(f);
 			f = new File(dataHome, "DATA/LOG/yacy.logging");
+            mkdirsIfNeseccary(f);
 			final File f0 = new File(appHome, "defaults/yacy.logging");
 			if (!f.exists() || f0.lastModified() > f.lastModified()) try {
 			    Files.copy(f0, f);
             } catch (final IOException e){
-                System.out.println("could not copy yacy.logging");
+                System.out.println("could not copy yacy.logging: " + e.getMessage());
             }
             try{
                 ConcurrentLog.configureLogging(dataHome, new File(dataHome, "DATA/LOG/yacy.logging"));
