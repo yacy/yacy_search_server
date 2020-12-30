@@ -21,24 +21,33 @@ cd yacy_search_server/docker
 ```
 
 Then according to the image type:
-* for ubuntu-based images:
+* `yacy/yacy_search_server:latest`: This image is based on latest stable official Debian stable [openjdk](https://hub.docker.com/_/openjdk/) 8 image provided by Docker. Embed Yacy compiled from latest git repository sources.
 
 ```
 docker build -t yacy/yacy_search_server:latest -f Dockerfile ../
 ```
 
-* To build the Alpine variant:
+* `yacy/yacy_search_server:aarch64-latest`: same as yacy/yacy_search_server:latest but based on 
 
 ```
-docker build -t yacy/yacy_search_server:alpine-latest -f Dockerfile.alpine ../
+docker build -t yacy/yacy_search_server:aarch64-latest -f Dockerfile.aarch64 ../
 ```
 
-## Image variants
 
-* `yacy/yacy_search_server:latest`: This image is based on latest stable official Debian stable [openjdk](https://hub.docker.com/_/openjdk/) 8 image provided by Docker. Embed Yacy compiled from latest git repository sources.
-* `yacy/yacy_search_server:latest-alpine`: This image is based on latest stable official Alpine Linux [openjdk](https://hub.docker.com/_/openjdk/) 8 image provided by Docker. Embed Yacy compiled from latest git repository sources.
 
-## Default admin account
+## Usage
+
+### Run the docker image
+
+
+```
+docker run -d --name yacy -p 8090:8090 -p 8443:8443 -v yacy_data:/opt/yacy_search_server/DATA --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server:latest
+```
+
+YaCy web interface is then exposed at http://[container_ip]:8090
+You can retrieve the container IP address with `docker inspect`.
+
+#### Default admin account
 
 * login: admin
 * password: yacy
@@ -46,49 +55,10 @@ docker build -t yacy/yacy_search_server:alpine-latest -f Dockerfile.alpine ../
 You should modify this default password with page /ConfigAccounts_p.html when exposing publicly your YaCy container.
 
 
-## Usage
-
-### First start
-
-#### Most basic
-
-    docker run yacy/yacy_search_server
-
-YaCy web interface is then exposed at http://[container_ip]:8090
-You can retrieve the container IP address with `docker inspect`.
-
-#### Easier to handle
-
-    docker run --name yacy -p 8090:8090 -p 8443:8443 --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server
-
-##### Options detail
-
-* --name: allow easier management of your container (without it, docker automatically generate a new name at each startup).
-* -p 8090:8090 -p 8443:8443: map host ports to YaCy container ports, allowing web interface access through the usual http://localhost:8090 and https://localhost:8443 (you can set a different mapping, for example -p 443:8443 if you prefer to use the default HTTPS port on your host)
-* --log-opt max-size: limit maximum docker log file size for this container
-* --log-opt max-file: limit number of docker rotated log files for this container
-
-Note: if you do not specify the log related options, when running a YaCy container 24hour a day with default log level, your Docker container log file will grow up to some giga bytes in a few days!
-
 #### Handle persistent data volume
 
-As configured in the Dockerfile, by default yacy data (in /opt/yacy_search_server/DATA) will persist after container stop or deletion, in a volume with an automatically generated id.
+As configured in the Dockerfile, by default yacy data (in /opt/yacy_search_server/DATA) will persist after container stop or deletion, in a volume named "yacy_data"
 
-But you may map a host directory to hold yacy data in container:
-
-    docker run -v [/your_host/data/directory]:/opt/yacy_search_server/DATA yacy/yacy_search_server
-
-Or just use a volume label to help identify it later
-
-    docker run -v yacy_volume:/opt/yacy_search_server/DATA yacy/yacy_search_server
-
-Note that you can list all docker volumes with:
-
-    docker volume ls
-
-#### Start as background process
-
-    docker run -d yacy/yacy_search_server
     
 ### HTTPS support
 
@@ -156,8 +126,6 @@ You can upgrade your YaCy container the Docker way with the following commands s
 Get latest Docker image:
 
     docker pull yacy/yacy_search_server:latest
-OR 
-    docker pull yacy/yacy_search_server:latest-alpine
 
 Create new container based on pulled image, using volume data from old container:
 
