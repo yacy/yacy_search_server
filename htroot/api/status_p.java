@@ -34,6 +34,7 @@ import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.io.ByteCount;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -66,8 +67,8 @@ public class status_p {
         prop.putNum("qpm", sb.peers.mySeed().getQPM());
         prop.putNum("wordCacheSize", segment.RWIBufferCount());
         prop.putNum("wordCacheMaxSize", cacheMaxSize);
-        
-		// memory usage and system attributes
+
+        // memory usage and system attributes
         prop.putNum("usedMemory", MemoryControl.used());
         prop.putNum("freeMemory", MemoryControl.free());
         prop.putNum("totalMemory", MemoryControl.total());
@@ -76,11 +77,11 @@ public class status_p {
         prop.putNum("freeDisk", sb.observer.getUsableSpace());
         prop.putNum("processors", WorkflowProcessor.availableCPU);
         prop.putNum("load", Memory.load());
-        
-		// proxy traffic
-		prop.put("trafficIn", ByteCount.getGlobalCount());
-		prop.put("trafficProxy", ByteCount.getAccountCount(ByteCount.PROXY));
-		prop.put("trafficCrawler", ByteCount.getAccountCount(ByteCount.CRAWLER));
+
+        // proxy traffic
+        prop.put("trafficIn", ByteCount.getGlobalCount());
+        prop.put("trafficProxy", ByteCount.getAccountCount(ByteCount.PROXY));
+        prop.put("trafficCrawler", ByteCount.getAccountCount(ByteCount.CRAWLER));
 
         // index size
         prop.putNum("urlpublictextSize", fulltext.collectionSize());
@@ -97,7 +98,8 @@ public class status_p {
         prop.putNum("loaderMax", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
 
         //local crawl queue
-        prop.putNum("localCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
+        BusyThread localCrawl = sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+        prop.putNum("localCrawlSize", localCrawl == null ? 0 : localCrawl.getJobCount());
         prop.put("localCrawlState", sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
 
         //global crawl queue
@@ -105,7 +107,8 @@ public class status_p {
         prop.put("limitCrawlState", STATE_RUNNING);
 
         //remote crawl queue
-        prop.putNum("remoteCrawlSize", sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) != null ? sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount() : 0);
+        BusyThread remoteCrawl = sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+        prop.putNum("remoteCrawlSize", remoteCrawl == null ? 0 : remoteCrawl.getJobCount());
         prop.put("remoteCrawlState", sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? STATE_PAUSED : STATE_RUNNING);
 
         //noload crawl queue
@@ -134,7 +137,7 @@ public class status_p {
         prop.put("crawlProfiles", count == 0 ? 0 : 1);
 
         prop.put("postprocessingRunning", CollectionConfiguration.postprocessingRunning ? 1 : 0);
-        
+
         boolean processCollection =  sb.index.fulltext().getDefaultConfiguration().contains(CollectionSchema.process_sxt) && (sb.index.connectedCitation() || sb.index.fulltext().useWebgraph());
         boolean processWebgraph =  sb.index.fulltext().getWebgraphConfiguration().contains(WebgraphSchema.process_sxt) && sb.index.fulltext().useWebgraph();
 
@@ -158,7 +161,7 @@ public class status_p {
         prop.put("postprocessingRemainingTime", remainingTime);
         prop.put("postprocessingRemainingTimeMinutes", (remainingTimeMinutes < 10 ? "0" : "") + Integer.toString(remainingTimeMinutes));
         prop.put("postprocessingRemainingTimeSeconds", (remainingTimeSeconds < 10 ? "0" : "") + Integer.toString(remainingTimeSeconds));
-        
+
         // return rewrite properties
         return prop;
     }
