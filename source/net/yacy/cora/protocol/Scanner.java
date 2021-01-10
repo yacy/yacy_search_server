@@ -56,6 +56,7 @@ public class Scanner {
     public static enum Protocol {http(80), https(443), ftp(21), smb(445);
         public int port;
         private Protocol(final int port) {this.port = port;}
+        public Protocol setPort(int port) {this.port = port; return this;}
     }
     public class Service implements Runnable {
         public Protocol protocol;
@@ -228,13 +229,13 @@ public class Scanner {
         this.threadPool.shutdown();
     }
 
-    public void addProtocols(final List<InetAddress> addresses, boolean http, boolean https, boolean ftp, boolean smb) {
-        if (http) addProtocol(Protocol.http, addresses);
-        if (https) addProtocol(Protocol.https, addresses);
+    public void addProtocols(final List<InetAddress> addresses, boolean http, int httpPort, boolean https, int httpsPort, boolean ftp, boolean smb) {
+        if (http) addProtocol(Protocol.http.setPort(httpPort), addresses);
+        if (https) addProtocol(Protocol.https.setPort(httpsPort), addresses);
         if (ftp) addProtocol(Protocol.ftp, addresses);
         if (smb) addProtocol(Protocol.smb, addresses);
     }
-    
+
     private void addProtocol(final Protocol protocol, final List<InetAddress> addresses) {
         for (final InetAddress i: addresses) {
             threadPool.execute(new Service(protocol, i));
@@ -294,7 +295,7 @@ public class Scanner {
         //try {System.out.println("192.168.1.91: " + ping(new MultiProtocolURI("smb://192.168.1.91/"), 1000));} catch (final MalformedURLException e) {}
         final Scanner scanner = new Scanner(100, 10);
         List<InetAddress> addresses = genlist(Domains.myIntranetIPs(), 20);
-        scanner.addProtocols(addresses, true, true, true, true);
+        scanner.addProtocols(addresses, true, 80, true, 443, true, true);
         scanner.terminate();
         for (final Service service: scanner.services().keySet()) {
             System.out.println(service.toString());
