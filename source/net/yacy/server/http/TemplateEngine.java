@@ -229,6 +229,15 @@ public final class TemplateEngine {
                     multi_key = keyStream.toByteArray(); //IMPORTANT: no prefix here
                     keyStream.reset(); //reset stream
 
+                    // read a separator character
+                    byte sep_char = -1;
+                    if (multi_key.length > 3 && multi_key[multi_key.length - 2] == '|') {
+                        sep_char = multi_key[multi_key.length - 1];
+                        byte[] a = new byte[multi_key.length - 2];
+                        System.arraycopy(multi_key, 0, a, 0, multi_key.length - 2);
+                        multi_key = a;
+                    }
+
                     //this needs multi_key without prefix
                     if (transferUntil(pis, keyStream, appendBytes(mOpen, slashChar, multi_key, mClose))){
                         bb = pis.read();
@@ -237,6 +246,24 @@ public final class TemplateEngine {
                         }
 
                         final byte[] text=keyStream.toByteArray(); //text between #{key}# an #{/key}#
+                        byte[] textsep = text;
+                        int p = text.length;
+                        if (sep_char != -1) {
+                            byte[] a = new byte[p + 1];
+                            System.arraycopy(text, 0, a, 0, p);
+                            // put the separator in front of a cr/lb
+                            if (p >= 2 && a[p - 1] < 32 && a[p - 2] < 32) { // cr and lf
+                                a[p] = a[p - 1];
+                                a[p - 1] = a[p - 2];
+                                a[p - 2] = sep_char;
+                            } else if (p >= 1 && a[p - 1] < 32) { // cr or lf
+                                a[p] = a[p - 1];
+                                a[p - 1] = sep_char;
+                            } else {
+                                a[p] = sep_char;
+                            }
+                            textsep = a;
+                        }
                         int num=0;
                         final String patternKey = getPatternKey(prefix, multi_key);
                         if(pattern.containsKey(patternKey) && !pattern.get(patternKey).isEmpty()){
@@ -254,7 +281,7 @@ public final class TemplateEngine {
                                  .append(ASCII.getBytes(Integer.toString(num)))
                                  .append(close_quotetagn);
                         for(int i=0;i < num;i++) {
-                            final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(text));
+                            final PushbackInputStream pis2 = new PushbackInputStream(new ByteArrayInputStream(sep_char != -1 && i < num -1 ? textsep : text));
                             //System.out.println("recursing with text(prefix="+ multi_key + "_" + i + "_" +"):"); //DEBUG
                             //System.out.println(text);
                             structure.append(writeTemplate(servletname, pis2, out, pattern, newPrefix(prefix,multi_key,i)));
