@@ -25,6 +25,7 @@
 package net.yacy.cora.protocol;
 
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
@@ -32,9 +33,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -53,10 +56,14 @@ import net.yacy.cora.protocol.http.HTTPClient;
 public class Scanner {
 
     public static enum Access {unknown, empty, granted, denied;}
-    public static enum Protocol {http(80), https(443), ftp(21), smb(445);
+    public static enum Protocol {http(80, true), https(443, true), ftp(21, true), smb(445, true);
         public int port;
-        private Protocol(final int port) {this.port = port;}
-        public Protocol setPort(int port) {this.port = port; return this;}
+        public boolean standard;
+        private Protocol(final int port, boolean standard) {this.port = port; this.standard = standard;}
+        public Protocol setPort(int port, boolean standard) {this.port = port; this.standard = standard; return this;}
+        public String portSuffix() {
+            return this.standard ? "" : ":" + this.port;
+        }
     }
     public class Service implements Runnable {
         public Protocol protocol;
@@ -106,7 +113,7 @@ public class Scanner {
         @Override
         public String toString() {
             try {
-                return new MultiProtocolURL(this.protocol.name() + "://" + this.inetAddress.getHostAddress() + "/").toNormalform(true);
+                return new MultiProtocolURL(this.protocol.name() + "://" + this.inetAddress.getHostAddress() + this.protocol.portSuffix() + "/").toNormalform(true);
             } catch (final MalformedURLException e) {
                 return "";
             }
@@ -230,13 +237,13 @@ public class Scanner {
     }
 
     public void addProtocols(final List<InetAddress> addresses, boolean http, int httpPort, boolean https, int httpsPort, boolean ftp, boolean smb) {
-        if (http) addProtocol(Protocol.http.setPort(httpPort), addresses);
-        if (https) addProtocol(Protocol.https.setPort(httpsPort), addresses);
+        if (http) addProtocol(Protocol.http.setPort(httpPort, httpPort == Protocol.http.port), addresses);
+        if (https) addProtocol(Protocol.https.setPort(httpsPort, httpsPort == Protocol.https.port), addresses);
         if (ftp) addProtocol(Protocol.ftp, addresses);
         if (smb) addProtocol(Protocol.smb, addresses);
     }
 
-    private void addProtocol(final Protocol protocol, final List<InetAddress> addresses) {
+    public void addProtocol(final Protocol protocol, final List<InetAddress> addresses) {
         for (final InetAddress i: addresses) {
             threadPool.execute(new Service(protocol, i));
         }
@@ -291,18 +298,50 @@ public class Scanner {
         return null;
     }
 
+    public static Set<String> scanForOtherYaCyInIntranet() {
+        final Set<InetAddress> in = Domains.myIPv4IntranetNonLocalhostIPs();
+        final List<InetAddress> myaddresses = genlist(in, 20);
+        myaddresses.removeAll(in);
+        final Scanner scanner = new Scanner(100, 1000);
+        scanner.addProtocol(Protocol.http.setPort(8090, false), myaddresses);
+        while (scanner.pending() > 0) try {Thread.sleep(1000);} catch (InterruptedException e1) {}
+        scanner.terminate();
+        final Set<String> urls = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        scanner.services().keySet().forEach(service -> {
+            String urlstub = service.toString();
+            boolean notMy = true;
+            for (InetAddress a: in) if (urlstub.indexOf(a.getHostAddress()) >= 0) notMy = false;
+            if (notMy) urls.add(urlstub);
+        });
+        return urls;
+    }
+
     public static void main(final String[] args) {
+        // boolean test = TimeoutRequest.ping("192.168.1.40", 8090, 10000);
+
         //try {System.out.println("192.168.1.91: " + ping(new MultiProtocolURI("smb://192.168.1.91/"), 1000));} catch (final MalformedURLException e) {}
-        final Scanner scanner = new Scanner(100, 10);
-        List<InetAddress> addresses = genlist(Domains.myIntranetIPs(), 20);
-        scanner.addProtocols(addresses, true, 80, true, 443, true, true);
+        System.out.println("collecting addresses");
+        Set<InetAddress> in = Domains.myIPv4IntranetNonLocalhostIPs();
+        System.out.println("found " + in.size() + " intranet addresses");
+        for (InetAddress a: in) System.out.println("intranet address:" + a.getHostAddress());
+        List<InetAddress> addresses = genlist(in, 20);
+        //for (InetAddress a: addresses) System.out.print(a.getHostAddress() + " ");
+        System.out.println();
+        System.out.println("scanner start with " + addresses.size() + " addresses");
+        long time = System.currentTimeMillis();
+        final Scanner scanner = new Scanner(100, 1000);
+        scanner.addProtocol(Protocol.http.setPort(8090, false), addresses);
+        while (scanner.pending() > 0) try {Thread.sleep(1000);} catch (InterruptedException e1) {}
         scanner.terminate();
         for (final Service service: scanner.services().keySet()) {
-            System.out.println(service.toString());
+            System.out.println("PING successful: " + service.toString());
         }
         try {
             HTTPClient.closeConnectionManager();
         } catch (final InterruptedException e) {
         }
+        time = System.currentTimeMillis() - time;
+        System.out.println("scanner terminated after " + time/1000 + " seconds, " + 1000 * addresses.size() / time + " addresses per second");
+        System.exit(0);
     }
 }

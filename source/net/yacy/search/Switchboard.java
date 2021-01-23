@@ -63,6 +63,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -133,6 +134,7 @@ import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.Scanner;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.protocol.http.ProxySettings;
@@ -302,6 +304,7 @@ public final class Switchboard extends serverSwitch {
     private Dispatcher dhtDispatcher;
     public LinkedBlockingQueue<String> trail; // connect infos from cytag servlet
     public SeedDB peers;
+    public Set<String> localpeers;
     public WorkTables tables;
     public Tray tray;
     private long lastStats = 0; // time when the last row was written to the stats table
@@ -626,6 +629,14 @@ public final class Switchboard extends serverSwitch {
                 partitionExponent,
                 false,
                 this.exceed134217727);
+        this.localpeers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        new OneTimeBusyThread("Switchboard.scanForOtherYaCyInIntranet") {
+            @Override
+            public boolean jobImpl() throws Exception {
+                Switchboard.this.localpeers.addAll(Scanner.scanForOtherYaCyInIntranet());
+                return true;
+            }
+        }.start();
 
         // load domainList
         try {

@@ -106,6 +106,7 @@ public class Domains {
     private static Set<InetAddress> publicIPv4HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
     private static Set<InetAddress> publicIPv6HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
     private static Set<String> localHostNames = new HashSet<String>(); // subset of myHostNames
+    private static Thread domaininit = null;
     static {
         localHostNames.add(LOCALHOST);
         try {
@@ -121,7 +122,7 @@ public class Domains {
         // if such a lookup blocks, it can cause that the static initiatializer does not finish fast
         // therefore we start the host name lookup as concurrent thread
         // meanwhile the host name is "127.0.0.1" which is not completely wrong
-        new Thread("Domains: init") {
+        domaininit = new Thread("Domains: init") {
             @Override
             public void run() {
                 // try to get local addresses from interfaces
@@ -188,7 +189,8 @@ public class Domains {
                     }
                 }
             }
-        }.start();
+        };
+        domaininit.start();
     }
     
     /**
@@ -1103,8 +1105,20 @@ public class Domains {
      * @return list of all intranet addresses
      */
     public static Set<InetAddress> myIntranetIPs() {
-        if (localHostAddresses.size() < 1) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
+        while (domaininit == null || domaininit.isAlive()) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         return localHostAddresses;
+    }
+    
+    public static Set<InetAddress> myIPv4IntranetIPs() {
+        Set<InetAddress> in = new HashSet<>();
+        for (InetAddress a: myIntranetIPs()) if (a instanceof Inet4Address) in.add(a);
+        return in;
+    }
+    
+    public static Set<InetAddress> myIPv4IntranetNonLocalhostIPs() {
+        Set<InetAddress> in = new HashSet<>();
+        for (InetAddress a: myIPv4IntranetIPs()) if (((Inet4Address) a).getAddress()[0] != 127) in.add(a);
+        return in;
     }
 
     /**

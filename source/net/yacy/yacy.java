@@ -62,7 +62,6 @@ import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.sorting.Array;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.TransactionManager;
 import net.yacy.data.Translator;
