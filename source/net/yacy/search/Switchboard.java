@@ -629,6 +629,8 @@ public final class Switchboard extends serverSwitch {
                 partitionExponent,
                 false,
                 this.exceed134217727);
+        String agent = getConfig(SwitchboardConstants.NETWORK_UNIT_AGENT, "");
+        if (!agent.isEmpty()) this.peers.setMyName(agent); // this can thus be set using the environment variable yacy.network.unit.agent
         this.localpeers = Collections.newSetFromMap(new ConcurrentHashMap<>());
         new OneTimeBusyThread("Switchboard.scanForOtherYaCyInIntranet") {
             @Override
@@ -3469,7 +3471,7 @@ public final class Switchboard extends serverSwitch {
                 condenser,
                 searchEvent,
                 sourceName,
-                getConfigBool(SwitchboardConstants.DHT_ENABLED, false),
+                getConfigBool(SwitchboardConstants.NETWORK_UNIT_DHT, false),
                 this.getConfigBool(SwitchboardConstants.PROXY_TRANSPARENT_PROXY, false) ? "http://127.0.0.1:" + sb.getConfigInt(SwitchboardConstants.SERVER_PORT, 8090) : null,
                 this.getConfig("crawler.http.acceptLanguage", null));
         final RSSFeed feed =
@@ -4123,7 +4125,7 @@ public final class Switchboard extends serverSwitch {
         if ( this.peers.noDHTActivity() ) {
             return "no DHT distribution: network too small";
         }
-        if ( !getConfigBool(SwitchboardConstants.DHT_ENABLED, true) ) {
+        if ( !getConfigBool(SwitchboardConstants.NETWORK_UNIT_DHT, true) ) {
             return "no DHT distribution: disabled by network.unit.dht";
         }
         if ( getConfig(SwitchboardConstants.INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false") ) {
