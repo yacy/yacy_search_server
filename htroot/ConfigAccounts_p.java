@@ -74,11 +74,11 @@ public class ConfigAccounts_p {
             final String pw2  = post.get("adminpw2", "");
             int inputerror=0;
             // may be overwritten if new password is given
-            if (user.length() > 0 && pw1.length() > 2 && pw1.equals(pw2)) {
+            if (user.length() > 0 && pw1.equals(pw2)) {
                 String oldusername = env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);
                 // check passed. set account:
                 // old: // env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
-                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "MD5:"+Digest.encodeMD5Hex(user + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":"+ pw1));
+                env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5,  sb.encodeDigestAuth(user, pw1));
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);
                 // make sure server accepts new credentials
                 Jetty9HttpServerImpl jhttpserver = (Jetty9HttpServerImpl)sb.getHttpServer();
@@ -210,7 +210,7 @@ public class ConfigAccounts_p {
                 if (!"".equals(pw1)) { //change only if set
                     // MD5 according to HTTP Digest RFC 2617 (3.2.2) name:realm:pwd (use seed.hash as realm)
                     // with prefix of encoding method (supported MD5: )
-                    mem.put(UserDB.Entry.MD5ENCODED_USERPWD_STRING, "MD5:"+Digest.encodeMD5Hex(username + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":"+pw1));
+                    mem.put(UserDB.Entry.MD5ENCODED_USERPWD_STRING, sb.encodeDigestAuth(username, pw1));
                 }
 
                 mem.put(UserDB.Entry.USER_FIRSTNAME, firstName);
@@ -238,11 +238,8 @@ public class ConfigAccounts_p {
 
                 if (entry != null) {
                     try{
-                        if (!"".equals(pw1)) {
-                            // with prefix of encoding method (supported MD5: )
-                            entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, "MD5:"+Digest.encodeMD5Hex(username+ ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":"+pw1));
-                        }
-
+                        // with prefix of encoding method (supported MD5: )
+                        entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, sb.encodeDigestAuth(username, pw1));
                         entry.setProperty(UserDB.Entry.USER_FIRSTNAME, firstName);
                         entry.setProperty(UserDB.Entry.USER_LASTNAME, lastName);
                         entry.setProperty(UserDB.Entry.USER_ADDRESS, address);

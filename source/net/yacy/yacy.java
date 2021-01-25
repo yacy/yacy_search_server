@@ -791,7 +791,7 @@ public final class yacy {
                                         } else {
                                             username = ss.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
                                         }
-                                        ss.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "MD5:" + Digest.encodeMD5Hex(username + ":" + ss.getConfig(SwitchboardConstants.ADMIN_REALM, "YaCy") + ":" + pwdtxt));
+                                        ss.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, sb.encodeDigestAuth(username, pwdtxt));
                                         System.out.println("Set property " + SwitchboardConstants.ADMIN_ACCOUNT_B64MD5 + " = " + ss.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
                                     }
                                 } else {

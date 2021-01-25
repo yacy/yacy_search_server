@@ -134,12 +134,12 @@ public class User{
                 prop.put("status", "1"); //password
 
                 if (entry.getMD5EncodedUserPwd().startsWith("MD5:") ?
-                        entry.getMD5EncodedUserPwd().equals("MD5:"+Digest.encodeMD5Hex(entry.getUserName() + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":" + post.get("oldpass", ""))) :
-                        entry.getMD5EncodedUserPwd().equals(Digest.encodeMD5Hex(entry.getUserName() + ":" + post.get("oldpass", "")))) {
+                        entry.getMD5EncodedUserPwd().equals(sb.encodeDigestAuth(entry.getUserName(), post.get("oldpass", ""))) :
+                        entry.getMD5EncodedUserPwd().equals(sb.encodeBasicAuth(entry.getUserName() , post.get("oldpass", "")))) {
                     if (post.get("newpass").equals(post.get("newpass2"))) {
                         if (!post.get("newpass", "").equals("")) {
                             try {
-                                entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, "MD5:" + Digest.encodeMD5Hex(entry.getUserName() + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":" + post.get("newpass", "")));
+                                entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, sb.encodeDigestAuth(entry.getUserName(), post.get("newpass", "")));
                                 prop.put("status_password", "0"); //changes
                             } catch (final Exception e) {
                                 ConcurrentLog.logException(e);

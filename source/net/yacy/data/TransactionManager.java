@@ -63,28 +63,36 @@ public class TransactionManager {
 	 */
     private static String getUserName(final RequestHeader header) {
         String userName = header.getRemoteUser();
-        
-		if (userName == null && header.accessFromLocalhost() && Switchboard.getSwitchboard() != null) {
-       	 	final String adminAccountUserName = Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
-       	 	final String adminAccountBase64MD5 = Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
-       	 	
-			if(Switchboard.getSwitchboard()
-				.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) {
-				/* Unauthenticated local access as administrator can be enabled */
-				userName = adminAccountUserName;
-			} else {
-		        /* authorization by encoded password, only for localhost access (used by bash scripts)*/
-		        String pass = Base64Order.standardCoder.encodeString(adminAccountUserName + ":" + adminAccountBase64MD5);
-		        
-		        /* get the authorization string from the header */
-		        final String realmProp = (header.get(RequestHeader.AUTHORIZATION, "")).trim();
-		        final String realmValue = realmProp.isEmpty() ? null : realmProp.substring(6); // take out "BASIC "
-		        
-		        if (pass.equals(realmValue)) { // assume realmValue as is in cfg
-		            userName = adminAccountUserName;
-		        }
-			}
-		}
+        Switchboard sb = Switchboard.getSwitchboard();
+
+        if (sb != null) {
+            final String adminAccountBase64MD5 = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
+            final String adminAccountUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+            if (adminAccountBase64MD5.equals(sb.emptyPasswordAdminAccount)) {
+                // admin users with empty passwords do not need to authentify, thus do not have
+                // this header present. We just consoder the name is "admin"
+                userName = adminAccountUserName;
+            }
+            
+    		if (userName == null && header.accessFromLocalhost()) {
+           	 	
+    			if (sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) {
+    				/* Unauthenticated local access as administrator can be enabled */
+    				userName = adminAccountUserName;
+    			} else {
+    		        /* authorization by encoded password, only for localhost access (used by bash scripts)*/
+    		        String pass = Base64Order.standardCoder.encodeString(adminAccountUserName + ":" + adminAccountBase64MD5);
+    		        
+    		        /* get the authorization string from the header */
+    		        final String realmProp = (header.get(RequestHeader.AUTHORIZATION, "")).trim();
+    		        final String realmValue = realmProp.isEmpty() ? null : realmProp.substring(6); // take out "BASIC "
+    		        
+    		        if (pass.equals(realmValue)) { // assume realmValue as is in cfg
+    		            userName = adminAccountUserName;
+    		        }
+    			}
+    		}
+        }
 		
 		return userName;
     }

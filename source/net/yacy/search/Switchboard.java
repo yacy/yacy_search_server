@@ -324,6 +324,7 @@ public final class Switchboard extends serverSwitch {
     private boolean startupAction = true; // this is set to false after the first event
     private static Switchboard sb;
     public HashMap<String, Object[]> crawlJobsStatus = new HashMap<String, Object[]>();
+    public String emptyPasswordAdminAccount;
 
     public Switchboard(final File dataPath, final File appPath, final String initPath, final String configPath) {
         super(dataPath, appPath, initPath, configPath);
@@ -455,6 +456,9 @@ public final class Switchboard extends serverSwitch {
                 ProbabilisticClassifier.initialize(Switchboard.this.classificationPath);
             }
         }.start();
+
+        // define the "non-password password"
+        emptyPasswordAdminAccount = encodeDigestAuth(getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,"admin"), "");
 
         // init the language detector
         this.log.config("Loading language profiles");
@@ -3980,6 +3984,8 @@ public final class Switchboard extends serverSwitch {
      * - access from localhost is granted and access comes from localhost: auth-level 3
      * - a password is configured and access comes from localhost and the realm-value
      *   of a http-authentify String is equal to the stored base64MD5: auth-level 3
+     * - an empty password is configured an access comes from anywhere: auth-level 3
+     *   This may be used in cluster installations where the cluster has an outside protection but inside is none needed.
      * - a password is configured and access comes with matching http-authentify: auth-level 4
      *
      * @param requestHeader
@@ -4004,6 +4010,11 @@ public final class Switchboard extends serverSwitch {
         if ( adminAccountBase64MD5.isEmpty() ) {
             adminAuthenticationLastAccess = System.currentTimeMillis();
             return 2; // no password stored; this should not happen for older peers
+        }
+
+        // authorization in case that administrators have stored an empty password; this authorizes all users as admin regardless of the give auth
+        if (adminAccountBase64MD5.equals(emptyPasswordAdminAccount)) {
+            return 3; // everyone is admin from everywhere
         }
 
         // authorization for localhost, only if flag is set to grant localhost access as admin
@@ -4081,6 +4092,14 @@ public final class Switchboard extends serverSwitch {
             }
         }
         return 1;
+    }
+
+    public String encodeDigestAuth(String user, String pw) {
+        return "MD5:" + Digest.encodeMD5Hex(user + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":" + pw);
+    }
+
+    public String encodeBasicAuth(String user, String pw) {
+        return Digest.encodeMD5Hex(user + ":" + pw);
     }
 
     /**

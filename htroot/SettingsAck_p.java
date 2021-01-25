@@ -91,7 +91,7 @@ public class SettingsAck_p {
                 return prop;
             }
             // check passed. set account:
-            env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "MD5:"+Digest.encodeMD5Hex(user + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":" + pw1));
+            env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, sb.encodeDigestAuth(user, pw1));
             env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, user);
             prop.put("info", "5");//admin account changed
             prop.putHTML("info_user", user);
