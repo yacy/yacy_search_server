@@ -135,10 +135,10 @@ network.unit.definition = defaults/yacy.network.freeworld.unit
 # This option is only valid if the network.unit.domain property is set to 'any'
 network.unit.domain.nocheck = false
 
-# in addition to non-dht networks a client may have its own agent name
-# this option is only used if the value is non-empty and network.unit.dht = false
-# that means it is not usable in YaCy p2p-configurations, only in private portal configurations
-network.unit.tenant.agent =
+# A client may have its own agent name. This name can be set by the user and is set to a random value
+# if not overwritten by the user. As an alternative, the name can be set with this property.
+# This option is only used if the value is non-empty.
+network.unit.agent =
 
 # Prefer https for in-protocol operations when available on remote peers
 # A distinct general setting is available to control whether https sould be used for remote search queries : remotesearch.https.preferred

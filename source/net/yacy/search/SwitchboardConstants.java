@@ -267,9 +267,9 @@ public final class SwitchboardConstants {
     /** Default value for the global HTTP Referrer policy delivered by meta tag */
     public static final String REFERRER_META_POLICY_DEFAULT = "origin-when-cross-origin";
 
-    
-    public static final String DHT_ENABLED                      = "network.unit.dht";
 
+    public static final String NETWORK_UNIT_DHT                 = "network.unit.dht";
+    public static final String NETWORK_UNIT_AGENT               = "network.unit.agent";
     public static final String REMOTESEARCH_MAXCOUNT_DEFAULT    = "network.unit.remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_DEFAULT     = "network.unit.remotesearch.maxtime";
     public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";

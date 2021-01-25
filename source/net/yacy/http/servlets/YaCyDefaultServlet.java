@@ -1039,7 +1039,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put("simpleheadernavbar", sb.getConfig("decoration.simpleheadernavbar", "navbar-default"));
                 
                 // add navigation keys to enable or disable menu items
-                templatePatterns.put("navigation-p2p", sb.getConfigBool(SwitchboardConstants.DHT_ENABLED, true) || !sb.isRobinsonMode() ? 1 : 0);
+                templatePatterns.put("navigation-p2p", sb.getConfigBool(SwitchboardConstants.NETWORK_UNIT_DHT, true) || !sb.isRobinsonMode() ? 1 : 0);
                 templatePatterns.put("navigation-p2p_authorized", authorized ? 1 : 0);
                 String submitted = sb.getConfig("server.servlets.submitted", "");
                 boolean crawler_enabled = true; /*
