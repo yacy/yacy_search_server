@@ -31,7 +31,7 @@
       var h;
       for (h = 0; h < a.length; h++) {
           var f = a[h];
-          if (f.href && f.href.endsWith("/style.css")) {
+          if (f.href && f.href.endsWith(".css")) {
               var g = f.href.replace(/(&|\?)rnd=\d+/, '');
               f.href = g + (g.match(/\?/) ? '&' : '?');
               f.href += 'rnd=' + (new Date().valueOf());
