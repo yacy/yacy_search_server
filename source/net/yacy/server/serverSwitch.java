@@ -58,9 +58,6 @@ import net.yacy.peers.Seed;
 import net.yacy.search.SwitchboardConstants;
 
 public class serverSwitch {
-    
-    /** Key of system property defining locally open http port */
-    public static final String LOCAL_PORT_SYSTEM_PROPERTY = "net.yacy.server.localPort";
 
     // configuration management
     private final File configFile;
@@ -132,6 +129,24 @@ public class serverSwitch {
         // this is necessary for migration, when new properties are attached
         initProps.putAll(this.configProps);
         this.configProps = initProps;
+
+        // Read system properties and set all variables that have a prefix "yacy.".
+        // This will make it possible that settings can be overwritten with environment variables.
+        // Do this i.e. with "export YACY_PORT=8091 && ./startYACY.sh"
+        for (Map.Entry<Object, Object> entry: System.getProperties().entrySet()) {
+            String yacykey = (String) entry.getKey();
+            if (yacykey.startsWith("YACY_")) {
+                key = yacykey.substring(5).toLowerCase().replace('_', '.');
+                if (this.configProps.containsKey(key)) this.configProps.put(key, (String) entry.getValue());
+            }
+        }
+        for (Map.Entry<String, String> entry: System.getenv().entrySet()) {
+            String yacykey = entry.getKey();
+            if (yacykey.startsWith("YACY_")) {
+                key = yacykey.substring(5).toLowerCase().replace('_', '.');
+                if (this.configProps.containsKey(key)) this.configProps.put(key, entry.getValue());
+            }
+        }
 
         // save result; this may initially create a config file after
         // initialization
@@ -222,40 +237,17 @@ public class serverSwitch {
 
         return getConfigInt(key, dflt);
     }
-    
-    /**
-     * @return local http server port or null if system property is not defined
-     */
-    public Integer getLocalPortSystemProperty() {
-        String systemDefinedPort = System.getProperty(LOCAL_PORT_SYSTEM_PROPERTY);
-        Integer localPort = null;
-        if(systemDefinedPort != null) {
-            try {
-                localPort = Integer.parseInt(systemDefinedPort);
-            } catch(NumberFormatException e) {
-                log.warn("System property " + LOCAL_PORT_SYSTEM_PROPERTY + " is not valid : it should be a integer.");
-            }
-        }
-        return localPort;
-    }
 
     /**
      * Wrapper for {@link #getConfigInt(String, int)} to have a more consistent
      * API.
      * 
-     * Default value 8090 will be used if no value is found in system properties and in configuration.
+     * Default value 8090 will be used if no value is found in configuration.
      * 
      * @return the local http port of this system
      * @see #getPublicPort(String, int)
      */
     public int getLocalPort() {
-
-        /* A system property "net.yacy.server.localPort" may override configuration 
-         * This is useful when running YaCy inside a container manager such as Heroku which decide which http port to use */
-        Integer localPort = getLocalPortSystemProperty();
-        if(localPort != null) {
-            return localPort;
-        }
         return getConfigInt(SwitchboardConstants.SERVER_PORT, 8090);
     }
 
