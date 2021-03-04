@@ -836,7 +836,7 @@ public class Domains {
 	final private static ExecutorService getByNameService = Executors
 			.newCachedThreadPool(new NamePrefixThreadFactory("InetAddress.getByName"));
 
-	final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(getByNameService);
+	final private static TimeLimiter timeLimiter = SimpleTimeLimiter.create(getByNameService);
 
     /**
      * strip off any parts of an url, address string (containing host/ip:port) or raw IPs/Hosts,
@@ -992,7 +992,7 @@ public class Domains {
                         public InetAddress call() throws Exception {
                             return InetAddress.getByName(host);
                         }
-                    }, 3000L, TimeUnit.MILLISECONDS, false);
+                    }, 3000L, TimeUnit.MILLISECONDS);
                     //ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
                 } catch (final UncheckedTimeoutException e) {
                 	// in case of a timeout - maybe cause of massive requests - do not fill NAME_CACHE_MISS

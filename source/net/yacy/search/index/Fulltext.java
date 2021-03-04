@@ -85,6 +85,8 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.lucene.util.Version;
+import org.apache.solr.core.SolrConfig;
+import org.apache.solr.schema.IndexSchema;
 
 public final class Fulltext {
 
@@ -150,7 +152,9 @@ public final class Fulltext {
         }
         
         EmbeddedInstance localCollectionInstance = new EmbeddedInstance(new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"), solrLocation, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
-        Version luceneVersion = localCollectionInstance.getDefaultCore().getSolrConfig().getLuceneVersion("luceneMatchVersion");
+        SolrConfig config = localCollectionInstance.getDefaultCore().getSolrConfig();
+        String versionValue = config.getVal(IndexSchema.LUCENE_MATCH_VERSION_PARAM, true);
+        Version luceneVersion = SolrConfig.parseLuceneVersionString(versionValue);
         String lvn = luceneVersion.major + "_" + luceneVersion.minor;
         ConcurrentLog.info("Fulltext", "using lucene version " + lvn);
         assert SOLR_PATH.endsWith(lvn) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", check defaults/solr/solrconfig.xml";
