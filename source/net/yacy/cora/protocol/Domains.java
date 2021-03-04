@@ -51,6 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -994,7 +995,7 @@ public class Domains {
                         }
                     }, 3000L, TimeUnit.MILLISECONDS);
                     //ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
-                } catch (final UncheckedTimeoutException e) {
+                } catch (final InterruptedException | TimeoutException e) {
                 	// in case of a timeout - maybe cause of massive requests - do not fill NAME_CACHE_MISS
                 	LOOKUP_SYNC.remove(host);
                     return null;
