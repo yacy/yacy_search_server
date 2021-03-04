@@ -365,7 +365,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             return SolrQueryResponse2SolrDocumentList(req, response);
         } finally {
             req.close();
-            SolrRequestInfo.clearRequestInfo();
         }
     }
 
