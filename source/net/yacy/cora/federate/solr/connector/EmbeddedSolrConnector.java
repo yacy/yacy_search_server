@@ -39,6 +39,7 @@ import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexableField;
 import org.apache.lucene.search.Query;
+import org.apache.lucene.search.TotalHits;
 import org.apache.lucene.util.BytesRef;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -232,7 +233,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         SolrDocumentList sdl = new SolrDocumentList();
         NamedList<?> nl = rsp.getValues();
         ResultContext resultContext = (ResultContext) nl.get("response");
-        DocList response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.getDocList();
+        DocList response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f, TotalHits.Relation.EQUAL_TO) : resultContext.getDocList();
         sdl.setNumFound(response == null ? 0 : response.matches());
         sdl.setStart(response == null ? 0 : response.offset());
         String originalName = Thread.currentThread().getName();
@@ -364,7 +365,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             return SolrQueryResponse2SolrDocumentList(req, response);
         } finally {
             req.close();
-            SolrRequestInfo.clearRequestInfo();
         }
     }
 
@@ -383,7 +383,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             NamedList<?> nl = rsp.getValues();
             ResultContext resultContext = (ResultContext) nl.get("response");
             if (resultContext == null) log.warn("DocListSearcher: no response for query '" + querystring + "'");
-            this.response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f) : resultContext.getDocList();
+            this.response = resultContext == null ? new DocSlice(0, 0, new int[0], new float[0], 0, 0.0f, TotalHits.Relation.EQUAL_TO) : resultContext.getDocList();
         }
         
         @Override
