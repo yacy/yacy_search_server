@@ -234,7 +234,7 @@ public final class SeedDB implements AlternativeDomainNames {
     }
 
     public void setMyName(final String name) {
-        this.mySeed.setName(name);
+        mySeed().setName(name);
     }
 
     @Override
@@ -259,12 +259,12 @@ public final class SeedDB implements AlternativeDomainNames {
 
     @Override
     public String myName() {
-        return this.mySeed.getName();
+        return mySeed().getName();
     }
 
     @Override
     public String myID() {
-        return this.mySeed.hash;
+        return mySeed().hash;
     }
 
     public synchronized void removeMySeed() {
