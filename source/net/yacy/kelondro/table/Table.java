@@ -238,7 +238,7 @@ public class Table implements Index, Iterable<Row.Entry> {
                     this.table = null;
                 }
             }
-            optimize();
+            //optimize();
 
             // open the file
             this.file = new BufferedRecords(new Records(tablefile, rowdef.objectsize), this.buffersize);

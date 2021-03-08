@@ -368,6 +368,8 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final Thread t = new Thread() {
             @Override
             public void run() {
+                // CPU-intensive tasks will be performed when accessing the solr index because there decompression of content happens
+                this.setPriority(Thread.MAX_PRIORITY);
                 try {
                     for (String querystring: querystrings) {
                         this.setName("AbstractSolrConnector:concurrentIDsByQueries(" + querystring + ")");
