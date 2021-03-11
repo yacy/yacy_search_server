@@ -1,6 +1,7 @@
 // Latency.java
 // ------------
-// (C) 2009 by Michael Peter Christen; mc@yacy.net
+// SPDX-FileCopyrightText: 2009 Michael Peter Christen <mc@yacy.net)>
+// SPDX-License-Identifier: GPL-2.0-or-later
 // first published 19.03.2009 on http://yacy.net
 //
 // $LastChangedDate$

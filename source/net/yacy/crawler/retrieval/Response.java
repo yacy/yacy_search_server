@@ -1,5 +1,7 @@
 // Response.java
-// (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// SPDX-FileCopyrightText: 2008 Michael Peter Christen <mc@yacy.net)> 
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Frankfurt a. M., Germany
 // first published 19.08.2008 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine

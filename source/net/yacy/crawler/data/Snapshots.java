@@ -1,6 +1,7 @@
 /**
  *  DocumentImage
- *  Copyright 2014 by Michael Peter Christen
+ *  SPDX-FileCopyrightText: 2014 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-License-Identifier: GPL-2.0-or-later
  *  First released 29.11.2014 at http://yacy.net
  *
  *  This library is free software; you can redistribute it and/or

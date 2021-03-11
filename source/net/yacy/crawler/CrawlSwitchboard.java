@@ -1,5 +1,7 @@
 // CrawlSwitchboard.java
-// (C) 2005, 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// SPDX-FileCopyrightText: 2005 2006 Michael Peter Christen <mc@yacy.net)> 
+// SPDX-License-Identifier: GPL-2.0-or-later 
+// Frankfurt a. M., Germany
 // first published 2005 on http://www.anomic.de
 //
 // This is a part of YaCy, a peer-to-peer based web search engine

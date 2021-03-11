@@ -1,5 +1,6 @@
 // CrawlQueues.java
-// (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// SPDX-FileCopyrightText: 2007 Michael Peter Christen <mc@yacy.net)>
+// SPDX-License-Identifier: GPL-2.0-or-later
 // first published 29.10.2007 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
