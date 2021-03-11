@@ -38,6 +38,7 @@ indexing performance.
 
 ## License
 
+This project is available as open source under the terms of the GPL 2.0 Or later. However, some elements are being licensed under GNU Lesser General Public License. For accurate information, please check individual files. As well as for accurate information regarding copyrights.
 The (GPLv2+) source code used to build YaCy is distributed with the package (in /source and /htroot).
 
 
