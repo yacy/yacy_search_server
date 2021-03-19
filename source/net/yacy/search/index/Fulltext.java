@@ -33,7 +33,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +43,15 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
+
+import org.apache.lucene.util.Version;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrException.ErrorCode;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.core.SolrConfig;
+import org.apache.solr.schema.IndexSchema;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
@@ -79,19 +87,10 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphConfiguration;
 import net.yacy.search.schema.WebgraphSchema;
 
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.SolrException.ErrorCode;
-import org.apache.lucene.util.Version;
-import org.apache.solr.core.SolrConfig;
-import org.apache.solr.schema.IndexSchema;
-
 public final class Fulltext {
 
     private static final String SOLR_PATH = "solr_8_8_1"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
-    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2", "solr_5_5", "solr_6_6"};
+//    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2", "solr_5_5", "solr_6_6"};
 
     // class objects
     private final File                    segmentPath;
@@ -573,13 +572,22 @@ public final class Fulltext {
         if (md == null) return null;
         return new DigestURL(md.url, ASCII.getBytes(urlHash));
     }
+    
+    /**
+     * check if a given document, identified by url hash as document id exists
+     * @param id the url hash and document id
+     * @return whether the documents exists
+     */
+    public boolean exists(final String id) {
+        return this.getDefaultConnector().exists(id);
+    }
 
     /**
      * get the load time of a resource.
      * @param urlHash
      * @return the time in milliseconds since epoch for the load time or -1 if the document does not exist
      */
-    public long getLoadTime(final String urlHash) throws IOException {
+    private long getLoadTime(final String urlHash) throws IOException {
         if (urlHash == null) return -1l;
         SolrConnector.LoadTimeURL md = this.getDefaultConnector().getLoadTimeURL(urlHash);
         if (md == null) return -1l;

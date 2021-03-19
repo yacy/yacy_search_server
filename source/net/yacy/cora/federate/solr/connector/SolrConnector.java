@@ -124,6 +124,13 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws IOException
      */
     public LoadTimeURL getLoadTimeURL(final String id) throws IOException;
+    
+    /**
+     * check if a given document, identified by url hash as document id exists
+     * @param id the url hash and document id
+     * @return whether the documents exists
+     */
+    public boolean exists(final String id);
 
     /**
      * add a solr input document

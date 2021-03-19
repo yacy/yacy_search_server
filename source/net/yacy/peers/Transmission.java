@@ -24,7 +24,6 @@
 
 package net.yacy.peers;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -175,15 +174,9 @@ public class Transmission {
             i = c.entries();
             while (i.hasNext()) {
                 final WordReference e = i.next();
-                try {
-                    if (Transmission.this.segment.fulltext().getLoadTime(ASCII.String(e.urlhash())) >= 0) {
-                        this.references.put(e.urlhash());
-                    } else {
-                        notFoundx.add(e.urlhash());
-                        this.badReferences.put(e.urlhash());
-                    }
-                } catch (IOException e1) {
-                    ConcurrentLog.logException(e1);
+                if (Transmission.this.segment.fulltext().exists(ASCII.String(e.urlhash()))) {
+                    this.references.put(e.urlhash());
+                } else {
                     notFoundx.add(e.urlhash());
                     this.badReferences.put(e.urlhash());
                 }
