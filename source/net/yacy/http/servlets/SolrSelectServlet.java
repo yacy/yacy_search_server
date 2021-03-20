@@ -182,10 +182,11 @@ public class SolrSelectServlet extends HttpServlet {
             } 
             mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(Math.min(mmsp.getInt(CommonParams.ROWS, CommonParams.ROWS_DEFAULT), (authenticated) ? 100000000 : 100))});
             boolean zeroDoc = mmsp.getInt(CommonParams.ROWS, CommonParams.ROWS_DEFAULT) < 1;
+            boolean multiDoc = mmsp.getInt(CommonParams.ROWS, CommonParams.ROWS_DEFAULT) > 1;
 
             // set ranking according to profile number if ranking attributes are not given in the request
             Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr);
-            if (!zeroDoc && !mmsp.getMap().containsKey(CommonParams.SORT) && !mmsp.getMap().containsKey(DisMaxParams.BQ) && !mmsp.getMap().containsKey(DisMaxParams.BF) && !mmsp.getMap().containsKey("boost")) {
+            if (multiDoc && !mmsp.getMap().containsKey(CommonParams.SORT) && !mmsp.getMap().containsKey(DisMaxParams.BQ) && !mmsp.getMap().containsKey(DisMaxParams.BF) && !mmsp.getMap().containsKey("boost")) {
                 if (!mmsp.getMap().containsKey("defType")) mmsp.getMap().put("defType", new String[]{"edismax"});        
                 String fq = ranking.getFilterQuery();
                 String bq = ranking.getBoostQuery();
@@ -243,16 +244,18 @@ public class SolrSelectServlet extends HttpServlet {
             if (connector == null) throw new ServletException("no core");
 
             // add default queryfield parameter according to local ranking config (or defaultfield)
-            if (ranking != null) { // ranking normally never null
-                final String qf = ranking.getQueryFields();
-                if (qf.length() > 4 && !mmsp.getMap().containsKey(DisMaxParams.QF)) { // make sure qf has content (else use df)
-                    MultiMapSolrParams.addParam(DisMaxParams.QF, qf, mmsp.getMap()); // add QF that we set to be best suited for our index
-                            // TODO: if every peer applies a decent QF itself, this can be reverted to getMap().put()
+            if (multiDoc) {
+                if (ranking != null) { // ranking normally never null
+                    final String qf = ranking.getQueryFields();
+                    if (qf.length() > 4 && !mmsp.getMap().containsKey(DisMaxParams.QF)) { // make sure qf has content (else use df)
+                        MultiMapSolrParams.addParam(DisMaxParams.QF, qf, mmsp.getMap()); // add QF that we set to be best suited for our index
+                                // TODO: if every peer applies a decent QF itself, this can be reverted to getMap().put()
+                    } else if(!mmsp.getMap().containsKey(CommonParams.DF)) {
+                        mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
+                    }
                 } else if(!mmsp.getMap().containsKey(CommonParams.DF)) {
                     mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
                 }
-            } else if(!mmsp.getMap().containsKey(CommonParams.DF)) {
-                mmsp.getMap().put(CommonParams.DF, new String[]{CollectionSchema.text_t.getSolrFieldName()});
             }
 
             // do the solr request, generate facets if we use a special YaCy format
