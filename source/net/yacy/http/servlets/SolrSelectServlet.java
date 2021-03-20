@@ -181,10 +181,11 @@ public class SolrSelectServlet extends HttpServlet {
                 mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(maximumRecords)}); // sru patch
             } 
             mmsp.getMap().put(CommonParams.ROWS, new String[]{Integer.toString(Math.min(mmsp.getInt(CommonParams.ROWS, CommonParams.ROWS_DEFAULT), (authenticated) ? 100000000 : 100))});
+            boolean zeroDoc = mmsp.getInt(CommonParams.ROWS, CommonParams.ROWS_DEFAULT) < 1;
 
             // set ranking according to profile number if ranking attributes are not given in the request
             Ranking ranking = sb.index.fulltext().getDefaultConfiguration().getRanking(profileNr);
-            if (!mmsp.getMap().containsKey(CommonParams.SORT) && !mmsp.getMap().containsKey(DisMaxParams.BQ) && !mmsp.getMap().containsKey(DisMaxParams.BF) && !mmsp.getMap().containsKey("boost")) {
+            if (!zeroDoc && !mmsp.getMap().containsKey(CommonParams.SORT) && !mmsp.getMap().containsKey(DisMaxParams.BQ) && !mmsp.getMap().containsKey(DisMaxParams.BF) && !mmsp.getMap().containsKey("boost")) {
                 if (!mmsp.getMap().containsKey("defType")) mmsp.getMap().put("defType", new String[]{"edismax"});        
                 String fq = ranking.getFilterQuery();
                 String bq = ranking.getBoostQuery();
@@ -208,7 +209,7 @@ public class SolrSelectServlet extends HttpServlet {
             }
 
             // if this is a call to YaCys special search formats, enhance the query with field assignments
-            if ((responseWriter instanceof YJsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) && "true".equals(mmsp.get("hl", "true"))) {
+            if (!zeroDoc && (responseWriter instanceof YJsonResponseWriter || responseWriter instanceof OpensearchResponseWriter) && "true".equals(mmsp.get("hl", "true"))) {
                 // add options for snippet generation
                 if (!mmsp.getMap().containsKey("hl.q")) mmsp.getMap().put("hl.q", new String[]{q});
                 if (!mmsp.getMap().containsKey("hl.fl")) mmsp.getMap().put("hl.fl", new String[]{CollectionSchema.description_txt.getSolrFieldName() + "," + CollectionSchema.h4_txt.getSolrFieldName() + "," + CollectionSchema.h3_txt.getSolrFieldName() + "," + CollectionSchema.h2_txt.getSolrFieldName() + "," + CollectionSchema.h1_txt.getSolrFieldName() + "," + CollectionSchema.text_t.getSolrFieldName()});
