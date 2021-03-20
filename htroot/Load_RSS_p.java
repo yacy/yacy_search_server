@@ -336,17 +336,13 @@ public class Load_RSS_p {
             
             final List<DigestURL> urlsToIndex = new ArrayList<DigestURL>();
             loop: for (final Map.Entry<String, DigestURL> entry: hash2UrlMap.entrySet()) {
-                try {
-                    final DigestURL messageUrl = entry.getValue();
-                    HarvestProcess harvestProcess = sb.urlExists(ASCII.String(messageUrl.hash()));
-                    if (harvestProcess != null) {
-                    	continue loop;
-                    }
-                    urlsToIndex.add(messageUrl);
-                    RSSLoader.indexTriggered.insertIfAbsent(messageUrl.hash(), new Date());
-                } catch (final IOException e) {
-                    ConcurrentLog.logException(e);
+                final DigestURL messageUrl = entry.getValue();
+                HarvestProcess harvestProcess = sb.getHarvestProcess(ASCII.String(messageUrl.hash()));
+                if (harvestProcess != null) {
+                	continue loop;
                 }
+                urlsToIndex.add(messageUrl);
+                RSSLoader.indexTriggered.insertIfAbsent(messageUrl.hash(), new Date());
             }
             
             sb.addToIndex(urlsToIndex, null, null, collections, true);
@@ -413,57 +409,48 @@ public class Load_RSS_p {
                 }
                 pubDate = item.getPubDate();
                 
-                HarvestProcess harvestProcess;
-                try {
-                 	if(link != null && StringUtils.isNotEmpty(item.getGuid())) {
-                   		harvestProcess = sb.urlExists(ASCII.String(link.hash()));
-                   		
-                       	prop.put("showitems_item_" + i + "_hasLink", true);
-                       	prop.putHTML("showitems_item_" + i + "_hasLink_link", link.toNormalform(true));
-                       	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(link.hash()) ? 1 : 0;
-                   		prop.put("showitems_item_" + i + "_state", state);
-                   		prop.put("showitems_item_" + i + "_indexable", state == 0);
-                        prop.put("showitems_item_" + i + "_indexable_count", i);
-                        prop.putHTML("showitems_item_" + i + "_indexable_inputValue", (link == enclosure ? CHECKBOX_MEDIA_ITEM_PREFIX : CHECKBOX_ITEM_PREFIX) + item.getGuid());
-                   	} else {
-                  		prop.put("showitems_item_" + i + "_state", 0);
-                   		prop.put("showitems_item_" + i + "_indexable", false);
-                       	prop.put("showitems_item_" + i + "_hasLink", false);
-                   	}
-                    prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
-                    prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
-                    prop.putHTML("showitems_item_" + i + "_description", item.getDescriptions().toString());
-                    prop.put("showitems_item_" + i + "_defaultMediaDesc", false);
-                    prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
-                    prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
-                    i++;
-                } catch (IOException e) {
-                    ConcurrentLog.logException(e);
-                }
+                if(link != null && StringUtils.isNotEmpty(item.getGuid())) {
+                    HarvestProcess harvestProcess = sb.getHarvestProcess(ASCII.String(link.hash()));
+               		
+                   	prop.put("showitems_item_" + i + "_hasLink", true);
+                   	prop.putHTML("showitems_item_" + i + "_hasLink_link", link.toNormalform(true));
+                   	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(link.hash()) ? 1 : 0;
+               		prop.put("showitems_item_" + i + "_state", state);
+               		prop.put("showitems_item_" + i + "_indexable", state == 0);
+                    prop.put("showitems_item_" + i + "_indexable_count", i);
+                    prop.putHTML("showitems_item_" + i + "_indexable_inputValue", (link == enclosure ? CHECKBOX_MEDIA_ITEM_PREFIX : CHECKBOX_ITEM_PREFIX) + item.getGuid());
+               	} else {
+              		prop.put("showitems_item_" + i + "_state", 0);
+               		prop.put("showitems_item_" + i + "_indexable", false);
+                   	prop.put("showitems_item_" + i + "_hasLink", false);
+               	}
+                prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
+                prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
+                prop.putHTML("showitems_item_" + i + "_description", item.getDescriptions().toString());
+                prop.put("showitems_item_" + i + "_defaultMediaDesc", false);
+                prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
+                prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
+                i++;
                     
-                try {
-                  	if(enclosure != null && enclosure != link && StringUtils.isNotEmpty(item.getGuid())) {
-                   		harvestProcess = sb.urlExists(ASCII.String(enclosure.hash()));
-                    		
-                       	prop.put("showitems_item_" + i + "_hasLink", true);
-                       	prop.putHTML("showitems_item_" + i + "_hasLink_link", enclosure.toNormalform(true));
-                       	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(enclosure.hash()) ? 1 : 0;
-                   		prop.put("showitems_item_" + i + "_state", state);
-                   		prop.put("showitems_item_" + i + "_indexable", state == 0);
-                        prop.put("showitems_item_" + i + "_indexable_count", i);
-                        prop.putHTML("showitems_item_" + i + "_indexable_inputValue", "media_" + item.getGuid());
-                        prop.putHTML("showitems_item_" + i + "_author", "");
-                        prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
-                        prop.putHTML("showitems_item_" + i + "_description", "");
-                        /* Description is already used for the main item link, use here a default one */
-                        prop.put("showitems_item_" + i + "_defaultMediaDesc", true);
-                        prop.putHTML("showitems_item_" + i + "_language", "");
-                        prop.putHTML("showitems_item_" + i + "_date", "");
-                        i++;
-                   	}
-                } catch (IOException e) {
-                    ConcurrentLog.logException(e);
-                }
+                if(enclosure != null && enclosure != link && StringUtils.isNotEmpty(item.getGuid())) {
+                    HarvestProcess harvestProcess = sb.getHarvestProcess(ASCII.String(enclosure.hash()));
+                		
+                   	prop.put("showitems_item_" + i + "_hasLink", true);
+                   	prop.putHTML("showitems_item_" + i + "_hasLink_link", enclosure.toNormalform(true));
+                   	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(enclosure.hash()) ? 1 : 0;
+               		prop.put("showitems_item_" + i + "_state", state);
+               		prop.put("showitems_item_" + i + "_indexable", state == 0);
+                    prop.put("showitems_item_" + i + "_indexable_count", i);
+                    prop.putHTML("showitems_item_" + i + "_indexable_inputValue", "media_" + item.getGuid());
+                    prop.putHTML("showitems_item_" + i + "_author", "");
+                    prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
+                    prop.putHTML("showitems_item_" + i + "_description", "");
+                    /* Description is already used for the main item link, use here a default one */
+                    prop.put("showitems_item_" + i + "_defaultMediaDesc", true);
+                    prop.putHTML("showitems_item_" + i + "_language", "");
+                    prop.putHTML("showitems_item_" + i + "_date", "");
+                    i++;
+               	}
             }
             prop.put("showitems_item", i);
             prop.put("showitems_num", i);

@@ -122,7 +122,6 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
-import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -1437,7 +1436,6 @@ public final class Switchboard extends serverSwitch {
                 i++;
             }
         } catch ( final NoSuchAlgorithmException e1 ) {
-            // TODO Auto-generated catch block
             ConcurrentLog.logException(e1);
         }
 
@@ -1906,9 +1904,8 @@ public final class Switchboard extends serverSwitch {
      * @param hash
      * @return if it exists, the name of the database is returned, if it not exists, null is returned
      */
-    public HarvestProcess urlExists(final String hash) throws IOException {
-        LoadTimeURL md = this.index.fulltext().getDefaultConnector().getLoadTimeURL(hash);
-        if (md != null && md.date >= 0) return HarvestProcess.LOADED;
+    public HarvestProcess getHarvestProcess(final String hash) {
+        if (this.index.fulltext().getDefaultConnector().exists(hash)) return HarvestProcess.LOADED;
         HarvestProcess hp = this.crawlQueues.exists(ASCII.getBytes(hash));
         if (hp != null) return hp;
         return null; // todo: can also be in error

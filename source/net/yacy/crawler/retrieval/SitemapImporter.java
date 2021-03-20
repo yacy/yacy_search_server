@@ -25,7 +25,6 @@
 
 package net.yacy.crawler.retrieval;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Date;
 
@@ -84,20 +83,15 @@ public class SitemapImporter extends Thread {
         // check if the url is known and needs to be recrawled
         Date lastMod = entry.lastmod(null);
         if (lastMod != null) {
-            HarvestProcess dbocc;
-            try {
-                dbocc = this.sb.urlExists(ASCII.String(nexturlhash));
-                if (dbocc != null && dbocc == HarvestProcess.LOADED) {
-                    // the url was already loaded. we need to check the date
-                    final URIMetadataNode oldEntry = this.sb.index.fulltext().getMetadata(nexturlhash);
-                    if (oldEntry != null) {
-                        final Date modDate = oldEntry.moddate();
-                        // check if modDate is null
-                        if (modDate.after(lastMod)) return;
-                    }
+            HarvestProcess dbocc = this.sb.getHarvestProcess(ASCII.String(nexturlhash));
+            if (dbocc != null && dbocc == HarvestProcess.LOADED) {
+                // the url was already loaded. we need to check the date
+                final URIMetadataNode oldEntry = this.sb.index.fulltext().getMetadata(nexturlhash);
+                if (oldEntry != null) {
+                    final Date modDate = oldEntry.moddate();
+                    // check if modDate is null
+                    if (modDate.after(lastMod)) return;
                 }
-            } catch (IOException e) {
-                ConcurrentLog.logException(e);
             }
         }
 

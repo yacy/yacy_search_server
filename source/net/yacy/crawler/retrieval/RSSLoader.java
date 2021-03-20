@@ -140,18 +140,13 @@ public class RSSLoader extends Thread {
         
         final List<DigestURL> list = new ArrayList<DigestURL>();
         for (final Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
-            HarvestProcess harvestProcess;
-            try {
-                harvestProcess = sb.urlExists(e.getKey());
-                if (harvestProcess != null) {
-                	continue;
-                }
-                list.add(e.getValue());
-                indexTriggered.insertIfAbsent(ASCII.getBytes(e.getKey()), new Date());
-                loadCount++;
-            } catch (IOException e1) {
-                ConcurrentLog.logException(e1);
+            HarvestProcess harvestProcess = sb.getHarvestProcess(e.getKey());
+            if (harvestProcess != null) {
+            	continue;
             }
+            list.add(e.getValue());
+            indexTriggered.insertIfAbsent(ASCII.getBytes(e.getKey()), new Date());
+            loadCount++;
         }
         sb.addToIndex(list, null, null, collections, true);
         // update info for loading
