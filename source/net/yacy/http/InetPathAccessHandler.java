@@ -24,8 +24,6 @@ package net.yacy.http;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.eclipse.jetty.http.pathmap.MappedResource;
 import org.eclipse.jetty.http.pathmap.PathMappings;
 import org.eclipse.jetty.http.pathmap.PathSpec;

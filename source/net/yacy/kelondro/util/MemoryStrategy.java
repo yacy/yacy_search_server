@@ -142,7 +142,7 @@ public abstract class MemoryStrategy {
         System.out.println("StandardMemoryStrategy   / memoryTotal : " + sms.total());
 
         MemoryStrategy gms = new GenerationMemoryStrategy();
-        System.out.println("GenerationMemoryStrategy / memoryFree  : " + sms.free());
-        System.out.println("GenerationMemoryStrategy / memoryTotal : " + sms.total());
+        System.out.println("GenerationMemoryStrategy / memoryFree  : " + gms.free());
+        System.out.println("GenerationMemoryStrategy / memoryTotal : " + gms.total());
     }
 }
