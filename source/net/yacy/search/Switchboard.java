@@ -97,6 +97,7 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.search.SyntaxError;
+import org.eclipse.jetty.http.DateParser;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -108,7 +109,9 @@ import com.google.common.io.Files;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.contentcontrol.SMWListSyncThread;
+import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
+import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.WordCache;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.encoding.ASCII;
@@ -121,6 +124,7 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.Ranking;
+import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
 import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
@@ -2199,6 +2203,7 @@ public final class Switchboard extends serverSwitch {
             // see https://github.com/yacy/yacy_grid_parser/blob/master/README.md
             FileInputStream fis = null;
             BufferedReader br = null;
+            VocabularyScraper scraper = new VocabularyScraper();
             try {
                 fis = new FileInputStream(infile);
                 InputStream is = new BufferedInputStream(fis);
@@ -2256,8 +2261,11 @@ public final class Switchboard extends serverSwitch {
                                 schema.add(surrogate, list);
                             }
                         } else {
-                            // patch yacy grid altered schema (yacy grid does not have IDs any more, but they can be re-computed here)
-                            if (key.equals("url_s")) {
+                            CollectionSchema ctype = null;
+                            try {ctype = CollectionSchema.valueOf(key);} catch (IllegalArgumentException e) {}
+                            if (key.equals("url_s") || key.equals("sku")) {
+                                ctype = CollectionSchema.sku;
+                                // patch yacy grid altered schema (yacy grid does not have IDs any more, but they can be re-computed here)
                                 DigestURL durl = new DigestURL(o.toString());
                                 String id = ASCII.String(durl.hash());
                                 surrogate.setField(CollectionSchema.sku.getSolrFieldName(), durl.toNormalform(true));
@@ -2267,11 +2275,29 @@ public final class Switchboard extends serverSwitch {
                                 DigestURL durl = new DigestURL(o.toString());
                                 String id = ASCII.String(durl.hash());
                                 surrogate.setField(CollectionSchema.referrer_id_s.getSolrFieldName(), id);
+                            } else if (ctype != null && ctype.getType() == SolrType.date) {
+                                // patch date into something that Solr can understand
+                                String d = o.toString(); // i.e. Wed Apr 01 02:00:00 CEST 2020
+                                Date dd = d == null || d.length() == 0 ? null : AbstractFormatter.parseAny(d);
+                                if (dd != null) surrogate.setField(ctype.getSolrFieldName(), ISO8601Formatter.FORMATTER.format(dd)); // solr dateTime is ISO8601 format
                             } else {
                                 surrogate.setField(key, o.toString());
                             }
                         }
                     }
+
+                    // enrich the surrogate
+                    final String id = (String) surrogate.getFieldValue(CollectionSchema.id.getSolrFieldName());
+                    final String text = (String) surrogate.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
+                    final DigestURL rootURL = new DigestURL((String) surrogate.getFieldValue(CollectionSchema.sku.getSolrFieldName()), ASCII.getBytes(id));
+                    if (text != null && text.length() > 0 && id != null ) {
+                        // run the tokenizer on the text to get vocabularies and synonyms
+                        final Tokenizer tokenizer = new Tokenizer(rootURL, text, LibraryProvider.dymLib, true, scraper);
+                        final Map<String, Set<String>> facets = Document.computeGenericFacets(tokenizer.tags());
+                        // overwrite the given vocabularies and synonyms with new computed ones
+                        Switchboard.this.index.fulltext().getDefaultConfiguration().enrich(surrogate, tokenizer.synonyms(), facets);
+                    }
+
                     Switchboard.this.index.putDocument(surrogate);
                 }
                 br.close();
