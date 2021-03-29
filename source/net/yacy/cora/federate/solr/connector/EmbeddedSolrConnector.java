@@ -30,11 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
-import net.yacy.cora.federate.solr.instance.SolrInstance;
-import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.search.schema.CollectionSchema;
-
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexableField;
@@ -57,7 +52,6 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.component.SearchHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrQueryRequestBase;
-import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.ResultContext;
 import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.FieldType;
@@ -70,6 +64,11 @@ import org.apache.solr.search.QueryResultKey;
 import org.apache.solr.search.SolrCache;
 import org.apache.solr.search.SolrIndexSearcher;
 import org.apache.solr.util.RefCounted;
+
+import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
+import net.yacy.cora.federate.solr.instance.SolrInstance;
+import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.search.schema.CollectionSchema;
 
 public class EmbeddedSolrConnector extends SolrServerConnector implements SolrConnector {
     
@@ -405,6 +404,22 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         	if (docListSearcher != null) docListSearcher.close();
         }
         return numFound;
+    }
+    
+    /**
+     * check if a given document, identified by url hash as document id exists
+     * @param id the url hash and document id
+     * @return whether the documents exists
+     */
+    @Override
+    public boolean exists(final String id) {
+        final String query = "{!cache=false raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id;
+        try (DocListSearcher docListSearcher = new DocListSearcher(query, null, 0, 0, CollectionSchema.id.getSolrFieldName())) {
+            return docListSearcher.response.matches() > 0l;
+        } catch (Throwable e) {
+            ConcurrentLog.logException(e);
+            return false;
+        }
     }
 
     /**

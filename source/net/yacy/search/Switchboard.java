@@ -126,7 +126,6 @@ import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.federate.solr.Ranking;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.federate.solr.connector.ShardSelection;
-import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.federate.solr.instance.EmbeddedInstance;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -1441,7 +1440,6 @@ public final class Switchboard extends serverSwitch {
                 i++;
             }
         } catch ( final NoSuchAlgorithmException e1 ) {
-            // TODO Auto-generated catch block
             ConcurrentLog.logException(e1);
         }
 
@@ -1910,9 +1908,8 @@ public final class Switchboard extends serverSwitch {
      * @param hash
      * @return if it exists, the name of the database is returned, if it not exists, null is returned
      */
-    public HarvestProcess urlExists(final String hash) throws IOException {
-        LoadTimeURL md = this.index.fulltext().getDefaultConnector().getLoadTimeURL(hash);
-        if (md != null && md.date >= 0) return HarvestProcess.LOADED;
+    public HarvestProcess getHarvestProcess(final String hash) {
+        if (this.index.fulltext().getDefaultConnector().exists(hash)) return HarvestProcess.LOADED;
         HarvestProcess hp = this.crawlQueues.exists(ASCII.getBytes(hash));
         if (hp != null) return hp;
         return null; // todo: can also be in error
@@ -3728,14 +3725,7 @@ public final class Switchboard extends serverSwitch {
         // we must wait here until the url has actually disappeared
         int t = 100;
         while (t-- > 0) {
-            try {
-                long lt = this.index.getLoadTime(ASCII.String(urlhash));
-                if (lt < 0) break;
-            } catch (IOException e) {
-                // if this fails, the url may still exist
-                // we should abandon the whole process
-                return "exist-test failed: " + e.getMessage();
-            }
+            if (!this.index.exists(ASCII.String(urlhash))) break;
             try {Thread.sleep(100);} catch (final InterruptedException e) {}
             ConcurrentLog.fine("Switchboard", "STACKURL: waiting for deletion, t=" + t);
             //if (t == 20) this.index.fulltext().commit(true);
@@ -3856,14 +3846,8 @@ public final class Switchboard extends serverSwitch {
         for (Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
             final String urlName = e.getValue().toNormalform(true);
             if (doublecheck) {
-                try {
-                    if (this.index.getLoadTime(e.getKey()) >= 0) {
-                        this.log.info("addToIndex: double " + urlName);
-                        continue;
-                    }
-                } catch (IOException ee) {
-                    // double check fail may mean that the url exist
-                    this.log.info("addToIndex: doublecheck failed for " + urlName + ": " + ee.getMessage());
+                if (this.index.exists(e.getKey())) {
+                    this.log.info("addToIndex: double " + urlName);
                     continue;
                 }
             }
@@ -3940,11 +3924,7 @@ public final class Switchboard extends serverSwitch {
         Map<String, DigestURL> urlmap = new HashMap<String, DigestURL>();
         for (DigestURL url: urls) urlmap.put(ASCII.String(url.hash()), url);
         for (Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
-            try {
-                if (this.index.getLoadTime(e.getKey()) >= 0) continue; // double
-            } catch (IOException ee) {
-                continue; // if the check fails, consider the url as double
-            }
+            if (this.index.exists(e.getKey())) continue; // double
             DigestURL url = e.getValue();
             final Request request = this.loader.request(url, true, true);
             final CrawlProfile profile = this.crawler.get(ASCII.getBytes(request.profileHandle()));

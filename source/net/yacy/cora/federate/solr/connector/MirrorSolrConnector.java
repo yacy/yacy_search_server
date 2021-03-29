@@ -409,6 +409,14 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr1 != null) s += this.solr1.getSize();
         return s;
     }
+    
+    @Override
+    public boolean exists(final String id) {
+        boolean result = false;
+        if (this.solr0 != null) result = result || this.solr0.exists(id);
+        if (this.solr1 != null) result = result || this.solr1.exists(id);
+        return result;
+    }
 
     @Override
     public LoadTimeURL getLoadTimeURL(String id) throws IOException {

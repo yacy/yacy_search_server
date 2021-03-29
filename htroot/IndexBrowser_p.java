@@ -136,8 +136,6 @@ public class IndexBrowser_p {
         prop.put("files", 0);
         prop.put("hostanalysis", 0);
 
-        String referer = header.get("Referer", "");
-
         String path = post == null ? "" : post.get("path", "").trim();
         sb.index.fulltext().commit(true);
         if (post == null || env == null) {
@@ -161,13 +159,8 @@ public class IndexBrowser_p {
 
         String load = post.get("load", "");
         boolean wait = false;
-        try {
-            if (loadRight && autoload && path.length() != 0 && pathURI != null && load.length() == 0 && sb.index.getLoadTime(ASCII.String(pathURI.hash())) < 0) {
-                // in case that the url does not exist and loading is wanted turn this request into a loading request
-                load = path;
-                wait = true;
-            }
-        } catch (IOException e1) {
+        if (loadRight && autoload && path.length() != 0 && pathURI != null && load.length() == 0 && !sb.index.exists(ASCII.String(pathURI.hash()))) {
+            // in case that the url does not exist and loading is wanted turn this request into a loading request
             load = path;
             wait = true;
         }
@@ -185,13 +178,8 @@ public class IndexBrowser_p {
                         sb.crawler.defaultProxyProfile.timezoneOffset()
                     ));
                 prop.putHTML("result", reasonString == null ? ("added url to indexer: " + load) : ("not indexed url '" + load + "': " + reasonString));
-                if (wait) waitloop: for (int i = 0; i < 30; i++) {
-                    try {
-                        if (sb.index.getLoadTime(ASCII.String(url.hash())) >= 0) break;
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                        break waitloop;
-                    }
+                if (wait) for (int i = 0; i < 30; i++) {
+                    if (sb.index.exists(ASCII.String(url.hash()))) break;
                     try {Thread.sleep(100);} catch (final InterruptedException e) {}
                 }
             } catch (final MalformedURLException e) {

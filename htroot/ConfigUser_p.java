@@ -20,7 +20,7 @@
 
 import java.util.EnumMap;
 import java.util.Map;
-import net.yacy.cora.order.Digest;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;

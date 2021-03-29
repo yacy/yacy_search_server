@@ -465,8 +465,10 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.setFacet(false);
         if (fields != null && fields.length > 0) params.setFields(fields);
         params.setIncludeScore(false);
-        params.setParam("defType", "edismax");
-        params.setParam(DisMaxParams.QF, CollectionSchema.text_t.getSolrFieldName() + "^1.0");
+        if (count > 1) {
+            params.setParam("defType", "edismax");
+            params.setParam(DisMaxParams.QF, CollectionSchema.text_t.getSolrFieldName() + "^1.0");
+        }
         return params;
     }
     
@@ -496,6 +498,22 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         SolrDocument doc = sdl.iterator().next();
         LoadTimeURL md = getLoadTimeURL(doc);
         return md;
+    }
+    
+    /**
+     * check if a given document, identified by url hash as document id exists
+     * @param id the url hash and document id
+     * @return whether the documents exists
+     */
+    @Override
+    public boolean exists(final String id) {
+        final String query = "{!cache=false raw f=" + CollectionSchema.id.getSolrFieldName() + "}" + id;
+        try {
+            return getCountByQuery(query) > 0l;
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
+            return false;
+        }
     }
     
     /**

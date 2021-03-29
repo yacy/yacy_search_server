@@ -26,8 +26,6 @@ package net.yacy.cora.sorting;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 
 
@@ -36,7 +34,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @author admin
  *
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Array {
 
     public static <A> void sort(final Sortable<A> x) {

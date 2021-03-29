@@ -27,7 +27,6 @@
 // javac -classpath .:../classes transferRWI.java
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -234,12 +233,7 @@ public final class transferRWI {
             }
             for (String id: testids) {
                 try {
-                    try {
-                        if (sb.index.fulltext().getLoadTime(id) < 0) {
-                            unknownURL.put(ASCII.getBytes(id));
-                        }
-                    } catch (IOException e) {
-                        ConcurrentLog.logException(e);
+                    if (!sb.index.fulltext().exists(id)) {
                         unknownURL.put(ASCII.getBytes(id));
                     }
                 } catch (final SpaceExceededException e) {

@@ -304,20 +304,20 @@ public class IndexControlRWIs_p {
                         Reference iEntry;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
-                            long loadTime = segment.fulltext().getLoadTime(ASCII.String(iEntry.urlhash()));
-                            if (loadTime < 0) {
+                            boolean exists = segment.fulltext().exists(ASCII.String(iEntry.urlhash()));
+                            if (exists) {
+                                try {
+                                    knownURLs.put(iEntry.urlhash());
+                                } catch (final SpaceExceededException e) {
+                                    ConcurrentLog.logException(e);
+                                }
+                            } else {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
                                 } catch (final SpaceExceededException e) {
                                     ConcurrentLog.logException(e);
                                 }
                                 urlIter.remove();
-                            } else {
-                                try {
-									knownURLs.put(iEntry.urlhash());
-								} catch (final SpaceExceededException e) {
-									ConcurrentLog.logException(e);
-								}
                             }
                         }
 

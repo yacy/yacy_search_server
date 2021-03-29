@@ -78,9 +78,6 @@ public class RemoteInstance implements SolrInstance {
 	/** Default maximum time in seconds to keep alive an idle connection in the pool */
 	private static final int DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE = 30;
 	
-	/** Default sleep time in seconds between each run of the connection evictor */
-	private static final int DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME = 5;
-	
 	/** Default total maximum number of connections in the pool */
 	private static final int DEFAULT_POOL_MAX_TOTAL = 100;
 	

@@ -55,6 +55,10 @@ import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import com.google.common.net.InetAddresses;
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.google.common.util.concurrent.TimeLimiter;
+
 import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.protocol.tld.GenericTLD;
 import net.yacy.cora.protocol.tld.InternationalizedCountryCodeTLD;
@@ -66,11 +70,6 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
-
-import com.google.common.net.InetAddresses;
-import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.google.common.util.concurrent.TimeLimiter;
-import com.google.common.util.concurrent.UncheckedTimeoutException;
 
 public class Domains {
     

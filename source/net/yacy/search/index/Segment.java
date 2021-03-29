@@ -397,14 +397,14 @@ public class Segment {
             return -1;
         }
     }
-
+    
     /**
-     * get the load time of a resource.
-     * @param urlhash the resource hash
-     * @return the time in milliseconds since epoch for the load time or -1 if the document does not exist
+     * check if a given document, identified by url hash as document id exists
+     * @param id the url hash and document id
+     * @return whether the documents exists
      */
-    public long getLoadTime(final String urlhash) throws IOException {
-        return this.fulltext.getLoadTime(urlhash);
+    public boolean exists(final String id) {
+        return this.fulltext.exists(id);
     }
 
     /**

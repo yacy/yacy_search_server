@@ -84,6 +84,9 @@
 	<classpathentry kind="lib" path="lib/lucene-queryparser-8.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-spatial-extras-8.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-suggest-8.8.1.jar"/>
+	<classpathentry kind="lib" path="lib/opentracing-api-0.33.0.jar"/>
+	<classpathentry kind="lib" path="lib/opentracing-noop-0.33.0.jar"/>
+	<classpathentry kind="lib" path="lib/opentracing-util-0.33.0.jar"/>
 	<classpathentry kind="lib" path="lib/metadata-extractor-2.11.0.jar"/>
 	<classpathentry kind="lib" path="lib/metrics-core-3.2.2.jar"/>
 	<classpathentry kind="lib" path="lib/metrics-jmx-4.1.5.jar"/>
