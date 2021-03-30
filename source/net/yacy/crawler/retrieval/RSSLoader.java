@@ -1,6 +1,8 @@
 /**
  *  RSSLoader
- *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
+ *  SPDX-FileCopyrightText: 2010 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-License-Identifier: GPL-2.0-or-later
+ *  Frankfurt a. M., Germany
  *  First released 27.8.2010 at http://yacy.net
  *
  * $LastChangedDate$

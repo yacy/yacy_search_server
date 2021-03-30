@@ -1,5 +1,7 @@
 // SMBLoader.java
-// (C) 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// SPDX-FileCopyrightText: 2010 Michael Peter Christen <mc@yacy.net)> 
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Frankfurt a. M., Germany
 // first published 10.03.2010 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based search engine

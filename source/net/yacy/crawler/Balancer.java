@@ -1,6 +1,8 @@
 /**
- *  Balancer
- *  Copyright 2014 by Michael Peter Christen, mc@yacy.net, Frankfurt am Main, Germany
+ *  Balancer 
+ *  SPDX-FileCopyrightText: 2014 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-License-Identifier: GPL-2.0-or-later 
+ *  Frankfurt am Main, Germany
  *  First released 14.04.2014 at http://yacy.net
  *
  *  This library is free software; you can redistribute it and/or

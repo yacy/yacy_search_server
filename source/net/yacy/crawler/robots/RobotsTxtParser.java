@@ -3,8 +3,9 @@
   -------------------------------------
   part of YACY
 
-  (C) 2005, 2006 by Alexander Schier
-                    Martin Thelian
+  SPDX-FileCopyrightText: 2005, 2006 Alexander Schier
+  SPDX-FileCopyrightText: 2005, 2006 Martin Thelian
+  SPDX-License-Identifier: GPL-2.0-or-later
 
   last change: $LastChangedDate$LastChangedBy: orbiter $
   Revision: $LastChangedRevision$

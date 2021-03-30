@@ -1,6 +1,7 @@
 /**
  *  FileLoader
- *  Copyright 2010 by Michael Peter Christen
+ *  SPDX-FileCopyrightText: 2010 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-License-Identifier: GPL-2.0-or-later
  *  First released 25.5.2010 at http://yacy.net
  *
  * $LastChangedDate$

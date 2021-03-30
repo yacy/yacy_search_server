@@ -1,6 +1,8 @@
 /**
  *  URLRewriterLibrary
- *  Copyright 2012 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+ *  SPDX-FileCopyrightText: 2012 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-License-Identifier: GPL-2.0-or-later
+ *  Frankfurt a. M., Germany
  *  first published 08.10.2012 on http://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
