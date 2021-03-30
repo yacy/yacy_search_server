@@ -24,7 +24,20 @@
 
 package net.yacy.document.parser.html;
 
+import net.yacy.search.Switchboard;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -44,171 +57,187 @@ public final class CharacterCoding {
 
     /** Special characters which have to be mapped for XML. */
     private static final String[] MAPPING4XML = {
-        "\"", "&quot;",      //quotation mark
-        "\u003C", "&lt;",    //less than
-        "\u003E", "&gt;",    //greater than
+            "\"", "&quot;",      //quotation mark
+            "\u003C", "&lt;",    //less than
+            "\u003E", "&gt;",    //greater than
     };
 
     /** Special characters which have to be mapped for HTML. */
     private static final String[] MAPPING4HTML = {
-        "\\",     "&#092;",  // Backslash
-        "\u005E", "&#094;",  // Caret
+            "\\",     "&#092;",  // Backslash
+            "\u005E", "&#094;",  // Caret
 
-        "\u0060", "&#096;",  // Accent Grave `
-        "\u007B", "&#123;",  // {
-        "\u007C", "&#124;",  // |
-        "\u007D", "&#125;",  // }
-        "\u007E", "&#126;",  // ~
+            "\u0060", "&#096;",  // Accent Grave `
+            "\u007B", "&#123;",  // {
+            "\u007C", "&#124;",  // |
+            "\u007D", "&#125;",  // }
+            "\u007E", "&#126;",  // ~
 
-        "\u0082", "&#130;",
-        "\u0083", "&#131;",
-        "\u0084", "&#132;",
-        "\u0085", "&#133;",
-        "\u0086", "&#134;",
-        "\u0087", "&#135;",
-        "\u0088", "&#136;",
-        "\u0089", "&#137;",
-        "\u008A", "&#138;",
-        "\u008B", "&#139;",
-        "\u008C", "&#140;",
-        "\u008D", "&#141;",
-        "\u008E", "&#142;",
+            "\u0082", "&#130;",
+            "\u0083", "&#131;",
+            "\u0084", "&#132;",
+            "\u0085", "&#133;",
+            "\u0086", "&#134;",
+            "\u0087", "&#135;",
+            "\u0088", "&#136;",
+            "\u0089", "&#137;",
+            "\u008A", "&#138;",
+            "\u008B", "&#139;",
+            "\u008C", "&#140;",
+            "\u008D", "&#141;",
+            "\u008E", "&#142;",
 
-        "\u0091", "&#145;",
-        "\u0092", "&#146;",
-        "\u0093", "&#147;",
-        "\u0094", "&#148;",
-        "\u0095", "&#149;",
-        "\u0096", "&#150;",
-        "\u0097", "&#151;",
-        "\u0098", "&#152;",
-        "\u0099", "&#153;",
-        "\u009A", "&#154;",
-        "\u009B", "&#155;",
-        "\u009C", "&#156;",
-        "\u009D", "&#157;",
-        "\u009E", "&#158;",
-        "\u009F", "&#159;",
+            "\u0091", "&#145;",
+            "\u0092", "&#146;",
+            "\u0093", "&#147;",
+            "\u0094", "&#148;",
+            "\u0095", "&#149;",
+            "\u0096", "&#150;",
+            "\u0097", "&#151;",
+            "\u0098", "&#152;",
+            "\u0099", "&#153;",
+            "\u009A", "&#154;",
+            "\u009B", "&#155;",
+            "\u009C", "&#156;",
+            "\u009D", "&#157;",
+            "\u009E", "&#158;",
+            "\u009F", "&#159;",
 
-        "\u00A1", "&iexcl;",    //inverted (spanish) exclamation mark
-        "\u00A2", "&cent;",     //cent
-        "\u00A3", "&pound;",    //pound
-        "\u00A4", "&curren;",   //currency
-        "\u00A5", "&yen;",      //yen
-        "\u00A6", "&brvbar;",   //broken vertical bar
-        "\u00A7", "&sect;",     //section sign
-        "\u00A8", "&uml;",      //diaeresis (umlaut)
-        "\u00A9", "&copy;",     //copyright sign
-        "\u00AA", "&ordf;",     //feminine ordinal indicator
-        "\u00AB", "&laquo;",    //left-pointing double angle quotation mark
-        "\u00AC", "&not;",      //not sign
-        "\u00AD", "&shy;",      //soft hyphen
-        "\u00AE", "&reg;",      //registered sign
-        "\u00AF", "&macr;",     //macron
-        "\u00B0", "&deg;",      //degree sign
-        "\u00B1", "&plusmn;",   //plus-minus sign
-        "\u00B2", "&sup2;",     //superscript two
-        "\u00B3", "&sup3;",     //superscript three
-        "\u00B4", "&acute;",    //acute accent
-        "\u00B5", "&micro;",    //micro sign
-        "\u00B6", "&para;",     //paragraph sign
-        "\u00B7", "&middot;",   //middle dot
-        "\u00B8", "&cedil;",    //cedilla
-        "\u00B9", "&sup1;",     //superscript one
-        "\u00BA", "&ordm;",     //masculine ordinal indicator
-        "\u00BB", "&raquo;",    //right-pointing double angle quotation mark
-        "\u00BC", "&frac14;",   //fraction 1/4
-        "\u00BD", "&frac12;",   //fraction 1/2
-        "\u00BE", "&frac34;",   //fraction 3/4
-        "\u00BF", "&iquest;",   //inverted (spanisch) questionmark
-        "\u00C0", "&Agrave;",
-        "\u00C1", "&Aacute;",
-        "\u00C2", "&Acirc;",
-        "\u00C3", "&Atilde;",
-        "\u00C4", "&Auml;",
-        "\u00C5", "&Aring;",
-        "\u00C6", "&AElig;",
-        "\u00C7", "&Ccedil;",
-        "\u00C8", "&Egrave;",
-        "\u00C9", "&Eacute;",
-        "\u00CA", "&Ecirc;",
-        "\u00CB", "&Euml;",
-        "\u00CC", "&Igrave;",
-        "\u00CD", "&Iacute;",
-        "\u00CE", "&Icirc;",
-        "\u00CF", "&Iuml;",
-        "\u00D0", "&ETH;",
-        "\u00D1", "&Ntilde;",
-        "\u00D2", "&Ograve;",
-        "\u00D3", "&Oacute;",
-        "\u00D4", "&Ocirc;",
-        "\u00D5", "&Otilde;",
-        "\u00D6", "&Ouml;",
-        "\u00D7", "&times;",
-        "\u00D8", "&Oslash;",
-        "\u00D9", "&Ugrave;",
-        "\u00DA", "&Uacute;",
-        "\u00DB", "&Ucirc;",
-        "\u00DC", "&Uuml;",
-        "\u00DD", "&Yacute;",
-        "\u00DE", "&THORN;",
-        "\u00DF", "&szlig;",
-        "\u00E0", "&agrave;",
-        "\u00E1", "&aacute;",
-        "\u00E2", "&acirc;",
-        "\u00E3", "&atilde;",
-        "\u00E4", "&auml;",
-        "\u00E5", "&aring;",
-        "\u00E6", "&aelig;",
-        "\u00E7", "&ccedil;",
-        "\u00E8", "&egrave;",
-        "\u00E9", "&eacute;",
-        "\u00EA", "&ecirc;",
-        "\u00EB", "&euml;",
-        "\u00EC", "&igrave;",
-        "\u00ED", "&iacute;",
-        "\u00EE", "&icirc;",
-        "\u00EF", "&iuml;",
-        "\u00F0", "&eth;",
-        "\u00F1", "&ntilde;",
-        "\u00F2", "&ograve;",
-        "\u00F3", "&oacute;",
-        "\u00F4", "&ocirc;",
-        "\u00F5", "&otilde;",
-        "\u00F6", "&ouml;",
-        "\u00F7", "&divide;",
-        "\u00F8", "&oslash;",
-        "\u00F9", "&ugrave;",
-        "\u00FA", "&uacute;",
-        "\u00FB", "&ucirc;",
-        "\u00FC", "&uuml;",
-        "\u00FD", "&yacute;",
-        "\u00FE", "&thorn;",
-        "\u00FF", "&yuml;"
+            "\u00A1", "&iexcl;",    //inverted (spanish) exclamation mark
+            "\u00A2", "&cent;",     //cent
+            "\u00A3", "&pound;",    //pound
+            "\u00A4", "&curren;",   //currency
+            "\u00A5", "&yen;",      //yen
+            "\u00A6", "&brvbar;",   //broken vertical bar
+            "\u00A7", "&sect;",     //section sign
+            "\u00A8", "&uml;",      //diaeresis (umlaut)
+            "\u00A9", "&copy;",     //copyright sign
+            "\u00AA", "&ordf;",     //feminine ordinal indicator
+            "\u00AB", "&laquo;",    //left-pointing double angle quotation mark
+            "\u00AC", "&not;",      //not sign
+            "\u00AD", "&shy;",      //soft hyphen
+            "\u00AE", "&reg;",      //registered sign
+            "\u00AF", "&macr;",     //macron
+            "\u00B0", "&deg;",      //degree sign
+            "\u00B1", "&plusmn;",   //plus-minus sign
+            "\u00B2", "&sup2;",     //superscript two
+            "\u00B3", "&sup3;",     //superscript three
+            "\u00B4", "&acute;",    //acute accent
+            "\u00B5", "&micro;",    //micro sign
+            "\u00B6", "&para;",     //paragraph sign
+            "\u00B7", "&middot;",   //middle dot
+            "\u00B8", "&cedil;",    //cedilla
+            "\u00B9", "&sup1;",     //superscript one
+            "\u00BA", "&ordm;",     //masculine ordinal indicator
+            "\u00BB", "&raquo;",    //right-pointing double angle quotation mark
+            "\u00BC", "&frac14;",   //fraction 1/4
+            "\u00BD", "&frac12;",   //fraction 1/2
+            "\u00BE", "&frac34;",   //fraction 3/4
+            "\u00BF", "&iquest;",   //inverted (spanisch) questionmark
+            "\u00C0", "&Agrave;",
+            "\u00C1", "&Aacute;",
+            "\u00C2", "&Acirc;",
+            "\u00C3", "&Atilde;",
+            "\u00C4", "&Auml;",
+            "\u00C5", "&Aring;",
+            "\u00C6", "&AElig;",
+            "\u00C7", "&Ccedil;",
+            "\u00C8", "&Egrave;",
+            "\u00C9", "&Eacute;",
+            "\u00CA", "&Ecirc;",
+            "\u00CB", "&Euml;",
+            "\u00CC", "&Igrave;",
+            "\u00CD", "&Iacute;",
+            "\u00CE", "&Icirc;",
+            "\u00CF", "&Iuml;",
+            "\u00D0", "&ETH;",
+            "\u00D1", "&Ntilde;",
+            "\u00D2", "&Ograve;",
+            "\u00D3", "&Oacute;",
+            "\u00D4", "&Ocirc;",
+            "\u00D5", "&Otilde;",
+            "\u00D6", "&Ouml;",
+            "\u00D7", "&times;",
+            "\u00D8", "&Oslash;",
+            "\u00D9", "&Ugrave;",
+            "\u00DA", "&Uacute;",
+            "\u00DB", "&Ucirc;",
+            "\u00DC", "&Uuml;",
+            "\u00DD", "&Yacute;",
+            "\u00DE", "&THORN;",
+            "\u00DF", "&szlig;",
+            "\u00E0", "&agrave;",
+            "\u00E1", "&aacute;",
+            "\u00E2", "&acirc;",
+            "\u00E3", "&atilde;",
+            "\u00E4", "&auml;",
+            "\u00E5", "&aring;",
+            "\u00E6", "&aelig;",
+            "\u00E7", "&ccedil;",
+            "\u00E8", "&egrave;",
+            "\u00E9", "&eacute;",
+            "\u00EA", "&ecirc;",
+            "\u00EB", "&euml;",
+            "\u00EC", "&igrave;",
+            "\u00ED", "&iacute;",
+            "\u00EE", "&icirc;",
+            "\u00EF", "&iuml;",
+            "\u00F0", "&eth;",
+            "\u00F1", "&ntilde;",
+            "\u00F2", "&ograve;",
+            "\u00F3", "&oacute;",
+            "\u00F4", "&ocirc;",
+            "\u00F5", "&otilde;",
+            "\u00F6", "&ouml;",
+            "\u00F7", "&divide;",
+            "\u00F8", "&oslash;",
+            "\u00F9", "&ugrave;",
+            "\u00FA", "&uacute;",
+            "\u00FB", "&ucirc;",
+            "\u00FC", "&uuml;",
+            "\u00FD", "&yacute;",
+            "\u00FE", "&thorn;",
+            "\u00FF", "&yuml;"
     };
 
     /** Mapping for XML to unicode. */
-    private static final Map<String, Character> HTML2UNICODE4XML =
-            new HashMap<String, Character>(MAPPING4XML.length * 2);
+    private static final Map<String, String> HTML2UNICODE4XML =
+            new HashMap<String, String>();
     /** Mapping for HTML to unicode. */
-    private static final Map<String, Character> HTML2UNICODE4HTML =
-            new HashMap<String, Character>(MAPPING4HTML.length * 2);
+    private static final Map<String, String> HTML2UNICODE4HTML =
+            new HashMap<String, String>();
     /** Mapping for unicode to XML. */
     private static final Map<Character, String> UNICODE2HTML4XML =
             new HashMap<Character, String>(MAPPING4XML.length * 2);
     /** Mapping for unicode to HTML. */
     private static final Map<Character, String> UNICODE2HTML4HTML =
-            new HashMap<Character, String>(MAPPING4HTML.length * 2);
+            new HashMap<Character, String>(MAPPING4XML.length * 2);
+
+    static void parseJsonEntities(JSONObject entities, Map<String, String> entityToChar) throws JSONException {
+        for (Iterator<String> it = entities.keys(); it.hasNext(); ) {
+            String entity = it.next();
+            String c = entities.getJSONObject(entity).getString("characters");
+            entityToChar.put(entity, c);
+        }
+    }
+
     static {
+        try {
+            byte[] encoded = Files.readAllBytes(Paths.get(Switchboard.getSwitchboard() != null ? Switchboard.getSwitchboard().appPath.getAbsolutePath() : ".", "defaults", "htmlEntities.json"));
+            JSONObject json = new JSONObject(new String(encoded, StandardCharsets.UTF_8));
+            parseJsonEntities(json.getJSONObject("xml"), HTML2UNICODE4XML);
+            parseJsonEntities(json.getJSONObject("html4"), HTML2UNICODE4HTML);
+            parseJsonEntities(json.getJSONObject("html5"), HTML2UNICODE4HTML);
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+        }
         Character c;
         for (int i = 0; i < MAPPING4HTML.length; i += 2) {
-            c = Character.valueOf(MAPPING4HTML[i].charAt(0));
-            HTML2UNICODE4HTML.put(MAPPING4HTML[i + 1], c);
+            c = MAPPING4HTML[i].charAt(0);
             UNICODE2HTML4HTML.put(c, MAPPING4HTML[i + 1]);
         }
         for (int i = 0; i < MAPPING4XML.length; i += 2) {
-            c = Character.valueOf(MAPPING4XML[i].charAt(0));
-            HTML2UNICODE4XML.put(MAPPING4XML[i + 1], c);
+            c = MAPPING4XML[i].charAt(0);
             UNICODE2HTML4XML.put(c, MAPPING4XML[i + 1]);
         }
     }
@@ -220,7 +249,6 @@ public final class CharacterCoding {
 
     /**
      * Replaces characters which have special representation in XML.
-     * @see #MAPPING4XML
      * @param text text with character to replace
      * @param amp true if ampersands shall be replaced, else false
      * @return text with replaced characters
@@ -231,7 +259,6 @@ public final class CharacterCoding {
 
     /**
      * Replaces characters which have special representation in HTML.
-     * @see #MAPPING4HTML
      * @param text text with character to replace
      * @param amp true if ampersands shall be replaced, else false
      * @return text with replaced characters
@@ -246,7 +273,7 @@ public final class CharacterCoding {
      * @param amp true if ampersands shall be replaced, else false
      * @param html true if characters shall be replaced for embedding in
      * HTML, false for XML (far more characters are replaced for HTML,
-     * compare {@link #MAPPING4HTML} with {@link #MAPPING4XML}
+     * see defaults/htmlEntities.json
      * @return text with replaced characters
      */
     private static String unicode2html(
@@ -291,7 +318,7 @@ public final class CharacterCoding {
         int p = 0, p1, q;
         final StringBuilder sb = new StringBuilder(text.length());
         String s;
-        Character r;
+        String r;
         while (p < text.length()) {
             p1 = text.indexOf('&', p);
             if (p1 < 0) {
@@ -328,7 +355,7 @@ public final class CharacterCoding {
                 continue;
             }
             if ((r = HTML2UNICODE4XML.get(s)) != null) {
-                sb.append(r.charValue());
+                sb.append(r);
                 continue;
             }
             if ((r = HTML2UNICODE4HTML.get(s)) != null) {

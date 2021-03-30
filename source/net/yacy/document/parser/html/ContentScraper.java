@@ -769,18 +769,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String content = tag.opts.getProperty("content", EMPTY_STRING);
             String name = tag.opts.getProperty("name", EMPTY_STRING);
             if (name.length() > 0) {
-                this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
+                this.metas.put(name.toLowerCase(), content);
                 if (name.toLowerCase().equals("generator")) {
                     this.evaluationScores.match(Element.metagenerator, content);
                 }
             }
             name = tag.opts.getProperty("http-equiv", EMPTY_STRING);
             if (name.length() > 0) {
-                this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
+                this.metas.put(name.toLowerCase(), content);
             }
             name = tag.opts.getProperty("property", EMPTY_STRING);
             if (name.length() > 0) {
-                this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
+                this.metas.put(name.toLowerCase(), content);
             }
         } else if (tag.name.equalsIgnoreCase("area")) {
             final String areatitle = cleanLine(tag.opts.getProperty("title", EMPTY_STRING));
@@ -904,7 +904,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // System.out.println("ScrapeTag1: tag.tagname=" + tag.tagname + ", opts=" + tag.opts.toString() + ", text=" + UTF8.String(text));
         if (tag.name.equalsIgnoreCase("a") && tag.content.length() < 2048) {
             String href = tag.opts.getProperty("href", EMPTY_STRING);
-            href = CharacterCoding.html2unicode(href);
             AnchorURL url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
                 if (followDenied()) {
