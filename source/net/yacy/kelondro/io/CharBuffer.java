@@ -32,6 +32,7 @@ import java.io.Writer;
 import java.util.Properties;
 
 import net.yacy.cora.document.encoding.UTF8;
+import net.yacy.document.parser.html.CharacterCoding;
 
 public final class CharBuffer extends Writer {
 
@@ -444,6 +445,7 @@ public final class CharBuffer extends Writer {
             while ((pos < this.length) && (this.buffer[pos] <= 32)) pos++;
             // doublequotes are obligatory. However, we want to be fuzzy if they
             // are ommittet
+            String value = null;
             if (pos >= this.length) {
                 // error case: input ended too early
                 break;
@@ -453,7 +455,7 @@ public final class CharBuffer extends Writer {
                 start = pos;
                 while ((pos < this.length) && (this.buffer[pos] != doublequote)) pos++;
                 if (pos >= this.length) break; // this is the case if we found no parent doublequote
-                p.setProperty(key, new String(this.buffer, start, pos - start).trim());
+                value = new String(this.buffer, start, pos - start).trim();
                 pos++;
             } else if (this.buffer[pos] == singlequote) {
                 // search next singlequote
@@ -461,14 +463,15 @@ public final class CharBuffer extends Writer {
                 start = pos;
                 while ((pos < this.length) && (this.buffer[pos] != singlequote)) pos++;
                 if (pos >= this.length) break; // this is the case if we found no parent singlequote
-                p.setProperty(key, new String(this.buffer, start, pos - start).trim());
+                value = new String(this.buffer, start, pos - start).trim();
                 pos++;
             } else {
                 // search next whitespace
                 start = pos;
                 while ((pos < this.length) && (this.buffer[pos] > 32)) pos++;
-                p.setProperty(key, new String(this.buffer, start, pos - start).trim());
+                value = new String(this.buffer, start, pos - start).trim();
             }
+            p.setProperty(key, CharacterCoding.html2unicode(value));
             // pos should point now to a whitespace: eat up spaces
             while ((pos < this.length) && (this.buffer[pos] <= 32)) pos++;
             // go on with next loop
