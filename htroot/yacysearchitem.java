@@ -437,7 +437,7 @@ public class yacysearchitem {
             boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
             boolean stealthmode = p2pmode && theSearch.query.isLocal();
             if ((sb.getConfigBool(SwitchboardConstants.HEURISTIC_SEARCHRESULTS, false) ||
-                (sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) && sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ENABLED, false) && Memory.load() < 1.0)) &&
+                (sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ACTIVE, false) && sb.getConfigBool(SwitchboardConstants.GREEDYLEARNING_ENABLED, false) && Memory.getSystemLoadAverage() < 1.0)) &&
                 !stealthmode) sb.heuristicSearchResults(result);
             theSearch.query.transmitcount = item + 1;
             return prop;

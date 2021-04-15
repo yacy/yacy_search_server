@@ -112,6 +112,7 @@
 	<classpathentry kind="lib" path="libt/hamcrest-library-2.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-collections4-4.4.jar"/>
 	<classpathentry kind="lib" path="lib/guava-25.1-jre.jar"/>
+	<classpathentry kind="lib" path="lib/hazelcast-4.2.jar"/>
 	<classpathentry kind="src" path="htroot/api/blacklists"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>

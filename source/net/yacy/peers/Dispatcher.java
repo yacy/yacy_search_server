@@ -367,7 +367,7 @@ public class Dispatcher implements WorkflowTask<Transmission.Chunk> {
         while (Protocol.metadataRetrievalRunning.get() > 0) try {Thread.sleep(1000);} catch (InterruptedException e) {break;}
         
         // we must test this here again
-        while (Memory.load() > this.env.getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f)) try {Thread.sleep(10000);} catch (InterruptedException e) {break;}
+        while (Memory.getSystemLoadAverage() > this.env.getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f)) try {Thread.sleep(10000);} catch (InterruptedException e) {break;}
         
         // do the transmission
         final boolean success = chunk.transmit();

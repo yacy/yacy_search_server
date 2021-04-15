@@ -17,7 +17,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.net.UnknownHostException;
+import java.util.Collection;
+import java.util.Map;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.hazelcast.cluster.Member;
+import com.hazelcast.core.HazelcastInstance;
+
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.util.Memory;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -28,14 +40,50 @@ public class localpeers {
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         int c = 0;
-        for (String urlstub: Switchboard.getSwitchboard().localpeers) {
-            prop.putJSON("peers_" + c + "_urlstub", urlstub);
+        for (String urlstub: Switchboard.getSwitchboard().localcluster_scan) {
+            prop.putJSON("peers_" + c + "_urlstub", urlstub); // a usrlstub is a full url with protocol, host and port up the the path start including first "/"
             c++;
         }
         prop.put("peers", c);
-
+        try {
+            prop.put("status", systemStatus().toString(2));
+        } catch (JSONException e) {
+            prop.put("status", "");
+        }
         // return rewrite properties
         return prop;
     }
 
+    public static JSONObject systemStatus() throws JSONException {
+
+        // generate json
+        JSONObject systemStatus = new JSONObject(true);
+        Memory.status().forEach((k, v) -> {try {systemStatus.put(k, v);} catch (JSONException e) {}});
+        JSONArray members = new JSONArray();
+        HazelcastInstance hi = Switchboard.getSwitchboard().localcluster_hazelcast;
+        String uuid = hi.getCluster().getLocalMember().getUuid().toString();
+        hi.getMap("status").put(uuid, Memory.status());
+        for (Member member: hi.getCluster().getMembers()) {
+            JSONObject m = new JSONObject(true);
+            uuid = member.getUuid().toString();
+            m.put("uuid", uuid);
+            m.put("host", member.getAddress().getHost());
+            try {m.put("ip", member.getAddress().getInetAddress().getHostAddress());} catch (JSONException | UnknownHostException e) {}
+            m.put("port", member.getAddress().getPort());
+            m.put("isLite", member.isLiteMember());
+            m.put("isLocal", member.localMember());
+            @SuppressWarnings("unchecked")
+            Map<String, Object> status = (Map<String, Object>) hi.getMap("status").get(uuid);
+            m.put("status", status);
+            members.put(m);
+        }
+        systemStatus.put("hazelcast_cluster_name", hi.getConfig().getClusterName());
+        systemStatus.put("hazelcast_instance_name", hi.getConfig().getInstanceName());
+        Collection<String> interfaces = hi.getConfig().getNetworkConfig().getInterfaces().getInterfaces();
+        systemStatus.put("hazelcast_interfaces", interfaces);
+        systemStatus.put("hazelcast_members", members);
+        systemStatus.put("hazelcast_members_count", members.length());
+
+        return systemStatus;
+    }
 }

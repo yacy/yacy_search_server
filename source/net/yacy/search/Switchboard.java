@@ -107,6 +107,12 @@ import org.json.JSONTokener;
 import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;
 import com.google.common.io.Files;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.InterfacesConfig;
+import com.hazelcast.config.JoinConfig;
+import com.hazelcast.config.NetworkConfig;
+import com.hazelcast.core.Hazelcast;
+import com.hazelcast.core.HazelcastInstance;
 
 import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.contentcontrol.SMWListSyncThread;
@@ -309,7 +315,8 @@ public final class Switchboard extends serverSwitch {
     private Dispatcher dhtDispatcher;
     public LinkedBlockingQueue<String> trail; // connect infos from cytag servlet
     public SeedDB peers;
-    public Set<String> localpeers;
+    public Set<String> localcluster_scan;
+    public HazelcastInstance localcluster_hazelcast;
     public WorkTables tables;
     public Tray tray;
     private long lastStats = 0; // time when the last row was written to the stats table
@@ -640,14 +647,25 @@ public final class Switchboard extends serverSwitch {
                 this.exceed134217727);
         String agent = getConfig(SwitchboardConstants.NETWORK_UNIT_AGENT, "");
         if (!agent.isEmpty()) this.peers.setMyName(agent); // this can thus be set using the environment variable yacy.network.unit.agent
-        this.localpeers = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        this.localcluster_scan = Collections.newSetFromMap(new ConcurrentHashMap<>());
         new OneTimeBusyThread("Switchboard.scanForOtherYaCyInIntranet") {
             @Override
             public boolean jobImpl() throws Exception {
-                Switchboard.this.localpeers.addAll(Scanner.scanForOtherYaCyInIntranet());
+                Switchboard.this.localcluster_scan.addAll(Scanner.scanForOtherYaCyInIntranet());
                 return true;
             }
         }.start();
+        // initialize hazelcast
+        InterfacesConfig interfacesConfig = new InterfacesConfig();
+        Domains.myIntranetIPs().forEach(ip -> interfacesConfig.addInterface(ip.getHostAddress()));
+        NetworkConfig networkConfig = new NetworkConfig().setInterfaces(interfacesConfig);
+        JoinConfig join = networkConfig.getJoin();
+        join.getMulticastConfig().setEnabled(true);
+        Config config = new Config().setClusterName("YaCyP2P").setInstanceName("Peer").setNetworkConfig(networkConfig);
+        config.getCPSubsystemConfig().setCPMemberCount(3);
+        localcluster_hazelcast = Hazelcast.newHazelcastInstance(config);
+        String uuid = localcluster_hazelcast.getCluster().getLocalMember().getUuid().toString();
+        localcluster_hazelcast.getMap("status").put(uuid, Memory.status());
 
         // load domainList
         try {
@@ -2951,8 +2969,8 @@ public final class Switchboard extends serverSwitch {
                 if (!reference_index_exist) log.info("postprocessing deactivated: no reference index avilable; activate citation index or webgraph");
                 boolean minimum_ram_fullfilled = MemoryControl.available() > getConfigLong("postprocessing.minimum_ram", 0);
                 if (!minimum_ram_fullfilled) log.info("postprocessing deactivated: no enough ram (" + MemoryControl.available() + "), needed " + getConfigLong("postprocessing.minimum_ram", 0) + ", to force change field postprocessing.minimum_ram");
-                boolean minimum_load_fullfilled = Memory.load() < getConfigFloat("postprocessing.maximum_load", 0);
-                if (!minimum_load_fullfilled) log.info("postprocessing deactivated: too high load (" + Memory.load() + ") > " + getConfigFloat("postprocessing.maximum_load", 0) + ", to force change field postprocessing.maximum_load");
+                boolean minimum_load_fullfilled = Memory.getSystemLoadAverage() < getConfigFloat("postprocessing.maximum_load", 0);
+                if (!minimum_load_fullfilled) log.info("postprocessing deactivated: too high load (" + Memory.getSystemLoadAverage() + ") > " + getConfigFloat("postprocessing.maximum_load", 0) + ", to force change field postprocessing.maximum_load");
                 boolean postprocessing = process_key_exist && reference_index_exist && minimum_ram_fullfilled && minimum_load_fullfilled;
                 if (!postprocessing) log.info("postprocessing deactivated: constraints violated");
 

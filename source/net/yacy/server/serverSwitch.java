@@ -742,7 +742,7 @@ public class serverSwitch {
     }
 
     public YaCyHttpServer getHttpServer() {
-        return httpserver;
+        return this.httpserver;
     }
 
 }

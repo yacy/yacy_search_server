@@ -109,6 +109,12 @@ public class Domains {
     private static Thread domaininit = null;
     static {
         localHostNames.add(LOCALHOST);
+        // look up the host name
+        try {
+            LOCALHOST_NAME = InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (final UnknownHostException e) {}
+        localHostNames.add(LOCALHOST_NAME);
+
         try {
             InetAddress localHostAddress = InetAddress.getLocalHost();
             if (localHostAddress != null) myHostAddresses.add(localHostAddress);
@@ -117,6 +123,12 @@ public class Domains {
             final InetAddress[] moreAddresses = InetAddress.getAllByName(LOCALHOST_NAME);
             if (moreAddresses != null) myHostAddresses.addAll(Arrays.asList(moreAddresses));
         } catch (final UnknownHostException e) {}
+
+        for (InetAddress a: myHostAddresses) {
+            if (a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress() || a.isSiteLocalAddress()) {
+                localHostAddresses.add(a);
+            }
+        }
 
         // to get the local host name, a dns lookup is necessary.
         // if such a lookup blocks, it can cause that the static initiatializer does not finish fast
@@ -138,11 +150,6 @@ public class Domains {
                     }
                 } catch (final SocketException e) {
                 }
-
-                // now look up the host name
-                try {
-                    LOCALHOST_NAME = getHostName(InetAddress.getLocalHost());
-                } catch (final UnknownHostException e) {}
 
                 // after the host name was resolved, we try to look up more local addresses
                 // using the host name:

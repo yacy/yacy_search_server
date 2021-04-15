@@ -76,7 +76,7 @@ public class status_p {
         prop.putNum("usedDisk", sb.observer.getSizeOfDataPath(true));
         prop.putNum("freeDisk", sb.observer.getUsableSpace());
         prop.putNum("processors", WorkflowProcessor.availableCPU);
-        prop.putNum("load", Memory.load());
+        prop.putNum("load", Memory.getSystemLoadAverage());
 
         // proxy traffic
         prop.put("trafficIn", ByteCount.getGlobalCount());

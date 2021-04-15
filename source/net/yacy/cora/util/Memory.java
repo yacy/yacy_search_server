@@ -22,6 +22,12 @@ package net.yacy.cora.util;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
+import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import net.yacy.http.YaCyHttpServer;
+import net.yacy.search.Switchboard;
 
 public class Memory {
 
@@ -74,15 +80,50 @@ public class Memory {
     public static final long cores() {
         return runtime.availableProcessors();
     }
-    
+
     /**
      * get the system load within the last minute
      * @return the system load or a negative number if the load is not available
      */
-    public static double load() {
+    public static double getSystemLoadAverage() {
         return ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
     }
-    
+
+    public static double getSystemCpuLoad() {
+        return getOSBean("getSystemCpuLoad");
+    }
+
+    public static double getProcessCpuLoad() {
+        return getOSBean("getProcessCpuLoad");
+    }
+
+    private static double getOSBean(String name) {
+        try {
+            Method m = ManagementFactory.getOperatingSystemMXBean().getClass().getMethod(name);
+            m.setAccessible(true);
+            Object o = m.invoke(ManagementFactory.getOperatingSystemMXBean());
+            if (o instanceof Double) return ((Double) o).doubleValue();
+        } catch (Throwable e) {}
+        return 0.0d;
+    }
+
+    public static Map<String, Object> status() {
+        Runtime runtime = Runtime.getRuntime();
+        Map<String, Object> status = new LinkedHashMap<>();
+        status.put("service", "Peer");
+        status.put("assigned_memory", runtime.maxMemory());
+        status.put("used_memory", runtime.totalMemory() - runtime.freeMemory());
+        status.put("available_memory", runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory());
+        status.put("cores", runtime.availableProcessors());
+        status.put("threads", Thread.activeCount());
+        status.put("deadlocks", deadlocks());
+        status.put("load_system_average", Memory.getSystemLoadAverage());
+        status.put("load_process_cpu", Memory.getProcessCpuLoad());
+        YaCyHttpServer server = Switchboard.getSwitchboard().getHttpServer();
+        status.put("server_threads", server == null ? 0 : server.getServerThreads());
+        return status;
+    }
+
     /**
      * find out the number of thread deadlocks. WARNING: this is a time-consuming task
      * @return the number of deadlocked threads
@@ -92,7 +133,7 @@ public class Memory {
         if (deadlockIDs == null) return 0;
         return deadlockIDs.length;
     }
-    
+
     /**
      * write deadlocked threads as to the log as warning
      */

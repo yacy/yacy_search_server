@@ -194,6 +194,7 @@
         <pathelement location="${lib}/commons-math3-3.4.1.jar" />
         <pathelement location="${lib}/fontbox-2.0.15.jar" />
         <pathelement location="${lib}/guava-25.1-jre.jar" />
+        <pathelement location="${lib}/hazelcast-4.2.jar" />
         <pathelement location="${lib}/http2-client-9.4.34.v20201102.jar" />
         <pathelement location="${lib}/http2-common-9.4.34.v20201102.jar" />
         <pathelement location="${lib}/http2-http-client-transport-9.4.34.v20201102.jar" />

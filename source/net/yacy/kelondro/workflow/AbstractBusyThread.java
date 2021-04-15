@@ -202,8 +202,8 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
                 ratz(this.idlePause);
                 idletime += System.currentTimeMillis() - timestamp;
             //} else if ((memnow = serverMemory.available()) > memprereq) try {
-            } else if (Memory.load() > loadprereq) {
-            	logSystem("Thread '" + this.getName() + "' runs high load cycle. current: " + Memory.load() + " max.: " + loadprereq);
+            } else if (Memory.getSystemLoadAverage() > loadprereq) {
+            	logSystem("Thread '" + this.getName() + "' runs high load cycle. current: " + Memory.getSystemLoadAverage() + " max.: " + loadprereq);
                 timestamp = System.currentTimeMillis();
                 ratz(this.idlePause);
                 highCPUCycles++;
