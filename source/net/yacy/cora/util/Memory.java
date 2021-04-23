@@ -116,8 +116,8 @@ public class Memory {
      * a negative value if not available.
      */
     public static double getSystemCpuLoad() {
-    	com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-    	return operatingSystemMXBean.getCpuLoad(); // getSystemCpuLoad is deprecated, getCpuLoad is the replacement
+        com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        return operatingSystemMXBean.getSystemCpuLoad();
     }
 
     /**
@@ -136,8 +136,8 @@ public class Memory {
      * a negative value if not available.
      */
     public static double getProcessCpuLoad() {
-    	com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
-    	return operatingSystemMXBean.getProcessCpuLoad();
+        com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        return operatingSystemMXBean.getProcessCpuLoad();
     }
 
     public static Map<String, Object> status() {
