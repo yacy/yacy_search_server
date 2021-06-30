@@ -267,21 +267,23 @@ public class Crawler_p {
                 String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
                 Set<DigestURL> rootURLs = new HashSet<DigestURL>();
                 String crawlName = "";
-                if (crawlingFile == null) for (String crawlingStart: rootURLs0) {
+                if (crawlingFile == null) {
                     StringBuilder crawlNameBuilder = new StringBuilder(); // for large crawl queues this can be pretty large
-                    if (crawlingStart == null || crawlingStart.length() == 0) continue;
-                    // add the prefix http:// if necessary
-                    int pos = crawlingStart.indexOf("://",0);
-                    if (pos == -1) {
-                        if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart; else crawlingStart = "http://" + crawlingStart;
-                    }
-                    try {
-                        DigestURL crawlingStartURL = new DigestURL(crawlingStart);
-                        rootURLs.add(crawlingStartURL);
-                        crawlNameBuilder.append((crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true) : crawlingStartURL.getHost()).append(',');
-                        if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
-                    } catch (final MalformedURLException e) {
-                        ConcurrentLog.warn("Crawler_p", "crawl start url invalid: " + e.getMessage());
+                    for (String crawlingStart: rootURLs0) {
+                        if (crawlingStart == null || crawlingStart.length() == 0) continue;
+                        // add the prefix http:// if necessary
+                        int pos = crawlingStart.indexOf("://",0);
+                        if (pos == -1) {
+                            if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart; else crawlingStart = "https://" + crawlingStart; // we default to https instead of http becuase those outnumber http by far
+                        }
+                        try {
+                            DigestURL crawlingStartURL = new DigestURL(crawlingStart);
+                            rootURLs.add(crawlingStartURL);
+                            crawlNameBuilder.append((crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true) : crawlingStartURL.getHost()).append(',');
+                            if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
+                        } catch (final MalformedURLException e) {
+                            ConcurrentLog.warn("Crawler_p", "crawl start url invalid: " + e.getMessage());
+                        }
                     }
                     crawlName = crawlNameBuilder.toString();
                 } else {
@@ -676,7 +678,7 @@ public class Crawler_p {
                             // liftoff!
                             prop.put("info", "8");
                             prop.putHTML("info_crawlingURL", post.get("crawlingURL"));
-    
+
                             // generate a YaCyNews if the global flag was set
                             if (!sb.isRobinsonMode() && crawlOrder) {
                                 final Map<String, String> m = new HashMap<String, String>(profile); // must be cloned
