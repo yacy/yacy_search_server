@@ -25,6 +25,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -96,7 +97,7 @@ public class Crawler_p {
         // inital values for AJAX Elements (without JavaScript)
         final serverObjects prop = new serverObjects();
         prop.put("rejected", 0);
-        
+
         // check for JSONP
         if (post != null && post.containsKey("callback") ) {
             final String jsonp = post.get("callback") + "([";
@@ -122,18 +123,18 @@ public class Crawler_p {
         prop.putNum("citationSegmentCount", segment.citationSegmentCount());
         prop.putNum("rwipublictextSize", segment.RWICount());
         prop.putNum("rwipublictextSegmentCount", segment.RWISegmentCount());
-        
+
         prop.put("list", "0");
         prop.put("loaderSize", 0);
         prop.put("loaderMax", 0);
         prop.put("list-loader", 0);
-        
+
         int coreCrawlJobSize = sb.crawlQueues.coreCrawlJobSize();
         int limitCrawlJobSize = sb.crawlQueues.limitCrawlJobSize();
         int remoteTriggeredCrawlJobSize = sb.crawlQueues.remoteTriggeredCrawlJobSize();
         int noloadCrawlJobSize = sb.crawlQueues.noloadCrawlJobSize();
         int allsize = coreCrawlJobSize + limitCrawlJobSize + remoteTriggeredCrawlJobSize + noloadCrawlJobSize;
-        
+
         prop.put("localCrawlSize", coreCrawlJobSize);
         prop.put("localCrawlState", "");
         prop.put("limitCrawlSize", limitCrawlJobSize);
@@ -148,7 +149,7 @@ public class Crawler_p {
 
         prop.put("info", "0");
         boolean debug = (post != null && post.containsKey("debug"));
-        
+
         if (post != null) {
             String c = post.toString();
             if (c.length() < 1000) ConcurrentLog.info("Crawl Start", c);
@@ -165,7 +166,7 @@ public class Crawler_p {
                 sb.crawler.removePassive(h);
                 try {sb.crawlQueues.noticeURL.removeByProfileHandle(p.handle(), 10000);} catch (SpaceExceededException e) {}
             }
-            
+
             // clear stacks
             for (StackType stackType: StackType.values()) sb.crawlQueues.noticeURL.clear(stackType);
             try { sb.cleanProfiles(); } catch (final InterruptedException e) {/* ignore this */}
@@ -206,8 +207,8 @@ public class Crawler_p {
             prop.put("info-queue", 1);
             prop.putHTML("info-queue_message", "pause reason: " + queuemessage);
         }
-        
-    	if (post != null && post.containsKey("terminate")) try {
+
+        if (post != null && post.containsKey("terminate")) try {
             final String handle = post.get("handle", "");
             // termination of a crawl: shift the crawl from active to passive
             final CrawlProfile p = sb.crawler.getActive(handle.getBytes());
@@ -225,13 +226,13 @@ public class Crawler_p {
             if (sb.peers == null) {
                 prop.put("info", "3");
             } else {
-            	
-            	if(post.getBoolean("cleanSearchCache")) {
-            		// clean up all search events
-            		SearchEventCache.cleanupEvents(true);
-            		sb.index.clearCaches(); // every time the ranking is changed we need to remove old orderings
-            	}
-                
+
+                if(post.getBoolean("cleanSearchCache")) {
+                    // clean up all search events
+                    SearchEventCache.cleanupEvents(true);
+                    sb.index.clearCaches(); // every time the ranking is changed we need to remove old orderings
+                }
+
                 // remove crawlingFileContent before we record the call
                 String crawlingFileName = post.get("crawlingFile");
                 final File crawlingFile;
@@ -244,7 +245,7 @@ public class Crawler_p {
                 if (crawlingFile != null && crawlingFile.exists()) {
                     post.remove("crawlingFile$file");
                 }
-                
+
                 // prepare some filter that are adjusted in case that this is wanted
                 boolean storeHTCache = "on".equals(post.get("storeHTCache", "off"));
                 String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL_STRING);
@@ -267,6 +268,7 @@ public class Crawler_p {
                 Set<DigestURL> rootURLs = new HashSet<DigestURL>();
                 String crawlName = "";
                 if (crawlingFile == null) for (String crawlingStart: rootURLs0) {
+                    StringBuilder crawlNameBuilder = new StringBuilder(); // for large crawl queues this can be pretty large
                     if (crawlingStart == null || crawlingStart.length() == 0) continue;
                     // add the prefix http:// if necessary
                     int pos = crawlingStart.indexOf("://",0);
@@ -276,14 +278,14 @@ public class Crawler_p {
                     try {
                         DigestURL crawlingStartURL = new DigestURL(crawlingStart);
                         rootURLs.add(crawlingStartURL);
-                        crawlName += ((crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true) : crawlingStartURL.getHost()) + ',';
+                        crawlNameBuilder.append((crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true) : crawlingStartURL.getHost()).append(',');
                         if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
-                        
                     } catch (final MalformedURLException e) {
                         ConcurrentLog.warn("Crawler_p", "crawl start url invalid: " + e.getMessage());
                     }
+                    crawlName = crawlNameBuilder.toString();
                 } else {
-                	crawlName = crawlingFile.getName();
+                    crawlName = crawlingFile.getName();
                 }
                 if (crawlName.endsWith(",")) crawlName = crawlName.substring(0, crawlName.length() - 1);
                 if (crawlName.length() > 64) {
@@ -296,7 +298,7 @@ public class Crawler_p {
                 if (fullDomain) {
                     for (DigestURL u: rootURLs) if (u.isFile()) {fullDomain = false; subPath = true; break;}
                 }
-                
+
                 // delete old robots entries
                 for (DigestURL ru : rootURLs) {
                     sb.robots.delete(ru);
@@ -307,7 +309,7 @@ public class Crawler_p {
                     } catch (IOException e) {}
                 }
                 try {sb.robots.clear();} catch (IOException e) {} // to be safe: clear all.
-                
+
                 // set the crawl filter
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
                 final String ipMustNotMatch = post.get("ipMustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
@@ -327,7 +329,7 @@ public class Crawler_p {
                 env.setConfig("crawlOrder", crawlOrder);
 
                 if (crawlOrder) crawlerNoDepthLimitMatch = CrawlProfile.MATCH_NEVER_STRING; // without limitation the crawl order does not work
-                
+
                 int newcrawlingdepth = post.getInt("crawlingDepth", 8);
                 env.setConfig("crawlingDepth", Integer.toString(newcrawlingdepth));
                 if ((crawlOrder) && (newcrawlingdepth > 8)) newcrawlingdepth = 8;
@@ -355,10 +357,10 @@ public class Crawler_p {
 
                 boolean followFrames = "on".equals(post.get("followFrames", "false"));
                 env.setConfig("followFrames", followFrames);
-                
+
                 boolean obeyHtmlRobotsNoindex = "on".equals(post.get("obeyHtmlRobotsNoindex", "false"));
                 env.setConfig("obeyHtmlRobotsNoindex", obeyHtmlRobotsNoindex);
-                
+
                 boolean obeyHtmlRobotsNofollow = "on".equals(post.get("obeyHtmlRobotsNofollow", "false"));
                 env.setConfig("obeyHtmlRobotsNofollow", obeyHtmlRobotsNofollow);
 
@@ -369,7 +371,7 @@ public class Crawler_p {
                 env.setConfig("indexMedia", indexMedia);
 
                 env.setConfig("storeHTCache", storeHTCache);
-                
+
                 String defaultAgentName = sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName;
                 String agentName = post.get("agentName", defaultAgentName);
                 ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
@@ -379,19 +381,19 @@ public class Crawler_p {
                 if (cachePolicy == null) cachePolicy = CacheStrategy.IFFRESH;
 
                 String crawlingMode = post.get("crawlingMode","url");
-                
+
                 if ("file".equals(crawlingMode) && post.containsKey("crawlingFile")) {
                     newcrawlingMustNotMatch = CrawlProfile.MATCH_NEVER_STRING;
                     directDocByURL = false;
                 }
-                
+
                 if ("sitemap".equals(crawlingMode)) {
                     newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING;
                     newcrawlingMustNotMatch = CrawlProfile.MATCH_NEVER_STRING;
                     newcrawlingdepth = 0;
                     directDocByURL = false;
                 }
-                
+
                 if ("sitelist".equals(crawlingMode)) {
                     newcrawlingMustNotMatch = CrawlProfile.MATCH_NEVER_STRING;
                     Set<DigestURL> newRootURLs = new HashSet<DigestURL>();
@@ -415,19 +417,21 @@ public class Crawler_p {
 
                 // delete all error urls for that domain
                 // and all urls for that host from the crawl queue
+                List<String> deleteIDs = new ArrayList<>();
                 Set<String> hosthashes = new HashSet<String>();
                 boolean anysmbftporpdf = false;
                 for (DigestURL u : rootURLs) {
-                    sb.index.fulltext().remove(u.hash());
+                    deleteIDs.add(new String(u.hash()));
                     hosthashes.add(u.hosthash());
                     if ("smb.ftp".indexOf(u.getProtocol()) >= 0 || "pdf".equals(MultiProtocolURL.getFileExtension(u.getFileName()))) anysmbftporpdf = true;
                 }
+                sb.index.fulltext().remove(deleteIDs);
                 sb.crawlQueues.removeHosts(hosthashes);
                 sb.index.fulltext().commit(true);
-                
+
                 boolean crawlingQ = anysmbftporpdf || "on".equals(post.get("crawlingQ", "off")) || "sitemap".equals(crawlingMode);
                 env.setConfig("crawlingQ", crawlingQ);
-                
+
                 // compute mustmatch filter according to rootURLs
                 if ((fullDomain || subPath) && newcrawlingdepth > 0) {
                     String siteFilter = ".*";
@@ -454,19 +458,21 @@ public class Crawler_p {
                         newcrawlingMustMatch = "(" + newcrawlingMustMatch + ")|(" + siteFilter + ")";
                     }
                 }
-                
+
                 // check if the crawl filter works correctly
                 try {
                     Pattern mmp = Pattern.compile(newcrawlingMustMatch);
+                    int maxcheck = 100;
                     for (DigestURL u: rootURLs) {
                         assert mmp.matcher(u.toNormalform(true)).matches() : "pattern " + mmp.toString() + " does not match url " + u.toNormalform(true);
+                        if (maxcheck-- <= 0) break;
                     }
                 } catch (final PatternSyntaxException e) {
                     prop.put("info", "4"); // crawlfilter does not match url
                     prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
                     prop.putHTML("info_error", e.getMessage());
                 }
-                
+
                 boolean hasCrawlstartDataOK = !crawlName.isEmpty();
                 if (hasCrawlstartDataOK) {
                     // check crawlurl was given in sitecrawl
@@ -474,25 +480,25 @@ public class Crawler_p {
                         prop.put("info", "5"); //Crawling failed
                         prop.putHTML("info_crawlingURL", "(no url given)");
                         prop.putHTML("info_reasonString", "you must submit at least one crawl url");
-                    	hasCrawlstartDataOK = false;
+                        hasCrawlstartDataOK = false;
                     }
                 }
-               
+
                 String snapshotsMaxDepthString = post.get("snapshotsMaxDepth", "-1");
                 int snapshotsMaxDepth = Integer.parseInt(snapshotsMaxDepthString);
                 boolean snapshotsLoadImage = post.getBoolean("snapshotsLoadImage");
                 boolean snapshotsReplaceOld = post.getBoolean("snapshotsReplaceOld");
                 String snapshotsMustnotmatch = post.get("snapshotsMustnotmatch", "");
-                
+
                 String ignoreclassname_s = post.get("ignoreclassname");
                 Set<String> ignoreclassname = new HashSet<>();
                 if (ignoreclassname_s != null) {
-                	String[] ignoreclassname_a = ignoreclassname_s.trim().split(",");
-                	for (int i = 0; i < ignoreclassname_a.length; i++) {
-                		ignoreclassname.add(ignoreclassname_a[i].trim());
-                	}
+                    String[] ignoreclassname_a = ignoreclassname_s.trim().split(",");
+                    for (int i = 0; i < ignoreclassname_a.length; i++) {
+                        ignoreclassname.add(ignoreclassname_a[i].trim());
+                    }
                 }
-                
+
                 // get vocabulary scraper info
                 JSONObject vocabulary_scraper = new JSONObject(); // key = vocabulary_name, value = properties with key = type (i.e. 'class') and value = keyword in context
                 for (String key: post.keySet()) {
@@ -518,9 +524,9 @@ public class Crawler_p {
                         }
                     }
                 }
-                
+
                 int timezoneOffset = post.getInt("timezoneOffset", 0);
-                
+
                 // in case that we crawl from a file, load that file and re-compute mustmatch pattern
                 List<AnchorURL> hyperlinks_from_file = null;
                 if ("file".equals(crawlingMode) && post.containsKey("crawlingFile") && crawlingFile != null) {
@@ -528,13 +534,13 @@ public class Crawler_p {
                     try {
                         if (newcrawlingdepth > 0) {
                             if (fullDomain) {
-                            	/* Crawl is restricted to start domains or sub-paths : we have to get all the start links now. 
-                            	 * Otherwise we can get them asynchronously later, thus allowing to handle more efficiently large start crawlingFiles */
+                                /* Crawl is restricted to start domains or sub-paths : we have to get all the start links now. 
+                                 * Otherwise we can get them asynchronously later, thus allowing to handle more efficiently large start crawlingFiles */
                                 hyperlinks_from_file = crawlingFileStart(crawlingFile, timezoneOffset, crawlingFileContent);
                                 newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks_from_file);
                             } else if (subPath) {
-                            	/* Crawl is restricted to start domains or sub-paths : we have to get all the start links now. 
-                            	 * Otherwise we can get them asynchronously later, thus allowing to handle more efficiently large start crawlingFiles */
+                                /* Crawl is restricted to start domains or sub-paths : we have to get all the start links now. 
+                                 * Otherwise we can get them asynchronously later, thus allowing to handle more efficiently large start crawlingFiles */
                                 hyperlinks_from_file = crawlingFileStart(crawlingFile, timezoneOffset, crawlingFileContent);
                                 newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks_from_file);
                             }
@@ -548,53 +554,50 @@ public class Crawler_p {
                     }
                     sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                 }
-                
-                /* If a solr query filter is defined, verify now its syntax and that the embedded Solr schema is available */
-				final String solrQueryMustMatch = post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY).trim();
-				final String solrQueryMustNotMatch = post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY).trim();
-				if(!(solrQueryMustMatch.isEmpty() || CrawlProfile.SOLR_MATCH_ALL_QUERY.equals(solrQueryMustMatch)) || !CrawlProfile.SOLR_EMPTY_QUERY.equals(solrQueryMustNotMatch)) {
-					
-					final EmbeddedInstance embeddedSolr = sb.index.fulltext().getEmbeddedInstance();
-					final SolrCore embeddedCore = embeddedSolr != null ? embeddedSolr.getDefaultCore() : null;
-					final boolean embeddedSolrConnected = embeddedSolr != null && embeddedCore != null;
-					prop.put("noEmbeddedSolr", !embeddedSolrConnected);
-					if (embeddedSolrConnected) {
-						if(!(solrQueryMustMatch.isEmpty() || CrawlProfile.SOLR_MATCH_ALL_QUERY.equals(solrQueryMustMatch))) {
-							try {
-								SingleDocumentMatcher.toLuceneQuery(solrQueryMustMatch, embeddedCore);
-							} catch(final SyntaxError | SolrException e) {
-								hasCrawlstartDataOK = false;
-								prop.put("info", "10");
-								prop.put("info_solrQuery", solrQueryMustMatch);
-							} catch(final RuntimeException e) {
-								hasCrawlstartDataOK = false;
-								prop.put("info", "11");
-								prop.put("info_solrQuery", solrQueryMustMatch);
-							}
-						}
-						
-						if(!CrawlProfile.SOLR_EMPTY_QUERY.equals(solrQueryMustNotMatch)) {
-							try {
-								SingleDocumentMatcher.toLuceneQuery(solrQueryMustNotMatch, embeddedCore);
-							} catch(final SyntaxError | SolrException e) {
-								hasCrawlstartDataOK = false;
-								prop.put("info", "10");
-								prop.put("info_solrQuery", solrQueryMustNotMatch);
-							} catch(final RuntimeException e) {
-								hasCrawlstartDataOK = false;
-								prop.put("info", "11");
-								prop.put("info_solrQuery", solrQueryMustNotMatch);
-							}
-						}
-					} else {
-						hasCrawlstartDataOK = false;
-						prop.put("info", "9");
-					}
-					
-					
 
-				}
-                
+                /* If a solr query filter is defined, verify now its syntax and that the embedded Solr schema is available */
+                final String solrQueryMustMatch = post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY).trim();
+                final String solrQueryMustNotMatch = post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY).trim();
+                if(!(solrQueryMustMatch.isEmpty() || CrawlProfile.SOLR_MATCH_ALL_QUERY.equals(solrQueryMustMatch)) || !CrawlProfile.SOLR_EMPTY_QUERY.equals(solrQueryMustNotMatch)) {
+
+                    final EmbeddedInstance embeddedSolr = sb.index.fulltext().getEmbeddedInstance();
+                    final SolrCore embeddedCore = embeddedSolr != null ? embeddedSolr.getDefaultCore() : null;
+                    final boolean embeddedSolrConnected = embeddedSolr != null && embeddedCore != null;
+                    prop.put("noEmbeddedSolr", !embeddedSolrConnected);
+                    if (embeddedSolrConnected) {
+                        if(!(solrQueryMustMatch.isEmpty() || CrawlProfile.SOLR_MATCH_ALL_QUERY.equals(solrQueryMustMatch))) {
+                            try {
+                                SingleDocumentMatcher.toLuceneQuery(solrQueryMustMatch, embeddedCore);
+                            } catch(final SyntaxError | SolrException e) {
+                                hasCrawlstartDataOK = false;
+                                prop.put("info", "10");
+                                prop.put("info_solrQuery", solrQueryMustMatch);
+                            } catch(final RuntimeException e) {
+                                hasCrawlstartDataOK = false;
+                                prop.put("info", "11");
+                                prop.put("info_solrQuery", solrQueryMustMatch);
+                            }
+                        }
+
+                        if(!CrawlProfile.SOLR_EMPTY_QUERY.equals(solrQueryMustNotMatch)) {
+                            try {
+                                SingleDocumentMatcher.toLuceneQuery(solrQueryMustNotMatch, embeddedCore);
+                            } catch(final SyntaxError | SolrException e) {
+                                hasCrawlstartDataOK = false;
+                                prop.put("info", "10");
+                                prop.put("info_solrQuery", solrQueryMustNotMatch);
+                            } catch(final RuntimeException e) {
+                                hasCrawlstartDataOK = false;
+                                prop.put("info", "11");
+                                prop.put("info_solrQuery", solrQueryMustNotMatch);
+                            }
+                        }
+                    } else {
+                        hasCrawlstartDataOK = false;
+                        prop.put("info", "9");
+                    }
+                }
+
                 // prepare a new crawling profile
                 final CrawlProfile profile;
                 byte[] handle;
@@ -632,20 +635,19 @@ public class Crawler_p {
                             new VocabularyScraper(vocabulary_scraper),
                             timezoneOffset);
 
-					profile.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key,
-							post.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
-					profile.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key, post
-							.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
-					profile.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key,
-							post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
-					profile.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, post
-							.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
-					profile.put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, solrQueryMustMatch);
-					profile.put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, solrQueryMustNotMatch);
-					profile.put(CrawlAttribute.CRAWLER_ALWAYS_CHECK_MEDIA_TYPE.key,
-							post.getBoolean("crawlerAlwaysCheckMediaType"));
-					
-                    
+                    profile.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key,
+                            post.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
+                    profile.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key, post
+                            .get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
+                    profile.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key,
+                            post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
+                    profile.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, post
+                            .get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
+                    profile.put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, solrQueryMustMatch);
+                    profile.put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, solrQueryMustNotMatch);
+                    profile.put(CrawlAttribute.CRAWLER_ALWAYS_CHECK_MEDIA_TYPE.key,
+                            post.getBoolean("crawlerAlwaysCheckMediaType"));
+
                     handle = ASCII.getBytes(profile.handle());
 
                     // before we fire up a new crawl, we make sure that another crawl with the same name is not running
@@ -658,14 +660,12 @@ public class Crawler_p {
                     profile = null;
                     handle = null;
                 }
-                
 
                 // start the crawl
-                if(hasCrawlstartDataOK) {
-                	
-                	final boolean wontReceiptRemoteRsults = crawlOrder && !sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false);
-                	
-                	if ("url".equals(crawlingMode)) {
+                if (hasCrawlstartDataOK) {
+                    final boolean wontReceiptRemoteRsults = crawlOrder && !sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false);
+
+                    if ("url".equals(crawlingMode)) {
                         // stack requests
                         sb.crawler.putActive(handle, profile);
                         final Set<DigestURL> successurls = new HashSet<DigestURL>();
@@ -703,65 +703,64 @@ public class Crawler_p {
                                 sb.crawlQueues.errorURL.push(failure.getKey(), 0, null, FailCategory.FINAL_LOAD_CONTEXT, failure.getValue(), -1);
                                 fr.append(failure.getValue()).append('/');
                             }
-    
+
                             prop.put("info", "5"); //Crawling failed
                             prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
                             prop.putHTML("info_reasonString", fr.toString());
                         }
                         if (successurls.size() > 0) {
-                        	sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                        	
-            				prop.put("wontReceiptRemoteResults", wontReceiptRemoteRsults);
+                            sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                            prop.put("wontReceiptRemoteResults", wontReceiptRemoteRsults);
                         }
-                	} else if ("sitemap".equals(crawlingMode)) {
-                		try {
-                			final DigestURL sitemapURL = sitemapURLStr.indexOf("//") > 0 ? new DigestURL(sitemapURLStr) : new DigestURL(rootURLs.iterator().next(), sitemapURLStr); // fix for relative paths which should not exist but are used anyway
-                			sb.crawler.putActive(handle, profile);
-                			final SitemapImporter importer = new SitemapImporter(sb, sitemapURL, profile);
-                			importer.start();
-                			sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-            				prop.put("wontReceiptRemoteResults", wontReceiptRemoteRsults);
-                		} catch (final Exception e) {
-                			// mist
-                			prop.put("info", "6");//Error with url
-                			prop.putHTML("info_crawlingStart", sitemapURLStr);
-                			prop.putHTML("info_error", e.getMessage());
-                			ConcurrentLog.logException(e);
-                		}
-                	} else if ("file".equals(crawlingMode)) {
-                		if (post.containsKey("crawlingFile") && crawlingFile != null) {
-                			try {
-                				if(newcrawlingdepth > 0 && (fullDomain || subPath)) {
-                					/* All links must have already been loaded because they are the part of the newcrawlingMustMatch filter */
-                					if(hyperlinks_from_file != null) {
-                						sb.crawler.putActive(handle, profile);
-                						sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks_from_file, profile.timezoneOffset());
-                					}
-                				} else {
-                					/* No restriction on domains or subpath : we scrape now links and asynchronously push them to the crawlStacker */
-                					final String crawlingFileContent = post.get("crawlingFile$file", "");
-                					final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000,
-                							new HashSet<String>(), new VocabularyScraper(), profile.timezoneOffset());
-                					FileCrawlStarterTask crawlStarterTask = new FileCrawlStarterTask(crawlingFile, crawlingFileContent, scraper, profile,
-                							sb.crawlStacker, sb.peers.mySeed().hash.getBytes());
-                					sb.crawler.putActive(handle, profile);
-                					crawlStarterTask.start();
-                				}
-                			} catch (final PatternSyntaxException e) {
-                				prop.put("info", "4"); // crawlfilter does not match url
-                				prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
-                				prop.putHTML("info_error", e.getMessage());
-                			} catch (final Exception e) {
-                				// mist
-                				prop.put("info", "7"); // Error with file
-                				prop.putHTML("info_crawlingStart", crawlingFileName);
-                				prop.putHTML("info_error", e.getMessage());
-                				ConcurrentLog.logException(e);
-                			}
-                			sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-            				prop.put("wontReceiptRemoteResults", wontReceiptRemoteRsults);
-                		}
-                	}
+                    } else if ("sitemap".equals(crawlingMode)) {
+                        try {
+                            final DigestURL sitemapURL = sitemapURLStr.indexOf("//") > 0 ? new DigestURL(sitemapURLStr) : new DigestURL(rootURLs.iterator().next(), sitemapURLStr); // fix for relative paths which should not exist but are used anyway
+                            sb.crawler.putActive(handle, profile);
+                            final SitemapImporter importer = new SitemapImporter(sb, sitemapURL, profile);
+                            importer.start();
+                            sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                            prop.put("wontReceiptRemoteResults", wontReceiptRemoteRsults);
+                        } catch (final Exception e) {
+                            // mist
+                            prop.put("info", "6");//Error with url
+                            prop.putHTML("info_crawlingStart", sitemapURLStr);
+                            prop.putHTML("info_error", e.getMessage());
+                            ConcurrentLog.logException(e);
+                        }
+                    } else if ("file".equals(crawlingMode)) {
+                        if (post.containsKey("crawlingFile") && crawlingFile != null) {
+                            try {
+                                if(newcrawlingdepth > 0 && (fullDomain || subPath)) {
+                                    /* All links must have already been loaded because they are the part of the newcrawlingMustMatch filter */
+                                    if(hyperlinks_from_file != null) {
+                                        sb.crawler.putActive(handle, profile);
+                                        sb.crawlStacker.enqueueEntriesAsynchronous(sb.peers.mySeed().hash.getBytes(), profile.handle(), hyperlinks_from_file, profile.timezoneOffset());
+                                    }
+                                } else {
+                                    /* No restriction on domains or subpath : we scrape now links and asynchronously push them to the crawlStacker */
+                                    final String crawlingFileContent = post.get("crawlingFile$file", "");
+                                    final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000,
+                                            new HashSet<String>(), new VocabularyScraper(), profile.timezoneOffset());
+                                    FileCrawlStarterTask crawlStarterTask = new FileCrawlStarterTask(crawlingFile, crawlingFileContent, scraper, profile,
+                                            sb.crawlStacker, sb.peers.mySeed().hash.getBytes());
+                                    sb.crawler.putActive(handle, profile);
+                                    crawlStarterTask.start();
+                                }
+                            } catch (final PatternSyntaxException e) {
+                                prop.put("info", "4"); // crawlfilter does not match url
+                                prop.putHTML("info_newcrawlingfilter", newcrawlingMustMatch);
+                                prop.putHTML("info_error", e.getMessage());
+                            } catch (final Exception e) {
+                                // mist
+                                prop.put("info", "7"); // Error with file
+                                prop.putHTML("info_crawlingStart", crawlingFileName);
+                                prop.putHTML("info_error", e.getMessage());
+                                ConcurrentLog.logException(e);
+                            }
+                            sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                            prop.put("wontReceiptRemoteResults", wontReceiptRemoteRsults);
+                        }
+                    }
                 }
             }
         }
@@ -783,7 +782,7 @@ public class Crawler_p {
             } catch (final NumberFormatException e) {}
             if ("minimum".equals(crawlingPerformance.toLowerCase(Locale.ROOT))) wantedPPM = 10;
             if ("maximum".equals(crawlingPerformance.toLowerCase(Locale.ROOT))) wantedPPM = 30000;
-            
+
             int wPPM = wantedPPM;
             if ( wPPM <= 0 ) {
                 wPPM = 1;
@@ -793,9 +792,9 @@ public class Crawler_p {
             }
             final int newBusySleep = 60000 / wPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
             final float loadprereq = wantedPPM <= 10 ? 1.0f : wantedPPM <= 100 ? 2.0f : wantedPPM >= 1000 ? 8.0f : 3.0f;
-            
+
             BusyThread thread;
-            
+
             thread = sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
             if ( thread != null ) {
                 sb.setConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, thread.setBusySleep(newBusySleep));
@@ -826,7 +825,7 @@ public class Crawler_p {
         String hosts = "";
         for (final byte[] h: sb.crawler.getActive()) {
             profile = sb.crawler.getActive(h);
-        	if (CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) continue;
+            if (CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) continue;
             profile.putProfileEntry("crawlProfilesShow_list_", prop, true, dark, count, domlistlength);
             prop.put("crawlProfilesShow_list_" + count + "_debug", debug ? 1 : 0);
             if (debug) {
@@ -877,47 +876,47 @@ public class Crawler_p {
      * @throws IOException
      * @throws FileNotFoundException
      */
-	private static List<AnchorURL> crawlingFileStart(final File crawlingFile, int timezoneOffset,
-			final String crawlingFileContent) throws MalformedURLException, IOException, FileNotFoundException {
-		List<AnchorURL> hyperlinks_from_file;
-		// check if the crawl filter works correctly
-		final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new HashSet<String>(), new VocabularyScraper(), timezoneOffset);
-		final Writer writer = new TransformerWriter(null, null, scraper, false);
-		if((crawlingFileContent == null || crawlingFileContent.isEmpty()) && crawlingFile != null) {
-			/* Let's report here detailed error to help user when he selected a wrong file */
-			if(!crawlingFile.exists()) {
-				throw new FileNotFoundException(crawlingFile.getAbsolutePath() +  " does not exists");
-			}
-			if(!crawlingFile.isFile()) {
-				throw new FileNotFoundException(crawlingFile.getAbsolutePath() +  " exists but is not a regular file");
-			}
-			if(!crawlingFile.canRead()) {
-				throw new IOException("Can not read : " + crawlingFile.getAbsolutePath());
-			}
-		}
-		if (crawlingFile != null) {
-			FileInputStream inStream = null;
-			try {
-				inStream = new FileInputStream(crawlingFile);
-				FileUtils.copy(inStream, writer);
-			} finally {
-				if(inStream != null) {
-					try {
-						inStream.close();
-					} catch(IOException ignoredException) {
-						ConcurrentLog.info("Crawler_p", "Could not close crawlingFile : " + crawlingFile.getAbsolutePath());
-					}
-				}
-			}
-		} else {
-		    FileUtils.copy(crawlingFileContent, writer);
-		}
-		writer.close();
+    private static List<AnchorURL> crawlingFileStart(final File crawlingFile, int timezoneOffset,
+            final String crawlingFileContent) throws MalformedURLException, IOException, FileNotFoundException {
+        List<AnchorURL> hyperlinks_from_file;
+        // check if the crawl filter works correctly
+        final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new HashSet<String>(), new VocabularyScraper(), timezoneOffset);
+        final Writer writer = new TransformerWriter(null, null, scraper, false);
+        if((crawlingFileContent == null || crawlingFileContent.isEmpty()) && crawlingFile != null) {
+            /* Let's report here detailed error to help user when he selected a wrong file */
+            if(!crawlingFile.exists()) {
+                throw new FileNotFoundException(crawlingFile.getAbsolutePath() +  " does not exists");
+            }
+            if(!crawlingFile.isFile()) {
+                throw new FileNotFoundException(crawlingFile.getAbsolutePath() +  " exists but is not a regular file");
+            }
+            if(!crawlingFile.canRead()) {
+                throw new IOException("Can not read : " + crawlingFile.getAbsolutePath());
+            }
+        }
+        if (crawlingFile != null) {
+            FileInputStream inStream = null;
+            try {
+                inStream = new FileInputStream(crawlingFile);
+                FileUtils.copy(inStream, writer);
+            } finally {
+                if(inStream != null) {
+                    try {
+                        inStream.close();
+                    } catch(IOException ignoredException) {
+                        ConcurrentLog.info("Crawler_p", "Could not close crawlingFile : " + crawlingFile.getAbsolutePath());
+                    }
+                }
+            }
+        } else {
+            FileUtils.copy(crawlingFileContent, writer);
+        }
+        writer.close();
 
-		// get links and generate filter
-		hyperlinks_from_file = scraper.getAnchors();
-		return hyperlinks_from_file;
-	}
+        // get links and generate filter
+        hyperlinks_from_file = scraper.getAnchors();
+        return hyperlinks_from_file;
+    }
 
     private static Date timeParser(final boolean recrawlIfOlderCheck, final int number, final String unit) {
         if (!recrawlIfOlderCheck) return null;

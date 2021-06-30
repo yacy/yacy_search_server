@@ -3757,7 +3757,8 @@ public final class Switchboard extends serverSwitch {
             if ((failreason = Switchboard.this.stackUrl(profile, turl)) == null) successurls.add(turl); else failurls.put(turl, failreason);
             return;
         }
-        final List<Thread> stackthreads = new ArrayList<Thread>(); // do this concurrently
+        final ArrayList<Thread> stackthreads = new ArrayList<Thread>(); // do this concurrently
+        int maxthreads = 5 * Runtime.getRuntime().availableProcessors();
         for (DigestURL url: rootURLs) {
             final DigestURL turl = url;
             Thread t = new Thread("Switchboard.stackURLs") {
@@ -3769,7 +3770,13 @@ public final class Switchboard extends serverSwitch {
             };
             t.start();
             stackthreads.add(t);
-            try {Thread.sleep(100);} catch (final InterruptedException e) {} // to prevent that this fires more than 10 connections pre second!
+            if (stackthreads.size() > maxthreads) {
+                Thread w = stackthreads.get(0);
+                while (w.isAlive()) {
+                    try {Thread.sleep(100);} catch (final InterruptedException e) {}
+                }
+                stackthreads.remove(0);
+            }
         }
         final long waitingtime = 10 + (30000 / rootURLs.size()); // at most wait only halve an minute to prevent that the crawl start runs into a time-out
         for (Thread t: stackthreads) try {t.join(waitingtime);} catch (final InterruptedException e) {}

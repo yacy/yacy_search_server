@@ -85,7 +85,9 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         connector.setName("httpd:"+Integer.toString(port));
         connector.setIdleTimeout(9000); // timout in ms when no bytes send / received
         connector.setAcceptQueueSize(128);
+        
         server.addConnector(connector);
+        
 
         // add ssl/https connector
         boolean useSSL = sb.getConfigBool("server.https", false);
@@ -202,6 +204,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         context.setServer(server);
         context.setContextPath("/");
         context.setHandler(handlers);
+        context.setMaxFormContentSize(1024 * 1024 * 10); // allow 10MB, large forms may be required during crawl starts with long lists
 
         // make YaCy handlers (in context) and servlet context handlers available (both contain root context "/")
         // logic: 1. YaCy handlers are called if request not handled (e.g. proxy) then servlets handle it
