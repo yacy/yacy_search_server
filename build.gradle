@@ -1,0 +1,55 @@
+plugins {
+  id 'java'
+  id 'maven-publish'
+  id 'com.github.johnrengelman.shadow' version '5.1.0'
+}
+
+apply plugin: 'java'
+//apply plugin: 'maven'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+repositories {
+    flatDir {
+       dirs 'lib'
+    }
+}
+
+sourceSets {
+    main {
+        java {
+	    srcDirs = ['source']
+        }
+    }
+}
+
+group = 'net.yacy'
+version = '1.925'
+description = 'YaCy Search Server'
+java.sourceCompatibility = JavaVersion.VERSION_1_8
+java.targetCompatibility = JavaVersion.VERSION_1_8
+
+mainClassName = "net.yacy.yacy"
+applicationDefaultJvmArgs = ["-Xmx1024m"]
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'net.yacy.grid.mcp.MCP'
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    implementation(fileTree("lib"))
+}
