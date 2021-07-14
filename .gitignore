@@ -19,3 +19,4 @@ yacy.log
 /target/
 /test/DATA/
 /javadoc/
+/build/
