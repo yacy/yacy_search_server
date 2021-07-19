@@ -556,94 +556,6 @@
     <delete dir="test/DATA" failonerror="false"/>
   </target>
 
-  <target name="installonlinux">
-
-    <!-- copy configuration files -->
-    <copy todir="${DESTDIR}/usr/share/yacy">
-      <fileset dir=".">
-        <include name="yacy.logging"/>
-        <include name="yacy.yellow"/>
-        <include name="yacy.badwords.example"/>
-        <include name="yacy.stopwords"/>
-        <include name="yacy.parser"/>
-        <include name="httpd.mime"/>
-      </fileset>
-    </copy>
-
-      <!-- copy defaults -->
-    <copy todir="${DESTDIR}/usr/share/yacy/defaults">
-          <fileset dir="${defaults}" includes="**/*"/>
-      </copy>
-    
-    <!-- copy locales  -->
-    <copy todir="${DESTDIR}/usr/share/yacy/locales">
-      <fileset dir="${locales}">
-        <include name="*"/>
-      </fileset>
-    </copy>
-
-    <!-- copy skins  -->
-    <copy todir="${DESTDIR}/usr/share/yacy/skins">
-      <fileset dir="${skins}">
-        <include name="*"/>
-      </fileset>
-    </copy>
-
-    <!-- copy language statistics files -->
-    <copy todir="${DESTDIR}/usr/share/yacy/langdetect">
-      <fileset dir="${langdetect}">
-        <include name="*"/>
-      </fileset>
-    </copy>
-
-    <!-- copy shell scripts from bin/ -->
-    <!-- i'm not sure, if this is consistent with the debian policy -->
-    <!-- but for /usr/bin or /usr/lib we need an extra environment variable -->
-    <copy todir="${DESTDIR}/usr/share/yacy/bin">
-      <fileset dir="bin/">
-        <include name="*"/>
-      </fileset>
-    </copy>
-    <chmod dir="${DESTDIR}/usr/share/yacy/bin/" perm="755" includes="*"/>
-
-    <!-- copy documentation -->
-    <copy todir="${DESTDIR}/usr/share/doc/yacy">
-      <fileset dir=".">
-        <include name="readme.txt"/>
-        <include name="ChangeLog"/>
-          <include name="AUTHORS"/>
-          <include name="COPYRIGHT"/>
-          <include name="NOTICE"/>
-      </fileset>
-    </copy>
-
-    <!-- copy server pages -->
-    <copy todir="${DESTDIR}/usr/share/yacy/htroot">
-      <fileset dir="${htroot}">
-        <include name="**/*"/>
-        <exclude name="yacy/seedUpload/**"/>
-      </fileset>
-      <fileset dir="${htroot}">
-        <include name="yacy/seedUpload/yacySeedUploadFile.html"/>
-        <include name="yacy/seedUpload/yacySeedUploadFtp.html"/>
-      </fileset>
-    </copy>
-
-    <!-- prepare /var/lib/yacy -->
-    <mkdir dir="${DESTDIR}/var/lib/yacy" />
-    <mkdir dir="${DESTDIR}/var/lib/yacy/LOG" />
-    <mkdir dir="${DESTDIR}/var/lib/yacy/SETTINGS" />
-    <mkdir dir="${DESTDIR}/etc" />
-    <mkdir dir="${DESTDIR}/var/log" />
-    <symlink link="${DESTDIR}/usr/share/yacy/DATA"
-        resource="../../../var/lib/yacy"/>
-    <symlink link="${DESTDIR}/etc/yacy"
-        resource="../var/lib/yacy/SETTINGS"/>
-    <symlink link="${DESTDIR}/var/log/yacy"
-        resource="../lib/yacy/LOG"/>
-
-  </target>
-
   <!-- run YaCy (needed for NetBeans4) -->
   <target name="run" description="Run YaCy">
     <!-- debug options:
@@ -758,23 +670,6 @@
     </javadoc>
   </target>
 
-  <target name="rpm" depends="all" description="Creates the main rpm-package and another for lib">
-    <mkdir dir="${release}/RPMS/noarch" />
-    <mkdir dir="${release}/BUILD" />
-    <copy file="addon/yacy-svn-4.spec" tofile="${release}/SPECS/yacy-svn.spec" overwrite="true" filtering="true" />
-
-    <rpm specFile="yacy-svn.spec" topDir="${release}" />
-
-    <move file="${release}/RPMS/noarch/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm"
-          tofile="${release}/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
-    <move file="${release}/RPMS/noarch/yacy-lib-${releaseVersion}_${releaseNr}-3.noarch.rpm"
-          tofile="${release}/yacy-lib-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
-
-    <delete dir="${release}/SPECS" failonerror="false" />
-    <delete dir="${release}/RPMS" failonerror="false" />
-    <delete dir="${release_windows}" failonerror="false" />
-  </target>
-    
   <target name="distWinInstaller" depends="copyMain4Dist" description="Creates an NSIS Windows installer">
     <!-- http://nsisant.sourceforge.net/ -->
     <mkdir dir="${release_windows}" />
@@ -803,53 +698,6 @@
             <arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.dmg"/>
       </exec>
       <delete dir="${release_mac}" failonerror="false" verbose="false" />
-  </target>
-
-  <!-- to use the deb command the following debian packages must be installed: dpkg-dev debhelper m4 fakeroot -->
-  <target name="deb" depends="init" description="Creates a debian package">
-    <!-- replacing the old with the new revision number -->
-    <replaceregexp file="debian/changelog"
-                  match="yacy \(.*\) unstable; urgency=low"
-                  replace="yacy (${releaseVersion}.${releaseNr}) unstable; urgency=low" />
-
-    <!-- build debian package -->
-    <exec executable="dpkg-buildpackage">
-      <arg value="-b"/>
-      <arg value="-rfakeroot"/>
-      <arg value="-uc"/>
-    </exec>
-    <replaceregexp file="debian/changelog"
-                  match="yacy \(.*\) unstable; urgency=low"
-                  replace="yacy (*auto-git-version*) unstable; urgency=low" />
-  </target>
-
-  <target name="sign" depends="readBuildProperties" description="sign current release file in RELEASE/ with ${privateKeyFile}">
-    <fail message="There is no release file (${release}/${stdReleaseFile}) that could be signed !">
-        <condition>
-            <not><available file="${stdReleaseFile}" filepath="${release}" type="file" /></not>
-        </condition>
-    </fail>
-    <java classname="net.yacy.utils.CryptoLib" failonerror="true">
-      <classpath>
-        <pathelement location="${build}"/>
-      </classpath>
-      <arg line="--sign ${privateKeyFile} ${release}/${stdReleaseFile}"/>
-    </java>
-  </target>
-
-  <target name="genkey" depends="readBuildProperties" description="generate a pair of keys and write it to ${privateKeyFile} and ${privateKeyFile}.pub">
-    <fail message="There is already a private key file (${privateKeyFile})!">
-      <condition>
-        <available file="${privateKeyFile}" type="file" />
-      </condition>
-    </fail>
-    <java classname="net.yacy.utils.CryptoLib" failonerror="true">
-      <classpath>
-        <pathelement location="${build}"/>
-      </classpath>
-      <arg line="--gen-key ${privateKeyFile} ${privateKeyFile}.pub"/>
-    </java>
-    <chmod file="${privateKeyFile}" perm="600"/>
   </target>
 
   <target name="deleteData" description="start with a fresh yacy installation">
