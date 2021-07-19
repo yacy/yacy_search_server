@@ -20,3 +20,4 @@ yacy.log
 /test/DATA/
 /javadoc/
 /build/
+.gradle
