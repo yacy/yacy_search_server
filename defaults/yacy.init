@@ -760,11 +760,8 @@ cleanup.failedSearchURLtimeout = 86400000
 # is valid in unix/shell and windows environments but
 # not for first startup of YaCy
 
-# -Xmx<size> and -Xms<size> maximum/init Java heap size
-# if a high performance for large search indexes is wanted, then setting the values to equal number is recommended
-# if YaCy shall be nice in not-only-yacy environments, then the Xms value may be lower
+# -Xmx<size> maximum/init Java heap size
 javastart_Xmx=Xmx600m
-javastart_Xms=Xms90m
 
 # YaCy is able to use RAM copies of database tables. This needs a lot of RAM.
 # To switch on copying of file tables int RAM, there must be enough memory

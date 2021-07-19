@@ -192,11 +192,9 @@ fi
 if [ -f $CONFIGFILE ]
 then
 	# startup memory
-	for i in Xmx Xms; do
-		j="`grep javastart_$i $CONFIGFILE | sed 's/^[^=]*=//'`";
-		if [ -n "$j" ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
-	done
-	
+	j="`grep javastart_Xmx $CONFIGFILE | sed 's/^[^=]*=//'`";
+	if [ -n "$j" ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
+
 	# Priority
 	j="`grep javastart_priority $CONFIGFILE | sed 's/^[^=]*=//'`";
 
@@ -210,7 +208,7 @@ then
 #		JAVA_ARGS="-$i $JAVA_ARGS";
 #	done
 else
-    JAVA_ARGS="-Xmx600m -Xms180m $JAVA_ARGS";
+    JAVA_ARGS="-Xmx600m $JAVA_ARGS";
     PORT="8090"
 fi
 

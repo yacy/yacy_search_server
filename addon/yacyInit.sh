@@ -39,10 +39,8 @@ JAVA_ARGS="-Djava.awt.headless=true"
 if [ -f DATA/SETTINGS/yacy.conf ]
 then
 	# startup memory
-	for i in Xmx Xms; do
-		j="`grep javastart_$i DATA/SETTINGS/yacy.conf | sed 's/^[^=]*=//'`";
-		if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
-	done
+	j="`grep javastart_Xmx DATA/SETTINGS/yacy.conf | sed 's/^[^=]*=//'`";
+	if [ -n $j ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
 	
 	# Priority
 	j="`grep javastart_priority DATA/SETTINGS/yacy.conf | sed 's/^[^=]*=//'`";

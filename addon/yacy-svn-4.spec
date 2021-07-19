@@ -174,8 +174,6 @@ fi
 if [ -f \$DATA_HOME/SETTINGS/yacy.conf ]; then
 	i=\`grep javastart_Xmx \$DATA_HOME/SETTINGS/yacy.conf\`;
 	JAVA_MAX="-\${i#javastart_Xmx=}";
-	i=\`grep javastart_Xms \$DATA_HOME/SETTINGS/yacy.conf\`;
-	JAVA_MIN="-\${i#javastart_Xms=}";
 fi
 
 CLASSPATH="\$YACY_HOME/classes:."
@@ -194,7 +192,6 @@ fi
 
 WTF=\$1; shift
 if [ "\$1" == "--max" ]; then JAVA_MAX="-Xmx\$2"; shift; shift; fi
-if [ "\$1" == "--min" ]; then JAVA_MIN="-Xms\$2"; shift; shift; fi
 if [ "\$1" == "--nice" ]; then NICE="nice -n \$2"; shift; shift; fi
 if [ "\$1" == "--debug" ]; then DEBUG="-d"; shift; fi
 shift

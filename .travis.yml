@@ -18,10 +18,10 @@ before_install:
   - sudo apt-get install -y ghostscript dpkg-dev debhelper m4 fakeroot
 
 install:
-- cd libbuild && MAVEN_OPTS="-Xmx6g -Xms2g" mvn clean install && cd ..
+- cd libbuild && MAVEN_OPTS="-Xmx2g" mvn clean install && cd ..
 
 script:
-- MAVEN_OPTS="-Xmx6g -Xms2g" mvn clean install
+- MAVEN_OPTS="-Xmx2g" mvn clean install
 # test build instructions
 - ant
 - ant dist

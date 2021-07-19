@@ -110,7 +110,7 @@ then
 	fi
 	
 else
-	JAVA_ARGS="-Xmx120m -Xms120m $JAVA_ARGS"
+	JAVA_ARGS="-Xmx120m $JAVA_ARGS"
 fi
 
 # generating the proper classpath
