@@ -578,7 +578,7 @@ Use remote Solr server(s)==Использовать удалённую базу 
 Solr Hosts==Хосты Solr
 Solr Host Administration Interface==Интерфейс управления Solr
 Index Size==Документов в индексе
-It's easy to <a href="http://www.yacy-websearch.net/wiki/index.php/Dev:Solr" target="_blank">attach an external Solr to YaCy</a>.==Присоединить внешнюю базу Solr <a href="http://www.yacy-websearch.net/wiki/index.php/Dev:Solr" target="_blank">просто</a>.
+It's easy to <a href="https://wiki.yacy.net/index.php/Dev:Solr" target="_blank">attach an external Solr to YaCy</a>.==Присоединить внешнюю базу Solr <a href="https://wiki.yacy.net/index.php/Dev:Solr" target="_blank">просто</a>.
 This external Solr can be used instead the internal Solr. It can also be used additionally to the internal Solr, then both Solr indexes are mirrored.==Внешняя база данных Solr будет использоваться вместо встроенной. Вы также можете использовать дополнительно встроенную базу, но тогда индексы будут сохраняться в обе базы.
 Solr URL(s)==Ссылки на базу Solr
 You can set one or more Solr targets here which are accessed as a shard. For several targets, list them using a ',' (comma) as separator.==Вы можете установить одну или более баз Solr, которые будут доступны распределённо. Адреса нескольких баз указывайте через запятую.

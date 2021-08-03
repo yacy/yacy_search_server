@@ -22,26 +22,26 @@ fi
 
 if [ ! -x "$JAVA" ]
 then
-	echo "The java command is not executable."
-	echo "Either you have not installed java or it is not in your PATH"
-	#Cron supports setting the path in 
-	#echo "Has this script been invoked by CRON?"
-	#echo "if so, please set PATH in the crontab, or set the correct path in the variable in this script."
-	exit 1
+    echo "The java command is not executable."
+    echo "Either you have not installed java or it is not in your PATH"
+    #Cron supports setting the path in 
+    #echo "Has this script been invoked by CRON?"
+    #echo "if so, please set PATH in the crontab, or set the correct path in the variable in this script."
+    exit 1
 fi
 
 usage() {
-	cat - <<USAGE
+    cat - <<USAGE
 startscript for YaCy on UNIX-like systems
 Options
-  -h, --help		show this help
-  -t, --tail-log	show the output of "tail -f DATA/LOG/yacy00.log" after starting YaCy
-  -l, --logging		save the output of YaCy to yacy.log
-  -d, --debug		show the output of YaCy on the console and enable remote monitoring with JMX
-  -f, --foreground	run as a foreground process, showing the output of YaCy on the console
-  -p, --print-out	only print the command, which would be executed to start YaCy
+  -h, --help                show this help
+  -t, --tail-log            show the output of "tail -f DATA/LOG/yacy00.log" after starting YaCy
+  -l, --logging             save the output of YaCy to yacy.log
+  -d, --debug               show the output of YaCy on the console and enable remote monitoring with JMX
+  -f, --foreground          run as a foreground process, showing the output of YaCy on the console
+  -p, --print-out           only print the command, which would be executed to start YaCy
   -s, --startup [data-path] start YaCy using the specified data folder path, relative to the current user home
-  -g, --gui		start a gui for YaCy
+  -g, --gui                 start a gui for YaCy
 USAGE
 }
 
@@ -50,12 +50,12 @@ YACY_PARENT_DATA_PATH="`dirname $0`"
 cd "$YACY_PARENT_DATA_PATH"
 
 case "$OS" in
-	*"BSD"|"Darwin")
-		if [ $(echo $@ | grep -o "\-\-" | wc -l) -ne 0  ]
-		then
-			echo "WARNING: Unfortunately this script does not support long options in $OS."
-		fi
-		
+    *"BSD"|"Darwin")
+        if [ $(echo $@ | grep -o "\-\-" | wc -l) -ne 0  ]
+        then
+            echo "WARNING: Unfortunately this script does not support long options in $OS."
+        fi
+        
         options="`getopt hdlptsg: $*`"
 ;;
   *)
@@ -65,7 +65,7 @@ esac
 
 if [ $? -ne 0 ];then
 
-	exit 1;
+    exit 1;
 fi
 
 isparameter=0; #options or parameter part of getopts?
@@ -79,76 +79,76 @@ TAILLOG=0
 STARTUP=0
 GUI=0
 for option in $options;do
-	if [ $isparameter -ne 1 ];then #option
-		case $option in
-			-h|--help) 
-				usage
-				exit 3
-				;;
-			-l|--logging) 
-				LOGGING=1
-				if [ $DEBUG -eq 1 ];then
-					echo "can not combine -l and -d"
-					exit 1;
-				fi
-				if [ $FOREGROUND -eq 1 ];then
-					echo "can not combine -l and -f"
-					exit 1;
-				fi
-				;;
-			-d|--debug)
-				DEBUG=1
+    if [ $isparameter -ne 1 ];then #option
+        case $option in
+            -h|--help) 
+                usage
+                exit 3
+                ;;
+            -l|--logging) 
+                LOGGING=1
+                if [ $DEBUG -eq 1 ];then
+                    echo "can not combine -l and -d"
+                    exit 1;
+                fi
+                if [ $FOREGROUND -eq 1 ];then
+                    echo "can not combine -l and -f"
+                    exit 1;
+                fi
+                ;;
+            -d|--debug)
+                DEBUG=1
                 # enable asserts
                 JAVA_ARGS="$JAVA_ARGS -ea -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
-				if [ $LOGGING -eq 1 ];then
-					echo "can not combine -l and -d"
-					exit 1;
-				fi
-				;;
-			-f|--foreground)
-				FOREGROUND=1
-				if [ $LOGGING -eq 1 ];then
-					echo "can not combine -l and -f"
-					exit 1;
-				fi
-				;;
-			-p|--print-out)
-				PRINTONLY=1
-				;;
-			-t|--tail-log)
-				TAILLOG=1
-				;;
-			-s|--startup)
-				STARTUP=1
-				isparameter=1
-				;;
-			-g|--gui)
-				GUI=1
-				isparameter=1
-				;;
-		esac #case option 
-	else #parameter
-		if [ $option = "--" ];then #option / parameter separator
-			isparameter=1;
-			continue
-		else
-			if [ $parameter ];then
-				parameter="$parameter $option"
-			else
-				parameter="$option"
-			fi
-		fi
-	fi #parameter or option?
+                if [ $LOGGING -eq 1 ];then
+                    echo "can not combine -l and -d"
+                    exit 1;
+                fi
+                ;;
+            -f|--foreground)
+                FOREGROUND=1
+                if [ $LOGGING -eq 1 ];then
+                    echo "can not combine -l and -f"
+                    exit 1;
+                fi
+                ;;
+            -p|--print-out)
+                PRINTONLY=1
+                ;;
+            -t|--tail-log)
+                TAILLOG=1
+                ;;
+            -s|--startup)
+                STARTUP=1
+                isparameter=1
+                ;;
+            -g|--gui)
+                GUI=1
+                isparameter=1
+                ;;
+        esac #case option 
+    else #parameter
+        if [ $option = "--" ];then #option / parameter separator
+            isparameter=1;
+            continue
+        else
+            if [ $parameter ];then
+                parameter="$parameter $option"
+            else
+                parameter="$option"
+            fi
+        fi
+    fi #parameter or option?
 done
 
 if [ ! -z "$parameter" ] && [ "$STARTUP" -eq 1 -o "$GUI" -eq 1 ]; then
-	# The data path is explicitely provided with startup or gui option
-	YACY_PARENT_DATA_PATH="`echo $parameter | cut -d' ' -f1`"
-	if [ ! "`echo $YACY_PARENT_DATA_PATH | cut -c1`" = "/" ]; then
-		# Parent DATA path is relative to the user home
-		YACY_PARENT_DATA_PATH="$HOME/$YACY_PARENT_DATA_PATH"
-	fi
-	CONFIGFILE="$YACY_PARENT_DATA_PATH/DATA/SETTINGS/yacy.conf"
+    # The data path is explicitely provided with startup or gui option
+    YACY_PARENT_DATA_PATH="`echo $parameter | cut -d' ' -f1`"
+    if [ ! "`echo $YACY_PARENT_DATA_PATH | cut -c1`" = "/" ]; then
+        # Parent DATA path is relative to the user home
+        YACY_PARENT_DATA_PATH="$HOME/$YACY_PARENT_DATA_PATH"
+    fi
+    CONFIGFILE="$YACY_PARENT_DATA_PATH/DATA/SETTINGS/yacy.conf"
 fi
 
 #echo $options;exit 0 #DEBUG for getopts
@@ -169,8 +169,8 @@ then
     # JAVA_ARGS="$JAVA_ARGS -XX:+UnlockExperimentalVMOptions -XX:+UseG1GC"
 elif [ $OS = "SunOS" ]
 then
-	# the UseConcMarkSweepGC option caused a full CPU usage - bug on Darwin.
-	# It was reported that the same option causes good performance on solaris.
+    # the UseConcMarkSweepGC option caused a full CPU usage - bug on Darwin.
+    # It was reported that the same option causes good performance on solaris.
     JAVA_ARGS="$JAVA_ARGS -XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode"
     ENABLEHUGEPAGES=1
 fi 
@@ -184,29 +184,33 @@ fi
 #turn on MMap for Solr if OS is a 64bit OS
 if [ -n "`uname -m | grep 64`" ]; then JAVA_ARGS="$JAVA_ARGS -Dsolr.directoryFactory=solr.MMapDirectoryFactory"; fi
 
-if [ ! -f $CONFIGFILE -a -f "$YACY_PARENT_DATA_PATH/DATA/SETTINGS/httpProxy.conf" ]
-then
-	# old config if new does not exist
-	CONFIGFILE="$YACY_PARENT_DATA_PATH/DATA/SETTINGS/httpProxy.conf"
-fi
 if [ -f $CONFIGFILE ]
 then
-	# startup memory
-	j="`grep javastart_Xmx $CONFIGFILE | sed 's/^[^=]*=//'`";
-	if [ -n "$j" ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
+    # startup memory
 
-	# Priority
-	j="`grep javastart_priority $CONFIGFILE | sed 's/^[^=]*=//'`";
+    if [ -z "$YACY_JAVASTART_XMX" ]
+    then
+        # When YACY_JAVASTART_XMX is not set or empty:
+        # Read from $CONFIGFILE
+        j="`grep javastart_Xmx $CONFIGFILE | sed 's/^[^=]*=//'`";
+        if [ -n "$j" ]; then JAVA_ARGS="-$j $JAVA_ARGS"; fi;
+    else
+        # use the YACY_JAVASTART_XMX variable
+        JAVA_ARGS="-$YACY_JAVASTART_XMX $JAVA_ARGS"
+    fi
 
-	if [ -n "$j" ]; then JAVA="nice -n $j $JAVA"; fi;
+    # Priority
+    j="`grep javastart_priority $CONFIGFILE | sed 's/^[^=]*=//'`";
+
+    if [ -n "$j" ]; then JAVA="nice -n $j $JAVA"; fi;
 
     PORT="`grep ^port= $CONFIGFILE | sed 's/^[^=]*=//'`";
     if [ -z "$PORT" ]; then PORT="8090"; fi;
-	
-#	for i in `grep javastart $CONFIGFILE`;do
-#		i="${i#javastart_*=}";
-#		JAVA_ARGS="-$i $JAVA_ARGS";
-#	done
+    
+#    for i in `grep javastart $CONFIGFILE`;do
+#        i="${i#javastart_*=}";
+#        JAVA_ARGS="-$i $JAVA_ARGS";
+#    done
 else
     JAVA_ARGS="-Xmx600m $JAVA_ARGS";
     PORT="8090"
@@ -224,43 +228,43 @@ cmdline="$JAVA $JAVA_ARGS -classpath $CLASSPATH net.yacy.yacy";
 
 if [ $STARTUP -eq 1 ] #startup
 then
-	cmdline="$cmdline -startup $parameter"
+    cmdline="$cmdline -startup $parameter"
 elif [ $GUI -eq 1 ];then #gui
-	cmdline="$cmdline -gui $parameter"
+    cmdline="$cmdline -gui $parameter"
 fi
 if [ $DEBUG -eq 1 ] #debug
 then
-	cmdline=$cmdline
+    cmdline=$cmdline
 elif [ $FOREGROUND -eq 1 ];then # foreground process without remote JMX monitoring
-	cmdline=$cmdline
+    cmdline=$cmdline
 elif [ $LOGGING -eq 1 ];then #logging
-	cmdline="$cmdline >> yacy.log & echo \$! > $PIDFILE"
+    cmdline="$cmdline >> yacy.log & echo \$! > $PIDFILE"
 else
-	cmdline="$cmdline >/dev/null 2>/dev/null &"
+    cmdline="$cmdline >/dev/null 2>/dev/null &"
 fi
 if [ $PRINTONLY -eq 1 ];then
-	echo $cmdline
+    echo $cmdline
 else
-	echo "****************** YaCy Web Crawler/Indexer & Search Engine *******************"
-	echo "**** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****"
-	echo "****   USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/   ****"
-	echo "**  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy<xx>.log)                **"
-	echo "**  STOP         YaCy: execute stopYACY.sh and wait some seconds             **"
+    echo "****************** YaCy Web Crawler/Indexer & Search Engine *******************"
+    echo "**** (C) by Michael Peter Christen, usage granted under the GPL Version 2  ****"
+    echo "****   USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/   ****"
+    echo "**  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy<xx>.log)                **"
+    echo "**  STOP         YaCy: execute stopYACY.sh and wait some seconds             **"
     echo "**  GET HELP for YaCy: join our community at https://searchlab.eu            **"
-	echo "*******************************************************************************"
-	if [ $DEBUG -eq 1 ] #debug
-	then
-		# with exec the java process become the main process and will receive signals such as SIGTERM
-		exec $cmdline
-	elif [ $FOREGROUND -eq 1 ];then # foreground process without remote JMX monitoring
-		# with exec the java process become the main process and will receive signals such as SIGTERM
-		exec $cmdline
-	else
-		echo " >> YaCy started as daemon process. Administration at http://localhost:$PORT << "
-		eval $cmdline
-		if [ "$TAILLOG" -eq "1" -a ! "$DEBUG" -eq "1" ];then
-			sleep 1
-			tail -f DATA/LOG/yacy00.log
-		fi
-	fi
+    echo "*******************************************************************************"
+    if [ $DEBUG -eq 1 ] #debug
+    then
+        # with exec the java process become the main process and will receive signals such as SIGTERM
+        exec $cmdline
+    elif [ $FOREGROUND -eq 1 ];then # foreground process without remote JMX monitoring
+        # with exec the java process become the main process and will receive signals such as SIGTERM
+        exec $cmdline
+    else
+        echo " >> YaCy started as daemon process. Administration at http://localhost:$PORT << "
+        eval $cmdline
+        if [ "$TAILLOG" -eq "1" -a ! "$DEBUG" -eq "1" ];then
+            sleep 1
+            tail -f DATA/LOG/yacy00.log
+        fi
+    fi
 fi

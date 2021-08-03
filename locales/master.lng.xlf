@@ -4935,7 +4935,7 @@
        <source>Index Size</source>
     </trans-unit>
     <trans-unit id="e587b435" xml:space="preserve" approved="no" translate="yes">
-       <source>It's easy to &lt;a href="http://www.yacy-websearch.net/wiki/index.php/Dev:Solr" target="_blank"&gt;attach an external Solr to YaCy&lt;/a&gt;.</source>
+       <source>It's easy to &lt;a href="https://wiki.yacy.net/index.php/Dev:Solr" target="_blank"&gt;attach an external Solr to YaCy&lt;/a&gt;.</source>
     </trans-unit>
     <trans-unit id="35e7810" xml:space="preserve" approved="no" translate="yes">
        <source>This external Solr can be used instead the internal Solr. It can also be used additionally to the internal Solr, then both Solr indexes are mirrored.</source>

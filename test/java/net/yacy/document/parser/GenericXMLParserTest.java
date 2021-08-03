@@ -23,9 +23,9 @@
 package net.yacy.document.parser;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -45,7 +45,7 @@ import net.yacy.document.VocabularyScraper;
 
 /**
  * Unit tests for the {@link GenericXMLParser} class
- * 
+ *
  * @author luccioman
  *
  */
@@ -58,13 +58,13 @@ public class GenericXMLParserTest {
 
 	@Before
 	public void setUp() {
-		this.parser = new GenericXMLParser();
+		parser = new GenericXMLParser();
 	}
 
 	/**
 	 * Unit test for the GenericXMLParser.parse() function with some small XML
 	 * test files.
-	 * 
+	 *
 	 * @throws Exception
 	 *             when an unexpected error occurred
 	 */
@@ -77,7 +77,7 @@ public class GenericXMLParserTest {
 			FileInputStream inStream = new FileInputStream(new File(folder, fileName));
 			DigestURL location = new DigestURL("http://localhost/" + fileName);
 			try {
-				Document[] documents = this.parser.parse(location, "text/xml", null, new VocabularyScraper(), 0,
+				Document[] documents = parser.parse(location, "text/xml", null, new VocabularyScraper(), 0,
 						inStream);
 				assertNotNull("Parser result must not be null for file " + fileName, documents);
 				assertNotNull("Parsed text must not be empty for file " + fileName, documents[0].getTextString());
@@ -90,7 +90,7 @@ public class GenericXMLParserTest {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param parser
 	 *            generic xml parser instance. Must not be null.
 	 * @param encodedXML
@@ -123,10 +123,10 @@ public class GenericXMLParserTest {
 
 	/**
 	 * Test UTF-8 charset detection
-	 * 
+	 *
 	 * @see RFC 7303 "UTF-8 Charset" example
 	 *      (https://tools.ietf.org/html/rfc7303#section-8.1)
-	 * 
+	 *
 	 * @throws Exception
 	 *             when an unexpected error occurred
 	 */
@@ -138,7 +138,7 @@ public class GenericXMLParserTest {
 		 */
 		byte[] encodedXML = ("<?xml version=\"1.0\" encoding=\"utf-8\"?>" + UMLAUT_TEXT_TAG)
 				.getBytes(StandardCharsets.UTF_8);
-		testCharsetDetection(this.parser, encodedXML, "application/xml; charset=utf-8", StandardCharsets.UTF_8.name(),
+		testCharsetDetection(parser, encodedXML, "application/xml; charset=utf-8", StandardCharsets.UTF_8.name(),
 				"Maßkrügen");
 
 		/*
@@ -146,18 +146,18 @@ public class GenericXMLParserTest {
 		 * declaration
 		 */
 		encodedXML = ("<?xml version=\"1.0\"?>" + UMLAUT_TEXT_TAG).getBytes(StandardCharsets.UTF_8);
-		testCharsetDetection(this.parser, encodedXML, "application/xml; charset=utf-8", StandardCharsets.UTF_8.name(),
+		testCharsetDetection(parser, encodedXML, "application/xml; charset=utf-8", StandardCharsets.UTF_8.name(),
 				"Maßkrügen");
 	}
 
 	/**
 	 * Test UTF-16 charset detection
-	 * 
+	 *
 	 * @see RFC 7303 "UTF-16 Charset" and
 	 *      "Omitted Charset and 16-Bit MIME Entity" examples
 	 *      (https://tools.ietf.org/html/rfc7303#section-8.2 and
 	 *      https://tools.ietf.org/html/rfc7303#section-8.4)
-	 * 
+	 *
 	 * @throws Exception
 	 *             when an unexpected error occurred
 	 */
@@ -169,7 +169,7 @@ public class GenericXMLParserTest {
 		 */
 		byte[] encodedXML = ("<?xml version=\"1.0\" encoding=\"utf-16\"?>" + UMLAUT_TEXT_TAG)
 				.getBytes(StandardCharsets.UTF_16);
-		testCharsetDetection(this.parser, encodedXML, "application/xml; charset=utf-16", StandardCharsets.UTF_16.name(),
+		testCharsetDetection(parser, encodedXML, "application/xml; charset=utf-16", StandardCharsets.UTF_16.name(),
 				"Maßkrügen");
 
 		/*
@@ -177,7 +177,7 @@ public class GenericXMLParserTest {
 		 * XML declaration having only BOM (Byte Order Mark)
 		 */
 		encodedXML = ("<?xml version=\"1.0\"?>" + UMLAUT_TEXT_TAG).getBytes(StandardCharsets.UTF_16);
-		testCharsetDetection(this.parser, encodedXML, "application/xml; charset=utf-16",
+		testCharsetDetection(parser, encodedXML, "application/xml; charset=utf-16",
 				StandardCharsets.UTF_16BE.name(), "Maßkrügen");
 
 		/*
@@ -186,22 +186,22 @@ public class GenericXMLParserTest {
 		 */
 		encodedXML = ("<?xml version=\"1.0\" encoding=\"utf-16\"?>" + UMLAUT_TEXT_TAG)
 				.getBytes(StandardCharsets.UTF_16);
-		testCharsetDetection(this.parser, encodedXML, "application/xml", StandardCharsets.UTF_16.name(), "Maßkrügen");
+		testCharsetDetection(parser, encodedXML, "application/xml", StandardCharsets.UTF_16.name(), "Maßkrügen");
 
 		/*
 		 * Charset is omitted in both Content-Type HTTP header and XML
 		 * declaration with BOM (Byte Order Mark)
 		 */
 		encodedXML = ("<?xml version=\"1.0\"?>" + UMLAUT_TEXT_TAG).getBytes(StandardCharsets.UTF_16);
-		testCharsetDetection(this.parser, encodedXML, "application/xml", StandardCharsets.UTF_16BE.name(), "Maßkrügen");
+		testCharsetDetection(parser, encodedXML, "application/xml", StandardCharsets.UTF_16BE.name(), "Maßkrügen");
 	}
 
 	/**
 	 * Test ISO-8859-1 charset detection
-	 * 
+	 *
 	 * @see RFC 7303 "Omitted Charset and 8-Bit MIME Entity" example
 	 *      (https://tools.ietf.org/html/rfc7303#section-8.3)
-	 * 
+	 *
 	 * @throws Exception
 	 *             when an unexpected error occurred
 	 */
@@ -213,7 +213,7 @@ public class GenericXMLParserTest {
 		 */
 		byte[] encodedXML = ("<?xml version=\"1.0\" encoding=\"iso-8859-1\"?>" + UMLAUT_TEXT_TAG)
 				.getBytes(StandardCharsets.ISO_8859_1);
-		testCharsetDetection(this.parser, encodedXML, "application/xml", StandardCharsets.ISO_8859_1.name(),
+		testCharsetDetection(parser, encodedXML, "application/xml", StandardCharsets.ISO_8859_1.name(),
 				"Maßkrügen");
 	}
 
@@ -221,10 +221,10 @@ public class GenericXMLParserTest {
 	 * Test charset detection when the character encoding is omitted in
 	 * Content-Type header, and content has a XML declaration with no encoding
 	 * declaration
-	 * 
+	 *
 	 * @see RFC 7303 "Omitted Charset, No Internal Encoding Declaration" example
 	 *      (https://tools.ietf.org/html/rfc7303#section-8.5)
-	 * 
+	 *
 	 * @throws Exception
 	 *             when an unexpected error occurred
 	 */
@@ -242,15 +242,15 @@ public class GenericXMLParserTest {
 		encodedXML = ("<?xml version=\"1.0\"?>"
 				+ "<text>In M&#x000FC;nchen steht ein Hofbr&#x000E4;uhaus, dort gibt es Bier in Ma&#x000DF;kr&#x000FC;gen</text>")
 						.getBytes(StandardCharsets.US_ASCII);
-		testCharsetDetection(this.parser, encodedXML, "application/xml", StandardCharsets.UTF_8.name(), "Maßkrügen");
+		testCharsetDetection(parser, encodedXML, "application/xml", StandardCharsets.UTF_8.name(), "Maßkrügen");
 	}
 
 	/**
 	 * Test UTF-16BE charset detection
-	 * 
+	 *
 	 * @see RFC 7303 "UTF-16BE Charset" example
 	 *      (https://tools.ietf.org/html/rfc7303#section-8.6)
-	 * 
+	 *
 	 * @throws Exception
 	 *             when an unexpected error occurred
 	 */
@@ -262,13 +262,13 @@ public class GenericXMLParserTest {
 		 */
 		byte[] encodedXML = ("<?xml version='1.0' encoding='utf-16be'?>" + UMLAUT_TEXT_TAG)
 				.getBytes(StandardCharsets.UTF_16BE);
-		testCharsetDetection(this.parser, encodedXML, "application/xml; charset=utf-16be",
+		testCharsetDetection(parser, encodedXML, "application/xml; charset=utf-16be",
 				StandardCharsets.UTF_16BE.name(), "Maßkrügen");
 	}
 
 	/**
 	 * Test absolute URLs detection in XML elements attributes.
-	 * 
+	 *
 	 * @throws Exception
 	 *             when an unexpected error occurred
 	 */
@@ -288,7 +288,7 @@ public class GenericXMLParserTest {
 		String charsetFromHttpHeader = HeaderFramework.getCharacterEncoding(contentTypeHeader);
 		DigestURL location = new DigestURL("http://localhost/testfile.xml");
 		try {
-			Document[] documents = this.parser.parse(location, contentTypeHeader, charsetFromHttpHeader,
+			Document[] documents = parser.parse(location, contentTypeHeader, charsetFromHttpHeader,
 					new VocabularyScraper(), 0, inStream);
 			assertEquals(1, documents.length);
 			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
@@ -304,7 +304,7 @@ public class GenericXMLParserTest {
 
 	/**
 	 * Test absolute URLs detection in XML elements text.
-	 * 
+	 *
 	 * @throws Exception
 	 *             when an unexpected error occurred
 	 */
@@ -324,7 +324,7 @@ public class GenericXMLParserTest {
 		String charsetFromHttpHeader = HeaderFramework.getCharacterEncoding(contentTypeHeader);
 		DigestURL location = new DigestURL("http://localhost/testfile.xml");
 		try {
-			Document[] documents = this.parser.parse(location, contentTypeHeader, charsetFromHttpHeader,
+			Document[] documents = parser.parse(location, contentTypeHeader, charsetFromHttpHeader,
 					new VocabularyScraper(), 0, inStream);
 			assertEquals(1, documents.length);
 			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
@@ -337,7 +337,7 @@ public class GenericXMLParserTest {
 			inStream.close();
 		}
 	}
-	
+
 	/**
 	 * Test parsing well-formed XML fragment (no XML declaration, no DTD or schema)
 	 * @throws Exception when an unexpected error occurred
@@ -351,18 +351,18 @@ public class GenericXMLParserTest {
 		String charsetFromHttpHeader = HeaderFramework.getCharacterEncoding(contentTypeHeader);
 		DigestURL location = new DigestURL("http://localhost/testfile.xml");
 		try {
-			Document[] documents = this.parser.parse(location, contentTypeHeader, charsetFromHttpHeader,
+			Document[] documents = parser.parse(location, contentTypeHeader, charsetFromHttpHeader,
 					new VocabularyScraper(), 0, inStream);
 			assertEquals(1, documents.length);
 			assertEquals("Node content1 Node content2", documents[0].getTextString());
 		} finally {
 			inStream.close();
-		}		
+		}
 	}
-	
+
 	/**
 	 * Test URLs detection when applying limits.
-	 * 
+	 *
 	 * @throws Exception
 	 *             when an unexpected error occurred
 	 */
@@ -376,7 +376,7 @@ public class GenericXMLParserTest {
 				+ "Home page : http://yacy.net - International Forum : "
 				+ "https://searchlab.eu "
 				+ "and this is a mention to a relative URL : /document.html</p>"
-				+ "<p>Here are YaCy<a href=\"http://mantis.tokeek.de\">bug tracker</a> and <a href=\"http://www.yacy-websearch.net/wiki/\">Wiki</a>."
+				+ "<p>Here are YaCy<a href=\"http://mantis.tokeek.de\">bug tracker</a> and <a href=\"https://wiki.yacy.net/index.php/\">Wiki</a>."
 				+ "And this is a relative link to another <a href=\"/document2.html\">sub document</a></p>"
 				+ "</body>" + "</html>";
 
@@ -386,12 +386,12 @@ public class GenericXMLParserTest {
 		String charsetFromHttpHeader = HeaderFramework.getCharacterEncoding(contentTypeHeader);
 		DigestURL location = new DigestURL("http://localhost/testfile.xml");
 		try {
-			Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader, new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, Long.MAX_VALUE);
+			Document[] documents = parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader, new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, Long.MAX_VALUE);
 			assertEquals(1, documents.length);
 			assertFalse(documents[0].isPartiallyParsed());
-			
+
 			assertTrue(documents[0].getTextString().contains("And this is a relative link"));
-			
+
 			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
 			assertEquals(5, detectedAnchors.size());
@@ -399,22 +399,22 @@ public class GenericXMLParserTest {
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://yacy.net")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("https://searchlab.eu")));
 			assertTrue(detectedAnchors.contains(new AnchorURL("http://mantis.tokeek.de")));
-			assertTrue(detectedAnchors.contains(new AnchorURL("http://www.yacy-websearch.net/wiki/")));
+			assertTrue(detectedAnchors.contains(new AnchorURL("https://wiki.yacy.net/index.php/")));
 		} finally {
 			inStream.close();
 		}
-		
+
 		/* Links limit exceeded */
 		inStream = new ByteArrayInputStream(xhtml.getBytes(StandardCharsets.UTF_8.name()));
 		try {
-			Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader,
+			Document[] documents = parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader,
 					new VocabularyScraper(), 0, inStream, 2, Long.MAX_VALUE);
 			assertEquals(1, documents.length);
 			assertTrue(documents[0].isPartiallyParsed());
-			
+
 			assertTrue(documents[0].getTextString().contains("Home page"));
 			assertFalse(documents[0].getTextString().contains("And this is a relative link"));
-			
+
 			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
 			assertEquals(2, detectedAnchors.size());
@@ -423,7 +423,7 @@ public class GenericXMLParserTest {
 		} finally {
 			inStream.close();
 		}
-		
+
 		/* Bytes limit exceeded */
 		StringBuilder xhtmlBuilder = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>")
 				.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">")
@@ -436,25 +436,25 @@ public class GenericXMLParserTest {
 				.append("Home page : http://yacy.net - International Forum : ")
 				.append("https://searchlab.eu ")
 				.append("and this is a mention to a relative URL : /document.html</p>");
-		
+
 		/* Add some filler text to reach a total size beyond SAX parser internal input stream buffers */
 		while(xhtmlBuilder.length() < 1024 * 20) {
 			xhtmlBuilder.append("<p>Some text to parse</p>");
 		}
-		
+
 		int firstBytes = xhtmlBuilder.toString().getBytes(StandardCharsets.UTF_8.name()).length;
-		xhtmlBuilder.append("<p>Here are YaCy<a href=\"http://mantis.tokeek.de\">bug tracker</a> and <a href=\"http://www.yacy-websearch.net/wiki/\">Wiki</a>.")
+		xhtmlBuilder.append("<p>Here are YaCy<a href=\"http://mantis.tokeek.de\">bug tracker</a> and <a href=\"https://wiki.yacy.net/index.php/\">Wiki</a>.")
 			.append("And this is a relative link to another <a href=\"/document2.html\">sub document</a></p>")
 			.append("</body></html>");
 		inStream = new ByteArrayInputStream(xhtmlBuilder.toString().getBytes(StandardCharsets.UTF_8.name()));
 		try {
-			Document[] documents = this.parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader, new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, firstBytes);
+			Document[] documents = parser.parseWithLimits(location, contentTypeHeader, charsetFromHttpHeader, new VocabularyScraper(), 0, inStream, Integer.MAX_VALUE, firstBytes);
 			assertEquals(1, documents.length);
 			assertTrue(documents[0].isPartiallyParsed());
-			
+
 			assertTrue(documents[0].getTextString().contains("and this is a mention to a relative URL"));
 			assertFalse(documents[0].getTextString().contains("And this is a relative link to another"));
-			
+
 			Collection<AnchorURL> detectedAnchors = documents[0].getAnchors();
 			assertNotNull(detectedAnchors);
 			assertEquals(3, detectedAnchors.size());
