@@ -366,7 +366,7 @@ public class Crawler_p {
                 boolean obeyHtmlRobotsNofollow = "on".equals(post.get("obeyHtmlRobotsNofollow", "false"));
                 env.setConfig("obeyHtmlRobotsNofollow", obeyHtmlRobotsNofollow);
 
-                final boolean indexText = "on".equals(post.get("indexText", "false"));
+                final boolean indexText = "on".equals(post.get("indexText", "on"));
                 env.setConfig("indexText", indexText);
 
                 final boolean indexMedia = "on".equals(post.get("indexMedia", "false"));
@@ -536,12 +536,12 @@ public class Crawler_p {
                     try {
                         if (newcrawlingdepth > 0) {
                             if (fullDomain) {
-                                /* Crawl is restricted to start domains or sub-paths : we have to get all the start links now. 
+                                /* Crawl is restricted to start domains or sub-paths : we have to get all the start links now.
                                  * Otherwise we can get them asynchronously later, thus allowing to handle more efficiently large start crawlingFiles */
                                 hyperlinks_from_file = crawlingFileStart(crawlingFile, timezoneOffset, crawlingFileContent);
                                 newcrawlingMustMatch = CrawlProfile.siteFilter(hyperlinks_from_file);
                             } else if (subPath) {
-                                /* Crawl is restricted to start domains or sub-paths : we have to get all the start links now. 
+                                /* Crawl is restricted to start domains or sub-paths : we have to get all the start links now.
                                  * Otherwise we can get them asynchronously later, thus allowing to handle more efficiently large start crawlingFiles */
                                 hyperlinks_from_file = crawlingFileStart(crawlingFile, timezoneOffset, crawlingFileContent);
                                 newcrawlingMustMatch = CrawlProfile.subpathFilter(hyperlinks_from_file);
@@ -770,7 +770,7 @@ public class Crawler_p {
         /*
          *  <input id="customPPM" name="customPPM" type="number" min="10" max="30000" style="width:46px" value="#[customPPMdefault]#" />PPM
             <input id="latencyFactor" name="latencyFactor" type="number" min="0.1" max="3.0" step="0.1" style="width:32px" value="#[latencyFactorDefault]#" />LF
-            <input id="MaxSameHostInQueue" name="MaxSameHostInQueue" type="number" min="1" max="30" style="width:32px" value="#[MaxSameHostInQueueDefault]#" />MH            
+            <input id="MaxSameHostInQueue" name="MaxSameHostInQueue" type="number" min="1" max="30" style="width:32px" value="#[MaxSameHostInQueueDefault]#" />MH
             <input type="submit" name="crawlingPerformance" value="set" />
             (<a href="/Crawler_p.html?crawlingPerformance=minimum">min</a>/<a href="/Crawler_p.html?crawlingPerformance=maximum">max</a>)
             </td>
