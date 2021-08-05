@@ -178,7 +178,7 @@ fi
 #turn on support for large memory pages if supported by OS
 if [ $ENABLEHUGEPAGES -eq 1 ]
 then
-    JAVA_ARGS="$JAVA_ARGS -XX:+UseLargePages"
+    JAVA_ARGS="$JAVA_ARGS -XX:MinHeapFreeRatio=60 -XX:MaxHeapFreeRatio=90"
 fi
 
 #turn on MMap for Solr if OS is a 64bit OS
