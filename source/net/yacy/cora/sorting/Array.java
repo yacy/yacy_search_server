@@ -133,14 +133,14 @@ public class Array {
 
         @Override
         public Integer buffer() {
-            return new Integer(0);
+            return Integer.valueOf(0);
         }
 
         @Override
         public void swap(final int i, final int j, Integer buffer) {
-            buffer = get(i);
-            set(i, get(j));
-            set(j, buffer);
+            buffer = this.get(i);
+            this.set(i, this.get(j));
+            this.set(j, buffer);
         }
 
         @Override
@@ -150,7 +150,7 @@ public class Array {
 
         @Override
         public Integer get(final int i, final boolean clone) {
-            return get(i);
+            return this.get(i);
         }
 
     }

@@ -83,10 +83,10 @@ public class MapDataMining extends MapHeap {
 
         ScoreMap<String>[] cluster = null;
         if (sortfields == null) this.sortClusterMap = null; else {
-            this.sortClusterMap = new ConcurrentHashMap<String, ScoreMap<String>>();
+            this.sortClusterMap = new ConcurrentHashMap<>();
             cluster = (ScoreMap<String>[]) Array.newInstance(ScoreMap.class, sortfields.length);
             for (int i = 0; i < sortfields.length; i++) {
-                cluster[i] = new ConcurrentScoreMap<String>();
+                cluster[i] = new ConcurrentScoreMap<>();
             }
         }
 
@@ -95,7 +95,7 @@ public class MapDataMining extends MapHeap {
         if (longaccfields == null) {
         	this.accLong = null;
         } else {
-            this.accLong = new ConcurrentHashMap<String, Long>();
+            this.accLong = new ConcurrentHashMap<>();
             longaccumulator = new Long[longaccfields.length];
             for (int i = 0; i < longaccfields.length; i++) {
                 longaccumulator[i] = LONG0;
@@ -104,7 +104,7 @@ public class MapDataMining extends MapHeap {
         if (floataccfields == null) {
             this.accFloat = null;
         } else {
-            this.accFloat = new ConcurrentHashMap<String, Float>();
+            this.accFloat = new ConcurrentHashMap<>();
             floataccumulator = new Float[floataccfields.length];
             for (int i = 0; i < floataccfields.length; i++) {
                 floataccumulator[i] = FLOAT0;
@@ -153,7 +153,7 @@ public class MapDataMining extends MapHeap {
                         valued = 0f;
                         if (cell != null) try {
                             valued = Float.parseFloat(cell);
-                            floataccumulator[i] = new Float(floataccumulator[i].floatValue() + valued);
+                            floataccumulator[i] = Float.valueOf(floataccumulator[i].floatValue() + valued);
                         } catch (final NumberFormatException e) {}
                     }
                 }
@@ -178,7 +178,7 @@ public class MapDataMining extends MapHeap {
     public synchronized void clear() {
     	super.clear();
         if (this.sortfields == null) this.sortClusterMap = null; else {
-            this.sortClusterMap = new HashMap<String, ScoreMap<String>>();
+            this.sortClusterMap = new HashMap<>();
             for (final String sortfield : this.sortfields) {
             	this.sortClusterMap.put(sortfield, new ConcurrentScoreMap<String>());
             }
@@ -187,7 +187,7 @@ public class MapDataMining extends MapHeap {
         if (this.longaccfields == null) {
             this.accLong = null;
         } else {
-            this.accLong = new HashMap<String, Long>();
+            this.accLong = new HashMap<>();
             for (final String longaccfield : this.longaccfields) {
                 this.accLong.put(longaccfield, LONG0);
             }
@@ -195,7 +195,7 @@ public class MapDataMining extends MapHeap {
         if (this.floataccfields == null) {
             this.accFloat = null;
         } else {
-            this.accFloat = new HashMap<String, Float>();
+            this.accFloat = new HashMap<>();
             for (final String floataccfield : this.floataccfields) {
                 this.accFloat.put(floataccfield, FLOAT0);
             }
@@ -215,17 +215,17 @@ public class MapDataMining extends MapHeap {
             final Map<String, String> oldMap = super.get(key, false);
             if (oldMap != null) {
                 // element exists, update acc
-                updateAcc(oldMap, false);
+                this.updateAcc(oldMap, false);
             }
 
             // update accumulators with new values (add)
-            updateAcc(newMap, true);
+            this.updateAcc(newMap, true);
         }
 
         super.insert(key, newMap);
 
         // update sortCluster
-        if (this.sortClusterMap != null) updateSortCluster(UTF8.String(key), newMap);
+        if (this.sortClusterMap != null) this.updateSortCluster(UTF8.String(key), newMap);
 
         this.columnIndex.update(key, newMap);
     }
@@ -295,10 +295,10 @@ public class MapDataMining extends MapHeap {
                 if (map != null) {
 
                     // update accumulators (subtract)
-                    if (this.longaccfields != null || this.floataccfields != null) updateAcc(map, false);
+                    if (this.longaccfields != null || this.floataccfields != null) this.updateAcc(map, false);
 
                     // remove from sortCluster
-                    if (this.sortfields != null) deleteSortCluster(UTF8.String(key));
+                    if (this.sortfields != null) this.deleteSortCluster(UTF8.String(key));
                 }
             } catch (final SpaceExceededException e) {
                 map = null;
@@ -365,7 +365,7 @@ public class MapDataMining extends MapHeap {
         try {
             idx = this.columnIndex.getIndex(whereKey, isValue);
         } catch (final UnsupportedOperationException e) {
-            this.columnIndex.init(whereKey, isValue, new FullMapIterator(keys()));
+            this.columnIndex.init(whereKey, isValue, new FullMapIterator(this.keys()));
             try {
                 idx = this.columnIndex.getIndex(whereKey, isValue);
             } catch (final UnsupportedOperationException ee) {
@@ -376,7 +376,7 @@ public class MapDataMining extends MapHeap {
     }
 
     public synchronized Iterator<Map.Entry<byte[], Map<String, String>>> entries(final boolean up, final String field) {
-        return new FullMapIterator(keys(up, field));
+        return new FullMapIterator(this.keys(up, field));
     }
 
     public synchronized long getLongAcc(final String field) {
@@ -412,7 +412,7 @@ public class MapDataMining extends MapHeap {
 
         super.close();
     }
-    
+
     private static final long minutemillis = 60000;
     private static long date2000 = 0;
 
@@ -499,17 +499,17 @@ public class MapDataMining extends MapHeap {
 
     public static void main(final String[] args) {
         try {
-            File f = new File("/tmp/MapDataMinig.test.db");
+            final File f = new File("/tmp/MapDataMinig.test.db");
             f.delete();
             final MapDataMining db = new MapDataMining(f, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, new String[] {"X"}, new String[] {"X"}, new String[] {});
-            final Map<String, String> m1 = new HashMap<String, String>();
-            long t = System.currentTimeMillis();
+            final Map<String, String> m1 = new HashMap<>();
+            final long t = System.currentTimeMillis();
             m1.put("X", Long.toString(t));
             db.put("abcdefghijk1".getBytes(), m1);
-            final Map<String, String> m2 = new HashMap<String, String>();
+            final Map<String, String> m2 = new HashMap<>();
             m2.put("X", Long.toString(t - 1000));
             db.put("abcdefghijk2".getBytes(), m2);
-            final Map<String, String> m3 = new HashMap<String, String>();
+            final Map<String, String> m3 = new HashMap<>();
             m3.put("X", Long.toString(t + 2000));
             db.put("abcdefghijk3".getBytes(), m3);
 

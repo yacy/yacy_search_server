@@ -114,7 +114,7 @@ public class LongVector {
         long oldValue = data[index];
         
         int numMoved = elt - index - 1;
-        Integer n = new Integer(elt);
+        Integer n = Integer.valueOf(elt);
         if (numMoved > 0)
             System.arraycopy(n, index+1, n, index,numMoved);
         elt = n.intValue();

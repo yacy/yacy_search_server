@@ -322,11 +322,11 @@ public class ArchiveDB {
                 	Folder folder = (Folder)folders.get(i);
                 	if (numSubstreams == 1 && folder.UnPackCRCDefined) {
                 		bsizes.add(Boolean.TRUE);
-                		sizes.add(new Integer(folder.UnPackCRC));
+                		sizes.add(Integer.valueOf(folder.UnPackCRC));
                 	} else {
                 		for (int j=0; j<numSubstreams; j++, digestIndex++) {
-                			bsizes.add(new Boolean(digestsDefined2.get(digestIndex)));
-                			sizes.add(new Integer(digests2.get(digestIndex)));
+                			bsizes.add(Boolean.valueOf(digestsDefined2.get(digestIndex)));
+                			sizes.add(Integer.valueOf(digests2.get(digestIndex)));
                 		}
                 	}
                 }

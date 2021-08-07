@@ -7,12 +7,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -34,7 +34,7 @@ public class LargeNumberCache {
         // fill the cache
         static {
             integerCache = new Integer[integerCacheLimit];
-            for (int i = 0; i < integerCache.length; i++) integerCache[i] = new Integer(i);
+            for (int i = 0; i < integerCache.length; i++) integerCache[i] = Integer.valueOf(i);
         }
 
     /**
@@ -50,8 +50,8 @@ public class LargeNumberCache {
      */
     public final static Integer valueOf(final int i) {
         if (i < 0) return Integer.valueOf(i);
-        if (i >= integerCacheLimit) return new Integer(i);
+        if (i >= integerCacheLimit) return Integer.valueOf(i);
         return integerCache[i];
     }
-    
+
 }

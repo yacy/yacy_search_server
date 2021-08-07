@@ -1406,7 +1406,7 @@ public class ActionWriter implements SWFActions, SWFActionCodes {
      *@exception  IOException  Description of the Exception
      */
     public void push(float value) throws IOException {
-        pushValues.add(new Float(value));
+        pushValues.add(Float.valueOf(value));
         if (flashVersion < 5) {
             flushPushValues();
         }
