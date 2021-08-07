@@ -120,22 +120,22 @@ public final class RandomAccessIO {
 
     public final synchronized void writeSpace(long pos, int spaceCount) throws IOException {
         if (spaceCount < 512) {
-            write(pos, space(spaceCount));
+            this.write(pos, space(spaceCount));
             return;
         }
-        byte[] b = space(512);
+        final byte[] b = space(512);
         while (spaceCount > b.length) {
-            write(pos, b);
+            this.write(pos, b);
             pos += b.length;
             spaceCount -= b.length;
         }
         if (spaceCount > 0) {
-            write(pos, space(spaceCount));
+            this.write(pos, space(spaceCount));
         }
     }
 
     private final static byte[] space(int count) {
-        byte[] s = new byte[count];
+        final byte[] s = new byte[count];
         while (count-- > 0) s[count] = 0;
         return s;
     }
@@ -147,7 +147,6 @@ public final class RandomAccessIO {
     @Override
     protected final void finalize() throws Throwable {
         if (this.ra != null) this.close();
-        super.finalize();
     }
 
     public final void deleteOnExit() {
