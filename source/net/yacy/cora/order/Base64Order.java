@@ -99,7 +99,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
 
     @Override
     public final boolean wellformed(final byte[] a) {
-        return wellformed(a, 0, a.length);
+        return this.wellformed(a, 0, a.length);
     }
 
     @Override
@@ -192,7 +192,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
 
     public final String encodeString(final String in) {
-        return encode(UTF8.getBytes(in));
+        return this.encode(UTF8.getBytes(in));
     }
 
     /**
@@ -203,9 +203,9 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     public final String encode(final byte[] in) {
         int rfc1521compliantLength = ((in.length + 2) / 3) * 4; // (bytes/bits/chars) = {(0/0/0), (1/8/4), (2/16/4), (3/24/4), (4/32/8), (5/40/8), (6/48/8), (7/56/12), (8/64/12), (9/72/12), ..}
         if (!this.rfc1521compliant) rfc1521compliantLength -= in.length % 3 == 2 ? 1 : in.length % 3 == 1 ? 2 : 0; // non-compliant are shorter (!)
-        return ASCII.String(encodeSubstring(in, rfc1521compliantLength));
+        return ASCII.String(this.encodeSubstring(in, rfc1521compliantLength));
     }
-    
+
     public final byte[] encodeSubstring(final byte[] in, final int sublen) {
         if (in.length == 0) return new byte[0];
         assert sublen <= ((in.length + 2) / 3) * 4 : "sublen = " + sublen + ", expected: " + ((in.length + 2) / 3) * 4;
@@ -214,8 +214,8 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         int pos = 0;
         long l;
         while (in.length - pos >= 3 && writepos < sublen) {
-            l = ((((0XffL & in[pos++]) << 8) | (0XffL & in[pos++])) << 8) | (0XffL & in[pos++]);  
-            encodeLong(l, out, writepos, 4);
+            l = ((((0XffL & in[pos++]) << 8) | (0XffL & in[pos++])) << 8) | (0XffL & in[pos++]);
+            this.encodeLong(l, out, writepos, 4);
             writepos += 4;
         }
         // now there may be remaining bytes
@@ -237,9 +237,9 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         }
         return out;
     }
-    
+
     public final String decodeString(final String in) {
-        return UTF8.String(decode(in));
+        return UTF8.String(this.decode(in));
     }
 
     final static Pattern cr = Pattern.compile("\n");
@@ -253,7 +253,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             final byte[] out = new byte[in.length() / 4 * 3 + (((in.length() % 4) == 0) ? 0 : in.length() % 4 - 1)];
             long l;
             while (posIn + 3 < in.length()) {
-                l = decodeLong(in.substring(posIn, posIn + 4));
+                l = this.decodeLong(in.substring(posIn, posIn + 4));
                 out[posOut + 2] = (byte) (l % 256);
                 l = l / 256;
                 out[posOut + 1] = (byte) (l % 256);
@@ -265,14 +265,14 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             }
             if (posIn < in.length()) {
                 if (in.length() - posIn == 3) {
-                    l = decodeLong(in.substring(posIn) + "A");
+                    l = this.decodeLong(in.substring(posIn) + "A");
                     l = l / 256;
                     out[posOut + 1] = (byte) (l % 256);
                     l = l / 256;
                     out[posOut] = (byte) (l % 256);
                     l = l / 256;
                 } else {
-                    l = decodeLong(in.substring(posIn) + "AA");
+                    l = this.decodeLong(in.substring(posIn) + "AA");
                     l = l / 256 / 256;
                     out[posOut] = (byte) (l % 256);
                     l = l / 256;
@@ -337,26 +337,26 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
 
     @Override
     public final long cardinal(final byte[] key) {
-        if (this.zero == null) return cardinalI(key, 0, key.length);
-        final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
-        final long keyCardinal = cardinalI(key, 0, key.length);
+        if (this.zero == null) return this.cardinalI(key, 0, key.length);
+        final long zeroCardinal = this.cardinalI(this.zero, 0, this.zero.length);
+        final long keyCardinal = this.cardinalI(key, 0, key.length);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
 
     @Override
     public final long cardinal(final byte[] key, final int off, final int len) {
-        if (this.zero == null) return cardinalI(key, off, len);
-        final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
-        final long keyCardinal = cardinalI(key, off, len);
+        if (this.zero == null) return this.cardinalI(key, off, len);
+        final long zeroCardinal = this.cardinalI(this.zero, 0, this.zero.length);
+        final long keyCardinal = this.cardinalI(key, off, len);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
 
     public final long cardinal(final String key) {
-        if (this.zero == null) return cardinalI(key);
-        final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
-        final long keyCardinal = cardinalI(key);
+        if (this.zero == null) return this.cardinalI(key);
+        final long zeroCardinal = this.cardinalI(this.zero, 0, this.zero.length);
+        final long keyCardinal = this.cardinalI(key);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
@@ -393,9 +393,9 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     public final int compare(final byte[] a, final byte[] b) {
         try {
         return (this.asc) ?
-                ((this.zero == null) ? compares(a, b) : compare0(a, b, a.length))
+                ((this.zero == null) ? this.compares(a, b) : this.compare0(a, b, a.length))
                 :
-                ((this.zero == null) ? compares(b, a) : compare0(b, a, a.length));
+                ((this.zero == null) ? this.compares(b, a) : this.compare0(b, a, a.length));
         } catch (final Throwable e) {
             // if a or b is not well-formed, an ArrayIndexOutOfBoundsException may occur
             // in that case we don't want that the exception makes databse functions
@@ -403,8 +403,8 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
             // a different order on the objects and treat not well-formed objects
             // as bigger as all others. If both object are not well-formed, they are
             // compared with the natural order.
-            final boolean wfa = wellformed(a);
-            final boolean wfb = wellformed(b);
+            final boolean wfa = this.wellformed(a);
+            final boolean wfb = this.wellformed(b);
             if (wfa && wfb) {
                 // uh strange. throw the exception
                 if (e instanceof ArrayIndexOutOfBoundsException) throw (ArrayIndexOutOfBoundsException) e;
@@ -420,13 +420,13 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     public final int compare(final byte[] a, final byte[] b, final int length) {
         try {
             return (this.asc) ?
-                    compare0(a, b, length)
+                    this.compare0(a, b, length)
                     :
-                    compare0(b, a, length);
+                    this.compare0(b, a, length);
         } catch (final Throwable e) {
             // same handling as in simple compare method above
-            final boolean wfa = wellformed(a, 0, length);
-            final boolean wfb = wellformed(b, 0, length);
+            final boolean wfa = this.wellformed(a, 0, length);
+            final boolean wfb = this.wellformed(b, 0, length);
             if (wfa && wfb) {
                 // uh strange. throw the exception
                 if (e instanceof ArrayIndexOutOfBoundsException) throw (ArrayIndexOutOfBoundsException) e;
@@ -442,13 +442,13 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     public final int compare(final byte[] a, final int aoffset, final byte[] b, final int boffset, final int length) {
         try {
             return (this.asc) ?
-                    compare0(a, aoffset, b, boffset, length)
+                    this.compare0(a, aoffset, b, boffset, length)
                     :
-                    compare0(b, boffset, a, aoffset, length);
+                    this.compare0(b, boffset, a, aoffset, length);
         } catch (final Throwable e) {
             // same handling as in simple compare method above
-            final boolean wfa = wellformed(a, aoffset, length);
-            final boolean wfb = wellformed(b, boffset, length);
+            final boolean wfa = this.wellformed(a, aoffset, length);
+            final boolean wfb = this.wellformed(b, boffset, length);
             if (wfa && wfb) {
                 // uh strange. throw the exception
                 if (e instanceof ArrayIndexOutOfBoundsException) throw (ArrayIndexOutOfBoundsException) e;
@@ -461,24 +461,24 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
 
     private final int compare0(final byte[] a, final byte[] b, int length) {
-        if (this.zero == null) return compares(a, b, length);
+        if (this.zero == null) return this.compares(a, b, length);
 
         // we have an artificial start point. check all combinations
         if (this.zero.length < length) length = this.zero.length;
-        final int az = compares(a, this.zero, length); // -1 if a < z; 0 if a == z; 1 if a > z
-        final int bz = compares(b, this.zero, length); // -1 if b < z; 0 if b == z; 1 if b > z
-        if (az == bz) return compares(a, b, length);
+        final int az = this.compares(a, this.zero, length); // -1 if a < z; 0 if a == z; 1 if a > z
+        final int bz = this.compares(b, this.zero, length); // -1 if b < z; 0 if b == z; 1 if b > z
+        if (az == bz) return this.compares(a, b, length);
         return sig(az - bz);
     }
 
     private final int compare0(final byte[] a, final int aoffset, final byte[] b, final int boffset, int length) {
-        if (this.zero == null) return compares(a, aoffset, b, boffset, length);
+        if (this.zero == null) return this.compares(a, aoffset, b, boffset, length);
 
         // we have an artificial start point. check all combinations
         if (this.zero.length < length) length = this.zero.length;
-        final int az = compares(a, aoffset, this.zero, 0, length); // -1 if a < z; 0 if a == z; 1 if a > z
-        final int bz = compares(b, boffset, this.zero, 0, length); // -1 if b < z; 0 if b == z; 1 if b > z
-        if (az == bz) return compares(a, aoffset, b, boffset, length);
+        final int az = this.compares(a, aoffset, this.zero, 0, length); // -1 if a < z; 0 if a == z; 1 if a > z
+        final int bz = this.compares(b, boffset, this.zero, 0, length); // -1 if b < z; 0 if b == z; 1 if b > z
+        if (az == bz) return this.compares(a, aoffset, b, boffset, length);
         return sig(az - bz);
     }
 
@@ -586,36 +586,36 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         if ("-test".equals(s[0])) {
             System.out.println("Pid: " + ManagementFactory.getRuntimeMXBean().getName());
             // do some checks
-            Random r = new Random(0); // not real random to be able to reproduce the test
+            final Random r = new Random(0); // not real random to be able to reproduce the test
 
-            try {                
+            try {
                 // use the class loader to call sun.misc.BASE64Encoder, the sun base64 encoder
                 // we do not instantiate that class here directly since that provokes a
                 // "warning: sun.misc.BASE64Encoder is internal proprietary API and may be removed in a future release"
 
-                Class<?> rfc1521Decoder_class = Class.forName("sun.misc.BASE64Decoder");
-                Object rfc1521Decoder = rfc1521Decoder_class.newInstance();
-                Method rfc1521Decoder_decodeBuffer = rfc1521Decoder_class.getMethod("decodeBuffer", String.class);
-                Class<?> rfc1521Encoder_class = Class.forName("sun.misc.BASE64Encoder");
-                Object rfc1521Encoder = rfc1521Encoder_class.newInstance();
-                Method rfc1521Encoder_encode = rfc1521Encoder_class.getMethod("encode", byte[].class);
+                final Class<?> rfc1521Decoder_class = Class.forName("sun.misc.BASE64Decoder");
+                final Object rfc1521Decoder = rfc1521Decoder_class.getDeclaredConstructor().newInstance();
+                final Method rfc1521Decoder_decodeBuffer = rfc1521Decoder_class.getMethod("decodeBuffer", String.class);
+                final Class<?> rfc1521Encoder_class = Class.forName("sun.misc.BASE64Encoder");
+                final Object rfc1521Encoder = rfc1521Encoder_class.getDeclaredConstructor().newInstance();
+                final Method rfc1521Encoder_encode = rfc1521Encoder_class.getMethod("encode", byte[].class);
 
                 System.out.println("preparing tests..");
                 // prepare challenges and results with rfc1521Encoder
-                int count = 100000;
-                String[] challenges = new String[count];
-                String[] rfc1521Encoded = new String[count];
+                final int count = 100000;
+                final String[] challenges = new String[count];
+                final String[] rfc1521Encoded = new String[count];
                 for (int i = 0; i < count; i++) {
-                    int len = r.nextInt(10000);
-                    StringBuilder challenge = new StringBuilder(len);
+                    final int len = r.nextInt(10000);
+                    final StringBuilder challenge = new StringBuilder(len);
                     for (int j = 0; j < len; j++) challenge.append((char) (32 + r.nextInt(64)));
                     challenges[i] = challenge.toString();
                     rfc1521Encoded[i] = (String) rfc1521Encoder_encode.invoke(rfc1521Encoder, UTF8.getBytes(challenges[i]));
                 }
 
                 // starting tests
-                long start = System.currentTimeMillis();
-                for (boolean rfc1521Compliant: new boolean[]{false, true}) {
+                final long start = System.currentTimeMillis();
+                for (final boolean rfc1521Compliant: new boolean[]{false, true}) {
                     System.out.println("starting tests, rfc1521Compliant = " + rfc1521Compliant + " ...");
                     String eb64, rfc1521;
                     // encode with enhancedCoder, decode with standard RFC 1521 base64
@@ -628,33 +628,33 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
                             while (rfc1521.length() % 4 != 0) rfc1521 += "=";
                             rfc1521 = rfc1521.replace('-', '+').replace('_', '/');
                         }
-                        String rfc1521Decoded = UTF8.String((byte[]) rfc1521Decoder_decodeBuffer.invoke(rfc1521Decoder, rfc1521));
+                        final String rfc1521Decoded = UTF8.String((byte[]) rfc1521Decoder_decodeBuffer.invoke(rfc1521Decoder, rfc1521));
                         if (!rfc1521Decoded.equals(challenges[i])) System.out.println("Encode enhancedB64 + Decode RFC1521: Fail for " + challenges[i]);
                     }
-                    
+
                     // encode with enhancedCoder, decode with standard RFC 1521 base64
                     // sun.misc.BASE64Encoder rfc1521Encoder = new sun.misc.BASE64Encoder();
                     for (int i = 0; i < count; i++) {
                         // encode with enhancedCoder, decode with standard RFC 1521 base64
                         rfc1521 = new String(rfc1521Encoded[i]);
                         if (rfc1521Compliant) {
-                            String standardCoderDecoded = UTF8.String(Base64Order.standardCoder.decode(rfc1521));
+                            final String standardCoderDecoded = UTF8.String(Base64Order.standardCoder.decode(rfc1521));
                             if (!standardCoderDecoded.equals(challenges[i])) System.out.println("Encode RFC1521 + Decode enhancedB64: Fail for " + rfc1521);
                         } else {
                             eb64 = new String(rfc1521);
                             while (eb64.endsWith("=")) eb64 = eb64.substring(0, eb64.length() - 1);
                             eb64 = eb64.replace('+', '-').replace('/', '_');
-                            String enhancedCoderDecoded = UTF8.String(Base64Order.enhancedCoder.decode(eb64));
+                            final String enhancedCoderDecoded = UTF8.String(Base64Order.enhancedCoder.decode(eb64));
                             if (!enhancedCoderDecoded.equals(challenges[i])) System.out.println("Encode RFC1521 + Decode enhancedB64: Fail for " + eb64);
                         }
                     }
                 }
-                long time = System.currentTimeMillis() - start;
+                final long time = System.currentTimeMillis() - start;
                 System.out.println("time: " + (time / 1000) + " seconds, " + (1000 * time / count) + " ms / 1000 steps");
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 e.printStackTrace();
             }
-            
+
         }
     }
 }

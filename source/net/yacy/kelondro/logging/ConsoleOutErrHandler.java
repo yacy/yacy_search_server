@@ -51,7 +51,7 @@ public final class ConsoleOutErrHandler extends Handler {
         this.stdErrHandler = new ConsoleHandler();
         this.stdOutHandler.setLevel(Level.FINEST);
         this.stdErrHandler.setLevel(Level.WARNING);
-        configure();
+        this.configure();
     }
 
     /**
@@ -59,21 +59,21 @@ public final class ConsoleOutErrHandler extends Handler {
      */
     private void configure() {
         final LogManager manager = LogManager.getLogManager();
-        final String className = getClass().getName();
+        final String className = this.getClass().getName();
 
         final String level = manager.getProperty(className + ".level");
-        setLevel((level == null) ? Level.INFO : Level.parse(level));
+        this.setLevel((level == null) ? Level.INFO : Level.parse(level));
 
-        final Level levelStdOut = parseLevel(manager.getProperty(className + ".levelStdOut"));
-        final Level levelSplit = parseLevel(manager.getProperty(className + ".levelSplit"));
-        final Level levelStdErr = parseLevel(manager.getProperty(className + ".levelStdErr"));
-        setLevels(levelStdOut,levelSplit,levelStdErr);
+        final Level levelStdOut = this.parseLevel(manager.getProperty(className + ".levelStdOut"));
+        final Level levelSplit = this.parseLevel(manager.getProperty(className + ".levelSplit"));
+        final Level levelStdErr = this.parseLevel(manager.getProperty(className + ".levelStdErr"));
+        this.setLevels(levelStdOut,levelSplit,levelStdErr);
 
         final String filter = manager.getProperty(className + ".filter");
-        setFilter(makeFilter(filter));
+        this.setFilter(this.makeFilter(filter));
 
         final String formatter = manager.getProperty(className + ".formatter");
-        setFormatter(makeFormatter(formatter));
+        this.setFormatter(this.makeFormatter(formatter));
 
         final String encoding = manager.getProperty(className + ".encoding");
         try {
@@ -102,7 +102,7 @@ public final class ConsoleOutErrHandler extends Handler {
         Filter f = null;
         try {
             final Class<?> c = Class.forName(name);
-            f = (Filter)c.newInstance();
+            f = (Filter)c.getDeclaredConstructor().newInstance();
         } catch (final Exception e) {
             if (name != null) {
                 System.err.println("Unable to load filter: " + name);
@@ -117,7 +117,7 @@ public final class ConsoleOutErrHandler extends Handler {
         Formatter f = null;
         try {
             final Class<?> c = Class.forName(name);
-            f = (Formatter)c.newInstance();
+            f = (Formatter)c.getDeclaredConstructor().newInstance();
         } catch (final Exception e) {
             f = new SimpleFormatter();
         }
@@ -127,7 +127,7 @@ public final class ConsoleOutErrHandler extends Handler {
 
     @Override
     public final void publish(final LogRecord record) {
-        if (!isLoggable(record)) return;
+        if (!this.isLoggable(record)) return;
 
         if (this.ignoreCtrlChr) {
             String msg = record.getMessage();
@@ -175,8 +175,8 @@ public final class ConsoleOutErrHandler extends Handler {
         super.setFormatter(newFormatter);
         if (newFormatter == null) return;
         try {
-            this.stdOutHandler.setFormatter(newFormatter.getClass().newInstance());
-            this.stdErrHandler.setFormatter(newFormatter.getClass().newInstance());
+            this.stdOutHandler.setFormatter(newFormatter.getClass().getDeclaredConstructor().newInstance());
+            this.stdErrHandler.setFormatter(newFormatter.getClass().getDeclaredConstructor().newInstance());
         } catch (final Exception e) {
             throw new SecurityException(e.getMessage());
         }
@@ -187,8 +187,8 @@ public final class ConsoleOutErrHandler extends Handler {
         super.setFilter(newFilter);
         if (newFilter == null) return;
         try {
-            this.stdOutHandler.setFilter(newFilter.getClass().newInstance());
-            this.stdErrHandler.setFilter(newFilter.getClass().newInstance());
+            this.stdOutHandler.setFilter(newFilter.getClass().getDeclaredConstructor().newInstance());
+            this.stdErrHandler.setFilter(newFilter.getClass().getDeclaredConstructor().newInstance());
         } catch (final Exception e) {
             throw new SecurityException(e.getMessage());
         }

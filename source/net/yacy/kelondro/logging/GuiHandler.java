@@ -28,6 +28,7 @@
 package net.yacy.kelondro.logging;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.ErrorManager;
 import java.util.logging.Filter;
@@ -50,11 +51,11 @@ public class GuiHandler extends Handler {
     public GuiHandler() {
         super();
         final LogManager manager = LogManager.getLogManager();
-        final String className = getClass().getName();
+        final String className = this.getClass().getName();
         final String level = manager.getProperty(className + ".level");
-        setLevel((level == null) ? Level.INFO : Level.parse(level));
-        setFilter(makeFilter(manager.getProperty(className + ".filter")));
-        setFormatter(makeFormatter(manager.getProperty(className + ".formatter")));
+        this.setLevel((level == null) ? Level.INFO : Level.parse(level));
+        this.setFilter(makeFilter(manager.getProperty(className + ".filter")));
+        this.setFormatter(makeFormatter(manager.getProperty(className + ".formatter")));
         try {
             GuiHandler.size = Integer.parseInt(manager.getProperty(className + ".size"));
         } catch (final NumberFormatException e) {
@@ -68,7 +69,7 @@ public class GuiHandler extends Handler {
     private static Filter makeFilter(final String name) {
         if (name == null) return null;
         try {
-            return (Filter) Class.forName(name).newInstance();
+            return (Filter) Class.forName(name).getDeclaredConstructor().newInstance();
         } catch (final Exception e) {
             System.err.println("Unable to load filter: " + name);
         }
@@ -78,7 +79,7 @@ public class GuiHandler extends Handler {
     private static Formatter makeFormatter(final String name) {
         if (name == null) return null;
         try {
-            return (Formatter) Class.forName(name).newInstance();
+            return (Formatter) Class.forName(name).getDeclaredConstructor().newInstance();
         } catch (final Exception e) {
             return new SimpleFormatter();
         }
@@ -90,21 +91,21 @@ public class GuiHandler extends Handler {
 
     @Override
     public final void publish(final LogRecord record) {
-        if (!isLoggable(record)) return;
+        if (!this.isLoggable(record)) return;
         final int ix = (GuiHandler.start + GuiHandler.count) % GuiHandler.buffer.length;
-        GuiHandler.buffer[ix] = getFormatter().format(record);
+        GuiHandler.buffer[ix] = this.getFormatter().format(record);
         if (GuiHandler.count < GuiHandler.buffer.length) {
             GuiHandler.count++;
         } else {
             GuiHandler.start++;
         }
-        flush();
+        this.flush();
         if (MemoryControl.shortStatus()) clear();
     }
 
     public final synchronized String[] getLogLines(final boolean reversed, int lineCount) {
         if (lineCount > GuiHandler.count || lineCount < 0) lineCount = GuiHandler.count;
-        final List<String> logMessages = new ArrayList<String>(GuiHandler.count);
+        final List<String> logMessages = new ArrayList<>(GuiHandler.count);
         try {
             final int theStart = (reversed) ? GuiHandler.start + GuiHandler.count - 1 : GuiHandler.start + GuiHandler.count - lineCount;
             String record = null;
@@ -115,7 +116,7 @@ public class GuiHandler extends Handler {
             }
             return logMessages.toArray(new String[logMessages.size()]);
         } catch (final Exception ex) {
-            reportError(null, ex, ErrorManager.FORMAT_FAILURE);
+            this.reportError(null, ex, ErrorManager.FORMAT_FAILURE);
             return new String[]{"Error while formatting the logging message"};
         }
     }
@@ -123,9 +124,9 @@ public class GuiHandler extends Handler {
     @Override
     public void flush() {
     }
-    
+
     public static void clear() {
-        for (int i = 0; i < GuiHandler.buffer.length; i++) GuiHandler.buffer[i] = null;
+        Arrays.fill(GuiHandler.buffer, null);
         GuiHandler.start = 0;
         GuiHandler.count = 0;
     }

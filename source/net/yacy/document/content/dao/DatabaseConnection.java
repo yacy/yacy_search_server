@@ -7,7 +7,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -35,9 +35,9 @@ import net.yacy.cora.util.ConcurrentLog;
 public class DatabaseConnection {
 
 	private Connection connection;
-	
+
     public DatabaseConnection(final String dbType, String host, int port, String dbname, String user, String pw) throws SQLException {
-        String dbDriverStr = null, dbConnStr = null;            
+        String dbDriverStr = null, dbConnStr = null;
         if (dbType.equalsIgnoreCase("mysql")) {
             dbDriverStr = "com.mysql.jdbc.Driver";
             dbConnStr = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
@@ -45,20 +45,20 @@ public class DatabaseConnection {
             dbDriverStr = "org.postgresql.Driver";
             dbConnStr = "jdbc:postgresql://" + host + ":" + port + "/" + dbname;
         } else throw new IllegalArgumentException();
-        
-        try {            
-            Class.forName(dbDriverStr).newInstance();
+
+        try {
+            Class.forName(dbDriverStr).getDeclaredConstructor().newInstance();
         } catch (final Exception e) {
             throw new SQLException("Unable to load the jdbc driver: " + e.getMessage());
         }
-        
+
         try {
             this.connection =  DriverManager.getConnection(dbConnStr, user, pw);
         } catch (final Exception e) {
             throw new SQLException("Unable to establish a database connection: " + e.getMessage());
         }
     }
-    
+
     public void setAutoCommit(boolean b) {
     	try {
 			this.connection.setAutoCommit(b);
@@ -66,7 +66,7 @@ public class DatabaseConnection {
 		    ConcurrentLog.logException(e);
 		}
     }
-    
+
     public int count(String tablename) throws SQLException {
         Statement stmt = null;
         ResultSet rs = null;
@@ -84,17 +84,17 @@ public class DatabaseConnection {
             if (stmt != null) try {stmt.close();} catch (final SQLException e) {}
         }
     }
-    
+
     public synchronized void close() {
-        if (connection != null) { 
+        if (this.connection != null) {
             try {
-            	connection.close();
-            	connection = null;
+            	this.connection.close();
+            	this.connection = null;
             } catch (final SQLException e) {
             }
         }
     }
-    
+
     public Statement statement() throws SQLException {
     	return this.connection.createStatement();
     }
