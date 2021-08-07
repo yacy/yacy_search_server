@@ -4,7 +4,11 @@
 	<classpathentry excluding="bookmarks/|ymarks/|bookmarks/posts/|bookmarks/tags/|bookmarks/xbel/|blacklists/" kind="src" path="htroot/api"/>
 	<classpathentry excluding="posts/|tags/|xbel/" kind="src" path="htroot/api/bookmarks"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<attributes>
+			<attribute name="module" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/avatica-core-1.13.0.jar"/>
@@ -18,7 +22,6 @@
 	<classpathentry kind="lib" path="lib/common-io-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/common-lang-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.14.jar"/>
-	<classpathentry kind="lib" path="lib/commons-compress-1.20.jar"/>
 	<classpathentry kind="lib" path="lib/commons-fileupload-1.4.jar"/>
 	<classpathentry kind="lib" path="lib/commons-io-2.7.jar"/>
 	<classpathentry kind="lib" path="lib/commons-lang-2.6.jar"/>
@@ -113,6 +116,7 @@
 	<classpathentry kind="lib" path="lib/commons-collections4-4.4.jar"/>
 	<classpathentry kind="lib" path="lib/guava-25.1-jre.jar"/>
 	<classpathentry kind="lib" path="lib/hazelcast-4.2.jar"/>
+	<classpathentry kind="lib" path="lib/commons-compress-1.21.jar"/>
 	<classpathentry kind="src" path="htroot/api/blacklists"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
