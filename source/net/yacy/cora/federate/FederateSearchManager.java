@@ -59,24 +59,24 @@ import net.yacy.search.schema.WebgraphSchema;
  * Handling of queries to configured remote OpenSearch systems.
  */
 public class FederateSearchManager {
-	
-	/** Logger for this class */
-	private static final ConcurrentLog LOG = new ConcurrentLog(FederateSearchManager.class.getName());
 
-	/** Delay between connects (in ms) */
+    /** Logger for this class */
+    private static final ConcurrentLog LOG = new ConcurrentLog(FederateSearchManager.class.getName());
+
+    /** Delay between connects (in ms) */
     private final int accessDelay = 15000;
 
     private File confFile = null; // later initialized to DATA/SETTINGS/heuristicopensearch.conf
-    
+
     /** Connectors list */
     private HashSet<AbstractFederateSearchConnector> conlist;
-    
+
     /** PropertiesConfiguration cfg */
     protected Configuration cfg;
-    
+
     /** Switchboard instance */
     private Switchboard switchboard;
-    
+
     /** Self reference for static .getManager() */
     private static FederateSearchManager manager = null;
 
@@ -85,7 +85,7 @@ public class FederateSearchManager {
      */
     public FederateSearchManager(Switchboard sb) {
         super();
-        this.conlist = new HashSet<AbstractFederateSearchConnector>();
+        this.conlist = new HashSet<>();
 
         // from here we need Switchboard settings
         if (sb == null) {
@@ -93,49 +93,49 @@ public class FederateSearchManager {
         }
         this.switchboard = sb;
         // Data needed  active  name, url(template), desc, rule-when-to-use, specifics
-        confFile = new File(sb.getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
-        if (!confFile.exists()) {
+        this.confFile = new File(sb.getDataPath(), "DATA/SETTINGS/heuristicopensearch.conf");
+        if (!this.confFile.exists()) {
             try {
-                Files.copy(new File(sb.appPath, "defaults/heuristicopensearch.conf"), confFile);
-                File defdir = new File(sb.dataPath, "DATA/SETTINGS/federatecfg");
+                Files.copy(new File(sb.appPath, "defaults/heuristicopensearch.conf"), this.confFile);
+                final File defdir = new File(sb.dataPath, "DATA/SETTINGS/federatecfg");
                 if (!defdir.exists()) {
                     Files.copy(new File(sb.appPath, "defaults/federatecfg"), defdir);
                 }
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
             }
         }
         // read settings config file
-        if (confFile.exists()) {
+        if (this.confFile.exists()) {
             try {
-                cfg = new Configuration(confFile);
-                Iterator<Entry> it = cfg.entryIterator();
+                this.cfg = new Configuration(this.confFile);
+                final Iterator<Entry> it = this.cfg.entryIterator();
                 while (it.hasNext()) {
-                    Entry cfgentry = it.next();
-                    String url = cfgentry.getValue();
+                    final Entry cfgentry = it.next();
+                    final String url = cfgentry.getValue();
                     if (cfgentry.enabled() && url != null && !url.isEmpty()) {
-                        String name = cfgentry.key();
+                        final String name = cfgentry.key();
                         if (url.startsWith("cfgfile:")) { // is cfgfile with field mappings (no opensearch url)
                             // format    prefix:connectortype:configfilename
                             // example   cfgfile:solrconnector:testsys.solr.schema
-                            String[] parts = url.split(":");
+                            final String[] parts = url.split(":");
                             if (parts[1].equalsIgnoreCase("solrconnector")) {
-                                SolrFederateSearchConnector sfc = new SolrFederateSearchConnector();
+                                final SolrFederateSearchConnector sfc = new SolrFederateSearchConnector();
                                 if (sfc.init(name, sb.getDataPath()+ "/DATA/SETTINGS/federatecfg/" + parts[2])) {
-                                    conlist.add(sfc);
+                                    this.conlist.add(sfc);
                                 }
                             } else {
                                 LOG.config("Error in configuration of: " + url);
                             }
                         } else { // handle opensearch url template
-                            OpenSearchConnector osc = new OpenSearchConnector(url);
+                            final OpenSearchConnector osc = new OpenSearchConnector(url);
                             if (osc.init(name, sb.getDataPath()+ "/DATA/SETTINGS/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name))) {
-                                conlist.add(osc);
+                                this.conlist.add(osc);
                             }
                         }
                     }
                 }
             } catch (final IOException ex) {
-            	LOG.config("Unexpected error when reading configuration file : " + this.confFile, ex);
+                LOG.config("Unexpected error when reading configuration file : " + this.confFile, ex);
             }
         }
         manager = this; // reference for static access via .getManager()
@@ -155,7 +155,7 @@ public class FederateSearchManager {
     }
 
     /**
-     * Sends a query request to remote systems configured. 
+     * Sends a query request to remote systems configured.
      * If search query domain is LOCAL procedure does nothing.
      *
      * @param theSearch
@@ -163,8 +163,8 @@ public class FederateSearchManager {
     public void search(SearchEvent theSearch) {
         if (theSearch != null) {
             if (!theSearch.query.isLocal() && !MemoryControl.shortStatus()) {
-                Set<AbstractFederateSearchConnector> picklist = getBest();
-                for (AbstractFederateSearchConnector fsc : picklist) {
+                final Set<AbstractFederateSearchConnector> picklist = this.getBest();
+                for (final AbstractFederateSearchConnector fsc : picklist) {
                     fsc.search(theSearch);
                 }
             }
@@ -179,9 +179,9 @@ public class FederateSearchManager {
      */
     public List<URIMetadataNode> query(QueryParams query) {
         if (!query.isLocal() && !MemoryControl.shortStatus()) {
-            List<URIMetadataNode> sdl = new ArrayList<URIMetadataNode>();
-            Set<AbstractFederateSearchConnector> picklist = getBest();
-            for (AbstractFederateSearchConnector fsc : picklist) {
+            final List<URIMetadataNode> sdl = new ArrayList<>();
+            final Set<AbstractFederateSearchConnector> picklist = this.getBest();
+            for (final AbstractFederateSearchConnector fsc : picklist) {
                 sdl.addAll(fsc.query(query));
             }
             return sdl;
@@ -199,7 +199,7 @@ public class FederateSearchManager {
     public List<URIMetadataNode> query(String querystr) {
 
         final QueryGoal qg = new QueryGoal(querystr);
-        Bitfield filter = new Bitfield();
+        final Bitfield filter = new Bitfield();
         final QueryParams query = new QueryParams(
                 qg,
                 new QueryModifier(0),
@@ -227,7 +227,7 @@ public class FederateSearchManager {
                 0.0d, 0.0d, 0.0d,
                 new HashSet<>());
 
-        return query(query);
+        return this.query(query);
     }
 
     /**
@@ -237,15 +237,15 @@ public class FederateSearchManager {
      * @return successful added
      */
     public boolean addOpenSearchTarget(String name, String urlTemplate, boolean active, String comment) {
-        if (confFile == null) {
+        if (this.confFile == null) {
             return false;
         }
 
         try {
-            Configuration conf = new Configuration(confFile);
+            final Configuration conf = new Configuration(this.confFile);
             if (name != null && !name.isEmpty()) {
                 conf.add(name, null, active);
-                Configuration.Entry e = conf.get(name);
+                final Configuration.Entry e = conf.get(name);
                 e.setValue(urlTemplate);
                 e.setEnable(active);
                 e.setComment(comment);
@@ -253,10 +253,10 @@ public class FederateSearchManager {
                 try {
                     conf.commit();
                     if (active) {
-                        OpenSearchConnector osd = new OpenSearchConnector(urlTemplate);
-                        String htmlMappingFile = this.switchboard.getDataPath()+ "/DATA/SETTINGS/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name);
+                        final OpenSearchConnector osd = new OpenSearchConnector(urlTemplate);
+                        final String htmlMappingFile = this.switchboard.getDataPath()+ "/DATA/SETTINGS/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name);
                         if (osd.init(name, htmlMappingFile)) {
-                            conlist.add(osd);
+                            this.conlist.add(osd);
                         }
                     }
                 } catch (final IOException ex) {
@@ -265,7 +265,7 @@ public class FederateSearchManager {
                 return true;
             }
         } catch (final IOException e1) {
-        	LOG.severe("Unexpected error when writing configuration file : " + confFile, e1);
+            LOG.severe("Unexpected error when writing configuration file : " + this.confFile, e1);
             return false;
         }
         return false;
@@ -275,47 +275,22 @@ public class FederateSearchManager {
      * Get the number of active remote query target systems
      */
     public int getSize() {
-        return conlist.size();
+        return this.conlist.size();
     }
 
     /**
      * Get best systems from configured targets
-     * 
+     *
      * @return list of searchtargetconnectors
      */
     protected Set<AbstractFederateSearchConnector> getBest() {
-        HashSet<AbstractFederateSearchConnector> retset = new HashSet<AbstractFederateSearchConnector>();
-        MultiProtocolURL connectorURL;
-        for (AbstractFederateSearchConnector fsc : conlist) {
-        	try {
-				connectorURL = new MultiProtocolURL(fsc.baseurl);
-			} catch (MalformedURLException e) {
-				LOG.warn("Malformed connector URL : " + fsc.baseurl);
-				continue;
-			}
-        	RobotsTxtEntry robotsEntry = null;
-        	int robotsDelay = 0;
-			if (this.switchboard != null && this.switchboard.robots != null) {
-				robotsEntry = this.switchboard.robots.getEntry(connectorURL,
-						ClientIdentification.yacyInternetCrawlerAgent);
-				if(robotsEntry != null) {
-					robotsDelay = robotsEntry.getCrawlDelayMillis();
-				}
-			}
-        	
+        final HashSet<AbstractFederateSearchConnector> retset = new HashSet<>();
+        final long currentTime = System.currentTimeMillis();
+        for (final AbstractFederateSearchConnector fsc : this.conlist) {
             // check access time
-			long currentTime = System.currentTimeMillis();
-            if ((fsc.lastaccesstime + accessDelay < currentTime) 
-            		&& (fsc.lastaccesstime + robotsDelay < currentTime) ) { 
-            	// enforce 15 sec delay between searches to same system, and also check any eventual robots.txt Crawl-delay directive
-    			if (robotsEntry == null || !robotsEntry.isDisallowed(connectorURL)) {
-                    // also check robots.txt exclusion
-    				retset.add(fsc);
-    			} else {
-    				LOG.warn("Connector URL is disallowed by robots.txt : " + fsc.baseurl);
-    			}
+            if (fsc.lastaccesstime + this.accessDelay < currentTime && fsc.lastaccesstime < currentTime) {
+                retset.add(fsc);
             }
-
         }
         return retset;
     }
@@ -352,7 +327,7 @@ public class FederateSearchManager {
 
         final long numfound;
         try {
-            SolrDocumentList docList = connector.getDocumentListByQuery(webgraphquerystr, null, 0, 1, webgraphqueryfields);
+            final SolrDocumentList docList = connector.getDocumentListByQuery(webgraphquerystr, null, 0, 1, webgraphqueryfields);
             numfound = docList.getNumFound();
             if (numfound == 0) {
                 LOG.info("no results found, abort discover job");
@@ -360,7 +335,7 @@ public class FederateSearchManager {
             }
             LOG.info("start checking " + Long.toString(numfound) + " found index results");
         } catch (final IOException ex) {
-        	LOG.severe("Error on Solr webgraph core query", ex);
+            LOG.severe("Error on Solr webgraph core query", ex);
             return false;
         }
 
@@ -374,54 +349,54 @@ public class FederateSearchManager {
                 try {
                     boolean doloop = true;
                     int loopnr = 0;
-                    Set<String> dblmem = new HashSet<String>(); // temp memory for already checked url
+                    final Set<String> dblmem = new HashSet<>(); // temp memory for already checked url
                     while (doloop) {
                         LOG.info("start Solr query loop at " + Integer.toString(loopnr * 20) + " of " + Long.toString(numfound));
-                        SolrDocumentList docList = connector.getDocumentListByQuery(webgraphquerystr, null, loopnr * 20, 20, webgraphqueryfields); // check chunk of 20 result documents
+                        final SolrDocumentList docList = connector.getDocumentListByQuery(webgraphquerystr, null, loopnr * 20, 20, webgraphqueryfields); // check chunk of 20 result documents
                         loopnr++;
                         if (stoptime < System.currentTimeMillis()) {// stop after max 1h
                             doloop = false;
                             LOG.info("long running discover task aborted");
                         }
                         if (docList != null && docList.size() > 0) {
-                            Iterator<SolrDocument> docidx = docList.iterator();
+                            final Iterator<SolrDocument> docidx = docList.iterator();
                             while (docidx.hasNext()) {
-                                SolrDocument sdoc = docidx.next();
+                                final SolrDocument sdoc = docidx.next();
 
-                                String hrefurltxt = sdoc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName()) + "://" + sdoc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
+                                final String hrefurltxt = sdoc.getFieldValue(WebgraphSchema.target_protocol_s.getSolrFieldName()) + "://" + sdoc.getFieldValue(WebgraphSchema.target_urlstub_s.getSolrFieldName());
                                 URL url;
                                 try {
                                     url = new URL(hrefurltxt);
                                 } catch (final MalformedURLException ex) {
-                                	LOG.warn("OpenSearch description URL is malformed : " + hrefurltxt);
-                                	continue;
+                                    LOG.warn("OpenSearch description URL is malformed : " + hrefurltxt);
+                                    continue;
                                 }
                                 //TODO: check Blacklist
                                 if (dblmem.add(url.getAuthority())) { // use only main path to detect double entries
-                                    opensearchdescriptionReader os = new opensearchdescriptionReader(hrefurltxt);
+                                    final opensearchdescriptionReader os = new opensearchdescriptionReader(hrefurltxt);
                                     if (os.getRSSorAtomUrl() != null) {
-                                     	/* Check eventual robots.txt policy */
-                                      	RobotsTxtEntry robotsEntry = null;
-                                      	MultiProtocolURL templateURL;
-                                       	try {
-                                       		templateURL = new MultiProtocolURL(os.getRSSorAtomUrl());
-                                       	} catch (final MalformedURLException ex) {
-                                           	LOG.warn("OpenSearch description URL is malformed : " + hrefurltxt);
-                                           	continue;
+                                         /* Check eventual robots.txt policy */
+                                          RobotsTxtEntry robotsEntry = null;
+                                          MultiProtocolURL templateURL;
+                                           try {
+                                               templateURL = new MultiProtocolURL(os.getRSSorAtomUrl());
+                                           } catch (final MalformedURLException ex) {
+                                               LOG.warn("OpenSearch description URL is malformed : " + hrefurltxt);
+                                               continue;
                                         }
-                                       	if(sb.robots != null) {
-                                       		robotsEntry = sb.robots.getEntry(templateURL, ClientIdentification.yacyInternetCrawlerAgent);
-                                       	}
+                                           if(sb.robots != null) {
+                                               robotsEntry = sb.robots.getEntry(templateURL, ClientIdentification.yacyInternetCrawlerAgent);
+                                           }
 
-                                   		if(robotsEntry != null && robotsEntry.isDisallowed(templateURL)) {
-                                   			LOG.info("OpenSearch description template URL is disallowed by robots.xt");
-                                   		} else {
-                                   			// add found system to config file
-                                            addOpenSearchTarget(os.getShortName(), os.getRSSorAtomUrl(), false, os.getItem("LongName"));
+                                           if(robotsEntry != null && robotsEntry.isDisallowed(templateURL)) {
+                                               LOG.info("OpenSearch description template URL is disallowed by robots.xt");
+                                           } else {
+                                               // add found system to config file
+                                            FederateSearchManager.this.addOpenSearchTarget(os.getShortName(), os.getRSSorAtomUrl(), false, os.getItem("LongName"));
                                             LOG.info("added " + os.getShortName() + " " + hrefurltxt);
-                                    	}
+                                        }
                                     } else {
-                                    	LOG.info("osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
+                                        LOG.info("osd.xml check failed (no RSS or Atom support) for " + hrefurltxt);
                                     }
                                 }
                             }
@@ -431,7 +406,7 @@ public class FederateSearchManager {
                     }
                     LOG.info("finisched Solr query (checked " + Integer.toString(dblmem.size()) + " unique opensearchdescription links found in " + Long.toString(numfound) + " results)");
                 } catch (final IOException ex) {
-                	LOG.severe("Unexpected error", ex);
+                    LOG.severe("Unexpected error", ex);
                 }
             }
         };
@@ -446,41 +421,41 @@ public class FederateSearchManager {
      * @return true if successful
      */
     public boolean init(String cfgFileName) {
-        confFile = new File(cfgFileName);
-        if (confFile.exists()) {
+        this.confFile = new File(cfgFileName);
+        if (this.confFile.exists()) {
             try {
-                cfg = new Configuration(confFile);
+                this.cfg = new Configuration(this.confFile);
                 if (!this.conlist.isEmpty()) this.conlist.clear(); // prevent double entries
-                Iterator<Entry> it = cfg.entryIterator();
+                final Iterator<Entry> it = this.cfg.entryIterator();
                 while (it.hasNext()) {
-                    Entry cfgentry = it.next();
+                    final Entry cfgentry = it.next();
                     if (cfgentry.enabled()) { // hold only enabled in memory
-                        String name = cfgentry.key();
-                        String url = cfgentry.getValue();
+                        final String name = cfgentry.key();
+                        final String url = cfgentry.getValue();
                         if (url != null && !url.isEmpty()) {
                             if (url.startsWith("cfgfile:")) { // is cfgfile with field mappings (no opensearch url)
                                 // config entry has 3 parts separated by :    1=cfgfile 2=connectortype 3=relative path to connector-cfg-file
                                 // example   cfgfile:solrconnector:testsys.solr.schema
-                                String[] parts = url.split(":");
+                                final String[] parts = url.split(":");
                                 if (parts[1].equalsIgnoreCase("solrconnector")) {
-                                    SolrFederateSearchConnector sfc = new SolrFederateSearchConnector();
-                                    if (sfc.init(name, confFile.getParent()+"/federatecfg/"+parts[2])) {
-                                        conlist.add(sfc);
+                                    final SolrFederateSearchConnector sfc = new SolrFederateSearchConnector();
+                                    if (sfc.init(name, this.confFile.getParent()+"/federatecfg/"+parts[2])) {
+                                        this.conlist.add(sfc);
                                     }
                                 } else {
                                     LOG.config("Init error in configuration of: " + url);
                                 }
                             } else { // handle opensearch url template
-                                OpenSearchConnector osd = new OpenSearchConnector(url);
-                                if (osd.init(name, confFile.getParent()+"/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name))) {
-                                    conlist.add(osd);
+                                final OpenSearchConnector osd = new OpenSearchConnector(url);
+                                if (osd.init(name, this.confFile.getParent()+"/federatecfg/" + OpenSearchConnector.htmlMappingFileName(name))) {
+                                    this.conlist.add(osd);
                                 }
                             }
                         }
                     }
                 }
             } catch (final IOException ex) {
-            	LOG.config("Unexpected error when reading configuration file : " + cfgFileName);
+                LOG.config("Unexpected error when reading configuration file : " + cfgFileName);
             }
         }
         return true;

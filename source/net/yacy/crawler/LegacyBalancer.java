@@ -1,8 +1,8 @@
 // LegacyBalancer.java
 // -----------------------
 // part of YaCy
-// SPDX-FileCopyrightText: 2005 Michael Peter Christen <mc@yacy.net)> 
-// SPDX-License-Identifier: GPL-2.0-or-later 
+// SPDX-FileCopyrightText: 2005 Michael Peter Christen <mc@yacy.net)>
+// SPDX-License-Identifier: GPL-2.0-or-later
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
 // created: 24.09.2005
@@ -95,19 +95,19 @@ public class LegacyBalancer implements Balancer {
             this.handleSet = handleSet;
         }
     }
-    
+
     public LegacyBalancer(
             final File cachePath,
             final String stackname,
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.cacheStacksPath = cachePath;
-        this.domainStacks = new ConcurrentHashMap<String, HostHandles>();
+        this.domainStacks = new ConcurrentHashMap<>();
         this.domStackInitSize = Integer.MAX_VALUE;
         this.double_push_check = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 0);
-        this.zeroWaitingCandidates = new ArrayList<Map.Entry<String, byte[]>>();
+        this.zeroWaitingCandidates = new ArrayList<>();
         this.random = new Random(System.currentTimeMillis());
-        
+
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
         this.cacheStacksPath.mkdirs();
@@ -122,7 +122,7 @@ public class LegacyBalancer implements Balancer {
             }
         }
         this.lastDomainStackFill = 0;
-        ConcurrentLog.info("Balancer", "opened balancer file with " + this.urlFileIndex.size() + " entries from " + f.toString());
+        ConcurrentLog.info("LEGACY BALANCER", "opened balancer file with " + this.urlFileIndex.size() + " entries from " + f.toString());
     }
 
     @Override
@@ -135,7 +135,7 @@ public class LegacyBalancer implements Balancer {
 
     @Override
     public void clear() {
-        ConcurrentLog.info("Balancer", "cleaning balancer with " + this.urlFileIndex.size() + " entries from " + this.urlFileIndex.filename());
+        ConcurrentLog.info("LEGACY BALANCER", "cleaning balancer with " + this.urlFileIndex.size() + " entries from " + this.urlFileIndex.filename());
         try {
             this.urlFileIndex.clear();
         } catch (final IOException e) {
@@ -177,7 +177,7 @@ public class LegacyBalancer implements Balancer {
         }
 
         // then delete all these urls from the queues and the file index
-        return remove(urlHashes);
+        return this.remove(urlHashes);
     }
 
     /**
@@ -210,7 +210,7 @@ public class LegacyBalancer implements Balancer {
             for (final byte[] handle: urlHashes) stack.remove(handle);
             if (stack.isEmpty()) q.remove();
         }
-        
+
         // iterate through zero-waiting map
         final Iterator<Map.Entry<String, byte[]>> i = this.zeroWaitingCandidates.iterator();
         while (i.hasNext()) {
@@ -258,7 +258,7 @@ public class LegacyBalancer implements Balancer {
             if (profile != null && profile.domMaxPages() != Integer.MAX_VALUE && profile.domMaxPages() > 0) {
                 profile.domInc(entry.url().getHost());
             }
-            
+
             // add to index
             final int s = this.urlFileIndex.size();
             this.urlFileIndex.put(entry.toRow());
@@ -279,12 +279,12 @@ public class LegacyBalancer implements Balancer {
      */
     @Override
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots) {
-        Map<String, Integer[]> map = new TreeMap<String, Integer[]>(); // we use a tree map to get a stable ordering
-        for (Map.Entry<String, HostHandles> entry: this.domainStacks.entrySet()) {
+        final Map<String, Integer[]> map = new TreeMap<>(); // we use a tree map to get a stable ordering
+        for (final Map.Entry<String, HostHandles> entry: this.domainStacks.entrySet()) {
             final String hostname = entry.getKey();
             final HostHandles hosthandles = entry.getValue();
-            int size = hosthandles.handleSet.size();
-            int delta = Latency.waitingRemainingGuessed(hostname, 80, hosthandles.hosthash, robots, ClientIdentification.yacyInternetCrawlerAgent);
+            final int size = hosthandles.handleSet.size();
+            final int delta = Latency.waitingRemainingGuessed(hostname, 80, hosthandles.hosthash, robots, ClientIdentification.yacyInternetCrawlerAgent);
             map.put(hostname, new Integer[]{size, delta});
         }
         return map;
@@ -300,12 +300,12 @@ public class LegacyBalancer implements Balancer {
     @Override
     public List<Request> getDomainStackReferences(final String host, int maxcount, final long maxtime) {
         final HostHandles hh = this.domainStacks.get(host);
-        if (hh == null) return new ArrayList<Request>(0);
+        if (hh == null) return new ArrayList<>(0);
         final HandleSet domainList = hh.handleSet;
-        if (domainList.isEmpty()) return new ArrayList<Request>(0);
+        if (domainList.isEmpty()) return new ArrayList<>(0);
         maxcount = Math.min(maxcount, domainList.size());
-        final ArrayList<Request> cel = new ArrayList<Request>(maxcount);
-        long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+        final ArrayList<Request> cel = new ArrayList<>(maxcount);
+        final long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         for (int i = 0; i < maxcount; i++) {
             final byte[] urlhash = domainList.getOne(i);
             if (urlhash == null) continue;
@@ -331,14 +331,14 @@ public class LegacyBalancer implements Balancer {
     private void pushHashToDomainStacks(String host, String hosthash, final byte[] urlhash) throws SpaceExceededException {
         // extend domain stack
         if (host == null) host = Domains.LOCALHOST;
-        HostHandles hh = this.domainStacks.get(host);
+        final HostHandles hh = this.domainStacks.get(host);
         if (hh == null) {
             // create new list
-            HandleSet domainList = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
+            final HandleSet domainList = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 1);
             domainList.put(urlhash);
             this.domainStacks.put(host, new HostHandles(hosthash, domainList));
         } else {
-            HandleSet domainList = hh.handleSet;
+            final HandleSet domainList = hh.handleSet;
             // extend existent domain list
             domainList.put(urlhash);
         }
@@ -347,20 +347,19 @@ public class LegacyBalancer implements Balancer {
     private void removeHashFromDomainStacks(String host, final byte[] urlhash) {
         // reduce domain stack
         if (host == null) host = Domains.LOCALHOST;
-        HostHandles hh = this.domainStacks.get(host);
+        final HostHandles hh = this.domainStacks.get(host);
         if (hh == null) {
             this.domainStacks.remove(host);
             return;
         }
-        HandleSet domainList = hh.handleSet;
+        final HandleSet domainList = hh.handleSet;
         domainList.remove(urlhash);
         if (domainList.isEmpty()) this.domainStacks.remove(host);
     }
 
     /**
      * get the next entry in this crawl queue in such a way that the domain access time delta is maximized
-     * and always above the given minimum delay time. An additional delay time is computed using the robots.txt
-     * crawl-delay time which is always respected. In case the minimum time cannot ensured, this method pauses
+     * and always above the given minimum delay time. In case the minimum time cannot ensured, this method pauses
      * the necessary time until the url is released and returned as CrawlEntry object. In case that a profile
      * for the computed Entry does not exist, null is returned
      * @param delay true if the requester demands forced delays using explicit thread sleep
@@ -376,51 +375,51 @@ public class LegacyBalancer implements Balancer {
         long sleeptime = 0;
         Request crawlEntry = null;
         CrawlProfile profileEntry = null;
-        byte[] failhash = null;
+        final byte[] failhash = null;
         while (!this.urlFileIndex.isEmpty()) {
-            byte[] nexthash = getbest(robots, cs);
+            final byte[] nexthash = this.getbest(robots, cs);
             if (nexthash == null) return null;
-            
+
             synchronized (this) {
-                Row.Entry rowEntry = (nexthash == null) ? null : this.urlFileIndex.remove(nexthash);
+                final Row.Entry rowEntry = (nexthash == null) ? null : this.urlFileIndex.remove(nexthash);
                 if (rowEntry == null) continue;
-                
+
                 crawlEntry = new Request(rowEntry);
-                //Log.logInfo("Balancer", "fetched next url: " + crawlEntry.url().toNormalform(true, false));
-    
+                //Log.logInfo("LEGACY BALANCER", "fetched next url: " + crawlEntry.url().toNormalform(true, false));
+
                 // check blacklist (again) because the user may have created blacklist entries after the queue has been filled
                 if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, crawlEntry.url())) {
                     ConcurrentLog.fine("CRAWLER", "URL '" + crawlEntry.url() + "' is in blacklist.");
                     continue;
                 }
-    
+
                 // at this point we must check if the crawlEntry has relevance because the crawl profile still exists
                 // if not: return null. A calling method must handle the null value and try again
                 profileEntry = cs.get(UTF8.getBytes(crawlEntry.profileHandle()));
                 if (profileEntry == null) {
-                    ConcurrentLog.fine("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
+                    ConcurrentLog.fine("LEGACY BALANCER", "no profile entry for handle " + crawlEntry.profileHandle());
                     continue;
                 }
                 // depending on the caching policy we need sleep time to avoid DoS-like situations
                 sleeptime = Latency.getDomainSleepTime(robots, profileEntry, crawlEntry.url());
-    
+
                 assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + ASCII.String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + ASCII.String(rowEntry.getPrimaryKeyBytes());
                 assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + ASCII.String(nexthash) + ", crawlEntry.url().hash() = " + ASCII.String(crawlEntry.url().hash());
-    
+
                 if (failhash != null && Base64Order.enhancedCoder.equal(failhash, nexthash)) break; // prevent endless loops
                 break;
             }
         }
         if (crawlEntry == null) return null;
-        ClientIdentification.Agent agent = profileEntry == null ? ClientIdentification.yacyInternetCrawlerAgent : profileEntry.getAgent();
-        long robotsTime = Latency.getRobotsTime(robots, crawlEntry.url(), agent);
+        final ClientIdentification.Agent agent = profileEntry == null ? ClientIdentification.yacyInternetCrawlerAgent : profileEntry.getAgent();
+        final long robotsTime = Latency.getRobotsTime(robots, crawlEntry.url(), agent);
         Latency.updateAfterSelection(crawlEntry.url(), profileEntry == null ? 0 : robotsTime);
         if (delay && sleeptime > 0) {
             // force a busy waiting here
             // in best case, this should never happen if the balancer works properly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            ConcurrentLog.info("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, agent) + ", domainStacks.size() = " + this.domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
+            ConcurrentLog.info("LEGACY BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ": " + Latency.waitingRemainingExplain(crawlEntry.url(), robots, agent) + ", domainStacks.size() = " + this.domainStacks.size() + ", domainStacksInitSize = " + this.domStackInitSize);
             long loops = sleeptime / 1000;
             long rest = sleeptime % 1000;
             if (loops < 3) {
@@ -430,10 +429,10 @@ public class LegacyBalancer implements Balancer {
             Thread.currentThread().setName("Balancer waiting for " +crawlEntry.url().getHost() + ": " + sleeptime + " milliseconds");
             synchronized(this) {
                 // must be synchronized here to avoid 'takeover' moves from other threads which then idle the same time which would not be enough
-                if (rest > 0) {try {this.wait(rest);} catch (final InterruptedException e) {}}
+                if (rest > 0) {try {Thread.sleep(rest);} catch (final InterruptedException e) {}}
                 for (int i = 0; i < loops; i++) {
-                    ConcurrentLog.info("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
-                    try {this.wait(1000); } catch (final InterruptedException e) {}
+                    ConcurrentLog.info("LEGACY BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
+                    try {Thread.sleep(1000); } catch (final InterruptedException e) {}
                 }
             }
             Latency.updateAfterSelection(crawlEntry.url(), robotsTime);
@@ -445,86 +444,86 @@ public class LegacyBalancer implements Balancer {
 
         synchronized (this.zeroWaitingCandidates) {
             if (this.zeroWaitingCandidates.size() > 0) {
-                byte[] urlhash = pickFromZeroWaiting();
+                final byte[] urlhash = this.pickFromZeroWaiting();
                 if (urlhash != null) return urlhash;
             }
             this.zeroWaitingCandidates.clear();
-            
+
             // check if we need to get entries from the file index
             try {
-                fillDomainStacks();
+                this.fillDomainStacks();
             } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
-    
+
             // iterate over the domain stacks
             final Iterator<Map.Entry<String, HostHandles>> i = this.domainStacks.entrySet().iterator();
             Map.Entry<String, HostHandles> entry;
-            OrderedScoreMap<Map.Entry<String, byte[]>> nextZeroCandidates = new OrderedScoreMap<Map.Entry<String, byte[]>>(null);
-            OrderedScoreMap<Map.Entry<String, byte[]>> failoverCandidates = new OrderedScoreMap<Map.Entry<String, byte[]>>(null);
+            final OrderedScoreMap<Map.Entry<String, byte[]>> nextZeroCandidates = new OrderedScoreMap<>(null);
+            final OrderedScoreMap<Map.Entry<String, byte[]>> failoverCandidates = new OrderedScoreMap<>(null);
             int newCandidatesForward = 1;
             while (i.hasNext() && nextZeroCandidates.size() < 1000) {
                 entry = i.next();
                 final String hostname = entry.getKey();
                 final HostHandles hosthandles = entry.getValue();
-    
+
                 // clean up empty entries
                 if (hosthandles.handleSet.isEmpty()) {
                     i.remove();
                     continue;
                 }
-    
+
                 final byte[] urlhash = hosthandles.handleSet.getOne(0);
                 if (urlhash == null) continue;
-    
+
                 int w;
                 Row.Entry rowEntry;
                 try {
                     rowEntry = this.urlFileIndex.get(urlhash, false);
                     if (rowEntry == null) continue; // may have been deleted there manwhile
-                    Request crawlEntry = new Request(rowEntry);
-                    CrawlProfile profileEntry = cs.get(UTF8.getBytes(crawlEntry.profileHandle()));
+                    final Request crawlEntry = new Request(rowEntry);
+                    final CrawlProfile profileEntry = cs.get(UTF8.getBytes(crawlEntry.profileHandle()));
                     if (profileEntry == null) {
-                        ConcurrentLog.warn("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
+                        ConcurrentLog.warn("LEGACY BALANCER", "no profile entry for handle " + crawlEntry.profileHandle());
                         continue;
                     }
                     w = Latency.waitingRemaining(crawlEntry.url(), robots, profileEntry.getAgent());
                 } catch (final IOException e1) {
-                    ConcurrentLog.warn("Balancer", e1.getMessage(), e1);
+                    ConcurrentLog.warn("LEGACY BALANCER", e1.getMessage(), e1);
                     continue;
                 }
 
                 if (w <= 0) {
                     if (w == Integer.MIN_VALUE) {
                         if (newCandidatesForward-- > 0) {
-                            nextZeroCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(hostname, urlhash), 10000);
+                            nextZeroCandidates.set(new AbstractMap.SimpleEntry<>(hostname, urlhash), 10000);
                         } else {
-                            failoverCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(hostname, urlhash), 0);
+                            failoverCandidates.set(new AbstractMap.SimpleEntry<>(hostname, urlhash), 0);
                         }
                     } else {
-                        nextZeroCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(hostname, urlhash), hosthandles.handleSet.size());
+                        nextZeroCandidates.set(new AbstractMap.SimpleEntry<>(hostname, urlhash), hosthandles.handleSet.size());
                     }
                 } else {
-                    failoverCandidates.set(new AbstractMap.SimpleEntry<String, byte[]>(hostname, urlhash), w);
+                    failoverCandidates.set(new AbstractMap.SimpleEntry<>(hostname, urlhash), w);
                 }
             }
-            //Log.logInfo("Balancer", "*** getbest: created new nextZeroCandidates-list, size = " + nextZeroCandidates.size() + ", domainStacks.size = " + this.domainStacks.size());
-            
+            //Log.logInfo("LEGACY BALANCER", "*** getbest: created new nextZeroCandidates-list, size = " + nextZeroCandidates.size() + ", domainStacks.size = " + this.domainStacks.size());
+
             if (!nextZeroCandidates.isEmpty()) {
                 // take some of the nextZeroCandidates and put the best into the zeroWaitingCandidates
                 int pick = nextZeroCandidates.size() <= 10 ? nextZeroCandidates.size() : Math.max(1, nextZeroCandidates.size() / 3);
-                Iterator<Map.Entry<String, byte[]>> k = nextZeroCandidates.keys(false);
+                final Iterator<Map.Entry<String, byte[]>> k = nextZeroCandidates.keys(false);
                 while (k.hasNext() && pick-- > 0) {
                     this.zeroWaitingCandidates.add(k.next());
                 }
-                //Log.logInfo("Balancer", "*** getbest: created new zeroWaitingCandidates-list, size = " + zeroWaitingCandidates.size() + ", domainStacks.size = " + this.domainStacks.size());
-                
-                return pickFromZeroWaiting();
+                //Log.logInfo("LEGACY BALANCER", "*** getbest: created new zeroWaitingCandidates-list, size = " + zeroWaitingCandidates.size() + ", domainStacks.size = " + this.domainStacks.size());
+
+                return this.pickFromZeroWaiting();
             }
 
             if (!failoverCandidates.isEmpty()) {
                 // bad luck: just take that one with least waiting
-                Iterator<Map.Entry<String, byte[]>> k = failoverCandidates.keys(true);
+                final Iterator<Map.Entry<String, byte[]>> k = failoverCandidates.keys(true);
                 String besthost;
                 byte[] besturlhash;
                 Map.Entry<String, byte[]> hosthash;
@@ -533,13 +532,13 @@ public class LegacyBalancer implements Balancer {
                     //if (failoverCandidates.get(hosthash) > 2000) break; // thats too long; we want a second chance for this!
                     besthost = hosthash.getKey();
                     besturlhash = hosthash.getValue();
-                    removeHashFromDomainStacks(besthost, besturlhash);
-                    //Log.logInfo("Balancer", "*** getbest: no zero waiting candidates, besthost = " + besthost);
+                    this.removeHashFromDomainStacks(besthost, besturlhash);
+                    //Log.logInfo("LEGACY BALANCER", "*** getbest: no zero waiting candidates, besthost = " + besthost);
                     return besturlhash;
                 }
             }
-            
-            //Log.logInfo("Balancer", "*** getbest: besturlhash == null");
+
+            //Log.logInfo("LEGACY BALANCER", "*** getbest: besturlhash == null");
             return null; // this should never happen
         }
     }
@@ -549,21 +548,21 @@ public class LegacyBalancer implements Balancer {
         String host = null;
         byte[] hash = null;
         while (this.zeroWaitingCandidates.size() > 0) {
-            Map.Entry<String, byte[]> z = this.zeroWaitingCandidates.remove(this.random.nextInt(this.zeroWaitingCandidates.size()));
-            HostHandles hh = this.domainStacks.get(z.getKey());
+            final Map.Entry<String, byte[]> z = this.zeroWaitingCandidates.remove(this.random.nextInt(this.zeroWaitingCandidates.size()));
+            final HostHandles hh = this.domainStacks.get(z.getKey());
             if (hh == null) continue;
             host = z.getKey(); if (host == null) continue;
             hash = z.getValue(); if (hash == null) continue;
-            removeHashFromDomainStacks(host, hash);
-            ConcurrentLog.info("Balancer", "// getbest: picked a random from the zero-waiting stack: " + host + ", zeroWaitingCandidates.size = " + this.zeroWaitingCandidates.size());
+            this.removeHashFromDomainStacks(host, hash);
+            ConcurrentLog.info("LEGACY BALANCER", "// getbest: picked a random from the zero-waiting stack: " + host + ", zeroWaitingCandidates.size = " + this.zeroWaitingCandidates.size());
             return hash;
         }
 
-        //Log.logInfo("Balancer", "*** getbest: picking from zero-waiting stack failed!" + " zeroWaitingCandidates.size = " + this.zeroWaitingCandidates.size());
+        //Log.logInfo("LEGACY BALANCER", "*** getbest: picking from zero-waiting stack failed!" + " zeroWaitingCandidates.size = " + this.zeroWaitingCandidates.size());
         this.zeroWaitingCandidates.clear();
         return null;
     }
-    
+
     private void fillDomainStacks() throws IOException {
         if (!this.domainStacks.isEmpty() && System.currentTimeMillis() - this.lastDomainStackFill < 60000L) return;
         this.domainStacks.clear();
@@ -572,32 +571,32 @@ public class LegacyBalancer implements Balancer {
         String host;
         Request request;
         int count = 0;
-        long timeout = System.currentTimeMillis() + 5000;
-        for (Row.Entry entry: this.urlFileIndex.random(10000)) {
+        final long timeout = System.currentTimeMillis() + 5000;
+        for (final Row.Entry entry: this.urlFileIndex.random(10000)) {
             if (entry == null) continue;
             request = new Request(entry);
-            
+
             // check blacklist (again) because the user may have created blacklist entries after the queue has been filled
             if (Switchboard.urlBlacklist.isListed(BlacklistType.CRAWLER, request.url())) {
                 ConcurrentLog.fine("CRAWLER", "URL '" + request.url() + "' is in blacklist.");
                 try {blackhandles.put(entry.getPrimaryKeyBytes());} catch (final SpaceExceededException e) {}
                 continue;
             }
-            
+
             host = request.url().getHost();
             try {
-                pushHashToDomainStacks(host, request.url().hosthash(), entry.getPrimaryKeyBytes());
+                this.pushHashToDomainStacks(host, request.url().hosthash(), entry.getPrimaryKeyBytes());
             } catch (final SpaceExceededException e) {
                 break;
             }
             count++;
             if (this.domainStacks.size() >= 1000 || count >= 100000 || System.currentTimeMillis() > timeout) break;
         }
-        
+
         // if we collected blacklist entries then delete them now
-        for (byte[] blackhandle: blackhandles) this.urlFileIndex.remove(blackhandle);
-        
-        ConcurrentLog.info("BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + this.domainStacks.size() + ", blackhandles = " + blackhandles.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
+        for (final byte[] blackhandle: blackhandles) this.urlFileIndex.remove(blackhandle);
+
+        ConcurrentLog.info("LEGACY BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + this.domainStacks.size() + ", blackhandles = " + blackhandles.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
         this.domStackInitSize = this.domainStacks.size();
     }
 

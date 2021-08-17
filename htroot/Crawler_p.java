@@ -108,9 +108,9 @@ public class Crawler_p {
             prop.put("jsonp-end", "");
         }
 
-        Segment segment = sb.index;
-        Fulltext fulltext = segment.fulltext();
-        String localSolr = "solr/select?core=collection1&q=*:*&start=0&rows=3";
+        final Segment segment = sb.index;
+        final Fulltext fulltext = segment.fulltext();
+        final String localSolr = "solr/select?core=collection1&q=*:*&start=0&rows=3";
         String remoteSolr = env.getConfig(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_URL, localSolr);
         if (!remoteSolr.endsWith("/")) remoteSolr = remoteSolr + "/";
         prop.put("urlpublictextSolrURL", fulltext.connectedLocalSolr() ? localSolr : remoteSolr + "collection1/select?&q=*:*&start=0&rows=3");
@@ -129,11 +129,11 @@ public class Crawler_p {
         prop.put("loaderMax", 0);
         prop.put("list-loader", 0);
 
-        int coreCrawlJobSize = sb.crawlQueues.coreCrawlJobSize();
-        int limitCrawlJobSize = sb.crawlQueues.limitCrawlJobSize();
-        int remoteTriggeredCrawlJobSize = sb.crawlQueues.remoteTriggeredCrawlJobSize();
-        int noloadCrawlJobSize = sb.crawlQueues.noloadCrawlJobSize();
-        int allsize = coreCrawlJobSize + limitCrawlJobSize + remoteTriggeredCrawlJobSize + noloadCrawlJobSize;
+        final int coreCrawlJobSize = sb.crawlQueues.coreCrawlJobSize();
+        final int limitCrawlJobSize = sb.crawlQueues.limitCrawlJobSize();
+        final int remoteTriggeredCrawlJobSize = sb.crawlQueues.remoteTriggeredCrawlJobSize();
+        final int noloadCrawlJobSize = sb.crawlQueues.noloadCrawlJobSize();
+        final int allsize = coreCrawlJobSize + limitCrawlJobSize + remoteTriggeredCrawlJobSize + noloadCrawlJobSize;
 
         prop.put("localCrawlSize", coreCrawlJobSize);
         prop.put("localCrawlState", "");
@@ -148,10 +148,10 @@ public class Crawler_p {
         prop.put("forwardToCrawlStart", "0");
 
         prop.put("info", "0");
-        boolean debug = (post != null && post.containsKey("debug"));
+        final boolean debug = (post != null && post.containsKey("debug"));
 
         if (post != null) {
-            String c = post.toString();
+            final String c = post.toString();
             if (c.length() < 1000) ConcurrentLog.info("Crawl Start", c);
         }
 
@@ -159,16 +159,16 @@ public class Crawler_p {
             // terminate crawls individually
             sb.crawlQueues.noticeURL.clear();
             for (final byte[] h: sb.crawler.getActive()) {
-                CrawlProfile p = sb.crawler.getActive(h);
+                final CrawlProfile p = sb.crawler.getActive(h);
                 if (CrawlSwitchboard.DEFAULT_PROFILES.contains(p.name())) continue;
                 if (p != null) sb.crawler.putPassive(h, p);
                 sb.crawler.removeActive(h);
                 sb.crawler.removePassive(h);
-                try {sb.crawlQueues.noticeURL.removeByProfileHandle(p.handle(), 10000);} catch (SpaceExceededException e) {}
+                try {sb.crawlQueues.noticeURL.removeByProfileHandle(p.handle(), 10000);} catch (final SpaceExceededException e) {}
             }
 
             // clear stacks
-            for (StackType stackType: StackType.values()) sb.crawlQueues.noticeURL.clear(stackType);
+            for (final StackType stackType: StackType.values()) sb.crawlQueues.noticeURL.clear(stackType);
             try { sb.cleanProfiles(); } catch (final InterruptedException e) {/* ignore this */}
 
             // remove pause
@@ -200,7 +200,7 @@ public class Crawler_p {
                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "user request in Crawler_p from " + header.refererHost());
             }
         }
-        String queuemessage = sb.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
+        final String queuemessage = sb.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL + "_isPaused_cause", "");
         if (queuemessage.length() == 0) {
             prop.put("info-queue", 0);
         } else {
@@ -263,21 +263,21 @@ public class Crawler_p {
                 final boolean deleteold = (deleteage && deleteageDate != null) || (restrictedcrawl && post.getBoolean("deleteold"));
 
                 final String sitemapURLStr = post.get("sitemapURL","");
-                String crawlingStart0 = post.get("crawlingURL","").trim(); // the crawljob start url
-                String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
-                Set<DigestURL> rootURLs = new HashSet<DigestURL>();
+                final String crawlingStart0 = post.get("crawlingURL","").trim(); // the crawljob start url
+                final String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
+                Set<DigestURL> rootURLs = new HashSet<>();
                 String crawlName = "";
                 if (crawlingFile == null) {
-                    StringBuilder crawlNameBuilder = new StringBuilder(); // for large crawl queues this can be pretty large
+                    final StringBuilder crawlNameBuilder = new StringBuilder(); // for large crawl queues this can be pretty large
                     for (String crawlingStart: rootURLs0) {
                         if (crawlingStart == null || crawlingStart.length() == 0) continue;
                         // add the prefix http:// if necessary
-                        int pos = crawlingStart.indexOf("://",0);
+                        final int pos = crawlingStart.indexOf("://",0);
                         if (pos == -1) {
                             if (crawlingStart.startsWith("ftp")) crawlingStart = "ftp://" + crawlingStart; else crawlingStart = "https://" + crawlingStart; // we default to https instead of http becuase those outnumber http by far
                         }
                         try {
-                            DigestURL crawlingStartURL = new DigestURL(crawlingStart);
+                            final DigestURL crawlingStartURL = new DigestURL(crawlingStart);
                             rootURLs.add(crawlingStartURL);
                             crawlNameBuilder.append((crawlingStartURL.getHost() == null) ? crawlingStartURL.toNormalform(true) : crawlingStartURL.getHost()).append(',');
                             if (crawlingStartURL != null && (crawlingStartURL.isFile() || crawlingStartURL.isSMB())) storeHTCache = false;
@@ -292,25 +292,25 @@ public class Crawler_p {
                 if (crawlName.endsWith(",")) crawlName = crawlName.substring(0, crawlName.length() - 1);
                 if (crawlName.length() > 64) {
                     crawlName = "crawl_for_" + rootURLs.size() + "_start_points_" + Integer.toHexString(crawlName.hashCode());
-                    int p = crawlName.lastIndexOf(',');
+                    final int p = crawlName.lastIndexOf(',');
                     if (p >= 8) crawlName = crawlName.substring(0, p);
                 }
                 if (crawlName.length() == 0 && sitemapURLStr.length() > 0) crawlName = "sitemap loader for " + sitemapURLStr;
                 // in case that a root url has a file protocol, then the site filter does not work, patch that:
                 if (fullDomain) {
-                    for (DigestURL u: rootURLs) if (u.isFile()) {fullDomain = false; subPath = true; break;}
+                    for (final DigestURL u: rootURLs) if (u.isFile()) {fullDomain = false; subPath = true; break;}
                 }
 
                 // delete old robots entries
-                for (DigestURL ru : rootURLs) {
+                for (final DigestURL ru : rootURLs) {
                     sb.robots.delete(ru);
                     try {
                         if (ru.getHost() != null) { // might be null for file://
                             Cache.delete(RobotsTxt.robotsURL(RobotsTxt.getHostPort(ru)).hash());
                         }
-                    } catch (IOException e) {}
+                    } catch (final IOException e) {}
                 }
-                try {sb.robots.clear();} catch (IOException e) {} // to be safe: clear all.
+                try {sb.robots.clear();} catch (final IOException e) {} // to be safe: clear all.
 
                 // set the crawl filter
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
@@ -357,13 +357,13 @@ public class Crawler_p {
                 final int crawlingDomMaxPages = (crawlingDomMaxCheck) ? post.getInt("crawlingDomMaxPages", -1) : -1;
                 env.setConfig("crawlingDomMaxPages", Integer.toString(crawlingDomMaxPages));
 
-                boolean followFrames = "on".equals(post.get("followFrames", "false"));
+                final boolean followFrames = "on".equals(post.get("followFrames", "false"));
                 env.setConfig("followFrames", followFrames);
 
-                boolean obeyHtmlRobotsNoindex = "on".equals(post.get("obeyHtmlRobotsNoindex", "false"));
+                final boolean obeyHtmlRobotsNoindex = "on".equals(post.get("obeyHtmlRobotsNoindex", "false"));
                 env.setConfig("obeyHtmlRobotsNoindex", obeyHtmlRobotsNoindex);
 
-                boolean obeyHtmlRobotsNofollow = "on".equals(post.get("obeyHtmlRobotsNofollow", "false"));
+                final boolean obeyHtmlRobotsNofollow = "on".equals(post.get("obeyHtmlRobotsNofollow", "false"));
                 env.setConfig("obeyHtmlRobotsNofollow", obeyHtmlRobotsNofollow);
 
                 final boolean indexText = "on".equals(post.get("indexText", "on"));
@@ -374,8 +374,8 @@ public class Crawler_p {
 
                 env.setConfig("storeHTCache", storeHTCache);
 
-                String defaultAgentName = sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName;
-                String agentName = post.get("agentName", defaultAgentName);
+                final String defaultAgentName = sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName;
+                final String agentName = post.get("agentName", defaultAgentName);
                 ClientIdentification.Agent agent = ClientIdentification.getAgent(agentName);
                 if (agent == null) agent = ClientIdentification.getAgent(defaultAgentName);
 
@@ -398,14 +398,14 @@ public class Crawler_p {
 
                 if ("sitelist".equals(crawlingMode)) {
                     newcrawlingMustNotMatch = CrawlProfile.MATCH_NEVER_STRING;
-                    Set<DigestURL> newRootURLs = new HashSet<DigestURL>();
-                    for (DigestURL sitelistURL: rootURLs) {
+                    final Set<DigestURL> newRootURLs = new HashSet<>();
+                    for (final DigestURL sitelistURL: rootURLs) {
                         // download document
                         Document scraper;
                         try {
                             scraper = sb.loader.loadDocument(sitelistURL, CacheStrategy.IFFRESH, BlacklistType.CRAWLER, agent);
                             // get links and generate filter
-                            for (DigestURL u: scraper.getHyperlinks().keySet()) {
+                            for (final DigestURL u: scraper.getHyperlinks().keySet()) {
                                 newRootURLs.add(u);
                             }
                         } catch (final IOException e) {
@@ -419,10 +419,10 @@ public class Crawler_p {
 
                 // delete all error urls for that domain
                 // and all urls for that host from the crawl queue
-                List<String> deleteIDs = new ArrayList<>();
-                Set<String> hosthashes = new HashSet<String>();
+                final List<String> deleteIDs = new ArrayList<>();
+                final Set<String> hosthashes = new HashSet<>();
                 boolean anysmbftporpdf = false;
-                for (DigestURL u : rootURLs) {
+                for (final DigestURL u : rootURLs) {
                     deleteIDs.add(new String(u.hash()));
                     hosthashes.add(u.hosthash());
                     if ("smb.ftp".indexOf(u.getProtocol()) >= 0 || "pdf".equals(MultiProtocolURL.getFileExtension(u.getFileName()))) anysmbftporpdf = true;
@@ -431,7 +431,7 @@ public class Crawler_p {
                 sb.crawlQueues.removeHosts(hosthashes);
                 sb.index.fulltext().commit(true);
 
-                boolean crawlingQ = anysmbftporpdf || "on".equals(post.get("crawlingQ", "off")) || "sitemap".equals(crawlingMode);
+                final boolean crawlingQ = anysmbftporpdf || "on".equals(post.get("crawlingQ", "off")) || "sitemap".equals(crawlingMode);
                 env.setConfig("crawlingQ", crawlingQ);
 
                 // compute mustmatch filter according to rootURLs
@@ -445,10 +445,10 @@ public class Crawler_p {
                     } else if (subPath) {
                         siteFilter = CrawlProfile.subpathFilter(rootURLs);
                         if (deleteold) {
-                            for (DigestURL u: rootURLs) {
+                            for (final DigestURL u: rootURLs) {
                                 String basepath = u.toNormalform(true);
-                                if (!basepath.endsWith("/")) {int p = basepath.lastIndexOf("/"); if (p > 0) basepath = basepath.substring(0, p + 1);}
-                                int count = sb.index.fulltext().remove(basepath, deleteageDate);
+                                if (!basepath.endsWith("/")) {final int p = basepath.lastIndexOf("/"); if (p > 0) basepath = basepath.substring(0, p + 1);}
+                                final int count = sb.index.fulltext().remove(basepath, deleteageDate);
                                 if (count > 0) ConcurrentLog.info("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
                             }
                         }
@@ -463,9 +463,9 @@ public class Crawler_p {
 
                 // check if the crawl filter works correctly
                 try {
-                    Pattern mmp = Pattern.compile(newcrawlingMustMatch);
+                    final Pattern mmp = Pattern.compile(newcrawlingMustMatch);
                     int maxcheck = 100;
-                    for (DigestURL u: rootURLs) {
+                    for (final DigestURL u: rootURLs) {
                         assert mmp.matcher(u.toNormalform(true)).matches() : "pattern " + mmp.toString() + " does not match url " + u.toNormalform(true);
                         if (maxcheck-- <= 0) break;
                     }
@@ -486,48 +486,48 @@ public class Crawler_p {
                     }
                 }
 
-                String snapshotsMaxDepthString = post.get("snapshotsMaxDepth", "-1");
-                int snapshotsMaxDepth = Integer.parseInt(snapshotsMaxDepthString);
-                boolean snapshotsLoadImage = post.getBoolean("snapshotsLoadImage");
-                boolean snapshotsReplaceOld = post.getBoolean("snapshotsReplaceOld");
-                String snapshotsMustnotmatch = post.get("snapshotsMustnotmatch", "");
+                final String snapshotsMaxDepthString = post.get("snapshotsMaxDepth", "-1");
+                final int snapshotsMaxDepth = Integer.parseInt(snapshotsMaxDepthString);
+                final boolean snapshotsLoadImage = post.getBoolean("snapshotsLoadImage");
+                final boolean snapshotsReplaceOld = post.getBoolean("snapshotsReplaceOld");
+                final String snapshotsMustnotmatch = post.get("snapshotsMustnotmatch", "");
 
-                String ignoreclassname_s = post.get("ignoreclassname");
-                Set<String> ignoreclassname = new HashSet<>();
+                final String ignoreclassname_s = post.get("ignoreclassname");
+                final Set<String> ignoreclassname = new HashSet<>();
                 if (ignoreclassname_s != null) {
-                    String[] ignoreclassname_a = ignoreclassname_s.trim().split(",");
+                    final String[] ignoreclassname_a = ignoreclassname_s.trim().split(",");
                     for (int i = 0; i < ignoreclassname_a.length; i++) {
                         ignoreclassname.add(ignoreclassname_a[i].trim());
                     }
                 }
 
                 // get vocabulary scraper info
-                JSONObject vocabulary_scraper = new JSONObject(); // key = vocabulary_name, value = properties with key = type (i.e. 'class') and value = keyword in context
-                for (String key: post.keySet()) {
+                final JSONObject vocabulary_scraper = new JSONObject(); // key = vocabulary_name, value = properties with key = type (i.e. 'class') and value = keyword in context
+                for (final String key: post.keySet()) {
                     if (key.startsWith("vocabulary_")) {
                         if (key.endsWith("_class")) {
-                            String vocabulary = key.substring(11, key.length() - 6);
-                            String value = post.get(key);
+                            final String vocabulary = key.substring(11, key.length() - 6);
+                            final String value = post.get(key);
                             if (value != null && value.length() > 0) {
                                 JSONObject props;
                                 try {
                                     props = vocabulary_scraper.getJSONObject(vocabulary);
-                                } catch (JSONException e) {
+                                } catch (final JSONException e) {
                                     props = new JSONObject();
                                     try {
                                         vocabulary_scraper.put(vocabulary, props);
-                                    } catch (JSONException ee) {}
+                                    } catch (final JSONException ee) {}
                                 }
                                 try {
                                     props.put("class", value);
-                                } catch (JSONException e) {
+                                } catch (final JSONException e) {
                                 }
                             }
                         }
                     }
                 }
 
-                int timezoneOffset = post.getInt("timezoneOffset", 0);
+                final int timezoneOffset = post.getInt("timezoneOffset", 0);
 
                 // in case that we crawl from a file, load that file and re-compute mustmatch pattern
                 List<AnchorURL> hyperlinks_from_file = null;
@@ -670,8 +670,8 @@ public class Crawler_p {
                     if ("url".equals(crawlingMode)) {
                         // stack requests
                         sb.crawler.putActive(handle, profile);
-                        final Set<DigestURL> successurls = new HashSet<DigestURL>();
-                        final Map<DigestURL,String> failurls = new HashMap<DigestURL, String>();
+                        final Set<DigestURL> successurls = new HashSet<>();
+                        final Map<DigestURL,String> failurls = new HashMap<>();
                         sb.stackURLs(rootURLs, profile, successurls, failurls);
 
                         if (failurls.size() == 0) {
@@ -681,7 +681,7 @@ public class Crawler_p {
 
                             // generate a YaCyNews if the global flag was set
                             if (!sb.isRobinsonMode() && crawlOrder) {
-                                final Map<String, String> m = new HashMap<String, String>(profile); // must be cloned
+                                final Map<String, String> m = new HashMap<>(profile); // must be cloned
                                 m.remove("specificDepth");
                                 m.remove("indexText");
                                 m.remove("indexMedia");
@@ -700,8 +700,8 @@ public class Crawler_p {
                                 sb.peers.newsPool.publishMyNews(sb.peers.mySeed(), NewsPool.CATEGORY_CRAWL_START, m);
                             }
                         } else {
-                            StringBuilder fr = new StringBuilder();
-                            for (Map.Entry<DigestURL, String> failure: failurls.entrySet()) {
+                            final StringBuilder fr = new StringBuilder();
+                            for (final Map.Entry<DigestURL, String> failure: failurls.entrySet()) {
                                 sb.crawlQueues.errorURL.push(failure.getKey(), 0, null, FailCategory.FINAL_LOAD_CONTEXT, failure.getValue(), -1);
                                 fr.append(failure.getValue()).append('/');
                             }
@@ -743,7 +743,7 @@ public class Crawler_p {
                                     final String crawlingFileContent = post.get("crawlingFile$file", "");
                                     final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000,
                                             new HashSet<String>(), new VocabularyScraper(), profile.timezoneOffset());
-                                    FileCrawlStarterTask crawlStarterTask = new FileCrawlStarterTask(crawlingFile, crawlingFileContent, scraper, profile,
+                                    final FileCrawlStarterTask crawlStarterTask = new FileCrawlStarterTask(crawlingFile, crawlingFileContent, scraper, profile,
                                             sb.crawlStacker, sb.peers.mySeed().hash.getBytes());
                                     sb.crawler.putActive(handle, profile);
                                     crawlStarterTask.start();
@@ -805,8 +805,8 @@ public class Crawler_p {
                 thread.setIdleSleep(2000);
             }
 
-            float latencyFactor = post.getFloat("latencyFactor", 0.5f);
-            int MaxSameHostInQueue = post.getInt("MaxSameHostInQueue", 20);
+            final float latencyFactor = post.getFloat("latencyFactor", 0.5f);
+            final int MaxSameHostInQueue = post.getInt("MaxSameHostInQueue", 20);
             env.setConfig(SwitchboardConstants.CRAWLER_LATENCY_FACTOR, latencyFactor);
             env.setConfig(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, MaxSameHostInQueue);
         }
@@ -831,7 +831,7 @@ public class Crawler_p {
             profile.putProfileEntry("crawlProfilesShow_list_", prop, true, dark, count, domlistlength);
             prop.put("crawlProfilesShow_list_" + count + "_debug", debug ? 1 : 0);
             if (debug) {
-                RowHandleSet urlhashes = sb.crawler.getURLHashes(h);
+                final RowHandleSet urlhashes = sb.crawler.getURLHashes(h);
                 prop.put("crawlProfilesShow_list_" + count + "_debug_count", urlhashes == null ? "unknown" : Integer.toString(urlhashes.size()));
             }
             hosts = hosts + "," + profile.name();
@@ -851,15 +851,15 @@ public class Crawler_p {
         }
         if (count > 0 && sb.getConfigBool(SwitchboardConstants.DECORATION_GRAFICS_LINKSTRUCTURE, true)) {
             // collect the host names for 'wide' crawls which can be visualized
-            boolean showLinkstructure = hosts.length() > 0 && !hosts.contains("file:");
+            final boolean showLinkstructure = hosts.length() > 0 && !hosts.contains("file:");
             if (showLinkstructure) {
-                StringBuilder q = new StringBuilder();
+                final StringBuilder q = new StringBuilder();
                 hosts = hosts.substring(1);
                 q.append(CollectionSchema.host_s.getSolrFieldName()).append(':').append(hosts).append(" OR ").append(CollectionSchema.host_s.getSolrFieldName()).append(':').append("www.").append(hosts);
                 try {
                     prop.put("crawlProfilesShow_linkstructure", count == 1 && sb.index.fulltext().getDefaultConnector().getCountByQuery(q.toString()) > 0 ? 1 : 2);
                     prop.put("crawlProfilesShow_linkstructure_hosts", hosts);
-                } catch (IOException e) {
+                } catch (final IOException e) {
                 }
             }
         }
@@ -905,7 +905,7 @@ public class Crawler_p {
                 if(inStream != null) {
                     try {
                         inStream.close();
-                    } catch(IOException ignoredException) {
+                    } catch(final IOException ignoredException) {
                         ConcurrentLog.info("Crawler_p", "Could not close crawlingFile : " + crawlingFile.getAbsolutePath());
                     }
                 }

@@ -1,7 +1,7 @@
 /**
- *  Balancer 
- *  SPDX-FileCopyrightText: 2014 Michael Peter Christen <mc@yacy.net)> 
- *  SPDX-License-Identifier: GPL-2.0-or-later 
+ *  Balancer
+ *  SPDX-FileCopyrightText: 2014 Michael Peter Christen <mc@yacy.net)>
+ *  SPDX-License-Identifier: GPL-2.0-or-later
  *  Frankfurt am Main, Germany
  *  First released 14.04.2014 at http://yacy.net
  *
@@ -9,12 +9,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -71,7 +71,7 @@ public interface Balancer {
      * @return number of deleted urls
      */
     public int removeAllByHostHashes(final Set<String> hosthashes);
-    
+
     /**
      * @param urlHashes, a list of hashes that shall be removed
      * @return number of entries that had been removed
@@ -112,11 +112,11 @@ public interface Balancer {
 
     /**
      * get a list of domains that are currently maintained as domain stacks
-     * @return a map of clear text strings of host names (each host name eventually concatenated with a port, depending on the implementation) 
+     * @return a map of clear text strings of host names (each host name eventually concatenated with a port, depending on the implementation)
      * 		to an integer array: {the size of the domain stack, guessed delta waiting time}
      */
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots);
-    
+
     /**
      * get lists of crawl request entries for a specific host
      * @param host
@@ -128,8 +128,7 @@ public interface Balancer {
 
     /**
      * get the next entry in this crawl queue in such a way that the domain access time delta is maximized
-     * and always above the given minimum delay time. An additional delay time is computed using the robots.txt
-     * crawl-delay time which is always respected. In case the minimum time cannot ensured, this method pauses
+     * and always above the given minimum delay time. In case the minimum time cannot ensured, this method pauses
      * the necessary time until the url is released and returned as CrawlEntry object. In case that a profile
      * for the computed Entry does not exist, null is returned
      * @param delay true if the requester demands forced delays using explicit thread sleep

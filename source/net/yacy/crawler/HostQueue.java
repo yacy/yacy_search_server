@@ -1,6 +1,6 @@
 /**
  *  HostQueue
- *  SPDX-FileCopyrightText: 2013 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-FileCopyrightText: 2013 Michael Peter Christen <mc@yacy.net)>
  *  SPDX-License-Identifier: GPL-2.0-or-later
  *  First released 24.09.2013 at http://yacy.net
  *
@@ -8,12 +8,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -65,7 +65,7 @@ import net.yacy.search.Switchboard;
 public class HostQueue implements Balancer {
 
     private final static ConcurrentLog log = new ConcurrentLog("HostQueue");
-    
+
     public  static final String indexSuffix           = ".stack";
     private static final int    EcoFSBufferSize       = 1000;
     private static final int    objectIndexBufferSize = 1000;
@@ -100,19 +100,19 @@ public class HostQueue implements Balancer {
         this.hostHash = hostUrl.hosthash(); // hosthash is calculated by protocol + hostname + port
         // hostName/port included just for human readability (& historically), "-#" marker used to define begin of hosthash in directoryname
         if(this.hostName.startsWith("[") && this.hostName.endsWith("]") && this.hostName.contains(":")) {
-        	/* Percent-encode the host name when it is an IPV6 address, as the ':' character is illegal in a file name on MS Windows FAT32 and NTFS file systems */
-        	File path;
-        	try {
-        		path = new File(hostsPath, URLEncoder.encode(this.hostName, StandardCharsets.UTF_8.name()) + "-#"+ this.hostHash + "." + this.port);
-			} catch (final UnsupportedEncodingException e) {
-				/* This should not happen has UTF-8 encoding support is required for any JVM implementation */
-				path = new File(hostsPath, this.hostName + "-#"+ this.hostHash + "." + this.port);
-			}
-        	this.hostPath = path;
+            /* Percent-encode the host name when it is an IPV6 address, as the ':' character is illegal in a file name on MS Windows FAT32 and NTFS file systems */
+            File path;
+            try {
+                path = new File(hostsPath, URLEncoder.encode(this.hostName, StandardCharsets.UTF_8.name()) + "-#"+ this.hostHash + "." + this.port);
+            } catch (final UnsupportedEncodingException e) {
+                /* This should not happen has UTF-8 encoding support is required for any JVM implementation */
+                path = new File(hostsPath, this.hostName + "-#"+ this.hostHash + "." + this.port);
+            }
+            this.hostPath = path;
         } else {
             this.hostPath = new File(hostsPath, this.hostName + "-#"+ this.hostHash + "." + this.port);
         }
-        init();
+        this.init();
     }
 
     /**
@@ -132,27 +132,27 @@ public class HostQueue implements Balancer {
         this.exceed134217727 = exceed134217727;
         this.hostPath = hostPath;
         // parse the hostName and port from the file name
-        String filename = hostPath.getName();
-        int pdot = filename.lastIndexOf('.');
+        final String filename = hostPath.getName();
+        final int pdot = filename.lastIndexOf('.');
         if (pdot < 0) throw new RuntimeException("hostPath name must contain a dot: " + filename);
         this.port = Integer.parseInt(filename.substring(pdot + 1)); // consider "host.com" contains dot but no required port -> will throw exception
-        int p1 = filename.lastIndexOf("-#");
+        final int p1 = filename.lastIndexOf("-#");
         if (p1 >= 0) {
             String hostNameInFile = filename.substring(0,p1);
             if(hostNameInFile.startsWith("%5B") && hostNameInFile.endsWith("%5D") && hostNameInFile.contains("%3A")) {
-            	/* Host name is a percent-encoded IPV6 address */
-            	try {
-            		hostNameInFile = URLDecoder.decode(hostNameInFile, StandardCharsets.UTF_8.name());
-				} catch (final UnsupportedEncodingException | RuntimeException ignored) {
-					/* This should not happen has UTF-8 encoding support is required for any JVM implementation */
-				}
-            	this.hostName = hostNameInFile;
+                /* Host name is a percent-encoded IPV6 address */
+                try {
+                    hostNameInFile = URLDecoder.decode(hostNameInFile, StandardCharsets.UTF_8.name());
+                } catch (final UnsupportedEncodingException | RuntimeException ignored) {
+                    /* This should not happen has UTF-8 encoding support is required for any JVM implementation */
+                }
+                this.hostName = hostNameInFile;
             } else {
-            	this.hostName = hostNameInFile;
+                this.hostName = hostNameInFile;
             }
             this.hostHash = filename.substring(p1+2,pdot);
         } else throw new RuntimeException("hostPath name must contain -# followd by hosthash: " + filename);
-        init();
+        this.init();
     }
 
     /**
@@ -166,38 +166,38 @@ public class HostQueue implements Balancer {
                 throw new MalformedURLException("hostPath could not be created: " + this.hostPath.toString());
             }
         }
-        this.depthStacks = new TreeMap<Integer, Index>();
-        int size = openAllStacks();
+        this.depthStacks = new TreeMap<>();
+        final int size = this.openAllStacks();
         if (log.isInfo()) log.info("opened HostQueue " + this.hostPath.getAbsolutePath() + " with " + size + " urls.");
     }
-    
+
     public String getHost() {
         return this.hostName;
     }
-    
+
     public int getPort() {
         return this.port;
     }
-    
+
     /**
      * Get the hosthash of this queue determined during init.
-     * 
-     * @return 
+     *
+     * @return
      */
     public String getHostHash() {
         return this.hostHash;
     }
 
     private int openAllStacks() {
-        String[] l = this.hostPath.list();
+        final String[] l = this.hostPath.list();
         int c = 0;
-        if (l != null) for (String s: l) {
+        if (l != null) for (final String s: l) {
             if (s.endsWith(indexSuffix)) try {
-                int depth = Integer.parseInt(s.substring(0, s.length() - indexSuffix.length()));
-                File stackFile = new File(this.hostPath, s);
-                Index depthStack = openStack(stackFile);
+                final int depth = Integer.parseInt(s.substring(0, s.length() - indexSuffix.length()));
+                final File stackFile = new File(this.hostPath, s);
+                final Index depthStack = this.openStack(stackFile);
                 if (depthStack != null) {
-                    int sz = depthStack.size();
+                    final int sz = depthStack.size();
                     if (sz == 0) {
                         depthStack.close();
                         deletedelete(stackFile);
@@ -206,7 +206,7 @@ public class HostQueue implements Balancer {
                         c += sz;
                     }
                 }
-            } catch (NumberFormatException e) {}
+            } catch (final NumberFormatException e) {}
             }
         return c;
     }
@@ -220,7 +220,7 @@ public class HostQueue implements Balancer {
             if (entry == null) return null; // happens only if map is empty
             if (entry.getValue().size() == 0) {
                 entry.getValue().close();
-                deletedelete(getFile(entry.getKey()));
+                deletedelete(this.getFile(entry.getKey()));
                 this.depthStacks.remove(entry.getKey());
                 continue;
             }
@@ -237,47 +237,47 @@ public class HostQueue implements Balancer {
      * @param depth
      * @return existing or new/empty stack
      */
-    private Index getStack(int depth) {
+    private Index getStack(final int depth) {
         Index depthStack;
         // create a new stack
         synchronized (this) {
             depthStack = this.depthStacks.get(depth);
             if (depthStack != null) return depthStack;
             // now actually create a new stack
-            final File f = getFile(depth);
-            depthStack = openStack(f);
+            final File f = this.getFile(depth);
+            depthStack = this.openStack(f);
             if (depthStack != null) this.depthStacks.put(depth, depthStack);
         }
         return depthStack;
     }
-    
-    private File getFile(int depth) {
+
+    private File getFile(final int depth) {
         String name = Integer.toString(depth);
         while (name.length() < 4) name = "0" + name;
         final File f = new File(this.hostPath, name + indexSuffix);
         return f;
     }
-    
+
     private Index openStack(File f) {
         for (int i = 0; i < 10; i++) {
             // we try that again if it fails because it shall not fail
             if (this.onDemand && (!f.exists() || f.length() < 10000)) {
                 try {
-                    return new BufferedObjectIndex(new OnDemandOpenFileIndex(f, Request.rowdef, exceed134217727), objectIndexBufferSize);
-                } catch (kelondroException e) {
+                    return new BufferedObjectIndex(new OnDemandOpenFileIndex(f, Request.rowdef, this.exceed134217727), objectIndexBufferSize);
+                } catch (final kelondroException e) {
                     // possibly the file was closed meanwhile
                     ConcurrentLog.logException(e);
                 }
             } else {
                     try {
-                    return new BufferedObjectIndex(new Table(f, Request.rowdef, EcoFSBufferSize, 0, false, exceed134217727, true), objectIndexBufferSize);
+                    return new BufferedObjectIndex(new Table(f, Request.rowdef, EcoFSBufferSize, 0, false, this.exceed134217727, true), objectIndexBufferSize);
                 } catch (final SpaceExceededException e) {
                     try {
-                        return new BufferedObjectIndex(new Table(f, Request.rowdef, 0, 0, false, exceed134217727, true), objectIndexBufferSize);
+                        return new BufferedObjectIndex(new Table(f, Request.rowdef, 0, 0, false, this.exceed134217727, true), objectIndexBufferSize);
                     } catch (final SpaceExceededException e1) {
                         ConcurrentLog.logException(e1);
                     }
-                } catch (kelondroException e) {
+                } catch (final kelondroException e) {
                     // possibly the file was closed meanwhile
                     ConcurrentLog.logException(e);
             }
@@ -288,25 +288,25 @@ public class HostQueue implements Balancer {
 
     @Override
     public synchronized void close() {
-        for (Map.Entry<Integer, Index> entry: this.depthStacks.entrySet()) {
-            int size = entry.getValue().size();
+        for (final Map.Entry<Integer, Index> entry: this.depthStacks.entrySet()) {
+            final int size = entry.getValue().size();
             entry.getValue().close();
-            if (size == 0) deletedelete(getFile(entry.getKey()));
+            if (size == 0) deletedelete(this.getFile(entry.getKey()));
         }
         this.depthStacks.clear();
-        String[] l = this.hostPath.list();
+        final String[] l = this.hostPath.list();
         if ((l == null || l.length == 0) && this.hostPath != null) deletedelete(this.hostPath);
     }
 
     @Override
     public synchronized void clear() {
-        for (Map.Entry<Integer, Index> entry: this.depthStacks.entrySet()) {
+        for (final Map.Entry<Integer, Index> entry: this.depthStacks.entrySet()) {
             entry.getValue().close();
-            deletedelete(getFile(entry.getKey()));
+            deletedelete(this.getFile(entry.getKey()));
         }
         this.depthStacks.clear();
-        String[] l = this.hostPath.list();
-        if (l != null) for (String s: l) {
+        final String[] l = this.hostPath.list();
+        if (l != null) for (final String s: l) {
             deletedelete(new File(this.hostPath, s));
         }
         deletedelete(this.hostPath);
@@ -316,7 +316,7 @@ public class HostQueue implements Balancer {
     public Request get(final byte[] urlhash) throws IOException {
         assert urlhash != null;
         if (this.depthStacks == null) return null; // case occurs during shutdown
-        for (Index depthStack: this.depthStacks.values()) {
+        for (final Index depthStack: this.depthStacks.values()) {
             final Row.Entry entry = depthStack.get(urlhash, false);
             if (entry == null) return null;
             return new Request(entry);
@@ -330,7 +330,7 @@ public class HostQueue implements Balancer {
         final long terminate = timeout == Long.MAX_VALUE ? Long.MAX_VALUE : (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
         int count = 0;
         synchronized (this) {
-            for (Index depthStack: this.depthStacks.values()) {
+            for (final Index depthStack: this.depthStacks.values()) {
                 final HandleSet urlHashes = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 100);
                 final Iterator<Row.Entry> i = depthStack.rows();
                 Row.Entry rowEntry;
@@ -351,7 +351,7 @@ public class HostQueue implements Balancer {
         }
         return count;
     }
-    
+
     /**
      * delete all urls which are stored for given host hashes
      * @param hosthashes
@@ -359,9 +359,9 @@ public class HostQueue implements Balancer {
      */
     @Override
     public int removeAllByHostHashes(final Set<String> hosthashes) {
-        for (String h: hosthashes) {
+        for (final String h: hosthashes) {
             if (this.hostHash.equals(h)) {
-                int s = this.size();
+                final int s = this.size();
                 this.clear();
                 return s;
             }
@@ -378,7 +378,7 @@ public class HostQueue implements Balancer {
     @Override
     public synchronized int remove(final HandleSet urlHashes) throws IOException {
         int removedCounter = 0;
-        for (Index depthStack: this.depthStacks.values()) {
+        for (final Index depthStack: this.depthStacks.values()) {
             final int s = depthStack.size();
             for (final byte[] urlhash: urlHashes) {
                 final Row.Entry entry = depthStack.remove(urlhash);
@@ -394,11 +394,11 @@ public class HostQueue implements Balancer {
     public boolean has(final byte[] urlhashb) {
         for (int retry = 0; retry < 3; retry++) {
             try {
-                for (Index depthStack: this.depthStacks.values()) {
+                for (final Index depthStack: this.depthStacks.values()) {
                     if (depthStack.has(urlhashb)) return true;
                 }
                 return false;
-            } catch (ConcurrentModificationException e) {}
+            } catch (final ConcurrentModificationException e) {}
         }
         return false;
     }
@@ -406,7 +406,7 @@ public class HostQueue implements Balancer {
     @Override
     public int size() {
         int size = 0;
-        for (Index depthStack: this.depthStacks.values()) {
+        for (final Index depthStack: this.depthStacks.values()) {
             size += depthStack.size();
         }
         return size;
@@ -414,7 +414,7 @@ public class HostQueue implements Balancer {
 
     @Override
     public boolean isEmpty() {
-        for (Index depthStack: this.depthStacks.values()) {
+        for (final Index depthStack: this.depthStacks.values()) {
             if (!depthStack.isEmpty()) return false;
         }
         return true;
@@ -430,15 +430,15 @@ public class HostQueue implements Balancer {
 
             // increase dom counter
             if (profile != null) {
-                int maxPages = profile.domMaxPages();
+                final int maxPages = profile.domMaxPages();
                 if (maxPages != Integer.MAX_VALUE && maxPages > 0) {
-                    String host = entry.url().getHost();
+                    final String host = entry.url().getHost();
                     profile.domInc(host);
                 }
             }
-            
+
             // add to index
-            Index depthStack = getStack(entry.depth());
+            final Index depthStack = this.getStack(entry.depth());
             final int s = depthStack.size();
             depthStack.put(entry.toRow());
             assert s < depthStack.size() : "hash = " + ASCII.String(hash) + ", s = " + s + ", size = " + depthStack.size();
@@ -456,12 +456,12 @@ public class HostQueue implements Balancer {
         CrawlProfile profileEntry = null;
         synchronized (this) {
             mainloop: while (true) {
-                Index depthStack = getLowestStack();
+                final Index depthStack = this.getLowestStack();
                 if (depthStack == null) return null;
                 Row.Entry rowEntry = null;
-                while (depthStack.size() > 0) {
+                depthstack: while (depthStack.size() > 0) {
                     rowEntry = depthStack.removeOne();
-                    if (rowEntry != null) break;
+                    if (rowEntry != null) break depthstack;
                 }
                 if (rowEntry == null) continue mainloop;
                 crawlEntry = new Request(rowEntry);
@@ -479,16 +479,18 @@ public class HostQueue implements Balancer {
                     if (log.isFine()) log.fine("no profile entry for handle " + crawlEntry.profileHandle());
                     continue mainloop;
                 }
-                
+
                 // depending on the caching policy we need sleep time to avoid DoS-like situations
                 sleeptime = Latency.getDomainSleepTime(robots, profileEntry, crawlEntry.url());
-                break;
+                break mainloop;
             }
         }
         if (crawlEntry == null) return null;
-        ClientIdentification.Agent agent = profileEntry == null ? ClientIdentification.yacyInternetCrawlerAgent : profileEntry.getAgent();
-        long robotsTime = Latency.getRobotsTime(robots, crawlEntry.url(), agent);
+        final ClientIdentification.Agent agent = profileEntry == null ? ClientIdentification.yacyInternetCrawlerAgent : profileEntry.getAgent();
+        final long robotsTime = Latency.getRobotsTime(robots, crawlEntry.url(), agent);
         Latency.updateAfterSelection(crawlEntry.url(), profileEntry == null ? 0 : robotsTime);
+
+        // the following case should be avoided by selection previously
         if (delay && sleeptime > 0) {
             // force a busy waiting here
             // in best case, this should never happen if the balancer works properly
@@ -502,13 +504,10 @@ public class HostQueue implements Balancer {
                 loops = 0;
             }
             Thread.currentThread().setName("Balancer waiting for " + crawlEntry.url().getHost() + ": " + sleeptime + " milliseconds");
-            synchronized(this) {
-                // must be synchronized here to avoid 'takeover' moves from other threads which then idle the same time which would not be enough
-                if (rest > 0) {try {this.wait(rest);} catch (final InterruptedException e) {}}
-                for (int i = 0; i < loops; i++) {
-                    if (log.isInfo()) log.info("waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
-                    try {this.wait(1000); } catch (final InterruptedException e) {}
-                }
+            if (rest > 0) {try {Thread.sleep(rest);} catch (final InterruptedException e) {}}
+            for (int i = 0; i < loops; i++) {
+                if (log.isInfo()) log.info("waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
+                try {Thread.sleep(1000); } catch (final InterruptedException e) {}
             }
             Latency.updateAfterSelection(crawlEntry.url(), robotsTime);
         }
@@ -531,14 +530,14 @@ public class HostQueue implements Balancer {
                 synchronized (HostQueue.this) {
                     try {
                         while (rowIterator[0] == null || !rowIterator[0].hasNext()) {
-                            Map.Entry<Integer, Index> entry = depthIterator.next();
+                            final Map.Entry<Integer, Index> entry = depthIterator.next();
                             rowIterator[0] = entry.getValue().iterator();
                         }
                         if (!rowIterator[0].hasNext()) return null;
-                        Row.Entry rowEntry = rowIterator[0].next();
+                        final Row.Entry rowEntry = rowIterator[0].next();
                         if (rowEntry == null) return null;
                         return new Request(rowEntry);
-                    } catch (Throwable e) {
+                    } catch (final Throwable e) {
                         return null;
                     }
                 }
@@ -556,8 +555,8 @@ public class HostQueue implements Balancer {
      */
     @Override
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots) {
-        Map<String, Integer[]> map = new TreeMap<String, Integer[]>();
-        int delta = Latency.waitingRemainingGuessed(this.hostName, this.port, this.hostHash, robots, ClientIdentification.yacyInternetCrawlerAgent);
+        final Map<String, Integer[]> map = new TreeMap<>();
+        final int delta = Latency.waitingRemainingGuessed(this.hostName, this.port, this.hostHash, robots, ClientIdentification.yacyInternetCrawlerAgent);
         map.put(this.hostName, new Integer[]{this.size(), delta});
         return map;
     }
@@ -571,19 +570,19 @@ public class HostQueue implements Balancer {
      */
     @Override
     public List<Request> getDomainStackReferences(String host, int maxcount, long maxtime) {
-        if (host == null) return new ArrayList<Request>(0);
-        if (!this.hostName.equals(host)) return new ArrayList<Request>(0);
-        final ArrayList<Request> cel = new ArrayList<Request>(maxcount);
-        long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+        if (host == null) return new ArrayList<>(0);
+        if (!this.hostName.equals(host)) return new ArrayList<>(0);
+        final ArrayList<Request> cel = new ArrayList<>(maxcount);
+        final long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         Iterator<Request> i;
         try {
             i = this.iterator();
             while (i.hasNext()) {
-                Request r = i.next();
+                final Request r = i.next();
                 if (r != null) cel.add(r);
                 if (System.currentTimeMillis() > timeout || cel.size() >= maxcount) break;
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
         return cel;
     }

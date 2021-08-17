@@ -699,12 +699,12 @@ collection=user
 50_localcrawl_idlesleep=2000
 50_localcrawl_busysleep=10
 50_localcrawl_memprereq=25165824
-50_localcrawl_loadprereq=6.0
+50_localcrawl_loadprereq=8.0
 50_localcrawl_isPaused=false
 55_autocrawl_idlesleep=10000
 55_autocrawl_busysleep=10000
 55_autocrawl_memprereq=25165824
-55_autocrawl_loadprereq=6.0
+55_autocrawl_loadprereq=8.0
 60_remotecrawlloader_idlesleep=4000
 60_remotecrawlloader_busysleep=800
 60_remotecrawlloader_memprereq=12582912
@@ -740,7 +740,7 @@ collection=user
 reindexSolr_idlesleep=1000
 reindexSolr_busysleep=1
 reindexSolr_memprereq=10485760
-reindexSolr_loadprereq=9.0
+reindexSolr_loadprereq=16.0
 
 # additional attributes:
 # performanceIO is a percent-value. a value of 10 means, that 10% of the busysleep time

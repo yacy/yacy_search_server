@@ -1,6 +1,6 @@
 /**
  *  HostQueues
- *  SPDX-FileCopyrightText: 2013 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-FileCopyrightText: 2013 Michael Peter Christen <mc@yacy.net)>
  *  SPDX-License-Identifier: GPL-2.0-or-later
  *  First released 24.09.2013 at http://yacy.net
  *
@@ -8,12 +8,12 @@
  *  modify it under the terms of the GNU Lesser General Public
  *  License as published by the Free Software Foundation; either
  *  version 2.1 of the License, or (at your option) any later version.
- *  
+ *
  *  This library is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *  Lesser General Public License for more details.
- *  
+ *
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with this program in the file lgpl21.txt
  *  If not, see <http://www.gnu.org/licenses/>.
@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +57,7 @@ import net.yacy.kelondro.util.FileUtils;
 /**
  * wrapper for single HostQueue queues; this is a collection of such queues.
  * All these queues are stored in a common directory for the queue stacks.
- * 
+ *
  * ATTENTION: the order of urls returned by this balancer must strictly follow the clickdepth order.
  * That means that all links from a given host must be returned from the lowest crawldepth only.
  * The crawldepth is interpreted as clickdepth and the crawler is producing that semantic using a
@@ -104,50 +105,50 @@ public class HostBalancer implements Balancer {
 
         // create a stack for newly entered entries
         if (!(hostsPath.exists())) hostsPath.mkdirs(); // make the path
-        this.queues = new ConcurrentHashMap<String, HostQueue>();
-        this.roundRobinHostHashes = new HashSet<String>();
-        init(asyncInit); // return without wait but starts a thread to fill the queues
+        this.queues = new ConcurrentHashMap<>();
+        this.roundRobinHostHashes = new HashSet<>();
+        this.init(asyncInit); // return without wait but starts a thread to fill the queues
     }
 
     /**
-     * Fills the queue by scanning the hostsPath directory. 
+     * Fills the queue by scanning the hostsPath directory.
      * @param async when true, launch in a dedicated thread to
      * return immediately (as large unfinished crawls may take longer to load)
      */
     private void init(final boolean async) {
         if(async) {
-            Thread t = new Thread("HostBalancer.init") {
+            final Thread t = new Thread("HostBalancer.init") {
                 @Override
                 public void run() {
-                    runInit();
+                    HostBalancer.this.runInit();
                 }
             };
 
-            t.start();            
+            t.start();
         } else {
-            runInit();
+            this.runInit();
         }
     }
 
     /**
-     * Fills the queue by scanning the hostsPath directory. 
+     * Fills the queue by scanning the hostsPath directory.
      */
     private void runInit() {
-        final String[] hostlist = hostsPath.list();
-        for (String hoststr : hostlist) {
+        final String[] hostlist = this.hostsPath.list();
+        for (final String hoststr : hostlist) {
             try {
-                File queuePath = new File(hostsPath, hoststr);
-                HostQueue queue = new HostQueue(queuePath, queues.size() > onDemandLimit, exceed134217727);
+                final File queuePath = new File(this.hostsPath, hoststr);
+                final HostQueue queue = new HostQueue(queuePath, this.queues.size() > this.onDemandLimit, this.exceed134217727);
                 if (queue.isEmpty()) {
                     queue.close();
                     FileUtils.deletedelete(queuePath);
                 } else {
-                    queues.put(queue.getHostHash(), queue);
+                    this.queues.put(queue.getHostHash(), queue);
                 }
             } catch (MalformedURLException | RuntimeException e) {
-                log.warn("delete queue due to init error for " + hostsPath.getName() + " host=" + hoststr + " " + e.getLocalizedMessage());
+                log.warn("delete queue due to init error for " + this.hostsPath.getName() + " host=" + hoststr + " " + e.getLocalizedMessage());
                 // if exception thrown we can't init the queue, maybe due to name violation. That won't get better, delete it.
-                FileUtils.deletedelete(new File(hostsPath, hoststr));
+                FileUtils.deletedelete(new File(this.hostsPath, hoststr));
             }
         }
     }
@@ -157,7 +158,7 @@ public class HostBalancer implements Balancer {
         if (depthCache != null) {
             depthCache.clear();
         }
-        for (HostQueue queue: this.queues.values()) queue.close();
+        for (final HostQueue queue: this.queues.values()) queue.close();
         this.queues.clear();
     }
 
@@ -166,14 +167,14 @@ public class HostBalancer implements Balancer {
         if (depthCache != null) {
             depthCache.clear();
         }
-        for (HostQueue queue: this.queues.values()) queue.clear();
+        for (final HostQueue queue: this.queues.values()) queue.clear();
         this.queues.clear();
     }
 
     @Override
     public Request get(final byte[] urlhash) throws IOException {
-        String hosthash = ASCII.String(urlhash, 6, 6);
-        HostQueue queue = this.queues.get(hosthash);
+        final String hosthash = ASCII.String(urlhash, 6, 6);
+        final HostQueue queue = this.queues.get(hosthash);
         if (queue == null) return null;
         return queue.get(urlhash);
     }
@@ -181,7 +182,7 @@ public class HostBalancer implements Balancer {
     @Override
     public int removeAllByProfileHandle(final String profileHandle, final long timeout) throws IOException, SpaceExceededException {
         int c = 0;
-        for (HostQueue queue: this.queues.values()) {
+        for (final HostQueue queue: this.queues.values()) {
             c += queue.removeAllByProfileHandle(profileHandle, timeout);
         }
         return c;
@@ -195,37 +196,37 @@ public class HostBalancer implements Balancer {
     @Override
     public int removeAllByHostHashes(final Set<String> hosthashes) {
         int c = 0;
-        for (String h: hosthashes) {
-            HostQueue hq = this.queues.get(h);
+        for (final String h: hosthashes) {
+            final HostQueue hq = this.queues.get(h);
             if (hq != null) c += hq.removeAllByHostHashes(hosthashes);
         }
         // remove from cache
-        Iterator<Map.Entry<byte[], Long>> i = depthCache.iterator();
-        ArrayList<String> deleteHashes = new ArrayList<String>();
+        final Iterator<Map.Entry<byte[], Long>> i = depthCache.iterator();
+        final ArrayList<String> deleteHashes = new ArrayList<>();
         while (i.hasNext()) {
-            String h = ASCII.String(i.next().getKey());
+            final String h = ASCII.String(i.next().getKey());
             if (hosthashes.contains(h.substring(6))) deleteHashes.add(h);
         }
-        for (String h: deleteHashes) depthCache.remove(ASCII.getBytes(h));
+        for (final String h: deleteHashes) depthCache.remove(ASCII.getBytes(h));
         return c;
     }
 
     @Override
     public synchronized int remove(final HandleSet urlHashes) throws IOException {
-        Map<String, HandleSet> removeLists = new ConcurrentHashMap<String, HandleSet>();
-        for (byte[] urlhash: urlHashes) {
+        final Map<String, HandleSet> removeLists = new ConcurrentHashMap<>();
+        for (final byte[] urlhash: urlHashes) {
             depthCache.remove(urlhash);
-            String hosthash = ASCII.String(urlhash, 6, 6);
+            final String hosthash = ASCII.String(urlhash, 6, 6);
             HandleSet removeList = removeLists.get(hosthash);
             if (removeList == null) {
                 removeList = new RowHandleSet(Word.commonHashLength, Base64Order.enhancedCoder, 100);
                 removeLists.put(hosthash, removeList);
             }
-            try {removeList.put(urlhash);} catch (SpaceExceededException e) {}
+            try {removeList.put(urlhash);} catch (final SpaceExceededException e) {}
         }
         int c = 0;
-        for (Map.Entry<String, HandleSet> entry: removeLists.entrySet()) {
-            HostQueue queue = this.queues.get(entry.getKey());
+        for (final Map.Entry<String, HandleSet> entry: removeLists.entrySet()) {
+            final HostQueue queue = this.queues.get(entry.getKey());
             if (queue != null) c += queue.remove(entry.getValue());
         }
         return c;
@@ -239,8 +240,8 @@ public class HostBalancer implements Balancer {
     @Override
     public boolean has(final byte[] urlhashb) {
         if (depthCache.has(urlhashb)) return true;
-        String hosthash = ASCII.String(urlhashb, 6, 6);
-        HostQueue queue = this.queues.get(hosthash);
+        final String hosthash = ASCII.String(urlhashb, 6, 6);
+        final HostQueue queue = this.queues.get(hosthash);
         if (queue == null) return false;
         return queue.has(urlhashb);
     }
@@ -248,7 +249,7 @@ public class HostBalancer implements Balancer {
     @Override
     public int size() {
         int c = 0;
-        for (HostQueue queue: this.queues.values()) {
+        for (final HostQueue queue: this.queues.values()) {
             c += queue.size();
         }
         return c;
@@ -256,7 +257,7 @@ public class HostBalancer implements Balancer {
 
     @Override
     public boolean isEmpty() {
-        for (HostQueue queue: this.queues.values()) {
+        for (final HostQueue queue: this.queues.values()) {
             if (!queue.isEmpty()) return false;
         }
         return true;
@@ -284,7 +285,7 @@ public class HostBalancer implements Balancer {
     public String push(final Request entry, CrawlProfile profile, final RobotsTxt robots) throws IOException, SpaceExceededException {
         if (this.has(entry.url().hash())) return "double occurrence";
         depthCache.put(entry.url().hash(), entry.depth());
-        String hosthash = entry.url().hosthash();
+        final String hosthash = entry.url().hosthash();
         synchronized (this) {
             HostQueue queue = this.queues.get(hosthash);
             if (queue == null) {
@@ -299,8 +300,7 @@ public class HostBalancer implements Balancer {
 
     /**
      * get the next entry in this crawl queue in such a way that the domain access time delta is maximized
-     * and always above the given minimum delay time. An additional delay time is computed using the robots.txt
-     * crawl-delay time which is always respected. In case the minimum time cannot ensured, this method pauses
+     * and always above the given minimum delay time. In case the minimum time cannot ensured, this method pauses
      * the necessary time until the url is released and returned as CrawlEntry object. In case that a profile
      * for the computed Entry does not exist, null is returned
      * @param delay true if the requester demands forced delays using explicit thread sleep
@@ -324,22 +324,23 @@ public class HostBalancer implements Balancer {
                     // this shall kick out small stacks to prevent that too many files are opened for very wide crawls
                     boolean smallStacksExist = false;
                     boolean singletonStacksExist = false;
-                    smallsearch: for (String s: this.roundRobinHostHashes) {
-                        HostQueue hq = this.queues.get(s);
+                    smallsearch: for (final String s: this.roundRobinHostHashes) {
+                        final HostQueue hq = this.queues.get(s);
                         if (hq != null) {
-                            int size = hq.size();
+                            final int size = hq.size();
                             if (size ==  1) {singletonStacksExist = true; break smallsearch;}
                             if (size <= 10) {smallStacksExist = true; break smallsearch;}
                         }
                     }
-                    Set<String> freshhosts = new HashSet<>();
-                    Iterator<String> i = this.roundRobinHostHashes.iterator();
+                    final ArrayList<String> freshhosts = new ArrayList<>();
+                    final ArrayList<String> removehosts = new ArrayList<>();
+                    final Iterator<String> i = this.roundRobinHostHashes.iterator();
                     smallstacks: while (i.hasNext()) {
                         if (this.roundRobinHostHashes.size() <= 10) break smallstacks; // don't shrink the hosts until nothing is left
-                        String hosthash = i.next();
-                        HostQueue hq = this.queues.get(hosthash);
-                        if (hq == null) {i.remove(); continue smallstacks;}
-                        int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hosthash, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                        final String hosthash = i.next();
+                        final HostQueue hq = this.queues.get(hosthash);
+                        if (hq == null) {removehosts.add(hosthash); i.remove(); continue smallstacks;}
+                        final int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hosthash, robots, ClientIdentification.yacyInternetCrawlerAgent);
                         if (delta == Integer.MIN_VALUE) {
                             // never-crawled hosts; we do not want to have too many of them in here. Loading new hosts means: waiting for robots.txt to load
                             freshhosts.add(hosthash);
@@ -349,17 +350,28 @@ public class HostBalancer implements Balancer {
                         if (singletonStacksExist || smallStacksExist) {
                             if (delta < 0) continue; // keep all non-waiting stacks; they are useful to speed up things
                             // to protect all small stacks which have a fast throughput, remove all with long waiting time
-                            if (delta >= 1000) {i.remove(); continue smallstacks;}
-                            int size = hq.size();
+                            if (delta >= 1000) {removehosts.add(hosthash); i.remove(); continue smallstacks;}
+                            final int size = hq.size();
                             if (singletonStacksExist) {
-                                if (size != 1) {i.remove(); continue smallstacks;} // remove all non-singletons
+                                if (size != 1) {removehosts.add(hosthash); i.remove(); continue smallstacks;} // remove all non-singletons
                             } else /*smallStacksExist*/ {
-                                if (size > 10) {i.remove(); continue smallstacks;} // remove all large stacks
+                                if (size > 10) {removehosts.add(hosthash); i.remove(); continue smallstacks;} // remove all large stacks
                             }
                         }
                     }
+
+                    // shuffle the lists
+                    final Random r = new Random();
+
                     // put at least one of the fresh hosts back
-                    if (freshhosts.size() > 0) this.roundRobinHostHashes.add(freshhosts.iterator().next());
+                    if (freshhosts.size() > 0) this.roundRobinHostHashes.add(freshhosts.remove(r.nextInt(freshhosts.size())));
+                    // fill up so we can have at least 100 domains in the queue
+                    while (this.roundRobinHostHashes.size() < 100 && removehosts.size() > 0) {
+                        this.roundRobinHostHashes.add(removehosts.remove(r.nextInt(removehosts.size())));
+                    }
+                    while (this.roundRobinHostHashes.size() < 100 && freshhosts.size() > 0) {
+                        this.roundRobinHostHashes.add(freshhosts.remove(r.nextInt(freshhosts.size())));
+                    }
 
                     // result
                     if (this.roundRobinHostHashes.size() == 1) {
@@ -381,9 +393,9 @@ public class HostBalancer implements Balancer {
                     // create a map of sleep time / queue relations with a fuzzy sleep time (ms / 500).
                     // if the entry with the smallest sleep time contains at least two entries,
                     // then the larger one from these queues are selected.
-                    TreeMap<Integer, List<String>> fastTree = new TreeMap<>();
-                    mixedstrategy: for (String h: this.roundRobinHostHashes) {
-                        HostQueue hq = this.queues.get(h);
+                    final TreeMap<Integer, List<String>> fastTree = new TreeMap<>();
+                    mixedstrategy: for (final String h: this.roundRobinHostHashes) {
+                        final HostQueue hq = this.queues.get(h);
                         if (hq != null) {
                             int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), h, robots, ClientIdentification.yacyInternetCrawlerAgent) / 200;
                             if (delta < 0) delta = 0;
@@ -394,14 +406,14 @@ public class HostBalancer implements Balancer {
                             }
                             queueHashes.add(h);
                             // check stop criteria
-                            List<String> firstEntries = fastTree.firstEntry().getValue();
+                            final List<String> firstEntries = fastTree.firstEntry().getValue();
                             if (firstEntries.size() > 1) {
                                 // select larger queue from that list
                                 int largest = Integer.MIN_VALUE;
-                                for (String hh: firstEntries) {
-                                    HostQueue hhq = this.queues.get(hh);
+                                for (final String hh: firstEntries) {
+                                    final HostQueue hhq = this.queues.get(hh);
                                     if (hhq != null) {
-                                        int s = hhq.size();
+                                        final int s = hhq.size();
                                         if (s > largest) {
                                             largest = s;
                                             rhh = hh;
@@ -416,15 +428,15 @@ public class HostBalancer implements Balancer {
                     if (rhq == null && fastTree.size() > 0) {
                         // it may be possible that the lowest entry never has more than one queues assigned
                         // in this case just take the smallest entry
-                        List<String> firstEntries = fastTree.firstEntry().getValue();
+                        final List<String> firstEntries = fastTree.firstEntry().getValue();
                         assert firstEntries.size() == 1;
                         rhh = firstEntries.get(0);
                         rhq = this.queues.get(rhh);
                     }
                     // to prevent that the complete roundrobinhosthashes are taken for each round, we remove the entries from the top of the fast queue
-                    List<String> lastEntries = fastTree.size() > 0 ? fastTree.lastEntry().getValue() : null;
+                    final List<String> lastEntries = fastTree.size() > 0 ? fastTree.lastEntry().getValue() : null;
                     if (lastEntries != null) {
-                        for (String h: lastEntries) this.roundRobinHostHashes.remove(h);
+                        for (final String h: lastEntries) this.roundRobinHostHashes.remove(h);
                     }
                 }
 
@@ -467,20 +479,20 @@ public class HostBalancer implements Balancer {
                 continue tryagain;
             }
             this.roundRobinHostHashes.remove(rhh); // prevent that the queue is used again
-            long timestamp = System.currentTimeMillis();
-            Request request = rhq.pop(delay, cs, robots); // this pop is outside of synchronization to prevent blocking of pushes
-            long actualwaiting = System.currentTimeMillis() - timestamp;
+            final long timestamp = System.currentTimeMillis();
+            final Request request = rhq.pop(delay, cs, robots); // this pop is outside of synchronization to prevent blocking of pushes
+            final long actualwaiting = System.currentTimeMillis() - timestamp;
 
             if (actualwaiting > 1000) {
                 synchronized (this) {
                     // to prevent that this occurs again, remove all stacks with positive delay times (which may be less after that waiting)
-                    Iterator<String> i = this.roundRobinHostHashes.iterator();
+                    final Iterator<String> i = this.roundRobinHostHashes.iterator();
                     protectcheck: while (i.hasNext()) {
                         if (this.roundRobinHostHashes.size() <= 3) break protectcheck; // don't shrink the hosts until nothing is left
-                        String s = i.next();
-                        HostQueue hq = this.queues.get(s);
+                        final String s = i.next();
+                        final HostQueue hq = this.queues.get(s);
                         if (hq == null) {i.remove(); continue protectcheck;}
-                        int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
+                        final int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), s, robots, ClientIdentification.yacyInternetCrawlerAgent);
                         if (delta >= 0) {i.remove();}
                     }
                 }
@@ -494,11 +506,11 @@ public class HostBalancer implements Balancer {
             }
             if (request == null) continue tryagain;
             return request;
-        } catch (ConcurrentModificationException e) {
+        } catch (final ConcurrentModificationException e) {
             continue tryagain;
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw e;
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             ConcurrentLog.logException(e);
             throw new IOException(e.getMessage());
         }
@@ -519,9 +531,9 @@ public class HostBalancer implements Balancer {
             public Request next() {
                 synchronized (HostBalancer.this) {
                     while (hostIterator[0] == null || !hostIterator[0].hasNext()) try {
-                        HostQueue entry = hostsIterator.next();
+                        final HostQueue entry = hostsIterator.next();
                         hostIterator[0] = entry.iterator();
-                    } catch (IOException e) {}
+                    } catch (final IOException e) {}
                     if (!hostIterator[0].hasNext()) return null;
                     return hostIterator[0].next();
                 }
@@ -539,9 +551,9 @@ public class HostBalancer implements Balancer {
      */
     @Override
     public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots) {
-        Map<String, Integer[]> map = new TreeMap<String, Integer[]>(); // we use a tree map to get a stable ordering
-        for (HostQueue hq: this.queues.values()) {
-            int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hq.getHostHash(), robots, ClientIdentification.yacyInternetCrawlerAgent);
+        final Map<String, Integer[]> map = new TreeMap<>(); // we use a tree map to get a stable ordering
+        for (final HostQueue hq: this.queues.values()) {
+            final int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hq.getHostHash(), robots, ClientIdentification.yacyInternetCrawlerAgent);
             map.put(hq.getHost() + ":" + hq.getPort(), new Integer[]{hq.size(), delta});
         }
         return map;
@@ -562,7 +574,7 @@ public class HostBalancer implements Balancer {
         try {
             HostQueue hq = this.queues.get(DigestURL.hosthash(host, host.startsWith("ftp.") ? 21 : 80));
             if (hq == null) hq = this.queues.get(DigestURL.hosthash(host, 443));
-            return hq == null ? new ArrayList<Request>(0) : hq.getDomainStackReferences(host, maxcount, maxtime);
+            return hq == null ? new ArrayList<>(0) : hq.getDomainStackReferences(host, maxcount, maxtime);
         } catch (final MalformedURLException e) {
             ConcurrentLog.logException(e);
             return Collections.emptyList();

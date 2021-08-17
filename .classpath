@@ -9,7 +9,6 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/avatica-core-1.13.0.jar"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15on-1.60.jar"/>
@@ -128,5 +127,6 @@
 	<classpathentry kind="src" path="htroot/yacy"/>
 	<classpathentry kind="src" path="source"/>
 	<classpathentry kind="src" path="test/java"/>
+	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

@@ -64,7 +64,7 @@ public final class RobotsTxtParser {
 
     private static final Pattern patternTab = Pattern.compile("\t");
 
-	private static final String ROBOTS_USER_AGENT = "User-agent:".toUpperCase();
+    private static final String ROBOTS_USER_AGENT = "User-agent:".toUpperCase();
     private static final String ROBOTS_DISALLOW = "Disallow:".toUpperCase();
     private static final String ROBOTS_ALLOW = "Allow:".toUpperCase();
     private static final String ROBOTS_COMMENT = "#";
@@ -73,15 +73,15 @@ public final class RobotsTxtParser {
 
     private final ArrayList<String> allowList;
     private final ArrayList<String> denyList;
-    private       ArrayList<String> sitemaps;
+    private final       ArrayList<String> sitemaps;
     private       long crawlDelayMillis;
     private final String[] myNames; // a list of own name lists
     private       String agentName; // the name of the agent that was used to return the result
 
     protected RobotsTxtParser(final String[] myNames) {
-        this.allowList = new ArrayList<String>(0);
-        this.denyList = new ArrayList<String>(0);
-        this.sitemaps = new ArrayList<String>(0);
+        this.allowList = new ArrayList<>(0);
+        this.denyList = new ArrayList<>(0);
+        this.sitemaps = new ArrayList<>(0);
         this.crawlDelayMillis = 0;
         this.myNames = myNames;
         this.agentName = null;
@@ -92,15 +92,15 @@ public final class RobotsTxtParser {
         if (robotsTxt != null && robotsTxt.length != 0) {
             final ByteArrayInputStream bin = new ByteArrayInputStream(robotsTxt);
             final BufferedReader reader = new BufferedReader(new InputStreamReader(bin));
-            parse(reader);
+            this.parse(reader);
         }
     }
 
     private void parse(final BufferedReader reader) {
-        final ArrayList<String> deny4AllAgents = new ArrayList<String>();
-        final ArrayList<String> deny4ThisAgents = new ArrayList<String>();
-        final ArrayList<String> allow4AllAgents = new ArrayList<String>();
-        final ArrayList<String> allow4ThisAgents = new ArrayList<String>();
+        final ArrayList<String> deny4AllAgents = new ArrayList<>();
+        final ArrayList<String> deny4ThisAgents = new ArrayList<>();
+        final ArrayList<String> allow4AllAgents = new ArrayList<>();
+        final ArrayList<String> allow4ThisAgents = new ArrayList<>();
 
         int pos;
         String line = null, lineUpper = null;
@@ -169,21 +169,36 @@ public final class RobotsTxtParser {
                     continue lineparser;
                 }
 
-                // parse crawl delay
+                // Parse crawl delay:
+                // The crawl-delay directive is a non-standard value and not supported by google
+                // see: https://en.wikipedia.org/wiki/Robots_exclusion_standard#Crawl-delay_directive
+                // The interpretation of other crawlers vary:
+                // - Yandex interprets the value as the number of seconds to wait between subsequent visits.
+                // - Bing defines crawl-delay as the size of a time window (from 1 to 30 seconds) during which BingBot will access a web site only once.
+                // - Google provides an interface in its search console for webmasters, to control the Googlebot's subsequent visits.
                 if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
                     inBlock = true;
-                	if (isRule4ThisAgents || isRule4AllAgents) {
-                		pos = line.indexOf(' ');
-                		if (pos != -1) {
-                			try {
-                				// the crawl delay can be a float number and means number of seconds
-                				this.crawlDelayMillis = (long) (1000.0 * Float.parseFloat(line.substring(pos).trim()));
-                			} catch (final NumberFormatException e) {
-                				// invalid crawling delay
-                			}
-                		}
-                	}
-                	continue lineparser;
+                    if (isRule4ThisAgents || isRule4AllAgents) {
+                        pos = line.indexOf(' ');
+                        if (pos != -1) {
+                            try {
+                                // the crawl delay can be a float number
+                                this.crawlDelayMillis = (long) (1000.0 * Float.parseFloat(line.substring(pos).trim()));
+                                // Because different crawlers apply different interpretations, we should do the same here for YaCy
+                                // Many robots.txt entries have crawl-delay entries which makes it impossible to crawl the page at all,
+                                // i.e. for values like "900" (would be 900 seconds which would be 15 minutes). To be able to operate,
+                                // we must do a "good-for-everyone" interpetation. This is done already with the "flux"-compensation delay
+                                // factor, which is applied additionally (its the 2-fold of the loading time from last visit), so we would be good
+                                // even if we ignore the craw-delay at all.
+                                this.crawlDelayMillis = Math.min(10000, this.crawlDelayMillis);
+                                // In this case we limit the delay to 10 seconds most. If a host wants not to be indexed at all, there is
+                                // an option for this in the robots.txt as well.
+                            } catch (final NumberFormatException e) {
+                                // invalid crawling delay
+                            }
+                        }
+                    }
+                    continue lineparser;
                 }
 
                 // parse disallow
