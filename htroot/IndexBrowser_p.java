@@ -73,7 +73,7 @@ import net.yacy.server.serverSwitch;
  */
 public class IndexBrowser_p {
 
-    final static long TIMEOUT = 10000L;
+    final static long TIMEOUT = 5 * 60000L;
 
     public static enum StoreType {
         LINK, INDEX, EXCLUDED, FAILED, RELOAD;
@@ -403,7 +403,7 @@ public class IndexBrowser_p {
                 final Set<String> reloadURLCollection = new HashSet<String>();
                 long timeoutList = System.currentTimeMillis() + TIMEOUT;
                 long remainingTime = TIMEOUT;
-                long timeoutReferences = System.currentTimeMillis() + 6000;
+                long timeoutReferences = System.currentTimeMillis() + TIMEOUT;
                 ReferenceReportCache rrCache = sb.index.getReferenceReportCache();
                 try {
                     SolrDocument doc = docs.poll(remainingTime, TimeUnit.MILLISECONDS);
