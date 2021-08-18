@@ -11,9 +11,6 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/avatica-core-1.13.0.jar"/>
-	<classpathentry kind="lib" path="lib/bcmail-jdk15on-1.60.jar"/>
-	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-1.60.jar"/>
-	<classpathentry kind="lib" path="lib/bcprov-jdk15on-1.60.jar"/>
 	<classpathentry kind="lib" path="lib/calcite-core-1.18.0.jar"/>
 	<classpathentry kind="lib" path="lib/calcite-linq4j-1.18.0.jar"/>
 	<classpathentry kind="lib" path="lib/chardet.jar"/>
@@ -116,6 +113,9 @@
 	<classpathentry kind="lib" path="lib/guava-25.1-jre.jar"/>
 	<classpathentry kind="lib" path="lib/hazelcast-4.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.21.jar"/>
+	<classpathentry kind="lib" path="lib/bcmail-jdk15on-169.jar"/>
+	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-169.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk15on-169.jar"/>
 	<classpathentry kind="src" path="htroot/api/blacklists"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>

@@ -174,9 +174,9 @@
         <pathelement location="${lib}/J7Zip-modified.jar" />
         <pathelement location="${lib}/apache-mime4j-0.6.jar" />
         <pathelement location="${lib}/avatica-core-1.13.0.jar" />
-        <pathelement location="${lib}/bcmail-jdk15on-1.60.jar" />
-        <pathelement location="${lib}/bcpkix-jdk15on-1.60.jar" />
-        <pathelement location="${lib}/bcprov-jdk15on-1.60.jar" />
+        <pathelement location="${lib}/bcmail-jdk15on-1.69.jar" />
+        <pathelement location="${lib}/bcpkix-jdk15on-1.69.jar" />
+        <pathelement location="${lib}/bcprov-jdk15on-1.69.jar" />
         <pathelement location="${lib}/calcite-core-1.18.0.jar" />
         <pathelement location="${lib}/calcite-linq4j-1.18.0.jar" />
         <pathelement location="${lib}/chardet.jar" />
