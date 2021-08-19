@@ -370,6 +370,10 @@ public class IndexBrowser_p {
                         q.append(" AND ").append(CollectionSchema.url_paths_sxt.getSolrFieldName()).append(AbstractSolrConnector.CATCHALL_DTERM);
                     }
                 }
+                
+                // if reload errors is requested, limit results to pages with some failreason set
+                if(reload404) q.append(" AND ").append(CollectionSchema.failtype_s.getSolrFieldName()).append(AbstractSolrConnector.CATCHALL_DTERM);
+                
                 final int pageSize = 100;
                 final BlockingQueue<SolrDocument> docs = new ArrayBlockingQueue<>(pageSize);
                 final List<String> queries = new ArrayList<>();
@@ -387,9 +391,7 @@ public class IndexBrowser_p {
                         CollectionSchema.references_i.getSolrFieldName(),
                         CollectionSchema.references_internal_i.getSolrFieldName(),
                         CollectionSchema.references_external_i.getSolrFieldName(),
-                        CollectionSchema.references_exthosts_i.getSolrFieldName(),
-                        CollectionSchema.cr_host_chance_d.getSolrFieldName(),
-                        CollectionSchema.cr_host_norm_i.getSolrFieldName()
+                        CollectionSchema.references_exthosts_i.getSolrFieldName()
                         ));
                 solrQueryTask.start();
                 Set<String> storedDocs = new HashSet<String>();
@@ -403,7 +405,7 @@ public class IndexBrowser_p {
                 final Set<String> reloadURLCollection = new HashSet<String>();
                 long timeoutList = System.currentTimeMillis() + TIMEOUT;
                 long remainingTime = TIMEOUT;
-                long timeoutReferences = System.currentTimeMillis() + 6000;
+                long timeoutReferences = System.currentTimeMillis() + TIMEOUT;
                 ReferenceReportCache rrCache = sb.index.getReferenceReportCache();
                 try {
                     SolrDocument doc = docs.poll(remainingTime, TimeUnit.MILLISECONDS);
@@ -474,6 +476,7 @@ public class IndexBrowser_p {
                     final Map<String, Pattern> cm = new LinkedHashMap<String, Pattern>();
                     for (String collection: reloadURLCollection) cm.put(collection, QueryParams.catchall_pattern);
                     sb.reload(reloadURLs, cm.size() > 0 ? cm : CrawlProfile.collectionParser("user"), false);
+                    
                 }
 
                 // collect from crawler
@@ -486,7 +489,7 @@ public class IndexBrowser_p {
                 for (String u: storedDocs) files.put(u, StoreType.INDEX);
                 for (Map.Entry<String, FailType> e: errorDocs.entrySet()) files.put(e.getKey(), e.getValue() == FailType.fail ? StoreType.FAILED : StoreType.EXCLUDED);
                 for (String u: inboundLinks) if (!files.containsKey(u)) files.put(u, StoreType.LINK);
-                for (String u: loadingLinks) if (u.startsWith(path) && !files.containsKey(u)) files.put(u, StoreType.LINK);
+                if(!reload404) for (String u: loadingLinks) if (u.startsWith(path) && !files.containsKey(u)) files.put(u, StoreType.LINK);
                 ConcurrentLog.info("IndexBrowser_p", "collected " + files.size() + " urls for path " + path);
 
                 // distinguish files and folders
