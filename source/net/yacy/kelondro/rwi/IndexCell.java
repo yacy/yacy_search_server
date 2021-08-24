@@ -65,7 +65,7 @@ import net.yacy.search.Switchboard;
 public final class IndexCell<ReferenceType extends Reference> extends AbstractBufferedIndex<ReferenceType> implements BufferedIndex<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
     private static final long cleanupCycle =  60000;
-    private static final long dumpCycle    = 600000;
+    private static final long dumpCycle    = 300000;
 
     // class variables
     private final ReferenceContainerArray<ReferenceType> array;
@@ -115,7 +115,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         public FlushThread(String name) {
             super("IndexCell.FlushThread(" + name + ")");
         }
-        
+
         @Override
         public void run() {
             while (IndexCell.this.flushShallRun) {
@@ -133,7 +133,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             // dump the cache if necessary
             final long t = System.currentTimeMillis();
             if ((IndexCell.this.ram.size() >= IndexCell.this.maxRamEntries ||
-                (IndexCell.this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)) ||
+                (IndexCell.this.ram.size() > 2000 && !MemoryControl.request(120L * 1024L * 1024L, false)) ||
                 (!IndexCell.this.ram.isEmpty() && IndexCell.this.lastDump + dumpCycle < t))) {
                 synchronized (IndexCell.this.merger) {
                     if (IndexCell.this.ram.size() >= IndexCell.this.maxRamEntries ||

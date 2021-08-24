@@ -788,7 +788,7 @@ javastart_priority=10
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
 # ram cache during indexing. If you want to increase indexing speed, increase this
 # value i.e. up to one million, but increase also the memory limit to a minimum of 2GB
-wordCacheMaxCount = 50000
+wordCacheMaxCount = 20000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
