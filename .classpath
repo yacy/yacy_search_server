@@ -61,12 +61,10 @@
 	<classpathentry kind="lib" path="lib/jsch-0.1.54.jar"/>
 	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jsonic-1.3.10.jar"/>
-	<classpathentry kind="lib" path="lib/jsoup-1.12.1.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-archive-common-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-common-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-gzip-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-warc-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/langdetect.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.25.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-common-8.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-8.8.1.jar"/>
@@ -116,6 +114,8 @@
 	<classpathentry kind="lib" path="lib/bcmail-jdk15on-169.jar"/>
 	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-169.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15on-169.jar"/>
+	<classpathentry kind="lib" path="lib/jsoup-1.14.2.jar"/>
+	<classpathentry kind="lib" path="lib/langdetect.jar"/>
 	<classpathentry kind="src" path="htroot/api/blacklists"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
