@@ -1359,7 +1359,7 @@ federated.service.solr.indexing.authenticated.allowSelfSigned = false
 # It can be switched off if only a remote solr index is used.
 core.service.fulltext = true
 core.service.rwi.tmp = true
-core.service.citation.tmp = true
+core.service.citation.tmp = false
 core.service.webgraph.tmp = false
 
 # Augmentation settings
