@@ -3388,38 +3388,6 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 >robots.txt table<==>爬虫协议列表<
 #-----------------------------
 
-#File: Table_YMark_p.html
-#---------------------------
-Table Viewer==表格查看
-YMark Table Administration==YMark表格管理
-Table Editor: showing table==表格编辑器: 显示表格
-"Edit Selected Row"=="编辑选中行"
-"Add a new Row"=="添加新行"
-"Delete Selected Rows"=="删除选中行"
-"Delete Table"=="删除表格"
-"Rebuild Index"=="重建索引"
-Primary Key==主键
->Row Editor<==>行编辑器<
-"Commit"=="备注"
-Table Selection==选择表格
-Select Table:==选择表格:
-show max. entries==显示最多条目
->all<==>所有<
-Display columns:==显示列:
-"load"=="载入"
-Search/Filter Table==搜索/过滤表格
-search rows for==搜索
-"Search"=="搜索"
-#>Tags<==>Tags<
->select a tag<==>选择标签<
->Folders<==>目录<
->select a folder<==>选择目录<
->Import Bookmarks<==>导入书签<
-#Importer:==Importer:
-#>XBEL Importer<==>XBEL Importer<
-#>Netscape HTML Importer<==>Netscape HTML Importer<
-"import"=="导入"
-#-----------------------------
 
 ### This Tables section is removed in current SVN Versions
 #File: Tables_p.html
@@ -3740,22 +3708,6 @@ This tag creates links to external websites.==此标记创建外部网站链接.
 alt text==文本备案
 #-----------------------------
 
-#File: YMarks.html
-#---------------------------
-"Import"=="导入"
-documents=="文件"
-days==天
-hours==小时
-minutes==分钟
-for new documents automatically==自动地对新文件
-run this crawl once==爬取一次
->Query<==>查询<
-Query Type==查询类型
->Import<==>导入<
-Tag Manager==标签管理器
-Bookmarks (user: #[user]# size: #[size]#)==书签(用户: #[user]# 大小: #[size]#)
-"Replace"=="替换"
-#-----------------------------
 
 #File: api/citation.html
 #---------------------------

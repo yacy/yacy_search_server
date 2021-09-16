@@ -104,12 +104,12 @@ public class yacysearchitem {
 
         final String eventID = post.get("eventID", "");
         final boolean adminAuthenticated = sb.verifyAuthentication(header);
-        
+
 		final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
 		final boolean authenticated = adminAuthenticated || user != null;
 
         final boolean extendedSearchRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
-		
+
         final int item = post.getInt("item", -1);
         final RequestHeader.FileType fileType = header.fileType();
 
@@ -117,14 +117,14 @@ public class yacysearchitem {
 			/*
 			 * Access to authentication protected features is explicitely requested here
 			 * but no authentication is provided : ask now for authentication.
-             * Wihout this, after timeout of HTTP Digest authentication nonce, browsers no more send authentication information 
+             * Wihout this, after timeout of HTTP Digest authentication nonce, browsers no more send authentication information
              * and as this page is not private, protected features would simply be hidden without asking browser again for authentication.
              * (see mantis 766 : http://mantis.tokeek.de/view.php?id=766) *
 			 */
 			prop.authenticationRequired();
 			return prop;
 		}
-		
+
         // default settings for blank item
         prop.put("content", "0");
         prop.put("rss", "0");
@@ -159,7 +159,7 @@ public class yacysearchitem {
         final boolean noreferrer = sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_NOREFERRER, SwitchboardConstants.SEARCH_RESULT_NOREFERRER_DEFAULT);
 
         long timeout = item == 0 ? 10000 : (theSearch.query.isLocal() ? 1000 : 3000);
-        
+
         if (theSearch.query.contentdom == Classification.ContentDomain.TEXT || theSearch.query.contentdom == Classification.ContentDomain.ALL) {
             // text search
 
@@ -183,12 +183,12 @@ public class yacysearchitem {
             prop.putJSON("content_title-json", result.title());
             prop.putHTML("content_showPictures_link", resultUrlstring);
             prop.put("content_showPictures_authSearch", authenticated);
-            
+
             /* Add information about the current search navigators to let browser refresh yacysearchtrailer only if needed */
             prop.put("content_nav-generation", theSearch.getNavGeneration());
-            
+
             //prop.putHTML("content_link", resultUrlstring);
-            
+
 // START interaction
             if (sb.getConfigBool("proxyURL.useforresults", false) && sb.getConfigBool("proxyURL", false)) {
                 String modifyURL = resultUrlstring;
@@ -218,7 +218,7 @@ public class yacysearchitem {
                 prop.putXML("content_link", resultUrlstring); // putXML for rss
             }
             prop.put("content_noreferrer", noreferrer ? 1 : 0);
-            
+
 // END interaction
 
             boolean isAtomFeed = header.get(HeaderFramework.CONNECTION_PROP_EXT, "").equals("atom");
@@ -227,7 +227,7 @@ public class yacysearchitem {
             DigestURL faviconURL = null;
 			final boolean showFavicon = sb.getConfigBool(SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON,
 					SwitchboardConstants.SEARCH_RESULT_SHOW_FAVICON_DEFAULT);
-            
+
 			if (((fileType == FileType.HTML && showFavicon) || fileType == FileType.JSON)
 					&& (resultURL.isHTTP() || resultURL.isHTTPS())) {
 				faviconURL = getFaviconURL(result, new Dimension(16, 16));
@@ -239,7 +239,7 @@ public class yacysearchitem {
             }
             prop.putHTML("content_favicon_faviconUrl", processFaviconURL(ImageViewer.hasFullViewingRights(header, sb), faviconURL));
             prop.putHTML("content_favicon_urlhash", urlhash);
-            
+
             if (result.limage() == 0) {
             	if (faviconURL == null) {
             		prop.put("content_image", 0);
@@ -257,7 +257,7 @@ public class yacysearchitem {
 
             	}
             }
-            
+
             prop.put("content_urlhash", urlhash);
             prop.put("content_ranking", Float.toString(result.score()));
             Date[] events = result.events();
@@ -358,7 +358,7 @@ public class yacysearchitem {
                 			selectedExt = ext;
                 			break;
                 		} else if("pdf".equals(ext)) {
-                			selectedExt = ext;                			
+                			selectedExt = ext;
                 		} else if("xml".equals(ext) && selectedExt == null) {
                 			/* Use the XML metadata snapshot in last resort */
                 			selectedExt = ext;
@@ -380,7 +380,7 @@ public class yacysearchitem {
             if (showEvent) prop.put("content_showEvent_date822", isAtomFeed ? ISO8601Formatter.FORMATTER.format(events[0]) : HeaderFramework.formatRFC1123(events[0]));
             //prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
-            prop.putHTML("content_sizename", RSSMessage.sizename(result.filesize()));            
+            prop.putHTML("content_sizename", RSSMessage.sizename(result.filesize()));
             prop.putHTML("content_host", resultURL.getHost() == null ? "" : resultURL.getHost());
             prop.putXML("content_file", resultFileName); // putXML for rss
             prop.putXML("content_path", resultURL.getPath()); // putXML for rss
@@ -431,7 +431,7 @@ public class yacysearchitem {
                 prop.put("content_loc_lat", result.lat());
                 prop.put("content_loc_lon", result.lon());
             }
-            
+
             final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
             final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
             boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
@@ -488,7 +488,7 @@ public class yacysearchitem {
     }
 
 	/**
-	 * 
+	 *
 	 * @param prop      the target properties
 	 * @param theSearch the search event
 	 * @param result    a result entry
@@ -571,7 +571,7 @@ public class yacysearchitem {
 	private static void appendEmbeddedAudio(final URIMetadataNode mainResult,
 			final MultiProtocolURL audioLink, final serverObjects prop, final String propPrefix) {
 		prop.putHTML(propPrefix + "_href", audioLink.toString());
-		
+
 		/* Add a title to help user distinguish embedded elements of the list */
 		final String title;
 		if(audioLink.getHost().equals(mainResult.url().getHost())) {
@@ -583,11 +583,11 @@ public class yacysearchitem {
 		}
 		prop.putHTML(propPrefix+ "_title", title);
 	}
-    
+
 	/**
 	 * Add to the target set, valid URLs from the iterator that are classified as
 	 * audio from their file name extension.
-	 * 
+	 *
 	 * @param linksIter     an iterator on URL strings
 	 * @param target        the target set to fill
 	 * @param targetMaxSize the maximum target set size
@@ -611,7 +611,7 @@ public class yacysearchitem {
 	 * Tries to retrieve favicon url from solr result document, or generates
 	 * default favicon URL (i.e. "http://host/favicon.ico") from resultURL and
 	 * port.
-	 * 
+	 *
 	 * @param result
 	 *            solr document result. Must not be null.
 	 * @param preferredSize preferred icon size. If no one matches, most close icon is returned.
@@ -656,7 +656,7 @@ public class yacysearchitem {
 			final String iconUrlExt = MultiProtocolURL.getFileExtension(faviconURL.getFileName());
 		    /* Image format ouput for ViewFavicon servlet : default is png, except with gif and svg icons */
 		    final String viewFaviconExt = !iconUrlExt.isEmpty() && ImageViewer.isBrowserRendered(iconUrlExt) ? iconUrlExt : "png";
-		    
+
 			contentFaviconURL.append("ViewFavicon.").append(viewFaviconExt).append("?maxwidth=16&maxheight=16&isStatic=true&quadratic");
 			if (hasFullViewingRights) {
 				contentFaviconURL.append("&url=").append(faviconURL.toNormalform(true));
@@ -666,7 +666,7 @@ public class yacysearchitem {
 		}
 		return contentFaviconURL.toString();
 	}
-	
+
     /**
      * Add action links reserved to authorized users. All parameters must be non null.
      * @param sb the main Switchboard instance
@@ -683,11 +683,11 @@ public class yacysearchitem {
 		// check if url exists in bookmarks
 		boolean bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
 		prop.put("content_authorized_bookmark", !bookmarkexists);
-		
+
 		final StringBuilder linkBuilder = QueryParams.navurl(RequestHeader.FileType.HTML, theSearch.query.offset / theSearch.query.itemsPerPage(),
 				theSearch.query, null, false, true);
 		final int baseUrlLength = linkBuilder.length();
-		
+
 		String encodedURLString;
 		try {
 			encodedURLString = URLEncoder.encode(crypt.simpleEncode(resultUrlstring), StandardCharsets.UTF_8.name());
@@ -695,24 +695,23 @@ public class yacysearchitem {
 			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
 			encodedURLString = crypt.simpleEncode(resultUrlstring);
 		}
-		final String bookmarkLink = linkBuilder.append("&bookmarkref=").append(urlhash)
-				.append("&bookmarkurl=").append(encodedURLString).toString();
+		final String bookmarkLink = linkBuilder.append("&bookmarkurl=").append(encodedURLString).toString();
 		linkBuilder.setLength(baseUrlLength);
-		
+
 		String deleteLink = linkBuilder.append("&deleteref=").append(urlhash).toString();
 		linkBuilder.setLength(baseUrlLength);
-		
+
 		String recommendLink = linkBuilder.append("&recommendref=").append(urlhash).toString();
 		linkBuilder.setLength(baseUrlLength);
-		
+
 		prop.put("content_authorized_bookmark_bookmarklink", bookmarkLink);
 		prop.put("content_authorized_recommend_deletelink", deleteLink);
 		prop.put("content_authorized_recommend_recommendlink", recommendLink);
-		
+
 		prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
 		prop.put("content_authorized_urlhash", urlhash);
 	}
-    
+
 
     /**
      * Process search of image type and feed prop object. All parameters must not be null.
@@ -762,10 +761,10 @@ public class yacysearchitem {
 		    prop.putHTML("content_item_name", shorten(image.imagetext, MAX_NAME_LENGTH));
 		    prop.put("content_item_mimetype", image.mimetype);
 		    prop.put("content_item_fileSize", 0);
-		    
+
 		    String itemWidth = DEFAULT_IMG_WIDTH + "px", itemHeight = DEFAULT_IMG_HEIGHT + "px", itemStyle="";
 		    /* When image content is rendered by browser :
-		     * - set smaller dimension to 100% in order to crop image on other dimension with CSS style 'overflow:hidden' on image container 
+		     * - set smaller dimension to 100% in order to crop image on other dimension with CSS style 'overflow:hidden' on image container
 		     * - set negative margin top behave like ViewImage which sets an offset when cutting to square */
 			if (ImageViewer.isBrowserRendered(imageUrlExt)) {
 				if (image.width > image.height) {

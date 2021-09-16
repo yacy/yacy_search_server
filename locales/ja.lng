@@ -1288,13 +1288,6 @@ entries,==エントリー,
 "Commit"=="コミット"
 #-----------------------------
 
-#File: Table_YMark_p.html
-#---------------------------
-Table Viewer==テーブル ヴューワー
-YMark Table Administration==YMark テーブル管理
-Table Editor: showing table==テーブル エディター: テーブルを表示しています
-"import"=="取り込み"
-#-----------------------------
 
 #File: terminal_p.html
 #---------------------------

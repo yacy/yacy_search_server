@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<posts>
-#{xml}#
-	<post href="#[url]#" id="#[id]#" title="#[title]#" tag="#[tags]#" folders="#[folders]#" added="#[date_added]#"/>
-#{/xml}#
-</posts>

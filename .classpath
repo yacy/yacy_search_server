@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="api/|env/|processing/domaingraph/applet/|yacy/|api/bookmarks/|api/ymarks/|api/bookmarks/posts/|api/bookmarks/tags/|api/bookmarks/xbel/|solr/|gsa/|solr/collection1/|api/blacklists/|proxymsg/|p2p/" kind="src" path="htroot"/>
-	<classpathentry excluding="bookmarks/|ymarks/|bookmarks/posts/|bookmarks/tags/|bookmarks/xbel/|blacklists/" kind="src" path="htroot/api"/>
+	<classpathentry excluding="api/|env/|processing/domaingraph/applet/|yacy/|api/bookmarks/|api/bookmarks/posts/|api/bookmarks/tags/|api/bookmarks/xbel/|solr/|gsa/|solr/collection1/|api/blacklists/|proxymsg/|p2p/" kind="src" path="htroot"/>
+	<classpathentry excluding="bookmarks/|bookmarks/posts/|bookmarks/tags/|bookmarks/xbel/|blacklists/" kind="src" path="htroot/api"/>
 	<classpathentry excluding="posts/|tags/|xbel/" kind="src" path="htroot/api/bookmarks"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
@@ -120,7 +120,6 @@
 	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/xbel"/>
-	<classpathentry kind="src" path="htroot/api/ymarks"/>
 	<classpathentry kind="src" path="htroot/env"/>
 	<classpathentry kind="src" path="htroot/p2p"/>
 	<classpathentry kind="src" path="htroot/proxymsg"/>

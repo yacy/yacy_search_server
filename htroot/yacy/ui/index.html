@@ -118,7 +118,6 @@
 		    */
 	    	tabid = "#"+ui.panel.id;
 			if (ui.index == bmk_tab) {
-				$("#searchbox select[name='resource']").setValue('ymarks');
 				$("#searchbox input[name='contentdom']").setValue('text');
 				$("#searchbox input[name='search']").setValue(qtag);
 			} else if (ui.index > bmk_tab) {
@@ -196,8 +195,6 @@
 						dataType: "xml",
 						success: function(xml) {
 							alert($(xml).find('result').text());
-							loadTagCloud();
-							reloadBM();
 							$("#tagadd").dialog('close');							
 						}					
 					});
@@ -213,8 +210,6 @@
 						data: data,			
 						dataType: "xml"				
 					});
-					loadTagCloud();
-					reloadBM();
 					$("#tagedit").dialog('close');
         		},
         		Cancel: function() { $("#tagedit").dialog("close"); }
@@ -242,8 +237,6 @@
 							dataType: 'xml'
 						}); // close $.ajax(					
 					}); //close each(
-					loadTagCloud();
-					reloadBM();
 					$("#tagadd").dialog("close");	 
         		},
         		Cancel: function() {
@@ -272,19 +265,9 @@
 			success: function(xml) {
          		$('#bmaddform').resetForm();
          		$("#bm_url").unbind('blur');
-         		$("#bmadd").dialog("close");				
-				loadTagCloud();
-				reloadBM();
+         		$("#bmadd").dialog("close");
    			}
    		});	 
-	}
-	function reloadBM() {
-		$('#ymarks').flexOptions({
-			query: qtag,
-			qtype: "tags"
-		});
-		$('div.ftitle').empty().html('YaCy Bookmarks: ' + HTMLenc(qtag));
-		$('#ymarks').flexReload();
 	}
 	function switchStylestyle(styleName) {
 		$('link[rel*=style][title]').each(function(i) 

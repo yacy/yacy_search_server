@@ -180,12 +180,10 @@ import net.yacy.data.WorkTables;
 import net.yacy.data.wiki.WikiBoard;
 import net.yacy.data.wiki.WikiCode;
 import net.yacy.data.wiki.WikiParser;
-import net.yacy.data.ymark.YMarkTables;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Parser;
-import net.yacy.document.Parser.Failure;
 import net.yacy.document.ProbabilisticClassifier;
 import net.yacy.document.TextParser;
 import net.yacy.document.Tokenizer;
@@ -3908,16 +3906,6 @@ public final class Switchboard extends serverSwitch {
             bookmark.setPublic(false);
             bookmark.setTags(tags, true);
             this.bookmarksDB.saveBookmark(bookmark);
-        }
-
-        // do the same for ymarks
-        // TODO: could a non admin user add crawls?
-        try {
-            this.tables.bookmarks.createBookmark(scraper, YMarkTables.USER_ADMIN, true, "crawlStart", "/Crawl Start");
-        } catch (final IOException e) {
-            ConcurrentLog.logException(e);
-        } catch (final Failure e) {
-            ConcurrentLog.logException(e);
         }
 
         // that was ok

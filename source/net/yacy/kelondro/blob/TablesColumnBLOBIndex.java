@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.data.ymark.YMarkUtil;
+import net.yacy.kelondro.data.word.Word;
 
 public class TablesColumnBLOBIndex extends TablesColumnIndex{
 
@@ -66,7 +66,7 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 
     @Override
     public void deleteIndex(final String columnName) {
-    	final byte[] column = YMarkUtil.getKeyId(columnName);
+    	final byte[] column = Word.word2hash(columnName);
     	try {
 			this.index.remove(column);
 		} catch (final IOException e) {
@@ -80,7 +80,7 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
     protected void  insertPK(final String columnName, final String columnValue, final byte[] pk) {
 		Map<String, byte[]> valueIdxMap;
 		Collection<byte[]> PKset;
-		final byte[] column = YMarkUtil.getKeyId(columnName);
+		final byte[] column = Word.word2hash(columnName);
 		try {
 			valueIdxMap = this.index.get(column);
 			if(valueIdxMap != null) {
@@ -147,7 +147,7 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 
 	@Override
     public Set<String> keySet(final String columnName) {
-		final byte[] column = YMarkUtil.getKeyId(columnName);
+		final byte[] column = Word.word2hash(columnName);
 		// a TreeSet is used to get sorted set of keys (e.g. folders)
 		if(this.index.containsKey(column)) {
 			try {
@@ -163,7 +163,7 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 
 	@Override
     public boolean containsKey(final String columnName, final String key) {
-		final byte[] column = YMarkUtil.getKeyId(columnName);
+		final byte[] column = Word.word2hash(columnName);
 		if(this.index.containsKey(column)) {
 			try {
 				return this.index.get(column).containsKey(key);
@@ -178,13 +178,13 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 
 	@Override
     public boolean hasIndex(final String columnName) {
-		final byte[] column = YMarkUtil.getKeyId(columnName);
+		final byte[] column = Word.word2hash(columnName);
 		return this.index.containsKey(column);
 	}
 
 	@Override
     public Collection<byte[]> get(final String columnName, final String key) {
-		final byte[] column = YMarkUtil.getKeyId(columnName);
+		final byte[] column = Word.word2hash(columnName.toLowerCase());
 		// deserialize
 		try {
 			return byteToCollection(this.index.get(column).get(key));
@@ -198,7 +198,7 @@ public class TablesColumnBLOBIndex extends TablesColumnIndex{
 
 	@Override
     public int size(final String columnName) {
-		final byte[] column = YMarkUtil.getKeyId(columnName);
+		final byte[] column = Word.word2hash(columnName.toLowerCase());
 		if(this.index.containsKey(column)) {
 			try {
 				return this.index.get(column).size();

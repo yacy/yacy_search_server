@@ -3386,38 +3386,6 @@ Primary Key==Primärschlüssel
 "Commit"=="Absenden"
 #-----------------------------
 
-#File: Table_YMark_p.html
-#---------------------------
-Table Viewer==Tabellen Anzeige
-YMark Table Administration==YMark Tabellen Administration
-Table Editor: showing table==Tabellen Editor: Angezeigte Tabelle
-"Edit Selected Row"=="Bearbeite angezeigte Reihe"
-"Add a new Row"=="Füge neue Zeile ein"
-"Delete Selected Rows"=="Lösche ausgewählte Reihe"
-"Delete Table"=="Lösche Tabelle"
-"Rebuild Index"=="Index neu aufbauen"
-Primary Key==Primärschlüssel
->Row Editor<==>Reihen Editor<
-"Commit"=="Eintragen"
-Table Selection==Tabellen Auswahl
-Select Table:==Wähle Tabelle:
-show max. entries==Zeige max. Einträge
->all<==>Alle<
-Display columns:==Zeige Spalten:
-"load"=="Laden"
-Search/Filter Table==Suche/Filter Tabelle
-search rows for==Suche Reihen mit
-"Search"=="Suche"
-#>Tags<==>Tags<
->select a tag<==>Tag auswählen<
->Folders<==>Ordner<
->select a folder<==>Ordner auswählen<
->Import Bookmarks<==>Importiere Lesezeichen<
-#Importer:==Importer:
-#>XBEL Importer<==>XBEL Importer<
-#>Netscape HTML Importer<==>Netscape HTML Importer<
-"import"=="Importieren"
-#-----------------------------
 
 #File: terminal_p.html
 #---------------------------

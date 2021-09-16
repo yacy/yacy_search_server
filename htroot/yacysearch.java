@@ -57,16 +57,13 @@ import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.geo.GeoLocation;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.lod.vocabulary.Tagging.Metatag;
-import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.DidYouMean;
 import net.yacy.data.UserDB;
-import net.yacy.data.ymark.YMarkTables;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.Tokenizer;
 import net.yacy.http.servlets.TemplateProcessingException;
@@ -96,7 +93,6 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
-import net.yacy.utils.crypt;
 
 public class yacysearch {
 
@@ -219,7 +215,7 @@ public class yacysearch {
             /*
              * Access to authentication protected features is explicitely requested here
              * but no authentication is provided : ask now for authentication.
-             * Wihout this, after timeout of HTTP Digest authentication nonce, browsers no more send authentication information 
+             * Wihout this, after timeout of HTTP Digest authentication nonce, browsers no more send authentication information
              * and as this page is not private, protected features would simply be hidden without asking browser again for authentication.
              * (see mantis 766 : http://mantis.tokeek.de/view.php?id=766) *
              */
@@ -305,8 +301,8 @@ public class yacysearch {
         /* Maximum number of suggestions to display in the first results page */
         final int meanMax = post.getInt("meanCount", 0);
 
-        boolean jsResort = global  
-                && (contentdom == ContentDomain.ALL || contentdom == ContentDomain.TEXT) // For now JavaScript resorting can only be applied for text search 
+        boolean jsResort = global
+                && (contentdom == ContentDomain.ALL || contentdom == ContentDomain.TEXT) // For now JavaScript resorting can only be applied for text search
                 && sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT, SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT);
 
         // check the search tracker
@@ -698,41 +694,6 @@ public class yacysearch {
                             sb.peers.mySeed(),
                             NewsPool.CATEGORY_SURFTIPP_ADD,
                             map);
-                }
-            }
-
-            // if a bookmarks-button was hit, create new bookmark entry
-            if (post != null && post.containsKey("bookmarkref")) {
-                if (!sb.verifyAuthentication(header)) {
-                    prop.authenticationRequired();
-                    return prop;
-                }
-                //final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
-                final String urlstr = crypt.simpleDecode(post.get("bookmarkurl"));
-                if (urlstr != null) {
-                    final Bookmark bmk = sb.bookmarksDB.createorgetBookmark(urlstr, YMarkTables.USER_ADMIN);
-                    if (bmk != null) {
-                        bmk.setProperty(Bookmark.BOOKMARK_QUERY, querystring);
-                        bmk.addTag("/search"); // add to bookmark folder
-                        bmk.addTag("searchresult"); // add tag
-                        String urlhash = post.get("bookmarkref");
-                        final URIMetadataNode urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(urlhash));
-                        if (urlentry != null && !urlentry.dc_title().isEmpty()) {
-                            bmk.setProperty(Bookmark.BOOKMARK_TITLE, urlentry.dc_title());
-                        }
-                        sb.bookmarksDB.saveBookmark(bmk);
-                    }
-                    // do the same for YMarks ?
-                    try {
-                        sb.tables.bookmarks.createBookmark(
-                                sb.loader,
-                                urlstr,
-                                ClientIdentification.yacyInternetCrawlerAgent,
-                                YMarkTables.USER_ADMIN,
-                                true,
-                                "searchresult",
-                                "/search");
-                    } catch (final Throwable e) { }
                 }
             }
 
