@@ -56,12 +56,10 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.crawler.FileCrawlStarterTask;
-import net.yacy.crawler.data.Cache;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlProfile.CrawlAttribute;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.SitemapImporter;
-import net.yacy.crawler.robots.RobotsTxt;
 import net.yacy.data.WorkTables;
 import net.yacy.document.Document;
 import net.yacy.document.VocabularyScraper;
@@ -265,7 +263,7 @@ public class Crawler_p {
                 final String sitemapURLStr = post.get("sitemapURL","");
                 final String crawlingStart0 = post.get("crawlingURL","").trim(); // the crawljob start url
                 final String[] rootURLs0 = crawlingStart0.indexOf('\n') > 0 || crawlingStart0.indexOf('\r') > 0 ? crawlingStart0.split("[\\r\\n]+") : crawlingStart0.split(Pattern.quote("|"));
-                Set<DigestURL> rootURLs = new HashSet<>();
+                final List<DigestURL> rootURLs = new ArrayList<>();
                 String crawlName = "";
                 if (crawlingFile == null) {
                     final StringBuilder crawlNameBuilder = new StringBuilder(); // for large crawl queues this can be pretty large
@@ -300,17 +298,6 @@ public class Crawler_p {
                 if (fullDomain) {
                     for (final DigestURL u: rootURLs) if (u.isFile()) {fullDomain = false; subPath = true; break;}
                 }
-
-                // delete old robots entries
-                for (final DigestURL ru : rootURLs) {
-                    sb.robots.delete(ru);
-                    try {
-                        if (ru.getHost() != null) { // might be null for file://
-                            Cache.delete(RobotsTxt.robotsURL(RobotsTxt.getHostPort(ru)).hash());
-                        }
-                    } catch (final IOException e) {}
-                }
-                try {sb.robots.clear();} catch (final IOException e) {} // to be safe: clear all.
 
                 // set the crawl filter
                 String ipMustMatch = post.get("ipMustmatch", CrawlProfile.MATCH_ALL_STRING);
@@ -398,7 +385,7 @@ public class Crawler_p {
 
                 if ("sitelist".equals(crawlingMode)) {
                     newcrawlingMustNotMatch = CrawlProfile.MATCH_NEVER_STRING;
-                    final Set<DigestURL> newRootURLs = new HashSet<>();
+                    final List<DigestURL> newRootURLs = new ArrayList<>();
                     for (final DigestURL sitelistURL: rootURLs) {
                         // download document
                         Document scraper;
@@ -412,7 +399,8 @@ public class Crawler_p {
                             ConcurrentLog.logException(e);
                         }
                     }
-                    rootURLs = newRootURLs;
+                    rootURLs.clear();
+                    rootURLs.addAll(newRootURLs);
                     crawlingMode = "url";
                     if ((fullDomain || subPath) && newcrawlingdepth > 0) newcrawlingMustMatch = CrawlProfile.MATCH_ALL_STRING; // to prevent that there is a restriction on the original urls
                 }
@@ -440,7 +428,7 @@ public class Crawler_p {
                     if (fullDomain) {
                         siteFilter = CrawlProfile.siteFilter(rootURLs);
                         if (deleteold) {
-                            sb.index.fulltext().deleteStaleDomainHashes(hosthashes, deleteageDate);
+                            sb.index.fulltext().deleteStaleDomainHashes(hosthashes, deleteageDate); // takes long time for long lists
                         }
                     } else if (subPath) {
                         siteFilter = CrawlProfile.subpathFilter(rootURLs);
