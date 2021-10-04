@@ -526,8 +526,9 @@ seedScpPassword=
 seedScpPath=
 
 # every peer periodically scans for other peers. you can set the time
-# of the period here (minutes)
-peerCycle=2
+# of the period here (minutes). You might switch it on in kubernetes clusters
+scan.enabled=false
+scan.peerCycle=2
 
 # debug flags
 debug.search.local.dht.off=false
