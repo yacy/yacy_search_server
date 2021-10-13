@@ -155,6 +155,7 @@ public class HostBalancer implements Balancer {
 
     @Override
     public synchronized void close() {
+        log.info("closing all HostBalancer queues (" + this.queues.size() + ") for hostPath " + this.hostsPath);
         if (depthCache != null) {
             depthCache.clear();
         }

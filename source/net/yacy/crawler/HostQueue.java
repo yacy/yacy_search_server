@@ -288,6 +288,7 @@ public class HostQueue implements Balancer {
 
     @Override
     public synchronized void close() {
+        log.info("closing HostQueue, closing " + this.depthStacks.size() + " depthStacks for host " + this.hostName);
         for (final Map.Entry<Integer, Index> entry: this.depthStacks.entrySet()) {
             final int size = entry.getValue().size();
             entry.getValue().close();
