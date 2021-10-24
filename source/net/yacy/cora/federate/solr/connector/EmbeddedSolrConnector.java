@@ -125,20 +125,16 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     public void clearCaches() {
         final SolrConfig solrConfig = this.core.getSolrConfig();
         @SuppressWarnings("unchecked")
-        final
-        SolrCache<String, ?> fieldValueCache = solrConfig.fieldValueCacheConfig == null ? null : solrConfig.fieldValueCacheConfig.newInstance();
+        final SolrCache<String, ?> fieldValueCache = solrConfig.fieldValueCacheConfig == null ? null : solrConfig.fieldValueCacheConfig.newInstance();
         if (fieldValueCache != null) fieldValueCache.clear();
         @SuppressWarnings("unchecked")
-        final
-        SolrCache<Query, DocSet> filterCache= solrConfig.filterCacheConfig == null ? null : solrConfig.filterCacheConfig.newInstance();
+        final SolrCache<Query, DocSet> filterCache= solrConfig.filterCacheConfig == null ? null : solrConfig.filterCacheConfig.newInstance();
         if (filterCache != null) filterCache.clear();
         @SuppressWarnings("unchecked")
-        final
-        SolrCache<QueryResultKey, DocList> queryResultCache = solrConfig.queryResultCacheConfig == null ? null : solrConfig.queryResultCacheConfig.newInstance();
+        final SolrCache<QueryResultKey, DocList> queryResultCache = solrConfig.queryResultCacheConfig == null ? null : solrConfig.queryResultCacheConfig.newInstance();
         if (queryResultCache != null) queryResultCache.clear();
         @SuppressWarnings("unchecked")
-        final
-        SolrCache<Integer, Document> documentCache = solrConfig.documentCacheConfig == null ? null : solrConfig.documentCacheConfig.newInstance();
+        final SolrCache<Integer, Document> documentCache = solrConfig.documentCacheConfig == null ? null : solrConfig.documentCacheConfig.newInstance();
         if (documentCache != null) documentCache.clear();
     }
 
@@ -332,7 +328,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
         //System.out.println("EmbeddedSolrConnector.getResponseByParams * QUERY: " + ql); System.out.println("STACKTRACE: " + ConcurrentLog.stackTrace());
         QueryResponse rsp;
         try {
-            System.out.println("*** PARAMS: " + params);
+            // System.out.println("*** PARAMS: " + params);
             rsp = this.server.query(params);
             Thread.currentThread().setName(threadname);
             if (rsp != null) if (log.isFine()) log.fine(rsp.getResults().getNumFound() + " results for " + ql);
