@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
@@ -56,6 +58,7 @@ import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
+import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -130,7 +133,7 @@ public final class yacy {
     public static File htDocsPath = null;
     public static File shareDefaultPath = null;
     public static File shareDumpDefaultPath = null;
-    
+
     /**
      * a reference to the {@link Switchboard} created by the
      * {@link yacy#startup(String, long, long)} method.
@@ -162,11 +165,11 @@ public final class yacy {
             }
 
             // set jvm tmpdir to a subdir for easy cleanup (as extensive use file.deleteonexit waists memory during long runs, as todelete files names are collected and never cleaned up during runtime)
-            // keep this as earlier as possible, as any other class can use the "java.io.tmpdir" property, even the log manager, when the log file pattern uses "%t" as an alias for the tmp directory 
-            try { 
+            // keep this as earlier as possible, as any other class can use the "java.io.tmpdir" property, even the log manager, when the log file pattern uses "%t" as an alias for the tmp directory
+            try {
                 tmpdir = java.nio.file.Files.createTempDirectory("yacy-tmp-").toString(); // creates sub dir in jvm's temp (see System.property "java.io.tempdir")
                 System.setProperty("java.io.tmpdir", tmpdir);
-            } catch (IOException ex) { }
+            } catch (final IOException ex) { }
 
             // setting up logging
             f = new File(dataHome, "DATA/LOG/");
@@ -230,8 +233,8 @@ public final class yacy {
                 String tmpversion = sb.getConfig(Seed.VERSION, "");
                 if (tmpversion.isEmpty()) { // before 1.83009737 only the svnRevision nr was in config (like 9737)
                     tmpversion = yacyBuildProperties.getVersion();
-                    int oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
-                    if (oldRev > 1) {                       
+                    final int oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
+                    if (oldRev > 1) {
                         oldVer = Double.parseDouble(tmpversion) + oldRev / 100000000.0;
                     } else {
                         oldVer = Double.parseDouble(yacyBuildProperties.getLongVersion()); // failsafe (assume current version = no migration)
@@ -255,7 +258,7 @@ public final class yacy {
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
             // create default notifier picture
-            File notifierFile = new File(htDocsPath, "notifier.gif");
+            final File notifierFile = new File(htDocsPath, "notifier.gif");
             if (!notifierFile.exists()) try {Files.copy(new File(htRootPath, "env/grafics/empty.gif"), notifierFile);} catch (final IOException e) {}
 
             final File htdocsReadme = new File(htDocsPath, "readme.txt");
@@ -308,7 +311,7 @@ public final class yacy {
                     final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
                     //boolean properPW = (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT, "").isEmpty()) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                     //if (!properPW) browserPopUpPage = "ConfigBasic.html";
-                    /* YaCy main startup process must not hang because browser opening is long or fails. 
+                    /* YaCy main startup process must not hang because browser opening is long or fails.
                      * Let's open try opening the browser in a separate thread */
                     new Thread("Browser opening") {
                         @Override
@@ -333,10 +336,10 @@ public final class yacy {
                 if (lang.endsWith("browser"))
                     langlist = Translator.activeTranslations(); // get all translated languages
                 else {
-                    langlist = new ArrayList<String>();
+                    langlist = new ArrayList<>();
                     langlist.add(lang);
                 }
-                for (String tmplang : langlist) {
+                for (final String tmplang : langlist) {
                     if (!tmplang.equals("") && !tmplang.equals("default") && !tmplang.equals("browser")) { //locale is used
                         String currentRev = null;
                         BufferedReader br = null;
@@ -348,7 +351,7 @@ public final class yacy {
                         } finally {
                             try {
                                 br.close();
-                            } catch(IOException ioe) {
+                            } catch(final IOException ioe) {
                                 ConcurrentLog.warn("STARTUP", "Could not close " + tmplang + " version file");
                             }
                         }
@@ -501,8 +504,8 @@ public final class yacy {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
-        
-        final LinkedHashMap<String,ContentBody> post = new LinkedHashMap<String,ContentBody>();
+
+        final LinkedHashMap<String,ContentBody> post = new LinkedHashMap<>();
         post.put("shutdown", UTF8.StringBody(""));
         submitPostURL(homePath, "Steering.html", "Terminate YaCy", post);
     }
@@ -537,11 +540,11 @@ public final class yacy {
         try {
             /* First get a valid transaction token using HTTP GET */
             con.GETbytes("http://localhost:"+ port +"/" + path, adminUser, encodedPassword, false);
-            
+
             if (con.getStatusCode() != HttpStatus.SC_OK) {
                 throw new IOException("Error response from YACY socket: " + con.getHttpResponse().getStatusLine());
             }
-            
+
             final Header transactionTokenHeader = con.getHttpResponse().getFirstHeader(HeaderFramework.X_YACY_TRANSACTION_TOKEN);
             if(transactionTokenHeader == null) {
                 throw new IOException("Could not retrieve a valid transaction token");
@@ -554,27 +557,27 @@ public final class yacy {
                 ConcurrentLog.config("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
             } else {
                 ConcurrentLog.severe("COMMAND-STEERING", "error response from YACY socket: " + con.getHttpResponse().getStatusLine());
-                
+
                 try {
                     HTTPClient.closeConnectionManager();
                 } catch (final InterruptedException e1) {
                     e1.printStackTrace();
                 }
-                
+
                 RemoteInstance.closeConnectionManager();
-                
+
                 System.exit(-1);
             }
         } catch (final IOException e) {
             ConcurrentLog.severe("COMMAND-STEERING", "could not establish connection to YACY socket: " + e.getMessage());
-            
+
             try {
                 HTTPClient.closeConnectionManager();
             } catch (final InterruptedException e1) {
                 e1.printStackTrace();
             }
             RemoteInstance.closeConnectionManager();
-            
+
             System.exit(-1);
         }
 
@@ -588,7 +591,7 @@ public final class yacy {
         // finished
         ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
     }
-    
+
     private static void submitURL(final File homePath, final String path, final String processdescription) {
         final Properties config = configuration("COMMAND-STEERING", homePath);
 
@@ -626,39 +629,39 @@ public final class yacy {
         // finished
         ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
     }
-    
+
     /**
      * read saved config file and perform action which need to be done before main task starts
      * - like check on system alrady running etc.
-     * 
+     *
      * @param dataHome data directory
      */
     static private void preReadSavedConfigandInit(File dataHome) {
-        File lockFile = new File(dataHome, "DATA/yacy.running");
+        final File lockFile = new File(dataHome, "DATA/yacy.running");
         final String conf = "DATA/SETTINGS/yacy.conf";
-        
+
         // If YaCy is actually running, then we check if the server port is open.
         // If yes, then we consider that a restart is a user mistake and then we just respond
         // as the user expects and tell the browser to open the start page.
         // That will especially happen if Windows Users double-Click the YaCy Icon on the desktop to simply
         // open the web interface. (They don't think of 'servers' they just want to get to the search page).
         // We need to parse the configuration file for that to get the host port
-        File configFile = new File(dataHome, conf);
-        
+        final File configFile = new File(dataHome, conf);
+
         if (configFile.exists()) {
-            Properties p = new Properties();
+            final Properties p = new Properties();
             FileInputStream fis = null;
             try {
                 fis = new FileInputStream(configFile);
                 p.load(fis);
-                
+
                 // test for yacy already running
                 if (lockFile.exists()) {  // another instance running? VM crash? User will have to care about this
                     //standard log system not up yet - use simply stdout
                     // prevents also creation of a log file while just opening browser
                     System.out.println("WARNING: the file " + lockFile + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
 
-                    int port = Integer.parseInt(p.getProperty(SwitchboardConstants.SERVER_PORT, "8090"));
+                    final int port = Integer.parseInt(p.getProperty(SwitchboardConstants.SERVER_PORT, "8090"));
                     if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
                         Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
                         // Thats it; YaCy was running, the user is happy, we can stop now.
@@ -668,9 +671,9 @@ public final class yacy {
                         // YaCy is not running; thus delete the file an go on as nothing was wrong.
                         System.err.println("INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
                         delete(lockFile);
-                    }                                
+                    }
                 }
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 System.err.println("ERROR: config file seems to be corrupt");
                 System.err.println("ERROR: if problem persists, delete file");
                 System.err.println(configFile.getAbsolutePath());
@@ -679,12 +682,12 @@ public final class yacy {
             } finally {
                 try {
                     fis.close();
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.warn("Startup", "Could not close file " + configFile);
                 }
             }
         }
-    }     
+    }
 
     /**
      * Main-method which is started by java. Checks for special arguments or
@@ -717,10 +720,23 @@ public final class yacy {
             if (args.length >= 1 && args[0].toLowerCase(Locale.ROOT).equals("-gui")) headless = false;
             System.setProperty("java.awt.headless", headless ? "true" : "false");
 
-            String s = ""; for (final String a: args) s += a + " ";
-            yacyRelease.startParameter = s.trim();
+            final StringBuilder s = new StringBuilder(); for (final String a: args) s.append(a).append(" ");
+            yacyRelease.startParameter = s.toString().trim();
 
+            // case for the application path if started normally with a jre command
             File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
+
+            // try to find the application root path within a Mac application
+            // call com.apple.eio.FileManager.getPathToApplicationBundle();
+            try {
+                final Class<?> comAppleEioFileManagerClass = Class.forName("com.apple.eio.FileManager");
+                final Method getPathToApplicationBundleMethod = ClassProvider.getStaticMethod(comAppleEioFileManagerClass, "getPathToApplicationBundle", null);
+                final String apppath = (String) getPathToApplicationBundleMethod.invoke(null);
+                System.out.println("PathToApplicationBundle = " + apppath);
+            } catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+
             File dataRoot = applicationRoot;
             //System.out.println("args.length=" + args.length);
             //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
@@ -760,7 +776,7 @@ public final class yacy {
             } else if ((args.length > 1) && (args[0].toLowerCase(Locale.ROOT).equals("-config"))) {
                     // set config parameter. Special handling of adminAccount=user:pwd (generates md5 encoded password)
                     // on Windows parameter should be enclosed in doublequotes to accept = sign (e.g. -config "port=8090" "port.ssl=8043")
-                    File f = new File (dataRoot,"DATA/SETTINGS/");
+                    final File f = new File (dataRoot,"DATA/SETTINGS/");
                     if (!f.exists()) {
                         mkdirsIfNeseccary(f);
                     } else {
@@ -769,21 +785,21 @@ public final class yacy {
                         }
                     }
                     // use serverSwitch to read config properties (including init values from yacy.init
-                    serverSwitch ss = new serverSwitch(dataRoot,applicationRoot,"defaults/yacy.init","DATA/SETTINGS/yacy.conf");
+                    final serverSwitch ss = new serverSwitch(dataRoot,applicationRoot,"defaults/yacy.init","DATA/SETTINGS/yacy.conf");
 
                     for (int icnt=1; icnt < args.length ; icnt++) {
-                        String cfg = args[icnt];
-                        int pos = cfg.indexOf('=');
+                        final String cfg = args[icnt];
+                        final int pos = cfg.indexOf('=');
                         if (pos > 0) {
-                            String cmd = cfg.substring(0, pos);
-                            String val = cfg.substring(pos + 1);
+                            final String cmd = cfg.substring(0, pos);
+                            final String val = cfg.substring(pos + 1);
 
                             if (!val.isEmpty()) {
                                 if (cmd.equalsIgnoreCase(SwitchboardConstants.ADMIN_ACCOUNT)) { // special command to set adminusername and md5-pwd
-                                    int cpos = val.indexOf(':');  //format adminAccount=adminname:adminpwd
+                                    final int cpos = val.indexOf(':');  //format adminAccount=adminname:adminpwd
                                     if (cpos >= 0) {
                                         String username = val.substring(0, cpos);
-                                        String pwdtxt = val.substring(cpos + 1);
+                                        final String pwdtxt = val.substring(cpos + 1);
                                         if (!username.isEmpty()) {
                                             ss.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, username);
                                             System.out.println("Set property " + SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME + " = " + username);
@@ -845,7 +861,7 @@ class shutdownHookThread extends Thread {
 
                 // waiting for the yacy thread to finish execution
                 ConcurrentLog.fine("SHUTDOWN","Waiting for main thread to finish.");
-                
+
                 /* Main thread will release the shutdownSemaphore once completely terminated.
                  * We do not wait indefinitely as the application is supposed here to quickly terminate */
                 final int maxWaitTime = 30;
