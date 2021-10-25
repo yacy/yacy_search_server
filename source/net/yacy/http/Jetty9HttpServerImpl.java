@@ -2,7 +2,7 @@
 //  Jetty9HttpServerImpl
 //  Copyright 2011 by Florian Richter
 //  First released 13.04.2011 at http://yacy.net
-//  
+//
 //  $LastChangedDate$
 //  $LastChangedRevision$
 //  $LastChangedBy$
@@ -11,12 +11,12 @@
 //  modify it under the terms of the GNU Lesser General Public
 //  License as published by the Free Software Foundation; either
 //  version 2.1 of the License, or (at your option) any later version.
-//  
+//
 //  This library is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 //  Lesser General Public License for more details.
-//  
+//
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program in the file lgpl21.txt
 //  If not, see <http://www.gnu.org/licenses/>.
@@ -75,19 +75,19 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
     public Jetty9HttpServerImpl(int port) {
         Switchboard sb = Switchboard.getSwitchboard();
 
-        server = new Server();
+        this.server = new Server();
 
         int cores = ProcessorUtils.availableProcessors();
         int acceptors = Math.max(1, Math.min(4, cores/2)); // original: Math.max(1, Math.min(4,cores/8));
         HttpConnectionFactory hcf = new HttpConnectionFactory();
-        ServerConnector connector = new ServerConnector(server, null, null, null, acceptors, -1, hcf);
+        ServerConnector connector = new ServerConnector(this.server, null, null, null, acceptors, -1, hcf);
         connector.setPort(port);
         connector.setName("httpd:"+Integer.toString(port));
         connector.setIdleTimeout(9000); // timout in ms when no bytes send / received
         connector.setAcceptQueueSize(128);
-        
-        server.addConnector(connector);
-        
+
+        this.server.addConnector(connector);
+
 
         // add ssl/https connector
         boolean useSSL = sb.getConfigBool("server.https", false);
@@ -105,14 +105,14 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                 https_config.addCustomizer(new SecureRequestCustomizer());
 
                 // SSL Connector
-                ServerConnector sslConnector = new ServerConnector(server,
+                ServerConnector sslConnector = new ServerConnector(this.server,
                         new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
                         new HttpConnectionFactory(https_config));
                 sslConnector.setPort(sslport);
                 sslConnector.setName("ssld:" + Integer.toString(sslport)); // name must start with ssl (for withSSL() to work correctly)
                 sslConnector.setIdleTimeout(9000); // timout in ms when no bytes send / received
 
-                server.addConnector(sslConnector);
+                this.server.addConnector(sslConnector);
                 ConcurrentLog.info("SERVER", "SSL support initialized successfully on port " + sslport);
             }
         }
@@ -123,7 +123,8 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         // configure root context
         WebAppContext htrootContext = new WebAppContext();
         htrootContext.setContextPath("/");
-        String htrootpath = sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+        String htrootpath = sb.appPath + "/" + sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+        ConcurrentLog.info("Jetty9HttpServerImpl", "htrootpath = " + htrootpath);
         htrootContext.setErrorHandler(new YaCyErrorHandler()); // handler for custom error page
         try {
             htrootContext.setBaseResource(Resource.newResource(htrootpath));
@@ -136,7 +137,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             Resource webxml = Resource.newResource(sb.dataPath + "/DATA/SETTINGS/web.xml");
             if (webxml.exists()) {
                 htrootContext.setDescriptor(webxml.getName());
-            } 
+            }
 
         } catch (IOException ex) {
             if (htrootContext.getBaseResource() == null) {
@@ -201,7 +202,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         }
         // context handler for dispatcher and security (hint: dispatcher requires a context)
         ContextHandler context = new ContextHandler();
-        context.setServer(server);
+        context.setServer(this.server);
         context.setContextPath("/");
         context.setHandler(handlers);
         context.setMaxFormContentSize(1024 * 1024 * 10); // allow 10MB, large forms may be required during crawl starts with long lists
@@ -209,10 +210,10 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         // make YaCy handlers (in context) and servlet context handlers available (both contain root context "/")
         // logic: 1. YaCy handlers are called if request not handled (e.g. proxy) then servlets handle it
         ContextHandlerCollection allrequesthandlers = new ContextHandlerCollection();
-        allrequesthandlers.setServer(server);
+        allrequesthandlers.setServer(this.server);
         allrequesthandlers.addHandler(context);
-        allrequesthandlers.addHandler(htrootContext);    
-        allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler 
+        allrequesthandlers.addHandler(htrootContext);
+        allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler
 
         YaCyLoginService loginService = new YaCyLoginService();
         // this is very important (as it is part of the user password hash)
@@ -225,7 +226,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         htrootContext.setSecurityHandler(securityHandler);
 
         // wrap all handlers
-        Handler crashHandler = new CrashProtectionHandler(server, allrequesthandlers);
+        Handler crashHandler = new CrashProtectionHandler(this.server, allrequesthandlers);
         // check server access restriction and add InetAccessHandler if restrictions are needed
         // otherwise don't (to save performance)
         final String white = sb.getConfig("serverClient", "*");
@@ -260,10 +261,10 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
                 ConcurrentLog.info("SERVER","activated IP access restriction to: [" + loopbackAddress + "," + white +"]");
             } else {
-                server.setHandler(crashHandler); // InetAccessHandler not needed
+                this.server.setHandler(crashHandler); // InetAccessHandler not needed
             }
         } else {
-            server.setHandler(crashHandler); // InetAccessHandler not needed
+            this.server.setHandler(crashHandler); // InetAccessHandler not needed
         }
     }
 
@@ -274,8 +275,8 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
     public void startupServer() throws Exception {
         // option to finish running requests on shutdown
 //        server.setGracefulShutdown(3000);
-        server.setStopAtShutdown(true);
-        server.start();
+        this.server.setStopAtShutdown(true);
+        this.server.start();
     }
 
     /**
@@ -283,16 +284,16 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
      */
     @Override
     public void stop() throws Exception {
-        server.stop();  
-        server.join();
+        this.server.stop();
+        this.server.join();
     }
 
     /**
      * @return true if ssl/https connector is available
      */
     @Override
-    public boolean withSSL() {        
-        Connector[] clist = server.getConnectors(); 
+    public boolean withSSL() {
+        Connector[] clist = this.server.getConnectors();
         for (Connector c:clist) {
             if (c.getName().startsWith("ssl")) return true;
         }
@@ -305,7 +306,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
      */
     @Override
     public int getSslPort() {
-        Connector[] clist = server.getConnectors();
+        Connector[] clist = this.server.getConnectors();
         for (Connector c:clist) {
             if (c.getName().startsWith("ssl")) {
                 int port =((ServerConnector)c).getLocalPort();
@@ -336,12 +337,12 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                     ConcurrentLog.logException(e);
                 }
                 try {
-                    if (!server.isRunning() || server.isStopped()) {
-                        server.start();
+                    if (!Jetty9HttpServerImpl.this.server.isRunning() || Jetty9HttpServerImpl.this.server.isStopped()) {
+                        Jetty9HttpServerImpl.this.server.start();
                     }
 
                     // reconnect with new settings (instead to stop/start server, just manipulate connectors
-                    final Connector[] cons = server.getConnectors();
+                    final Connector[] cons = Jetty9HttpServerImpl.this.server.getConnectors();
                     final int port = Switchboard.getSwitchboard().getLocalPort();
                     final int sslport = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.SERVER_SSLPORT, 8443);
                     for (Connector con : cons) {
@@ -455,7 +456,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                     final KeyStore ks = KeyStore.getInstance("JKS");
                     ks.load(null,keyStorePwd.toCharArray());
                     try (
-                        /* Automatically closed by this try-with-resources statement */    
+                        /* Automatically closed by this try-with-resources statement */
                         final FileOutputStream ksOut = new FileOutputStream(keyStoreFileName);
                     ) {
                         ks.store(ksOut, keyStorePwd.toCharArray());
@@ -521,7 +522,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
     @Override
     public int getServerThreads() {
-        return server == null ? 0 : server.getThreadPool().getThreads() - server.getThreadPool().getIdleThreads();
+        return this.server == null ? 0 : this.server.getThreadPool().getThreads() - this.server.getThreadPool().getIdleThreads();
     }
 
     @Override

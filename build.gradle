@@ -1,3 +1,9 @@
+buildscript {
+    dependencies {
+        classpath "org.mini2Dx:parcl:1.7.1"
+    }
+}
+
 plugins {
   id 'java'
   id 'maven-publish'
@@ -7,6 +13,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
+apply plugin: "org.mini2Dx.parcl"
 
 repositories {
     flatDir {
@@ -30,6 +37,27 @@ java.targetCompatibility = JavaVersion.VERSION_1_8
 
 mainClassName = "net.yacy.yacy"
 applicationDefaultJvmArgs = ["-Xmx1024m"]
+
+parcl {
+   exe {
+      exeName = "YaCy"
+   }
+
+   app {
+      vmArgs = ["-Xmx1g"]
+      appName = "YaCy"
+      icon = "addon/YaCy.icns"
+      applicationCategory = "Search-Engine"
+      displayName = 'YaCy Search Engine'
+      identifier = 'net.yacy'
+      copyright = 'Copyright 2021 Michael Peter Christen et al.'
+      zipName = 'YaCy.zip'
+   }
+
+   linux {
+      binName = "YaCy"
+   }
+}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'

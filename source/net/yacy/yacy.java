@@ -729,10 +729,17 @@ public final class yacy {
             // try to find the application root path within a Mac application
             // call com.apple.eio.FileManager.getPathToApplicationBundle();
             try {
+                // these methods will cause a warning: remove them with --illegal-access=permit
                 final Class<?> comAppleEioFileManagerClass = Class.forName("com.apple.eio.FileManager");
                 final Method getPathToApplicationBundleMethod = ClassProvider.getStaticMethod(comAppleEioFileManagerClass, "getPathToApplicationBundle", null);
                 final String apppath = (String) getPathToApplicationBundleMethod.invoke(null);
-                System.out.println("PathToApplicationBundle = " + apppath);
+                System.out.println("PathToApplicationBundle = " + apppath); // PathToApplicationBundle = /Users/admin/git/rc1/build/YaCy.app
+                if (apppath != null && apppath.endsWith(".app")) {
+                    // modify the applicationRoot path to within the app file
+                    applicationRoot = new File(apppath + "/Contents");
+                    System.setProperty("user.dir", applicationRoot.getAbsolutePath()); // required since nasty code elswhere is using it
+                    System.setProperty("user.home", applicationRoot.getAbsolutePath()); // well
+                }
             } catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
                 e.printStackTrace();
             }
