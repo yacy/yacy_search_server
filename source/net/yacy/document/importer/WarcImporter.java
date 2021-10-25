@@ -28,6 +28,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
+import org.jwat.common.HeaderLine;
+import org.jwat.common.HttpHeader;
+import org.jwat.warc.WarcConstants;
+import org.jwat.warc.WarcReader;
+import org.jwat.warc.WarcReaderFactory;
+import org.jwat.warc.WarcRecord;
+
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
@@ -42,12 +49,6 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.TextParser;
 import net.yacy.search.Switchboard;
 import net.yacy.server.http.ChunkedInputStream;
-import org.jwat.common.HeaderLine;
-import org.jwat.common.HttpHeader;
-import org.jwat.warc.WarcConstants;
-import org.jwat.warc.WarcReader;
-import org.jwat.warc.WarcReaderFactory;
-import org.jwat.warc.WarcRecord;
 
 /**
  * Web Archive file format reader to process the warc archive content (responses)
@@ -58,6 +59,17 @@ import org.jwat.warc.WarcRecord;
  *
  * http://archive-access.sourceforge.net/warc/warc_file_format-0.9.html
  * http://archive-access.sourceforge.net/warc/
+ *
+ * TESTING:
+ *
+ * To get a copy of the YaCy homepage, you can i.e. generate a warc file easily with
+ * wget "https://yacy.net" --mirror --warc-file=yacy.net
+ *
+ * The result is a compressed warc file named "yacy.net.warc.gz".
+ * To index the content, it can be copied to the surrogate input path:
+ * cp yacy.net.warc.gz DATA/SURROGATES/in/
+ *
+ * after processing, that warc file is moved to DATA/SURROGATES/out/
  */
 public class WarcImporter extends Thread implements Importer {
 
@@ -100,17 +112,20 @@ public class WarcImporter extends Thread implements Importer {
 
         byte[] content;
         job = this;
-        startTime = System.currentTimeMillis();
+        this.startTime = System.currentTimeMillis();
 
         WarcReader localwarcReader = WarcReaderFactory.getReader(f);
         WarcRecord wrec = localwarcReader.getNextRecord();
-        while (wrec != null && !abort) {
+        while (wrec != null && !this.abort) {
 
             HeaderLine hl = wrec.getHeader(WarcConstants.FN_WARC_TYPE);
             if (hl != null && hl.value.equals(WarcConstants.RT_RESPONSE)) { // filter responses
 
                 hl = wrec.getHeader(WarcConstants.FN_WARC_TARGET_URI);
-                DigestURL location = new DigestURL(hl.value);
+                // the content of that line was lately surrounded with '<' and '>', we must remove that
+                String url = hl.value;
+                if (url.startsWith("<") && url.endsWith(">")) url = url.substring(1, url.length() - 1);
+                DigestURL location = new DigestURL(url);
 
                 HttpHeader http = wrec.getHttpHeader();
 
@@ -169,7 +184,7 @@ public class WarcImporter extends Thread implements Importer {
                             try {istream.close();} catch (IOException e) {}
                         }
 
-                        recordCnt++;
+                        this.recordCnt++;
                     }
                 }
             }
@@ -177,7 +192,7 @@ public class WarcImporter extends Thread implements Importer {
             wrec = localwarcReader.getNextRecord();
         }
         localwarcReader.close();
-        ConcurrentLog.info("WarcImporter", "Indexed " + recordCnt + " documents");
+        ConcurrentLog.info("WarcImporter", "Indexed " + this.recordCnt + " documents");
         job = null;
     }
 
