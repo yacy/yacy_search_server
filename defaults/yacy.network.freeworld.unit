@@ -55,16 +55,13 @@ network.unit.inspection.searchverify = true
 network.unit.remotecrawl.speed = 300
 
 # addresses of seed-list bootstrap locations
-network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
-network.unit.bootstrap.seedlist1 = http://sixcooler.de/yacy/seed.txt
-network.unit.bootstrap.seedlist2 = http://esfbc.com/seed.txt
-network.unit.bootstrap.seedlist3 = http://rptr.me/yacy/seed.txt
-network.unit.bootstrap.seedlist4 = https://yacy.tschability.ch/seed.txt
-network.unit.bootstrap.seedlist5 = http://yacy.tschability.ch/seed.txt
-network.unit.bootstrap.seedlist6 = http://www1.isg.hamshack.info/seed.txt
-network.unit.bootstrap.seedlist7 = http://5.45.105.16/yacyseed
-network.unit.bootstrap.seedlist8 = http://berndkwasnik.de/yacy/seed.txt
-network.unit.bootstrap.seedlist9 = http://yacy.1a-referenzen.de/seed.txt
+network.unit.bootstrap.seedlist0 = http://sixcooler.de/yacy/seed.txt
+network.unit.bootstrap.seedlist1 = http://rptr.me/yacy/seed.txt
+network.unit.bootstrap.seedlist2 = https://yacy.tschability.ch/seed.txt
+network.unit.bootstrap.seedlist3 = http://www1.isg.hamshack.info/seed.txt
+network.unit.bootstrap.seedlist4 = http://5.45.105.16/yacyseed
+network.unit.bootstrap.seedlist5 = http://berndkwasnik.de/yacy/seed.txt
+network.unit.bootstrap.seedlist6 = http://yacy.1a-referenzen.de/seed.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
@@ -72,8 +69,6 @@ network.unit.update.location0 = http://yacy.net/en/index.html
 network.unit.update.location0.key = MIIBtzCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYQAAoGAbGeo21lW3Ost86RxSrCLIHaYaaj/68jFrTMjAORGJqUTgnvYCd4T1HmD/pCYrW8sQtN4KFPbm8M/MbDWeojQpy+qVqewBilYIdNpArGknvFkw4jpDPu7aR6FRz56zcZTnBiOpqAbBXDB3o6D1w9zVDPd4LBSTLgedt0joZeVAVk=
 network.unit.update.location1 = http://kaskelix.de/update/
 network.unit.update.location1.key = MIIBtzCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYQAAoGAbGeo21lW3Ost86RxSrCLIHaYaaj/68jFrTMjAORGJqUTgnvYCd4T1HmD/pCYrW8sQtN4KFPbm8M/MbDWeojQpy+qVqewBilYIdNpArGknvFkw4jpDPu7aR6FRz56zcZTnBiOpqAbBXDB3o6D1w9zVDPd4LBSTLgedt0joZeVAVk=
-network.unit.update.location2 = http://github.com/luccioman/yacy_search_server/releases
-network.unit.update.location2.key = MIIBuDCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYUAAoGBAM9s3lUhuBGUWJHiAVMYFRgWle5X9sh8m4kHc9aiBZmWzoZDx1cqFAj0dRNyWicZhoRnL2xRjo+Mw31BbR3QWWgF+t0tPDNaFL14Nr7BhSyWVzml16JhX2ep3tbenw7ySq1K5JbAQevt6gXognFTBDJsXGSSD/s4nHgsUgZDIA9a
 
 # properties for in-protocol response authentication:
 network.unit.protocol.control = uncontrolled
