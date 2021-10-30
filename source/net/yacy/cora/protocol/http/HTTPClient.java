@@ -452,10 +452,8 @@ public class HTTPClient {
                 .register(AuthSchemes.DIGEST, YACY_DIGEST_SCHEME_FACTORY)
                 .build();
 
-		CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
-				.setDefaultAuthSchemeRegistry(authSchemeRegistry).build();
-        byte[] content = null;
-        try {
+		try (final CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
+                .setDefaultAuthSchemeRegistry(authSchemeRegistry).build()) {
             this.httpResponse = httpclient.execute(httpGet);
             try {
                 HttpEntity httpEntity = this.httpResponse.getEntity();
@@ -467,10 +465,8 @@ public class HTTPClient {
             				 * Otherwise returning null and consuming fully the entity can be very long on large resources */
             				throw new IOException("Content to download exceed maximum value of " + Formatter.bytesToString(maxBytes));
             			}
-                        content = getByteArray(httpEntity, maxBytes);
+                        return getByteArray(httpEntity, maxBytes);
                     }
-                    // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-                    EntityUtils.consume(httpEntity);
                 }
             } catch (final IOException e) {
             	httpGet.abort();
@@ -478,10 +474,8 @@ public class HTTPClient {
             } finally {
                 this.httpResponse.close();
             }
-        } finally {
-            httpclient.close();
         }
-        return content;
+        return null;
     }
     
     /**
@@ -649,8 +643,6 @@ public class HTTPClient {
             return getContentBytes(httpPost, Integer.MAX_VALUE, concurrent);
         }
         
-        byte[] content = null;
-        
         final CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
                 new AuthScope("localhost", url.getPort()),
@@ -661,28 +653,22 @@ public class HTTPClient {
                 .register(AuthSchemes.BASIC, BASIC_SCHEME_FACTORY)
                 .register(AuthSchemes.DIGEST, YACY_DIGEST_SCHEME_FACTORY)
                 .build();
-
-		CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
-				.setDefaultAuthSchemeRegistry(authSchemeRegistry).build();
 		
-        try {
+        try (final CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
+                .setDefaultAuthSchemeRegistry(authSchemeRegistry).build()) {
             this.httpResponse = httpclient.execute(httpPost);
             try {
                 HttpEntity httpEntity = this.httpResponse.getEntity();
                 if (httpEntity != null) {
                     if (getStatusCode() == HttpStatus.SC_OK) {
-                        content = getByteArray(httpEntity, Integer.MAX_VALUE);
+                        return getByteArray(httpEntity, Integer.MAX_VALUE);
                     }
-                    // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-                    EntityUtils.consume(httpEntity);
                 }
             } finally {
                 this.httpResponse.close();
             }
-        } finally {
-            httpclient.close();
         }
-        return content;
+        return null;
     }
 
     /**
@@ -920,8 +906,6 @@ public class HTTPClient {
         			}
                     content = getByteArray(httpEntity, maxBytes);
                 }
-                // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-            	EntityUtils.consume(httpEntity);
             }
         } catch (final IOException e) {
                 httpUriRequest.abort();
@@ -1001,11 +985,10 @@ public class HTTPClient {
      * @throws IOException when a read error occured or content length is over maxBytes
      */
 	public static byte[] getByteArray(final HttpEntity entity, int maxBytes) throws IOException {
-		final InputStream instream = entity.getContent();
-		if (instream == null) {
-			return null;
-		}
-		try {
+		try (final InputStream instream = entity.getContent()) {
+		    if (instream == null) {
+		        return null;
+		    }
 			long contentLength = entity.getContentLength();
 			/*
 			 * When no maxBytes is specified, the default limit is
@@ -1046,7 +1029,8 @@ public class HTTPClient {
 		} catch (final OutOfMemoryError e) {
 			throw new IOException(e.toString());
 		} finally {
-			instream.close();
+		    // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+            EntityUtils.consume(entity);
 		}
 	}
 
