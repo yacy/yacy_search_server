@@ -289,9 +289,6 @@ public final class yacy {
             final int deleteOldDownloadsAfterDays = (int) sb.getConfigLong("update.deleteOld", 30);
             yacyRelease.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
 
-            // set user-agent
-            HTTPClient.setDefaultUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent);
-
             // start main threads
             final int port = sb.getLocalPort();
             try {

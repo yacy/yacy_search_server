@@ -190,10 +190,6 @@ public class HTTPClient {
         reqConfBuilder = RequestConfig.copy(dfltReqConf);
         setTimout(timeout);
     }
-
-    public static void setDefaultUserAgent(final String defaultAgent) {
-    	clientBuilder.setUserAgent(defaultAgent);
-    }
     
     private static RequestConfig initRequestConfig() {
     	final RequestConfig.Builder builder = RequestConfig.custom();
