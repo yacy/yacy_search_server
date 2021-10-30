@@ -121,9 +121,10 @@ import net.yacy.kelondro.util.NamePrefixThreadFactory;
  */
 public class HTTPClient {
     
-    private final static int default_timeout = 6000;
+    private static final int default_timeout = 6000;
+    
     /** Maximum number of simultaneously open outgoing HTTP connections in the pool */
-	private final static int maxcon = 200;
+	private static final int maxcon = 200;
 	
 	/** Default sleep time in seconds between each run of the connection evictor */
 	private static final int DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME = 5;
@@ -131,7 +132,13 @@ public class HTTPClient {
 	/** Default maximum time in seconds to keep alive an idle connection in the pool */
 	private static final int DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE = 30;
 	
-	private final static RequestConfig dfltReqConf = initRequestConfig();
+	private static final RequestConfig DFLTREQUESTCONFIG = initRequestConfig();
+	
+	/** Use the custom YaCyDigestScheme for HTTP Digest Authentication */
+    private static final Lookup<AuthSchemeProvider> AUTHSCHEMEREGISTRY = RegistryBuilder.<AuthSchemeProvider>create()
+            .register(AuthSchemes.BASIC, new BasicSchemeFactory())
+            .register(AuthSchemes.DIGEST, new YaCyDigestSchemeFactory())
+            .build();
 	
 	/** The connection manager holding the configured connection pool for this client */
 	public static final PoolingHttpClientConnectionManager CONNECTION_MANAGER = initPoolingConnectionManager();
@@ -146,11 +153,7 @@ public class HTTPClient {
 			Boolean.parseBoolean(System.getProperty("jsse.enableSNIExtension", Boolean.toString(ENABLE_SNI_EXTENSION_DEFAULT))));
 	
 
-    // digest factories
-    private final BasicSchemeFactory BASIC_SCHEME_FACTORY = new BasicSchemeFactory();
-    private final YaCyDigestSchemeFactory YACY_DIGEST_SCHEME_FACTORY = new YaCyDigestSchemeFactory();
-
-	/**
+    /**
 	 * Background daemon thread evicting expired idle connections from the pool.
 	 * This may be eventually already done by the pool itself on connection request,
 	 * but this background task helps when no request is made to the pool for a long
@@ -179,7 +182,7 @@ public class HTTPClient {
         super();
         this.timeout = agent.clientTimeout;
         clientBuilder.setUserAgent(agent.userAgent);
-        reqConfBuilder = RequestConfig.copy(dfltReqConf);
+        reqConfBuilder = RequestConfig.copy(DFLTREQUESTCONFIG);
         setTimout(agent.clientTimeout);
     }
     
@@ -187,7 +190,7 @@ public class HTTPClient {
         super();
         this.timeout = timeout;
         clientBuilder.setUserAgent(agent.userAgent);
-        reqConfBuilder = RequestConfig.copy(dfltReqConf);
+        reqConfBuilder = RequestConfig.copy(DFLTREQUESTCONFIG);
         setTimout(timeout);
     }
     
@@ -211,7 +214,7 @@ public class HTTPClient {
     	final HttpClientBuilder builder = HttpClientBuilder.create();
     	
     	builder.setConnectionManager(CONNECTION_MANAGER);
-		builder.setDefaultRequestConfig(dfltReqConf);
+		builder.setDefaultRequestConfig(DFLTREQUESTCONFIG);
 		
     	// UserAgent
 		builder.setUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent);
@@ -442,14 +445,8 @@ public class HTTPClient {
         		new AuthScope("localhost", url.getPort()),
                 new UsernamePasswordCredentials(username, pass));
         
-        /* Use the custom YaCyDigestScheme for HTTP Digest Authentication */
-        final Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
-                .register(AuthSchemes.BASIC, BASIC_SCHEME_FACTORY)
-                .register(AuthSchemes.DIGEST, YACY_DIGEST_SCHEME_FACTORY)
-                .build();
-
-		try (final CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
-                .setDefaultAuthSchemeRegistry(authSchemeRegistry).build()) {
+        try (final CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
+                .setDefaultAuthSchemeRegistry(AUTHSCHEMEREGISTRY).build()) {
             this.httpResponse = httpclient.execute(httpGet);
             try {
                 HttpEntity httpEntity = this.httpResponse.getEntity();
@@ -644,14 +641,8 @@ public class HTTPClient {
                 new AuthScope("localhost", url.getPort()),
                 new UsernamePasswordCredentials(userName, password));
 
-        /* Use the custom YaCyDigestScheme for HTTP Digest Authentication */
-        final Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
-                .register(AuthSchemes.BASIC, BASIC_SCHEME_FACTORY)
-                .register(AuthSchemes.DIGEST, YACY_DIGEST_SCHEME_FACTORY)
-                .build();
-		
         try (final CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
-                .setDefaultAuthSchemeRegistry(authSchemeRegistry).build()) {
+                .setDefaultAuthSchemeRegistry(AUTHSCHEMEREGISTRY).build()) {
             this.httpResponse = httpclient.execute(httpPost);
             try {
                 HttpEntity httpEntity = this.httpResponse.getEntity();
