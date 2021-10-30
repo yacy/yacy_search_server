@@ -781,10 +781,7 @@ public class HTTPClient {
             if (httpEntity != null) try {
                     return httpEntity.getContent();
             } catch (final IOException e) {
-                ConnectionInfo.removeConnection(this.currentRequest.hashCode());
-                this.currentRequest.abort();
-                this.currentRequest = null;
-                this.httpResponse.close();
+                finish();
                 throw e;
             }
         }
@@ -804,16 +801,8 @@ public class HTTPClient {
             if (httpEntity != null) try {
                 httpEntity.writeTo(outputStream);
                 outputStream.flush();
-                // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-                EntityUtils.consume(httpEntity);
-                ConnectionInfo.removeConnection(this.currentRequest.hashCode());
-                this.currentRequest = null;
-            } catch (final IOException e) {
-                ConnectionInfo.removeConnection(this.currentRequest.hashCode());
-                this.currentRequest.abort();
-                this.currentRequest = null;
-                this.httpResponse.close();
-                throw e;
+            } finally {
+                finish();
             }
         }
     }
@@ -841,8 +830,7 @@ public class HTTPClient {
 	}
 
     private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final int maxBytes, final boolean concurrent) throws IOException {
-        byte[] content = null;
-    	try {
+        try {
             execute(httpUriRequest, concurrent);
             if (this.httpResponse == null) return null;
             // get the response body
@@ -855,7 +843,7 @@ public class HTTPClient {
         				 * Otherwise returning null and consuming fully the entity can be very long on large resources */
         				throw new IOException("Content to download exceed maximum value of " + Formatter.bytesToString(maxBytes));
         			}
-                    content = getByteArray(httpEntity, maxBytes);
+                    return getByteArray(httpEntity, maxBytes);
                 }
             }
         } catch (final IOException e) {
@@ -865,7 +853,7 @@ public class HTTPClient {
         	if (this.httpResponse != null) this.httpResponse.close();
         	ConnectionInfo.removeConnection(httpUriRequest.hashCode());
         }
-    	return content;
+    	return null;
     }
 
     private void execute(final HttpUriRequest httpUriRequest, final boolean concurrent) throws IOException {
