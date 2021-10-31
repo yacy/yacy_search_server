@@ -686,23 +686,13 @@ public class serverSwitch {
             final String[] uris = CommonPattern.COMMA.split(uri);
             for (String netdef : uris) {
                 netdef = netdef.trim();
-                try {
+                try (final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
                     final RequestHeader reqHeader = new RequestHeader();
-                    reqHeader
-                            .put(HeaderFramework.USER_AGENT,
-                                    ClientIdentification.yacyInternetCrawlerAgent.userAgent);
-                    final HTTPClient client = new HTTPClient(
-                            ClientIdentification.yacyInternetCrawlerAgent);
+                    reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
                     client.setHeader(reqHeader.entrySet());
-                    byte[] data = client
-                            .GETbytes(
-                                    uri,
-                                    getConfig(
-                                            SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,
-                                            "admin"),
-                                    getConfig(
-                                            SwitchboardConstants.ADMIN_ACCOUNT_B64MD5,
-                                            ""), false);
+                    byte[] data = client.GETbytes(uri,
+                                    getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),
+                                    getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), false);
                     if (data == null || data.length == 0) {
                         continue;
                     }

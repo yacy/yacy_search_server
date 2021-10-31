@@ -159,11 +159,11 @@ public final class Protocol {
             final String path,
             final Map<String, ContentBody> parts,
             final int timeout) throws IOException {
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-            httpClient.setTimout(timeout);
-            MultiProtocolURL targetURL = new MultiProtocolURL(targetBaseURL, path);
-			this.result = httpClient.POSTbytes(targetURL, Seed.b64Hash2hexHash(targetHash) + ".yacyh", parts, false,
-					true);
+            try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
+                httpClient.setTimout(timeout);
+                MultiProtocolURL targetURL = new MultiProtocolURL(targetBaseURL, path);
+    			this.result = httpClient.POSTbytes(targetURL, Seed.b64Hash2hexHash(targetHash) + ".yacyh", parts, false, true);
+            }
         }
         
         /**
@@ -197,19 +197,16 @@ public final class Protocol {
         final String salt = crypt.randomSalt();
         long responseTime = Long.MAX_VALUE;
         byte[] content = null;
-        try {
+        try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 30000)) {
             // generate request
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), null, salt);
+            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), null, salt);
             parts.put("count", UTF8.StringBody("20"));
             parts.put("magic", UTF8.StringBody(Long.toString(Network.magic)));
             parts.put("seed", UTF8.StringBody(mySeed.genSeedStr(salt)));
             // send request
             final long start = System.currentTimeMillis();
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/hello.html"), 30000, yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 30000);
-            content =
-                httpClient.POSTbytes(
+            content = httpClient.POSTbytes(
                     new MultiProtocolURL(targetBaseURL, "/yacy/hello.html"),
                     Seed.b64Hash2hexHash(targetHash) + ".yacyh",
                     parts,
@@ -433,41 +430,44 @@ public final class Protocol {
         parts.put("count", UTF8.StringBody(Integer.toString(maxCount)));
         parts.put("time", UTF8.StringBody(Long.toString(maxTime)));
         // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts);
-        final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, (int) maxTime);
         RSSReader reader = null;
-        for (final String ip: target.getIPs()) {
-        	MultiProtocolURL targetBaseURL = null;
-            try {
-            	targetBaseURL = target.getPublicMultiprotocolURL(ip, preferHttps);
-            	byte[] result;
-            	try {
-            		result = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
-            	} catch(final IOException e) {
-            		if(targetBaseURL.isHTTPS()) {
-            			/* Failed with https : retry with http */
-            			targetBaseURL = target.getPublicMultiprotocolURL(ip, false);
-            			result = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
-            			if(result != null) {
-							/* Got something with http : mark peer SSL as unavailable on target peer */
-							markSSLUnavailableOnPeer(seedDB, target, ip, "yacyClient.queryRemoteCrawlURLs");
-            			}
-            		} else {
-            			throw e;
-            		}
-            	}
-                reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
-            } catch(MalformedURLException e) {
-				Network.log.warn("yacyClient.queryRemoteCrawlURLs malformed target URL for peer '" + target.getName()
-						+ "' on address : " + ip);
-            } catch (final IOException e ) {
-                reader = null;
-                Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
+        try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, (int) maxTime)) {
+            for (final String ip: target.getIPs()) {
+            	MultiProtocolURL targetBaseURL = null;
+                try {
+                	targetBaseURL = target.getPublicMultiprotocolURL(ip, preferHttps);
+                	byte[] result;
+                	try {
+                		result = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
+                	} catch(final IOException e) {
+                		if(targetBaseURL.isHTTPS()) {
+                			/* Failed with https : retry with http */
+                			targetBaseURL = target.getPublicMultiprotocolURL(ip, false);
+                			result = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
+                			if(result != null) {
+    							/* Got something with http : mark peer SSL as unavailable on target peer */
+    							markSSLUnavailableOnPeer(seedDB, target, ip, "yacyClient.queryRemoteCrawlURLs");
+                			}
+                		} else {
+                			throw e;
+                		}
+                	}
+                    reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
+                } catch(MalformedURLException e) {
+    				Network.log.warn("yacyClient.queryRemoteCrawlURLs malformed target URL for peer '" + target.getName()
+    						+ "' on address : " + ip);
+                } catch (final IOException e ) {
+                    reader = null;
+                    Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
+                }
+                if (reader != null) {
+                	break;
+                }
+                target.put(Seed.RCOUNT, "0");
+                seedDB.peerActions.interfaceDeparture(target, ip);
             }
-            if (reader != null) {
-            	break;
-            }
-            target.put(Seed.RCOUNT, "0");
-            seedDB.peerActions.interfaceDeparture(target, ip);
+        } catch (IOException e) {
+            Network.log.warn(e);
         }
         
         final RSSFeed feed = reader == null ? null : reader.getFeed();
@@ -962,13 +962,14 @@ public final class Protocol {
                 //resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
             }
 
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 8000);
-            byte[] a = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL + "/yacy/search.html"), hostname, parts, false, true);
-            if (a != null && a.length > 200000) {
-                // there is something wrong. This is too large, maybe a hack on the other side?
-                a = null;
+            try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 8000)) {
+                byte[] a = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL + "/yacy/search.html"), hostname, parts, false, true);
+                if (a != null && a.length > 200000) {
+                    // there is something wrong. This is too large, maybe a hack on the other side?
+                    a = null;
+                }
+                resultMap = FileUtils.table(a);
             }
-            resultMap = FileUtils.table(a);
 
             // evaluate request result
             if ( resultMap == null || resultMap.isEmpty() ) {
@@ -1628,25 +1629,26 @@ public final class Protocol {
 				}
 				parts.put("lurlEntry", UTF8.StringBody(crypt.simpleEncode(lurlstr, salt)));
 				// send request
-				final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 10000);
-				MultiProtocolURL targetBaseURL = target.getPublicMultiprotocolURL(ip, preferHttps);
 				byte[] content;
-				try {
-					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/crawlReceipt.html"),
-							target.getHexHash() + ".yacyh", parts, false, true);
-				} catch(final IOException e) {
-					if(targetBaseURL.isHTTPS()) {
-						/* Failed using https : retry with http */
-						targetBaseURL = target.getPublicMultiprotocolURL(ip, false);
-						content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/crawlReceipt.html"),
-								target.getHexHash() + ".yacyh", parts, false, true);
-						if(content != null) {
-							/* Success with http : mark SSL as unavailable on the target peer */
-							markSSLUnavailableOnPeer(sb.peers, target, ip, "yacyClient.crawlReceipt");
-						}
-					} else {
-						throw e;
-					}
+				try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 10000)) {
+    				MultiProtocolURL targetBaseURL = target.getPublicMultiprotocolURL(ip, preferHttps);
+    				try {
+    					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/crawlReceipt.html"),
+    							target.getHexHash() + ".yacyh", parts, false, true);
+    				} catch(final IOException e) {
+    					if(targetBaseURL.isHTTPS()) {
+    						/* Failed using https : retry with http */
+    						targetBaseURL = target.getPublicMultiprotocolURL(ip, false);
+    						content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/crawlReceipt.html"),
+    								target.getHexHash() + ".yacyh", parts, false, true);
+    						if(content != null) {
+    							/* Success with http : mark SSL as unavailable on the target peer */
+    							markSSLUnavailableOnPeer(sb.peers, target, ip, "yacyClient.crawlReceipt");
+    						}
+    					} else {
+    						throw e;
+    					}
+    				}
 				}
 				return FileUtils.table(content);
 			} catch (final Exception e ) {
@@ -1849,23 +1851,24 @@ public final class Protocol {
                 parts.put("wordc", UTF8.StringBody(Integer.toString(indexes.size())));
                 parts.put("entryc", UTF8.StringBody(Integer.toString(indexcount)));
                 parts.put("indexes", UTF8.StringBody(entrypost.toString()));
-                final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
                 byte[] content = null;
-                try {
-					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferRWI.html"),
-							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
-                } catch(final IOException e) {
-                    if(targetBaseURL.isHTTPS()) {
-                    	targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
-                    	/* Failed with https : retry with http on the same address */
-						content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferRWI.html"),
-								targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
-						if(content != null) {
-							/* Success with http : mark SSL as unavailable on the target peer */
-            				markSSLUnavailableOnPeer(Switchboard.getSwitchboard().peers, targetSeed, ip, "yacyClient.transferRWI");
-						}
-                    } else {
-                    	throw e;
+                try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout)) {
+                    try {
+    					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferRWI.html"),
+    							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
+                    } catch(final IOException e) {
+                        if(targetBaseURL.isHTTPS()) {
+                        	targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
+                        	/* Failed with https : retry with http on the same address */
+    						content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferRWI.html"),
+    								targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
+    						if(content != null) {
+    							/* Success with http : mark SSL as unavailable on the target peer */
+                				markSSLUnavailableOnPeer(Switchboard.getSwitchboard().peers, targetSeed, ip, "yacyClient.transferRWI");
+    						}
+                        } else {
+                        	throw e;
+                        }
                     }
                 }
                 final Iterator<String> v = FileUtils.strings(content);
@@ -1953,20 +1956,21 @@ public final class Protocol {
                 MultiProtocolURL targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, preferHttps);
                 
                 parts.put("urlc", UTF8.StringBody(Integer.toString(urlc)));
-                final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
                 byte[] content = null;
-                try {
-					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferURL.html"),
-							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
-                } catch(final IOException e) {
-                	if(targetBaseURL.isHTTPS()) {
-                		targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
-                		/* Failed with https : retry with http on the same address */
+                try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout)) {
+                    try {
     					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferURL.html"),
-    							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);                		
-                	} else {
-                		throw e;
-                	}
+    							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
+                    } catch(final IOException e) {
+                    	if(targetBaseURL.isHTTPS()) {
+                    		targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
+                    		/* Failed with https : retry with http on the same address */
+        					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferURL.html"),
+        							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);                		
+                    	} else {
+                    		throw e;
+                    	}
+                    }
                 }
                 final Iterator<String> v = FileUtils.strings(content);
 
@@ -1998,10 +2002,8 @@ public final class Protocol {
 				SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
 
         for (final String ip : targetSeed.getIPs()) {
-            try {
-                final Map<String, ContentBody> parts =
-                    basicRequestParts(sb, targetSeed.hash, salt);
-                final HTTPClient httpclient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 15000);
+            try (final HTTPClient httpclient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 15000)) {
+                final Map<String, ContentBody> parts = basicRequestParts(sb, targetSeed.hash, salt);
                 MultiProtocolURL targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, preferHttps);
                 byte[] content;
                 try {

@@ -327,50 +327,53 @@ public class WorkTables extends Tables {
      * @return a map of the called urls and the http status code of the api call or -1 if any other IOException occurred
      */
     public Map<String, Integer> execAPICalls(String host, int port, Collection<String> pks, final String username, final String pass) {
-        // now call the api URLs and store the result status
-        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-        client.setTimout(120000);
-        Tables.Row row;
         LinkedHashMap<String, Integer> l = new LinkedHashMap<String, Integer>();
-        for (final String pk: pks) {
-            row = null;
-            try {
-                row = select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
-            } catch (final IOException e) {
-                ConcurrentLog.logException(e);
-            } catch (final SpaceExceededException e) {
-                ConcurrentLog.logException(e);
-            }
-            if (row == null) continue;
-            String theapicall = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)) + "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
-            try {
-                MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall);
-                final Map<String, String> attributes = url.getAttributes();
-                final boolean isTokenProtectedAPI = attributes.containsKey(TransactionManager.TRANSACTION_TOKEN_PARAM);
-                // use 4 param MultiProtocolURL to allow api_row_url with searchpart (like url?p=a&p2=b ) in client.GETbytes()
-                if (theapicall.length() > 1000 || isTokenProtectedAPI) {
-                    // use a POST to execute the call
-                    execPostAPICall(host, port, username, pass, client, l, url, isTokenProtectedAPI);
-                } else {
-                    // use a GET to execute the call
-                    ConcurrentLog.info("WorkTables", "executing url: " + url.toNormalform(true));
-                    try {
-                        client.GETbytes(url, username, pass, false); // use GETbytes(MultiProtocolURL,..) form to allow url in parameter (&url=path%
-                        if(client.getStatusCode() == HttpStatus.SC_METHOD_NOT_ALLOWED) {
-                        	/* GET method not allowed (HTTP 450 status) : this may be an old API entry,
-                        	 * now restricted to HTTP POST and requiring a transaction token. We try now with POST. */
-                        	execPostAPICall(host, port, username, pass, client, l, url, true);
-                        } else {
-                        	l.put(url.toNormalform(true), client.getStatusCode());
-                        }
-                    } catch (final IOException e) {
-                        ConcurrentLog.logException(e);
-                        l.put(url.toString(), -1);
-                    }
+        // now call the api URLs and store the result status
+        try (final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
+            client.setTimout(120000);
+            Tables.Row row;
+            for (final String pk: pks) {
+                row = null;
+                try {
+                    row = select(WorkTables.TABLE_API_NAME, UTF8.getBytes(pk));
+                } catch (final IOException e) {
+                    ConcurrentLog.logException(e);
+                } catch (final SpaceExceededException e) {
+                    ConcurrentLog.logException(e);
                 }
-            } catch (MalformedURLException ex) {
-                ConcurrentLog.warn("APICALL", "wrong url in apicall " + theapicall);
+                if (row == null) continue;
+                String theapicall = UTF8.String(row.get(WorkTables.TABLE_API_COL_URL)) + "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(row.getPK());
+                try {
+                    MultiProtocolURL url = new MultiProtocolURL("http", host, port, theapicall);
+                    final Map<String, String> attributes = url.getAttributes();
+                    final boolean isTokenProtectedAPI = attributes.containsKey(TransactionManager.TRANSACTION_TOKEN_PARAM);
+                    // use 4 param MultiProtocolURL to allow api_row_url with searchpart (like url?p=a&p2=b ) in client.GETbytes()
+                    if (theapicall.length() > 1000 || isTokenProtectedAPI) {
+                        // use a POST to execute the call
+                        execPostAPICall(host, port, username, pass, client, l, url, isTokenProtectedAPI);
+                    } else {
+                        // use a GET to execute the call
+                        ConcurrentLog.info("WorkTables", "executing url: " + url.toNormalform(true));
+                        try {
+                            client.GETbytes(url, username, pass, false); // use GETbytes(MultiProtocolURL,..) form to allow url in parameter (&url=path%
+                            if(client.getStatusCode() == HttpStatus.SC_METHOD_NOT_ALLOWED) {
+                            	/* GET method not allowed (HTTP 450 status) : this may be an old API entry,
+                            	 * now restricted to HTTP POST and requiring a transaction token. We try now with POST. */
+                            	execPostAPICall(host, port, username, pass, client, l, url, true);
+                            } else {
+                            	l.put(url.toNormalform(true), client.getStatusCode());
+                            }
+                        } catch (final IOException e) {
+                            ConcurrentLog.logException(e);
+                            l.put(url.toString(), -1);
+                        }
+                    }
+                } catch (MalformedURLException ex) {
+                    ConcurrentLog.warn("APICALL", "wrong url in apicall " + theapicall);
+                }
             }
+        } catch (IOException e) {
+            ConcurrentLog.logException(e);
         }
         return l;
     }
@@ -447,11 +450,10 @@ public class WorkTables extends Tables {
 	 */
     public static int execGetAPICall(String host, int port, String path, byte[] pk, final String username, final String pass) {
         // now call the api URLs and store the result status
-        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-        client.setTimout(120000);
         String url = "http://" + host + ":" + port + path;
         if (pk != null) url += "&" + WorkTables.TABLE_API_COL_APICALL_PK + "=" + UTF8.String(pk);
-        try {
+        try (final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
+            client.setTimout(120000);
             client.GETbytes(url, username, pass, false);
             return client.getStatusCode();
         } catch (final IOException e) {
