@@ -93,7 +93,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.IdleConnectionEvictor;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HTTP;
@@ -452,25 +451,23 @@ public class HTTPClient implements Closeable {
         		new AuthScope("localhost", url.getPort()),
                 new UsernamePasswordCredentials(username, pass));
         
-        try (final CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
+        try (final CloseableHttpClient httpclient = clientBuilder.setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(AUTHSCHEMEREGISTRY).build()) {
             this.httpResponse = httpclient.execute(this.currentRequest);
-            try {
-                HttpEntity httpEntity = this.httpResponse.getEntity();
-                if (httpEntity != null) {
-                    if (getStatusCode() == HttpStatus.SC_OK) {
-            			if (maxBytes >= 0 && httpEntity.getContentLength() > maxBytes) {
-            				/* When anticipated content length is already known and exceed the specified limit : 
-            				 * throw an exception and abort the connection, consistently with getByteArray() implementation 
-            				 * Otherwise returning null and consuming fully the entity can be very long on large resources */
-            				throw new IOException("Content to download exceed maximum value of " + Formatter.bytesToString(maxBytes));
-            			}
-                        return getByteArray(httpEntity, maxBytes);
-                    }
+            HttpEntity httpEntity = this.httpResponse.getEntity();
+            if (httpEntity != null) {
+                if (getStatusCode() == HttpStatus.SC_OK) {
+        			if (maxBytes >= 0 && httpEntity.getContentLength() > maxBytes) {
+        				/* When anticipated content length is already known and exceed the specified limit : 
+        				 * throw an exception and abort the connection, consistently with getByteArray() implementation 
+        				 * Otherwise returning null and consuming fully the entity can be very long on large resources */
+        				throw new IOException("Content to download exceed maximum value of " + Formatter.bytesToString(maxBytes));
+        			}
+                    return getByteArray(httpEntity, maxBytes);
                 }
-            } finally {
-                close();
             }
+        } finally {
+            close();
         }
         return null;
     }
@@ -642,19 +639,17 @@ public class HTTPClient implements Closeable {
                 new AuthScope("localhost", url.getPort()),
                 new UsernamePasswordCredentials(userName, password));
 
-        try (final CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
+        try (final CloseableHttpClient httpclient = clientBuilder.setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(AUTHSCHEMEREGISTRY).build()) {
             this.httpResponse = httpclient.execute(this.currentRequest);
-            try {
-                HttpEntity httpEntity = this.httpResponse.getEntity();
-                if (httpEntity != null) {
-                    if (getStatusCode() == HttpStatus.SC_OK) {
-                        return getByteArray(httpEntity, Integer.MAX_VALUE);
-                    }
+            HttpEntity httpEntity = this.httpResponse.getEntity();
+            if (httpEntity != null) {
+                if (getStatusCode() == HttpStatus.SC_OK) {
+                    return getByteArray(httpEntity, Integer.MAX_VALUE);
                 }
-            } finally {
-                close();
             }
+        } finally {
+            close();
         }
         return null;
     }
