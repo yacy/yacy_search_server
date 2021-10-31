@@ -170,14 +170,18 @@ public class HTTPClient {
 	private final static HttpClientBuilder clientBuilder = initClientBuilder();
 	private final RequestConfig.Builder reqConfBuilder;
 	private Set<Entry<String, String>> headers = null;
-	private CloseableHttpResponse httpResponse = null;
-	private HttpUriRequest currentRequest = null;
 	private long upbytes = 0L;
 	private String host = null;
 	private final long timeout;
 	private static ExecutorService executor = Executors
 			.newCachedThreadPool(new NamePrefixThreadFactory(HTTPClient.class.getSimpleName() + ".execute"));
+	
+	/** these are the main variable to hold information and to take care of closing: */
+	private CloseableHttpClient client = null;
+	private CloseableHttpResponse httpResponse = null;
+	private HttpUriRequest currentRequest = null;
 
+	
     public HTTPClient(final ClientIdentification.Agent agent) {
         super();
         this.timeout = agent.clientTimeout;
@@ -214,6 +218,8 @@ public class HTTPClient {
     	final HttpClientBuilder builder = HttpClientBuilder.create();
     	
     	builder.setConnectionManager(CONNECTION_MANAGER);
+    	builder.setConnectionManagerShared(true);
+    	
 		builder.setDefaultRequestConfig(DFLTREQUESTCONFIG);
 		
     	// UserAgent
@@ -429,15 +435,15 @@ public class HTTPClient {
     public byte[] GETbytes(final MultiProtocolURL url, final String username, final String pass, final int maxBytes, final boolean concurrent) throws IOException {
         final boolean localhost = Domains.isLocalhost(url.getHost());
         final String urix = url.toNormalform(true);
-        HttpGet httpGet = null;
+        
         try {
-            httpGet = new HttpGet(urix);
+            this.currentRequest = new HttpGet(urix);
         } catch (IllegalArgumentException e) {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         if (!localhost || pass == null) {
-            return getContentBytes(httpGet, maxBytes, concurrent);
+            return getContentBytes(maxBytes, concurrent);
         }
         
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -447,7 +453,7 @@ public class HTTPClient {
         
         try (final CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(AUTHSCHEMEREGISTRY).build()) {
-            this.httpResponse = httpclient.execute(httpGet);
+            this.httpResponse = httpclient.execute(this.currentRequest);
             try {
                 HttpEntity httpEntity = this.httpResponse.getEntity();
                 if (httpEntity != null) {
@@ -461,11 +467,8 @@ public class HTTPClient {
                         return getByteArray(httpEntity, maxBytes);
                     }
                 }
-            } catch (final IOException e) {
-            	httpGet.abort();
-                throw e;
             } finally {
-                this.httpResponse.close();
+                finish();
             }
         }
         return null;
@@ -494,15 +497,15 @@ public class HTTPClient {
     public void GET(final MultiProtocolURL url, final boolean concurrent) throws IOException {
         if (this.currentRequest != null) throw new IOException("Client is in use!");
         final String urix = url.toNormalform(true);
-        HttpGet httpGet = null;
+        
         try {
-            httpGet = new HttpGet(urix);
+            this.currentRequest = new HttpGet(urix);
         } catch (IllegalArgumentException e) {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-        this.currentRequest = httpGet;
-        execute(httpGet, concurrent);
+        
+        execute(concurrent);
     }
 
     /**
@@ -524,11 +527,9 @@ public class HTTPClient {
      * @throws IOException
      */
     public HttpResponse HEADResponse(final MultiProtocolURL url, final boolean concurrent) throws IOException {
-        final HttpHead httpHead = new HttpHead(url.toNormalform(true));
+        this.currentRequest = new HttpHead(url.toNormalform(true));
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-    	execute(httpHead, concurrent);
-    	finish();
-    	ConnectionInfo.removeConnection(httpHead.hashCode());
+    	execute(concurrent);
     	return this.httpResponse;
     }
 
@@ -560,16 +561,15 @@ public class HTTPClient {
      */
     public void POST(final MultiProtocolURL url, final InputStream instream, final long length, final boolean concurrent) throws IOException {
     	if (this.currentRequest != null) throw new IOException("Client is in use!");
-        final HttpPost httpPost = new HttpPost(url.toNormalform(true));
+    	this.currentRequest = new HttpPost(url.toNormalform(true));
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         final NonClosingInputStreamEntity inputStreamEntity = new NonClosingInputStreamEntity(instream, length);
     	// statistics
     	this.upbytes = length;
-    	httpPost.setEntity(inputStreamEntity);
-    	this.currentRequest = httpPost;
-    	execute(httpPost, concurrent);
+    	((HttpPost) this.currentRequest).setEntity(inputStreamEntity);
+    	execute(concurrent);
     }
 
     /**
@@ -615,7 +615,7 @@ public class HTTPClient {
      */
     public byte[] POSTbytes(final MultiProtocolURL url, final String vhost, final Map<String, ContentBody> post, 
     		final String userName, final String password, final boolean usegzip, final boolean concurrent) throws IOException {
-    	final HttpPost httpPost = new HttpPost(url.toNormalform(true));
+        this.currentRequest = new HttpPost(url.toNormalform(true));
     	final boolean localhost = Domains.isLocalhost(url.getHost());
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	if (vhost == null) setHost(Domains.LOCALHOST);
@@ -627,13 +627,13 @@ public class HTTPClient {
         this.upbytes = multipartEntity.getContentLength();
 
         if (usegzip) {
-            httpPost.setEntity(new GzipCompressingEntity(multipartEntity));
+            ((HttpPost) this.currentRequest).setEntity(new GzipCompressingEntity(multipartEntity));
         } else {
-            httpPost.setEntity(multipartEntity);
+            ((HttpPost) this.currentRequest).setEntity(multipartEntity);
         }
         
         if (!localhost || password == null) {
-            return getContentBytes(httpPost, Integer.MAX_VALUE, concurrent);
+            return getContentBytes(Integer.MAX_VALUE, concurrent);
         }
         
         final CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -643,7 +643,7 @@ public class HTTPClient {
 
         try (final CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
                 .setDefaultAuthSchemeRegistry(AUTHSCHEMEREGISTRY).build()) {
-            this.httpResponse = httpclient.execute(httpPost);
+            this.httpResponse = httpclient.execute(this.currentRequest);
             try {
                 HttpEntity httpEntity = this.httpResponse.getEntity();
                 if (httpEntity != null) {
@@ -652,7 +652,7 @@ public class HTTPClient {
                     }
                 }
             } finally {
-                this.httpResponse.close();
+                finish();
             }
         }
         return null;
@@ -820,6 +820,9 @@ public class HTTPClient {
                 EntityUtils.consumeQuietly(this.httpResponse.getEntity());
 				this.httpResponse.close();
 			}
+			if (this.client != null) {
+			    client.close();
+			}
 		} finally {
 			if (this.currentRequest != null) {
 				ConnectionInfo.removeConnection(this.currentRequest.hashCode());
@@ -829,9 +832,9 @@ public class HTTPClient {
 		}
 	}
 
-    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final int maxBytes, final boolean concurrent) throws IOException {
+    private byte[] getContentBytes(final int maxBytes, final boolean concurrent) throws IOException {
         try {
-            execute(httpUriRequest, concurrent);
+            execute(concurrent);
             if (this.httpResponse == null) return null;
             // get the response body
             final HttpEntity httpEntity = this.httpResponse.getEntity();
@@ -846,28 +849,24 @@ public class HTTPClient {
                     return getByteArray(httpEntity, maxBytes);
                 }
             }
-        } catch (final IOException e) {
-                httpUriRequest.abort();
-                throw e;
         } finally {
-        	if (this.httpResponse != null) this.httpResponse.close();
-        	ConnectionInfo.removeConnection(httpUriRequest.hashCode());
+        	finish();
         }
     	return null;
     }
 
-    private void execute(final HttpUriRequest httpUriRequest, final boolean concurrent) throws IOException {
+    private void execute(final boolean concurrent) throws IOException {
     	final HttpClientContext context = HttpClientContext.create();
     	context.setRequestConfig(reqConfBuilder.build());
     	if (this.host != null)
     		context.setTargetHost(new HttpHost(this.host));
     	
-    	setHeaders(httpUriRequest);
+    	setHeaders();
     	// statistics
-    	storeConnectionInfo(httpUriRequest);
+    	storeConnectionInfo();
     	// execute the method; some asserts confirm that that the request can be send with Content-Length and is therefore not terminated by EOF
-	    if (httpUriRequest instanceof HttpEntityEnclosingRequest) {
-	        final HttpEntityEnclosingRequest hrequest = (HttpEntityEnclosingRequest) httpUriRequest;
+	    if (this.currentRequest instanceof HttpEntityEnclosingRequest) {
+	        final HttpEntityEnclosingRequest hrequest = (HttpEntityEnclosingRequest) this.currentRequest;
 	        final HttpEntity entity = hrequest.getEntity();
 	        assert entity != null;
 	        //assert !entity.isChunked();
@@ -876,16 +875,17 @@ public class HTTPClient {
 	    }
 
 	    final String initialThreadName = Thread.currentThread().getName();
-	    Thread.currentThread().setName("HTTPClient-" + httpUriRequest.getURI());
+	    final String uri = this.currentRequest.getURI().toString();
+	    Thread.currentThread().setName("HTTPClient-" + uri);
         final long time = System.currentTimeMillis();
 	    try {
 	        
+	        this.client = clientBuilder.build();
 	        if (concurrent) {
 	            FutureTask<CloseableHttpResponse> t = new FutureTask<CloseableHttpResponse>(new Callable<CloseableHttpResponse>() {
 	                @Override
                     public CloseableHttpResponse call() throws ClientProtocolException, IOException {
-	                    final CloseableHttpClient client = clientBuilder.build();
-	                    CloseableHttpResponse response = client.execute(httpUriRequest, context);
+	                    CloseableHttpResponse response = client.execute(currentRequest, context);
 	                    return response;
 	                }
 	            });
@@ -896,20 +896,18 @@ public class HTTPClient {
 	                throw e.getCause();
 	            } catch (Throwable e) {}
 	            try {t.cancel(true);} catch (Throwable e) {}
-	            if (this.httpResponse == null) throw new IOException("timout to client after " + this.timeout + "ms" + " for url " + httpUriRequest.getURI().toString());
+	            if (this.httpResponse == null) {
+	                throw new IOException("timout to client after " + this.timeout + "ms" + " for url " + uri);
+	            }
 	        } else {
-	            final CloseableHttpClient client = clientBuilder.build();
-	            this.httpResponse = client.execute(httpUriRequest, context);
+	            this.httpResponse = client.execute(this.currentRequest, context);
 	        }
             this.httpResponse.setHeader(HeaderFramework.RESPONSE_TIME_MILLIS, Long.toString(System.currentTimeMillis() - time));
         } catch (final Throwable e) {
-            ConnectionInfo.removeConnection(httpUriRequest.hashCode());
-            httpUriRequest.abort();
-            if (this.httpResponse != null) this.httpResponse.close();
-            //e.printStackTrace();
+            finish();
             throw new IOException("Client can't execute: "
             		+ (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
-            		+ " duration=" + Long.toString(System.currentTimeMillis() - time) + " for url " + httpUriRequest.getURI().toString());
+            		+ " duration=" + Long.toString(System.currentTimeMillis() - time) + " for url " + uri);
         } finally {
         	/* Restore the thread initial name */
         	Thread.currentThread().setName(initialThreadName);
@@ -973,25 +971,25 @@ public class HTTPClient {
 		}
 	}
 
-    private void setHeaders(final HttpUriRequest httpUriRequest) {
+    private void setHeaders() {
     	if (this.headers != null) {
             for (final Entry<String, String> entry : this.headers) {
-                    httpUriRequest.setHeader(entry.getKey(),entry.getValue());
+                this.currentRequest.setHeader(entry.getKey(),entry.getValue());
             }
     	}
-    	if (this.host != null) httpUriRequest.setHeader(HTTP.TARGET_HOST, this.host);
-        httpUriRequest.setHeader(HTTP.CONN_DIRECTIVE, "close"); // don't keep alive, prevent CLOSE_WAIT state
+    	if (this.host != null) this.currentRequest.setHeader(HTTP.TARGET_HOST, this.host);
+    	this.currentRequest.setHeader(HTTP.CONN_DIRECTIVE, "close"); // don't keep alive, prevent CLOSE_WAIT state
     }
 
-    private void storeConnectionInfo(final HttpUriRequest httpUriRequest) {
-    	final int port = httpUriRequest.getURI().getPort();
-    	final String thost = httpUriRequest.getURI().getHost();
+    private void storeConnectionInfo() {
+    	final int port = this.currentRequest.getURI().getPort();
+    	final String thost = this.currentRequest.getURI().getHost();
     	//assert thost != null : "uri = " + httpUriRequest.getURI().toString();
     	ConnectionInfo.addConnection(new ConnectionInfo(
-    			httpUriRequest.getURI().getScheme(),
+    	        this.currentRequest.getURI().getScheme(),
     			port == -1 ? thost : thost + ":" + port,
-    			httpUriRequest.getMethod() + " " + httpUriRequest.getURI().getPath(),
-    			httpUriRequest.hashCode(),
+    			        this.currentRequest.getMethod() + " " + this.currentRequest.getURI().getPath(),
+    			        this.currentRequest.hashCode(),
     			System.currentTimeMillis(),
     			this.upbytes));
     }
