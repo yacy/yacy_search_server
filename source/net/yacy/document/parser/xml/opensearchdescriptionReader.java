@@ -156,7 +156,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             ConcurrentLog.logException(e);
         } finally {
         	try {
-				www.finish();
+				www.close();
 			} catch (final IOException e) {
 				ConcurrentLog.logException(e);
 			}
@@ -187,7 +187,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             return false;
         } finally {
         	try {
-				www.finish();
+				www.close();
 			} catch (final IOException e) {
 				ConcurrentLog.logException(e);
 			}

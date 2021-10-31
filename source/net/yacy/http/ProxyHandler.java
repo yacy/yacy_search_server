@@ -220,7 +220,7 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             } catch (final SocketException se) {
                 throw new ServletException("Socket Exception: " + se.getMessage());
             } finally {
-                client.finish();
+                client.close();
             }
         
         // we handled this request, break out of handler chain

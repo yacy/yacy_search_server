@@ -601,7 +601,7 @@ public final class HTTPDProxyHandler {
 //                    // client cut proxy connection, abort download
 //                    res.abort();
 //                }
-            	client.finish();
+            	client.close();
                 handleProxyException(se,conProp,respond,url);
             } finally {
                 // if opened ...
@@ -609,7 +609,7 @@ public final class HTTPDProxyHandler {
 //                    // ... close connection
 //                    res.closeStream();
 //                }
-            	client.finish();
+            	client.close();
             }
         } catch (final Exception e) {
             handleProxyException(e,conProp,respond,url);

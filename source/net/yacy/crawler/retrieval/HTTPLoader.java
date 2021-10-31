@@ -156,7 +156,7 @@ public final class HTTPLoader {
 
         // check redirection
         if (statusCode > 299 && statusCode < 310) {
-            client.finish();
+            client.close();
 
             final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, statusline, responseHeader, requestURLString);
 
@@ -225,7 +225,7 @@ public final class HTTPLoader {
                 } catch (final IOException e) {
                     this.log.warn("cannot write " + url + " to Cache (3): " + e.getMessage(), e);
                 } finally {
-                    client.finish();
+                    client.close();
                 }
 
                 contentStream = new ByteArrayInputStream(content);
@@ -251,7 +251,7 @@ public final class HTTPLoader {
 
             return new StreamResponse(new Response(request, requestHeader, responseHeader, profile, false, null), contentStream);
         } else {
-            client.finish();
+            client.close();
             // if the response has not the right response type then reject file
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
                     FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);

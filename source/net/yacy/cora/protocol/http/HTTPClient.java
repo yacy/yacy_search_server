@@ -25,6 +25,7 @@
 
 package net.yacy.cora.protocol.http;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -119,7 +120,7 @@ import net.yacy.kelondro.util.NamePrefixThreadFactory;
  * @author sixcooler
  *
  */
-public class HTTPClient {
+public class HTTPClient implements Closeable {
     
     private static final int default_timeout = 6000;
     
@@ -468,7 +469,7 @@ public class HTTPClient {
                     }
                 }
             } finally {
-                finish();
+                close();
             }
         }
         return null;
@@ -477,7 +478,7 @@ public class HTTPClient {
     /**
      * This method GETs a page from the server.
      * to be used for streaming out
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @param uri the url to get
      * @throws IOException
@@ -489,7 +490,7 @@ public class HTTPClient {
     /**
      * This method GETs a page from the server.
      * to be used for streaming out
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @param url the url to get
      * @throws IOException
@@ -536,7 +537,7 @@ public class HTTPClient {
     /**
      * This method POSTs a page from the server.
      * to be used for streaming out
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @param uri the url to post
      * @param instream the input to post
@@ -552,7 +553,7 @@ public class HTTPClient {
     /**
      * This method POSTs a page from the server.
      * to be used for streaming out
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @param url the url to post
      * @param instream the input to post
@@ -652,7 +653,7 @@ public class HTTPClient {
                     }
                 }
             } finally {
-                finish();
+                close();
             }
         }
         return null;
@@ -770,7 +771,7 @@ public class HTTPClient {
     /**
      * This method gets direct access to the content-stream
      * Since this way is uncontrolled by the Client think of using 'writeTo' instead!
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @return the content as InputStream
      * @throws IOException
@@ -781,7 +782,7 @@ public class HTTPClient {
             if (httpEntity != null) try {
                     return httpEntity.getContent();
             } catch (final IOException e) {
-                finish();
+                close();
                 throw e;
             }
         }
@@ -790,7 +791,7 @@ public class HTTPClient {
 
     /**
      * This method streams the content to the outputStream
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @param outputStream
      * @throws IOException
@@ -802,18 +803,19 @@ public class HTTPClient {
                 httpEntity.writeTo(outputStream);
                 outputStream.flush();
             } finally {
-                finish();
+                close();
             }
         }
     }
 
     /**
-     * This method ensures correct finish of client-connections
+     * This method ensures correct close of client-connections
      * This method should be used after every use of GET or POST and writeTo or getContentstream!
      *
      * @throws IOException
      */
-	public void finish() throws IOException {
+	@Override
+    public void close() throws IOException {
 		try {
 			if (this.httpResponse != null) {
                 // Ensures that the entity content Stream is closed.
@@ -850,7 +852,7 @@ public class HTTPClient {
                 }
             }
         } finally {
-        	finish();
+        	close();
         }
     	return null;
     }
@@ -904,7 +906,7 @@ public class HTTPClient {
 	        }
             this.httpResponse.setHeader(HeaderFramework.RESPONSE_TIME_MILLIS, Long.toString(System.currentTimeMillis() - time));
         } catch (final Throwable e) {
-            finish();
+            close();
             throw new IOException("Client can't execute: "
             		+ (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
             		+ " duration=" + Long.toString(System.currentTimeMillis() - time) + " for url " + uri);
