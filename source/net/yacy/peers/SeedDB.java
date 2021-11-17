@@ -897,19 +897,20 @@ public final class SeedDB implements AlternativeDomainNames {
         reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache, no-store"); // httpc uses HTTP/1.0 is this necessary?
         reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
 
-        final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-        client.setHeader(reqHeader.entrySet());
         byte[] content = null;
-        try {
-            // send request
-        	content = client.GETbytes(seedURL, null, null, false);
-        } catch (final Exception e) {
-        	throw new IOException("Unable to download seed file '" + seedURL + "'. " + e.getMessage());
-        }
-
-        // check response code
-        if (client.getHttpResponse().getStatusLine().getStatusCode() != 200) {
-        	throw new IOException("Server returned status: " + client.getHttpResponse().getStatusLine());
+        try (final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
+            client.setHeader(reqHeader.entrySet());
+            try {
+                // send request
+            	content = client.GETbytes(seedURL, null, null, false);
+            } catch (final Exception e) {
+            	throw new IOException("Unable to download seed file '" + seedURL + "'. " + e.getMessage());
+            }
+    
+            // check response code
+            if (client.getHttpResponse().getStatusLine().getStatusCode() != 200) {
+            	throw new IOException("Server returned status: " + client.getHttpResponse().getStatusLine());
+            }
         }
 
         try {
@@ -1124,13 +1125,12 @@ public final class SeedDB implements AlternativeDomainNames {
             @Override
             public void run() {
                 // load the seed list
-                try {
+                try (final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout)) {
                     DigestURL url = new DigestURL(seedListFileURL);
                     //final long start = System.currentTimeMillis();
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
                     reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
-                    final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
                     client.setHeader(reqHeader.entrySet());
 
                     client.HEADResponse(url.toNormalform(false), false);

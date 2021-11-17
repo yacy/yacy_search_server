@@ -297,10 +297,9 @@ public class OpenSearchConnector extends AbstractFederateSearchConnector impleme
         String searchurl = this.parseSearchTemplate(baseurl, searchTerms, startIndex, count);
         try {
         	DigestURL aurl = new DigestURL(searchurl);
-            try {
+        	try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
                 this.lastaccesstime = System.currentTimeMillis();
                 
-                final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
                 byte[] result = httpClient.GETbytes(aurl, null, null, false);
                 
     			if(result == null) {

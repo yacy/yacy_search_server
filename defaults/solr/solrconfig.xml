@@ -180,12 +180,13 @@
          The default since Lucene 2.3 was the LogByteSizeMergePolicy,
          Even older versions of Lucene used LogDocMergePolicy.
       -->
-    <!--
-        <mergePolicyFactory class="solr.TieredMergePolicyFactory">
-          <int name="maxMergeAtOnce">10</int>
-          <int name="segmentsPerTier">10</int>
+        <mergePolicyFactory class="org.apache.solr.index.TieredMergePolicyFactory">
+          <int name="maxMergeAtOnce">8</int>
+          <int name="segmentsPerTier">8</int>
+          <int name="maxMergedSegmentMB">51200</int>
+          <int name="maxCFSSegmentSizeMB">1024</int>
+          <double name="noCFSRatio">0.1</double>
         </mergePolicyFactory>
-     -->
 
     <!-- Expert: Merge Scheduler
          The Merge Scheduler in Lucene controls how merges are
@@ -314,8 +315,8 @@
          have some sort of hard autoCommit to limit the log size.
       -->
      <autoCommit> 
-       <maxTime>${solr.autoCommit.maxTime:15000}</maxTime> 
-       <openSearcher>false</openSearcher> 
+       <maxTime>${solr.autoCommit.maxTime:180000}</maxTime> 
+       <openSearcher>true</openSearcher> 
      </autoCommit>
 
     <!-- softAutoCommit is like autoCommit except it causes a
@@ -442,8 +443,8 @@
                and old cache.  
       -->
     <filterCache class="solr.FastLRUCache"
-                 size="512"
-                 initialSize="512"
+                 size="100"
+                 initialSize="100"
                  autowarmCount="0"/>
 
     <!-- Query Result Cache
@@ -466,27 +467,26 @@
                    size="512"
                    initialSize="512"
                    autowarmCount="0"/>
-    
-    <!-- custom cache currently used by block join --> 
+
+    <!-- custom cache currently used by block join 
     <cache name="perSegFilter"
       class="solr.search.LRUCache"
       size="10"
       initialSize="0"
       autowarmCount="10"
-      regenerator="solr.NoOpRegenerator" />
-
+      regenerator="solr.NoOpRegenerator" /> -->
+      
     <!-- Field Value Cache
          
          Cache used to hold field values that are quickly accessible
          by document id.  The fieldValueCache is created by default
          even if not configured here.
       -->
-    <!--
        <fieldValueCache class="solr.FastLRUCache"
-                        size="512"
-                        autowarmCount="128"
+                        size="32"
+                        initialSize="0"
+                        autowarmCount="0"
                         showItems="32" />
-      -->
 
     <!-- Custom Cache
 

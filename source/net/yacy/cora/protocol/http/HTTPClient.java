@@ -25,6 +25,7 @@
 
 package net.yacy.cora.protocol.http;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -92,7 +93,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.client.IdleConnectionEvictor;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.protocol.HTTP;
@@ -119,11 +119,12 @@ import net.yacy.kelondro.util.NamePrefixThreadFactory;
  * @author sixcooler
  *
  */
-public class HTTPClient {
+public class HTTPClient implements Closeable {
     
-    private final static int default_timeout = 6000;
+    private static final int default_timeout = 6000;
+    
     /** Maximum number of simultaneously open outgoing HTTP connections in the pool */
-	private final static int maxcon = 200;
+	private static final int maxcon = 200;
 	
 	/** Default sleep time in seconds between each run of the connection evictor */
 	private static final int DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME = 5;
@@ -131,7 +132,13 @@ public class HTTPClient {
 	/** Default maximum time in seconds to keep alive an idle connection in the pool */
 	private static final int DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE = 30;
 	
-	private final static RequestConfig dfltReqConf = initRequestConfig();
+	private static final RequestConfig DFLTREQUESTCONFIG = initRequestConfig();
+	
+	/** Use the custom YaCyDigestScheme for HTTP Digest Authentication */
+    private static final Lookup<AuthSchemeProvider> AUTHSCHEMEREGISTRY = RegistryBuilder.<AuthSchemeProvider>create()
+            .register(AuthSchemes.BASIC, new BasicSchemeFactory())
+            .register(AuthSchemes.DIGEST, new YaCyDigestSchemeFactory())
+            .build();
 	
 	/** The connection manager holding the configured connection pool for this client */
 	public static final PoolingHttpClientConnectionManager CONNECTION_MANAGER = initPoolingConnectionManager();
@@ -146,11 +153,7 @@ public class HTTPClient {
 			Boolean.parseBoolean(System.getProperty("jsse.enableSNIExtension", Boolean.toString(ENABLE_SNI_EXTENSION_DEFAULT))));
 	
 
-    // digest factories
-    private final BasicSchemeFactory BASIC_SCHEME_FACTORY = new BasicSchemeFactory();
-    private final YaCyDigestSchemeFactory YACY_DIGEST_SCHEME_FACTORY = new YaCyDigestSchemeFactory();
-
-	/**
+    /**
 	 * Background daemon thread evicting expired idle connections from the pool.
 	 * This may be eventually already done by the pool itself on connection request,
 	 * but this background task helps when no request is made to the pool for a long
@@ -167,19 +170,23 @@ public class HTTPClient {
 	private final static HttpClientBuilder clientBuilder = initClientBuilder();
 	private final RequestConfig.Builder reqConfBuilder;
 	private Set<Entry<String, String>> headers = null;
-	private CloseableHttpResponse httpResponse = null;
-	private HttpUriRequest currentRequest = null;
 	private long upbytes = 0L;
 	private String host = null;
 	private final long timeout;
 	private static ExecutorService executor = Executors
 			.newCachedThreadPool(new NamePrefixThreadFactory(HTTPClient.class.getSimpleName() + ".execute"));
+	
+	/** these are the main variable to hold information and to take care of closing: */
+	private CloseableHttpClient client = null;
+	private CloseableHttpResponse httpResponse = null;
+	private HttpUriRequest currentRequest = null;
 
+	
     public HTTPClient(final ClientIdentification.Agent agent) {
         super();
         this.timeout = agent.clientTimeout;
         clientBuilder.setUserAgent(agent.userAgent);
-        reqConfBuilder = RequestConfig.copy(dfltReqConf);
+        reqConfBuilder = RequestConfig.copy(DFLTREQUESTCONFIG);
         setTimout(agent.clientTimeout);
     }
     
@@ -187,12 +194,8 @@ public class HTTPClient {
         super();
         this.timeout = timeout;
         clientBuilder.setUserAgent(agent.userAgent);
-        reqConfBuilder = RequestConfig.copy(dfltReqConf);
+        reqConfBuilder = RequestConfig.copy(DFLTREQUESTCONFIG);
         setTimout(timeout);
-    }
-
-    public static void setDefaultUserAgent(final String defaultAgent) {
-    	clientBuilder.setUserAgent(defaultAgent);
     }
     
     private static RequestConfig initRequestConfig() {
@@ -215,7 +218,9 @@ public class HTTPClient {
     	final HttpClientBuilder builder = HttpClientBuilder.create();
     	
     	builder.setConnectionManager(CONNECTION_MANAGER);
-		builder.setDefaultRequestConfig(dfltReqConf);
+    	builder.setConnectionManagerShared(true);
+    	
+		builder.setDefaultRequestConfig(DFLTREQUESTCONFIG);
 		
     	// UserAgent
 		builder.setUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent);
@@ -430,15 +435,15 @@ public class HTTPClient {
     public byte[] GETbytes(final MultiProtocolURL url, final String username, final String pass, final int maxBytes, final boolean concurrent) throws IOException {
         final boolean localhost = Domains.isLocalhost(url.getHost());
         final String urix = url.toNormalform(true);
-        HttpGet httpGet = null;
+        
         try {
-            httpGet = new HttpGet(urix);
+            this.currentRequest = new HttpGet(urix);
         } catch (IllegalArgumentException e) {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         if (!localhost || pass == null) {
-            return getContentBytes(httpGet, maxBytes, concurrent);
+            return getContentBytes(maxBytes, concurrent);
         }
         
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -446,48 +451,31 @@ public class HTTPClient {
         		new AuthScope("localhost", url.getPort()),
                 new UsernamePasswordCredentials(username, pass));
         
-        /* Use the custom YaCyDigestScheme for HTTP Digest Authentication */
-        final Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
-                .register(AuthSchemes.BASIC, BASIC_SCHEME_FACTORY)
-                .register(AuthSchemes.DIGEST, YACY_DIGEST_SCHEME_FACTORY)
-                .build();
-
-		CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
-				.setDefaultAuthSchemeRegistry(authSchemeRegistry).build();
-        byte[] content = null;
-        try {
-            this.httpResponse = httpclient.execute(httpGet);
-            try {
-                HttpEntity httpEntity = this.httpResponse.getEntity();
-                if (httpEntity != null) {
-                    if (getStatusCode() == HttpStatus.SC_OK) {
-            			if (maxBytes >= 0 && httpEntity.getContentLength() > maxBytes) {
-            				/* When anticipated content length is already known and exceed the specified limit : 
-            				 * throw an exception and abort the connection, consistently with getByteArray() implementation 
-            				 * Otherwise returning null and consuming fully the entity can be very long on large resources */
-            				throw new IOException("Content to download exceed maximum value of " + Formatter.bytesToString(maxBytes));
-            			}
-                        content = getByteArray(httpEntity, maxBytes);
-                    }
-                    // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-                    EntityUtils.consume(httpEntity);
+        try (final CloseableHttpClient httpclient = clientBuilder.setDefaultCredentialsProvider(credsProvider)
+                .setDefaultAuthSchemeRegistry(AUTHSCHEMEREGISTRY).build()) {
+            this.httpResponse = httpclient.execute(this.currentRequest);
+            HttpEntity httpEntity = this.httpResponse.getEntity();
+            if (httpEntity != null) {
+                if (getStatusCode() == HttpStatus.SC_OK) {
+        			if (maxBytes >= 0 && httpEntity.getContentLength() > maxBytes) {
+        				/* When anticipated content length is already known and exceed the specified limit : 
+        				 * throw an exception and abort the connection, consistently with getByteArray() implementation 
+        				 * Otherwise returning null and consuming fully the entity can be very long on large resources */
+        				throw new IOException("Content to download exceed maximum value of " + Formatter.bytesToString(maxBytes));
+        			}
+                    return getByteArray(httpEntity, maxBytes);
                 }
-            } catch (final IOException e) {
-            	httpGet.abort();
-                throw e;
-            } finally {
-                this.httpResponse.close();
             }
         } finally {
-            httpclient.close();
+            close();
         }
-        return content;
+        return null;
     }
     
     /**
      * This method GETs a page from the server.
      * to be used for streaming out
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @param uri the url to get
      * @throws IOException
@@ -499,7 +487,7 @@ public class HTTPClient {
     /**
      * This method GETs a page from the server.
      * to be used for streaming out
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @param url the url to get
      * @throws IOException
@@ -507,15 +495,15 @@ public class HTTPClient {
     public void GET(final MultiProtocolURL url, final boolean concurrent) throws IOException {
         if (this.currentRequest != null) throw new IOException("Client is in use!");
         final String urix = url.toNormalform(true);
-        HttpGet httpGet = null;
+        
         try {
-            httpGet = new HttpGet(urix);
+            this.currentRequest = new HttpGet(urix);
         } catch (IllegalArgumentException e) {
             throw new IOException(e.getMessage()); // can be caused  at java.net.URI.create()
         }
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-        this.currentRequest = httpGet;
-        execute(httpGet, concurrent);
+        
+        execute(concurrent);
     }
 
     /**
@@ -537,18 +525,16 @@ public class HTTPClient {
      * @throws IOException
      */
     public HttpResponse HEADResponse(final MultiProtocolURL url, final boolean concurrent) throws IOException {
-        final HttpHead httpHead = new HttpHead(url.toNormalform(true));
+        this.currentRequest = new HttpHead(url.toNormalform(true));
         setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
-    	execute(httpHead, concurrent);
-    	finish();
-    	ConnectionInfo.removeConnection(httpHead.hashCode());
+    	execute(concurrent);
     	return this.httpResponse;
     }
 
     /**
      * This method POSTs a page from the server.
      * to be used for streaming out
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @param uri the url to post
      * @param instream the input to post
@@ -564,7 +550,7 @@ public class HTTPClient {
     /**
      * This method POSTs a page from the server.
      * to be used for streaming out
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @param url the url to post
      * @param instream the input to post
@@ -573,16 +559,15 @@ public class HTTPClient {
      */
     public void POST(final MultiProtocolURL url, final InputStream instream, final long length, final boolean concurrent) throws IOException {
     	if (this.currentRequest != null) throw new IOException("Client is in use!");
-        final HttpPost httpPost = new HttpPost(url.toNormalform(true));
+    	this.currentRequest = new HttpPost(url.toNormalform(true));
         String host = url.getHost();
         if (host == null) host = Domains.LOCALHOST;
         setHost(host); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
         final NonClosingInputStreamEntity inputStreamEntity = new NonClosingInputStreamEntity(instream, length);
     	// statistics
     	this.upbytes = length;
-    	httpPost.setEntity(inputStreamEntity);
-    	this.currentRequest = httpPost;
-    	execute(httpPost, concurrent);
+    	((HttpPost) this.currentRequest).setEntity(inputStreamEntity);
+    	execute(concurrent);
     }
 
     /**
@@ -628,7 +613,7 @@ public class HTTPClient {
      */
     public byte[] POSTbytes(final MultiProtocolURL url, final String vhost, final Map<String, ContentBody> post, 
     		final String userName, final String password, final boolean usegzip, final boolean concurrent) throws IOException {
-    	final HttpPost httpPost = new HttpPost(url.toNormalform(true));
+        this.currentRequest = new HttpPost(url.toNormalform(true));
     	final boolean localhost = Domains.isLocalhost(url.getHost());
         if (!localhost) setHost(url.getHost()); // overwrite resolved IP, needed for shared web hosting DO NOT REMOVE, see http://en.wikipedia.org/wiki/Shared_web_hosting_service
     	if (vhost == null) setHost(Domains.LOCALHOST);
@@ -640,49 +625,33 @@ public class HTTPClient {
         this.upbytes = multipartEntity.getContentLength();
 
         if (usegzip) {
-            httpPost.setEntity(new GzipCompressingEntity(multipartEntity));
+            ((HttpPost) this.currentRequest).setEntity(new GzipCompressingEntity(multipartEntity));
         } else {
-            httpPost.setEntity(multipartEntity);
+            ((HttpPost) this.currentRequest).setEntity(multipartEntity);
         }
         
         if (!localhost || password == null) {
-            return getContentBytes(httpPost, Integer.MAX_VALUE, concurrent);
+            return getContentBytes(Integer.MAX_VALUE, concurrent);
         }
-        
-        byte[] content = null;
         
         final CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
                 new AuthScope("localhost", url.getPort()),
                 new UsernamePasswordCredentials(userName, password));
 
-        /* Use the custom YaCyDigestScheme for HTTP Digest Authentication */
-        final Lookup<AuthSchemeProvider> authSchemeRegistry = RegistryBuilder.<AuthSchemeProvider>create()
-                .register(AuthSchemes.BASIC, BASIC_SCHEME_FACTORY)
-                .register(AuthSchemes.DIGEST, YACY_DIGEST_SCHEME_FACTORY)
-                .build();
-
-		CloseableHttpClient httpclient = HttpClients.custom().setDefaultCredentialsProvider(credsProvider)
-				.setDefaultAuthSchemeRegistry(authSchemeRegistry).build();
-		
-        try {
-            this.httpResponse = httpclient.execute(httpPost);
-            try {
-                HttpEntity httpEntity = this.httpResponse.getEntity();
-                if (httpEntity != null) {
-                    if (getStatusCode() == HttpStatus.SC_OK) {
-                        content = getByteArray(httpEntity, Integer.MAX_VALUE);
-                    }
-                    // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-                    EntityUtils.consume(httpEntity);
+        try (final CloseableHttpClient httpclient = clientBuilder.setDefaultCredentialsProvider(credsProvider)
+                .setDefaultAuthSchemeRegistry(AUTHSCHEMEREGISTRY).build()) {
+            this.httpResponse = httpclient.execute(this.currentRequest);
+            HttpEntity httpEntity = this.httpResponse.getEntity();
+            if (httpEntity != null) {
+                if (getStatusCode() == HttpStatus.SC_OK) {
+                    return getByteArray(httpEntity, Integer.MAX_VALUE);
                 }
-            } finally {
-                this.httpResponse.close();
             }
         } finally {
-            httpclient.close();
+            close();
         }
-        return content;
+        return null;
     }
 
     /**
@@ -797,7 +766,7 @@ public class HTTPClient {
     /**
      * This method gets direct access to the content-stream
      * Since this way is uncontrolled by the Client think of using 'writeTo' instead!
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @return the content as InputStream
      * @throws IOException
@@ -808,10 +777,7 @@ public class HTTPClient {
             if (httpEntity != null) try {
                     return httpEntity.getContent();
             } catch (final IOException e) {
-                ConnectionInfo.removeConnection(this.currentRequest.hashCode());
-                this.currentRequest.abort();
-                this.currentRequest = null;
-                this.httpResponse.close();
+                close();
                 throw e;
             }
         }
@@ -820,7 +786,7 @@ public class HTTPClient {
 
     /**
      * This method streams the content to the outputStream
-     * Please take care to call finish()!
+     * Please take care to call close()!
      *
      * @param outputStream
      * @throws IOException
@@ -831,82 +797,41 @@ public class HTTPClient {
             if (httpEntity != null) try {
                 httpEntity.writeTo(outputStream);
                 outputStream.flush();
-                // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-                EntityUtils.consume(httpEntity);
-                ConnectionInfo.removeConnection(this.currentRequest.hashCode());
-                this.currentRequest = null;
-            } catch (final IOException e) {
-                ConnectionInfo.removeConnection(this.currentRequest.hashCode());
-                this.currentRequest.abort();
-                this.currentRequest = null;
-                this.httpResponse.close();
-                throw e;
+            } finally {
+                close();
             }
         }
     }
 
     /**
-     * This method ensures correct finish of client-connections
+     * This method ensures correct close of client-connections
      * This method should be used after every use of GET or POST and writeTo or getContentstream!
      *
      * @throws IOException
      */
-	public void finish() throws IOException {
+	@Override
+    public void close() throws IOException {
 		try {
 			if (this.httpResponse != null) {
-				final HttpEntity httpEntity = this.httpResponse.getEntity();
-				if (httpEntity != null && httpEntity.isStreaming()) {
-					/*
-					 * Try to fully consume the eventual remaining of the
-					 * content stream : if too long abort the request. Not using
-					 * EntityUtils.consumeQuietly(httpEntity) because too long
-					 * to perform on large resources when calling this before
-					 * full stream processing end : for example on caller
-					 * exception handling .
-					 */
-					InputStream contentStream = null;
-					try {
-						contentStream = httpEntity.getContent();
-						if (contentStream != null) {
-							byte[] buffer = new byte[2048];
-							int count = 0;
-							int readNb = contentStream.read(buffer);
-							while (readNb >= 0 && count < 10) {
-								readNb = contentStream.read(buffer);
-								count++;
-							}
-							if (readNb >= 0) {
-								if (this.currentRequest != null) {
-									this.currentRequest.abort();
-								}
-							}
-						}
-					} catch(IOException e){
-						/* Silently ignore here IOException (for example caused by stream already closed) as in EntityUtils.consumeQuietly() */
-					} finally {
-						if (contentStream != null) {
-							try {
-								contentStream.close();
-							} catch(IOException ignored) {}
-						}
-						this.httpResponse.close();
-					}
-
-				}
-
+                // Ensures that the entity content Stream is closed.
+                EntityUtils.consumeQuietly(this.httpResponse.getEntity());
+				this.httpResponse.close();
+			}
+			if (this.client != null) {
+			    client.close();
 			}
 		} finally {
 			if (this.currentRequest != null) {
 				ConnectionInfo.removeConnection(this.currentRequest.hashCode());
+				this.currentRequest.abort();
 				this.currentRequest = null;
 			}
 		}
 	}
 
-    private byte[] getContentBytes(final HttpUriRequest httpUriRequest, final int maxBytes, final boolean concurrent) throws IOException {
-        byte[] content = null;
-    	try {
-            execute(httpUriRequest, concurrent);
+    private byte[] getContentBytes(final int maxBytes, final boolean concurrent) throws IOException {
+        try {
+            execute(concurrent);
             if (this.httpResponse == null) return null;
             // get the response body
             final HttpEntity httpEntity = this.httpResponse.getEntity();
@@ -918,33 +843,27 @@ public class HTTPClient {
         				 * Otherwise returning null and consuming fully the entity can be very long on large resources */
         				throw new IOException("Content to download exceed maximum value of " + Formatter.bytesToString(maxBytes));
         			}
-                    content = getByteArray(httpEntity, maxBytes);
+                    return getByteArray(httpEntity, maxBytes);
                 }
-                // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
-            	EntityUtils.consume(httpEntity);
             }
-        } catch (final IOException e) {
-                httpUriRequest.abort();
-                throw e;
         } finally {
-        	if (this.httpResponse != null) this.httpResponse.close();
-        	ConnectionInfo.removeConnection(httpUriRequest.hashCode());
+        	close();
         }
-    	return content;
+    	return null;
     }
 
-    private void execute(final HttpUriRequest httpUriRequest, final boolean concurrent) throws IOException {
+    private void execute(final boolean concurrent) throws IOException {
     	final HttpClientContext context = HttpClientContext.create();
     	context.setRequestConfig(reqConfBuilder.build());
     	if (this.host != null)
     		context.setTargetHost(new HttpHost(this.host));
     	
-    	setHeaders(httpUriRequest);
+    	setHeaders();
     	// statistics
-    	storeConnectionInfo(httpUriRequest);
+    	storeConnectionInfo();
     	// execute the method; some asserts confirm that that the request can be send with Content-Length and is therefore not terminated by EOF
-	    if (httpUriRequest instanceof HttpEntityEnclosingRequest) {
-	        final HttpEntityEnclosingRequest hrequest = (HttpEntityEnclosingRequest) httpUriRequest;
+	    if (this.currentRequest instanceof HttpEntityEnclosingRequest) {
+	        final HttpEntityEnclosingRequest hrequest = (HttpEntityEnclosingRequest) this.currentRequest;
 	        final HttpEntity entity = hrequest.getEntity();
 	        assert entity != null;
 	        //assert !entity.isChunked();
@@ -953,16 +872,17 @@ public class HTTPClient {
 	    }
 
 	    final String initialThreadName = Thread.currentThread().getName();
-	    Thread.currentThread().setName("HTTPClient-" + httpUriRequest.getURI());
+	    final String uri = this.currentRequest.getURI().toString();
+	    Thread.currentThread().setName("HTTPClient-" + uri);
         final long time = System.currentTimeMillis();
 	    try {
 	        
+	        this.client = clientBuilder.build();
 	        if (concurrent) {
 	            FutureTask<CloseableHttpResponse> t = new FutureTask<CloseableHttpResponse>(new Callable<CloseableHttpResponse>() {
 	                @Override
                     public CloseableHttpResponse call() throws ClientProtocolException, IOException {
-	                    final CloseableHttpClient client = clientBuilder.build();
-	                    CloseableHttpResponse response = client.execute(httpUriRequest, context);
+	                    CloseableHttpResponse response = client.execute(currentRequest, context);
 	                    return response;
 	                }
 	            });
@@ -973,20 +893,18 @@ public class HTTPClient {
 	                throw e.getCause();
 	            } catch (Throwable e) {}
 	            try {t.cancel(true);} catch (Throwable e) {}
-	            if (this.httpResponse == null) throw new IOException("timout to client after " + this.timeout + "ms" + " for url " + httpUriRequest.getURI().toString());
+	            if (this.httpResponse == null) {
+	                throw new IOException("timout to client after " + this.timeout + "ms" + " for url " + uri);
+	            }
 	        } else {
-	            final CloseableHttpClient client = clientBuilder.build();
-	            this.httpResponse = client.execute(httpUriRequest, context);
+	            this.httpResponse = client.execute(this.currentRequest, context);
 	        }
             this.httpResponse.setHeader(HeaderFramework.RESPONSE_TIME_MILLIS, Long.toString(System.currentTimeMillis() - time));
         } catch (final Throwable e) {
-            ConnectionInfo.removeConnection(httpUriRequest.hashCode());
-            httpUriRequest.abort();
-            if (this.httpResponse != null) this.httpResponse.close();
-            //e.printStackTrace();
+            close();
             throw new IOException("Client can't execute: "
             		+ (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
-            		+ " duration=" + Long.toString(System.currentTimeMillis() - time) + " for url " + httpUriRequest.getURI().toString());
+            		+ " duration=" + Long.toString(System.currentTimeMillis() - time) + " for url " + uri);
         } finally {
         	/* Restore the thread initial name */
         	Thread.currentThread().setName(initialThreadName);
@@ -1001,11 +919,10 @@ public class HTTPClient {
      * @throws IOException when a read error occured or content length is over maxBytes
      */
 	public static byte[] getByteArray(final HttpEntity entity, int maxBytes) throws IOException {
-		final InputStream instream = entity.getContent();
-		if (instream == null) {
-			return null;
-		}
-		try {
+		try (final InputStream instream = entity.getContent()) {
+		    if (instream == null) {
+		        return null;
+		    }
 			long contentLength = entity.getContentLength();
 			/*
 			 * When no maxBytes is specified, the default limit is
@@ -1046,29 +963,30 @@ public class HTTPClient {
 		} catch (final OutOfMemoryError e) {
 			throw new IOException(e.toString());
 		} finally {
-			instream.close();
+		    // Ensures that the entity content is fully consumed and the content stream, if exists, is closed.
+            EntityUtils.consume(entity);
 		}
 	}
 
-    private void setHeaders(final HttpUriRequest httpUriRequest) {
+    private void setHeaders() {
     	if (this.headers != null) {
             for (final Entry<String, String> entry : this.headers) {
-                    httpUriRequest.setHeader(entry.getKey(),entry.getValue());
+                this.currentRequest.setHeader(entry.getKey(),entry.getValue());
             }
     	}
-    	if (this.host != null) httpUriRequest.setHeader(HTTP.TARGET_HOST, this.host);
-        httpUriRequest.setHeader(HTTP.CONN_DIRECTIVE, "close"); // don't keep alive, prevent CLOSE_WAIT state
+    	if (this.host != null) this.currentRequest.setHeader(HTTP.TARGET_HOST, this.host);
+    	this.currentRequest.setHeader(HTTP.CONN_DIRECTIVE, "close"); // don't keep alive, prevent CLOSE_WAIT state
     }
 
-    private void storeConnectionInfo(final HttpUriRequest httpUriRequest) {
-    	final int port = httpUriRequest.getURI().getPort();
-    	final String thost = httpUriRequest.getURI().getHost();
+    private void storeConnectionInfo() {
+    	final int port = this.currentRequest.getURI().getPort();
+    	final String thost = this.currentRequest.getURI().getHost();
     	//assert thost != null : "uri = " + httpUriRequest.getURI().toString();
     	ConnectionInfo.addConnection(new ConnectionInfo(
-    			httpUriRequest.getURI().getScheme(),
+    	        this.currentRequest.getURI().getScheme(),
     			port == -1 ? thost : thost + ":" + port,
-    			httpUriRequest.getMethod() + " " + httpUriRequest.getURI().getPath(),
-    			httpUriRequest.hashCode(),
+    			        this.currentRequest.getMethod() + " " + this.currentRequest.getURI().getPath(),
+    			        this.currentRequest.hashCode(),
     			System.currentTimeMillis(),
     			this.upbytes));
     }

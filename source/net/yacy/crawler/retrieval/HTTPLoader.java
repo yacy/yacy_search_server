@@ -140,123 +140,124 @@ public final class HTTPLoader {
         final RequestHeader requestHeader = createRequestheader(request, agent);
 
         // HTTP-Client
-        final HTTPClient client = new HTTPClient(agent);
-        client.setRedirecting(false); // we want to handle redirection
-                                        // ourselves, so we don't index pages
-                                        // twice
-        client.setTimout(this.socketTimeout);
-        client.setHeader(requestHeader.entrySet());
-
-        // send request
-        client.GET(url, false);
-        final StatusLine statusline = client.getHttpResponse().getStatusLine();
-        final int statusCode = statusline.getStatusCode();
-        final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
-        String requestURLString = request.url().toNormalform(true);
-
-        // check redirection
-        if (statusCode > 299 && statusCode < 310) {
-            client.finish();
-
-            final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, statusline, responseHeader, requestURLString);
-
-            if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
-                // we have two use cases here: loading from a crawl or just
-                // loading the url. Check this:
-                if (profile != null && !CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) {
-                    // put redirect url on the crawler queue to repeat a
-                    // double-check
-                    /* We have to clone the request instance and not to modify directly its URL, 
-                     * otherwise the stackCrawl() function would reject it, because detecting it as already in the activeWorkerEntries */
-                    Request redirectedRequest = new Request(request.initiator(),
-                            redirectionUrl,
-                            request.referrerhash(),
-                            request.name(),
-                            request.appdate(),
-                            request.profileHandle(),
-                            request.depth(),
-                            request.timezoneOffset());
-                    String rejectReason = this.sb.crawlStacker.stackCrawl(redirectedRequest);
-                    if(rejectReason != null) {
-                        throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " aborted. Reason : " + rejectReason);
+        try (final HTTPClient client = new HTTPClient(agent)) {
+            client.setRedirecting(false); // we want to handle redirection
+                                            // ourselves, so we don't index pages
+                                            // twice
+            client.setTimout(this.socketTimeout);
+            client.setHeader(requestHeader.entrySet());
+    
+            // send request
+            client.GET(url, false);
+            final StatusLine statusline = client.getHttpResponse().getStatusLine();
+            final int statusCode = statusline.getStatusCode();
+            final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
+            String requestURLString = request.url().toNormalform(true);
+    
+            // check redirection
+            if (statusCode > 299 && statusCode < 310) {
+                client.close();
+    
+                final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, statusline, responseHeader, requestURLString);
+    
+                if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
+                    // we have two use cases here: loading from a crawl or just
+                    // loading the url. Check this:
+                    if (profile != null && !CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) {
+                        // put redirect url on the crawler queue to repeat a
+                        // double-check
+                        /* We have to clone the request instance and not to modify directly its URL, 
+                         * otherwise the stackCrawl() function would reject it, because detecting it as already in the activeWorkerEntries */
+                        Request redirectedRequest = new Request(request.initiator(),
+                                redirectionUrl,
+                                request.referrerhash(),
+                                request.name(),
+                                request.appdate(),
+                                request.profileHandle(),
+                                request.depth(),
+                                request.timezoneOffset());
+                        String rejectReason = this.sb.crawlStacker.stackCrawl(redirectedRequest);
+                        if(rejectReason != null) {
+                            throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " aborted. Reason : " + rejectReason);
+                        }
+                        // in the end we must throw an exception (even if this is
+                        // not an error, just to abort the current process
+                        throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " to "
+                                + redirectionUrl.toNormalform(false) + " placed on crawler queue for double-check");
                     }
-                    // in the end we must throw an exception (even if this is
-                    // not an error, just to abort the current process
-                    throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " to "
-                            + redirectionUrl.toNormalform(false) + " placed on crawler queue for double-check");
+    
+                    // if we are already doing a shutdown we don't need to retry
+                    // crawling
+                    if (Thread.currentThread().isInterrupted()) {
+                        this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
+                                FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
+                        throw new IOException(
+                                "CRAWLER Redirect of URL=" + requestURLString + " aborted because of server shutdown.$");
+                    }
+    
+                    // check if the redirected URL is the same as the requested URL
+                    // this shortcuts a time-out using retryCount
+                    if (redirectionUrl.equals(url)) {
+                        this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirect to same url", -1);
+                        throw new IOException( "retry counter exceeded for URL " + request.url().toString() + ". Processing aborted.$");
+                    }
+    
+                    // retry crawling with new url
+                    request.redirectURL(redirectionUrl);
+                    return openInputStream(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
                 }
-
-                // if we are already doing a shutdown we don't need to retry
-                // crawling
-                if (Thread.currentThread().isInterrupted()) {
-                    this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
-                            FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
-                    throw new IOException(
-                            "CRAWLER Redirect of URL=" + requestURLString + " aborted because of server shutdown.$");
+                // we don't want to follow redirects
+                this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
+                throw new IOException("REJECTED UNWANTED REDIRECTION '" + statusline + "' for URL '" + requestURLString + "'$");
+            } else if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_NON_AUTHORITATIVE_INFORMATION) {
+                // the transfer is ok
+    
+                /*
+                 * When content is not large (less than Response.CRAWLER_MAX_SIZE_TO_CACHE), we have better cache it if cache is enabled and url is not local
+                 */
+                long contentLength = client.getHttpResponse().getEntity().getContentLength();
+                InputStream contentStream;
+                if (profile != null && profile.storeHTCache() && contentLength > 0 && contentLength < (Response.CRAWLER_MAX_SIZE_TO_CACHE) && !url.isLocal()) {
+                    byte[] content = null;
+                    try {
+                        content = HTTPClient.getByteArray(client.getHttpResponse().getEntity(), maxFileSize);
+                        Cache.store(url, responseHeader, content);
+                    } catch (final IOException e) {
+                        this.log.warn("cannot write " + url + " to Cache (3): " + e.getMessage(), e);
+                    } finally {
+                        client.close();
+                    }
+    
+                    contentStream = new ByteArrayInputStream(content);
+                } else {
+                    /*
+                     * Content length may already be known now : check it before opening a stream
+                     */
+                    if (maxFileSize >= 0 && contentLength > maxFileSize) {
+                        throw new IOException("Content to download exceed maximum value of " + maxFileSize + " bytes");
+                    }
+                    /*
+                     * Create a HTTPInputStream delegating to
+                     * client.getContentstream(). Close method will ensure client is
+                     * properly closed.
+                     */
+                    contentStream = new HTTPInputStream(client);
+                    /* Anticipated content length may not be already known or incorrect : let's apply now the same eventual content size restriction as when loading in a byte array */
+                    if(maxFileSize >= 0) {
+                        contentStream = new StrictLimitInputStream(contentStream, maxFileSize,
+                                "Content to download exceed maximum value of " + Formatter.bytesToString(maxFileSize));
+                    }
                 }
-
-                // check if the redirected URL is the same as the requested URL
-                // this shortcuts a time-out using retryCount
-                if (redirectionUrl.equals(url)) {
-                    this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "redirect to same url", -1);
-                    throw new IOException( "retry counter exceeded for URL " + request.url().toString() + ". Processing aborted.$");
-                }
-
-                // retry crawling with new url
-                request.redirectURL(redirectionUrl);
-                return openInputStream(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
-            }
-            // we don't want to follow redirects
-            this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
-            throw new IOException("REJECTED UNWANTED REDIRECTION '" + statusline + "' for URL '" + requestURLString + "'$");
-        } else if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_NON_AUTHORITATIVE_INFORMATION) {
-            // the transfer is ok
-
-            /*
-             * When content is not large (less than Response.CRAWLER_MAX_SIZE_TO_CACHE), we have better cache it if cache is enabled and url is not local
-             */
-            long contentLength = client.getHttpResponse().getEntity().getContentLength();
-            InputStream contentStream;
-            if (profile != null && profile.storeHTCache() && contentLength > 0 && contentLength < (Response.CRAWLER_MAX_SIZE_TO_CACHE) && !url.isLocal()) {
-                byte[] content = null;
-                try {
-                    content = HTTPClient.getByteArray(client.getHttpResponse().getEntity(), maxFileSize);
-                    Cache.store(url, responseHeader, content);
-                } catch (final IOException e) {
-                    this.log.warn("cannot write " + url + " to Cache (3): " + e.getMessage(), e);
-                } finally {
-                    client.finish();
-                }
-
-                contentStream = new ByteArrayInputStream(content);
+    
+                return new StreamResponse(new Response(request, requestHeader, responseHeader, profile, false, null), contentStream);
             } else {
-                /*
-                 * Content length may already be known now : check it before opening a stream
-                 */
-                if (maxFileSize >= 0 && contentLength > maxFileSize) {
-                    throw new IOException("Content to download exceed maximum value of " + maxFileSize + " bytes");
-                }
-                /*
-                 * Create a HTTPInputStream delegating to
-                 * client.getContentstream(). Close method will ensure client is
-                 * properly closed.
-                 */
-                contentStream = new HTTPInputStream(client);
-                /* Anticipated content length may not be already known or incorrect : let's apply now the same eventual content size restriction as when loading in a byte array */
-                if(maxFileSize >= 0) {
-                    contentStream = new StrictLimitInputStream(contentStream, maxFileSize,
-                            "Content to download exceed maximum value of " + Formatter.bytesToString(maxFileSize));
-                }
+                client.close();
+                // if the response has not the right response type then reject file
+                this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
+                        FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
+                throw new IOException("REJECTED WRONG STATUS TYPE '" + statusline
+                        + "' for URL '" + requestURLString + "'$");
             }
-
-            return new StreamResponse(new Response(request, requestHeader, responseHeader, profile, false, null), contentStream);
-        } else {
-            client.finish();
-            // if the response has not the right response type then reject file
-            this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile,
-                    FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
-            throw new IOException("REJECTED WRONG STATUS TYPE '" + statusline
-                    + "' for URL '" + requestURLString + "'$");
         }
     }
 
@@ -364,90 +365,91 @@ public final class HTTPLoader {
         final RequestHeader requestHeader = createRequestheader(request, agent);
 
         // HTTP-Client
-        final HTTPClient client = new HTTPClient(agent);
-        client.setRedirecting(false); // we want to handle redirection ourselves, so we don't index pages twice
-        client.setTimout(this.socketTimeout);
-        client.setHeader(requestHeader.entrySet());
-
-        // send request
-        final byte[] responseBody = client.GETbytes(url, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), maxFileSize, false);
-        final int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
-        final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
-        String requestURLString = request.url().toNormalform(true);
-
-        // check redirection
-        if (statusCode > 299 && statusCode < 310) {
-
-            final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, client.getHttpResponse().getStatusLine(),
-                    responseHeader, requestURLString);
-
-            if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
-                // we have two use cases here: loading from a crawl or just loading the url. Check this:
-                if (profile != null && !CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) {
-                    // put redirect url on the crawler queue to repeat a double-check
-                    /* We have to clone the request instance and not to modify directly its URL, 
-                     * otherwise the stackCrawl() function would reject it, because detecting it as already in the activeWorkerEntries */
-                    Request redirectedRequest = new Request(request.initiator(),
-                            redirectionUrl,
-                            request.referrerhash(),
-                            request.name(),
-                            request.appdate(),
-                            request.profileHandle(),
-                            request.depth(),
-                            request.timezoneOffset());
-                    String rejectReason = this.sb.crawlStacker.stackCrawl(redirectedRequest);
-                    // in the end we must throw an exception (even if this is not an error, just to abort the current process
-                    if(rejectReason != null) {
-                        throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " aborted. Reason : " + rejectReason);
+        try (final HTTPClient client = new HTTPClient(agent)) {
+            client.setRedirecting(false); // we want to handle redirection ourselves, so we don't index pages twice
+            client.setTimout(this.socketTimeout);
+            client.setHeader(requestHeader.entrySet());
+    
+            // send request
+            final byte[] responseBody = client.GETbytes(url, sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"), sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), maxFileSize, false);
+            final int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+            final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
+            String requestURLString = request.url().toNormalform(true);
+    
+            // check redirection
+            if (statusCode > 299 && statusCode < 310) {
+    
+                final DigestURL redirectionUrl = extractRedirectURL(request, profile, url, client.getHttpResponse().getStatusLine(),
+                        responseHeader, requestURLString);
+    
+                if (this.sb.getConfigBool(SwitchboardConstants.CRAWLER_FOLLOW_REDIRECTS, true)) {
+                    // we have two use cases here: loading from a crawl or just loading the url. Check this:
+                    if (profile != null && !CrawlSwitchboard.DEFAULT_PROFILES.contains(profile.name())) {
+                        // put redirect url on the crawler queue to repeat a double-check
+                        /* We have to clone the request instance and not to modify directly its URL, 
+                         * otherwise the stackCrawl() function would reject it, because detecting it as already in the activeWorkerEntries */
+                        Request redirectedRequest = new Request(request.initiator(),
+                                redirectionUrl,
+                                request.referrerhash(),
+                                request.name(),
+                                request.appdate(),
+                                request.profileHandle(),
+                                request.depth(),
+                                request.timezoneOffset());
+                        String rejectReason = this.sb.crawlStacker.stackCrawl(redirectedRequest);
+                        // in the end we must throw an exception (even if this is not an error, just to abort the current process
+                        if(rejectReason != null) {
+                            throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " aborted. Reason : " + rejectReason);
+                        }
+                        throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " to " + redirectionUrl.toNormalform(false) + " placed on crawler queue for double-check");
                     }
-                    throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " to " + redirectionUrl.toNormalform(false) + " placed on crawler queue for double-check");
+    
+                    // if we are already doing a shutdown we don't need to retry crawling
+                    if (Thread.currentThread().isInterrupted()) {
+                        this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
+                        throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " aborted because of server shutdown.$");
+                    }
+    
+                    // retry crawling with new url
+                    request.redirectURL(redirectionUrl);
+                    return load(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
                 }
-
-                // if we are already doing a shutdown we don't need to retry crawling
-                if (Thread.currentThread().isInterrupted()) {
-                    this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_LOAD_CONTEXT, "server shutdown", statusCode);
-                    throw new IOException("CRAWLER Redirect of URL=" + requestURLString + " aborted because of server shutdown.$");
+                // we don't want to follow redirects
+                this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
+                throw new IOException("REJECTED UNWANTED REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
+            } else if (responseBody == null) {
+                // no response, reject file
+                this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "no response body", statusCode);
+                throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
+            } else if (statusCode == 200 || statusCode == 203) {
+                // the transfer is ok
+    
+                // we write the new cache entry to file system directly
+                final long contentLength = responseBody.length;
+                ByteCount.addAccountCount(ByteCount.CRAWLER, contentLength);
+    
+                // check length again in case it was not possible to get the length before loading
+                if (maxFileSize >= 0 && contentLength > maxFileSize) {
+                    this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "file size limit exceeded", statusCode);
+                    throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)$");
                 }
-
-                // retry crawling with new url
-                request.redirectURL(redirectionUrl);
-                return load(request, profile, retryCount - 1, maxFileSize, blacklistType, agent);
+    
+                // create a new cache entry
+                response = new Response(
+                        request,
+                        requestHeader,
+                        responseHeader,
+                        profile,
+                        false,
+                        responseBody
+                );
+    
+                return response;
+            } else {
+                // if the response has not the right response type then reject file
+                this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
+                throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
             }
-            // we don't want to follow redirects
-            this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "redirection not wanted", statusCode);
-            throw new IOException("REJECTED UNWANTED REDIRECTION '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
-        } else if (responseBody == null) {
-            // no response, reject file
-            this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "no response body", statusCode);
-            throw new IOException("REJECTED EMPTY RESPONSE BODY '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
-        } else if (statusCode == 200 || statusCode == 203) {
-            // the transfer is ok
-
-            // we write the new cache entry to file system directly
-            final long contentLength = responseBody.length;
-            ByteCount.addAccountCount(ByteCount.CRAWLER, contentLength);
-
-            // check length again in case it was not possible to get the length before loading
-            if (maxFileSize >= 0 && contentLength > maxFileSize) {
-                this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "file size limit exceeded", statusCode);
-                throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)$");
-            }
-
-            // create a new cache entry
-            response = new Response(
-                    request,
-                    requestHeader,
-                    responseHeader,
-                    profile,
-                    false,
-                    responseBody
-            );
-
-            return response;
-        } else {
-            // if the response has not the right response type then reject file
-            this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), profile, FailCategory.TEMPORARY_NETWORK_FAILURE, "wrong http status code", statusCode);
-            throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL '" + requestURLString + "'$");
         }
     }
 
@@ -484,9 +486,9 @@ public final class HTTPLoader {
         requestHeader.put(HeaderFramework.ACCEPT_CHARSET, DEFAULT_CHARSET);
         requestHeader.put(HeaderFramework.ACCEPT_ENCODING, DEFAULT_ENCODING);
 
-        final HTTPClient client = new HTTPClient(agent);
-        client.setTimout(20000);
-        client.setHeader(requestHeader.entrySet());
+        try (final HTTPClient client = new HTTPClient(agent)) {
+            client.setTimout(20000);
+            client.setHeader(requestHeader.entrySet());
             final byte[] responseBody = client.GETbytes(request.url(), null, null, false);
             final int code = client.getHttpResponse().getStatusLine().getStatusCode();
             final ResponseHeader header = new ResponseHeader(code, client.getHttpResponse().getAllHeaders());
@@ -539,6 +541,7 @@ public final class HTTPLoader {
                 // if the response has not the right response type then reject file
                 throw new IOException("REJECTED WRONG STATUS TYPE '" + client.getHttpResponse().getStatusLine() + "' for URL " + request.url().toString());
             }
+        }
         return response;
     }
 
