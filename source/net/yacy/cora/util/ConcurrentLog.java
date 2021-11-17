@@ -40,7 +40,7 @@ import java.util.logging.Logger;
 
 /**
  * jdk-based logger tend to block at java.util.logging.Logger.log(Logger.java:476)
- * in concurrent environments. This makes logging a main performance issue. 
+ * in concurrent environments. This makes logging a main performance issue.
  * To overcome this problem, this is a add-on to jdk logging to put log entries
  * on a concurrent message queue and log the messages one by one using a
  * separate process
@@ -51,19 +51,20 @@ public final class ConcurrentLog {
     private final static Message POISON_MESSAGE = new Message();
     private final static BlockingQueue<Message> logQueue = new ArrayBlockingQueue<Message>(500);
     private static Worker logRunnerThread = null;
+    public static boolean backgroundRunner = false;
 
     static {
         ensureWorkerIsRunning();
     }
 
     public static void ensureWorkerIsRunning() {
-        if (logRunnerThread == null || !logRunnerThread.isAlive()) {
+        if (backgroundRunner && (logRunnerThread == null || !logRunnerThread.isAlive())) {
             logRunnerThread = new Worker();
             logRunnerThread.start();
             //ConcurrentLogLogger.log(Level.INFO, "started ConcurrentLog.Worker.");
         }
     }
-    
+
     private final Logger theLogger;
 
     public ConcurrentLog(final String appName) {
@@ -174,14 +175,14 @@ public final class ConcurrentLog {
     public final boolean isLoggable(final Level level) {
         return this.theLogger.isLoggable(level);
     }
-    
+
     /*
     public final void logException(final Throwable thrown) {
         if (thrown == null) return;
         enQueueLog(this.theLogger, Level.WARNING, thrown.getMessage(), thrown);
     }
     */
-    
+
     // static log messages
     public final static void logException(final Throwable thrown) {
         if (thrown == null) return;
@@ -252,20 +253,20 @@ public final class ConcurrentLog {
     // private
     private final static void enQueueLog(final Logger logger, final Level level, final String message, final Throwable thrown) {
         if (!logger.isLoggable(level)) return;
-        if (logRunnerThread == null || !logRunnerThread.isAlive()) {
+        if (!backgroundRunner || logRunnerThread == null || !logRunnerThread.isAlive()) {
             if (thrown == null) logger.log(level, "* " + message); else logger.log(level, "* " + message, thrown); // the * is inefficient, but should show up only in emergency cases
         } else {
             try {
-            	if (thrown == null) logQueue.put(new Message(logger, level, message)); else logQueue.put(new Message(logger, level, message, thrown));
+                if (thrown == null) logQueue.put(new Message(logger, level, message)); else logQueue.put(new Message(logger, level, message, thrown));
             } catch (final InterruptedException e) {
-            	if (thrown == null) logger.log(level, message); else  logger.log(level, message, thrown);
+                if (thrown == null) logger.log(level, message); else  logger.log(level, message, thrown);
             }
         }
     }
 
     private final static void enQueueLog(final Logger logger, final Level level, final String message) {
         if (!logger.isLoggable(level)) return;
-        if (logRunnerThread == null || !logRunnerThread.isAlive()) {
+        if (!backgroundRunner || logRunnerThread == null || !logRunnerThread.isAlive()) {
             logger.log(level, "* " + message); // the * is inefficient, but should show up only in emergency cases
         } else {
             try {
@@ -277,19 +278,19 @@ public final class ConcurrentLog {
     }
 
     private final static void enQueueLog(final String loggername, final Level level, final String message, final Throwable thrown) {
-        if (logRunnerThread == null || !logRunnerThread.isAlive()) {
-        	if (thrown == null) Logger.getLogger(loggername).log(level, "* " + message); else Logger.getLogger(loggername).log(level, "* " + message, thrown); // the * is inefficient, but should show up only in emergency cases
+        if (!backgroundRunner || logRunnerThread == null || !logRunnerThread.isAlive()) {
+            if (thrown == null) Logger.getLogger(loggername).log(level, "* " + message); else Logger.getLogger(loggername).log(level, "* " + message, thrown); // the * is inefficient, but should show up only in emergency cases
         } else {
             try {
-            	if (thrown == null) logQueue.put(new Message(loggername, level, message)); else logQueue.put(new Message(loggername, level, message, thrown));
+                if (thrown == null) logQueue.put(new Message(loggername, level, message)); else logQueue.put(new Message(loggername, level, message, thrown));
             } catch (final InterruptedException e) {
-            	if (thrown == null) Logger.getLogger(loggername).log(level, message); else Logger.getLogger(loggername).log(level, message, thrown);
+                if (thrown == null) Logger.getLogger(loggername).log(level, message); else Logger.getLogger(loggername).log(level, message, thrown);
             }
         }
     }
 
     private final static void enQueueLog(final String loggername, final Level level, final String message) {
-        if (logRunnerThread == null || !logRunnerThread.isAlive()) {
+        if (!backgroundRunner || logRunnerThread == null || !logRunnerThread.isAlive()) {
             Logger.getLogger(loggername).log(level, "* " + message); // the * is inefficient, but should show up only in emergency cases
         } else {
             try {
@@ -382,15 +383,15 @@ public final class ConcurrentLog {
     public static final void configureLogging(final File dataPath, final File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
         System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());
         try (final FileInputStream fileIn = new FileInputStream(loggingConfigFile);){
-            
-        	final String logFilePatternKey = "java.util.logging.FileHandler.pattern";
+
+            final String logFilePatternKey = "java.util.logging.FileHandler.pattern";
             final Properties logProperties = new Properties();
             logProperties.load(fileIn);
             String logFilePattern = logProperties.getProperty(logFilePatternKey, "%h/java%u.log" /* default FileHandler pattern*/);
-            
+
             File logFile;
             if(logFilePattern.startsWith("%h")) {
-            	logFile = new File(System.getProperty("user.home") + logFilePattern.substring(2));
+                logFile = new File(System.getProperty("user.home") + logFilePattern.substring(2));
             } else if(logFilePattern.startsWith("%t")) {
                 String tmpDir = System.getProperty("java.io.tmpdir");
                 if (tmpDir == null) {
@@ -398,36 +399,36 @@ public final class ConcurrentLog {
                 }
                 logFile = new File(tmpDir, logFilePattern.substring(2));
             } else {
-            	logFile = new File(logFilePattern);
+                logFile = new File(logFilePattern);
                 if (!logFile.isAbsolute()) {
-                	logFile = new File(dataPath, logFilePattern);
-                	logFilePattern = logFile.getAbsolutePath();
-                	
-					/*
-					 * Update the file pattern with the absolute path flavor as LogManager and
-					 * FileHandler classes do not offer a way to configure the base parent path when
-					 * using relative path
-					 */
-					logProperties.setProperty(logFilePatternKey, logFilePattern);
+                    logFile = new File(dataPath, logFilePattern);
+                    logFilePattern = logFile.getAbsolutePath();
+
+                    /*
+                     * Update the file pattern with the absolute path flavor as LogManager and
+                     * FileHandler classes do not offer a way to configure the base parent path when
+                     * using relative path
+                     */
+                    logProperties.setProperty(logFilePatternKey, logFilePattern);
                 }
             }
-            
-           
+
+
             // creating the logging directory if necessary
             File logDirectory = logFile.getParentFile();
             if(logDirectory != null) {
-            	if (!logDirectory.exists()) {
-            		if(!logDirectory.mkdirs()) {
-            			System.err.println("STARTUP: Could not create the logs directory at " + logDirectory.getAbsolutePath());
-            		}
-            	} else if(!logDirectory.isDirectory()) {
-            		System.err.println("STARTUP: Log file parent path at " + logDirectory.getAbsolutePath() + "is not a directory");
-            	}
+                if (!logDirectory.exists()) {
+                    if(!logDirectory.mkdirs()) {
+                        System.err.println("STARTUP: Could not create the logs directory at " + logDirectory.getAbsolutePath());
+                    }
+                } else if(!logDirectory.isDirectory()) {
+                    System.err.println("STARTUP: Log file parent path at " + logDirectory.getAbsolutePath() + "is not a directory");
+                }
             }
-            
+
             final ByteArrayOutputStream propsStream = new ByteArrayOutputStream();
             logProperties.store(propsStream, null);
-            
+
             // loading the logger configuration from properties
             final LogManager logManager = LogManager.getLogManager();
             logManager.readConfiguration(new ByteArrayInputStream(propsStream.toByteArray()));

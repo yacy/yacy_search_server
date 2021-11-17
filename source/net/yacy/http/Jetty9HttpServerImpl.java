@@ -52,6 +52,7 @@ import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.eclipse.jetty.util.ProcessorUtils;
+import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -206,7 +207,8 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         context.setContextPath("/");
         context.setHandler(handlers);
         context.setMaxFormContentSize(1024 * 1024 * 10); // allow 10MB, large forms may be required during crawl starts with long lists
-
+        org.eclipse.jetty.util.log.Logger log = Log.getRootLogger();
+        context.setLogger(log);
         // make YaCy handlers (in context) and servlet context handlers available (both contain root context "/")
         // logic: 1. YaCy handlers are called if request not handled (e.g. proxy) then servlets handle it
         ContextHandlerCollection allrequesthandlers = new ContextHandlerCollection();
