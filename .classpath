@@ -65,7 +65,6 @@
 	<classpathentry kind="lib" path="lib/jwat-common-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-gzip-1.1.1.jar"/>
 	<classpathentry kind="lib" path="lib/jwat-warc-1.1.1.jar"/>
-	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.25.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-common-8.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-analyzers-phonetic-8.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/lucene-backward-codecs-8.8.1.jar"/>
@@ -92,8 +91,6 @@
 	<classpathentry kind="lib" path="lib/poi-3.17.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.17.jar"/>
 	<classpathentry kind="lib" path="lib/rrd4j-3.2.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-api-1.7.25.jar"/>
-	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.25.jar"/>
 	<classpathentry kind="lib" path="lib/solr-core-8.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/solr-solrj-8.8.1.jar"/>
 	<classpathentry kind="lib" path="lib/spatial4j-0.6.jar"/>
@@ -115,6 +112,9 @@
 	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-169.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15on-169.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.14.2.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.32.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.7.32.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.32.jar"/>
 	<classpathentry kind="lib" path="lib/langdetect.jar"/>
 	<classpathentry kind="src" path="htroot/api/blacklists"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
