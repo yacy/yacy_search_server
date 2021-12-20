@@ -425,14 +425,12 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
 
     /**
      * check if a given document, identified by url hash as document id exists
-     * @Deprecated use Segment.getLastSeenTime instead
      * @param id the url hash and document id
      * @return the load date if any entry in solr exists, null otherwise
      * @throws IOException
      */
-    @Deprecated
     @Override
-    public LoadTimeURL getLoadTimeURL(String id) throws IOException {
+    public String getURL(String id) throws IOException {
         int responseCount = 0;
         DocListSearcher docListSearcher = null;
         try {
@@ -444,7 +442,7 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
             //for (int i = 0; i < responseCount; i++) {
             final Document doc = searcher.doc(iterator.nextDoc(), AbstractSolrConnector.SOLR_ID_and_LOAD_DATE_FIELDS);
             if (doc == null) return null;
-            return AbstractSolrConnector.getLoadTimeURL(doc);
+            return AbstractSolrConnector.getURL(doc);
             //}
         } catch (final Throwable e) {
             ConcurrentLog.logException(e);

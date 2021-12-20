@@ -418,21 +418,6 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         return result;
     }
 
-    @Deprecated
-    @Override
-    public LoadTimeURL getLoadTimeURL(String id) throws IOException {
-        if (this.solr0 != null && this.solr1 == null) return this.solr0.getLoadTimeURL(id);
-        if (this.solr0 == null && this.solr1 != null) return this.solr1.getLoadTimeURL(id);
-        if (this.solr0 == null && this.solr1 == null) return null;
-        LoadTimeURL md0 = this.solr0.getLoadTimeURL(id);
-        LoadTimeURL md1 = this.solr1.getLoadTimeURL(id);
-        if (md0 == null) return md1;
-        if (md1 == null) return md0;
-        long date = Math.max(md0.date, md1.date);
-        assert md0.url.equals(md1.url);
-        return new LoadTimeURL(md0.url, date);
-    }
-
     @Override
     public BlockingQueue<String> concurrentIDsByQuery(final String querystring, final String sort, final int offset, final int maxcount, final long maxtime, final int buffersize, final int concurrency) {
         if (this.solr0 != null && this.solr1 == null) return this.solr0.concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency);

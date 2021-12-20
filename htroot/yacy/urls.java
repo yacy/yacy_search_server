@@ -25,9 +25,9 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
+
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.ASCII;
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.NoticedURL;
@@ -63,7 +63,7 @@ public class urls {
             final long timeout = System.currentTimeMillis() + maxTime;
             int c = 0;
             Request entry;
-            DigestURL referrer;
+            String referrerURL;
             while ((maxCount > 0) &&
                    (System.currentTimeMillis() < timeout) &&
                    (!sb.crawlQueues.noticeURL.isEmpty(stackType))) {
@@ -76,9 +76,9 @@ public class urls {
 
                 // find referrer, if there is one
                 try {
-                    referrer = sb.getURL(entry.referrerhash());
+                    referrerURL = sb.getURL(entry.referrerhash());
                 } catch (IOException e) {
-                    referrer = null;
+                    referrerURL = null;
                     ConcurrentLog.logException(e);
                 }
 
@@ -88,7 +88,7 @@ public class urls {
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");
                 prop.putXML("item_" + c + "_link", entry.url().toNormalform(true));
-                prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true));
+                prop.putXML("item_" + c + "_referrer", (referrerURL == null) ? "" : referrerURL);
                 prop.putXML("item_" + c + "_description", entry.name());
                 prop.put("item_" + c + "_author", "");
                 prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.appdate()));
@@ -107,17 +107,17 @@ public class urls {
             final int count = urlhashes.length() / 12;
         	int c = 0;
         	URIMetadataNode entry;
-            DigestURL referrer;
+            String referrerURL;
             for (int i = 0; i < count; i++) {
                 entry = sb.index.fulltext().getMetadata(ASCII.getBytes(urlhashes.substring(12 * i, 12 * (i + 1))));
                 if (entry == null) continue;
                 // find referrer, if there is one
                 try {
-                    referrer = sb.getURL(entry.referrerHash());
+                    referrerURL = sb.getURL(entry.referrerHash());
                     // create RSS entry
                     prop.put("item_" + c + "_title", entry.dc_title());
                     prop.putXML("item_" + c + "_link", entry.url().toNormalform(true));
-                    prop.putXML("item_" + c + "_referrer", (referrer == null) ? "" : referrer.toNormalform(true));
+                    prop.putXML("item_" + c + "_referrer", (referrerURL == null) ? "" : referrerURL);
                     prop.putXML("item_" + c + "_description", entry.dc_title());
                     prop.put("item_" + c + "_author", entry.dc_creator());
                     prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.moddate()));

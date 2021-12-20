@@ -1,7 +1,7 @@
 // FTPLoader.java
 // -------------------------------------
 // part of YACY
-// SPDX-FileCopyrightText: 2006 Michael Peter Christen <mc@yacy.net)> 
+// SPDX-FileCopyrightText: 2006 Michael Peter Christen <mc@yacy.net)>
 // SPDX-License-Identifier: GPL-2.0-or-later
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2006
@@ -72,7 +72,7 @@ public class FTPLoader {
     public Response load(final Request request, final boolean acceptOnlyParseable) throws IOException {
 
         Latency.updateBeforeLoad(request.url());
-        
+
         final long start = System.currentTimeMillis();
         final DigestURL entryUrl = request.url();
         final String fullPath = getPath(entryUrl);
@@ -121,10 +121,10 @@ public class FTPLoader {
                 // directory -> get list of files
                 RequestHeader requestHeader = null;
                 if (request.referrerhash() != null) {
-                    final DigestURL u = this.sb.getURL(request.referrerhash());
+                    final String u = this.sb.getURL(request.referrerhash());
                     if (u != null) {
                         requestHeader = new RequestHeader();
-                        requestHeader.put(RequestHeader.REFERER, u.toNormalform(true));
+                        requestHeader.put(RequestHeader.REFERER, u);
                     }
                 }
 
@@ -168,7 +168,7 @@ public class FTPLoader {
         Latency.updateAfterLoad(request.url(), System.currentTimeMillis() - start);
         return response;
     }
-    
+
     /**
      * Open a stream on the entry content from a FTP server
      *
@@ -187,7 +187,7 @@ public class FTPLoader {
         } else {
         	/* content can be null when no parser can handle it : then return the URL tokens as content */
         	streamResponse = new StreamResponse(response,
-        			new ByteArrayInputStream(UTF8.getBytes(request.url().toTokens())));        	
+        			new ByteArrayInputStream(UTF8.getBytes(request.url().toTokens())));
         }
 		return streamResponse;
     }
@@ -253,10 +253,10 @@ public class FTPLoader {
         // create response header
         RequestHeader requestHeader = null;
         if (request.referrerhash() != null) {
-            final DigestURL refurl = this.sb.getURL(request.referrerhash());
+            final String refurl = this.sb.getURL(request.referrerhash());
             if (refurl != null) {
                 requestHeader = new RequestHeader();
-                requestHeader.put(RequestHeader.REFERER, refurl.toNormalform(true));
+                requestHeader.put(RequestHeader.REFERER, refurl);
             }
         }
         final ResponseHeader responseHeader = new ResponseHeader(200);

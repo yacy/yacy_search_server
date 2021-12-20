@@ -871,9 +871,7 @@ public final class Protocol {
                     return;
                 }
                 try {
-                    long now = System.currentTimeMillis();
-                    this.segment.setFirstSeenTime(entry.hash(), Math.min(entry.moddate().getTime(), now));
-                    this.segment.setLoadTime(entry.hash(), now);
+                    this.segment.setFirstSeenTime(entry.hash(), Math.min(entry.moddate().getTime(), System.currentTimeMillis())); // Set only firstsee, but not load time - because we did not load the document
                     this.segment.fulltext().putMetadata(entry); // it will be checked inside the putMetadata that poor metadata does not overwrite rich metadata
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);

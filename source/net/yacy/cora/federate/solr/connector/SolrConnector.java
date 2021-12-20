@@ -37,15 +37,6 @@ import net.yacy.cora.sorting.ReversibleScoreMap;
 
 public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
 
-    public static class LoadTimeURL {
-        public long date;
-        public String url;
-        public LoadTimeURL(final String url, final long date) {
-            this.url = url;
-            this.date = date;
-        }
-    }
-
     /**
      * clear all caches: inside solr and ouside solr within the implementations of this interface
      */
@@ -120,11 +111,10 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
-     * @return the load time metadata (url and load data) if any entry in solr exists, null otherwise
+     * @return the url if any entry in solr exists, null otherwise
      * @throws IOException
      */
-    @Deprecated
-    public LoadTimeURL getLoadTimeURL(final String id) throws IOException;
+    public String getURL(String id) throws IOException;
 
     /**
      * check if a given document, identified by url hash as document id exists

@@ -62,7 +62,8 @@ public class linkstructure {
             if (about.length() == 12 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
                 byte[] urlhash = ASCII.getBytes(about);
                 try {
-                    url = authenticated ? sb.getURL(urlhash) : null;
+                    String u = authenticated ? sb.getURL(urlhash) : null;
+                    url = u == null ? null : new DigestURL(u);
                 } catch (IOException e) {
                     ConcurrentLog.logException(e);
                 }

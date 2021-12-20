@@ -310,9 +310,9 @@ public final class HTTPLoader {
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
         if (request.referrerhash() != null) {
-                    DigestURL refererURL = this.sb.getURL(request.referrerhash());
+                    String refererURL = this.sb.getURL(request.referrerhash());
                     if (refererURL != null) {
-                        requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
+                        requestHeader.put(RequestHeader.REFERER, refererURL);
                     }
         }
 

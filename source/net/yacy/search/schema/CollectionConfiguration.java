@@ -69,7 +69,6 @@ import net.yacy.cora.federate.solr.SchemaConfiguration;
 import net.yacy.cora.federate.solr.SchemaDeclaration;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
-import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.federate.solr.logic.BooleanLiteral;
 import net.yacy.cora.federate.solr.logic.CatchallLiteral;
 import net.yacy.cora.federate.solr.logic.Conjunction;
@@ -2030,8 +2029,8 @@ public class CollectionConfiguration extends SchemaConfiguration implements Seri
             for (final Map.Entry<byte[], CRV> entry: rm.entrySet()) {
                 if (entry == null || entry.getValue() == null) continue;
                 try {
-                    final LoadTimeURL md = connector.getLoadTimeURL(ASCII.String(entry.getKey()));
-                    ConcurrentLog.info("CollectionConfiguration", "CR for " + md.url);
+                    final String url = connector.getURL(ASCII.String(entry.getKey()));
+                    ConcurrentLog.info("CollectionConfiguration", "CR for " + url);
                     ConcurrentLog.info("CollectionConfiguration", ">> " + entry.getValue().toString());
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);

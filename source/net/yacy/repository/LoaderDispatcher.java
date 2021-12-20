@@ -155,7 +155,7 @@ public final class LoaderDispatcher {
     /**
      * loads a resource from cache or web/ftp/smb/file
      * on concurrent execution waits max 5 sec for the prev. loader to fill the cache (except for CacheStrategy.NOCACHE)
-     * 
+     *
      * @param request the request essentials
      * @param cacheStrategy strategy according to NOCACHE, IFFRESH, IFEXIST, CACHEONLY
      * @param maxFileSize
@@ -207,13 +207,13 @@ public final class LoaderDispatcher {
         final String protocol = url.getProtocol();
         final String host = url.getHost();
         final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.get(UTF8.getBytes(request.profileHandle()));
-        
+
         // check if url is in blacklist
         if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(Locale.ROOT), url.getFile())) {
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
-        
+
         // check if we have the page in the cache
         Response response = loadFromCache(request, cacheStrategy, agent, url, crawlProfile);
         if(response != null) {
@@ -267,8 +267,8 @@ public final class LoaderDispatcher {
         final String storeError = response.shallStoreCacheForCrawler();
         if (storeError == null) {
             try {
-            	/* Important : we associate here the loaded content with the URL response.url(). 
-            	 * On eventual redirection(s), response.url() provides the last redirection location. 
+            	/* Important : we associate here the loaded content with the URL response.url().
+            	 * On eventual redirection(s), response.url() provides the last redirection location.
             	 * If instead we associated content with the initial url (beginning of the redirection(s) chain),
             	 * the parsers would then have a wrong base URL when following links with relative URLs. */
                 Cache.store(response.url(), response.getResponseHeader(), response.getContent());
@@ -306,9 +306,9 @@ public final class LoaderDispatcher {
                 // in case that we want to return the cached content in the next step
                 final RequestHeader requestHeader = new RequestHeader();
                 requestHeader.put(HeaderFramework.USER_AGENT, agent.userAgent);
-                DigestURL refererURL = null;
+                String refererURL = null;
                 if (request.referrerhash() != null) refererURL = this.sb.getURL(request.referrerhash());
-                if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true));
+                if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL);
                 response = new Response(
                         request,
                         requestHeader,
@@ -347,7 +347,7 @@ public final class LoaderDispatcher {
         }
 		return response;
 	}
-    
+
     /**
      * Open an InputStream on a resource from the web, from ftp, from smb or a file
      * @param request the request essentials
@@ -365,13 +365,13 @@ public final class LoaderDispatcher {
         final String protocol = url.getProtocol();
         final String host = url.getHost();
         final CrawlProfile crawlProfile = request.profileHandle() == null ? null : this.sb.crawler.get(UTF8.getBytes(request.profileHandle()));
-        
+
         // check if url is in blacklist
         if (blacklistType != null && host != null && Switchboard.urlBlacklist.isListed(blacklistType, host.toLowerCase(Locale.ROOT), url.getFile())) {
             this.sb.crawlQueues.errorURL.push(request.url(), request.depth(), crawlProfile, FailCategory.FINAL_LOAD_CONTEXT, "url in blacklist", -1);
             throw new IOException("DISPATCHER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.$");
         }
-        
+
         // check if we have the page in the cache
         Response cachedResponse = loadFromCache(request, cacheStrategy, agent, url, crawlProfile);
 		if (cachedResponse != null) {
@@ -412,7 +412,7 @@ public final class LoaderDispatcher {
 
         return response;
     }
-    
+
 
     /**
      * Check access time: this is a double-check (we checked possibly already in the balancer)
@@ -446,7 +446,7 @@ public final class LoaderDispatcher {
 
 	/**
 	 * @param url the URL of a resource to load
-	 * @return the crawler configured maximum size allowed to load for the protocol of the URL 
+	 * @return the crawler configured maximum size allowed to load for the protocol of the URL
 	 */
     public int protocolMaxFileSize(final DigestURL url) {
     	if (url.isHTTP() || url.isHTTPS()) {
@@ -480,7 +480,7 @@ public final class LoaderDispatcher {
         // read resource body (if it is there)
         return entry.getContent();
     }
-    
+
     /**
      * Open the URL as an InputStream from the web or the cache
      * @param request must be not null
@@ -527,7 +527,7 @@ public final class LoaderDispatcher {
 
 		return response;
 	}
-    
+
     /**
      * Open the URL as an InputStream from the web or the cache. Apply the default per protocol configured maximum file size limit.
      * @param request must be not null
@@ -560,7 +560,7 @@ public final class LoaderDispatcher {
         if (x_robots_tag.indexOf("noindex",0) >= 0) {
             for (Document d: documents) d.setIndexingDenied(true);
         }
-        
+
         return documents;
     }
 
@@ -578,16 +578,16 @@ public final class LoaderDispatcher {
         try {
             Document[] documents = response.parse();
             Document merged = Document.mergeDocuments(location, response.getMimeType(), documents);
-            
+
             String x_robots_tag = response.getResponseHeader().getXRobotsTag();
             if (x_robots_tag.indexOf("noindex",0) >= 0) merged.setIndexingDenied(true);
-            
+
             return merged;
         } catch(final Parser.Failure e) {
             throw new IOException(e.getMessage());
         }
     }
-    
+
     /**
      * Similar to the loadDocument method, but streaming the resource content when possible instead of fully loading it in memory.
      * @param location URL of the resource to load
@@ -597,7 +597,7 @@ public final class LoaderDispatcher {
      * @return on parsed document or null when an error occurred while parsing
      * @throws IOException when the content can not be fetched or no parser support it
      */
-    public Document loadDocumentAsStream(final DigestURL location, final CacheStrategy cachePolicy, 
+    public Document loadDocumentAsStream(final DigestURL location, final CacheStrategy cachePolicy,
     		final BlacklistType blacklistType, final ClientIdentification.Agent agent) throws IOException {
         // load resource
         Request request = request(location, true, false);
@@ -615,18 +615,18 @@ public final class LoaderDispatcher {
         try {
             Document[] documents = streamResponse.parse();
             Document merged = Document.mergeDocuments(location, response.getMimeType(), documents);
-            
+
             String x_robots_tag = response.getResponseHeader().getXRobotsTag();
             if (x_robots_tag.indexOf("noindex",0) >= 0) {
             	merged.setIndexingDenied(true);
             }
-            
+
             return merged;
         } catch(final Parser.Failure e) {
             throw new IOException(e.getMessage());
         }
     }
-    
+
     /**
 	 * Similar to the loadDocument method, but streaming the resource content
 	 * when possible instead of fully loading it in memory.<br>
@@ -638,7 +638,7 @@ public final class LoaderDispatcher {
 	 * {@link Parser#isParseWithLimitsSupported()}. When available parsers do
 	 * not support parsing within limits, an exception is thrown when
 	 * content size is beyond maxBytes.
-	 * 
+	 *
 	 * @param location
 	 *            URL of the resource to load
 	 * @param cachePolicy
@@ -656,7 +656,7 @@ public final class LoaderDispatcher {
 	 * @throws IOException
 	 *             when the content can not be fetched or no parser support it
 	 */
-    public Document loadDocumentAsLimitedStream(final DigestURL location, final CacheStrategy cachePolicy, 
+    public Document loadDocumentAsLimitedStream(final DigestURL location, final CacheStrategy cachePolicy,
     		final BlacklistType blacklistType, final ClientIdentification.Agent agent, final int maxLinks, final long maxBytes) throws IOException {
         // load resource
         Request request = request(location, true, false);
@@ -674,12 +674,12 @@ public final class LoaderDispatcher {
         try {
             Document[] documents = streamResponse.parseWithLimits(maxLinks, maxBytes);
             Document merged = Document.mergeDocuments(location, response.getMimeType(), documents);
-            
+
             String x_robots_tag = response.getResponseHeader().getXRobotsTag();
             if (x_robots_tag.indexOf("noindex",0) >= 0) {
             	merged.setIndexingDenied(true);
             }
-            
+
             return merged;
         } catch(final Parser.Failure e) {
             throw new IOException(e.getMessage());

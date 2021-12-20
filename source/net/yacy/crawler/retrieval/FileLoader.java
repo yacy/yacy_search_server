@@ -1,6 +1,6 @@
 /**
  *  FileLoader
- *  SPDX-FileCopyrightText: 2010 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-FileCopyrightText: 2010 Michael Peter Christen <mc@yacy.net)>
  *  SPDX-License-Identifier: GPL-2.0-or-later
  *  First released 25.5.2010 at http://yacy.net
  *
@@ -50,7 +50,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.search.Switchboard;
 
 public class FileLoader {
-	
+
 	/** Default maximum file size allowed for the crawler */
     public static final int DEFAULT_MAXFILESIZE = 100000000;
 
@@ -73,14 +73,14 @@ public class FileLoader {
      */
     public Response load(final Request request, boolean acceptOnlyParseable) throws IOException {
         StreamResponse streamResponse = openInputStream(request, acceptOnlyParseable);
-        
+
         /* Read fully the stream and update the response */
         byte[] content = FileUtils.read(streamResponse.getContentStream());
         Response response = streamResponse.getResponse();
         response.setContent(content);
         return response;
     }
-    
+
     /**
      * Open a stream on the requested file. When actual file size is over maxBytes, return a stream on metadata only (URL tokens).
      *
@@ -95,10 +95,10 @@ public class FileLoader {
 
         RequestHeader requestHeader = null;
         if (request.referrerhash() != null) {
-            DigestURL ur = this.sb.getURL(request.referrerhash());
+            String ur = this.sb.getURL(request.referrerhash());
             if (ur != null) {
                 requestHeader = new RequestHeader();
-                requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true));
+                requestHeader.put(RequestHeader.REFERER, ur);
             }
         }
 
@@ -171,7 +171,7 @@ public class FileLoader {
 
         // load the resource
         InputStream is = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
-        
+
         if(size < 0 && maxBytes >= 0) {
 			/* If content length is unknown for some reason, let's apply now the eventual size restriction */
 			is = new StrictLimitInputStream(is, maxBytes,
@@ -189,7 +189,7 @@ public class FileLoader {
                 null);
         return new StreamResponse(response, is);
     }
-    
+
     /**
      * Open a stream on the requested file
      *

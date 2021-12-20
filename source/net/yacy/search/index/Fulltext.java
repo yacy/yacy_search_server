@@ -400,25 +400,17 @@ public final class Fulltext {
         String id = ASCII.String(idb);
         try {
             // because node entries are richer than metadata entries we must check if they exist to prevent that they are overwritten
-            long date = this.getLoadTime(id);
-            if (date == -1) {
+            SolrDocument doc = this.getDefaultConnector().getDocumentById(id, CollectionSchema.collection_sxt.getSolrFieldName());
+            if (doc == null || !doc.containsKey(CollectionSchema.collection_sxt.getSolrFieldName())) {
                 // document does not exist
                 putDocument(getDefaultConfiguration().metadata2solr(entry));
             } else {
-                // check if document contains rich data
-                if (date < entry.loaddate().getTime()) {
-                    SolrDocument doc = this.getDefaultConnector().getDocumentById(id, CollectionSchema.collection_sxt.getSolrFieldName());
-                    if (doc == null || !doc.containsKey(CollectionSchema.collection_sxt.getSolrFieldName())) {
-                        putDocument(getDefaultConfiguration().metadata2solr(entry));
-                    } else {
-                        Collection<Object> collections = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
-                        // collection dht is used to identify metadata from full crawled documents (if "dht" exists don't overwrite rich crawldata with metadata
-                        if (!collections.contains("dht")) return;
+                Collection<Object> collections = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
+                // collection dht is used to identify metadata from full crawled documents (if "dht" exists don't overwrite rich crawldata with metadata
+                if (!collections.contains("dht")) return;
 
-                        // passed all checks, overwrite document
-                        putDocument(getDefaultConfiguration().metadata2solr(entry));
-                    }
-                }
+                // passed all checks, overwrite document
+                putDocument(getDefaultConfiguration().metadata2solr(entry));
             }
         } catch (final SolrException e) {
             throw new IOException(e.getMessage(), e);
@@ -565,12 +557,10 @@ public final class Fulltext {
         return false;
     }
 
-    public DigestURL getURL(final String urlHash) throws IOException {
+    public String getURL(final String urlHash) throws IOException {
         if (urlHash == null || this.getDefaultConnector() == null) return null;
 
-        SolrConnector.LoadTimeURL md = this.getDefaultConnector().getLoadTimeURL(urlHash);
-        if (md == null) return null;
-        return new DigestURL(md.url, ASCII.getBytes(urlHash));
+        return this.getDefaultConnector().getURL(urlHash);
     }
 
     /**
@@ -580,19 +570,6 @@ public final class Fulltext {
      */
     public boolean exists(final String id) {
         return this.getDefaultConnector().exists(id);
-    }
-
-    /**
-     * get the load time of a resource.
-     * @param urlHash
-     * @return the time in milliseconds since epoch for the load time or -1 if the document does not exist
-     */
-    @Deprecated
-    private long getLoadTime(final String urlHash) throws IOException {
-        if (urlHash == null) return -1l;
-        SolrConnector.LoadTimeURL md = this.getDefaultConnector().getLoadTimeURL(urlHash);
-        if (md == null) return -1l;
-        return md.date;
     }
 
     public List<File> dumpFiles() {

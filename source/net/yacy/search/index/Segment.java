@@ -51,7 +51,6 @@ import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.solr.connector.SolrConnector;
-import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.order.ByteOrder;
@@ -423,16 +422,6 @@ public class Segment {
             ConcurrentLog.logException(e);
             return -1;
         }
-    }
-
-    public LoadTimeURL getLoadTimeURL(String url, byte[] urlhash) {
-        long t = getLoadTime(urlhash);
-        if (t < 0) return null;
-        return new LoadTimeURL(url, t);
-    }
-
-    public LoadTimeURL getLoadTimeURL(String url, String id) {
-        return getLoadTimeURL(url, id.getBytes());
     }
 
     /**
@@ -843,7 +832,8 @@ public class Segment {
         if (urlhash == null) return 0;
         // determine the url string
         try {
-            final DigestURL url = fulltext().getURL(ASCII.String(urlhash));
+            final String u = fulltext().getURL(ASCII.String(urlhash));
+            final DigestURL url = u == null ? null : new DigestURL(u);
             if (url == null) return 0;
 
             // parse the resource

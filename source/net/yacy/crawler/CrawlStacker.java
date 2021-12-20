@@ -44,7 +44,6 @@ import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
-import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
@@ -426,7 +425,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": " + dbocc.name();
         }
         String urls = url.toNormalform(false);
-        LoadTimeURL oldEntry = this.indexSegment.getLoadTimeURL(urls, url.hash());
+        final long oldDate = this.indexSegment.getLoadTime(url.hash());
 
         // deny urls that exceed allowed number of occurrences
         final int maxAllowedPagesPerDomain = profile.domMaxPages();
@@ -445,16 +444,16 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             */
         }
 
-        final Long oldDate = oldEntry == null ? null : oldEntry.date;
-        if (oldDate == null) {
+        //final Long oldDate = oldEntry == null ? null : oldEntry.date;
+        if (oldDate < 0) {
             return null; // no evidence that we know that url
         }
-        final boolean recrawl = profile.recrawlIfOlder() > oldDate.longValue();
+        final boolean recrawl = profile.recrawlIfOlder() > oldDate;
         final String urlstring = url.toNormalform(false);
         if (recrawl) {
             if (CrawlStacker.log.isFine())
                 CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
-                    ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
+                    ((System.currentTimeMillis() - oldDate) / 60000 / 60 / 24) + " days ago.");
         } else {
             return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": local index, recrawl rejected. Document date = "
                     + ISO8601Formatter.FORMATTER.format(new Date(oldDate)) + " is not older than crawl profile recrawl minimum date = "

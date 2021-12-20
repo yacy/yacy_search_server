@@ -81,15 +81,15 @@ public class IndexBrowser_p {
 
     /**
      * <p>Retrieve local index entries for a path, or for hosts with the most references. Also allow some maintaining operations on entries with load errors.</p>
-     * <p>Some parameters need administrator authentication or unauthenticated local host requests to be allowed : load, deleteLoadErrors, delete, reload404, 
+     * <p>Some parameters need administrator authentication or unauthenticated local host requests to be allowed : load, deleteLoadErrors, delete, reload404,
      * hosts="crawling" and hosts="error".
      * The "load" parameter can also be applied without authentication when "browser.load4everyone" configuration setting is true.</p>
      * <p>
      * Configuration settings :
      * <ul>
-     *     <li>browser.autoload : allow the administrator to stack URLs to the local crawl queue, manually with the "load" parameter, 
+     *     <li>browser.autoload : allow the administrator to stack URLs to the local crawl queue, manually with the "load" parameter,
      *         or automatically when the "path" parameter is filled with an unknown URL</li>
-     *  <li>browser.load4everyone : allow everyone to stack URLs to the local crawl queue. 
+     *  <li>browser.load4everyone : allow everyone to stack URLs to the local crawl queue.
      *          "browser.autoload" has also to be set to true to enable automatic loading on an unknown path</li>
      *  <li>publicSearchpage : set to false to restrict use of this servlet to authenticated administrator only</li>
      *  <li>decoration.hostanalysis : add supplementary hosts information for debug/analysis purpose</li>
@@ -98,11 +98,11 @@ public class IndexBrowser_p {
      * </p>
      * @param header servlet request header
      * @param post request parameters. Supported keys :<ul>
-     *                 <li>path : root URL or host name to browse (ignored when the hosts parameter is filled). When not yet locally indexed, this URL can be automatically crawled and indexed 
+     *                 <li>path : root URL or host name to browse (ignored when the hosts parameter is filled). When not yet locally indexed, this URL can be automatically crawled and indexed
      *                     when "browser.autoload" or "browser.load4everyone" configuration settings are set to true.</li>
      *                 <li>load : URL to crawl and index.</li>
      *                 <li>deleteLoadErrors : delete from the local index documents with load error (HTTP status different from 200 or any other failure).</li>
-     *                 <li>hosts : generate hosts with most references list. Supported values : 
+     *                 <li>hosts : generate hosts with most references list. Supported values :
      *                     <ul>
      *                         <li>"crawling" : restrict to host currently crawled</li>
      *                         <li>"error" : restrict to hosts with having at least one resource load error</li>
@@ -189,7 +189,7 @@ public class IndexBrowser_p {
 
         if (post.containsKey("deleteLoadErrors")) {
             try {
-                fulltext.getDefaultConnector().deleteByQuery("-" + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND " 
+                fulltext.getDefaultConnector().deleteByQuery("-" + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200 AND "
                         + CollectionSchema.httpstatus_i.getSolrFieldName() + AbstractSolrConnector.CATCHALL_DTERM); // make sure field exists
                 ConcurrentLog.info ("IndexBrowser_p:", "delete documents with httpstatus_i <> 200");
                 fulltext.getDefaultConnector().deleteByQuery(CollectionSchema.failtype_s.getSolrFieldName() + ":\"" + FailType.fail.name() + "\"" );
@@ -689,13 +689,13 @@ public class IndexBrowser_p {
                     // get all urls from the index and store them here
                     for (String id: internalIDs) {
                         if (id.equals(urlhash)) continue; // no self-references
-                        DigestURL u = fulltext.getURL(id);
-                        if (u != null) references_internal_urls.add(u.toNormalform(true));
+                        String u = fulltext.getURL(id);
+                        if (u != null) this.references_internal_urls.add(u);
                     }
                     for (String id: externalIDs) {
                         if (id.equals(urlhash)) continue; // no self-references
-                        DigestURL u = fulltext.getURL(id);
-                        if (u != null) references_external_urls.add(u.toNormalform(true));
+                        String u = fulltext.getURL(id);
+                        if (u != null) this.references_external_urls.add(u);
                     }
                 } catch (final IOException e) {
                 }
@@ -707,7 +707,7 @@ public class IndexBrowser_p {
         public String toString() {
             StringBuilder sbi = new StringBuilder();
             int c = 0;
-            for (String s: references_internal_urls) {
+            for (String s: this.references_internal_urls) {
                 sbi.append("<a href='").append(s).append("' target='_blank'><img src='env/grafics/i16.gif' alt='info' title='" + s + "' width='12' height='12'/></a>");
                 c++;
                 if (c % 80 == 0) sbi.append("<br/>");
@@ -715,7 +715,7 @@ public class IndexBrowser_p {
             if (sbi.length() > 0) sbi.insert(0, "<br/>internal referrer:");
             StringBuilder sbe = new StringBuilder();
             c = 0;
-            for (String s: references_external_urls) {
+            for (String s: this.references_external_urls) {
                 sbe.append("<a href='").append(s).append("' target='_blank'><img src='env/grafics/i16.gif' alt='info' title='" + s + "' width='12' height='12'/></a>");
                 c++;
                 if (c % 80 == 0) sbe.append("<br/>");

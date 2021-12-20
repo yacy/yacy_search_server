@@ -1921,12 +1921,20 @@ public final class Switchboard extends serverSwitch {
         this.crawlQueues.removeURL(hash);
     }
 
-    public DigestURL getURL(final byte[] urlhash) throws IOException {
+    public String getURL(final byte[] urlhash) throws IOException {
         if (urlhash == null) return null;
         if (urlhash.length == 0) return null;
-        final DigestURL url = this.index.fulltext().getURL(ASCII.String(urlhash));
+        final String url = this.index.fulltext().getURL(ASCII.String(urlhash));
         if (url != null) return url;
-        return this.crawlQueues.getURL(urlhash);
+        return this.crawlQueues.getURL(urlhash).toNormalform(true);
+    }
+
+    public String getURL(final String urlhash) throws IOException {
+        if (urlhash == null) return null;
+        if (urlhash.length() == 0) return null;
+        final String url = this.index.fulltext().getURL(urlhash);
+        if (url != null) return url;
+        return this.crawlQueues.getURL(urlhash.getBytes()).toNormalform(true);
     }
 
     public RankingProfile getRanking() {

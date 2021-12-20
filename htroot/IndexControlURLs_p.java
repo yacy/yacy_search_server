@@ -173,16 +173,15 @@ public class IndexControlURLs_p {
             /* Check the transaction is valid */
             TransactionManager.checkPostTransaction(header, post);
 
-            DigestURL url;
+            String url;
             try {
                 url = segment.fulltext().getURL(urlhash);
                 if (url == null) {
                     prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
                 } else {
-                    urlstring = url.toNormalform(true);
                     prop.put("urlstring", "");
                     sb.urlRemove(segment, urlhash.getBytes());
-                    prop.putHTML("result", "Removed URL " + urlstring);
+                    prop.putHTML("result", "Removed URL " + url);
                 }
             } catch (IOException e) {
                 prop.putHTML("result", "Error when querying the url hash " + urlhash + ":" + e.getMessage());

@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -96,33 +95,20 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     protected final static int pagesize_docs = 100;
     protected final static int pagesize_ids = 1000;
 
-    @Deprecated
-    protected static LoadTimeURL getLoadTimeURL(final Object doc) {
+    protected static String getURL(final Object doc) {
         if (doc == null) return null;
-        Object d = null;
         String url = null;
         if (doc instanceof SolrInputDocument) {
-            d = ((SolrInputDocument) doc).getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
             url = (String) ((SolrInputDocument) doc).getFieldValue(CollectionSchema.sku.getSolrFieldName());
         }
         if (doc instanceof SolrDocument) {
-            d = ((SolrDocument) doc).getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
             url = (String) ((SolrDocument) doc).getFieldValue(CollectionSchema.sku.getSolrFieldName());
         }
         if (doc instanceof org.apache.lucene.document.Document) {
-            String ds = ((org.apache.lucene.document.Document) doc).get(CollectionSchema.load_date_dt.getSolrFieldName());
-            try {
-                d = Long.parseLong(ds);
-            } catch (NumberFormatException e) {
-                d = -1l;
-            }
             url = ((org.apache.lucene.document.Document) doc).get(CollectionSchema.sku.getSolrFieldName());
         }
-        if (d == null) return null;
-        long date = -1;
-        if (d instanceof Long) date = ((Long) d).longValue();
-        if (d instanceof Date) date = ((Date) d).getTime();
-        return new LoadTimeURL(url, date);
+        if (url == null) return null;
+        return url;
     }
 
     /**
@@ -476,12 +462,11 @@ public abstract class AbstractSolrConnector implements SolrConnector {
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
-     * @return metadata if any entry in solr exists, null otherwise
+     * @return url if document exist or null otherwise
      * @throws IOException
      */
-    @Deprecated
     @Override
-    public LoadTimeURL getLoadTimeURL(String id) throws IOException {
+    public String getURL(String id) throws IOException {
         // construct raw query
         final SolrQuery params = new SolrQuery();
         //params.setQuery(CollectionSchema.id.getSolrFieldName() + ":\"" + id + "\"");
@@ -498,8 +483,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         final SolrDocumentList sdl = getDocumentListByParams(params);
         if (sdl == null || sdl.getNumFound() <= 0) return null;
         SolrDocument doc = sdl.iterator().next();
-        LoadTimeURL md = getLoadTimeURL(doc);
-        return md;
+        return getURL(doc);
     }
 
     /**

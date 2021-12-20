@@ -1,5 +1,5 @@
 // SMBLoader.java
-// SPDX-FileCopyrightText: 2010 Michael Peter Christen <mc@yacy.net)> 
+// SPDX-FileCopyrightText: 2010 Michael Peter Christen <mc@yacy.net)>
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Frankfurt a. M., Germany
 // first published 10.03.2010 on http://yacy.net
@@ -81,14 +81,14 @@ public class SMBLoader {
      */
     public Response load(final Request request, boolean acceptOnlyParseable) throws IOException {
         StreamResponse streamResponse = openInputStream(request, acceptOnlyParseable);
-        
+
         /* Read fully the stream and update the response */
         byte[] content = FileUtils.read(streamResponse.getContentStream());
         Response response = streamResponse.getResponse();
         response.setContent(content);
         return response;
     }
-    
+
     /**
      * Open a stream on the requested file
      *
@@ -102,10 +102,10 @@ public class SMBLoader {
 
         RequestHeader requestHeader = null;
         if (request.referrerhash() != null) {
-            DigestURL ur = this.sb.getURL(request.referrerhash());
+            String ur = this.sb.getURL(request.referrerhash());
             if (ur != null) {
                 requestHeader = new RequestHeader();
-                requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true));
+                requestHeader.put(RequestHeader.REFERER, ur);
             }
         }
 
