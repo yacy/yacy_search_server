@@ -217,7 +217,7 @@ public final class Fulltext {
             }
             return null;
         } finally {
-            this.solrInstancesLock.unlock();    
+            this.solrInstancesLock.unlock();
         }
     }
 
@@ -226,7 +226,7 @@ public final class Fulltext {
         try {
             return this.solrInstances.getDefaultMirrorConnector();
         } finally {
-            this.solrInstancesLock.unlock();    
+            this.solrInstancesLock.unlock();
         }
     }
 
@@ -319,8 +319,8 @@ public final class Fulltext {
     private long lastCommit = 0;
     public void commit(boolean softCommit) {
         long t = System.currentTimeMillis();
-        if (lastCommit + 10000 > t) return;
-        lastCommit = t;
+        if (this.lastCommit + 10000 > t) return;
+        this.lastCommit = t;
         getDefaultConnector().commit(softCommit);
         if (this.writeWebgraph) getWebgraphConnector().commit(softCommit);
     }
@@ -332,13 +332,13 @@ public final class Fulltext {
      * are accessible) of the returned document.
      * If the no document with url.hash = solrdocument.id is found in the embedded
      * Solr index null is return.
-     * 
+     *
      * @param element rwi wordreference
      * @return URIMetadataNode (solrdocument) with all fields stored in embedded solr index
      */
     public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
         if (element == null) return null;
-        WordReferenceVars wre = element.getElement();        
+        WordReferenceVars wre = element.getElement();
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
         long score = element.getWeight();
         URIMetadataNode node = getMetadata(wre.urlhash(), wre, score);
@@ -572,7 +572,7 @@ public final class Fulltext {
         if (md == null) return null;
         return new DigestURL(md.url, ASCII.getBytes(urlHash));
     }
-    
+
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
@@ -587,6 +587,7 @@ public final class Fulltext {
      * @param urlHash
      * @return the time in milliseconds since epoch for the load time or -1 if the document does not exist
      */
+    @Deprecated
     private long getLoadTime(final String urlHash) throws IOException {
         if (urlHash == null) return -1l;
         SolrConnector.LoadTimeURL md = this.getDefaultConnector().getLoadTimeURL(urlHash);
@@ -727,7 +728,7 @@ public final class Fulltext {
             String nowstr = new Date(now).toInstant().toString();
             String fromstr = new Date(from).toInstant().toString();
             String dateq = CollectionSchema.load_date_dt.getSolrFieldName() + ":[" + fromstr + " TO " + nowstr + "]";
-            query = query == null || AbstractSolrConnector.CATCHALL_QUERY.equals(query) ? dateq : query + " AND " + dateq; 
+            query = query == null || AbstractSolrConnector.CATCHALL_QUERY.equals(query) ? dateq : query + " AND " + dateq;
         } else {
             query = query == null? AbstractSolrConnector.CATCHALL_QUERY : query;
         }
@@ -744,7 +745,7 @@ public final class Fulltext {
         final Date firstdate, lastdate;
         if (firstdoclist.size() == 0 || lastdoclist.size() == 0) {
             /* Now check again the number of documents without sorting, for compatibility with old fields indexed without DocValues fields (prior to YaCy 1.90)
-             * When the local Solr index contains such old documents, requests with sort query return nothing and trace in logs 
+             * When the local Solr index contains such old documents, requests with sort query return nothing and trace in logs
              * "java.lang.IllegalStateException: unexpected docvalues type NONE for field..." */
             doccount = this.getDefaultConnector().getCountByQuery(query);
             if(doccount == 0) {
@@ -764,8 +765,8 @@ public final class Fulltext {
             firstdateobject = firstdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
             lastdateobject = lastdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
 
-            /* When firstdate or lastdate is null, we use a default one just to generate a proper dump file path 
-             * This should not happen because load_date_dt field is mandatory in the main Solr schema, 
+            /* When firstdate or lastdate is null, we use a default one just to generate a proper dump file path
+             * This should not happen because load_date_dt field is mandatory in the main Solr schema,
              * but for some reason some documents might end up here with an empty load_date_dt field value */
             if(firstdateobject instanceof Date) {
                 firstdate = (Date) firstdateobject;
@@ -854,7 +855,7 @@ public final class Fulltext {
 
             try (/* Resources automatically closed by this try-with-resources statement */
                 final OutputStream os = new FileOutputStream(this.format == ExportFormat.solr ? new File(this.f.getAbsolutePath() + ".gz") : this.f);
-                final OutputStream wrappedStream = ((this.format == ExportFormat.solr)) ? new GZIPOutputStream(os, 65536){{def.setLevel(Deflater.BEST_COMPRESSION);}} : os;
+                final OutputStream wrappedStream = ((this.format == ExportFormat.solr)) ? new GZIPOutputStream(os, 65536){{this.def.setLevel(Deflater.BEST_COMPRESSION);}} : os;
                 final PrintWriter pw =  new PrintWriter(new BufferedOutputStream(wrappedStream));
             ) {
                 if (this.format == ExportFormat.html) {
@@ -907,7 +908,7 @@ public final class Fulltext {
                             this.count++;
                         }
                     } else {
-                        BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true, 
+                        BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true,
                                 CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.title.getSolrFieldName(),
                                 CollectionSchema.author.getSolrFieldName(), CollectionSchema.description_txt.getSolrFieldName(), CollectionSchema.size_i.getSolrFieldName(), CollectionSchema.last_modified.getSolrFieldName());
                         SolrDocument doc;

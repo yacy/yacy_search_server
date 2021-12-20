@@ -425,23 +425,15 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         if (dbocc != null) {
             return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": " + dbocc.name();
         }
-        final String urlhash = ASCII.String(url.hash());
-        LoadTimeURL oldEntry = null;
-        try {
-            oldEntry = this.indexSegment.fulltext().getDefaultConnector().getLoadTimeURL(urlhash);
-        } catch (final IOException e) {
-            // if an exception here occurs then there is the danger that urls which had been in the crawler are overwritten a second time
-            // to prevent that, we reject urls in these events
-            ConcurrentLog.logException(e);
-            return "exception during double-test: " + e.getMessage();
-        }
+        String urls = url.toNormalform(false);
+        LoadTimeURL oldEntry = this.indexSegment.getLoadTimeURL(urls, url.hash());
 
         // deny urls that exceed allowed number of occurrences
         final int maxAllowedPagesPerDomain = profile.domMaxPages();
         if (maxAllowedPagesPerDomain < Integer.MAX_VALUE && maxAllowedPagesPerDomain > 0) {
             final AtomicInteger dp = profile.getCount(url.getHost());
             if (dp != null && dp.get() >= maxAllowedPagesPerDomain) {
-                if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + url.toNormalform(false) + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
+                if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urls + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
                 return "crawl stack domain counter exceeded (test by profile)";
             }
 

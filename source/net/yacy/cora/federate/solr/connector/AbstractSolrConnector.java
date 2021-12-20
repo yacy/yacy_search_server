@@ -69,7 +69,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         SOLR_ID_and_LOAD_DATE_FIELDS.add(CollectionSchema.id.getSolrFieldName());
         SOLR_ID_and_LOAD_DATE_FIELDS.add(CollectionSchema.load_date_dt.getSolrFieldName());
     }
-    
+
     public final static SolrDocument POISON_DOCUMENT = new SolrDocument();
     public final static String POISON_ID = "POISON_ID";
     public final static String CATCHALL_TERM = "[* TO *]";
@@ -92,10 +92,11 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         catchSuccessQuery.setRows(0);
         catchSuccessQuery.setStart(0);
     }
-    
+
     protected final static int pagesize_docs = 100;
     protected final static int pagesize_ids = 1000;
-    
+
+    @Deprecated
     protected static LoadTimeURL getLoadTimeURL(final Object doc) {
         if (doc == null) return null;
         Object d = null;
@@ -139,7 +140,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         }
         return fields;
     }
-    
+
     /**
      * Get results from a solr query as a stream of documents.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.
@@ -170,7 +171,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         querystrings.add(querystring);
         return concurrentDocumentsByQueries(querystrings, sort, offset, maxcount, maxtime, buffersize, concurrency, prefetchIDs, fields);
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -223,7 +224,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         }
         return queue;
     }
-    
+
     @Override
     public Runnable newDocumentsByQueriesTask(
     		final BlockingQueue<SolrDocument> queue,
@@ -236,7 +237,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             final int concurrency,
             final String ... fields) {
     	Objects.requireNonNull(queue, "The queue parameter must not be null.");
-    	
+
         if (querystrings == null || querystrings.isEmpty()) {
 			return () -> {
 				for (int i = 0; i < Math.max(1, concurrency); i++) {
@@ -315,7 +316,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             }
         };
     }
-    
+
     /**
      * get a document id result stream from a solr query.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_ID is returned.
@@ -341,7 +342,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         querystrings.add(querystring);
         return concurrentIDsByQueries(querystrings, sort, offset, maxcount, maxtime, buffersize, concurrency);
     }
-    
+
     /**
      * get a document id result stream from a set of solr queries.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_ID is returned.
@@ -420,7 +421,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
 
         };
     }
-    
+
     /**
      * get a query result from solr
      * to get all results set the query String to "*:*"
@@ -436,7 +437,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             final String ... fields) throws IOException {
         // construct query
         final SolrQuery params = getSolrQuery(querystring, sort, offset, count, fields);
-        
+
         // query the server
         final SolrDocumentList docs = getDocumentListByParams(params);
         return docs;
@@ -471,13 +472,14 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         }
         return params;
     }
-    
+
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
      * @return metadata if any entry in solr exists, null otherwise
      * @throws IOException
      */
+    @Deprecated
     @Override
     public LoadTimeURL getLoadTimeURL(String id) throws IOException {
         // construct raw query
@@ -499,7 +501,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         LoadTimeURL md = getLoadTimeURL(doc);
         return md;
     }
-    
+
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
@@ -515,7 +517,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             return false;
         }
     }
-    
+
     /**
      * get the number of results when this query is done.
      * This should only be called if the actual result is never used, and only the count is interesting
@@ -564,7 +566,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         params.clearSorts();
         params.setIncludeScore(false);
         for (String field: fields) params.addFacetField(field);
-        
+
         // query the server
         QueryResponse rsp = getResponseByParams(params);
         LinkedHashMap<String, ReversibleScoreMap<String>> facets = new LinkedHashMap<String, ReversibleScoreMap<String>>(fields.length);
@@ -578,7 +580,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         }
         return facets;
     }
-    
+
     @Override
     public SolrDocument getDocumentById(final String id, final String ... fields) throws IOException {
         assert id.length() == Word.commonHashLength : "wrong id: " + id;
@@ -606,7 +608,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
             throw new IOException(e.getMessage(), e);
         }
     }
-    
+
     /**
      * Update a solr document.
      * This will write only a partial update for all fields given in the SolrInputDocument
@@ -634,7 +636,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         for (SolrInputDocument doc: solrdoc) docs.add(partialUpdatePatch(doc));
         this.add(docs);
     }
-    
+
     private SolrInputDocument partialUpdatePatch(final SolrInputDocument docIn) {
         SolrInputDocument docOut = new SolrInputDocument();
         docOut.setField(CollectionSchema.id.name(), docIn.getFieldValue(CollectionSchema.id.name()));
@@ -649,6 +651,6 @@ public abstract class AbstractSolrConnector implements SolrConnector {
         }
         return docOut;
     }
-    
+
 
 }
