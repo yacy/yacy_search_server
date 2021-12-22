@@ -426,7 +426,8 @@ public class LegacyBalancer implements Balancer {
                 rest = rest + 1000 * loops;
                 loops = 0;
             }
-            Thread.currentThread().setName("Balancer waiting for " +crawlEntry.url().getHost() + ": " + sleeptime + " milliseconds");
+            final String tname = Thread.currentThread().getName();
+            Thread.currentThread().setName("Balancer waiting for " + crawlEntry.url().getHost() + ": " + sleeptime + " milliseconds");
             synchronized(this) {
                 // must be synchronized here to avoid 'takeover' moves from other threads which then idle the same time which would not be enough
                 if (rest > 0) {try {Thread.sleep(rest);} catch (final InterruptedException e) {}}
@@ -435,6 +436,7 @@ public class LegacyBalancer implements Balancer {
                     try {Thread.sleep(1000); } catch (final InterruptedException e) {}
                 }
             }
+            Thread.currentThread().setName(tname); // restore the name so we do not see this in the thread dump as a waiting thread
             Latency.updateAfterSelection(crawlEntry.url(), robotsTime);
         }
         return crawlEntry;

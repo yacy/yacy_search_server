@@ -504,12 +504,14 @@ public class HostQueue implements Balancer {
                 rest = rest + 1000 * loops;
                 loops = 0;
             }
+            final String tname = Thread.currentThread().getName();
             Thread.currentThread().setName("Balancer waiting for " + crawlEntry.url().getHost() + ": " + sleeptime + " milliseconds");
             if (rest > 0) {try {Thread.sleep(rest);} catch (final InterruptedException e) {}}
             for (int i = 0; i < loops; i++) {
                 if (log.isInfo()) log.info("waiting for " + crawlEntry.url().getHost() + ": " + (loops - i) + " seconds remaining...");
                 try {Thread.sleep(1000); } catch (final InterruptedException e) {}
             }
+            Thread.currentThread().setName(tname); // restore the name so we do not see this in the thread dump as a waiting thread
             Latency.updateAfterSelection(crawlEntry.url(), robotsTime);
         }
         return crawlEntry;
