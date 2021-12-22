@@ -143,7 +143,6 @@ public class IndexControlURLs_p {
             if ( post.get("deleteFirstSeen", "").equals("on")) {
                 try {
                     segment.firstSeenIndex().clear();
-                    segment.loadTimeIndex().clear();
                 } catch (final IOException e) {}
             }
             if ( post.get("deleteCrawlQueues", "").equals("on") ) {
@@ -166,6 +165,7 @@ public class IndexControlURLs_p {
 
             ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
             int i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, agent, CacheStrategy.IFEXIST);
+            try {segment.loadTimeIndex().remove(urlhash.getBytes());} catch (IOException e) {}
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
         }
 
@@ -183,6 +183,7 @@ public class IndexControlURLs_p {
                     sb.urlRemove(segment, urlhash.getBytes());
                     prop.putHTML("result", "Removed URL " + url);
                 }
+                segment.loadTimeIndex().remove(urlhash.getBytes());
             } catch (IOException e) {
                 prop.putHTML("result", "Error when querying the url hash " + urlhash + ":" + e.getMessage());
             }
@@ -201,6 +202,7 @@ public class IndexControlURLs_p {
                 prop.put("result", "No input given; nothing deleted.");
             } else {
                 sb.urlRemove(segment, urlhash.getBytes());
+                try {segment.loadTimeIndex().remove(urlhash.getBytes());} catch (IOException e) {}
                 prop.putHTML("result", "Removed URL " + urlstring);
             }
         }
@@ -267,6 +269,7 @@ public class IndexControlURLs_p {
             Set<String> hostnames = new HashSet<String>();
             hostnames.add(domain);
             segment.fulltext().deleteStaleDomainNames(hostnames, null);
+            try {segment.loadTimeIndex().clear();} catch (IOException e) {} // delete all to prevent that existing entries reject reloading
             // trigger the loading of the table
             post.put("statistics", "");
         }

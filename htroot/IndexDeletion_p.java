@@ -52,7 +52,7 @@ public class IndexDeletion_p {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        
+
         /* Acquire a transaction token for the next POST form submission */
         prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
 
@@ -61,8 +61,8 @@ public class IndexDeletion_p {
         if (post == null || post.size() == 0) defaultConnector.commit(false); // we must do a commit here because the user cannot see a proper count.
 
         String schemaName = CollectionSchema.CORE_NAME;
-        if (post != null) schemaName = post.get("core", schemaName); 
-        
+        if (post != null) schemaName = post.get("core", schemaName);
+
         // Delete by URL Matching
         String urldelete = post == null ? "" : post.get("urldelete", "");
         boolean urldelete_mm_subpath_checked = post == null ? true : post.get("urldelete-mm", "subpath").equals("subpath");
@@ -70,7 +70,7 @@ public class IndexDeletion_p {
         prop.put("urldelete-mm-subpath-checked", urldelete_mm_subpath_checked ? 1 : 0);
         prop.put("urldelete-mm-regexp-checked", urldelete_mm_subpath_checked ? 0 : 1);
         prop.put("urldelete-active", 0);
-        
+
         // Delete by Age
         int timedelete_number = post == null ? 14 : post.getInt("timedelete-number", 14);
         String timedelete_unit = post == null ? "day" : post.get("timedelete-unit", "day");
@@ -84,7 +84,7 @@ public class IndexDeletion_p {
         prop.put("timedelete-source-loaddate-checked", timedelete_source_loaddate_checked ? 1 : 0);
         prop.put("timedelete-source-lastmodified-checked", timedelete_source_loaddate_checked ? 0 : 1);
         prop.put("timedelete-active", 0);
-        
+
         // Delete Collections
         boolean collectiondelete_mode_unassigned_checked = post == null ? true : post.get("collectiondelete-mode", "unassigned").equals("unassigned");
         String collectiondelete = post == null ? "" : post.get("collectiondelete", "");
@@ -112,7 +112,7 @@ public class IndexDeletion_p {
         prop.put("collectiondelete-mode-assigned-checked", collectiondelete_mode_unassigned_checked ? 0 : 1);
         prop.putHTML("collectiondelete-select_collectiondelete", collectiondelete);
         prop.put("collectiondelete-active", 0);
-        
+
         // Delete by Solr Query
         prop.put("querydelete", "");
         String querydelete = post == null ? "" : post.get("querydelete", "");
@@ -121,16 +121,16 @@ public class IndexDeletion_p {
         prop.putHTML("querydelete", querydelete);
         prop.put("querydelete-active", 0);
 
-        
+
         int count = post == null ? -1 : post.getInt("count", -1);
 
         if (post != null && (post.containsKey("simulate-urldelete") || post.containsKey("engage-urldelete"))) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
             boolean simulate = post.containsKey("simulate-urldelete");
             // parse the input
-            urldelete = urldelete.trim(); 
+            urldelete = urldelete.trim();
             if (urldelete_mm_subpath_checked) {
                 // collect using url stubs
                 Set<String> ids = new HashSet<String>();
@@ -154,13 +154,14 @@ public class IndexDeletion_p {
                         }
                     } catch (final MalformedURLException e) {}
                 }
-                
+
                 if (simulate) {
                     count = ids.size();
                     prop.put("urldelete-active", count == 0 ? 2 : 1);
                 } else {
                     sb.remove(ids);
                     defaultConnector.commit(false);
+                    ids.forEach(urlhash -> {try {sb.index.loadTimeIndex().remove(urlhash.getBytes());} catch (IOException e) {}});
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs matching with " + urldelete);
                     prop.put("urldelete-active", 2);
                 }
@@ -177,6 +178,7 @@ public class IndexDeletion_p {
                     try {
                         defaultConnector.deleteByQuery(regexquery);
                         defaultConnector.commit(false);
+                        try {sb.index.loadTimeIndex().clear();} catch (IOException e) {}
                         sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, regex match = " + urldelete);
                     } catch (final IOException e) {
                     }
@@ -187,9 +189,9 @@ public class IndexDeletion_p {
         }
 
         if (post != null && (post.containsKey("simulate-timedelete") || post.containsKey("engage-timedelete"))) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
             boolean simulate = post.containsKey("simulate-timedelete");
             Date deleteageDate = null;
             long t = timeParser(timedelete_number, timedelete_unit); // year, month, day, hour
@@ -206,6 +208,7 @@ public class IndexDeletion_p {
                 try {
                     defaultConnector.deleteByQuery(collection1Query);
                     defaultConnector.commit(false);
+                    try {sb.index.loadTimeIndex().clear();} catch (IOException e) {}
                     if (webgraphConnector != null) webgraphConnector.deleteByQuery(webgraphQuery);
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, docs older than " + timedelete_number + " " + timedelete_unit);
                 } catch (final IOException e) {
@@ -214,11 +217,11 @@ public class IndexDeletion_p {
             }
             prop.put("timedelete-active_count", count);
         }
-        
+
         if (post != null && (post.containsKey("simulate-collectiondelete") || post.containsKey("engage-collectiondelete"))) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
             boolean simulate = post.containsKey("simulate-collectiondelete");
             collectiondelete = collectiondelete.replaceAll(" ","").replaceAll(",", "|");
             String query = collectiondelete_mode_unassigned_checked ? "-" + CollectionSchema.collection_sxt + AbstractSolrConnector.CATCHALL_DTERM : collectiondelete.length() == 0 ? CollectionSchema.collection_sxt + ":\"\"" : QueryModifier.parseCollectionExpression(collectiondelete);
@@ -232,6 +235,7 @@ public class IndexDeletion_p {
                 try {
                     defaultConnector.deleteByQuery(query);
                     defaultConnector.commit(false);
+                    try {sb.index.loadTimeIndex().clear();} catch (IOException e) {}
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, collection " + collectiondelete);
                 } catch (final IOException e) {
                 }
@@ -239,11 +243,11 @@ public class IndexDeletion_p {
             }
             prop.put("collectiondelete-active_count", count);
         }
-        
+
         if (post != null && (post.containsKey("simulate-querydelete") || post.containsKey("engage-querydelete"))) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
             boolean simulate = post.containsKey("simulate-querydelete");
 
             SolrConnector connector = schemaName.equals(CollectionSchema.CORE_NAME) ? defaultConnector : sb.index.fulltext().getWebgraphConnector();
@@ -258,6 +262,7 @@ public class IndexDeletion_p {
                     ConcurrentLog.info("IndexDeletion", "delete by query \"" + querydelete + "\", size before deletion = " + connector.getSize());
                     connector.deleteByQuery(querydelete);
                     connector.commit(false);
+                    try {sb.index.loadTimeIndex().clear();} catch (IOException e) {}
                     ConcurrentLog.info("IndexDeletion", "delete by query \"" + querydelete + "\", size after commit = " + connector.getSize());
                     sb.tables.recordAPICall(post, "IndexDeletion_p.html", WorkTables.TABLE_API_TYPE_DELETION, "deletion, solr query, q = " + querydelete);
                 } catch (final IOException e) {
@@ -267,14 +272,14 @@ public class IndexDeletion_p {
             prop.put("querydelete-active_count", count);
         }
         prop.put("doccount", defaultConnector.getSize());
-        
+
 
         prop.put("cores_" + 0 + "_name", CollectionSchema.CORE_NAME);
         prop.put("cores_" + 0 + "_selected", CollectionSchema.CORE_NAME.equals(schemaName) ? 1 : 0);
         prop.put("cores_" + 1 + "_name", WebgraphSchema.CORE_NAME);
         prop.put("cores_" + 1 + "_selected", WebgraphSchema.CORE_NAME.equals(schemaName) ? 1 : 0);
         prop.put("cores", 2);
-        
+
         // return rewrite properties
         return prop;
     }

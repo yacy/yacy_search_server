@@ -416,6 +416,7 @@ public class Crawler_p {
                     if ("smb.ftp".indexOf(u.getProtocol()) >= 0 || "pdf".equals(MultiProtocolURL.getFileExtension(u.getFileName()))) anysmbftporpdf = true;
                 }
                 sb.index.fulltext().remove(deleteIDs);
+                deleteIDs.forEach(urlhash -> {try {sb.index.loadTimeIndex().remove(urlhash.getBytes());} catch (IOException e) {}});
                 sb.crawlQueues.removeHosts(hosthashes);
                 sb.index.fulltext().commit(true);
 
@@ -437,6 +438,7 @@ public class Crawler_p {
                                 String basepath = u.toNormalform(true);
                                 if (!basepath.endsWith("/")) {final int p = basepath.lastIndexOf("/"); if (p > 0) basepath = basepath.substring(0, p + 1);}
                                 final int count = sb.index.fulltext().remove(basepath, deleteageDate);
+                                try {sb.index.loadTimeIndex().clear();} catch (IOException e) {}
                                 if (count > 0) ConcurrentLog.info("Crawler_p", "deleted " + count + " documents for host " + u.getHost());
                             }
                         }
