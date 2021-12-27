@@ -88,7 +88,7 @@ public class yacysearchitem {
     private static final int MAX_NAME_LENGTH = 60;
     private static final int MAX_URL_LENGTH = 120;
     /** Default image item width in pixels */
-    private static final int DEFAULT_IMG_WIDTH = 128;
+    private static final int DEFAULT_IMG_WIDTH = 256;
     /** Default image item height in pixels */
     private static final int DEFAULT_IMG_HEIGHT = DEFAULT_IMG_WIDTH;
 

@@ -33,6 +33,7 @@ body {
 }
 @media (min-width: 768px) {
   .sidebar {
+    width: 15%;
     position: fixed;
     top: 61px;
     bottom: 0;
@@ -131,4 +132,6 @@ ul.nav li.dropdown:hover ul.dropdown-menu{
 }
 .col-md-9 {
     overflow-x: hidden;
+	margin-left: 15%;
+	width: 85%;
 }
