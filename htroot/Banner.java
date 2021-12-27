@@ -60,7 +60,7 @@ public class Banner {
             textcolor = post.get("textcolor", textcolor);
             bordercolor = post.get("bordercolor", bordercolor);
             width = post.getInt("width", width);
-            height = post.getInt("heigth", height);
+            height = post.getInt("height", height);
         }
 
         String name = "";

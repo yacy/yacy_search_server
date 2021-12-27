@@ -57,11 +57,7 @@ network.unit.remotecrawl.speed = 300
 # addresses of seed-list bootstrap locations
 network.unit.bootstrap.seedlist0 = http://sixcooler.de/yacy/seed.txt
 network.unit.bootstrap.seedlist1 = http://rptr.me/yacy/seed.txt
-network.unit.bootstrap.seedlist2 = https://yacy.tschability.ch/seed.txt
-network.unit.bootstrap.seedlist3 = http://www1.isg.hamshack.info/seed.txt
-network.unit.bootstrap.seedlist4 = http://5.45.105.16/yacyseed
-network.unit.bootstrap.seedlist5 = http://berndkwasnik.de/yacy/seed.txt
-network.unit.bootstrap.seedlist6 = http://yacy.1a-referenzen.de/seed.txt
+network.unit.bootstrap.seedlist2 = http://5.45.105.16/yacyseed
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
@@ -77,6 +73,6 @@ network.unit.protocol.control = uncontrolled
 network.unit.access.whitelist = 10\..*,127\..*,172\.(1[6-9]|2[0-9]|3[0-1])\..*,169\.254\..*,192\.168\..*,localhost
 network.unit.access.blacklist =
 
-# greedy learning: fast information acquisition heuristic for new peers 
+# greedy learning: fast information acquisition heuristic for new peers
 greedylearning.enabled = true
 greedylearning.limit.doccount = 1000
