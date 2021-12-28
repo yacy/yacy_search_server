@@ -19,7 +19,7 @@
     }::#(item)#::#(nl)#::    ,#(/nl)#
     {
       "title": "#[name]#",
-      "icon": "/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=#[code]#",
+      "icon": "/ViewImage.png?maxwidth=256&amp;maxheight=256&amp;code=#[code]#",
       "image": "#[href]#",
       "cache": "#[hrefCache]#",
       "url": "#[source]#",

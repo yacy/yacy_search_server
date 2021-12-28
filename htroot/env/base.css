@@ -258,8 +258,8 @@ tt, *.tt {
 
 .thumbcontainer {
   margin: 2px;
-  width: 128px;
-  height: 128px; /* 96px thumbnail + some lines of text */
+  width: 256px;
+  height: 256px; /* 96px thumbnail + some lines of text */
   float: left;
   /* Cut non square images not rendered by YaCy ViewImage */
   overflow: hidden;
@@ -600,10 +600,10 @@ ul.SubMenu a.MenuItemLink {
 
 a.thumblink {
   display:block;
-  width: 128px;
-  height: 128px;
+  width: 256px;
+  height: 256px;
   margin: 2px;
-  line-height: 128px;
+  line-height: 256px;
   text-align: center;
   overflow: hidden;
 }
