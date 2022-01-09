@@ -213,10 +213,10 @@ public final class LogParser {
     private long DHTSendTraffic=0;
     private int DHTSendURLs=0;
     private int RWIRejectCount=0;
-    private final Set<String> RWIRejectPeerNames = new HashSet<String>();
-    private final Set<String> RWIRejectPeerHashs = new HashSet<String>();
-    private final Set<String> DHTPeerNames = new HashSet<String>();
-    private final Set<String> DHTPeerHashs = new HashSet<String>();
+    private final Set<String> RWIRejectPeerNames = new HashSet<>();
+    private final Set<String> RWIRejectPeerHashs = new HashSet<>();
+    private final Set<String> DHTPeerNames = new HashSet<>();
+    private final Set<String> DHTPeerHashs = new HashSet<>();
     private int DHTSelectionTargetCount = 1;
     private int DHTSelectionWordsCount = 0;
     private int DHTSelectionWordsTimeCount = 0;
@@ -437,7 +437,7 @@ public final class LogParser {
     }
 
     public final Map<String, Object> getResults() {
-        final Map<String, Object> results = new HashMap<String, Object>();
+        final Map<String, Object> results = new HashMap<>();
         results.put(PARSER_VERSION          , Float.valueOf(parserVersion));
         results.put(URLS_RECEIVED           , Integer.valueOf(this.urlSum));
         results.put(URLS_REQUESTED          , Integer.valueOf(this.urlReqSum));
@@ -473,10 +473,10 @@ public final class LogParser {
         results.put(INDEXED_WORDS           , Integer.valueOf(this.indexedWordSum));
         results.put(INDEXED_SITES_SIZE      , Integer.valueOf(this.indexedSiteSizeSum));
         results.put(INDEXED_ANCHORS         , Integer.valueOf(this.indexedAnchorsCount));
-//        results.put(INDEXED_STACK_TIME      , new Integer(indexedStackingTime));
-//        results.put(INDEXED_PARSE_TIME      , new Integer(indexedParsingTime));
-//        results.put(INDEXED_INDEX_TIME      , new Integer(indexedIndexingTime));
-//        results.put(INDEXED_STORE_TIME      , new Integer(indexedStorageTime));
+//        results.put(INDEXED_STACK_TIME      , Integer.valueOf(indexedStackingTime));
+//        results.put(INDEXED_PARSE_TIME      , Integer.valueOf(indexedParsingTime));
+//        results.put(INDEXED_INDEX_TIME      , Integer.valueOf(indexedIndexingTime));
+//        results.put(INDEXED_STORE_TIME      , Integer.valueOf(indexedStorageTime));
         results.put(INDEXED_LINKSTORE_TIME , Integer.valueOf(this.indexedLinkStorageTime));
         results.put(INDEXED_INDEXSTORE_TIME, Integer.valueOf(this.indexedIndexStorageTime));
         results.put(TOTAL_PARSER_TIME      , Long.valueOf(this.totalParserTime));

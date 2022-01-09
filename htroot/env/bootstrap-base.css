@@ -2,9 +2,14 @@
  * Base bootstrap structure, this should become part of base.css later
  */
 
-/* Move down content because we have a fixed navbar that is 50px tall */
+.navbar {
+  padding-top: 5px;
+  min-height: 60px;
+}
+
+/* Move down content because we have a fixed navbar that is 60px tall */
 body {
-  padding-top: 57px;
+  padding-top: 70px;
 }
 
 
@@ -23,17 +28,19 @@ body {
 /* Hide for mobile, show later */
 .sidebar {
   display: none;
-  margin-top: -14px;
+  margin-top: -1px;
+  margin-left: 8px;
 }
 @media (min-width: 768px) {
   .sidebar {
+    width: 15%;
     position: fixed;
-    top: 51px;
+    top: 61px;
     bottom: 0;
     left: 0;
     z-index: 1000;
     display: block;
-    padding: 20px;
+    padding: 10px;
     overflow-x: hidden;
     overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
   }
@@ -41,15 +48,15 @@ body {
 
 /* Sidebar navigation */
 .nav-sidebar {
-  margin-right: -21px; /* 20px padding + 1px border */
+  margin-right: -11px; /* 20px padding + 1px border */
   margin-bottom: 10px;
-  margin-left: -20px;
+  margin-left: -10px;
 }
 .nav-sidebar > li > a {
   padding-right: 10px;
-  padding-left: 16px;
-  padding-top: 0px;
-  padding-bottom: 0px;
+  padding-left: 18px;
+  padding-top: 4px;
+  padding-bottom: 3px;
 }
 .nav-sidebar > li {
   padding: 0px;
@@ -125,4 +132,6 @@ ul.nav li.dropdown:hover ul.dropdown-menu{
 }
 .col-md-9 {
     overflow-x: hidden;
+	margin-left: 15%;
+	width: 85%;
 }

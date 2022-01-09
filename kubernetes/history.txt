@@ -1,0 +1,11 @@
+
+kubectl create -f yacy-deployment.yaml
+kubectl create -f yacy-service.yaml
+
+kubectl get pods -l app=yacy-pod -o yaml | grep podIP
+
+kubectl get nodes -o wide
+minikube service yacy-service
+
+kubectl delete -n default deployment yacy-deployment
+

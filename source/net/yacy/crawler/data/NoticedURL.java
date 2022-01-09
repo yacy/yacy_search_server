@@ -1,7 +1,8 @@
 // NoticedURL.java
 // -----------------------
 // part of YaCy
-// (C) by Michael Peter Christen; mc@yacy.net
+// SPDX-FileCopyrightText: 2004 Michael Peter Christen <mc@yacy.net)>
+// SPDX-License-Identifier: GPL-2.0-or-later
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 //
@@ -57,16 +58,16 @@ public class NoticedURL {
 
     /** links found by crawling to depth-1 */
     private Balancer coreStack;
-    
+
     /** links found by crawling at target depth */
     private Balancer limitStack;
-    
+
     /** links from remote crawl orders (init on demand) */
     private Balancer remoteStack;
-    
+
     /** links that are not passed to a loader; the index will be generated from the Request entry */
     private Balancer noloadStack;
-    
+
     private final File cachePath;
 
     protected NoticedURL(
@@ -81,7 +82,7 @@ public class NoticedURL {
         this.limitStack = new HostBalancer(new File(cachePath, "CrawlerLimitStacks"), onDemandLimit, exceed134217727);
 
         this.remoteStack = null; // init on demand (on first push)
-        
+
         ConcurrentLog.info("NoticedURL", "opening CrawlerNoLoadStacks..");
         this.noloadStack = new HostBalancer(new File(cachePath, "CrawlerNoLoadStacks"), onDemandLimit, exceed134217727);
         ConcurrentLog.info("NoticedURL", "FINISHED CREATING STACKS at " + cachePath.toString());
@@ -130,9 +131,8 @@ public class NoticedURL {
     protected void finalize() throws Throwable {
         if ((this.coreStack != null) || (this.limitStack != null) || (this.remoteStack != null)) {
             ConcurrentLog.warn("plasmaCrawlNURL", "NURL stack closed by finalizer");
-            close();
+            this.close();
         }
-        super.finalize();
     }
 
     public int size() {
@@ -146,9 +146,9 @@ public class NoticedURL {
         if (!this.noloadStack.isEmpty()) return false;
         return true;
     }
-    
+
     public boolean isEmpty() {
-        if (!isEmptyLocal()) return false;
+        if (!this.isEmptyLocal()) return false;
         if (this.remoteStack != null && !this.remoteStack.isEmpty()) return false;
         return true;
     }
@@ -162,7 +162,7 @@ public class NoticedURL {
             default: return true;
         }
     }
-    
+
     public int stackSize(final StackType stackType) {
         switch (stackType) {
             case NOLOAD:    return (this.noloadStack == null) ? 0 : this.noloadStack.size();
@@ -298,9 +298,9 @@ public class NoticedURL {
 
     protected void shift(final StackType fromStack, final StackType toStack, final CrawlSwitchboard cs, final RobotsTxt robots) {
         try {
-            final Request entry = pop(fromStack, false, cs, robots);
+            final Request entry = this.pop(fromStack, false, cs, robots);
             if (entry != null) {
-                final String warning = push(toStack, entry, null, robots);
+                final String warning = this.push(toStack, entry, null, robots);
                 if (warning != null) {
                     ConcurrentLog.warn("NoticedURL", "shift from " + fromStack + " to " + toStack + ": " + warning);
                 }
@@ -345,15 +345,15 @@ public class NoticedURL {
             // it may be possible that another process has taken all
             s = balancer.size(); // this time read the size to find errors
             if (s == 0) return null; // the balancer is actually empty!
-            
+
             // if the balancer is not empty, try again
             entry = balancer.pop(delay, cs, robots);
             if (entry != null) return entry;
-            
+
             if (s > balancer.size()) continue; // the balancer has shrinked, thats good, it will terminate
             errors++; // bad, if the size does not shrink we are in danger to not terminate
             if (errors < 100) continue; // there is the possibility that it is not a bug but concurrency, so just ignore it for some time
-                
+
             // at this point we consider the balancer to be broken
             final int aftersize = balancer.size(); // get the amount of data that we loose
             balancer.clear(); // the balancer is broken and cannot shrink

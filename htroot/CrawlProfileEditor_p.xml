@@ -23,6 +23,8 @@
 		<crawlerAlwaysCheckMediaType>#(crawlerAlwaysCheckMediaType)#false::true#(/crawlerAlwaysCheckMediaType)#</crawlerAlwaysCheckMediaType>
 		<crawlerURLMustMatch>#[crawlerURLMustMatch]#</crawlerURLMustMatch>
 		<crawlerURLMustNotMatch>#[crawlerURLMustNotMatch]#</crawlerURLMustNotMatch>
+		<crawlerOriginURLMustMatch>#[crawlerOriginURLMustMatch]#</crawlerOriginURLMustMatch>
+		<crawlerOriginURLMustNotMatch>#[crawlerOriginURLMustNotMatch]#</crawlerOriginURLMustNotMatch>
 		<crawlerIPMustMatch>#[crawlerIPMustMatch]#</crawlerIPMustMatch>
 		<crawlerIPMustNotMatch>#[crawlerIPMustNotMatch]#</crawlerIPMustNotMatch>
 		<crawlerCountryMustMatch>#[crawlerCountryMustMatch]#</crawlerCountryMustMatch>

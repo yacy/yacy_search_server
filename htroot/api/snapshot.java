@@ -34,6 +34,8 @@ import java.util.TreeMap;
 import org.apache.http.HttpStatus;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.encoding.UTF8;
@@ -44,8 +46,6 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.Html2Image;
-import net.yacy.cora.util.JSONException;
-import net.yacy.cora.util.JSONObject;
 import net.yacy.crawler.data.Snapshots;
 import net.yacy.crawler.data.Snapshots.Revisions;
 import net.yacy.crawler.data.Transactions;
@@ -60,7 +60,7 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class snapshot {
-    
+
     //width = 1024, height = 1024, density = 300, quality = 75
     private final static int DEFAULT_WIDTH = 1024;
     private final static int DEFAULT_HEIGHT = 1024;
@@ -70,19 +70,19 @@ public class snapshot {
 
     public static Object respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-        
+
     	final serverObjects defaultResponse = new serverObjects();
-    	
+
 
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final String ext = header.get(HeaderFramework.CONNECTION_PROP_EXT, "");
-        
+
         if(ext.isEmpty()) {
 			throw new TemplateProcessingException("Missing extension. Try with rss, xml, json, pdf, png or jpg." + ext,
 					HttpStatus.SC_BAD_REQUEST);
         }
-        
-        
+
+
         if (ext.equals("rss")) {
             // create a report about the content of the snapshot directory
             if (!authenticated) {
@@ -103,9 +103,9 @@ public class snapshot {
             rssfeed.setChannel(new RSSMessage("Snapshot list for host = " + host + ", depth = " + depth + ", order = " + order + ", maxcount = " + maxcount, "", ""));
             for (Map.Entry<String, Revisions> e: iddate.entrySet()) {
                 try {
-                    DigestURL u = e.getValue().url == null ? sb.index.fulltext().getURL(e.getKey()) : new DigestURL(e.getValue().url);
+                    String u = e.getValue().url == null ? sb.index.fulltext().getURL(e.getKey()) : e.getValue().url;
                     if (u == null) continue;
-                    RSSMessage message = new RSSMessage(u.toNormalform(true), "", u, e.getKey());
+                    RSSMessage message = new RSSMessage(u, "", new DigestURL(u), e.getKey());
                     message.setPubDate(e.getValue().dates[0]);
                     rssfeed.addMessage(message);
                 } catch (IOException ee) {
@@ -137,7 +137,8 @@ public class snapshot {
         }
         if (durl == null && urlhash.length() > 0) {
             try {
-                durl = sb.index.fulltext().getURL(urlhash);
+                String u = sb.index.fulltext().getURL(urlhash);
+                durl = u == null ? null : new DigestURL(u);
             } catch (IOException e) {
                 ConcurrentLog.logException(e);
             }
@@ -183,8 +184,8 @@ public class snapshot {
                                     for (Revisions r: entry.getValue()) {
                                         try {
                                             JSONObject metadata = new JSONObject();
-                                            DigestURL u = r.url != null ? new DigestURL(r.url) : sb.index.fulltext().getURL(r.urlhash);
-                                            metadata.put("url", u == null ? "unknown" : u.toNormalform(true));
+                                            String u = r.url != null ? r.url : sb.index.fulltext().getURL(r.urlhash);
+                                            metadata.put("url", u == null ? "unknown" : u);
                                             metadata.put("dates", r.dates);
                                             assert r.depth == entry.getKey().intValue();
                                             metadata.put("depth", entry.getKey().intValue());
@@ -239,9 +240,8 @@ public class snapshot {
                         }
                         if (r != null) {
                             JSONObject metadata = new JSONObject();
-                            DigestURL u;
-                            u = r.url != null ? new DigestURL(r.url) : sb.index.fulltext().getURL(r.urlhash);
-                            metadata.put("url", u == null ? "unknown" : u.toNormalform(true));
+                            String u = r.url != null ? r.url : sb.index.fulltext().getURL(r.urlhash);
+                            metadata.put("url", u == null ? "unknown" : u);
                             metadata.put("dates", r.dates);
                             metadata.put("depth", r.depth);
                             metadata.put("state", state.name());
@@ -256,12 +256,12 @@ public class snapshot {
             if (post.containsKey("callback")) json = post.get("callback") + "([" + json + "]);";
             return new ByteArrayInputStream(UTF8.getBytes(json));
         }
-        
+
         // for the following methods we always need the durl to fetch data
         if (durl == null) {
         	throw new TemplateMissingParameterException("Missing valid url or urlhash parameter");
         }
-        
+
         if (xml) {
             Collection<File> xmlSnapshots = Transactions.findPaths(durl, "xml", Transactions.State.ANY);
             File xmlFile = null;
@@ -277,7 +277,7 @@ public class snapshot {
                 throw new TemplateProcessingException("Could not read the xml snapshot file.");
             }
         }
-        
+
         if (pdf || pngjpg) {
             Collection<File> pdfSnapshots = Transactions.findPaths(durl, "pdf", Transactions.State.INVENTORY);
             File pdfFile = null;
@@ -319,7 +319,7 @@ public class snapshot {
 					throw new TemplateProcessingException("Could not read the pdf snapshot file.");
                 }
             }
-            
+
             if (pngjpg) {
                 int width = Math.min(post.getInt("width", DEFAULT_WIDTH), DEFAULT_WIDTH);
                 int height = Math.min(post.getInt("height", DEFAULT_HEIGHT), DEFAULT_HEIGHT);
@@ -357,7 +357,7 @@ public class snapshot {
                     final MediaTracker mediaTracker = new MediaTracker(new Container());
                     mediaTracker.addImage(scaled, 0);
                     try {mediaTracker.waitForID(0);} catch (final InterruptedException e) {}
-                    
+
 					/*
 					 * Ensure there is no alpha component on the ouput image, as it is pointless
 					 * here and it is not well supported by the JPEGImageWriter from OpenJDK
@@ -369,10 +369,10 @@ public class snapshot {
                     ConcurrentLog.logException(e);
 					throw new TemplateProcessingException("Could not scale the " + ext + " image snapshot file.");
                 }
-    
+
             }
         }
-        
+
 		throw new TemplateProcessingException(
 				"Unsupported extension : " + ext + ". Try with rss, xml, json, pdf, png or jpg.",
 				HttpStatus.SC_BAD_REQUEST);

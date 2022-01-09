@@ -14,7 +14,6 @@ Rem This target is used to read java runtime parameters out of the yacy config f
 :GETSTARTOPTS
 REM for /F "tokens=1,2 delims==" %%i in (DATA\SETTINGS\yacy.conf) do (
 REM 	if "%%i"=="javastart_Xmx" set jmx=%%j
-REM 	if "%%i"=="javastart_Xms" set jms=%%j
 REM )
 
 Rem choose service runner executable according to processor architecture

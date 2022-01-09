@@ -84,9 +84,9 @@ import net.yacy.utils.crypt;
  * Future implementations should try to replace URIMetadata objects completely by SolrDocument objects
  */
 public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMetadataNode>, Comparator<URIMetadataNode> */ {
-    
+
     private static final long serialVersionUID = -256046934741561968L;
-    
+
     protected String keywords = null;
     protected DigestURL url;
     protected Bitfield flags = null;
@@ -113,7 +113,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
         super();
         final String urlRaw = crypt.simpleDecode(prop.getProperty("url", ""));
-        url = new DigestURL(urlRaw);
+        this.url = new DigestURL(urlRaw);
         String descr = crypt.simpleDecode(prop.getProperty("descr", "")); if (descr == null) descr = "";
         String dc_creator = crypt.simpleDecode(prop.getProperty("author", "")); if (dc_creator == null) dc_creator = "";
         String tags = crypt.simpleDecode(prop.getProperty("tags", "")); if (tags == null) tags = "";
@@ -121,7 +121,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         String dc_publisher = crypt.simpleDecode(prop.getProperty("publisher", "")); if (dc_publisher == null) dc_publisher = "";
         String lons = crypt.simpleDecode(prop.getProperty("lon"));
         String lats = crypt.simpleDecode(prop.getProperty("lat"));
-        
+
         this.setField(CollectionSchema.title.name(), descr);
         this.setField(CollectionSchema.author.name(), dc_creator);
         this.setField(CollectionSchema.publisher_t.name(), dc_publisher);
@@ -129,11 +129,8 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         this.lat = (lats == null) ? 0.0d : Double.parseDouble(lats);
 
         this.setField(CollectionSchema.last_modified.name(), parseShortDayDate(prop.getProperty("mod", "20000101")));
-        
         this.setField(CollectionSchema.load_date_dt.name(), parseShortDayDate(prop.getProperty("load", "20000101")));
-        
 		this.setField(CollectionSchema.fresh_date_dt.name(), parseShortDayDate(prop.getProperty("fresh", "20000101")));
-        
         this.setField(CollectionSchema.referrer_id_s.name(), prop.getProperty("referrer", ""));
         // this.setField(CollectionSchema.md5_s.name(), prop.getProperty("md5", "")); // always 0 (not used / calculated)
         this.setField(CollectionSchema.size_i.name(), Integer.parseInt(prop.getProperty("size", "0")));
@@ -170,7 +167,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         	this.setIconsFields(faviconURL);
         }
     }
-    
+
 
     public URIMetadataNode(final SolrDocument doc) throws MalformedURLException {
         super();
@@ -213,11 +210,11 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 
     public URIMetadataNode(DigestURL theurl) {
         super();
-        url = theurl;
-        this.setField(CollectionSchema.sku.name(), url.toNormalform(true));
-        this.setField(CollectionSchema.id.name(), ASCII.String(url.hash()));
+        this.url = theurl;
+        this.setField(CollectionSchema.sku.name(), this.url.toNormalform(true));
+        this.setField(CollectionSchema.id.name(), ASCII.String(this.url.hash()));
     }
-    
+
     /**
      * Get the content domain of a document. This tries to get the content domain from the mime type
      * and if this fails it uses alternatively the content domain from the file extension.
@@ -331,7 +328,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
                         if (this.lat < -90.0d || this.lat > 90.0d) this.lat = 0.0d;
                     }
 
-                    if ( (p < latlon.length()-1) && (latlon.charAt(p+1) <= '9') ) { 
+                    if ( (p < latlon.length()-1) && (latlon.charAt(p+1) <= '9') ) {
                         this.lon=Double.parseDouble(latlon.substring(p + 1));
                         if (this.lon < -180.0d || this.lon > 180.0d) this.lon = 0.0d;
                     }
@@ -424,7 +421,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     }
 
     public Bitfield flags() {
-        if (flags == null) {
+        if (this.flags == null) {
             this.flags = new Bitfield();
             if (dc_subject() != null && dc_subject().indexOf("indexof") >= 0) this.flags.set(Tokenizer.flag_cat_indexof, true);
             ContentDomain cd = getContentDomain();
@@ -456,7 +453,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
     	String url = images_protocol.get(0) + "://" + images_stub.get(0);
     	return url;
     }
-    
+
     public int llocal() {
         return getInt(CollectionSchema.inboundlinkscount_i);
     }
@@ -538,7 +535,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         }
         return list.iterator();
     }
-    
+
     /**
      * Extracts icon entries from this solr document
      * @return icon entries collection eventually empty
@@ -560,7 +557,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 				if (item instanceof String) {
 					urlStub = (String) item;
 					String iconURLStr = (ports != null && ports.size() > index ? ports.get(index) : "http") + "://" + urlStub;
-					
+
 					DigestURL iconURL;
 					try {
 						iconURL = new DigestURL(iconURLStr);
@@ -588,14 +585,14 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 							sizes = ContentScraper.parseSizes((String) item);
 						}
 					}
-					
+
 					icons.add(new IconEntry(iconURL, rels, sizes));
 				}
 			}
 		}
 		return icons;
 	}
-	
+
 	/**
 	 * Try to extract icon entry with preferred size from this solr document.
 	 * We look preferably for a standard icon but accept as a fallback other icons.
@@ -632,13 +629,13 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 				}
 			}
 		}
-		
+
 		return faviconEntry;
 	}
-	
+
 	/**
 	 * Use iconURL to set icons related field on this solr document.
-	 * 
+	 *
 	 * @param iconURL icon URL
 	 */
 	private void setIconsFields(DigestURL iconURL) {
@@ -676,7 +673,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 		}
 		return list;
     }
-    
+
     public static Date getDate(SolrDocument doc, final CollectionSchema key) {
         Date x = doc == null ? null : (Date) doc.getFieldValue(key.getSolrFieldName());
         Date now = new Date();
@@ -698,10 +695,10 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         text = null;
         return sentences;
     }
-    
+
     public ArrayList<String> getDescription() {
         return getStringList(CollectionSchema.description_txt);
-    }    
+    }
 
     public static URIMetadataNode importEntry(final String propStr, String collection) {
         if (propStr == null || propStr.isEmpty() || propStr.charAt(0) != '{' || !propStr.endsWith("}")) {
@@ -716,7 +713,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
             return null;
         }
     }
-    
+
     /**
      * Format a date using the short day format.
      * @param date the date to format. Must not be null.
@@ -737,10 +734,10 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 		}
 		return formattedDate;
 	}
-	
+
 	/**
 	 * Parse a date string with the short day format.
-	 * 
+	 *
 	 * @param dateStr
 	 *            a date representation as a String. Must not be null.
 	 * @return the parsed Date or the current date when an parsing error occurred.
@@ -761,7 +758,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
 		}
 		return parsed;
 	}
-	
+
     protected StringBuilder corePropList() {
         // generate a parseable string; this is a simple property-list
         final StringBuilder s = new StringBuilder(300);
@@ -854,7 +851,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         core.append('}');
         return core.toString();
     }
-    
+
     private int getInt(CollectionSchema field) {
         assert !field.isMultiValued();
         assert field.getType() == SolrType.num_integer;
@@ -909,7 +906,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         a.add((String) r);
         return a;
     }
-    
+
     @SuppressWarnings("unchecked")
     private ArrayList<Integer> getIntList(CollectionSchema field) {
         assert field.isMultiValued();
@@ -983,7 +980,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
      */
     public String urlstring() {
         if (this.alternative_urlstring != null) return this.alternative_urlstring;
-        
+
         if (!pdfParser.individualPages) return this.url().toNormalform(true);
         if (!"pdf".equals(MultiProtocolURL.getFileExtension(this.url().getFileName()).toLowerCase(Locale.ROOT))) return this.url().toNormalform(true);
         // for pdf links we rewrite the url
@@ -1041,7 +1038,7 @@ public class URIMetadataNode extends SolrDocument /* implements Comparable<URIMe
         }
         return this.toString(this.textSnippet.getLineRaw());
     }
-    
+
     @Override
     public int hashCode() {
         return this.url().hashCode();

@@ -75,7 +75,7 @@ public class crypt {
     if (key == null) { key = "NULL"; }
     switch (method) {
     case 'b' : return "b|" + Base64Order.enhancedCoder.encodeString(content);
-    case 'z' : return "z|" + Base64Order.enhancedCoder.encode(gzip.gzipString(content));
+    case 'z' : return "z|" + Base64Order.enhancedCoder.encode(Gzip.gzipString(content));
     case 'p' : return "p|" + content;
     default  : return null;
     }
@@ -94,7 +94,7 @@ public class crypt {
         }
         case 'z':
             try {
-                return gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded.substring(2)));
+                return Gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded.substring(2)));
             } catch (final Exception e) {
                 ConcurrentLog.logException(e);
                 return null;

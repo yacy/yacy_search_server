@@ -26,8 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 
-import net.yacy.cora.sorting.ReversibleScoreMap;
-
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -35,33 +33,26 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
 
+import net.yacy.cora.sorting.ReversibleScoreMap;
+
 public interface SolrConnector extends Iterable<String> /* Iterable of document IDs */ {
 
-    public static class LoadTimeURL {
-        public long date;
-        public String url;
-        public LoadTimeURL(final String url, final long date) {
-            this.url = url;
-            this.date = date;
-        }
-    }
-    
     /**
      * clear all caches: inside solr and ouside solr within the implementations of this interface
      */
     public void clearCaches();
-    
+
     /**
      * get the size of a write buffer (if any) of pending write requests
      */
     public int bufferSize();
-    
+
     /**
      * get the size of the index
      * @return number of results if solr is queries with a catch-all pattern
      */
     public long getSize();
-    
+
     /**
      * force a commit
      */
@@ -72,19 +63,19 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @param maxSegments the maximum number of segments. Set to 1 for maximum optimization
      */
     public void optimize(int maxSegments);
-    
+
     /**
      * ask the solr subsystem about it's segment number
      * @return the segment count, which corresponds to the number of files for an index
      */
     public int getSegmentCount();
-    
+
     /**
      * test if the connector is already closed
      * @return true if the connector is closed
      */
     public boolean isClosed();
-    
+
     /**
      * close the server connection
      */
@@ -120,10 +111,17 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
     /**
      * check if a given document, identified by url hash as document id exists
      * @param id the url hash and document id
-     * @return the load time metadata (url and load data) if any entry in solr exists, null otherwise
+     * @return the url if any entry in solr exists, null otherwise
      * @throws IOException
      */
-    public LoadTimeURL getLoadTimeURL(final String id) throws IOException;
+    public String getURL(String id) throws IOException;
+
+    /**
+     * check if a given document, identified by url hash as document id exists
+     * @param id the url hash and document id
+     * @return whether the documents exists
+     */
+    public boolean exists(final String id);
 
     /**
      * add a solr input document
@@ -132,7 +130,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws SolrException
      */
     public void add(final SolrInputDocument solrdoc) throws IOException, SolrException;
-    
+
     /**
      * Update a solr document.
      * This will write only a partial update for all fields given in the SolrInputDocument
@@ -160,7 +158,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws SolrException
      */
     public void update(final Collection<SolrInputDocument> solrdoc) throws IOException, SolrException;
-    
+
     /**
      * get a document from solr by given key for the id-field
      * @param key
@@ -187,7 +185,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws SolrException
      */
     public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException;
-   
+
     /**
      * get a query result from solr
      * to get all results set the query String to "*:*"
@@ -204,7 +202,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
             final int offset,
             final int count,
             final String ... fields) throws IOException;
-    
+
     /**
      * get the number of results when this query is done.
      * This should only be called if the actual result is never used, and only the count is interesting
@@ -222,12 +220,12 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
      * @throws IOException
      */
     public LinkedHashMap<String, ReversibleScoreMap<String>> getFacets(String query, int maxresults, final String ... fields) throws IOException;
-    
+
     /**
      * <p>Get results from solr queries as a stream of documents.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.
      * The method returns immediately and feeds the search results into the queue.</p>
-     * <p><strong>Important</strong> : be careful if the consumer thread(s) terminate before taking the poison document(s) from the queue, 
+     * <p><strong>Important</strong> : be careful if the consumer thread(s) terminate before taking the poison document(s) from the queue,
      * as the producer thread(s) may indefinitely block on their last step (adding poison element) because the queue would be full.</p>
      * @param querystring the solr query string
      * @param sort the solr sort string, may be null to be not used
@@ -250,11 +248,11 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
             final int concurrency,
             final boolean prefetchIDs,
             final String ... fields);
-    
+
 	/**
 	 * Creates a new runnable task to run a given list of Solr queries and fill a
 	 * results queue by packets of a limited number of results.
-	 * 
+	 *
 	 * @param queue        the results queue. Must not be null.
 	 * @param querystrings a list of Solr queries
 	 * @param sort         an eventual Solr sort criteria
@@ -271,7 +269,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
 	public Runnable newDocumentsByQueriesTask(final BlockingQueue<SolrDocument> queue, final List<String> querystrings,
 			final String sort, final int offset, final int maxcount, final long maxtime, final int buffersize,
 			final int concurrency, final String... fields);
-    
+
     /**
      * Get results from solr queries as a stream of documents.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_DOCUMENT is returned.
@@ -297,7 +295,7 @@ public interface SolrConnector extends Iterable<String> /* Iterable of document 
             final int concurrency,
             final boolean prefetchIDs,
             final String ... fields);
-            
+
     /**
      * get a document id result stream from a solr query.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_ID is returned.

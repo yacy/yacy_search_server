@@ -43,7 +43,7 @@ import org.eclipse.jetty.util.security.Credential;
  *
  */
 public class YaCyLegacyCredential extends Credential {
-	
+
     private static final long serialVersionUID = -3527894085562480001L;
 
     private String hash; // remember password hash (for new style with prefix of used encryption supported "MD5:" )
@@ -65,11 +65,12 @@ public class YaCyLegacyCredential extends Credential {
     public boolean check(Object credentials) {
 
         if (credentials instanceof Credential) { // for DIGEST auth
-        	if(this.c == null) {
-        		/* credential may be null after switching from BASIC to DIGEST authentication without re-encoding the password */
-        		return false;
-        	}
-        	return ((Credential) credentials).check(this.c);
+            if (this.c == null) {
+                /* credential may be null after switching from BASIC to DIGEST authentication without re-encoding the password */
+                return false;
+            }
+            Credential credential = (Credential) credentials;
+            return credential.check(this.c);
         }
         if (credentials instanceof String) { // for BASIC auth
             final String pw = (String) credentials;
@@ -88,7 +89,8 @@ public class YaCyLegacyCredential extends Credential {
 
             // normal users (and new admin pwd) for BASIC auth
             if (hash.startsWith("MD5:") && hash != null) {
-                boolean success = (Digest.encodeMD5Hex(foruser + ":" + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy")+":" + pw).equals(hash.substring(4)));
+                String realm = Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_REALM, "");
+                boolean success = Digest.encodeMD5Hex(foruser + ":" + realm + ":" + pw).equals(hash.substring(4));
                 // exception: allow the hash as pwd (used  in bin/apicall.sh)
                 if (!success && foruser.equals(Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"))) {
                     if (pw.equals(hash)) {
@@ -103,7 +105,7 @@ public class YaCyLegacyCredential extends Credential {
         }
         throw new UnsupportedOperationException();
     }
-	
+
     /**
      * create Credential object from config file hash
      *

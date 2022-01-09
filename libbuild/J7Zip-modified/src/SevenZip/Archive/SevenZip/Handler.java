@@ -152,7 +152,6 @@ public class Handler implements IInArchive {
     
     protected void finalize() throws Throwable {
     	close();
-    	super.finalize();
     }
     
     public void close() throws IOException {

@@ -267,9 +267,9 @@ public final class SwitchboardConstants {
     /** Default value for the global HTTP Referrer policy delivered by meta tag */
     public static final String REFERRER_META_POLICY_DEFAULT = "origin-when-cross-origin";
 
-    
-    public static final String DHT_ENABLED                      = "network.unit.dht";
 
+    public static final String NETWORK_UNIT_DHT                 = "network.unit.dht";
+    public static final String NETWORK_UNIT_AGENT               = "network.unit.agent";
     public static final String REMOTESEARCH_MAXCOUNT_DEFAULT    = "network.unit.remotesearch.maxcount";
     public static final String REMOTESEARCH_MAXTIME_DEFAULT     = "network.unit.remotesearch.maxtime";
     public static final String REMOTESEARCH_MAXCOUNT_USER       = "remotesearch.maxcount";
@@ -329,10 +329,10 @@ public final class SwitchboardConstants {
     /** Default value controlling whether a self-signed certificate is acceptable from a remote Solr instance with authentication credentials. */
     public static final boolean FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT = false;
 
-    /** Key of the setting controlling wheter to use or not an embedded Solr instance */
+    /** Key of the setting controlling whether to use or not an embedded Solr instance */
     public static final String CORE_SERVICE_FULLTEXT            = "core.service.fulltext";
     
-    /** Default setting value controlling wheter to use or not an embedded Solr instance */
+    /** Default setting value controlling whether to use or not an embedded Solr instance */
     public static final boolean CORE_SERVICE_FULLTEXT_DEFAULT   = true;
     
     public static final String CORE_SERVICE_RWI                 = "core.service.rwi.tmp";
@@ -353,6 +353,12 @@ public final class SwitchboardConstants {
     public static final String CRAWLER_USER_AGENT_STRING        = "crawler.userAgent.string";
     public static final String CRAWLER_USER_AGENT_MINIMUMDELTA  = "crawler.userAgent.minimumdelta";
     public static final String CRAWLER_USER_AGENT_CLIENTTIMEOUT = "crawler.userAgent.clienttimeout";
+    
+    /** Key of the setting controlling the maximum time to wait for each wkhtmltopdf call when rendering PDF snapshots */
+    public static final String SNAPSHOTS_WKHTMLTOPDF_TIMEOUT          = "snapshots.wkhtmltopdf.timeout";
+    
+    /** Default maximum time in seconds to wait for each wkhtmltopdf call when rendering PDF snapshots*/
+    public static final long SNAPSHOTS_WKHTMLTOPDF_TIMEOUT_DEFAULT   = 30;
     
     /* --- debug flags ---  */
     
@@ -503,6 +509,13 @@ public final class SwitchboardConstants {
     
     /** Default setting value controlling the maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool */
     public static final int HTTP_OUTGOING_POOL_REMOTE_SOLR_MAX_TOTAL_DEFAULT = 100;
+    
+    /** Key of the setting controlling whether TLS Server Name Indication (SNI) extension is enabled on outgoing HTTP connections in the general http client (net.yacy.cora.protocol.http.HTTPClient) */
+    public static final String HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED = "http.outgoing.general.tls.sniExtension.enabled";
+    
+    /** Key of the setting controlling whether TLS Server Name Indication (SNI) extension is enabled on outgoing HTTP connections in the remote Solr http client (net.yacy.cora.federate.solr.instance.RemoteInstance) */
+    public static final String HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED = "http.outgoing.remoteSolr.tls.sniExtension.enabled";
+    
 
 
     /*

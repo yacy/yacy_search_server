@@ -1,4 +1,4 @@
-// CachedFileReader.java 
+// CachedFileReader.java
 // ---------------------
 // (C) 2009 by Michael Peter Christen; mc@yacy.net
 // first published 09.09.2009 on http://yacy.net
@@ -48,10 +48,10 @@ public final class CachedFileReader extends AbstractReader implements Reader {
         }
         this.cachelen = 0;
     }
-    
+
     @Override
     public final synchronized long available() throws IOException {
-        return this.length() - RAFile.getFilePointer();
+        return this.length() - this.RAFile.getFilePointer();
     }
 
     @Override
@@ -61,28 +61,28 @@ public final class CachedFileReader extends AbstractReader implements Reader {
 
     @Override
     public final synchronized void readFully(final byte[] b, final int off, int len) throws IOException {
-        long seek = RAFile.getFilePointer();
-        if (cache != null  && cachelen - seek >= len) {
+        final long seek = this.RAFile.getFilePointer();
+        if (this.cache != null  && this.cachelen - seek >= len) {
             // read from cache
-            System.arraycopy(cache, (int) (seek), b, off, len);
-            RAFile.seek(seek + len);
+            System.arraycopy(this.cache, (int) (seek), b, off, len);
+            this.RAFile.seek(seek + len);
             return;
         }
         // cannot use the cache
-        RAFile.readFully(b, off, len);
+        this.RAFile.readFully(b, off, len);
         return;
     }
 
     @Override
     public final synchronized void seek(final long pos) throws IOException {
-        RAFile.seek(pos);
+        this.RAFile.seek(pos);
     }
-    
+
     @Override
     public final synchronized void close() {
-        if (RAFile != null) try {
-            try{RAFile.getChannel().close();} catch (final IOException e) {}
-            RAFile.close();
+        if (this.RAFile != null) try {
+            try{this.RAFile.getChannel().close();} catch (final IOException e) {}
+            this.RAFile.close();
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         }
@@ -92,7 +92,6 @@ public final class CachedFileReader extends AbstractReader implements Reader {
     @Override
     protected void finalize() throws Throwable {
         this.close();
-        super.finalize();
     }
 
 }

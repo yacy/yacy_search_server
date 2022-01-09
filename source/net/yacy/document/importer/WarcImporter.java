@@ -24,11 +24,21 @@ package net.yacy.document.importer;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
+
+import org.jwat.common.HeaderLine;
+import org.jwat.common.HttpHeader;
+import org.jwat.warc.WarcConstants;
+import org.jwat.warc.WarcReader;
+import org.jwat.warc.WarcReaderFactory;
+import org.jwat.warc.WarcRecord;
+
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.document.id.DigestURL;
+import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
@@ -39,12 +49,6 @@ import net.yacy.crawler.retrieval.Response;
 import net.yacy.document.TextParser;
 import net.yacy.search.Switchboard;
 import net.yacy.server.http.ChunkedInputStream;
-import org.jwat.common.HeaderLine;
-import org.jwat.common.HttpHeader;
-import org.jwat.warc.WarcConstants;
-import org.jwat.warc.WarcReader;
-import org.jwat.warc.WarcReaderFactory;
-import org.jwat.warc.WarcRecord;
 
 /**
  * Web Archive file format reader to process the warc archive content (responses)
@@ -55,44 +59,46 @@ import org.jwat.warc.WarcRecord;
  *
  * http://archive-access.sourceforge.net/warc/warc_file_format-0.9.html
  * http://archive-access.sourceforge.net/warc/
+ *
+ * TESTING:
+ *
+ * To get a copy of the YaCy homepage, you can i.e. generate a warc file easily with
+ * wget "https://yacy.net" --mirror --warc-file=yacy.net
+ *
+ * The result is a compressed warc file named "yacy.net.warc.gz".
+ * To index the content, it can be copied to the surrogate input path:
+ * cp yacy.net.warc.gz DATA/SURROGATES/in/
+ *
+ * after processing, that warc file is moved to DATA/SURROGATES/out/
  */
 public class WarcImporter extends Thread implements Importer {
 
     static public WarcImporter job; // static object to assure only one importer is running (if started from a servlet, this object is used to store the thread)
 
-    private final InputStream source; // current input warc archive
+    private InputStream source; // current input warc archive
     private String name; // file name of input source
-    
+
     private int recordCnt; // number of responses indexed (for statistic)
     private long startTime; // (for statistic)
     private final long sourceSize; // length of the input source (for statistic)
     private long consumed; // bytes consumed from input source (for statistic)
     private boolean abort = false; // flag to signal stop of import
 
-    public WarcImporter(InputStream f) {
-    	super("WarcImporter - from InputStream");
-        source = f;
-        recordCnt = 0;
-        sourceSize = -1;
+    public WarcImporter(MultiProtocolURL url) throws IOException {
+        super("WarcImporter - from InputStream");
+        this.recordCnt = 0;
+        this.sourceSize = -1;
+        this.name = url.toNormalform(true);
+        this.source = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
+        if (this.name.endsWith(".gz")) this.source = new GZIPInputStream(this.source);
     }
 
-    /**
-     * Init the WarcImporter with input stream with a informational filename or
-     * url als info for calls to the importer methode source() which returns
-     * the urlinfo. Otherwise this methode is equivalent to WarchImporter(inputstream)
-     * @param f the input stream to read the warc archive from
-     * @param urlinfo a info like the url or the filename
-     */
-    public WarcImporter (InputStream f, String urlinfo) {
-        this(f);
-        name = urlinfo;
-    }
-
-    public WarcImporter(File f) throws FileNotFoundException{
+    public WarcImporter(File f) throws IOException {
        super("WarcImporter - from file " + f.getName());
-       name = f.getName();
-       sourceSize = f.length();
-       source = new FileInputStream(f);
+       this.name = f.getName();
+       this.sourceSize = f.length();
+       this.source = new FileInputStream(f);
+       if (this.name.endsWith(".gz")) this.source = new GZIPInputStream(this.source);
     }
 
     /**
@@ -106,17 +112,20 @@ public class WarcImporter extends Thread implements Importer {
 
         byte[] content;
         job = this;
-        startTime = System.currentTimeMillis();
+        this.startTime = System.currentTimeMillis();
 
         WarcReader localwarcReader = WarcReaderFactory.getReader(f);
         WarcRecord wrec = localwarcReader.getNextRecord();
-        while (wrec != null && !abort) {
+        while (wrec != null && !this.abort) {
 
             HeaderLine hl = wrec.getHeader(WarcConstants.FN_WARC_TYPE);
             if (hl != null && hl.value.equals(WarcConstants.RT_RESPONSE)) { // filter responses
 
                 hl = wrec.getHeader(WarcConstants.FN_WARC_TARGET_URI);
-                DigestURL location = new DigestURL(hl.value);
+                // the content of that line was lately surrounded with '<' and '>', we must remove that
+                String url = hl.value;
+                if (url.startsWith("<") && url.endsWith(">")) url = url.substring(1, url.length() - 1);
+                DigestURL location = new DigestURL(url);
 
                 HttpHeader http = wrec.getHttpHeader();
 
@@ -126,49 +135,56 @@ public class WarcImporter extends Thread implements Importer {
 
                         InputStream istream = wrec.getPayloadContent();
                         hl = http.getHeader(HeaderFramework.TRANSFER_ENCODING);
-                        if (hl != null && hl.value.contains("chunked")) {
-                            // because chunked stream.read doesn't read source fully, make sure all chunks are read
-                            istream = new ChunkedInputStream(istream);
-                            final ByteBuffer bbuffer = new ByteBuffer();
-                            int c;
-                            while ((c = istream.read()) >= 0) {
-                                bbuffer.append(c);
+                        content = null;
+                        try {
+                            if (hl != null && hl.value.contains("chunked")) {
+                                // because chunked stream.read doesn't read source fully, make sure all chunks are read
+                                istream = new ChunkedInputStream(istream);
+                                final ByteBuffer bbuffer = new ByteBuffer();
+                                int c;
+                                while ((c = istream.read()) >= 0) {
+                                    bbuffer.append(c);
+                                }
+                                content = bbuffer.getBytes();
+                            } else {
+                                content = new byte[(int) http.getPayloadLength()];
+                                istream.read(content, 0, content.length);
                             }
-                            content = bbuffer.getBytes();
-                        } else {
-                            content = new byte[(int) http.getPayloadLength()];
-                            istream.read(content, 0, content.length);
+
+                            RequestHeader requestHeader = new RequestHeader();
+                            ResponseHeader responseHeader = new ResponseHeader(http.statusCode);
+                            for (HeaderLine hx : http.getHeaderList()) { // include all original response headers for parser
+                                responseHeader.put(hx.name, hx.value);
+                            }
+
+                            final Request request = new Request(
+                                    ASCII.getBytes(Switchboard.getSwitchboard().peers.mySeed().hash),
+                                    location,
+                                    requestHeader.referer() == null ? null : requestHeader.referer().hash(),
+                                    "warc",
+                                    responseHeader.lastModified(),
+                                    Switchboard.getSwitchboard().crawler.defaultSurrogateProfile.handle(),
+                                    0,
+                                    Switchboard.getSwitchboard().crawler.defaultSurrogateProfile.timezoneOffset());
+
+                            final Response response = new Response(
+                                    request,
+                                    requestHeader,
+                                    responseHeader,
+                                    Switchboard.getSwitchboard().crawler.defaultSurrogateProfile,
+                                    false,
+                                    content
+                            );
+
+                            String error = Switchboard.getSwitchboard().toIndexer(response);
+                            if (error != null) ConcurrentLog.info("WarcImporter", "error parsing: " + error);
+                        } catch (IOException e) {
+                            ConcurrentLog.info("WarcImporter", "error reading: " + e.getMessage());
+                        } finally {
+                            try {istream.close();} catch (IOException e) {}
                         }
-                        istream.close();
 
-                        RequestHeader requestHeader = new RequestHeader();
-
-                        ResponseHeader responseHeader = new ResponseHeader(http.statusCode);
-                        for (HeaderLine hx : http.getHeaderList()) { // include all original response headers for parser
-                            responseHeader.put(hx.name, hx.value);
-                        }
-
-                        final Request request = new Request(
-                                ASCII.getBytes(Switchboard.getSwitchboard().peers.mySeed().hash),
-                                location,
-                                requestHeader.referer() == null ? null : requestHeader.referer().hash(),
-                                "warc",
-                                responseHeader.lastModified(),
-                                Switchboard.getSwitchboard().crawler.defaultSurrogateProfile.handle(),
-                                0,
-                                Switchboard.getSwitchboard().crawler.defaultSurrogateProfile.timezoneOffset());
-
-                        final Response response = new Response(
-                                request,
-                                requestHeader,
-                                responseHeader,
-                                Switchboard.getSwitchboard().crawler.defaultSurrogateProfile,
-                                false,
-                                content
-                        );
-
-                        Switchboard.getSwitchboard().toIndexer(response);
-                        recordCnt++;
+                        this.recordCnt++;
                     }
                 }
             }
@@ -176,7 +192,7 @@ public class WarcImporter extends Thread implements Importer {
             wrec = localwarcReader.getNextRecord();
         }
         localwarcReader.close();
-        ConcurrentLog.info("WarcImporter", "Indexed " + recordCnt + " documents");
+        ConcurrentLog.info("WarcImporter", "Indexed " + this.recordCnt + " documents");
         job = null;
     }
 
@@ -188,7 +204,7 @@ public class WarcImporter extends Thread implements Importer {
             ConcurrentLog.info("WarcImporter", ex.getMessage());
         }
     }
-    
+
     /**
      * Set the flag to stop import
      */
@@ -242,10 +258,9 @@ public class WarcImporter extends Thread implements Importer {
     public long remainingTime() {
         if (this.consumed == 0) {
             return 0;
-        } else {
-            long speed = this.consumed / runningTime();
-            return (this.sourceSize - this.consumed) / speed;
         }
+        long speed = this.consumed / runningTime();
+        return (this.sourceSize - this.consumed) / speed;
     }
 
     @Override

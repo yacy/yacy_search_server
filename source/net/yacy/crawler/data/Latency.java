@@ -1,6 +1,7 @@
 // Latency.java
 // ------------
-// (C) 2009 by Michael Peter Christen; mc@yacy.net
+// SPDX-FileCopyrightText: 2009 Michael Peter Christen <mc@yacy.net)>
+// SPDX-License-Identifier: GPL-2.0-or-later
 // first published 19.03.2009 on http://yacy.net
 //
 // $LastChangedDate$
@@ -44,7 +45,7 @@ public class Latency {
 
     // the map is a mapping from host names to host configurations
     private static final int mapMaxSize = 1000;
-    private static final ConcurrentHashMap<String, Host> map = new ConcurrentHashMap<String, Host>();
+    private static final ConcurrentHashMap<String, Host> map = new ConcurrentHashMap<>();
 
     /**
      * update the latency entry after a host was selected for queueing into the loader
@@ -54,7 +55,7 @@ public class Latency {
     public static void updateAfterSelection(final DigestURL url, final long robotsCrawlDelay) {
         final String host = url.getHost();
         if (host == null) return;
-        String hosthash = url.hosthash();
+        final String hosthash = url.hosthash();
         Host h = map.get(hosthash);
         if (h == null) {
             h = new Host(host, Switchboard.getSwitchboard().getConfigInt("crawler.defaultAverageLatency", 500), robotsCrawlDelay);
@@ -71,7 +72,7 @@ public class Latency {
     public static void updateBeforeLoad(final DigestURL url) {
         final String host = url.getHost();
         if (host == null) return;
-        String hosthash = url.hosthash();
+        final String hosthash = url.hosthash();
         Host h = map.get(hosthash);
         if (h == null) {
             h = new Host(host, 500, 0);
@@ -90,7 +91,7 @@ public class Latency {
     public static void updateAfterLoad(final DigestURL url, final long time) {
         final String host = url.getHost();
         if (host == null) return;
-        String hosthash = url.hosthash();
+        final String hosthash = url.hosthash();
         Host h = map.get(hosthash);
         if (h == null) {
             h = new Host(host, time, 0);
@@ -121,16 +122,16 @@ public class Latency {
      * @return the waiting time in milliseconds; 0 if not known; -1 if host gives us special rights
      */
     public static int waitingRobots(final MultiProtocolURL url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
-        int robotsDelay = 0;
-        RobotsTxtEntry robotsEntry = robots.getEntry(url, agent);
+        int robotsDelay;
+        final RobotsTxtEntry robotsEntry = robots.getEntry(url, agent);
         robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
         if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null) return -1; // no limits if granted exclusively for this peer
         return robotsDelay;
     }
-    
+
     private static int waitingRobots(final String hostport, final RobotsTxt robots, final ClientIdentification.Agent agent, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
-        int robotsDelay = 0;
-        RobotsTxtEntry robotsEntry = robots.getEntry(hostport, agent, fetchOnlineIfNotAvailableOrNotFresh);
+        int robotsDelay;
+        final RobotsTxtEntry robotsEntry = robots.getEntry(hostport, agent, fetchOnlineIfNotAvailableOrNotFresh);
         robotsDelay = (robotsEntry == null) ? 0 : robotsEntry.getCrawlDelayMillis();
         if (robotsEntry != null && robotsDelay == 0 && robotsEntry.getAgentName() != null) return -1; // no limits if granted exclusively for this peer
         return robotsDelay;
@@ -165,20 +166,20 @@ public class Latency {
 
         // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
         if (Switchboard.getSwitchboard().crawlQueues.hostcount(hostname) > Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20)) waiting += 3000;
-        
+
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
-        
+
         // find the delay as given by robots.txt on target site
         if (robots != null) {
-            int robotsDelay = waitingRobots(hostname + ":" + port, robots, agent, false);
+            final int robotsDelay = waitingRobots(hostname + ":" + port, robots, agent, false);
             if (robotsDelay < 0) return -timeSinceLastAccess; // no limits if granted exclusively for this peer
             waiting = Math.max(waiting, robotsDelay);
         }
 
-        return Math.min(60000, waiting) - timeSinceLastAccess;
+        return waiting - timeSinceLastAccess;
     }
-    
+
     /**
      * calculates how long should be waited until the domain can be accessed again
      * this follows from:
@@ -197,7 +198,7 @@ public class Latency {
         if (host == null) return Integer.MIN_VALUE; // no delay if host is new; use Integer because there is a cast to int somewhere
 
         // find the minimum waiting time based on the network domain (local or global)
-        boolean local = url.isLocal();
+        final boolean local = url.isLocal();
         int waiting = agent.minimumDelta;
 
         // if we have accessed the domain many times, get slower (the flux factor)
@@ -205,21 +206,21 @@ public class Latency {
 
         // use the access latency as rule how fast we can access the server
         waiting = Math.max(waiting, (int) (host.average() * Switchboard.getSwitchboard().getConfigFloat(SwitchboardConstants.CRAWLER_LATENCY_FACTOR, 0.5f)));
-        
+
         // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
         if (Switchboard.getSwitchboard().crawlQueues.hostcount(url.getHost()) > Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20)) waiting += 3000;
 
         // the time since last access to the domain is the basis of the remaining calculation
         final int timeSinceLastAccess = (int) (System.currentTimeMillis() - host.lastacc());
-        
+
         // find the delay as given by robots.txt on target site
-        int robotsDelay = waitingRobots(url, robots, agent);
+        final int robotsDelay = waitingRobots(url, robots, agent);
         if (robotsDelay < 0) return -timeSinceLastAccess; // no limits if granted exclusively for this peer
 
         waiting = Math.max(waiting, robotsDelay);
-        return Math.min(60000, waiting) - timeSinceLastAccess;
+        return waiting - timeSinceLastAccess;
     }
-    
+
     public static String waitingRemainingExplain(final DigestURL url, final RobotsTxt robots, final ClientIdentification.Agent agent) {
 
         // first check if the domain was _ever_ accessed before
@@ -227,7 +228,7 @@ public class Latency {
         if (host == null) return "host " + host + " never accessed before -> Integer.MIN_VALUE"; // no delay if host is new
 
         // find the minimum waiting time based on the network domain (local or global)
-        boolean local = url.isLocal();
+        final boolean local = url.isLocal();
         final StringBuilder s = new StringBuilder(50);
 
         // find the minimum waiting time based on the network domain (local or global)
@@ -236,26 +237,26 @@ public class Latency {
 
         // if we have accessed the domain many times, get slower (the flux factor)
         if (!local) {
-            int flux = host.flux(waiting);
+            final int flux = host.flux(waiting);
             waiting += flux;
             s.append(", flux = ").append(flux);
         }
-        
+
         // use the access latency as rule how fast we can access the server
         // this applies also to localhost, but differently, because it is not necessary to
         // consider so many external accesses
         s.append(", host.average = ").append(host.average());
         waiting = Math.max(waiting, (int) (host.average() * Switchboard.getSwitchboard().getConfigFloat(SwitchboardConstants.CRAWLER_LATENCY_FACTOR, 0.5f)));
-        
+
         // if the number of same hosts as in the url in the loading queue is greater than MaxSameHostInQueue, then increase waiting
-        int hostcount = Switchboard.getSwitchboard().crawlQueues.hostcount(url.getHost());
+        final int hostcount = Switchboard.getSwitchboard().crawlQueues.hostcount(url.getHost());
         if (hostcount > Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.CRAWLER_MAX_SAME_HOST_IN_QUEUE, 20)) {
             s.append(", hostcount = ").append(hostcount);
-            waiting += 5000;
+            waiting += 3000;
         }
 
         // find the delay as given by robots.txt on target site
-        int robotsDelay = waitingRobots(url, robots, agent);
+        final int robotsDelay = waitingRobots(url, robots, agent);
         if (robotsDelay < 0) return "no waiting for exclusive granted peer"; // no limits if granted exclusively for this peer
 
         waiting = Math.max(waiting, robotsDelay);
@@ -279,13 +280,13 @@ public class Latency {
      */
     public static long getDomainSleepTime(final RobotsTxt robots, final CrawlProfile profileEntry, final DigestURL crawlURL) {
         if (profileEntry == null) return 0;
-        long sleeptime = (
+        final long sleeptime = (
             profileEntry.cacheStrategy() == CacheStrategy.CACHEONLY ||
             (profileEntry.cacheStrategy() == CacheStrategy.IFEXIST && Cache.has(crawlURL.hash()))
             ) ? Integer.MIN_VALUE : waitingRemaining(crawlURL, robots, profileEntry.getAgent()); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         return sleeptime;
     }
-    
+
     /**
      * load a robots.txt to get the robots time.
      * ATTENTION: this method causes that a robots.txt is loaded from the web which may cause a longer delay in execution.
@@ -296,16 +297,16 @@ public class Latency {
      * @return
      */
     public static long getRobotsTime(final RobotsTxt robots, final DigestURL crawlURL, ClientIdentification.Agent agent) {
-        long sleeptime = waitingRobots(crawlURL, robots, agent); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+        final long sleeptime = waitingRobots(crawlURL, robots, agent); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         return sleeptime < 0 ? 0 : sleeptime;
     }
-    
+
     public static final class Host {
-        private AtomicLong timeacc;
-        private AtomicLong lastacc;
-        private AtomicInteger count;
+        private final AtomicLong timeacc;
+        private final AtomicLong lastacc;
+        private final AtomicInteger count;
         private final String host;
-        private long robotsMinDelay;
+        private final long robotsMinDelay;
         private Host(final String host, final long time, long robotsMinDelay) {
             this.host = host;
             this.timeacc = new AtomicLong(time);
@@ -353,5 +354,5 @@ public class Latency {
             return this.count.get() >= 10000 ? range >> 1 : (range * this.count.get() / 10000) >> 1;
         }
     }
-    
+
 }

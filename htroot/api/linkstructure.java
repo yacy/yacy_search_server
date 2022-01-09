@@ -37,14 +37,14 @@ import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
 
 public class linkstructure {
-    
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
-        
+
         final String ext = header.get(HeaderFramework.CONNECTION_PROP_EXT, "");
         //final boolean json = ext.equals("json");
         final boolean xml = ext.equals("xml");
-        
+
         final Switchboard sb = (Switchboard) env;
         Fulltext fulltext = sb.index.fulltext();
         if (post == null) return prop;
@@ -53,7 +53,7 @@ public class linkstructure {
         int maxnodes = Math.min(post.getInt("maxnodes", 10000), authenticated ? 10000000 : 100);
         HyperlinkGraph hlg = new HyperlinkGraph();
         int maxdepth = 0;
-        
+
         if (post.get("about", null) != null) try {
             // get link structure within a host
             String about = post.get("about", null); // may be a URL, a URL hash or a domain hash
@@ -62,7 +62,8 @@ public class linkstructure {
             if (about.length() == 12 && Base64Order.enhancedCoder.wellformed(ASCII.getBytes(about))) {
                 byte[] urlhash = ASCII.getBytes(about);
                 try {
-                    url = authenticated ? sb.getURL(urlhash) : null;
+                    String u = authenticated ? sb.getURL(urlhash) : null;
+                    url = u == null ? null : new DigestURL(u);
                 } catch (IOException e) {
                     ConcurrentLog.logException(e);
                 }
@@ -71,7 +72,7 @@ public class linkstructure {
                 hostname = url.getHost();
             }
             if (hostname == null) return prop;
-            
+
             // now collect _all_ documents inside the domain until a timeout appears
             hlg.fill(fulltext.getDefaultConnector(), hostname, null, maxtime, maxnodes);
             maxdepth = hlg.findLinkDepth();
@@ -82,7 +83,7 @@ public class linkstructure {
             DigestURL from = post.get("from", null) == null ? null : new DigestURL(post.get("from", null)); // can be null or must be an url
             hlg.path(sb.index, from, to, maxtime, maxnodes);
         } catch (final MalformedURLException e) {}
-        
+
         // finally just write out the edge array
         writeGraph(prop, hlg, maxdepth);
 
@@ -92,11 +93,11 @@ public class linkstructure {
             outgoingHeader.put(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
             prop.setOutgoingHeader(outgoingHeader);
         }
-        
+
         // return rewrite properties
         return prop;
     }
-    
+
     private static void writeGraph(final servletProperties prop, final HyperlinkGraph hlg, final int maxdepth) {
         int c = 0;
         for (HyperlinkEdge e: hlg) {
@@ -107,10 +108,8 @@ public class linkstructure {
             Integer depth_target = hlg.getDepth(e.target);
             prop.put("edges_" + c + "_depthSource", depth_source == null ? -1 : depth_source.intValue());
             prop.put("edges_" + c + "_depthTarget", depth_target == null ? -1 : depth_target.intValue());
-            prop.put("edges_" + c + "_eol", 1);
             c++;
         }
-        prop.put("edges_" + (c-1) + "_eol", 0);
         prop.put("edges", c);
         prop.put("maxdepth", maxdepth);
     }

@@ -36,8 +36,8 @@ import net.yacy.search.schema.CollectionSchema;
  */
 public class TokenizedStringNavigator  extends StringNavigator implements Navigator {
 
-    public TokenizedStringNavigator(String title, CollectionSchema field) {
-        super(title, field);
+    public TokenizedStringNavigator(String title, CollectionSchema field, final NavigatorSort sort) {
+        super(title, field, sort);
     }
 
     /**

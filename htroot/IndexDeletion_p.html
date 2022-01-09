@@ -9,7 +9,10 @@
     #%env/templates/header.template%#
     #%env/templates/submenuIndexControl.template%#
     <h2>Index Deletion</h2>
-    <p>The search index contains #[doccount]# documents. You can delete them here. Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.</p>
+    <p>The search index contains #[doccount]# documents. You can delete them here.
+    Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.</p>
+    <p>Index deletion will not immediately reduce the storage size on disk because entries are only marked as deleted in a first step.
+    The storage size will later on shrink by itself if new documents are indexed or you can force a shrinking by <a href="/IndexControlURLs_p.html">performing an "Optimize Solr" procedure.</a></p>
     <form id="IndexDeletionPath" action="IndexDeletion_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
 	<input type="hidden" name="transactionToken" value="#[transactionToken]#" />
     <fieldset>

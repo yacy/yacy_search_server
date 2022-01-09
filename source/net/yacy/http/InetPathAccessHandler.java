@@ -24,13 +24,12 @@ package net.yacy.http;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.eclipse.jetty.http.pathmap.MappedResource;
 import org.eclipse.jetty.http.pathmap.PathMappings;
 import org.eclipse.jetty.http.pathmap.PathSpec;
 import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.util.InetAddressSet;
+import org.eclipse.jetty.util.component.DumpableCollection;
 
 /**
  * InetPathAccessHandler Access Handler
@@ -125,12 +124,6 @@ public class InetPathAccessHandler extends InetAccessHandler {
 	public static void checkPattern(final String pattern) throws IllegalArgumentException {
 		new InetPathAccessHandler().include(pattern);
 	}
-
-	@Override
-	protected boolean isAllowed(final InetAddress address, final HttpServletRequest request) {
-		return isAllowed(address, request.getPathInfo());
-	}
-
 	/**
 	 * Check whether the given address and path are allowed by current rules.
 	 * 
@@ -167,7 +160,9 @@ public class InetPathAccessHandler extends InetAccessHandler {
 
 	@Override
 	public void dump(final Appendable out, final String indent) throws IOException {
-		this.dumpBeans(out, indent, this.white.getMappings(), this.black.getMappings());
+		dumpObjects(out, indent,
+	            DumpableCollection.from("white", this.white.getMappings()),
+	            DumpableCollection.from("black", this.black.getMappings()));
 	}
 
 }

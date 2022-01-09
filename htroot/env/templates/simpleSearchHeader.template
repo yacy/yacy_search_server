@@ -40,7 +40,6 @@
           <li id="header_websearch"><a href="index.html#(authSearch)#::?auth#(/authSearch)#" onclick="this.href='index.html?#(authSearch)#::auth&#(/authSearch)#former='+encodeURIComponent(document.searchform.search.value)">Web Search</a></li>
           <li id="header_filesearch"><a href="yacyinteractive.html" onclick="this.href='yacyinteractive.html?handover='+document.searchform.search.value">File Search</a></li>
           <li id="header_comparesearch"><a href="compare_yacy.html?display=0">Compare Search</a></li>
-          <li id="header_hostbrowser"><a href="HostBrowser.html?hosts=">Index Browser</a></li>
           <li id="header_urlviewer"><a href="ViewFile.html">URL Viewer</a></li>
           <!--<li><a href="yacysearch_location.html">Location Search</a></li>-->
           <li class="divider" role="separator"></li>
@@ -51,7 +50,6 @@
           <li><a href="solr/select?hl=false&wt=yjson&facet=true&facet.mincount=1&facet.field=url_file_ext_s&start=0&rows=10&query=www" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / JSON</a></li>
           <li><a href="solr/collection1/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Default Core / XML</a></li>
           <li><a href="solr/webgraph/select?q=*:*&defType=edismax&start=0&rows=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Solr Webgraph Core / XML</a></li>
-          <li><a href="gsa/search?q=www&num=3" target="_blank"><i>API</i>&nbsp;&nbsp;&nbsp;Google Appliance API / XML</a></li>
         </ul>
       </li>
       <li id="header_help" class="dropdown">
@@ -62,10 +60,9 @@
           <li id="header_jslicense"><a href="jslicense.html" data-jslicense="1">JavaScript information</a></li>
           <li class="divider" role="separator"></li>
           <li id="header_download"><a href="https://yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
-          <li id="header_community"><a href="http://forum.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
-          <li id="header_wiki"><a href="http://wiki.yacy.de" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Project Wiki</a></li>
+          <li id="header_community"><a href="https://searchlab.eu" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
           <li id="header_git"><a href="https://github.com/yacy/yacy_search_server/commits/master" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
-          <li id="header_bugs"><a href="http://bugs.yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker</a></li>
+          <li id="header_bugs"><a href="https://github.com/yacy/yacy_search_server/issues" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Bugtracker</a></li>
         </ul>
       </li>
       <li id="header_administration">

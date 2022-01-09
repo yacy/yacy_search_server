@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
@@ -54,22 +56,17 @@ import com.google.common.io.Files;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
-import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.instance.RemoteInstance;
-import net.yacy.cora.federate.yacy.CacheStrategy;
-import net.yacy.cora.order.Digest;
+import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.protocol.ConnectionInfo;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.TimeoutRequest;
 import net.yacy.cora.protocol.http.HTTPClient;
-import net.yacy.cora.sorting.Array;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.crawler.retrieval.Response;
 import net.yacy.data.TransactionManager;
 import net.yacy.data.Translator;
-import net.yacy.document.Document;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
 import net.yacy.http.Jetty9HttpServerImpl;
@@ -136,7 +133,7 @@ public final class yacy {
     public static File htDocsPath = null;
     public static File shareDefaultPath = null;
     public static File shareDumpDefaultPath = null;
-    
+
     /**
      * a reference to the {@link Switchboard} created by the
      * {@link yacy#startup(String, long, long)} method.
@@ -162,27 +159,27 @@ public final class yacy {
             mkdirsIfNeseccary(appHome);
             File f = new File(dataHome, "DATA/");
             mkdirsIfNeseccary(f);
-			if (!(f.exists())) {
-				System.err.println("Error creating DATA-directory in " + dataHome.toString() + " . Please check your write-permission for this folder. YaCy will now terminate.");
-				System.exit(-1);
-			}
-			
+            if (!(f.exists())) {
+                System.err.println("Error creating DATA-directory in " + dataHome.toString() + " . Please check your write-permission for this folder. YaCy will now terminate.");
+                System.exit(-1);
+            }
+
             // set jvm tmpdir to a subdir for easy cleanup (as extensive use file.deleteonexit waists memory during long runs, as todelete files names are collected and never cleaned up during runtime)
-			// keep this as earlier as possible, as any other class can use the "java.io.tmpdir" property, even the log manager, when the log file pattern uses "%t" as an alias for the tmp directory 
-            try { 
+            // keep this as earlier as possible, as any other class can use the "java.io.tmpdir" property, even the log manager, when the log file pattern uses "%t" as an alias for the tmp directory
+            try {
                 tmpdir = java.nio.file.Files.createTempDirectory("yacy-tmp-").toString(); // creates sub dir in jvm's temp (see System.property "java.io.tempdir")
                 System.setProperty("java.io.tmpdir", tmpdir);
-            } catch (IOException ex) { }
+            } catch (final IOException ex) { }
 
             // setting up logging
-			f = new File(dataHome, "DATA/LOG/");
+            f = new File(dataHome, "DATA/LOG/");
             mkdirsIfNeseccary(f);
-			f = new File(dataHome, "DATA/LOG/yacy.logging");
-			final File f0 = new File(appHome, "defaults/yacy.logging");
-			if (!f.exists() || f0.lastModified() > f.lastModified()) try {
-			    Files.copy(f0, f);
+            f = new File(f, "yacy.logging");
+            final File f0 = new File(appHome, "defaults/yacy.logging");
+            if (!f.exists() || f0.lastModified() > f.lastModified()) try {
+                Files.copy(f0, f);
             } catch (final IOException e){
-                System.out.println("could not copy yacy.logging");
+                System.out.println("could not copy yacy.logging: " + e.getMessage());
             }
             try{
                 ConcurrentLog.configureLogging(dataHome, new File(dataHome, "DATA/LOG/yacy.logging"));
@@ -199,17 +196,17 @@ public final class yacy {
             ConcurrentLog.config("STARTUP", "Maximum file system path length: " + OS.maxPathLength);
 
             f = new File(dataHome, "DATA/yacy.running");
-            final String conf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             if (!f.createNewFile()) ConcurrentLog.severe("STARTUP", "WARNING: the file " + f + " can not be created!");
             try { new FileOutputStream(f).write(Integer.toString(OS.getPID()).getBytes()); } catch (final Exception e) { } // write PID
             f.deleteOnExit();
             FileChannel channel = null;
             FileLock lock = null;
             try {
-            	channel = new RandomAccessFile(f,"rw").getChannel();
-            	lock = channel.tryLock(); // lock yacy.running
+                channel = new RandomAccessFile(f,"rw").getChannel();
+                lock = channel.tryLock(); // lock yacy.running
             } catch (final Exception e) { }
 
+            final String conf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             try {
                 sb = new Switchboard(dataHome, appHome, "defaults/yacy.init".replace("/", File.separator), conf);
             } catch (final RuntimeException e) {
@@ -232,12 +229,12 @@ public final class yacy {
             sb.setConfig("htTemplatePath", "htroot/env/templates");
 
             double oldVer;
-    	    try {
+            try {
                 String tmpversion = sb.getConfig(Seed.VERSION, "");
                 if (tmpversion.isEmpty()) { // before 1.83009737 only the svnRevision nr was in config (like 9737)
                     tmpversion = yacyBuildProperties.getVersion();
-                    int oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
-                    if (oldRev > 1) {                       
+                    final int oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
+                    if (oldRev > 1) {
                         oldVer = Double.parseDouble(tmpversion) + oldRev / 100000000.0;
                     } else {
                         oldVer = Double.parseDouble(yacyBuildProperties.getLongVersion()); // failsafe (assume current version = no migration)
@@ -247,7 +244,7 @@ public final class yacy {
                 }
             } catch (final NumberFormatException e) {
                 oldVer = 0.0d;
-    	    }
+            }
             final double newRev = Double.parseDouble(yacyBuildProperties.getLongVersion());
             sb.setConfig(Seed.VERSION, yacyBuildProperties.getLongVersion());
             sb.setConfig("applicationRoot", appHome.toString());
@@ -260,11 +257,8 @@ public final class yacy {
             mkdirIfNeseccary(htDocsPath);
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
-            // copy the donate iframe (better to copy this once here instead of doing this in an actual iframe in the search result)
-            importDonationIFrame(sb, htDocsPath);
-            
             // create default notifier picture
-            File notifierFile = new File(htDocsPath, "notifier.gif");
+            final File notifierFile = new File(htDocsPath, "notifier.gif");
             if (!notifierFile.exists()) try {Files.copy(new File(htRootPath, "env/grafics/empty.gif"), notifierFile);} catch (final IOException e) {}
 
             final File htdocsReadme = new File(htDocsPath, "readme.txt");
@@ -295,14 +289,11 @@ public final class yacy {
             final int deleteOldDownloadsAfterDays = (int) sb.getConfigLong("update.deleteOld", 30);
             yacyRelease.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
 
-            // set user-agent
-            HTTPClient.setDefaultUserAgent(ClientIdentification.yacyInternetCrawlerAgent.userAgent);
-
             // start main threads
             final int port = sb.getLocalPort();
             try {
                 // start http server
-            	YaCyHttpServer httpServer;
+                YaCyHttpServer httpServer;
                 httpServer = new Jetty9HttpServerImpl(port);
                 httpServer.startupServer();
                 sb.setHttpServer(httpServer);
@@ -310,20 +301,20 @@ public final class yacy {
                 ConnectionInfo.setServerMaxcount(sb.getConfigInt("connectionsMax", ConnectionInfo.getMaxcount()));
 
                 ConcurrentLog.info("STARTUP",httpServer.getVersion());
-                
+
                 // open the browser window
                 final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
                 if (browserPopUpTrigger) try {
                     final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
                     //boolean properPW = (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT, "").isEmpty()) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                     //if (!properPW) browserPopUpPage = "ConfigBasic.html";
-                    /* YaCy main startup process must not hang because browser opening is long or fails. 
+                    /* YaCy main startup process must not hang because browser opening is long or fails.
                      * Let's open try opening the browser in a separate thread */
                     new Thread("Browser opening") {
-                    	@Override
-                    	public void run() {
+                        @Override
+                        public void run() {
                             Browser.openBrowser(("http://localhost:"+port) + "/" + browserPopUpPage);
-                    	}
+                        }
                     }.start();
                    // Browser.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage);
                 } catch (final Throwable e) {
@@ -342,10 +333,10 @@ public final class yacy {
                 if (lang.endsWith("browser"))
                     langlist = Translator.activeTranslations(); // get all translated languages
                 else {
-                    langlist = new ArrayList<String>();
+                    langlist = new ArrayList<>();
                     langlist.add(lang);
                 }
-                for (String tmplang : langlist) {
+                for (final String tmplang : langlist) {
                     if (!tmplang.equals("") && !tmplang.equals("default") && !tmplang.equals("browser")) { //locale is used
                         String currentRev = null;
                         BufferedReader br = null;
@@ -355,11 +346,11 @@ public final class yacy {
                         } catch (final IOException e) {
                             //Error
                         } finally {
-                        	try {
-                        		br.close();
-                        	} catch(IOException ioe) {
-                        		ConcurrentLog.warn("STARTUP", "Could not close " + tmplang + " version file");
-                        	}
+                            try {
+                                br.close();
+                            } catch(final IOException ioe) {
+                                ConcurrentLog.warn("STARTUP", "Could not close " + tmplang + " version file");
+                            }
                         }
 
                         if (currentRev == null || !currentRev.equals(sb.getConfig(Seed.VERSION, ""))) {
@@ -402,7 +393,6 @@ public final class yacy {
                     ConcurrentLog.severe("MAIN CONTROL LOOP", "PANIC: " + e.getMessage(),e);
                 }
                 // shut down
-                Array.terminate();
                 ConcurrentLog.config("SHUTDOWN", "caught termination signal");
                 httpServer.stop();
 
@@ -430,87 +420,34 @@ public final class yacy {
     }
 
     /**
-     * Concurrently import the donation iframe content to serve it directly from this peer.
-     * @param switchBoard the SwitchBoard instance. Must not be null.
-     * @param htDocsDirectory the custom htdocs directory. Must not be null.
+     * @param f
      */
-	private static void importDonationIFrame(final Switchboard switchBoard, final File htDocsDirectory) {
-		final File wwwEnvPath = new File(htDocsDirectory, "env");
-		mkdirIfNeseccary(wwwEnvPath);
-		final String iframesource = switchBoard.getConfig("donation.iframesource", "");
-		final String iframetarget = switchBoard.getConfig("donation.iframetarget", "");
-		final File iframefile = new File(htDocsDirectory, iframetarget);
-		if (!iframefile.exists()) new Thread("yacy.importDonationIFrame") {
-		    @Override
-		    public void run() {
-		        final ClientIdentification.Agent agent = ClientIdentification.getAgent(ClientIdentification.yacyInternetCrawlerAgentName);
-		        Response documentResponse;
-		        try {
-		        	/* Load the donation html frame content */
-		        	documentResponse = switchBoard.loader == null ? null : switchBoard.loader.load(switchBoard.loader.request(new DigestURL(iframesource), false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
-		            if (documentResponse != null) {
-		            	Document[] documents = documentResponse.parse();
-		            	if(documents != null && documents.length > 0 && documents[0] != null) {
-		            		Document donateDocument = documents[0];
-		            		String donateDocContent = new String(documentResponse.getContent(), donateDocument.getCharset());
-		            		/* Load image resources contained in the page */
-		            		if(donateDocument.getImages() != null) {
-		            			for(DigestURL imgURL : donateDocument.getImages().keySet()) {
-		            				try {
-		            					Response response = switchBoard.loader.load(switchBoard.loader.request(imgURL, false, true), CacheStrategy.NOCACHE, Integer.MAX_VALUE, null, agent);
-		            					if (response != null) {
-		            						String imgFileName = imgURL.getFileName();
-		            						/* Store each image in the same directory as the iframe target file */
-		            						FileUtils.copy(response.getContent(), new File(iframefile.getParentFile(), imgFileName));
-		                        	
-		            						/* Transform the original image URL to a relative one */
-		            						donateDocContent = donateDocContent.replace(imgURL.getURL().toString(), imgFileName);
-		            					}
-		            				} catch(IOException e) {
-		            					/* Failing to load one image should not stop the whole task */
-		            					ConcurrentLog.warn("STARTUP", "Donation frame retrieval : could not get an image resource.", e);
-		            				}
-		            			}
-		            		}
-			            	FileUtils.copy(donateDocContent.getBytes(donateDocument.getCharset()), iframefile);
-		            	}
-		            }
-		        } catch (Exception e) {
-		        	ConcurrentLog.warn("STARTUP", "Could not retrieve donation frame content.", e);
-		        }
-		    }
-		}.start();
-	}
+    private static void delete(final File f) {
+        if(!f.delete())
+            ConcurrentLog.severe("STARTUP", "WARNING: the file " + f + " can not be deleted!");
+    }
 
-	/**
-	 * @param f
-	 */
-	private static void delete(final File f) {
-		if(!f.delete())
-		    ConcurrentLog.severe("STARTUP", "WARNING: the file " + f + " can not be deleted!");
-	}
+    /**
+     * @see File#mkdir()
+     * @param path
+     */
+    private static void mkdirIfNeseccary(final File path) {
+        if (!(path.exists()))
+            if(!path.mkdir())
+                ConcurrentLog.warn("STARTUP", "could not create directory "+ path.toString());
+    }
 
-	/**
-	 * @see File#mkdir()
-	 * @param path
-	 */
-	private static void mkdirIfNeseccary(final File path) {
-		if (!(path.exists()))
-			if(!path.mkdir())
-				ConcurrentLog.warn("STARTUP", "could not create directory "+ path.toString());
-	}
+    /**
+     * @see File#mkdirs()
+     * @param path
+     */
+    public static void mkdirsIfNeseccary(final File path) {
+        if (!(path.exists()))
+            if(!path.mkdirs())
+                ConcurrentLog.warn("STARTUP", "could not create directories "+ path.toString());
+    }
 
-	/**
-	 * @see File#mkdirs()
-	 * @param path
-	 */
-	public static void mkdirsIfNeseccary(final File path) {
-		if (!(path.exists()))
-			if(!path.mkdirs())
-				ConcurrentLog.warn("STARTUP", "could not create directories "+ path.toString());
-	}
-
-	/**
+    /**
     * Loads the configuration from the data-folder.
     * FIXME: Why is this called over and over again from every method, instead
     * of setting the configurationdata once for this class in main?
@@ -532,8 +469,8 @@ public final class yacy {
 
         final Properties config = new Properties();
         FileInputStream fis = null;
-		try {
-        	fis  = new FileInputStream(new File(homePath, "DATA/SETTINGS/yacy.conf"));
+        try {
+            fis  = new FileInputStream(new File(homePath, "DATA/SETTINGS/yacy.conf"));
             config.load(fis);
         } catch (final FileNotFoundException e) {
             ConcurrentLog.severe(mes, "could not find configuration file.");
@@ -542,13 +479,13 @@ public final class yacy {
             ConcurrentLog.severe(mes, "could not read configuration file.");
             System.exit(-1);
         } finally {
-        	if(fis != null) {
-        		try {
-					fis.close();
-				} catch (final IOException e) {
-				    ConcurrentLog.logException(e);
-				}
-        	}
+            if(fis != null) {
+                try {
+                    fis.close();
+                } catch (final IOException e) {
+                    ConcurrentLog.logException(e);
+                }
+            }
         }
 
         return config;
@@ -564,8 +501,8 @@ public final class yacy {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
-        
-        final LinkedHashMap<String,ContentBody> post = new LinkedHashMap<String,ContentBody>();
+
+        final LinkedHashMap<String,ContentBody> post = new LinkedHashMap<>();
         post.put("shutdown", UTF8.StringBody(""));
         submitPostURL(homePath, "Steering.html", "Terminate YaCy", post);
     }
@@ -595,19 +532,17 @@ public final class yacy {
         final String adminUser = config.getProperty(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
 
         // send 'wget' to web interface
-        final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-        // con.setHeader(requestHeader.entrySet());
-        try {
-        	/* First get a valid transaction token using HTTP GET */
+        try (final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
+            /* First get a valid transaction token using HTTP GET */
             con.GETbytes("http://localhost:"+ port +"/" + path, adminUser, encodedPassword, false);
-            
+
             if (con.getStatusCode() != HttpStatus.SC_OK) {
                 throw new IOException("Error response from YACY socket: " + con.getHttpResponse().getStatusLine());
             }
-            
+
             final Header transactionTokenHeader = con.getHttpResponse().getFirstHeader(HeaderFramework.X_YACY_TRANSACTION_TOKEN);
             if(transactionTokenHeader == null) {
-            	throw new IOException("Could not retrieve a valid transaction token");
+                throw new IOException("Could not retrieve a valid transaction token");
             }
 
             /* Then POST the request */
@@ -616,42 +551,42 @@ public final class yacy {
             if (con.getStatusCode() >= HttpStatus.SC_OK && con.getStatusCode() < HttpStatus.SC_MULTIPLE_CHOICES) {
                 ConcurrentLog.config("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
             } else {
-            	ConcurrentLog.severe("COMMAND-STEERING", "error response from YACY socket: " + con.getHttpResponse().getStatusLine());
-            	
+                ConcurrentLog.severe("COMMAND-STEERING", "error response from YACY socket: " + con.getHttpResponse().getStatusLine());
+
                 try {
-        			HTTPClient.closeConnectionManager();
-        		} catch (final InterruptedException e1) {
-        			e1.printStackTrace();
-        		}
-                
+                    HTTPClient.closeConnectionManager();
+                } catch (final InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+
                 RemoteInstance.closeConnectionManager();
-            	
+
                 System.exit(-1);
             }
         } catch (final IOException e) {
             ConcurrentLog.severe("COMMAND-STEERING", "could not establish connection to YACY socket: " + e.getMessage());
-            
+
             try {
-    			HTTPClient.closeConnectionManager();
-    		} catch (final InterruptedException e1) {
-    			e1.printStackTrace();
-    		}
+                HTTPClient.closeConnectionManager();
+            } catch (final InterruptedException e1) {
+                e1.printStackTrace();
+            }
             RemoteInstance.closeConnectionManager();
-            
+
             System.exit(-1);
         }
 
         try {
-			HTTPClient.closeConnectionManager();
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
-		}
+            HTTPClient.closeConnectionManager();
+        } catch (final InterruptedException e) {
+            e.printStackTrace();
+        }
         RemoteInstance.closeConnectionManager();
 
         // finished
         ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
     }
-    
+
     private static void submitURL(final File homePath, final String path, final String processdescription) {
         final Properties config = configuration("COMMAND-STEERING", homePath);
 
@@ -663,15 +598,13 @@ public final class yacy {
         if (encodedPassword == null) encodedPassword = ""; // not defined
 
         // send 'wget' to web interface
-        final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-        // con.setHeader(requestHeader.entrySet());
-        try {
+        try (final HTTPClient con = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
             con.GETbytes("http://localhost:"+ port +"/" + path, config.getProperty(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,"admin"), encodedPassword, false);
             if (con.getStatusCode() > 199 && con.getStatusCode() < 300) {
                 ConcurrentLog.config("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
 
             } else {
-            	ConcurrentLog.severe("COMMAND-STEERING", "error response from YACY socket: " + con.getHttpResponse().getStatusLine());
+                ConcurrentLog.severe("COMMAND-STEERING", "error response from YACY socket: " + con.getHttpResponse().getStatusLine());
                 System.exit(-1);
             }
         } catch (final IOException e) {
@@ -680,48 +613,48 @@ public final class yacy {
         }
 
         try {
-			HTTPClient.closeConnectionManager();
-		} catch (final InterruptedException e) {
-			e.printStackTrace();
-		}
+            HTTPClient.closeConnectionManager();
+        } catch (final InterruptedException e) {
+            e.printStackTrace();
+        }
         RemoteInstance.closeConnectionManager();
 
         // finished
         ConcurrentLog.config("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
     }
-    
+
     /**
      * read saved config file and perform action which need to be done before main task starts
      * - like check on system alrady running etc.
-     * 
+     *
      * @param dataHome data directory
      */
     static private void preReadSavedConfigandInit(File dataHome) {
-        File lockFile = new File(dataHome, "DATA/yacy.running");
+        final File lockFile = new File(dataHome, "DATA/yacy.running");
         final String conf = "DATA/SETTINGS/yacy.conf";
-        
+
         // If YaCy is actually running, then we check if the server port is open.
         // If yes, then we consider that a restart is a user mistake and then we just respond
         // as the user expects and tell the browser to open the start page.
         // That will especially happen if Windows Users double-Click the YaCy Icon on the desktop to simply
         // open the web interface. (They don't think of 'servers' they just want to get to the search page).
         // We need to parse the configuration file for that to get the host port
-        File configFile = new File(dataHome, conf);
-        
+        final File configFile = new File(dataHome, conf);
+
         if (configFile.exists()) {
-            Properties p = new Properties();
+            final Properties p = new Properties();
             FileInputStream fis = null;
             try {
                 fis = new FileInputStream(configFile);
                 p.load(fis);
-                
+
                 // test for yacy already running
                 if (lockFile.exists()) {  // another instance running? VM crash? User will have to care about this
                     //standard log system not up yet - use simply stdout
                     // prevents also creation of a log file while just opening browser
                     System.out.println("WARNING: the file " + lockFile + " exists, this usually means that a YaCy instance is still running. If you want to restart YaCy, try first ./stopYACY.sh, then ./startYACY.sh. If ./stopYACY.sh fails, try ./killYACY.sh");
 
-                    int port = Integer.parseInt(p.getProperty(SwitchboardConstants.SERVER_PORT, "8090"));
+                    final int port = Integer.parseInt(p.getProperty(SwitchboardConstants.SERVER_PORT, "8090"));
                     if (TimeoutRequest.ping("127.0.0.1", port, 1000)) {
                         Browser.openBrowser("http://localhost:" + port + "/" + p.getProperty(SwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html"));
                         // Thats it; YaCy was running, the user is happy, we can stop now.
@@ -731,23 +664,23 @@ public final class yacy {
                         // YaCy is not running; thus delete the file an go on as nothing was wrong.
                         System.err.println("INFO: delete old yacy.running file; likely previous YaCy session was not orderly shutdown!");
                         delete(lockFile);
-                    }                                
+                    }
                 }
-            } catch (IOException ex) {
+            } catch (final IOException ex) {
                 System.err.println("ERROR: config file seems to be corrupt");
                 System.err.println("ERROR: if problem persists, delete file");
                 System.err.println(configFile.getAbsolutePath());
                 ConcurrentLog.logException(ex);
                 ConcurrentLog.severe("Startup", "cannot read " + configFile.toString() + ", please delete the corrupted file if problem persits");
             } finally {
-            	try {
-					fis.close();
-				} catch (IOException e) {
-					ConcurrentLog.warn("Startup", "Could not close file " + configFile);
-				}
+                try {
+                    fis.close();
+                } catch (final IOException e) {
+                    ConcurrentLog.warn("Startup", "Could not close file " + configFile);
+                }
             }
         }
-    }     
+    }
 
     /**
      * Main-method which is started by java. Checks for special arguments or
@@ -758,72 +691,92 @@ public final class yacy {
      */
     public static void main(String args[]) {
 
-    	try {
-	        // check assertion status
-	        //ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
-	        boolean assertionenabled = false;
-	        assert (assertionenabled = true) == true; // compare to true to remove warning: "Possible accidental assignement"
-	        if (assertionenabled) System.out.println("Asserts are enabled");
+        try {
+            // check assertion status
+            //ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+            boolean assertionenabled = false;
+            assert (assertionenabled = true) == true; // compare to true to remove warning: "Possible accidental assignement"
+            if (assertionenabled) System.out.println("Asserts are enabled");
 
-	        // check memory amount
-	        System.gc();
-	        final long startupMemFree  = MemoryControl.free();
-	        final long startupMemTotal = MemoryControl.total();
+            // check memory amount
+            System.gc();
+            final long startupMemFree  = MemoryControl.free();
+            final long startupMemTotal = MemoryControl.total();
 
-	        // maybe go into headless awt mode: we have three cases depending on OS and one exception:
-	        // windows   : better do not go into headless mode
-	        // mac       : go into headless mode because an application is shown in gui which may not be wanted
-	        // linux     : go into headless mode because this does not need any head operation
-	        // exception : if the -gui option is used then do not go into headless mode since that uses a gui
-	        boolean headless = true;
-	        if (OS.isWindows) headless = false;
-	        if (args.length >= 1 && args[0].toLowerCase(Locale.ROOT).equals("-gui")) headless = false;
-	        System.setProperty("java.awt.headless", headless ? "true" : "false");
+            // maybe go into headless awt mode: we have three cases depending on OS and one exception:
+            // windows   : better do not go into headless mode
+            // mac       : go into headless mode because an application is shown in gui which may not be wanted
+            // linux     : go into headless mode because this does not need any head operation
+            // exception : if the -gui option is used then do not go into headless mode since that uses a gui
+            boolean headless = true;
+            if (OS.isWindows) headless = false;
+            if (args.length >= 1 && args[0].toLowerCase(Locale.ROOT).equals("-gui")) headless = false;
+            System.setProperty("java.awt.headless", headless ? "true" : "false");
 
-	        String s = ""; for (final String a: args) s += a + " ";
-	        yacyRelease.startParameter = s.trim();
+            final StringBuilder s = new StringBuilder(); for (final String a: args) s.append(a).append(" ");
+            yacyRelease.startParameter = s.toString().trim();
 
-	        File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
-	        File dataRoot = applicationRoot;
-	        //System.out.println("args.length=" + args.length);
-	        //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
-	        if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-startup") || args[0].equals("-start"))) {
-	            // normal start-up of yacy
-	            if (args.length > 1) {
-            		dataRoot = new File(args[1]);
-	            	if(!dataRoot.isAbsolute()) {
-	            		/* data root folder provided as a path relative to the user home folder */
-	            		dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
-	            	}
-	            }
+            // case for the application path if started normally with a jre command
+            File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
+
+            // try to find the application root path within a Mac application
+            // call com.apple.eio.FileManager.getPathToApplicationBundle();
+            try {
+                // these methods will cause a warning: remove them with --illegal-access=permit
+                final Class<?> comAppleEioFileManagerClass = Class.forName("com.apple.eio.FileManager");
+                final Method getPathToApplicationBundleMethod = ClassProvider.getStaticMethod(comAppleEioFileManagerClass, "getPathToApplicationBundle", null);
+                final String apppath = (String) getPathToApplicationBundleMethod.invoke(null);
+                System.out.println("PathToApplicationBundle = " + apppath); // PathToApplicationBundle = /Users/admin/git/rc1/build/YaCy.app
+                if (apppath != null && apppath.endsWith(".app")) {
+                    // modify the applicationRoot path to within the app file
+                    applicationRoot = new File(apppath + "/Contents");
+                    System.setProperty("user.dir", applicationRoot.getAbsolutePath()); // required since nasty code elswhere is using it
+                    System.setProperty("user.home", applicationRoot.getAbsolutePath()); // well
+                }
+            } catch (ClassNotFoundException | InvocationTargetException | IllegalAccessException | IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+
+            File dataRoot = applicationRoot;
+            //System.out.println("args.length=" + args.length);
+            //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
+            if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-startup") || args[0].equals("-start"))) {
+                // normal start-up of yacy
+                if (args.length > 1) {
+                    dataRoot = new File(args[1]);
+                    if(!dataRoot.isAbsolute()) {
+                        /* data root folder provided as a path relative to the user home folder */
+                        dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+                    }
+                }
                 preReadSavedConfigandInit(dataRoot);
-	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
-	        } else if (args.length >= 1 && args[0].toLowerCase(Locale.ROOT).equals("-gui")) {
-	            // start-up of yacy with gui
-	            if (args.length > 1) {
-	            	dataRoot = new File(args[1]);
-	            	if(!dataRoot.isAbsolute()) {
-	            		/* data root folder provided as a path relative to the user home folder */
-	            		dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
-	            	}
-	            }
+                startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
+            } else if (args.length >= 1 && args[0].toLowerCase(Locale.ROOT).equals("-gui")) {
+                // start-up of yacy with gui
+                if (args.length > 1) {
+                    dataRoot = new File(args[1]);
+                    if(!dataRoot.isAbsolute()) {
+                        /* data root folder provided as a path relative to the user home folder */
+                        dataRoot = new File(System.getProperty("user.home").replace('\\', '/'), args[1]);
+                    }
+                }
                 preReadSavedConfigandInit(dataRoot);
-	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);
-	        } else if ((args.length >= 1) && ((args[0].toLowerCase(Locale.ROOT).equals("-shutdown")) || (args[0].equals("-stop")))) {
-	            // normal shutdown of yacy
-	            if (args.length == 2) applicationRoot= new File(args[1]);
-	            shutdown(applicationRoot);
-	        } else if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-update"))) {
-	            // aut-update yacy
-	            if (args.length == 2) applicationRoot= new File(args[1]);
-	            update(applicationRoot);
-	        } else if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-version"))) {
-	            // show yacy version
-	            System.out.println(copyright);
+                startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, true);
+            } else if ((args.length >= 1) && ((args[0].toLowerCase(Locale.ROOT).equals("-shutdown")) || (args[0].equals("-stop")))) {
+                // normal shutdown of yacy
+                if (args.length == 2) applicationRoot= new File(args[1]);
+                shutdown(applicationRoot);
+            } else if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-update"))) {
+                // aut-update yacy
+                if (args.length == 2) applicationRoot= new File(args[1]);
+                update(applicationRoot);
+            } else if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-version"))) {
+                // show yacy version
+                System.out.println(copyright);
             } else if ((args.length > 1) && (args[0].toLowerCase(Locale.ROOT).equals("-config"))) {
                     // set config parameter. Special handling of adminAccount=user:pwd (generates md5 encoded password)
                     // on Windows parameter should be enclosed in doublequotes to accept = sign (e.g. -config "port=8090" "port.ssl=8043")
-                    File f = new File (dataRoot,"DATA/SETTINGS/");
+                    final File f = new File (dataRoot,"DATA/SETTINGS/");
                     if (!f.exists()) {
                         mkdirsIfNeseccary(f);
                     } else {
@@ -832,28 +785,28 @@ public final class yacy {
                         }
                     }
                     // use serverSwitch to read config properties (including init values from yacy.init
-                    serverSwitch ss = new serverSwitch(dataRoot,applicationRoot,"defaults/yacy.init","DATA/SETTINGS/yacy.conf");
+                    final serverSwitch ss = new serverSwitch(dataRoot,applicationRoot,"defaults/yacy.init","DATA/SETTINGS/yacy.conf");
 
                     for (int icnt=1; icnt < args.length ; icnt++) {
-                        String cfg = args[icnt];
-                        int pos = cfg.indexOf('=');
+                        final String cfg = args[icnt];
+                        final int pos = cfg.indexOf('=');
                         if (pos > 0) {
-                            String cmd = cfg.substring(0, pos);
-                            String val = cfg.substring(pos + 1);
+                            final String cmd = cfg.substring(0, pos);
+                            final String val = cfg.substring(pos + 1);
 
                             if (!val.isEmpty()) {
                                 if (cmd.equalsIgnoreCase(SwitchboardConstants.ADMIN_ACCOUNT)) { // special command to set adminusername and md5-pwd
-                                    int cpos = val.indexOf(':');  //format adminAccount=adminname:adminpwd
+                                    final int cpos = val.indexOf(':');  //format adminAccount=adminname:adminpwd
                                     if (cpos >= 0) {
                                         String username = val.substring(0, cpos);
-                                        String pwdtxt = val.substring(cpos + 1);
+                                        final String pwdtxt = val.substring(cpos + 1);
                                         if (!username.isEmpty()) {
                                             ss.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, username);
                                             System.out.println("Set property " + SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME + " = " + username);
                                         } else {
                                             username = ss.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
                                         }
-                                        ss.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "MD5:" + Digest.encodeMD5Hex(username + ":" + ss.getConfig(SwitchboardConstants.ADMIN_REALM, "YaCy") + ":" + pwdtxt));
+                                        ss.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, sb.encodeDigestAuth(username, pwdtxt));
                                         System.out.println("Set property " + SwitchboardConstants.ADMIN_ACCOUNT_B64MD5 + " = " + ss.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""));
                                     }
                                 } else {
@@ -867,15 +820,15 @@ public final class yacy {
                         System.out.println();
                     }
             } else {
-	            if (args.length == 1) {
-	            	applicationRoot= new File(args[0]);
-	            }
+                if (args.length == 1) {
+                    applicationRoot= new File(args[0]);
+                }
                 preReadSavedConfigandInit(dataRoot);
-	            startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
-	        }
-    	} finally {
-    		ConcurrentLog.shutdown();
-    	}
+                startup(dataRoot, applicationRoot, startupMemFree, startupMemTotal, false);
+            }
+        } finally {
+            ConcurrentLog.shutdown();
+        }
     }
 }
 
@@ -908,7 +861,7 @@ class shutdownHookThread extends Thread {
 
                 // waiting for the yacy thread to finish execution
                 ConcurrentLog.fine("SHUTDOWN","Waiting for main thread to finish.");
-                
+
                 /* Main thread will release the shutdownSemaphore once completely terminated.
                  * We do not wait indefinitely as the application is supposed here to quickly terminate */
                 final int maxWaitTime = 30;

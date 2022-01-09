@@ -92,7 +92,7 @@ public class sharedBlacklist_p {
      * @param env server environment
      * @return the servlet answer
      */
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();

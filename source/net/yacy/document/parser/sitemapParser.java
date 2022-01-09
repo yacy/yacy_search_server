@@ -41,7 +41,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.protocol.ClientIdentification;
-import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.cora.util.ConcurrentLog;
@@ -115,9 +114,8 @@ public class sitemapParser extends AbstractParser implements Parser {
     public static SitemapReader parse(final DigestURL sitemapURL, final ClientIdentification.Agent agent) throws IOException {
         // download document
         ConcurrentLog.info("SitemapReader", "loading sitemap from " + sitemapURL.toNormalform(true));
-        final HTTPClient client = new HTTPClient(agent);
         // client.setHeader(requestHeader.entrySet());
-        try {
+        try (final HTTPClient client = new HTTPClient(agent)) {
             client.GET(sitemapURL.toNormalform(false), false);
             if (client.getStatusCode() != 200) {
                 throw new IOException("Unable to download the sitemap file " + sitemapURL +
@@ -187,6 +185,12 @@ public class sitemapParser extends AbstractParser implements Parser {
                 }
             } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
+            } finally {
+            	try {
+					this.source.close();
+				} catch (IOException e) {
+					ConcurrentLog.logException(e);
+				}
             }
 
             try {

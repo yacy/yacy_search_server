@@ -2,9 +2,6 @@
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 06.02.2009 on http://www.yacy.net
 //
-// This is a part of YaCy.
-// The Software shall be used for Good, not Evil.
-//
 // $LastChangedDate$
 // $LastChangedRevision$
 // $LastChangedBy$

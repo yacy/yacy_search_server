@@ -1,5 +1,8 @@
 package net.yacy.document;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -8,14 +11,14 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+
+import org.junit.Test;
+
 import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.document.parser.docParser;
 import net.yacy.document.parser.odtParser;
 import net.yacy.document.parser.pdfParser;
 import net.yacy.document.parser.pptParser;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
-import org.junit.Test;
 
 
 public class ParserTest {

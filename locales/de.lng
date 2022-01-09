@@ -1427,7 +1427,7 @@ More Tutorials==Mehr Tutorials
 Please see the tutorials on==Bitte besuchen Sie auch die Anleitungen auf
 #-----------------------------
 
-#File: HostBrowser.html
+#File: IndexBrowser_p.html
 #---------------------------
 #Index Browser==Index Browser
 Browse the index of #[ucount]# documents.==Durchsuchen Sie den Index von #[ucount]# Dokumenten.
@@ -1468,10 +1468,6 @@ Inbound Links, incoming to #[host]# - Host List==Eingehende Links, eingehend auf
 ##[count]# URLs==#[count]# URL(s)
 #Administration Options==Administration Optionen
 <html lang="en">==<html lang="de">
-#-----------------------------
-
-#File: HostBrowserAdmin_p.html
-#---------------------------
 Administration Options==Administrator Optionen
 Delete all==Lösche alle
 >Load Errors<==>Ladefehler<
@@ -1815,7 +1811,7 @@ deselect the partial import flag==Den teilweisen Import Flag abschalten
 When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==Wenn ein Export gestartet wird werden Hilfsdateien in DATA/SURROGATE/in erzeugt, die automatisch von einem Indexer Thread geholt und verarbeitet werden.
 All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/SURROGATE/out verschoben und können recycelt werden wenn ein Index gelöscht wird.
 The URL stub==Der Teil der URL
-like http://forum.yacy-websuche.de==wie z.B. http://forum.yacy-websuche.de
+like https://searchlab.eu==wie z.B. https://searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==dies muss den kompletten Pfad vor '/viewtopic.php?' enthalten
 Type==Typ
 > of database<==> der Datenbank<
@@ -3390,38 +3386,6 @@ Primary Key==Primärschlüssel
 "Commit"=="Absenden"
 #-----------------------------
 
-#File: Table_YMark_p.html
-#---------------------------
-Table Viewer==Tabellen Anzeige
-YMark Table Administration==YMark Tabellen Administration
-Table Editor: showing table==Tabellen Editor: Angezeigte Tabelle
-"Edit Selected Row"=="Bearbeite angezeigte Reihe"
-"Add a new Row"=="Füge neue Zeile ein"
-"Delete Selected Rows"=="Lösche ausgewählte Reihe"
-"Delete Table"=="Lösche Tabelle"
-"Rebuild Index"=="Index neu aufbauen"
-Primary Key==Primärschlüssel
->Row Editor<==>Reihen Editor<
-"Commit"=="Eintragen"
-Table Selection==Tabellen Auswahl
-Select Table:==Wähle Tabelle:
-show max. entries==Zeige max. Einträge
->all<==>Alle<
-Display columns:==Zeige Spalten:
-"load"=="Laden"
-Search/Filter Table==Suche/Filter Tabelle
-search rows for==Suche Reihen mit
-"Search"=="Suche"
-#>Tags<==>Tags<
->select a tag<==>Tag auswählen<
->Folders<==>Ordner<
->select a folder<==>Ordner auswählen<
->Import Bookmarks<==>Importiere Lesezeichen<
-#Importer:==Importer:
-#>XBEL Importer<==>XBEL Importer<
-#>Netscape HTML Importer<==>Netscape HTML Importer<
-"import"=="Importieren"
-#-----------------------------
 
 #File: terminal_p.html
 #---------------------------

@@ -184,7 +184,7 @@ public class ViewFile {
 
         Response response = null;
         try {
-            ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
+            final ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
             // use sb.loader.requst( , , global=true) to use crawlprofile to allow index update
             response = sb.loader.load(sb.loader.request(url, true, true), authorized ? CacheStrategy.IFEXIST : CacheStrategy.CACHEONLY, Integer.MAX_VALUE, null, agent);
         } catch (final IOException e) {
@@ -341,7 +341,7 @@ public class ViewFile {
                 prop.put("viewMode_words", i);
 
             } else if (viewMode.equals("links")) {
-                putLinks(prop, wordArray, document);
+                putLinks(prop, wordArray, document, post.get("agentName"));
 
             }
             // optional: generate snippet
@@ -442,16 +442,17 @@ public class ViewFile {
      * @param prop object to be filled. Must not be null
      * @param wordArray aray of words from word post parameter
      * @param document document to process
+     * @param agentName the eventual custom identification agent name used to load documents
      */
-	private static void putLinks(final serverObjects prop, final String[] wordArray, Document document) {
+	private static void putLinks(final serverObjects prop, final String[] wordArray, final Document document, final String agentName) {
 		prop.put("viewMode", VIEW_MODE_AS_LINKLIST);
 		boolean dark = true;
 		int i = 0;
 
-		i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0));
-		i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
+		i += putMediaInfo(prop, wordArray, i, document.getVideolinks(), "video", (i % 2 == 0), agentName);
+		i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0), agentName);
 		dark = (i % 2 == 0);
-		i += putIconsInfos(prop, wordArray, i, document.getIcons().values(), (i % 2 == 0));
+		i += putIconsInfos(prop, wordArray, i, document.getIcons().values(), (i % 2 == 0), agentName);
 		dark = (i % 2 == 0);
 
 		final Map<DigestURL, ImageEntry> ts = document.getImages();
@@ -459,12 +460,20 @@ public class ViewFile {
 		ImageEntry entry;
 		while (tsi.hasNext()) {
 		    entry = tsi.next();
+		    final String urlStr = entry.url().toNormalform(true);
 		    prop.put("viewMode_links_" + i + "_nr", i);
 		    prop.put("viewMode_links_" + i + "_dark", dark ? "1" : "0");
 		    prop.put("viewMode_links_" + i + "_type", "image");
 		    prop.put("viewMode_links_" + i + "_text", (entry.alt().isEmpty()) ? "&nbsp;" : markup(wordArray, entry.alt()));
-		    prop.put("viewMode_links_" + i + "_url", entry.url().toNormalform(true));
-		    prop.put("viewMode_links_" + i + "_link", markup(wordArray, entry.url().toNormalform(true)));
+			prop.put("viewMode_links_" + i + "_encodedUrl", UTF8.encodeUrl(urlStr));
+			if(agentName != null) {
+				prop.put("viewMode_links_" + i + "_agent", true);
+				prop.put("viewMode_links_" + i + "_agent_name", UTF8.encodeUrl(agentName));
+			} else {
+				prop.put("viewMode_links_" + i + "_agent", false);
+			}
+		    prop.put("viewMode_links_" + i + "_url", urlStr);
+		    prop.put("viewMode_links_" + i + "_link", markup(wordArray, urlStr));
 		    if (entry.width() > 0 && entry.height() > 0) {
 		        prop.put("viewMode_links_" + i + "_rel", entry.width() + "x" + entry.height() + " Pixel");
 		    } else {
@@ -474,8 +483,8 @@ public class ViewFile {
 		    dark = !dark;
 		    i++;
 		}
-		i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0));
-		i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "link", (i % 2 == 0));
+		i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0), agentName);
+		i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "link", (i % 2 == 0), agentName);
 		prop.put("viewMode_links", i);
 	}
 
@@ -518,6 +527,7 @@ public class ViewFile {
      * @param media media links
      * @param type type of media link
      * @param dark current result line style
+     * @param agentName the eventual custom identification agent name used to load documents
      * @return number of links added to prop
      */
     private static int putMediaInfo(
@@ -526,19 +536,28 @@ public class ViewFile {
                     int c,
                     final Map<AnchorURL, String> media,
                     final String type,
-                    boolean dark) {
+                    boolean dark,
+                    final String agentName) {
         int i = 0;
         for (final Map.Entry<AnchorURL, String> entry : media.entrySet()) {
             final String name = entry.getKey().getNameProperty(); // the name attribute
             final String rel = entry.getKey().getRelProperty();   // the rel-attribute
             final String text = entry.getKey().getTextProperty(); // the text between the <a></a> tag
+            final String urlStr = entry.getKey().toNormalform(true);
 
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
             prop.putHTML("viewMode_links_" + c + "_type", type);
             prop.put("viewMode_links_" + c + "_text", text);
-            prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getKey().toNormalform(true)));
-            prop.put("viewMode_links_" + c + "_url", entry.getKey().toNormalform(true));
+            prop.put("viewMode_links_" + c + "_link", markup(wordArray, urlStr));
+            prop.put("viewMode_links_" + c + "_url", urlStr);
+			prop.put("viewMode_links_" + c + "_encodedUrl", UTF8.encodeUrl(urlStr));
+			if(agentName != null) {
+				prop.put("viewMode_links_" + c + "_agent", true);
+				prop.put("viewMode_links_" + c + "_agent_name", UTF8.encodeUrl(agentName));
+			} else {
+				prop.put("viewMode_links_" + c + "_agent", false);
+			}
             prop.put("viewMode_links_" + c + "_rel", rel);
             prop.put("viewMode_links_" + c + "_name", name);
             dark = !dark;
@@ -555,6 +574,7 @@ public class ViewFile {
      * @param c current links count
      * @param icons icon links
      * @param dark current result line style
+     * @param agentName the eventual custom identification agent name used to load documents
      * @return number of links added to prop
      */
     private static int putIconsInfos(
@@ -562,19 +582,28 @@ public class ViewFile {
                     final String[] wordArray,
                     int c,
                     final Collection<IconEntry> icons,
-                    boolean dark) {
+                    boolean dark,
+                    final String agentName) {
         int i = 0;
         for (final IconEntry entry : icons) {
             final String name = ""; // the name attribute
             final String rel = entry.relToString();   // the rel-attribute
             final String text = ""; // the text between the <a></a> tag
+            final String urlStr = entry.getUrl().toNormalform(true);
 
             prop.put("viewMode_links_" + c + "_nr", c);
             prop.put("viewMode_links_" + c + "_dark", ((dark) ? 1 : 0));
             prop.putHTML("viewMode_links_" + c + "_type", "icon");
             prop.put("viewMode_links_" + c + "_text", text);
-            prop.put("viewMode_links_" + c + "_link", markup(wordArray, entry.getUrl().toNormalform(true)));
-            prop.put("viewMode_links_" + c + "_url", entry.getUrl().toNormalform(true));
+            prop.put("viewMode_links_" + c + "_link", markup(wordArray, urlStr));
+            prop.put("viewMode_links_" + c + "_url", urlStr);
+			prop.put("viewMode_links_" + c + "_encodedUrl", UTF8.encodeUrl(urlStr));
+			if(agentName != null) {
+				prop.put("viewMode_links_" + c + "_agent", true);
+				prop.put("viewMode_links_" + c + "_agent_name", UTF8.encodeUrl(agentName));
+			} else {
+				prop.put("viewMode_links_" + c + "_agent", false);
+			}
             prop.put("viewMode_links_" + c + "_rel", rel);
             prop.put("viewMode_links_" + c + "_name", name);
             dark = !dark;
@@ -583,5 +612,4 @@ public class ViewFile {
         }
         return i;
     }
-
 }

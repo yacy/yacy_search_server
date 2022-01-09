@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
 
-import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.peers.Protocol;
 import net.yacy.search.Switchboard;

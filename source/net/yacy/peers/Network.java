@@ -70,12 +70,12 @@ public class Network
 
     // statics
     public static final ThreadGroup publishThreadGroup = new ThreadGroup("publishThreadGroup");
-    public static final HashMap<String, String> seedUploadMethods = new HashMap<String, String>();
+    public static final HashMap<String, String> seedUploadMethods = new HashMap<>();
     public static final ConcurrentLog log = new ConcurrentLog("YACY");
     /** pseudo-random key derived from a time-interval while YaCy startup */
     public static long speedKey = 0;
     public static long magic = System.currentTimeMillis();
-    public static final Map<String, Accessible> amIAccessibleDB = new ConcurrentHashMap<String, Accessible>(); // Holds PeerHash / yacyAccessible Relations
+    public static final Map<String, Accessible> amIAccessibleDB = new ConcurrentHashMap<>(); // Holds PeerHash / yacyAccessible Relations
     // constants for PeerPing behavior
     private static final int PING_INITIAL = 20;
     private static final int PING_MAX_RUNNING = 3;
@@ -185,7 +185,7 @@ public class Network
                 + this.sb.peers.sizeConnected()
                 + " new peer(s)");
         }
-        publishMySeed();
+        this.publishMySeed();
     }
 
     protected class publishThread extends Thread
@@ -316,7 +316,7 @@ public class Network
                 if ( ch != null ) {
                     String hash;
                     Seed seed;
-                    for (byte[] hashb: ch) {
+                    for (final byte[] hashb: ch) {
                         hash = ASCII.String(hashb);
                         seed = seeds.get(hash);
                         if (seed == null) {
@@ -363,7 +363,7 @@ public class Network
             //if (seeds.length > 1) {
             // holding a reference to all started threads
             final List<publishThread> syncList = Collections.synchronizedList(new LinkedList<publishThread>()); // memory for threads
-            
+
             // go through the peer list and starting a new publisher thread for each peer
             int i = 0;
             while ( si.hasNext() ) {
@@ -378,7 +378,7 @@ public class Network
                 	/* This should not happen : seeds db maintains only seeds with at least one IP */
                 	log.warn("Peer " + seed.getName() + "has no known IP address");
                 } else {
-                	String ip = ips.iterator().next();
+                	final String ip = ips.iterator().next();
                 	final String address = seed.getPublicAddress(ip);
                 	if ( log.isFine() ) log.fine("HELLO #" + i + " to peer '" + seed.getName() + "' at " + address); // debug
                 	final String seederror = seed.isProper(false);
@@ -387,7 +387,7 @@ public class Network
                 		this.sb.peers.peerActions.interfaceDeparture(seed, ip);
                 	} else {
                 		// starting a new publisher thread
-                		publishThread t = new publishThread(Network.publishThreadGroup, seed);
+                		final publishThread t = new publishThread(Network.publishThreadGroup, seed);
                 		t.start();
                 		syncList.add(t);
                 	}
@@ -395,7 +395,7 @@ public class Network
             }
 
             // receiving the result of all started publisher threads
-            for (publishThread t: syncList) {
+            for (final publishThread t: syncList) {
                 // waiting for the next thread to finish
                 t.join();
             }
@@ -543,7 +543,7 @@ public class Network
         }
         try {
             final Class<?> uploaderClass = Class.forName(className);
-            final Object uploader = uploaderClass.newInstance();
+            final Object uploader = uploaderClass.getDeclaredConstructor().newInstance();
             return (yacySeedUploader) uploader;
         } catch (final Exception e ) {
             return null;
@@ -705,7 +705,7 @@ public class Network
             sb.peers.lastSeedUpload_timeStamp = System.currentTimeMillis();
             final Set<String> myIPs = sb.peers.myIPs();
             if(!myIPs.isEmpty()) {
-                sb.peers.lastSeedUpload_myIP = myIPs.iterator().next();	
+                sb.peers.lastSeedUpload_myIP = myIPs.iterator().next();
             }
         }
     }

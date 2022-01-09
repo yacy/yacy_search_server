@@ -32,6 +32,7 @@ import java.util.Map;
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.cora.federate.yacy.CacheStrategy;
 import net.yacy.cora.lod.vocabulary.Tagging;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.sorting.ScoreMap;
@@ -43,7 +44,10 @@ import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
+import net.yacy.search.index.Segment;
 import net.yacy.search.navigator.Navigator;
+import net.yacy.search.navigator.NavigatorSortDirection;
+import net.yacy.search.navigator.NavigatorSortType;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.query.SearchEvent;
 import net.yacy.search.query.SearchEventCache;
@@ -60,37 +64,31 @@ public class yacysearchtrailer {
 
     @SuppressWarnings({ })
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-		if (post == null) {
-			throw new TemplateMissingParameterException("The eventID parameter is required");
-		}
-    	
+        if (post == null) {
+            throw new TemplateMissingParameterException("The eventID parameter is required");
+        }
+
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         final String eventID = post.get("eventID", "");
-        
+
         final boolean adminAuthenticated = sb.verifyAuthentication(header);
-        
+
         final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-		final boolean authenticated = adminAuthenticated || user != null;
-        
-		if (post.containsKey("auth") && !authenticated) {
-			/*
-			 * Authenticated search is explicitely requested here
-			 * but no authentication is provided : ask now for authentication.
+        final boolean authenticated = adminAuthenticated || user != null;
+
+        if (post.containsKey("auth") && !authenticated) {
+            /*
+             * Authenticated search is explicitely requested here
+             * but no authentication is provided : ask now for authentication.
              * Wihout this, after timeout of HTTP Digest authentication nonce, browsers no more send authentication information 
              * and as this page is not private, protected features would simply be hidden without asking browser again for authentication.
              * (see mantis 766 : http://mantis.tokeek.de/view.php?id=766) *
-			 */
-			prop.authenticationRequired();
-			return prop;
-		}
-        
-        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
-        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
-        boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
-        boolean global = post == null || (!post.get("resource-switch", post.get("resource", "global")).equals("local") && p2pmode);
-        boolean stealthmode = p2pmode && !global;
-        prop.put("resource-select", !adminAuthenticated ? 0 : stealthmode ? 2 : global ? 1 : 0);
+             */
+            prop.authenticationRequired();
+            return prop;
+        }
+
         // find search event
         final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
         if (theSearch == null) {
@@ -98,9 +96,12 @@ public class yacysearchtrailer {
             return prop;
         }
         final RequestHeader.FileType fileType = header.fileType();
-        
-        /* Add information about the current navigators generation (number of updates since their initialization) */
-        prop.put("nav-generation", theSearch.getNavGeneration());
+
+        final boolean clustersearch = sb.isRobinsonMode() && sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER);
+        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true) || clustersearch;
+        boolean p2pmode = sb.peers != null && sb.peers.sizeConnected() > 0 && indexReceiveGranted;
+        boolean global = post == null || (!post.get("resource-switch", post.get("resource", "global")).equals("local") && p2pmode);
+        boolean stealthmode = p2pmode && !global;
 
         // compose search navigation
         ContentDomain contentdom = theSearch.getQuery().contentdom;
@@ -110,6 +111,36 @@ public class yacysearchtrailer {
                 || sb.getConfigBool("search.video", true)
                 || sb.getConfigBool("search.image", true)
                 || sb.getConfigBool("search.app", true) ? 1 : 0);
+
+        String originalquerystring = post.get("query", post.get("search", "")).trim();
+        originalquerystring = originalquerystring.replace('<', ' ').replace('>', ' '); // light xss protection
+        final String former = originalquerystring.replaceAll(Segment.catchallString, "*");
+        final CacheStrategy snippetFetchStrategy = CacheStrategy.parse(post.get("verify", sb.getConfig("search.verify", "")));
+        final String snippetFetchStrategyName = snippetFetchStrategy == null
+                ? sb.getConfig("search.verify", CacheStrategy.IFFRESH.toName())
+                : snippetFetchStrategy.toName();
+        final int startRecord = post.getInt("startRecord", post.getInt("offset", post.getInt("start", 0)));
+        /* Maximum number of suggestions to display in the first results page */
+        final int meanMax = post.getInt("meanCount", 0);
+
+        prop.put("resource-switches", adminAuthenticated && (stealthmode || global));
+        prop.put("resource-switches_global", adminAuthenticated && global);
+        appendSearchFormValues("resource-switches_", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
+
+        /* The search event has been found : we can render ranking switches */
+        prop.put("ranking-switches", true);
+        appendSearchFormValues("ranking-switches_", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
+
+        /* Add information about the current navigators generation (number of updates since their initialization) */
+        prop.put("ranking-switches_nav-generation", theSearch.getNavGeneration());
+
+        prop.put("ranking-switches_contextRanking", !former.contains(" /date"));
+        prop.put("ranking-switches_contextRanking_formerWithoutDate", former.replace(" /date", ""));
+        prop.put("ranking-switches_dateRanking", former.contains(" /date"));
+        prop.put("ranking-switches_dateRanking_former", former);
+
+        appendSearchFormValues("searchdomswitches_", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
+
         prop.put("searchdomswitches_searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
         prop.put("searchdomswitches_searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
         prop.put("searchdomswitches_searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
@@ -120,6 +151,8 @@ public class yacysearchtrailer {
         prop.put("searchdomswitches_searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
         prop.put("searchdomswitches_searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
         prop.put("searchdomswitches_searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
+
+        appendSearchFormValues("searchdomswitches_strictContentDomSwitch_", post, prop, global, theSearch, former, snippetFetchStrategyName, startRecord, meanMax);
         prop.put("searchdomswitches_strictContentDomSwitch", (contentdom != ContentDomain.TEXT && contentdom != ContentDomain.ALL) ? 1 : 0);
         prop.put("searchdomswitches_strictContentDomSwitch_strictContentDom", theSearch.getQuery().isStrictContentDom() ? 1 : 0);
 
@@ -156,8 +189,8 @@ public class yacysearchtrailer {
                 count = entry.getValue();
                 prop.put(fileType, "nav-topics_element_" + i + "_modifier", name);
                 prop.put(fileType, "nav-topics_element_" + i + "_name", name);
-				prop.putUrlEncoded(fileType, "nav-topics_element_" + i + "_url", QueryParams
-						.navurl(fileType, 0, theSearch.query, name, false, authenticated).toString());
+                prop.putUrlEncoded(fileType, "nav-topics_element_" + i + "_url", QueryParams
+                        .navurl(fileType, 0, theSearch.query, name, false, authenticated).toString());
                 prop.put("nav-topics_element_" + i + "_count", count);
                 int fontsize = TOPWORDS_MINSIZE + (TOPWORDS_MAXSIZE - TOPWORDS_MINSIZE) * (count - mincount) / (1 + maxcount - mincount);
                 fontsize = Math.max(TOPWORDS_MINSIZE, fontsize - (name.length() - 5));
@@ -170,7 +203,7 @@ public class yacysearchtrailer {
             i--;
             prop.put("nav-topics_element_" + i + "_nl", 0);
         }
-        
+
         // protocol navigators
         if (theSearch.protocolNavigator == null || theSearch.protocolNavigator.isEmpty()) {
             prop.put("nav-protocols", 0);
@@ -200,15 +233,15 @@ public class yacysearchtrailer {
                     prop.put("nav-protocols_element_" + i + "_on", 0);
                     prop.put("nav-protocols_element_" + i + "_onclick", 0);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", nav);
-					url = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString();
+                    url = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString();
                 } else {
                     neg++;                    
                     prop.put("nav-protocols_element_" + i + "_on", 1);
                     prop.put("nav-protocols_element_" + i + "_onclick", 1);
                     prop.put(fileType, "nav-protocols_element_" + i + "_modifier", "-" + nav);
-					url = QueryParams
-							.navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav, authenticated)
-							.toString();
+                    url = QueryParams
+                            .navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav, authenticated)
+                            .toString();
                 }
                 prop.put(fileType, "nav-protocols_element_" + i + "_name", name);
                 prop.put("nav-protocols_element_" + i + "_onclick_url", url);
@@ -245,7 +278,7 @@ public class yacysearchtrailer {
                 if (name.length() < 10) continue;
                 count = theSearch.dateNavigator.get(name);
                 if(count == 0) {
-                	continue;
+                    continue;
                 }
                 String shortname = name.substring(0, 10);
                 long d = Instant.parse(name).toEpochMilli();
@@ -268,7 +301,7 @@ public class yacysearchtrailer {
                     pos++;
                     prop.put("nav-dates_element_" + i + "_on", 1);
                 } else {
-                    neg++;                    
+                    neg++;
                     prop.put("nav-dates_element_" + i + "_on", 0);
                 }
                 prop.put(fileType, "nav-dates_element_" + i + "_name", shortname);
@@ -314,7 +347,7 @@ public class yacysearchtrailer {
                         navUrl = QueryParams.navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav, authenticated);
                     }
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_name", name);
-					prop.putUrlEncoded(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", navUrl);
+                    prop.putUrlEncoded(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_url", navUrl);
                     prop.put(fileType, "nav-vocabulary_" + navvoccount + "_element_" + i + "_id", "vocabulary_" + navname + "_" + i);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_count", count);
                     prop.put("nav-vocabulary_" + navvoccount + "_element_" + i + "_nl", 1);
@@ -344,14 +377,34 @@ public class yacysearchtrailer {
             prop.put("navs_" + ni + "_name", naviname);
             prop.put("navs_" + ni + "_count", navi.size());
 
-            navigatorIterator = navi.keys(false);
+            final int navSort;
+            if(navi.getSort() == null) {
+                navSort = 0;
+            } else {
+                if(navi.getSort().getSortType() == NavigatorSortType.COUNT) {
+                    if(navi.getSort().getSortDir() == NavigatorSortDirection.DESC) {
+                        navSort = 0;        
+                    } else {
+                        navSort = 1;
+                    }
+                } else {
+                    if(navi.getSort().getSortDir() == NavigatorSortDirection.DESC) {
+                        navSort = 2;        
+                    } else {
+                        navSort = 3;
+                    }                    
+                }
+            }
+            prop.put("navs_" + ni + "_navSort", navSort);
+
+               navigatorIterator = navi.navigatorKeys();
             int i = 0, pos = 0, neg = 0;
             String nav, rawNav;
             while (i < theSearch.getQuery().getStandardFacetsMaxCount() && navigatorIterator.hasNext()) {
                 name = navigatorIterator.next();
                 count = navi.get(name);
                 if (count == 0) {
-                	/* This entry has a zero count, but the next may be positive */
+                    /* This entry has a zero count, but the next may be positive */
                     continue;
                 }
 
@@ -367,24 +420,24 @@ public class yacysearchtrailer {
                     pos++;
                     prop.put("navs_" + ni + "_element_" + i + "_on", 1);
                     prop.put(fileType, "navs_" + ni + "_element_" + i + "_modifier", nav);
-					navUrl = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString();
+                    navUrl = QueryParams.navurl(fileType, 0, theSearch.query, rawNav, false, authenticated).toString();
                 } else {
                     neg++;
                     prop.put("navs_" + ni + "_element_" + i + "_on", 0);
                     prop.put(fileType, "navs_" + ni + "_element_" + i + "_modifier", "-" + nav);
-					navUrl = QueryParams.navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav,
-							authenticated);
+                    navUrl = QueryParams.navUrlWithSingleModifierRemoved(fileType, 0, theSearch.query, rawNav,
+                            authenticated);
                 }
                 prop.put(fileType, "navs_" + ni + "_element_" + i + "_name", navi.getElementDisplayName(name));
-				prop.putUrlEncoded(fileType, "navs_" + ni + "_element_" + i + "_url", navUrl);
+                prop.putUrlEncoded(fileType, "navs_" + ni + "_element_" + i + "_url", navUrl);
                 prop.put(fileType, "navs_" + ni + "_element_" + i + "_id", naviname + "_" + i);
                 prop.put("navs_" + ni + "_element_" + i + "_count", count);
                 prop.put("navs_" + ni + "_element_" + i + "_nl", 1);
                 i++;
             }
             if(i == 0) {
-            	/* The navigator has only entries with value==0 : this is equivalent to empty navigator */
-            	continue;
+                /* The navigator has only entries with value==0 : this is equivalent to empty navigator */
+                continue;
             }
             prop.put("navs_" + ni + "_element", i);
             prop.put("navs_" + ni + "_count", i);
@@ -424,6 +477,36 @@ public class yacysearchtrailer {
         prop.put("num-results_totalcount", theSearch.getResultCount());
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(theSearch.query.id(true), SearchEventType.FINALIZATION, "bottomline", 0, 0), false);
         return prop;
+    }
+
+    /**
+     * Append search input fields values to the prop object. All parameters are required and must not be null.
+     * @param templatePrefix the template prefix to append before each template key
+     * @param post request parameters
+     * @param prop the servlet answer object to be filled
+     * @param global when true the search scope is blobal (not limited to this peer local index)
+     * @param theSearch the search object
+     * @param former the previous search terms
+     * @param snippetFetchStrategyName the snippet fetching strategy name to apply
+     * @param startRecord the zero based index of the first record to return
+     * @param meanMax the maximum number of suggestions ("Did you mean") to propose
+     */
+    private static void appendSearchFormValues(final String templatePrefix, final serverObjects post, final serverObjects prop, 
+            boolean global, final SearchEvent theSearch, final String former, final String snippetFetchStrategyName,
+            final int startRecord, final int meanMax) {
+        prop.putHTML(templatePrefix + "former", former);
+        prop.put(templatePrefix + "authSearch", post.containsKey("auth"));
+        prop.put(templatePrefix + "contentdom", post.get("contentdom", "text"));
+        prop.put(templatePrefix + "strictContentDom", String.valueOf(theSearch.getQuery().isStrictContentDom()));
+        prop.put(templatePrefix + "maximumRecords", theSearch.getQuery().itemsPerPage);
+        prop.put(templatePrefix + "startRecord", startRecord);
+        prop.put(templatePrefix + "search.verify", snippetFetchStrategyName);
+        prop.put(templatePrefix + "resource", global ? "global" : "local");
+        prop.put(templatePrefix + "search.navigation", post.get("nav", "all"));
+        prop.putHTML(templatePrefix + "prefermaskfilter", theSearch.getQuery().prefer.pattern());
+        prop.put(templatePrefix + "depth", "0");
+        prop.put(templatePrefix + "constraint", (theSearch.getQuery().constraint == null) ? "" : theSearch.getQuery().constraint.exportB64());
+        prop.put(templatePrefix + "meanCount", meanMax);
     }
 
 }

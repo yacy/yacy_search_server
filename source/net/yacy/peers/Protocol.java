@@ -74,6 +74,10 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import net.yacy.migration;
 import net.yacy.cora.date.GenericFormatter;
@@ -98,10 +102,6 @@ import net.yacy.cora.storage.HandleSet;
 import net.yacy.cora.util.ByteBuffer;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.JSONArray;
-import net.yacy.cora.util.JSONException;
-import net.yacy.cora.util.JSONObject;
-import net.yacy.cora.util.JSONTokener;
 import net.yacy.cora.util.SpaceExceededException;
 import net.yacy.crawler.data.ResultURLs;
 import net.yacy.crawler.data.ResultURLs.EventOrigin;
@@ -140,10 +140,10 @@ public final class Protocol {
      * wrapper class for multi-post attempts to multiple IPs
      */
     public static class Post {
-    
-    	/** Contains the result from a successful post or null if no attempt was successful */
+
+        /** Contains the result from a successful post or null if no attempt was successful */
         private byte[] result;
-        
+
         /**
          * @param targetBaseURL the base target URL
          * @param targetHash the hash of the target peer
@@ -159,21 +159,21 @@ public final class Protocol {
             final String path,
             final Map<String, ContentBody> parts,
             final int timeout) throws IOException {
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-            httpClient.setTimout(timeout);
-            MultiProtocolURL targetURL = new MultiProtocolURL(targetBaseURL, path);
-			this.result = httpClient.POSTbytes(targetURL, Seed.b64Hash2hexHash(targetHash) + ".yacyh", parts, false,
-					true);
+            try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
+                httpClient.setTimout(timeout);
+                MultiProtocolURL targetURL = new MultiProtocolURL(targetBaseURL, path);
+                this.result = httpClient.POSTbytes(targetURL, Seed.b64Hash2hexHash(targetHash) + ".yacyh", parts, false, true);
+            }
         }
-        
+
         /**
          * @return the result from a successful post or null if no attempt was successful
          */
         public byte[] getResult() {
-			return this.result;
-		}
+            return this.result;
+        }
     }
-    
+
     /**
      * this is called to enrich the seed information by - own address (if peer is behind a nat/router) - check
      * peer type (virgin/junior/senior/principal) to do this, we send a 'Hello' to another peer this carries
@@ -197,19 +197,16 @@ public final class Protocol {
         final String salt = crypt.randomSalt();
         long responseTime = Long.MAX_VALUE;
         byte[] content = null;
-        try {
+        try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 30000)) {
             // generate request
-            final Map<String, ContentBody> parts =
-                basicRequestParts(Switchboard.getSwitchboard(), null, salt);
+            final Map<String, ContentBody> parts = basicRequestParts(Switchboard.getSwitchboard(), null, salt);
             parts.put("count", UTF8.StringBody("20"));
             parts.put("magic", UTF8.StringBody(Long.toString(Network.magic)));
             parts.put("seed", UTF8.StringBody(mySeed.genSeedStr(salt)));
             // send request
             final long start = System.currentTimeMillis();
             // final byte[] content = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + address + "/yacy/hello.html"), 30000, yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", parts);
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 30000);
-            content =
-                httpClient.POSTbytes(
+            content = httpClient.POSTbytes(
                     new MultiProtocolURL(targetBaseURL, "/yacy/hello.html"),
                     Seed.b64Hash2hexHash(targetHash) + ".yacyh",
                     parts,
@@ -283,7 +280,7 @@ public final class Protocol {
                 Switchboard.getSwitchboard().index.fulltext().connectedLocalSolr() &&
                 responseTime < 1000 && Domains.isThisHostIP(mySeed.getIPs())
                 );
-        
+
         // change our seed-type
         final Accessible accessible = new Accessible();
         if ( mytype.equals(Seed.PEERTYPE_SENIOR) || mytype.equals(Seed.PEERTYPE_PRINCIPAL) ) {
@@ -372,7 +369,7 @@ public final class Protocol {
         return result;
     }
 
-    public static long[] queryRWICount(final MultiProtocolURL targetBaseURL, final Seed target, int timeout) {        
+    public static long[] queryRWICount(final MultiProtocolURL targetBaseURL, final Seed target, int timeout) {
         // prepare request
         final String salt = crypt.randomSalt();
 
@@ -383,7 +380,7 @@ public final class Protocol {
             parts.put("env", UTF8.StringBody(""));
             //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "posting request to " + targetBaseURL);
             final Post post = new Post(targetBaseURL, target.hash, "/yacy/query.html", parts, timeout);
-    		
+
             //ConcurrentLog.info("**hello-DEBUG**queryRWICount**", "received CONTENT from requesting " + targetBaseURL + (post.result == null ? "NULL" : (": length = " + post.result.length)));
             final Map<String, String> result = FileUtils.table(post.result);
             if (result == null || result.isEmpty()) return new long[] {-1, -1};
@@ -433,43 +430,46 @@ public final class Protocol {
         parts.put("count", UTF8.StringBody(Integer.toString(maxCount)));
         parts.put("time", UTF8.StringBody(Long.toString(maxTime)));
         // final byte[] result = HTTPConnector.getConnector(MultiProtocolURI.yacybotUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/urls.xml"), (int) maxTime, target.getHexHash() + ".yacyh", parts);
-        final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, (int) maxTime);
         RSSReader reader = null;
-        for (final String ip: target.getIPs()) {
-        	MultiProtocolURL targetBaseURL = null;
-            try {
-            	targetBaseURL = target.getPublicMultiprotocolURL(ip, preferHttps);
-            	byte[] result;
-            	try {
-            		result = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
-            	} catch(final IOException e) {
-            		if(targetBaseURL.isHTTPS()) {
-            			/* Failed with https : retry with http */
-            			targetBaseURL = target.getPublicMultiprotocolURL(ip, false);
-            			result = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
-            			if(result != null) {
-							/* Got something with http : mark peer SSL as unavailable on target peer */
-							markSSLUnavailableOnPeer(seedDB, target, ip, "yacyClient.queryRemoteCrawlURLs");
-            			}
-            		} else {
-            			throw e;
-            		}
-            	}
-                reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
-            } catch(MalformedURLException e) {
-				Network.log.warn("yacyClient.queryRemoteCrawlURLs malformed target URL for peer '" + target.getName()
-						+ "' on address : " + ip);
-            } catch (final IOException e ) {
-                reader = null;
-                Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
+        try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, (int) maxTime)) {
+            for (final String ip: target.getIPs()) {
+                MultiProtocolURL targetBaseURL = null;
+                try {
+                    targetBaseURL = target.getPublicMultiprotocolURL(ip, preferHttps);
+                    byte[] result;
+                    try {
+                        result = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
+                    } catch(final IOException e) {
+                        if(targetBaseURL.isHTTPS()) {
+                            /* Failed with https : retry with http */
+                            targetBaseURL = target.getPublicMultiprotocolURL(ip, false);
+                            result = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/urls.xml"), target.getHexHash() + ".yacyh", parts, false, true);
+                            if(result != null) {
+                                /* Got something with http : mark peer SSL as unavailable on target peer */
+                                markSSLUnavailableOnPeer(seedDB, target, ip, "yacyClient.queryRemoteCrawlURLs");
+                            }
+                        } else {
+                            throw e;
+                        }
+                    }
+                    reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
+                } catch(MalformedURLException e) {
+                    Network.log.warn("yacyClient.queryRemoteCrawlURLs malformed target URL for peer '" + target.getName()
+                            + "' on address : " + ip);
+                } catch (final IOException e ) {
+                    reader = null;
+                    Network.log.warn("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
+                }
+                if (reader != null) {
+                    break;
+                }
+                target.put(Seed.RCOUNT, "0");
+                seedDB.peerActions.interfaceDeparture(target, ip);
             }
-            if (reader != null) {
-            	break;
-            }
-            target.put(Seed.RCOUNT, "0");
-            seedDB.peerActions.interfaceDeparture(target, ip);
+        } catch (IOException e) {
+            Network.log.warn(e);
         }
-        
+
         final RSSFeed feed = reader == null ? null : reader.getFeed();
         if ( feed == null ) {
             // case where the rss reader does not understand the content
@@ -520,13 +520,13 @@ public final class Protocol {
         SearchResult result = null;
         for (String ip: target.getIPs()) {
             //if (ip.indexOf(':') >= 0) System.out.println("Search target: IPv6: " + ip);
-			final String targetBaseURL;
+            final String targetBaseURL;
             if (target.clash(event.peers.mySeed().getIPs())) {
-            	targetBaseURL = "http://localhost:" + event.peers.mySeed().getPort();
+                targetBaseURL = "http://localhost:" + event.peers.mySeed().getPort();
             } else {
-            	targetBaseURL = target.getPublicURL(ip,
-    					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
-    							SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT));
+                targetBaseURL = target.getPublicURL(ip,
+                        Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+                                SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT));
             }
             try {
                 result =
@@ -551,17 +551,17 @@ public final class Protocol {
             } catch (final IOException e ) {
                 Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
                 if(targetBaseURL.startsWith("https")) {
-                	/* First mark https unavailable on this peer before removing any interface */
-    				target.setFlagSSLAvailable(false);
-    				event.peers.updateConnected(target);
+                    /* First mark https unavailable on this peer before removing any interface */
+                    target.setFlagSSLAvailable(false);
+                    event.peers.updateConnected(target);
                 } else {
-                	event.peers.peerActions.interfaceDeparture(target, ip);
+                    event.peers.peerActions.interfaceDeparture(target, ip);
                 }
                 return -1;
             }
         }
         if (result == null) return -1;
-        
+
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;
 
@@ -618,9 +618,9 @@ public final class Protocol {
         event.addExpectedRemoteReferences(count);
         SearchResult result = null;
         for (String ip: target.getIPs()) {
-        	final String targetBaseURL = target.getPublicURL(ip,
-					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
-							SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT));
+            final String targetBaseURL = target.getPublicURL(ip,
+                    Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+                            SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT));
             try {
                 result =
                     new SearchResult(
@@ -644,17 +644,17 @@ public final class Protocol {
             } catch (final IOException e ) {
                 Network.log.info("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + ")");
                 if(targetBaseURL.startsWith("https")) {
-                	/* First mark https unavailable on this peer before removing any interface */
-    				target.setFlagSSLAvailable(false);     
-    				event.peers.updateConnected(target);
+                    /* First mark https unavailable on this peer before removing any interface */
+                    target.setFlagSSLAvailable(false);
+                    event.peers.updateConnected(target);
                 } else {
-                	event.peers.peerActions.interfaceDeparture(target, ip);
+                    event.peers.peerActions.interfaceDeparture(target, ip);
                 }
                 return -1;
             }
         }
         if (result == null) return -1;
-        
+
         // computation time
         final long totalrequesttime = System.currentTimeMillis() - timestamp;
 
@@ -781,24 +781,24 @@ public final class Protocol {
         // insert one container into the search result buffer
         // one is enough, only the references are used, not the word
         if (event.addResultsToLocalIndex) {
-			/*
-			 * Current thread might be interrupted by SearchEvent.cleanup()
-			 */
-			if (Thread.interrupted()) {
-				throw new InterruptedException("solrQuery interrupted");
-			}
-			WriteMetadataNodeToLocalIndexThread writerToLocalIndex = new WriteMetadataNodeToLocalIndexThread(event.query.getSegment(), storeDocs);
-			writerToLocalIndex.start();
-			try {
-				writerToLocalIndex.join();
-			} catch(InterruptedException e) {
-				/*
-				 * Current thread interruption might happen while waiting
-				 * for writeToLocalIndexThread.
-				 */
-				writerToLocalIndex.stopWriting();
-				throw new InterruptedException("remoteProcess stopped!");
-			}
+            /*
+             * Current thread might be interrupted by SearchEvent.cleanup()
+             */
+            if (Thread.interrupted()) {
+                throw new InterruptedException("solrQuery interrupted");
+            }
+            WriteMetadataNodeToLocalIndexThread writerToLocalIndex = new WriteMetadataNodeToLocalIndexThread(event.query.getSegment(), storeDocs);
+            writerToLocalIndex.start();
+            try {
+                writerToLocalIndex.join();
+            } catch(InterruptedException e) {
+                /*
+                 * Current thread interruption might happen while waiting
+                 * for writeToLocalIndexThread.
+                 */
+                writerToLocalIndex.stopWriting();
+                throw new InterruptedException("remoteProcess stopped!");
+            }
             event.addRWIs(container.get(0), false, target.getName() + "/" + target.hash, result.totalCount, time);
         } else {
             // feed results as nodes (SolrQuery results) which carry metadata,
@@ -828,57 +828,57 @@ public final class Protocol {
         }
         Network.log.info("remote search: peer " + target.getName() + " sent " + container.get(0).size() + "/" + result.totalCount + " references");
     }
-    
+
     /**
      * This thread is used to write a collection of URIMetadataNode documents to a segment allowing to be safely stopped.
-     * Indeed, if one interrupt a thread while commiting to Solr index, the index is closed and will be no more writable 
+     * Indeed, if one interrupt a thread while commiting to Solr index, the index is closed and will be no more writable
      * (later calls would throw a org.apache.lucene.store.AlreadyClosedException) because Solr IndexWriter uses an InterruptibleChanel.
      * This thread allow to safely stop writing operation using an AtomicBoolean.
      * @author luc
      *
      */
     private static class WriteMetadataNodeToLocalIndexThread extends Thread {
-    	
-    	private AtomicBoolean stop = new AtomicBoolean(false);
-    	
-    	private Segment segment;
-    	
-    	private Collection<URIMetadataNode> storeDocs;
-    	
-    	/**
-    	 * Parameters must be not null.
-    	 * @param segment solr segment to write
-    	 * @param storeDocs solr documents collection to put to segment
-    	 */
-    	public WriteMetadataNodeToLocalIndexThread(Segment segment, Collection<URIMetadataNode> storeDocs) {
-    		super("WriteMetadataNodeToLocalIndexThread");
-    		this.segment = segment;
-    		this.storeDocs = storeDocs;
-    	}
-    	
-    	/**
-    	 * Use this to stop writing operation. This thread will not stop immediately as Solr might be writing something.
-    	 */
-    	public void stopWriting() {
-    		this.stop.set(true);
-    	}
-		
-		@Override
-		public void run() {
+
+        private AtomicBoolean stop = new AtomicBoolean(false);
+
+        private Segment segment;
+
+        private Collection<URIMetadataNode> storeDocs;
+
+        /**
+         * Parameters must be not null.
+         * @param segment solr segment to write
+         * @param storeDocs solr documents collection to put to segment
+         */
+        public WriteMetadataNodeToLocalIndexThread(Segment segment, Collection<URIMetadataNode> storeDocs) {
+            super("WriteMetadataNodeToLocalIndexThread");
+            this.segment = segment;
+            this.storeDocs = storeDocs;
+        }
+
+        /**
+         * Use this to stop writing operation. This thread will not stop immediately as Solr might be writing something.
+         */
+        public void stopWriting() {
+            this.stop.set(true);
+        }
+
+        @Override
+        public void run() {
             for (URIMetadataNode entry : this.storeDocs) {
-            	if(stop.get()) {
-            		Network.log.info("Writing documents collection to Solr segment was stopped.");
-            		return;
-            	}
+                if(this.stop.get()) {
+                    Network.log.info("Writing documents collection to Solr segment was stopped.");
+                    return;
+                }
                 try {
-                    segment.setFirstSeenTime(entry.hash(), Math.min(entry.moddate().getTime(), System.currentTimeMillis()));
-                    segment.fulltext().putMetadata(entry); // it will be checked inside the putMetadata that poor metadata does not overwrite rich metadata
+                    this.segment.setFirstSeenTime(entry.hash(), Math.min(entry.moddate().getTime(), System.currentTimeMillis())); // Set only firstsee, but not load time - because we did not load the document
+                    this.segment.fulltext().putMetadata(entry); // it will be checked inside the putMetadata that poor metadata does not overwrite rich metadata
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
             }
-		}
-	}
+        }
+    }
 
     private static class SearchResult {
         public int availableCount; // number of returned LURL's for this search
@@ -934,7 +934,7 @@ public final class Protocol {
                 baos.close();
                 baos = null;
             }
-            
+
             parts.put("myseed", UTF8.StringBody((event.peers.mySeed() == null) ? "" : event.peers.mySeed().genSeedStr(key)));
             parts.put("count", UTF8.StringBody(Integer.toString(Math.max(10, count))));
             parts.put("time", UTF8.StringBody(Long.toString(Math.max(3000, time))));
@@ -951,7 +951,7 @@ public final class Protocol {
             parts.put("author", UTF8.StringBody(event.query.modifier.author));
             parts.put("contentdom", UTF8.StringBody(contentdom == null ? ContentDomain.ALL.toString() : contentdom.toString()));
             if(strictContentDom) {
-            	parts.put("strictContentDom", UTF8.StringBody("true"));	
+                parts.put("strictContentDom", UTF8.StringBody("true"));
             }
             parts.put("maxdist", UTF8.StringBody(Integer.toString(maxDistance)));
             parts.put("profile", UTF8.StringBody(crypt.simpleEncode(event.query.ranking.toExternalString())));
@@ -962,13 +962,14 @@ public final class Protocol {
                 //resultMap = FileUtils.table(HTTPConnector.getConnector(MultiProtocolURI.crawlerUserAgent).post(new MultiProtocolURI("http://" + target.getClusterAddress() + "/yacy/search.html"), 60000, target.getHexHash() + ".yacyh", parts));
             }
 
-            final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 8000);
-            byte[] a = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL + "/yacy/search.html"), hostname, parts, false, true);
-            if (a != null && a.length > 200000) {
-                // there is something wrong. This is too large, maybe a hack on the other side?
-                a = null;
+            try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 8000)) {
+                byte[] a = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL + "/yacy/search.html"), hostname, parts, false, true);
+                if (a != null && a.length > 200000) {
+                    // there is something wrong. This is too large, maybe a hack on the other side?
+                    a = null;
+                }
+                resultMap = FileUtils.table(a);
             }
-            resultMap = FileUtils.table(a);
 
             // evaluate request result
             if ( resultMap == null || resultMap.isEmpty() ) {
@@ -1028,153 +1029,153 @@ public final class Protocol {
      * A task dedicated to requesting a Solr instance
      */
     protected static class SolrRequestTask extends Thread {
-    	
-    	/** Maximum length of detailed log error message */
-    	private final static int MAX_ERROR_MESSAGE_LENGTH = 500;
-    	
-    	/** Logger */
-    	private final static ConcurrentLog log = new ConcurrentLog(SolrRequestTask.class.getSimpleName());
-    	
-    	/** The solr to request */
-    	private RemoteInstance instance;
-    	
-    	/** Connector to the Solr instance */
-    	private SolrConnector solrConnector;
-    	
-    	/** The solr query to run */
-    	private final SolrQuery solrQuery;
-    	
-    	/** The instance base URL */
-    	private final String targetBaseURL;
-    	
-    	/** The target seed information */
-    	private final Seed target;
-    	
-    	/** Set to true when the target is this local peer */
-    	private final boolean mySeed;
-    	
-    	/** The request timeout in milliseconds */
-    	private final int timeout;
-    	
-    	/** The query response array to fill */
-    	private final QueryResponse[] rsp;
-    	
-    	/** The result documents list to fill */
-    	private final SolrDocumentList[] docList;
-    	
-    	/** Indicates wether this task has been closed */
-    	private volatile boolean closed;
-    	
-    	/**
-    	 * Constructor. All parameters are required to not be null.
-    	 * @param solrQuery the Solr query to run
-    	 * @param targetBaseURL the instance base URL : http(s) + host name or IP + the eventual port
-    	 * @param target the remote target seed information
-    	 * @param timeout the request timeout in milliseconds
-    	 */
-		protected SolrRequestTask(final SolrQuery solrQuery, final String targetBaseURL, final Seed target,
-				final boolean mySeed, final int timeout, final QueryResponse[] rsp, final SolrDocumentList[] docList) {
-			super("Protocol.solrQuery(" + solrQuery.getQuery() + " to " + target.hash + ")");
-			this.solrQuery = solrQuery;
-			this.targetBaseURL = targetBaseURL;
-			this.target = target;
-			this.mySeed = mySeed;
-			this.timeout = timeout;
-			this.rsp = rsp;
-			this.docList = docList;
-			this.closed = false;
-		}
-		
-		/**
-		 * Logs the exception detailed message if any, at fine level because errors on remote solr queries to other peers occurs quite frequently.
-		 * @param messageBegin beginning of the log message
-		 * @param ex exception to log
-		 */
-		private void logError(final String messageBegin, final Exception ex) {
-			if(log.isFine()) {
-				String message = ex.getMessage();
-				if(message == null) {
-					message = "no details";
-				} else if(message.length() > MAX_ERROR_MESSAGE_LENGTH){
-					/* Strip too large details to avoid polluting this log with complete remote stack traces */
-					message = message.substring(0, MAX_ERROR_MESSAGE_LENGTH) + "...";
-				}
-				log.fine(messageBegin + " at " + this.targetBaseURL + " : " + message);
-			}
-		}
-    	
+
+        /** Maximum length of detailed log error message */
+        private final static int MAX_ERROR_MESSAGE_LENGTH = 500;
+
+        /** Logger */
+        private final static ConcurrentLog log = new ConcurrentLog(SolrRequestTask.class.getSimpleName());
+
+        /** The solr to request */
+        private RemoteInstance instance;
+
+        /** Connector to the Solr instance */
+        private SolrConnector solrConnector;
+
+        /** The solr query to run */
+        private final SolrQuery solrQuery;
+
+        /** The instance base URL */
+        private final String targetBaseURL;
+
+        /** The target seed information */
+        private final Seed target;
+
+        /** Set to true when the target is this local peer */
+        private final boolean mySeed;
+
+        /** The request timeout in milliseconds */
+        private final int timeout;
+
+        /** The query response array to fill */
+        private final QueryResponse[] rsp;
+
+        /** The result documents list to fill */
+        private final SolrDocumentList[] docList;
+
+        /** Indicates wether this task has been closed */
+        private volatile boolean closed;
+
+        /**
+         * Constructor. All parameters are required to not be null.
+         * @param solrQuery the Solr query to run
+         * @param targetBaseURL the instance base URL : http(s) + host name or IP + the eventual port
+         * @param target the remote target seed information
+         * @param timeout the request timeout in milliseconds
+         */
+        protected SolrRequestTask(final SolrQuery solrQuery, final String targetBaseURL, final Seed target,
+                final boolean mySeed, final int timeout, final QueryResponse[] rsp, final SolrDocumentList[] docList) {
+            super("Protocol.solrQuery(" + solrQuery.getQuery() + " to " + target.hash + ")");
+            this.solrQuery = solrQuery;
+            this.targetBaseURL = targetBaseURL;
+            this.target = target;
+            this.mySeed = mySeed;
+            this.timeout = timeout;
+            this.rsp = rsp;
+            this.docList = docList;
+            this.closed = false;
+        }
+
+        /**
+         * Logs the exception detailed message if any, at fine level because errors on remote solr queries to other peers occurs quite frequently.
+         * @param messageBegin beginning of the log message
+         * @param ex exception to log
+         */
+        private void logError(final String messageBegin, final Exception ex) {
+            if(log.isFine()) {
+                String message = ex.getMessage();
+                if(message == null) {
+                    message = "no details";
+                } else if(message.length() > MAX_ERROR_MESSAGE_LENGTH){
+                    /* Strip too large details to avoid polluting this log with complete remote stack traces */
+                    message = message.substring(0, MAX_ERROR_MESSAGE_LENGTH) + "...";
+                }
+                log.fine(messageBegin + " at " + this.targetBaseURL + " : " + message);
+            }
+        }
+
         @Override
         public void run() {
             try {
-    			boolean trustSelfSignedOnAuthenticatedServer = SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT;
-    			if (Switchboard.getSwitchboard() != null) {
-    				trustSelfSignedOnAuthenticatedServer = Switchboard.getSwitchboard().getConfigBool(
-    						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
-    						SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT);
-    			}
-    			/* Add a limit to the maximum acceptable size of the remote peer Solr response. This can help prevent out of memory errors when :
-    			 * - this peer is overloaded
-    			 * - the remote peer has indexed documents with excessively large metadata (too large at least to fit within this peer resources)
-    			 * - the remote peer is a malicious one and would like to trigger a deny of service */
-				final long maxBytesPerResponse = MemoryControl.available() / 4;
-    			
+                boolean trustSelfSignedOnAuthenticatedServer = SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT;
+                if (Switchboard.getSwitchboard() != null) {
+                    trustSelfSignedOnAuthenticatedServer = Switchboard.getSwitchboard().getConfigBool(
+                            SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED,
+                            SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_AUTHENTICATED_ALLOW_SELF_SIGNED_DEFAULT);
+                }
+                /* Add a limit to the maximum acceptable size of the remote peer Solr response. This can help prevent out of memory errors when :
+                 * - this peer is overloaded
+                 * - the remote peer has indexed documents with excessively large metadata (too large at least to fit within this peer resources)
+                 * - the remote peer is a malicious one and would like to trigger a deny of service */
+                final long maxBytesPerResponse = MemoryControl.available() / 4;
+
                 this.instance = new RemoteInstance(this.targetBaseURL, null, "solr", this.timeout, trustSelfSignedOnAuthenticatedServer, maxBytesPerResponse, false); // this is a 'patch configuration' which considers 'solr' as default collection
                 try {
-					boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
-					if (Switchboard.getSwitchboard() != null) {
-						useBinaryResponseWriter = Switchboard.getSwitchboard().getConfigBool(
-								SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
-								SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT);
-					}
+                    boolean useBinaryResponseWriter = SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT;
+                    if (Switchboard.getSwitchboard() != null) {
+                        useBinaryResponseWriter = Switchboard.getSwitchboard().getConfigBool(
+                                SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED,
+                                SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT);
+                    }
                     this.solrConnector = new RemoteSolrConnector(this.instance, useBinaryResponseWriter && (this.mySeed ? true : this.target.getVersion() >= 1.63), "solr");
-					if (!solrConnector.isClosed() && !this.closed) {
-						try {
-							this.rsp[0] = this.solrConnector.getResponseByParams(solrQuery);
-							this.docList[0] = this.rsp[0].getResults();
-							if(log.isFine() && rsp[0] != null && rsp[0].getElapsedTime() >= 0) {
-								log.fine("Got a response from solr instance at " + this.targetBaseURL + " in " + rsp[0].getElapsedTime() + "ms");
-							}
-						} catch (Exception e) {
-							logError("Could not get result from solr", e);
-						}
-					}
+                    if (!this.solrConnector.isClosed() && !this.closed) {
+                        try {
+                            this.rsp[0] = this.solrConnector.getResponseByParams(this.solrQuery);
+                            this.docList[0] = this.rsp[0].getResults();
+                            if(log.isFine() && this.rsp[0] != null && this.rsp[0].getElapsedTime() >= 0) {
+                                log.fine("Got a response from solr instance at " + this.targetBaseURL + " in " + this.rsp[0].getElapsedTime() + "ms");
+                            }
+                        } catch (Exception e) {
+                            logError("Could not get result from solr", e);
+                        }
+                    }
                 } catch (Exception ee) {
-					logError("Could not connect to solr instance", ee);
+                    logError("Could not connect to solr instance", ee);
                 }
             } catch (Exception eee) {
-				logError("Could not set up remote solr instance", eee);
+                logError("Could not set up remote solr instance", eee);
             } finally {
-            	this.close();
+                this.close();
             }
         }
-        
+
         /**
          * Stop the eventually running Solr request, and close the eventually opened connector and instance to the target Solr.
          */
-		protected synchronized void close() {
-			if (!this.closed) {
-				try {
-					if (this.solrConnector != null) {
-						this.solrConnector.close();
-					}
-				} catch (Exception e) {
-					logError("Could not close solr connector", e);
-				} finally {
-					try {
-						if (this.instance != null) {
-							this.instance.close();
-						}
-					} catch (Exception e) {
-						logError("Could not close solr instance", e);
-					} finally {
-						this.closed = true;
-					}
-				}
-			}
-		}
-		
+        protected synchronized void close() {
+            if (!this.closed) {
+                try {
+                    if (this.solrConnector != null) {
+                        this.solrConnector.close();
+                    }
+                } catch (Exception e) {
+                    logError("Could not close solr connector", e);
+                } finally {
+                    try {
+                        if (this.instance != null) {
+                            this.instance.close();
+                        }
+                    } catch (Exception e) {
+                        logError("Could not close solr instance", e);
+                    } finally {
+                        this.closed = true;
+                    }
+                }
+            }
+        }
+
     }
-    
+
     /**
      * Execute solr query against specified target.
      * @param event search event ot feed with results
@@ -1201,7 +1202,7 @@ public final class Protocol {
             final boolean incrementNavigators) throws InterruptedException {
 
         //try {System.out.println("*** debug-query *** " + URLDecoder.decode(solrQuery.toString(), "UTF-8"));} catch (UnsupportedEncodingException e) {}
-        
+
         if (event.query.getQueryGoal().getQueryString(false) == null || event.query.getQueryGoal().getQueryString(false).length() == 0) {
             return -1; // we cannot query solr only with word hashes, there is no clear text string
         }
@@ -1209,7 +1210,7 @@ public final class Protocol {
         if (partitions > 0) solrQuery.set("partitions", partitions);
         solrQuery.setStart(offset);
         solrQuery.setRows(count);
-        
+
         boolean localsearch = target == null || target.equals(event.peers.mySeed());
         Map<String, ReversibleScoreMap<String>> facets = new HashMap<String, ReversibleScoreMap<String>>(event.query.facetfields.size());
         Map<String, LinkedHashSet<String>> snippets = new HashMap<String, LinkedHashSet<String>>(); // this will be a list of urlhash-snippet entries
@@ -1233,20 +1234,20 @@ public final class Protocol {
                 try {
                     final boolean myseed = target == event.peers.mySeed();
                     if(myseed) {
-                    	targetBaseURL = "http://localhost:" + target.getPort();
+                        targetBaseURL = "http://localhost:" + target.getPort();
                     } else {
                         final Set<String> ips = target.getIPs();
                         if(ips.isEmpty()) {
-                        	/* This should not happen : seeds db maintains only seeds with at least one IP */
-                        	Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + " has no known IP address");
-                        	target.setFlagSolrAvailable(false);
-                        	return -1;
+                            /* This should not happen : seeds db maintains only seeds with at least one IP */
+                            Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + " has no known IP address");
+                            target.setFlagSolrAvailable(false);
+                            return -1;
                         }
                         final String ip = ips.iterator().next();
-                        
-            			targetBaseURL = target.getPublicURL(ip,
-            					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
-            							SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT));
+
+                        targetBaseURL = target.getPublicURL(ip,
+                                Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED,
+                                        SwitchboardConstants.REMOTESEARCH_HTTPS_PREFERRED_DEFAULT));
                     }
                     if (!myseed && !target.getFlagSolrAvailable()) { // skip if peer.dna has flag that last try resulted in error
                         Network.log.info("SEARCH skip (solr), remote Solr interface not accessible, peer=" + target.getName());
@@ -1257,38 +1258,38 @@ public final class Protocol {
                     remoteRequest.start();
                     remoteRequest.join(solrtimeout); // just wait until timeout appears
                     if (remoteRequest.isAlive()) {
-                    	/* Try to free the request thread resources properly */
-                    	remoteRequest.close();
-                    	if(remoteRequest.isAlive()) {
-                    		/* Thread still running : try also with interrupt*/
-                    		remoteRequest.interrupt();
-                    	}
+                        /* Try to free the request thread resources properly */
+                        remoteRequest.close();
+                        if(remoteRequest.isAlive()) {
+                            /* Thread still running : try also with interrupt*/
+                            remoteRequest.interrupt();
+                        }
                         Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + targetBaseURL + " does not answer (time-out)");
                         target.setFlagSolrAvailable(false || myseed);
                         return -1; // give up, leave remoteRequest abandoned.
                     }
-                    
+
                     if (rsp[0] == null || docList[0] == null) {
                         Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + "/" + targetBaseURL + " returned null");
                         if(!myseed) {
-                        	if(targetBaseURL.startsWith("https")) {
-                        		/* First mark https unavailable on this peer before removing anything else */
-                        		target.setFlagSSLAvailable(false);
-                        		event.peers.updateConnected(target);
-                        	} else {
-                        		target.setFlagSolrAvailable(false);
-                        	}
+                            if(targetBaseURL.startsWith("https")) {
+                                /* First mark https unavailable on this peer before removing anything else */
+                                target.setFlagSSLAvailable(false);
+                                event.peers.updateConnected(target);
+                            } else {
+                                target.setFlagSolrAvailable(false);
+                            }
                         }
                         return -1;
                     }
                 } catch(InterruptedException e) {
-                	/* Current thread might be interrupted by SearchEvent.cleanup() : 
-                	 * we must not in that case mark the target as not available but rather transmit the exception to the caller (likely RemoteSearch.solrRemoteSearch) */
+                    /* Current thread might be interrupted by SearchEvent.cleanup() :
+                     * we must not in that case mark the target as not available but rather transmit the exception to the caller (likely RemoteSearch.solrRemoteSearch) */
                     throw e;
                 } catch (final Throwable e) {
-                	if(Network.log.isInfo()) {
-                		Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + (targetBaseURL != null ? "/" + targetBaseURL : "") + " (" + e.getMessage() + ")");
-                	}
+                    if(Network.log.isInfo()) {
+                        Network.log.info("SEARCH failed (solr), remote Peer: " + target.getName() + (targetBaseURL != null ? "/" + targetBaseURL : "") + " (" + e.getMessage() + ")");
+                    }
                     target.setFlagSolrAvailable(false || localsearch);
                     return -1;
                 }
@@ -1296,29 +1297,29 @@ public final class Protocol {
 
             // evaluate facets
             if(useSolrFacets) {
-            	for (String field: event.query.facetfields) {
-            		FacetField facet = rsp[0].getFacetField(field);
-            		ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
-            		List<Count> values = facet == null ? null : facet.getValues();
-            		if (values == null) {
-            			continue;
-            		}
-            		for (Count ff: values) {
-            			int c = (int) ff.getCount();
-            			if (c == 0) {
-            				continue;
-            			}
-            			if (ff.getName().length() == 0) {
-            				continue; // facet entry without text is not useful
-            			}
-            			result.set(ff.getName(), c);
-            		}
-            		if (result.size() > 0) {
-            			facets.put(field, result);
-            		}
-            	}
+                for (String field: event.query.facetfields.keySet()) {
+                    FacetField facet = rsp[0].getFacetField(field);
+                    ReversibleScoreMap<String> result = new ClusteredScoreMap<String>(UTF8.insensitiveUTF8Comparator);
+                    List<Count> values = facet == null ? null : facet.getValues();
+                    if (values == null) {
+                        continue;
+                    }
+                    for (Count ff: values) {
+                        int c = (int) ff.getCount();
+                        if (c == 0) {
+                            continue;
+                        }
+                        if (ff.getName().length() == 0) {
+                            continue; // facet entry without text is not useful
+                        }
+                        result.set(ff.getName(), c);
+                    }
+                    if (result.size() > 0) {
+                        facets.put(field, result);
+                    }
+                }
             }
-            
+
             // evaluate snippets
             final Map<String, Map<String, List<String>>> rawsnippets = rsp[0].getHighlighting(); // a map from the urlhash to a map with key=field and value = list of snippets
             if (rawsnippets != null) {
@@ -1340,13 +1341,19 @@ public final class Protocol {
             }
             rsp[0] = null;
         }
-        
+
         // evaluate result
-        if (docList == null || docList[0].size() == 0) {
+        final int numFound = (int) docList[0].getNumFound();
+        if (docList == null || docList[0].isEmpty()) {
             Network.log.info("SEARCH (solr), returned 0 out of 0 documents from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())) + " query = " + solrQuery.toString()) ;
+            if(localsearch && offset > 0) {
+                /* No documents were returned from Solr because the offset is too high, but we have to keep the total number of matching documents for accurate pagination.
+                 * This case can notably happen on latest results pages, when mixing results from local RWI and local Solr ("Stealth Mode") */
+                event.local_solr_stored.set(numFound);
+            }
             return 0;
         }
-        
+
         List<URIMetadataNode> resultContainer = new ArrayList<URIMetadataNode>();
         Network.log.info("SEARCH (solr), returned " + docList[0].size() + " out of " + docList[0].getNumFound() + " documents and " + facets.size() + " facets " + facets.keySet().toString() + " from " + (target == null ? "shard" : ("peer " + target.hash + ":" + target.getName())));
         int term = count;
@@ -1395,7 +1402,7 @@ public final class Protocol {
 
             // passed all checks, store url
             if (!localsearch) {
-                
+
                 // put the remote documents to the local index. We must convert the solr document to a solr input document:
                 if (event.addResultsToLocalIndex) {
                     /* Check document size, only if a limit is set on remote documents size allowed to be stored to local index */
@@ -1427,7 +1434,6 @@ public final class Protocol {
             // add the url entry to the checked results
             resultContainer.add(urlEntry);
         }
-        final int numFound = (int) docList[0].getNumFound();
         docList[0].clear();
         docList[0] = null;
         if (localsearch) {
@@ -1438,7 +1444,7 @@ public final class Protocol {
         } else {
             if (event.addResultsToLocalIndex) {
                 /*
-		 * Current thread might be interrupted by SearchEvent.cleanup()
+         * Current thread might be interrupted by SearchEvent.cleanup()
                  */
                 if (Thread.interrupted()) {
                     throw new InterruptedException("solrQuery interrupted");
@@ -1454,101 +1460,101 @@ public final class Protocol {
         }
         return resultContainer.size();
     }
-    
+
     /**
      * This thread is used to write a collection of Solr documents to a segment allowing to be safely stopped.
-     * Indeed, if one interrupt a thread while commiting to Solr index, the index is closed and will be no more writable 
+     * Indeed, if one interrupt a thread while commiting to Solr index, the index is closed and will be no more writable
      * (later calls would throw a org.apache.lucene.store.AlreadyClosedException) because Solr IndexWriter uses an InterruptibleChanel.
      * This thead allow to safely stop writing operation using an AtomicBoolean.
      * @author luc
      *
      */
     private static class WriteToLocalIndexThread extends Thread {
-    	
-    	private AtomicBoolean stop = new AtomicBoolean(false);
-    	
-    	private Segment segment;
-    	
-    	private Collection<SolrInputDocument> docs;
-    	
-    	/**
-    	 * Parameters must be not null.
+
+        private AtomicBoolean stop = new AtomicBoolean(false);
+
+        private Segment segment;
+
+        private Collection<SolrInputDocument> docs;
+
+        /**
+         * Parameters must be not null.
          * After writing the collection is cleared
-    	 * @param segment solr segment to write
-    	 * @param docs solr documents collection to put to segment
-    	 */
-    	public WriteToLocalIndexThread(Segment segment, Collection<SolrInputDocument> docs) {
-    		super("WriteToLocalIndexThread");
-    		this.segment = segment;
-    		this.docs = docs;
-    	}
-    	
-    	/**
-    	 * Use this to stop writing operation. This thread will not stop immediately as Solr might be writing something.
-    	 */
-    	public void stopWriting() {
-    		this.stop.set(true);
-    	}
-		
+         * @param segment solr segment to write
+         * @param docs solr documents collection to put to segment
+         */
+        public WriteToLocalIndexThread(Segment segment, Collection<SolrInputDocument> docs) {
+            super("WriteToLocalIndexThread");
+            this.segment = segment;
+            this.docs = docs;
+        }
+
+//        /**
+//         * Use this to stop writing operation. This thread will not stop immediately as Solr might be writing something.
+//         */
+//        public void stopWriting() {
+//            this.stop.set(true);
+//        }
+
         @Override
         public void run() {
-            for (SolrInputDocument doc : docs) {
-                if (stop.get()) {
-                    docs.clear();
+            for (SolrInputDocument doc : this.docs) {
+                if (this.stop.get()) {
+                    this.docs.clear();
                     Network.log.info("Writing documents collection to Solr segment was stopped.");
                     return;
                 }
-                segment.putDocument(doc);
+                this.segment.putDocument(doc);
             }
-            docs.clear();
+            this.docs.clear();
         }
     }
-    
-	/**
-	 * Only when maxSize is greater than zero, check that doc size is lower. To
-	 * process in a reasonable amount of time, document size is not evaluated
-	 * summing all fields sizes, but only against text_t field which is quite representative and might weigh
-	 * some MB.
-	 * 
-	 * @param doc
-	 *            document to verify. Must not be null.
-	 * @param maxSize
-	 *            maximum allowed size in bytes
-	 * @return true when document evaluated size is lower or equal than maxSize, or when
-	 *         maxSize is lower or equal than zero.
-	 */
-	protected static boolean checkDocumentSize(SolrDocument doc, long maxSize) {
-		if (maxSize > 0) {
-			/* All text field is often the largest */
-			Object value = doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
-			if(value instanceof String) {
-				/* Each char uses 2 bytes */
-				if(((String)value).length() > (maxSize /2)) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
 
-	/**
-	 * Post a request asking for allowed message size and attachment size to the
-	 * target peer on the selected target ip. All parameters must not be null.
-	 * 
-	 * @param targetBaseURL
-	 *            the public base URL of the target peer on one of its reported IP
-	 *            addresses in {@link Seed#getIPs()}
-	 * @param target
-	 *            the target peer
-	 * @param sb
-	 *            the switchboard instance
-	 * @return the result of the request
-	 * @throws IOException
-	 *             when the peer doesn't answer on this IP or any other error
-	 *             occurred
-	 */
-	public static Map<String, String> permissionMessage(final MultiProtocolURL targetBaseURL, final Seed target,
-			final Switchboard sb) throws IOException {
+    /**
+     * Only when maxSize is greater than zero, check that doc size is lower. To
+     * process in a reasonable amount of time, document size is not evaluated
+     * summing all fields sizes, but only against text_t field which is quite representative and might weigh
+     * some MB.
+     *
+     * @param doc
+     *            document to verify. Must not be null.
+     * @param maxSize
+     *            maximum allowed size in bytes
+     * @return true when document evaluated size is lower or equal than maxSize, or when
+     *         maxSize is lower or equal than zero.
+     */
+    protected static boolean checkDocumentSize(SolrDocument doc, long maxSize) {
+        if (maxSize > 0) {
+            /* All text field is often the largest */
+            Object value = doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName());
+            if(value instanceof String) {
+                /* Each char uses 2 bytes */
+                if(((String)value).length() > (maxSize /2)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Post a request asking for allowed message size and attachment size to the
+     * target peer on the selected target ip. All parameters must not be null.
+     *
+     * @param targetBaseURL
+     *            the public base URL of the target peer on one of its reported IP
+     *            addresses in {@link Seed#getIPs()}
+     * @param target
+     *            the target peer
+     * @param sb
+     *            the switchboard instance
+     * @return the result of the request
+     * @throws IOException
+     *             when the peer doesn't answer on this IP or any other error
+     *             occurred
+     */
+    public static Map<String, String> permissionMessage(final MultiProtocolURL targetBaseURL, final Seed target,
+            final Switchboard sb) throws IOException {
         // prepare request
         final String salt = crypt.randomSalt();
 
@@ -1556,13 +1562,13 @@ public final class Protocol {
         final Map<String, ContentBody> parts = basicRequestParts(sb, target.hash, salt);
         parts.put("process", UTF8.StringBody("permission"));
         final Post post = new Post(targetBaseURL, target.hash, "/yacy/message.html", parts, 6000);
-        
+
         final Map<String, String> result = FileUtils.table(post.result);
         return result;
     }
 
     public static Map<String, String> crawlReceipt(
-    	final Switchboard sb,
+        final Switchboard sb,
         final Seed mySeed,
         final Seed target,
         final String process,
@@ -1596,82 +1602,83 @@ public final class Protocol {
 
         // prepare request
         final String salt = crypt.randomSalt();
-        
-		final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
-				SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
 
-		for (final String ip : target.getIPs()) {
-			// send request
-			try {
-				// prepare request
-				final Map<String, ContentBody> parts = basicRequestParts(sb, target.hash, salt);
-				parts.put("process", UTF8.StringBody(process));
-				parts.put("urlhash", UTF8.StringBody(((entry == null) ? "" : ASCII.String(entry.hash()))));
-				parts.put("result", UTF8.StringBody(result));
-				parts.put("reason", UTF8.StringBody(reason));
-				parts.put("wordh", UTF8.StringBody(wordhashes));
-				final String lurlstr;
-				if (entry == null) {
-					lurlstr = "";
-				} else { 
-					final ArrayList<String> ldesc = entry.getDescription();
-					if (ldesc.isEmpty()) {
-						lurlstr = entry.toString();
-					} else { // add document abstract/description as snippet (remotely stored in description_txt)
-						lurlstr = entry.toString(ldesc.get(0));
-					}
-				}
-				parts.put("lurlEntry", UTF8.StringBody(crypt.simpleEncode(lurlstr, salt)));
-				// send request
-				final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 10000);
-				MultiProtocolURL targetBaseURL = target.getPublicMultiprotocolURL(ip, preferHttps);
-				byte[] content;
-				try {
-					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/crawlReceipt.html"),
-							target.getHexHash() + ".yacyh", parts, false, true);
-				} catch(final IOException e) {
-					if(targetBaseURL.isHTTPS()) {
-						/* Failed using https : retry with http */
-						targetBaseURL = target.getPublicMultiprotocolURL(ip, false);
-						content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/crawlReceipt.html"),
-								target.getHexHash() + ".yacyh", parts, false, true);
-						if(content != null) {
-							/* Success with http : mark SSL as unavailable on the target peer */
-							markSSLUnavailableOnPeer(sb.peers, target, ip, "yacyClient.crawlReceipt");
-						}
-					} else {
-						throw e;
-					}
-				}
-				return FileUtils.table(content);
-			} catch (final Exception e ) {
-				// most probably a network time-out exception
-				Network.log.warn("yacyClient.crawlReceipt error:" + e.getMessage());
-			}
-		}
+        final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+                SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+
+        for (final String ip : target.getIPs()) {
+            // send request
+            try {
+                // prepare request
+                final Map<String, ContentBody> parts = basicRequestParts(sb, target.hash, salt);
+                parts.put("process", UTF8.StringBody(process));
+                parts.put("urlhash", UTF8.StringBody(((entry == null) ? "" : ASCII.String(entry.hash()))));
+                parts.put("result", UTF8.StringBody(result));
+                parts.put("reason", UTF8.StringBody(reason));
+                parts.put("wordh", UTF8.StringBody(wordhashes));
+                final String lurlstr;
+                if (entry == null) {
+                    lurlstr = "";
+                } else {
+                    final ArrayList<String> ldesc = entry.getDescription();
+                    if (ldesc.isEmpty()) {
+                        lurlstr = entry.toString();
+                    } else { // add document abstract/description as snippet (remotely stored in description_txt)
+                        lurlstr = entry.toString(ldesc.get(0));
+                    }
+                }
+                parts.put("lurlEntry", UTF8.StringBody(crypt.simpleEncode(lurlstr, salt)));
+                // send request
+                byte[] content;
+                try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 10000)) {
+                    MultiProtocolURL targetBaseURL = target.getPublicMultiprotocolURL(ip, preferHttps);
+                    try {
+                        content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/crawlReceipt.html"),
+                                target.getHexHash() + ".yacyh", parts, false, true);
+                    } catch(final IOException e) {
+                        if(targetBaseURL.isHTTPS()) {
+                            /* Failed using https : retry with http */
+                            targetBaseURL = target.getPublicMultiprotocolURL(ip, false);
+                            content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/crawlReceipt.html"),
+                                    target.getHexHash() + ".yacyh", parts, false, true);
+                            if(content != null) {
+                                /* Success with http : mark SSL as unavailable on the target peer */
+                                markSSLUnavailableOnPeer(sb.peers, target, ip, "yacyClient.crawlReceipt");
+                            }
+                        } else {
+                            throw e;
+                        }
+                    }
+                }
+                return FileUtils.table(content);
+            } catch (final Exception e ) {
+                // most probably a network time-out exception
+                Network.log.warn("yacyClient.crawlReceipt error:" + e.getMessage());
+            }
+        }
         return null;
     }
 
     public static AtomicInteger metadataRetrievalRunning = new AtomicInteger(0);
 
     /**
-	 * transfer the index. If the transmission fails, return a string describing the
-	 * cause. If everything is ok, return null.
-	 *
-	 * @param sb
-	 *            the Switchboard instance holding server environment
-	 * @param targetSeed
-	 *            the target peer
-	 * @param indexes
-	 *            the index entries to transfer
-	 * @param urlCache
-	 * @param gzipBody
-	 *            when true, the transferred data are compressed using gzip
-	 * @param timeout
-	 *            the maximum time in milliseconds to wait for a success of the
-	 *            http(s) request to the remote peer
-	 * @return
-	 */
+     * transfer the index. If the transmission fails, return a string describing the
+     * cause. If everything is ok, return null.
+     *
+     * @param sb
+     *            the Switchboard instance holding server environment
+     * @param targetSeed
+     *            the target peer
+     * @param indexes
+     *            the index entries to transfer
+     * @param urlCache
+     * @param gzipBody
+     *            when true, the transferred data are compressed using gzip
+     * @param timeout
+     *            the maximum time in milliseconds to wait for a success of the
+     *            http(s) request to the remote peer
+     * @return
+     */
     public static String transferIndex(
         final Switchboard sb,
         final Seed targetSeed,
@@ -1697,10 +1704,10 @@ public final class Protocol {
                 }
             }
         }
-        
-		final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
-				SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
-        
+
+        final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+                SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+
         // transfer the RWI without the URLs
         Map<String, String> in = transferRWI(targetSeed, indexes, gzipBody, timeout, preferHttps);
 
@@ -1770,23 +1777,23 @@ public final class Protocol {
     }
 
     /**
-	 * Transfer Reverse Word Index entries to remote peer. If the used IP is not
-	 * responding, this IP (interface) is removed from targtSeed IP list. Remote
-	 * peer responds with list of unknown url hashes
-	 *
-	 * @param targetSeed
-	 *            the target peer
-	 * @param indexes
-	 *            the index entries to transfer
-	 * @param gzipBody
-	 *            when true, the transferred data are compressed using gzip
-	 * @param timeout
-	 *            the maximum time in milliseconds to wait for a success of the
-	 *            http(s) request(s) to the remote peer
-	 * @param preferHttps
-	 *            when true, use https when available on the target peer
-	 * @return peer response or null if transfer failed
-	 */
+     * Transfer Reverse Word Index entries to remote peer. If the used IP is not
+     * responding, this IP (interface) is removed from targtSeed IP list. Remote
+     * peer responds with list of unknown url hashes
+     *
+     * @param targetSeed
+     *            the target peer
+     * @param indexes
+     *            the index entries to transfer
+     * @param gzipBody
+     *            when true, the transferred data are compressed using gzip
+     * @param timeout
+     *            the maximum time in milliseconds to wait for a success of the
+     *            http(s) request(s) to the remote peer
+     * @param preferHttps
+     *            when true, use https when available on the target peer
+     * @return peer response or null if transfer failed
+     */
     private static Map<String, String> transferRWI(
         final Seed targetSeed,
         final ReferenceContainerCache<WordReference> indexes,
@@ -1800,7 +1807,7 @@ public final class Protocol {
             }
             MultiProtocolURL targetBaseURL = null;
             try {
-            	targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, preferHttps);
+                targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, preferHttps);
             } catch(final MalformedURLException e) {
                 Network.log.info("yacyClient.transferRWI malformed target URL : " + targetBaseURL);
                 // disconnect unavailable peer ip
@@ -1844,23 +1851,24 @@ public final class Protocol {
                 parts.put("wordc", UTF8.StringBody(Integer.toString(indexes.size())));
                 parts.put("entryc", UTF8.StringBody(Integer.toString(indexcount)));
                 parts.put("indexes", UTF8.StringBody(entrypost.toString()));
-                final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
                 byte[] content = null;
-                try {
-					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferRWI.html"),
-							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
-                } catch(final IOException e) {
-                    if(targetBaseURL.isHTTPS()) {
-                    	targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
-                    	/* Failed with https : retry with http on the same address */
-						content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferRWI.html"),
-								targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
-						if(content != null) {
-							/* Success with http : mark SSL as unavailable on the target peer */
-            				markSSLUnavailableOnPeer(Switchboard.getSwitchboard().peers, targetSeed, ip, "yacyClient.transferRWI");
-						}
-                    } else {
-                    	throw e;
+                try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout)) {
+                    try {
+                        content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferRWI.html"),
+                                targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
+                    } catch(final IOException e) {
+                        if(targetBaseURL.isHTTPS()) {
+                            targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
+                            /* Failed with https : retry with http on the same address */
+                            content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferRWI.html"),
+                                    targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
+                            if(content != null) {
+                                /* Success with http : mark SSL as unavailable on the target peer */
+                                markSSLUnavailableOnPeer(Switchboard.getSwitchboard().peers, targetSeed, ip, "yacyClient.transferRWI");
+                            }
+                        } else {
+                            throw e;
+                        }
                     }
                 }
                 final Iterator<String> v = FileUtils.strings(content);
@@ -1883,17 +1891,17 @@ public final class Protocol {
     /**
      * Transfer URL entries to remote peer
      *
-	 * @param targetSeed
-	 *            the target peer
+     * @param targetSeed
+     *            the target peer
      * @param uhs hashes of URLs to transfer (unknown by the target peer)
      * @param urlRefs list of locally known URLs entries
      * @param segment
 
-	 * @param gzipBody
-	 *            when true, the transferred data are compressed using gzip
-	 * @param timeout
-	 *            the maximum time in milliseconds to wait for a success of the
-	 *            http(s) request(s) to the remote peer
+     * @param gzipBody
+     *            when true, the transferred data are compressed using gzip
+     * @param timeout
+     *            the maximum time in milliseconds to wait for a success of the
+     *            http(s) request(s) to the remote peer
      * @param preferHttps when true, use https when available on the target peer
      * @return remote peer response
      */
@@ -1943,25 +1951,26 @@ public final class Protocol {
                 }
             }
             metadataRetrievalRunning.decrementAndGet();
-            
+
             try {
                 MultiProtocolURL targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, preferHttps);
-                
+
                 parts.put("urlc", UTF8.StringBody(Integer.toString(urlc)));
-                final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout);
                 byte[] content = null;
-                try {
-					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferURL.html"),
-							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
-                } catch(final IOException e) {
-                	if(targetBaseURL.isHTTPS()) {
-                		targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
-                		/* Failed with https : retry with http on the same address */
-    					content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferURL.html"),
-    							targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);                		
-                	} else {
-                		throw e;
-                	}
+                try (final HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, timeout)) {
+                    try {
+                        content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferURL.html"),
+                                targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
+                    } catch(final IOException e) {
+                        if(targetBaseURL.isHTTPS()) {
+                            targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
+                            /* Failed with https : retry with http on the same address */
+                            content = httpClient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/transferURL.html"),
+                                    targetSeed.getHexHash() + ".yacyh", parts, gzipBody, true);
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
                 final Iterator<String> v = FileUtils.strings(content);
 
@@ -1988,33 +1997,31 @@ public final class Protocol {
 
         // this post a message to the remote message board
         final String salt = crypt.randomSalt();
-        
-		final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
-				SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
+
+        final boolean preferHttps = sb.getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+                SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT);
 
         for (final String ip : targetSeed.getIPs()) {
-            try {
-                final Map<String, ContentBody> parts =
-                    basicRequestParts(sb, targetSeed.hash, salt);
-                final HTTPClient httpclient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 15000);
+            try (final HTTPClient httpclient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent, 15000)) {
+                final Map<String, ContentBody> parts = basicRequestParts(sb, targetSeed.hash, salt);
                 MultiProtocolURL targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, preferHttps);
                 byte[] content;
                 try {
-                	content = httpclient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/profile.html"),
-						targetSeed.getHexHash() + ".yacyh", parts, false, true);
+                    content = httpclient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/profile.html"),
+                        targetSeed.getHexHash() + ".yacyh", parts, false, true);
                 } catch(final IOException e) {
-                	if(targetBaseURL.isHTTPS()) {
-                		/* Failed with https : retry using http */
-                		targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
-                		content = httpclient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/profile.html"),
-                				targetSeed.getHexHash() + ".yacyh", parts, false, true);
-                		if(content != null) {
-							/* Got something with http : mark peer SSL as unavailable on target peer */
-							markSSLUnavailableOnPeer(sb.peers, targetSeed, ip, "yacyClient.getProfile");
-                		}
-                	} else {
-                		throw e;
-                	}
+                    if(targetBaseURL.isHTTPS()) {
+                        /* Failed with https : retry using http */
+                        targetBaseURL = targetSeed.getPublicMultiprotocolURL(ip, false);
+                        content = httpclient.POSTbytes(new MultiProtocolURL(targetBaseURL, "/yacy/profile.html"),
+                                targetSeed.getHexHash() + ".yacyh", parts, false, true);
+                        if(content != null) {
+                            /* Got something with http : mark peer SSL as unavailable on target peer */
+                            markSSLUnavailableOnPeer(sb.peers, targetSeed, ip, "yacyClient.getProfile");
+                        }
+                    } else {
+                        throw e;
+                    }
                 }
                 return FileUtils.table(content);
             } catch (final Exception e ) {
@@ -2047,11 +2054,11 @@ public final class Protocol {
             final Set<String> targetIps = target.getIPs();
             if(targetIps.isEmpty()) {
                 Network.log.warn("yacyClient.loadIDXHosts error: no known address on target peer.");
-                return null;            	
+                return null;
             }
-			final String remoteBaseURL = target.getPublicURL(targetIps.iterator().next(),
-					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
-							SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT));
+            final String remoteBaseURL = target.getPublicURL(targetIps.iterator().next(),
+                    Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED,
+                            SwitchboardConstants.NETWORK_PROTOCOL_HTTPS_PREFERRED_DEFAULT));
             final Post post = new Post(new MultiProtocolURL(remoteBaseURL), target.hash, "/yacy/idx.json", parts, 30000);
             if ( post.result == null || post.result.length == 0 ) {
                 Network.log.warn("yacyClient.loadIDXHosts error: empty result");
@@ -2144,25 +2151,25 @@ public final class Protocol {
      */
     public static final LinkedHashMap<String, ContentBody> basicRequestParts(final Switchboard sb, final String targetHash, final String salt) {
         final LinkedHashMap<String, ContentBody> parts = new LinkedHashMap<String, ContentBody>();
-        
+
         // just standard identification essentials
         if ( sb.peers.mySeed().hash != null ) {
             parts.put("iam", UTF8.StringBody(sb.peers.mySeed().hash));
             if ( targetHash != null ) parts.put("youare", UTF8.StringBody(targetHash));
-        
+
             // time information for synchronization
             final long myTime = System.currentTimeMillis();
             String formattedTime;
             try {
-            	/* Prefer using first the shared and thread-safe DateTimeFormatter instance */
-            	formattedTime = GenericFormatter.FORMAT_SHORT_SECOND.format(Instant.ofEpochMilli(myTime));
+                /* Prefer using first the shared and thread-safe DateTimeFormatter instance */
+                formattedTime = GenericFormatter.FORMAT_SHORT_SECOND.format(Instant.ofEpochMilli(myTime));
             } catch(final DateTimeException e) {
-            	/* This should not happen, but rather than failing we fallback to the old formatter wich uses synchronization locks */
-            	formattedTime = GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(myTime));
+                /* This should not happen, but rather than failing we fallback to the old formatter wich uses synchronization locks */
+                formattedTime = GenericFormatter.SHORT_SECOND_FORMATTER.format(new Date(myTime));
             }
             parts.put("mytime", UTF8.StringBody(formattedTime));
             parts.put("myUTC", UTF8.StringBody(Long.toString(myTime)));
-        
+
             // network identification
             parts.put(SwitchboardConstants.NETWORK_NAME, UTF8.StringBody(Switchboard.getSwitchboard().getConfig(
                                 SwitchboardConstants.NETWORK_NAME,
@@ -2196,27 +2203,27 @@ public final class Protocol {
         }
         return "?" + sb.toString().substring(1);
     }
-    
-	/**
-	 * Mark a SSL/TLS as unavailable on a connected peer and log an information
-	 * level message. Use when http is successful whereas https is not on the target
-	 * peer. All parameters must not be null.
-	 * 
-	 * @param seedDB
-	 *            the seeds database to update
-	 * @param peer
-	 *            the peer to update
-	 * @param address
-	 *            the address on peer where http is successful but https fails.
-	 * @param logPrefix
-	 *            a prefix to the log message
-	 */
-	private static void markSSLUnavailableOnPeer(final SeedDB seedDB, final Seed peer, final String address,
-			final String logPrefix) {
-		Network.log.info(logPrefix + " SSL/TLS unavailable on peer '" + peer.getName()
-				+ "' : can be reached using http but not https on address " + address);
-		peer.setFlagSSLAvailable(false);
-		seedDB.updateConnected(peer);
-	}
-    
+
+    /**
+     * Mark a SSL/TLS as unavailable on a connected peer and log an information
+     * level message. Use when http is successful whereas https is not on the target
+     * peer. All parameters must not be null.
+     *
+     * @param seedDB
+     *            the seeds database to update
+     * @param peer
+     *            the peer to update
+     * @param address
+     *            the address on peer where http is successful but https fails.
+     * @param logPrefix
+     *            a prefix to the log message
+     */
+    private static void markSSLUnavailableOnPeer(final SeedDB seedDB, final Seed peer, final String address,
+            final String logPrefix) {
+        Network.log.info(logPrefix + " SSL/TLS unavailable on peer '" + peer.getName()
+                + "' : can be reached using http but not https on address " + address);
+        peer.setFlagSSLAvailable(false);
+        seedDB.updateConnected(peer);
+    }
+
 }

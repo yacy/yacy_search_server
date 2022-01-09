@@ -254,7 +254,7 @@ public final class search {
                     0.0d,
                     0.0d,
                     0.0d,
-                    new String[0]
+                    new HashSet<>()
                     );
             theQuery.setStrictContentDom(strictContentDom);
             Network.log.info("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
@@ -319,7 +319,7 @@ public final class search {
                     0.0d,
                     0.0d,
                     0.0d,
-                    new String[0]
+                    new HashSet<>()
                     );
             theQuery.setStrictContentDom(strictContentDom);
             Network.log.info("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");

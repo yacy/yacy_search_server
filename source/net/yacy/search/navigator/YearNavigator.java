@@ -24,11 +24,9 @@ package net.yacy.search.navigator;
 
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeSet;
 import net.yacy.cora.federate.solr.SolrType;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -54,8 +52,8 @@ import net.yacy.search.schema.CollectionSchema;
  */
 public class YearNavigator extends StringNavigator implements Navigator {
 
-    public YearNavigator(String title, CollectionSchema field) {
-        super(title, field);
+    public YearNavigator(final String title, final CollectionSchema field, final NavigatorSort sort) {
+        super(title, field, sort == null ? NavigatorSort.LABEL_DESC : sort);
         if (field.getType() != SolrType.date) throw new IllegalArgumentException("field is not of type Date");
     }
 
@@ -69,8 +67,7 @@ public class YearNavigator extends StringNavigator implements Navigator {
     public String getQueryModifier(final String key) {
         if (this.field == CollectionSchema.dates_in_content_dts)
             return "from:" + key +"-01-01 to:" + key + "-12-31 ";
-        else
-            return key;
+		return key;
     }
 
     /**
@@ -118,32 +115,6 @@ public class YearNavigator extends StringNavigator implements Navigator {
                 }
             }
         }
-    }
-
-    /**
-     * YearNavigator returns keys in asc or desc order instead of ordered by
-     * score
-     *
-     * @param up true = asc
-     * @return key alphabetically ordered
-     */
-    @Override
-    public Iterator<String> keys(boolean up) {
-        TreeSet<String> years;
-        if (up) {
-            years = new TreeSet<String>();
-        } else {
-            years = new TreeSet<String>(Collections.reverseOrder());
-        }
-
-        // make sure keys with high score are included (display may be limited in size)
-        // Iterator<String> it = this.iterator();
-        Iterator<String> it = super.keys(false);
-
-        while (it.hasNext()) {
-            years.add(it.next());
-        }
-        return years.iterator();
     }
 
 

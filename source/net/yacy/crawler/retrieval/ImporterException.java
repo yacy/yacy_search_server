@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2004 Michael Peter Christen <mc@yacy.net)> 
+// SPDX-License-Identifier: GPL-2.0-or-later
+
 package net.yacy.crawler.retrieval;
 
 public class ImporterException extends Exception {

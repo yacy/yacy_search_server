@@ -59,13 +59,13 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class Load_RSS_p {
-	
+
 	/** Value prefix of checkbox inputs used to select items */
 	private static final String CHECKBOX_ITEM_PREFIX = "mark_";
-	
+
 	/** Value prefix of checkbox inputs used to select media items */
 	private static final String CHECKBOX_MEDIA_ITEM_PREFIX = "media_";
-	
+
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
@@ -82,7 +82,7 @@ public class Load_RSS_p {
         prop.put("showscheduledfeeds", 0);
         prop.put("url", "");
         prop.put("showerrmsg", 0);
-        
+
         if (post != null && post.containsKey("removeSelectedFeedsNewList")) {
             for (final Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith(CHECKBOX_ITEM_PREFIX)) try {
@@ -213,7 +213,7 @@ public class Load_RSS_p {
                     messageurl = row.get("url", "");
                     if (messageurl.isEmpty()) continue;
                     // get referrer
-                    final DigestURL referrer = sb.getURL(row.get("referrer", "").getBytes());
+                    final String referrerURL = sb.getURL(row.get("referrer", "").getBytes());
                     // check if feed is registered in scheduler
                     final byte[] api_pk = row.get("api_pk");
                     final Row r = api_pk == null ? null : sb.tables.select("api", api_pk);
@@ -224,7 +224,7 @@ public class Load_RSS_p {
                         prop.put("showscheduledfeeds_list_" + apic + "_count", apic);
                         prop.put("showscheduledfeeds_list_" + apic + "_rss", MultiProtocolURL.escape(messageurl).toString());
                         prop.putXML("showscheduledfeeds_list_" + apic + "_title", row.get("title", ""));
-                        prop.putXML("showscheduledfeeds_list_" + apic + "_referrer", referrer == null ? "#" : referrer.toNormalform(true));
+                        prop.putXML("showscheduledfeeds_list_" + apic + "_referrer", referrerURL == null ? "#" : referrerURL);
                         prop.put("showscheduledfeeds_list_" + apic + "_recording", DateFormat.getDateTimeInstance().format(row.get("recording_date", new Date())));
                         prop.put("showscheduledfeeds_list_" + apic + "_lastload", DateFormat.getDateTimeInstance().format(row.get("last_load_date", new Date())));
                         prop.put("showscheduledfeeds_list_" + apic + "_nextload", date_next_exec == null ? "" : DateFormat.getDateTimeInstance().format(date_next_exec));
@@ -238,7 +238,7 @@ public class Load_RSS_p {
                         prop.put("shownewfeeds_list_" + newc + "_count", newc);
                         prop.putXML("shownewfeeds_list_" + newc + "_rss", messageurl);
                         prop.putXML("shownewfeeds_list_" + newc + "_title", row.get("title", ""));
-                        prop.putXML("shownewfeeds_list_" + newc + "_referrer", referrer == null ? "" : referrer.toNormalform(true));
+                        prop.putXML("shownewfeeds_list_" + newc + "_referrer", referrerURL == null ? "" : referrerURL);
                         prop.put("shownewfeeds_list_" + newc + "_recording", DateFormat.getDateTimeInstance().format(row.get("recording_date", new Date())));
                         newc++;
                     }
@@ -275,7 +275,7 @@ public class Load_RSS_p {
         }
 
         ClientIdentification.Agent agent = post == null ? ClientIdentification.yacyInternetCrawlerAgent : ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
-        
+
         // if we have an url then try to load the rss
         RSSReader rss = null;
         if (url != null) try {
@@ -333,22 +333,18 @@ public class Load_RSS_p {
                     hash2UrlMap.put(ASCII.String(mediaUrl.hash()), mediaUrl);
                 }
             }
-            
+
             final List<DigestURL> urlsToIndex = new ArrayList<DigestURL>();
             loop: for (final Map.Entry<String, DigestURL> entry: hash2UrlMap.entrySet()) {
-                try {
-                    final DigestURL messageUrl = entry.getValue();
-                    HarvestProcess harvestProcess = sb.urlExists(ASCII.String(messageUrl.hash()));
-                    if (harvestProcess != null) {
-                    	continue loop;
-                    }
-                    urlsToIndex.add(messageUrl);
-                    RSSLoader.indexTriggered.insertIfAbsent(messageUrl.hash(), new Date());
-                } catch (final IOException e) {
-                    ConcurrentLog.logException(e);
+                final DigestURL messageUrl = entry.getValue();
+                HarvestProcess harvestProcess = sb.getHarvestProcess(ASCII.String(messageUrl.hash()));
+                if (harvestProcess != null) {
+                	continue loop;
                 }
+                urlsToIndex.add(messageUrl);
+                RSSLoader.indexTriggered.insertIfAbsent(messageUrl.hash(), new Date());
             }
-            
+
             sb.addToIndex(urlsToIndex, null, null, collections, true);
         }
 
@@ -391,7 +387,7 @@ public class Load_RSS_p {
             			ConcurrentLog.warn("Load_RSS", "Malformed feed item link URL : " + linkStr);
             		}
             	}
-            	
+
             	DigestURL enclosure = null;
             	final String enclosureStr = item.getEnclosure();
             	if(StringUtils.isNotBlank(enclosureStr)) {
@@ -401,7 +397,7 @@ public class Load_RSS_p {
             			ConcurrentLog.warn("Load_RSS", "Malformed feed item enclosure URL : " + enclosureStr);
             		}
             	}
-            	
+
             	if(link == null) {
             		/* No link in this feed item : we use the enclosure media URL as the main link */
             		link = enclosure;
@@ -412,58 +408,49 @@ public class Load_RSS_p {
                  	author = item.getCopyright();
                 }
                 pubDate = item.getPubDate();
-                
-                HarvestProcess harvestProcess;
-                try {
-                 	if(link != null && StringUtils.isNotEmpty(item.getGuid())) {
-                   		harvestProcess = sb.urlExists(ASCII.String(link.hash()));
-                   		
-                       	prop.put("showitems_item_" + i + "_hasLink", true);
-                       	prop.putHTML("showitems_item_" + i + "_hasLink_link", link.toNormalform(true));
-                       	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(link.hash()) ? 1 : 0;
-                   		prop.put("showitems_item_" + i + "_state", state);
-                   		prop.put("showitems_item_" + i + "_indexable", state == 0);
-                        prop.put("showitems_item_" + i + "_indexable_count", i);
-                        prop.putHTML("showitems_item_" + i + "_indexable_inputValue", (link == enclosure ? CHECKBOX_MEDIA_ITEM_PREFIX : CHECKBOX_ITEM_PREFIX) + item.getGuid());
-                   	} else {
-                  		prop.put("showitems_item_" + i + "_state", 0);
-                   		prop.put("showitems_item_" + i + "_indexable", false);
-                       	prop.put("showitems_item_" + i + "_hasLink", false);
-                   	}
-                    prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
+
+                if(link != null && StringUtils.isNotEmpty(item.getGuid())) {
+                    HarvestProcess harvestProcess = sb.getHarvestProcess(ASCII.String(link.hash()));
+
+                   	prop.put("showitems_item_" + i + "_hasLink", true);
+                   	prop.putHTML("showitems_item_" + i + "_hasLink_link", link.toNormalform(true));
+                   	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(link.hash()) ? 1 : 0;
+               		prop.put("showitems_item_" + i + "_state", state);
+               		prop.put("showitems_item_" + i + "_indexable", state == 0);
+                    prop.put("showitems_item_" + i + "_indexable_count", i);
+                    prop.putHTML("showitems_item_" + i + "_indexable_inputValue", (link == enclosure ? CHECKBOX_MEDIA_ITEM_PREFIX : CHECKBOX_ITEM_PREFIX) + item.getGuid());
+               	} else {
+              		prop.put("showitems_item_" + i + "_state", 0);
+               		prop.put("showitems_item_" + i + "_indexable", false);
+                   	prop.put("showitems_item_" + i + "_hasLink", false);
+               	}
+                prop.putHTML("showitems_item_" + i + "_author", author == null ? "" : author);
+                prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
+                prop.putHTML("showitems_item_" + i + "_description", item.getDescriptions().toString());
+                prop.put("showitems_item_" + i + "_defaultMediaDesc", false);
+                prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
+                prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
+                i++;
+
+                if(enclosure != null && enclosure != link && StringUtils.isNotEmpty(item.getGuid())) {
+                    HarvestProcess harvestProcess = sb.getHarvestProcess(ASCII.String(enclosure.hash()));
+
+                   	prop.put("showitems_item_" + i + "_hasLink", true);
+                   	prop.putHTML("showitems_item_" + i + "_hasLink_link", enclosure.toNormalform(true));
+                   	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(enclosure.hash()) ? 1 : 0;
+               		prop.put("showitems_item_" + i + "_state", state);
+               		prop.put("showitems_item_" + i + "_indexable", state == 0);
+                    prop.put("showitems_item_" + i + "_indexable_count", i);
+                    prop.putHTML("showitems_item_" + i + "_indexable_inputValue", "media_" + item.getGuid());
+                    prop.putHTML("showitems_item_" + i + "_author", "");
                     prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
-                    prop.putHTML("showitems_item_" + i + "_description", item.getDescriptions().toString());
-                    prop.put("showitems_item_" + i + "_defaultMediaDesc", false);
-                    prop.putHTML("showitems_item_" + i + "_language", item.getLanguage());
-                    prop.putHTML("showitems_item_" + i + "_date", (pubDate == null) ? "" : DateFormat.getDateTimeInstance().format(pubDate));
+                    prop.putHTML("showitems_item_" + i + "_description", "");
+                    /* Description is already used for the main item link, use here a default one */
+                    prop.put("showitems_item_" + i + "_defaultMediaDesc", true);
+                    prop.putHTML("showitems_item_" + i + "_language", "");
+                    prop.putHTML("showitems_item_" + i + "_date", "");
                     i++;
-                } catch (IOException e) {
-                    ConcurrentLog.logException(e);
-                }
-                    
-                try {
-                  	if(enclosure != null && enclosure != link && StringUtils.isNotEmpty(item.getGuid())) {
-                   		harvestProcess = sb.urlExists(ASCII.String(enclosure.hash()));
-                    		
-                       	prop.put("showitems_item_" + i + "_hasLink", true);
-                       	prop.putHTML("showitems_item_" + i + "_hasLink_link", enclosure.toNormalform(true));
-                       	final int state = harvestProcess != null ? 2 : RSSLoader.indexTriggered.containsKey(enclosure.hash()) ? 1 : 0;
-                   		prop.put("showitems_item_" + i + "_state", state);
-                   		prop.put("showitems_item_" + i + "_indexable", state == 0);
-                        prop.put("showitems_item_" + i + "_indexable_count", i);
-                        prop.putHTML("showitems_item_" + i + "_indexable_inputValue", "media_" + item.getGuid());
-                        prop.putHTML("showitems_item_" + i + "_author", "");
-                        prop.putHTML("showitems_item_" + i + "_title", item.getTitle());
-                        prop.putHTML("showitems_item_" + i + "_description", "");
-                        /* Description is already used for the main item link, use here a default one */
-                        prop.put("showitems_item_" + i + "_defaultMediaDesc", true);
-                        prop.putHTML("showitems_item_" + i + "_language", "");
-                        prop.putHTML("showitems_item_" + i + "_date", "");
-                        i++;
-                   	}
-                } catch (IOException e) {
-                    ConcurrentLog.logException(e);
-                }
+               	}
             }
             prop.put("showitems_item", i);
             prop.put("showitems_num", i);

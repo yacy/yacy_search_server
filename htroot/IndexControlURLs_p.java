@@ -58,14 +58,14 @@ public class IndexControlURLs_p {
         final Switchboard sb = (Switchboard) env;
 
         final serverObjects prop = new serverObjects();
-        
+
         /* Acquire a transaction token for the next possible POST form submissions */
         final String nextTransactionToken = TransactionManager.getTransactionToken(header);
         prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, nextTransactionToken);
 
         Segment segment = sb.index;
         long ucount = segment.fulltext().collectionSize();
-        
+
         // set default values
         prop.put("urlstring", "");
         prop.put("urlhash", "");
@@ -82,16 +82,16 @@ public class IndexControlURLs_p {
         List<File> dumpFiles =  segment.fulltext().dumpFiles();
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
         prop.put("dumprestore_optimizemax", 10);
-		prop.put("dumprestore_rebootSolrEnabled",
-				sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
-						SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT)
-						&& !sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED,
-								SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT));
+        prop.put("dumprestore_rebootSolrEnabled",
+                sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
+                        SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT)
+                        && !sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED,
+                                SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT));
         prop.put("cleanup", ucount == 0 ? 0 : 1);
         prop.put("cleanupsolr", segment.fulltext().connectedRemoteSolr() ? 1 : 0);
         prop.put("cleanuprwi", segment.termIndex() != null && !segment.termIndex().isEmpty() ? 1 : 0);
         prop.put("cleanupcitation", segment.connectedCitation() && !segment.urlCitation().isEmpty() ? 1 : 0);
-        
+
         if (post == null || env == null) {
             prop.putNum("ucount", ucount);
             return prop; // nothing to do
@@ -119,14 +119,20 @@ public class IndexControlURLs_p {
 
         // delete everything
         if ( post.containsKey("deletecomplete") ) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
             if ( post.get("deleteIndex", "").equals("on") ) {
-                try {segment.fulltext().clearLocalSolr();} catch (final IOException e) {}
+                try {
+                    segment.fulltext().clearLocalSolr();
+                    segment.loadTimeIndex().clear();
+                } catch (final IOException e) {}
             }
             if ( post.get("deleteRemoteSolr", "").equals("on")) {
-                try {segment.fulltext().clearRemoteSolr();} catch (final IOException e) {}
+                try {
+                    segment.fulltext().clearRemoteSolr();
+                    segment.loadTimeIndex().clear();
+                } catch (final IOException e) {}
             }
             if ( post.get("deleteRWI", "").equals("on")) {
                 if (segment.termIndex() != null) try {segment.termIndex().clear();} catch (final IOException e) {}
@@ -135,7 +141,9 @@ public class IndexControlURLs_p {
                 if (segment.connectedCitation()) try {segment.urlCitation().clear();} catch (final IOException e) {}
             }
             if ( post.get("deleteFirstSeen", "").equals("on")) {
-                try {segment.firstSeen().clear();} catch (final IOException e) {}
+                try {
+                    segment.firstSeenIndex().clear();
+                } catch (final IOException e) {}
             }
             if ( post.get("deleteCrawlQueues", "").equals("on") ) {
                 sb.crawlQueues.clear();
@@ -152,38 +160,39 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdeleteall")) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
             ClientIdentification.Agent agent = ClientIdentification.getAgent(post.get("agentName", ClientIdentification.yacyInternetCrawlerAgentName));
             int i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, agent, CacheStrategy.IFEXIST);
+            try {segment.loadTimeIndex().remove(urlhash.getBytes());} catch (IOException e) {}
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
         }
 
         if (post.containsKey("urlhashdelete")) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
-            DigestURL url;
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
+            String url;
             try {
                 url = segment.fulltext().getURL(urlhash);
                 if (url == null) {
                     prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
                 } else {
-                    urlstring = url.toNormalform(true);
                     prop.put("urlstring", "");
                     sb.urlRemove(segment, urlhash.getBytes());
-                    prop.putHTML("result", "Removed URL " + urlstring);
+                    prop.putHTML("result", "Removed URL " + url);
                 }
+                segment.loadTimeIndex().remove(urlhash.getBytes());
             } catch (IOException e) {
                 prop.putHTML("result", "Error when querying the url hash " + urlhash + ":" + e.getMessage());
             }
         }
 
         if (post.containsKey("urldelete")) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
             try {
                 urlhash = ASCII.String((new DigestURL(urlstring)).hash());
             } catch (final MalformedURLException e) {
@@ -193,6 +202,7 @@ public class IndexControlURLs_p {
                 prop.put("result", "No input given; nothing deleted.");
             } else {
                 sb.urlRemove(segment, urlhash.getBytes());
+                try {segment.loadTimeIndex().remove(urlhash.getBytes());} catch (IOException e) {}
                 prop.putHTML("result", "Removed URL " + urlstring);
             }
         }
@@ -227,38 +237,39 @@ public class IndexControlURLs_p {
                 prop.put("statistics", 0);
             }
         }
-        
+
         if (post.containsKey("optimizesolr")) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
-        	final int size = post.getInt("optimizemax", 10);
-        	segment.fulltext().optimize(size);
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
+            final int size = post.getInt("optimizemax", 10);
+            segment.fulltext().optimize(size);
             sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr optimize " + size);
         }
 
         if (post.containsKey("rebootsolr")) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
-			if (sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
-					SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT)
-					&& !sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED,
-							SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT)) {
-				/* This operation is designed only for an embdded local Solr with no mirroring to an external remote Solr server */
-        		segment.fulltext().rebootEmbeddedLocalSolr();
-        		sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr reboot");
-        	}
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
+            if (sb.getConfigBool(SwitchboardConstants.CORE_SERVICE_FULLTEXT,
+                    SwitchboardConstants.CORE_SERVICE_FULLTEXT_DEFAULT)
+                    && !sb.getConfigBool(SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED,
+                            SwitchboardConstants.FEDERATED_SERVICE_SOLR_INDEXING_ENABLED_DEFAULT)) {
+                /* This operation is designed only for an embdded local Solr with no mirroring to an external remote Solr server */
+                segment.fulltext().rebootEmbeddedLocalSolr();
+                sb.tables.recordAPICall(post, "IndexControlURLs_p.html", WorkTables.TABLE_API_TYPE_STEERING, "solr reboot");
+            }
         }
 
         if (post.containsKey("deletedomain")) {
-        	/* Check the transaction is valid */
-        	TransactionManager.checkPostTransaction(header, post);
-        	
+            /* Check the transaction is valid */
+            TransactionManager.checkPostTransaction(header, post);
+
             final String domain = post.get("domain");
             Set<String> hostnames = new HashSet<String>();
             hostnames.add(domain);
             segment.fulltext().deleteStaleDomainNames(hostnames, null);
+            try {segment.loadTimeIndex().clear();} catch (IOException e) {} // delete all to prevent that existing entries reject reloading
             // trigger the loading of the table
             post.put("statistics", "");
         }

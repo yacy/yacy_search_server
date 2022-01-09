@@ -744,9 +744,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } catch (final NumberFormatException e) {}
             this.evaluationScores.match(Element.imgpath, src);
         } else if(tag.name.equalsIgnoreCase("base")) {
-            try {
-                this.root = new DigestURL(tag.opts.getProperty("href", EMPTY_STRING));
-            } catch (final MalformedURLException e) {}
+        	final String baseHref = tag.opts.getProperty("href", EMPTY_STRING);
+        	if(!baseHref.isEmpty()) {
+        		/* We must use here AnchorURL.newAnchor as the base href may also be an URL relative to the document URL */
+        		try {
+        			this.root = AnchorURL.newAnchor(this.root, baseHref);
+        		} catch (final MalformedURLException | RuntimeException ignored) {
+        			/* Nothing more to do when the base URL is malformed */
+        		}
+        	}
         } else if (tag.name.equalsIgnoreCase("frame")) {
             final AnchorURL src = absolutePath(tag.opts.getProperty("src", EMPTY_STRING));
             if(src != null) {
@@ -763,18 +769,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String content = tag.opts.getProperty("content", EMPTY_STRING);
             String name = tag.opts.getProperty("name", EMPTY_STRING);
             if (name.length() > 0) {
-                this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
+                this.metas.put(name.toLowerCase(), content);
                 if (name.toLowerCase().equals("generator")) {
                     this.evaluationScores.match(Element.metagenerator, content);
                 }
             }
             name = tag.opts.getProperty("http-equiv", EMPTY_STRING);
             if (name.length() > 0) {
-                this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
+                this.metas.put(name.toLowerCase(), content);
             }
             name = tag.opts.getProperty("property", EMPTY_STRING);
             if (name.length() > 0) {
-                this.metas.put(name.toLowerCase(), CharacterCoding.html2unicode(content));
+                this.metas.put(name.toLowerCase(), content);
             }
         } else if (tag.name.equalsIgnoreCase("area")) {
             final String areatitle = cleanLine(tag.opts.getProperty("title", EMPTY_STRING));
@@ -898,7 +904,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // System.out.println("ScrapeTag1: tag.tagname=" + tag.tagname + ", opts=" + tag.opts.toString() + ", text=" + UTF8.String(text));
         if (tag.name.equalsIgnoreCase("a") && tag.content.length() < 2048) {
             String href = tag.opts.getProperty("href", EMPTY_STRING);
-            href = CharacterCoding.html2unicode(href);
             AnchorURL url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
                 if (followDenied()) {

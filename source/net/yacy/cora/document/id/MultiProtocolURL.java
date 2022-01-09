@@ -2538,7 +2538,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             return new ByteArrayInputStream(b);
         }
         if (isHTTP() || isHTTPS()) {
-                final HTTPClient client = new HTTPClient(agent);
+            try (final HTTPClient client = new HTTPClient(agent)){
                 client.setHost(getHost());
                 client.GET(this, false);
                 if (client.getStatusCode() != HttpStatus.SC_OK) {
@@ -2546,6 +2546,7 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
                             "\nServer returned status: " + client.getHttpResponse().getStatusLine());
                 }
                 return new HTTPInputStream(client);
+            }
         }
 
         return null;
@@ -2562,9 +2563,10 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
             return b;
         }
         if (isHTTP() || isHTTPS()) {
-                final HTTPClient client = new HTTPClient(agent);
-                client.setHost(getHost());
-                return client.GETbytes(this, username, pass, false);
+                try (final HTTPClient client = new HTTPClient(agent)) {
+                    client.setHost(getHost());
+                    return client.GETbytes(this, username, pass, false);
+                }
         }
 
         return null;

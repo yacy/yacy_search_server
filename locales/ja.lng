@@ -829,14 +829,10 @@ YaCy: Tutorial==YaCy: チュートリアル
 >Tutorial==>チュートリアル
 #-----------------------------
 
-#File: HostBrowser.html
+#File: IndexBrowser_p.html
 #---------------------------
 Index Browser==索引ブラウザー
 #Administration Options==管理オプション
-#-----------------------------
-
-#File: HostBrowserAdmin_p.html
-#---------------------------
 Administration Options==管理オプション
 Delete all==全部を削除する
 >Load Errors<==>読み込みエラー<
@@ -1292,13 +1288,6 @@ entries,==エントリー,
 "Commit"=="コミット"
 #-----------------------------
 
-#File: Table_YMark_p.html
-#---------------------------
-Table Viewer==テーブル ヴューワー
-YMark Table Administration==YMark テーブル管理
-Table Editor: showing table==テーブル エディター: テーブルを表示しています
-"import"=="取り込み"
-#-----------------------------
 
 #File: terminal_p.html
 #---------------------------

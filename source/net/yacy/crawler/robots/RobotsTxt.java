@@ -1,7 +1,8 @@
 //plasmaCrawlRobotsTxt.java
 //-------------------------------------
 //part of YACY
-//(C) by Michael Peter Christen; mc@yacy.net
+// SPDX-FileCopyrightText: 2004 Michael Peter Christen <mc@yacy.net)>
+// SPDX-License-Identifier: GPL-2.0-or-later
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2004
 //
@@ -71,24 +72,24 @@ public class RobotsTxt {
     private final WorkTables tables;
     private final LoaderDispatcher loader;
     /** Thread pool used to launch concurrent tasks */
-	private ThreadPoolExecutor threadPool; 
+    private final ThreadPoolExecutor threadPool;
 
     private static class DomSync {
-    	private DomSync() {}
+        private DomSync() {}
     }
 
     /**
-     * 
+     *
      * @param worktables
      * @param loader
      * @param maxConcurrentTheads maximum active threads this instance is allowed to run for its concurrent tasks
      */
     public RobotsTxt(final WorkTables worktables, LoaderDispatcher loader, final int maxActiveTheads) {
-    	this.threadPool = new ThreadPoolExecutor(maxActiveTheads, maxActiveTheads,
+        this.threadPool = new ThreadPoolExecutor(maxActiveTheads, maxActiveTheads,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(),
                 new NamePrefixThreadFactory(RobotsTxt.class.getSimpleName()));
-        this.syncObjects = new ConcurrentHashMap<String, DomSync>();
+        this.syncObjects = new ConcurrentHashMap<>();
         this.tables = worktables;
         this.loader = loader;
         try {
@@ -107,12 +108,12 @@ public class RobotsTxt {
         this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME).clear();
         this.syncObjects.clear();
     }
-    
+
     public void close() {
-    	/* Shutdown all active robots.txt loading threads */
-    	if(this.threadPool != null) {
-    		this.threadPool.shutdownNow();
-    	}
+        /* Shutdown all active robots.txt loading threads */
+        if(this.threadPool != null) {
+            this.threadPool.shutdownNow();
+        }
     }
 
     public int size() throws IOException {
@@ -122,7 +123,7 @@ public class RobotsTxt {
     public RobotsTxtEntry getEntry(final MultiProtocolURL theURL, final ClientIdentification.Agent agent) {
         if (theURL == null) throw new IllegalArgumentException();
         if (!theURL.getProtocol().startsWith("http")) return null;
-        return getEntry(getHostPort(theURL), agent, true);
+        return this.getEntry(getHostPort(theURL), agent, true);
     }
 
     public RobotsTxtEntry getEntry(final String urlHostPort, final ClientIdentification.Agent agent, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
@@ -147,13 +148,13 @@ public class RobotsTxt {
         if (record != null) robotsTxt4Host = new RobotsTxtEntry(urlHostPort, record);
 
         if (fetchOnlineIfNotAvailableOrNotFresh && (
-             robotsTxt4Host == null ||
+             robotsTxt4Host == null /*||
              robotsTxt4Host.getLoadedDate() == null ||
-             System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000
+             System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() > 7*24*60*60*1000 */
            )) {
 
             // make or get a synchronization object
-        	DomSync syncObj = this.syncObjects.get(urlHostPort);
+            DomSync syncObj = this.syncObjects.get(urlHostPort);
             if (syncObj == null) {
                 syncObj = new DomSync();
                 this.syncObjects.put(urlHostPort, syncObj);
@@ -174,19 +175,19 @@ public class RobotsTxt {
                     record = null;
                 }
                 if (record != null) robotsTxt4Host = new RobotsTxtEntry(urlHostPort, record);
-                if (robotsTxt4Host != null &&
+                if (robotsTxt4Host != null /*&&
                     robotsTxt4Host.getLoadedDate() != null &&
-                    System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() <= 1*24*60*60*1000) {
+                    System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() <= 1*24*60*60*1000 */) {
                     return robotsTxt4Host;
                 }
 
                 // generating the proper url to download the robots txt
-                DigestURL robotsURL = robotsURL(urlHostPort);
+                final DigestURL robotsURL = robotsURL(urlHostPort);
 
                 Response response = null;
                 if (robotsURL != null) {
                     if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
-                    Request request = new Request(robotsURL, null);
+                    final Request request = new Request(robotsURL, null);
                     try {
                         response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, agent);
                     } catch (final Throwable e) {
@@ -196,16 +197,16 @@ public class RobotsTxt {
                 }
 
                 if (response == null) {
-                    processOldEntry(robotsTxt4Host, robotsURL, robotsTable);
+                    this.processOldEntry(robotsTxt4Host, robotsURL, robotsTable);
                 } else {
-                	robotsTxt4Host = processNewEntry(robotsURL, response, agent.robotIDs);
+                    robotsTxt4Host = this.processNewEntry(robotsURL, response, agent.robotIDs);
                 }
             }
         }
 
         return robotsTxt4Host;
     }
-    
+
     public void delete(final MultiProtocolURL theURL) {
         final String urlHostPort = getHostPort(theURL);
         if (urlHostPort == null) return;
@@ -219,10 +220,10 @@ public class RobotsTxt {
         if (robotsTable == null) return;
         try {
             robotsTable.delete(robotsTable.encodedKey(urlHostPort));
-        } catch (IOException e) {
+        } catch (final IOException e) {
         }
     }
-    
+
     public void ensureExist(final MultiProtocolURL theURL, final ClientIdentification.Agent agent, boolean concurrent) {
         if (theURL.isLocal()) return;
         final String urlHostPort = getHostPort(theURL);
@@ -235,7 +236,7 @@ public class RobotsTxt {
             return;
         }
         if (robotsTable != null && robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
-        Thread t = new Thread("Robots.txt:ensureExist(" + theURL.toNormalform(true) + ")") {
+        final Thread t = new Thread("Robots.txt:ensureExist(" + theURL.toNormalform(true) + ")") {
             @Override
             public void run(){
                 // make or get a synchronization object
@@ -249,12 +250,12 @@ public class RobotsTxt {
                     if (robotsTable.containsKey(robotsTable.encodedKey(urlHostPort))) return;
 
                     // generating the proper url to download the robots txt
-                    DigestURL robotsURL = robotsURL(urlHostPort);
-                    
+                    final DigestURL robotsURL = robotsURL(urlHostPort);
+
                     Response response = null;
                     if (robotsURL != null) {
                         if (log.isFine()) log.fine("Trying to download the robots.txt file from URL '" + robotsURL + "'.");
-                        Request request = new Request(robotsURL, null);
+                        final Request request = new Request(robotsURL, null);
                         try {
                             response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE, null, agent);
                         } catch (final IOException e) {
@@ -263,26 +264,26 @@ public class RobotsTxt {
                     }
 
                     if (response == null) {
-                        processOldEntry(null, robotsURL, robotsTable);
+                        RobotsTxt.this.processOldEntry(null, robotsURL, robotsTable);
                     } else {
-                        processNewEntry(robotsURL, response, agent.robotIDs);
+                        RobotsTxt.this.processNewEntry(robotsURL, response, agent.robotIDs);
                     }
                 }
             }
         };
         if (concurrent) {
-        	this.threadPool.execute(t);
+            this.threadPool.execute(t);
         } else {
-        	t.run();
+            t.run();
         }
     }
-    
+
     /**
      * @return the approximate number of threads that are actively
      * executing robots.txt loading tasks
      */
     public int getActiveThreads() {
-    	return this.threadPool != null ? this.threadPool.getActiveCount() : 0;
+        return this.threadPool != null ? this.threadPool.getActiveCount() : 0;
     }
 
     private void processOldEntry(RobotsTxtEntry robotsTxt4Host, DigestURL robotsURL, BEncodedHeap robotsTable) {
@@ -305,14 +306,14 @@ public class RobotsTxt {
 
         // store the data into the robots DB
         final int sz = robotsTable.size();
-        addEntry(robotsTxt4Host);
+        this.addEntry(robotsTxt4Host);
         if (robotsTable.size() <= sz) {
             log.severe("new entry in robots.txt table failed, resetting database");
-            try {clear();} catch (final IOException e) {}
-            addEntry(robotsTxt4Host);
+            try {this.clear();} catch (final IOException e) {}
+            this.addEntry(robotsTxt4Host);
         }
     }
-    
+
     /**
      * Process a response to a robots.txt request, create a new robots entry, add it to the robots table then return it.
      * @param robotsURL the initial robots.txt URL (before any eventual redirection). Must not be null.
@@ -328,7 +329,7 @@ public class RobotsTxt {
         if (response.getResponseHeader().getStatusCode() == 401 || response.getResponseHeader().getStatusCode() == 403) {
             parserResult = new RobotsTxtParser(thisAgents);
             // create virtual deny path
-            denyPath = new ArrayList<String>();
+            denyPath = new ArrayList<>();
             denyPath.add("/");
         } else {
             parserResult = new RobotsTxtParser(thisAgents, robotsTxt);
@@ -336,12 +337,12 @@ public class RobotsTxt {
         }
 
         // store the data into the robots DB
-        String etag = response.getResponseHeader().containsKey(HeaderFramework.ETAG) ? (response.getResponseHeader().get(HeaderFramework.ETAG)).trim() : null;
-        boolean isBrowserAgent = thisAgents.length == 1 && thisAgents[0].equals("Mozilla");
+        final String etag = response.getResponseHeader().containsKey(HeaderFramework.ETAG) ? (response.getResponseHeader().get(HeaderFramework.ETAG)).trim() : null;
+        final boolean isBrowserAgent = thisAgents.length == 1 && thisAgents[0].equals("Mozilla");
         if (isBrowserAgent) {
-        	denyPath.clear();
+            denyPath.clear();
         }
-        /* The robotsURL may eventually be redirected (from http to https is common), 
+        /* The robotsURL may eventually be redirected (from http to https is common),
          * but we store here the url before any redirection. If would not process this way, the unredirected URL would later
          * never found in the robots table thus needing each time a http load.*/
         final RobotsTxtEntry robotsTxt4Host = new RobotsTxtEntry(
@@ -354,10 +355,10 @@ public class RobotsTxt {
                     parserResult.sitemap(),
                     parserResult.crawlDelayMillis(),
                     parserResult.agentName());
-        addEntry(robotsTxt4Host);
+        this.addEntry(robotsTxt4Host);
         return robotsTxt4Host;
     }
-    
+
     private String addEntry(final RobotsTxtEntry entry) {
         // writes a new page and returns key
         try {
@@ -381,18 +382,18 @@ public class RobotsTxt {
                 port = 80;
             }
         }
-        String host = theURL.getHost();
+        final String host = theURL.getHost();
         if (host == null) return null;
-        StringBuilder sb = new StringBuilder(host.length() + 6);
+        final StringBuilder sb = new StringBuilder(host.length() + 6);
         if (host.indexOf(':') >= 0) {sb.append('[').append(host).append(']');} else sb.append(host);
         sb.append(':').append(Integer.toString(port));
         return sb.toString();
     }
-    
+
     public static boolean isRobotsURL(MultiProtocolURL url) {
         return url.getPath().equals(ROBOTS_TXT_PATH);
     }
-    
+
     /**
      * generate a robots.txt url.
      * @param urlHostPort a string of the form <host>':'<port> or just <host>
@@ -409,7 +410,7 @@ public class RobotsTxt {
         }
         return robotsURL;
     }
-    
+
     public static class CheckEntry {
         public final DigestURL digestURL;
         public final RobotsTxtEntry robotsTxtEntry;
@@ -422,59 +423,59 @@ public class RobotsTxt {
             this.error = error;
         }
     }
-    
+
     /**
      * A unit task to load a robots.txt entry
      */
     private class CrawlCheckTask implements Callable<CheckEntry> {
-    	
-    	private final DigestURL url;
-    	private final ClientIdentification.Agent userAgent;
-    	
-    	public CrawlCheckTask(final DigestURL url, final ClientIdentification.Agent userAgent) {
-    		this.url = url;
-    		this.userAgent = userAgent;
-    	}
 
-		@Override
-		public CheckEntry call() throws Exception {
+        private final DigestURL url;
+        private final ClientIdentification.Agent userAgent;
+
+        public CrawlCheckTask(final DigestURL url, final ClientIdentification.Agent userAgent) {
+            this.url = url;
+            this.userAgent = userAgent;
+        }
+
+        @Override
+        public CheckEntry call() throws Exception {
             // try to load the robots
-            RobotsTxtEntry robotsEntry = getEntry(this.url, this.userAgent);
-            boolean robotsAllowed = robotsEntry == null ? true : !robotsEntry.isDisallowed(this.url);
-			if (robotsAllowed) {
-				try {
-					Request request = loader.request(this.url, true, false);
-					Response response = loader.load(request, CacheStrategy.NOCACHE,
-							BlacklistType.CRAWLER, userAgent);
-					return new CheckEntry(this.url, robotsEntry, response, null);
-				} catch (final IOException e) {
-					return new CheckEntry(this.url, robotsEntry, null, "error response: " + e.getMessage());
-				}
-			}
-			return new CheckEntry(this.url, robotsEntry, null, null);
-		}
+            final RobotsTxtEntry robotsEntry = RobotsTxt.this.getEntry(this.url, this.userAgent);
+            final boolean robotsAllowed = robotsEntry == null ? true : !robotsEntry.isDisallowed(this.url);
+            if (robotsAllowed) {
+                try {
+                    final Request request = RobotsTxt.this.loader.request(this.url, true, false);
+                    final Response response = RobotsTxt.this.loader.load(request, CacheStrategy.NOCACHE,
+                            BlacklistType.CRAWLER, this.userAgent);
+                    return new CheckEntry(this.url, robotsEntry, response, null);
+                } catch (final IOException e) {
+                    return new CheckEntry(this.url, robotsEntry, null, "error response: " + e.getMessage());
+                }
+            }
+            return new CheckEntry(this.url, robotsEntry, null, null);
+        }
 
-    	
+
     }
-    
+
     public Collection<CheckEntry> massCrawlCheck(final Collection<DigestURL> rootURLs, final ClientIdentification.Agent userAgent) {
         final List<Future<CheckEntry>> futures = new ArrayList<>();
-        	for (DigestURL u: rootURLs) {
-        		futures.add(this.threadPool.submit(new CrawlCheckTask(u, userAgent)));
-        	}
+            for (final DigestURL u: rootURLs) {
+                futures.add(this.threadPool.submit(new CrawlCheckTask(u, userAgent)));
+            }
         final Collection<CheckEntry> results = new ArrayList<>();
         /* Now collect the results concurrently loaded */
-        for(Future<CheckEntry> future: futures) {
-        	try {
-				results.add(future.get());
-			} catch (InterruptedException e) {
-				log.warn("massCrawlCheck was interrupted before retrieving all results.");
-				break;
-			} catch (ExecutionException e) {
-				/* A robots.txt loading failed : let's continue and try to get the next result
-				 * (most of time this should not happen, as Exceptions are caught inside the concurrent task) */
-				continue;
-			}
+        for(final Future<CheckEntry> future: futures) {
+            try {
+                results.add(future.get());
+            } catch (final InterruptedException e) {
+                log.warn("massCrawlCheck was interrupted before retrieving all results.");
+                break;
+            } catch (final ExecutionException e) {
+                /* A robots.txt loading failed : let's continue and try to get the next result
+                 * (most of time this should not happen, as Exceptions are caught inside the concurrent task) */
+                continue;
+            }
         }
         return results;
     }

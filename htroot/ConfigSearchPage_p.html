@@ -139,16 +139,36 @@
                       #{search.navigation.plugin}#
                       <tr>
                         <td><button class="btn btn-xs" title="Delete navigator" aria-label="Delete navigator" aria-describedby="title-#[name]#" name="del.nav" value="#[name]#"><span class="glyphicon glyphicon-remove" style="color: red"></span></button></td>
-                        <td><ul class="nav nav-sidebar menugroup"  style="padding-left:15px; padding-right:10px;">
-                          <li><h3 id="title-#[name]#">#[displayname]#</h3></li>
-                          </ul><input type="hidden" name="search.navigation.active" value="#[name]#" />
+                        <td>
+                        	<ul class="nav nav-sidebar menugroup"  style="padding-left:15px; padding-right:10px;">
+                          		<li>
+                          			<h3 id="title-#[name]#">#[displayname]#
+                          					#(navSort)#<span class="glyphicon glyphicon-sort-by-attributes-alt" title="Sorted by descending counts"></span>
+											::<span class="glyphicon glyphicon-sort-by-attributes" title="Sorted by ascending counts"></span>
+											::<span class="glyphicon glyphicon glyphicon-sort-by-alphabet-alt" title="Sorted by descending labels"></span>
+											::<span class="glyphicon glyphicon-sort-by-alphabet" title="Sorted by ascending labels"></span>
+											#(/navSort)#
+									</h3>
+						  		</li>
+						  		<li>
+						  			<label>Sort by 
+						  				<select name="search.navigation.#[name]#.navSort">
+						  					<option value="count:desc" #(navSort)#selected="selected"::#(/navSort)#>Descending counts</option>
+						  					<option value="count:asc" #(navSort)#::selected="selected"#(/navSort)#>Ascending counts</option>
+						  					<option value="label:desc" #(navSort)#::::selected="selected"#(/navSort)#>Descending labels</option>
+						  					<option value="label:asc" #(navSort)#::::::selected="selected"#(/navSort)#>Ascending labels</option>
+						  				</select>
+						  			</label>
+						  		</li>
+                        	</ul>
+                        	<input type="hidden" name="search.navigation.active" value="#[name]#" />
                         </td>
                       </tr>
                       #{/search.navigation.plugin}#
                       <tr>
                         <td></td>
                         <td><ul class="nav nav-sidebar menugroup" id="vocabulary" style="padding-left:15px; padding-right:10px;">
-                          <li><h3>Vocabulary</h3></li>
+                          <li><h3>Vocabulary <span class="glyphicon glyphicon-sort-by-attributes-alt" title="Sorted by descending counts"></span></h3></li>
                           </ul></td>
                       </tr>
                       <tr>    
@@ -197,7 +217,7 @@
 <script type="text/javascript" src="js/accessibleHistogram.js" charset="UTF-8"></script>
 <div id="graph" style="height:200px"></div>
 <script>
-var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index&facet.limit=#[search.navigation.dates.maxcount]#", function(data) {
+var solr= $.getJSON("solr/collection1/select?q=*:*&start=0&rows=0&wt=json&facet=true&facet.field=dates_in_content_dts&facet.sort=index&facet.limit=#[search.navigation.dates.maxcount]#", function(data) {
 	dates_in_content_dts = data.facet_counts.facet_fields.dates_in_content_dts;
 	var parsed = [];
     for (var i = 0; i < dates_in_content_dts.length; i = i + 2) {
@@ -268,13 +288,13 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                           <td style="width:15px;"></td>
                           <td><span title="Last known modification date">#[content_showDate_date]#</span></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span>42 kbyte</td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="metadataLink" href="solr/select?q=*:*&defType=edismax&start=0&rows=1&core=collection1&wt=html&omitHeader=true" target="LayouTest">Metadata</a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="metadataLink" href="solr/select?q=*:*&start=0&rows=1&core=collection1&wt=html&omitHeader=true" target="LayouTest">Metadata</a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="parserLink" href="ViewFile.html" target="LayouTest">Parser</a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="citationLink" href="api/citation.html?url=yacy.net" target="LayouTest">Citation</a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="picturesLink" href="yacysearch.html" target="LayouTest">Pictures</a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="cacheLink" href="CacheResource_p.html" target="LayouTest">Cache</a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="proxyLink" href="proxy.html" target="LayouTest">View via Proxy</a></td>
-                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="browseIndexLink" href="HostBrowser.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
+                          <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="browseIndexLink" href="IndexBrowser_p.html" target="LayouTest"><img src="env/grafics/minitree.png" width="15" height="8" title="Browse index" alt="Browse index"/></a></td>
                           <td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><a id="snapshotsLink" href="yacysearch.html" target="LayouTest">JPG Snapshot</a></td>
                           #(search.result.show.ranking)#::<td><span role="separator" aria-orientation="vertical">&nbsp;|&nbsp;</span><span title="Raw ranking score value">Ranking: 1.12195955E9</span>#(/search.result.show.ranking)#
                         </tr>
@@ -294,7 +314,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&defType=edismax&start=0&rows=
                               menu: System Administration > Advanced Settings
                             </span></span>
                           </td>
-                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.hostbrowser" aria-labelledby="browseIndexLink" value="true" #(search.result.show.hostbrowser)#::checked="checked" #(/search.result.show.hostbrowser)# /></td>
+                          <td style="text-align:center;"><input type="checkbox" name="search.result.show.indexbrowser" aria-labelledby="browseIndexLink" value="true" #(search.result.show.indexbrowser)#::checked="checked" #(/search.result.show.indexbrowser)# /></td>
                           <td style="text-align:center;"><input type="checkbox" name="search.result.show.snapshots" aria-labelledby="snapshotsLink" value="true" #(search.result.show.snapshots)#::checked="checked" #(/search.result.show.snapshots)# /></td>
                           #(search.result.show.ranking)#::<td style="text-align:center;">
                             <span class="info" style="padding-left: 10px"><img src="env/grafics/i16.gif" alt="info"/><span>

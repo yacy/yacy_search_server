@@ -22,6 +22,11 @@ package net.yacy.cora.util;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import net.yacy.http.YaCyHttpServer;
+import net.yacy.search.Switchboard;
 
 public class Memory {
 
@@ -74,15 +79,85 @@ public class Memory {
     public static final long cores() {
         return runtime.availableProcessors();
     }
-    
+
     /**
-     * get the system load within the last minute
-     * @return the system load or a negative number if the load is not available
+     * Returns the system load average for the last minute.
+     * The system load average is the sum of the number of runnable entities
+     * queued to the {@linkplain #getAvailableProcessors available processors}
+     * and the number of runnable entities running on the available processors
+     * averaged over a period of time.
+     * The way in which the load average is calculated is operating system
+     * specific but is typically a damped time-dependent average.
+     * <p>
+     * If the load average is not available, a negative value is returned.
+     * <p>
+     * This method is designed to provide a hint about the system load
+     * and may be queried frequently.
+     * The load average may be unavailable on some platform where it is
+     * expensive to implement this method.
+     *
+     * @return the system load average; or a negative value if not available.
      */
-    public static double load() {
+    public static double getSystemLoadAverage() {
         return ManagementFactory.getOperatingSystemMXBean().getSystemLoadAverage();
     }
-    
+
+    /**
+     * Returns the "recent cpu usage" for the operating environment. This value
+     * is a double in the [0.0,1.0] interval. A value of 0.0 means that all CPUs
+     * were idle during the recent period of time observed, while a value
+     * of 1.0 means that all CPUs were actively running 100% of the time
+     * during the recent period being observed. All values betweens 0.0 and
+     * 1.0 are possible depending of the activities going on.
+     * If the recent cpu usage is not available, the method returns a
+     * negative value.
+     *
+     * @return the "recent cpu usage" for the whole operating environment;
+     * a negative value if not available.
+     */
+    public static double getSystemCpuLoad() {
+        com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        return operatingSystemMXBean.getSystemCpuLoad();
+    }
+
+    /**
+     * Returns the "recent cpu usage" for the Java Virtual Machine process.
+     * This value is a double in the [0.0,1.0] interval. A value of 0.0 means
+     * that none of the CPUs were running threads from the JVM process during
+     * the recent period of time observed, while a value of 1.0 means that all
+     * CPUs were actively running threads from the JVM 100% of the time
+     * during the recent period being observed. Threads from the JVM include
+     * the application threads as well as the JVM internal threads. All values
+     * betweens 0.0 and 1.0 are possible depending of the activities going on
+     * in the JVM process and the whole system. If the Java Virtual Machine
+     * recent CPU usage is not available, the method returns a negative value.
+     *
+     * @return the "recent cpu usage" for the Java Virtual Machine process;
+     * a negative value if not available.
+     */
+    public static double getProcessCpuLoad() {
+        com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        return operatingSystemMXBean.getProcessCpuLoad();
+    }
+
+    public static Map<String, Object> status() {
+        Runtime runtime = Runtime.getRuntime();
+        Map<String, Object> status = new LinkedHashMap<>();
+        status.put("service", "Peer");
+        status.put("assigned_memory", runtime.maxMemory());
+        status.put("used_memory", runtime.totalMemory() - runtime.freeMemory());
+        status.put("available_memory", runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory());
+        status.put("cores", runtime.availableProcessors());
+        status.put("threads", Thread.activeCount());
+        status.put("deadlocks", deadlocks());
+        status.put("load_system_load_average", Memory.getSystemLoadAverage());
+        status.put("load_system_cpu_load", Memory.getSystemCpuLoad());
+        status.put("load_process_cpu_load", Memory.getProcessCpuLoad());
+        YaCyHttpServer server = Switchboard.getSwitchboard().getHttpServer();
+        status.put("server_threads", server == null ? 0 : server.getServerThreads());
+        return status;
+    }
+
     /**
      * find out the number of thread deadlocks. WARNING: this is a time-consuming task
      * @return the number of deadlocked threads
@@ -92,7 +167,7 @@ public class Memory {
         if (deadlockIDs == null) return 0;
         return deadlockIDs.length;
     }
-    
+
     /**
      * write deadlocked threads as to the log as warning
      */

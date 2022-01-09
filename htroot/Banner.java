@@ -48,7 +48,7 @@ public class Banner {
         final serverObjects post,
         final serverSwitch env) throws IOException {
         final Switchboard sb = (Switchboard) env;
-        final String pathToImage = "htroot/env/grafics/yacy.png";
+        final String pathToImage = sb.appPath + "/htroot/env/grafics/yacy.png";
         int width = 468;
         int height = 60;
         String bgcolor = "e7effc";
@@ -73,7 +73,7 @@ public class Banner {
                 env.getConfig(
                         SwitchboardConstants.NETWORK_NAME,
                         "unspecified").toUpperCase();
-        
+
         // the '+ 1': the own peer is not included in sizeConnected()
         final int peers = sb.peers.sizeConnected() + 1;
         long nlinks = sb.peers.countActiveURL();
@@ -89,7 +89,7 @@ public class Banner {
             words = seed.getWordCount();
             myppm = Switchboard.currentPPM();
             myqph = 60d * sb.averageQPM();
-            
+
             if (sb.peers.mySeed().isVirgin()) {
                 type = "VIRGIN";
                 nqph = Math.round(6000d * nqpm) / 100d;

@@ -1,6 +1,7 @@
 // FileCrawlStarterTask.java
 // ---------------------------
-// Copyright 2016 by luccioman; https://github.com/luccioman
+// SPDX-FileCopyrightText: 2016 luccioman; https://github.com/luccioman
+// SPDX-License-Identifier: GPL-2.0-or-later
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //

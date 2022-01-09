@@ -42,19 +42,17 @@ import org.apache.solr.schema.TextField;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
-import org.json.simple.JSONArray;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import net.yacy.cora.federate.solr.SolrType;
-import net.yacy.cora.util.JSONObject;
 
 public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter {
 
     private static final char lb = '\n';
     
-    private boolean elasticsearchBulkRequest;
-    
-    public FlatJSONResponseWriter(boolean elasticsearchBulkRequest) {
-        this.elasticsearchBulkRequest = elasticsearchBulkRequest;
+    public FlatJSONResponseWriter() {
     }
     
     @Override
@@ -83,12 +81,12 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
         for (int i = 0; i < sz; i++) {
             int id = iterator.nextDoc();
             Document doc = searcher.doc(id);
-            writeDoc(writer, schema, null, doc.getFields(), (includeScore ? iterator.score() : 0.0f), includeScore);
+            writeDoc(writer, schema, doc.getFields());
         }
     }
 
-    private static final void writeDoc(final Writer writer, final IndexSchema schema, final String name, final List<IndexableField> fields, final float score, final boolean includeScore) throws IOException {
-        JSONObject json = new JSONObject(true);
+    private static final void writeDoc(final Writer writer, final IndexSchema schema, final List<IndexableField> fields) throws IOException {
+        JSONObject json = new JSONObject();
         
         int sz = fields.size();
         int fidx1 = 0, fidx2 = 0;
@@ -104,6 +102,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
                 sf = new SchemaField(fieldName, new TextField());
             }
             FieldType type = sf.getType();
+            try {
             if (fidx1 + 1 == fidx2) {
                 if (sf.multiValued()) {
                     JSONArray a = new JSONArray();
@@ -111,7 +110,7 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
                     JSONObject j = new JSONObject();
                     String sv = value.stringValue();
                     setValue(j, type.getTypeName(), "x", sv); //sf.write(this, null, f1);
-                    a.add(j.get("x"));
+                    a.put(j.opt("x"));
                 } else {
                     setValue(json, type.getTypeName(), value.name(), value.stringValue());
                 }
@@ -122,16 +121,19 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
                     String sv = fields.get(i).stringValue();
                     JSONObject j = new JSONObject();
                     setValue(j, type.getTypeName(), "x", sv); //sf.write(this, null, f1);
-                    a.add(j.get("x"));
+                    a.put(j.opt("x"));
                 }
             }
             fidx1 = fidx2;
+            } catch (JSONException e) {
+                throw new IOException(e.getMessage());
+            }
         }
         writer.write(json.toString());
         writer.write(lb);
     }
 
-    private static void setValue(final JSONObject json, final String typeName, final String name, final String value) {
+    private static void setValue(final JSONObject json, final String typeName, final String name, final String value) throws JSONException {
         if (typeName.equals(SolrType.text_general.printName()) ||
             typeName.equals(SolrType.string.printName()) ||
             typeName.equals(SolrType.text_en_splitting_tight.printName())) {
@@ -152,20 +154,24 @@ public class FlatJSONResponseWriter implements QueryResponseWriter, EmbeddedSolr
     }
     
     public static final void writeDoc(final Writer writer, final SolrDocument doc) throws IOException {
-        JSONObject json = new JSONObject(true);
+        JSONObject json = new JSONObject();
         final Map<String, Object> fields = doc.getFieldValueMap();
         for (String key: fields.keySet()) {
             if (key == null)  continue;
             Object value = doc.get(key);
-            if (value == null) {
-            } else if (value instanceof Collection<?>) {
-                JSONArray a = new JSONArray();
-                json.put(key, a);
-                for (Object o: ((Collection<?>) value)) {
-                    a.add(o);
+            try {
+                if (value == null) {
+                } else if (value instanceof Collection<?>) {
+                    JSONArray a = new JSONArray();
+                    json.put(key, a);
+                    for (Object o: ((Collection<?>) value)) {
+                        a.put(o);
+                    }
+                } else {
+                    json.put(key, value);
                 }
-            } else {
-                json.put(key, value);
+            } catch (JSONException e) {
+                throw new IOException(e.getMessage());
             }
         }
         writer.write(json.toString());

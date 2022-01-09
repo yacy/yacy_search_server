@@ -25,9 +25,14 @@
 package net.yacy.cora.date;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 public abstract class AbstractFormatter implements DateFormatter {
 
@@ -37,7 +42,7 @@ public abstract class AbstractFormatter implements DateFormatter {
     static {
         UTCCalendar.setTimeZone(UTCtimeZone);
     }
-    
+
     // statics
     public final static long secondMillis = 1000;
     public final static long minuteMillis = 60 * secondMillis;
@@ -49,11 +54,58 @@ public abstract class AbstractFormatter implements DateFormatter {
 
     protected long last_time;
     protected String last_format;
-    
+
     @Override
     public abstract Calendar parse(String s, int timezoneOffset) throws ParseException;
     @Override
     public abstract String format(final Date date);
     @Override
     public abstract String format();
+
+    private static final HashMap<Pattern, SimpleDateFormat> DATE_FORMAT_REGEXPS = new HashMap<Pattern, SimpleDateFormat>() {
+        private static final long serialVersionUID = 1321140786174228717L;
+    {
+        put(Pattern.compile("^\\d{8}$"), new SimpleDateFormat("yyyyMMdd", Locale.US));
+        put(Pattern.compile("^\\d{1,2}-\\d{1,2}-\\d{4}$"), new SimpleDateFormat("dd-MM-yyyy", Locale.US));
+        put(Pattern.compile("^\\d{4}-\\d{1,2}-\\d{1,2}$"), new SimpleDateFormat("yyyy-MM-dd", Locale.US));
+        put(Pattern.compile("^\\d{1,2}/\\d{1,2}/\\d{4}$"), new SimpleDateFormat("MM/dd/yyyy", Locale.US));
+        put(Pattern.compile("^\\d{4}/\\d{1,2}/\\d{1,2}$"), new SimpleDateFormat("yyyy/MM/dd", Locale.US));
+        put(Pattern.compile("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}$"), new SimpleDateFormat("dd MMM yyyy", Locale.US));
+        put(Pattern.compile("^\\d{1,2}\\s[a-z]{4,}\\s\\d{4}$"), new SimpleDateFormat("dd MMMM yyyy", Locale.US));
+        put(Pattern.compile("^\\d{12}$"), new SimpleDateFormat("yyyyMMddHHmm", Locale.US));
+        put(Pattern.compile("^\\d{8}\\s\\d{4}$"), new SimpleDateFormat("yyyyMMdd HHmm", Locale.US));
+        put(Pattern.compile("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}$"), new SimpleDateFormat("dd-MM-yyyy HH:mm", Locale.US));
+        put(Pattern.compile("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}$"), new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US));
+        put(Pattern.compile("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}$"), new SimpleDateFormat("MM/dd/yyyy HH:mm", Locale.US));
+        put(Pattern.compile("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}$"), new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.US));
+        put(Pattern.compile("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}$"), new SimpleDateFormat("dd MMM yyyy HH:mm", Locale.US));
+        put(Pattern.compile("^\\d{1,2}\\s[a-z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}$"), new SimpleDateFormat("dd MMMM yyyy HH:mm", Locale.US));
+        put(Pattern.compile("^\\d{14}$"), new SimpleDateFormat("yyyyMMddHHmmss", Locale.US));
+        put(Pattern.compile("^\\d{8}\\s\\d{6}$"), new SimpleDateFormat("yyyyMMdd HHmmss", Locale.US));
+        put(Pattern.compile("^\\d{1,2}-\\d{1,2}-\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$"), new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.US));
+        put(Pattern.compile("^\\d{4}-\\d{1,2}-\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$"), new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US));
+        put(Pattern.compile("^\\d{1,2}/\\d{1,2}/\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$"), new SimpleDateFormat("MM/dd/yyyy HH:mm:ss", Locale.US));
+        put(Pattern.compile("^\\d{4}/\\d{1,2}/\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}$"), new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US));
+        put(Pattern.compile("^\\d{1,2}\\s[a-z]{3}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$"), new SimpleDateFormat("dd MMM yyyy HH:mm:ss", Locale.US));
+        put(Pattern.compile("^\\d{1,2}\\s[a-z]{4,}\\s\\d{4}\\s\\d{1,2}:\\d{2}:\\d{2}$"), new SimpleDateFormat("dd MMMM yyyy HH:mm:ss", Locale.US));
+        put(Pattern.compile("^[a-z]{3}\\s[a-z]{3}\\s\\d{1,2}\\s\\d{1,2}:\\d{2}:\\d{2}\\s[a-z]{4,}\\s\\d{4}$"), new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US));
+    }};
+
+    @Override
+    public Date parse(String s) {
+        return parseAny(s);
+    }
+
+    public static Date parseAny(String s) {
+        for (Map.Entry<Pattern, SimpleDateFormat> ps: DATE_FORMAT_REGEXPS.entrySet()) {
+            if (ps.getKey().matcher(s.toLowerCase()).matches()) {
+                try {
+                    return ps.getValue().parse(s);
+                } catch (ParseException e) {
+                }
+            }
+        }
+        return null; // Unknown format.
+    }
+
 }

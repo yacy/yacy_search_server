@@ -147,12 +147,10 @@ public class opensearchdescriptionReader extends DefaultHandler {
     public opensearchdescriptionReader(final String path, final ClientIdentification.Agent agent) {
         this();
         this.agent = agent;
-        try {
-            HTTPClient www = new HTTPClient(agent);
+        try (HTTPClient www = new HTTPClient(agent)) {
             www.GET(path, false);
             final SAXParser saxParser = getParser();
             saxParser.parse(www.getContentstream(), this);
-            www.finish();
         } catch (final Exception e) {
             ConcurrentLog.logException(e);
         }
@@ -165,20 +163,16 @@ public class opensearchdescriptionReader extends DefaultHandler {
         this.parsingTextValue = false;
         this.rssurl = null;
         this.atomurl = null;
-        try {
-            HTTPClient www = new HTTPClient(this.agent);
+        try (HTTPClient www = new HTTPClient(this.agent)) {
             www.GET(path, false);
             final SAXParser saxParser = getParser();
             try {
                 saxParser.parse(www.getContentstream(), this);
             } catch (final SAXException se) {
-                www.finish();
                 return false;
             } catch (final IOException ioe) {
-                www.finish();
                 return false;
             }
-            www.finish();
             return true;
         } catch (final Exception e) {
             ConcurrentLog.warn("opensearchdescriptionReader", "parse exception: " + e);

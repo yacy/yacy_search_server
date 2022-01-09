@@ -17,23 +17,19 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import net.yacy.cora.document.id.MultiProtocolURL;
-import net.yacy.cora.protocol.ClientIdentification;
 
+import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.document.importer.WarcImporter;
-import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class IndexImportWarc_p {
 
-    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-        final Switchboard sb = (Switchboard) env;
 
         if (WarcImporter.job != null && WarcImporter.job.isAlive()) {
             // one import is running, no option to insert anything
@@ -61,7 +57,7 @@ public class IndexImportWarc_p {
                                 WarcImporter wi = new WarcImporter(sourcefile);
                                 wi.start();
                                 prop.put("import_thread", "started");
-                            } catch (FileNotFoundException ex) {
+                            } catch (IOException ex) {
                                 prop.put("import_thread", "Error: file not found [" + filename + "]");
                             }
                             prop.put("import", 1);
@@ -75,7 +71,7 @@ public class IndexImportWarc_p {
                         if (urlstr != null && urlstr.length() > 0) {
                             try {
                                 MultiProtocolURL url = new MultiProtocolURL(urlstr);
-                                WarcImporter wi = new WarcImporter(url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent), urlstr);
+                                WarcImporter wi = new WarcImporter(url);
                                 wi.start();
                                 prop.put("import_thread", "started");
                             } catch (MalformedURLException ex) {

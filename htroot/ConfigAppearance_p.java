@@ -138,19 +138,22 @@ public class ConfigAppearance_p {
             }
         }
 
+        String currentSkin = env.getConfig("currentSkin", "default");
+        prop.putHTML("currentskin", currentSkin);
         // reread skins
         skinFiles = FileUtils.getDirListing(skinPath, SKIN_FILENAME_FILTER);
         Collections.sort(skinFiles);
         int count = 0;
         for (final String skinFile : skinFiles) {
             if (skinFile.endsWith(".css")) {
+                String skinName = skinFile.substring(0, skinFile.length() - 4);
                 prop.put("skinlist_" + count + "_file", skinFile);
-                prop.put("skinlist_" + count + "_name", skinFile.substring(0, skinFile.length() - 4));
+                prop.put("skinlist_" + count + "_name", skinName);
+                prop.put("skinlist_" + count + "_selected", skinName.equals(currentSkin) ? 1 : 0);
                 count++;
             }
         }
         prop.put("skinlist", count);
-        prop.putHTML("currentskin", env.getConfig("currentSkin", "default"));
 
         // write colors from generic skin
         Iterator<String> i = env.configKeys();

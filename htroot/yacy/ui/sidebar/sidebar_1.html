@@ -43,19 +43,10 @@
 		
 		/* Load Search Result into new Tab */
 		$('#searchbox').submit(function() {			
-			if ($("select[name='resource']").getValue() == "ymarks") {								
-				qtag = $("input[name='search']").getValue();				
-				if (tabid == "#Bookmarks") {
-					reloadBM();
-				} else {
-					$tabs.tabs('select',2);
-				}						
-			} else {			
-				var tabnr = $tabs.tabs('length');			
-				var tabname = $("input[name='search']").getValue();			
-				$tabs.tabs('add', "yacyui-search.html", '*' + HTMLenc(tabname));
-				$tabs.tabs('select',tabnr);
-			}
+			var tabnr = $tabs.tabs('length');			
+			var tabname = $("input[name='search']").getValue();			
+			$tabs.tabs('add', "yacyui-search.html", '*' + HTMLenc(tabname));
+			$tabs.tabs('select',tabnr);
 			return false;
 		});		
 	});	
@@ -77,7 +68,6 @@
 			<select name="resource" class="selector">		
 				<option value="/yacysearch.json?resource=global&verify=true" selected="selected">freeworld</option>
 				<option value="/yacysearch.json?resource=local&verify=true" >local peer</option>
-				<option value="ymarks" >bookmarks</option>
 				<option value="/api/ynetSearch.json?login=&url=http://sciencenet.fzk.de:8080/yacysearch.json?resource=global&verify=true" >sciencenet-ynetSearch</option>
 				<option value="http://sciencenet.fzk.de:8080/yacysearch.json?callback=?&resource=global&verify=true" >sciencenet-JsonP</option>
 				<option value="http://yacy.kicks-ass.net:8080/yacysearch.json?callback=?&resource=global&verify=true" >apfelmaennchen-JsonP</option>							

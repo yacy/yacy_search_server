@@ -1,6 +1,8 @@
 /**
  *  RSSLoader
- *  Copyright 2010 by Michael Peter Christen, mc@yacy.net, Frankfurt a. M., Germany
+ *  SPDX-FileCopyrightText: 2010 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-License-Identifier: GPL-2.0-or-later
+ *  Frankfurt a. M., Germany
  *  First released 27.8.2010 at http://yacy.net
  *
  * $LastChangedDate$
@@ -140,18 +142,13 @@ public class RSSLoader extends Thread {
         
         final List<DigestURL> list = new ArrayList<DigestURL>();
         for (final Map.Entry<String, DigestURL> e: urlmap.entrySet()) {
-            HarvestProcess harvestProcess;
-            try {
-                harvestProcess = sb.urlExists(e.getKey());
-                if (harvestProcess != null) {
-                	continue;
-                }
-                list.add(e.getValue());
-                indexTriggered.insertIfAbsent(ASCII.getBytes(e.getKey()), new Date());
-                loadCount++;
-            } catch (IOException e1) {
-                ConcurrentLog.logException(e1);
+            HarvestProcess harvestProcess = sb.getHarvestProcess(e.getKey());
+            if (harvestProcess != null) {
+            	continue;
             }
+            list.add(e.getValue());
+            indexTriggered.insertIfAbsent(ASCII.getBytes(e.getKey()), new Date());
+            loadCount++;
         }
         sb.addToIndex(list, null, null, collections, true);
         // update info for loading

@@ -51,7 +51,7 @@ url_file_ext_s
 ## either the second level domain or, if a ccSLD is used, the third level domain. Needed to search in the url
 host_organization_s
 
-## internal links, only the protocol. Needed for HostBrowser
+## internal links, only the protocol. Needed for IndexBrowser
 inboundlinks_protocol_sxt
 
 ## internal links, the url only without the protocol. For correct assembly of inboundlinks  inboundlinks_protocol_sxt + inboundlinks_urlstub_sxt is needed

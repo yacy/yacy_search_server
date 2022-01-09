@@ -32,7 +32,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +45,8 @@ import java.util.regex.Pattern;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.OS;
+import net.yacy.peers.operation.yacyBuildProperties;
+import net.yacy.search.Switchboard;
 import net.yacy.utils.nxTools;
 
 public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> implements Map<ThreadDump.StackTrace, List<String>> {
@@ -254,6 +260,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                     }
                 }
                 final String threaddump = sb.toString();
+                @SuppressWarnings("unlikely-arg-type")
                 List<String> threads = get(threaddump);
                 if (threads == null) threads = new ArrayList<String>();
                 Thread.State state = null;
@@ -371,7 +378,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
     }
 
     public static void bufferappend(final StringBuilder buffer, final boolean plain, final String a) {
-        buffer.append(a);
+        buffer.append(plain ? a.replaceAll("&nbsp;", "") : a);
         buffer.append(plain ? "\n" : "<br />");
     }
 
@@ -447,6 +454,73 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         for (final String s: list) System.out.println("  " + s);
         System.out.println("");
     }
+
+    public static String threaddump(Switchboard sb, boolean plain, int sleep, boolean multiple, int multipleCount) {
+        final StringBuilder buffer = new StringBuilder(1000);
+
+        if (sleep > 0) try {Thread.sleep(sleep);} catch (final InterruptedException e) {}
+        // Thread dump
+        final Date dt = new Date();
+        final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
+        Runtime runtime = Runtime.getRuntime();
+
+        ThreadDump.bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
+        ThreadDump.bufferappend(buffer, plain, "&nbsp;");
+        ThreadDump.bufferappend(buffer, plain, "YaCy Version: " + versionstring);
+        ThreadDump.bufferappend(buffer, plain, "Assigned&nbsp;&nbsp;&nbsp;Memory = " + (runtime.maxMemory()));
+        ThreadDump.bufferappend(buffer, plain, "Used&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Memory = " + (runtime.totalMemory() - runtime.freeMemory()));
+        ThreadDump.bufferappend(buffer, plain, "Available&nbsp;&nbsp;Memory = " + (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory()));
+        ThreadDump.bufferappend(buffer, plain, "&nbsp;");
+        ThreadDump.bufferappend(buffer, plain, "&nbsp;");
+
+        File appPath = sb.getAppPath();
+        if (multiple) {
+            final ArrayList<Map<Thread,StackTraceElement[]>> traces = new ArrayList<Map<Thread,StackTraceElement[]>>();
+            for (int i = 0; i < multipleCount; i++) {
+                try {
+                    traces.add(ThreadDump.getAllStackTraces());
+                } catch (final OutOfMemoryError e) {
+                    break;
+                }
+            }
+            ThreadDump.appendStackTraceStats(appPath, buffer, traces, plain);
+        } else {
+            // write a thread dump to standard error output
+            File logFile = new File("yacy.log");
+            if (ThreadDump.canProduceLockedBy(logFile)) {
+                try {
+                    new ThreadDump(logFile).appendBlockTraces(buffer, plain);
+                } catch (final IOException e) {
+                    e.printStackTrace();
+                }
+            } else if (OS.canExecUnix) {
+                ThreadDump.bufferappend(buffer, plain, "this thread dump function can find threads that lock others, to enable this function start YaCy with 'startYACY.sh -l'");
+                ThreadDump.bufferappend(buffer, plain, "&nbsp;");
+            }
+
+            // generate a single thread dump
+            final Map<Thread,StackTraceElement[]> stackTraces = ThreadDump.getAllStackTraces();
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.BLOCKED).appendStackTraces(buffer, plain, Thread.State.BLOCKED);
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.RUNNABLE).appendStackTraces(buffer, plain, Thread.State.RUNNABLE);
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.TIMED_WAITING).appendStackTraces(buffer, plain, Thread.State.TIMED_WAITING);
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.WAITING).appendStackTraces(buffer, plain, Thread.State.WAITING);
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.NEW).appendStackTraces(buffer, plain, Thread.State.NEW);
+            new ThreadDump(appPath, stackTraces, plain, Thread.State.TERMINATED).appendStackTraces(buffer, plain, Thread.State.TERMINATED);
+        }
+
+        ThreadDump.bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
+
+        ThreadDump.bufferappend(buffer, plain, "");
+        ThreadMXBean threadbean = ManagementFactory.getThreadMXBean();
+        ThreadDump.bufferappend(buffer, plain, "Thread list from ThreadMXBean, " + threadbean.getThreadCount() + " threads:");
+        ThreadInfo[] threadinfo = threadbean.dumpAllThreads(true, true);
+        for (ThreadInfo ti: threadinfo) {
+            ThreadDump.bufferappend(buffer, plain, ti.getThreadName());
+        }
+
+        return buffer.toString();
+    }
+
 
     public static void main(final String[] args) {
         ThreadDump dump = null;

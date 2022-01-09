@@ -76,7 +76,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
 
     public SQLTable(final String dbType, final Row rowdef) throws Exception {
         this.rowdef = rowdef;
-        openDatabaseConnection(dbType);
+        this.openDatabaseConnection(dbType);
     }
 
     private void openDatabaseConnection(final String dbType) throws Exception{
@@ -92,7 +92,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
             dbConnStr = db_conn_str_pgsql;
         }
         try {
-            Class.forName(dbDriverStr).newInstance();
+            Class.forName(dbDriverStr).getDeclaredConstructor().newInstance();
         } catch (final Exception e) {
             throw new Exception ("Unable to load the jdbc driver: " + e.getMessage(),e);
         }
@@ -103,7 +103,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
         }
 
     }
-    
+
     @Override
     public void optimize() {
     }
@@ -163,7 +163,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public boolean isEmpty() {
-        return size() == 0;
+        return this.size() == 0;
     }
 
     @Override
@@ -174,7 +174,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
     @Override
     public boolean has(final byte[] key) {
         try {
-            return (get(key, false) != null);
+            return (this.get(key, false) != null);
         } catch (final IOException e) {
             return false;
         }
@@ -182,7 +182,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public ArrayList<RowCollection> removeDoubles() {
-        return new ArrayList<RowCollection>();
+        return new ArrayList<>();
     }
 
     @Override
@@ -212,10 +212,10 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public Map<byte[], Row.Entry> get(final Collection<byte[]> keys, final boolean forcecopy) throws IOException, InterruptedException {
-        final Map<byte[], Row.Entry> map = new TreeMap<byte[], Row.Entry>(row().objectOrder);
+        final Map<byte[], Row.Entry> map = new TreeMap<>(this.row().objectOrder);
         Row.Entry entry;
         for (final byte[] key: keys) {
-            entry = get(key, forcecopy);
+            entry = this.get(key, forcecopy);
             if (entry != null) map.put(key, entry);
         }
         return map;
@@ -224,7 +224,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
     @Override
     public Row.Entry replace(final Row.Entry row) throws IOException {
         try {
-            final Row.Entry oldEntry = remove(row.getPrimaryKeyBytes());
+            final Row.Entry oldEntry = this.remove(row.getPrimaryKeyBytes());
             final String sqlQuery = "INSERT INTO test (" +
                     "hash, " +
                     "value) " +
@@ -302,7 +302,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
 
     @Override
     public boolean delete(final byte[] key) throws IOException {
-        return remove(key) != null;
+        return this.remove(key) != null;
     }
 
     @Override
@@ -329,7 +329,7 @@ public class SQLTable implements Index, Iterable<Row.Entry> {
     @Override
     public Iterator<Entry> iterator() {
         try {
-            return rows();
+            return this.rows();
         } catch (final IOException e) {
             return null;
         }

@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,8 +34,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.apache.lucene.document.Document;
@@ -151,9 +153,11 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
         SimpleOrderedMap<Object> facetCounts = (SimpleOrderedMap<Object>) values.get("facet_counts");
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> facetFields = facetCounts == null || facetCounts.size() == 0 ? null : (SimpleOrderedMap<Object>) facetCounts.get("facet_fields");
-        @SuppressWarnings("unchecked")
-        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
-        final Map<String, LinkedHashSet<String>> snippets = highlighting(highlighting);
+        
+		final Object highlightingObj = values.get("highlighting");
+		final Map<String, Collection<String>> snippets = highlightingObj instanceof NamedList
+				? OpensearchResponseWriter.snippetsFromHighlighting((NamedList<?>) highlightingObj)
+				: new HashMap<>();
         
         if(responseObj instanceof ResultContext){
         	/* Regular response object */
@@ -266,7 +270,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
 	 * @throws IOException when an unexpected error occurred while writing
 	 */
 	private void writeDocs(final Writer writer, final SolrDocumentList documents,
-			final Map<String, LinkedHashSet<String>> snippets) throws IOException {
+			final Map<String, Collection<String>> snippets) throws IOException {
 		// parse body
         String urlhash = null;
         MultiProtocolURL url = null;
@@ -403,7 +407,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
 	 * @throws IOException when an unexpected error occurred while writing
 	 */
 	private void writeDocs(final Writer writer, final DocList documents, final SolrQueryRequest request, 
-			final Map<String, LinkedHashSet<String>> snippets) throws IOException {
+			final Map<String, Collection<String>> snippets) throws IOException {
 		// parse body
         SolrIndexSearcher searcher = request.getSearcher();
         String urlhash = null;
@@ -518,7 +522,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
 	 * Append to the writer the end of the RSS OpenSearch representation of the Solr
 	 * document.
 	 */
-	private void writeDocEnd(final Writer writer, final Map<String, LinkedHashSet<String>> snippets, final String urlhash,
+	private void writeDocEnd(final Writer writer, final Map<String, Collection<String>> snippets, final String urlhash,
 			final MultiProtocolURL url, final String keywords, final List<String> texts, final List<String> descriptions, final String docTitle,
 			final List<Object> imagesProtocolObjs, final List<String> imagesStubs) throws IOException {
 		if (Math.min(imagesProtocolObjs.size(), imagesStubs.size()) > 0) {
@@ -535,7 +539,7 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
 		
 		// compute snippet from texts
 		solitaireTag(writer, RSSMessage.Token.title.name(), docTitle.length() == 0 ? (texts.size() == 0 ? "" : texts.get(0)) : docTitle);
-		LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+		Collection<String> snippet = urlhash == null ? null : snippets.get(urlhash);
 		String tagname = RSSMessage.Token.description.name();
 		if (snippet == null || snippet.size() == 0) {
 		    writer.write("<"); writer.write(tagname); writer.write('>');
@@ -556,38 +560,37 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
 	}
 	
     
-    /**
-     * produce snippets from solr (they call that 'highlighting')
-     * @param val
-     * @return a map from urlhashes to a list of snippets for that url
-     */
-    @SuppressWarnings("unchecked")
-    public static Map<String, LinkedHashSet<String>> highlighting(final SimpleOrderedMap<Object> val) {
-        Map<String, LinkedHashSet<String>> snippets = new HashMap<String, LinkedHashSet<String>>();
-        if (val == null) return snippets;
-        int sz = val.size();
-        Object v, vv;
-        for (int i = 0; i < sz; i++) {
-            String n = val.getName(i);
-            v = val.getVal(i);
-            if (v instanceof SimpleOrderedMap) {
-                int sz1 = ((SimpleOrderedMap<Object>) v).size();
-                LinkedHashSet<String> t = new LinkedHashSet<String>();
-                for (int j = 0; j < sz1; j++) {
-                    vv = ((SimpleOrderedMap<Object>) v).getVal(j);
-                    if (vv instanceof String[]) {
-                        for (String t0: ((String[]) vv)) t.add(t0);
-                    }
-                }
-                snippets.put(n, t);
-            }
-        }
-        return snippets;
-    }
-
+	/**
+	 * produce snippets from solr (they call that 'highlighting')
+	 * 
+	 * @param sorlHighlighting highlighting from Solr
+	 * @return a map from urlhashes to a list of snippets for that url
+	 */
+	public static Map<String, Collection<String>> snippetsFromHighlighting(final NamedList<?> sorlHighlighting) {
+		final Map<String, Collection<String>> snippets = new HashMap<>();
+		if (sorlHighlighting == null) {
+			return snippets;
+		}
+		for (final Entry<String, ?> highlightingEntry : sorlHighlighting) {
+			final String urlHash = highlightingEntry.getKey();
+			final Object highlights = highlightingEntry.getValue();
+			if (highlights instanceof SimpleOrderedMap) {
+				final LinkedHashSet<String> urlSnippets = new LinkedHashSet<>();
+				for (final Entry<String, ?> entry : (SimpleOrderedMap<?>) highlights) {
+					final Object texts = entry.getValue();
+					if (texts instanceof String[]) {
+						Collections.addAll(urlSnippets, (String[]) texts);
+					}
+				}
+				snippets.put(urlHash, urlSnippets);
+			}
+		}
+		return snippets;
+	}
+    
     final static Pattern keymarks = Pattern.compile("<b>|</b>");
     
-    public static void removeSubsumedTitle(LinkedHashSet<String> snippets, String title) {
+    public static void removeSubsumedTitle(Collection<String> snippets, String title) {
         if (title == null || title.length() == 0 || snippets == null || snippets.size() == 0) return;
         snippets.remove(title);
         String tlc = title.toLowerCase();
@@ -601,11 +604,11 @@ public class OpensearchResponseWriter implements QueryResponseWriter, SolrjRespo
     }
 
     /**
-     * @param snippets snippets list eventually empty
+     * @param snippets snippets collection eventually empty
      * @return the largest snippet containing at least a space character among the list, or null
      */
-    public static String getLargestSnippet(final LinkedHashSet<String> snippets) {
-        if (snippets == null || snippets.size() == 0) {
+    public static String getLargestSnippet(final Collection<String> snippets) {
+        if (snippets == null || snippets.isEmpty()) {
         	return null;
         }
         String l = null;

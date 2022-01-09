@@ -34,10 +34,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.regex.Matcher;
@@ -77,6 +77,8 @@ import net.yacy.kelondro.util.Bitfield;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.Seed;
 import net.yacy.search.index.Segment;
+import net.yacy.search.navigator.NavigatorPlugins;
+import net.yacy.search.navigator.NavigatorSort;
 import net.yacy.search.ranking.RankingProfile;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -88,6 +90,18 @@ public final class QueryParams {
     
     /** The default maximum number of date elements in the date navigator */
     public static final int FACETS_DATE_MAXCOUNT_DEFAULT = 640;
+    
+	/**
+	 * The Solr facet limit to apply when resorting or filtering is done in a YaCy
+	 * search navigator. For example sort by ascending counts or by descending
+	 * indexed terms are not supported with Solr 6.6 (but should be on Solr 7 JSON
+	 * Facet API - see
+	 * https://lucene.apache.org/solr/guide/7_6/json-facet-api.html). The limit
+	 * defined here is set large enough so that resorting can be done by the YaCy
+	 * Navigator itself. We don't set the facet to unlimited to prevent a too high
+	 * memory usage.
+	 */
+	private static final int FACETS_MAXCOUNT_FOR_RESORT_ON_SEARCH_NAV = 100000;
     
     public enum Searchdom {
         LOCAL, CLUSTER, GLOBAL;
@@ -188,7 +202,9 @@ public final class QueryParams {
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     public final String userAgent;
     protected double lat, lon, radius;
-    public LinkedHashSet<String> facetfields;
+    
+    /** Map from facet/navigator name to sort properties */
+    public Map<String, NavigatorSort> facetfields;
     private SolrQuery cachedQuery;
     private CollectionConfiguration solrSchema;
     public final int timezoneOffset;
@@ -228,7 +244,7 @@ public final class QueryParams {
         final double lat,
         final double lon,
         final double radius,
-        final String[] search_navigation
+        final Set<String> navConfigs
         ) {
         this.queryGoal = queryGoal;
         this.modifier = modifier;
@@ -286,7 +302,7 @@ public final class QueryParams {
         this.snippetCacheStrategy = snippetCacheStrategy;
         this.clienthost = host;
         this.remotepeer = null;
-        this.starttime = Long.valueOf(System.currentTimeMillis());
+        this.starttime = System.currentTimeMillis();
         this.maxtime = 10000;
         this.indexSegment = indexSegment;
         this.userAgent = userAgent;
@@ -296,23 +312,23 @@ public final class QueryParams {
         this.lat = Math.floor(lat * this.kmNormal) / this.kmNormal;
         this.lon = Math.floor(lon * this.kmNormal) / this.kmNormal;
         this.radius = Math.floor(radius * this.kmNormal + 1) / this.kmNormal;
-        this.facetfields = new LinkedHashSet<String>();
+        this.facetfields = new HashMap<>();
         
         this.solrSchema = indexSegment.fulltext().getDefaultConfiguration();
-        for (String navkey: search_navigation) {
-            CollectionSchema f = defaultfacetfields.get(navkey);
+        for (final String navConfig: navConfigs) {
+            CollectionSchema f = defaultfacetfields.get(NavigatorPlugins.getNavName(navConfig));
             // handle special field, authors_sxt (add to facet w/o contains check, as authors_sxt is not enabled (is copyfield))
             // dto. for coordinate_p_0_coordinate is not enabled but used for location facet (because coordinate_p not valid for facet field)
-            if (f != null && (solrSchema.contains(f) || f.name().equals("author_sxt") || f.name().equals("coordinate_p_0_coordinate") ))
-                this.facetfields.add(f.getSolrFieldName());
+            if (f != null && (solrSchema.contains(f) || f == CollectionSchema.author_sxt || f == CollectionSchema.coordinate_p_0_coordinate))
+                this.facetfields.put(f.getSolrFieldName(), NavigatorPlugins.parseNavSortConfig(navConfig));
         }
         if (LibraryProvider.autotagging != null) for (Tagging v: LibraryProvider.autotagging.getVocabularies()) {
             if (v.isFacet()) {
-                this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
+                this.facetfields.put(CollectionSchema.VOCABULARY_PREFIX + v.getName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX, NavigatorSort.COUNT_DESC);
             }
         }
         for (String context: ProbabilisticClassifier.getContextNames()) {
-            this.facetfields.add(CollectionSchema.VOCABULARY_PREFIX + context + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
+            this.facetfields.put(CollectionSchema.VOCABULARY_PREFIX + context + CollectionSchema.VOCABULARY_TERMS_SUFFIX, NavigatorSort.COUNT_DESC);
         }
         this.cachedQuery = null;
         this.standardFacetsMaxCount = FACETS_STANDARD_MAXCOUNT_DEFAULT;
@@ -686,6 +702,61 @@ public final class QueryParams {
         return params;
     }
     
+	/**
+	 * Fill the Solr parameters with the relevant values to apply the search
+	 * navigator sort properties.
+	 * 
+	 * @param params  the Solr parameters to modify
+	 * @param a       Solr field name
+	 * @param navSort navigator sort properties to apply
+	 */
+	private void fillSolrParamWithNavSort(final SolrQuery params, final String solrFieldName,
+			final NavigatorSort navSort) {
+		if (params != null && solrFieldName != null && navSort != null) {
+			switch (navSort) {
+			case COUNT_ASC:
+				params.setParam("f." + solrFieldName + ".facet.sort", FacetParams.FACET_SORT_COUNT);
+				/*
+				 * Ascending count is not supported with Solr 6.6 (but should be on Solr 7 JSON
+				 * Facet API https://lucene.apache.org/solr/guide/7_6/json-facet-api.html) So we
+				 * use a here a high limit and ascending resorting will be done by YaCy
+				 * Navigator
+				 */
+				params.setParam("f." + solrFieldName + ".facet.limit",
+						String.valueOf(FACETS_MAXCOUNT_FOR_RESORT_ON_SEARCH_NAV));
+				break;
+			case LABEL_DESC:
+				/*
+				 * Descending index order is not supported with Solr 6.6 (but should be on Solr
+				 * 7 JSON Facet API
+				 * https://lucene.apache.org/solr/guide/7_6/json-facet-api.html) So we use a
+				 * here a high limit and descending resorting will be done by YaCy Navigator
+				 */
+				params.setParam("f." + solrFieldName + ".facet.sort", FacetParams.FACET_SORT_INDEX);
+				params.setParam("f." + solrFieldName + ".facet.limit",
+						String.valueOf(FACETS_MAXCOUNT_FOR_RESORT_ON_SEARCH_NAV));
+				break;
+			case LABEL_ASC:
+				params.setParam("f." + solrFieldName + ".facet.sort", FacetParams.FACET_SORT_INDEX);
+				break;
+			default:
+				/* Nothing to add for COUNT_DESC which is the default for Solr */
+				break;
+			}
+
+			if (CollectionSchema.language_s.getSolrFieldName().equals(solrFieldName)
+					|| CollectionSchema.url_file_ext_s.getSolrFieldName().equals(solrFieldName)
+					|| CollectionSchema.collection_sxt.getSolrFieldName().equals(solrFieldName)) {
+				/*
+				 * For these search navigators additional filtering or resorting is done in the navigator itself. 
+				 * So we use a here a high limit so that the navigator apply its rules without missing elements.
+				 */
+				params.setParam("f." + solrFieldName + ".facet.limit",
+						String.valueOf(FACETS_MAXCOUNT_FOR_RESORT_ON_SEARCH_NAV));
+			}
+		}
+	}
+    
     private SolrQuery getBasicParams(final boolean getFacets, final List<String> fqs) {
         final SolrQuery params = new SolrQuery();
         params.setParam("defType", "edismax");
@@ -713,15 +784,19 @@ public final class QueryParams {
             params.setFacetLimit(this.standardFacetsMaxCount);
             params.setFacetSort(FacetParams.FACET_SORT_COUNT);
             params.setParam(FacetParams.FACET_METHOD, FacetParams.FACET_METHOD_enum); // fight the fieldcache
-            for (String field: this.facetfields) params.addFacetField("{!ex=" + field + "}" + field); // params.addFacetField("{!ex=" + field + "}" + field);
-            if (this.facetfields.contains(CollectionSchema.dates_in_content_dts.name())) {
+            for (final Entry<String, NavigatorSort> entry : this.facetfields.entrySet()) {
+            	params.addFacetField("{!ex=" + entry.getKey() + "}" + entry.getKey()); // params.addFacetField("{!ex=" + field + "}" + field);
+                fillSolrParamWithNavSort(params, entry.getKey(), entry.getValue());                	
+            }
+            final NavigatorSort datesInContentSort = this.facetfields.get(CollectionSchema.dates_in_content_dts.name());
+            if (datesInContentSort != null) {
             	params.setParam(FacetParams.FACET_RANGE, CollectionSchema.dates_in_content_dts.name());
                 String start = new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L * 3).toInstant().toString();
                 String end = new Date(System.currentTimeMillis() + 1000L * 60L * 60L * 24L * 3).toInstant().toString();
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.start", start);
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.end", end);
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.range.gap", "+1DAY");
-                params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.sort", "index");
+                fillSolrParamWithNavSort(params, CollectionSchema.dates_in_content_dts.getSolrFieldName(), datesInContentSort);
                 params.setParam("f." + CollectionSchema.dates_in_content_dts.getSolrFieldName() + ".facet.limit", Integer.toString(this.dateFacetMaxCount)); // the year constraint should cause that limitation already
             }
             //for (String k: params.getParameterNames()) {ArrayList<String> al = new ArrayList<>(); for (String s: params.getParams(k)) al.add(s); System.out.println("Parameter: " + k + "=" + al.toString());}

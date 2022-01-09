@@ -28,10 +28,6 @@
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.TreeMap;
-
-import org.apache.solr.core.SolrInfoMBean;
-import org.apache.solr.search.SolrCache;
 
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.RequestHeader;
@@ -50,11 +46,9 @@ public class PerformanceMemory_p {
 
     private static final long KB = 1024;
     private static final long MB = 1024 * KB;
-    
+
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        // return variable that accumulates replacements
-        Switchboard sb = (Switchboard) env;
-        
+
         final serverObjects prop = new serverObjects();
 
         prop.put("gc", "0");
@@ -73,7 +67,7 @@ public class PerformanceMemory_p {
                 MemoryControl.setStandardStrategy(std);
             }
         }
-        
+
         prop.put("simulatedshortmemory.checked", MemoryControl.getSimulatedShortStatus() ? 1 : 0);
         prop.put("useStandardmemoryStrategy.checked", env.getConfigBool("memory.standardStrategy", true) ? 1 : 0);
         prop.put("memoryStrategy", MemoryControl.getStrategyName());
@@ -90,50 +84,31 @@ public class PerformanceMemory_p {
         prop.putNum("memoryAvailAfterInitBGC", (MemoryControl.maxMemory() - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / MB);
         prop.putNum("memoryAvailAfterInitAGC", (MemoryControl.maxMemory() - memoryTotalAfterInitAGC + memoryFreeAfterInitAGC) / MB);
         prop.putNum("memoryAvailNow", MemoryControl.available() / MB);
-        prop.putNum("memoryTotalAfterStartup", memoryTotalAfterStartup / KB);
-        prop.putNum("memoryTotalAfterInitBGC", memoryTotalAfterInitBGC / KB);
-        prop.putNum("memoryTotalAfterInitAGC", memoryTotalAfterInitAGC / KB);
+        prop.putNum("memoryTotalAfterStartup", memoryTotalAfterStartup / MB);
+        prop.putNum("memoryTotalAfterInitBGC", memoryTotalAfterInitBGC / MB);
+        prop.putNum("memoryTotalAfterInitAGC", memoryTotalAfterInitAGC / MB);
         prop.putNum("memoryTotalNow", MemoryControl.total() / MB);
-        prop.putNum("memoryFreeAfterStartup", memoryFreeAfterStartup / KB);
-        prop.putNum("memoryFreeAfterInitBGC", memoryFreeAfterInitBGC / KB);
-        prop.putNum("memoryFreeAfterInitAGC", memoryFreeAfterInitAGC / KB);
+        prop.putNum("memoryFreeAfterStartup", memoryFreeAfterStartup / MB);
+        prop.putNum("memoryFreeAfterInitBGC", memoryFreeAfterInitBGC / MB);
+        prop.putNum("memoryFreeAfterInitAGC", memoryFreeAfterInitAGC / MB);
         prop.putNum("memoryFreeNow", MemoryControl.free() / MB);
-        prop.putNum("memoryUsedAfterStartup", (memoryTotalAfterStartup - memoryFreeAfterStartup) / KB);
-        prop.putNum("memoryUsedAfterInitBGC", (memoryTotalAfterInitBGC - memoryFreeAfterInitBGC) / KB);
-        prop.putNum("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / KB);
+        prop.putNum("memoryUsedAfterStartup", (memoryTotalAfterStartup - memoryFreeAfterStartup) / MB);
+        prop.putNum("memoryUsedAfterInitBGC", (memoryTotalAfterInitBGC - memoryFreeAfterInitBGC) / MB);
+        prop.putNum("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / MB);
         prop.putNum("memoryUsedNow", MemoryControl.used() / MB);
 
-        
-        final Map<String, SolrInfoMBean> solrInfoMBeans = sb.index.fulltext().getSolrInfoBeans();
-        final TreeMap<String, Map.Entry<String, SolrInfoMBean>> solrBeanOM = new TreeMap<String, Map.Entry<String, SolrInfoMBean>>();
-        int c = 0;
-        for (Map.Entry<String, SolrInfoMBean> sc: solrInfoMBeans.entrySet()) solrBeanOM.put(sc.getValue().getName() + "$" + sc.getKey() + "$" + c++, sc);
-        c = 0;
-        int scc = 0;
-        for (Map.Entry<String, SolrInfoMBean> sc: solrBeanOM.values()) {
-            prop.put("SolrList_" + c + "_class", sc.getValue().getName());
-            prop.put("SolrList_" + c + "_type", sc.getKey());
-            prop.put("SolrList_" + c + "_description", sc.getValue().getDescription());
-            prop.put("SolrList_" + c + "_statistics", sc.getValue().getStatistics() == null ? "" : sc.getValue().getStatistics().toString().replaceAll(",", ", "));
-            prop.put("SolrList_" + c + "_size", sc.getValue() instanceof SolrCache ? Integer.toString(((SolrCache<?,?>)sc.getValue()).size()) : "");
-            if (sc.getValue() instanceof SolrCache) scc++;
-            c++;
-        }
-        prop.put("SolrList", c);
-        prop.put("SolrCacheCount", scc);
-        
         // write table for Table index sizes
         Iterator<String> i = Table.filenames();
         String filename;
         TableStatistics stats;
         int p;
-        c = 0;
+        int c = 0;
         long totalmem = 0;
         while (i.hasNext()) {
             filename = i.next();
             stats = Table.memoryStats(filename);
-        	totalmem += stats.getTotalMem();
-        	
+            totalmem += stats.getTotalMem();
+
             prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA",0)) < 0) ? filename : filename.substring(p));
             prop.putNum("EcoList_" + c + "_tableSize", stats.getTableSize());
 

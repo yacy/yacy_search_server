@@ -161,9 +161,8 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         String cookiestring = this.get(COOKIE); // get from legacy or HttpServletRequest
         if (cookiestring == null) {
             return "";
-        } else {
-            return cookiestring;
         }
+		return cookiestring;
     }
 
     // implementation of HttpServletRequest procedures
@@ -214,11 +213,10 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public String mime() {
         if (super.containsKey(HeaderFramework.CONTENT_TYPE)) {
             return super.mime();
-        } else {
-            if (_request != null) {
-                return _request.getContentType();
-            }
         }
+		if (_request != null) {
+		    return _request.getContentType();
+		}
         return "application/octet-stream";
     }
 
@@ -234,15 +232,14 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public Cookie[] getCookies() {
         if (_request != null) {
             return _request.getCookies();
-        } else {
-            String cstr = super.get(COOKIE);
-            if (cstr != null) {
-                CookieCutter cc = new CookieCutter(); // reuse jetty cookie parser
-                cc.addCookieField(cstr);
-                return cc.getCookies();
-            }
-            return null;
         }
+		String cstr = super.get(COOKIE);
+		if (cstr != null) {
+		    CookieCutter cc = new CookieCutter(); // reuse jetty cookie parser
+		    cc.addCookieField(cstr);
+		    return cc.getCookies();
+		}
+		return null;
     }
 
     @Override
@@ -250,12 +247,11 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         Date d = super.headerDate(name);
         if (d != null) {
             return d.getTime();
-        } else {
-            if (_request != null) {
-                return _request.getDateHeader(name);
-            }
-            return -1;
         }
+		if (_request != null) {
+		    return _request.getDateHeader(name);
+		}
+		return -1;
     }
 
     @Override
@@ -298,9 +294,8 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public String getMethod() {
         if (_request != null) {
             return _request.getMethod();
-        } else {
-            return HeaderFramework.METHOD_POST;
         }
+		return HeaderFramework.METHOD_POST;
     }
 
     @Override
@@ -317,146 +312,130 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public String getPathTranslated() {
         if (_request != null) {
             return _request.getPathTranslated();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public String getContextPath() {
         if (_request != null) {
             return _request.getContextPath();
-        } else {
-            return "";
         }
+		return "";
     }
 
     @Override
     public String getQueryString() {
         if (_request != null) {
             return _request.getQueryString();
-        } else {
-            return null;
         }
+		return null;
     }
 
     @Override
     public String getRemoteUser() {
         if (_request != null)
             return _request.getRemoteUser();
-        else
-            return null;
+		return null;
     }
 
     @Override
     public boolean isUserInRole(String role) {
         if (_request != null) {
             return _request.isUserInRole(role);
-        } else {
-            return false;
         }
+		return false;
     }
 
     @Override
     public Principal getUserPrincipal() {
         if (_request != null) {
             return _request.getUserPrincipal();
-        } else {
-            return null;
         }
+		return null;
     }
 
     @Override
     public String getRequestedSessionId() {
         if (_request != null) {
             return _request.getRequestedSessionId();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public String getRequestURI() {
         if (_request != null) {
             return _request.getRequestURI();
-        } else {
-            return super.get(HeaderFramework.CONNECTION_PROP_PATH, "/"); // TODO: property as header discouraged (but currently used)
         }
+		return super.get(HeaderFramework.CONNECTION_PROP_PATH, "/"); // TODO: property as header discouraged (but currently used)
     }
 
     @Override
     public StringBuffer getRequestURL() {
         if (_request != null) {
             return _request.getRequestURL();
-        } else {
-            StringBuffer sbuf = new StringBuffer(32);
-            URIUtil.appendSchemeHostPort(sbuf, this.getScheme(), this.getServerName(), this.getServerPort());
-            sbuf.append(this.getRequestURI());
-            return sbuf;
         }
+		StringBuffer sbuf = new StringBuffer(32);
+		URIUtil.appendSchemeHostPort(sbuf, this.getScheme(), this.getServerName(), this.getServerPort());
+		sbuf.append(this.getRequestURI());
+		return sbuf;
     }
 
     @Override
     public String getServletPath() {
         if (_request != null) {
             return _request.getServletPath();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public HttpSession getSession(boolean create) {
         if (_request != null) {
             return _request.getSession(create);
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public HttpSession getSession() {
         if (_request != null) {
             return _request.getSession();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public String changeSessionId() {
         if (_request != null) {
             return _request.changeSessionId();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public boolean isRequestedSessionIdValid() {
         if (_request != null) {
             return _request.isRequestedSessionIdValid();
-        } else {
-            return false;
         }
+		return false;
     }
 
     @Override
     public boolean isRequestedSessionIdFromCookie() {
         if (_request != null) {
             return _request.isRequestedSessionIdFromCookie();
-        } else {
-            return false;
         }
+		return false;
     }
 
     @Override
     public boolean isRequestedSessionIdFromURL() {
         if (_request != null) {
             return _request.isRequestedSessionIdFromURL();
-        } else {
-            return false;
         }
+		return false;
     }
 
     @Deprecated // As of Version 2.1 of the Java Servlet API, use isRequestedSessionIdFromURL() instead.
@@ -464,18 +443,16 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public boolean isRequestedSessionIdFromUrl() {
         if (_request != null) {
             return _request.isRequestedSessionIdFromUrl();
-        } else {
-            return false;
         }
+		return false;
     }
 
     @Override
     public boolean authenticate(HttpServletResponse response) throws IOException, ServletException {
         if (_request != null) {
             return _request.authenticate(response);
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -526,18 +503,16 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public Object getAttribute(String name) {
         if (_request != null) {
             return _request.getAttribute(name);
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Enumeration<String> getAttributeNames() {
         if (_request != null) {
             return _request.getAttributeNames();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -579,11 +554,10 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public String getContentType() {
         if (super.containsKey(HeaderFramework.CONTENT_TYPE)) {
             return super.mime();
-        } else {
-            if (_request != null) {
-                return _request.getContentType();
-            }
         }
+		if (_request != null) {
+		    return _request.getContentType();
+		}
         return null;
     }
 
@@ -591,45 +565,40 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public ServletInputStream getInputStream() throws IOException {
         if (_request != null) {
             return _request.getInputStream();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public String getParameter(String name) {
         if (_request != null) {
             return _request.getParameter(name);
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Enumeration<String> getParameterNames() {
         if (_request != null) {
             return _request.getParameterNames();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public String[] getParameterValues(String name) {
         if (_request != null) {
             return _request.getParameterValues(name);
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Map<String, String[]> getParameterMap() {
         if (_request != null) {
             return _request.getParameterMap();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -637,23 +606,21 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
         // here we can directly check original request, as protocol is not expected to be modified
         if (_request != null) {
             return _request.getProtocol();
-        } else {
-            return super.get(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
         }
+		return super.get(HeaderFramework.CONNECTION_PROP_HTTP_VER, HeaderFramework.HTTP_VERSION_1_1);
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public String getScheme() {
         // here we can directly check original request first, as scheme is not expected to be changed
         if (_request != null) {
             return _request.getScheme();
-        } else {
-            if (super.containsKey(HeaderFramework.CONNECTION_PROP_PROTOCOL)) {
-                return super.get(HeaderFramework.CONNECTION_PROP_PROTOCOL);
-            } else {
-                return "http";
-            }
         }
+		if (super.containsKey(HeaderFramework.CONNECTION_PROP_PROTOCOL)) {
+		    return super.get(HeaderFramework.CONNECTION_PROP_PROTOCOL);
+		}
+		return "http";
     }
 
     @Override
@@ -708,9 +675,8 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public String getRemoteAddr() {
         if (this._request != null) {
         	return client(_request);
-        } else {
-            return super.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
         }
+		return super.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
     }
 
     public static String client(final ServletRequest request) {
@@ -772,9 +738,8 @@ public class RequestHeader extends HeaderFramework implements HttpServletRequest
     public Enumeration<Locale> getLocales() {
         if (this._request != null) {
             return _request.getLocales();
-        } else {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
+		throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override

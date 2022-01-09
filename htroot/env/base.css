@@ -34,7 +34,7 @@
 /* --------------- global elements -------------------------- */
 
 * {
-  font-family:/*Helvetica, Arial, */sans-serif;
+  font-family:sans-serif;
 }
 
 /* the following dl style is needed to patch a bug in Safari
@@ -57,6 +57,7 @@ h1 {
 }
 
 h2 {
+  margin-top:40px;
   font-size:1.6em;
   clear:left; /* The heading after the submenu has to be left again */
 }
@@ -115,7 +116,7 @@ fieldset {
 
 legend {
   font-size:1.2em;
-  padding:0.2em;
+  padding:0.3em 0.8em;
   text-align:center;
 }
 
@@ -257,8 +258,8 @@ tt, *.tt {
 
 .thumbcontainer {
   margin: 2px;
-  width: 128px;
-  height: 128px; /* 96px thumbnail + some lines of text */
+  width: 256px;
+  height: 256px; /* 96px thumbnail + some lines of text */
   float: left;
   /* Cut non square images not rendered by YaCy ViewImage */
   overflow: hidden;
@@ -504,22 +505,20 @@ form.search.small h2 {
 }
 
 li.menugroup h3 {
-	font-size: 1em; font-weight: bold;
-	margin: 0; padding: 1px 10px;
+  font-size: 1em;
+  margin: 0; padding: 1px 10px;
 }
 
 div.SubMenugroup h3 {
-  font-size:1em;
-  font-weight:bold;
+  font-size:1.1em;
   margin:0;
-  padding:1px 10px;
+  padding:3px 10px;
 }
 div.SubMenu h3 {
-  font-size:1em;
-  font-weight:bold;
+  font-size:1.1em;
   margin:0;
   margin-bottom:1px;
-  padding:1px 10px;
+  padding:3px 10px;
   clear: both;
 }
 
@@ -546,24 +545,26 @@ a.BookmarkLink {
   padding-left:15px;
 }
 
-a.MenuItemLink{
+a.MenuItemLink {
   text-decoration:none;
   margin-top:1px;
   margin-bottom:1px;
-  padding:1px 10px 1px 15px;
-  font-size:1.0em;
+  padding:4px 10px 3px 18px;
+  font-size:1.1em;
 }
 
-a.MenuItemLink.lock{
-  background-image:url(grafics/lock.gif);
-  background-position:2px center;
+a.MenuItemLink.lock {
+  background-image:url(grafics/lockclose.png);
+  background-position:1px center;
   background-repeat:no-repeat;
+  background-size: 16px 16px;
 }
 
-a.MenuItemLink.unlock{
-  background-image:url(grafics/lockopen.gif);
-  background-position:2px center;
+a.MenuItemLink.unlock {
+  background-image:url(grafics/lockopen.png);
+  background-position:1px center;
   background-repeat:no-repeat;
+  background-size: 16px 16px;
 }
 
 a:hover.MenuItemLink {
@@ -599,10 +600,10 @@ ul.SubMenu a.MenuItemLink {
 
 a.thumblink {
   display:block;
-  width: 128px;
-  height: 128px;
+  width: 256px;
+  height: 256px;
   margin: 2px;
-  line-height: 128px;
+  line-height: 256px;
   text-align: center;
   overflow: hidden;
 }
@@ -644,18 +645,17 @@ ul.tagList {
   margin-left:0;
 }
 
-
-
 ul.menu, ul.SubMenu {
   clear:left;
   padding:0;
   margin:0;
+  margin-top:6px;
 }
 
 ul.menu li, ul.SubMenu li {
   list-style:none;
-  margin:0;
   margin-top:1px;
+  margin-bottom:1px;
   padding:0;
 }
 
@@ -739,7 +739,9 @@ form.search {
 }
 form.search.small {
   text-align:left;
-  margin-bottom:5px;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  margin-left: -15px;
   white-space:nowrap;
 }
 
@@ -1089,57 +1091,50 @@ div#tagcloud {
   z-index: 100;
  }
  
-/******* yacysearchtrailer.html ********** 
- Styling for the resource switch button, to avoid overlapping at various screen sizes */ 
  
-/* When screen size is too small, reduce font-size and padding as done in the bootstrap-switch-mini class */
-@media (max-width: 1449px) {
-#resource-switch-form .bootstrap-switch-handle-on,
-#resource-switch-form .bootstrap-switch-handle-off,
-#resource-switch-form .bootstrap-switch-label {
-  	padding: 1px 1px !important;
-  	font-size: 12px !important;
-  	line-height: 1.5 !important;
-  }
+ /******* yacysearch.html ********** 
+ 
+ /* Higlight overall audio controls when playing all results */
+#audioControls:not([data-current-track="-1"]) {
+	border-style: solid;
+	border-color: #1e90ff;
 }
 
-/* When screen size is large enough, us the same values as the bootstrap-switch-large class, 
-  except padding wich is reduced to handle the quite long text */
-@media (min-width: 1450px) {
-#resource-switch-form .bootstrap-switch-handle-on,
-#resource-switch-form .bootstrap-switch-handle-off,
-#resource-switch-form .bootstrap-switch-label {
-  padding: 6px 1px !important;
-  font-size: 18px !important;
-  line-height: 1.3333333 !important;
-  }
+#stopAllBtn:hover {
+	color: red;
 }
 
-/* override bootstrap-switch wrapper to use 100% of the parent available size */
-#resource-switch-form,
-.bootstrap-switch-large {
-	width: 100% !important;
+#playAllBtn:hover .glyphicon-play {
+	color: #32cd32;
 }
 
-/* override bootstrap-switch-container to use 155% of the parent available size 
-  (only 100% is displayed, hiding the switched off part) */
-#resource-switch-form .bootstrap-switch-container {
-	width: 155% !important;
+#playAllBtn:hover .glyphicon-pause {
+	color: #ff8c00;
 }
 
-/* override bootstrap-switch-container to use a percent margin value 
-  (when resource switch is "Privacy" position) */
-#resource-switch-form div[class~="bootstrap-switch-container"][style*="margin-left: -"] {
-	margin-left: -52% !important;
+.embeddedAudios {
+	/* Remove bootstrap ul bottom margin so that there is no interval with the expandable list */
+	margin-bottom: 0px;
 }
 
-/* override bootstrap-switch elements to use percent widths */
-#resource-switch-form .bootstrap-switch-handle-on,
-#resource-switch-form .bootstrap-switch-handle-off,
-#resource-switch-form .bootstrap-switch-label {
-	width: 33.333% !important;
+/* Button to expand/collapse audio results beyond the initial number of elements display limit */
+.expandAudiosBtn[aria-expanded="true"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-left class */
+	content: "\e079\e079";
 }
 
+.expandAudiosBtn[aria-expanded="false"] .glyphicon:before {
+	/* Repeated same char as in the glyphicon-chevron-right class */
+	content: "\e080\e080";
+}
+
+/******* yacysearch.html end ***********/ 
+
+/******* yacysearchtrailer.html **********/
+#resource-switch-form .btn-lg {
+	/* Reduce bootstrap btn-lg padding to avoid text overlapping */
+	padding: 6px 1px;
+}
 /******* yacysearchtrailer.html end ***********/
 
 /******* yacysearchitem.html **********/

@@ -60,7 +60,7 @@ public class HTTPInputStream extends InputStream {
 	 */
 	@Override
 	public void close() throws IOException {
-		httpClient.finish();
+		httpClient.close();
 	}
 
 

@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
@@ -63,8 +64,8 @@ import net.yacy.peers.DHTSelection;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.repository.Blacklist;
-import net.yacy.repository.BlacklistHostAndPath;
 import net.yacy.repository.Blacklist.BlacklistType;
+import net.yacy.repository.BlacklistHostAndPath;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
@@ -77,7 +78,7 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public class IndexControlRWIs_p {
-    
+
     private static final String APP_NAME = "IndexControlRWIs_p";
 
     private final static String errmsg = "not possible to compute word from hash";
@@ -161,7 +162,7 @@ public class IndexControlRWIs_p {
             if ( post.containsKey("maxReferencesLimit") ) {
             	/* Check the transaction is valid */
             	TransactionManager.checkPostTransaction(header, post);
-            	
+
                 if ( post.get("maxReferencesRadio", "").equals("on") ) {
                     ReferenceContainer.maxReferences = post.getInt("maxReferences", 0);
                 } else {
@@ -174,7 +175,7 @@ public class IndexControlRWIs_p {
             if ( post.containsKey("keyhashdeleteall") ) {
             	/* Check the transaction is valid */
             	TransactionManager.checkPostTransaction(header, post);
-            	
+
                 try {
                     if ( delurl || delurlref ) {
                         // generate urlx: an array of url hashes to be deleted
@@ -260,7 +261,7 @@ public class IndexControlRWIs_p {
             if ( post.containsKey("keyhashtransfer") ) {
             	/* Check the transaction is valid */
             	TransactionManager.checkPostTransaction(header, post);
-            	
+
                 try {
                     if ( keystring.isEmpty() || !Arrays.equals(Word.word2hash(keystring), keyhash) ) {
                         prop.put("keystring", "&lt;" + errmsg + "&gt;");
@@ -303,20 +304,20 @@ public class IndexControlRWIs_p {
                         Reference iEntry;
                         while (urlIter.hasNext()) {
                             iEntry = urlIter.next();
-                            long loadTime = segment.fulltext().getLoadTime(ASCII.String(iEntry.urlhash()));
-                            if (loadTime < 0) {
+                            boolean exists = segment.fulltext().exists(ASCII.String(iEntry.urlhash()));
+                            if (exists) {
+                                try {
+                                    knownURLs.put(iEntry.urlhash());
+                                } catch (final SpaceExceededException e) {
+                                    ConcurrentLog.logException(e);
+                                }
+                            } else {
                                 try {
                                     unknownURLEntries.put(iEntry.urlhash());
                                 } catch (final SpaceExceededException e) {
                                     ConcurrentLog.logException(e);
                                 }
                                 urlIter.remove();
-                            } else {
-                                try {
-									knownURLs.put(iEntry.urlhash());
-								} catch (final SpaceExceededException e) {
-									ConcurrentLog.logException(e);
-								}
                             }
                         }
 
@@ -403,7 +404,8 @@ public class IndexControlRWIs_p {
 					        ConcurrentLog.logException(e);
 					    }
 					    try {
-                            url = segment.fulltext().getURL(ASCII.String(b));
+                            String u = segment.fulltext().getURL(ASCII.String(b));
+                            url = u == null ? null : new DigestURL(u);
                             segment.fulltext().remove(b);
                             if ( url != null ) {
                             	items.add(new BlacklistHostAndPath(url.getHost(), url.getFile()));
@@ -438,7 +440,8 @@ public class IndexControlRWIs_p {
 					        ConcurrentLog.logException(e);
 					    }
 					    try {
-                            url = segment.fulltext().getURL(ASCII.String(b));
+                            String u = segment.fulltext().getURL(ASCII.String(b));
+                            url = u == null ? null : new DigestURL(u);
                             segment.fulltext().remove(b);
                             if ( url != null ) {
                                 for ( final BlacklistType supportedBlacklistType : BlacklistType.values() ) {
@@ -472,7 +475,7 @@ public class IndexControlRWIs_p {
             if ( prop.getInt("searchresult", 0) == 3 ) {
                 /* Acquire a transaction token for the next available POST form submissions */
                 prop.put("searchresult_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
-                
+
                 listHosts(prop, keyhash, sb);
             }
         }
@@ -652,8 +655,8 @@ public class IndexControlRWIs_p {
         final Switchboard sb,
         final byte[] keyhash,
         final Bitfield filter) {
-        
-        final HandleSet queryhashes = QueryParams.hashes2Set(ASCII.String(keyhash));        
+
+        final HandleSet queryhashes = QueryParams.hashes2Set(ASCII.String(keyhash));
         final QueryGoal qg = new QueryGoal(queryhashes, null);
         final QueryParams query = new QueryParams(
                 qg,
@@ -665,7 +668,7 @@ public class IndexControlRWIs_p {
                 0, //timezoneOffset
                 null,
                 CacheStrategy.IFFRESH,
-                1000, 0, //count, offset             
+                1000, 0, //count, offset
                 ".*", //urlmask
                 null,
                 null,
@@ -674,14 +677,14 @@ public class IndexControlRWIs_p {
                 false,
                 null,
                 MultiProtocolURL.TLD_any_zone_filter,
-                "", 
+                "",
                 false,
                 sb.index,
                 sb.getRanking(),
                 "",//userAgent
                 0.0d, 0.0d, 0.0d,
-                new String[0]);     
-        final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE);       
+                new HashSet<>());
+        final SearchEvent theSearch = SearchEventCache.getEvent(query, sb.peers, sb.tables, null, false, sb.loader, Integer.MAX_VALUE, Long.MAX_VALUE);
         if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (final InterruptedException e) {}
         if (theSearch.local_rwi_available.get() == 0) {
             prop.put("searchresult", 2);

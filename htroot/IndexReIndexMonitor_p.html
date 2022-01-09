@@ -73,6 +73,9 @@
             <div class="form-group">
             	<label>Include failed URLs <input type="checkbox" name="includefailedurls" #(includefailedurls)#::checked="checked"#(/includefailedurls)# /></label>
             </div>
+            <div class="form-group">
+              <label>Delete URLs <input type="checkbox" name="deleteOnRecrawl" #(deleteOnRecrawl)#::checked="checked"#(/deleteOnRecrawl)# /></label>
+            </div>
             <input type="submit" name="recrawlDefaults" value="Set defaults" class="btn btn-default" title="Reset to default values"/>
             <input type="submit" name="recrawlnow" value="start recrawl job now" class="btn btn-primary"/>
             to re-crawl documents selected with the given query.
@@ -90,6 +93,9 @@
               </div>
               <div class="form-group">
               	<label>Include failed urls <input type="checkbox" name="includefailedurls" onchange="this.form.submit()" #(includefailedurls)#::checked="checked"#(/includefailedurls)# /></label>
+              </div>
+              <div class="form-group">
+                <label>Delete urls <input type="checkbox" name="deleteOnRecrawl" onchange="this.form.submit()" #(deleteOnRecrawl)#::checked="checked"#(/deleteOnRecrawl)# /></label>
               </div>
               <input type="submit" name="stoprecrawl" value="stop recrawl job" class="btn btn-danger"/>
             </fieldset>

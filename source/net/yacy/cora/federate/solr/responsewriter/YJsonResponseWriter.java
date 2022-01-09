@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -46,12 +47,12 @@ import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.DocList;
 import org.apache.solr.search.SolrIndexSearcher;
+import org.json.JSONObject;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.responsewriter.OpensearchResponseWriter.ResHead;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.JSONObject;
 import net.yacy.crawler.retrieval.Response;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.CollectionSchema;
@@ -130,9 +131,11 @@ public class YJsonResponseWriter implements QueryResponseWriter, SolrjResponseWr
         SimpleOrderedMap<Object> facetCounts = (SimpleOrderedMap<Object>) values.get("facet_counts");
         @SuppressWarnings("unchecked")
         SimpleOrderedMap<Object> facetFields = facetCounts == null || facetCounts.size() == 0 ? null : (SimpleOrderedMap<Object>) facetCounts.get("facet_fields");
-        @SuppressWarnings("unchecked")
-        SimpleOrderedMap<Object> highlighting = (SimpleOrderedMap<Object>) values.get("highlighting");
-        Map<String, LinkedHashSet<String>> snippets = OpensearchResponseWriter.highlighting(highlighting);
+        
+		final Object highlightingObj = values.get("highlighting");
+		final Map<String, Collection<String>> snippets = highlightingObj instanceof NamedList
+				? OpensearchResponseWriter.snippetsFromHighlighting((NamedList<?>) highlightingObj)
+				: new HashMap<>();
 
         // parse response header
         final ResHead resHead = new ResHead();
@@ -282,7 +285,7 @@ public class YJsonResponseWriter implements QueryResponseWriter, SolrjResponseWr
 	 * @throws IOException when an unexpected error occurred while writing
 	 */
 	private void writeDocs(final Writer writer, final DocList documents, final SolrQueryRequest request, 
-			final Map<String, LinkedHashSet<String>> snippets) throws IOException {
+			final Map<String, Collection<String>> snippets) throws IOException {
         final SolrIndexSearcher searcher = request.getSearcher();
         final DocIterator iterator = documents.iterator();
         int writtenDocs = 0;
@@ -377,7 +380,7 @@ public class YJsonResponseWriter implements QueryResponseWriter, SolrjResponseWr
 	 * @throws IOException when an unexpected error occurred while writing
 	 */
 	private void writeDocs(final Writer writer, final SolrDocumentList documents,
-			final Map<String, LinkedHashSet<String>> snippets) throws IOException {
+			final Map<String, Collection<String>> snippets) throws IOException {
 		int writtenDocs = 0;
         for (final SolrDocument doc : documents) {
         	if(writtenDocs > 0) {
@@ -542,7 +545,7 @@ public class YJsonResponseWriter implements QueryResponseWriter, SolrjResponseWr
 	 * Append to the writer the end of the YaCy json representation of the Solr
 	 * document.
 	 */
-	private void writeDocEnd(final Writer writer, final Map<String, LinkedHashSet<String>> snippets,
+	private void writeDocEnd(final Writer writer, final Map<String, Collection<String>> snippets,
 			final MultiProtocolURL url, final String urlhash, final List<String> descriptions, final String docTitle, final StringBuilder path,
 			final List<Object> imagesProtocolObjs, final List<String> imagesStubs) throws IOException {
 		if (Math.min(imagesProtocolObjs.size(), imagesStubs.size()) > 0) {
@@ -558,7 +561,7 @@ public class YJsonResponseWriter implements QueryResponseWriter, SolrjResponseWr
 		// compute snippet from texts            
 		solitaireTag(writer, "path", path.toString());
 		solitaireTag(writer, "title", docTitle.length() == 0 ? path.toString() : docTitle.replaceAll("\"", "'"));
-		LinkedHashSet<String> snippet = urlhash == null ? null : snippets.get(urlhash);
+		Collection<String> snippet = urlhash == null ? null : snippets.get(urlhash);
 		if (snippet == null) {snippet = new LinkedHashSet<>(); snippet.addAll(descriptions);}
 		OpensearchResponseWriter.removeSubsumedTitle(snippet, docTitle);
 		String snippetstring = snippet == null || snippet.size() == 0 ? (descriptions.size() > 0 ? descriptions.get(0) : "") : OpensearchResponseWriter.getLargestSnippet(snippet);

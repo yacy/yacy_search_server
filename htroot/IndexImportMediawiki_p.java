@@ -196,29 +196,29 @@ public class IndexImportMediawiki_p {
      * @return the last modified date for the file at fileURL, or 0L when unknown or when an error occurred
      */
 	private static long getLastModified(MultiProtocolURL fileURL) {
-		long lastModified = 0l;
 		try {
 			if (fileURL.isHTTP() || fileURL.isHTTPS()) {
 				/* http(s) : we do not use MultiprotocolURL.lastModified() which always returns 0L for these protocols */
-				HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
-				HttpResponse headResponse = httpClient.HEADResponse(fileURL, false);
-				if (headResponse != null && headResponse.getStatusLine() != null
-						&& headResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-					Header lastModifiedHeader = headResponse
-							.getFirstHeader(HeaderFramework.LAST_MODIFIED);
-					if (lastModifiedHeader != null) {
-						Date lastModifiedDate = HeaderFramework.parseHTTPDate(lastModifiedHeader.getValue());
-						if(lastModifiedDate != null) {
-							lastModified = lastModifiedDate.getTime();
-						}
-					}
-				}
+				try (HTTPClient httpClient = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent)) {
+    				HttpResponse headResponse = httpClient.HEADResponse(fileURL, false);
+    				if (headResponse != null && headResponse.getStatusLine() != null
+    						&& headResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+    					Header lastModifiedHeader = headResponse
+    							.getFirstHeader(HeaderFramework.LAST_MODIFIED);
+    					if (lastModifiedHeader != null) {
+    						Date lastModifiedDate = HeaderFramework.parseHTTPDate(lastModifiedHeader.getValue());
+    						if(lastModifiedDate != null) {
+    							return lastModifiedDate.getTime();
+    						}
+    					}
+    				}
+    			}
 			} else {
-				lastModified = fileURL.lastModified();
+				return fileURL.lastModified();
 			}
 		} catch (IOException ignored) {
 			ConcurrentLog.warn("IndexImportMediawiki_p", "Could not retrieve last modified date for dump file at " + fileURL);
 		}
-		return lastModified;
+		return 0l;
 	}
 }

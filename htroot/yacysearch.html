@@ -9,6 +9,9 @@
   <script type="text/javascript" src="js/ajax.js"></script>
   <script type="text/javascript" src="js/xml.js"></script>
   <script type="text/javascript" src="js/yacysearch.js"></script>
+  #(resultTable)#::::
+  	#(embed)#::<script type="text/javascript" src="js/yacysearchAudio.js"></script>#(/embed)#
+  #(/resultTable)#
   <script type="text/javascript" src="js/highslide/highslide.js"></script>
   <script type="text/javascript">hs.outlineType = 'rounded-white';</script>
   <script type="text/javascript" src="env/bootstrap/js/typeahead.jquery.min.js"></script>
@@ -23,6 +26,13 @@
   #(/jsResort)#
   <script type="text/javascript">
     $(document).ready(function() {
+    	
+    #(resultTable)#::::
+    	#(embed)#::
+    	showJSAudioControls();
+		#(/embed)#
+    #(/resultTable)#
+    	
       #(jsResort)#::
         $.get(
           "yacysearchitem.html",
@@ -79,10 +89,13 @@
     </script>
     #(/topmenu)#
 
-<div id="api" style="top:58px;">
+<div id="api" style="top:81px;">
 <script type="text/javascript">
 //<![CDATA[
-document.write("\<a href=\"yacysearch.rss?" + window.location.search.substring(1) + "\" id=\"apilink\" target=\"_blank\"\><img src=\"env/grafics/rss.png\" width=\"16\" height=\"16\" alt=\"RSS\" /></a>")
+	var showRSSIcon = #(num-results)#false::true::true::true::false::false#(/num-results)#;
+	if(showRSSIcon) {
+		document.write("\<a href=\"yacysearch.rss?" + window.location.search.substring(1) + "\" id=\"apilink\" target=\"_blank\"\><img src=\"env/grafics/rss.png\" width=\"16\" height=\"16\" alt=\"RSS\" /></a>");
+	}
 //]]>
 </script>
 <span>This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.
@@ -141,7 +154,7 @@ Use the RSS search result format to add static searches to your RSS reader, if y
 	<p>No Results. (length of search words must be at least 1 character)</p>
 	::
 	<div id="results"></div>
-    <div class="progress">
+    <div class="progress" style="margin-top:10px;margin-bottom:0px;">
       <div class="progress-bar progress-bar-info" id="progressbar" role="progressbar" aria-valuemin="0" aria-valuemax="100" style="width:0%;">
         <span style="position:absolute;display:block;text-align:left;width:85%;color:black;">&nbsp;&nbsp;&nbsp;<strong id="offset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> 
         #(globalresults)#::; (<strong id="localIndexCount">#[localIndexCount]#</strong> local, <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> remote from <strong id="remotePeerCount">#[remotePeerCount]#</strong> YaCy peers).#(/globalresults)# 
@@ -150,7 +163,17 @@ Use the RSS search result format to add static searches to your RSS reader, if y
       </div>
     </div>
 	::
-	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
+	<p class="alert alert-danger" role="alert">Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
+	::
+	<p class="alert alert-danger col-sm-10" role="alert">
+		#(blockReason)#::You are not allowed to search the web with this peer.
+		::You have reached the maximum allowed number of accesses to this search page within ten minutes.
+		Please try again later or log in as administrator or as a user with extended search right.
+		::You have reached the maximum allowed number of accesses to this search page within one minute.
+		Please try again later or log in as administrator or as a user with extended search right.
+		::You have reached the maximum allowed number of accesses to this search page within three seconds.
+		Please try again later or log in as administrator or as a user with extended search right.
+	</p>
 #(/num-results)#
 
 #(urlmaskerror)#::
@@ -212,7 +235,28 @@ document.getElementById("Enter").innerHTML = "search again";
 
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td></tr>
-::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</td>#(embed)#::<td>Player</td>#(/embed)#</tr>#(/resultTable)#
+::<table width="100%">
+	<tr class="TableHeader">
+		<td width="30%">Media</td>
+		<td width="70%">URL</td>
+		#(embed)#::<td>Player
+			<div id="audioControls" class="btn-group btn-group-xs col-xs-offset-3 hidden" role="group" data-current-track="-1">
+				<button id="playAllBtn" type="button"
+					class="btn btn-default btn-xs" title="Play all"
+					data-playAll-title="Play all"
+					data-pause-title="Pause"
+					onclick="handlePlayAllBtnClick()">
+						<span id="playAllIcon" class="glyphicon glyphicon-play"></span>
+				</button>
+				<button id="stopAllBtn"
+					class="btn btn-default btn-xs" title="Stop all"
+					onclick="handleStopAllBtnClick()">
+						<span id="stopAllIcon" class="glyphicon glyphicon-stop"></span>
+				</button>
+			</div>
+		</td>#(/embed)#
+	</tr>
+#(/resultTable)#
 #(jsResort)#
   #{results}#
   <!--#include virtual="yacysearchitem.html?item=#[item]#&eventID=#[eventID]#" -->
@@ -224,19 +268,7 @@ document.getElementById("Enter").innerHTML = "search again";
 #(resultTable)#::</table>::</table>#(/resultTable)#
 <!-- linklist end -->
 
-#(num-results)#
-	::
-	::
-	::
-	<span id="resNav" class="col-sm-12  col-md-12" style="display: inline;">
-		<ul id="paginationButtons" class="pagination hidden">
-			<li id="prevpage" class="disabled"><a title="Previous page" href="#">&laquo;</a></li>
-			<li class="active"><a href="#">1</a></li>
-			<li id="nextpage" class="disabled"><a title="Next page" href="#">&raquo;</a></li>
-		</ul>
-	</span>
-	::
-#(/num-results)#
+<!--#include virtual="yacysearchpagination.html?eventID=#[eventID]#&maximumRecords=#[count]#&offset=#[offset]#&jsResort=#(jsResort)#false::true#(/jsResort)##(authSearch)#::&auth#(/authSearch)#" -->
 
 </div> <!-- close main -->
 
@@ -275,9 +307,9 @@ function latestinfo() {
       
     	if(rsp && rsp.offset != null) {
 			#(jsResort)#
-			  statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, false);
+			  statistics(rsp.offset, rsp.itemscount, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, false, true);
 			::
-			  statistics($("#resultscontainer .searchresults.earlierpage").length + 1, $("#resultscontainer .searchresults.earlierpage").length + $("#resultscontainer .searchresults.currentpage").length, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, true);
+			  statistics($("#resultscontainer .searchresults.earlierpage").length + 1, $("#resultscontainer .searchresults.earlierpage").length + $("#resultscontainer .searchresults.currentpage").length, rsp.itemsperpage, rsp.totalcount, rsp.localIndexCount, rsp.remoteIndexCount, rsp.remotePeerCount, rsp.navurlBase, #[localQuery]#, rsp.feedRunning, true, false);
 			#(/jsResort)#
 			if(rsp.feedRunning) {
 				/* Refresh statistics while server feeders are still running */

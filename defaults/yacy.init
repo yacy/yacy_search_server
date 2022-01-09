@@ -16,9 +16,6 @@ port.ssl = 8443
 # port to listen for a shutdown signal ( -1 = disable use of a shutdown port, 8005 = recommended default )
 port.shutdown = -1
 
-# prefix for new default peer names
-peernameprefix=_anon
-
 # use UPnP [true/false]
 upnp.enabled = true
 # remote host on UPnP device (for more than one connection)
@@ -138,10 +135,10 @@ network.unit.definition = defaults/yacy.network.freeworld.unit
 # This option is only valid if the network.unit.domain property is set to 'any'
 network.unit.domain.nocheck = false
 
-# in addition to non-dht networks a client may have its own agent name
-# this option is only used if the value is non-empty and network.unit.dht = false
-# that means it is not usable in YaCy p2p-configurations, only in private portal configurations
-network.unit.tenant.agent =
+# A client may have its own agent name. This name can be set by the user and is set to a random value
+# if not overwritten by the user. As an alternative, the name can be set with this property.
+# This option is only used if the value is non-empty.
+network.unit.agent =
 
 # Prefer https for in-protocol operations when available on remote peers
 # A distinct general setting is available to control whether https sould be used for remote search queries : remotesearch.https.preferred
@@ -226,6 +223,19 @@ http.outgoing.pool.general.maxTotal = 200
 
 # maximum number of simultaneously open outgoing HTTP connections in the remote Solr pool (net.yacy.cora.federate.solr.instance.RemoteInstance)
 http.outgoing.pool.remoteSolr.maxTotal = 100
+
+
+# TLS Server Name Indication (SNI) extension support for outgoing HTTP connections
+# Must be enabled to load some https URLs (for websites deployed with different certificats and host names on the same shared IP address), otherwise loading fails with errors such as "Received fatal alert: handshake_failure" 
+# It can be necessary to disable it to load some https URLs served by old and misconfigured web servers, otherwise loading fails with the exception javax.net.ssl.SSLProtocolException: "handshake alert:  unrecognized_name"
+# In 2019, this last error should occur less frequently as in the early days of the extension implementation as its standard definition has evolved from RFC 4366 to RFC 6066 which revised how server implementations should handle the unrecognized_name(112) alert. 
+# Can also be configured with the JVM option jsse.enableSNIExtension, but in that case a server restart is required when you want to modify the setting and it is not customizable per http client (general or for remote Solr)
+
+# Set to true to enable TLS Server Name Indication (SNI) extension on outgoing HTTP connections in the general http client (net.yacy.cora.protocol.http.HTTPClient)
+http.outgoing.general.tls.sniExtension.enabled = true
+
+# Set to true to enable TLS Server Name Indication (SNI) extension on outgoing HTTP connections in the remote Solr http client (net.yacy.cora.federate.solr.instance.RemoteInstance)
+http.outgoing.remoteSolr.tls.sniExtension.enabled = true
 
 # default root path for the file server
 # may be overridden by the htdocs parameter
@@ -435,13 +445,17 @@ serverClient=*
 #use User_p.html to create some Users.
 use_proxyAccounts=true
 
-# adminAccountBase64MD5: a encoded user:password - pair for administration of
-# settings through the web interface
-# should be set to a secret. By default it is without a password
+# adminAccountBase64MD5: a encoded user:password - pair
+# For the administration of settings through the web interface.
+# Should be set to a secret.
 # but you are encouraged to set it to another value on the page
 # http://localhost:8090/ConfigAccounts_p.html
+# The hash is calculated with net.yacy.cora.order.Digest, i.e.
+# > java -classpath classes net.yacy.cora.order.Digest -strfhex "admin:<realm>:<pw>"
 #adminAccountBase64=MD5:{admin:realm:mysecretpassword}
 adminAccountBase64MD5=
+# If you want a default password, use this setting, it sets the pw to "yacy"
+#adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c
 adminAccountUserName=admin
 
 # special access handling for users from localhost:
@@ -512,8 +526,9 @@ seedScpPassword=
 seedScpPath=
 
 # every peer periodically scans for other peers. you can set the time
-# of the period here (minutes)
-peerCycle=2
+# of the period here (minutes). You might switch it on in kubernetes clusters
+scan.enabled=false
+scan.peerCycle=2
 
 # debug flags
 debug.search.local.dht.off=false
@@ -685,12 +700,12 @@ collection=user
 50_localcrawl_idlesleep=2000
 50_localcrawl_busysleep=10
 50_localcrawl_memprereq=25165824
-50_localcrawl_loadprereq=6.0
+50_localcrawl_loadprereq=8.0
 50_localcrawl_isPaused=false
 55_autocrawl_idlesleep=10000
 55_autocrawl_busysleep=10000
 55_autocrawl_memprereq=25165824
-55_autocrawl_loadprereq=6.0
+55_autocrawl_loadprereq=8.0
 60_remotecrawlloader_idlesleep=4000
 60_remotecrawlloader_busysleep=800
 60_remotecrawlloader_memprereq=12582912
@@ -726,7 +741,7 @@ collection=user
 reindexSolr_idlesleep=1000
 reindexSolr_busysleep=1
 reindexSolr_memprereq=10485760
-reindexSolr_loadprereq=9.0
+reindexSolr_loadprereq=16.0
 
 # additional attributes:
 # performanceIO is a percent-value. a value of 10 means, that 10% of the busysleep time
@@ -746,11 +761,8 @@ cleanup.failedSearchURLtimeout = 86400000
 # is valid in unix/shell and windows environments but
 # not for first startup of YaCy
 
-# -Xmx<size> and -Xms<size> maximum/init Java heap size
-# if a high performance for large search indexes is wanted, then setting the values to equal number is recommended
-# if YaCy shall be nice in not-only-yacy environments, then the Xms value may be lower
+# -Xmx<size> maximum/init Java heap size
 javastart_Xmx=Xmx600m
-javastart_Xms=Xms90m
 
 # YaCy is able to use RAM copies of database tables. This needs a lot of RAM.
 # To switch on copying of file tables int RAM, there must be enough memory
@@ -777,7 +789,7 @@ javastart_priority=10
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
 # ram cache during indexing. If you want to increase indexing speed, increase this
 # value i.e. up to one million, but increase also the memory limit to a minimum of 2GB
-wordCacheMaxCount = 50000
+wordCacheMaxCount = 20000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
@@ -858,6 +870,10 @@ crawler.latencyFactor = 0.5
 # defined here
 crawler.onDemandLimit = 1000
 
+# The maximum time in seconds to wait for each wkhtmltopdf call when rendering PDF snapshots
+# Beyond that limit the process is killed
+snapshots.wkhtmltopdf.timeout = 30
+
 # maximum size of indexing queue
 indexer.slots = 100
 
@@ -918,7 +934,7 @@ search.result.show.citation = true
 search.result.show.pictures = false
 search.result.show.cache = true
 search.result.show.proxy = false
-search.result.show.hostbrowser = true
+search.result.show.indexbrowser = true
 search.result.show.vocabulary = false
 # Set of comma separated vocabulary names not to be used as search results facets
 search.result.show.vocabulary.omit = 
@@ -926,12 +942,34 @@ search.result.show.snapshots = false
 # when true, display the raw ranking score value
 search.result.show.ranking = false
 
+# Maximum numbers of accesses within a given time period to the search interface for unauthenticated users and authenticated users with no extended search right
+search.public.max.access.3s = 60
+search.public.max.access.1mn = 600
+search.public.max.access.10mn = 3000
+
+# Maximum numbers of accesses within a given time period to the search interface in P2P mode for unauthenticated users and authenticated users with no extended search right
+search.public.max.p2p.access.3s = 1
+search.public.max.p2p.access.1mn = 6
+search.public.max.p2p.access.10mn = 60
+
+# Maximum numbers of accesses within a given time period to the search interface in P2P mode with browser-side JavaScript remote results resorting for unauthenticated users and authenticated users with no extended search right
+search.public.max.p2p.jsresort.access.3s = 1
+search.public.max.p2p.jsresort.access.1mn = 1
+search.public.max.p2p.jsresort.access.10mn = 10
+
+# Maximum number of accesses within a given time period to the search interface to support fetching remote results snippets for unauthenticated users and authenticated users with no extended search right
+search.public.max.remoteSnippet.access.3s = 1
+search.public.max.remoteSnippet.access.1mn = 4
+search.public.max.remoteSnippet.access.10mn = 20
+
 
 # search navigators: comma-separated list of default values for search navigation.
-# can be temporary different if search string is given with differen navigation values
+# By default navigators keys are sorted by descending counts. To sort by ascending displayed labels, add the :label suffix (example : hosts:label). 
+# The sort direction can also be specified with the :asc or :desc suffixes (example : hosts:label:desc)
+# can be temporary different if search string is given with different navigation values
 # assigning no value(s) means that no navigation is shown
 search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language
-#search.navigation=location,hosts,authors,namespace,topics,filetype,protocol,language,collections,date,year,year:dates_in_content_dts:Event
+#search.navigation=location,hosts:label,authors,namespace,topics,filetype,protocol,language,collections,date,year,year:dates_in_content_dts:Event
 
 # max number of items displayed in search navigators
 search.navigation.maxcount=100
@@ -1096,10 +1134,10 @@ Version=
 # old version value (keep to allow conversion of .conf, until next main releas > 1.83)
 svnRevision=0
 
-currentSkin=pdbootstrap
+currentSkin=pdblue
 
 # flag to show if pages shall be usable for non-admin users
-# this can be applied to the Surftips.html, yacysearch.html and HostBrowser.html pages
+# this can be applied to the Surftips.html, yacysearch.html and IndexBrowser_p.html pages
 publicSurftips = true
 publicSearchpage = true
 
@@ -1243,8 +1281,8 @@ content.phpbb3.dumpfile =
 
 # search engine teaser: an about box in search results
 # this is only shown, if the about.body is filled
-about.headline=Please support YaCy!
-about.body=<iframe src="env/donate.html" width="100%" height="90" border="0" frameborder="0" scrolling="no" hspace="0" vspace="0" name="donate"></iframe><br/><div style="padding:8px;">If you run a YaCy server, feel free to replace our donation plea with your own support message, use the <a href="ConfigPortal_p.html">Portal Configuration</a> servlet.</div>
+about.headline=
+about.body=
 
 donation.iframesource=https://yacy.net/include/donate.html
 donation.iframetarget=env/donate.html
@@ -1322,7 +1360,7 @@ federated.service.solr.indexing.authenticated.allowSelfSigned = false
 # It can be switched off if only a remote solr index is used.
 core.service.fulltext = true
 core.service.rwi.tmp = true
-core.service.citation.tmp = true
+core.service.citation.tmp = false
 core.service.webgraph.tmp = false
 
 # Augmentation settings

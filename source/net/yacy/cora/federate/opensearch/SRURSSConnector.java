@@ -121,8 +121,9 @@ public class SRURSSConnector {
             parts.put("resource", UTF8.StringBody(global ? "global" : "local"));
             parts.put("nav", UTF8.StringBody("none"));
             // result = HTTPConnector.getConnector(userAgent == null ? MultiProtocolURI.yacybotUserAgent : userAgent).post(new MultiProtocolURI(rssSearchServiceURL), (int) timeout, uri.getHost(), parts);
-            final HTTPClient httpClient = new HTTPClient(agent);
-            result = httpClient.POSTbytes(new MultiProtocolURL(rssSearchServiceURL), uri.getHost(), parts, false, false);
+            try (final HTTPClient httpClient = new HTTPClient(agent)) {
+                result = httpClient.POSTbytes(new MultiProtocolURL(rssSearchServiceURL), uri.getHost(), parts, false, false);
+            }
 
             final RSSReader reader = RSSReader.parse(RSSFeed.DEFAULT_MAXSIZE, result);
             if (reader == null) {

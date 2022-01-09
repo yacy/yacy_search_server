@@ -1000,7 +1000,7 @@ This can be done using the <a href="CrawlStartExpert.html">Expert Crawl Start</a
 The scheduler on crawls can be changed or removed using the <a href="Table_API_p.html">API Steering==Le planificateur de balayage peut &ecirc;tre modifi&eacute; ou supprim&eacute; au moyen de la <a href="Table_API_p.html">commande de l'API
 #---------------------------
 
-#File: HostBrowser.html
+#File: IndexBrowser_p.html
 #---------------------------
 Browse the index of #[ucount]# documents.==Naviguer dans les #[ucount]# documents de l'index.
 Enter a host or an URL for a file list or view a list of==Saisir un nom de domaine ou une URL pour obtenir une liste de fichiers, ou visualiser la liste de
@@ -1041,10 +1041,6 @@ Inbound Links, incoming to #[host]# - Host List==Liens entrants, vers #[host]# -
 'number of documents about this date'=='Nombre de documents liés à cette date'
 "show link structure graph"=="Afficher le graphique d'arborescence de liens"
 Host has load error(s)==Erreur(s) de chargement sur ce domaine
-#-----------------------------
-
-#File: HostBrowserAdmin_p.html
-#---------------------------
 Administration Options==Options d'administration
 Delete all==Supprimer toutes les
 >Load Errors<==>erreurs de chargement<
@@ -2161,7 +2157,7 @@ where it can be retrieved using the URL==d'o&ugrave; elle peut &ecirc;tre r&eacu
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStartSite.html">here</a>==Votre indexeur de pages web est inactif. Vous pouvez d&eacute;marrer votre propre balayage du web <a href="CrawlStartSite.html">ici</a>
 Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==Votre indexeur de pages web est actif. Vous pouvez surveiller votre balayage du web <a href="Crawler_p.html">ici</a>.
 If you need professional support, please write to==Si vous avez besoin d'une assistance professionnelle, vous pouvez &eacute;crire &agrave;
-For community support, please visit our <a href="http://forum.yacy.de" target="_blank">forum</a>==Si vous cherchez l'aide de la communaut&eacute;, vous pouvez visiter notre <a href="http://forum.yacy.de" target="_blank">forum</a>
+For community support, please visit our <a href="https://searchlab.eu" target="_blank">forum</a>==Si vous cherchez l'aide de la communaut&eacute;, vous pouvez visiter notre <a href="https://searchlab.eu" target="_blank">forum</a>
 "Follow YaCy on Twitter"=="Suivez YaCy sur Twitter"
 
 
@@ -2306,7 +2302,7 @@ Therefore we like to ask you: do you like YaCy? Will you use it again... if not,
 Please send us feed-back about your experience with an==Vous pouvez nous faire parvenir vos commentaires avec un
 anonymous message==message anonyme
 or a<br/>==ou un<br/>
-posting to our <a href="http://forum.yacy.de" target="_blank">web forums</a><br/>==message sur nos <a href="http://forum.yacy.de" target="_blank">forums</a><br/>
+posting to our <a href="https://searchlab.eu" target="_blank">web forums</a><br/>==message sur nos <a href="https://searchlab.eu" target="_blank">forums</a><br/>
 bug report==rapport de bogue
 <h2>Professional Support</h2>==<h2>Support professionnel</h2>
 If you are a professional user and you would like to use YaCy in your company in combination with consulting services by YaCy specialists, please see==Si vous souhaitez utiliser YaCy dans votre entreprise en association avec un service de consultations d'expertise par des sp&eacute;cialistes de YaCy, veuillez consulter
@@ -2611,12 +2607,11 @@ and contributors, CC-BY-SA==et ses contributeurs, CC-BY-SA
 #---------------------------
 Your search is done using peers in the YaCy P2P network.==Recherche effectu&eacute;e gr&acirc;ce aux noeuds du r&eacute;seau P2P YaCy.
 You can switch to 'Stealth Mode' which will switch off P2P, giving you full privacy. Expect less results then, because then only your own search index is used.==Vous pouvez passer en 'Mode furtif' ce qui d&eacute;sactivera le r&eacute;seau pair &agrave; pair et vous offrira une privatisation compl&egrave;te. Cependant vous obtiendrez probablement moins de r&eacute;sultats car la recherche sera alors bas&eacute;e uniquement sur votre propre index.
-"Privacy"=="Privé"
-&nbsp;Peer-to-Peer&nbsp;==&nbsp;Pair&nbsp;&agrave;&nbsp;pair&nbsp;
-Stealth&nbsp;Mode==Mode&nbsp;furtif
+Privacy==Privé
+>Peer-to-Peer<==>Pair&nbsp;&agrave;&nbsp;pair<
+Stealth Mode==Mode furtif
 Your search is done using only your own peer, locally.==La recherche est r&eacute;alis&eacute;e uniquement sur les donn&eacute;es locales de votre noeud.
 You can switch to 'Peer-to-Peer Mode' which will cause that your search is done using the other peers in the YaCy network.==Vous pouvez passer en mode 'Pair &agrave; pair' dans lequel votre recherche sera bas&eacute;e sur les autres noeuds du r&eacute;seau YaCy.
-"Peer-to-Peer"==Pair&nbsp;&agrave;&nbsp;pair
 Context Ranking==Classement contextuel
 Sort by Date==Trier par date
 Video==Vid&eacute;o

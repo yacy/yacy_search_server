@@ -9,7 +9,7 @@ Set CLASSPATH=lib/yacycore.jar
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=
 set jms=
-set javacmd=-Xmx600m -Xms180m
+set javacmd=-Xmx600m
 set priolvl=10
 set priority=/BELOWNORMAL
 set port=8090
@@ -17,8 +17,7 @@ if exist DATA\SETTINGS\httpProxy.conf GoTo :RENAMEINDEX
 if exist DATA\SETTINGS\yacy.conf GoTo :GETSTARTOPTS
 
 :STARTJAVA
-set javacmd=%javacmd% -XX:-UseGCOverheadLimit -Djava.awt.headless=true -Dfile.encoding=UTF-8 -Djsse.enableSNIExtension=false
-Rem    -Djsse.enableSNIExtension=false  fix a ssl problem in Java 1.7, see http://teknosrc.com/javax-net-ssl-sslprotocolexception-handshake-alert-unrecognized_name-solved/
+set javacmd=%javacmd% -XX:-UseGCOverheadLimit -Djava.awt.headless=true -Dfile.encoding=UTF-8
 
 Rem Starting YaCy
 Echo Generated classpath:%CLASSPATH%
@@ -30,7 +29,7 @@ Echo **** (C) by Michael Peter Christen, usage granted under the GPL Version 2  
 Echo ****   USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/   ****
 Echo **  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy^<xx^>.log)              **
 Echo **  STOP         YaCy: execute stopYACY.bat and wait some seconds            **
-Echo **  GET HELP for YaCy: see www.yacy-websearch.net/wiki and forum.yacy.de     **
+Echo **  GET HELP for YaCy: join our community at https://searchlab.eu            **
 Echo *******************************************************************************
 Echo  ^>^> YaCy started as daemon process. Administration at http://localhost:%port% ^<^<
 
@@ -61,7 +60,6 @@ Rem This target is used to read java runtime parameters out of the yacy config f
 :GETSTARTOPTS
 for /F "tokens=1,2 delims==" %%i in (DATA\SETTINGS\yacy.conf) do (
     if "%%i"=="javastart_Xmx" set jmx=%%j
-    if "%%i"=="javastart_Xms" set jms=%%j
     if "%%i"=="port" set port=%%j
     if "%%i"=="javastart_priority" set priolvl=%%j
 )

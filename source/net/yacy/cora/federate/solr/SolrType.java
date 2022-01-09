@@ -29,11 +29,11 @@ public enum SolrType {
     date("dt", "dts"),                   // date format as in http://www.w3.org/TR/xmlschema-2/#dateTime with trailing 'Z'
     bool("b", "bs", "boolean"),
     num_integer("i", "val", "int"),
-    num_long("l", "ls", "long"), 
-    num_float("f", "fs", "float"), 
+    num_long("l", "ls", "long"),
+    num_float("f", "fs", "float"),
     num_double("d", "ds", "double"),
     coordinate("coordinate", "coordinatex", "tdouble");
-    
+
     private String printName, singlevalExt, multivalExt;
     private SolrType(final String singlevalExt, final String multivalExt) {
         this.printName = this.name();
@@ -49,21 +49,21 @@ public enum SolrType {
         return this.printName;
     }
     public boolean appropriateName(final SchemaDeclaration collectionSchema) {
-        String field = collectionSchema.name();
-        int p = field.indexOf('_');
+        final String field = collectionSchema.name();
+        final int p = field.indexOf('_');
         if (p < 0 || field.length() - p > 4) return true; // special names may have no type extension
-        String ext = field.substring(p + 1);
+        final String ext = field.substring(p + 1);
         boolean ok = collectionSchema.isMultiValued() ? this.multivalExt.equals(ext) : this.singlevalExt.equals(ext);
-        assert ok : "SolrType = " + this.name() + ", field = " + field + ", ext = " + ext + ", multivalue = " + new Boolean(collectionSchema.isMultiValued()).toString() + ", singlevalExt = " + this.singlevalExt + ", multivalExt = " + this.multivalExt;
+        assert ok : "SolrType = " + this.name() + ", field = " + field + ", ext = " + ext + ", multivalue = " + Boolean.toString(collectionSchema.isMultiValued()) + ", singlevalExt = " + this.singlevalExt + ", multivalExt = " + this.multivalExt;
         if (!ok) return ok;
         ok = !"s".equals(this.singlevalExt) || collectionSchema.isMultiValued() || field.endsWith("s");
-        assert ok : "SolrType = " + this.name() + ", field = " + field + ", ext = " + ext + ", multivalue = " + new Boolean(collectionSchema.isMultiValued()).toString() + ", singlevalExt = " + this.singlevalExt + ", multivalExt = " + this.multivalExt;
+        assert ok : "SolrType = " + this.name() + ", field = " + field + ", ext = " + ext + ", multivalue = " + Boolean.toString(collectionSchema.isMultiValued()) + ", singlevalExt = " + this.singlevalExt + ", multivalExt = " + this.multivalExt;
         if (!ok) return ok;
         ok = !"sxt".equals(this.singlevalExt) || !collectionSchema.isMultiValued()  || field.endsWith("sxt");
-        assert ok : "SolrType = " + this.name() + ", field = " + field + ", ext = " + ext + ", multivalue = " + new Boolean(collectionSchema.isMultiValued()).toString() + ", singlevalExt = " + this.singlevalExt + ", multivalExt = " + this.multivalExt;
+        assert ok : "SolrType = " + this.name() + ", field = " + field + ", ext = " + ext + ", multivalue = " + Boolean.toString(collectionSchema.isMultiValued()) + ", singlevalExt = " + this.singlevalExt + ", multivalExt = " + this.multivalExt;
         if (!ok) return ok;
         ok = !"t".equals(this.singlevalExt) || collectionSchema.isMultiValued() || field.endsWith("t");
-        assert ok : "SolrType = " + this.name() + ", field = " + field + ", ext = " + ext + ", multivalue = " + new Boolean(collectionSchema.isMultiValued()).toString() + ", singlevalExt = " + this.singlevalExt + ", multivalExt = " + this.multivalExt;
+        assert ok : "SolrType = " + this.name() + ", field = " + field + ", ext = " + ext + ", multivalue = " + Boolean.toString(collectionSchema.isMultiValued()) + ", singlevalExt = " + this.singlevalExt + ", multivalExt = " + this.multivalExt;
         if (!ok) return ok;
         return ok;
     }

@@ -20,7 +20,7 @@
 
 import java.util.EnumMap;
 import java.util.Map;
-import net.yacy.cora.order.Digest;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.UserDB;
@@ -121,11 +121,8 @@ public class ConfigUser_p {
 
             if (entry != null) {
                 try {
-                    if (!"".equals(pw1)) {
-                        // with prefix of encoding method (supported MD5: )
-                        entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, "MD5:" + Digest.encodeMD5Hex(username + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM, "YaCy") + ":" + pw1));
-                    }
-
+                    // with prefix of encoding method (supported MD5: )
+                    entry.setProperty(UserDB.Entry.MD5ENCODED_USERPWD_STRING, sb.encodeDigestAuth(username, pw1));
                     entry.setProperty(UserDB.Entry.USER_FIRSTNAME, firstName);
                     entry.setProperty(UserDB.Entry.USER_LASTNAME, lastName);
                     entry.setProperty(UserDB.Entry.USER_ADDRESS, address);

@@ -218,16 +218,6 @@ public final class HTTPDemon {
     static final void sendRespondHeader(
             final HashMap<String, Object> conProp,
             final OutputStream respond,
-            final String httpVersion,
-            final int httpStatusCode,
-            final ResponseHeader header
-    ) throws IOException {
-        sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,null,header);
-    }
-
-    static final void sendRespondHeader(
-            final HashMap<String, Object> conProp,
-            final OutputStream respond,
             String httpVersion,
             final int httpStatusCode,
             String httpStatusText,

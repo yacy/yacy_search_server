@@ -24,11 +24,15 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocket;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.Header;
@@ -44,17 +48,8 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.AuthCache;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.GzipDecompressingEntity;
-import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.client.protocol.ClientContext;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.ssl.SSLContextBuilder;
@@ -63,7 +58,6 @@ import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.apache.solr.client.solrj.impl.HttpClientUtil;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.solr.update.UpdateShardHandler.IdleConnectionsEvictor;
 
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.HeaderFramework;
@@ -84,31 +78,23 @@ public class RemoteInstance implements SolrInstance {
 	/** Default maximum time in seconds to keep alive an idle connection in the pool */
 	private static final int DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE = 30;
 	
-	/** Default sleep time in seconds between each run of the connection evictor */
-	private static final int DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME = 5;
-	
 	/** Default total maximum number of connections in the pool */
 	private static final int DEFAULT_POOL_MAX_TOTAL = 100;
 	
 	/** The connection manager holding the HTTP connections pool shared between remote Solr clients. */
 	public static final org.apache.http.impl.conn.PoolingClientConnectionManager CONNECTION_MANAGER = buildConnectionManager();
 	
-	/**
-	 * Background daemon thread evicting expired idle connections from the pool.
-	 * This may be eventually already done by the pool itself on connection request,
-	 * but this background task helps when no request is made to the pool for a long
-	 * time period.
-	 */
-	private static final IdleConnectionsEvictor EXPIRED_CONNECTIONS_EVICTOR = new IdleConnectionsEvictor(
-			CONNECTION_MANAGER, DEFAULT_CONNECTION_EVICTOR_SLEEP_TIME, TimeUnit.SECONDS,
-			DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
+	/** Default setting to apply when the JVM system option jsse.enableSNIExtension is not defined */
+	public static final boolean ENABLE_SNI_EXTENSION_DEFAULT = true;
 	
-	static {
-		EXPIRED_CONNECTIONS_EVICTOR.start();
-	}
+	/** When true, Server Name Indication (SNI) extension is enabled on outgoing TLS connections.
+	 * @see <a href="https://tools.ietf.org/html/rfc6066#section-3">RFC 6066 definition</a> 
+	 * @see <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=7127374">JDK 1.7 bug</a> on "unrecognized_name" warning for SNI */
+	public static final AtomicBoolean ENABLE_SNI_EXTENSION = new AtomicBoolean(
+			Boolean.parseBoolean(System.getProperty("jsse.enableSNIExtension", Boolean.toString(ENABLE_SNI_EXTENSION_DEFAULT))));
 	
 	/** A custom scheme registry allowing https connections to servers using self-signed certificate */
-	private static final SchemeRegistry SCHEME_REGISTRY = buildTrustSelfSignedSchemeRegistry();
+	private static final org.apache.http.conn.scheme.SchemeRegistry SCHEME_REGISTRY = buildTrustSelfSignedSchemeRegistry();
 	
 	/** Solr server URL */
     private String solrurl;
@@ -282,11 +268,11 @@ public class RemoteInstance implements SolrInstance {
             params.set(HttpClientUtil.PROP_SO_TIMEOUT, this.timeout);
             
             
-            this.client = HttpClientUtil.createClient(params, CONNECTION_MANAGER);
-            if(this.client instanceof DefaultHttpClient) {
+            this.client = HttpClientUtil.createClient(params);
+            if(this.client instanceof org.apache.http.impl.client.DefaultHttpClient) {
             	if(this.client.getParams() != null) {
             		/* Set the maximum time to get a connection from the shared connections pool */
-            		HttpClientParams.setConnectionManagerTimeout(this.client.getParams(), timeout);
+            	    org.apache.http.client.params.HttpClientParams.setConnectionManagerTimeout(this.client.getParams(), timeout);
             	}
             	
         		if (maxBytesPerResponse >= 0 && maxBytesPerResponse < Long.MAX_VALUE) {
@@ -294,8 +280,8 @@ public class RemoteInstance implements SolrInstance {
         			 * Add in last position the eventual interceptor limiting the response size, so
         			 * that this is the decompressed amount of bytes that is considered
         			 */
-        			((DefaultHttpClient)this.client).addResponseInterceptor(new StrictSizeLimitResponseInterceptor(maxBytesPerResponse),
-        					((DefaultHttpClient)this.client).getResponseInterceptorCount());
+        			((org.apache.http.impl.client.DefaultHttpClient)this.client).addResponseInterceptor(new StrictSizeLimitResponseInterceptor(maxBytesPerResponse),
+        					((org.apache.http.impl.client.DefaultHttpClient)this.client).getResponseInterceptorCount());
         		}
             }
         }
@@ -335,7 +321,7 @@ public class RemoteInstance implements SolrInstance {
 		 * Upgrade only when Solr implementation will become compatible */
 		
 		final org.apache.http.impl.conn.PoolingClientConnectionManager cm = new org.apache.http.impl.conn.PoolingClientConnectionManager(
-				SchemeRegistryFactory.createDefault(), DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
+		        org.apache.http.impl.conn.SchemeRegistryFactory.createDefault(), DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE, TimeUnit.SECONDS);
 		initPoolMaxConnections(cm, DEFAULT_POOL_MAX_TOTAL);
 		return cm;
 	}
@@ -344,17 +330,28 @@ public class RemoteInstance implements SolrInstance {
 	 * @return a custom scheme registry allowing https connections to servers using
 	 *         a self-signed certificate
 	 */
-	private static SchemeRegistry buildTrustSelfSignedSchemeRegistry() {
+	private static org.apache.http.conn.scheme.SchemeRegistry buildTrustSelfSignedSchemeRegistry() {
 		/* Important note : use of deprecated Apache classes is required because SolrJ still use them internally (see HttpClientUtil). 
 		 * Upgrade only when Solr implementation will become compatible */
-		SchemeRegistry registry = null;
+	    org.apache.http.conn.scheme.SchemeRegistry registry = null;
 		SSLContext sslContext;
 		try {
 			sslContext = SSLContextBuilder.create().loadTrustMaterial(TrustSelfSignedStrategy.INSTANCE).build();
-			registry = new SchemeRegistry();
-			registry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
+			registry = new org.apache.http.conn.scheme.SchemeRegistry();
+			registry.register(new org.apache.http.conn.scheme.Scheme("http", 80, org.apache.http.conn.scheme.PlainSocketFactory.getSocketFactory()));
 			registry.register(
-					new Scheme("https", 443, new SSLSocketFactory(sslContext, AllowAllHostnameVerifier.INSTANCE)));
+					new org.apache.http.conn.scheme.Scheme("https", 443, new org.apache.http.conn.ssl.SSLSocketFactory(sslContext, org.apache.http.conn.ssl.AllowAllHostnameVerifier.INSTANCE) {
+						@Override
+						protected void prepareSocket(SSLSocket socket) throws IOException {
+			        		if(!ENABLE_SNI_EXTENSION.get()) {
+			        			/* Set the SSLParameters server names to empty so we don't use SNI extension.
+			        			 * See https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html#ClientSNIExamples */
+			        			final SSLParameters sslParams = socket.getSSLParameters();
+			        			sslParams.setServerNames(Collections.emptyList());
+			        			socket.setSSLParameters(sslParams);
+			        		}
+						}
+					}));
 		} catch (final Exception e) {
 			// Should not happen
 			ConcurrentLog.warn("RemoteInstance",
@@ -391,7 +388,7 @@ public class RemoteInstance implements SolrInstance {
 		        authCache.put(targetHost, basicAuth);
 		        context.setAttribute(org.apache.http.client.protocol.HttpClientContext.AUTH_CACHE, authCache);
 				if (trustSelfSignedCertificates && SCHEME_REGISTRY != null) {
-					context.setAttribute(ClientContext.SCHEME_REGISTRY, SCHEME_REGISTRY);
+					context.setAttribute(org.apache.http.client.protocol.ClientContext.SCHEME_REGISTRY, SCHEME_REGISTRY);
 				}
 		        this.setHttpRequestRetryHandler(new org.apache.http.impl.client.DefaultHttpRequestRetryHandler(0, false)); // no retries needed; we expect connections to fail; therefore we should not retry
 		        return context;
@@ -403,7 +400,7 @@ public class RemoteInstance implements SolrInstance {
 		/* Set the maximum time between data packets reception one a connection has been established */
 		org.apache.http.params.HttpConnectionParams.setSoTimeout(params, timeout);
 		/* Set the maximum time to get a connection from the shared connections pool */
-		HttpClientParams.setConnectionManagerTimeout(params, timeout);
+		org.apache.http.client.params.HttpClientParams.setConnectionManagerTimeout(params, timeout);
 		result.addRequestInterceptor(new HttpRequestInterceptor() {
 		    @Override
 		    public void process(final HttpRequest request, final HttpContext context) throws IOException {
@@ -572,14 +569,6 @@ public class RemoteInstance implements SolrInstance {
 	 */
 	public static void closeConnectionManager() {
 		try {
-			if (EXPIRED_CONNECTIONS_EVICTOR != null) {
-				// Shut down the evictor thread
-				EXPIRED_CONNECTIONS_EVICTOR.shutdown();
-				try {
-					EXPIRED_CONNECTIONS_EVICTOR.awaitTermination(1L, TimeUnit.SECONDS);
-				} catch (final InterruptedException ignored) {
-				}
-			}
 		} finally {
 			if (CONNECTION_MANAGER != null) {
 				CONNECTION_MANAGER.shutdown();

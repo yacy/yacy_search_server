@@ -13,7 +13,7 @@
       -->
     </script>
     <!-- redirecting browser if port was changed -->
-    #(reconnect)#::<meta http-equiv="refresh" content="10; url=http://#[host]#:#[port]#/ConfigBasic.html" />#(/reconnect)#
+    #(reconnect)#::<meta http-equiv="refresh" content="5; url=http://#[host]#:#[port]#/ConfigBasic.html" />#(/reconnect)#
     <!-- redirecting browser if language was changed -->
     #(changedLanguage)#::<meta http-equiv="refresh" content="0; url=ConfigBasic.html" />#(/changedLanguage)#
   </head>
@@ -45,7 +45,8 @@
             <input type="radio" name="language" value="ja" id="lang_ja" onchange="this.form.submit()" #(lang_ja)#::checked="checked"#(/lang_ja)# /><label for="lang_ja" #(active_ja)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_ja)#>&#26085;&#26412;&#35486;</label>
             <input type="radio" name="language" value="el" id="lang_el" onchange="this.form.submit()" #(lang_el)#::checked="checked"#(/lang_el)# /><label for="lang_el" #(active_el)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_el)#>Greek</label>
 			<input type="radio" name="language" value="it" id="lang_it" onchange="this.form.submit()" #(lang_it)#::checked="checked"#(/lang_it)# /><label for="lang_it" #(active_el)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_el)#>Italiano</label>            
-          </fieldset>
+          	<input type="radio" name="language" value="es" id="lang_es" onchange="this.form.submit()" #(lang_es)#::checked="checked"#(/lang_es)# /><label for="lang_es" #(active_es)#::title="Click to generate translated pages"::class="label-success" title="Active : translated pages are available"#(/active_es)#>Español</label>
+		  </fieldset>
         </li>
         <!-- take care that no other items are changed, but also change the former if no js is enabled -->
         <script type="text/javascript"> document.write('</form><form action="ConfigBasic.html" method="post" accept-charset="UTF-8"><input type="hidden" name="transactionToken" value="#[transactionToken]#"/>');</script>
@@ -103,7 +104,7 @@
             <dl>
               <dt><label for="port">Peer Port: </label></dt>
               <dd>
-				<input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" #(hasSystemDefinedPort)#::disabled="disabled"#(/hasSystemDefinedPort)#/> #(hasSystemDefinedPort)#::(Set by system property '#[systemProperty]#')#(/hasSystemDefinedPort)#&nbsp;&nbsp;&nbsp;
+                <input type="text" name="port" id="port" value="#[defaultPort]#" size="5" maxlength="5" /> &nbsp;&nbsp;&nbsp;
                 <input type="checkbox" name="withssl" id="withssl" #(withsslenabled)#::checked="checked"#(/withsslenabled)#>with SSL (https enabled#(withsslenabled)#:: on port <a href="Settings_p.html?page=ProxyAccess">#[sslport]#</a>#(/withsslenabled)#)
               </dd>
               #(upnp)#::<dt>
@@ -117,6 +118,8 @@
            </fieldset>
          </li>
     <fieldset>&nbsp;&nbsp;&nbsp;&nbsp;<input type="submit" name="set" value="Set Configuration" class="btn btn-primary"/></fieldset>
+    
+    #(reconnect)#::<div class="alert alert-danger" role="alert">Your Browser will reload the YaCy UI with the new port in 5 seconds...</div>#(/reconnect)#
         
       </ol>
     </form>

@@ -62,7 +62,7 @@ public class DigestURLHashPerfTest {
 
 		System.out.println(urls.size() + " URLs loaded from " + inFile.getAbsolutePath());
 
-		try (OutputStream outStream = args.length >= 2 ? new FileOutputStream(args[1]) : new NullOutputStream();
+		try (OutputStream outStream = args.length >= 2 ? new FileOutputStream(args[1]) : NullOutputStream.NULL_OUTPUT_STREAM;
 				OutputStreamWriter writer = new OutputStreamWriter(outStream, StandardCharsets.UTF_8.name());
 				BufferedWriter out = new BufferedWriter(writer);) {
 

@@ -22,9 +22,14 @@
  */
 package net.yacy.search.navigator;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import net.yacy.cora.sorting.ConcurrentScoreMap;
 import net.yacy.cora.sorting.ReversibleScoreMap;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
@@ -35,16 +40,41 @@ import net.yacy.search.schema.CollectionSchema;
  * Search navigator for simple string entries based on ScoreMap to count and
  * order the result list by counted occurence
  */
-public class StringNavigator  extends ConcurrentScoreMap<String> implements Navigator {
+public class StringNavigator extends ConcurrentScoreMap<String> implements Navigator {
 
     public String title;
     protected final CollectionSchema field;
+    
+	/**
+	 * The sort properties to apply when iterating over keys with the
+	 * {@link #navigatorKeys()} function
+	 */
+	private final NavigatorSort sort;
+	
+	/**
+	 * Constructor applying a descending sort by counts as defaut.
+	 * @param title the navigator title
+	 * @param field the indexed field to count
+	 */
+	public StringNavigator(final String title, final CollectionSchema field) {
+		this(title, field, NavigatorSort.COUNT_DESC);
+	}
 
-    public StringNavigator(String title, CollectionSchema field) {
-        super();
-        this.title = title;
-        this.field = field;
-    }
+	/**
+	 * @param title the navigator title
+	 * @param field the indexed field to count
+	 * @param sort the sort properties to apply when iterating over keys with the
+	 * {@link #navigatorKeys()} function
+	 */
+	public StringNavigator(final String title, final CollectionSchema field, final NavigatorSort sort) {
+		this.title = title;
+		this.field = field;
+		if(sort == null) {
+			this.sort = NavigatorSort.COUNT_DESC;
+		} else {
+			this.sort = sort;
+		}
+	}
 
     @Override
     public String getDisplayName() {
@@ -152,5 +182,27 @@ public class StringNavigator  extends ConcurrentScoreMap<String> implements Navi
             return this.field.getSolrFieldName();
         }
         return "";
+    }
+    
+    @Override
+    public Iterator<String> navigatorKeys() {
+    	if(this.sort.getSortType() == NavigatorSortType.LABEL) {
+        	final ArrayList<String> keys = new ArrayList<>(this.map.keySet());
+        	
+        	Comparator<String> keyComparator = Comparator.comparing(this::getElementDisplayName);
+        	if(this.sort.getSortDir() == NavigatorSortDirection.DESC) {
+        		keyComparator = keyComparator.reversed();
+        	}
+        	Collections.sort(keys, keyComparator);
+        	
+
+        	return keys.iterator();
+    	}
+		return keys(this.sort.getSortDir() == NavigatorSortDirection.ASC);
+    }
+    
+    @Override
+    public NavigatorSort getSort() {
+    	return this.sort;
     }
 }

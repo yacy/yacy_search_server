@@ -34,6 +34,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Fulltext;
 import net.yacy.search.index.Segment;
+import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -46,8 +47,13 @@ public class IndexExport_p {
         final serverObjects prop = new serverObjects();
 
         Segment segment = sb.index;
+        // we have two counts of document: total number and such that are exportable with status code 200
         long ucount = segment.fulltext().collectionSize();
-        
+        long ucount200 = ucount;
+        try {
+            ucount200 = segment.fulltext().getDefaultConnector().getCountByQuery(CollectionSchema.httpstatus_i.getSolrFieldName() + ":200");
+        } catch (IOException e1) {}
+
         // set default values
         prop.put("otherHosts", "");
         prop.put("reload", 0);
@@ -62,7 +68,8 @@ public class IndexExport_p {
         prop.put("dumprestore_dumpfile", dumpFiles.size() == 0 ? "" : dumpFiles.get(dumpFiles.size() - 1).getAbsolutePath());
         prop.put("dumprestore_optimizemax", 10);
         prop.putNum("ucount", ucount);
-        
+        prop.putNum("ucount200", ucount200);
+
         // show export messages
         Fulltext.Export export = segment.fulltext().export();
         if ((export != null) && (export.isAlive())) {
@@ -104,7 +111,7 @@ public class IndexExport_p {
             Fulltext.ExportFormat format = Fulltext.ExportFormat.text;
             final String fname = post.get("format", "url-text");
             final boolean dom = fname.startsWith("dom"); // if dom== false complete urls are exported, otherwise only the domain
-            final boolean text = fname.startsWith("text"); 
+            final boolean text = fname.startsWith("text");
             if (fname.endsWith("text")) format = Fulltext.ExportFormat.text;
             if (fname.endsWith("html")) format = Fulltext.ExportFormat.html;
             if (fname.endsWith("rss")) format = Fulltext.ExportFormat.rss;
@@ -118,7 +125,7 @@ public class IndexExport_p {
 
             // store this call as api call: we do this even if there is a chance that it fails because recurring calls may do not fail
             if (maxseconds != -1) sb.tables.recordAPICall(post, "IndexExport_p.html", WorkTables.TABLE_API_TYPE_DUMP, format + "-dump, q=" + query + ", maxseconds=" + maxseconds);
-            
+
             // start the export
             try {
                 export = sb.index.fulltext().export(format, filter, query, maxseconds, new File(path), dom, text);
@@ -128,7 +135,7 @@ public class IndexExport_p {
                 prop.put("lurlexporterror_exportfailmsg", e.getMessage());
                 return prop;
             }
-            
+
             // show result
             prop.put("lurlexport_exportfile", export.file().toString());
             prop.put("lurlexport_urlcount", export.count());

@@ -27,9 +27,6 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 
-import net.yacy.cora.sorting.ReversibleScoreMap;
-import net.yacy.kelondro.data.word.Word;
-
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -37,6 +34,9 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
+
+import net.yacy.cora.sorting.ReversibleScoreMap;
+import net.yacy.kelondro.data.word.Word;
 
 public class MirrorSolrConnector extends AbstractSolrConnector implements SolrConnector {
 
@@ -47,7 +47,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         this.solr0 = null;
         this.solr1 = null;
     }
-    
+
     public MirrorSolrConnector(SolrConnector solr0, SolrConnector solr1) {
         this.solr0 = solr0;
         this.solr1 = solr1;
@@ -64,8 +64,8 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
                 ((this.solr0 == null && ((MirrorSolrConnector) o).solr0 == null) || (((this.solr0 != null && ((MirrorSolrConnector) o).solr0 != null)) && this.solr0.equals(((MirrorSolrConnector) o).solr0))) &&
                 ((this.solr1 == null && ((MirrorSolrConnector) o).solr1 == null) || (((this.solr1 != null && ((MirrorSolrConnector) o).solr1 != null)) && this.solr1.equals(((MirrorSolrConnector) o).solr1)));
     }
-    
-    
+
+
     @Override
     public int bufferSize() {
         int b = 0;
@@ -79,7 +79,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr0 != null) this.solr0.clearCaches();
         if (this.solr1 != null) this.solr1.clearCaches();
     }
-    
+
     public boolean isConnected0() {
         return this.solr0 != null;
     }
@@ -139,7 +139,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     public boolean isClosed() {
         return (this.solr0 == null || this.solr0.isClosed()) && (this.solr1 == null || this.solr1.isClosed());
     }
-    
+
     @Override
     public synchronized void close() {
         if (this.solr0 != null) {this.solr0.close(); this.solr0 = null;}
@@ -183,12 +183,12 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr0 != null) this.solr0.deleteByQuery(querystring);
         if (this.solr1 != null) this.solr1.deleteByQuery(querystring);
     }
-    
+
     @Override
     public SolrDocument getDocumentById(final String key, final String ... fields) throws IOException {
         assert key.length() == Word.commonHashLength : "wrong id: " + key;
         SolrDocument doc;
-        if ((solr0 != null && ((doc = solr0.getDocumentById(key, fields)) != null)) || (solr1 != null && ((doc = solr1.getDocumentById(key, fields)) != null))) {
+        if ((this.solr0 != null && ((doc = this.solr0.getDocumentById(key, fields)) != null)) || (this.solr1 != null && ((doc = this.solr1.getDocumentById(key, fields)) != null))) {
             return doc;
         }
         return null;
@@ -204,7 +204,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr0 != null) this.solr0.add(solrdoc);
         if (this.solr1 != null) this.solr1.add(solrdoc);
     }
-    
+
     @Override
     public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
         if (this.solr0 != null) this.solr0.add(solrdocs);
@@ -346,7 +346,7 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         // TODO: combine both
         return l1;
     }
-    
+
     @Override
     public long getCountByQuery(final String querystring) throws IOException {
         if (this.solr0 == null && this.solr1 == null) return 0;
@@ -411,17 +411,11 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
     }
 
     @Override
-    public LoadTimeURL getLoadTimeURL(String id) throws IOException {
-        if (this.solr0 != null && this.solr1 == null) return this.solr0.getLoadTimeURL(id);
-        if (this.solr0 == null && this.solr1 != null) return this.solr1.getLoadTimeURL(id);
-        if (this.solr0 == null && this.solr1 == null) return null;
-        LoadTimeURL md0 = this.solr0.getLoadTimeURL(id);
-        LoadTimeURL md1 = this.solr1.getLoadTimeURL(id);
-        if (md0 == null) return md1;
-        if (md1 == null) return md0;
-        long date = Math.max(md0.date, md1.date);
-        assert md0.url.equals(md1.url);
-        return new LoadTimeURL(md0.url, date);
+    public boolean exists(final String id) {
+        boolean result = false;
+        if (this.solr0 != null) result = result || this.solr0.exists(id);
+        if (this.solr1 != null) result = result || this.solr1.exists(id);
+        return result;
     }
 
     @Override
@@ -430,5 +424,5 @@ public class MirrorSolrConnector extends AbstractSolrConnector implements SolrCo
         if (this.solr0 == null && this.solr1 != null) return this.solr1.concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency);
         return super.concurrentIDsByQuery(querystring, sort, offset, maxcount, maxtime, buffersize, concurrency);
     }
-    
+
 }

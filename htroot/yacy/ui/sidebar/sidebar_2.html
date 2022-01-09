@@ -7,54 +7,12 @@
 			clearStyle: true,					
 			header: "h3"
 		});
-		$("#side2").accordion("activate", 1);					
-		/* Load TagCloud */
-		loadTagCloud();
+		$("#side2").accordion("activate", 1);
 	});
 	
 	$("#topwords").treeview({
 			unique: true
 	});
-		
-	function loadTagCloud() {		
-		$("#tagcloud *").remove();
-		$("#sidebar-2-1").toggleClass("ui.loading");
-		$.ajax({
-			type: "POST",
-			url: "/api/ymarks/get_tags.xml?top=25&sort=alpha",			
-			dataType: "xml",
-			cache: false,
-			success: function(xml) {				
-				var bhtml = "<li id='bmk_tags_folder' class='closed'><span class='folder'>Bookmark Tags</span><ul>";
-				$(xml).find('tag').each(function(){					
-					var count = $(this).attr('count');
-					var tag = $(this).attr('tag');										
-					var size = ((count/20)+0.3);
-					if (size < 1) {size = 1;}					
-					$('<a style="font-size:'+size+'em"></a>')
-						.html(HTMLenc(tag)+' ')						
-						.appendTo('#tagcloud')
-						.bind('click', function() {
-							qtag = $(this).text().replace(/\s+/g,"");
-							$("select[name='resource']").setValue('ymarks');
-							$("input[name='search']").setValue(qtag);
-							if ($tabs.data('selected.tabs') == bmk_tab) {
-								reloadBM();
-							} else {
-								$tabs.tabs('select',2);
-							}							
-						});
-					bhtml = bhtml + "<li><span class='tag'>"+tag+"</span></li>";																										
-				}); //close each(
-				bhtml = bhtml + "</ul></li>";
-				var bfold = $(bhtml).prependTo("#yfolder");
-				$("#yfolder").treeview({
-					add: bfold
-				});		
-				$("#sidebar-2-1").toggleClass("ui.loading");
-			}
-		}); //close $.ajax(	
-	}	
   //]]>  
 </script>
 

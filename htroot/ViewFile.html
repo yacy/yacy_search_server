@@ -84,7 +84,7 @@ function updatepage(str) {
           <dd>
             <input type="text" size="60" name="url" id="url" value="#[url]#" />
             <input type="submit" name="show" class="btn btn-primary" value="Show Metadata" />
-            #(moar)#::<input type="button" value="Browse Host" class="btn btn-default" onClick="location.href='HostBrowser.html?path=' + document.getElementById('url').value" />#(/moar)#
+            #(moar)#::<input type="button" value="Browse Host" class="btn btn-default" onClick="location.href='IndexBrowser_p.html?path=' + document.getElementById('url').value" />#(/moar)#
             <div id="searchresults"></div>
           </dd>
           #(moar)#::
@@ -202,6 +202,7 @@ function updatepage(str) {
 	<table border="0">
 		<tr class="head">
 			<td>nr</td>
+			<td class="tt"><span class="glyphicon glyphicon-list" title="action"></span></td>
 			<td class="tt">type</td>
 			<td class="tt">name</td>
 			<td class="tt">link</td>
@@ -211,6 +212,7 @@ function updatepage(str) {
 		#{links}#
 		<tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
 			<td>#[nr]#</td>
+			<td class="tt"><a href="ViewFile.html?viewMode=links#(agent)#::&agentName=#[name]##(/agent)#&url=#[encodedUrl]#" title="Show Metadata"><img src="env/grafics/doc.gif" alt=""></a></td>
 			<td class="tt"><tt>#[type]#</tt></td>
 			<td class="tt"><tt>#[name]#</tt></td>
 			<td class="tt"><tt><a href="#[url]#">#[link]#</a></tt></td>

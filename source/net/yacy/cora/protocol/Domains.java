@@ -51,8 +51,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import com.google.common.net.InetAddresses;
+import com.google.common.util.concurrent.SimpleTimeLimiter;
+import com.google.common.util.concurrent.TimeLimiter;
 
 import net.yacy.cora.plugin.ClassProvider;
 import net.yacy.cora.protocol.tld.GenericTLD;
@@ -65,11 +70,6 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
-
-import com.google.common.net.InetAddresses;
-import com.google.common.util.concurrent.SimpleTimeLimiter;
-import com.google.common.util.concurrent.TimeLimiter;
-import com.google.common.util.concurrent.UncheckedTimeoutException;
 
 public class Domains {
     
@@ -106,8 +106,15 @@ public class Domains {
     private static Set<InetAddress> publicIPv4HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
     private static Set<InetAddress> publicIPv6HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
     private static Set<String> localHostNames = new HashSet<String>(); // subset of myHostNames
+    private static Thread domaininit = null;
     static {
         localHostNames.add(LOCALHOST);
+        // look up the host name
+        try {
+            LOCALHOST_NAME = InetAddress.getLocalHost().getCanonicalHostName();
+        } catch (final UnknownHostException e) {}
+        localHostNames.add(LOCALHOST_NAME);
+
         try {
             InetAddress localHostAddress = InetAddress.getLocalHost();
             if (localHostAddress != null) myHostAddresses.add(localHostAddress);
@@ -117,11 +124,17 @@ public class Domains {
             if (moreAddresses != null) myHostAddresses.addAll(Arrays.asList(moreAddresses));
         } catch (final UnknownHostException e) {}
 
+        for (InetAddress a: myHostAddresses) {
+            if (a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress() || a.isSiteLocalAddress()) {
+                localHostAddresses.add(a);
+            }
+        }
+
         // to get the local host name, a dns lookup is necessary.
         // if such a lookup blocks, it can cause that the static initiatializer does not finish fast
         // therefore we start the host name lookup as concurrent thread
         // meanwhile the host name is "127.0.0.1" which is not completely wrong
-        new Thread("Domains: init") {
+        domaininit = new Thread("Domains: init") {
             @Override
             public void run() {
                 // try to get local addresses from interfaces
@@ -137,11 +150,6 @@ public class Domains {
                     }
                 } catch (final SocketException e) {
                 }
-
-                // now look up the host name
-                try {
-                    LOCALHOST_NAME = getHostName(InetAddress.getLocalHost());
-                } catch (final UnknownHostException e) {}
 
                 // after the host name was resolved, we try to look up more local addresses
                 // using the host name:
@@ -188,7 +196,8 @@ public class Domains {
                     }
                 }
             }
-        }.start();
+        };
+        domaininit.start();
     }
     
     /**
@@ -834,7 +843,7 @@ public class Domains {
 	final private static ExecutorService getByNameService = Executors
 			.newCachedThreadPool(new NamePrefixThreadFactory("InetAddress.getByName"));
 
-	final private static TimeLimiter timeLimiter = new SimpleTimeLimiter(getByNameService);
+	final private static TimeLimiter timeLimiter = SimpleTimeLimiter.create(getByNameService);
 
     /**
      * strip off any parts of an url, address string (containing host/ip:port) or raw IPs/Hosts,
@@ -990,9 +999,9 @@ public class Domains {
                         public InetAddress call() throws Exception {
                             return InetAddress.getByName(host);
                         }
-                    }, 3000L, TimeUnit.MILLISECONDS, false);
+                    }, 3000L, TimeUnit.MILLISECONDS);
                     //ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
-                } catch (final UncheckedTimeoutException e) {
+                } catch (final InterruptedException | TimeoutException e) {
                 	// in case of a timeout - maybe cause of massive requests - do not fill NAME_CACHE_MISS
                 	LOOKUP_SYNC.remove(host);
                     return null;
@@ -1064,7 +1073,6 @@ public class Domains {
      * Please use myPublicIPv4() or (preferred) myPublicIPv6() instead.
      * @return
      */
-    @Deprecated
     public static InetAddress myPublicLocalIP() {
         // for backward compatibility, we try to select a IPv4 address here.
         // future methods should use myPublicIPs() and prefer IPv6
@@ -1104,8 +1112,20 @@ public class Domains {
      * @return list of all intranet addresses
      */
     public static Set<InetAddress> myIntranetIPs() {
-        if (localHostAddresses.size() < 1) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
+        while (domaininit == null || domaininit.isAlive()) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         return localHostAddresses;
+    }
+    
+    public static Set<InetAddress> myIPv4IntranetIPs() {
+        Set<InetAddress> in = new HashSet<>();
+        for (InetAddress a: myIntranetIPs()) if (a instanceof Inet4Address) in.add(a);
+        return in;
+    }
+    
+    public static Set<InetAddress> myIPv4IntranetNonLocalhostIPs() {
+        Set<InetAddress> in = new HashSet<>();
+        for (InetAddress a: myIPv4IntranetIPs()) if (((Inet4Address) a).getAddress()[0] != 127) in.add(a);
+        return in;
     }
 
     /**

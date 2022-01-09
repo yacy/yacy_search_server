@@ -32,8 +32,8 @@ import net.yacy.kelondro.data.meta.URIMetadataNode;
  */
 public class NameSpaceNavigator extends StringNavigator implements Navigator {
 
-    public NameSpaceNavigator(String title) {
-        super(title, null);
+    public NameSpaceNavigator(final String title, final NavigatorSort sort) {
+        super(title, null, sort);
     }
 
     @Override

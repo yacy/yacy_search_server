@@ -320,7 +320,7 @@ public class Status
         prop.put("usedDisk", Formatter.bytesToString(sb.observer.getSizeOfDataPath(true)));
         prop.put("freeDisk", Formatter.bytesToString(sb.observer.getUsableSpace()));
         prop.put("processors", WorkflowProcessor.availableCPU);
-        prop.put("load", Memory.load());
+        prop.put("load", Memory.getSystemLoadAverage());
         ThreadMXBean threadbean = ManagementFactory.getThreadMXBean();
         prop.put("processesCurrentInclDaemon", threadbean.getThreadCount());
         prop.put("processesCurrentOnlyDaemon", threadbean.getDaemonThreadCount());

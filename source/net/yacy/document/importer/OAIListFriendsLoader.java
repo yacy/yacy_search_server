@@ -127,12 +127,10 @@ public class OAIListFriendsLoader implements Serializable {
         private SAXParser saxParser;
         private final InputStream stream;
         private Attributes atts;
-        private int recordCounter;
         private final TreeMap<String, String> map;
 
         public Parser(final byte[] b) {
             this.map = new TreeMap<String, String>();
-            this.recordCounter = 0;
             this.buffer = new StringBuilder();
             this.parsingValue = false;
             this.atts = null;
@@ -164,14 +162,9 @@ public class OAIListFriendsLoader implements Serializable {
          </BaseURLs>
          */
 
-        public int getCounter() {
-        	return this.recordCounter;
-        }
-
         @Override
         public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
             if ("baseURL".equals(tag)) {
-                this.recordCounter++;
                 this.parsingValue = true;
                 this.atts = atts;
             }

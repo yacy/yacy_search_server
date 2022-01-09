@@ -49,8 +49,7 @@ import net.yacy.search.schema.CollectionSchema;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
-public class CrawlStartScanner_p
-{
+public class CrawlStartScanner_p {
 
     private final static int CONCURRENT_RUNNER = 200;
 
@@ -83,7 +82,7 @@ public class CrawlStartScanner_p
         String[] hosts0 = hostt.indexOf('\n') > 0 || hostt.indexOf('\r') > 0 ? hostt.split("[\\r\\n]+") : hostt.split(Pattern.quote(","));
         Set<String> hostSet = new LinkedHashSet<String>();
         for (String s: hosts0) if (s != null && s.length() > 0) hostSet.add(s);
-        
+
         final Set<InetAddress> ips = Domains.myIntranetIPs();
         prop.put("intranethosts", ips.toString());
         prop.put("intranetHint", sb.isIntranetMode() ? 0 : 1);
@@ -99,22 +98,22 @@ public class CrawlStartScanner_p
                     hostSet.add(ip.getHostAddress());
                 }
             } else {
-            	final Set<InetAddress> myPublicIPs = new HashSet<InetAddress>();
-            	myPublicIPs.addAll(Domains.myPublicIPv4());
-            	myPublicIPs.addAll(Domains.myPublicIPv6());
-            	for(final InetAddress myPublicIP: myPublicIPs) {
+                final Set<InetAddress> myPublicIPs = new HashSet<InetAddress>();
+                myPublicIPs.addAll(Domains.myPublicIPv4());
+                myPublicIPs.addAll(Domains.myPublicIPv6());
+                for(final InetAddress myPublicIP: myPublicIPs) {
                     if (Domains.isThisHostIP(myPublicIP)) {
-                    	final Set<String> myIPs = sb.peers.mySeed().getIPs();
-                    	for(final String myIP: myIPs) {
+                        final Set<String> myIPs = sb.peers.mySeed().getIPs();
+                        for(final String myIP: myIPs) {
                             ip = Domains.dnsResolve(myIP);
                             if(ip != null) {
-                            	hostSet.add(ip.getHostAddress());
+                                hostSet.add(ip.getHostAddress());
                             }
-                    	}
+                        }
                     } else {
                         hostSet.add(myPublicIP.getHostAddress());
                     }
-            	}
+                }
             }
         }
         String hos = ""; for (String s: hostSet) hos += s + "\n";
@@ -130,7 +129,7 @@ public class CrawlStartScanner_p
                 for (String s: hostscore) hostSet.add(s);
             }
         }
-        
+
         // parse post requests
         if ( post != null ) {
             int repeat_time = 0;
@@ -149,12 +148,14 @@ public class CrawlStartScanner_p
 
                 // start a scanner
                 final Scanner scanner = new Scanner(CONCURRENT_RUNNER, timeout);
-                
+
                 boolean scanhttp = "on".equals(post.get("scanhttp", ""));
+                int scanhttpport = post.getInt("scanhttpport", 80);
                 boolean scanhttps = "on".equals(post.get("scanhttps", ""));
+                int scanhttpsport = post.getInt("scanhttpsport", 443);
                 boolean scanftp = "on".equals(post.get("scanftp", ""));
                 boolean scansmb = "on".equals(post.get("scansmb", ""));
-                
+
                 // select host base to scan
                 if ("hosts".equals(post.get("source", ""))) {
                     for (String host: hostSet) {
@@ -187,13 +188,13 @@ public class CrawlStartScanner_p
                                 if (ip != null) scanbase.add(ip);
                             }
                         }
-                        scanner.addProtocols(Scanner.genlist(scanbase, subnet), scanhttp, scanhttps, scanftp, scansmb);
+                        scanner.addProtocols(Scanner.genlist(scanbase, subnet), scanhttp, scanhttpport, scanhttps, scanhttpsport, scanftp, scansmb);
                     }
                 }
                 if ("intranet".equals(post.get("source", ""))) {
-                    scanner.addProtocols(Scanner.genlist(Domains.myIntranetIPs(), subnet), scanhttp, scanhttps, scanftp, scansmb);
+                    scanner.addProtocols(Scanner.genlist(Domains.myIntranetIPs(), subnet), scanhttp, scanhttpport, scanhttps, scanhttpsport, scanftp, scansmb);
                 }
-                
+
                 scanner.terminate();
                 if ("on".equals(post.get("accumulatescancache", "")) && !"scheduler".equals(post.get("rescan", ""))) {
                     Scanner.scancacheExtend(scanner);
@@ -223,7 +224,7 @@ public class CrawlStartScanner_p
                         final byte[] pk = entry.getValue().substring(5).getBytes();
                         final DigestURL url = pkmap.get(pk);
                         if ( url != null ) {
-                            String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99&directDocByURL=off";
+                            String path = "/Crawler_p.html?createBookmark=off&xsstopw=off&crawlingDomMaxPages=10000&intention=&range=domain&indexMedia=on&recrawl=nodoubles&xdstopw=off&storeHTCache=on&sitemapURL=&repeat_time=7&crawlingQ=on&cachePolicy=iffresh&indexText=on&crawlingMode=url&mustnotmatch=&crawlingDomFilterDepth=1&crawlingDomFilterCheck=off&crawlingstart=Start%20New%20Crawl&xpstopw=off&repeat_unit=seldays&crawlingDepth=99&directDocByURL=on";
                             path += "&crawlingURL=" + url.toNormalform(true);
                             WorkTables.execGetAPICall(
                                 Domains.LOCALHOST,
@@ -295,5 +296,5 @@ public class CrawlStartScanner_p
 
         return prop;
     }
-    
+
 }

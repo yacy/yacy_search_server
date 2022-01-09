@@ -67,6 +67,7 @@ public class YaCyDefaultServletTest {
 	 * custom "CONNECTION_PROP_PROTOCOL" header indicates the protocol
 	 */
 	@Test
+    @SuppressWarnings("deprecation")
 	public void testGetContextCustomProtocolHeader() {
 		RequestHeader header = new RequestHeader();
 		header.put(HeaderFramework.HOST, "myhost.com:8443");
@@ -84,6 +85,7 @@ public class YaCyDefaultServletTest {
 	 * custom "CONNECTION_PROP_PROTOCOL" indicates the protocol
 	 */
 	@Test
+    @SuppressWarnings("deprecation")
 	public void testGetContextDefaultPortCustomProtocolHeader() {
 		RequestHeader header = new RequestHeader();
 		header.put(HeaderFramework.HOST, "myhost.com");
@@ -99,7 +101,8 @@ public class YaCyDefaultServletTest {
 	/**
 	 * getContext() : reverse proxy serving HTTPS, YaCy serving HTTP
 	 */
-	@Test
+    @Test
+    @SuppressWarnings("deprecation")
 	public void testGetContextReverseProxy() {
 		/* Different protocols : HTTPS on proxy, HTTP on peer */
 		RequestHeader header = new RequestHeader();

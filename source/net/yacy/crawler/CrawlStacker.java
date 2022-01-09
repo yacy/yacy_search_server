@@ -1,7 +1,8 @@
 // plasmaCrawlStacker.java
 // -----------------------
 // part of YaCy
-// (C) by Michael Peter Christen; mc@yacy.net
+// SPDX-FileCopyrightText: 2005 Michael Peter Christen <mc@yacy.net)>
+// SPDX-License-Identifier: GPL-2.0-or-later
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
 //
@@ -43,7 +44,6 @@ import net.yacy.cora.document.id.AnchorURL;
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.FailCategory;
-import net.yacy.cora.federate.solr.connector.SolrConnector.LoadTimeURL;
 import net.yacy.cora.order.Base64Order;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.ftp.FTPClient;
@@ -63,15 +63,15 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.index.Segment;
 
 public final class CrawlStacker implements WorkflowTask<Request>{
-    
+
     public static String ERROR_NO_MATCH_MUST_MATCH_FILTER = "url does not match must-match filter ";
     public static String ERROR_MATCH_WITH_MUST_NOT_MATCH_FILTER = "url matches must-not-match filter ";
-    
+
     /** Crawl reject reason prefix having specific processing */
     public static final String CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX = "double in";
-    
+
     private final static ConcurrentLog log = new ConcurrentLog("STACKCRAWL");
-    
+
     private final RobotsTxt robots;
     private final WorkflowProcessor<Request>  requestQueue;
     public  final CrawlQueues       nextQueue;
@@ -100,14 +100,14 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
         this.domainList = domainList;
-        this.requestQueue = new WorkflowProcessor<Request>("CrawlStacker", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, 10000, null, WorkflowProcessor.availableCPU);
+        this.requestQueue = new WorkflowProcessor<>("CrawlStacker", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, 10000, null, WorkflowProcessor.availableCPU);
         CrawlStacker.log.info("STACKCRAWL thread initialized.");
     }
 
     public int size() {
         return this.requestQueue.getQueueSize();
     }
-    
+
     public boolean isEmpty() {
         if (!this.requestQueue.queueIsEmpty()) return false;
         return true;
@@ -118,26 +118,26 @@ public final class CrawlStacker implements WorkflowTask<Request>{
     }
 
     public void announceClose() {
-        CrawlStacker.log.info("Flushing remaining " + size() + " crawl stacker job entries.");
+        CrawlStacker.log.info("Flushing remaining " + this.size() + " crawl stacker job entries.");
         this.requestQueue.shutdown();
     }
 
     public synchronized void close() {
-        CrawlStacker.log.info("Shutdown. waiting for remaining " + size() + " crawl stacker job entries. please wait.");
+        CrawlStacker.log.info("Shutdown. waiting for remaining " + this.size() + " crawl stacker job entries. please wait.");
         this.requestQueue.shutdown();
 
         CrawlStacker.log.info("Shutdown. Closing stackCrawl queue.");
 
-        clear();
+        this.clear();
     }
 
     @Override
     public Request process(final Request entry) {
         // this is the method that is called by the busy thread from outside
         if (entry == null) return null;
-        
+
         try {
-            final String rejectReason = stackCrawl(entry);
+            final String rejectReason = this.stackCrawl(entry);
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null && !rejectReason.startsWith(CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX)) {
@@ -157,7 +157,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         if (CrawlStacker.log.isFinest()) CrawlStacker.log.finest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + ((entry.initiator() == null) ? "" : ASCII.String(entry.initiator())) + ", name=" + entry.name() + ", appdate=" + entry.appdate() + ", depth=" + entry.depth());
         this.requestQueue.enQueue(entry);
     }
-    
+
     public void enqueueEntriesAsynchronous(
             final byte[] initiator,
             final String profileHandle,
@@ -166,11 +166,11 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         new Thread("enqueueEntriesAsynchronous") {
             @Override
             public void run() {
-                enqueueEntries(initiator, profileHandle, hyperlinks, true, timezoneOffset);
+                CrawlStacker.this.enqueueEntries(initiator, profileHandle, hyperlinks, true, timezoneOffset);
             }
         }.start();
     }
-    
+
     /**
      * Enqueue crawl start entries
      * @param initiator Hash of the peer initiating the crawl
@@ -186,15 +186,15 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             final List<AnchorURL> hyperlinks,
             final boolean replace,
             final int timezoneOffset) {
-    	/* Let's check if the profile is still active before removing any existing entry */
-        byte[] handle = UTF8.getBytes(profileHandle);
+        /* Let's check if the profile is still active before removing any existing entry */
+        final byte[] handle = UTF8.getBytes(profileHandle);
         final CrawlProfile profile = this.crawler.get(handle);
         if (profile == null) {
             String error;
             if(hyperlinks.size() == 1) {
-            	error = "Rejected URL : " + hyperlinks.get(0).toNormalform(false) + ". Reason : LOST STACKER PROFILE HANDLE '" + profileHandle + "'";  
+                error = "Rejected URL : " + hyperlinks.get(0).toNormalform(false) + ". Reason : LOST STACKER PROFILE HANDLE '" + profileHandle + "'";
             } else {
-            	error = "Rejected " + hyperlinks.size() + " crawl entries. Reason : LOST STACKER PROFILE HANDLE '" + profileHandle + "'";            	
+                error = "Rejected " + hyperlinks.size() + " crawl entries. Reason : LOST STACKER PROFILE HANDLE '" + profileHandle + "'";
             }
             CrawlStacker.log.info(error); // this is NOT an error but a normal behavior when terminating a crawl queue
             /* Throw an exception to signal caller it can stop stacking URLs using this crawl profile */
@@ -202,7 +202,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         }
         if (replace) {
             // delete old entries, if exists to force a re-load of the url (thats wanted here)
-            Set<String> hosthashes = new HashSet<String>();
+            final Set<String> hosthashes = new HashSet<>();
             for (final AnchorURL url: hyperlinks) {
                 if (url == null) continue;
                 hosthashes.add(url.hosthash());
@@ -230,12 +230,12 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             }
 
             if (url.getProtocol().equals("ftp")) {
-                /* put ftp site entries on the crawl stack, 
+                /* put ftp site entries on the crawl stack,
                  * using the crawl profile depth to control how many children folders of the url are stacked */
-                enqueueEntriesFTP(initiator, profile, url, replace, timezoneOffset);
+                this.enqueueEntriesFTP(initiator, profile, url, replace, timezoneOffset);
             } else {
                 // put entry on crawl stack
-                enqueueEntry(new Request(
+                this.enqueueEntry(new Request(
                         initiator,
                         url,
                         null,
@@ -248,7 +248,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             }
         }
     }
-    
+
     /**
      * Asynchronously enqueue crawl start entries for a ftp url.
      * @param initiator Hash of the peer initiating the crawl
@@ -292,13 +292,13 @@ public final class CrawlStacker implements WorkflowTask<Request>{
                             CrawlStacker.this.indexSegment.fulltext().remove(urlhash);
                             cq.noticeURL.removeByURLHash(urlhash);
                         }
-                        
-                        /* Each entry is a children resource of the starting ftp URL : 
+
+                        /* Each entry is a children resource of the starting ftp URL :
                          * take into account the sub folder depth in the crawl depth control */
-                        int nextDepth = Math.max(0, url.getPaths().length - pathParts);
+                        final int nextDepth = Math.max(0, url.getPaths().length - pathParts);
 
                         // put entry on crawl stack
-                        enqueueEntry(new Request(
+                        CrawlStacker.this.enqueueEntry(new Request(
                                 initiator,
                                 url,
                                 null,
@@ -322,8 +322,8 @@ public final class CrawlStacker implements WorkflowTask<Request>{
      * @return null if successfull, a reason string if not successful
      */
     public String stackSimpleCrawl(final DigestURL url) {
-    	final CrawlProfile pe = this.crawler.defaultSurrogateProfile;
-    	return stackCrawl(new Request(
+        final CrawlProfile pe = this.crawler.defaultSurrogateProfile;
+        return this.stackCrawl(new Request(
                 this.peers.mySeed().hash.getBytes(),
                 url,
                 null,
@@ -341,7 +341,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
     public String stackCrawl(final Request entry) {
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");
 
-        byte[] handle = UTF8.getBytes(entry.profileHandle());
+        final byte[] handle = UTF8.getBytes(entry.profileHandle());
         final CrawlProfile profile = this.crawler.get(handle);
         String error;
         if (profile == null) {
@@ -350,9 +350,9 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             return error;
         }
 
-        error = checkAcceptanceChangeable(entry.url(), profile, entry.depth());
+        error = this.checkAcceptanceChangeable(entry.url(), profile, entry.depth());
         if (error != null) return error;
-        error = checkAcceptanceInitially(entry.url(), profile);
+        error = this.checkAcceptanceInitially(entry.url(), profile);
         if (error != null) return error;
 
         // store information
@@ -376,15 +376,15 @@ public final class CrawlStacker implements WorkflowTask<Request>{
 
         String warning = null;
         if (!profile.isCrawlerAlwaysCheckMediaType() && TextParser.supportsExtension(entry.url()) != null) {
-        	if(profile.isIndexNonParseableUrls()) {
-        		/* Unsupported file extension and no cross-checking of Media Type : add immediately to the noload stack to index only URL metadata */
-        		warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry, profile, this.robots);
-        		if (warning != null && CrawlStacker.log.isFine()) {
-        			CrawlStacker.log.fine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed to " + NoticedURL.StackType.NOLOAD + " stack : " + warning);
-        		}
-        		return null;
-        	}
-        	
+            if(profile.isIndexNonParseableUrls()) {
+                /* Unsupported file extension and no cross-checking of Media Type : add immediately to the noload stack to index only URL metadata */
+                warning = this.nextQueue.noticeURL.push(NoticedURL.StackType.NOLOAD, entry, profile, this.robots);
+                if (warning != null && CrawlStacker.log.isFine()) {
+                    CrawlStacker.log.fine("CrawlStacker.stackCrawl of URL " + entry.url().toNormalform(true) + " - not pushed to " + NoticedURL.StackType.NOLOAD + " stack : " + warning);
+                }
+                return null;
+            }
+
             error = "URL '" + entry.url().toString() + "' file extension is not supported and indexing of linked non-parsable documents is disabled.";
             CrawlStacker.log.info(error);
             return error;
@@ -424,26 +424,18 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         if (dbocc != null) {
             return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": " + dbocc.name();
         }
-        String urlhash = ASCII.String(url.hash());
-        LoadTimeURL oldEntry = null;
-        try {
-            oldEntry = this.indexSegment.fulltext().getDefaultConnector().getLoadTimeURL(urlhash);
-        } catch (IOException e) {
-            // if an exception here occurs then there is the danger that urls which had been in the crawler are overwritten a second time
-            // to prevent that, we reject urls in these events
-            ConcurrentLog.logException(e);
-            return "exception during double-test: " + e.getMessage();
-        }
+        String urls = url.toNormalform(false);
+        final long oldDate = this.indexSegment.getLoadTime(url.hash());
 
         // deny urls that exceed allowed number of occurrences
         final int maxAllowedPagesPerDomain = profile.domMaxPages();
         if (maxAllowedPagesPerDomain < Integer.MAX_VALUE && maxAllowedPagesPerDomain > 0) {
             final AtomicInteger dp = profile.getCount(url.getHost());
             if (dp != null && dp.get() >= maxAllowedPagesPerDomain) {
-                if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + url.toNormalform(false) + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
+                if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL '" + urls + "' appeared too often in crawl stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
                 return "crawl stack domain counter exceeded (test by profile)";
             }
-            
+
             /*
             if (ResultURLs.domainCount(EventOrigin.LOCAL_CRAWLING, url.getHost()) >= maxAllowedPagesPerDomain) {
                 if (this.log.isFine()) this.log.fine("URL '" + urlstring + "' appeared too often in result stack, a maximum of " + maxAllowedPagesPerDomain + " is allowed.");
@@ -451,21 +443,21 @@ public final class CrawlStacker implements WorkflowTask<Request>{
             }
             */
         }
-        
-        final Long oldDate = oldEntry == null ? null : oldEntry.date;
-        if (oldDate == null) {
+
+        //final Long oldDate = oldEntry == null ? null : oldEntry.date;
+        if (oldDate < 0) {
             return null; // no evidence that we know that url
         }
-        final boolean recrawl = profile.recrawlIfOlder() > oldDate.longValue();
+        final boolean recrawl = profile.recrawlIfOlder() > oldDate;
         final String urlstring = url.toNormalform(false);
         if (recrawl) {
             if (CrawlStacker.log.isFine())
                 CrawlStacker.log.fine("RE-CRAWL of URL '" + urlstring + "': this url was crawled " +
-                    ((System.currentTimeMillis() - oldDate.longValue()) / 60000 / 60 / 24) + " days ago.");
+                    ((System.currentTimeMillis() - oldDate) / 60000 / 60 / 24) + " days ago.");
         } else {
-			return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": local index, recrawl rejected. Document date = "
-					+ ISO8601Formatter.FORMATTER.format(new Date(oldDate)) + " is not older than crawl profile recrawl minimum date = "
-					+ ISO8601Formatter.FORMATTER.format(new Date(profile.recrawlIfOlder()));
+            return CRAWL_REJECT_REASON_DOUBLE_IN_PREFIX + ": local index, recrawl rejected. Document date = "
+                    + ISO8601Formatter.FORMATTER.format(new Date(oldDate)) + " is not older than crawl profile recrawl minimum date = "
+                    + ISO8601Formatter.FORMATTER.format(new Date(profile.recrawlIfOlder()));
         }
 
         return null;
@@ -489,7 +481,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         }
 
         // check if ip is local ip address
-        final String urlRejectReason = urlInAcceptedDomain(url);
+        final String urlRejectReason = this.urlInAcceptedDomain(url);
         if (urlRejectReason != null) {
             if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("denied_(" + urlRejectReason + ")");
             return "denied_(" + urlRejectReason + ")";
@@ -503,9 +495,9 @@ public final class CrawlStacker implements WorkflowTask<Request>{
 
         // filter with must-match for URLs
         if ((depth > 0) && !profile.urlMustMatchPattern().matcher(urlstring).matches()) {
-        	final String patternStr = profile.formattedUrlMustMatchPattern();
+            final String patternStr = profile.formattedUrlMustMatchPattern();
             if (CrawlStacker.log.isFine()) {
-            	CrawlStacker.log.fine("URL '" + urlstring + "' does not match must-match crawling filter '" + patternStr + "'.");
+                CrawlStacker.log.fine("URL '" + urlstring + "' does not match must-match crawling filter '" + patternStr + "'.");
             }
             return ERROR_NO_MATCH_MUST_MATCH_FILTER + patternStr;
         }
@@ -577,31 +569,31 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         if (url == null) return "url is null";
         // check domainList from network-definition
         if(this.domainList != null) {
-        	if(!this.domainList.isListed(url, null)) {
-        		return "the url '" + url + "' is not in domainList of this network";
-        	}
+            if(!this.domainList.isListed(url, null)) {
+                return "the url '" + url + "' is not in domainList of this network";
+            }
         }
-        
+
         if (Switchboard.getSwitchboard().getConfigBool(
-				"contentcontrol.enabled", false) == true) {
+                "contentcontrol.enabled", false) == true) {
 
-			if (!Switchboard.getSwitchboard()
-					.getConfig("contentcontrol.mandatoryfilterlist", "")
-					.equals("")) {
-				FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
-				if (f != null) {
-					if (!f.isListed(url, null)) {
+            if (!Switchboard.getSwitchboard()
+                    .getConfig("contentcontrol.mandatoryfilterlist", "")
+                    .equals("")) {
+                final FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
+                if (f != null) {
+                    if (!f.isListed(url, null)) {
 
-						return "the url '"
-								+ url
-								+ "' does not belong to the network mandatory filter list";
+                        return "the url '"
+                                + url
+                                + "' does not belong to the network mandatory filter list";
 
-					}
-				}
-			}
+                    }
+                }
+            }
 
-		}
-        
+        }
+
         final boolean local = url.isLocal();
         if (this.acceptLocalURLs && local) return null;
         if (this.acceptGlobalURLs && !local) return null;
@@ -620,6 +612,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         // returns true if the url can be accepted according to network.unit.domain
         if (urlhash == null) return "url is null";
         // check if this is a local address and we are allowed to index local pages:
+        @SuppressWarnings("deprecation")
         final boolean local = DigestURL.isLocal(urlhash);
         if (this.acceptLocalURLs && local) return null;
         if (this.acceptGlobalURLs && !local) return null;

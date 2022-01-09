@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.cora.storage.Configuration.Entry;
-import net.yacy.cora.storage.Files;
 
 /**
  * this class reads configuration attributes as a list of keywords from a list

@@ -2,7 +2,7 @@
 //  Jetty9HttpServerImpl
 //  Copyright 2011 by Florian Richter
 //  First released 13.04.2011 at http://yacy.net
-//  
+//
 //  $LastChangedDate$
 //  $LastChangedRevision$
 //  $LastChangedBy$
@@ -11,12 +11,12 @@
 //  modify it under the terms of the GNU Lesser General Public
 //  License as published by the Free Software Foundation; either
 //  version 2.1 of the License, or (at your option) any later version.
-//  
+//
 //  This library is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 //  Lesser General Public License for more details.
-//  
+//
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program in the file lgpl21.txt
 //  If not, see <http://www.gnu.org/licenses/>.
@@ -51,6 +51,8 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.InetAccessHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.util.ProcessorUtils;
+import org.eclipse.jetty.util.log.Log;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.webapp.WebAppContext;
@@ -73,19 +75,26 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
      */
     public Jetty9HttpServerImpl(int port) {
         Switchboard sb = Switchboard.getSwitchboard();
-        
-        server = new Server();
-        ServerConnector connector = new ServerConnector(server);
+
+        this.server = new Server();
+
+        int cores = ProcessorUtils.availableProcessors();
+        int acceptors = Math.max(1, Math.min(4, cores/2)); // original: Math.max(1, Math.min(4,cores/8));
+        HttpConnectionFactory hcf = new HttpConnectionFactory();
+        ServerConnector connector = new ServerConnector(this.server, null, null, null, acceptors, -1, hcf);
         connector.setPort(port);
         connector.setName("httpd:"+Integer.toString(port));
         connector.setIdleTimeout(9000); // timout in ms when no bytes send / received
-        server.addConnector(connector);
-        
+        connector.setAcceptQueueSize(128);
+
+        this.server.addConnector(connector);
+
+
         // add ssl/https connector
         boolean useSSL = sb.getConfigBool("server.https", false);
-      
+
         if (useSSL) {
-            final SslContextFactory sslContextFactory = new SslContextFactory();
+            final SslContextFactory sslContextFactory = new SslContextFactory.Server();
             final SSLContext sslContext = initSslContext(sb);
             if (sslContext != null) {
 
@@ -97,14 +106,14 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
                 https_config.addCustomizer(new SecureRequestCustomizer());
 
                 // SSL Connector
-                ServerConnector sslConnector = new ServerConnector(server,
+                ServerConnector sslConnector = new ServerConnector(this.server,
                         new SslConnectionFactory(sslContextFactory, HttpVersion.HTTP_1_1.asString()),
                         new HttpConnectionFactory(https_config));
                 sslConnector.setPort(sslport);
                 sslConnector.setName("ssld:" + Integer.toString(sslport)); // name must start with ssl (for withSSL() to work correctly)
                 sslConnector.setIdleTimeout(9000); // timout in ms when no bytes send / received
 
-                server.addConnector(sslConnector);
+                this.server.addConnector(sslConnector);
                 ConcurrentLog.info("SERVER", "SSL support initialized successfully on port " + sslport);
             }
         }
@@ -115,7 +124,8 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         // configure root context
         WebAppContext htrootContext = new WebAppContext();
         htrootContext.setContextPath("/");
-        String htrootpath = sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+        String htrootpath = sb.appPath + "/" + sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT);
+        ConcurrentLog.info("Jetty9HttpServerImpl", "htrootpath = " + htrootpath);
         htrootContext.setErrorHandler(new YaCyErrorHandler()); // handler for custom error page
         try {
             htrootContext.setBaseResource(Resource.newResource(htrootpath));
@@ -128,7 +138,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             Resource webxml = Resource.newResource(sb.dataPath + "/DATA/SETTINGS/web.xml");
             if (webxml.exists()) {
                 htrootContext.setDescriptor(webxml.getName());
-            } 
+            }
 
         } catch (IOException ex) {
             if (htrootContext.getBaseResource() == null) {
@@ -144,21 +154,21 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         sholder.setAsyncSupported(true); // needed for YaCyQoSFilter
         //sholder.setInitParameter("welcomeFile", "index.html"); // default is index.html, welcome.html
         htrootContext.addServlet(sholder, "/*");
-        
-		final GzipHandler gzipHandler = new GzipHandler();
-		/*
-		 * Decompression of incoming requests body is required for index distribution
-		 * APIs /yacy/transferRWI.html and /yacy/transferURL.html This was previously
-		 * handled by a GZIPRequestWrapper in the YaCyDefaultServlet.
-		 */
-		gzipHandler.setInflateBufferSize(4096);
-		
-		if (!sb.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
-				SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT)) {
-			/* Gzip compression of responses can be disabled by user configuration */
-			gzipHandler.setExcludedMethods(HttpMethod.GET.asString(), HttpMethod.POST.asString());
-		}
-		htrootContext.setGzipHandler(gzipHandler);
+
+        final GzipHandler gzipHandler = new GzipHandler();
+        /*
+         * Decompression of incoming requests body is required for index distribution
+         * APIs /yacy/transferRWI.html and /yacy/transferURL.html This was previously
+         * handled by a GZIPRequestWrapper in the YaCyDefaultServlet.
+         */
+        gzipHandler.setInflateBufferSize(4096);
+
+        if (!sb.getConfigBool(SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP,
+                SwitchboardConstants.SERVER_RESPONSE_COMPRESS_GZIP_DEFAULT)) {
+            /* Gzip compression of responses can be disabled by user configuration */
+            gzipHandler.setExcludedMethods(HttpMethod.GET.asString(), HttpMethod.POST.asString());
+        }
+        htrootContext.setGzipHandler(gzipHandler);
 
         // -----------------------------------------------------------------------------
         // here we set and map the mandatory servlets, needed for typical YaCy operation
@@ -171,13 +181,13 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         //htrootContext.addServlet(SolrSelectServlet.class, "/solr/select"); // uses the default core, collection1
         //htrootContext.addServlet(SolrSelectServlet.class, "/solr/collection1/select"); // the same servlet, identifies the collection1 core using the path
         //htrootContext.addServlet(SolrSelectServlet.class, "/solr/webgraph/select"); // the same servlet, identifies the webgraph core using the path
-        
+
         //htrootContext.addServlet(SolrServlet.class, "/solr/collection1/admin/luke");
         //htrootContext.addServlet(SolrServlet.class, "/solr/webgraph/admin/luke");
 
         // add proxy?url= servlet
         //htrootContext.addServlet(YaCyProxyServlet.class,"/proxy.html");
-        
+
         // add GSA servlet
         //htrootContext.addServlet(GSAsearchServlet.class,"/gsa/search");
         // --- eof default servlet mappings --------------------------------------------
@@ -193,18 +203,20 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         }
         // context handler for dispatcher and security (hint: dispatcher requires a context)
         ContextHandler context = new ContextHandler();
-        context.setServer(server);
+        context.setServer(this.server);
         context.setContextPath("/");
         context.setHandler(handlers);
-
+        context.setMaxFormContentSize(1024 * 1024 * 10); // allow 10MB, large forms may be required during crawl starts with long lists
+        org.eclipse.jetty.util.log.Logger log = Log.getRootLogger();
+        context.setLogger(log);
         // make YaCy handlers (in context) and servlet context handlers available (both contain root context "/")
         // logic: 1. YaCy handlers are called if request not handled (e.g. proxy) then servlets handle it
         ContextHandlerCollection allrequesthandlers = new ContextHandlerCollection();
-        allrequesthandlers.setServer(server);
+        allrequesthandlers.setServer(this.server);
         allrequesthandlers.addHandler(context);
-        allrequesthandlers.addHandler(htrootContext);    
-        allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler 
-        
+        allrequesthandlers.addHandler(htrootContext);
+        allrequesthandlers.addHandler(new DefaultHandler()); // if not handled by other handler
+
         YaCyLoginService loginService = new YaCyLoginService();
         // this is very important (as it is part of the user password hash)
         // changes will ivalidate all current existing user-password-hashes (from userDB)
@@ -216,46 +228,46 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         htrootContext.setSecurityHandler(securityHandler);
 
         // wrap all handlers
-        Handler crashHandler = new CrashProtectionHandler(server, allrequesthandlers);
+        Handler crashHandler = new CrashProtectionHandler(this.server, allrequesthandlers);
         // check server access restriction and add InetAccessHandler if restrictions are needed
         // otherwise don't (to save performance)
         final String white = sb.getConfig("serverClient", "*");
         if (!white.equals("*")) { // full ip (allowed ranges 0-255 or prefix  10.0-255,0,0-100  or CIDR notation 192.168.1.0/24)
             final StringTokenizer st = new StringTokenizer(white, ",");
             final InetAccessHandler whiteListHandler;
-			if (white.contains("|")) {
-				/*
-				 * At least one pattern includes a path definition : we must use the
-				 * InetPathAccessHandler as InetAccessHandler doesn't support path patterns
-				 */
-				whiteListHandler = new InetPathAccessHandler();
-			} else {
-				whiteListHandler = new InetAccessHandler();
-			}
+            if (white.contains("|")) {
+                /*
+                 * At least one pattern includes a path definition : we must use the
+                 * InetPathAccessHandler as InetAccessHandler doesn't support path patterns
+                 */
+                whiteListHandler = new InetPathAccessHandler();
+            } else {
+                whiteListHandler = new InetAccessHandler();
+            }
             int i = 0;
             while (st.hasMoreTokens()) {
                 final String pattern = st.nextToken();
                 try {
-                	whiteListHandler.include(pattern);
+                    whiteListHandler.include(pattern);
                 } catch (final IllegalArgumentException nex) { // catch format exception on wrong ip address pattern
                     ConcurrentLog.severe("SERVER", "Server Access Settings - IP filter: " + nex.getMessage());
                     continue;
                 }
                 i++;
-            }          
+            }
             if (i > 0) {
-            	final String loopbackAddress = InetAddress.getLoopbackAddress().getHostAddress();
-            	whiteListHandler.include(loopbackAddress);
+                final String loopbackAddress = InetAddress.getLoopbackAddress().getHostAddress();
+                whiteListHandler.include(loopbackAddress);
                 whiteListHandler.setHandler(crashHandler);
                 this.server.setHandler(whiteListHandler);
-                
+
                 ConcurrentLog.info("SERVER","activated IP access restriction to: [" + loopbackAddress + "," + white +"]");
             } else {
-                server.setHandler(crashHandler); // InetAccessHandler not needed
+                this.server.setHandler(crashHandler); // InetAccessHandler not needed
             }
         } else {
-            server.setHandler(crashHandler); // InetAccessHandler not needed
-        }        
+            this.server.setHandler(crashHandler); // InetAccessHandler not needed
+        }
     }
 
     /**
@@ -265,8 +277,8 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
     public void startupServer() throws Exception {
         // option to finish running requests on shutdown
 //        server.setGracefulShutdown(3000);
-        server.setStopAtShutdown(true);
-        server.start();
+        this.server.setStopAtShutdown(true);
+        this.server.start();
     }
 
     /**
@@ -274,16 +286,16 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
      */
     @Override
     public void stop() throws Exception {
-        server.stop();  
-        server.join();
+        this.server.stop();
+        this.server.join();
     }
 
     /**
      * @return true if ssl/https connector is available
      */
     @Override
-    public boolean withSSL() {        
-        Connector[] clist = server.getConnectors(); 
+    public boolean withSSL() {
+        Connector[] clist = this.server.getConnectors();
         for (Connector c:clist) {
             if (c.getName().startsWith("ssl")) return true;
         }
@@ -296,7 +308,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
      */
     @Override
     public int getSslPort() {
-        Connector[] clist = server.getConnectors();
+        Connector[] clist = this.server.getConnectors();
         for (Connector c:clist) {
             if (c.getName().startsWith("ssl")) {
                 int port =((ServerConnector)c).getLocalPort();
@@ -305,7 +317,7 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
         }
         return -1;
     }
-    
+
     /**
      * reconnect with new port settings (after waiting milsec) - routine returns
      * immediately
@@ -319,15 +331,20 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
             @Override
             public void run() {
-                try {
+                if (milsec > 0) try {
                     Thread.sleep(milsec);
                 } catch (final InterruptedException e) {
                     ConcurrentLog.logException(e);
                 } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                 }
-                try { // reconnect with new settings (instead to stop/start server, just manipulate connectors
-                    final Connector[] cons = server.getConnectors();
+                try {
+                    if (!Jetty9HttpServerImpl.this.server.isRunning() || Jetty9HttpServerImpl.this.server.isStopped()) {
+                        Jetty9HttpServerImpl.this.server.start();
+                    }
+
+                    // reconnect with new settings (instead to stop/start server, just manipulate connectors
+                    final Connector[] cons = Jetty9HttpServerImpl.this.server.getConnectors();
                     final int port = Switchboard.getSwitchboard().getLocalPort();
                     final int sslport = Switchboard.getSwitchboard().getConfigInt(SwitchboardConstants.SERVER_SSLPORT, 8443);
                     for (Connector con : cons) {
@@ -407,92 +424,90 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
 
         // getting the keystore file name
         String keyStoreFileName = sb.getConfig("keyStore", "").trim();
- 
+
         // getting the keystore pwd
         String keyStorePwd = sb.getConfig("keyStorePassword", "").trim();
- 
+
         // take a look if we have something to import
         final String pkcs12ImportFile = sb.getConfig("pkcs12ImportFile", "").trim();
-        
+
         // if no keyStore and no import is defined, then set the default key
         if (keyStoreFileName.isEmpty() && keyStorePwd.isEmpty() && pkcs12ImportFile.isEmpty()) {
             keyStoreFileName = "defaults/freeworldKeystore";
             keyStorePwd = "freeworld";
             sb.setConfig("keyStore", keyStoreFileName);
             sb.setConfig("keyStorePassword", keyStorePwd);
-        } 
-        
+        }
+
         if (pkcs12ImportFile.length() > 0) {
             ConcurrentLog.info("SERVER", "Import certificates from import file '" + pkcs12ImportFile + "'.");
- 
+
             try {
                 // getting the password
                 final String pkcs12ImportPwd = sb.getConfig("pkcs12ImportPwd", "").trim();
- 
+
                 // creating tool to import cert
                 final PKCS12Tool pkcsTool = new PKCS12Tool(pkcs12ImportFile,pkcs12ImportPwd);
- 
+
                 // creating a new keystore file
                 if (keyStoreFileName.isEmpty()) {
                     // using the default keystore name
                     keyStoreFileName = "DATA/SETTINGS/myPeerKeystore";
- 
+
                     // creating an empty java keystore
                     final KeyStore ks = KeyStore.getInstance("JKS");
                     ks.load(null,keyStorePwd.toCharArray());
                     try (
-                    	/* Automatically closed by this try-with-resources statement */	
-                    	final FileOutputStream ksOut = new FileOutputStream(keyStoreFileName);
+                        /* Automatically closed by this try-with-resources statement */
+                        final FileOutputStream ksOut = new FileOutputStream(keyStoreFileName);
                     ) {
-                    	ks.store(ksOut, keyStorePwd.toCharArray());
+                        ks.store(ksOut, keyStorePwd.toCharArray());
                     }
- 
+
                     // storing path to keystore into config file
                     sb.setConfig("keyStore", keyStoreFileName);
                 }
- 
+
                 // importing certificate
                 pkcsTool.importToJKS(keyStoreFileName, keyStorePwd);
- 
+
                 // removing entries from config file
                 sb.setConfig("pkcs12ImportFile", "");
                 sb.setConfig("pkcs12ImportPwd", "");
- 
+
                 // deleting original import file
                 // TODO: should we do this
- 
             } catch (final Exception e) {
                 ConcurrentLog.severe("SERVER", "Unable to import certificate from import file '" + pkcs12ImportFile + "'.",e);
             }
         } else if (keyStoreFileName.isEmpty()) return null;
- 
- 
+
         // get the ssl context
         try {
             ConcurrentLog.info("SERVER","Initializing SSL support ...");
- 
+
             // creating a new keystore instance of type (java key store)
             if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER", "Initializing keystore ...");
             final KeyStore ks = KeyStore.getInstance("JKS");
- 
+
             // loading keystore data from file
             if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER","Loading keystore file " + keyStoreFileName);
             final FileInputStream stream = new FileInputStream(keyStoreFileName);
             try {
-            	ks.load(stream, keyStorePwd.toCharArray());
+                ks.load(stream, keyStorePwd.toCharArray());
             } finally {
-            	try {
-            		stream.close();
-            	} catch(IOException ioe) {
-            		ConcurrentLog.warn("SERVER", "Could not close input stream on file " + keyStoreFileName);
-            	}
+                try {
+                    stream.close();
+                } catch(IOException ioe) {
+                    ConcurrentLog.warn("SERVER", "Could not close input stream on file " + keyStoreFileName);
+                }
             }
- 
+
             // creating a keystore factory
             if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER","Initializing key manager factory ...");
             final KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
             kmf.init(ks,keyStorePwd.toCharArray());
- 
+
             // initializing the ssl context
             if (ConcurrentLog.isFine("SERVER")) ConcurrentLog.fine("SERVER","Initializing SSL context ...");
             final SSLContext sslcontext = SSLContext.getInstance("TLS");
@@ -505,5 +520,15 @@ public class Jetty9HttpServerImpl implements YaCyHttpServer {
             System.out.println(errorMsg);
             return null;
         }
+    }
+
+    @Override
+    public int getServerThreads() {
+        return this.server == null ? 0 : this.server.getThreadPool().getThreads() - this.server.getThreadPool().getIdleThreads();
+    }
+
+    @Override
+    public String toString() {
+        return this.server.dump() + "\n\n" + this.server.getState();
     }
 }

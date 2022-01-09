@@ -187,10 +187,11 @@ public class RemoteSearch extends Thread {
         if (indexingQueueSize > 0) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", indexingQueueSize > 0");}
         if (indexingQueueSize > 10) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", indexingQueueSize > 10");}
         if (indexingQueueSize > 50) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", indexingQueueSize > 50");}
-        if (Memory.load() > 2.0) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", load() > 2.0");}
+        if (Memory.getSystemLoadAverage() > 2.0) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", load() > 2.0");}
         if (Memory.cores() < 4) {redundancy = Math.max(1, redundancy - 1); healthMessage.append(", cores() < 4");}
         if (Memory.cores() == 1) {redundancy = 1; healthMessage.append(", cores() == 1");}
-        int minage = 3;
+        final int minage = 3;
+        final int minRWIWordCount = 1; // we exclude seeds with empty or disabled RWI from remote RWI search
         int robinsoncount = event.peers.scheme.verticalPartitions() * redundancy / 2;
         if (indexingQueueSize > 0) robinsoncount = Math.max(1, robinsoncount / 2);
         if (indexingQueueSize > 10) robinsoncount = Math.max(1, robinsoncount / 2);
@@ -212,17 +213,19 @@ public class RemoteSearch extends Thread {
                             event.peers,
                             QueryParams.hashes2Set(ASCII.String(Word.word2hash(newGoal))),
                             minage,
+                            minRWIWordCount,
                             redundancy, event.peers.redundancy(),
                             random);
                 } else {
                     // select just random peers
-                    dhtPeers = DHTSelection.seedsByAge(event.peers, false, event.peers.redundancy()).values();
+                    dhtPeers = DHTSelection.seedsByAge(event.peers, false, event.peers.redundancy(), minRWIWordCount).values();
                 }
             } else {
                 dhtPeers = DHTSelection.selectDHTSearchTargets(
                                 event.peers,
                                 event.query.getQueryGoal().getIncludeHashes(),
                                 minage,
+                                minRWIWordCount,
                                 redundancy, event.peers.redundancy(),
                                 random);
                 // this set of peers may be too large and consume too many threads if more than one word is searched.
@@ -272,7 +275,7 @@ public class RemoteSearch extends Thread {
 					event.query.isStrictContentDom(), useFacets, event.excludeintext_image);
             for (Seed s: robinsonPeers) {
 				if (MemoryControl.shortStatus()
-						|| Memory.load() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR,
+						|| Memory.getSystemLoadAverage() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR,
 								SwitchboardConstants.REMOTESEARCH_MAXLOAD_SOLR_DEFAULT)) {
 					continue;
 				}
@@ -286,7 +289,7 @@ public class RemoteSearch extends Thread {
             for (Seed dhtPeer: dhtPeers) {
                 if (dhtPeer == null || dhtPeer.hash == null) continue;
 				if (MemoryControl.shortStatus()
-						|| Memory.load() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI,
+						|| Memory.getSystemLoadAverage() > sb.getConfigFloat(SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI,
 								SwitchboardConstants.REMOTESEARCH_MAXLOAD_RWI_DEFAULT)) {
 					continue;
 				}

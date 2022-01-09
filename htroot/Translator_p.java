@@ -44,9 +44,8 @@ public class Translator_p {
             if ("default".equals(langcfg) || "browser".equals(langcfg)) {
                 prop.put("errmsg", 1); // msg: activate diff lng
                 return prop;
-            } else {
-                prop.put("errmsg", 0);
             }
+			prop.put("errmsg", 0);
 
             final File localesFolder = sb.getAppPath("locale.source", "locales");
             File lngfile = new File(localesFolder, langcfg + ".lng");

@@ -1558,7 +1558,7 @@ in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is n
 deselect the partial import flag==Зніміть прапорець часткового імпорту
 When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==При запуску експорту в DATA/SURROGATE/in створюються допоміжні файли, які автоматично вилучаються та опрацьовуються потоком індексувача.
 All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Всі проіндексовані допоміжні файли потім переміщуються в DATA/SURROGATE/out, і можуть бути знову оброблені, якщо індекс буде видалено.
-<b>The URL stub</b>,<br />like http://forum.yacy-websuche.de==<b>Частина URL, як наприклад,</b><br />http://forum.yacy-websuche.de
+<b>The URL stub</b>,<br />like https://searchlab.eu==<b>Частина URL, як наприклад,</b><br />https://searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==повний шлях перед "/viewtopic.php?"
 Type==Тип
 Host</b> of the database<==Ім’я хосту</b> БД<
@@ -3048,38 +3048,6 @@ Primary Key==Первинний ключ
 </body>==<script>window.onload = function () {$("td:contains('type')").text('Тип'); $("td:contains('comment')").text('Коментар'); $("td:contains('date_recording')").text('Дата запису'); $("td:contains('date_last_exec')").text('Дата використання'); $("td:contains('apicall_count')").text('Виклики API');}</script></body>
 #-----------------------------
 
-#File: Table_YMark_p.html
-#---------------------------
-Table Viewer==Перегляд таблиць
-YMark Table Administration==Керування таблицями YMark
-Table Editor: showing table==Редактор таблиць: Показ таблиці
-"Edit Selected Row"=="Редагувати вибраний рядок"
-"Add a new Row"=="Додати новий рядок"
-"Delete Selected Rows"=="Видалити вибрані рядки"
-"Delete Table"=="Видалити таблицю"
-"Rebuild Index"=="Перебудувати індекс"
-Primary Key==Основний ключ
->Row Editor<==>Редактор рядка<
-"Commit"=="Здійснити"
-Table Selection==Вибір таблиці
-Select Table:==Виберіть таблицю:
-show max. entries==Показано найбільше записів
->all<==>Всі<
-Display columns:==Відображення стовпчиків:
-"load"=="Завантажити"
-Search/Filter Table==Пошук/Фільтр таблиці
-search rows for==Шукати рядки з
-"Search"=="Пошук"
->Tags<==>Ключі<
->select a tag<==>Вибрати ключ<
->Folders<==>Папки<
->select a folder<==>Виберіть папку<
->Import Bookmarks<==>Імпортувати закладки<
-Importer:==Імпортувач:
->XBEL Importer<==>Імпортувач XBEL<
->Netscape HTML Importer<==>Імпортувач Netscape HTML<
-"import"=="Імпортувати"
-#-----------------------------
 
 #File: terminal_p.html
 #---------------------------
@@ -4001,113 +3969,6 @@ Server Access Grid==Сітка доступу до сервера
 This images shows incoming connections to your YaCy peer and outgoing connections from your peer to other peers and web servers==Ці зображення показують вхідні з’єднання до вашого вузла і вихідні з’єднання до інших вузлів та веб-серверів
 #-----------------------------
 
-#File: YMarks.html
-#---------------------------
->YaCy Bookmarks<==>Закладки YaCy<
->Explorer==>Огляд
-The information that is presented on this page can also be retrieved as XML.==Інформацію на цій сторінці також можна отримати в форматі XML.
-Click the API icon to see the XML.==Натисніть значок API для відображення XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Для перегляду списку всіх API, будь-ласка, відвідайте <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">сторінку API у Wiki</a>.
-#>Tag Manager==>Ключові слова
->Tag Manager==>Ключі
->Import<==>Імпорт<
-#All tag actions are applied to the sub-set of bookmarks defined by this query.==
->Query==>Запит
->Query Type==>Тип запиту
->Tags (comma seperated)==>Ключі (через кому)
->Tags (regexp)==>Ключі (рег.вираз)
->Folders (comma seperated)==>Папки (через кому)
->Folders (regexp)==>Папки (рег.вираз)
->Title (regexp)==>Заголовок (рег.вираз)
->Description (regexp)==>Опис (рег.вираз)
-#Enter tags to add (<i>replace with</i>)==
->(comma separated tags)==>(ключі через кому)
-#>Bookmark Importer==>Імпортувач закладок
->Bookmark Importer==>Імпорт закладок
-> Netscape HTML==>Netscape HTML
-> Firefox JSON==>Firefox JSON
-> XBEL==>XBEL
-> DMOZ XML==>DMOZ XML
->YaCy White/Black List==>Ч/Б список YaCy
->YaCy Crawl Starts (admin)==>Запуски сканування (адм.)
->Bookmark file==>Файл закладок
-#>Folder settings==>Налаштування папок
->Folder settings==>Настройки папок
->Source folder==>Папка-джерело
->Target folder==>Кінцева папка
-#>Automatic tagging==>Автоматичні закладки
->Automatic tagging==>Самозакладки
->Off==>Вимкнені
->Only for empty tags==>Тільки порожні ключі
-> Overwriting existing tags==> Перезаписувати ключі
-> Merging with existing tags==> Об’єднувати ключі
-#>URL:==>URL:
->Title:==>Заголовок:
->Description:==>Опис:
->Folder (/folder/subfolder):==>Папка (/папка/підпапка)
->Tags (comma separated):==>Ключі (через кому)
->Public:==>Загальнодоступна
->yes<==>так<
->no<==>ні<
->Site==>Сайт
->Scheduler==>Планувальник
->run this crawl once==>запистити це сканування один раз
->scheduled, look every==>запланувати, див. кожні
->minutes<==>хвилин<
->hours<==>годин<
->days<==>днів<
-for new documents automatically.==для нових документів автоматично.
->Path==>Шлях
->load all files in domain==>завантажувати всі файли в домені
->load only files in a sub-path of given url==>завантажуати тільки файли з підшляху даного посилання
->Limitations==>Обмеження
-> not more than==> не більше, ніж
-	documents==	документів
->Dynamic URLs==>Мінливі URL
-query-strings</a> (urls with a '?' in the path)==рядки-запити</a> (посилання з "?" в шляху)
-> allow <a href="http://en.wikipedia.org/wiki/Query_string">==> дозволити <a href="http://en.wikipedia.org/wiki/Query_string">
-"Add & Edit Bookmark"==Додати/Змінити закладку
-"Import"=="Імпорт"
-> Only for empty/unsorted tags==> Тільки для порожніх/несортованих ключів
-"Run"=="Записк"
-"Add"=="Додати"
->Add==>Додати
-"Delete"=="Видалити"
->Delete==>Видалити
-"Edit"=="Редагувати"
->Edit==>Редагувати
-"Help"=="Допомога"
->Help==>Допомога
->TreeView==>Деревовидний вигляд
->Import Bookmarks==>Імпортувати закладки
->Bookmarks (XBEL)==>Закладки (XBEL)
-#"API"=="API"
-#Мабуть, краще залишити як є, для сумісності з іншими мовами та попередніми налаштуваннями
-#"/Imported Bookmarks"=="/Імпортовані закладки"
-"Replace"=="Замінити"
->Bookmarks<==>Закладки<
-A folder structure is helpful to organize your bookmarks in a hierarchical way==Папки корисні для розміщення закладок в ієрархічному порядку
-If you put in your bookmarks here, you can access them anywhere where you have access to your YaCy peer==Після розміщення в закладки тут, ви можете отримати до них доступ скрізь, де у вас є доступ до вашого вузла YaCy
-Think of it as your 'personal cloud' for bookmarking==Це як ваша &quot;особиста хмара&quot; для закладок
-Tags are words that are attached to documents as metadata==Ключі це слова, які додаються до документів у вигляді метаданих
-It is possible to read all the documents and find the attached tags automatically==Можливо автоматично читати всі документи і знаходити приєднані ключі
-While doing the bookmark import, YaCy can push all URLs to the indexing process==При імпортуванні закладок, YaCy може помістити всі URL-адреси на індексування
-alt="help"==alt="допомога"
-#тобто title="import"
-"import"=="Імпортувач закладок"
-"tags"=="Ключові слова"
-"navigation"=="Огляд"
-#>Automatic Indexing==>Автоіндексування
->Automatic Indexing==>Самоіндексування
->No indexing==>Без індексування
->Index every bookmark entry==>Кожну закладку
->Index every bookmark entry plus all directly linked pages==>Кожну закладку + прямо з’єднані сторінки
->Index all domains from all bookmarks completely==>Всі домени з усіх закладок повністю
->include all media (image/movie/document) links==>включити всі медіа (image/movie/document)
-title="help"==title="допомога"
-#Портрібно дозволити локалізацію js як всіх інших і видалити цей трюк
-</body>==<script>window.onload = function () {$('div.ui-multiselect-filter').replaceWith('<div class="ui-multiselect-filter" style="margin-right: 5px;"><div class="ui-multiselect-filter" style="margin: 0px; margin-top: 3px; vertical-align: middle;">Фільтр:</div><input placeholder="Введіть ключ" type="search"></div>'); $('.nBtn,.srtd').attr( 'title',"Показати/Приховати стовпчики"); $("span:contains('Select (multiple) tags ...')").text('Виберіть (кілька) ключів'); $("span:contains('Select tags to remove ...')").text('Ключі для видалення ...'); $("span.bookmark").text('Додати'); $("span.edit").text('Редагувати'); $("span.delete").text('Видалити'); $("span.crawl").text('Сканувати'); $("span.calendar").text('Запланувати'); $("span.help").text('Допомога'); $("div.sDiv2").html('<div class="sDiv2">Знайти <input value=".*" size="30" name="q" class="qsbox" type="text">  <select name="qtype"><option value="">Текст повністю (regexp)&nbsp;&nbsp;</option><option value="_tags">Ключі (через кому)&nbsp;&nbsp;</option><option value="tags">Ключі (regexp)&nbsp;&nbsp;</option><option value="_folder">Папки (через кому)&nbsp;&nbsp;</option><option value="folders">Папки (regexp)&nbsp;&nbsp;</option><option value="title">Заголовок (regexp)&nbsp;&nbsp;</option><option value="desc">Опис (regexp)&nbsp;&nbsp;</option></select></div>');}</script></body>
-#-----------------------------
 
 ### Subdirectory jquery/js ###
 #File: jquery/js/jquery.multiselect.filter.min.js
@@ -4115,18 +3976,6 @@ title="help"==title="допомога"
 "Enter keywords"=="Введіть ключ"
 #-----------------------------
 
-#File: js/yacy-ymarks.js
-#---------------------------
-"Hide/Show Columns"=="Показати/Приховати стовпчики"
-Select (multiple) tags ...==Виберіть (кілька) ключів
-Select tags to remove ...==Ключі для видалення ...
->Add<==>Додати<
->Edit<==>Редагувати<
->Delete<==>Видалити<
->Crawl<==>Сканувати<
->Schedule<==>Запланувати<
-#>XBEL<==>XBEL<
->Help<==>Допомога<
 
 #Hash==Хеш
 #Public==Загальнодоступна

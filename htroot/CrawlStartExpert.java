@@ -71,7 +71,7 @@ public class CrawlStartExpert {
         } else {
             prop.put("starturl", "");
         }
-        
+
         // sitemap URL
         if (post != null && post.containsKey("sitemapURL")) {
             final String sitemapURL = post.get("sitemapURL", "");
@@ -83,7 +83,7 @@ public class CrawlStartExpert {
         } else {
             prop.put("sitemapURL", "");
         }
-        
+
         // crawling file
         if (post != null && post.containsKey("crawlingFile")) {
             final String crawlingFile = post.get("crawlingFile", "");
@@ -144,12 +144,10 @@ public class CrawlStartExpert {
         } else {
             prop.put("bookmarkTitle", "");
         }
-        
 
         // ---------- Crawling filter
-        final int crawlingDomMaxPages = env.getConfigInt(
-                "crawlingDomMaxPages", -1);
-        
+        final int crawlingDomMaxPages = env.getConfigInt("crawlingDomMaxPages", -1);
+
         // crawling depth
         if (post != null && post.containsKey("crawlingDepth")) {
             final Integer depth = post.getInt("crawlingDepth", -1);
@@ -213,13 +211,13 @@ public class CrawlStartExpert {
             prop.put("obeyHtmlRobotsNoindexChecked", post.getBoolean("obeyHtmlRobotsNoindex") ? 1 : 0);
             prop.put("obeyHtmlRobotsNofollowChecked", post.getBoolean("obeyHtmlRobotsNofollow") ? 1 : 0);
         }
-        
+
         // always cross-check URL file extension against actual Media Type ?
-		if (post == null) {
-			prop.put("crawlerAlwaysCheckMediaType", true);
-		} else {
-			prop.put("crawlerAlwaysCheckMediaType", post.getBoolean("crawlerAlwaysCheckMediaType"));
-		}
+        if (post == null) {
+            prop.put("crawlerAlwaysCheckMediaType", true);
+        } else {
+            prop.put("crawlerAlwaysCheckMediaType", post.getBoolean("crawlerAlwaysCheckMediaType"));
+        }
 
         // Load Filter on URLs (range)
         if (post != null && post.containsKey("range")) {
@@ -247,6 +245,22 @@ public class CrawlStartExpert {
             prop.put("mustnotmatch", post.get("mustnotmatch", ""));
         } else {
             prop.put("mustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+        }
+
+        // Filter on URL origin of links: must match
+        if (post != null && post.containsKey(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key)) {
+            prop.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key,
+                    post.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
+        } else {
+            prop.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING);
+        }
+
+        // Filter on URL origin of links: must-not-match
+        if (post != null && post.containsKey(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key)) {
+            prop.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key,
+                    post.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
+        } else {
+            prop.put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
         }
 
         // Load Filter on IPs: must match
@@ -313,45 +327,45 @@ public class CrawlStartExpert {
         } else {
             prop.put("indexcontentmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
         }
-        
-		// Filter on Media Type of Document: must match
-		if (post != null && post.containsKey(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key)) {
-			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key,
-					post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
-		} else {
-			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING);
-		}
 
-		// Filter on Media Type of Document: must-not-match
-		if (post != null && post.containsKey(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key)) {
-			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key,
-					post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
-		} else {
-			prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
-		}
-		
-		// Filter with a Solr syntax query
-		/* Check that the embedded local Solr index is connected, as its schema is required to apply the eventual Solr filter query */
-		final EmbeddedInstance embeddedSolr = sb.index.fulltext().getEmbeddedInstance();
-		final SolrCore embeddedCore = embeddedSolr != null ? embeddedSolr.getDefaultCore() : null;
-		final boolean embeddedSolrConnected = embeddedSolr != null && embeddedCore != null;
-		prop.put("embeddedSolrConnected", embeddedSolrConnected);
-		
-		if(embeddedSolrConnected) {
-			if (post != null && post.containsKey(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key)) {
-				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key,
-						post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY).trim());
-			} else {
-				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY);
-			}
-			
-			if (post != null && post.containsKey(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key)) {
-				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key,
-						post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY).trim());
-			} else {
-				prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY);
-			}
-		}
+        // Filter on Media Type of Document: must match
+        if (post != null && post.containsKey(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key)) {
+            prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key,
+                    post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING));
+        } else {
+            prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, CrawlProfile.MATCH_ALL_STRING);
+        }
+
+        // Filter on Media Type of Document: must-not-match
+        if (post != null && post.containsKey(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key)) {
+            prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key,
+                    post.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING));
+        } else {
+            prop.put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
+        }
+
+        // Filter with a Solr syntax query
+        /* Check that the embedded local Solr index is connected, as its schema is required to apply the eventual Solr filter query */
+        final EmbeddedInstance embeddedSolr = sb.index.fulltext().getEmbeddedInstance();
+        final SolrCore embeddedCore = embeddedSolr != null ? embeddedSolr.getDefaultCore() : null;
+        final boolean embeddedSolrConnected = embeddedSolr != null && embeddedCore != null;
+        prop.put("embeddedSolrConnected", embeddedSolrConnected);
+
+        if(embeddedSolrConnected) {
+            if (post != null && post.containsKey(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key)) {
+                prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key,
+                        post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY).trim());
+            } else {
+                prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY);
+            }
+
+            if (post != null && post.containsKey(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key)) {
+                prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key,
+                        post.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY).trim());
+            } else {
+                prop.put("embeddedSolrConnected_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY);
+            }
+        }
 
 
         // ---------- Clean-Up before Crawl Start
@@ -417,18 +431,17 @@ public class CrawlStartExpert {
         } else {
             prop.put("deleteIfOlderUnitSelect_list_2_default", 1);
         }
-        
-        
+
         // clean up search events cache ?
         if (post != null && post.containsKey("cleanSearchCache")) {
-        	prop.put("cleanSearchCacheChecked", post.getBoolean("cleanSearchCache"));
+            prop.put("cleanSearchCacheChecked", post.getBoolean("cleanSearchCache"));
         } else {
-			/*
-			 * no parameter passed : the checkbox is proposed unchecked
-			 * when JavaScript search resort is enabled, as it heavily relies on search events cache
-			 */
-			prop.put("cleanSearchCacheChecked", !sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT,
-					SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT));
+            /*
+             * no parameter passed : the checkbox is proposed unchecked
+             * when JavaScript search resort is enabled, as it heavily relies on search events cache
+             */
+            prop.put("cleanSearchCacheChecked", !sb.getConfigBool(SwitchboardConstants.SEARCH_JS_RESORT,
+                    SwitchboardConstants.SEARCH_JS_RESORT_DEFAULT));
         }
 
         // delete any document before the crawl is started?
@@ -531,7 +544,7 @@ public class CrawlStartExpert {
             prop.put("storeHTCacheChecked",
                     post.getBoolean("storeHTCache") ? 1 : 0);
         }
-        
+
         // Policy for usage of Web Cache
         if (post != null && post.containsKey("cachePolicy")) {
             final String cachePolicy = post.get("cachePolicy", "");
@@ -549,35 +562,29 @@ public class CrawlStartExpert {
         }
 
         // ---------- Agent name
-        if (sb.isP2PMode()) {
-            prop.put("agentSelect", 0);
-        } else {
-            prop.put("agentSelect", 1);
-            List<String> agentNames = new ArrayList<String>();
-            if (sb.isIntranetMode()) {
-                agentNames.add(ClientIdentification.yacyIntranetCrawlerAgentName);
-            }
-            if (sb.isGlobalMode()) {
-                agentNames.add(ClientIdentification.yacyInternetCrawlerAgentName);
-            }
-            agentNames.add(ClientIdentification.googleAgentName);
-            if (sb.isAllIPMode()) {
-                agentNames.add(ClientIdentification.browserAgentName);
-                if (ClientIdentification.getAgent(ClientIdentification.customAgentName) != null) agentNames.add(ClientIdentification.customAgentName);
-            }
-            String defaultAgentName = agentNames.get(0);
-            if (post != null && post.containsKey("agentName")) {
-                String agentName = post.get("agentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);
-                if (agentNames.contains(agentName)) defaultAgentName = agentName;
-            }
-            for (int i = 0; i < agentNames.size(); i++) {
-                prop.put("agentSelect_list_" + i + "_name", agentNames.get(i));
-                prop.put("agentSelect_list_" + i + "_default", agentNames.get(i).equals(defaultAgentName) ? 1 : 0);
-            }
-            prop.put("agentSelect_list", agentNames.size());
-
+        List<String> agentNames = new ArrayList<String>();
+        if (sb.isIntranetMode()) {
+            agentNames.add(ClientIdentification.yacyIntranetCrawlerAgentName);
         }
-        prop.put("agentSelect_defaultAgentName", ClientIdentification.yacyInternetCrawlerAgentName);
+        if (sb.isGlobalMode()) {
+            agentNames.add(ClientIdentification.yacyInternetCrawlerAgentName);
+        }
+        agentNames.add(ClientIdentification.googleAgentName);
+        if (sb.isAllIPMode()) {
+            agentNames.add(ClientIdentification.browserAgentName);
+            if (ClientIdentification.getAgent(ClientIdentification.customAgentName) != null) agentNames.add(ClientIdentification.customAgentName);
+        }
+        String defaultAgentName = agentNames.get(0);
+        if (post != null && post.containsKey("agentName")) {
+            String agentName = post.get("agentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);
+            if (agentNames.contains(agentName)) defaultAgentName = agentName;
+        }
+        for (int i = 0; i < agentNames.size(); i++) {
+            prop.put("list_" + i + "_name", agentNames.get(i));
+            prop.put("list_" + i + "_default", agentNames.get(i).equals(defaultAgentName) ? 1 : 0);
+        }
+        prop.put("list", agentNames.size());
+        prop.put("defaultAgentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);
 
         // ---------- Ignore Class Name
         if (post != null && post.containsKey("ignoreclassname")) {
@@ -586,7 +593,7 @@ public class CrawlStartExpert {
         } else {
             prop.put("ignoreclassname", "");
         }
-        
+
         // ---------- Enrich Vocabulary
         Collection<Tagging> vocs = LibraryProvider.autotagging.getVocabularies();
         if (vocs.size() == 0) {
@@ -602,7 +609,7 @@ public class CrawlStartExpert {
             }
             prop.put("vocabularySelect_vocabularyset", count);
         }
-        
+
         // ---------- Snapshot generation
         boolean wkhtmltopdfAvailable = Html2Image.wkhtmltopdfAvailable();
         //boolean convertAvailable = Html2Image.convertAvailable();
@@ -627,9 +634,9 @@ public class CrawlStartExpert {
             // Do Remote Indexing?
             if (sb.isP2PMode()) {
                 prop.put("remoteindexing", 1);
-				prop.put("remoteindexing_remoteCrawlerDisabled",
-						!sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
-				prop.put("remoteindexing_remoteCrawlerDisabled_crawlOrderChecked", env.getConfigBool("crawlOrder", true));
+                prop.put("remoteindexing_remoteCrawlerDisabled",
+                        !sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
+                prop.put("remoteindexing_remoteCrawlerDisabled_crawlOrderChecked", env.getConfigBool("crawlOrder", true));
                 prop.put("remoteindexing_crawlOrderChecked", env.getConfigBool("crawlOrder", true));
                 prop.put("remoteindexing_intention", "");
             } else {
@@ -642,9 +649,9 @@ public class CrawlStartExpert {
                     post.getBoolean("indexMedia") ? 1 : 0);
             if (sb.isP2PMode()) {
                 prop.put("remoteindexing", 1);
-				prop.put("remoteindexing_remoteCrawlerDisabled",
-						!sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
-				prop.put("remoteindexing_remoteCrawlerDisabled_crawlOrderChecked", post.getBoolean("crawlOrder"));
+                prop.put("remoteindexing_remoteCrawlerDisabled",
+                        !sb.getConfigBool(SwitchboardConstants.CRAWLJOB_REMOTE, false));
+                prop.put("remoteindexing_remoteCrawlerDisabled_crawlOrderChecked", post.getBoolean("crawlOrder"));
                 prop.put("remoteindexing_crawlOrderChecked", post.getBoolean("crawlOrder"));
                 prop.put("remoteindexing_intention", post.get("intention", ""));
             } else {
@@ -665,7 +672,7 @@ public class CrawlStartExpert {
                 prop.put("collection", collectionEnabled ? defaultCollection : "");
             }
         }
-        
+
         // return rewrite properties
         return prop;
     }

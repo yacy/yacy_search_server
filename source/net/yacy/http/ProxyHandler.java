@@ -132,12 +132,11 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
         RequestHeader proxyHeaders = ProxyHandler.convertHeaderFromJetty(request);
         setProxyHeaderForClient(request, proxyHeaders);
 
-        final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent);
-        client.setTimout(timeout);
-        client.setHeader(proxyHeaders.entrySet());
-        client.setRedirecting(false);
         // send request
-        try {
+        try (final HTTPClient client = new HTTPClient(ClientIdentification.yacyProxyAgent)) {
+            client.setTimout(timeout);
+            client.setHeader(proxyHeaders.entrySet());
+            client.setRedirecting(false);
             String queryString = request.getQueryString() != null ? "?" + request.getQueryString() : "";
             DigestURL digestURI = new DigestURL(request.getScheme(), request.getServerName(), request.getServerPort(), request.getRequestURI() + queryString);
             if (request.getMethod().equals(HeaderFramework.METHOD_GET)) {
@@ -219,8 +218,6 @@ public class ProxyHandler extends AbstractRemoteHandler implements Handler {
             }
             } catch (final SocketException se) {
                 throw new ServletException("Socket Exception: " + se.getMessage());
-            } finally {
-                client.finish();
             }
         
         // we handled this request, break out of handler chain

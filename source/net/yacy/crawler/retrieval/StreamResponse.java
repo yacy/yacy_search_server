@@ -1,6 +1,7 @@
 // StreamResponse.java
 // ---------------------------
-// Copyright 2017 by luccioman; https://github.com/luccioman
+// SPDX-FileCopyrightText: 2017 luccioman; https://github.com/luccioman
+// SPDX-License-Identifier: GPL-2.0-or-later
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //

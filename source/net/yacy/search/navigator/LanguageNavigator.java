@@ -39,13 +39,11 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
      * Default constructor, using the default YaCy Solr field language_s.
      *
      * @param title the navigator display name
+	 * @param sort the sort properties to apply when iterating over keys with the
+	 * {@link #navigatorKeys()} function
      */
-    public LanguageNavigator(String title) {
-        super(title, CollectionSchema.language_s);
-    }
-
-    public LanguageNavigator(String title, CollectionSchema field) {
-        super(title, field);
+    public LanguageNavigator(final String title, final NavigatorSort sort) {
+        super(title, CollectionSchema.language_s, sort);
     }
 
     /**
@@ -128,9 +126,8 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
         String longname = ISO639.country(lng);
         if (longname == null) {
             return lng;
-        } else {
-            return longname;
         }
+		return longname;
     }
 
     /**
@@ -141,10 +138,6 @@ public class LanguageNavigator extends StringNavigator implements Navigator {
      */
     @Override
     public boolean modifieractive(final QueryModifier modifier, final String name) {
-        if (modifier.language != null && modifier.language.contains(name)) {
-            return true;
-        } else {
-            return false;
-        }
+        return modifier.language != null && modifier.language.contains(name);
     }
 }

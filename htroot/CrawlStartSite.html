@@ -38,7 +38,7 @@
             <td valign="top"><input type="radio" name="crawlingMode" id="url" value="url" checked="checked"
             onmousedown="document.getElementById('rangeDomain').disabled=false;document.getElementById('rangeSubpath').disabled=false;document.getElementById('crawlingDomMaxCheck').disabled=false;document.getElementById('crawlingDomMaxPages').disabled=false;"/>Start URL&nbsp;(must start with<br/>http:// https:// ftp:// smb:// file://)</td>
             <td valign="top">
-            <input name="crawlingURL" id="crawlingURL" type="text" size="50" maxlength="256" value="#[starturl]#" onkeypress="changed()" onfocus="check('url')" style="font-size:16px"/><br/>
+            <input name="crawlingURL" id="crawlingURL" type="text" size="50" maxlength="256" value="#[starturl]#" onkeydown="changed()" onfocus="check('url')" style="font-size:16px"/><br/>
             <input name="bookmarkTitle" id="bookmarkTitle" type="text" size="50" maxlength="256" value="" readonly="readonly" style="background:transparent; border:0px"/>
             </td>
 	        <td>
@@ -105,7 +105,7 @@
     </fieldset>
     <h3>Hints</h3>
     <ul>
-    <li><h4>Crawl Speed Limitation</h4> No more that two pages are loaded from the same host in one second (not more that 120 document per minute) to limit the load on the target server.</li>
+    <li><h4>Crawl Speed Limitation</h4> No more that four pages are loaded from the same host in one second (not more that 120 document per minute) to limit the load on the target server.</li>
     <li><h4>Target Balancer</h4> A second crawl for a different host increases the throughput to a maximum of 240 documents per minute since the crawler balances the load over all hosts.</li>
     <li><h4>High Speed Crawling</h4> A 'shallow crawl' which is not limited to a single host (or site)
     can extend the pages per minute (ppm) rate to unlimited documents per minute when the number of target hosts is high.

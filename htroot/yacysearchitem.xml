@@ -43,14 +43,14 @@
   height="#[width]#"
   width="#[height]#" />
 <media:content 
-  url="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=#[code]#" 
+  url="/ViewImage.png?maxwidth=256&amp;maxheight=256&amp;code=#[code]#" 
   fileSize="#[fileSize]#" 
   type="#[mimetype]#"
   medium="image"
   isDefault="false" 
   expression="sample" 
-  height="96"
-  width="96" />
+  height="256"
+  width="256" />
 </media:group>
 </item>#(/item)#::
 #(/content)#

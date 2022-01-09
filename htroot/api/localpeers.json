@@ -1,0 +1,6 @@
+{
+"peers" : [#{peers|,}#
+{"urlstub":"#[urlstub]#"}
+#{/peers}#],
+"status": #[status]#
+}

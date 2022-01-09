@@ -1,6 +1,7 @@
 /**
  *  Transactions
- *  Copyright 2014 by Michael Peter Christen
+ *  SPDX-FileCopyrightText: 2014 Michael Peter Christen <mc@yacy.net)> 
+ *  SPDX-License-Identifier: GPL-2.0-or-later
  *  First released 08.12.2014 at http://yacy.net
  *
  *  This library is free software; you can redistribute it and/or
@@ -65,6 +66,9 @@ public class Transactions {
     private static ExecutorService executor = Executors.newCachedThreadPool();
     private static AtomicInteger executorRunning = new AtomicInteger(0);
     
+    /** the maximum to wait for each wkhtmltopdf call when rendering PDF snapshots */
+    private static long wkhtmltopdfTimeout = 30;
+    
     static {
         for (int i = 0; i < WHITESPACE.length; i++) WHITESPACE[i] = 32;
     }
@@ -77,13 +81,18 @@ public class Transactions {
         }
     }
     
-    public static void init(File dir) {
+    /**
+     * @param dir the parent directory of inventory and archive snapshots.
+     * @param wkhtmltopdfTimeout the maximum to wait for each wkhtmltopdf call when rendering PDF snapshots
+     */
+    public static void init(final File dir, final long wkhtmltopdfSecondsTimeout) {
         transactionDir = dir;
         transactionDir.mkdirs();
         inventoryDir = new File(transactionDir, State.INVENTORY.dirname);
         inventory = new Snapshots(inventoryDir);
         archiveDir = new File(transactionDir, State.ARCHIVE.dirname);
         archive = new Snapshots(archiveDir);
+        wkhtmltopdfTimeout = wkhtmltopdfSecondsTimeout;
     }
     
     public static synchronized void migrateIPV6Snapshots() {
@@ -228,7 +237,7 @@ public class Transactions {
                 public void run() {
                     executorRunning.incrementAndGet();
                     try {
-                        Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath);
+                        Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath, wkhtmltopdfTimeout);
                     } catch (Throwable e) {} finally {
                     executorRunning.decrementAndGet();
                     }
@@ -236,7 +245,7 @@ public class Transactions {
             };
             executor.execute(t);
         } else {
-            success = Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath);
+            success = Html2Image.writeWkhtmltopdf(urls, proxy, ClientIdentification.browserAgent.userAgent, acceptLanguage, pdfPath, wkhtmltopdfTimeout);
         }
         
         return success;

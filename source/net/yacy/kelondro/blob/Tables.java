@@ -52,7 +52,7 @@ import net.yacy.cora.util.ByteArray;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.cora.util.LookAheadIterator;
 import net.yacy.cora.util.SpaceExceededException;
-import net.yacy.data.ymark.YMarkUtil;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -166,7 +166,7 @@ public class Tables implements Iterable<String> {
     		return tci.hasIndex(columnName);
     	}
     	try {
-			if(this.has(tableName+CIDX, YMarkUtil.getKeyId(columnName))) {
+			if(this.has(tableName+CIDX, Word.word2hash(columnName))) {
 				return true;
 			}
 		} catch (final IOException e) {
@@ -240,7 +240,7 @@ public class Tables implements Iterable<String> {
     public Iterator<String> iterator() {
         return getTablenames().iterator();
     }
-    
+
     public Set<String> getTablenames() {
         // we did a lazy initialization, but here we must discover all actually existing tables
         String tablename;
@@ -274,7 +274,7 @@ public class Tables implements Iterable<String> {
         for (final BEncodedHeap heap: this.tables.values()) heap.close();
         this.tables.clear();
     }
-    
+
     public void clear() {
         Set<String> tablenames = this.getTablenames();
         for (String tablename: tablenames) this.clear(tablename);
@@ -443,7 +443,7 @@ public class Tables implements Iterable<String> {
         final BEncodedHeap heap = getHeap(table);
         return heap.keys();
     }
-    
+
     public Iterator<byte[]> keys(final String table, final boolean up, final boolean rotating) throws IOException {
         final BEncodedHeap heap = getHeap(table);
         return heap.keys(up, rotating);
@@ -480,7 +480,7 @@ public class Tables implements Iterable<String> {
     public Iterator<Row> iterator(final String table, final Pattern wherePattern, final boolean up) throws IOException {
         return new OrderedRowIterator(table, wherePattern, up);
     }
-    
+
 	/**
 	 * @param rowIterator
 	 *            an open iterator on a table. Must not be null.
@@ -492,7 +492,7 @@ public class Tables implements Iterable<String> {
 	public static Collection<Row> orderBy(final Iterator<Row> rowIterator, final String sortColumn) {
 		return orderByString(rowIterator, sortColumn, "", SortDirection.ASC);
 	}
-    
+
 	/**
 	 * @param rowIterator
 	 *            an open iterator on a table. Must not be null.
@@ -518,7 +518,7 @@ public class Tables implements Iterable<String> {
 		}
 		return orderBy(rowIterator, comparator);
 	}
-	
+
 	/**
 	 * @param rowIterator
 	 *            an open iterator on a table. Must not be null.
@@ -571,7 +571,7 @@ public class Tables implements Iterable<String> {
 		}
 		return orderBy(rowIterator, comparator);
 	}
-	
+
 	/**
 	 * @param rowIterator
 	 *            an open iterator on a table. Must not be null.
@@ -598,7 +598,7 @@ public class Tables implements Iterable<String> {
 		}
 		return orderBy(rowIterator, comparator);
 	}
-	
+
 	/**
 	 * @param rowIterator
 	 *            an open iterator on a table. Must not be null.
@@ -619,7 +619,7 @@ public class Tables implements Iterable<String> {
         final BEncodedHeap heap = getHeap(table);
         return heap.columns();
     }
-    
+
     /** Sort direction for ordering rows */
     public enum SortDirection {
     	/** Ascending order */
@@ -743,7 +743,7 @@ public class Tables implements Iterable<String> {
             this.whereValue = null;
             this.wherePattern = null;
             this.heap = getHeap(table);
-            this.i = heap.keys(up, false);
+            this.i = this.heap.keys(up, false);
         }
 
         /**
@@ -761,7 +761,7 @@ public class Tables implements Iterable<String> {
             this.whereValue = whereValue;
             this.wherePattern = null;
             this.heap = getHeap(table);
-            this.i = heap.keys(up, false);
+            this.i = this.heap.keys(up, false);
         }
 
         /**
@@ -778,7 +778,7 @@ public class Tables implements Iterable<String> {
             this.whereValue = null;
             this.wherePattern = wherePattern == null || wherePattern.toString().isEmpty() ? null : wherePattern;
             this.heap = getHeap(table);
-            this.i = heap.keys(up, false);
+            this.i = this.heap.keys(up, false);
         }
 
         /**
@@ -794,7 +794,7 @@ public class Tables implements Iterable<String> {
             this.whereValue = null;
             this.wherePattern = wherePattern == null || wherePattern.toString().isEmpty() ? null : wherePattern;
             this.heap = getHeap(table);
-            this.i = heap.keys(up, false);
+            this.i = this.heap.keys(up, false);
         }
 
         @Override
@@ -831,7 +831,7 @@ public class Tables implements Iterable<String> {
         }
 
     }
-    
+
     public static class Data extends LinkedHashMap<String, byte[]> {
 
         private static final long serialVersionUID = 978426054043749337L;

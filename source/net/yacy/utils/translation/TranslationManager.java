@@ -128,8 +128,7 @@ public class TranslationManager extends TranslatorXliff {
        Map<String, String> tmp = mainTransLists.get(filename);
        if (tmp != null)
            return tmp.get(source);
-       else
-           return null;
+       return null;
     }
 
     /**

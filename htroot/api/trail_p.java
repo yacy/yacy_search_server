@@ -2,9 +2,6 @@
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 06.02.2009 on http://www.yacy.net
 //
-// This is a part of YaCy.
-// The Software shall be used for Good, not Evil.
-//
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
 // $LastChangedRevision: 1986 $
 // $LastChangedBy: orbiter $

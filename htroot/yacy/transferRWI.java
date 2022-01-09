@@ -27,7 +27,6 @@
 // javac -classpath .:../classes transferRWI.java
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -102,7 +101,7 @@ public final class transferRWI {
             return prop;
         }
         // load tests
-        if (Memory.load() > 2.0 || MemoryControl.shortStatus()) {
+        if (Memory.getSystemLoadAverage() > 2.0 || MemoryControl.shortStatus()) {
             // check also Protocol.metadataRetrievalRunning.get() > 0 ?
             result = "too high load"; // don't tell too much details
             prop.put("result", result);
@@ -127,7 +126,7 @@ public final class transferRWI {
         result = "ok";
         final StringBuilder unknownURLs = new StringBuilder(6000);
 
-        double load = Memory.load();
+        double load = Memory.getSystemLoadAverage();
         float maxload = sb.getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f);
         if (load > maxload) {
             // too high local load. this is bad but we must reject this to protect ourself!
@@ -234,12 +233,7 @@ public final class transferRWI {
             }
             for (String id: testids) {
                 try {
-                    try {
-                        if (sb.index.fulltext().getLoadTime(id) < 0) {
-                            unknownURL.put(ASCII.getBytes(id));
-                        }
-                    } catch (IOException e) {
-                        ConcurrentLog.logException(e);
+                    if (!sb.index.fulltext().exists(id)) {
                         unknownURL.put(ASCII.getBytes(id));
                     }
                 } catch (final SpaceExceededException e) {

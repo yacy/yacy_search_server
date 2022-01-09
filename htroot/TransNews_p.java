@@ -45,7 +45,7 @@ import net.yacy.utils.translation.TranslationManager;
 
 public class TransNews_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
@@ -56,9 +56,8 @@ public class TransNews_p {
             prop.put("errmsg", 1); // msg: activate diff lng
             prop.put("transsize", 0);
             return prop;
-        } else {
-            prop.put("errmsg", 0);
         }
+		prop.put("errmsg", 0);
 
         TranslationManager transMgr = new TranslationManager();
         File locallangFile = transMgr.getScratchFile(new File(currentlang + ".lng"));

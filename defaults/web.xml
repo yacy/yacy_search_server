@@ -50,12 +50,6 @@
         <servlet-class>net.yacy.http.servlets.SolrServlet</servlet-class>
     </servlet>
     
-    <!-- servlet to provide Google Search Appliance (GSA) formatted search results -->
-    <servlet>
-        <servlet-name>GSAServlet</servlet-name>
-        <servlet-class>net.yacy.http.servlets.GSAsearchServlet</servlet-class>
-    </servlet>
-    
     <!-- servlet to provide searchresults via proxy -->
     <servlet>
         <servlet-name>URLProxyServlet</servlet-name>
@@ -74,11 +68,6 @@
         <url-pattern>/solr/collection1/select</url-pattern>
         <url-pattern>/solr/webgraph/select</url-pattern>
     </servlet-mapping>
-    
-    <servlet-mapping>
-        <servlet-name>GSAServlet</servlet-name>
-        <url-pattern>/gsa/search</url-pattern>
-    </servlet-mapping>
 
     <servlet-mapping>
         <servlet-name>URLProxyServlet</servlet-name>
@@ -89,7 +78,9 @@
     <servlet-mapping>
         <servlet-name>SolrServlet</servlet-name>
         <url-pattern>/solr/collection1/admin/luke</url-pattern>
-        <url-pattern>/solr/webgraph/admin/luke</url-pattern>        
+        <url-pattern>/solr/webgraph/admin/luke</url-pattern>
+        <!-- uncomment this to use YaCy as remote solr -->
+        <!-- <url-pattern>/solr/collection1/update</url-pattern> --> <!-- only with server.response.compress.gzip=false  -->
     </servlet-mapping>       
     <!-- eof hardcoded mappings --> 
             

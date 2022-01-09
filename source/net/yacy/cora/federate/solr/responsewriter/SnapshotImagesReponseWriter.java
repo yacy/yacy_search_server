@@ -3,10 +3,15 @@ package net.yacy.cora.federate.solr.responsewriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.index.IndexableField;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.apache.solr.request.SolrQueryRequest;
@@ -23,7 +28,7 @@ import net.yacy.search.schema.CollectionSchema;
 /**
  * this writer is supposed to be used to generate iframes. It generates links for the /api/snapshot.jpg servlet.
  */
-public class SnapshotImagesReponseWriter implements QueryResponseWriter, EmbeddedSolrResponseWriter  {
+public class SnapshotImagesReponseWriter implements QueryResponseWriter, SolrjResponseWriter  {
 
     private static final Set<String> DEFAULT_FIELD_LIST = new HashSet<>();
     
@@ -108,7 +113,7 @@ public class SnapshotImagesReponseWriter implements QueryResponseWriter, Embedde
 
     @Override
     public void write(final Writer writer, final SolrQueryRequest request, final SolrQueryResponse rsp) throws IOException {
-            NamedList<?> values = rsp.getValues();
+            final NamedList<?> values = rsp.getValues();
             assert values.get("responseHeader") != null;
             assert values.get("response") != null;
 
@@ -116,39 +121,85 @@ public class SnapshotImagesReponseWriter implements QueryResponseWriter, Embedde
             writer.write("<body id=\"SnapshotImagesReponseWriter\">\n");
             final SolrParams originalParams = request.getOriginalParams();
             
-            final int width = originalParams.getInt("width", DEFAULT_WIDTH);
-            final int height = originalParams.getInt("height", DEFAULT_HEIGTH);
+            final int width = originalParams != null ? originalParams.getInt("width", DEFAULT_WIDTH) : DEFAULT_WIDTH;
+            final int height = originalParams != null ? originalParams.getInt("height", DEFAULT_HEIGTH) : DEFAULT_HEIGTH;
             
-            DocList response = ((ResultContext) values.get("response")).getDocList();
+            final DocList response = ((ResultContext) values.get("response")).getDocList();
             final int sz = response.size();
             if (sz > 0) {
-                SolrIndexSearcher searcher = request.getSearcher();
-                DocIterator iterator = response.iterator();
+                final SolrIndexSearcher searcher = request.getSearcher();
+                final DocIterator iterator = response.iterator();
                 while (iterator.hasNext()) {
-                    int id = iterator.nextDoc();
-                    Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
-                    String urlhash = doc.getField(CollectionSchema.id.getSolrFieldName()).stringValue();
-                    String url = doc.getField(CollectionSchema.sku.getSolrFieldName()).stringValue();
-                    writer.write("<a href=\"");
-                    writer.write(url);
-                    writer.write("\" class=\"forceNoExternalIcon\"><img width=\"");
-                    writer.write(String.valueOf(width));
-                    writer.write("\" height=\"");
-                    writer.write(String.valueOf(height));
-                    writer.write("\" src=\"/api/snapshot.jpg?urlhash=");
-                    writer.write(urlhash);
-                    writer.write("&amp;width=");
-                    writer.write(String.valueOf(width));
-                    writer.write("&amp;height=");
-                    writer.write(String.valueOf(height));
-                    writer.write("\" alt=\"");
-                    writer.write(url);
-                    writer.write("\"></a>\n");
+                    final int id = iterator.nextDoc();
+                    final Document doc = searcher.doc(id, DEFAULT_FIELD_LIST);
+                    final IndexableField docId = doc.getField(CollectionSchema.id.getSolrFieldName());
+                    final IndexableField docSku = doc.getField(CollectionSchema.sku.getSolrFieldName());
+                    if(docId != null && docSku != null) {
+                    	writeDoc(writer, width, height, docId.stringValue(), docSku.stringValue());
+                    }
                 }
             }
             
             writer.write("</body></html>\n");
         
     }
+
+    /**
+     * Process a document and append its representation to the output writer.
+     * @param writer an open ouput writer. Must not be null.
+     * @param width the width of the snapshot image to render
+     * @param height the height of the snapshot image to render
+     * @param docId the document id (URL hash).
+	 * @param docUrl the document URL.
+     * @throws IOException when a write error occurred
+     */
+	private void writeDoc(final Writer writer, final int width, final int height, final String docId, final String docUrl)
+			throws IOException {
+		if(docId != null && docUrl != null) {
+			writer.write("<a href=\"");
+			writer.write(docUrl);
+			writer.write("\" class=\"forceNoExternalIcon\"><img width=\"");
+			writer.write(String.valueOf(width));
+			writer.write("\" height=\"");
+			writer.write(String.valueOf(height));
+			writer.write("\" src=\"/api/snapshot.jpg?urlhash=");
+			writer.write(docId);
+			writer.write("&amp;width=");
+			writer.write(String.valueOf(width));
+			writer.write("&amp;height=");
+			writer.write(String.valueOf(height));
+			writer.write("\" alt=\"");
+			writer.write(docUrl);
+			writer.write("\"></a>\n");
+		}
+	}
+    
+	@Override
+	public void write(final Writer writer, final SolrQueryRequest request, final String coreName,
+			final QueryResponse rsp) throws IOException {
+
+		writeHtmlHead(writer, request);
+		writer.write("<body id=\"SnapshotImagesReponseWriter\">\n");
+		final SolrParams originalParams = request.getOriginalParams();
+
+        final int width = originalParams != null ? originalParams.getInt("width", DEFAULT_WIDTH) : DEFAULT_WIDTH;
+        final int height = originalParams != null ? originalParams.getInt("height", DEFAULT_HEIGTH) : DEFAULT_HEIGTH;
+
+		final SolrDocumentList docList = rsp.getResults();
+		final int sz = docList.size();
+		if (sz > 0) {
+			final Iterator<SolrDocument> iterator = docList.iterator();
+			while (iterator.hasNext()) {
+				final SolrDocument doc = iterator.next();
+				final Object docId = doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+				final Object docSku = doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+				if (docId != null && docSku != null) {
+					writeDoc(writer, width, height, docId.toString(), docSku.toString());
+				}
+			}
+		}
+
+		writer.write("</body></html>\n");
+	}
 
 }

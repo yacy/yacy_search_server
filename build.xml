@@ -58,7 +58,7 @@
   <property name="git" location=".git"/>
   <property name="defaults" location="defaults"/>
   <property name="RDFaParser" location="RDFaParser"/>
-	
+    
   <!-- pseudo default branch as fallback -->
   <property name="branch" value="" />
 
@@ -69,8 +69,8 @@
   <property name="jquery" location="htroot/jquery/"/>
   <property name="portalsearch" location="htroot/portalsearch/"/>
   <property name="img-2" location="htroot/yacy/ui/img-2"/>
-	
-	<!-- variables for installonlinux target-->
+    
+    <!-- variables for installonlinux target-->
   <property name="DESTDIR" value="DESTDIR"/>
   <property name="PKGMANAGER" value="false"/>
   <property name="RESTARTCMD" value="/etc/init.d/yacy restart"/>
@@ -83,14 +83,14 @@
   <target name="buildGitRevTask">
     <delete file="${libbuild}/GitRevTask.jar" failonerror="false" />
     <javac srcdir="${libbuild}/GitRevTask" includeantruntime="true" encoding="UTF-8">
-    	<classpath>
-    		<pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
-    		<!-- Next are the jgit dependencies -->
-    		<pathelement location="${libbuild}/httpclient-4.3.6.jar" />
-    		<pathelement location="${libbuild}/JavaEWAH-0.7.9.jar" />
-    		<pathelement location="${libbuild}/jsch-0.1.53.jar" />
-    		<pathelement location="${libbuild}/slf4j-api-1.7.2.jar" />
-    	</classpath>
+        <classpath>
+            <pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
+            <!-- Next are the jgit dependencies -->
+            <pathelement location="${libbuild}/httpclient-4.3.6.jar" />
+            <pathelement location="${libbuild}/JavaEWAH-0.7.9.jar" />
+            <pathelement location="${libbuild}/jsch-0.1.53.jar" />
+            <pathelement location="${libbuild}/slf4j-api-1.7.2.jar" />
+        </classpath>
     </javac>
     <jar destfile="${libbuild}/GitRevTask.jar" basedir="${libbuild}/GitRevTask">
       <manifest>
@@ -100,18 +100,18 @@
   </target>
 
   <target name="determineGitRevision" if="isGit" depends="buildGitRevTask">
-  	<taskdef resource="GitRevTask.properties">
-		<classpath>
-			<pathelement location="${libbuild}/GitRevTask.jar" />
-    		<pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
-    		<!-- Next are the jgit dependencies -->
-    		<pathelement location="${libbuild}/httpclient-4.3.6.jar" />
-    		<pathelement location="${libbuild}/JavaEWAH-0.7.9.jar" />
-    		<pathelement location="${libbuild}/jsch-0.1.53.jar" />
-    		<pathelement location="${libbuild}/slf4j-api-1.7.2.jar" />
-		</classpath>
-  	</taskdef>
-  	<gitRev repoPath="${yacyroot}" branchprop="branch" revprop="releaseNr" dateprop="DSTAMP" />
+      <taskdef resource="GitRevTask.properties">
+        <classpath>
+            <pathelement location="${libbuild}/GitRevTask.jar" />
+            <pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
+            <!-- Next are the jgit dependencies -->
+            <pathelement location="${libbuild}/httpclient-4.3.6.jar" />
+            <pathelement location="${libbuild}/JavaEWAH-0.7.9.jar" />
+            <pathelement location="${libbuild}/jsch-0.1.53.jar" />
+            <pathelement location="${libbuild}/slf4j-api-1.7.2.jar" />
+        </classpath>
+      </taskdef>
+      <gitRev repoPath="${yacyroot}" branchprop="branch" revprop="releaseNr" dateprop="DSTAMP" />
   </target>
 
   <!-- reading the build properties from file -->
@@ -128,9 +128,9 @@
     <!-- YaCy Release Date -->
     <filter token="REPL_DATE" value="${DSTAMP}"/>
     <filter token="REPL_RELEASE" value="${stdReleaseFile}"/>
-  	
-  	<!-- YaCy Brach -->
-  	<echo message="YaCy Branch: ${branch}" />
+      
+      <!-- YaCy Brach -->
+      <echo message="YaCy Branch: ${branch}" />
 
     <!-- YaCy Release Version number -->
     <echo message="YaCy Version number: ${releaseVersion}" />
@@ -165,106 +165,120 @@
       </fileset>
     </javadoc>
   </target>
-	
+    
     <!-- define the classpath that should be used for compiling -->
     <!-- when changing paths here, please also update the paths in /addon/YaCy.app/Contents/Info.plist -->
     <path id="project.class.path">
         <pathelement location="${build}" />
-    	<pathelement location="${lib}/apache-mime4j-0.6.jar" />
-    	<pathelement location="${lib}/bcmail-jdk15on-1.60.jar" />
-    	<pathelement location="${lib}/bcprov-jdk15on-1.60.jar" />
-    	<pathelement location="${lib}/bcpkix-jdk15on-1.60.jar" />
-    	<pathelement location="${lib}/chardet.jar" />
-    	<pathelement location="${lib}/common-image-3.3.2.jar" />
-    	<pathelement location="${lib}/common-io-3.3.2.jar" />
-    	<pathelement location="${lib}/common-lang-3.3.2.jar" />
-    	<pathelement location="${lib}/commons-codec-1.11.jar" />
-    	<pathelement location="${lib}/commons-compress-1.17.jar" />
-    	<pathelement location="${lib}/xz-1.8.jar" />
-    	<pathelement location="${lib}/commons-fileupload-1.3.3.jar" />
-    	<pathelement location="${lib}/commons-io-2.6.jar" />
-    	<pathelement location="${lib}/commons-jxpath-1.3.jar" />
-    	<pathelement location="${lib}/commons-lang-2.6.jar" />
-    	<pathelement location="${lib}/commons-logging-1.2.jar" />
-    	<pathelement location="${lib}/commons-math3-3.4.1.jar" />
-    	<pathelement location="${lib}/fontbox-2.0.11.jar" />
-        <pathelement location="${lib}/guava-18.0.jar" />
-        <pathelement location="${lib}/htmllexer.jar" />
-        <pathelement location="${lib}/httpclient-4.5.5.jar" />
-        <pathelement location="${lib}/httpcore-4.4.9.jar" />
-        <pathelement location="${lib}/httpmime-4.5.5.jar" />
-        <pathelement location="${lib}/icu4j-62.1.jar" />
-    	<pathelement location="${lib}/imageio-bmp-3.3.2.jar" />
-    	<pathelement location="${lib}/imageio-core-3.3.2.jar" />
-    	<pathelement location="${lib}/imageio-metadata-3.3.2.jar" />
-    	<pathelement location="${lib}/imageio-tiff-3.3.2.jar" />
         <pathelement location="${lib}/J7Zip-modified.jar" />
+        <pathelement location="${lib}/apache-mime4j-0.6.jar" />
+        <pathelement location="${lib}/avatica-core-1.13.0.jar" />
+        <pathelement location="${lib}/bcmail-jdk15on-1.69.jar" />
+        <pathelement location="${lib}/bcpkix-jdk15on-1.69.jar" />
+        <pathelement location="${lib}/bcprov-jdk15on-1.69.jar" />
+        <pathelement location="${lib}/calcite-core-1.18.0.jar" />
+        <pathelement location="${lib}/calcite-linq4j-1.18.0.jar" />
+        <pathelement location="${lib}/chardet.jar" />
+        <pathelement location="${lib}/common-image-3.3.2.jar" />
+        <pathelement location="${lib}/common-io-3.3.2.jar" />
+        <pathelement location="${lib}/common-lang-3.3.2.jar" />
+        <pathelement location="${lib}/commons-codec-1.14.jar" />
+        <pathelement location="${lib}/commons-collections4-4.4.jar" />
+        <pathelement location="${lib}/commons-compress-1.21.jar" />
+        <pathelement location="${lib}/commons-fileupload-1.4.jar" />
+        <pathelement location="${lib}/commons-io-2.7.jar" />
+        <pathelement location="${lib}/commons-lang-2.6.jar" />
+        <pathelement location="${lib}/commons-lang3-3.12.0.jar" />
+        <pathelement location="${lib}/commons-logging-1.2.jar" />
+        <pathelement location="${lib}/commons-math3-3.4.1.jar" />
+        <pathelement location="${lib}/fontbox-2.0.15.jar" />
+        <pathelement location="${lib}/guava-25.1-jre.jar" />
+        <pathelement location="${lib}/hazelcast-4.2.jar" />
+        <pathelement location="${lib}/http2-client-9.4.34.v20201102.jar" />
+        <pathelement location="${lib}/http2-common-9.4.34.v20201102.jar" />
+        <pathelement location="${lib}/http2-http-client-transport-9.4.34.v20201102.jar" />
+        <pathelement location="${lib}/httpclient-4.5.12.jar" />
+        <pathelement location="${lib}/httpcore-4.4.13.jar" />
+        <pathelement location="${lib}/httpmime-4.5.12.jar" />
+        <pathelement location="${lib}/icu4j-63.1.jar" />
+        <pathelement location="${lib}/imageio-bmp-3.3.2.jar" />
+        <pathelement location="${lib}/imageio-core-3.3.2.jar" />
+        <pathelement location="${lib}/imageio-metadata-3.3.2.jar" />
+        <pathelement location="${lib}/imageio-tiff-3.3.2.jar" />
+        <pathelement location="${lib}/jackson-annotations-2.11.2.jar" />
+        <pathelement location="${lib}/jackson-core-2.11.2.jar" />
+        <pathelement location="${lib}/jackson-databind-2.11.2.jar" />
         <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
-    	<pathelement location="${lib}/jaudiotagger-2.2.5.jar" />
+        <pathelement location="${lib}/jaudiotagger-2.2.5.jar" />
         <pathelement location="${lib}/javax.servlet-api-3.1.0.jar" />
-    	<pathelement location="${lib}/jcifs-1.3.17.jar" />
-    	<pathelement location="${lib}/jcl-over-slf4j-1.7.25.jar" />
-        <pathelement location="${lib}/jetty-client-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-continuation-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-deploy-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-http-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-io-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-jmx-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-proxy-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-security-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-server-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-servlet-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-servlets-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-util-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-webapp-9.4.12.v20180830.jar" />
-        <pathelement location="${lib}/jetty-xml-9.4.12.v20180830.jar" />
-    	<pathelement location="${lib}/jsch-0.1.54.jar" />
-    	<pathelement location="${lib}/json-simple-1.1.1.jar" />
-    	<pathelement location="${lib}/jsonic-1.3.10.jar" />
-    	<pathelement location="${lib}/jsoup-1.11.3.jar" />
+        <pathelement location="${lib}/jcifs-1.3.17.jar" />
+        <pathelement location="${lib}/jcl-over-slf4j-1.7.25.jar" />
+        <pathelement location="${lib}/jetty-client-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-continuation-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-deploy-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-http-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-io-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-jmx-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-proxy-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-security-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-server-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-servlet-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-servlets-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-util-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-webapp-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jetty-xml-9.4.35.v20201120.jar" />
+        <pathelement location="${lib}/jsch-0.1.54.jar" />
+        <pathelement location="${lib}/json-simple-1.1.1.jar" />
+        <pathelement location="${lib}/jsonic-1.3.10.jar" />
+        <pathelement location="${lib}/jsoup-1.14.2.jar" />
         <pathelement location="${lib}/jwat-archive-common-1.1.1.jar" />
         <pathelement location="${lib}/jwat-common-1.1.1.jar" />
         <pathelement location="${lib}/jwat-gzip-1.1.1.jar" />
         <pathelement location="${lib}/jwat-warc-1.1.1.jar" />
-    	<pathelement location="${lib}/log4j-over-slf4j-1.7.25.jar" />
-    	<pathelement location="${lib}/lucene-analyzers-common-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-analyzers-phonetic-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-backward-codecs-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-classification-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-codecs-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-core-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-grouping-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-highlighter-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-join-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-memory-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-misc-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-queries-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-queryparser-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-spatial-extras-6.6.5.jar" />
-    	<pathelement location="${lib}/lucene-suggest-6.6.5.jar" />
-    	<pathelement location="${lib}/metadata-extractor-2.11.0.jar" />
-    	<pathelement location="${lib}/metrics-core-3.2.2.jar" />
-    	<pathelement location="${lib}/noggit-0.6.jar" />
-    	<pathelement location="${lib}/org.restlet.jar" />
-    	<pathelement location="${lib}/langdetect.jar" />
-        <pathelement location="${lib}/pdfbox-2.0.11.jar" />
-    	<pathelement location="${lib}/poi-3.17.jar" />
-    	<pathelement location="${lib}/poi-scratchpad-3.17.jar" />
-        <pathelement location="${lib}/slf4j-api-1.7.25.jar" />
-        <pathelement location="${lib}/slf4j-jdk14-1.7.25.jar" />
-        <pathelement location="${lib}/solr-core-6.6.5.jar" />
-        <pathelement location="${lib}/solr-solrj-6.6.5.jar" />
-    	<pathelement location="${lib}/spatial4j-0.6.jar" />
+        <pathelement location="${lib}/langdetect.jar" />
+        <pathelement location="${lib}/log4j-over-slf4j-1.7.32.jar" />
+        <pathelement location="${lib}/lucene-analyzers-common-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-analyzers-phonetic-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-backward-codecs-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-classification-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-codecs-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-core-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-grouping-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-highlighter-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-join-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-memory-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-misc-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-queries-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-queryparser-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-spatial-extras-8.8.1.jar" />
+        <pathelement location="${lib}/lucene-suggest-8.8.1.jar" />
+        <pathelement location="${lib}/metadata-extractor-2.11.0.jar" />
+        <pathelement location="${lib}/metrics-core-3.2.2.jar" />
+        <pathelement location="${lib}/metrics-jmx-4.1.5.jar" />
+        <pathelement location="${lib}/opentracing-api-0.33.0.jar" />
+        <pathelement location="${lib}/opentracing-noop-0.33.0.jar" />
+        <pathelement location="${lib}/opentracing-util-0.33.0.jar" />
+        <pathelement location="${lib}/org.restlet.jar" />
+        <pathelement location="${lib}/pdfbox-2.0.15.jar" />
+        <pathelement location="${lib}/poi-3.17.jar" />
+        <pathelement location="${lib}/poi-scratchpad-3.17.jar" />
+        <pathelement location="${lib}/rrd4j-3.2.jar" />
+        <pathelement location="${lib}/slf4j-api-1.7.32.jar" />
+        <pathelement location="${lib}/slf4j-jdk14-1.7.32.jar" />
+        <pathelement location="${lib}/solr-core-8.8.1.jar" />
+        <pathelement location="${lib}/solr-solrj-8.8.1.jar" />
+        <pathelement location="${lib}/spatial4j-0.6.jar" />
         <pathelement location="${lib}/stax2-api_3.1.4.jar" />        
-    	<pathelement location="${lib}/weupnp-0.1.4.jar" />
-    	<pathelement location="${lib}/woodstox-core-asl-4.4.1.jar" />
-    	<pathelement location="${lib}/xml-apis.jar" />
+        <pathelement location="${lib}/weupnp-0.1.4.jar" />
+        <pathelement location="${lib}/woodstox-core-asl-4.4.1.jar" />
+        <pathelement location="${lib}/xml-apis.jar" />
         <pathelement location="${lib}/xmpcore-5.1.3.jar" />
-    	<pathelement location="${lib}/zookeeper-3.4.10.jar" />
+        <pathelement location="${lib}/xz-1.8.jar" />
+        <pathelement location="${lib}/zookeeper-3.4.14.jar" />
     </path>
 
   <target name="compile-core" depends="init" description="compile YaCy core">
-  	
+
     <!-- compile yacyBuildProperties.java -->
     <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
            debug="true" debuglevel="lines,vars,source" includeantruntime="false"
@@ -283,7 +297,7 @@
       <classpath refid="project.class.path" />
       <compilerarg value="-Xlint"/>
     </javac>
-  	
+
     <!-- prepare classpath for MANIFEST (manifest cp is relative to jar) -->
     <path id="project.classpath.runtime">
         <fileset dir="./lib">
@@ -295,7 +309,7 @@
         <flattenmapper/>
     </pathconvert>
 
-  	<!-- make the jacycore jar -->
+      <!-- make the jacycore jar -->
     <jar destfile="${lib}/yacycore.jar" basedir="${build}/">
       <manifest>
         <attribute name="Main-Class" value="net.yacy.yacy"/>
@@ -304,11 +318,11 @@
     </jar>
 
   </target>
-  
+
   <target name="compile" depends="compile-core" description="compile YaCy core and YaCy servlets">
     <!-- compile htroot, htroot/yacy and htroot/htdocsdefault -->
     <javac srcdir="${htroot}/"
-    	   excludes="processing/**"
+           excludes="processing/**"
            source="${javacSource}" target="${javacTarget}"
            debug="true" debuglevel="lines,vars,source" includeantruntime="false" encoding="UTF-8">
       <classpath refid="project.class.path" />
@@ -319,19 +333,19 @@
   <target name="all" depends="compile">
   </target>
 
-  <target name="copyMain4Dist" depends="compile">  	
-  	<!-- copy all libs -->
-  	    <copy todir="${release_main}/lib">
-  	      <fileset dir="${lib}" 
-  	               includes="**/*"/>
-  	    </copy>
-  	
-  	<!-- copy build libs -->
-  	    <copy todir="${release_main}/libbuild">
-  	      <fileset dir="${libbuild}" 
-  	               includes="**/*"
-  	      		   excludes="**/target/**"/>
-  	    </copy>
+  <target name="copyMain4Dist" depends="compile">      
+      <!-- copy all libs -->
+          <copy todir="${release_main}/lib">
+            <fileset dir="${lib}" 
+                     includes="**/*"/>
+          </copy>
+
+      <!-- copy build libs -->
+          <copy todir="${release_main}/libbuild">
+            <fileset dir="${libbuild}" 
+                     includes="**/*"
+                       excludes="**/target/**"/>
+          </copy>
 
     <!-- copy configuration files -->
     <copy todir="${release_main}">
@@ -343,13 +357,13 @@
       </fileset>
     </copy>
 
-  	<!-- copy defaults -->
+      <!-- copy defaults -->
     <copy todir="${release_main}/defaults">
       <fileset dir="${defaults}" 
                includes="**/*"/>
     </copy>
 
-  	<!-- copy Unix wrappers -->
+      <!-- copy Unix wrappers -->
     <copy todir="${release_main}">
       <fileset dir=".">
         <include name="startYACY.sh"/>
@@ -369,7 +383,7 @@
         <include name="startYACY.bat"/>
         <include name="startYACY_debug.bat"/>
         <include name="stopYACY.bat"/>
-      	<include name="getWin32MaxHeap.bat"/>
+          <include name="getWin32MaxHeap.bat"/>
         <include name="installYaCyWindowsService.bat" />
         <include name="uninstallYaCyWindowsService.bat" />
       </fileset>
@@ -402,9 +416,9 @@
         <include name="readme.txt"/>
         <include name="gpl.txt"/>
         <include name="ChangeLog"/>
-      	<include name="AUTHORS"/>
-      	<include name="COPYRIGHT"/>
-      	<include name="NOTICE"/>
+          <include name="AUTHORS"/>
+          <include name="COPYRIGHT"/>
+          <include name="NOTICE"/>
       </fileset>
     </copy>
 
@@ -436,7 +450,7 @@
         <include name="build.properties"/>
       </fileset>
     </copy>
-  	
+      
     <!-- copy searchtest -->
     <copy todir="${release_main}/bin">
       <fileset dir="bin">
@@ -449,7 +463,7 @@
 
   <!-- run unittests-->
   <target name="compileTest" depends="compile" description="run unittests">
-	  <javac srcdir="${test}" destdir="${test}"
+      <javac srcdir="${test}" destdir="${test}"
            debug="true" debuglevel="lines,vars,source"
            source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
       <classpath>
@@ -467,14 +481,14 @@
       <formatter type="plain"/>
       <batchtest>
         <fileset dir="${test}">
-	  <include name="**/*Test*.java"/>
+      <include name="**/*Test*.java"/>
         </fileset>
       </batchtest>
       <classpath>
         <pathelement location="${test}"/>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
-	<fileset dir="${libt}" includes="**/*.jar" />
+    <fileset dir="${libt}" includes="**/*.jar" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
     </junit>
@@ -489,8 +503,8 @@
 
       <!-- packing all files into a gzipped tar -->
       <tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsExecutable}">
-      	<include name="**/*.sh"/>
-      	<include name="**/*.command"/>
+          <include name="**/*.sh"/>
+          <include name="**/*.command"/>
       </tarfileset>
       <tarfileset dir="${release_main}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
         <include name="**/*"/>
@@ -503,22 +517,22 @@
     <delete dir="${release_windows}" failonerror="false" />
     <delete dir="${release}/SPECS" failonerror="false" />
   </target>
-	
+    
   <!-- packing YaCy search widget for static hosting -->
   <target name="portalsearch" description="pack YaCy search widget for static hosting">
-  	<tar destfile="${release}/yacy-portalsearch.tar.gz" compression="gzip" defaultexcludes="yes" longfile="fail">
-  	  <tarfileset dir="${portalsearch}" prefix="yacy/portalsearch/">
-    	<include name="*.*"/>
+      <tar destfile="${release}/yacy-portalsearch.tar.gz" compression="gzip" defaultexcludes="yes" longfile="fail">
+        <tarfileset dir="${portalsearch}" prefix="yacy/portalsearch/">
+        <include name="*.*"/>
       </tarfileset>
       <tarfileset dir="${jquery}" prefix="yacy/jquery/">
-      	<include name="**/*"/>
+          <include name="**/*"/>
       </tarfileset>
       <tarfileset dir="${img-2}" prefix="yacy/ui/img-2/">
-      	<include name="magnify.png"/>
-      	<include name="cancel_round.png"/>
-      	<include name="stop.png"/>  
+          <include name="magnify.png"/>
+          <include name="cancel_round.png"/>
+          <include name="stop.png"/>  
       </tarfileset>
-  	</tar>
+      </tar>
   </target>
 
   <!-- make clean -->
@@ -540,94 +554,6 @@
       <fileset dir="." includes="TEST-*" />
     </delete>
     <delete dir="test/DATA" failonerror="false"/>
-  </target>
-
-  <target name="installonlinux">
-
-    <!-- copy configuration files -->
-    <copy todir="${DESTDIR}/usr/share/yacy">
-      <fileset dir=".">
-        <include name="yacy.logging"/>
-        <include name="yacy.yellow"/>
-        <include name="yacy.badwords.example"/>
-        <include name="yacy.stopwords"/>
-        <include name="yacy.parser"/>
-        <include name="httpd.mime"/>
-      </fileset>
-    </copy>
-
-  	<!-- copy defaults -->
-	<copy todir="${DESTDIR}/usr/share/yacy/defaults">
-  	    <fileset dir="${defaults}" includes="**/*"/>
-  	</copy>
-    
-    <!-- copy locales  -->
-    <copy todir="${DESTDIR}/usr/share/yacy/locales">
-      <fileset dir="${locales}">
-        <include name="*"/>
-      </fileset>
-    </copy>
-
-    <!-- copy skins  -->
-    <copy todir="${DESTDIR}/usr/share/yacy/skins">
-      <fileset dir="${skins}">
-        <include name="*"/>
-      </fileset>
-    </copy>
-
-    <!-- copy language statistics files -->
-    <copy todir="${DESTDIR}/usr/share/yacy/langdetect">
-      <fileset dir="${langdetect}">
-        <include name="*"/>
-      </fileset>
-    </copy>
-
-    <!-- copy shell scripts from bin/ -->
-    <!-- i'm not sure, if this is consistent with the debian policy -->
-    <!-- but for /usr/bin or /usr/lib we need an extra environment variable -->
-    <copy todir="${DESTDIR}/usr/share/yacy/bin">
-      <fileset dir="bin/">
-        <include name="*"/>
-      </fileset>
-    </copy>
-    <chmod dir="${DESTDIR}/usr/share/yacy/bin/" perm="755" includes="*"/>
-
-    <!-- copy documentation -->
-    <copy todir="${DESTDIR}/usr/share/doc/yacy">
-      <fileset dir=".">
-        <include name="readme.txt"/>
-        <include name="ChangeLog"/>
-      	<include name="AUTHORS"/>
-      	<include name="COPYRIGHT"/>
-      	<include name="NOTICE"/>
-      </fileset>
-    </copy>
-
-    <!-- copy server pages -->
-    <copy todir="${DESTDIR}/usr/share/yacy/htroot">
-      <fileset dir="${htroot}">
-        <include name="**/*"/>
-        <exclude name="yacy/seedUpload/**"/>
-      </fileset>
-      <fileset dir="${htroot}">
-        <include name="yacy/seedUpload/yacySeedUploadFile.html"/>
-        <include name="yacy/seedUpload/yacySeedUploadFtp.html"/>
-      </fileset>
-    </copy>
-
-    <!-- prepare /var/lib/yacy -->
-    <mkdir dir="${DESTDIR}/var/lib/yacy" />
-    <mkdir dir="${DESTDIR}/var/lib/yacy/LOG" />
-    <mkdir dir="${DESTDIR}/var/lib/yacy/SETTINGS" />
-    <mkdir dir="${DESTDIR}/etc" />
-    <mkdir dir="${DESTDIR}/var/log" />
-    <symlink link="${DESTDIR}/usr/share/yacy/DATA"
-	    resource="../../../var/lib/yacy"/>
-    <symlink link="${DESTDIR}/etc/yacy"
-	    resource="../var/lib/yacy/SETTINGS"/>
-    <symlink link="${DESTDIR}/var/log/yacy"
-	    resource="../lib/yacy/LOG"/>
-
   </target>
 
   <!-- run YaCy (needed for NetBeans4) -->
@@ -663,7 +589,6 @@
       </classpath>
       <!--<arg value="-Xrunhprof"/>-->
       <arg line="-start"/>
-      <jvmarg line="-Xms180m"/>
       <jvmarg line="-Xmx800m"/>
       <!-- <arg line="-migratewords"/>-->
       <!-- <arg line="-start ${user.dir}"/>-->
@@ -745,98 +670,34 @@
     </javadoc>
   </target>
 
-  <target name="rpm" depends="all" description="Creates the main rpm-package and another for lib">
-    <mkdir dir="${release}/RPMS/noarch" />
-    <mkdir dir="${release}/BUILD" />
-    <copy file="addon/yacy-svn-4.spec" tofile="${release}/SPECS/yacy-svn.spec" overwrite="true" filtering="true" />
-
-    <rpm specFile="yacy-svn.spec" topDir="${release}" />
-
-    <move file="${release}/RPMS/noarch/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm"
-          tofile="${release}/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
-    <move file="${release}/RPMS/noarch/yacy-lib-${releaseVersion}_${releaseNr}-3.noarch.rpm"
-          tofile="${release}/yacy-lib-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
-
-    <delete dir="${release}/SPECS" failonerror="false" />
-    <delete dir="${release}/RPMS" failonerror="false" />
-    <delete dir="${release_windows}" failonerror="false" />
-  </target>
-	
   <target name="distWinInstaller" depends="copyMain4Dist" description="Creates an NSIS Windows installer">
     <!-- http://nsisant.sourceforge.net/ -->
     <mkdir dir="${release_windows}" />
     <copy file="build.nsi" tofile="${release_windows}/build.nsi" overwrite="true" filtering="true" />
     <taskdef name="nsis" classname="net.sf.nsisant.Task">
-	    <classpath location="${libbuild}/nsisant-1.2.jar"/>
+        <classpath location="${libbuild}/nsisant-1.2.jar"/>
     </taskdef>
     <nsis script="${release_windows}/build.nsi" nocd="yes" verbosity="2" />
     <move file="${release_windows}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
           tofile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe" />
-  	
+      
     <delete dir="${release_main}"/>
     <delete dir="${release_windows}" failonerror="false" />
   </target>
 
   <target name="distMacApp" depends="copyMain4Dist" description="Creates a YaCy.app">
-  	<copy todir="${release_mac}/YaCy.app">
-  		<fileset dir="${addon}/YaCy.app"></fileset>
-  	</copy>
-  	<copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="true" overwrite="true" />
-  	<move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/MacOS" verbose="false" />
-  	<!-- startYACY.sh and startYACYMacOS.sh will be the main entry points : we set permissions to make it executable files -->
-  	<chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACYMacOS.sh" perm="755"/>
-  	<chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACY.sh" perm="755"/>
-  	<exec executable="hdiutil">
-  	  	<arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.dmg"/>
-  	</exec>
-  	<delete dir="${release_mac}" failonerror="false" verbose="false" />
-  </target>
-
-  <!-- to use the deb command the following debian packages must be installed: dpkg-dev debhelper m4 fakeroot -->
-  <target name="deb" depends="init" description="Creates a debian package">
-    <!-- replacing the old with the new revision number -->
-    <replaceregexp file="debian/changelog"
-                  match="yacy \(.*\) unstable; urgency=low"
-                  replace="yacy (${releaseVersion}.${releaseNr}) unstable; urgency=low" />
-
-    <!-- build debian package -->
-    <exec executable="dpkg-buildpackage">
-      <arg value="-b"/>
-      <arg value="-rfakeroot"/>
-      <arg value="-uc"/>
-    </exec>
-    <replaceregexp file="debian/changelog"
-                  match="yacy \(.*\) unstable; urgency=low"
-                  replace="yacy (*auto-git-version*) unstable; urgency=low" />
-  </target>
-	
-  <target name="sign" depends="readBuildProperties" description="sign current release file in RELEASE/ with ${privateKeyFile}">
-    <fail message="There is no release file (${release}/${stdReleaseFile}) that could be signed !">
-        <condition>
-            <not><available file="${stdReleaseFile}" filepath="${release}" type="file" /></not>
-        </condition>
-    </fail>
-    <java classname="net.yacy.utils.CryptoLib" failonerror="true">
-      <classpath>
-        <pathelement location="${build}"/>
-      </classpath>
-      <arg line="--sign ${privateKeyFile} ${release}/${stdReleaseFile}"/>
-    </java>
-  </target>
-
-  <target name="genkey" depends="readBuildProperties" description="generate a pair of keys and write it to ${privateKeyFile} and ${privateKeyFile}.pub">
-    <fail message="There is already a private key file (${privateKeyFile})!">
-      <condition>
-	<available file="${privateKeyFile}" type="file" />
-      </condition>
-    </fail>
-    <java classname="net.yacy.utils.CryptoLib" failonerror="true">
-      <classpath>
-        <pathelement location="${build}"/>
-      </classpath>
-      <arg line="--gen-key ${privateKeyFile} ${privateKeyFile}.pub"/>
-    </java>
-    <chmod file="${privateKeyFile}" perm="600"/>
+      <copy todir="${release_mac}/YaCy.app">
+          <fileset dir="${addon}/YaCy.app"></fileset>
+      </copy>
+      <copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="true" overwrite="true" />
+      <move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/MacOS" verbose="false" />
+      <!-- startYACY.sh and startYACYMacOS.sh will be the main entry points : we set permissions to make it executable files -->
+      <chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACYMacOS.sh" perm="755"/>
+      <chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACY.sh" perm="755"/>
+      <exec executable="hdiutil">
+            <arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.dmg"/>
+      </exec>
+      <delete dir="${release_mac}" failonerror="false" verbose="false" />
   </target>
 
   <target name="deleteData" description="start with a fresh yacy installation">

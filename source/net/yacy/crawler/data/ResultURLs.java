@@ -1,7 +1,8 @@
 // ResultURLs.java
 // -----------------------
 // part of YaCy
-// (C) by Michael Peter Christen; mc@yacy.net
+// SPDX-FileCopyrightText: 2004 Michael Peter Christen <mc@yacy.net)> 
+// SPDX-License-Identifier: GPL-2.0-or-later
 // first published on http://yacy.net
 // Frankfurt, Germany, 2004
 //

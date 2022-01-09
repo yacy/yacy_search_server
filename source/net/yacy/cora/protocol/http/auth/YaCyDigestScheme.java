@@ -23,6 +23,7 @@ package net.yacy.cora.protocol.http.auth;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -41,7 +42,6 @@ import org.apache.http.HttpRequest;
 import org.apache.http.auth.AUTH;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.Credentials;
-import org.apache.http.auth.params.AuthPNames;
 import org.apache.http.impl.auth.DigestScheme;
 import org.apache.http.impl.auth.UnsupportedDigestAlgorithmException;
 import org.apache.http.message.BasicHeaderValueFormatter;
@@ -134,19 +134,10 @@ public class YaCyDigestScheme extends DigestScheme {
         // Add method name and request-URI to the parameter map
         getParameters().put("methodname", request.getRequestLine().getMethod());
         getParameters().put("uri", request.getRequestLine().getUri());
-        final String charset = getParameter("charset");
-        if (charset == null) {
-            getParameters().put("charset", getCredentialsCharset(request));
+        if (getParameter("charset") == null) {
+            getParameters().put("charset", StandardCharsets.US_ASCII.name()); // default according to https://hc.apache.org/httpcomponents-client-4.2.x/tutorial/html/authentication.html
         }
         return createDigestHeader(credentials, request);
-    }
-    
-    String getCredentialsCharset(final HttpRequest request) {
-        String charset = (String) request.getParams().getParameter(AuthPNames.CREDENTIAL_CHARSET);
-        if (charset == null) {
-            charset = getCredentialsCharset().name();
-        }
-        return charset;
     }
 
     private static MessageDigest createMessageDigest(
@@ -261,7 +252,7 @@ public class YaCyDigestScheme extends DigestScheme {
             sb.append(checksum).append(':').append(nonce).append(':').append(cnonce);
             a1 = sb.toString();*/
             sb.append(pwd).append(':').append(nonce).append(':').append(cnonce);
-            hasha1 = encode(digester.digest(EncodingUtils.getBytes(sb.toString(), charset)));;
+            hasha1 = encode(digester.digest(EncodingUtils.getBytes(sb.toString(), charset)));
         } else {
             // unq(username-value) ":" unq(realm-value) ":" passwd
             /* Modification for YaCy Digest Authentication : the pwd value is already the result of MD5(userName:realm:password)

@@ -3,7 +3,7 @@ cd `dirname $0`
 
 if [ -x `which wget` ]
 then
-	bin/apicall.sh "ConfigUpdate_p.html?autoUpdate="
+	bin/apicall.sh "ConfigUpdate_p.html?autoUpdate=" > /dev/null
 
 elif [ -x `which java` ]
 then

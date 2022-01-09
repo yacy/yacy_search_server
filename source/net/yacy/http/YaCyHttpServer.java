@@ -18,4 +18,5 @@ public interface YaCyHttpServer {
     abstract boolean withSSL();
     abstract void reconnect(int milsec);
     abstract String getVersion();
+    abstract int getServerThreads();
 }

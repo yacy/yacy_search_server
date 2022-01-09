@@ -61,30 +61,38 @@ public class TransactionManager {
 	 * @throws NullPointerException
 	 *             when header parameter is null.
 	 */
-    private static String getCurrentUserName(final RequestHeader header) {
+    private static String getUserName(final RequestHeader header) {
         String userName = header.getRemoteUser();
-        
-		if (userName == null && header.accessFromLocalhost() && Switchboard.getSwitchboard() != null) {
-       	 	final String adminAccountUserName = Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
-       	 	final String adminAccountBase64MD5 = Switchboard.getSwitchboard().getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
-       	 	
-			if(Switchboard.getSwitchboard()
-				.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) {
-				/* Unauthenticated local access as administrator can be enabled */
-				userName = adminAccountUserName;
-			} else {
-		        /* authorization by encoded password, only for localhost access (used by bash scripts)*/
-		        String pass = Base64Order.standardCoder.encodeString(adminAccountUserName + ":" + adminAccountBase64MD5);
-		        
-		        /* get the authorization string from the header */
-		        final String realmProp = (header.get(RequestHeader.AUTHORIZATION, "")).trim();
-		        final String realmValue = realmProp.isEmpty() ? null : realmProp.substring(6); // take out "BASIC "
-		        
-		        if (pass.equals(realmValue)) { // assume realmValue as is in cfg
-		            userName = adminAccountUserName;
-		        }
-			}
-		}
+        Switchboard sb = Switchboard.getSwitchboard();
+
+        if (sb != null) {
+            final String adminAccountBase64MD5 = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
+            final String adminAccountUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+            if (adminAccountBase64MD5.equals(sb.emptyPasswordAdminAccount)) {
+                // admin users with empty passwords do not need to authentify, thus do not have
+                // this header present. We just consoder the name is "admin"
+                userName = adminAccountUserName;
+            }
+            
+    		if (userName == null && header.accessFromLocalhost()) {
+           	 	
+    			if (sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) {
+    				/* Unauthenticated local access as administrator can be enabled */
+    				userName = adminAccountUserName;
+    			} else {
+    		        /* authorization by encoded password, only for localhost access (used by bash scripts)*/
+    		        String pass = Base64Order.standardCoder.encodeString(adminAccountUserName + ":" + adminAccountBase64MD5);
+    		        
+    		        /* get the authorization string from the header */
+    		        final String realmProp = (header.get(RequestHeader.AUTHORIZATION, "")).trim();
+    		        final String realmValue = realmProp.isEmpty() ? null : realmProp.substring(6); // take out "BASIC "
+    		        
+    		        if (pass.equals(realmValue)) { // assume realmValue as is in cfg
+    		            userName = adminAccountUserName;
+    		        }
+    			}
+    		}
+        }
 		
 		return userName;
     }
@@ -124,7 +132,7 @@ public class TransactionManager {
         }
         
         /* Check this comes from an authenticated user */
-        final String userName = getCurrentUserName(header);
+        final String userName = getUserName(header);
 		if (userName == null) {
 			throw new IllegalArgumentException("User is not authenticated");
 		}
@@ -152,23 +160,24 @@ public class TransactionManager {
      * @throws BadTransactionException when a condition for valid transaction is not met.
      */
 	public static void checkPostTransaction(final RequestHeader header, final serverObjects post) {
-        if (header == null || post == null) {
-        	throw new IllegalArgumentException("Missing required parameters.");
-        }
+        if (header == null)
+            throw new IllegalArgumentException("Missing required header parameters.");
         
-		if(!HeaderFramework.METHOD_POST.equals(header.getMethod())) {
+        if (header.accessFromLocalhost()) return; // this is one exception that we accept if basc authentication is gven
+        
+        if (post == null) // non-local requests must use POST parameters
+            throw new IllegalArgumentException("Missing required post parameters.");
+        
+		if (!HeaderFramework.METHOD_POST.equals(header.getMethod())) // non-local users must use POST protocol
 			throw new DisallowedMethodException("HTTP POST method is the only one authorized.");
-		}
 		
-        String userName = getCurrentUserName(header);
-		if (userName == null) {
+        String userName = getUserName(header);
+		if (userName == null)
 			throw new BadTransactionException("User is not authenticated.");
-		}
 		
 		final String transactionToken = post.get(TRANSACTION_TOKEN_PARAM);
-		if(transactionToken == null) {
+		if (transactionToken == null)
 			throw new TemplateMissingParameterException("Missing transaction token.");
-		}
 		
 		final String token = new HmacUtils(HmacAlgorithms.HMAC_SHA_1, SIGNING_KEY)
 				.hmacHex(TOKEN_SEED + userName + header.getPathInfo());

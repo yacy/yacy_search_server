@@ -65,7 +65,6 @@ import net.yacy.cora.document.encoding.UTF8;
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.RequestHeader.FileType;
-import net.yacy.cora.util.JSONObject;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.search.Switchboard;
@@ -74,6 +73,7 @@ import net.yacy.search.schema.CollectionSchema;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.FacetParams;
 import org.apache.solr.common.params.MultiMapSolrParams;
+import org.json.JSONObject;
 
 
 public class serverObjects implements Serializable, Cloneable {

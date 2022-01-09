@@ -90,11 +90,12 @@ public class citation {
         }
         if (uri == null && hash.length() > 0) {
             try {
-                uri = sb.getURL(ASCII.getBytes(hash));
-                if (uri == null) {
+                String u = sb.getURL(ASCII.getBytes(hash));
+                if (u == null) {
                     connector.commit(true); // try again, that url can be fresh
-                    uri = sb.getURL(ASCII.getBytes(hash));
+                    u = sb.getURL(ASCII.getBytes(hash));
                 }
+                if (u != null) uri = new DigestURL(u);
             } catch (IOException e) {
                 ConcurrentLog.logException(e);
             }
@@ -102,7 +103,7 @@ public class citation {
         if (uri == null) return prop; // no proper url addressed
         url = uri.toNormalform(true);
         prop.put("url", url);
-        
+
         // get the document from the index
         SolrDocument doc;
         try {
@@ -149,11 +150,11 @@ public class citation {
                     sentenceOcc.put(sentence, list);
                 }
             } catch (final Throwable ee) {
-                
+
             }
         }
         sentences.clear(); // we do not need this again
-        
+
         // iterate the sentences
         int i = 0;
         int sentenceNr = 0;
@@ -189,7 +190,7 @@ public class citation {
             sentenceNr++;
         }
         prop.put("sentences", i);
-        
+
         // iterate the citations in order of number of citations
         i = 0;
         for (String u: scores.keyList(false)) {
@@ -207,7 +208,7 @@ public class citation {
             } catch (final MalformedURLException e) {}
         }
         prop.put("citations", i);
-        
+
         // find similar documents from different hosts
         i = 0;
         for (String u: scores.keyList(false)) {
@@ -221,7 +222,7 @@ public class citation {
         }
         prop.put("similar_links", i);
         prop.put("similar", i > 0 ? 1 : 0);
-        
+
         // return rewrite properties
         return prop;
     }

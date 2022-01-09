@@ -61,7 +61,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
     public boolean isOnDemand() {
         return this.backend instanceof OnDemandOpenFileIndex;
     }
-    
+
     @Override
     public byte[] smallestKey() {
         if (this.buffer == null || this.buffer.isEmpty()) return this.backend.smallestKey();
@@ -78,8 +78,12 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
 
     private final void flushBuffer() throws IOException, SpaceExceededException {
         if (!this.buffer.isEmpty()) {
-            for (final Row.Entry e: this.buffer) {
-                this.backend.put(e);
+            if (this.backend instanceof OnDemandOpenFileIndex) {
+                ((OnDemandOpenFileIndex) this.backend).put(this.buffer);
+            } else {
+                for (final Row.Entry e: this.buffer) {
+                    this.backend.put(e);
+                }
             }
             this.buffer.clear();
         }
@@ -90,7 +94,7 @@ public class BufferedObjectIndex implements Index, Iterable<Row.Entry> {
         this.backend.optimize();
         this.buffer.optimize();
     }
-    
+
     @Override
     public long mem() {
         return this.backend.mem() + this.buffer.mem();

@@ -33,7 +33,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.TransactionManager;
 import net.yacy.http.InetPathAccessHandler;
@@ -91,7 +90,7 @@ public class SettingsAck_p {
                 return prop;
             }
             // check passed. set account:
-            env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "MD5:"+Digest.encodeMD5Hex(user + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":" + pw1));
+            env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, sb.encodeDigestAuth(user, pw1));
             env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, user);
             prop.put("info", "5");//admin account changed
             prop.putHTML("info_user", user);
@@ -640,6 +639,25 @@ public class SettingsAck_p {
             env.setConfig(SwitchboardConstants.SEARCH_RESULT_NOREFERRER, tickedCheckbox);
             
             prop.put("info", "35");
+            return prop;
+        }
+        
+        // HTTP client settings
+        if (post.containsKey("httpClientSettings")) {
+            // set backlink
+            prop.put("needsRestart_referer", "Settings_p.html?page=httpClient");
+            
+            if(System.getProperty("jsse.enableSNIExtension") == null) {
+            	/* Only apply custom SNI extension settings when the JVM system option jsse.enableSNIExtension is not defined */
+            	env.setConfig(SwitchboardConstants.HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED,
+            			post.containsKey(SwitchboardConstants.HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED));
+			
+            	env.setConfig(SwitchboardConstants.HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED,
+            			post.containsKey(SwitchboardConstants.HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED));
+            }
+            sb.initOutgoingConnectionSettings();
+            
+            prop.put("info", "38");
             return prop;
         }
 

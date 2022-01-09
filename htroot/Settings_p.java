@@ -25,7 +25,9 @@
 import java.util.HashMap;
 import java.util.Iterator;
 
+import net.yacy.cora.federate.solr.instance.RemoteInstance;
 import net.yacy.cora.protocol.RequestHeader;
+import net.yacy.cora.protocol.http.HTTPClient;
 import net.yacy.data.TransactionManager;
 import net.yacy.http.ReferrerPolicy;
 import net.yacy.peers.Network;
@@ -81,6 +83,8 @@ public final class Settings_p {
             prop.put("settingsTables", "Settings_Crawler.inc");
         } else if (page.equals("debug")) {
             prop.put("settingsTables", "Settings_Debug.inc");
+        } else if (page.equals("httpClient")) {
+            prop.put("settingsTables", "Settings_HttpClient.inc");
         } else {
             prop.put("settingsTables", "");
         }
@@ -237,6 +241,23 @@ public final class Settings_p {
         // debug/analysis
         prop.put("solrBinaryResponseChecked", env.getConfigBool(SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED, 
         		SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT) ? 1 : 0);
+        
+        // HTTP client
+		prop.put(SwitchboardConstants.HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED,
+				env.getConfigBool(SwitchboardConstants.HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED,
+						HTTPClient.ENABLE_SNI_EXTENSION_DEFAULT));
+		prop.put(SwitchboardConstants.HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED,
+				env.getConfigBool(SwitchboardConstants.HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED,
+						RemoteInstance.ENABLE_SNI_EXTENSION_DEFAULT));
+		final String jvmSniExtensionSetting = System.getProperty("jsse.enableSNIExtension");
+		prop.put(SwitchboardConstants.HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED + ".readonly",
+				jvmSniExtensionSetting != null);
+		prop.put(SwitchboardConstants.HTTP_OUTGOING_GENERAL_TLS_SNI_EXTENSION_ENABLED + ".readonly_jvmSettingValue",
+				jvmSniExtensionSetting);
+		prop.put(SwitchboardConstants.HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED + ".readonly",
+				jvmSniExtensionSetting != null);
+		prop.put(SwitchboardConstants.HTTP_OUTGOING_REMOTE_SOLR_TLS_SNI_EXTENSION_ENABLED + ".readonly_jvmSettingValue",
+				jvmSniExtensionSetting);
         
         /* For easier user understanding, the following flags controlling data sources selection 
          * are rendered in the UI as checkboxes corresponding to enabled value when ticked */

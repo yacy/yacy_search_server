@@ -1,7 +1,8 @@
 // CrawlProfile.java
 // ------------------------
 // part of YaCy
-// (C) by Michael Peter Christen; mc@yacy.net
+// SPDX-FileCopyrightText: 2004 Michael Peter Christen <mc@yacy.net)>
+// SPDX-License-Identifier: GPL-2.0-or-later
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 //
@@ -40,6 +41,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONTokener;
+
 import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.federate.solr.connector.AbstractSolrConnector;
 import net.yacy.cora.federate.yacy.CacheStrategy;
@@ -48,9 +53,6 @@ import net.yacy.cora.order.Digest;
 import net.yacy.cora.protocol.ClientIdentification;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
-import net.yacy.cora.util.JSONArray;
-import net.yacy.cora.util.JSONException;
-import net.yacy.cora.util.JSONTokener;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.kelondro.data.word.Word;
@@ -99,6 +101,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         CRAWLER_ALWAYS_CHECK_MEDIA_TYPE("crawlerAlwaysCheckMediaType", false, CrawlAttribute.BOOLEAN, "Always cross check file extension against actual Media Type"),
         CRAWLER_URL_MUSTMATCH        ("crawlerURLMustMatch",        false, CrawlAttribute.STRING,  "URL Must-Match Filter"),
         CRAWLER_URL_MUSTNOTMATCH     ("crawlerURLMustNotMatch",     false, CrawlAttribute.STRING,  "URL Must-Not-Match Filter"),
+        CRAWLER_ORIGIN_URL_MUSTMATCH ("crawlerOriginURLMustMatch",  false, CrawlAttribute.STRING,  "Links Origin URL Must-Match Filter"),
+        CRAWLER_ORIGIN_URL_MUSTNOTMATCH ("crawlerOriginURLMustNotMatch", false, CrawlAttribute.STRING, "Links Origin URL Must-Not-Match Filter"),
         CRAWLER_IP_MUSTMATCH         ("crawlerIPMustMatch",         false, CrawlAttribute.STRING,  "IP Must-Match Filter"),
         CRAWLER_IP_MUSTNOTMATCH      ("crawlerIPMustNotMatch",      false, CrawlAttribute.STRING,  "IP Must-Not-Match Filter"),
         CRAWLER_COUNTRY_MUSTMATCH    ("crawlerCountryMustMatch",    false, CrawlAttribute.STRING,  "Country Must-Match Filter"),
@@ -148,6 +152,13 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     
     
     private Pattern crawlerurlmustmatch = null, crawlerurlmustnotmatch = null;
+    
+    /** Pattern on the URL a document must match to allow adding its embedded links to the crawl stack */
+    private Pattern crawlerOriginUrlMustMatch = null;
+    
+    /** Pattern on the URL a document must not match to allow adding its embedded links to the crawl stack */
+    private Pattern crawlerOriginUrlMustNotMatch = null;
+    
     private Pattern crawleripmustmatch = null, crawleripmustnotmatch = null;
     private Pattern crawlernodepthlimitmatch = null;
     private Pattern indexurlmustmatch = null, indexurlmustnotmatch = null;
@@ -243,6 +254,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(CrawlAttribute.CRAWLER_ALWAYS_CHECK_MEDIA_TYPE.key, true);
         put(CrawlAttribute.CRAWLER_URL_MUSTMATCH.key,     (crawlerUrlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerUrlMustMatch);
         put(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key,  (crawlerUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerUrlMustNotMatch);
+        put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key, (crawlerUrlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerUrlMustMatch);
+        put(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key,  (crawlerUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerUrlMustNotMatch);
         put(CrawlAttribute.CRAWLER_IP_MUSTMATCH.key,      (crawlerIpMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerIpMustMatch);
         put(CrawlAttribute.CRAWLER_IP_MUSTNOTMATCH.key,   (crawlerIpMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerIpMustNotMatch);
         put(CrawlAttribute.CRAWLER_COUNTRY_MUSTMATCH.key, (crawlerCountryMustMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerCountryMustMatch);
@@ -305,9 +318,11 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     		}
     	}
         this.ignore_class_name = new HashSet<String>();
-        for (int i = 0; i < a.length(); i++) this.ignore_class_name.add(a.getString(i));
+        for (int i = 0; i < a.length(); i++) try {
+            this.ignore_class_name.add(a.getString(i));
+        } catch (JSONException e) {}
         jsonString = ext.get(CrawlAttribute.SCRAPER.key);
-        if(jsonString == null || jsonString.length() == 0) {
+        if (jsonString == null || jsonString.length() == 0) {
         	this.scraper = new VocabularyScraper();
         } else {
         	VocabularyScraper loadedScraper;
@@ -500,6 +515,50 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             } catch (final PatternSyntaxException e) { this.crawlerurlmustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.crawlerurlmustnotmatch;
+    }
+    
+	/**
+	 * Get the pattern on the URL a document must match to allow adding its embedded links to the crawl stack
+	 * 
+	 * @return a {@link Pattern} instance, defaulting to
+	 *         {@link CrawlProfile#MATCH_ALL_PATTERN} when the regular expression
+	 *         string is not set or its syntax is incorrect
+	 */
+    public Pattern getCrawlerOriginUrlMustMatchPattern() {
+		if (this.crawlerOriginUrlMustMatch == null) {
+			/* Cache the compiled pattern for faster next calls */
+			final String patternStr = get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key);
+			try {
+				this.crawlerOriginUrlMustMatch = (patternStr == null
+						|| patternStr.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN
+								: Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
+			} catch (final PatternSyntaxException e) {
+				this.crawlerOriginUrlMustMatch = CrawlProfile.MATCH_ALL_PATTERN;
+			}
+		}
+        return this.crawlerOriginUrlMustMatch;
+    }
+    
+	/**
+	 * Get the pattern on the URL a document must not match to allow adding its embedded links to the crawl stack
+	 * 
+	 * @return a {@link Pattern} instance, defaulting to
+	 *         {@link CrawlProfile#MATCH_NEVER_PATTERN} when the regular expression
+	 *         string is not set or its syntax is incorrect
+	 */
+    public Pattern getCrawlerOriginUrlMustNotMatchPattern() {
+		if (this.crawlerOriginUrlMustNotMatch == null) {
+			/* Cache the compiled pattern for faster next calls */
+			final String patternStr = get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key);
+			try {
+				this.crawlerOriginUrlMustNotMatch = (patternStr == null
+						|| patternStr.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN
+								: Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
+			} catch (final PatternSyntaxException e) {
+				this.crawlerOriginUrlMustNotMatch = CrawlProfile.MATCH_NEVER_PATTERN;
+			}
+		}
+        return this.crawlerOriginUrlMustNotMatch;
     }
 
     /**
@@ -926,6 +985,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlerAlwaysCheckMediaType", this.isCrawlerAlwaysCheckMediaType());
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerURLMustMatch", this.get(CrawlAttribute.CRAWLER_URL_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerURLMustNotMatch", this.get(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerOriginURLMustMatch", this.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerOriginURLMustNotMatch", this.get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerIPMustMatch", this.get(CrawlAttribute.CRAWLER_IP_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerIPMustNotMatch", this.get(CrawlAttribute.CRAWLER_IP_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerCountryMustMatch", this.get(CrawlAttribute.CRAWLER_COUNTRY_MUSTMATCH.key));
@@ -969,10 +1030,14 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     	String s = j.toString();
     	System.out.println(s);
     	JSONTokener o = new JSONTokener(s);
-    	j = new JSONArray(o);
-    	System.out.println(j);
-    	Set<String> h = new HashSet<String>();
-        for (int i = 0; i < j.length(); i++) h.add(j.getString(i));
-    	System.out.println(h);
+    	try {
+        	j = new JSONArray(o);
+        	System.out.println(j);
+        	Set<String> h = new HashSet<String>();
+            for (int i = 0; i < j.length(); i++) h.add(j.getString(i));
+        	System.out.println(h);
+    	} catch (JSONException e) {
+    	    e.printStackTrace();
+    	}
     }
 }

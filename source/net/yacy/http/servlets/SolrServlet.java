@@ -20,91 +20,140 @@
 
 package net.yacy.http.servlets;
 
+import java.io.EOFException;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
+import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.solr.common.params.MultiMapSolrParams;
-import org.apache.solr.common.util.ContentStreamBase;
+import org.apache.solr.common.util.NamedList;
+import org.apache.solr.common.util.SimpleOrderedMap;
+import org.apache.solr.handler.UpdateRequestHandler;
+import org.apache.solr.handler.admin.LukeRequestHandler;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.request.SolrRequestHandler;
-import org.apache.solr.response.BinaryQueryResponseWriter;
+import org.apache.solr.request.SolrRequestInfo;
 import org.apache.solr.response.QueryResponseWriter;
+import org.apache.solr.response.QueryResponseWriterUtil;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.servlet.ResponseUtils;
 import org.apache.solr.servlet.SolrRequestParsers;
 import org.apache.solr.servlet.cache.Method;
-import org.apache.solr.util.FastWriter;
 
 import net.yacy.cora.federate.solr.connector.EmbeddedSolrConnector;
+import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
 import net.yacy.search.schema.WebgraphSchema;
 
 public class SolrServlet extends HttpServlet {
-    
-    private static final long serialVersionUID = 1L;
-    
-    @Override
-    public void service(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 
-        HttpServletRequest hrequest = (HttpServletRequest) request;
+	private static final long serialVersionUID = 1L;
 
-        final Method reqMethod = Method.getMethod(hrequest.getMethod());
-        
-        // get the embedded connector
-        String requestURI = hrequest.getRequestURI();
-        MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(hrequest.getQueryString());
-        boolean defaultConnector = (requestURI.startsWith("/solr/" + WebgraphSchema.CORE_NAME)) ? false : requestURI.startsWith("/solr/" + CollectionSchema.CORE_NAME) || mmsp.get("core", CollectionSchema.CORE_NAME).equals(CollectionSchema.CORE_NAME);
-        mmsp.getMap().remove("core");
-        Switchboard sb = Switchboard.getSwitchboard();
-        EmbeddedSolrConnector connector = defaultConnector ? sb.index.fulltext().getDefaultEmbeddedConnector() : sb.index.fulltext().getEmbeddedConnector(WebgraphSchema.CORE_NAME);
-        if (connector == null) throw new ServletException("no core");
+	@Override
+	public void service(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 
-        SolrQueryResponse solrRsp = new SolrQueryResponse();
-        SolrQueryRequest solrReq = null;
-        try {
-            solrReq = connector.request(mmsp); // SolrRequestParsers.DEFAULT.parse(null, hrequest.getServletPath(), hrequest);
-            solrReq.getContext().put("webapp", hrequest.getContextPath());
-            SolrRequestHandler handler = sb.index.fulltext().getEmbeddedInstance().getCoreContainer().getMultiCoreHandler();
-            connector.getCore().execute( handler, solrReq, solrRsp );
-            
-            // write response header 
-            QueryResponseWriter responseWriter = connector.getCore().getQueryResponseWriter(solrReq);
+    	if (!Domains.isIntranet(request.getRemoteAddr())) {
+    		((HttpServletResponse) response).sendError(HttpServletResponse.SC_FORBIDDEN,
+                    "SolrServlet use not granted for IP " + request.getRemoteAddr());
+    	}
 
-            final String ct = responseWriter.getContentType(solrReq, solrRsp);
-            if (null != ct) response.setContentType(ct); 
+		HttpServletRequest hrequest = (HttpServletRequest) request;
 
-            if (Method.HEAD != reqMethod) {
-              if (responseWriter instanceof BinaryQueryResponseWriter) {
-                BinaryQueryResponseWriter binWriter = (BinaryQueryResponseWriter) responseWriter;
-                binWriter.write(response.getOutputStream(), solrReq, solrRsp);
-              } else {
-                String charset = ContentStreamBase.getCharsetFromContentType(ct);
-                Writer out = (charset == null || charset.equalsIgnoreCase(StandardCharsets.UTF_8.name()))
-                  ? new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)
-                  : new OutputStreamWriter(response.getOutputStream(), charset);
-                out = new FastWriter(out);
-                responseWriter.write(out, solrReq, solrRsp);
-                out.flush();
-              }
-            }
+		final Method reqMethod = Method.getMethod(hrequest.getMethod());
 
-            ConcurrentLog.info("luke", solrRsp.getValues().toString());
+		// get the embedded connector
+		String requestURI = hrequest.getRequestURI();
+		MultiMapSolrParams mmsp = SolrRequestParsers.parseQueryString(hrequest.getQueryString());
+		boolean defaultConnector = (requestURI.startsWith("/solr/" + WebgraphSchema.CORE_NAME)) ? false
+				: requestURI.startsWith("/solr/" + CollectionSchema.CORE_NAME)
+						|| mmsp.get("core", CollectionSchema.CORE_NAME).equals(CollectionSchema.CORE_NAME);
+		mmsp.getMap().remove("core");
+		Switchboard sb = Switchboard.getSwitchboard();
+		EmbeddedSolrConnector connector = defaultConnector ? sb.index.fulltext().getDefaultEmbeddedConnector()
+				: sb.index.fulltext().getEmbeddedConnector(WebgraphSchema.CORE_NAME);
 
-        } catch (Exception e) {
-            ConcurrentLog.logException(e);
-        } finally {
-            if (solrReq != null) solrReq.close();
-        }
-        
-    }
+		if (connector == null)
+			throw new ServletException("no core");
 
+		SolrQueryResponse solrRsp = new SolrQueryResponse();
+		SolrQueryRequest solrReq = null;
+		try {
+			solrReq = SolrRequestParsers.DEFAULT.parse(connector.getCore(), hrequest.getServletPath(), hrequest);
+			solrReq.getContext().put("webapp", hrequest.getContextPath());
+			SolrRequestHandler handler;
+			if ("/solr/collection1/update".equals(hrequest.getServletPath())
+					|| "/solr/webgraph/update".equals(hrequest.getServletPath())) {
+				handler = new UpdateRequestHandler();
+			} else {
+				handler = new LukeRequestHandler();
+			}
+			handler.init(new NamedList<Object>());
+
+			SolrRequestInfo.setRequestInfo(new SolrRequestInfo(solrReq, solrRsp));
+			connector.getCore().execute(handler, solrReq, solrRsp);
+			Iterator<Map.Entry<String, String>> headers = solrRsp.httpHeaders();
+			while (headers.hasNext()) {
+				Map.Entry<String, String> entry = headers.next();
+				((HttpServletResponse) response).addHeader(entry.getKey(), entry.getValue());
+			}
+
+			// write response header
+			QueryResponseWriter responseWriter = connector.getCore().getQueryResponseWriter(solrReq);
+			writeResponse(solrReq, solrRsp, (HttpServletResponse) response, responseWriter, reqMethod);
+		} catch (Exception e) {
+			ConcurrentLog.logException(e);
+		} finally {
+			if (solrReq != null)
+				solrReq.close();
+			SolrRequestInfo.clearRequestInfo();
+		}
+
+	}
+
+	private void writeResponse(SolrQueryRequest solrReq, SolrQueryResponse solrRsp, HttpServletResponse response, QueryResponseWriter responseWriter,
+			Method reqMethod) throws IOException {
+		try {
+			Object invalidStates = solrReq.getContext().get(CloudSolrClient.STATE_VERSION);
+			// This is the last item added to the response and the client would expect it
+			// that way.
+			// If that assumption is changed , it would fail. This is done to avoid an O(n)
+			// scan on
+			// the response for each request
+			if (invalidStates != null)
+				solrRsp.add(CloudSolrClient.STATE_VERSION, invalidStates);
+			// Now write it out
+			final String ct = responseWriter.getContentType(solrReq, solrRsp);
+			// don't call setContentType on null
+			if (null != ct)
+				response.setContentType(ct);
+
+			if (solrRsp.getException() != null) {
+				@SuppressWarnings("rawtypes")
+				NamedList info = new SimpleOrderedMap();
+				int code = ResponseUtils.getErrorInfo(solrRsp.getException(), info, null);
+				solrRsp.add("error", info);
+				response.setStatus(code);
+			}
+
+			if (Method.HEAD != reqMethod) {
+				OutputStream out = response.getOutputStream();
+				QueryResponseWriterUtil.writeQueryResponse(out, responseWriter, solrReq, solrRsp, ct);
+			}
+			// else http HEAD request, nothing to write out, waited this long just to get
+			// ContentType
+		} catch (EOFException e) {
+			ConcurrentLog.info("SolrServlet", "Unable to write response, client closed connection or we are shutting down", e);
+		}
+	}
 }

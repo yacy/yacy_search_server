@@ -10,7 +10,7 @@
 // $LastChangedBy$
 //
 // LICENSE
-// 
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -27,16 +27,15 @@
 
 package net.yacy.gui;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -50,10 +49,10 @@ import net.yacy.search.SwitchboardConstants;
 
 
 public final class Tray {
-	private Switchboard sb;
+	private final Switchboard sb;
 
 	private TrayIcon ti = null;
-	private String trayLabel;
+	private final String trayLabel;
 
 	final private static boolean deutsch = System.getProperty("user.language","").equals("de");
 	final private static boolean french = System.getProperty("user.language","").equals("fr");
@@ -64,7 +63,7 @@ public final class Tray {
 	private boolean menuEnabled = true;
     private BufferedImage[] progressIcons = null;
     private final String iconPath;
-    
+
     private MenuItem menuItemHeadline = null;
     private MenuItem menuItemSearch = null;
     private MenuItem menuItemAdministration = null;
@@ -72,27 +71,22 @@ public final class Tray {
 
 	public Tray(final Switchboard sb_par) {
 		this.sb = sb_par;
-		this.menuEnabled = sb.getConfigBool(SwitchboardConstants.TRAY_MENU_ENABLED, true);
-		this.trayLabel = sb.getConfig(SwitchboardConstants.TRAY_ICON_LABEL, "YaCy");
-		this.iconPath = sb.getAppPath().toString() + "/addon/YaCy_TrayIcon.png".replace("/", File.separator);
-		if (useTray()) {
+		this.menuEnabled = this.sb.getConfigBool(SwitchboardConstants.TRAY_MENU_ENABLED, true);
+		this.trayLabel = this.sb.getConfig(SwitchboardConstants.TRAY_ICON_LABEL, "YaCy");
+		this.iconPath = this.sb.getAppPath().toString() + "/addon/YaCy_TrayIcon.png".replace("/", File.separator);
+		if (this.useTray()) {
 		    try {
 			    System.setProperty("java.awt.headless", "false"); // we have to switch off headless mode, else all will fail
 			    if (SystemTray.isSupported()) {
-                    ActionListener al = new ActionListener() {
-    					@Override
-                        public void actionPerformed(final ActionEvent e) {
-    						doubleClickAction();
-    					}
-    				};
+                    final ActionListener al = e -> Tray.this.doubleClickAction();
     				ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
-    			    final Image trayIcon = ImageIO.read(new File(iconPath)); // 128x128
-                    final Image progressBooting = ImageIO.read(new File(sb.getAppPath().toString() + "/addon/progress_booting.png".replace("/", File.separator))); // 128x28
-                    final BufferedImage progress = getProgressImage();
+    			    final Image trayIcon = ImageIO.read(new File(this.iconPath)); // 128x128
+                    final Image progressBooting = ImageIO.read(new File(this.sb.getAppPath().toString() + "/addon/progress_booting.png".replace("/", File.separator))); // 128x28
+                    final BufferedImage progress = this.getProgressImage();
                     this.progressIcons = new BufferedImage[4];
                     for (int i = 0; i < 4; i++) {
     				    this.progressIcons[i] = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
-                        Graphics2D h = this.progressIcons[i].createGraphics();
+                        final Graphics2D h = this.progressIcons[i].createGraphics();
                         h.setBackground(Color.BLACK);
                         h.clearRect(0, 0, 128, 128);
                         h.drawImage(trayIcon, 0, 0, 128, 128 - progress.getHeight(), null);
@@ -100,115 +94,115 @@ public final class Tray {
                         h.drawImage(progressBooting, 0, 128 - progress.getHeight(), null);
                         h.dispose();
     				}
-                    final PopupMenu menu = (menuEnabled) ? getPopupMenu() : null;
-    				ti = new TrayIcon(trayIcon, trayLabel, menu);
+                    final PopupMenu menu = (this.menuEnabled) ? this.getPopupMenu() : null;
+    				this.ti = new TrayIcon(trayIcon, this.trayLabel, menu);
                     if (OS.isMacArchitecture) setDockIcon(trayIcon);
-    				ti.setImageAutoSize(true);
-    				ti.addActionListener(al);
-    				SystemTray.getSystemTray().add(ti);
-    				isShown = true;
-    				ti.setToolTip(startupMessage());
+    				this.ti.setImageAutoSize(true);
+    				this.ti.addActionListener(al);
+    				SystemTray.getSystemTray().add(this.ti);
+    				this.isShown = true;
+    				this.ti.setToolTip(this.startupMessage());
     				new TrayAnimation().start();
 			    } else {
-			        System.setProperty("java.awt.headless", "true");			        
+			        System.setProperty("java.awt.headless", "true");
 			    }
 			} catch (final Exception e) {
 	            System.setProperty("java.awt.headless", "true");
 	        }
 		}
 	}
-	
+
 	private boolean useTray() {
-	    final boolean trayIconEnabled = sb.getConfigBool(SwitchboardConstants.TRAY_ICON_ENABLED, false);
-        final boolean trayIconForced = sb.getConfigBool(SwitchboardConstants.TRAY_ICON_FORCED, false);
+	    final boolean trayIconEnabled = this.sb.getConfigBool(SwitchboardConstants.TRAY_ICON_ENABLED, false);
+        final boolean trayIconForced = this.sb.getConfigBool(SwitchboardConstants.TRAY_ICON_FORCED, false);
         return trayIconEnabled && (OS.isWindows || OS.isMacArchitecture || trayIconForced);
 	}
-	
+
 	private class TrayAnimation extends Thread {
-		
+
 		public TrayAnimation() {
 			super(TrayAnimation.class.getSimpleName());
 		}
-		
+
 	    int ic = 0;
 	    @Override
         public void run() {
 	        while (!Tray.this.appIsReady) {
-	            Tray.this.ti.setImage(Tray.this.progressIcons[ic]);
-                if (OS.isMacArchitecture) setDockIcon(Tray.this.progressIcons[ic]);
-	            ic++; if (ic >= 4) ic = 0;
-	            try {Thread.sleep(80);} catch (InterruptedException e) {break;}
+	            Tray.this.ti.setImage(Tray.this.progressIcons[this.ic]);
+                if (OS.isMacArchitecture) setDockIcon(Tray.this.progressIcons[this.ic]);
+	            this.ic++; if (this.ic >= 4) this.ic = 0;
+	            try {Thread.sleep(80);} catch (final InterruptedException e) {break;}
 	        }
             try {
                 ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
-                Image trayIcon = ImageIO.read(new File(Tray.this.iconPath));
-                ti.setImage(trayIcon);
-                ti.setToolTip(readyMessage());
+                final Image trayIcon = ImageIO.read(new File(Tray.this.iconPath));
+                Tray.this.ti.setImage(trayIcon);
+                Tray.this.ti.setToolTip(Tray.this.readyMessage());
                 setDockIcon(trayIcon);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
             Tray.this.progressIcons = null;
 	    }
 	}
-	
+
 	private static void setDockIcon(Image icon) {
-	    if (!OS.isMacArchitecture) return;
+	    if (!OS.isMacArchitecture || Toolkits.setDockIconImage == null || Toolkits.applicationInstance == null) return;
 	    try {
 	        Toolkits.setDockIconImage.invoke(Toolkits.applicationInstance, icon);
-        } catch (Throwable e) {}
+        } catch (final Throwable e) {}
         // same as: Application.getApplication().setDockIconImage(i);
 	}
-	
+
 	/**
 	 * set all functions available
 	 */
 	public void setReady() {
-		appIsReady = true;
-		if (useTray()) {
+		this.appIsReady = true;
+		if (this.useTray()) {
     		try {
     		    ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
-    		    Image trayIcon = ImageIO.read(new File(this.iconPath));
-    	        if (ti != null) {
-    	            ti.setImage(trayIcon);
-    	            ti.setToolTip(readyMessage());
+    		    final Image trayIcon = ImageIO.read(new File(this.iconPath));
+    	        if (this.ti != null) {
+    	            this.ti.setImage(trayIcon);
+    	            this.ti.setToolTip(this.readyMessage());
     	        }
     	        setDockIcon(trayIcon);
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
-            if (this.menuItemHeadline != null) this.menuItemHeadline.setLabel(readyMessage());
+            if (this.menuItemHeadline != null) this.menuItemHeadline.setLabel(this.readyMessage());
             if (this.menuItemSearch != null) this.menuItemSearch.setEnabled(true);
             if (this.menuItemAdministration != null) this.menuItemAdministration.setEnabled(true);
             if (this.menuItemTerminate != null) this.menuItemTerminate.setEnabled(true);
 		}
 	}
-	
+
     public void setShutdown() {
-        if (useTray()) {
+        if (this.useTray()) {
             try {
-                if (ti != null) {
+                if (this.ti != null) {
                     ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
-                    Image trayIcon = ImageIO.read(new File(this.iconPath)); // 128x128
-                    final Image progressShutdown = ImageIO.read(new File(sb.getAppPath().toString() + "/addon/progress_shutdown.png".replace("/", File.separator))); // 128x28
-                    final BufferedImage progress = getProgressImage();
+                    final Image trayIcon = ImageIO.read(new File(this.iconPath)); // 128x128
+                    final Image progressShutdown = ImageIO.read(new File(this.sb.getAppPath().toString() + "/addon/progress_shutdown.png".replace("/", File.separator))); // 128x28
+                    final BufferedImage progress = this.getProgressImage();
                     BufferedImage shutdownIcon;
                     shutdownIcon = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
-                    Graphics2D h = shutdownIcon.createGraphics();
+                    final Graphics2D h = shutdownIcon.createGraphics();
                     h.setBackground(Color.BLACK);
                     h.clearRect(0, 0, 128, 128);
                     h.drawImage(trayIcon, 0, 0, 128, 128 - progress.getHeight(), null);
                     h.drawImage(progress.getSubimage(0, 0, 128, progress.getHeight() / 2), 0, 128 - progress.getHeight() / 2, null);
                     h.drawImage(progressShutdown, 0, 128 - progress.getHeight(), null);
                     h.dispose();
-                    ti.setImage(shutdownIcon);
+                    this.ti.setImage(shutdownIcon);
                     setDockIcon(shutdownIcon);
-                    ti.setToolTip(shutdownMessage());
+                    this.ti.setToolTip(this.shutdownMessage());
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 ConcurrentLog.logException(e);
             }
-            if (this.menuItemHeadline != null) this.menuItemHeadline.setLabel(shutdownMessage());
+            if (this.menuItemHeadline != null) this.menuItemHeadline.setLabel(this.shutdownMessage());
             if (this.menuItemSearch != null) this.menuItemSearch.setEnabled(false);
             if (this.menuItemAdministration != null) this.menuItemAdministration.setEnabled(false);
             if (this.menuItemTerminate != null) this.menuItemTerminate.setEnabled(false);
@@ -216,21 +210,21 @@ public final class Tray {
     }
 
     private BufferedImage getProgressImage() throws IOException {
-        final String progressPath = sb.getAppPath().toString() + "/addon/progressbar.png".replace("/", File.separator);
+        final String progressPath = this.sb.getAppPath().toString() + "/addon/progressbar.png".replace("/", File.separator);
         ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
-        Image progress_raw = ImageIO.read(new File(progressPath)); // 149x56
-        BufferedImage progress = new BufferedImage(149, 56, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D progressg = progress.createGraphics();
+        final Image progress_raw = ImageIO.read(new File(progressPath)); // 149x56
+        final BufferedImage progress = new BufferedImage(149, 56, BufferedImage.TYPE_INT_ARGB);
+        final Graphics2D progressg = progress.createGraphics();
         progressg.drawImage(progress_raw, 0, 0, null);
         progressg.dispose();
         return progress;
     }
-    
+
 	public void remove() {
-		if (isShown){
-			SystemTray.getSystemTray().remove(ti);
-			ti = null;
-			isShown = false;
+		if (this.isShown){
+			SystemTray.getSystemTray().remove(this.ti);
+			this.ti = null;
+			this.isShown = false;
 		}
 	}
 
@@ -244,10 +238,10 @@ public final class Tray {
     }
 
     private String readyMessage() {
-        if (deutsch) return "YaCy laeuft unter http://localhost:" + sb.getLocalPort();
+        if (deutsch) return "YaCy laeuft unter http://localhost:" + this.sb.getLocalPort();
         else if(french)
-        	return "YaCy est en cours d'exécution à l'adresse http://localhost:" + sb.getLocalPort();
-        return "YaCy is running at http://localhost:" + sb.getLocalPort();
+        	return "YaCy est en cours d'exécution à l'adresse http://localhost:" + this.sb.getLocalPort();
+        return "YaCy is running at http://localhost:" + this.sb.getLocalPort();
     }
 
     private String shutdownMessage() {
@@ -256,40 +250,40 @@ public final class Tray {
         	return "YaCy est en cours d'arrêt, veuillez patienter...";
         return "YaCy will shut down, please wait...";
     }
-    
+
     private void doubleClickAction() {
-        if (!appIsReady) {
-            String label = startupMessage();
-            ti.displayMessage("YaCy", label, TrayIcon.MessageType.INFO);
+        if (!this.appIsReady) {
+            final String label = this.startupMessage();
+            this.ti.displayMessage("YaCy", label, TrayIcon.MessageType.INFO);
         } else {
-            openBrowserPage("");
+            this.openBrowserPage("");
         }
     }
 
 	/**
-	 * 
+	 *
 	 * @param browserPopUpPage relative path to the webserver root
 	 */
 	private void openBrowserPage(final String browserPopUpPage) {
-		if(!menuEnabled) return;
+		if(!this.menuEnabled) return;
 		// no need for https, because we are on localhost
-		Browser.openBrowser("http://localhost:" + sb.getConfig(SwitchboardConstants.SERVER_PORT, "8090") + "/" + browserPopUpPage);
+		Browser.openBrowser("http://localhost:" + this.sb.getConfig(SwitchboardConstants.SERVER_PORT, "8090") + "/" + browserPopUpPage);
 	}
 
 	private PopupMenu getPopupMenu() {
 		String label;
 
-		PopupMenu menu = new PopupMenu();
-		
+		final PopupMenu menu = new PopupMenu();
+
         // Headline
-        this.menuItemHeadline = new MenuItem(startupMessage());
+        this.menuItemHeadline = new MenuItem(this.startupMessage());
         this.menuItemHeadline.setEnabled(false);
         //this.menuItemHeadline.setFont(this.menuItemHeadline.getFont().deriveFont(Font.BOLD)); // does not work because getFont() returns null;
         menu.add(this.menuItemHeadline);
-        
+
         // Separator
         menu.addSeparator();
-        
+
 		// YaCy Search
 		if (deutsch)
 			label = "YaCy Suche";
@@ -299,12 +293,7 @@ public final class Tray {
 			label = "YaCy Search";
 		this.menuItemSearch = new MenuItem(label);
 		this.menuItemSearch.setEnabled(false);
-		this.menuItemSearch.addActionListener(new ActionListener() {
-			@Override
-            public void actionPerformed(final ActionEvent e) {
-				openBrowserPage("index.html");
-			}
-		});
+		this.menuItemSearch.addActionListener(e -> Tray.this.openBrowserPage("index.html"));
 		menu.add(this.menuItemSearch);
 
 		// Peer Administration
@@ -316,20 +305,15 @@ public final class Tray {
 			label = "Administration";
 		this.menuItemAdministration = new MenuItem(label);
         this.menuItemAdministration.setEnabled(false);
-		this.menuItemAdministration.addActionListener(new ActionListener() {
-			@Override
-            public void actionPerformed(final ActionEvent e) {
-				openBrowserPage("Status.html");
-			}
-		});
+		this.menuItemAdministration.addActionListener(e -> Tray.this.openBrowserPage("Status.html"));
 		menu.add(this.menuItemAdministration);
-		
+
 
 		// Separator
 		menu.addSeparator();
 
 		// Quit
-		if(deutsch) 
+		if(deutsch)
 			label = "YaCy Beenden";
 		else if(french)
 			label = "Arrêter YaCy";
@@ -337,12 +321,7 @@ public final class Tray {
 			label = "Shutdown YaCy";
 		this.menuItemTerminate = new MenuItem(label);
         this.menuItemTerminate.setEnabled(false);
-		this.menuItemTerminate.addActionListener(new ActionListener() {
-			@Override
-            public void actionPerformed(final ActionEvent e) {
-				sb.terminate("shutdown from tray");
-			}
-		});
+		this.menuItemTerminate.addActionListener(e -> Tray.this.sb.terminate("shutdown from tray"));
 		menu.add(this.menuItemTerminate);
 		return menu;
 	}

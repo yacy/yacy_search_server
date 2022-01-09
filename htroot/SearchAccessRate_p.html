@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>YaCy '#[clientname]#': Local Search access rate
+	limitations</title> #%env/templates/metas.template%#
+</head>
+<body id="Settings">
+	#%env/templates/header.template%#
+	#%env/templates/submenuAccessTracker.template%#
+	<h2>Local Search access rate limitations</h2>
+	<p>
+		You can configure here limitations on access rate to this peer search interface by unauthenticated users and users without extended search	right 
+		(see the <a href="ConfigAccounts_p.html">Accounts</a> configuration page for details on users rights).
+	</p>
+
+	<form action="SearchAccessRate_p.html" method="post"
+		class="form-horizontal">
+		<input type="hidden" name="transactionToken"
+			value="#[transactionToken]#" />
+		<fieldset>
+			<legend>YaCy search</legend>
+
+			<p>
+				Access rate limitations to this peer search interface. 
+				When a user with limited rights (unauthenticated or without extended search	right) exceeds a limit, the search is blocked.
+			</p>
+
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.access.3s">Max searches in 3s</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control" id="search.public.max.access.3s"
+						name="search.public.max.access.3s" type="number"
+						value="#[search.public.max.access.3s]#" min="0" max="2147483647" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.access.1mn">Max searches in 1mn</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control" id="search.public.max.access.1mn"
+						name="search.public.max.access.1mn" type="number"
+						value="#[search.public.max.access.1mn]#" min="0" max="2147483647" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.access.10mn">Max searches in 10mn</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control" id="search.public.max.access.10mn"
+						name="search.public.max.access.10mn" type="number"
+						value="#[search.public.max.access.10mn]#" min="0" max="2147483647" />
+				</div>
+			</div>
+		</fieldset>
+
+		<fieldset>
+			<legend>Peer-to-peer search</legend>
+
+			<p>
+				Access rate limitations to the peer-to-peer search mode. 
+				When a user with limited rights (unauthenticated or without extended search right) exceeds a limit, the search scope falls back to only	this local peer index.
+			</p>
+
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.p2p.access.3s">Max searches in 3s</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control" id="search.public.max.p2p.access.3s"
+						name="search.public.max.p2p.access.3s" type="number"
+						value="#[search.public.max.p2p.access.3s]#" min="0"
+						max="2147483647" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.p2p.access.1mn">Max searches in 1mn</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control" id="search.public.max.p2p.access.1mn"
+						name="search.public.max.p2p.access.1mn" type="number"
+						value="#[search.public.max.p2p.access.1mn]#" min="0"
+						max="2147483647" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.p2p.access.10mn">Max searches in	10mn</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control" id="search.public.max.p2p.access.10mn"
+						name="search.public.max.p2p.access.10mn" type="number"
+						value="#[search.public.max.p2p.access.10mn]#" min="0"
+						max="2147483647" />
+				</div>
+			</div>
+		</fieldset>
+
+		<fieldset>
+			<legend>Peer-to-peer search with JavaScript results	resorting</legend>
+
+			<p>
+				Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled 
+				(check the 'Remote results resorting' section in the <a href="ConfigPortal_p.html">Search Portal</a> configuration page). 
+				When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.
+			</p>
+
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.p2p.jsresort.access.3s">Max searches in 3s</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control" id="search.public.max.p2p.jsresort.access.3s"
+						name="search.public.max.p2p.jsresort.access.3s" type="number"
+						value="#[search.public.max.p2p.jsresort.access.3s]#" min="0"
+						max="2147483647" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.p2p.jsresort.access.1mn">Max searches in 1mn</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control" id="search.public.max.p2p.jsresort.access.1mn"
+						name="search.public.max.p2p.jsresort.access.1mn" type="number"
+						value="#[search.public.max.p2p.jsresort.access.1mn]#" min="0"
+						max="2147483647" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.p2p.jsresort.access.10mn">Max searches in 10mn</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control" id="search.public.max.p2p.jsresort.access.10mn"
+						name="search.public.max.p2p.jsresort.access.10mn" type="number"
+						value="#[search.public.max.p2p.jsresort.access.10mn]#" min="0"
+						max="2147483647" />
+				</div>
+			</div>
+		</fieldset>
+
+		<fieldset>
+			<legend>Remote snippet load</legend>
+
+			<p>
+				Limitations on snippet loading from remote websites. 
+				When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY' 
+				(check the default Snippet Fetch Strategy on the <a	href="ConfigPortal_p.html">Search Portal</a> configuration page).
+			</p>
+
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.remoteSnippet.access.3s">Max	searches in 3s</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control"
+						id="search.public.max.remoteSnippet.access.3s"
+						name="search.public.max.remoteSnippet.access.3s" type="number"
+						value="#[search.public.max.remoteSnippet.access.3s]#" min="0"
+						max="2147483647" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.remoteSnippet.access.1mn">Max searches in 1mn</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control"
+						id="search.public.max.remoteSnippet.access.1mn"
+						name="search.public.max.remoteSnippet.access.1mn" type="number"
+						value="#[search.public.max.remoteSnippet.access.1mn]#" min="0"
+						max="2147483647" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="control-label col-sm-6 col-md-4 col-lg-3"
+					for="search.public.max.remoteSnippet.access.10mn">Max searches in 10mn</label>
+				<div class="col-sm-3 col-md-2">
+					<input class="form-control"
+						id="search.public.max.remoteSnippet.access.10mn"
+						name="search.public.max.remoteSnippet.access.10mn" type="number"
+						value="#[search.public.max.remoteSnippet.access.10mn]#" min="0"
+						max="2147483647" />
+				</div>
+			</div>
+		</fieldset>
+
+		<div class="form-group">
+			<div
+				class="col-xs-offset-1 col-sm-offset-3 col-md-offset-3 col-lg-offset-2">
+				<input type="submit" class="btn btn-primary" name="set"
+					value="Submit" aria-describedby="changeInfo" /> 
+				<input
+					type="submit" class="btn btn-default" name="setDefaults"
+					value="Set defaults" title="Reset to defaults settings"
+					aria-describedby="changeInfo" /> 
+				<em id="changeInfo">Changes will take effect immediately.</em>
+			</div>
+		</div>
+	</form>
+
+	#%env/templates/footer.template%#
+</body>
+</html>

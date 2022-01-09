@@ -1,5 +1,5 @@
 <div class="rightbar">
-<fieldset style="width: 230px;">
+<fieldset style="width: 320px;">
   <legend>System Status</legend>
   <dl>
 

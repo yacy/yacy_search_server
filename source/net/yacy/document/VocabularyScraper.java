@@ -23,9 +23,10 @@ package net.yacy.document;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import net.yacy.cora.document.id.DigestURL;
-import net.yacy.cora.util.JSONException;
-import net.yacy.cora.util.JSONObject;
 import net.yacy.kelondro.io.CharBuffer;
 
 public class VocabularyScraper {
@@ -51,8 +52,8 @@ public class VocabularyScraper {
         } else {
             this.classVocabulary = new ConcurrentHashMap<>();
             for (String voc: this.scraperDefinition.keySet()) {
-                JSONObject props = this.scraperDefinition.getJSONObject(voc);
                 try {
+                    JSONObject props = this.scraperDefinition.getJSONObject(voc);
                     String classtype = props.getString("class");
                     this.classVocabulary.put(classtype, voc);
                 } catch (JSONException e) {}
@@ -61,7 +62,7 @@ public class VocabularyScraper {
         }
     }
     
-    public VocabularyScraper(String init) {
+    public VocabularyScraper(String init) throws JSONException {
         this(new JSONObject(init));
     }
     

@@ -173,7 +173,7 @@ public class ContentScraperTest {
      */
     @Test
     public void testFindAbsoluteURLs() throws MalformedURLException {
-		final String[] urlStrings = { "http://yacy.net", "http://forum.yacy.de", "https://en.wikipedia.org" };
+		final String[] urlStrings = { "http://yacy.net", "https://searchlab.eu", "https://en.wikipedia.org" };
 		final List<AnchorURL> urls = new ArrayList<>();
 		for (String urlString : urlStrings) {
 			urls.add(new AnchorURL(urlString));
@@ -277,7 +277,7 @@ public class ContentScraperTest {
      */
     @Test
     public void testFindAbsoluteURLsMaxURLs() throws MalformedURLException {
-    	final String text = "Some test URLS : http://yacy.net - http://forum.yacy.de - https://en.wikipedia.org";
+    	final String text = "Some test URLS : http://yacy.net - https://searchlab.eu - https://en.wikipedia.org";
     	
     	/* No limit */
     	ArrayList<AnchorURL> detectedURLs = new ArrayList<>();
@@ -340,6 +340,106 @@ public class ContentScraperTest {
     	Assert.assertEquals("{abc}", ContentScraper.removeUnpairedBrackets("{abc}", '{', '}'));
     	Assert.assertEquals("{abc}{def}", ContentScraper.removeUnpairedBrackets("{abc}{def}", '{', '}'));
     	Assert.assertEquals("{{abc}{def}}", ContentScraper.removeUnpairedBrackets("{{abc}{def}}", '{', '}'));
+    }
+    
+    /**
+     * Test base tag URL resolution
+     * @throws IOException when an unexpected error occurred
+     */
+    @Test
+    public void testBaseTagUrlResolution() throws IOException {
+    	final String htmlHeaderBeginning = "<!DOCTYPE html><head><title>Test document</title>";
+        final DigestURL docUrl = new DigestURL("http://example.org/parent/base.html");
+        
+        final String htmlLinksList = "<ul>" 
+				+ "<li><a href=\"http://example.org/sameDomain/absolute.html\">Absolute on same domain</a></li>"
+				+ "<li><a href=\"http://localhost/otherDomain/absolute.html\">Absolute on another domain</a></li>"
+				+ "<li><a href=\"//example.org/sameDomain/scheme-relative.html\">scheme-relative on same domain</a></li>"
+				+ "<li><a href=\"//example.net/otherDomain/scheme-relative.html\">scheme-relative on another domain</a></li>"
+				+ "<li><a href=\"/path/absolute.html\">path-absolute</a></li>"
+				+ "<li><a href=\"path/relative/schemeless.html\">path-relative-scheme-less</a></li>"
+				+ "</ul>";
+        
+        
+        final Map<String, String[]> html2Results = new HashMap<>();
+        /* No base tag */
+		String html = htmlHeaderBeginning + "</head>" + htmlLinksList;
+		String[] expectedUrls = { "http://example.org/sameDomain/absolute.html",
+				"http://localhost/otherDomain/absolute.html", "http://example.org/sameDomain/scheme-relative.html",
+				"http://example.net/otherDomain/scheme-relative.html", "http://example.org/path/absolute.html",
+				"http://example.org/parent/path/relative/schemeless.html" };
+    	html2Results.put(html, expectedUrls);
+    	
+        /* Base with absolute href on same domain */
+		html = htmlHeaderBeginning + "<base href=\"http://example.org/base/index.html\"/>"
+				+ "</head>" + htmlLinksList;
+		expectedUrls = new String[]{ "http://example.org/sameDomain/absolute.html",
+				"http://localhost/otherDomain/absolute.html", "http://example.org/sameDomain/scheme-relative.html",
+				"http://example.net/otherDomain/scheme-relative.html", "http://example.org/path/absolute.html",
+				"http://example.org/base/path/relative/schemeless.html" };
+    	html2Results.put(html, expectedUrls);
+    	
+        /* Base with absolute href on another domain */
+		html = htmlHeaderBeginning + "<base href=\"http://example.net/base/index.html\"/>"
+				+ "</head>" + htmlLinksList;
+		expectedUrls = new String[]{ "http://example.org/sameDomain/absolute.html",
+				"http://localhost/otherDomain/absolute.html", "http://example.org/sameDomain/scheme-relative.html",
+				"http://example.net/otherDomain/scheme-relative.html", "http://example.net/path/absolute.html",
+				"http://example.net/base/path/relative/schemeless.html" };
+    	html2Results.put(html, expectedUrls);
+    	
+        /* Base with scheme-relative href on same domain */
+		html = htmlHeaderBeginning + "<base href=\"//example.org/base/index.html\"/>"
+				+ "</head>" + htmlLinksList;
+		expectedUrls = new String[]{ "http://example.org/sameDomain/absolute.html",
+				"http://localhost/otherDomain/absolute.html", "http://example.org/sameDomain/scheme-relative.html",
+				"http://example.net/otherDomain/scheme-relative.html", "http://example.org/path/absolute.html",
+				"http://example.org/base/path/relative/schemeless.html" };
+    	html2Results.put(html, expectedUrls);
+    	
+        /* Base with scheme-relative href on another domain */
+		html = htmlHeaderBeginning + "<base href=\"//example.net/base/index.html\"/>"
+				+ "</head>" + htmlLinksList;
+		expectedUrls = new String[]{ "http://example.org/sameDomain/absolute.html",
+				"http://localhost/otherDomain/absolute.html", "http://example.org/sameDomain/scheme-relative.html",
+				"http://example.net/otherDomain/scheme-relative.html", "http://example.net/path/absolute.html",
+				"http://example.net/base/path/relative/schemeless.html" };
+    	html2Results.put(html, expectedUrls);
+    	
+        /* Base with path-absolute relative href */
+		html = htmlHeaderBeginning + "<base href=\"/base/index.html\"/>"
+				+ "</head>" + htmlLinksList;
+		expectedUrls = new String[]{ "http://example.org/sameDomain/absolute.html",
+				"http://localhost/otherDomain/absolute.html", "http://example.org/sameDomain/scheme-relative.html",
+				"http://example.net/otherDomain/scheme-relative.html", "http://example.org/path/absolute.html",
+				"http://example.org/base/path/relative/schemeless.html" };
+    	html2Results.put(html, expectedUrls);
+    	
+        /* Base with path-relative-scheme-less relative href */
+		html = htmlHeaderBeginning + "<base href=\"base/index.html\"/>"
+				+ "</head>" + htmlLinksList;
+		expectedUrls = new String[]{ "http://example.org/sameDomain/absolute.html",
+				"http://localhost/otherDomain/absolute.html", "http://example.org/sameDomain/scheme-relative.html",
+				"http://example.net/otherDomain/scheme-relative.html", "http://example.org/path/absolute.html",
+				"http://example.org/parent/base/path/relative/schemeless.html" };
+    	html2Results.put(html, expectedUrls);
+
+		for (final Entry<String, String[]> html2Result : html2Results.entrySet()) {
+			ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), new VocabularyScraper(), 0);
+			try (final Writer writer = new TransformerWriter(null, null, scraper, false)) {
+				FileUtils.copy(new StringReader(html2Result.getKey()), writer);
+
+				final Set<DigestURL> expected = new HashSet<>();
+				for (final String url : html2Result.getValue()) {
+					expected.add(new DigestURL(url));
+				}
+
+				Assert.assertEquals(expected.size(), scraper.getAnchors().size());
+				Assert.assertTrue(expected.containsAll(scraper.getAnchors()));
+			} finally {
+				scraper.close();
+			}
+		}
     }
     
     /**

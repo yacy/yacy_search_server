@@ -64,14 +64,11 @@ SetCompressor /SOLID LZMA
 ; at least we need Java 8
 !define JRE_VERSION8 "1.8"
 
-; download links for Oracle Java 8 Update 191 (available at https://java.com/fr/download/manual.jsp)
-; 32 bit / jre-8u191-windows-i586.exe
-!define JRE_32 "https://javadl.oracle.com/webapps/download/AutoDL?BundleId=235725_2787e4a523244c269598db4e85c51e0c"
-; 64 bit / jre-8u191-windows-x64.exe
-!define JRE_64 "https://javadl.oracle.com/webapps/download/AutoDL?BundleId=235727_2787e4a523244c269598db4e85c51e0c"
-
-;!define JRE_32 "http://yacy.berlios.de/download.php?what=jre&version=32&yacyrevnr=@REPL_REVISION_NR@"
-;!define JRE_64 "http://yacy.berlios.de/download.php?what=jre&version=64&yacyrevnr=@REPL_REVISION_NR@"
+; download links for Oracle Java 8 Update 211 (available at https://java.com/en/download/manual.jsp)
+; 32 bit / jre-8u211-windows-i586.exe
+!define JRE_32 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=238727_478a62b7d4e34b78b671c754eaaf38ab"
+; 64 bit / jre-8u211-windows-x64.exe
+!define JRE_64 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=238729_478a62b7d4e34b78b671c754eaaf38ab"
 
 ; ----------------------------------------
 ; GENERAL APPEARANCE
@@ -106,7 +103,7 @@ ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
 !insertmacro MUI_PAGE_INSTFILES
 
 !define MUI_PAGE_CUSTOMFUNCTION_SHOW SHOW_PageFinish_custom
-!define MUI_FINISHPAGE_SHOWREADME http://www.yacy-websuche.de/wiki/index.php/InstallerFinished
+!define MUI_FINISHPAGE_SHOWREADME https://www.youtube.com/yacy_tutorials
 !define MUI_FINISHPAGE_SHOWREADME_TEXT $(finishPage)
 !insertmacro MUI_PAGE_FINISH
 

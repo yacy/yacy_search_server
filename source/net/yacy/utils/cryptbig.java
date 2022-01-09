@@ -380,7 +380,7 @@ public class cryptbig {
 	//System.out.println("Salt=" + salt);
 	final cryptbig c = new cryptbig(key, salt);
 	boolean gzFlag = true;
-	byte[] gz = gzip.gzipString(s);
+	byte[] gz = Gzip.gzipString(s);
 	if (gz.length > s.length()) {
 	    // revert compression
 	    try {
@@ -406,7 +406,7 @@ public class cryptbig {
 	if (b64dec == null) return null; // error in input string (inconsistency)
 	final byte[] dec = c.decryptArray(b64dec);
 	if (dec == null) return null;
-	if (gzFlag) return gzip.gunzipString(dec);
+	if (gzFlag) return Gzip.gunzipString(dec);
 	return UTF8.String(dec);
 
     }
@@ -429,7 +429,7 @@ public class cryptbig {
 	if (key == null) key = "NULL";
 	if (method == 'p') return "p|" + content;
 	if (method == 'b') return "b|" + Base64Order.enhancedCoder.encodeString(content);
-	if (method == 'z') return "z|" + Base64Order.enhancedCoder.encode(gzip.gzipString(content));
+	if (method == 'z') return "z|" + Base64Order.enhancedCoder.encode(Gzip.gzipString(content));
 	if (method == 'c') return "c|" + scrambleString(key, content);
 	return null;
     }
@@ -441,7 +441,7 @@ public class cryptbig {
 	encoded = encoded.substring(2);
 	if (method == 'p') return encoded;
 	if (method == 'b') return Base64Order.enhancedCoder.decodeString(encoded);
-	if (method == 'z') return gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded));
+	if (method == 'z') return Gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded));
 	if (method == 'c') return descrambleString(key, encoded);
 	return null;
     }

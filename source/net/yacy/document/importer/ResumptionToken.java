@@ -59,6 +59,7 @@ public class ResumptionToken extends TreeMap<String, String> {
 
     private final DigestURL source;
 
+    @SuppressWarnings("unused")
     public ResumptionToken(final DigestURL source, final byte[] b) throws IOException {
         super((Collator) insensitiveCollator.clone());
         this.source = source;

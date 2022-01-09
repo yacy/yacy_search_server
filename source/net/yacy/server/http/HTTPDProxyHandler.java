@@ -444,10 +444,10 @@ public final class HTTPDProxyHandler {
 
             requestHeader.remove(HeaderFramework.HOST);
 
-            final HTTPClient client = setupHttpClient(requestHeader, agent);
-
             // send request
-            try {
+            try (final HTTPClient client = new HTTPClient(agent, timeout)) {
+                client.setHeader(requestHeader.entrySet());
+                client.setRedirecting(false);
             	client.GET(getUrl, false);
                 if (log.isFinest()) log.finest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
 
@@ -596,20 +596,7 @@ public final class HTTPDProxyHandler {
                     }
                 } // end hasBody
             } catch(final SocketException se) {
-                // if opened ...
-//                if(res != null) {
-//                    // client cut proxy connection, abort download
-//                    res.abort();
-//                }
-            	client.finish();
                 handleProxyException(se,conProp,respond,url);
-            } finally {
-                // if opened ...
-//                if(res != null) {
-//                    // ... close connection
-//                    res.closeStream();
-//                }
-            	client.finish();
             }
         } catch (final Exception e) {
             handleProxyException(e,conProp,respond,url);
@@ -668,7 +655,7 @@ public final class HTTPDProxyHandler {
                 cachedResponseHeader.put(HeaderFramework.CONTENT_LENGTH, Integer.toString(0));
 
                 // send cached header with replaced date and added length
-                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,304,cachedResponseHeader);
+                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,304,null,cachedResponseHeader);
                 //respondHeader(respond, "304 OK", cachedResponseHeader); // respond with 'not modified'
             } else {
                 // unconditional request: send content of cache
@@ -679,7 +666,7 @@ public final class HTTPDProxyHandler {
                 cachedResponseHeader.put(HeaderFramework.CONTENT_LENGTH, Long.toString(cacheEntry.length));
 
                 // send cached header with replaced date and added length
-                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,203,cachedResponseHeader);
+                HTTPDemon.sendRespondHeader(conProp,respond,clienthttpVer,203,null,cachedResponseHeader);
                 //respondHeader(respond, "203 OK", cachedResponseHeader); // respond with 'non-authoritative'
 
                 // send also the complete body now from the cache
@@ -757,20 +744,6 @@ public final class HTTPDProxyHandler {
             }
         }
         return domain;
-    }
-
-    /**
-     * creates a new HttpClient and sets parameters according to proxy needs
-     *
-     * @param requestHeader
-     * @return
-     */
-    private static HTTPClient setupHttpClient(final RequestHeader requestHeader, final ClientIdentification.Agent agent) {
-        // setup HTTP-client
-    	final HTTPClient client = new HTTPClient(agent, timeout);
-    	client.setHeader(requestHeader.entrySet());
-    	client.setRedirecting(false);
-        return client;
     }
 
     /**
@@ -1044,8 +1017,10 @@ public final class HTTPDProxyHandler {
         String orgHostName = orgurl.getHost();
         if (orgHostName == null) orgHostName = "unknown";
         orgHostName = orgHostName.toLowerCase(Locale.ROOT);
-        String orgHostPath = orgurl.getPath(); if (orgHostPath == null) orgHostPath = "";
-        String orgHostArgs = orgurl.getSearchpart();; if (orgHostArgs == null) orgHostArgs = "";
+        String orgHostPath = orgurl.getPath();
+        if (orgHostPath == null) orgHostPath = "";
+        String orgHostArgs = orgurl.getSearchpart();
+        if (orgHostArgs == null) orgHostArgs = "";
         if (orgHostArgs.length() > 0) orgHostArgs = "?" + orgHostArgs;
         detailedErrorMsgMap.put("hostName", orgHostName);
 
