@@ -50,10 +50,17 @@
         <col width="10" />
         <col />
       </colgroup>
+      #(showtable)#
       <tr class="TableHeader">
-        <th>Count</th>
+        <th #(sortedByCount)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByCount)#>
+                <a class="sortTableLink" href="IndexCreateQueues_p.html?stack=#[queuename]#&amp;sort=#(sortedByCount_asc)#::-#(/sortedByCount_asc)#count" target="_self" title="Sort #(sortedByCount_asc)#ascending::descending#(/sortedByCount_asc)#">Count</a>
+                #(sortedByCount)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByCount)#
+        </th>
         <th>Delta/ms</th>
-        <th>Host</th>
+        <th #(sortedByHost)#::aria-sort="#(asc)#descending::ascending#(/asc)#"#(/sortedByHost)#>
+                <a class="sortTableLink" href="IndexCreateQueues_p.html?stack=#[queuename]#&amp;sort=#(sortedByHost_asc)#::-#(/sortedByHost_asc)#host" target="_self" title="Sort #(sortedByHost_asc)#ascending::descending#(/sortedByHost_asc)#">Host</a>
+                #(sortedByHost)#::<span class="glyphicon glyphicon-chevron-#(asc)#down::up#(/asc)#"></span>#(/sortedByHost)#
+        </th>
         <th>Initiator</th>
         <th>Profile</th>
         <th>Depth</th>
@@ -61,6 +68,7 @@
         <th>Anchor Name</th>
         <th>URL</th>
       </tr>
+      #(/showtable)#
     #{host}#
       <tr class="TableCellDark">
         <td>#[hostcount]#</td>

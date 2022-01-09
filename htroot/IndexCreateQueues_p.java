@@ -9,6 +9,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Collections;
+import java.util.stream.Collectors;
+import java.util.LinkedHashMap;
+import java.util.TreeMap;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -59,7 +64,9 @@ public class IndexCreateQueues_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         StackType stackType = StackType.LOCAL;
-        int urlsPerHost = 5;
+        int urlsPerHost = 3;
+        int sortByCount = 0;
+        int sortByHost = 0;
         boolean embed = false;
         String deletepattern = ".*";
 
@@ -67,6 +74,14 @@ public class IndexCreateQueues_p {
             stackType = StackType.valueOf(post.get("stack", stackType.name()).toUpperCase());
             urlsPerHost = post.getInt("urlsPerHost", urlsPerHost);
             if (post.containsKey("embed")) embed = true;
+
+            if (post.containsKey("sort")) {
+                String countSort = post.get("sort");
+                if (countSort.equals("count"))  sortByCount = +1;
+                if (countSort.equals("-count")) sortByCount = -1;
+                if (countSort.equals("host"))  sortByHost = +1;
+                if (countSort.equals("-host")) sortByHost = -1;
+            }
 
             if (post.containsKey("delete")) {
                 deletepattern = post.get("pattern", deletepattern).trim();
@@ -149,7 +164,55 @@ public class IndexCreateQueues_p {
             prop.put("crawler_embed_deletepattern", deletepattern);
             prop.put("crawler_embed_queuename", stackType.name());
 
-            final Map<String, Integer[]> hosts = sb.crawlQueues.noticeURL.getDomainStackHosts(stackType, sb.robots);
+            Map<String, Integer[]> hosts = sb.crawlQueues.noticeURL.getDomainStackHosts(stackType, sb.robots);
+
+            prop.put("crawler_showtable_queuename", stackType.name());
+
+            if ( sortByCount==0 && sortByHost==0 ) {
+                prop.put("crawler_showtable_sortedByCount",false);
+                prop.put("crawler_showtable_sortedByCount_asc",true); // first click sorts descending
+                prop.put("crawler_showtable_sortedByHost",false);
+                prop.put("crawler_showtable_sortedByHost_asc",false);
+            }
+            else {
+
+                if ( sortByCount!=0 ) {
+                    prop.put("crawler_showtable_sortedByHost",false);
+                    prop.put("crawler_showtable_sortedByHost_asc",false);
+                    prop.put("crawler_showtable_sortedByCount",true);
+                    if (sortByCount < 0) {
+                        prop.put("crawler_showtable_sortedByCount_asc", false);
+                        Map<String, Integer[]> hosts_sorted = hosts.entrySet().stream()
+                            .sorted( (e1, e2)->e2.getValue()[0].compareTo(e1.getValue()[0]) )
+                            .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                        hosts = hosts_sorted;
+                    }
+                    else {
+                        prop.put("crawler_showtable_sortedByCount_asc", true);
+                        Map<String, Integer[]> hosts_sorted = hosts.entrySet().stream()
+                            .sorted( (e1, e2)->e1.getValue()[0].compareTo(e2.getValue()[0]) )
+                            .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+                        hosts = hosts_sorted;
+                    }
+                }
+                
+                if ( sortByHost!=0 ) {
+                    prop.put("crawler_showtable_sortedByCount",false);
+                    prop.put("crawler_showtable_sortedByCount_asc",true);
+                    prop.put("crawler_showtable_sortedByHost",true);
+                    if (sortByHost < 0) {
+                        prop.put("crawler_showtable_sortedByHost_asc", false);
+                        Map<String, Integer[]> hosts_sorted = new TreeMap<String, Integer[]>(Collections.reverseOrder());
+                        hosts_sorted.putAll(hosts);
+                        hosts = hosts_sorted;
+                    }
+                    else {
+                        prop.put("crawler_showtable_sortedByHost_asc", true);
+                        Map<String, Integer[]> hosts_sorted = new TreeMap<String, Integer[]>(hosts);
+                        hosts = hosts_sorted;
+                    }
+                }
+            }
 
             int hc = 0;
             for (Map.Entry<String, Integer[]> host: hosts.entrySet()) {
