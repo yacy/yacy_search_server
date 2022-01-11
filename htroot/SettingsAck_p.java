@@ -211,6 +211,19 @@ public class SettingsAck_p {
                 sb.peers.mySeed().setIP("");
                 env.setConfig(SwitchboardConstants.SERVER_STATICIP, "");
             }
+
+            // publicPort
+            String publicPort =  (post.get("publicPort")).trim();
+            try {
+                Integer pport = Integer.parseInt(publicPort);
+                if(pport < 65535 && pport >= 0) {
+                    serverCore.usePublicPort = true;
+                    sb.peers.mySeed().setPort(pport);
+                    env.setConfig(SwitchboardConstants.SERVER_PUBLIC_PORT, publicPort);
+                }
+            } catch (NumberFormatException e) {
+                // noop
+            }
             
             // server access data
             String filter = (post.get("serverfilter")).trim();

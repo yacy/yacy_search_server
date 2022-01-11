@@ -31,6 +31,15 @@
            you will not be able to access the server pages anymore.</td>
   </tr>
   <tr valign="top">
+      <td><label for="publicPort">publicPort (optional):</label></td>
+      <td><input name="publicPort" id="publicPort" aria-describedby="publicPortInfo" type="text" size="32" maxlength="80" value="#[publicPort]#" /></td>
+      <td id="publicPortInfo"><strong>The publicPort can help that your peer can be reached by other peers in case that your
+             peer is behind a reverse proxy.</strong>
+             If the port used to access YaCy is the same port the application is listening on,
+             you don't need to set anything here, please leave it blank.<br />
+      </td>
+  </tr>
+  <tr valign="top">
     <td><label for="fileHost">fileHost:</label></td>
     <td><input name="fileHost" id="fileHost" aria-describedby="fileHostInfo" type="text" size="32" maxlength="80" value="#[fileHost]#" /><br />(requires restart)</td>
     <td id="fileHostInfo"><strong>Set this to avoid error-messages like 'proxy use not allowed / granted' on accessing your Peer by its hostname.</strong>
