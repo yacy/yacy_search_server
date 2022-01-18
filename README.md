@@ -179,11 +179,6 @@ Compiling YaCy:
   because the servlet pages are not compiled by the Eclipse build process.
 after the dist procedure, the release can be found in the RELEASE subdirectory.
 
-Build with Maven:
-- For the first time go to the subdirectory libbuild (which contains the Maven parent POM).
-- Compile with `mvn clean install -DskipTests`, this will create all needed modules.
-- After this you can use just use the POM in the main directory to build YaCy with Maven.
-
 ## APIs and attaching software
 
 YaCy has many built-in interfaces, and they are all based on HTTP/XML and
