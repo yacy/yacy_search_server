@@ -71,7 +71,10 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    implementation(fileTree("lib"))
+    implementation(fileTree(dir : "lib", include : "*.jar"))
+
+    // need at least one entry to make references to configuragtion.xxxx work in combination with local lib directory
+    implementation 'com.ibm.icu:icu4j:63.1'
 
     testImplementation('junit:junit:4.13.2')
 }
@@ -85,8 +88,24 @@ jar {
     FileTree  libdir = fileTree("lib").include ("*.jar").exclude("yacycore.jar")
     manifest {
         attributes(
-            "Main-Class": "net.yacy.yacy" ,
-            "Class-Path": libdir.collect { it.name }.join(' ')               
+            "Main-Class": mainClassName ,
+            "Class-Path": configurations.compileClasspath.collect { it.name }.join(' ')               
         )
     }
+}
+
+shadowJar.zip64 = true // saw build error: Execution failed for task ':shadowJar'. shadow.org.apache.tools.zip.Zip64RequiredException: archive contains more than 65535 entries.
+
+// mimic current config with dependencies in lib directory
+// @TODO: maybe removed after complete Gradle migration
+task copyDependenciesToLib(type: Copy) {
+    def destination = project.file("lib")
+    into destination
+    from configurations.compileClasspath
+    eachFile { // prevent overwriting existing files
+        if (it.getRelativePath().getFile(destination).exists()) {
+            it.exclude()
+        }
+    }
+    build.dependsOn(copyDependenciesToLib)
 }
