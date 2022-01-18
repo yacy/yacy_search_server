@@ -19,12 +19,19 @@ repositories {
     flatDir {
        dirs 'lib'
     }
+    mavenCentral()
 }
 
 sourceSets {
     main {
         java {
 	    srcDirs = ['source']
+        }
+    }
+
+    test {
+        java {
+            srcDirs = ['test/java']
         }
     }
 }
@@ -65,4 +72,21 @@ tasks.withType(JavaCompile) {
 
 dependencies {
     implementation(fileTree("lib"))
+
+    testImplementation('junit:junit:4.13.2')
+}
+
+// output to lib/yacycore.jar (like with ant with downside by determine class-path)
+jar {
+    archiveFileName = 'yacycore.jar'
+    destinationDirectory  = new File('lib')
+
+    // @TODO: class-path workaround until we've dependencies to use configurations.implementation instead of filetree.
+    FileTree  libdir = fileTree("lib").include ("*.jar").exclude("yacycore.jar")
+    manifest {
+        attributes(
+            "Main-Class": "net.yacy.yacy" ,
+            "Class-Path": libdir.collect { it.name }.join(' ')               
+        )
+    }
 }
