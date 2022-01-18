@@ -109,3 +109,29 @@ task copyDependenciesToLib(type: Copy) {
     }
     build.dependsOn(copyDependenciesToLib)
 }
+
+/** -----------------------------------------------------------
+ * Settings during the migration from Ant to Gradle build
+ * importing Ant targets and to use them within this Gradle build
+ * until/where functionality has not been migrated yet
+ * ------------------------------------------------------------
+ */
+// Import Ant build and prefix all task names with 'ant_' to prevent naming conflict with Gradle tasks.
+ant.importBuild('build.xml') { antTaskName -> "ant_${antTaskName}".toString() }
+
+// Set group property for all Ant tasks.
+tasks.matching { task -> task.name.startsWith('ant_') }*.group = 'Ant'
+
+// include compile of htroot servlets in Gradle lifecycle somewhere after compileJava
+startScripts.dependsOn("ant_compile-htroot")
+
+tasks.named('ant_buildGitRevTask') {
+    doFirst { 
+        println '====================================='
+        println 'In case this imported Ant task fails'
+        println '(stop ant jvm which on failure keeps a lock on libbuild/GitRevTask.jar (making supsequent builds fail too)'
+        println '- run the normal ant build "ant all" ONCE (to complile the libbuild/GitRevTask.jar)'
+        println '- after this Gradle build should work'
+        println '====================================='
+    }
+}

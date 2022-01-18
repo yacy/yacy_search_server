@@ -21,3 +21,4 @@ yacy.log
 /javadoc/
 /build/
 .gradle
+source/net/yacy/peers/operation/yacyBuildProperties.java

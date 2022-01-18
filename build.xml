@@ -43,7 +43,7 @@
   <property name="lib" location="lib"/>
   <property name="libt" location="libt"/>
   <property name="libbuild" location="libbuild"/>
-  <property name="build" location="classes"/>
+  <property name="build" location="build/classes/java/main"/> <!-- reuse Gradle build path -->
   <property name="javadoc" location="javadoc"/>
   <property name="htroot" location="htroot"/>
   <property name="test" location="test/java"/>
@@ -81,7 +81,7 @@
   </condition>
 
   <target name="buildGitRevTask">
-    <delete file="${libbuild}/GitRevTask.jar" failonerror="false" />
+    <!-- <delete file="${libbuild}/GitRevTask.jar" failonerror="false" /> deleted via clean no need to do it all the time -->
     <javac srcdir="${libbuild}/GitRevTask" includeantruntime="true" encoding="UTF-8">
         <classpath>
             <pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
@@ -146,11 +146,10 @@
     <filter token="REPL_RESTARTCMD" value="${RESTARTCMD}"/>
 
     <!-- apply replacments -->
-    <delete file="${build}/net/yacy/peers/operation/yacyBuildProperties.java" failonerror="false"/>
-    <copy file="${src}/net/yacy/peers/operation/yacyBuildProperties.java" tofile="${build}/net/yacy/peers/operation/yacyBuildProperties.java" overwrite="true" filtering="true" />
+    <copy file="${src}/net/yacy/peers/operation/yacyBuildProperties.java.template" tofile="${src}/net/yacy/peers/operation/yacyBuildProperties.java" overwrite="true" filtering="true" />
     
     <!-- copy log4j config file -->
-    <copy file="${src}/log4j.properties" tofile="${build}/log4j.properties" overwrite="true" filtering="true" />
+    <copy file="${src}/log4j.properties" tofile="${build}/log4j.properties" overwrite="true" filtering="true" /> <!-- @TODO: obsolete, contains no replace/filter pattern -->
 
   </target>
 
@@ -159,7 +158,8 @@
       windowtitle="YaCy API: javadoc documentation"
       encoding="UTF-8"
       charset="UTF-8"
-      access="private">
+      access="private"
+      useexternalfile="true">
       <fileset dir="${src}">
         <include name="**/*.java"/>
       </fileset>
@@ -280,6 +280,7 @@
   <target name="compile-core" depends="init" description="compile YaCy core">
 
     <!-- compile yacyBuildProperties.java -->
+    <!-- *obsolete* - for Gradle migration process changed to use *.java.template file for filtered copy 
     <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
            debug="true" debuglevel="lines,vars,source" includeantruntime="false"
            includes="net/yacy/peers/operation/yacyBuildProperties.java"
@@ -288,11 +289,10 @@
       <compilerarg value="-Xlint"/>
     </javac>
     <delete file="${build}/BuildProperties.java" />
-
+-->
     <!-- compile the core sources -->
     <javac srcdir="${src}/" destdir="${build}"
            debug="true" debuglevel="lines,vars,source" includeantruntime="false"
-           excludes="net/yacy/peers/operation/yacyBuildProperties.java"
            source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
       <classpath refid="project.class.path" />
       <compilerarg value="-Xlint"/>
@@ -319,7 +319,7 @@
 
   </target>
 
-  <target name="compile" depends="compile-core" description="compile YaCy core and YaCy servlets">
+  <target name="compile-htroot" depends="init" description="compile YaCy servlets">
     <!-- compile htroot, htroot/yacy and htroot/htdocsdefault -->
     <javac srcdir="${htroot}/"
            excludes="processing/**"
@@ -329,6 +329,8 @@
       <compilerarg value="-Xlint"/>
     </javac>
   </target>
+  
+  <target name="compile" depends="compile-core, compile-htroot" description="compile YaCy core and YaCy servlets" />
 
   <target name="all" depends="compile">
   </target>
@@ -538,18 +540,17 @@
   <!-- make clean -->
   <target name="clean" description="make clean">
     <delete dir="${release_main}" failonerror="false"/>
-    <delete file="${build}/net/yacy/peers/operation/yacyBuildProperties.java" failonerror="false"/>
     <delete file="${build}/log4j.properties" failonerror="false"/>
     <delete file="${lib}/yacycore.jar" failonerror="false"/>
-    <delete file="${lib}/svnRevNr.jar" failonerror="false"/>
-    <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/>
+    <delete file="${lib}/svnRevNr.jar" failonerror="false"/> <!-- @TODO: obsolete, never generated -->
+    <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/> <!-- @TODO: obsolete, never generated -->
     <delete file="${libbuild}/GitRevTask.jar" failonerror="false"/>    
     <delete failonerror="false">
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
       <fileset dir="${htroot}" includes="**/*.class" />
       <fileset dir="test/" includes="**/*.class" />
-      <fileset dir="${libbuild}/svnRevNr" includes="**/*.class" />
+      <fileset dir="${libbuild}/svnRevNr" includes="**/*.class" /> <!-- @TODO: obsolete, never generated -->
       <fileset dir="${libbuild}/GitRevTask" includes="**/*.class" />
       <fileset dir="." includes="TEST-*" />
     </delete>
