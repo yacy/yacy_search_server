@@ -77,6 +77,10 @@ dependencies {
     implementation(fileTree(dir : "lib", include : "*.jar"))
 
     // need at least one entry to make references to configuragtion.xxxx work in combination with local lib directory
+    implementation 'org.apache.james:apache-mime4j:0.6'
+    implementation 'org.apache.calcite.avatica:avatica-core:1.13.0'
+    implementation 'org.bouncycastle:bcmail-jdk15on:1.69'
+    implementation 'commons-codec:commons-codec:1.14'
     implementation 'com.ibm.icu:icu4j:63.1'
 
     testImplementation('junit:junit:4.13.2')
