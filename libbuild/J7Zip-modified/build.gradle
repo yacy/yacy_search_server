@@ -1,0 +1,24 @@
+
+
+plugins {
+    id 'java-library'
+}
+
+/** Port of older support library to be build with Gradle
+previous Maven Info
+    <groupId>net.yacy.extlib</groupId>
+    <artifactId>J7Zip-modified</artifactId>
+    <packaging>jar</packaging>
+    <version>1.02</version>
+    <description>J7Zip library for YaCy sevenzipParser (not available in external maven repository)</description>
+*/
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
+
+version = '1.02'

@@ -1,1 +1,3 @@
 rootProject.name = 'yacycore'
+
+include ('libbuild:J7Zip-modified')
