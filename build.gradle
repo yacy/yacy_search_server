@@ -242,18 +242,23 @@ task prepYaCyProperties (type: Copy) {
 prepYaCyProperties.dependsOn(runGitComInf)
 compileJava.dependsOn(prepYaCyProperties) // must be executed before compile
 
-/** -----------------------------------------------------------
- * Settings during the migration from Ant to Gradle build
- * importing Ant targets and to use them within this Gradle build
- * until/where functionality has not been migrated yet
- * ------------------------------------------------------------
- */
-// Import Ant build and prefix all task names with 'ant_' to prevent naming conflict with Gradle tasks.
-ant.importBuild('build.xml') { antTaskName -> "ant_${antTaskName}".toString() }
+// implement ant task to simulate old Ant build for htroot,
+// to avoid import of complete build.xml (as currently used)
+task compileHtrootServlets {
 
-// Set group property for all Ant tasks.
-tasks.matching { task -> task.name.startsWith('ant_') }*.group = 'Ant'
-
-// include compile of htroot servlets in Gradle lifecycle somewhere after compileJava
-startScripts.dependsOn("ant_gradle-compile-htroot")
+    ant {
+        path(id:'project.class.path') {
+            // place yacycore.jar on classpath (not automatically done)
+            pathelement (location: jar.archiveFile.get())
+            // construct path elements
+            configurations.compileClasspath.each { pathelement (location: it) }
+        }
+        javac (srcdir:'htroot', excludes:'processing/**', 
+            source:'1.8', target:'1.8',
+            debug:"true", debuglevel:"lines,vars,source", includeantruntime:"false", encoding:"UTF-8") {
+            classpath (refid:'project.class.path')
+        }
+    }
+}
+startScripts.dependsOn(compileHtrootServlets)
 
