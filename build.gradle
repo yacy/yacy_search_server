@@ -425,3 +425,33 @@ task packageDist (dependsOn : ['copyDependenciesForDistribution','packageDistZip
     // which includes the lib (and bin) directory by default (task copyDependenciesForDistribution)
     // actually if copied early (e.g. in task copyFilesToDistDir) final Gradle zip/tar archive has all files double in lib dir (believe it or not)
 }
+
+// configure Javadoc task
+tasks.withType (Javadoc) {
+    destinationDir  project.file("javadoc")
+    title = "YaCy " + version + " API Documentation"
+    failOnError = false
+    options.addStringOption("encoding","UTF-8" ) // or any reason to keep the old "iso-8859-1" ?
+    classpath = configurations.compileClasspath
+    includes = ['**/*.java']
+}
+
+// some legacy stuff packaged in separate archive
+// archive in build/distributions
+task packagePortalsearch {
+    ant {
+        tar(destfile:'build/distributions/yacy-portalsearch.tar.gz', compression:'gzip', defaultexcludes:'yes', longfile:'fail') {
+            tarfileset (dir:'htroot/portalsearch/', prefix:'yacy/portalsearch/') {
+                include(name:'**/*')
+            }
+            tarfileset (dir:'htroot/jquery/', prefix:'yacy/jquery/') {
+                include(name:'**/*')
+            }
+            tarfileset (dir:"htroot/yacy/ui/img-2", prefix:'yacy/ui/img-2/') {
+                include(name:"magnify.png")
+                include(name:"cancel_round.png")
+                include(name:"stop.png")
+            }
+        }  
+    }
+}
