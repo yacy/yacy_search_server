@@ -2,6 +2,7 @@
 
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
 /** Port of older support library to be build with Gradle
@@ -22,3 +23,42 @@ sourceSets {
 }
 
 version = '1.02'
+group = 'net.yacy.extlib'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'J7Zip-modified'
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = 'J7Zip'
+                description = 'J7Zip library for YaCy sevenzipParser (not available in external maven repository)'
+                licenses {
+                    license {
+                        name = 'GNU Lesser General Public License 2.1'
+                        url = 'http://www.gnu.org/licenses/lgpl-2.1.txt'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/yacy/yacy_search_server.git'
+                    url = 'https://github.com/yacy/yacy_search_server'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            // change URLs to point to your repos, e.g. http://my.org/repo
+            def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
+        }
+    }
+}
+

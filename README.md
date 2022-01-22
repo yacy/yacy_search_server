@@ -155,6 +155,13 @@ To start developing YaCy in Eclipse:
 - → Name: "YaCy Build" → Buildfile: Browse Workspace → build.xml → Run
 - In the Package Explorer, right-click on YaCy → Run as → Java Application -> Select "yacy - net.yacy" -> OK
 
+To start developing YaCy in Netbeans:
+
+- clone https://github.com/yacy/yacy_search_server.git (Team → Git → Clone)
+    - if you checked "scan for project" you'll be ask to open the project
+- Open the project (File → Open Project)
+- you may directly use all the Netbeans build feature.
+
 To join our development community, got to https://searchlab.eu
 
 Send pull requests to https://github.com/yacy/yacy_search_server
