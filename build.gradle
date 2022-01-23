@@ -8,9 +8,8 @@ plugins {
   id 'java'
   id 'distribution'
   id 'maven-publish'
-  id 'com.github.johnrengelman.shadow' version '5.1.0'
-  // Load gradle-nsis plugin
-  id "com.github.langmo.gradlensis" version "0.1.0"
+  id 'com.github.johnrengelman.shadow' version '5.1.0' // uberJar plugin
+  id 'com.github.langmo.gradlensis' version '0.1.0'  // NSIS plugin
 }
 
 apply plugin: 'java'
@@ -78,48 +77,24 @@ dependencies {
 //  implementation 'net.yacy.extlib:J7Zip-modified:1.02' // alternatively support library from mavenLocal() repo (use publishToMavenLocal in subproject first) 
     implementation fileTree(dir: 'lib', include: 'J7Zip-modified.jar') // switched back to use local lib/jar for this one library (avoiding sub-project execution w/o need)
 
-    implementation 'org.apache.james:apache-mime4j:0.6'
-    implementation 'org.apache.calcite.avatica:avatica-core:1.13.0'
     implementation 'org.bouncycastle:bcmail-jdk15on:1.69'
     implementation 'org.bouncycastle:bcpkix-jdk15on:1.69'
     implementation 'org.bouncycastle:bcprov-jdk15on:1.69'
     implementation 'org.bouncycastle:bcutil-jdk15on:1.69'
-    implementation 'org.apache.calcite:calcite-core:1.18.0'
-    implementation 'org.apache.calcite:calcite-linq4j:1.18.0'
     implementation 'net.sourceforge.jchardet:jchardet:1.0'            
-    implementation 'com.twelvemonkeys.common:common-image:3.3.2'
-    implementation 'com.twelvemonkeys.common:common-io:3.3.2'
-    implementation 'com.twelvemonkeys.common:common-lang:3.3.2'
-    implementation 'commons-codec:commons-codec:1.14'
-    implementation 'org.apache.commons:commons-collections4:4.4'
     implementation 'org.apache.commons:commons-compress:1.21'
     implementation 'commons-fileupload:commons-fileupload:1.4'
-    implementation 'commons-io:commons-io:2.7'
-    implementation 'commons-lang:commons-lang:2.6'
-    implementation 'org.apache.commons:commons-lang3:3.12.0'
-    implementation 'commons-logging:commons-logging:1.2'
-    implementation 'org.apache.commons:commons-math3:3.4.1'
     implementation 'org.apache.pdfbox:fontbox:2.0.15'
     implementation 'com.google.guava:guava:25.1-jre' 
     implementation 'com.hazelcast:hazelcast:4.2'
-    implementation 'org.eclipse.jetty.http2:http2-client:9.4.34.v20201102'
-    implementation 'org.eclipse.jetty.http2:http2-common:9.4.34.v20201102'
-    implementation 'org.eclipse.jetty.http2:http2-http-client-transport:9.4.34.v20201102'
-    implementation 'org.apache.httpcomponents:httpclient:4.5.12'
-    implementation 'org.apache.httpcomponents:httpcore:4.4.13'
-    implementation 'org.apache.httpcomponents:httpmime:4.5.12'
     implementation 'com.ibm.icu:icu4j:63.1'
     implementation 'com.twelvemonkeys.imageio:imageio-bmp:3.3.2'
     implementation 'com.twelvemonkeys.imageio:imageio-core:3.3.2'
     implementation 'com.twelvemonkeys.imageio:imageio-metadata:3.3.2'
     implementation 'com.twelvemonkeys.imageio:imageio-tiff:3.3.2'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.11.2'
-    implementation 'com.fasterxml.jackson.core:jackson-core:2.11.2'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.2'
     implementation 'oro:oro:2.0.8'
     implementation 'net.jthink:jaudiotagger:2.2.5'
     implementation 'jcifs:jcifs:1.3.17'
-    implementation 'org.slf4j:jcl-over-slf4j:1.7.25'
     implementation 'javax.servlet:javax.servlet-api:3.1.0'
     implementation 'org.eclipse.jetty:jetty-client:9.4.35.v20201120'
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.35.v20201120'
@@ -144,30 +119,15 @@ dependencies {
     implementation 'org.jwat:jwat-gzip:1.1.1'
     implementation 'org.jwat:jwat-warc:1.1.1'
     implementation 'com.cybozu.labs:langdetect:1.1-20120112'
-    implementation 'org.slf4j:log4j-over-slf4j:1.7.32'
-    implementation 'org.slf4j:jcl-over-slf4j:1.7.25'
     implementation 'com.drewnoakes:metadata-extractor:2.11.0'
-    implementation 'io.dropwizard.metrics:metrics-core:3.2.2'
-    implementation 'io.dropwizard.metrics:metrics-jmx:4.1.5'
-    implementation 'io.opentracing:opentracing-api:0.33.0'
-    implementation 'io.opentracing:opentracing-noop:0.33.0'
-    implementation 'io.opentracing:opentracing-util:0.33.0'
     implementation 'org.apache.pdfbox:pdfbox:2.0.15'
     implementation 'org.apache.poi:poi:3.17'
     implementation 'org.apache.poi:poi-scratchpad:3.17'
-    implementation 'org.rrd4j:rrd4j:3.2'
-    implementation 'org.slf4j:slf4j-api:1.7.32'
-    implementation 'org.slf4j:slf4j-jdk14:1.7.32'
     implementation 'org.apache.solr:solr-core:8.8.1'
     implementation 'org.apache.solr:solr-solrj:8.8.1'
     implementation 'org.locationtech.spatial4j:spatial4j:0.6'
-    implementation 'org.codehaus.woodstox:stax2-api:3.1.4'
     implementation 'org.bitlet:weupnp:0.1.4'
-    implementation 'org.codehaus.woodstox:woodstox-core-asl:4.4.1'
-    implementation 'xml-apis:xml-apis:1.4.01'
-    implementation 'com.adobe.xmp:xmpcore:5.1.3'
     implementation 'org.tukaani:xz:1.8'
-    implementation 'org.apache.zookeeper:zookeeper:3.4.14'
 
     testImplementation('junit:junit:4.13.2')
 }
@@ -179,6 +139,8 @@ configurations.implementation {
     exclude group: 'org.eclipse.jetty',        module: 'jetty-alpn-java-client'
     exclude group: 'org.eclipse.jetty',        module: 'jetty-alpn-java-server'
     exclude group: 'org.eclipse.jetty',        module: 'jetty-alpn-server'
+    // warning 'Class path contains multiple SLF4J bindings' 
+    exclude group: 'org.slf4j',                module: 'slf4j-log4j12'
 }
 
 // output to lib/yacycore.jar (like with ant with downside by determine class-path)
@@ -223,6 +185,7 @@ task runGitComInf(type: JavaExec) {
 import org.apache.tools.ant.filters.ReplaceTokens
 task prepYaCyProperties (type: Copy, dependsOn : ['runGitComInf']) {
     mustRunAfter runGitComInf
+
     def propfile = "build/tmp/gitbuildnumber.properties";
     if (project.file(propfile).exists()) { // must check otherwise any action may stop after clean on this error
         file("build/tmp/gitbuildnumber.properties").withReader { 
