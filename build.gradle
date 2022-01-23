@@ -9,6 +9,8 @@ plugins {
   id 'distribution'
   id 'maven-publish'
   id 'com.github.johnrengelman.shadow' version '5.1.0'
+  // Load gradle-nsis plugin
+  id "com.github.langmo.gradlensis" version "0.1.0"
 }
 
 apply plugin: 'java'
@@ -420,7 +422,7 @@ task packageDistTar (type : Tar, dependsOn : ['copyDependenciesForDistribution',
 }
 
 // wrapper to create legacy distribution archives
-task packageDist (dependsOn : ['copyDependenciesForDistribution','packageDistZip','packageDistTar']) {
+task packageDist (dependsOn : ['copyDependenciesForDistribution','packageDistZip','packageDistTar'],group:'distribution') {
     // do a late copy of dependencies to dist lib directory to not interfere with standard distZip
     // which includes the lib (and bin) directory by default (task copyDependenciesForDistribution)
     // actually if copied early (e.g. in task copyFilesToDistDir) final Gradle zip/tar archive has all files double in lib dir (believe it or not)
@@ -455,3 +457,36 @@ task packagePortalsearch {
         }  
     }
 }
+
+// Configuration of gradle-nsis plugin.
+nsis  {
+    // path to the NSIS configuration file
+    configuration = file("${buildDir}/RELEASE/WINDOWS/build.nsi")
+    // folder where the NSIS installer generator is run. All paths 
+    // in the NSIS configuration file are relative to this folder.
+    runIn =  file("${buildDir}")
+}
+
+// prepare the NSIS build script 
+task prepNsis (type: Copy, dependsOn: ['prepYaCyProperties']) {
+    from projectDir
+    include 'build.nsi'
+    include 'gpl.txt'
+    into 'build/RELEASE/WINDOWS'
+
+    filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: project.ext.filterTokens)
+    filter(ReplaceTokens, tokens: [REPL_VERSION: version])
+
+    copy {
+        from projectDir
+        include 'gpl.txt'
+        into buildDir
+    }
+}
+
+// wrapper to run prepNsis task before nsis createInstaller, to copy some config files
+task distWinInstaller (dependsOn:['copyFilesToDistDir','copyDependenciesForDistribution','prepNsis','createInstaller'], group:'distribution') {
+    tasks.findByName('createInstaller').mustRunAfter 'prepNsis'
+}
+
+
