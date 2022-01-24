@@ -55,6 +55,7 @@ public class zipParser extends AbstractParser implements Parser {
         this.SUPPORTED_EXTENSIONS.add("zip");
         this.SUPPORTED_EXTENSIONS.add("jar");
         this.SUPPORTED_EXTENSIONS.add("apk");    // Android package
+        this.SUPPORTED_EXTENSIONS.add("epub");   // ebook = zip archiv containing xhtml files // examples epub https://github.com/IDPF/epub3-samples/releases/tag/20170606
         this.SUPPORTED_MIME_TYPES.add("application/zip");
         this.SUPPORTED_MIME_TYPES.add("application/x-zip");
         this.SUPPORTED_MIME_TYPES.add("application/x-zip-compressed");
@@ -63,6 +64,7 @@ public class zipParser extends AbstractParser implements Parser {
         this.SUPPORTED_MIME_TYPES.add("multipart/x-zip");
         this.SUPPORTED_MIME_TYPES.add("application/java-archive");
         this.SUPPORTED_MIME_TYPES.add("application/vnd.android.package-archive");
+        this.SUPPORTED_MIME_TYPES.add("application/epub+zip"); // ebook (zipped xhtml) standard https://www.w3.org/AudioVideo/ebook/
     }
 
     @Override
