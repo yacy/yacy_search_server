@@ -36,7 +36,8 @@ sourceSets {
 
     htroot { // optional sourceset to have htroot servelets available/visible in development IDE
         java {
-	        srcDirs = ['htroot']
+	    srcDirs = ['htroot']
+            exclude 'processing/**'
             compileClasspath = configurations.compileClasspath + jar.outputs.files
         }
     }

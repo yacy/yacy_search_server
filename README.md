@@ -145,7 +145,7 @@ adjust it [Here](http://localhost:8090/ConfigHTCache_p.html) to fit your needs.
 Join the large number of contributors that make YaCy what it is;
 community software.
 
-To start developing YaCy in Eclipse:
+To start developing YaCy in [Eclipse:](https://www.eclipse.org/)
 
 - Clone https://github.com/yacy/yacy_search_server.git
 - File → Import as Git → Projects from Git → Existing local repository
@@ -155,14 +155,14 @@ To start developing YaCy in Eclipse:
 - → Name: "YaCy Build" → Buildfile: Browse Workspace → build.xml → Run
 - In the Package Explorer, right-click on YaCy → Run as → Java Application -> Select "yacy - net.yacy" -> OK
 
-To start developing YaCy in Netbeans:
+To start developing YaCy in [Netbeans:](https://netbeans.apache.org/)
 
 - clone https://github.com/yacy/yacy_search_server.git (Team → Git → Clone)
     - if you checked "scan for project" you'll be ask to open the project
 - Open the project (File → Open Project)
 - you may directly use all the Netbeans build feature.
 
-To start developing YaCy in IntelliJ IDEA
+To start developing YaCy in [IntelliJ IDEA:](https://www.jetbrains.com/idea/)
 
 - clone https://github.com/yacy/yacy_search_server.git
 - File -> New -> Project from Version Control -> URL (see above) -> Clone
