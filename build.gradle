@@ -149,21 +149,6 @@ jar {
 
 shadowJar.zip64 = true // saw build error: Execution failed for task ':shadowJar'. shadow.org.apache.tools.zip.Zip64RequiredException: archive contains more than 65535 entries.
 
-// mimic current config with dependencies in lib directory
-// @TODO: maybe removed after complete Gradle migration
-/**
-task copyDependenciesToLib(type: Copy) {
-    def destination = project.file("lib")
-    into destination
-    from configurations.compileClasspath
-    eachFile { // prevent overwriting existing files
-        if (it.getRelativePath().getFile(destination).exists()) {
-            it.exclude()
-        }
-    }
-    build.dependsOn(copyDependenciesToLib)
-}
-*/
 
 // runs the support tool which creates gitbuildnumber.properties from info of local git repository
 task runGitComInf(type: JavaExec) {
@@ -317,6 +302,7 @@ distributions {
 
         contents { // fyi: content completed by copyFilesToDistDir
             from 'build/RELEASE/MAIN'
+            exclude 'lib/*.jar'
         }
     }
 }
@@ -327,15 +313,15 @@ task copyDependenciesForDistribution {
 // which includes the lib (and bin) directory by default
 // actually if copied early (e.g. task copyFilesToDistDir) final Gradle zip/tar archive has all files double in lib dir (believe it or not)
 
-        String instDir = "$buildDir/RELEASE/MAIN/"
-        copy { // needed for legacy distribution file (task packageDist) - (fyi: gradle.distXxx includes it autom. in dist archive)
-            from configurations.runtimeClasspath
-            into instDir + "lib"
-        }
-        copy { // add own jar (not included automatically)
-            from jar.outputs.files
-            into instDir + "lib"
-        }
+    String instDir = "$buildDir/RELEASE/MAIN/"
+    copy { // needed for legacy distribution file (task packageDist) - (fyi: gradle.distXxx includes it autom. in dist archive)
+       from configurations.runtimeClasspath
+        into instDir + "lib"
+    }
+    copy { // add own jar (not included automatically)
+        from jar.outputs.files
+        into instDir + "lib"
+    }
 }
 
 // create a legacy distribution zip archive
