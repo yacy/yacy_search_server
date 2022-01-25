@@ -33,6 +33,14 @@ sourceSets {
             srcDirs = ['test/java']
         }
     }
+/*    
+    htroot { // optional sourceset to have htroot servelets available/visible in development IDE
+        java {
+	    srcDirs = ['htroot']
+            compileClasspath = configurations.compileClasspath + jar.outputs.files
+}
+    }
+*/
 }
 
 group = 'net.yacy'
@@ -195,22 +203,22 @@ compileJava.dependsOn(prepYaCyProperties) // must be executed before compile (du
 // implement ant task to simulate old Ant build for htroot,
 // to avoid import of complete build.xml (as currently used)
 task compileHtrootServlets (dependsOn: ['jar']) {
-
-    ant {
-        path(id:'project.class.path') {
-            // place yacycore.jar on classpath (not automatically done)
-            pathelement (location: jar.archiveFile.get())
-            // construct path elements
-            configurations.compileClasspath.each { pathelement (location: it) }
-        }
-        javac (srcdir:'htroot', excludes:'processing/**',
-            source:java.sourceCompatibility, target:java.targetCompatibility,
-            debug:"true", debuglevel:"lines,vars,source", includeantruntime:"false", encoding:"UTF-8") {
-            classpath (refid:'project.class.path')
+    if (buildDir.exists()) { // prevent buildscript failing on prime build with fresh git clone due to javac error during gradle init
+        ant {
+            path(id:'project.class.path') {
+                // place yacycore.jar on classpath (not automatically done)
+                pathelement (location: jar.archiveFile.get())
+                // construct path elements
+                configurations.compileClasspath.each { pathelement (location: it) }
+            }
+            javac (srcdir:'htroot', excludes:'processing/**',
+                source:java.sourceCompatibility, target:java.targetCompatibility,
+                debug:"true", debuglevel:"lines,vars,source", includeantruntime:"false", encoding:"UTF-8") {
+                classpath (refid:'project.class.path')
+            }
         }
     }
 }
-startScripts.dependsOn(compileHtrootServlets)
 
 // copy additional files into directory used to create distribution archive (distZip/distTar)
 task copyFilesToDistDir (dependsOn : ['compileJava', 'jar', 'compileHtrootServlets']) {  
@@ -324,8 +332,7 @@ task copyDependenciesForDistribution {
             into instDir + "lib"
         }
         copy { // add own jar (not included automatically)
-            from 'lib'
-            include 'yacycore.jar'
+            from jar.outputs.files
             into instDir + "lib"
         }
 }
@@ -381,7 +388,8 @@ tasks.withType (Javadoc) {
 
 // some legacy stuff packaged in separate archive
 // archive in build/distributions
-task packagePortalsearch {
+task packagePortalsearch (group:'distribution') {
+    description 'Bundles the javascript portalsearch as *.tar.gz distribution'
     ant {
         tar(destfile:'build/distributions/yacy-portalsearch.tar.gz', compression:'gzip', defaultexcludes:'yes', longfile:'fail') {
             tarfileset (dir:'htroot/portalsearch/', prefix:'yacy/portalsearch/') {
