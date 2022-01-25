@@ -33,14 +33,14 @@ sourceSets {
             srcDirs = ['test/java']
         }
     }
-/*    
+
     htroot { // optional sourceset to have htroot servelets available/visible in development IDE
         java {
-	    srcDirs = ['htroot']
+	        srcDirs = ['htroot']
             compileClasspath = configurations.compileClasspath + jar.outputs.files
-}
+        }
     }
-*/
+
 }
 
 group = 'net.yacy'
