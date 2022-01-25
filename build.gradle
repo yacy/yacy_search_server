@@ -285,6 +285,7 @@ task copyFilesToDistDir (dependsOn : ['compileJava', 'jar', 'compileHtrootServle
             into instDir 
         }        
 }
+
 distZip.dependsOn(copyFilesToDistDir)
 distTar.dependsOn(copyFilesToDistDir)
 
@@ -299,12 +300,33 @@ distributions {
         // String branch = project.ext.filterTokens.get('branch')
         //
         // distributionBaseName = 'yacy' + branch + '_v' + version + '_' + Dst + '_' + rNr
-
+        
         contents { // fyi: content completed by copyFilesToDistDir
             from 'build/RELEASE/MAIN'
             exclude 'lib/*.jar'
         }
     }
+}
+
+// configure distTar archive name
+tasks.findByName('assembleDist').dependsOn('prepYaCyProperties') // make sure poperties are loaded before distTar/distZip
+distTar {
+    compression 'GZIP'
+    archiveExtension = 'tar.gz'
+    String Dst = project.ext.filterTokens.get('DSTAMP')
+    String rNr = project.ext.filterTokens.get('releaseNr')
+    String branch = project.ext.filterTokens.get('branch')
+    archiveVersion = '' // important as otherwise version is added automatically again to the end of archiveBaseName
+    archiveBaseName = 'yacy' + branch + '_v' + project.version + '_' + Dst + '_' + rNr // important to use project.version otherwise depreciated distZip.version is used (wich is now '')
+}
+
+// configure distZip archive name
+distZip {
+    String Dst = project.ext.filterTokens.get('DSTAMP')
+    String rNr = project.ext.filterTokens.get('releaseNr')
+    String branch = project.ext.filterTokens.get('branch')
+    archiveVersion = '' // important as otherwise version is added automatically again to the end of archiveBaseName
+    archiveBaseName = 'yacy' + branch + '_v' + project.version + '_' + Dst + '_' + rNr // important to use project.version otherwise depreciated distZip.version is used (wich is now '')
 }
 
 // copy runtime dependencies (jar) to the distribution directory
@@ -333,7 +355,7 @@ task packageDistZip (type : Zip, dependsOn : ['copyDependenciesForDistribution',
     String destName = 'yacy' + branch + '_v' + version + '_' + Dst + '_' + rNr + '.' + archiveExtension.get()
 
     archiveFileName = destName
-    destinationDirectory = layout.buildDirectory.dir('distributions')
+    destinationDirectory = layout.buildDirectory.dir('distributions/legacyDistFiles')
 
     from layout.buildDirectory.dir("RELEASE/MAIN")
     into 'yacy'
@@ -349,7 +371,7 @@ task packageDistTar (type : Tar, dependsOn : ['copyDependenciesForDistribution',
     String destName = 'yacy' + branch + '_v' + version + '_' + Dst + '_' + rNr + '.tar.gz' // ! Gradle would use ext .tgz (archiveExtension.get()) 
 
     archiveFileName = destName
-    destinationDirectory = layout.buildDirectory.dir('distributions')
+    destinationDirectory = layout.buildDirectory.dir('distributions/legacyDistFiles')
 
     from layout.buildDirectory.dir("RELEASE/MAIN")
     into 'yacy'
