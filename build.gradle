@@ -203,7 +203,7 @@ compileJava.dependsOn(prepYaCyProperties) // must be executed before compile (du
 // implement ant task to simulate old Ant build for htroot,
 // to avoid import of complete build.xml (as currently used)
 task compileHtrootServlets (dependsOn: ['jar']) {
-    if (buildDir.exists()) { // prevent buildscript failing on prime build with fresh git clone due to javac error during gradle init
+    if (file('lib/yacycore.jar').exists()) { // prevent buildscript failing on prime build with fresh git clone due to javac error during gradle init
         ant {
             path(id:'project.class.path') {
                 // place yacycore.jar on classpath (not automatically done)
