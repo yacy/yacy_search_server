@@ -172,7 +172,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
 
     /**
      * delete entries from solr according the given solr query string
-     * @param id the url hash of the entry
+     * @param querystring
      * @throws IOException
      */
     @Override

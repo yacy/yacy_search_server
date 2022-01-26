@@ -196,7 +196,7 @@ public final class UserDB {
      * Determine if a user has admin rights from a 'Authorisation' http header field.
      * Tests both userDB and old style adminpw.
      * 
-     * @param auth http-headerline for authorisation.
+     * @param header http-headerline for authorisation.
      * @param cookies
      */
     public boolean hasAdminRight(final RequestHeader header, final Cookie[] cookies) {

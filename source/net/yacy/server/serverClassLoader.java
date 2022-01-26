@@ -57,7 +57,7 @@ public final class serverClassLoader extends ClassLoader {
      * This methode is mainly to avoid classpath conflicts for servlet to servlet calls
      * making inclusion of htroot in system classpath not crucial
      *
-     * @param servletname (delivered by parent loader without ".class" file extension
+     * @param classname (delivered by parent loader without ".class" file extension
      * @return class in htroot
      * @throws ClassNotFoundException
      */

@@ -352,7 +352,7 @@ public class WebStructureGraph {
     
     /**
      * Compute outgoing references from the source host hash
-     * @param srcHostName reference source host hash
+     * @param hosthash reference source host hash
      * @return outgoing structure with references mapped from target host hashes to counts or null when the host is not known
      */
     public StructureEntry outgoingReferences(final String hosthash) {

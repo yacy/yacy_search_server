@@ -47,7 +47,7 @@ import java.util.TreeSet;
  *
  * @author Philipp Nolte
  *
- * @see http://en.wikipedia.org/wiki/Naive_Bayes_classifier
+ * @see <a href="https://en.wikipedia.org/wiki/Naive_Bayes_classifier">Naive Bayes classifier</a>
  *
  * @param <T> The feature class.
  * @param <K> The category class.

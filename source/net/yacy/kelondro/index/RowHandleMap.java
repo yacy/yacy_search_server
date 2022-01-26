@@ -69,7 +69,9 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
      * The class is used as index for database files
      * @param keylength
      * @param objectOrder
-     * @param space
+     * @param idxbytes
+     * @param expectedspace
+     * @param name
      */
     public RowHandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace, final String name) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-" + idxbytes + " {b256}")}, objectOrder);
@@ -407,8 +409,9 @@ public final class RowHandleMap implements HandleMap, Iterable<Map.Entry<byte[],
      * map creation will speed up the initialization process.
      * @param keylength
      * @param objectOrder
-     * @param space
-     * @param bufferSize
+     * @param name
+     * @param idxbytes
+     * @param expectedspace
      * @return
      */
     public final static initDataConsumer asynchronusInitializer(final String name, final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace) {

@@ -83,7 +83,7 @@ public class Transactions {
     
     /**
      * @param dir the parent directory of inventory and archive snapshots.
-     * @param wkhtmltopdfTimeout the maximum to wait for each wkhtmltopdf call when rendering PDF snapshots
+     * @param wkhtmltopdfSecondsTimeout the maximum to wait for each wkhtmltopdf call when rendering PDF snapshots
      */
     public static void init(final File dir, final long wkhtmltopdfSecondsTimeout) {
         transactionDir = dir;
@@ -361,7 +361,6 @@ public class Transactions {
      * @param state the wanted transaction state, State.INVENTORY, State.ARCHIVE or State.ANY 
      * @param url
      * @param depth
-     * @param date
      */
     public static void announceDeletion(final DigestURL url, final int depth, final State state) {
         if (state == State.INVENTORY || state == State.ANY) inventory.announceDeletion(url, depth); 

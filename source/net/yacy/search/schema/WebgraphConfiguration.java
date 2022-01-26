@@ -285,7 +285,7 @@ public class WebgraphConfiguration extends SchemaConfiguration implements Serial
      * encode a string containing attributes from anchor rel properties binary:
      * bit 0: "me" contained in rel
      * bit 1: "nofollow" contained in rel
-     * @param rel
+     * @param rels
      * @return binary encoded information about rel
      */
     private static int relEval(final String rels) {

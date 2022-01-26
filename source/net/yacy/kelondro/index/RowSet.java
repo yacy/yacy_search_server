@@ -71,7 +71,6 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
      * import an exported collection
      * @param rowdef
      * @param exportedCollectionRowEnvironment
-     * @param columnInEnvironment
      */
     public RowSet(final Row rowdef, final Row.Entry exportedCollectionRowEnvironment) {
         super(rowdef, exportedCollectionRowEnvironment);
@@ -158,7 +157,7 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
 
     /**
      * Adds the row to the index. The row is identified by the primary key of the row.
-     * @param row a index row
+     * @param entry a index row
      * @return true if this set did _not_ already contain the given row.
      * @throws IOException
      * @throws SpaceExceededException
@@ -499,7 +498,8 @@ public class RowSet extends RowCollection implements Index, Iterable<Row.Entry>,
     /**
      * merge this row collection with another row collection using an simultanous iteration of the input collections
      * the current collection is not altered in any way, the returned collection is a new collection with copied content.
-     * @param c
+     * @param c0
+     * @param c1
      * @return
      * @throws SpaceExceededException
      */

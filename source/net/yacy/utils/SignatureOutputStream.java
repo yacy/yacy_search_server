@@ -67,7 +67,8 @@ public class SignatureOutputStream extends FilterOutputStream {
     
     /**
      * write byte
-     * @see FilterOutputStream.write(int b)
+     * @param b
+     * @see FilterOutputStream#write(int)
      */
     @Override
     public void write(int b) throws IOException {

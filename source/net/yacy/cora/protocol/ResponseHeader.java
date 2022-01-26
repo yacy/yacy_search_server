@@ -146,7 +146,7 @@ public class ResponseHeader extends HeaderFramework {
      * @param path Path the cookie belongs to. Default - "/". Can be <b>null</b>.
      * @param domain Domain this cookie belongs to. Default - domain name. Can be <b>null</b>.
      * @param secure If true cookie will be send only over safe connection such as https
-     * @see further documentation: <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">docs.sun.com</a>
+     * @see <a href="http://docs.sun.com/source/816-6408-10/cookies.htm">further documentation at docs.sun.com</a>
      */
     public void setCookie(final String name, final String value, final Integer maxage, final String path, final String domain, final boolean secure)
     {

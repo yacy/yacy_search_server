@@ -46,7 +46,6 @@ public abstract class AbstractScoreMap<E> implements ScoreMap<E> {
     
     /**
      * divide the map into two halve parts using the count of the entries
-     * @param score
      * @return the objects of the smaller entries from at least 1/2 of the list
      */
     @Override

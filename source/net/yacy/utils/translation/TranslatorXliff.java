@@ -65,7 +65,7 @@ public class TranslatorXliff extends Translator {
     /**
      * Load translationLists for one language from a Xliff File.
      *
-     * @param translationFile the File, which contains the Lists
+     * @param xliffFile the File, which contains the Lists
      * @return a HashMap, which contains for each File a HashMap with
      * translations.
      */
@@ -296,9 +296,9 @@ public class TranslatorXliff extends Translator {
     /**
      * Saves the internal translation map as XLIFF 1.2 file
      *
-     * @param targetLanguage the target language code, if null target is omitted
+     * @param targetLanguageCode the target language code, if null target is omitted
      * in output file and only source text stored
-     * @param xliffFile name of the output XLIFF file (typically with .xlf
+     * @param lngFile name of the output XLIFF file (typically with .xlf
      * extension)
      * @param lng the YaCy translation for one language
      *
@@ -340,7 +340,7 @@ public class TranslatorXliff extends Translator {
     /**
      * Helper to make valid xml content text as text may contain html markup
      * (the reverse on read is done automatically)
-     * @param html input string
+     * @param s input string
      * @return xml string
      */
     private String toXmlStr(String s) {

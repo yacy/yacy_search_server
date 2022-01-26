@@ -110,7 +110,7 @@ public class Stack {
      * push a new element on the top of the stack using a entry object
      * this is only useful for internal processes where a special handle
      * is created
-     * @param b the new stack element
+     * @param e the new stack element
      * @return the handle used to store the new element
      * @throws IOException
      * @throws SpaceExceededException

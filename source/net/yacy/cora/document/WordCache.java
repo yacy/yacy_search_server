@@ -99,7 +99,7 @@ public class WordCache {
 
         /**
          * read the dictionary and construct a set of recommendations to a given string
-         * @param s input value that is used to match recommendations
+         * @param string input value that is used to match recommendations
          * @return set that contains all words that start or end with the input value
          */
         public Set<StringBuilder> recommend(StringBuilder string) {
@@ -139,7 +139,7 @@ public class WordCache {
          * check if the library supports the given word
          * A word is supported, if the library contains a word
          * that starts or ends with the given word
-         * @param s the given word
+         * @param string the given word
          * @return true if the library supports the word
          */
         public boolean supports(StringBuilder string) {
@@ -259,7 +259,7 @@ public class WordCache {
 
     /**
      * read the dictionary and construct a set of recommendations to a given string
-     * @param s input value that is used to match recommendations
+     * @param string input value that is used to match recommendations
      * @return set that contains all words that start or end with the input value
      */
     public Set<StringBuilder> recommend(StringBuilder string) {
@@ -302,7 +302,7 @@ public class WordCache {
      * check if the library supports the given word
      * A word is supported, if the library contains a word
      * that starts or ends with the given word
-     * @param s the given word
+     * @param string the given word
      * @return true if the library supports the word
      */
     public boolean supports(StringBuilder string) {

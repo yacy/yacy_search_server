@@ -49,7 +49,6 @@ public interface ScoreMap<E> extends Iterable<E> {
 
     /**
      * divide the map into two halve parts using the count of the entries
-     * @param score
      * @return the objects of the smaller entries from at least 1/2 of the list
      */
     public List<E> lowerHalf();

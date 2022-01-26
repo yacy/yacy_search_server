@@ -274,7 +274,6 @@ public class Snapshots {
      * The actual deletion of files in the target directory must be done elsewhere, this method does not store the snapshot files.
      * @param url
      * @param depth
-     * @param date
      */
     public Set<Date> announceDeletion(final DigestURL url, final int depth) {
         HashSet<Date> dates = new HashSet<>();

@@ -68,7 +68,6 @@ public abstract class TablesColumnIndex {
     /**
      * create an index for a given table and given columns
      * @param columns - a map of column names and booleans for 'valueIsArray' you want to build an index for
-     * @param separator - a string value used to split column values into an array
      * @param table - an iterator over table rows which should be added to the index
      */  
     public synchronized void buildIndex(final Map<String,String> columns, final Iterator<Tables.Row> table) {

@@ -91,8 +91,9 @@ public class SRURSSConnector {
      * @param query the query as string
      * @param startRecord number of first record
      * @param maximumRecords maximum number of records
-     * @param verify if true, result entries are verified using the snippet fetch (slow); if false simply the result is returned
+     * @param cacheStrategy
      * @param global if true also search results from other peers are included
+     * @param agent
      * @return
      */
     public static RSSFeed loadSRURSS(

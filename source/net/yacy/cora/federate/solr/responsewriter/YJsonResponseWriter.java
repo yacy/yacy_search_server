@@ -118,7 +118,7 @@ public class YJsonResponseWriter implements QueryResponseWriter, SolrjResponseWr
 	 * @param writer  an open output writer. Must not be null.
 	 * @param request the initial Solr request. Must not be null.
 	 * @param values  the response values. Must not be null.
-	 * @param rsp     the Solr response header.
+	 * @param responseObj     the Solr response header.
 	 * @throws IOException when a write error occurred
 	 */
 	private void write(final Writer writer, final SolrQueryRequest request, final NamedList<?> values,
@@ -375,7 +375,6 @@ public class YJsonResponseWriter implements QueryResponseWriter, SolrjResponseWr
 	 * 
 	 * @param writer        an open output writer. Must not be null.
 	 * @param documents     the documents to render. Must not be null.
-	 * @param responseCount the number of documents to process
 	 * @param snippets      snippets Solr computed text snippets (highlighting).
 	 * @throws IOException when an unexpected error occurred while writing
 	 */
