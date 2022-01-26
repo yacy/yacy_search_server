@@ -1926,7 +1926,10 @@ public final class Switchboard extends serverSwitch {
         if (urlhash.length == 0) return null;
         final String url = this.index.fulltext().getURL(ASCII.String(urlhash));
         if (url != null) return url;
-        return this.crawlQueues.getURL(urlhash).toNormalform(true);
+        final DigestURL returl = this.crawlQueues.getURL(urlhash); // getURL may be null
+        if (returl != null)
+            return returl.toNormalform(true);
+        return null;
     }
 
     public String getURL(final String urlhash) throws IOException {
@@ -1934,7 +1937,10 @@ public final class Switchboard extends serverSwitch {
         if (urlhash.length() == 0) return null;
         final String url = this.index.fulltext().getURL(urlhash);
         if (url != null) return url;
-        return this.crawlQueues.getURL(urlhash.getBytes()).toNormalform(true);
+        final DigestURL returl = this.crawlQueues.getURL(urlhash.getBytes()); // getURL may be null
+        if (returl != null)
+            return returl.toNormalform(true);
+        return null;
     }
 
     public RankingProfile getRanking() {
