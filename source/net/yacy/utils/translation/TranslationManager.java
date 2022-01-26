@@ -165,7 +165,7 @@ public class TranslationManager extends TranslatorXliff {
      * If a masterOutputFile exists, content is preserved (loaded first)
      *
      * @param localesFolder folder containing *.lng translation files
-     * @param masterOutpuFile output file (xliff format). Must not be null.
+     * @param masterOutputFile output file (xliff format). Must not be null.
      * @throws IOException
      */
     public void createMasterTranslationLists(final File localesFolder, final File masterOutputFile) throws IOException {

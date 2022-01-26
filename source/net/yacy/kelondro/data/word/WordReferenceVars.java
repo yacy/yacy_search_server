@@ -275,7 +275,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 
     /**
      * Word positions for joined references (for multi word queries).
-     * @see posintext()
+     * @see #posintext()
      * @return the word positions of the joined references
      */
     @Override

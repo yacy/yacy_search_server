@@ -52,7 +52,7 @@ public interface SchemaDeclaration {
     
     /**
      * @return true when this field is stored as a column-oriented field optimized for sorting, faceting and grouping
-     * @see https://cwiki.apache.org/confluence/display/solr/DocValues
+     * @see <a href="https://cwiki.apache.org/confluence/display/solr/DocValues">DocValues</a>
      */
     public boolean isDocValue();
 

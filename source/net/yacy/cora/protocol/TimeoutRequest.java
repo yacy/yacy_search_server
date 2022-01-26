@@ -114,7 +114,8 @@ public class TimeoutRequest<E> {
 
     /**
      * ping a remote server using a given uri and a time-out
-     * @param uri
+     * @param host
+     * @param port
      * @param timeout
      * @return true if the server exists and replies within the given time-out
      */

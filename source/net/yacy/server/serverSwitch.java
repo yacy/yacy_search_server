@@ -225,7 +225,7 @@ public class serverSwitch {
      *            default value which will be used if no value is found
      * @return the public port of this system on its IPv4 address
      * 
-     * @see #getLocalPort(String, int)
+     * @see #getLocalPort()
      */
     public int getPublicPort(final String key, final int dflt) {
 

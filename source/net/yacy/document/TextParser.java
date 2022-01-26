@@ -418,7 +418,7 @@ public final class TextParser {
      * @param timezoneOffset the local time zone offset
      * @param depth the current depth of the crawl
      * @param contentLength the length of the source, if known (else -1 should be used)
-     * @param source a input stream
+     * @param sourceStream a input stream
      * @param maxLinks the maximum total number of links to parse and add to the result documents
      * @param maxBytes the maximum number of content bytes to process
      * @return a list of documents that result from parsing the source, with empty or null text.
@@ -443,7 +443,7 @@ public final class TextParser {
      * @param timezoneOffset the local time zone offset
      * @param depth the current depth of the crawl
      * @param contentLength the length of the source, if known (else -1 should be used)
-     * @param source a input stream
+     * @param sourceStream a input stream
      * @param maxLinks the maximum total number of links to parse and add to the result documents
      * @param maxBytes the maximum number of content bytes to process
      * @return a list of documents that result from parsing the source, with empty or null text.
@@ -665,7 +665,7 @@ public final class TextParser {
      * - the mime type computed from the extension (3.)
      * finally the generic parser is added as backup if all above fail
      * @param url the given url
-     * @param mimeType the given mime type
+     * @param mimeType1 the given mime type
      * @return a list of Idiom parsers that may be appropriate for the given criteria
      * @throws Parser.Failure when the file extension or the MIME type is denied
      */

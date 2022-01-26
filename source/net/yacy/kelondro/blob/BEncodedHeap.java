@@ -238,7 +238,7 @@ public class BEncodedHeap implements MapStore {
     /**
      * check if a row with given key exists in the table
      *
-     * @param name
+     * @param pk
      * @return true if the row exists
      */
     private boolean containsKey(final byte[] pk) {
@@ -248,7 +248,7 @@ public class BEncodedHeap implements MapStore {
     /**
      * check if a row with given key exists in the table This method is here to implement the Map interface
      *
-     * @param name
+     * @param key
      * @return true if the row exists
      */
     @Override
@@ -271,7 +271,7 @@ public class BEncodedHeap implements MapStore {
     /**
      * get a map from the table
      *
-     * @param name
+     * @param pk
      * @return the map if one found or NULL if no entry exists or the entry is corrupt
      * @throws SpaceExceededException
      * @throws IOException
@@ -287,7 +287,7 @@ public class BEncodedHeap implements MapStore {
     /**
      * get a map from the table this method is here to implement the Map interface
      *
-     * @param name
+     * @param key
      * @return the map if one found or NULL if no entry exists or the entry is corrupt
      */
     @Override
@@ -383,7 +383,7 @@ public class BEncodedHeap implements MapStore {
      * insert a map into the table this method shall be used in exchange of the get method if the previous
      * entry value is not needed.
      *
-     * @param name
+     * @param pk
      * @param map
      * @throws SpaceExceededException
      * @throws IOException
@@ -431,7 +431,7 @@ public class BEncodedHeap implements MapStore {
     /**
      * insert a map into the table
      *
-     * @param name
+     * @param pk
      * @param map
      */
     @Override
@@ -454,7 +454,7 @@ public class BEncodedHeap implements MapStore {
     /**
      * delete a map from the table
      *
-     * @param name
+     * @param pk
      * @throws IOException
      */
     public void delete(final byte[] pk) throws IOException {
@@ -464,7 +464,7 @@ public class BEncodedHeap implements MapStore {
     /**
      * delete a map from the table
      *
-     * @param name
+     * @param key
      * @throws SpaceExceededException
      * @throws IOException
      */
@@ -493,7 +493,7 @@ public class BEncodedHeap implements MapStore {
     /**
      * Copy all the mappings from the specified map to this map.
      *
-     * @param m mappings to be stored in this map
+     * @param map mappings to be stored in this map
      */
     @Override
     public void putAll(final Map<? extends byte[], ? extends Map<String, byte[]>> map) {

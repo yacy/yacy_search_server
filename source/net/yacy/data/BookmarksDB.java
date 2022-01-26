@@ -639,7 +639,7 @@ public class BookmarksDB {
 
         /**
          * set the Tags of the bookmark
-         * @param tagNames ArrayList with the tagnames
+         * @param tags2 ArrayList with the tagnames
          * @param local sets, whether the updated tags should be stored to tagsDB
          */
         public void setTags(final Set<String> tags2, final boolean local){

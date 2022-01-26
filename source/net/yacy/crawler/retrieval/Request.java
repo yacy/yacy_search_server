@@ -29,6 +29,7 @@
 package net.yacy.crawler.retrieval;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.Date;
 
 import net.yacy.cora.document.encoding.ASCII;
@@ -127,7 +128,7 @@ public class Request extends WorkflowJob
      *
      * @param initiator the hash of the initiator peer
      * @param url the {@link URL} to crawl
-     * @param referrer the hash of the referrer URL
+     * @param referrerhash the hash of the referrer URL
      * @param name the name of the document to crawl
      * @param appdate the time when the url was first time appeared
      * @param profileHandle the name of the prefetch profile. This must not be null!

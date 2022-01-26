@@ -50,7 +50,7 @@ public interface Scraper {
 
     /**
      * Process plain text
-     * @param plain text to process
+     * @param text text to process
      * @param insideTag the eventual direct parent tag. May be null.
      */
     public void scrapeText(char[] text, ContentScraper.Tag insideTag);

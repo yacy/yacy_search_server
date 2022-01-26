@@ -1051,7 +1051,7 @@ public class WikiCode extends AbstractWikiParser implements WikiParser {
      * Process template inclusions in line, eventually with geo coordinate metadata
      * @param line line of wiki text
      * @return cleaned text with eventual geo coordinates formatted to be recognizable by parser
-     * @see https://en.wikipedia.org/wiki/Wikipedia:Transclusion
+     * @see <a href="https://en.wikipedia.org/wiki/Wikipedia:Transclusion">Wikipedia:Transclusion</a>
      */
     protected static String processMetadata(final String line) {
     	StringBuilder processedLine = new StringBuilder(line);

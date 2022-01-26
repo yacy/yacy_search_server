@@ -59,7 +59,6 @@ public final class BlacklistHelper {
      * @param blacklistToUse the name of the blacklist the entry is to be added to
      * @param entry the entry that is to be added
      * @param header the current HTTP request headers
-     * @param supportedBlacklistTypes
      * @return true when no error occurred and the entry was successfully added
      */
 	public static boolean addBlacklistEntry(
@@ -100,7 +99,6 @@ public final class BlacklistHelper {
      * @param blacklistToUse the name of the blacklist the entry is to be deleted from
      * @param entry the entry that is to be deleted
      * @param header
-     * @param supportedBlacklistTypes
      * @return null if no error occurred, else a String to put into LOCATION
      */
     public static String deleteBlacklistEntry(

@@ -333,7 +333,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * get a document id result stream from a set of solr queries.
      * The result queue is considered as terminated if AbstractSolrConnector.POISON_ID is returned.
      * The method returns immediately and feeds the search results into the queue
-     * @param querystring a list of query strings
+     * @param querystrings a list of query strings
      * @param sort the solr sort string, may be null to be not used
      * @param offset common offset of all queries
      * @param maxcount maximum count for each query
@@ -610,7 +610,7 @@ public abstract class AbstractSolrConnector implements SolrConnector {
      * Update a collection of solr input documents.
      * This will write only a partial update for all fields given in the SolrInputDocuments
      * and leaves all other fields untouched.
-     * @param solrdocs
+     * @param solrdoc
      * @throws IOException
      * @throws SolrException
      */

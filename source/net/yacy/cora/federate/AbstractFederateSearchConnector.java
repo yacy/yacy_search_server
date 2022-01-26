@@ -82,7 +82,7 @@ public abstract class AbstractFederateSearchConnector implements FederateSearchC
      * convert the remote serch result to the internal result presentation
      * (field mapping)
      *
-     * @param instanceName internal name
+     * @param instance internal name
      * @param cfgFileName e.g. DATA/SETTINGS/FEDERATECFG/instanceName.SCHEMA
      * @return true if success false if not
      */
@@ -156,7 +156,7 @@ public abstract class AbstractFederateSearchConnector implements FederateSearchC
      * Converts a remote schema result to YaCy schema using the fieldname
      * mapping provided as config file
      *
-     * @param remote result (with remote fieldnames)
+     * @param doc result (with remote fieldnames)
      * @return SolrDocument with field names according to the YaCy schema
      */
     protected URIMetadataNode toYaCySchema(final SolrDocument doc) throws MalformedURLException {

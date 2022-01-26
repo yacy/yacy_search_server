@@ -43,7 +43,8 @@ public class Stacks {
      * Stacks can be created on-the-fly in the given stacksLocation directory
      * using simple push operations that create first entries in the stack
      * Stacks that do not contain any element upon the close() operation are removed
-     * @param stackFile
+     * @param stacksLocation
+     * @param stacksPrefix
      * @throws IOException
      */
     public Stacks(final File stacksLocation, final String stacksPrefix) {
@@ -160,7 +161,7 @@ public class Stacks {
      * this is only useful for internal processes where a special handle
      * is created
      * @param stack the name of the stack
-     * @param b the new stack element
+     * @param e the new stack element
      * @return the handle used to store the new element
      * @throws IOException
      * @throws SpaceExceededException 

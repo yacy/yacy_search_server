@@ -256,7 +256,7 @@ public class tarParser extends AbstractParser implements Parser {
 	 *            the media type of the resource
 	 * @param charset
 	 *            the charset name if known
-	 * @param an
+	 * @param parser
 	 *            instance of tarParser that is registered as the parser origin of
 	 *            the document
 	 * @return a Document instance

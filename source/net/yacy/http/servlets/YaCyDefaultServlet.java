@@ -1143,7 +1143,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * Write input stream content to response and close input stream.
      * @param response servlet response. Must not be null.
      * @param targetExt response file format
-     * @param tmp
+     * @param inStream
      * @throws IOException when a read/write error occured.
      */
 	private void writeInputStream(HttpServletResponse response, String targetExt, InputStream inStream)

@@ -82,7 +82,7 @@ public class RobotsTxt {
      *
      * @param worktables
      * @param loader
-     * @param maxConcurrentTheads maximum active threads this instance is allowed to run for its concurrent tasks
+     * @param maxActiveTheads maximum active threads this instance is allowed to run for its concurrent tasks
      */
     public RobotsTxt(final WorkTables worktables, LoaderDispatcher loader, final int maxActiveTheads) {
         this.threadPool = new ThreadPoolExecutor(maxActiveTheads, maxActiveTheads,

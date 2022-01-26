@@ -148,7 +148,7 @@ public class bzipParser extends AbstractParser implements Parser {
      * @param location the parsed resource URL
      * @param mimeType the media type of the resource
      * @param charset the charset name if known
-     * @param an instance of bzipParser that is registered as the parser origin of the document
+     * @param parser instance of bzipParser that is registered as the parser origin of the document
      * @return a Document instance
      */
 	public static Document createMainDocument(final DigestURL location, final String mimeType, final String charset, final bzipParser parser) {

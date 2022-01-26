@@ -132,7 +132,8 @@ public interface Balancer {
      * the necessary time until the url is released and returned as CrawlEntry object. In case that a profile
      * for the computed Entry does not exist, null is returned
      * @param delay true if the requester demands forced delays using explicit thread sleep
-     * @param profile
+     * @param cs
+     * @param robots
      * @return a url in a CrawlEntry object
      * @throws IOException
      * @throws SpaceExceededException

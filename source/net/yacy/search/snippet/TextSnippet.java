@@ -390,7 +390,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     /**
      * Init a snippet line for urlhash
      *
-     * @param urlhash hash of the url for this snippet
+     * @param url hash of the url for this snippet
      * @param line text to use as snippet
      * @param isMarked true if query words already marked in input text
      * @param errorCode
