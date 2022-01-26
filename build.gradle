@@ -1,15 +1,15 @@
 buildscript {
     dependencies {
-        classpath "org.mini2Dx:parcl:1.7.1"
+        classpath "org.mini2Dx:parcl:1.8.0"
     }
 }
 
 plugins {
-  id 'java'
-  id 'distribution'
-  id 'maven-publish'
-  id 'com.github.johnrengelman.shadow' version '5.1.0' // uberJar plugin
-  id 'com.github.langmo.gradlensis' version '0.1.0'  // NSIS plugin
+    id 'java'
+    id 'distribution'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.1.2' // uberJar plugin
+    id 'com.github.langmo.gradlensis' version '0.1.0'  // NSIS plugin
 }
 
 apply plugin: 'java'
@@ -447,5 +447,4 @@ task distWinInstaller (dependsOn:['copyFilesToDistDir','copyDependenciesForDistr
     description 'Creates a Win installer distribution exe file'
     tasks.findByName('createInstaller').mustRunAfter 'prepNsis'
 }
-
 
