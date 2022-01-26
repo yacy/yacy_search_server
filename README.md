@@ -145,21 +145,21 @@ adjust it [Here](http://localhost:8090/ConfigHTCache_p.html) to fit your needs.
 Join the large number of contributors that make YaCy what it is;
 community software.
 
-To start developing YaCy in Eclipse:
+To start developing YaCy in **Eclipse**:
 
 - Clone https://github.com/yacy/yacy_search_server.git using build-in Eclipse features (File -> Import -> Git) 
 - or Download source form this side (download button "Code" -> download as Zip -> and unpack)
 - Import a Gradle project (File -> Import -> Gradle -> Existing Gradle Project).
 - in the tab "Gradle Tasks" are tasks available to use build the project (e.g. build -> build  or application -> run)
 
-To start developing YaCy in Netbeans:
+To start developing YaCy in **Netbeans**:
 
 - clone https://github.com/yacy/yacy_search_server.git (Team → Git → Clone)
     - if you checked "scan for project" you'll be asked to open the project
 - Open the project (File → Open Project)
 - you may directly use all the Netbeans build feature.
 
-To start developing YaCy in IntelliJ IDEA:
+To start developing YaCy in **IntelliJ IDEA**:
 
 - clone https://github.com/yacy/yacy_search_server.git
 - File -> New -> Project from Version Control -> URL (see above) -> Clone
@@ -183,14 +183,14 @@ git clone https://github.com/yacy/yacy_search_server
 ```
 
 Compiling YaCy:
-- You need Java 1.8 or later and [Apache Ant](https://ant.apache.org/).
-- Compile: `ant clean all` - then you can `./startYACY.sh` or `./startYACY.bat`.
-- Create a release tarball: `ant dist`.
-- Create a macOS release: `ant distMacApp` (only works on macOS).
-- Create a Debian release: `ant deb`.
-- Work with Eclipse: Within Eclipse you also need to start the ant build process.
-  because the servlet pages are not compiled by the Eclipse build process.
-after the dist procedure, the release can be found in the RELEASE subdirectory.
+- You need Java 1.8 or later and [Gradle](https://gradle.org/).
+- Compile: `gradlew build` - then you can `./startYACY.sh` or `./startYACY.bat`.
+- Create a release tarball and zip archive: `gradlew packageDist`.
+- Create a Windows installer release exe: `gradlew distWinInstaller`.
+- Create a macOS release: not yet availabe with gradle (old build `ant distMacApp` (only works on macOS)).
+- Work with Eclipse or other IDE: Within the IDE you also need to start the gradle build process
+  because the servlet pages are not compiled by the IDE build process.
+  after the dist procedure, the release can be found in the build/distributions subdirectory.
 
 ## APIs and attaching software
 
