@@ -110,7 +110,7 @@ public class Blacklist_p {
                             newFile.createNewFile();
 
                             // share the newly created blacklist
-                            ListManager.updateListSet(BLACKLIST_SHARED, blacklistToUse);
+                            // ListManager.updateListSet(BLACKLIST_SHARED, blacklistToUse); // sharing new user created blacklist by default is likely unauthorized
 
                             // activate it for all known blacklist types
                             for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
