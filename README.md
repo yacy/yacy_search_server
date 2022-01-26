@@ -29,7 +29,7 @@ everybody, free of censorship and central data retention:
 - Intranet indexing and search
 - Set up your own search portal
 - All users have equal rights
-- Comprehensive concept to anonymise the users' index
+- Comprehensive concept to anonymize the users' index
 
 To be able to perform a search using the YaCy network, every user has to set up
 their own node. More users means higher index capacity and better distributed
@@ -93,7 +93,7 @@ This presents you with the personal search and administration interface.
 
 YaCy will authorize users automatically if they
 access the server from its localhost. After about 10 minutes a random
-password is generated and then it is no longer possible to log in from
+password is generated, and then it is no longer possible to log in from
 a remote location. If you install YaCy on a server that is not your
 workstation you must set an admin account immediately after the first start-up.
 Open:
@@ -106,7 +106,7 @@ and set an admin account.
 
 Use virtualization software like VirtualBox or VMware. 
 
-The following container technologies can deployed locally, on remote machines you own, or in the 'cloud' using a provider by clicking "Deploy" at the top of the page:
+The following container technologies can deploy locally, on remote machines you own, or in the 'cloud' using a provider by clicking "Deploy" at the top of the page:
 
 ### Docker
 
@@ -124,7 +124,7 @@ You can forward port 80 to 8090 with iptables:
 iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8090
 ```
 
-On some operation systems, access to the ports you are using must be granted first:
+On some operating systems, access to the ports you are using must be granted first:
 ```bash
 iptables -I INPUT -m tcp -p tcp --dport 8090 -j ACCEPT
 ```
@@ -132,7 +132,7 @@ iptables -I INPUT -m tcp -p tcp --dport 8090 -j ACCEPT
 ## Scaling, RAM and disk space
 
 You can have many millions web pages in your own search index.
-By default 600MB RAM is available to the Java process.
+By default, 600MB RAM is available to the Java process.
 The GC process will free the memory once in a while. If you have less than
 100000 pages you could try 200MB till you hit 1 million.
 [Here](http://localhost:8090/Performance_p.html) you can adjust it.
@@ -150,12 +150,12 @@ To start developing YaCy in Eclipse:
 - Clone https://github.com/yacy/yacy_search_server.git using build-in Eclipse features (File -> Import -> Git) 
 - or Download source form this side (download button "Code" -> download as Zip -> and unpack)
 - Import a Gradle project (File -> Import -> Gradle -> Existing Gradle Project).
-- in the tab "Gradle Tasks" are tasks available to use build the project (e.g. build -> build  or apprication -> run)
+- in the tab "Gradle Tasks" are tasks available to use build the project (e.g. build -> build  or application -> run)
 
 To start developing YaCy in Netbeans:
 
 - clone https://github.com/yacy/yacy_search_server.git (Team → Git → Clone)
-    - if you checked "scan for project" you'll be ask to open the project
+    - if you checked "scan for project" you'll be asked to open the project
 - Open the project (File → Open Project)
 - you may directly use all the Netbeans build feature.
 
@@ -196,7 +196,7 @@ after the dist procedure, the release can be found in the RELEASE subdirectory.
 
 YaCy has many built-in interfaces, and they are all based on HTTP/XML and
 HTTP/JSON. You can discover these interfaces if you notice the orange "API" icon in
-the upper right corner of some web pages in the YaCy web interface. Click it and
+the upper right corner of some web pages in the YaCy web interface. Click it, and
 you will see the XML/JSON version of the respective webpage.
 You can also use the shell script provided in the /bin subdirectory.
 The shell scripts also calls the YaCy web interface. By cloning some of those
