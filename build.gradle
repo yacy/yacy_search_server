@@ -296,20 +296,16 @@ distZip {
 }
 
 // copy runtime dependencies (jar) to the distribution directory
-task copyDependenciesForDistribution {
-// do a late copy of dependencies to dist lib directory to not interfere with standard distZip
-// which includes the lib (and bin) directory by default
-// actually if copied early (e.g. task copyFilesToDistDir) final Gradle zip/tar archive has all files double in lib dir (believe it or not)
+task copyDependenciesForDistribution (type: Copy) {
+    // do a late copy of dependencies to dist lib directory to not interfere with standard distZip
+    // which includes the lib (and bin) directory by default
+    // actually if copied early (e.g. task copyFilesToDistDir) final Gradle zip/tar archive has all files double in lib dir (believe it or not)
 
     String instDir = "$buildDir/RELEASE/MAIN/"
-    copy { // needed for legacy distribution file (task packageDist) - (fyi: gradle.distXxx includes it autom. in dist archive)
-       from configurations.runtimeClasspath
-        into instDir + "lib"
-    }
-    copy { // add own jar (not included automatically)
-        from jar.outputs.files
-        into instDir + "lib"
-    }
+    // needed for legacy distribution file (task packageDist) - (fyi: gradle.distZip/Tar includes it autom. in dist archive)
+    from configurations.runtimeClasspath
+    from jar.outputs.files  // add own jar (not included automatically)
+    into instDir + "lib" 
 }
 
 // create a legacy distribution zip archive
@@ -446,17 +442,18 @@ task distMacApp (type: Copy, dependsOn: ['copyFilesToDistDir'], group: 'distribu
  
     from 'build/RELEASE/MAIN'
     into 'build/RELEASE/MAC/YaCy.app/Contents/MacOS'
-    eachFile { file ->
-        if(file.getName().endsWith(".sh")) {
-            file.setMode(0755)
-        }
-    }
-    copy {
-        from 'addon/YaCy.app'
-        into 'build/RELEASE/MAC/YaCy.app'
-    }
+
     doLast {   
         if (Os.isFamily(Os.FAMILY_MAC))  {
+            eachFile { file ->
+                if(file.getName().endsWith(".sh")) {
+                    file.setMode(0755)
+                }
+            }
+            copy {
+                from 'addon/YaCy.app'
+                into 'build/RELEASE/MAC/YaCy.app'
+            }
             String Dst = project.ext.filterTokens.get('REPL_DATE')
             String rNr = project.ext.filterTokens.get('REPL_REVISION_NR')
             String branch = project.ext.filterTokens.get('branch')    
@@ -468,7 +465,7 @@ task distMacApp (type: Copy, dependsOn: ['copyFilesToDistDir'], group: 'distribu
                 }
             }
         } else {
-            println "this task [distMacApp] can only run on a Mac"
+            logger.error ("this task [distMacApp] can only run on a Mac")
         }
     }
 }
