@@ -119,7 +119,7 @@ dependencies {
     implementation group: 'org.bitlet',         name: 'weupnp',             version: '0.1.4'
 
     // overwrite version for transient dependencies
-    implementation 'org.eclipse.jetty:jetty-client:9.4.44.v20210927'  // for solrj
+    implementation 'org.eclipse.jetty:jetty-client:9.4.35.v20201120'  // for solrj
     implementation 'org.tukaani:xz:1.9' // commons.compress.compressors.xz uses this, but declares it as optional dependency
 
     testImplementation 'junit:junit:4.13.2'
@@ -264,6 +264,14 @@ distributions {
         contents { // fyi: content completed by copyFilesToDistDir
             from 'build/RELEASE/MAIN'
             exclude 'lib/*.jar'
+            // define unix/linux file permission
+            fileMode 0644
+            dirMode 0755
+            eachFile { file ->
+                if(file.getName().endsWith(".sh")) {
+                    file.setMode(0755)
+                }
+            }
         }
     }
 }
@@ -332,8 +340,13 @@ task packageDistTar (type : Tar, dependsOn : ['copyDependenciesForDistribution',
 
     archiveFileName = destName
     destinationDirectory = layout.buildDirectory.dir('distributions/legacyDistFiles')
-
-    from layout.buildDirectory.dir("RELEASE/MAIN")
+    from layout.buildDirectory.dir("RELEASE/MAIN") 
+    fileMode 0644
+    eachFile { file ->
+        if(file.getName().endsWith(".sh")) {
+            file.setMode(0755)
+        }
+    }
     into 'yacy'
 }
 
