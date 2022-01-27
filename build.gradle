@@ -119,7 +119,8 @@ dependencies {
     implementation group: 'org.bitlet',         name: 'weupnp',             version: '0.1.4'
 
     // overwrite version for transient dependencies
-    implementation 'org.eclipse.jetty:jetty-client:9.4.35.v20201120'  // for solrj
+    implementation 'org.eclipse.jetty:jetty-client:9.4.44.v20210927'  // for solrj
+    implementation 'org.tukaani:xz:1.9' // commons.compress.compressors.xz uses this, but declares it as optional dependency
 
     testImplementation 'junit:junit:4.13.2'
 }
@@ -167,10 +168,8 @@ task prepYaCyProperties (type: Copy) {
         String Dstr = new Date().format("yyyyMMDD")
         String Tstr = new Date().format("yyyyMMDD-HHmmss")
         props.put("branch","-dev")
-        props.put ("DSTAMP",Dstr )
         props.put ("REPL_DATE",Dstr)
         props.put ("REPL_REVISION_NR",Tstr)
-        props.put ("releaseNr",Tstr)
         project.ext.filterTokens.putAll(props)
     }
     
@@ -206,83 +205,45 @@ task compileHtrootServlets (dependsOn: ['jar']) {
 }
 
 // copy additional files into directory used to create distribution archive (distZip/distTar)
-task copyFilesToDistDir (dependsOn : ['compileJava', 'jar', 'compileHtrootServlets']) {  
+task copyFilesToDistDir (type: Copy, dependsOn : ['compileJava', 'jar', 'compileHtrootServlets']) {  
     String instDir = "$buildDir/RELEASE/MAIN/" 
     outputs.files  fileTree(instDir)
 
-        copy {
-            from 'addon'
-            into instDir + "addon"
-        }
-        copy {
-            from 'bin'
-            into instDir + "bin"
-        }
-        copy {
-            from 'defaults'
-            into instDir + "defaults"
-        }
-        copy {
-            from 'dictionaries'
-            into instDir + "dictionaries"
-        }
-        copy {
-            from 'examples'
-            into instDir + "examples"
-        }
-        copy {
-            from 'htroot'
-            into instDir + "htroot"
-        }
-        copy {
-            from 'langdetect'
-            into instDir + "langdetect"
-        }
-        copy {
-            from 'lib'
-            include '*.License'
-            into instDir + "lib"
-        }
-        copy {
-            from 'libbuild'
-            exclude '**/build/**'
-            exclude '**/target/**'
-            into instDir + "libbuild"
-        }
-        copy {
-            from 'locales'
-            into instDir + "locales"
-        }
-        copy {
-            from 'skins'
-            into instDir + "skins"
-        }
-        copy {
-            from 'source'
-            into instDir + "source"
-        }
-        copy {
-            from 'vocabularies'
-            into instDir + "vocabularies"
-        }
-        copy {
-            from new File('.') 
-                include '*.bat' 
-                include '*.sh'
-                include 'gradlew'
-                include 'AUTHORS'
-                include 'COPYRIGHT'
-                include 'NOTICE'
-                include 'readme.txt'
-                include 'ChangeLog'
-                include 'gpl.txt'
-                include 'yacy.yellow'
-                include '*.properties'
-                include 'build.gradle'
-                include 'settings.gradle'
-                include 'build.xml'
-            into instDir 
-        }        
+    from projectDir
+    include 'addon/**'
+    include 'bin/**'
+    include 'defaults/**'
+    include 'dictionaries/**'
+    include 'examples/**'
+    include 'gradle/**'
+    include 'htroot/**'
+    include 'langdetect/**'
+    include 'lib/**'
+    include 'libbuild/**'
+    include 'locales/**'
+    include 'skins/**'
+    include 'source/**'
+    include 'vocabularies/**'
+
+    include '*.bat' 
+    include '*.sh'
+    include 'gradlew'
+    include 'AUTHORS'
+    include 'COPYRIGHT'
+    include 'NOTICE'
+    include 'readme.txt'
+    include 'ChangeLog'
+    include 'gpl.txt'
+    include 'yacy.yellow'
+    include '*.properties'
+    include 'build.gradle'
+    include 'settings.gradle'
+    include 'build.xml'
+
+    exclude '**/build/**'
+    exclude '**/target/**'
+
+    into instDir
 }
 
 distZip.dependsOn(copyFilesToDistDir)
@@ -294,8 +255,8 @@ distributions {
         // Gradle appends always the version to the BaseName so this doesn't work, 
         // legacy archive name must be archieved by file rename
         //
-        // String Dst = project.ext.filterTokens.get('DSTAMP')
-        // String rNr = project.ext.filterTokens.get('releaseNr')
+        // String Dst = project.ext.filterTokens.get('REPL_DATE')
+        // String rNr = project.ext.filterTokens.get('REPL_REVISION_NR')
         // String branch = project.ext.filterTokens.get('branch')
         //
         // distributionBaseName = 'yacy' + branch + '_v' + version + '_' + Dst + '_' + rNr
@@ -312,8 +273,8 @@ tasks.findByName('assembleDist').dependsOn('prepYaCyProperties') // make sure po
 distTar {
     compression 'GZIP'
     archiveExtension = 'tar.gz'
-    String Dst = project.ext.filterTokens.get('DSTAMP')
-    String rNr = project.ext.filterTokens.get('releaseNr')
+    String Dst = project.ext.filterTokens.get('REPL_DATE')
+    String rNr = project.ext.filterTokens.get('REPL_REVISION_NR')
     String branch = project.ext.filterTokens.get('branch')
     archiveVersion = '' // important as otherwise version is added automatically again to the end of archiveBaseName
     archiveBaseName = 'yacy' + branch + '_v' + project.version + '_' + Dst + '_' + rNr // important to use project.version otherwise depreciated distZip.version is used (wich is now '')
@@ -321,8 +282,8 @@ distTar {
 
 // configure distZip archive name
 distZip {
-    String Dst = project.ext.filterTokens.get('DSTAMP')
-    String rNr = project.ext.filterTokens.get('releaseNr')
+    String Dst = project.ext.filterTokens.get('REPL_DATE')
+    String rNr = project.ext.filterTokens.get('REPL_REVISION_NR')
     String branch = project.ext.filterTokens.get('branch')
     archiveVersion = '' // important as otherwise version is added automatically again to the end of archiveBaseName
     archiveBaseName = 'yacy' + branch + '_v' + project.version + '_' + Dst + '_' + rNr // important to use project.version otherwise depreciated distZip.version is used (wich is now '')
@@ -348,8 +309,8 @@ task copyDependenciesForDistribution {
 // create a legacy distribution zip archive
 task packageDistZip (type : Zip, dependsOn : ['copyDependenciesForDistribution','copyFilesToDistDir','prepYaCyProperties'] ) {
 
-    String Dst = project.ext.filterTokens.get('DSTAMP')
-    String rNr = project.ext.filterTokens.get('releaseNr')
+    String Dst = project.ext.filterTokens.get('REPL_DATE')
+    String rNr = project.ext.filterTokens.get('REPL_REVISION_NR')
     String branch = project.ext.filterTokens.get('branch')    
     String destName = 'yacy' + branch + '_v' + version + '_' + Dst + '_' + rNr + '.' + archiveExtension.get()
 
@@ -364,8 +325,8 @@ task packageDistZip (type : Zip, dependsOn : ['copyDependenciesForDistribution',
 task packageDistTar (type : Tar, dependsOn : ['copyDependenciesForDistribution','copyFilesToDistDir','prepYaCyProperties']) {
 
     compression 'GZIP'
-    String Dst = project.ext.filterTokens.get('DSTAMP')
-    String rNr = project.ext.filterTokens.get('releaseNr')
+    String Dst = project.ext.filterTokens.get('REPL_DATE')
+    String rNr = project.ext.filterTokens.get('REPL_REVISION_NR')
     String branch = project.ext.filterTokens.get('branch')    
     String destName = 'yacy' + branch + '_v' + version + '_' + Dst + '_' + rNr + '.tar.gz' // ! Gradle would use ext .tgz (archiveExtension.get()) 
 
