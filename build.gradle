@@ -218,7 +218,7 @@ task copyFilesToDistDir (type: Copy, dependsOn : ['compileJava', 'jar', 'compile
     include 'gradle/**'
     include 'htroot/**'
     include 'langdetect/**'
-    include 'lib/**'
+    //include 'lib/**'  // do not copy old ant lib, gradle dependencies will be copied into lib by task copy copyDependenciesForDistribution
     include 'libbuild/**'
     include 'locales/**'
     include 'skins/**'
@@ -265,8 +265,6 @@ distributions {
             from 'build/RELEASE/MAIN'
             exclude 'lib/*.jar'
             // define unix/linux file permission
-            fileMode 0644
-            dirMode 0755
             eachFile { file ->
                 if(file.getName().endsWith(".sh")) {
                     file.setMode(0755)
@@ -440,3 +438,38 @@ gradle.startParameter.taskNames.each {
     expandedTaskList << (buildAliases[it] ? buildAliases[it] : it)
 }
 gradle.startParameter.taskNames = expandedTaskList.flatten()
+
+// create a Mac distribution archive
+import org.apache.tools.ant.taskdefs.condition.Os
+task distMacApp (type: Copy, dependsOn: ['copyFilesToDistDir'], group: 'distribution') {
+    description 'Bundles the project as a Mac distribution - task must run on Mac'
+ 
+    from 'build/RELEASE/MAIN'
+    into 'build/RELEASE/MAC/YaCy.app/Contents/MacOS'
+    eachFile { file ->
+        if(file.getName().endsWith(".sh")) {
+            file.setMode(0755)
+        }
+    }
+    copy {
+        from 'addon/YaCy.app'
+        into 'build/RELEASE/MAC/YaCy.app'
+    }
+    doLast {   
+        if (Os.isFamily(Os.FAMILY_MAC))  {
+            String Dst = project.ext.filterTokens.get('REPL_DATE')
+            String rNr = project.ext.filterTokens.get('REPL_REVISION_NR')
+            String branch = project.ext.filterTokens.get('branch')    
+            String theArchiveName = 'yacy' + branch + '_v' + project.version + '_' + Dst + '_' + rNr + '.dmg'
+
+            ant {
+                exec (executable:'hdiutil') {
+                    arg (line:'create -srcfolder build/RELEASE/MAC/YaCy.app build/distributions/' + theArchiveName)
+                }
+            }
+        } else {
+            println "this task [distMacApp] can only run on a Mac"
+        }
+    }
+}
+

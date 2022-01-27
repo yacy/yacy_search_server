@@ -187,7 +187,7 @@ Compiling YaCy:
 - Compile: `gradlew build` - then you can `./startYACY.sh` or `./startYACY.bat`.
 - Create a release tarball and zip archive: `gradlew packageDist`.
 - Create a Windows installer release exe: `gradlew distWinInstaller`.
-- Create a macOS release: not yet availabe with gradle (old build `ant distMacApp` (only works on macOS)).
+- Create a macOS release: `gradlew distMacApp`.
 - Work with Eclipse or other IDE: Within the IDE you also need to start the gradle build process
   because the servlet pages are not compiled by the IDE build process.
   after the dist procedure, the release can be found in the build/distributions subdirectory.
