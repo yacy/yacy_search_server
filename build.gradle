@@ -262,7 +262,7 @@ distributions {
         // distributionBaseName = 'yacy' + branch + '_v' + version + '_' + Dst + '_' + rNr
         
         contents { // fyi: content completed by copyFilesToDistDir
-            from 'build/RELEASE/MAIN'
+            from "${buildDir}/RELEASE/MAIN"
             exclude 'lib/*.jar'
             // define unix/linux file permission
             eachFile { file ->
@@ -367,7 +367,7 @@ tasks.withType (Javadoc) {
 task packagePortalsearch (group:'distribution') {
     description 'Bundles the javascript portalsearch as *.tar.gz distribution'
     ant {
-        tar(destfile:'build/distributions/yacy-portalsearch.tar.gz', compression:'gzip', defaultexcludes:'yes', longfile:'fail') {
+        tar(destfile:"${buildDir}/distributions/yacy-portalsearch.tar.gz", compression:'gzip', defaultexcludes:'yes', longfile:'fail') {
             tarfileset (dir:'htroot/portalsearch/', prefix:'yacy/portalsearch/') {
                 include(name:'**/*')
             }
@@ -397,7 +397,7 @@ task prepNsis (type: Copy, dependsOn: ['prepYaCyProperties']) {
     from projectDir
     include 'build.nsi'
     include 'gpl.txt'
-    into 'build/RELEASE/WINDOWS'
+    into "${buildDir}/RELEASE/WINDOWS"
 
     filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: project.ext.filterTokens)
     filter(ReplaceTokens, tokens: [REPL_VERSION: version])
@@ -437,11 +437,11 @@ gradle.startParameter.taskNames = expandedTaskList.flatten()
 
 // create a Mac distribution archive
 import org.apache.tools.ant.taskdefs.condition.Os
-task distMacApp (type: Copy, dependsOn: ['copyFilesToDistDir'], group: 'distribution') {
+task distMacApp (type: Copy, dependsOn: ['copyFilesToDistDir','copyDependenciesForDistribution'], group: 'distribution') {
     description 'Bundles the project as a Mac distribution - task must run on Mac'
  
-    from 'build/RELEASE/MAIN'
-    into 'build/RELEASE/MAC/YaCy.app/Contents/MacOS'
+    from "${buildDir}/RELEASE/MAIN"  // remember var substitution requires double quote
+    into "${buildDir}/RELEASE/MAC/YaCy.app/Contents/MacOS"
 
     doLast {   
         if (Os.isFamily(Os.FAMILY_MAC))  {
@@ -452,20 +452,21 @@ task distMacApp (type: Copy, dependsOn: ['copyFilesToDistDir'], group: 'distribu
             }
             copy {
                 from 'addon/YaCy.app'
-                into 'build/RELEASE/MAC/YaCy.app'
+                into "${buildDir}/RELEASE/MAC/YaCy.app"
             }
             String Dst = project.ext.filterTokens.get('REPL_DATE')
             String rNr = project.ext.filterTokens.get('REPL_REVISION_NR')
             String branch = project.ext.filterTokens.get('branch')    
             String theArchiveName = 'yacy' + branch + '_v' + project.version + '_' + Dst + '_' + rNr + '.dmg'
-
+            logger.info("task 'distMacApp' execute: " + "'hdiutil create -srcfolder ${buildDir}/RELEASE/MAC/YaCy.app ${buildDir}/distributions/" + theArchiveName + "'")
             ant {
                 exec (executable:'hdiutil') {
-                    arg (line:'create -srcfolder build/RELEASE/MAC/YaCy.app build/distributions/' + theArchiveName)
+                    arg (line: "create -srcfolder ${buildDir}/RELEASE/MAC/YaCy.app ${buildDir}/distributions/" + theArchiveName)
                 }
             }
         } else {
-            logger.error ("this task [distMacApp] can only run on a Mac")
+            logger.error ("this task 'distMacApp' can only run on a Mac")
+            delete "${buildDir}/RELEASE/MAC"
         }
     }
 }
