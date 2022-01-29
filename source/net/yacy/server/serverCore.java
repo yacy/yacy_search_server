@@ -39,5 +39,6 @@ public final class serverCore {
     public static final String LF_STRING = UTF8.String(new byte[]{LF});
 
     public static boolean useStaticIP = false;
+    public static boolean usePublicPort = false;
 
 }
