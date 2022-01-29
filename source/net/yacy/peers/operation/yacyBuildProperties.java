@@ -15,7 +15,7 @@ public final class yacyBuildProperties {
 	 * returns the SVN-Revision Number as a String
 	 */
 	public static String getSVNRevision() {
-		final String revision = "10210";
+		final String revision = "@REPL_REVISION_NR@";
 		if (revision.contains("@") || revision.contains("$")) {
 			return "0";
 		}
@@ -26,10 +26,10 @@ public final class yacyBuildProperties {
 	 * returns the version String (e. g. 0.9)
 	 */
 	public static String getVersion() {
-		if ("1.925".contains("@") ) {
+		if ("@REPL_VERSION@".contains("@") ) {
 			return "0.1";
 		}
-		return "1.925";
+		return "@REPL_VERSION@";
 	}
 
     public static final Pattern versionMatcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z"); 
@@ -45,10 +45,10 @@ public final class yacyBuildProperties {
 	 * returns the date, when this release was build
 	 */
 	public static String getBuildDate() {
-		if ("20220126".contains("@")) {
+		if ("@REPL_DATE@".contains("@")) {
 			return "19700101";
 		}
-		return "20220126";
+		return "@REPL_DATE@";
 	}
 
 	/**
@@ -56,7 +56,7 @@ public final class yacyBuildProperties {
 	 * by a package manager
 	 */
 	public static boolean isPkgManager() {
-		return "false".equals("true");
+		return "@REPL_PKGMANAGER@".equals("true");
 	}
 
 	/**
@@ -64,9 +64,9 @@ public final class yacyBuildProperties {
 	 * when YaCy was installed with a packagemanger
 	 */
 	public static String getRestartCmd() {
-		if ("/etc/init.d/yacy restart".contains("@")) {
+		if ("@REPL_RESTARTCMD@".contains("@")) {
 			return "echo 'error'";
 		}
-		return "/etc/init.d/yacy restart";
+		return "@REPL_RESTARTCMD@";
 	}
 }
