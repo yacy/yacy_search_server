@@ -21,13 +21,13 @@
         <form action="" method="get" accept-charset="UTF-8">
             <p><input type="text" class="searchinput" name="query" value="#[search_query]#" size="40" onFocus="this.select()"/> <input type="submit" class="btn btn-primary" value="Compare" />
                Left Search Engine
-                   <select name="left">
+                   <select id="selforobjleft" name="left">
                    #{searchengines}#
                    <option #(leftengine)#::selected="selected"#(/leftengine)#>#[searchengine]#</option>
                    #{/searchengines}#
                    </select>
                 &nbsp;&nbsp;Right Search Engine
-                   <select name="right">
+                   <select id="selforobjright" name="right">
                    #{searchengines}#
                    <option #(rightengine)#::selected="selected"#(/rightengine)#>#[searchengine]#</option>
                    #{/searchengines}#
@@ -40,8 +40,16 @@
     ::
     <fieldset>
         <legend>Search Result</legend>
-        <object type="text/html" data="#[left]##[query]#" style="width:49%;height:1600px;overflow:scroll;"></object> 
-        <object type="text/html" data="#[right]##[query]#" style="width:49%;height:1600px;overflow:scroll;"></object>
+        <object id="objleft" onerror="loadErrorFunction('objleft')"  type="text/html" data="#[left]##[query]#" style="width:49%;height:1600px;overflow:scroll;min-width:30%;"></object> 
+        <object id="objright" onerror="loadErrorFunction('objright')" type="text/html" data="#[right]##[query]#" style="width:49%;height:1600px;overflow:scroll;">loading....</object>
+        <script>
+            function loadErrorFunction(theObject) {
+                var htobj = document.getElementById(theObject);
+                htobj.innerHTML = "&nbsp;&nbsp;&nbsp;Error: no results received...    from " + document.getElementById("selfor"+theObject).value + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+                htobj.style.verticalAlign = "top";
+                htobj.style.color = "red";                  
+            }
+        </script>
     </fieldset>
     #(/search)#
     #%env/templates/footer.template%#

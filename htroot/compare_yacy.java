@@ -44,9 +44,7 @@ public class compare_yacy {
         //searchengines.put("google.com", "https://www.google.com/#q=");
         searchengines.put("startpage.com", "https://startpage.com/do/search?cat=web&query=");
         searchengines.put("bing.com", "https://www.bing.com/search?q=");
-        searchengines.put("metager.de", "https://www.metager.de/meta/cgi-bin/meta.ger1?eingabe=");
-        searchengines.put("metager2.de (web)", "https://www.metager2.de/search.php?ses=web&q=");
-        searchengines.put("metager2.de (international)", "https://www.metager2.de/search.php?ses=international&q=");
+        searchengines.put("metager.de", "https://metager.de/meta/meta.ger3?eingabe="); // see https://gitlab.metager.de/open-source/MetaGer/-/blob/development/resources/lang/de/help/help-functions.php#L37
         //searchengines.put("yahoo.com", "https://search.yahoo.com/search?p="); // no search service in iframe 2016-08-17 : "Load denied by X-Frame-Options: does not permit cross-origin framing."
         //searchengines.put("romso.de", "http://romso.de/?q="); // no search service 2016-01-02
         searchengines.put("Wikipedia English", "https://en.wikipedia.org/wiki/");
