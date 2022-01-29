@@ -3,8 +3,6 @@ package net.yacy.peers.operation;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import net.yacy.peers.operation.yacyBuildProperties;
-
 
 /**
  * Properties set when compiling this release/version
@@ -17,7 +15,7 @@ public final class yacyBuildProperties {
 	 * returns the SVN-Revision Number as a String
 	 */
 	public static String getSVNRevision() {
-		final String revision = "@REPL_REVISION_NR@";
+		final String revision = "10210";
 		if (revision.contains("@") || revision.contains("$")) {
 			return "0";
 		}
@@ -28,10 +26,10 @@ public final class yacyBuildProperties {
 	 * returns the version String (e. g. 0.9)
 	 */
 	public static String getVersion() {
-		if ("@REPL_VERSION@".contains("@") ) {
+		if ("1.925".contains("@") ) {
 			return "0.1";
 		}
-		return "@REPL_VERSION@";
+		return "1.925";
 	}
 
     public static final Pattern versionMatcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z"); 
@@ -47,10 +45,10 @@ public final class yacyBuildProperties {
 	 * returns the date, when this release was build
 	 */
 	public static String getBuildDate() {
-		if ("@REPL_DATE@".contains("@")) {
+		if ("20220126".contains("@")) {
 			return "19700101";
 		}
-		return "@REPL_DATE@";
+		return "20220126";
 	}
 
 	/**
@@ -58,7 +56,7 @@ public final class yacyBuildProperties {
 	 * by a package manager
 	 */
 	public static boolean isPkgManager() {
-		return "@REPL_PKGMANAGER@".equals("true");
+		return "false".equals("true");
 	}
 
 	/**
@@ -66,9 +64,9 @@ public final class yacyBuildProperties {
 	 * when YaCy was installed with a packagemanger
 	 */
 	public static String getRestartCmd() {
-		if ("@REPL_RESTARTCMD@".contains("@")) {
+		if ("/etc/init.d/yacy restart".contains("@")) {
 			return "echo 'error'";
 		}
-		return "@REPL_RESTARTCMD@";
+		return "/etc/init.d/yacy restart";
 	}
 }
