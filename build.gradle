@@ -139,7 +139,6 @@ configurations.implementation {
 // output to lib/yacycore.jar (like with ant with downside by determine class-path)
 jar {
     archiveFileName = 'yacycore.jar'
-    destinationDirectory  = new File('lib')
     manifest {
         attributes(
             "Main-Class": mainClassName ,
@@ -187,7 +186,7 @@ compileJava.dependsOn(prepYaCyProperties) // must be executed before compile (du
 // implement ant task to simulate old Ant build for htroot,
 // to avoid import of complete build.xml (as currently used)
 task compileHtrootServlets (dependsOn: ['jar']) {
-    if (file('lib/yacycore.jar').exists()) { // prevent buildscript failing on prime build with fresh git clone due to javac error during gradle init
+    if (file(jar.archiveFile).exists()) { // prevent buildscript failing on prime build with fresh git clone due to javac error during gradle init
         ant {
             path(id:'project.class.path') {
                 // place yacycore.jar on classpath (not automatically done)
