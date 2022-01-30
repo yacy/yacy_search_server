@@ -41,6 +41,7 @@ public class GitComInf extends Properties {
             final File src = new File(this.repoPath);
             repo = new FileRepositoryBuilder().readEnvironment()
                     .findGitDir(src).build();
+
             branch = repo.getBranch();
             branch = "master".equals(branch) ? "" : "_" + branch;
             this.setProperty(this.BRANCHPROP_LABEL, branch);
@@ -80,12 +81,20 @@ public class GitComInf extends Properties {
             } else {
                 revision = Integer.toString(distance + 9000);
             }
+
+            this.setProperty(this.BRANCHPROP_LABEL, branch);
+            this.setProperty(this.REVPROP_LABEL, revision);
+            this.setProperty("REPL_REVISION_NR", revision);
+            this.setProperty(this.DATEPROP_LABEL, commitDate);
+            this.setProperty("REPL_DATE", commitDate);
         } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (GitAPIException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+
         } finally {
             /* In all cases, properly release resources */
             if (walk != null) {
@@ -97,14 +106,8 @@ public class GitComInf extends Properties {
             if (repo != null) {
                 repo.close();
             }
-        }
 
-        this.setProperty(this.BRANCHPROP_LABEL, branch);
-//this.setProperty(branch, branch)
-        this.setProperty(this.REVPROP_LABEL, revision);
-        this.setProperty("REPL_REVISION_NR", revision);
-        this.setProperty(this.DATEPROP_LABEL, commitDate);
-        this.setProperty("REPL_DATE", commitDate);
+        }
     }
 
     /**
@@ -121,29 +124,33 @@ public class GitComInf extends Properties {
         } else {
             gitRevTask.setRepoPath(args[0]);
         }
-
         gitRevTask.execute();
-        System.out.println("Git Commit Info: " + gitRevTask.toString());
-
-        // output result to property file
-        File f;
-        if (args.length > 1) {
-            f = new File(args[1]);
+        if (gitRevTask.isEmpty()) {
+            System.err.println("no Git repository found" + (args.length == 0 ? "" : " in " + args[0]));
         } else {
-            f = new File("gitbuildnumber.properties");
-        }
-        try {
-            if (!f.exists()) { 
-                f.getParentFile().mkdirs();
-             //   Files.createDirectories(f.getParentFile().toPath()); // just make sure missing dir is not a problem
+            
+            System.out.println("Git Commit Info: " + gitRevTask.toString());
+
+            // output result to property file
+            File f;
+            if (args.length > 1) {
+                f = new File(args[1]);
+            } else {
+                f = new File("gitbuildnumber.properties");
             }
-            f.createNewFile();
-            FileWriter w = new FileWriter(f);
-            gitRevTask.store(w, "");
-            w.close();
-        } catch (final IOException ex) {
-            System.out.println(ex.toString());
-            System.out.println (args[1]);
+            try {
+                if (!f.exists()) {
+                    f.getParentFile().mkdirs();
+                    //   Files.createDirectories(f.getParentFile().toPath()); // just make sure missing dir is not a problem
+                }
+                f.createNewFile();
+                FileWriter w = new FileWriter(f);
+                gitRevTask.store(w, "");
+                w.close();
+            } catch (final IOException ex) {
+                System.out.println(ex.toString());
+                System.out.println(args[1]);
+            }
         }
     }
 }

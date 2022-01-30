@@ -35,7 +35,8 @@ jar {
 }
 */
 // copy fat-jar to deploy location ..
-task installJar (type:Copy) {
+task installJar (type:Copy, group: 'distribution') {
+    description 'Install jar in libbuild directory'
     from 'build/libs'
     include 'GitComInf-all.jar'
     into project.projectDir.getParent()
