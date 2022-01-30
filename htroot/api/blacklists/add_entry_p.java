@@ -31,7 +31,7 @@ public class add_entry_p {
             		WorkTables.TABLE_API_TYPE_CONFIGURATION,
 					"add to blacklist '" + blacklistToUse + "': " + entry);
             
-            if (BlacklistHelper.addBlacklistEntry(blacklistToUse, entry, header)) {
+            if (BlacklistHelper.addBlacklistEntry(blacklistToUse, entry)) {
                 prop.put(XML_ITEM_STATUS, RESULT_SUCCESS);
 
                 Switchboard.urlBlacklist.clear();

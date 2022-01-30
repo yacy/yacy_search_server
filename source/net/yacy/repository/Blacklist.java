@@ -789,10 +789,23 @@ public class Blacklist {
         return BlacklistError.NO_ERROR;
     }
 
+    /**
+     * Returns the default blacklist name default is the first name which
+     * contains ".default." (standard default list name is 'url.default.black')
+     * or if no the first blacklist if no name containing ".default." exists.
+     *
+     * @param listsPath directory containig the blacklists
+     * @return String blacklist name
+     */
     public static String defaultBlacklist(final File listsPath) {
         final List<String> dirlist = FileUtils.getDirListing(listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
         if (dirlist.isEmpty()) {
             return null;
+        }
+        for (String name : dirlist) {
+            if (name.contains(".default.")) {
+                return name;
+            }
         }
         return dirlist.get(0);
     }
