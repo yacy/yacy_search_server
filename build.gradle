@@ -51,7 +51,7 @@ java.sourceCompatibility = JavaVersion.VERSION_1_8
 java.targetCompatibility = JavaVersion.VERSION_1_8
 
 mainClassName = "net.yacy.yacy"
-applicationDefaultJvmArgs = ["-Xmx1024m"]
+// applicationDefaultJvmArgs = ["-Xmx1024m"] // // limit memory use (below gradle default)
 
 // create property store for filterTokens (here, to make sure it exist)
 project.ext.filterTokens = new Properties()
