@@ -262,7 +262,7 @@ distributions {
         
         contents { // fyi: content completed by copyFilesToDistDir
             from "${buildDir}/RELEASE/MAIN"
-            exclude 'lib/*.jar'
+            exclude "lib/**" // lib dir is only for packageDist created
             // define unix/linux file permission
             eachFile { file ->
                 if(file.getName().endsWith(".sh")) {
@@ -313,7 +313,7 @@ task packageDistZip (type : Zip, dependsOn : ['copyDependenciesForDistribution',
     String Dst = project.ext.filterTokens.get('REPL_DATE')
     String rNr = project.ext.filterTokens.get('REPL_REVISION_NR')
     String branch = project.ext.filterTokens.get('branch')    
-    String destName = 'yacy' + branch + '_v' + version + '_' + Dst + '_' + rNr + '.' + archiveExtension.get()
+    String destName = 'yacy' + branch + '_v' + project.version + '_' + Dst + '_' + rNr + '.' + archiveExtension.get()
 
     archiveFileName = destName
     destinationDirectory = layout.buildDirectory.dir('distributions/legacyDistFiles')
@@ -344,7 +344,7 @@ task packageDistTar (type : Tar, dependsOn : ['copyDependenciesForDistribution',
 }
 
 // wrapper to create legacy distribution archives
-task packageDist (dependsOn : ['copyDependenciesForDistribution','packageDistZip','packageDistTar'],group:'distribution') {
+task packageDist (dependsOn : ['packageDistZip','packageDistTar'],group:'distribution') {
     description 'Create legacy distribution tar.gz and zip archives'
     // do a late copy of dependencies to dist lib directory to not interfere with standard distZip
     // which includes the lib (and bin) directory by default (task copyDependenciesForDistribution)
