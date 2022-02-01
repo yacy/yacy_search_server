@@ -82,10 +82,10 @@ tasks.withType(JavaCompile) {
 }
 
 dependencies {
-    // used by YaCy code
+// used by YaCy code
 //  implementation project ('libbuild:J7Zip-modified') // support library in libbuild (fyi: downside groovy/gradle use internal *.class instead of *.jar = trouble in task packageDist)
-//  implementation 'net.yacy.extlib:J7Zip-modified:1.02' // alternatively support library from mavenLocal() repo (use publishToMavenLocal in subproject first) 
-    implementation fileTree(dir: 'lib', include: 'J7Zip-modified.jar') // switched back to use local lib/jar for this one library (avoiding sub-project execution w/o need)
+//  implementation 'net.yacy.extlib:J7Zip-modified:1.0.2' // alternatively support library from mavenLocal() repo (use publishToMavenLocal in subproject first) 
+    implementation fileTree(dir: 'lib', include: 'J7Zip-modified-1.0.2.jar') // switched back to use local lib/jar for this one library (avoiding sub-project execution w/o need)
     implementation group: 'org.bouncycastle',   name: 'bcmail-jdk15on',     version: '1.69'
     implementation group: 'org.apache.commons', name: 'commons-compress',   version: '1.21'
     implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
@@ -417,7 +417,7 @@ task distWinInstaller (dependsOn:['copyFilesToDistDir','copyDependenciesForDistr
 // runs the support tool which creates gitbuildnumber.properties from info of local git repository
 task storeGitComInf(type: JavaExec) {
     mustRunAfter(build)
-    classpath = files('libbuild/GitComInf-all.jar')
+    classpath = files('libbuild/GitComInf-1.0-all.jar')
     args = [project.projectDir.getPath(), project.projectDir.getPath() + "/gitbuildnumber.properties"]
     mainClass = 'GitComInf'
 }

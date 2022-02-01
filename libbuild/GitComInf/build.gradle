@@ -14,6 +14,7 @@ repositories {
 }
 
 mainClassName = "GitComInf"
+version = "1.0"
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
@@ -35,10 +36,12 @@ jar {
 }
 */
 // copy fat-jar to deploy location ..
-task installJar (type:Copy, group: 'distribution') {
-    description 'Install jar in libbuild directory'
-    from 'build/libs'
-    include 'GitComInf-all.jar'
+task installJarToRoot (type: Copy, dependsOn: shadowJar) {
+    description 'Install jar in libbuild directory'  
+    from shadowJar.archiveFile
     into project.projectDir.getParent()
+    doLast {
+        logger.lifecycle ("copied jar to ${projectDir.getParent()}/" + shadowJar.archiveFileName.get())
+    }
 }
 
