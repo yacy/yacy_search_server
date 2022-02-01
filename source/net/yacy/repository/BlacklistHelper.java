@@ -58,18 +58,16 @@ public final class BlacklistHelper {
      * Adds a new entry to the chosen blacklist.
      * @param blacklistToUse the name of the blacklist the entry is to be added to
      * @param entry the entry that is to be added
-     * @param header the current HTTP request headers
      * @return true when no error occurred and the entry was successfully added
      */
-	public static boolean addBlacklistEntry(
-	        final String blacklistToUse,
-	        final String entry,
-	        final RequestHeader header) {
-    	String newEntry = entry;
+    public static boolean addBlacklistEntry(
+            final String blacklistToUse,
+            final String entry) {
+        String newEntry = entry;
 
-		if (blacklistToUse == null || blacklistToUse.isEmpty() || newEntry == null || newEntry.isEmpty()) {
-			return false;
-		}
+        if (blacklistToUse == null || blacklistToUse.isEmpty() || newEntry == null || newEntry.isEmpty()) {
+            return false;
+        }
         
     	newEntry = prepareEntry(newEntry);
 
@@ -77,7 +75,7 @@ public final class BlacklistHelper {
         String host = newEntry.substring(0, pos);
         String path = newEntry.substring(pos + 1);
 
-		boolean success = false;
+	boolean success = false;
         for (final BlacklistType supportedBlacklistType : BlacklistType.values()) {
         	if (ListManager.listSetContains(supportedBlacklistType + ".BlackLists", blacklistToUse)) {
             	try {

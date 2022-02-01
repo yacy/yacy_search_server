@@ -27,4 +27,6 @@ source/net/yacy/peers/operation/yacyBuildProperties.java
 *.iws
 /out/
 /.settings/
+/.classpath
+/.project
 

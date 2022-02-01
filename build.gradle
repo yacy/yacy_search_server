@@ -51,7 +51,7 @@ java.sourceCompatibility = JavaVersion.VERSION_1_8
 java.targetCompatibility = JavaVersion.VERSION_1_8
 
 mainClassName = "net.yacy.yacy"
-applicationDefaultJvmArgs = ["-Xmx1024m"]
+// applicationDefaultJvmArgs = ["-Xmx1024m"] // // limit memory use (below gradle default)
 
 // create property store for filterTokens (here, to make sure it exist)
 project.ext.filterTokens = new Properties()
@@ -92,8 +92,8 @@ dependencies {
     implementation group: 'com.google.guava',   name: 'guava',              version: '31.0.1-jre' 
     implementation group: 'com.hazelcast',      name: 'hazelcast',          version: '4.2'
     implementation group: 'com.ibm.icu',        name: 'icu4j',              version: '63.1'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.3.2'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff',version: '3.3.2'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.8.1'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff',version: '3.8.1'
     implementation group: 'net.jthink',         name: 'jaudiotagger',       version: '2.2.5'
     implementation group: 'javax.servlet',      name: 'javax.servlet-api',  version: '3.1.0'
     implementation group: 'net.sourceforge.jchardet',  name: 'jchardet',    version: '1.0' 
@@ -139,7 +139,6 @@ configurations.implementation {
 // output to lib/yacycore.jar (like with ant with downside by determine class-path)
 jar {
     archiveFileName = 'yacycore.jar'
-    destinationDirectory  = new File('lib')
     manifest {
         attributes(
             "Main-Class": mainClassName ,
@@ -187,7 +186,7 @@ compileJava.dependsOn(prepYaCyProperties) // must be executed before compile (du
 // implement ant task to simulate old Ant build for htroot,
 // to avoid import of complete build.xml (as currently used)
 task compileHtrootServlets (dependsOn: ['jar']) {
-    if (file('lib/yacycore.jar').exists()) { // prevent buildscript failing on prime build with fresh git clone due to javac error during gradle init
+    if (file(jar.archiveFile).exists()) { // prevent buildscript failing on prime build with fresh git clone due to javac error during gradle init
         ant {
             path(id:'project.class.path') {
                 // place yacycore.jar on classpath (not automatically done)
@@ -263,7 +262,7 @@ distributions {
         
         contents { // fyi: content completed by copyFilesToDistDir
             from "${buildDir}/RELEASE/MAIN"
-            exclude 'lib/*.jar'
+            exclude "lib/**" // lib dir is only for packageDist created
             // define unix/linux file permission
             eachFile { file ->
                 if(file.getName().endsWith(".sh")) {
@@ -314,7 +313,7 @@ task packageDistZip (type : Zip, dependsOn : ['copyDependenciesForDistribution',
     String Dst = project.ext.filterTokens.get('REPL_DATE')
     String rNr = project.ext.filterTokens.get('REPL_REVISION_NR')
     String branch = project.ext.filterTokens.get('branch')    
-    String destName = 'yacy' + branch + '_v' + version + '_' + Dst + '_' + rNr + '.' + archiveExtension.get()
+    String destName = 'yacy' + branch + '_v' + project.version + '_' + Dst + '_' + rNr + '.' + archiveExtension.get()
 
     archiveFileName = destName
     destinationDirectory = layout.buildDirectory.dir('distributions/legacyDistFiles')
@@ -345,7 +344,7 @@ task packageDistTar (type : Tar, dependsOn : ['copyDependenciesForDistribution',
 }
 
 // wrapper to create legacy distribution archives
-task packageDist (dependsOn : ['copyDependenciesForDistribution','packageDistZip','packageDistTar'],group:'distribution') {
+task packageDist (dependsOn : ['packageDistZip','packageDistTar'],group:'distribution') {
     description 'Create legacy distribution tar.gz and zip archives'
     // do a late copy of dependencies to dist lib directory to not interfere with standard distZip
     // which includes the lib (and bin) directory by default (task copyDependenciesForDistribution)

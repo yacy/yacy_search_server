@@ -3,8 +3,6 @@ package net.yacy.peers.operation;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-import net.yacy.peers.operation.yacyBuildProperties;
-
 
 /**
  * Properties set when compiling this release/version

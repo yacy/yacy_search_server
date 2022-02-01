@@ -18,6 +18,7 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -58,6 +59,8 @@ import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
 import net.yacy.kelondro.data.meta.URIMetadataNode;
 import net.yacy.peers.graphics.WebStructureGraph.StructureEntry;
+import net.yacy.repository.Blacklist;
+import static net.yacy.repository.BlacklistHelper.addBlacklistEntry;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Fulltext;
@@ -652,6 +655,17 @@ public class IndexBrowser_p {
 
             } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
+            }
+
+            // for addtoblacklist button 
+            if (post.containsKey("addtoblacklist") && sb != null) {
+                final File blacklistsPath = sb.getDataPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
+                String blacklistname = Blacklist.defaultBlacklist(blacklistsPath);
+                if (blacklistname != null) {
+                    addBlacklistEntry(
+                            blacklistname,
+                            "*." + pathURI.getHost());
+                }
             }
         }
 

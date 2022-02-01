@@ -183,7 +183,7 @@ git clone https://github.com/yacy/yacy_search_server
 ```
 
 Compiling YaCy:
-- You need Java 1.8 or later and [Gradle](https://gradle.org/).
+- You need Java 1.8 or later and [Gradle](https://gradle.org/) (Gradle is downloaded automatically on first build if not present).
 - Compile: `gradlew build` - then you can `./startYACY.sh` or `./startYACY.bat`.
 - Create a release tarball and zip archive: `gradlew packageDist`.
 - Create a Windows installer release exe: `gradlew distWinInstaller`.

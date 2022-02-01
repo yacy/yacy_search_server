@@ -240,7 +240,7 @@ public class Blacklist_p {
                 		WorkTables.TABLE_API_TYPE_CONFIGURATION,
                 		"add to blacklist '" + blacklistToUse + "': " + blentry);
 
-                if(!BlacklistHelper.addBlacklistEntry(blacklistToUse, blentry, header)) {
+                if(!BlacklistHelper.addBlacklistEntry(blacklistToUse, blentry)) {
                 	prop.put(DISABLED + EDIT + "addError", true);
                 	prop.put(DISABLED + EDIT + "addError_entry", blentry);
                 }
@@ -281,7 +281,7 @@ public class Blacklist_p {
                             return prop;
                         }
                         
-                        if (!BlacklistHelper.addBlacklistEntry(targetBlacklist, selectedBlacklistEntry, header)) {
+                        if (!BlacklistHelper.addBlacklistEntry(targetBlacklist, selectedBlacklistEntry)) {
                         	prop.put(DISABLED + EDIT + "moveError", true);
                         	break;
                         }
@@ -322,7 +322,7 @@ public class Blacklist_p {
                         if (!normalizeEntry(selectedEntry.getValue()).equals(preparedNewEntry)) {
 
                         	/* Add first, to detect any eventual syntax errors before removing the old entry */
-                            if (!BlacklistHelper.addBlacklistEntry(blacklistToUse, editedEntryValue, header)) {
+                            if (!BlacklistHelper.addBlacklistEntry(blacklistToUse, editedEntryValue)) {
                             	selected2EditedErrors.put(selectedEntry.getValue(), editedEntryValue);
                             } else if ((temp = BlacklistHelper.deleteBlacklistEntry(blacklistToUse, selectedEntry.getValue(), header)) != null) {
                                 prop.put(serverObjects.ACTION_LOCATION, temp);
