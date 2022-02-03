@@ -170,7 +170,7 @@ var solr= $.getJSON("solr/collection1/select?q=*:*&start=0&rows=0&wt=json&facet=
       <legend style="display: inline">Browser for <a href="#[path]#" target="_blank">#[path]#</a>
         <span style="padding-left: 25px">
           <form style="display: inline" action="IndexBrowser_p.html?path=#[path]#" id="searchform" method="get" role="search">     
-            <button type="submit" name="addtoblacklist" class="btn btn-xs btn-default">Add to blacklist</button>
+            <button type="submit" name="addtoblacklist" class="btn btn-xs btn-default">Add to blacklist #(blkadded)#::<span class="text-success glyphicon glyphicon-ok"></span>::<span class="text-danger glyphicon glyphicon-remove">#(/blkadded)#</button>
             <input type="text" name="path" value="#[path]#" hidden="true"/>
           </form>    
         </span>

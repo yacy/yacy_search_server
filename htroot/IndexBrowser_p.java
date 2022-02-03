@@ -662,10 +662,21 @@ public class IndexBrowser_p {
                 final File blacklistsPath = sb.getDataPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
                 String blacklistname = Blacklist.defaultBlacklist(blacklistsPath);
                 if (blacklistname != null) {
-                    addBlacklistEntry(
+                    String hoststr = pathURI.getHost();
+                    if (hoststr.startsWith("www.")) { // to allow the automatic matching for www.host.com and host.com
+                        hoststr = hoststr.substring(4);
+                    }
+                    final boolean isok = addBlacklistEntry(
                             blacklistname,
-                            "*." + pathURI.getHost());
+                            hoststr + "/.*"); // as yacy expands host pattern to match www.host.com as well as host.com no need to prefix with "*." 
+                    if (isok) {
+                        prop.put("files_blkadded", 1); // glyphicon-ok on (display)
+                    } else {
+                        prop.put("files_blkadded", 2); // failure - glypicon-remove on
+                    }
                 }
+            } else {
+                prop.put("files_blkadded", 0); // glyphicon-ok off
             }
         }
 

@@ -126,6 +126,6 @@
 	<classpathentry kind="src" path="htroot/yacy"/>
 	<classpathentry kind="src" path="source"/>
 	<classpathentry kind="src" path="test/java"/>
-	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
+	<classpathentry kind="lib" path="lib/J7Zip-modified-1.0.2.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

@@ -1,5 +1,4 @@
 
-
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -22,7 +21,7 @@ sourceSets {
     }
 }
 
-version = '1.02'
+version = '1.0.2'
 group = 'net.yacy.extlib'
 
 publishing {
@@ -59,6 +58,15 @@ publishing {
             // change URLs to point to your repos, e.g. http://my.org/repo
             def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
         }
+    }
+}
+
+// copy jar to yacycore /lib directory (used as dependencies)
+task installJarToRoot (type: Copy, dependsOn: jar) {
+    from jar.archiveFile
+    into "${projectDir.getParent()}/../lib"
+    doLast {
+        logger.lifecycle ("copied jar to ${projectDir.getParent()}/../lib/" + jar.archiveFileName.get())
     }
 }
 
