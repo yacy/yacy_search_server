@@ -45,7 +45,7 @@ The (GPLv2+) source code used to build YaCy is distributed with the package (in 
 ## Where is the documentation?
 
 - [Homepage](https://yacy.net)
-- [International Forum](https://searchlab.eu)
+- [International Forum](https://community.searchlab.eu)
 - [German wiki](https://wiki.yacy.net/index.php/De:Start)
 - [Esperanto wiki](https://wiki.yacy.net/index.php/Eo:Start)
 - [French wiki](https://wiki.yacy.net/index.php/Fr:Start)
@@ -168,7 +168,7 @@ To start developing YaCy in **IntelliJ IDEA**:
 - Run via IDE -> Add Configuration -> + -> Gradle -> in Run Tasks add:  build run
    - (in above line "build" is needed to make sure all needed Gradle tasks are executed before run)
 
-To join our development community, got to https://searchlab.eu
+To join our development community, got to https://community.searchlab.eu
 
 Send pull requests to https://github.com/yacy/yacy_search_server
 
@@ -204,7 +204,7 @@ scripts you can easily create more shell API access methods.
 
 ## Contact
 
-[Visit the international YaCy forum](https://searchlab.eu)
+[Visit the international YaCy forum](https://community.searchlab.eu)
 where you can start a discussion there in your own language.
 
 Questions and requests for paid customization and integration into enterprise solutions.

@@ -143,13 +143,13 @@ public class ContentScraperTest {
     @Test
     public void testGetStartDates() throws MalformedURLException, IOException {
         List<Date> dateResultList;
-        DigestURL root = new DigestURL("http://test.org/test.html");
+        final DigestURL root = new DigestURL("http://test.org/test.html");
 
-        String page = "<html><body>"
+        final String page = "<html><body>"
                 + "<time datetime='2016-12-23'>23. Dezember 2016</time>" // html5 time tag
                 + "</body></html>";
 
-        ContentScraper scraper = new ContentScraper(root, 10, new HashSet<String>(), new VocabularyScraper(), 0);
+        final ContentScraper scraper = new ContentScraper(root, 10, new HashSet<String>(), new VocabularyScraper(), 0);
         final Writer writer = new TransformerWriter(null, null, scraper, false);
 
         FileUtils.copy(new StringReader(page), writer);
@@ -157,11 +157,11 @@ public class ContentScraperTest {
 
         dateResultList = scraper.getStartDates();
 
-        Calendar cal = Calendar.getInstance();
+        final Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(0); // to zero hours
         cal.set(2016, Calendar.DECEMBER, 23);
 
-        for (Date d : dateResultList) {
+        for (final Date d : dateResultList) {
             Assert.assertEquals(cal.getTime(), d);
         }
         scraper.close();
@@ -173,35 +173,35 @@ public class ContentScraperTest {
      */
     @Test
     public void testFindAbsoluteURLs() throws MalformedURLException {
-		final String[] urlStrings = { "http://yacy.net", "https://searchlab.eu", "https://en.wikipedia.org" };
+		final String[] urlStrings = { "http://yacy.net", "https://community.searchlab.eu", "https://en.wikipedia.org" };
 		final List<AnchorURL> urls = new ArrayList<>();
-		for (String urlString : urlStrings) {
+		for (final String urlString : urlStrings) {
 			urls.add(new AnchorURL(urlString));
 		}
 
 		/* Test with various white space separators */
-		String[] separators = { " ", "\n", "\t", "\r" };
-		for (String separator : separators) {
-			StringBuilder text = new StringBuilder();
-			for (String urlString : urlStrings) {
+		final String[] separators = { " ", "\n", "\t", "\r" };
+		for (final String separator : separators) {
+			final StringBuilder text = new StringBuilder();
+			for (final String urlString : urlStrings) {
 				if (text.length() > 0) {
 					text.append(separator);
 				}
 				text.append(urlString);
 			}
-			Collection<AnchorURL> detectedURLs = new ArrayList<>();
+			final Collection<AnchorURL> detectedURLs = new ArrayList<>();
 			ContentScraper.findAbsoluteURLs(text.toString(), detectedURLs, null);
 			Assert.assertEquals(urls.size(), detectedURLs.size());
 			Assert.assertTrue(urls.containsAll(detectedURLs));
 		}
 		
 		/* URLs surrounded with parenthesis */
-		String[] texts = { "(http://yacy.net)", "YaCy home page (http://yacy.net)",
+		final String[] texts = { "(http://yacy.net)", "YaCy home page (http://yacy.net)",
 				"Nested parentheses (YaCy home page (http://yacy.net))",
 				"Text in parenthesis (example : http://yacy.net)", "A markdown link [YaCy home page](http://yacy.net)",
 				"A markdown [example](http://yacy.net \"YaCy home page\") inline link" };
-		for (String text : texts) {
-			Collection<AnchorURL> detectedURLs = new ArrayList<>();
+		for (final String text : texts) {
+			final Collection<AnchorURL> detectedURLs = new ArrayList<>();
 			ContentScraper.findAbsoluteURLs(text, detectedURLs, null);
 			Assert.assertEquals(1, detectedURLs.size());
 			Assert.assertEquals(new AnchorURL("http://yacy.net"), detectedURLs.iterator().next());
@@ -209,11 +209,11 @@ public class ContentScraperTest {
 		
 		/* URLs surrounded with square brackets */ 
 		//http://[abcd:ef01:2345:6789:abcd:ef01:2345:6789]/
-		String[] squareBracketsTexts = { "[http://yacy.net]", "YaCy home page [http://yacy.net]",
+		final String[] squareBracketsTexts = { "[http://yacy.net]", "YaCy home page [http://yacy.net]",
 				"Nested brackets [YaCy home page [http://yacy.net]]",
 				"A mediawiki external link with different label [http://yacy.net YaCy home page]" };
-		for(String text : squareBracketsTexts) {
-			Collection<AnchorURL> detectedURLs = new ArrayList<>();
+		for(final String text : squareBracketsTexts) {
+			final Collection<AnchorURL> detectedURLs = new ArrayList<>();
 			ContentScraper.findAbsoluteURLs(text, detectedURLs, null);
 			Assert.assertEquals(1, detectedURLs.size());
 			Assert.assertEquals(new AnchorURL("http://yacy.net"), detectedURLs.iterator().next());
@@ -221,11 +221,11 @@ public class ContentScraperTest {
 		
 		/* URLs surrounded with curly brackets */ 
 		//http://[abcd:ef01:2345:6789:abcd:ef01:2345:6789]/
-		String[] curlyBracketsTexts = { "{http://yacy.net}", "YaCy home page {http://yacy.net}",
+		final String[] curlyBracketsTexts = { "{http://yacy.net}", "YaCy home page {http://yacy.net}",
 				"Nested brackets {YaCy home page {http://yacy.net}}",
 				"Text in brackets {example : http://yacy.net}" };
-		for(String text : curlyBracketsTexts) {
-			Collection<AnchorURL> detectedURLs = new ArrayList<>();
+		for(final String text : curlyBracketsTexts) {
+			final Collection<AnchorURL> detectedURLs = new ArrayList<>();
 			ContentScraper.findAbsoluteURLs(text, detectedURLs, null);
 			Assert.assertEquals(1, detectedURLs.size());
 			Assert.assertEquals(new AnchorURL("http://yacy.net"), detectedURLs.iterator().next());
@@ -277,7 +277,7 @@ public class ContentScraperTest {
      */
     @Test
     public void testFindAbsoluteURLsMaxURLs() throws MalformedURLException {
-    	final String text = "Some test URLS : http://yacy.net - https://searchlab.eu - https://en.wikipedia.org";
+    	final String text = "Some test URLS : http://yacy.net - https://community.searchlab.eu - https://en.wikipedia.org";
     	
     	/* No limit */
     	ArrayList<AnchorURL> detectedURLs = new ArrayList<>();
@@ -425,7 +425,7 @@ public class ContentScraperTest {
     	html2Results.put(html, expectedUrls);
 
 		for (final Entry<String, String[]> html2Result : html2Results.entrySet()) {
-			ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), new VocabularyScraper(), 0);
+			final ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), new VocabularyScraper(), 0);
 			try (final Writer writer = new TransformerWriter(null, null, scraper, false)) {
 				FileUtils.copy(new StringReader(html2Result.getKey()), writer);
 
@@ -500,7 +500,7 @@ public class ContentScraperTest {
   
 
 		for (final Entry<String, String[]> html2Result : html2Results.entrySet()) {
-			ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), new VocabularyScraper(), 0);
+			final ContentScraper scraper = new ContentScraper(docUrl, 10, new HashSet<String>(), new VocabularyScraper(), 0);
 			try (final Writer writer = new TransformerWriter(null, null, scraper, false)) {
 				FileUtils.copy(new StringReader(html2Result.getKey()), writer);
 

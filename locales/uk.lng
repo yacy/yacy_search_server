@@ -1558,7 +1558,7 @@ in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is n
 deselect the partial import flag==Зніміть прапорець часткового імпорту
 When an export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==При запуску експорту в DATA/SURROGATE/in створюються допоміжні файли, які автоматично вилучаються та опрацьовуються потоком індексувача.
 All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when an index is deleted.==Всі проіндексовані допоміжні файли потім переміщуються в DATA/SURROGATE/out, і можуть бути знову оброблені, якщо індекс буде видалено.
-<b>The URL stub</b>,<br />like https://searchlab.eu==<b>Частина URL, як наприклад,</b><br />https://searchlab.eu
+<b>The URL stub</b>,<br />like https://community.searchlab.eu==<b>Частина URL, як наприклад,</b><br />https://community.searchlab.eu
 this must be the path right in front of '/viewtopic.php?'==повний шлях перед "/viewtopic.php?"
 Type==Тип
 Host</b> of the database<==Ім’я хосту</b> БД<

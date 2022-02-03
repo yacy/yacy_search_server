@@ -250,7 +250,7 @@ else
     echo "****   USE AT YOUR OWN RISK! Project home and releases: http://yacy.net/   ****"
     echo "**  LOG of       YaCy: DATA/LOG/yacy00.log (and yacy<xx>.log)                **"
     echo "**  STOP         YaCy: execute stopYACY.sh and wait some seconds             **"
-    echo "**  GET HELP for YaCy: join our community at https://searchlab.eu            **"
+    echo "**  GET HELP for YaCy: join our community at https://community.searchlab.eu  **"
     echo "*******************************************************************************"
     if [ $DEBUG -eq 1 ] #debug
     then

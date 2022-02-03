@@ -105,7 +105,7 @@
         </li>
         <li>&nbsp;</li>
         <li id="header_community">
-          <form action="https://searchlab.eu" target="_blank" method="get">
+          <form action="https://community.searchlab.eu" target="_blank" method="get">
             <button accesskey="f" type="submit" class="btn btn-inverse navbar-btn label-info" title="Community">
                 <span class="glyphicon glyphicon-user"></span>
                 <span class="hidden-sm"> Forum</span>
@@ -128,7 +128,7 @@
           <li class="divider" role="separator"></li>
           <li id="header_tutorial"><a href="https://www.youtube.com/user/YaCyTutorials/videos" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;YaCy Tutorials</a></li>
           <li id="header_download"><a href="https://yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
-          <li id="header_community"><a href="https://searchlab.eu" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
+          <li id="header_community"><a href="https://community.searchlab.eu" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
           <li id="header_git"><a href="https://github.com/yacy/yacy_search_server" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
           </ul>
         </li>

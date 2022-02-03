@@ -93,7 +93,7 @@ public class ooxmlParserTest {
 				final String mimetype = testFile[1];
 				final AnchorURL url = new AnchorURL("http://localhost/" + filename);
 
-				AbstractParser p = new ooxmlParser();
+				final AbstractParser p = new ooxmlParser();
 				inStream = new FileInputStream(file);
 				final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, inStream);
 				for (final Document doc : docs) {
@@ -116,7 +116,7 @@ public class ooxmlParserTest {
 						if (content != null) {
 							try {
 								content.close();
-							} catch (IOException ioe) {
+							} catch (final IOException ioe) {
 								System.out.println("Could not close text input stream");
 							}
 						}
@@ -126,7 +126,7 @@ public class ooxmlParserTest {
 				if (inStream != null) {
 					try {
 						inStream.close();
-					} catch (IOException ioe) {
+					} catch (final IOException ioe) {
 						System.out.println("Could not close input stream on file " + filename);
 					}
 				}
@@ -145,7 +145,7 @@ public class ooxmlParserTest {
 		final String mimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 		final AnchorURL url = new AnchorURL("http://localhost/" + fileName);
 
-		AbstractParser p = new ooxmlParser();
+		final AbstractParser p = new ooxmlParser();
 		try(InputStream inStream = new FileInputStream(file);) {
 			final Document[] docs = p.parse(url, mimetype, null, new VocabularyScraper(), 0, inStream);
 			assertNotNull("Documents result must not be null", docs);
@@ -153,7 +153,7 @@ public class ooxmlParserTest {
 			assertNotNull("Detected URLs must not be null", anchors);
 			assertEquals("2 URLs should be detected", 2, anchors.size());
 			assertTrue("YaCy home page URL should have been parsed: " + anchors.toString(), anchors.contains(new AnchorURL("http://yacy.net/")));
-			assertTrue("YaCy forum URL should have been parsed: " + anchors.toString(), anchors.contains(new AnchorURL("https://searchlab.eu/")));
+			assertTrue("YaCy forum URL should have been parsed: " + anchors.toString(), anchors.contains(new AnchorURL("https://community.searchlab.eu/")));
 		}
 	}
 
