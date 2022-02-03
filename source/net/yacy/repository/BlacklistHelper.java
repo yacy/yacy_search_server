@@ -58,7 +58,7 @@ public final class BlacklistHelper {
      * Adds a new entry to the chosen blacklist.
      * @param blacklistToUse the name of the blacklist the entry is to be added to
      * @param entry the entry that is to be added
-     * @return true when no error occurred and the entry was successfully added
+     * @return true when no error occurred and the entry was successfully added or exists
      */
     public static boolean addBlacklistEntry(
             final String blacklistToUse,

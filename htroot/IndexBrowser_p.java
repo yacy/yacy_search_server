@@ -666,10 +666,17 @@ public class IndexBrowser_p {
                     if (hoststr.startsWith("www.")) { // to allow the automatic matching for www.host.com and host.com
                         hoststr = hoststr.substring(4);
                     }
-                    addBlacklistEntry(
+                    final boolean isok = addBlacklistEntry(
                             blacklistname,
                             hoststr + "/.*"); // as yacy expands host pattern to match www.host.com as well as host.com no need to prefix with "*." 
+                    if (isok) {
+                        prop.put("files_blkadded", 1); // glyphicon-ok on (display)
+                    } else {
+                        prop.put("files_blkadded", 2); // failure - glypicon-remove on
+                    }
                 }
+            } else {
+                prop.put("files_blkadded", 0); // glyphicon-ok off
             }
         }
 
