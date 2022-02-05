@@ -58,7 +58,7 @@ public class BlacklistImpExp_p {
 
         // if we have not chosen a blacklist until yet we use the first file
         if (blacklistToUse == null && dirlist != null && !dirlist.isEmpty()) {
-            blacklistToUse = dirlist.get(0);
+            blacklistToUse = Blacklist.defaultBlacklist(sb.listsPath);
         }
 
         // List known hosts for BlackList retrieval

@@ -119,6 +119,11 @@ public class sharedBlacklist_p {
             if (dirlist != null) {
                 for (final String element : dirlist) {
                     prop.putXML("page_blackLists_" + blacklistCount + "_name", element);
+                    if (selectedBlacklistName.equalsIgnoreCase(element)) {
+                        prop.putXML("page_blackLists_" + blacklistCount + "_options","selected");
+                    } else {
+                        prop.putXML("page_blackLists_" + blacklistCount + "_options","");
+                    }
                     blacklistCount++;
                 }
             }
@@ -288,7 +293,14 @@ public class sharedBlacklist_p {
                         prop.put("page_urllist_" + count + "_dark", count % 2 == 0 ? "0" : "1");
                         /* We do not use here putHTML as we don't want '+' characters to be decoded as spaces by application/x-www-form-urlencoded encoding */
                         prop.put("page_urllist_" + count + "_url", CharacterCoding.unicode2html(tmp, true));
-                        prop.put("page_urllist_" + count + "_count", count);
+                        // exclude comment lines
+                        if (tmp.startsWith("#") || tmp.startsWith("//") || tmp.startsWith(";")) {
+                            prop.put("page_urllist_" + count + "_toimport", "0");
+                        } else {
+                            prop.put("page_urllist_" + count + "_toimport", "1");
+                            prop.put("page_urllist_" + count + "_toimport_count", count);
+                            prop.put("page_urllist_" + count + "_toimport_url", CharacterCoding.unicode2html(tmp, true));
+                        }
                         count++;
                     }
                 }
