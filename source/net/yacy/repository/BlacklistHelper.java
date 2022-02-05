@@ -1,5 +1,9 @@
 package net.yacy.repository;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -8,6 +12,7 @@ import net.yacy.cora.document.id.Punycode.PunycodeException;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.data.ListManager;
+import static net.yacy.kelondro.util.SetTools.loadMapMultiValsPerKey;
 import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.search.query.SearchEventCache;
@@ -137,6 +142,36 @@ public final class BlacklistHelper {
         
         SearchEventCache.cleanupEvents(true);
         return null;
+    }
+
+    /**
+     * Reads a blacklist file and returns all entries as string in a sorted
+     * String array.This uses same read/load method as used during normal init
+     * and should be used in servlet (in preference of creating a private list
+     * or array)
+     *
+     * @param blacklistToUse filename of the blacklist file to use (e.g.
+     * url.default.black)
+     *
+     * @return array with entries as string
+     */
+    public static String[] blacklistToSortedArray(String blacklistToUse) {
+
+        final SortedMap<String, List<String>> blklist = loadMapMultiValsPerKey(ListManager.listsPath + "/" + blacklistToUse, "/");
+        final List<String> list = new ArrayList<String>();
+        // convert the loaded Map to the list used in this servlet
+        for (String it : blklist.keySet()) {
+            List<String> thevalue = blklist.get(it);
+            String valstr = "";
+            for (String valitem : thevalue) {
+                valstr += "/" + valitem;
+            }
+            list.add(it + valstr);
+        }
+        // sort them 
+        final String[] sortedlist = new String[list.size()];
+        Arrays.sort(list.toArray(sortedlist));
+        return sortedlist;
     }
 	
 }

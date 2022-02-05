@@ -395,12 +395,8 @@ public class Blacklist_p {
         // Read the blacklist items from file
         if (blacklistToUse != null) {
             int entryCount = 0;
-            final List<String> list = FileUtils.getListArray(new File(ListManager.listsPath, blacklistToUse));
-
-            // sort them
-            final String[] sortedlist = new String[list.size()];
-            Arrays.sort(list.toArray(sortedlist));
-
+            // we should use same load methode as during internal init (even if we only need a simple array to display content)
+            String[] sortedlist = BlacklistHelper.blacklistToSortedArray(blacklistToUse);
             // display them
             boolean dark = true;
             int offset = 0;

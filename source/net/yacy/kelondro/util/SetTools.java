@@ -258,7 +258,6 @@ public final class SetTools {
 
     /**
      * test if one set is totally included in another set
-     * @param <A>
      * @param small
      * @param large
      * @return true if the small set is completely included in the large set
@@ -285,7 +284,6 @@ public final class SetTools {
 
     /**
      * test if the intersection of two sets is not empty
-     * @param <A>
      * @param set1
      * @param set2
      * @return true if any element of the first set is part of the second set or vice-versa
@@ -490,6 +488,17 @@ public final class SetTools {
         return map;
     }
 
+    /**
+     * Used to load blacklist entries from blacklist file (text file). The
+     * blacklist entry is expected to have a host and a path part with standard
+     * deparator "/". To deal with possibly modified lists the procedure is
+     * error tolerant if path part is missing and adds the default "/.*".
+     *
+     * Lines starting with '#' character are interpreted as comment line
+     *
+     * @param filename filename to load
+     * @param sep separator between host and path part (typically '/')
+     */
     public static SortedMap<String, List<String>> loadMapMultiValsPerKey(final String filename, final String sep) {
         final SortedMap<String, List<String>> map = new TreeMap<String, List<String>>();
         BufferedReader br = null;
@@ -499,11 +508,17 @@ public final class SetTools {
             int pos;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if ((!line.isEmpty() && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0)) {
+                if ((!line.isEmpty() && line.charAt(0) != '#')) {
+                    //  old statement 2022-02-05: if ((!line.isEmpty() && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0)) {
+                    pos = line.indexOf(sep); // deal with missing path part
+                    if (pos <= 0) {
+                        line = line + sep + ".*"; // fix missing path part
+                        pos = line.length() - sep.length() - 2;
+                    }
                     key = line.substring(0, pos).trim().toLowerCase();
                     value = line.substring(pos + sep.length()).trim();
                     if (!map.containsKey(key)) map.put(key, new ArrayList<String>());
-                    map.get(key).add(value);
+                    map.get(key).add(value); // add value to the list stored as value for the map
                 }
             }
         } catch (final IOException e) {
