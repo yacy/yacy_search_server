@@ -162,11 +162,10 @@ public final class BlacklistHelper {
         // convert the loaded Map to the list used in this servlet
         for (String it : blklist.keySet()) {
             List<String> thevalue = blklist.get(it);
-            String valstr = "";
+        //    String valstr = "";
             for (String valitem : thevalue) {
-                valstr += "/" + valitem;
+                list.add(it + "/" + valitem);
             }
-            list.add(it + valstr);
         }
         // sort them 
         final String[] sortedlist = new String[list.size()];
