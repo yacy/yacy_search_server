@@ -90,7 +90,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-compress',   version: '1.21'
     implementation group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
     implementation group: 'com.google.guava',   name: 'guava',              version: '31.0.1-jre' 
-    implementation group: 'com.hazelcast',      name: 'hazelcast',          version: '4.2'
+    implementation group: 'com.hazelcast',      name: 'hazelcast',          version: '4.2.4'
     implementation group: 'com.ibm.icu',        name: 'icu4j',              version: '63.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.8.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff',version: '3.8.1'
@@ -136,7 +136,7 @@ configurations.implementation {
     exclude group: 'org.slf4j',                module: 'slf4j-log4j12'
 }
 
-// output to lib/yacycore.jar (like with ant with downside by determine class-path)
+// configure jar
 jar {
     archiveFileName = 'yacycore.jar'
     manifest {
@@ -186,27 +186,38 @@ compileJava.dependsOn(prepYaCyProperties) // must be executed before compile (du
 // implement ant task to simulate old Ant build for htroot,
 // to avoid import of complete build.xml (as currently used)
 task compileHtrootServlets (dependsOn: ['jar']) {
-    if (file(jar.archiveFile).exists()) { // prevent buildscript failing on prime build with fresh git clone due to javac error during gradle init
-        ant {
-            path(id:'project.class.path') {
-                // place yacycore.jar on classpath (not automatically done)
-                pathelement (location: jar.archiveFile.get())
-                // construct path elements
-                configurations.compileClasspath.each { pathelement (location: it) }
-            }
-            javac (srcdir:'htroot', excludes:'processing/**',
-                source:java.sourceCompatibility, target:java.targetCompatibility,
-                debug:"true", debuglevel:"lines,vars,source", includeantruntime:"false", encoding:"UTF-8") {
-                classpath (refid:'project.class.path')
+    inputs.files(fileTree('htroot') { // allow lifecycle UP-TO-DATE even with doLast block
+        include '**/*.java'
+        include '**/*.class'  // to detect missing class file
+        exclude 'processing/**'
+        })
+    outputs.files(fileTree('htroot') {
+        include '**/*.class'
+        })
+
+    doLast{
+        if (file(jar.archiveFile).exists()) { // prevent buildscript failing on prime build with fresh git clone due to javac error during gradle init
+            // logger.warn("if java files changed in source AND htroot at the same time and build fails during 'Configure project' with javac error -> delete build/libs/yacycore.jar or build directory once")
+            ant {
+                path(id:'project.class.path') {
+                    // place yacycore.jar on classpath (not automatically done)
+                    pathelement (location: jar.archiveFile.get())
+                    // construct path elements
+                    configurations.compileClasspath.each { pathelement (location: it) }
+                }
+                javac (srcdir:'htroot', excludes:'processing/**',
+                    source:java.sourceCompatibility, target:java.targetCompatibility,
+                    debug:"true", debuglevel:"lines,vars,source", includeantruntime:"false", encoding:"UTF-8") {
+                    classpath (refid:'project.class.path')
+                }
             }
         }
     }
 }
 
 // copy additional files into directory used to create distribution archive (distZip/distTar)
-task copyFilesToDistDir (type: Copy, dependsOn : ['compileJava', 'jar', 'compileHtrootServlets']) {  
+task copyFilesToDistDir (type: Copy, dependsOn : ['jar', 'compileHtrootServlets']) {  
     String instDir = "$buildDir/RELEASE/MAIN/" 
-    outputs.files  fileTree(instDir)
 
     from projectDir
     include 'addon/**'
