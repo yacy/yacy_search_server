@@ -256,7 +256,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 					::
 					<img class="bookmarkIcon" src="env/grafics/bookmarkpub.png" alt="public bookmark" title="public bookmark"/>
 					#(/public)#
-					<a href="#[link]#" class="bookmarkTitle">#[title]#</a>
+					<a href="#[link]#" target="_blank" class="bookmarkTitle">#[title]#</a>
 				</h4>
 				<p class="bookmarkDescription">#[description]#</p>
                                 #(hasquery)#::<p class="bookmarkDescription">query=#[query]#</p>#(/hasquery)#
@@ -266,7 +266,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 					/
 					<a href="Bookmarks.html?delete=#[hash]#" class="bookmarkAction" onclick="return confirm('Confirm deletion')">Delete</a>
 					/
-					<a href="api/getpageinfo_p.xml?url=#[link]#" class="bookmarkAction">Info</a>
+					<a href="api/getpageinfo_p.xml?url=#[link]#" target="_blank" class="bookmarkAction">Info</a>
                                         #(hasquery)#::
                                         /
                                         <a href="yacysearch.html?query=#[query]#" class="bookmarkAction">search</a>

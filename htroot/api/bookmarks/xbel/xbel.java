@@ -8,6 +8,7 @@ import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.BookmarkHelper;
 import net.yacy.data.BookmarksDB;
 import net.yacy.document.parser.html.CharacterCoding;
+import net.yacy.peers.operation.yacyBuildProperties;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
@@ -60,6 +61,7 @@ public class xbel {
     	R = root.replaceAll("[^/]","").length() - 1;
     	count = recurseFolders(BookmarkHelper.getFolderList(root, switchboard.bookmarksDB.getTagIterator(isAdmin)),root,0,true,"");
         prop.put("xbel", count);
+        prop.put("yacyversion", yacyBuildProperties.getVersion());
     	return prop;    // return from serverObjects respond()
     }
 
