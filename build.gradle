@@ -1,8 +1,10 @@
+/** for possible future use or parcl (of native apps) - 2022-02-09 (see other commented out sections below)
 buildscript {
     dependencies {
         classpath "org.mini2Dx:parcl:1.8.0"
     }
 }
+*/
 
 plugins {
     id 'java'
@@ -15,7 +17,7 @@ plugins {
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
-apply plugin: "org.mini2Dx.parcl"
+/** apply plugin: "org.mini2Dx.parcl" // for possible future use parcl - 2022-02-09 */
 
 repositories {
     mavenCentral()
@@ -56,6 +58,7 @@ mainClassName = "net.yacy.yacy"
 // create property store for filterTokens (here, to make sure it exist)
 project.ext.filterTokens = new Properties()
 
+/** for possible future use of parcl - 2022-02-09
 parcl {
    exe {
       exeName = "YaCy"
@@ -76,6 +79,7 @@ parcl {
       binName = "YaCy"
    }
 }
+*/
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
