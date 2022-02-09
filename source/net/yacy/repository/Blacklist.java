@@ -451,7 +451,7 @@ public class Blacklist {
     }
 
     /**
-     * appends aN entry to the backlist source file and updates internal blacklist maps.
+     * appends an entry to the backlist source file and updates internal blacklist maps.
      * 
      * @param blacklistSourcefile name of the blacklist file (LISTS/*.black)
      * @param host host or host pattern

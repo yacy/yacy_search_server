@@ -30,6 +30,7 @@
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.IDN;
+import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -77,6 +78,8 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.peers.EventChannel;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.repository.Blacklist;
+import static net.yacy.repository.BlacklistHelper.addBlacklistEntry;
 import net.yacy.search.EventTracker;
 import net.yacy.search.SearchAccessRateConstants;
 import net.yacy.search.Switchboard;
@@ -93,6 +96,7 @@ import net.yacy.search.ranking.RankingProfile;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.server.servletProperties;
+import net.yacy.utils.crypt;
 
 public class yacysearch {
 
@@ -694,6 +698,24 @@ public class yacysearch {
                             sb.peers.mySeed(),
                             NewsPool.CATEGORY_SURFTIPP_ADD,
                             map);
+                }
+            }
+
+              // if a blacklist-button was hit, add host to default blacklist
+            if (post != null && post.containsKey("blacklisturl")) {
+
+                if (!sb.verifyAuthentication(header)) {
+                    prop.authenticationRequired();
+                    return prop;
+                }
+
+                String blacklisturl = crypt.simpleDecode(post.get("blacklisturl", "")); // url
+                try {
+                    MultiProtocolURL mpurl = new MultiProtocolURL(blacklisturl);
+                    addBlacklistEntry(
+                            Blacklist.defaultBlacklist(sb.listsPath),
+                            mpurl.getHost() + "/.*");
+                } catch (MalformedURLException e) {
                 }
             }
 

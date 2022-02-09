@@ -105,8 +105,8 @@ public class yacysearchitem {
         final String eventID = post.get("eventID", "");
         final boolean adminAuthenticated = sb.verifyAuthentication(header);
 
-		final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-		final boolean authenticated = adminAuthenticated || user != null;
+	final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
+	final boolean authenticated = adminAuthenticated || user != null;
 
         final boolean extendedSearchRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
 
@@ -668,7 +668,9 @@ public class yacysearchitem {
 	}
 
     /**
-     * Add action links reserved to authorized users. All parameters must be non null.
+     * Add action links reserved to authorized users (adminRights). All
+     * parameters must be non null.
+     *
      * @param sb the main Switchboard instance
      * @param prop properties map to feed
      * @param theSearch search event
@@ -677,41 +679,44 @@ public class yacysearchitem {
      * @param origQ origin query terms
      * @param urlhash URL hash of the result item
      */
-	private static void addAuthorizedActions(final Switchboard sb, final serverObjects prop,
-			final SearchEvent theSearch, final String resultUrlstring, final String resource, final String origQ,
-			final String urlhash) {
-		// check if url exists in bookmarks
-		boolean bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
-		prop.put("content_authorized_bookmark", !bookmarkexists);
+    private static void addAuthorizedActions(final Switchboard sb, final serverObjects prop,
+            final SearchEvent theSearch, final String resultUrlstring, final String resource, final String origQ,
+            final String urlhash) {
+        // check if url exists in bookmarks
+        boolean bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
+        prop.put("content_authorized_bookmark", !bookmarkexists);
 
-		final StringBuilder linkBuilder = QueryParams.navurl(RequestHeader.FileType.HTML, theSearch.query.offset / theSearch.query.itemsPerPage(),
-				theSearch.query, null, false, true);
-		final int baseUrlLength = linkBuilder.length();
+        final StringBuilder linkBuilder = QueryParams.navurl(RequestHeader.FileType.HTML, theSearch.query.offset / theSearch.query.itemsPerPage(),
+                theSearch.query, null, false, true);
+        final int baseUrlLength = linkBuilder.length();
 
-		String encodedURLString;
-		try {
-			encodedURLString = URLEncoder.encode(crypt.simpleEncode(resultUrlstring), StandardCharsets.UTF_8.name());
-		} catch (UnsupportedEncodingException e1) {
-			ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
-			encodedURLString = crypt.simpleEncode(resultUrlstring);
-		}
-		final String bookmarkLink = linkBuilder.append("&bookmarkurl=").append(encodedURLString).toString();
-		linkBuilder.setLength(baseUrlLength);
+        String encodedURLString;
+        try {
+            encodedURLString = URLEncoder.encode(crypt.simpleEncode(resultUrlstring), StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e1) {
+            ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
+            encodedURLString = crypt.simpleEncode(resultUrlstring);
+        }
+        final String bookmarkLink = linkBuilder.append("&bookmarkurl=").append(encodedURLString).toString();
+        linkBuilder.setLength(baseUrlLength);
 
-		String deleteLink = linkBuilder.append("&deleteref=").append(urlhash).toString();
-		linkBuilder.setLength(baseUrlLength);
+        String deleteLink = linkBuilder.append("&deleteref=").append(urlhash).toString();
+        linkBuilder.setLength(baseUrlLength);
 
-		String recommendLink = linkBuilder.append("&recommendref=").append(urlhash).toString();
-		linkBuilder.setLength(baseUrlLength);
+        String recommendLink = linkBuilder.append("&recommendref=").append(urlhash).toString();
+        linkBuilder.setLength(baseUrlLength);
 
-		prop.put("content_authorized_bookmark_bookmarklink", bookmarkLink);
-		prop.put("content_authorized_recommend_deletelink", deleteLink);
-		prop.put("content_authorized_recommend_recommendlink", recommendLink);
+        final String blacklistLink = linkBuilder.append("&blacklisturl=").append(encodedURLString).toString();
+        linkBuilder.setLength(baseUrlLength); // cut off - for next new append
 
-		prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
-		prop.put("content_authorized_urlhash", urlhash);
-	}
+        prop.put("content_authorized_blacklist_blacklistlink", blacklistLink);
+        prop.put("content_authorized_bookmark_bookmarklink", bookmarkLink);
+        prop.put("content_authorized_recommend_deletelink", deleteLink);
+        prop.put("content_authorized_recommend_recommendlink", recommendLink);
 
+        prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
+        prop.put("content_authorized_blacklist", "1");
+    }
 
     /**
      * Process search of image type and feed prop object. All parameters must not be null.

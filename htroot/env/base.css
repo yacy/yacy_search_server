@@ -594,6 +594,10 @@ a.deletelink:hover, a.deletelink:focus, div.searchresults:hover a.deletelink, di
   background:url(grafics/minus.gif) center center no-repeat;
 }
 
+a.blacklistlink:hover, a.blacklistlink:focus, div.searchresults:hover a.blacklistlink, div.searchresults.hover a.blacklistlink {
+  background:url(grafics/blkl.gif) center center no-repeat;
+}
+
 ul.SubMenu a.MenuItemLink {
   margin-top:0;
 }
