@@ -2509,20 +2509,18 @@ public class FTPClient {
             final String password, final boolean extended) {
         try {
             final FTPClient c = new FTPClient();
-            c.cmd = new String[] { "open", host };
+            c.cmd = new String[]{"open", host};
             c.OPEN();
-            c.cmd = new String[] { "user", account, password };
+            c.cmd = new String[]{"user", account, password};
             c.USER();
-            c.cmd = new String[] { "ls" };
+            c.cmd = new String[]{"ls"};
             final List<String> v = c.list(remotePath, extended);
-            c.cmd = new String[] { "close" };
+            c.cmd = new String[]{"close"};
             c.CLOSE();
-            c.cmd = new String[] { "exit" };
+            c.cmd = new String[]{"exit"};
             c.EXIT();
             return v;
-        } catch (final java.security.AccessControlException e) {
-            return null;
-        } catch (final IOException e) {
+        } catch (final SecurityException | IOException e) {
             return null;
         }
     }
@@ -2536,7 +2534,7 @@ public class FTPClient {
             c.exec("ls", true);
             c.exec("close", false);
             c.exec("exit", false);
-        } catch (final java.security.AccessControlException e) {
+        } catch (final SecurityException e) {
         }
     }
 
@@ -2782,7 +2780,7 @@ public class FTPClient {
             c.exec("get " + remoteFile + " " + localPath.getAbsoluteFile().toString(), false);
             c.exec("close", false);
             c.exec("exit", false);
-        } catch (final java.security.AccessControlException e) {
+        } catch (final SecurityException e) {
         }
     }
 
