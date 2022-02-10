@@ -30,13 +30,14 @@ public class GitComInf extends Properties {
     public void execute() {
 
         String branch = null;
-        String revision = null;
-        String lastTag = null;
+        String revision = null;        
         String commitDate = null;
 
         Repository repo = null;
         Git git = null;
         RevWalk walk = null;
+        Ref lastTag = null;
+
         try {
             final File src = new File(this.repoPath);
             repo = new FileRepositoryBuilder().readEnvironment()
@@ -60,18 +61,15 @@ public class GitComInf extends Properties {
             /* Peel known tags */
             final List<Ref> peeledTags = new ArrayList<>();
             for (final Ref tag : tags) {
-                peeledTags.add(repo.peel(tag));
+                lastTag = tag;
             }
 
             /* Look for the last tag commit and calculate distance with the HEAD commit */
             for (final RevCommit commit : walk) {
-                for (final Ref tag : peeledTags) {
-                    if (commit.equals(tag.getPeeledObjectId()) || commit.equals(tag.getObjectId())) {
-                        lastTag = commit.getShortMessage();
-                        break;
-                    }
+                if (commit.equals(lastTag.getPeeledObjectId()) || commit.equals(lastTag.getObjectId())) {
+                    break;
                 }
-                if (lastTag != null || distance++ > 90999) {
+                if (distance++ > 90999) {
                     break;
                 }
             }
@@ -88,13 +86,11 @@ public class GitComInf extends Properties {
             this.setProperty(this.DATEPROP_LABEL, commitDate);
             this.setProperty("REPL_DATE", commitDate);
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         } catch (GitAPIException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         } catch (IllegalArgumentException e) {
-
+            System.err.println(e.getMessage());
         } finally {
             /* In all cases, properly release resources */
             if (walk != null) {
@@ -113,9 +109,8 @@ public class GitComInf extends Properties {
     /**
      * use: GitComInf.jar pathtoGitRepro outputfile gitbuildnumber.properties
      *
-     * @param args = path to Git repository (default . )
-     * @param args (optional) = filename for result (default
-     * ./gitbuildnumber.properties)
+     * @param args = [0] path to Git repository (default . )
+     * [1] (optional) = filename for result (default ./gitbuildnumber.properties)
      */
     public static void main(String[] args) {
         GitComInf gitRevTask = new GitComInf();
@@ -126,23 +121,22 @@ public class GitComInf extends Properties {
         }
         gitRevTask.execute();
         if (gitRevTask.isEmpty()) {
-            System.err.println("no Git repository found" + (args.length == 0 ? "" : " in " + args[0]));
+            System.err.println("no Git repository found" + (args.length == 0 ? " in " + System.getProperty("user.dir") : " in " + args[0]));
         } else {
-            
+
             System.out.println("Git Commit Info: " + gitRevTask.toString());
 
             // output result to property file
             File f;
             if (args.length > 1) {
                 f = new File(args[1]);
+                if (!f.exists()) {
+                    f.getParentFile().mkdirs(); // just make sure missing dir is not a problem
+                }
             } else {
                 f = new File("gitbuildnumber.properties");
             }
             try {
-                if (!f.exists()) {
-                    f.getParentFile().mkdirs();
-                    //   Files.createDirectories(f.getParentFile().toPath()); // just make sure missing dir is not a problem
-                }
                 f.createNewFile();
                 FileWriter w = new FileWriter(f);
                 gitRevTask.store(w, "");
