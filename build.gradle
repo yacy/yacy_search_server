@@ -227,17 +227,16 @@ task copyFilesToDistDir (type: Copy, dependsOn : ['jar', 'compileHtrootServlets'
     include 'addon/**'
     include 'bin/**'
     include 'defaults/**'
-    include 'dictionaries/**'
     include 'examples/**'
     include 'gradle/**'
     include 'htroot/**'
     include 'langdetect/**'
-    //include 'lib/**'  // do not copy old ant lib, gradle dependencies will be copied into lib by task copy copyDependenciesForDistribution
+    // include 'lib/**'  // do not copy old ant lib, gradle dependencies will be copied into lib by task copy copyDependenciesForDistribution
     include 'libbuild/**'
     include 'locales/**'
     include 'skins/**'
     include 'source/**'
-    include 'vocabularies/**'
+//    include 'vocabularies/**' // not included in prev releases
 
     include '*.bat' 
     include '*.sh'
