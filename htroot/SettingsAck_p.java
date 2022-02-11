@@ -219,7 +219,7 @@ public class SettingsAck_p {
                 if(pport < 65535 && pport >= 0) {
                     serverCore.usePublicPort = true;
                     sb.peers.mySeed().setPort(pport);
-                    env.setConfig(SwitchboardConstants.SERVER_PUBLIC_PORT, publicPort);
+                    env.setConfig(SwitchboardConstants.SERVER_PUBLICPORT, publicPort);
                 }
             } catch (NumberFormatException e) {
                 // noop
