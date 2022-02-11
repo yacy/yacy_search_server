@@ -568,6 +568,15 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
             }
         }
     }
+
+    /**
+     * Set the public facing port.
+     * @param port the port to use
+     */
+    public final void setPort(Integer port) {
+        if (!isProperPort(port)) return;
+        this.dna.put(Seed.PORT, String.valueOf(port));
+    }
     
     /**
      * Set several local IPs which are good to access this peer.
@@ -1373,7 +1382,7 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
      * check if the given string containing an IP is proper. This checks also if the IP is within the given
      * range of the network definition
      * @param ipString
-     * @return true iff the IP is proper
+     * @return true if the IP is proper
      */
     public static final boolean isProperIP(final String ipString) {
         if (ipString == null) return false;
@@ -1382,6 +1391,16 @@ public class Seed implements Cloneable, Comparable<Seed>, Comparator<Seed>
         final boolean islocal = Domains.isLocal(ipString, null);
         //if (islocal && Switchboard.getSwitchboard().isGlobalMode()) return ipString + " - local IP for global mode rejected";
         return islocal == Switchboard.getSwitchboard().isIntranetMode();
+    }
+
+    /**
+     * checks if the given port is within the allowed range (1-65535).
+     * @param port the port to check
+     * @return true if the port is valid
+     */
+    public static final boolean isProperPort(final Integer port) {
+        if (port <= 0) return false;
+        return port <= 65535;
     }
 
     @Override

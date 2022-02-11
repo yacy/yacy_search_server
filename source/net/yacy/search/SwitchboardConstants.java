@@ -61,6 +61,7 @@ public final class SwitchboardConstants {
     public static final String SERVER_SSLPORT               = "port.ssl"; // port for https
     public static final String SERVER_SHUTDOWNPORT          = "port.shutdown"; // local port to listen for a shutdown signal (0 <= disabled)
     public static final String SERVER_STATICIP              = "staticIP"; // static IP of http server
+    public static final String SERVER_PUBLICPORT            = "publicPort";
 
     public static final String PUBLIC_SEARCHPAGE            = "publicSearchpage";
     

@@ -543,6 +543,9 @@ debug.snippets.statistics.enabled=false
 #staticIP if you have a static IP, you can use this setting
 staticIP=
 
+#publicPort if you use a different port to access YaCy than the one it listens on, you can use this setting
+publicPort=
+
 # each time YaCy starts up, it can trigger the local browser to show the
 # status page. This is active by default, to make it easier for first-time
 # users to understand what this application does. You can disable browser
