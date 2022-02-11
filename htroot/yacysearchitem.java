@@ -65,6 +65,7 @@ import net.yacy.kelondro.util.Formatter;
 import net.yacy.peers.NewsPool;
 import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.ProfilingGraph;
+import net.yacy.repository.Blacklist;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
@@ -109,6 +110,7 @@ public class yacysearchitem {
 	final boolean authenticated = adminAuthenticated || user != null;
 
         final boolean extendedSearchRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
+        final boolean bookmarkRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
 
         final int item = post.getInt("item", -1);
         final RequestHeader.FileType fileType = header.fileType();
@@ -173,10 +175,21 @@ public class yacysearchitem {
             final String resource = theSearch.query.domType.toString();
             final String origQ = theSearch.query.getQueryGoal().getQueryString(true);
             prop.put("content", 1); // switch on specific content
-            prop.put("content_authorized", adminAuthenticated ? "1" : "0");
             final String urlhash = ASCII.String(result.hash());
             if (adminAuthenticated) { // only needed if authorized
-                addAuthorizedActions(sb, prop, theSearch, resultUrlstring, resource, origQ, urlhash);
+                addAuthorizedActions(sb, prop, theSearch, resultUrlstring, resource, origQ, urlhash, null);
+            } else if (authenticated && user != null) {
+                addAuthorizedActions(sb, prop, theSearch, resultUrlstring, resource, origQ, urlhash, user);
+            } else
+                prop.put("content_authorized", "0"); // disable for not authorized user
+// for testing only
+// result
+// if local Admin - no admin_right
+// if admin authent -> admin_right = true, bookmark_right = false
+            if (header.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString())) {
+                if (header.isUserInRole(UserDB.AccessRight.BOOKMARK_RIGHT.toString())) {
+                    System.out.println("booki");
+                }
             }
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
@@ -678,14 +691,23 @@ public class yacysearchitem {
      * @param resource resource scope ("local" or "global")
      * @param origQ origin query terms
      * @param urlhash URL hash of the result item
+     * @param user current user or null if current user is admin
      */
     private static void addAuthorizedActions(final Switchboard sb, final serverObjects prop,
             final SearchEvent theSearch, final String resultUrlstring, final String resource, final String origQ,
-            final String urlhash) {
+            final String urlhash, UserDB.Entry user) {
         // check if url exists in bookmarks
         boolean bookmarkexists = sb.bookmarksDB.getBookmark(urlhash) != null;
-        prop.put("content_authorized_bookmark", !bookmarkexists);
-
+        if (user == null || user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT)) {
+            prop.put("content_authorized_bookmark", !bookmarkexists);
+        } else
+            prop.put("content_authorized_bookmark", "0");
+/*      boolean blacklistislisted = false;
+        try {
+            DigestURL durl = new DigestURL(resultUrlstring);
+            blacklistislisted = sb.urlBlacklist.isListed(Blacklist.BlacklistType.SEARCH, durl);
+        } catch (Exception e) {}
+*/
         final StringBuilder linkBuilder = QueryParams.navurl(RequestHeader.FileType.HTML, theSearch.query.offset / theSearch.query.itemsPerPage(),
                 theSearch.query, null, false, true);
         final int baseUrlLength = linkBuilder.length();
@@ -697,7 +719,7 @@ public class yacysearchitem {
             ConcurrentLog.warn("YACY_SEARCH_ITEM", "UTF-8 encoding is not supported!");
             encodedURLString = crypt.simpleEncode(resultUrlstring);
         }
-        final String bookmarkLink = linkBuilder.append("&bookmarkurl=").append(encodedURLString).toString();
+        final String bookmarkLink = linkBuilder.append("&bookmarkurl=").append(encodedURLString).append("&bookmarkref=" + urlhash).toString();
         linkBuilder.setLength(baseUrlLength);
 
         String deleteLink = linkBuilder.append("&deleteref=").append(urlhash).toString();
@@ -714,9 +736,17 @@ public class yacysearchitem {
         prop.put("content_authorized_recommend_deletelink", deleteLink);
         prop.put("content_authorized_recommend_recommendlink", recommendLink);
 
-        prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
-        prop.put("content_authorized_blacklist", "1");
+        if (user == null || user.hasRight(UserDB.AccessRight.ADMIN_RIGHT)) {
+            prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(NewsPool.OUTGOING_DB, NewsPool.CATEGORY_SURFTIPP_ADD, "url", resultUrlstring) == null) ? "1" : "0");
+            prop.put("content_authorized_blacklist", "1");
+        } else {
+            prop.put("content_authorized_recommend", "0");
+            prop.put("content_authorized_blacklist", "0");
+        }
+        // prop.put("content_authorized_urlhash", urlhash); // not used 2022-02-09
+        prop.put("content_authorized", "1"); // enable authorized icons/content
     }
+
 
     /**
      * Process search of image type and feed prop object. All parameters must not be null.

@@ -63,6 +63,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.protocol.ResponseHeader;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.DidYouMean;
 import net.yacy.data.UserDB;
 import net.yacy.document.LibraryProvider;
@@ -112,14 +113,15 @@ public class yacysearch {
         final boolean searchAllowed = sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true) || adminAuthenticated;
 
         boolean extendedSearchRights = adminAuthenticated;
-
-        if(adminAuthenticated) {
+        boolean bookmarkRights = false;
+        if (adminAuthenticated) {
             authenticatedUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
         } else {
             final UserDB.Entry user = sb.userDB != null ? sb.userDB.getUser(header) : null;
-            if(user != null) {
+            if (user != null) {
                 extendedSearchRights = user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT);
                 authenticatedUserName = user.getUserName();
+                bookmarkRights = user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT);
             }
         }
 
@@ -701,7 +703,31 @@ public class yacysearch {
                 }
             }
 
-              // if a blacklist-button was hit, add host to default blacklist
+          // if a bookmarks-button was hit, create new bookmark entry
+            if (post != null && post.containsKey("bookmarkref")) {
+                if (!sb.verifyAuthentication(header) && !bookmarkRights) {
+                    prop.authenticationRequired();
+                    return prop;
+                }
+                //final String bookmarkHash = post.get("bookmarkref", ""); // urlhash
+                final String urlstr = crypt.simpleDecode(post.get("bookmarkurl"));
+                if (urlstr != null) {
+                    final Bookmark bmk = sb.bookmarksDB.createorgetBookmark(urlstr, "admin");
+                    if (bmk != null) {
+                        bmk.setProperty(Bookmark.BOOKMARK_QUERY, querystring);
+                        bmk.addTag("/search"); // add to bookmark folder
+                        bmk.addTag("searchresult"); // add tag
+                        String urlhash = post.get("bookmarkref");
+                        final URIMetadataNode urlentry = indexSegment.fulltext().getMetadata(UTF8.getBytes(urlhash));
+                        if (urlentry != null && !urlentry.dc_title().isEmpty()) {
+                            bmk.setProperty(Bookmark.BOOKMARK_TITLE, urlentry.dc_title());
+                        }
+                        sb.bookmarksDB.saveBookmark(bmk);
+                    }
+                }
+            }
+
+            // if a blacklist-button was hit, add host to default blacklist
             if (post != null && post.containsKey("blacklisturl")) {
 
                 if (!sb.verifyAuthentication(header)) {
