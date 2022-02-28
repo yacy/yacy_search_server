@@ -461,12 +461,11 @@ Your YaCy Peer needs some basic information to operate properly==你的YaCy节�
 Select a language for the interface==选择界面语言
 Browser==浏览器
 Use the browser preferred language if available==如果可用就使用浏览器偏好的语言
-&#27721;&#35821;/&#28450;&#35486==中文
 Use Case: what do you want to do with YaCy:==用法：你想将YaCy当作：
 Community-based web search==基于社区的网络搜索
 Join and support the global network 'freeworld', search the web with an uncensored user-owned search network==加入并支持全球网络 'freeworld', 自由搜索网络。
 Search portal for your own web pages==个人网站的搜索门户
-Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==你的YaCy安装独立于其他节点，你可以通过开始自己的网络爬虫来创建自己的网络索引。这可用于搜索你的个人网站或创建具有特定主题的搜索门户。
+Your YaCy installation behaves independently from other peers and you define your own web index by starting your own web crawl. This can be used to search your own web pages or to define a topic-oriented search portal.==你的YaCy安装独立于其他节点，你可以通过开始自己的网络爬虫来创建自己的网络索引。这可用于搜索你的个人网站或创建专题搜索门户。
 Files may also be shared with the YaCy server, assign a path here:==你也能与YaCy服务器共享内容, 在这里指定路径:
 This path can be accessed at ==可以通过以下链接访问
 Use that path as crawl start point.==将此路径作为索引起点.
@@ -896,7 +895,7 @@ Sorted by ascending labels==按升序标签排序
 Maximum range (in days)==最大范围 (按照天算)
 Maximum days number in the histogram. Beware that a large value may trigger high CPU loads both on the server and on the browser with large result sets.==直方图中的最大天数. 请注意, 较大的值可能会在服务器和具有大结果集的浏览器上触发高CPU负载.
 Show websites favicon==显示网站图标
-Not showing websites favicon can help you save some CPU time and network bandwidth.==不显示网站图标可以帮助您节省一些CPU时间和网络带宽。
+Not showing websites favicon can help you save some CPU time and network bandwidth.==不显示网站图标可以帮助你节省一些CPU时间和网络带宽。
 >Title of Result<==>结果标题<
 Description and text snippet of the search result==搜索结果的描述和文本片段
 >Tags<==>标签<
@@ -3059,17 +3058,19 @@ Changes will take effect immediately.==改变立即生效.
 #File: Settings_p.html
 #---------------------------
 Advanced Settings==高级设置
-If you want to restore all settings to the default values,==如果要恢复所有默认设置,
-but <strong>forgot your administration password</strong>, you must stop the proxy,==但是忘记了<strong>管理员密码</strong>, 则你必须首先停止代理,
-delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==删除YaCy根目录下的 'DATA/SETTINGS/yacy.conf' 并重启.
-Server Access Settings==服务器访问设置
-Proxy Access Settings==代理访问设置
-Crawler Settings==爬虫设置
-Remote Proxy (optional)==远端代理(可选)
-Seed Upload Settings==种子上传设置
-Message Forwarding (optional)==消息发送(可选)
-Referrer Policy Settings==引荐策略设置
-Debug/Analysis Settings==调试/分析设置
+If you want to restore all settings to the default values,==你如果要恢复所有设置到默认值,
+but <strong>forgot your administration password</strong>, you must stop the proxy,==但是<strong>忘记了管理员密码</strong>， 则你首先必须停止代理，
+delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==然后删除YaCy应用根目录下的 'DATA/SETTINGS/yacy.conf' 文件，最后再次启动YaCy。
+>Server Access Settings<==>服务器访问设置<
+>Referrer Policy Settings<==>参考策略设置<
+>Crawler Settings<==>爬虫设置<
+>Seed Upload Settings<==>种子上传设置<
+>Message Forwarding (optional)<==>消息传输(可选)<
+>Transparent Proxy Access Settings<==>透明代理访问设置<
+>URL/Web Proxy Access Settings<==>网址代理访问设置<
+>Remote Proxy (optional)<==>远端代理(可选)<
+>Debug/Analysis Settings<==>调试/分析设置<
+>HTTP client Settings<==>HTTP客户端设置<
 #-----------------------------
 
 #File: Settings_Proxy.inc
@@ -3197,25 +3198,47 @@ The URL that can be used to retrieve the uploaded seed file, like==能够上传�
 #---------------------------
 Server Access Settings==服务器访问设置
 IP-Number filter:==IP地址过滤:
-Here you can restrict access to the server.==通过此限制访问服务器的IP.
-By default, the access is not limited,==默认情况下, 不对访问作限制,
-because this function is needed to spawn the p2p index-sharing function.==否则会影响p2p索引共享功能.
-If you block access to your server (setting anything else than '*'), then you will also be blocked==如果作了访问限制(不要设置'*'),
-from using other peers' indexes for search service.==不能使用其他节点的索引.
+(requires restart)==(要求重启)
+Here you can restrict access to the server.==通过此限制访问服务器的IP。
+By default, the access is not limited,==默认情况下, 不对访问作限制，
+because this function is needed to spawn the p2p index-sharing function.==否则会影响p2p索引共享功能。
+If you block access to your server (setting anything else than '*'), then you will also be blocked==如果作了访问限制(设置了不是'*'的任何值),
+from using other peers' indexes for search service.==你也将在搜索服务中不能使用其他节点的索引。
 However, blocking access may be correct in enterprise environments where you only want to index your==然而, 在企业环境中, 如果仅需要索引公司内部网页,
-company's own web pages.==则可作相应限制.
+company's own web pages.==作相应限制则是正确的选项。
+Filter have to be entered as IP, IP range or using CIDR notation separated by comma (e.g. 192.168.1.1,2001:db8::ff00:42:8329,192.168.1.10-192.168.1.20,192.168.1.30-40,192.168.2.0/24)==过滤器必须输入使用逗号分隔的IP、IP范围或CIDR符号 (比如 192.168.1.1,2001:db8::ff00:42:8329,192.168.1.10-192.168.1.20,192.168.1.30-40,192.168.2.0/24)
+further details on format see Jetty==关于格式的进一步细节参见Jetty 
+<a href="http://download.eclipse.org/jetty/stable-9/apidocs/org/eclipse/jetty/util/InetAddressSet.html" target="_blank">InetAddressSet</a> documentation.==<a href="http://download.eclipse.org/jetty/stable-9/apidocs/org/eclipse/jetty/util/InetAddressSet.html" target="_blank">InetAddressSet</a>文档。
 staticIP (optional):==静态IP (可选):
-<strong>The staticIP can help that your peer can be reached by other peers in case that your==<strong>如果你在防火墙或者代理后,
-peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy==静态IP能够确保其他节点能够找到你.</strong> 你可以创建一个穿过防火墙/代理的通道,
-(look out for 'tunneling through https proxy with connect command') and create==(查找"通过connect命令创建https代理通道")
-an access point for incoming connections.==以给其他节点提供访问点.
-This access address can be set here (either as IP number or domain name).==在此设置访问地址(IP地址或者域名).
+The staticIP can help that your peer can be reached by other peers in case that your==如果你在防火墙或者代理后,
+peer is behind a firewall or proxy.</strong> You can create a tunnel through the firewall/proxy==静态IP设置能够确保其他节点能够找到你.</strong> 你可以创建一个穿过防火墙/代理的通道,
+(look out for 'tunneling through https proxy with connect command') and create==(请搜索"通过链接命令创建https代理通道"了解更多)
+an access point for incoming connections.==以给输入链接提供访问点。
+This access address can be set here (either as IP number or domain name).==在此设置访问地址(IP地址或者域名)。
 If the address of outgoing connections is equal to the address of incoming connections,==如果流出链接的地址和流入链接的相同,
 you don't need to set anything here, please leave it blank.==请留空此栏.
 ATTENTION: Your current IP is recognized as "#[clientIP]#".==注意: 当前你的为"#[clientIP]#".
 If the value you enter here does not match with this IP,==如果你输入的IP与此IP不符,
 you will not be able to access the server pages anymore.==那么你就不能访问服务器页面了.
-value="Submit"==value="提交"
+>fileHost:<==>文件主机:<
+Set this to avoid error-messages like 'proxy use not allowed / granted' on accessing your Peer by its hostname.==设置此选项可避免在通过主机名访问对等服务器时出现‘代理使用不允许/已授权’等错误消息。
+Virtual host for httpdFileServlet access for example http://FILEHOST/ shall access the file servlet and==Virtual host for httpdFileServlet access for example http://FILEHOST/ shall access the file servlet and
+return the defaultFile at rootPath either way, http://FILEHOST/ denotes the same as http://localhost:&lt;port&gt;/==return the defaultFile at rootPath either way, http://FILEHOST/ denotes the same as http://localhost:&lt;port&gt;/
+for the preconfigured value 'localpeer', the URL is: http://localpeer/.==for the preconfigured value 'localpeer', the URL is: http://localpeer/.
+"Submit"=="提交"
+>Server Port Settings<==>服务器端口设置<
+>Server port:<==>服务器端口:<
+This is the main port for all http communication (default is 8090). A change requires a restart.==这是所有http通信的主端口（默认值为8090）。更改需要重新启动。
+>Server ssl port:<==>服务器ssl端口:<
+This is the port to connect via https (default is 8443). A change requires a restart.==这是通过https连接的端口（默认为8443）。更改需要重新启动。
+>Shutdown port:<==>关机端口:<
+This is the local port on the loopback address (127.0.0.1 or :1) to listen for a shutdown signal to stop the YaCy server (-1 disables the shutdown port, recommended default is 8005). A change requires a restart.==This is the local port on the loopback address (127.0.0.1 or :1) to listen for a shutdown signal to stop the YaCy server (-1 disables the shutdown port, recommended default is 8005). 更改需要重新启动。
+>Compression settings<==>压缩设置<
+Compress responses with gzip==用gzip压缩响应
+When checked (default), HTTP responses can be compressed using gzip.==When checked (default), HTTP responses can be compressed using gzip.
+The requesting user-agent (a web browser, another YaCy peer or any other tool) uses the header 'Accept-Encoding' to tell whether it accepts gzip compression or not.==The requesting user-agent (a web browser, another YaCy peer or any other tool) uses the header 'Accept-Encoding' to tell whether it accepts gzip compression or not.
+This adds some processing overhead, but can significantly reduce the amount of bytes transmitted over the network.==This adds some processing overhead, but can significantly reduce the amount of bytes transmitted over the network.
+>Changes need a server restart.<==>需重启服务器才能让改变生效。<
 #-----------------------------
 
 #File: Settings_UrlProxyAccess.inc
@@ -3413,9 +3436,9 @@ global index on your own search page.==, 需要通过其他节点的全球索引
 "idea"=="主意"
 "good"=="好"
 "Follow YaCy on Twitter"=="在Twitter上关注YaCy"
-We encourage you to open your firewall for the port you configured (usually: 8090),==我们推荐你开发防火墙端口(通常是: 8090),
-or to set up a 'virtual server' in your router settings (often called DMZ).==或者在路由设置中(DMZ)建立一个"虚拟服务器".
-Please be fair, contribute your own index to the global index.==请公平地贡献你的索引给全球索引.
+We encourage you to open your firewall for the port you configured (usually: 8090),==我们推荐你开放防火墙端口(通常是:8090)，
+or to set up a 'virtual server' in your router settings (often called DMZ).==或者在路由器中建立一个'虚拟服务器'(常叫做DMZ)。
+Please be fair, contribute your own index to the global index.==请公平地贡献你的索引给全球索引。
 Free disk space is lower than #[minSpace]#. Crawling has been disabled. Please fix==空闲磁盘空间低于 #[minSpace]#. 爬取已被关闭,
 it as soon as possible and restart YaCy.==请尽快修复并重启YaCy.
 Free memory is lower than #[minSpace]#. DHT-in has been disabled. Please fix==空闲内存低于 #[minSpace]#. DHT-in已被关闭,
