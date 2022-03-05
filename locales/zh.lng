@@ -1017,14 +1017,17 @@ Duration==持续时间
 
 #File: ContentAnalysis_p.html
 #---------------------------
-Content Analysis==内容分析
-These are document analysis attributes==这些是文档分析属性
-Double Content Detection==重复内容检测
+Content Analysis<==内容分析<
+These are document analysis attributes.==这些是文档分析属性。
+>Double Content Detection<==>重复内容检测<
 Double-Content detection is done using a ranking on a 'unique'-Field, named 'fuzzy_signature_unique_b'.==重复内容检测是使用名为'fuzzy_signature_unique_b'的'unique'字段上的排名完成的。
-This is the minimum length of a word which shall be considered as element of the signature. Should be either 2 or 3.==这是一个应被视为签名的元素单词的最小长度。 应该是2或3。
-The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less==quantRate是参与签名计算的单词数量的度量。数字越高，越少
-words are used for the signature==单词用于签名
-For minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5.==对于minTokenLen = 2，quantRate值不应低于0.24; 对于minTokenLen = 3，quantRate值必须不低于0.5。
+This field is set during parsing and is influenced by two attributes for the <a href="https://lucene.apache.org/solr/5_5_2/solr-core/org/apache/solr/update/processor/TextProfileSignature.html" target="_blank">TextProfileSignature</a> class.==此字段在解析期间设置，并受<a href="https://lucene.apache.org/solr/5_5_2/solr-core/org/apache/solr/update/processor/TextProfileSignature.html" target="_blank">TextProfileSignature</a>类的两个属性影响。
+>minTokenLen<==>最小令牌长度<
+This is the minimum length of a word which shall be considered as element of the signature. Should be either 2 or 3.==这是一个应被视为签名的元素单词的最小长度。应该是2或3。
+>quantRate<==>量化率<
+The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less==量化率是参与签名计算的单词数量的度量。
+words are used for the signature==数字越大，用于签名的单词就越少。
+For minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5.==对于最小令牌长度=2，量化率值不应低于0.24; 对于最小令牌长度=3，量化率值必须不低于0.5。
 "Re-Set to default"=="重置为默认"
 "Set"=="设置"
 The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number==quantRate是参与签名计算的单词数量的度量。 数字越高，越少
