@@ -2661,17 +2661,19 @@ Remote Search:==远端搜索:
 
 #File: PerformanceConcurrency_p.html
 #---------------------------
-Performance of Concurrent Processes==并行进程性能查看
-serverProcessor Objects==处理器对象
-#Thread==Thread
-Queue Size<br />Current==当前队列<br />大小
-Queue Size<br />Current==当前队列<br />大小
+Performance of Concurrent Processes==并行进程性能
+serverProcessor Objects==服务器处理器对象
+>Thread<==>线程<
+Queue Size<br />Current==队列大小<br />当前
+Queue Size<br />Maximum==队列大小<br />最大
+Executors:<br />Current Number of Threads==执行者：<br />当前线程数
+Concurrency:<br />Maximum Number of Threads==并发：<br />最大线程数
+>Childs<==>子线程<
+Average<br />Block Time<br />Reading==平均<br />阻塞时间<br />读取
+Average<br />Exec Time==平均<br />运行时间
+Average<br />Block Time<br />Writing==平均<br />阻塞时间<br />写入
 Concurrency:<br />Number of Threads==并行:<br />线程数
-Childs==子进程
-Average<br />Block Time<br />Reading==平均<br />读取阻塞<br />时间
-Average<br />Exec Time==平均运行时间
-Average<br />Block Time<br />Writing==平均<br />写阻塞<br />时间
-Total<br />Cycles==运行次数
+Total<br />Cycles==总<br />循环
 Full Description==完整描述
 #-----------------------------
 
