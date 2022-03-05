@@ -54,7 +54,7 @@ Returned Results==返回结果
 Known Results==已知结果
 Used Time (ms)==消耗时间(毫秒)
 URL fetch (ms)==获取地址(毫秒)
-Snippet comp (ms)==片段比较(毫秒)
+Snippet comp (ms)==摘录比较(毫秒)
 Query==查询字符
 >User Agent<==>用户代理<
 Top Search Words (last 7 Days)==热门搜索词汇(最近7天)
@@ -736,7 +736,7 @@ When SSL/TLS is enabled on remote peers, https should be used to encrypt data ex
 Please note that contrary to strict TLS, certificates are not validated against trusted certificate authorities (CA), thus allowing YaCy peers to use self-signed certificates.==请注意,与严格TLS相反,证书不会针对受信任的证书颁发机构(CA)进行验证,因此允许YaCy节点使用自签名证书。
 >Snippet Fetch Strategy==>摘要提取策略
 Speed up search results with this option! (use CACHEONLY or FALSE to switch off verification)==使用此选项加速搜索结果!(使用CACHEONLY或FALSE来关闭验证)
-Statistics on text snippets generation can be enabled in the <a href="Settings_p.html?page=debug">Debug/Analysis Settings</a> page.==可以在<a href="Settings_p.html?page=debug">调试/分析设置</a>页面中启用文本片段生成的统计信息。
+Statistics on text snippets generation can be enabled in the <a href="Settings_p.html?page=debug">Debug/Analysis Settings</a> page.==可以在<a href="Settings_p.html?page=debug">调试/分析设置</a>页面中启用文本摘录生成的统计信息。
 NOCACHE: no use of web cache, load all snippets online==NOCACHE:不使用网络缓存,在线加载所有网页摘要
 IFFRESH: use the cache if the cache exists and is fresh otherwise load online==IFFRESH:如果缓存存在则使用最新的缓存,否则在线加载
 IFEXIST: use the cache if the cache exist or load online==IFEXIST:如果缓存存在则使用缓存,或在线加载
@@ -893,7 +893,7 @@ Maximum days number in the histogram. Beware that a large value may trigger high
 Show websites favicon==显示网站图标
 Not showing websites favicon can help you save some CPU time and network bandwidth.==不显示网站图标可以帮助你节省一些CPU时间和网络带宽。
 >Title of Result<==>结果标题<
-Description and text snippet of the search result==搜索结果的描述和文本片段
+Description and text snippet of the search result==搜索结果的描述和文本摘录
 >Tags<==>标签<
 >keyword<==>关键词<
 >subject<==>主题<
@@ -1020,14 +1020,13 @@ Duration==持续时间
 Content Analysis==内容分析
 These are document analysis attributes==这些是文档分析属性
 Double Content Detection==重复内容检测
-Double-Content detection is done using a ranking on a 'unique'-Field, named 'fuzzy_signature_unique_b'.==双内容检测是使用名为'fuzzy_signature_unique_b'的'unique'字段上的排名完成的。
+Double-Content detection is done using a ranking on a 'unique'-Field, named 'fuzzy_signature_unique_b'.==重复内容检测是使用名为'fuzzy_signature_unique_b'的'unique'字段上的排名完成的。
 This is the minimum length of a word which shall be considered as element of the signature. Should be either 2 or 3.==这是一个应被视为签名的元素单词的最小长度。 应该是2或3。
 The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number, the less==quantRate是参与签名计算的单词数量的度量。数字越高，越少
 words are used for the signature==单词用于签名
 For minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLen = 3 the quantRate value must be not below 0.5.==对于minTokenLen = 2，quantRate值不应低于0.24; 对于minTokenLen = 3，quantRate值必须不低于0.5。
 "Re-Set to default"=="重置为默认"
 "Set"=="设置"
-Double-Content detection is done using a ranking on a 'unique'-Field==双内容检测是使用名为'fuzzy_signature_unique_b'的'unique'字段上的排名完成的。
 The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number==quantRate是参与签名计算的单词数量的度量。 数字越高，越少
 #-----------------------------
 
@@ -1765,14 +1764,20 @@ from index==来自索引
 
 #File: IndexControlRWIs_p.html
 #---------------------------
-Reverse Word Index Administration==详细索引字管理
-The local index currently contains #[wcount]# reverse word indexes==本地索引包含 #[wcount]# 个索引字
-RWI Retrieval (= search for a single word)==RWI接收(= 搜索单个单词)
-Select Segment:==选择片段:
-Retrieve by Word:<==输入单词:<
-"Show URL Entries for Word"=="显示关键字相关的地址"
-Retrieve by Word-Hash==输入单词Hash值
-"Show URL Entries for Word-Hash"=="显示关键字Hash值相关的URL"
+Reverse Word Index Administration==反向词索引管理
+The local index currently contains #[wcount]# reverse word indexes==本地索引包含#[wcount]#个反向词索引
+RWI Retrieval (= search for a single word)==反向词检索(=搜索单个词)
+Retrieve by Word:<==按单词检索:<
+"Show URL Entries for Word"=="显示单词相关的地址"
+Retrieve by Word-Hash==按单词Hash值检索
+"Show URL Entries for Word-Hash"=="显示单词Hash值相关的地址"
+>Limitations<==>限制<
+>Index Reference Size<==>反向词索引大小<
+No reference size limitation (this may cause strong CPU load when words are searched that appear very often)==没有索引大小限制（当搜索经常出现的单词时，这可能会导致CPU负载过大）
+Limitation of number of references per word:==每个单词的索引数量限制：
+(this causes that old references are deleted if that limit is reached)==（这会导致如果达到该限制，旧的索引将被删除）
+>Set References Limit<==>设置索引限制<
+Select Segment:==选择分段:
 "Generate List"=="生成列表"
 Cleanup==清理
 >Index Deletion<==>删除索引<
@@ -1852,17 +1857,31 @@ Blacklist Extension==黑名单扩展
 #File: IndexControlURLs_p.html
 #---------------------------
 URL Database Administration<==地址数据库管理<
-The local index currently contains #[ucount]# URL references==目前本地索引含有 #[ucount]# 个参考地址
+The local index currently contains #[ucount]# URL references==目前本地索引含有#[ucount]#个地址索引
 #URL Retrieval
-URL Retrieval==地址获取
-Retrieve by URL:<==输入地址:<
-Retrieve by URL-Hash==输入地址Hash值
-"Show Details for URL"=="显示细节"
-"Show Details for URL-Hash"=="显示细节"
+URL Retrieval<==地址检索<
+Retrieve by URL:<==按地址检索:<
+Retrieve by URL-Hash==按地址Hash值检索
+"Show Details for URL"=="显示地址细节"
+"Show Details for URL-Hash"=="显示地址Hash细节"
 #Cleanup
 >Cleanup<==>清理<
 >Index Deletion<==>删除索引<
-Select Segment:==选择片段:
+> Delete local search index (embedded Solr and old Metadata)<==> 删除本地搜索索引（嵌入 Solr 和旧元数据）<
+> Delete remote solr index<==> 删除远程solr索引<
+> Delete RWI Index (DHT transmission words)<==> 删除反向词索引（DHT传输词）<
+> Delete Citation Index (linking between URLs)<==> 删除引文索引（地址之间的链接）<
+> Delete First-Seen Date Table<==> 删除首次出现日期表<
+> Delete HTTP &amp; FTP Cache<==> 删除HTTP &amp; FTP缓存<
+> Stop Crawler and delete Crawl Queues<==> 停止爬虫并删除爬虫队列<
+> Delete robots.txt Cache<==> 删除robots.txt缓存<
+value="Delete"==value="删除"
+>Optimize Solr<==>优化Solr<
+merge to max. <input type="text" name="optimizemax" value="#[optimizemax]#" size="6" maxlength="6" /> segments==合并到最大<input type="text" name="optimizemax" value="#[optimizemax]#" size="6" maxlength="6" /> 个分段
+"Optimize Solr"=="优化Solr"
+>Reboot Solr Core<==>重启Solr核<
+"Shut Down and Re-Start Solr"=="关闭并重启Solr"
+Select Segment:==选择分段:
 "Generate List"=="生成列表"
 Statistics about top-domains in URL Database==地址数据库中顶级域数据
 Show top==显示全部URL中的
@@ -1969,8 +1988,10 @@ Delta/ms==延迟/ms
 #File: IndexDeletion_p.html
 #---------------------------
 Index Deletion<==索引删除<
-The search index contains #[doccount]# documents. You can delete them here.==搜索索引包含了 #[doccount]# 篇文档. 你可以在这儿删除它们.
-Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.==删除是同时进行的,这可能导致最近删除的文档还没有反映在文档计数中.
+The search index contains #[doccount]# documents. You can delete them here.==搜索索引包含#[doccount]#篇文档。你可以在这儿删除它们。
+Deletions are made concurrently which can cause that recently deleted documents are not yet reflected in the document count.==删除是同步进行的，这可能导致最近删除的文档还没有反映在文档计数中。
+Index deletion will not immediately reduce the storage size on disk because entries are only marked as deleted in a first step.==索引删除不会立即减少磁盘上的存储大小，因为条目仅在第一步中被标记为已删除。
+The storage size will later on shrink by itself if new documents are indexed or you can force a shrinking by <a href="/IndexControlURLs_p.html">performing an "Optimize Solr" procedure.</a>==如果新文档被索引，存储大小将在稍后自行缩小，或者你可以通过执行<a href="/IndexControlURLs_p.html">优化Solr</a>过程强制缩小。
 Delete by URL Matching<==通过URL匹配删除<
 Delete all documents within a sub-path of the given urls. That means all documents must start with one of the url stubs as given here.==删除给定网址的子路径中的所有文档. 这意味着所有文档必须以此处给出的其中一个url存根开头.
 One URL stub, a list of URL stubs<br/>or a regular expression==一个URL存根, 一个URL存根列表<br/> 或一条正则表达式
@@ -2033,9 +2054,26 @@ documents.<==文档<
 
 #File: IndexFederated_p.html
 #---------------------------
->Index Sources & Targets<==>索引来源&目标<
-YaCy supports multiple index storage locations.==YaCy支持多地索引储存.
-As an internal indexing database a deep-embedded multi-core Solr is used and it is possible to attach also a remote Solr.==内部索引数据库使用了深度嵌入式多核Solr,并且还可以附加远端Solr.
+Index Sources &amp; Targets==索引来源&目标
+YaCy supports multiple index storage locations.==YaCy支持多地索引储存。
+As an internal indexing database a deep-embedded multi-core Solr is used and it is possible to attach also a remote Solr.==内部索引数据库使用了深度嵌入式多核Solr，并且还可以附加远端Solr。
+>Solr Search Index<==>Solr搜索索引<
+Solr stores the main search index. It is the home of two cores, the default 'collection1' core for documents and the 'webgraph' core for a web structure graph. Detailed information about the used Solr fields can be edited in the <a href="IndexSchema_p.html">Schema Editor</a>.==Solr存储主搜索索引。它是两个核心的所在地，默认的'collection1'核心用于文档，'webgraph'核心用于网络结构图。可以在<a href="IndexSchema_p.html">模式编辑器</a>中编辑有关已用Solr字段的详细信息。
+>Lazy Value Initialization&nbsp;<==>惰性值初始化&nbsp;<
+If checked, only non-zero values and non-empty strings are written to Solr fields.==如果选中，则仅将非零值和非空字符串写入 Solr 字段。
+>Use deep-embedded local Solr&nbsp;<==>使用深度嵌入的本地Solr&nbsp;<
+This will write the YaCy-embedded Solr index which stored within the YaCy DATA directory.==这将写入存储在YaCy的DATA目录下的 YaCy嵌入式Solr索引。
+>Use remote Solr server(s)&nbsp;<==>使用远程Solr服务器&nbsp;<
+>Allow self-signed certificates <==>允许自签名证书 <
+write-enabled (if unchecked, the remote server(s) will only be used as search peers)==启用写入（如果未选中，远程服务器将仅用作搜索节点）
+value="Set"==value="设置"
+Web Structure Index==网络结构图索引
+The web structure index is used for host browsing (to discover the internal file/folder structure), ranking (counting the number of references) and file search (there are about fourty times more links from loaded pages as in documents of the main search index). ==网页结构索引用于服务器浏览（发现内部文件/文件夹结构）、排名（计算引用次数）和文件搜索（加载页面的链接大约是主搜索索引的文档中的40倍）。
+use citation reference index (lightweight and fast)==使用引文参考索引（轻量且快速）
+use webgraph search index (rich information in second Solr core)==使用网图搜索索引（第二个Solr核心中的丰富信息）
+Peer-to-Peer Operation==P2P运行
+The 'RWI' (Reverse Word Index) is necessary for index transmission in distributed mode. For portal or intranet mode this must be switched off.=='RWI'（反向词索引）对于分布式模式下的索引传输是必需的。在门户或内网模式下，必须将其关闭。
+support peer-to-peer index transmission (DHT RWI index)==支持点对点索引传输（DHT RWI索引）
 #-----------------------------
 
 #File: IndexImportMediawiki_p.html
@@ -2126,82 +2164,82 @@ Remaining Time:==剩余时间:
 
 #File: IndexReIndexMonitor_p.html
 #---------------------------
-Field Re-Indexing<==Field Re-Indexing<
-In case that an index schema of the embedded/local index has changed, all documents with missing field entries can be indexed again with a reindex job.==In case that an index schema of the embedded/local index has changed, all documents with missing field entries can be indexed again with a reindex job.
-"refresh page"=="refresh page"
-Documents in current queue<==Documents in current queue<
-Documents processed<==Documents processed<
-current select query==current select query
-"start reindex job now"=="start reindex job now"
-"stop reindexing"=="stop reindexing"
-Remaining field list==Remaining field list
-reindex documents containing these fields:==reindex documents containing these fields:
-Re-Crawl Index Documents==Re-Crawl Index Documents
-Searches the local index and selects documents to add to the crawler (recrawl the document).==Searches the local index and selects documents to add to the crawler (recrawl the document).
-This runs transparent as background job.==This runs transparent as background job.
-Documents are added to the crawler only if no other crawls are active==Documents are added to the crawler only if no other crawls are active
-and are added in small chunks.==and are added in small chunks.
-"start recrawl job now"=="start recrawl job now"
-"stop recrawl job"=="stop recrawl job"
-Re-Crawl Query Details==Re-Crawl Query Details
-Documents to process==Documents to process
-Current Query==Current Query
-Edit Solr Query==Edit Solr Query
-update==update
-to re-crawl documents selected with the given query.==to re-crawl documents selected with the given query.
-Include failed URLs==Include failed URLs
->Field<==>Field<
->count<==>count<
-Re-crawl works only with an embedded local Solr index!==Re-crawl works only with an embedded local Solr index!
-Simulate==Simulate
-Check only how many documents would be selected for recrawl==Check only how many documents would be selected for recrawl
-"Browse metadata of the #[rows]# first selected documents"=="Browse metadata of the #[rows]# first selected documents"
+Field Re-Indexing<==字段重新索引<
+In case that an index schema of the embedded/local index has changed, all documents with missing field entries can be indexed again with a reindex job.==如果嵌入式/本地索引的索引架构发生更改，则可以使用重新索引作业再次索引所有缺少字段条目的文档。
+"refresh page"=="刷新页面"
+Documents in current queue<==当前队列中的文档<
+Documents processed<==已处理的文档<
+current select query==当前选择查询
+"start reindex job now"=="立即开始重新索引作业"
+"stop reindexing"=="停止重新索引"
+Remaining field list==剩余字段列表
+reindex documents containing these fields:==重新索引包含这些字段的文档：
+Re-Crawl Index Documents==重新抓取索引文档
+Searches the local index and selects documents to add to the crawler (recrawl the document).==搜索本地索引并选择要添加到爬虫的文档（重新爬取文档）。
+This runs transparent as background job.==这作为后台作业透明运行。
+Documents are added to the crawler only if no other crawls are active==仅当没有其他爬取处于活动状态时，才会将文档添加到爬虫中
+and are added in small chunks.==并以小块添加。
+"start recrawl job now"=="立即开始重新抓取作业"
+"stop recrawl job"=="停止重新抓取作业"
+Re-Crawl Query Details==重新抓取查询详情
+Documents to process==待处理的文档
+Current Query==当前查询
+Edit Solr Query==编辑Solr查询
+update==更新
+to re-crawl documents selected with the given query.==重新抓取使用给定查询选择的文档。
+Include failed URLs==包含失败的地址
+>Field<==>字段<
+>count<==>计数<
+Re-crawl works only with an embedded local Solr index!==重新抓取仅适用于嵌入的本地Solr索引！
+Simulate==模拟
+Check only how many documents would be selected for recrawl==仅检查将选择多少文档进行重新抓取
+"Browse metadata of the #[rows]# first selected documents"=="浏览 #[rows]# 个第一个选定文档的元数据"
 document(s)</a>#(/showSelectLink)# selected for recrawl.==document(s)</a>#(/showSelectLink)# selected for recrawl.
->Solr query <==>Solr query <
-Set defaults==Set defaults
-"Reset to default values"=="Reset to default values"
-Last #(/jobStatus)#Re-Crawl job report==Last #(/jobStatus)#Re-Crawl job report
-Automatically refreshing==Automatically refreshing
-An error occurred while trying to refresh automatically==An error occurred while trying to refresh automatically
-The job terminated early due to an error when requesting the Solr index.==The job terminated early due to an error when requesting the Solr index.
->Status<==>Status<
-"Running"=="Running"
-"Shutdown in progress"=="Shutdown in progress"
-"Terminated"=="Terminated"
-Running::Shutdown in progress::Terminated==Running::Shutdown in progress::Terminated
->Query<==>Query<
->Start time<==>Start time<
->End time<==>End time<
-URLs added to the crawler queue for recrawl==URLs added to the crawler queue for recrawl
->Recrawled URLs<==>Recrawled URLs<
-URLs rejected for some reason by the crawl stacker or the crawler queue. Please check the logs for more details.==URLs rejected for some reason by the crawl stacker or the crawler queue. Please check the logs for more details.
->Rejected URLs<==>Rejected URLs<
->Malformed URLs<==>Malformed URLs<
+>Solr query <==>Solr查询 <
+Set defaults==设置默认值
+"Reset to default values"=="重置为默认值"
+Last #(/jobStatus)#Re-Crawl job report==最近的#(/jobStatus)#重新抓取作业报告
+Automatically refreshing==自动刷新
+An error occurred while trying to refresh automatically==尝试自动刷新时出错
+The job terminated early due to an error when requesting the Solr index.==由于请求Solr索引时出错，作业提前终止。
+>Status<==>状态<
+"Running"=="运行中"
+"Shutdown in progress"=="正在关闭"
+"Terminated"=="已终止"
+Running::Shutdown in progress::Terminated==运行中::正在关闭:已终止
+>Query<==>查询<
+>Start time<==>开启时间<
+>End time<==>结束时间<
+URLs added to the crawler queue for recrawl==添加到爬虫队列以进行重新爬取的地址
+>Recrawled URLs<==>已重新爬取的地址<
+URLs rejected for some reason by the crawl stacker or the crawler queue. Please check the logs for more details.==由于某种原因在抓取堆栈器或抓取器队列中被拒绝的地址。请检查日志以获取更多详细信息。
+>Rejected URLs<==>已被拒绝的地址<
+>Malformed URLs<==>格式错误的地址<
 "#[malformedUrlsDeletedCount]# deleted from the index"=="#[malformedUrlsDeletedCount]# deleted from the index"
-> Refresh<==> Refresh<
+> Refresh<==> 刷新<
 #-----------------------------
 
 #File: IndexSchema_p.html
 #---------------------------
-Solr Schema Editor==Solr Schema Editor
-If you use a custom Solr schema you may enter a different field name in the column 'Custom Solr Field Name' of the YaCy default attribute name==If you use a custom Solr schema you may enter a different field name in the column 'Custom Solr Field Name' of the YaCy default attribute name
-Select a core:==Select a core:
-the core can be searched at==the core can be searched at
-Active==Active
-Attribute==Attribute
-Custom Solr Field Name==Custom Solr Field Name
-Comment==Comment
-show active==show active
-show all available==show all available
-show disabled==show disabled
-"Set"=="Set"
-"reset selection to default"=="reset selection to default"
->Reindex documents<==>Reindex documents<
-If you unselected some fields, old documents in the index still contain the unselected fields.==If you unselected some fields, old documents in the index still contain the unselected fields.
-To physically remove them from the index you need to reindex the documents.==To physically remove them from the index you need to reindex the documents.
-Here you can reindex all documents with inactive fields.==Here you can reindex all documents with inactive fields.
-"reindex Solr"=="reindex Solr"
-You may monitor progress (or stop the job) under <a href="IndexReIndexMonitor_p.html">IndexReIndexMonitor_p.html</a>==You may monitor progress (or stop the job) under <a href="IndexReIndexMonitor_p.html">IndexReIndexMonitor_p.html</a>
+Solr Schema Editor==Solr模式编辑器
+If you use a custom Solr schema you may enter a different field name in the column 'Custom Solr Field Name' of the YaCy default attribute name==如果您使用自定义 Solr 架构，您可以在YaCy默认属性名称的'自定义Solr字段名称'列中输入不同的字段名称
+Select a core:==选择核心：
+the core can be searched at==核心可以在以下位置搜索
+Active==激活
+Attribute==属性
+Custom Solr Field Name==自定义Solr字段名称
+Comment==注释
+show active==显示激活
+show all available==显示全部可用
+show disabled==显示未激活
+"Set"=="设置"
+"reset selection to default"=="将选择值重置为默认值"
+>Reindex documents<==>重新索引文档<
+If you unselected some fields, old documents in the index still contain the unselected fields.==如果您取消选择某些字段，但索引中的旧文档仍包含取消选择的字段。
+To physically remove them from the index you need to reindex the documents.==要从索引中实际删除它们，您需要重新索引文档。
+Here you can reindex all documents with inactive fields.==在这里，您可以重新索引所有具有非活动字段的文档。
+"reindex Solr"=="重新索引Solr"
+You may monitor progress (or stop the job) under <a href="IndexReIndexMonitor_p.html">IndexReIndexMonitor_p.html</a>==您可以在<a href="IndexReIndexMonitor_p.html">IndexReIndexMonitor_p.html</a>下监控进度（或停止工作）
 #-----------------------------
 
 #File: IndexShare_p.html
@@ -2392,9 +2430,9 @@ To see a list of all APIs==获取所有API
 please visit the==请访问
 API wiki page==API百科页面
 Network Overview==网络一览
-Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers==主动骨干高级节点
-Passive&nbsp;Senior&nbsp;Peers==被动高级节点
-Junior&nbsp;(fragment)&nbsp;Peers==初级(片段)节点
+Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers==主动&nbsp;骨干&nbsp;和&nbsp;高级&nbsp;节点
+Passive&nbsp;Senior&nbsp;Peers==被动&nbsp;高级&nbsp;节点
+Junior&nbsp;(fragment)&nbsp;Peers==初级&nbsp;(碎片)&nbsp;节点
 Network History==网络历史
 <b>Count of Connected Senior Peers</b> in the last two days, scale = 1h==<b>过去两天连接的高级节点数</b>, 尺度 = 1小时
 <b>Count of all Active Peers Per Day</b> in the last week, scale = 1d==<b>过去1周内每天所有主动节点数</b>, 尺度 = 1天
@@ -2402,11 +2440,11 @@ Network History==网络历史
 <b>Count of all Active Peers Per Month</b> in the last 365d, scale = 30d==<b>过去365天中每月所有主动节点数</b>, 尺度 = 30天
 Active Principal and Senior Peers in '#[networkName]#' Network== '#[networkName]#' 网络中的主动骨干高级节点
 Passive Senior Peers in '#[networkName]#' Network== '#[networkName]#' 网络中的被动高级节点
-Junior Peers (a fragment) in '#[networkName]#' Network=='#[networkName]#' 网络中的初级(片段)节点
+Junior Peers (a fragment) in '#[networkName]#' Network=='#[networkName]#' 网络中的初级(碎片)节点
 Manually contacting Peer==手动联系节点
 Active Senior==主动高级
 Passive Senior==被动高级
-Junior (fragment)==初级(片段)
+Junior (fragment)==初级(碎片)
 >Network<==>网络<
 >Online Peers<==>在线节点<
 >Number of<br/>Documents<==>文件<br/>数目<
@@ -2783,8 +2821,8 @@ When scraping proxy pages then <strong>no personal or protected page is indexed<
 # as result of proxy fetch/prefetch.==durch Besuchen einer Seite indexiert.
 # No personal or protected page is indexed==Persönliche Seiten und geschütze Seiten werden nicht indexiert
 those pages are detected by properties in the HTTP header (like Cookie-Use, or HTTP Authorization)==通过检测HTTP头部属性(比如cookie用途或者http认证)
-or by POST-Parameters (either in URL or as HTTP protocol)==或者提交参数(链接或者http协议)
-and automatically excluded from indexing.==能够检测出此类网页并在索引时排除.
+or by POST-Parameters (either in URL or as HTTP protocol) and automatically excluded from indexing.==或者提交参数(链接或者http协议)能够检测出此类网页并在索引时排除.
+You have to <a href="Settings_p.html?page=ProxyAccess">setup the proxy</a> before use.==您必须在使用前<a href="Settings_p.html?page=ProxyAccess">设置代理</a>。
 Proxy Auto Config:==自动配置代理:
 this controls the proxy auto configuration script for browsers at http://localhost:8090/autoconfig.pac==这会影响浏览器代理自动配置脚本 http://localhost:8090/autoconfig.pac
 .yacy-domains only==仅 .yacy 域名
@@ -2951,10 +2989,10 @@ Peer-to-peer search with JavaScript results	resorting==带有结果排序的P2P�
 Access rate limitations to the peer-to-peer search mode with browser-side JavaScript results resorting enabled==对启用了浏览器端JavaScript结果重新排序的P2P搜索模式的访问率限制
 (check the 'Remote results resorting' section in the <a href="ConfigPortal_p.html">Search Portal</a> configuration page).==(在<a href="ConfigPortal_p.html">搜索门户</a>配置页面勾选'远端结果重排序')。
 When a user with limited rights	(unauthenticated or without extended search right) exceeds a limit,	results resorting becomes only applicable on demand, server-side.==当具有有限权限的用户（未经验证或没有扩展搜索权限）超过限制时，搜索结果重排仅可用于服务器侧搜索。
-Remote snippet load==远端片段加载
-Limitations on snippet loading from remote websites.==对从远程网站加载片段的限制。
-When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==当具有有限权限的用户（未经验证或没有扩展搜索权限）超过限制时，片段获取策略缩小为'CACHEONLY'。
-(check the default Snippet Fetch Strategy on the <a	href="ConfigPortal_p.html">Search Portal</a> configuration page).==(在<a	href="ConfigPortal_p.html">搜索门户</a>配置页面勾选默认的片段获取策略)。
+Remote snippet load==远端摘录加载
+Limitations on snippet loading from remote websites.==对从远程网站加载摘录的限制。
+When a user	with limited rights (unauthenticated or without extended search	right) exceeds a limit, the snippets fetch strategy falls back to 'CACHEONLY'==当具有有限权限的用户（未经验证或没有扩展搜索权限）超过限制时，摘录获取策略缩小为'CACHEONLY'。
+(check the default Snippet Fetch Strategy on the <a	href="ConfigPortal_p.html">Search Portal</a> configuration page).==(在<a	href="ConfigPortal_p.html">搜索门户</a>配置页面勾选默认的摘录获取策略)。
 Submit==提交
 Set defaults==设定为默认值
 Changes will take effect immediately.==改变将会立即生效。
@@ -3332,7 +3370,7 @@ Host:==服务器:
 Public Address:==公共地址:
 YaCy Address:==YaCy地址:
 Proxy</dt>==代理</dt>
-Transparent ==透明
+Transparent ==透明代理 
 not used==未使用
 broken::connected==断开::连接
 broken==已断开
@@ -3395,12 +3433,12 @@ Please open the <a href="ConfigAccounts_p.html">accounts configuration</a> page 
 and set an administration password.==并设置管理密码.
 Access is unrestricted from localhost (this includes administration features).==访问权限在localhost不受限制（这包括管理功能）。
 Please check the <a href="ConfigAccounts_p.html">accounts configuration</a> page to ensure that the settings match the security level you need.==请检查<a href="ConfigAccounts_p.html">帐户配置</a>页面，确保设置符合你所需的安全级别。
-You have not published your peer seed yet. This happens automatically, just wait.==尚未发布你的节点种子. 将会自动发布, 请稍候.
-The peer must go online to get a peer address.==节点必须上线以获得节点地址.
-You cannot be reached from outside.==外部不能访问你的节点.
-A possible reason is that you are behind a firewall, NAT or Router.==很可能是你在防火墙, NAT或者路由的后面.
-But you can <a href="index.html">search the internet</a> using the other peers'==但是你依然能进行<a href="index.html">搜索</a>
-global index on your own search page.==, 需要通过其他节点的全球索引.
+You have not published your peer seed yet. This happens automatically, just wait.==尚未发布你的节点种子. 将会自动发布, 请稍候。
+The peer must go online to get a peer address.==节点必须上线以获得节点地址。
+You cannot be reached from outside.==外部不能访问你的节点。
+A possible reason is that you are behind a firewall, NAT or Router.==很可能是因为你被防火墙, NAT或者路由器阻挡在后面。
+But you can <a href="index.html">search the internet</a> using the other peers'==但是你依然能在<a href="index.html">你的搜索页面</a>
+global index on your own search page.==通过其他节点的全球索引进行搜索。
 "bad"=="坏"
 "idea"=="主意"
 "good"=="好"
