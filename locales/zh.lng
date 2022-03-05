@@ -3027,15 +3027,17 @@ Available server within the given IP range==指定IP范围内的可用服务器
 
 #File: Settings_Crawler.inc
 #---------------------------
+>Crawler Settings<==>爬虫设置<
 Generic Crawler Settings==普通爬虫设置
-Connection timeout in ms==连接超时(ms)
-means unlimited==表示无超时
+>Timeout:<==>超时:<
+Connection timeout in ms==连接超时(毫秒)
+means unlimited.==表示没有限制。
 HTTP Crawler Settings:==HTTP 爬虫设置:
-Maximum Filesize==文件最大尺寸
+Maximum Filesize==最大文件大小
 FTP Crawler Settings==FTP 爬虫设置
 SMB Crawler Settings==SMB 爬虫设置
 Local File Crawler Settings==本地文件爬虫设置
-Maximum allowed file size in bytes that should be downloaded==允许下载的最大文件尺寸(字节)
+Maximum allowed file size in bytes that should be downloaded==允许下载的最大文件大小(字节)
 Larger files will be skipped==超出此限制的文件将被忽略
 Please note that if the crawler uses content compression, this limit is used to check the compressed content size==请注意, 如果爬虫使用内容压缩, 则此限制对压缩后文件大小有效.
 Submit==提交
