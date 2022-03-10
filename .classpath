@@ -108,9 +108,9 @@
 	<classpathentry kind="lib" path="lib/guava-25.1-jre.jar"/>
 	<classpathentry kind="lib" path="lib/hazelcast-4.2.jar"/>
 	<classpathentry kind="lib" path="lib/commons-compress-1.21.jar"/>
-	<classpathentry kind="lib" path="lib/bcmail-jdk15on-169.jar"/>
-	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-169.jar"/>
-	<classpathentry kind="lib" path="lib/bcprov-jdk15on-169.jar"/>
+	<classpathentry kind="lib" path="lib/bcmail-jdk15on-1.69.jar"/>
+	<classpathentry kind="lib" path="lib/bcpkix-jdk15on-1.69.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk15on-1.69.jar"/>
 	<classpathentry kind="lib" path="lib/jsoup-1.14.2.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.32.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.32.jar"/>
