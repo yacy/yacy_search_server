@@ -1,4 +1,4 @@
-<project name="YaCy" default="all" basedir=".">
+<project name="YaCy" default="all" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
   <description>
     YaCy - a Peer to Peer Web Search Engine
   </description>
@@ -80,17 +80,35 @@
     <available file="${git}" />
   </condition>
 
-  <target name="buildGitRevTask">
+  <target name="install-ivy" depends="" description="--> install ivy">
+    <!--  try to load Ivy here from local Ivy dir, in case the user has not already dropped
+             it into Ant's lib dir (note that the latter copy will always take precedence).
+             We will not fail as long as local lib dir exists (it may be empty) and
+             Ivy is in at least one of Ant's lib dir or the local lib dir.  -->
+    <path id="ivy.lib.path">
+      <!--fileset dir="${ivy.jar.dir}" includes="*.jar"/-->
+      <file file="/usr/share/java/ivy.jar" />
+    </path>
+    <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+  </target>
+
+  <target name="resolve" depends="install-ivy" description="--> retrieve dependencies with Ivy">
+    <!-- The recommended way is to [conf] in the retrieve pattern instead of two calls to retrieve.
+         We can move there in a following step.
+         ${lib} just happens to be equal to ${ivy.lib.dir}.
+    -->
+    <ivy:retrieve conf="compile" pathid="compile.path" pattern="${ivy.lib.dir}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="test" pattern="${libt}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="libbuild" pattern="${libbuild}/[artifact]-[revision].[ext]" />
+    <ivy:cachepath pathId="test.path" conf="test" />
+    <ivy:cachepath pathId="libbuild.path" conf="libbuild" />
+
+    <echo message="compile.path: ${toString:compile.path}" />
+  </target>
+
+  <target name="buildGitRevTask" depends="resolve">
     <!-- <delete file="${libbuild}/GitRevTask.jar" failonerror="false" /> deleted via clean no need to do it all the time -->
-    <javac srcdir="${libbuild}/GitRevTask" includeantruntime="true" encoding="UTF-8">
-        <classpath>
-            <pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
-            <!-- Next are the jgit dependencies -->
-            <pathelement location="${libbuild}/httpclient-4.3.6.jar" />
-            <pathelement location="${libbuild}/JavaEWAH-0.7.9.jar" />
-            <pathelement location="${libbuild}/jsch-0.1.53.jar" />
-            <pathelement location="${libbuild}/slf4j-api-1.7.2.jar" />
-        </classpath>
+    <javac srcdir="${libbuild}/GitRevTask" includeantruntime="true" encoding="UTF-8" classpathref="libbuild.path">
     </javac>
     <jar destfile="${libbuild}/GitRevTask.jar" basedir="${libbuild}/GitRevTask">
       <manifest>
@@ -171,113 +189,11 @@
     <path id="project.class.path">
         <pathelement location="${build}" />
         <pathelement location="${lib}/J7Zip-modified-1.0.2.jar" />
-        <pathelement location="${lib}/apache-mime4j-0.6.jar" />
-        <pathelement location="${lib}/avatica-core-1.13.0.jar" />
-        <pathelement location="${lib}/bcmail-jdk15on-1.69.jar" />
-        <pathelement location="${lib}/bcpkix-jdk15on-1.69.jar" />
-        <pathelement location="${lib}/bcprov-jdk15on-1.69.jar" />
-        <pathelement location="${lib}/calcite-core-1.18.0.jar" />
-        <pathelement location="${lib}/calcite-linq4j-1.18.0.jar" />
-        <pathelement location="${lib}/jchardet-1.0.jar" />
-        <pathelement location="${lib}/common-image-3.3.2.jar" />
-        <pathelement location="${lib}/common-io-3.3.2.jar" />
-        <pathelement location="${lib}/common-lang-3.3.2.jar" />
-        <pathelement location="${lib}/commons-codec-1.14.jar" />
-        <pathelement location="${lib}/commons-collections4-4.4.jar" />
-        <pathelement location="${lib}/commons-compress-1.21.jar" />
-        <pathelement location="${lib}/commons-fileupload-1.4.jar" />
-        <pathelement location="${lib}/commons-io-2.7.jar" />
-        <pathelement location="${lib}/commons-lang-2.6.jar" />
-        <pathelement location="${lib}/commons-lang3-3.12.0.jar" />
-        <pathelement location="${lib}/commons-logging-1.2.jar" />
-        <pathelement location="${lib}/commons-math3-3.4.1.jar" />
-        <pathelement location="${lib}/fontbox-2.0.15.jar" />
-        <pathelement location="${lib}/guava-25.1-jre.jar" />
-        <pathelement location="${lib}/hazelcast-4.2.jar" />
-        <pathelement location="${lib}/http2-client-9.4.34.v20201102.jar" />
-        <pathelement location="${lib}/http2-common-9.4.34.v20201102.jar" />
-        <pathelement location="${lib}/http2-http-client-transport-9.4.34.v20201102.jar" />
-        <pathelement location="${lib}/httpclient-4.5.12.jar" />
-        <pathelement location="${lib}/httpcore-4.4.13.jar" />
-        <pathelement location="${lib}/httpmime-4.5.12.jar" />
-        <pathelement location="${lib}/icu4j-63.1.jar" />
-        <pathelement location="${lib}/imageio-bmp-3.3.2.jar" />
-        <pathelement location="${lib}/imageio-core-3.3.2.jar" />
-        <pathelement location="${lib}/imageio-metadata-3.3.2.jar" />
-        <pathelement location="${lib}/imageio-tiff-3.3.2.jar" />
-        <pathelement location="${lib}/jackson-annotations-2.11.2.jar" />
-        <pathelement location="${lib}/jackson-core-2.11.2.jar" />
-        <pathelement location="${lib}/jackson-databind-2.11.2.jar" />
-        <pathelement location="${lib}/oro-2.0.8.jar" />
-        <pathelement location="${lib}/jaudiotagger-2.2.5.jar" />
-        <pathelement location="${lib}/javax.servlet-api-3.1.0.jar" />
-        <pathelement location="${lib}/jcifs-1.3.17.jar" />
-        <pathelement location="${lib}/jcl-over-slf4j-1.7.25.jar" />
-        <pathelement location="${lib}/jetty-client-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-continuation-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-deploy-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-http-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-io-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-jmx-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-proxy-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-security-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-server-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-servlet-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-servlets-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-util-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-webapp-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jetty-xml-9.4.35.v20201120.jar" />
-        <pathelement location="${lib}/jsch-0.1.54.jar" />
-        <pathelement location="${lib}/json-simple-1.1.1.jar" />
-        <pathelement location="${lib}/jsonic-1.3.10.jar" />
-        <pathelement location="${lib}/jsoup-1.14.2.jar" />
-        <pathelement location="${lib}/jwat-archive-common-1.1.1.jar" />
-        <pathelement location="${lib}/jwat-common-1.1.1.jar" />
-        <pathelement location="${lib}/jwat-gzip-1.1.1.jar" />
-        <pathelement location="${lib}/jwat-warc-1.1.1.jar" />
-        <pathelement location="${lib}/langdetect-1.1-20120112.jar" />
-        <pathelement location="${lib}/log4j-over-slf4j-1.7.32.jar" />
-        <pathelement location="${lib}/lucene-analyzers-common-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-analyzers-phonetic-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-backward-codecs-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-classification-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-codecs-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-core-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-grouping-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-highlighter-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-join-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-memory-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-misc-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-queries-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-queryparser-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-spatial-extras-8.8.1.jar" />
-        <pathelement location="${lib}/lucene-suggest-8.8.1.jar" />
-        <pathelement location="${lib}/metadata-extractor-2.11.0.jar" />
-        <pathelement location="${lib}/metrics-core-3.2.2.jar" />
-        <pathelement location="${lib}/metrics-jmx-4.1.5.jar" />
-        <pathelement location="${lib}/opentracing-api-0.33.0.jar" />
-        <pathelement location="${lib}/opentracing-noop-0.33.0.jar" />
-        <pathelement location="${lib}/opentracing-util-0.33.0.jar" />
         <pathelement location="${lib}/org.restlet.jar" />
-        <pathelement location="${lib}/pdfbox-2.0.15.jar" />
-        <pathelement location="${lib}/poi-3.17.jar" />
-        <pathelement location="${lib}/poi-scratchpad-3.17.jar" />
-        <pathelement location="${lib}/rrd4j-3.2.jar" />
-        <pathelement location="${lib}/slf4j-api-1.7.32.jar" />
-        <pathelement location="${lib}/slf4j-jdk14-1.7.32.jar" />
-        <pathelement location="${lib}/solr-core-8.8.1.jar" />
-        <pathelement location="${lib}/solr-solrj-8.8.1.jar" />
-        <pathelement location="${lib}/spatial4j-0.6.jar" />
-        <pathelement location="${lib}/stax2-api_3.1.4.jar" />        
-        <pathelement location="${lib}/weupnp-0.1.4.jar" />
-        <pathelement location="${lib}/woodstox-core-asl-4.4.1.jar" />
-        <pathelement location="${lib}/xml-apis-1.4.01.jar" />
-        <pathelement location="${lib}/xmpcore-5.1.3.jar" />
-        <pathelement location="${lib}/xz-1.8.jar" />
-        <pathelement location="${lib}/zookeeper-3.4.14.jar" />
+        <path refid="compile.path" />
     </path>
 
-  <target name="compile-core" depends="init" description="compile YaCy core">
+  <target name="compile-core" depends="init,resolve" description="compile YaCy core">
 
     <!-- compile yacyBuildProperties.java -->
     <!-- *obsolete* - for Gradle migration process changed to use *.java.template file for filtered copy 
@@ -291,6 +207,7 @@
     <delete file="${build}/BuildProperties.java" />
 -->
     <!-- compile the core sources -->
+    <echo message="project.class.path: ${toString:project.class.path}" />
     <javac srcdir="${src}/" destdir="${build}"
            debug="true" debuglevel="lines,vars,source" includeantruntime="false"
            source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
@@ -319,7 +236,7 @@
 
   </target>
 
-  <target name="compile-htroot" depends="init" description="compile YaCy servlets">
+  <target name="compile-htroot" depends="init,resolve" description="compile YaCy servlets">
     <!-- compile htroot, htroot/yacy and htroot/htdocsdefault -->
     <javac srcdir="${htroot}/"
            excludes="processing/**"
@@ -471,8 +388,8 @@
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
-        <fileset dir="${libt}" includes="**/*.jar" />
-        <fileset dir="${lib}" includes="**/*.jar" />
+        <path refid="compile.path"/>
+        <path refid="test.path"/>
       </classpath>
       <compilerarg value="-Xlint"/>
     </javac>
