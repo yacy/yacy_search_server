@@ -235,7 +235,7 @@
         <pathelement location="${lib}/jwat-common-1.1.1.jar" />
         <pathelement location="${lib}/jwat-gzip-1.1.1.jar" />
         <pathelement location="${lib}/jwat-warc-1.1.1.jar" />
-        <pathelement location="${lib}/langdetect.jar" />
+        <pathelement location="${lib}/langdetect-1.1-20120112.jar" />
         <pathelement location="${lib}/log4j-over-slf4j-1.7.32.jar" />
         <pathelement location="${lib}/lucene-analyzers-common-8.8.1.jar" />
         <pathelement location="${lib}/lucene-analyzers-phonetic-8.8.1.jar" />
