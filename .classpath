@@ -39,7 +39,7 @@
 	<classpathentry kind="lib" path="lib/jackson-annotations-2.11.2.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-core-2.11.2.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-databind-2.11.2.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/jaudiotagger-2.2.5.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jcifs-1.3.17.jar"/>
@@ -97,7 +97,7 @@
 	<classpathentry kind="lib" path="lib/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/weupnp-0.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/woodstox-core-asl-4.4.1.jar"/>
-	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="lib" path="lib/xmpcore-5.1.3.jar"/>
 	<classpathentry kind="lib" path="lib/xz-1.8.jar"/>
 	<classpathentry kind="lib" path="lib/zookeeper-3.4.14.jar"/>

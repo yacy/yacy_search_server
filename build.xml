@@ -208,7 +208,7 @@
         <pathelement location="${lib}/jackson-annotations-2.11.2.jar" />
         <pathelement location="${lib}/jackson-core-2.11.2.jar" />
         <pathelement location="${lib}/jackson-databind-2.11.2.jar" />
-        <pathelement location="${lib}/jakarta-oro-2.0.8.jar" />
+        <pathelement location="${lib}/oro-2.0.8.jar" />
         <pathelement location="${lib}/jaudiotagger-2.2.5.jar" />
         <pathelement location="${lib}/javax.servlet-api-3.1.0.jar" />
         <pathelement location="${lib}/jcifs-1.3.17.jar" />
@@ -271,7 +271,7 @@
         <pathelement location="${lib}/stax2-api_3.1.4.jar" />        
         <pathelement location="${lib}/weupnp-0.1.4.jar" />
         <pathelement location="${lib}/woodstox-core-asl-4.4.1.jar" />
-        <pathelement location="${lib}/xml-apis.jar" />
+        <pathelement location="${lib}/xml-apis-1.4.01.jar" />
         <pathelement location="${lib}/xmpcore-5.1.3.jar" />
         <pathelement location="${lib}/xz-1.8.jar" />
         <pathelement location="${lib}/zookeeper-3.4.14.jar" />
