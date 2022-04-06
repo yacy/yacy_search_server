@@ -178,7 +178,7 @@
         <pathelement location="${lib}/bcprov-jdk15on-1.69.jar" />
         <pathelement location="${lib}/calcite-core-1.18.0.jar" />
         <pathelement location="${lib}/calcite-linq4j-1.18.0.jar" />
-        <pathelement location="${lib}/chardet.jar" />
+        <pathelement location="${lib}/jchardet-1.0.jar" />
         <pathelement location="${lib}/common-image-3.3.2.jar" />
         <pathelement location="${lib}/common-io-3.3.2.jar" />
         <pathelement location="${lib}/common-lang-3.3.2.jar" />

@@ -13,7 +13,7 @@
 	<classpathentry kind="lib" path="lib/avatica-core-1.13.0.jar"/>
 	<classpathentry kind="lib" path="lib/calcite-core-1.18.0.jar"/>
 	<classpathentry kind="lib" path="lib/calcite-linq4j-1.18.0.jar"/>
-	<classpathentry kind="lib" path="lib/chardet.jar"/>
+	<classpathentry kind="lib" path="lib/jchardet-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/common-image-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/common-io-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/common-lang-3.3.2.jar"/>
