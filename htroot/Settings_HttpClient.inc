@@ -6,7 +6,7 @@
 
 <p id="sniExtensionInfo">
 	About Server Name Indication (SNI) :
-	this extension to the <abbr title="Transport Layer Security">TLS</abbr> protocol must be enabled to load some https URLs (for websites deployed with different certificats and host names on the same shared IP address), otherwise loading fails with errors such as <samp>Received fatal alert: handshake_failure</samp>.
+	this extension to the <abbr title="Transport Layer Security">TLS</abbr> protocol must be enabled to load some https URLs (for websites deployed with different certificates and host names on the same shared IP address), otherwise loading fails with errors such as <samp>Received fatal alert: handshake_failure</samp>.
 	But it can be necessary to disable it in order to load some https URLs served by old and misconfigured web servers, otherwise loading fails with the exception <samp>javax.net.ssl.SSLProtocolException: "handshake alert:  unrecognized_name"</samp>. 
 	Controlling <abbr title="Server Name Indication">SNI</abbr> extension activation can also be done with the JVM option <var>jsse.enableSNIExtension</var>, but in that case a server restart is required when you want to modify the setting and it is not customizable per http client (general or for remote Solr).
 </p>
