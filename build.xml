@@ -1,4 +1,4 @@
-<project name="YaCy" default="all" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project name="YaCy" default="all" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:if="ant:if" xmlns:unless="ant:unless">
   <description>
     YaCy - a Peer to Peer Web Search Engine
   </description>
@@ -80,16 +80,27 @@
     <available file="${git}" />
   </condition>
 
-  <target name="install-ivy" depends="" description="--> install ivy">
-    <!--  try to load Ivy here from local Ivy dir, in case the user has not already dropped
-             it into Ant's lib dir (note that the latter copy will always take precedence).
-             We will not fail as long as local lib dir exists (it may be empty) and
-             Ivy is in at least one of Ant's lib dir or the local lib dir.  -->
-    <path id="ivy.lib.path">
-      <!--fileset dir="${ivy.jar.dir}" includes="*.jar"/-->
-      <file file="/usr/share/java/ivy.jar" />
-    </path>
-    <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+  <target name="install-ivy" description="--> install ivy">
+    <local name="ivy.download.dir"/><property name="ivy.download.dir" value="${basedir}/ivy" />
+    <local name="ivy.download.file"/><property name="ivy.download.file" value="${ivy.download.dir}/ivy.jar" />
+    <local name="ivy.download.version"/><property name="ivy.install.version" value="2.5.0"/>
+    <local name="ivy.debian.file"/><property name="ivy.debian.file" value="/usr/share/java/ivy.jar" />
+
+    <!-- Check whether ivy is already available as a Debian package -->
+    <local name="ivy.debian.exists"/><available property="ivy.debian.exists" file="${ivy.debian.file}" />
+
+    <sequential unless:set="ivy.debian.exists">
+      <mkdir dir="${ivy.download.dir}"/>
+      <echo message="downloading ivy (if not already there) to ${ify.download.file} ..."/>
+      <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.download.file}" skipexisting="true"/>
+    </sequential>
+
+    <local name="ivy.jar.file"/>
+    <property name="ivy.jar.file" value="${ivy.debian.file}" if:set="ivy.debian.exists" />
+    <property name="ivy.jar.file" value="${ivy.download.file}" unless:set="ivy.debian.exists" />
+    <echo message="using ivy.jar.file: ${ivy.jar.file}" />
+
+    <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpath="${ivy.jar.file}"/>
   </target>
 
   <target name="resolve" depends="install-ivy" description="--> retrieve dependencies with Ivy">
@@ -98,12 +109,8 @@
          ${lib} just happens to be equal to ${ivy.lib.dir}.
     -->
     <ivy:retrieve conf="compile" pathid="compile.path" pattern="${ivy.lib.dir}/[artifact]-[revision].[ext]" />
-    <ivy:retrieve conf="test" pattern="${libt}/[artifact]-[revision].[ext]" />
-    <ivy:retrieve conf="libbuild" pattern="${libbuild}/[artifact]-[revision].[ext]" />
-    <ivy:cachepath pathId="test.path" conf="test" />
-    <ivy:cachepath pathId="libbuild.path" conf="libbuild" />
-
-    <echo message="compile.path: ${toString:compile.path}" />
+    <ivy:retrieve conf="test" pathid="test.path" pattern="${libt}/[artifact]-[revision].[ext]" />
+    <ivy:retrieve conf="libbuild" pathid="libbuild.path" pattern="${libbuild}/[artifact]-[revision].[ext]" />
   </target>
 
   <target name="buildGitRevTask" depends="resolve">
