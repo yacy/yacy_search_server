@@ -13,7 +13,7 @@
 	<classpathentry kind="lib" path="lib/avatica-core-1.13.0.jar"/>
 	<classpathentry kind="lib" path="lib/calcite-core-1.18.0.jar"/>
 	<classpathentry kind="lib" path="lib/calcite-linq4j-1.18.0.jar"/>
-	<classpathentry kind="lib" path="lib/chardet.jar"/>
+	<classpathentry kind="lib" path="lib/jchardet-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/common-image-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/common-io-3.3.2.jar"/>
 	<classpathentry kind="lib" path="lib/common-lang-3.3.2.jar"/>
@@ -39,7 +39,7 @@
 	<classpathentry kind="lib" path="lib/jackson-annotations-2.11.2.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-core-2.11.2.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-databind-2.11.2.jar"/>
-	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/oro-2.0.8.jar"/>
 	<classpathentry kind="lib" path="lib/jaudiotagger-2.2.5.jar"/>
 	<classpathentry kind="lib" path="lib/javax.servlet-api-3.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jcifs-1.3.17.jar"/>
@@ -97,7 +97,7 @@
 	<classpathentry kind="lib" path="lib/stax2-api-3.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/weupnp-0.1.4.jar"/>
 	<classpathentry kind="lib" path="lib/woodstox-core-asl-4.4.1.jar"/>
-	<classpathentry kind="lib" path="lib/xml-apis.jar"/>
+	<classpathentry kind="lib" path="lib/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="lib" path="lib/xmpcore-5.1.3.jar"/>
 	<classpathentry kind="lib" path="lib/xz-1.8.jar"/>
 	<classpathentry kind="lib" path="lib/zookeeper-3.4.14.jar"/>
@@ -115,7 +115,7 @@
 	<classpathentry kind="lib" path="lib/log4j-over-slf4j-1.7.32.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-api-1.7.32.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-jdk14-1.7.32.jar"/>
-	<classpathentry kind="lib" path="lib/langdetect.jar"/>
+	<classpathentry kind="lib" path="lib/langdetect-1.1-20120112.jar"/>
 	<classpathentry kind="src" path="htroot/api/blacklists"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
