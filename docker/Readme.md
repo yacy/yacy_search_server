@@ -10,7 +10,6 @@
 The repository URL is https://hub.docker.com/r/yacy/yacy_search_server/
 
 * ubuntu-based: `docker pull yacy/yacy_search_server:latest`
-* alpine-based: `docker pull yacy/yacy_search_server:latest-alpine`
 
 
 ## Building image yourself
