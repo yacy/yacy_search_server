@@ -1,0 +1,15 @@
+name: CI Script to build after pull request
+
+on: pull_request
+
+jobs:
+  build:
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up JDK 8
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+    - name: Build with ant
+      run: ant clean all dist
