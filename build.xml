@@ -103,7 +103,7 @@
     <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpath="${ivy.jar.file}"/>
   </target>
 
-  <target name="resolve" depends="install-ivy" description="--> retrieve dependencies with Ivy">
+  <target name="resolve" depends="install-ivy" description="--> retrieve dependencies with Ivy" unless="target-resolve-already-run">
     <!-- The recommended way is to [conf] in the retrieve pattern instead of two calls to retrieve.
          We can move there in a following step.
          ${lib} just happens to be equal to ${ivy.lib.dir}.
@@ -111,6 +111,7 @@
     <ivy:retrieve conf="compile" pathid="compile.path" pattern="${ivy.lib.dir}/[artifact]-[revision].[ext]" />
     <ivy:retrieve conf="test" pathid="test.path" pattern="${libt}/[artifact]-[revision].[ext]" />
     <ivy:retrieve conf="libbuild" pathid="libbuild.path" pattern="${libbuild}/[artifact]-[revision].[ext]" />
+    <property name="target-resolve-already-run" value="true" />
   </target>
 
   <target name="buildGitRevTask" depends="resolve">
