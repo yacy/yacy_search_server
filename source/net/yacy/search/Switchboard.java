@@ -665,9 +665,14 @@ public final class Switchboard extends serverSwitch {
         join.getMulticastConfig().setEnabled(true);
         final Config config = new Config().setClusterName("YaCyP2P").setInstanceName("Peer").setNetworkConfig(networkConfig);
         config.getCPSubsystemConfig().setCPMemberCount(3);
-        this.localcluster_hazelcast = Hazelcast.newHazelcastInstance(config);
-        final String uuid = this.localcluster_hazelcast.getCluster().getLocalMember().getUuid().toString();
-        this.localcluster_hazelcast.getMap("status").put(uuid, Memory.status());
+        try {
+        	this.localcluster_hazelcast = Hazelcast.newHazelcastInstance(config);
+        	final String uuid = this.localcluster_hazelcast.getCluster().getLocalMember().getUuid().toString();
+        	this.localcluster_hazelcast.getMap("status").put(uuid, Memory.status());
+        } catch (final Exception e) {
+        	this.log.warn(e);
+        	this.localcluster_hazelcast = null;
+        }
 
         // load domainList
         try {
@@ -1345,7 +1350,7 @@ public final class Switchboard extends serverSwitch {
     }
 
     @Override
-    public void setHttpServer(YaCyHttpServer server) {
+    public void setHttpServer(final YaCyHttpServer server) {
         super.setHttpServer(server);
 
         // finally start jobs which shall be started after start-up
@@ -2255,7 +2260,7 @@ public final class Switchboard extends serverSwitch {
         return moved;
     }
 
-    private boolean processSurrogateJson(File infile, File outfile) {
+    private boolean processSurrogateJson(final File infile, final File outfile) {
         // parse a file that can be generated with yacy_grid_parser
         // see https://github.com/yacy/yacy_grid_parser/blob/master/README.md
         this.log.info("processing json surrogate " + infile);
@@ -3062,7 +3067,7 @@ public final class Switchboard extends serverSwitch {
      *
      * @param jobType
      */
-    public void pauseCrawlJob(final String jobType, String cause) {
+    public void pauseCrawlJob(final String jobType, final String cause) {
         final Object[] status = this.crawlJobsStatus.get(jobType);
         synchronized ( status[SwitchboardConstants.CRAWLJOB_SYNC] ) {
             status[SwitchboardConstants.CRAWLJOB_STATUS] = Boolean.TRUE;
@@ -3807,7 +3812,7 @@ public final class Switchboard extends serverSwitch {
      * @param url
      * @return null if this was ok. If this failed, return a string with a fail reason
      */
-    public String stackUrl(CrawlProfile profile, DigestURL url) {
+    public String stackUrl(final CrawlProfile profile, final DigestURL url) {
 
         final byte[] handle = ASCII.getBytes(profile.handle());
 
@@ -4186,11 +4191,11 @@ public final class Switchboard extends serverSwitch {
         return 1;
     }
 
-    public String encodeDigestAuth(String user, String pw) {
+    public String encodeDigestAuth(final String user, final String pw) {
         return "MD5:" + Digest.encodeMD5Hex(user + ":" + sb.getConfig(SwitchboardConstants.ADMIN_REALM,"YaCy") + ":" + pw);
     }
 
-    public String encodeBasicAuth(String user, String pw) {
+    public String encodeBasicAuth(final String user, final String pw) {
         return Digest.encodeMD5Hex(user + ":" + pw);
     }
 

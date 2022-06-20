@@ -41,14 +41,14 @@ public class localpeers {
     public static serverObjects respond(@SuppressWarnings("unused") final RequestHeader header, @SuppressWarnings("unused") final serverObjects post, @SuppressWarnings("unused") final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         int c = 0;
-        for (String urlstub: Switchboard.getSwitchboard().localcluster_scan) {
+        for (final String urlstub: Switchboard.getSwitchboard().localcluster_scan) {
             prop.putJSON("peers_" + c + "_urlstub", urlstub); // a usrlstub is a full url with protocol, host and port up the the path start including first "/"
             c++;
         }
         prop.put("peers", c);
         try {
             prop.put("status", systemStatus().toString(2));
-        } catch (JSONException e) {
+        } catch (final JSONException e) {
             prop.put("status", "");
         }
         // return rewrite properties
@@ -58,32 +58,35 @@ public class localpeers {
     public static JSONObject systemStatus() throws JSONException {
 
         // generate json
-        JSONObject systemStatus = new JSONObject(true);
-        Memory.status().forEach((k, v) -> {try {systemStatus.put(k, v);} catch (JSONException e) {}});
-        JSONArray members = new JSONArray();
-        HazelcastInstance hi = Switchboard.getSwitchboard().localcluster_hazelcast;
-        String uuid = hi.getCluster().getLocalMember().getUuid().toString();
-        hi.getMap("status").put(uuid, Memory.status());
-        for (Member member: hi.getCluster().getMembers()) {
-            JSONObject m = new JSONObject(true);
-            uuid = member.getUuid().toString();
-            m.put("uuid", uuid);
-            m.put("host", member.getAddress().getHost());
-            try {m.put("ip", member.getAddress().getInetAddress().getHostAddress());} catch (JSONException | UnknownHostException e) {}
-            m.put("port", member.getAddress().getPort());
-            m.put("isLite", member.isLiteMember());
-            m.put("isLocal", member.localMember());
-            @SuppressWarnings("unchecked")
-            Map<String, Object> status = (Map<String, Object>) hi.getMap("status").get(uuid);
-            m.put("status", status);
-            members.put(m);
+        final JSONObject systemStatus = new JSONObject(true);
+        Memory.status().forEach((k, v) -> {try {systemStatus.put(k, v);} catch (final JSONException e) {}});
+        final JSONArray members = new JSONArray();
+        final HazelcastInstance hi = Switchboard.getSwitchboard().localcluster_hazelcast;
+        if (hi != null) {
+	        String uuid = hi.getCluster().getLocalMember().getUuid().toString();
+	        hi.getMap("status").put(uuid, Memory.status());
+	        for (final Member member: hi.getCluster().getMembers()) {
+	            final JSONObject m = new JSONObject(true);
+	            uuid = member.getUuid().toString();
+	            m.put("uuid", uuid);
+	            m.put("host", member.getAddress().getHost());
+	            try {m.put("ip", member.getAddress().getInetAddress().getHostAddress());} catch (JSONException | UnknownHostException e) {}
+	            m.put("port", member.getAddress().getPort());
+	            m.put("isLite", member.isLiteMember());
+	            m.put("isLocal", member.localMember());
+	            @SuppressWarnings("unchecked")
+				final
+	            Map<String, Object> status = (Map<String, Object>) hi.getMap("status").get(uuid);
+	            m.put("status", status);
+	            members.put(m);
+	        }
+	        systemStatus.put("hazelcast_cluster_name", hi.getConfig().getClusterName());
+	        systemStatus.put("hazelcast_instance_name", hi.getConfig().getInstanceName());
+	        final Collection<String> interfaces = hi.getConfig().getNetworkConfig().getInterfaces().getInterfaces();
+	        systemStatus.put("hazelcast_interfaces", interfaces);
+	        systemStatus.put("hazelcast_members", members);
+	        systemStatus.put("hazelcast_members_count", members.length());
         }
-        systemStatus.put("hazelcast_cluster_name", hi.getConfig().getClusterName());
-        systemStatus.put("hazelcast_instance_name", hi.getConfig().getInstanceName());
-        Collection<String> interfaces = hi.getConfig().getNetworkConfig().getInterfaces().getInterfaces();
-        systemStatus.put("hazelcast_interfaces", interfaces);
-        systemStatus.put("hazelcast_members", members);
-        systemStatus.put("hazelcast_members_count", members.length());
 
         return systemStatus;
     }
