@@ -25,6 +25,8 @@ COMMAND LINE OPTIONS (case sensitive):
 ; ----------------------------------------
 ; GENERAL
 
+Unicode true
+
 VIProductVersion "@REPL_VERSION@.0.0"
 VIAddVersionKey "ProductName" "YaCy"
 VIAddVersionKey "LegalCopyright" "YaCy"
@@ -131,13 +133,13 @@ LangString yacyNoJavaFoundOpenBrowser 0 "Java 8 has not been found in the Window
 LangString yacyNoJavaFoundContinue 0 "Click Retry to check again for installed Java version!"
 
 LangString stillRunning ${LANG_GERMAN} "YaCy ist noch aktiv. Bitte beenden Sie YaCy."
-LangString keepData 0 "Moechten Sie die Daten behalten?"
+LangString keepData 0 "Möchten Sie die Daten behalten?"
 LangString finishPage 0 "Zeige die Windows Firewall Konfiguration fuer YaCy."
-LangString yacyNoHd 0 "YaCy sollte auf einer Festplatte installiert werden. Soll der gewaehlte Ordner trotzdem verwendet werden?" 
-LangString yacyNeedSpace 0 "Wir empfehlen ${RecommendSpace} GB fuer YaCy. Es sind noch $TempDriveFree GB frei. Trotzdem fortfahren?"
+LangString yacyNoHd 0 "YaCy sollte auf einer Festplatte installiert werden. Soll der gewählte Ordner trotzdem verwendet werden?"
+LangString yacyNeedSpace 0 "Wir empfehlen ${RecommendSpace} GB für YaCy. Es sind noch $TempDriveFree GB frei. Trotzdem fortfahren?"
 LangString yacyNeedOs 0 "YaCy benoetigt Windows 2000 oder besser (z.B. Windows XP, Vista oder Windows 7)."
-LangString yacyNoJavaFoundOpenBrowser 0 "Java 8 has not been found in the Windows registry!$\r$\n(Key: SOFTWARE\JavaSoft\Java Runtime Environment)$\r$\nOpen download location (adoptium.net) in Browser?"
-LangString yacyNoJavaFoundContinue 0 "Click Retry to check again for installed Java version!"
+LangString yacyNoJavaFoundOpenBrowser 0 "Java 8 wurde in der Windows registry nicht gefunden!$\r$\n(Key: SOFTWARE\JavaSoft\Java Runtime Environment)$\r$\nDie Downloadseite (adoptium.net) im Browser öffnen?"
+LangString yacyNoJavaFoundContinue 0 "Wähle Wiederholen, um erneut zu versuchen, Java zu finden!"
 
 ; ----------------------------------------
 ; INSTALLABLE MODULES
