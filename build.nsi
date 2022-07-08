@@ -75,7 +75,12 @@ SetCompressor /SOLID LZMA
 ; ----------------------------------------
 ; INSTALLER PAGES
 
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW MyWelcomeShowCallback
 !insertmacro MUI_PAGE_WELCOME
+
+Function MyWelcomeShowCallback
+	SendMessage $mui.WelcomePage.Text ${WM_SETTEXT} 0 "STR:$(MUI_TEXT_WELCOME_INFO_TEXT)$\r$\n$\r$\nThe YaCy project needs a maintainer for this installer!$\r$\nSee github.com/yacy/yacy_search_server/labels/Windows"
+FunctionEnd
 
 !insertmacro MUI_PAGE_LICENSE gpl.txt
 
