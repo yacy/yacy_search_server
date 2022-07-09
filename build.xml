@@ -58,9 +58,6 @@
   <property name="git" location=".git"/>
   <property name="defaults" location="defaults"/>
   <property name="RDFaParser" location="RDFaParser"/>
-    
-  <!-- pseudo default branch as fallback -->
-  <property name="branch" value="" />
 
   <!-- pseudo default releaseNr as fallback --> 
   <property name="releaseNr" value="9000" />
@@ -154,9 +151,6 @@
     <!-- YaCy Release Date -->
     <filter token="REPL_DATE" value="${DSTAMP}"/>
     <filter token="REPL_RELEASE" value="${stdReleaseFile}"/>
-      
-      <!-- YaCy Brach -->
-      <echo message="YaCy Branch: ${branch}" />
 
     <!-- YaCy Release Version number -->
     <echo message="YaCy Version number: ${releaseVersion}" />
