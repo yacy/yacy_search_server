@@ -108,12 +108,6 @@ public final class yacyRelease extends yacyVersion {
         // if false, null is returned
         final Switchboard sb = Switchboard.getSwitchboard();
 
-        // check if release was installed by packagemanager
-        if (yacyBuildProperties.isPkgManager()) {
-            Network.log.info("rulebasedUpdateInfo: package manager is used for update");
-            return null;
-        }
-
         // check if update process allows update retrieve
         final String process = sb.getConfig("update.process", "manual");
         if ((!manual) && (!process.equals("auto"))) {
@@ -445,22 +439,7 @@ public final class yacyRelease extends yacyVersion {
             }
         }
 
-        if (yacyBuildProperties.isPkgManager()) {
-            // start a re-start daemon
-            try {
-                ConcurrentLog.info("RESTART", "INITIATED");
-                final String script =
-                    "#!/bin/sh" + serverCore.LF_STRING +
-                    yacyBuildProperties.getRestartCmd() + " >/var/lib/yacy/RELEASE/log" + serverCore.LF_STRING;
-                final File scriptFile = new File(sb.getDataPath(), "DATA/RELEASE/restart.sh");
-                OS.deployScript(scriptFile, script);
-                ConcurrentLog.info("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
-                OS.execAsynchronous(scriptFile);
-                ConcurrentLog.info("RESTART", "script is running");
-            } catch (final IOException e) {
-                ConcurrentLog.severe("RESTART", "restart failed", e);
-            }
-        } else if (OS.canExecUnix) {
+        if (OS.canExecUnix) {
             // start a re-start daemon
             try {
                 ConcurrentLog.info("RESTART", "INITIATED");
@@ -492,9 +471,6 @@ public final class yacyRelease extends yacyVersion {
      */
     public static boolean deployRelease(final File releaseFile) {
     	boolean restartTriggered = false;
-        if (yacyBuildProperties.isPkgManager()) {
-            return restartTriggered;
-        }
         try {
             final Switchboard sb = Switchboard.getSwitchboard();
             ConcurrentLog.info("UPDATE", "INITIATED");

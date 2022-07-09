@@ -53,10 +53,7 @@ public class ConfigUpdate_p {
         final Switchboard sb = (Switchboard) env;
 
         // set if this should be visible
-        if (yacyBuildProperties.isPkgManager()) {
-            prop.put("candeploy", "2");
-            return prop;
-        } else if (OS.isWindows && sb.appPath.toString().indexOf("Program Files") > -1) {
+        if (OS.isWindows && sb.appPath.toString().indexOf("Program Files") > -1) {
             prop.put("candeploy", "3");
             return prop;
         } else if (OS.canExecUnix || OS.isWindows) {

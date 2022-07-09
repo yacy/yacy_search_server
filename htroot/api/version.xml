@@ -2,5 +2,5 @@
 <version>
 	<number>#[versionstring]#</number>
 	<svnRevision>#[svnRev]#</svnRevision>
-	<buildDate>#[buildDate]#</buildDate>
+	<buildDate>19700101</buildDate>
 </version>

@@ -20,7 +20,6 @@ yacy.log
 /test/DATA/
 /javadoc/
 /build/
-.gradle
 source/net/yacy/peers/operation/yacyBuildProperties.java
 /.idea/
 .idea/
