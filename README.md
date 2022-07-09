@@ -159,15 +159,6 @@ To start developing YaCy in **Netbeans**:
 - Open the project (File → Open Project)
 - you may directly use all the Netbeans build feature.
 
-To start developing YaCy in **IntelliJ IDEA**:
-
-- clone https://github.com/yacy/yacy_search_server.git
-- File -> New -> Project from Version Control -> URL (see above) -> Clone
-- Open or Import Project -> Gradle project -> OK
-- In the Gradle tab you can now execute the gradle tasks to build YaCy
-- Run via IDE -> Add Configuration -> + -> Gradle -> in Run Tasks add:  build run
-   - (in above line "build" is needed to make sure all needed Gradle tasks are executed before run)
-
 To join our development community, got to https://community.searchlab.eu
 
 Send pull requests to https://github.com/yacy/yacy_search_server
@@ -183,14 +174,8 @@ git clone https://github.com/yacy/yacy_search_server
 ```
 
 Compiling YaCy:
-- You need Java 1.8 or later and [Gradle](https://gradle.org/) (Gradle is downloaded automatically on first build if not present).
-- Compile: `gradlew build` - then you can `./startYACY.sh` or `./startYACY.bat`.
-- Create a release tarball and zip archive: `gradlew packageDist`.
-- Create a Windows installer release exe: `gradlew distWinInstaller`.
-- Create a macOS release: `gradlew distMacApp`.
-- Work with Eclipse or other IDE: Within the IDE you also need to start the gradle build process
-  because the servlet pages are not compiled by the IDE build process.
-  after the dist procedure, the release can be found in the build/distributions subdirectory.
+- You need Java 1.8 and ant
+- See `ant -p` for the available ant targets
 
 ## APIs and attaching software
 
