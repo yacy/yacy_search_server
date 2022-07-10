@@ -82,7 +82,6 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
             thisVersion = new yacyVersion(
                 "yacy" +
                 "_v" + yacyBuildProperties.getVersion() + "_" +
-                yacyBuildProperties.getBuildDate() + "_" +
                 yacyBuildProperties.getSVNRevision() + ".tar.gz", null);
         }
         return thisVersion;

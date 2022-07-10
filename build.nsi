@@ -30,10 +30,10 @@ VIAddVersionKey "ProductName" "YaCy"
 VIAddVersionKey "LegalCopyright" "YaCy"
 VIAddVersionKey "FileVersion" "@REPL_VERSION@"
 VIAddVersionKey "FileDescription" "YaCy"
-VIAddVersionKey "OriginalFilename" "yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe"
+VIAddVersionKey "OriginalFilename" "yacy_v@REPL_VERSION@_@REPL_REVISION_NR@.exe"
 
 Name "YaCy @REPL_VERSION@"
-OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe"
+OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_REVISION_NR@.exe"
 
 ;default installation folder
 InstallDir "$PROFILE\YaCy"
@@ -95,7 +95,7 @@ SetCompressor /SOLID LZMA
 
 !define MUI_COMPONENTSPAGE_NODESC
 !insertmacro MUI_PAGE_COMPONENTS
-ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
+ComponentText "YaCy v@REPL_VERSION@"
 
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE CheckDriveSpace
 !insertmacro MUI_PAGE_DIRECTORY

@@ -40,14 +40,4 @@ public final class yacyBuildProperties {
 	public static String getLongVersion() {
 		return String.format(Locale.US, "%.3f%05d", Float.valueOf(getVersion()), Integer.valueOf(getSVNRevision()));
 	}
-
-	/**
-	 * returns the date, when this release was build
-	 */
-	public static String getBuildDate() {
-		if ("@REPL_DATE@".contains("@")) {
-			return "19700101";
-		}
-		return "@REPL_DATE@";
-	}
 }

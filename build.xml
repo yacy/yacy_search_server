@@ -30,11 +30,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 -->
 
-  <!-- defining the timestamp format -->
-  <tstamp>
-    <format property="REPL_DATE_FORMAT" pattern="yyyymmdd" />
-  </tstamp>
-
   <!-- defining all needed directory names -->
   <property name="yacyroot" location="."/>
   <property name="addon" location="addon"/>
@@ -143,10 +138,6 @@
     <mkdir dir="${data}"/>
     <mkdir dir="${release}"/>
 
-    <!-- YaCy Release Date -->
-    <filter token="REPL_DATE" value="${DSTAMP}"/>
-    <filter token="REPL_RELEASE" value="${stdReleaseFile}"/>
-
     <!-- YaCy Release Version number -->
     <echo message="YaCy Version number: ${releaseVersion}" />
     <filter token="REPL_VERSION" value="${releaseVersion}" />
@@ -155,14 +146,11 @@
     <echo message="YaCy Release number: ${releaseNr}" />
     <filter token="REPL_REVISION_NR" value="${releaseNr}"/>
 
-    <!-- YaCy root directory -->
-    <filter token="REPL_YACY_ROOT_DIR" value="${yacyroot}"/>
-
     <!-- apply replacments -->
     <copy file="${src}/net/yacy/peers/operation/yacyBuildProperties.java.template" tofile="${src}/net/yacy/peers/operation/yacyBuildProperties.java" overwrite="true" filtering="true" />
     
     <!-- copy log4j config file -->
-    <copy file="${src}/log4j.properties" tofile="${build}/log4j.properties" overwrite="true" filtering="true" /> <!-- @TODO: obsolete, contains no replace/filter pattern -->
+    <copy file="${src}/log4j.properties" tofile="${build}/log4j.properties" overwrite="true" filtering="false" /> <!-- @TODO: obsolete, contains no replace/filter pattern -->
 
   </target>
 
@@ -591,8 +579,8 @@
         <classpath location="${libbuild}/nsisant-1.2.jar"/>
     </taskdef>
     <nsis script="${release_windows}/build.nsi" nocd="yes" verbosity="2" />
-    <move file="${release_windows}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
-          tofile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe" />
+    <move file="${release_windows}/yacy_v${releaseVersion}_${releaseNr}.exe"
+          tofile="${release}/yacy_v${releaseVersion}_${releaseNr}.exe" />
       
     <delete dir="${release_main}"/>
     <delete dir="${release_windows}" failonerror="false" />
@@ -602,13 +590,13 @@
       <copy todir="${release_mac}/YaCy.app">
           <fileset dir="${addon}/YaCy.app"></fileset>
       </copy>
-      <copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="true" overwrite="true" />
+      <copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="false" overwrite="true" />
       <move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/MacOS" verbose="false" />
       <!-- startYACY.sh and startYACYMacOS.sh will be the main entry points : we set permissions to make it executable files -->
       <chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACYMacOS.sh" perm="755"/>
       <chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACY.sh" perm="755"/>
       <exec executable="hdiutil">
-            <arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.dmg"/>
+            <arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${releaseNr}.dmg"/>
       </exec>
       <delete dir="${release_mac}" failonerror="false" verbose="false" />
   </target>
