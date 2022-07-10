@@ -37,7 +37,6 @@
   <property name="data" location="DATA"/>
   <property name="lib" location="lib"/>
   <property name="libt" location="libt"/>
-  <property name="libbuild" location="libbuild"/>
   <property name="build" location="build/classes/java/main"/> <!-- reuse Gradle build path -->
   <property name="javadoc" location="javadoc"/>
   <property name="htroot" location="htroot"/>
@@ -528,10 +527,11 @@
     <!-- http://nsisant.sourceforge.net/ -->
     <mkdir dir="${release_windows}" />
     <copy file="build.nsi" tofile="${release_windows}/build.nsi" overwrite="true" filtering="true" />
-    <taskdef name="nsis" classname="net.sf.nsisant.Task">
-        <classpath location="${libbuild}/nsisant-1.2.jar"/>
-    </taskdef>
-    <nsis script="${release_windows}/build.nsi" nocd="yes" verbosity="2" />
+    <exec executable="makensis">
+      <arg value="-V2" />
+      <arg value="-NOCD" />
+      <arg value="${release_windows}/build.nsi" />
+    </exec>
     <move file="${release_windows}/yacy_v${releaseVersion}_${releaseNr}.exe"
           tofile="${release}/yacy_v${releaseVersion}_${releaseNr}.exe" />
       
