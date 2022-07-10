@@ -1,0 +1,72 @@
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+/** Port of older support library to be build with Gradle
+previous Maven Info
+    <groupId>net.yacy.extlib</groupId>
+    <artifactId>J7Zip-modified</artifactId>
+    <packaging>jar</packaging>
+    <version>1.02</version>
+    <description>J7Zip library for YaCy sevenzipParser (not available in external maven repository)</description>
+*/
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+    }
+}
+
+version = '1.0.2'
+group = 'net.yacy.extlib'
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'J7Zip-modified'
+            from components.java
+            versionMapping {
+                usage('java-api') {
+                    fromResolutionOf('runtimeClasspath')
+                }
+                usage('java-runtime') {
+                    fromResolutionResult()
+                }
+            }
+            pom {
+                name = 'J7Zip'
+                description = 'J7Zip library for YaCy sevenzipParser (not available in external maven repository)'
+                licenses {
+                    license {
+                        name = 'GNU Lesser General Public License 2.1'
+                        url = 'http://www.gnu.org/licenses/lgpl-2.1.txt'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/yacy/yacy_search_server.git'
+                    url = 'https://github.com/yacy/yacy_search_server'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            // change URLs to point to your repos, e.g. http://my.org/repo
+            def releasesRepoUrl = layout.buildDirectory.dir('repos/releases')
+        }
+    }
+}
+
+// copy jar to yacycore /lib directory (used as dependencies)
+task installJarToRoot (type: Copy, dependsOn: jar) {
+    from jar.archiveFile
+    into "${projectDir.getParent()}/../lib"
+    doLast {
+        logger.lifecycle ("copied jar to ${projectDir.getParent()}/../lib/" + jar.archiveFileName.get())
+    }
+}
+
