@@ -49,7 +49,6 @@
   <property name="release_main" location="${release}/MAIN"/>
   <property name="release_windows" location="${release}/WINDOWS"/>
   <property name="release_mac" location="${release}/MAC"/>
-  <property name="git" location=".git"/>
   <property name="defaults" location="defaults"/>
   <property name="RDFaParser" location="RDFaParser"/>
 
@@ -57,11 +56,6 @@
   <property name="jquery" location="htroot/jquery/"/>
   <property name="portalsearch" location="htroot/portalsearch/"/>
   <property name="img-2" location="htroot/yacy/ui/img-2"/>
-
-  <!-- determining if the .git directory exists -->
-  <condition property="isGit">
-    <available file="${git}" />
-  </condition>
 
   <target name="install-ivy" description="--> install ivy">
     <local name="ivy.download.dir"/><property name="ivy.download.dir" value="${basedir}/ivy" />
@@ -130,7 +124,7 @@
       </fileset>
     </javadoc>
   </target>
-    
+
     <!-- define the classpath that should be used for compiling -->
     <!-- when changing paths here, please also update the paths in /addon/YaCy.app/Contents/Info.plist -->
     <path id="project.class.path">
@@ -141,18 +135,6 @@
     </path>
 
   <target name="compile-core" depends="init,resolve" description="compile YaCy core">
-
-    <!-- compile yacyBuildProperties.java -->
-    <!-- *obsolete* - for Gradle migration process changed to use *.java.template file for filtered copy 
-    <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
-           debug="true" debuglevel="lines,vars,source" includeantruntime="false"
-           includes="net/yacy/peers/operation/yacyBuildProperties.java"
-           source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
-      <classpath refid="project.class.path" />
-      <compilerarg value="-Xlint"/>
-    </javac>
-    <delete file="${build}/BuildProperties.java" />
--->
     <!-- compile the core sources -->
     <echo message="project.class.path: ${toString:project.class.path}" />
     <javac srcdir="${src}/" destdir="${build}"
@@ -534,7 +516,7 @@
     </exec>
     <move file="${release_windows}/yacy_v${releaseVersion}_${releaseNr}.exe"
           tofile="${release}/yacy_v${releaseVersion}_${releaseNr}.exe" />
-      
+
     <delete dir="${release_main}"/>
     <delete dir="${release_windows}" failonerror="false" />
   </target>
