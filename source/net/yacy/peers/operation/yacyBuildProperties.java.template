@@ -40,33 +40,4 @@ public final class yacyBuildProperties {
 	public static String getLongVersion() {
 		return String.format(Locale.US, "%.3f%05d", Float.valueOf(getVersion()), Integer.valueOf(getSVNRevision()));
 	}
-
-	/**
-	 * returns the date, when this release was build
-	 */
-	public static String getBuildDate() {
-		if ("@REPL_DATE@".contains("@")) {
-			return "19700101";
-		}
-		return "@REPL_DATE@";
-	}
-
-	/**
-	 * determines, if this release was compiled and installed
-	 * by a package manager
-	 */
-	public static boolean isPkgManager() {
-		return "@REPL_PKGMANAGER@".equals("true");
-	}
-
-	/**
-	 * returns command to use to restart the YaCy daemon,
-	 * when YaCy was installed with a packagemanger
-	 */
-	public static String getRestartCmd() {
-		if ("@REPL_RESTARTCMD@".contains("@")) {
-			return "echo 'error'";
-		}
-		return "@REPL_RESTARTCMD@";
-	}
 }

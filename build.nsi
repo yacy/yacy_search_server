@@ -25,15 +25,17 @@ COMMAND LINE OPTIONS (case sensitive):
 ; ----------------------------------------
 ; GENERAL
 
+Unicode true
+
 VIProductVersion "@REPL_VERSION@.0.0"
 VIAddVersionKey "ProductName" "YaCy"
 VIAddVersionKey "LegalCopyright" "YaCy"
 VIAddVersionKey "FileVersion" "@REPL_VERSION@"
 VIAddVersionKey "FileDescription" "YaCy"
-VIAddVersionKey "OriginalFilename" "yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe"
+VIAddVersionKey "OriginalFilename" "yacy_v@REPL_VERSION@_@REPL_REVISION_NR@.exe"
 
 Name "YaCy @REPL_VERSION@"
-OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_DATE@_@REPL_REVISION_NR@.exe"
+OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_REVISION_NR@.exe"
 
 ;default installation folder
 InstallDir "$PROFILE\YaCy"
@@ -57,20 +59,6 @@ SetCompressor /SOLID LZMA
 !insertmacro MUI_RESERVEFILE_LANGDLL ;loads faster
 
 ; ----------------------------------------
-; JAVA VERSION
-; http://www.java.com/de/download/manual.jsp BundleId +1 / +2
-; User-Agent to see the 64bit link: Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Win64; x64; Trident/4.0)
-
-; at least we need Java 8
-!define JRE_VERSION8 "1.8"
-
-; download links for Oracle Java 8 Update 211 (available at https://java.com/en/download/manual.jsp)
-; 32 bit / jre-8u211-windows-i586.exe
-!define JRE_32 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=238727_478a62b7d4e34b78b671c754eaaf38ab"
-; 64 bit / jre-8u211-windows-x64.exe
-!define JRE_64 "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=238729_478a62b7d4e34b78b671c754eaaf38ab"
-
-; ----------------------------------------
 ; GENERAL APPEARANCE
 
 ;BrandingText "yacy.net"
@@ -89,13 +77,18 @@ SetCompressor /SOLID LZMA
 ; ----------------------------------------
 ; INSTALLER PAGES
 
+!define MUI_PAGE_CUSTOMFUNCTION_SHOW MyWelcomeShowCallback
 !insertmacro MUI_PAGE_WELCOME
+
+Function MyWelcomeShowCallback
+	SendMessage $mui.WelcomePage.Text ${WM_SETTEXT} 0 "STR:$(MUI_TEXT_WELCOME_INFO_TEXT)$\r$\n$\r$\nThe YaCy project needs a maintainer for this installer!$\r$\nSee github.com/yacy/yacy_search_server/labels/Windows"
+FunctionEnd
 
 !insertmacro MUI_PAGE_LICENSE gpl.txt
 
 !define MUI_COMPONENTSPAGE_NODESC
 !insertmacro MUI_PAGE_COMPONENTS
-ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
+ComponentText "YaCy v@REPL_VERSION@"
 
 !define MUI_PAGE_CUSTOMFUNCTION_LEAVE CheckDriveSpace
 !insertmacro MUI_PAGE_DIRECTORY
@@ -123,32 +116,58 @@ ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
 
 LangString stillRunning ${LANG_ENGLISH} "YaCy is still active. Please stop YaCy first."
 LangString keepData 0 "Do you want to keep the data?"
-LangString noAdminForJava 0 "You need Administrator privileges to install Java. Java will now be downloaded to the shared documents folder. YaCy won't run without Java."
 LangString finishPage 0 "Show how to configure the Windows Firewall for YaCy."
 LangString yacyNoHd 0 "YaCy should be installed on a hard disk. Continue with selected folder?" 
 LangString yacyNeedSpace 0 "We recommend ${RecommendSpace} GB free space for YaCy. There are only $TempDriveFree GB left. Continue anyway?"
 LangString yacyNeedOs 0 "Please run Windows 2000 or better (e.g. Windows XP, Vista or Windows 7) for YaCy."
+LangString yacyNoJavaFoundOpenBrowser ${LANG_ENGLISH} "Java 8 has not been found in the Windows registry!$\r$\n(Key: SOFTWARE\JavaSoft\Java Runtime Environment)$\r$\nOpen download location (adoptium.net) in Browser?"
+LangString yacyNoJavaFoundContinue ${LANG_ENGLISH} "Click Retry to check again for installed Java version!"
 
 LangString stillRunning ${LANG_FRENCH} "YaCy is still active. Please stop YaCy first."
 LangString keepData 0 "Do you want to keep the data?"
-LangString noAdminForJava 0 "You need Administrator privileges to install Java. Java will now be downloaded to the shared documents folder. YaCy won't run without Java."
 LangString finishPage 0 "Show how to configure the Windows Firewall for YaCy."
 LangString yacyNoHd 0 "YaCy should be installed on a hard disk. Continue with selected folder?"
 LangString yacyNeedSpace 0 "We recommend ${RecommendSpace} GB free space for YaCy. There are only $TempDriveFree GB left. Continue anyway?"
 LangString yacyNeedOs 0 "Please run Windows 2000 or better (e.g. Windows XP, Vista or Windows 7) for YaCy."
+LangString yacyNoJavaFoundOpenBrowser 0 "Java 8 has not been found in the Windows registry!$\r$\n(Key: SOFTWARE\JavaSoft\Java Runtime Environment)$\r$\nOpen download location (adoptium.net) in Browser?"
+LangString yacyNoJavaFoundContinue 0 "Click Retry to check again for installed Java version!"
 
 LangString stillRunning ${LANG_GERMAN} "YaCy ist noch aktiv. Bitte beenden Sie YaCy."
-LangString keepData 0 "Moechten Sie die Daten behalten?"
-LangString noAdminForJava 0 "Sie benoetigen Administrator-Rechte um Java zu installieren. Java wird nun in 'Gemeinsame Dokumente' gespeichert. YaCy benoetigt Java zur Ausfuehrung."
+LangString keepData 0 "Möchten Sie die Daten behalten?"
 LangString finishPage 0 "Zeige die Windows Firewall Konfiguration fuer YaCy."
-LangString yacyNoHd 0 "YaCy sollte auf einer Festplatte installiert werden. Soll der gewaehlte Ordner trotzdem verwendet werden?" 
-LangString yacyNeedSpace 0 "Wir empfehlen ${RecommendSpace} GB fuer YaCy. Es sind noch $TempDriveFree GB frei. Trotzdem fortfahren?"
+LangString yacyNoHd 0 "YaCy sollte auf einer Festplatte installiert werden. Soll der gewählte Ordner trotzdem verwendet werden?"
+LangString yacyNeedSpace 0 "Wir empfehlen ${RecommendSpace} GB für YaCy. Es sind noch $TempDriveFree GB frei. Trotzdem fortfahren?"
 LangString yacyNeedOs 0 "YaCy benoetigt Windows 2000 oder besser (z.B. Windows XP, Vista oder Windows 7)."
+LangString yacyNoJavaFoundOpenBrowser 0 "Java 8 wurde in der Windows registry nicht gefunden!$\r$\n(Key: SOFTWARE\JavaSoft\Java Runtime Environment)$\r$\nDie Downloadseite (adoptium.net) im Browser öffnen?"
+LangString yacyNoJavaFoundContinue 0 "Wähle Wiederholen, um erneut zu versuchen, Java zu finden!"
 
 ; ----------------------------------------
 ; INSTALLABLE MODULES
 
 ;InstType "Normal"
+
+Section "check Java 8 installed" Sec_Java_id
+   	SectionIn 1 RO
+   	SetShellVarContext current
+
+	; init of JRE section
+	; detect JRE first
+	var /global InstalledJREVersion
+	${If} ${RunningX64}
+		SetRegView 64
+	${EndIf}
+    Retry:
+	ReadRegStr $InstalledJREVersion HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
+
+	${If} $InstalledJREVersion != "1.8"
+		MessageBox MB_ICONEXCLAMATION|MB_YESNO "$(yacyNoJavaFoundOpenBrowser)" IDNO ContinueWithoutJava
+		ExecShell open "https://adoptium.net/de/temurin/releases/?version=8"
+
+		MessageBox MB_ICONEXCLAMATION|MB_ABORTRETRYIGNORE "$(yacyNoJavaFoundContinue)" IDIGNORE ContinueWithoutJava IDRETRY Retry
+		Abort
+	${EndIf}
+    ContinueWithoutJava:
+SectionEnd
 
 Section "YaCy"
 	SectionIn 1 RO
@@ -169,12 +188,6 @@ Section "YaCy"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DisplayName" "YaCy"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString" '"$INSTDIR\uninstall.exe"'
 	WriteUninstaller "uninstall.exe"
-SectionEnd
-
-Section "Java (Oracle JRE)" Sec_Java_id
-    	SectionIn 1 RO
-    	SetShellVarContext current
-    	Call GetJRE
 SectionEnd
 
 Section "Start Menu Group"
@@ -259,19 +272,6 @@ Function .onInit
 		Abort 
 	${EndIf}		
 	
-	; init of JRE section
-	; detect JRE first
-	var /global InstalledJREVersion
-	${If} ${RunningX64}
-		SetRegView 64
-	${EndIf}
-	ReadRegStr $InstalledJREVersion HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
-	; if right JRE already installed hide and deselect JRE section
-	${If} $InstalledJREVersion = ${JRE_VERSION8}
-		SectionSetText ${Sec_Java_id} ""
-		SectionSetFlags ${Sec_Java_id} 0
-	${EndIf}
-	
 	; init of Firewall section, only valid for WindowsXP SP2/SP3 and Vista/Win 7 with Admin 
 	var /global FirewallServiceStart 
 	IntOp $FirewallServiceStart 3 + 0
@@ -299,41 +299,6 @@ Function .onInit
 	${If} $FirewallServiceStart > 2 
 		SectionSetText ${Sec_Firewall_id} ""
 		SectionSetFlags ${Sec_Firewall_id} 0
-	${EndIf}
-FunctionEnd
-
-Function GetJRE
-; based on http://nsis.sourceforge.net/Simple_Java_Runtime_Download_Script
-    	${If} ${RunningX64}
-    		StrCpy $3 ${JRE_64} 
-    	${Else}
-    		StrCpy $3 ${JRE_32}
-    	${EndIf}
-
-	;check if admin before download, advise if non    
-	userInfo::getAccountType
-	Pop $0
-
-	${IfNot} $0 = "Admin" 
-		MessageBox MB_ICONEXCLAMATION "$(noAdminForJava)" /SD IDOK
-	${EndIf}
-
-	SetShellVarContext all
-	StrCpy $2 "$DOCUMENTS\Java Runtime (install for YaCy).exe"
-	SetShellVarContext current
-	nsisdl::download /TIMEOUT=30000 $3 $2
-	Pop $R0 ;Get the return value
-	
-	${IfNot} $R0 = "success" 
-		MessageBox MB_OK "Download failed: $R0" /SD IDOK
-		Return
-	${EndIf}
-
-	${If} $0 == "Admin" 
-		ExecWait "$2 /s"
-		Delete $2
-	${Else}
-		CreateShortCut "$DESKTOP\Install Java for YaCy.lnk" "$2"
 	${EndIf}
 FunctionEnd
 

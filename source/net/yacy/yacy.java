@@ -125,8 +125,7 @@ public final class yacy {
     // static objects
     public static final String vString = yacyBuildProperties.getVersion();
 
-    public static final String vDATE   = yacyBuildProperties.getBuildDate();
-    public static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
+    public static final String copyright = "[ YaCy v" + vString + " by Michael Christen / www.yacy.net ]";
     public static final String hline = "-------------------------------------------------------------------------------";
     public static final Semaphore shutdownSemaphore = new Semaphore(0);
 

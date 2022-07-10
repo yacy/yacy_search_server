@@ -13,7 +13,7 @@ public class version {
 
         prop.put("versionstring", yacyBuildProperties.getLongVersion());
         prop.put("svnRev", yacyBuildProperties.getSVNRevision());
-        prop.put("buildDate", yacyBuildProperties.getBuildDate());
+
         // return rewrite properties
         return prop;
     }

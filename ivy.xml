@@ -4,7 +4,6 @@
     <!-- https://wrongnotes.blogspot.com/2014/02/simplest-explanation-of-ivy.html -->
     <conf name="compile" visibility="public"/>
     <conf name="test" visibility="public"/>
-    <conf name="libbuild" visibility="public"/>
   </configurations>
     <dependencies defaultconf="compile->default">
       <dependency org="commons-fileupload" name="commons-fileupload" rev="1.4" conf="compile->master" />
@@ -101,11 +100,5 @@
       <dependency org="org.hamcrest" name="hamcrest" rev="2.2" conf="test->default"/>
       <dependency org="org.hamcrest" name="hamcrest-core" rev="2.2" conf="test->default"/>
       <dependency org="org.hamcrest" name="hamcrest-library" rev="2.2" conf="test->default"/>
-
-      <dependency org="com.googlecode.javaewah" name="JavaEWAH" rev="0.7.9" conf="libbuild->master"/>
-      <dependency org="com.jcraft" name="jsch" rev="0.1.53" conf="libbuild->master"/>
-      <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.3.6" conf="libbuild->master"/>
-      <dependency org="org.eclipse.jgit" name="org.eclipse.jgit" rev="4.5.0.201609210915-r" conf="libbuild->master"/>
-      <dependency org="org.slf4j" name="slf4j-api" rev="1.7.2" conf="libbuild->master"/>
     </dependencies>
 </ivy-module>

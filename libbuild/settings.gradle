@@ -1,5 +1,0 @@
-
-rootProject.name = 'libbuild'
-
-include 'GitComInf' 
-include 'J7Zip-modified'

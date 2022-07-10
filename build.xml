@@ -30,11 +30,6 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 -->
 
-  <!-- defining the timestamp format -->
-  <tstamp>
-    <format property="REPL_DATE_FORMAT" pattern="yyyymmdd" />
-  </tstamp>
-
   <!-- defining all needed directory names -->
   <property name="yacyroot" location="."/>
   <property name="addon" location="addon"/>
@@ -42,7 +37,6 @@
   <property name="data" location="DATA"/>
   <property name="lib" location="lib"/>
   <property name="libt" location="libt"/>
-  <property name="libbuild" location="libbuild"/>
   <property name="build" location="build/classes/java/main"/> <!-- reuse Gradle build path -->
   <property name="javadoc" location="javadoc"/>
   <property name="htroot" location="htroot"/>
@@ -55,30 +49,13 @@
   <property name="release_main" location="${release}/MAIN"/>
   <property name="release_windows" location="${release}/WINDOWS"/>
   <property name="release_mac" location="${release}/MAC"/>
-  <property name="git" location=".git"/>
   <property name="defaults" location="defaults"/>
   <property name="RDFaParser" location="RDFaParser"/>
-    
-  <!-- pseudo default branch as fallback -->
-  <property name="branch" value="" />
 
-  <!-- pseudo default releaseNr as fallback --> 
-  <property name="releaseNr" value="9000" />
-  
   <!-- defining all needed directory names for packing search widget-->
   <property name="jquery" location="htroot/jquery/"/>
   <property name="portalsearch" location="htroot/portalsearch/"/>
   <property name="img-2" location="htroot/yacy/ui/img-2"/>
-    
-    <!-- variables for installonlinux target-->
-  <property name="DESTDIR" value="DESTDIR"/>
-  <property name="PKGMANAGER" value="false"/>
-  <property name="RESTARTCMD" value="/etc/init.d/yacy restart"/>
-
-  <!-- determining if the .git directory exists -->
-  <condition property="isGit">
-    <available file="${git}" />
-  </condition>
 
   <target name="install-ivy" description="--> install ivy">
     <local name="ivy.download.dir"/><property name="ivy.download.dir" value="${basedir}/ivy" />
@@ -110,53 +87,14 @@
     -->
     <ivy:retrieve conf="compile" pathid="compile.path" pattern="${ivy.lib.dir}/[artifact]-[revision].[ext]" />
     <ivy:retrieve conf="test" pathid="test.path" pattern="${libt}/[artifact]-[revision].[ext]" />
-    <ivy:retrieve conf="libbuild" pathid="libbuild.path" pattern="${libbuild}/[artifact]-[revision].[ext]" />
     <property name="target-resolve-already-run" value="true" />
   </target>
 
-  <target name="buildGitRevTask" depends="resolve">
-    <!-- <delete file="${libbuild}/GitRevTask.jar" failonerror="false" /> deleted via clean no need to do it all the time -->
-    <javac srcdir="${libbuild}/GitRevTask" includeantruntime="true" encoding="UTF-8" classpathref="libbuild.path">
-    </javac>
-    <jar destfile="${libbuild}/GitRevTask.jar" basedir="${libbuild}/GitRevTask">
-      <manifest>
-        <attribute name="Main-Class" value="GitRevTask"/>
-      </manifest>
-    </jar>
-  </target>
-
-  <target name="determineGitRevision" if="isGit" depends="buildGitRevTask">
-      <taskdef resource="GitRevTask.properties">
-        <classpath>
-            <pathelement location="${libbuild}/GitRevTask.jar" />
-            <pathelement location="${libbuild}/org.eclipse.jgit-4.5.0.201609210915-r.jar" />
-            <!-- Next are the jgit dependencies -->
-            <pathelement location="${libbuild}/httpclient-4.3.6.jar" />
-            <pathelement location="${libbuild}/JavaEWAH-0.7.9.jar" />
-            <pathelement location="${libbuild}/jsch-0.1.53.jar" />
-            <pathelement location="${libbuild}/slf4j-api-1.7.2.jar" />
-        </classpath>
-      </taskdef>
-      <gitRev repoPath="${yacyroot}" branchprop="branch" revprop="releaseNr" dateprop="DSTAMP" />
-  </target>
-
-  <!-- reading the build properties from file -->
-  <target name="readBuildProperties" depends="determineGitRevision">
-    <!-- loading some property values from file -->
-    <loadproperties srcFile="build.properties" />
-  </target>
-
   <!-- initializing all needed variables -->
-  <target name="init" depends="readBuildProperties">
+  <target name="init">
+    <loadproperties srcFile="build.properties" />
     <mkdir dir="${data}"/>
     <mkdir dir="${release}"/>
-
-    <!-- YaCy Release Date -->
-    <filter token="REPL_DATE" value="${DSTAMP}"/>
-    <filter token="REPL_RELEASE" value="${stdReleaseFile}"/>
-      
-      <!-- YaCy Brach -->
-      <echo message="YaCy Branch: ${branch}" />
 
     <!-- YaCy Release Version number -->
     <echo message="YaCy Version number: ${releaseVersion}" />
@@ -166,16 +104,11 @@
     <echo message="YaCy Release number: ${releaseNr}" />
     <filter token="REPL_REVISION_NR" value="${releaseNr}"/>
 
-    <!-- YaCy root directory -->
-    <filter token="REPL_YACY_ROOT_DIR" value="${yacyroot}"/>
-    <filter token="REPL_PKGMANAGER" value="${PKGMANAGER}"/>
-    <filter token="REPL_RESTARTCMD" value="${RESTARTCMD}"/>
-
     <!-- apply replacments -->
     <copy file="${src}/net/yacy/peers/operation/yacyBuildProperties.java.template" tofile="${src}/net/yacy/peers/operation/yacyBuildProperties.java" overwrite="true" filtering="true" />
     
     <!-- copy log4j config file -->
-    <copy file="${src}/log4j.properties" tofile="${build}/log4j.properties" overwrite="true" filtering="true" /> <!-- @TODO: obsolete, contains no replace/filter pattern -->
+    <copy file="${src}/log4j.properties" tofile="${build}/log4j.properties" overwrite="true" filtering="false" /> <!-- @TODO: obsolete, contains no replace/filter pattern -->
 
   </target>
 
@@ -191,7 +124,7 @@
       </fileset>
     </javadoc>
   </target>
-    
+
     <!-- define the classpath that should be used for compiling -->
     <!-- when changing paths here, please also update the paths in /addon/YaCy.app/Contents/Info.plist -->
     <path id="project.class.path">
@@ -202,18 +135,6 @@
     </path>
 
   <target name="compile-core" depends="init,resolve" description="compile YaCy core">
-
-    <!-- compile yacyBuildProperties.java -->
-    <!-- *obsolete* - for Gradle migration process changed to use *.java.template file for filtered copy 
-    <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
-           debug="true" debuglevel="lines,vars,source" includeantruntime="false"
-           includes="net/yacy/peers/operation/yacyBuildProperties.java"
-           source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
-      <classpath refid="project.class.path" />
-      <compilerarg value="-Xlint"/>
-    </javac>
-    <delete file="${build}/BuildProperties.java" />
--->
     <!-- compile the core sources -->
     <echo message="project.class.path: ${toString:project.class.path}" />
     <javac srcdir="${src}/" destdir="${build}"
@@ -265,13 +186,6 @@
           <copy todir="${release_main}/lib">
             <fileset dir="${lib}" 
                      includes="**/*"/>
-          </copy>
-
-      <!-- copy build libs -->
-          <copy todir="${release_main}/libbuild">
-            <fileset dir="${libbuild}" 
-                     includes="**/*"
-                       excludes="**/target/**"/>
           </copy>
 
     <!-- copy configuration files -->
@@ -467,16 +381,11 @@
     <delete dir="${release_main}" failonerror="false"/>
     <delete file="${build}/log4j.properties" failonerror="false"/>
     <delete file="${lib}/yacycore.jar" failonerror="false"/>
-    <delete file="${lib}/svnRevNr.jar" failonerror="false"/> <!-- @TODO: obsolete, never generated -->
-    <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/> <!-- @TODO: obsolete, never generated -->
-    <delete file="${libbuild}/GitRevTask.jar" failonerror="false"/>    
     <delete failonerror="false">
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
       <fileset dir="${htroot}" includes="**/*.class" />
       <fileset dir="test/" includes="**/*.class" />
-      <fileset dir="${libbuild}/svnRevNr" includes="**/*.class" /> <!-- @TODO: obsolete, never generated -->
-      <fileset dir="${libbuild}/GitRevTask" includes="**/*.class" />
       <fileset dir="." includes="TEST-*" />
     </delete>
     <delete dir="test/DATA" failonerror="false"/>
@@ -600,13 +509,14 @@
     <!-- http://nsisant.sourceforge.net/ -->
     <mkdir dir="${release_windows}" />
     <copy file="build.nsi" tofile="${release_windows}/build.nsi" overwrite="true" filtering="true" />
-    <taskdef name="nsis" classname="net.sf.nsisant.Task">
-        <classpath location="${libbuild}/nsisant-1.2.jar"/>
-    </taskdef>
-    <nsis script="${release_windows}/build.nsi" nocd="yes" verbosity="2" />
-    <move file="${release_windows}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe"
-          tofile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe" />
-      
+    <exec executable="makensis">
+      <arg value="-V2" />
+      <arg value="-NOCD" />
+      <arg value="${release_windows}/build.nsi" />
+    </exec>
+    <move file="${release_windows}/yacy_v${releaseVersion}_${releaseNr}.exe"
+          tofile="${release}/yacy_v${releaseVersion}_${releaseNr}.exe" />
+
     <delete dir="${release_main}"/>
     <delete dir="${release_windows}" failonerror="false" />
   </target>
@@ -615,13 +525,13 @@
       <copy todir="${release_mac}/YaCy.app">
           <fileset dir="${addon}/YaCy.app"></fileset>
       </copy>
-      <copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="true" overwrite="true" />
+      <copy file="${addon}/YaCy.app/Contents/Info.plist" tofile="${release_mac}/YaCy.app/Contents/Info.plist" filtering="false" overwrite="true" />
       <move file="${release_main}" tofile="${release_mac}/YaCy.app/Contents/MacOS" verbose="false" />
       <!-- startYACY.sh and startYACYMacOS.sh will be the main entry points : we set permissions to make it executable files -->
       <chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACYMacOS.sh" perm="755"/>
       <chmod file="${release_mac}/YaCy.app/Contents/MacOS/startYACY.sh" perm="755"/>
       <exec executable="hdiutil">
-            <arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.dmg"/>
+            <arg line="create -srcfolder ${release_mac}/YaCy.app ${release}/yacy_v${releaseVersion}_${releaseNr}.dmg"/>
       </exec>
       <delete dir="${release_mac}" failonerror="false" verbose="false" />
   </target>
