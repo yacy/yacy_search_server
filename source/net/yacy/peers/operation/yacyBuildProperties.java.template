@@ -50,23 +50,4 @@ public final class yacyBuildProperties {
 		}
 		return "@REPL_DATE@";
 	}
-
-	/**
-	 * determines, if this release was compiled and installed
-	 * by a package manager
-	 */
-	public static boolean isPkgManager() {
-		return "@REPL_PKGMANAGER@".equals("true");
-	}
-
-	/**
-	 * returns command to use to restart the YaCy daemon,
-	 * when YaCy was installed with a packagemanger
-	 */
-	public static String getRestartCmd() {
-		if ("@REPL_RESTARTCMD@".contains("@")) {
-			return "echo 'error'";
-		}
-		return "@REPL_RESTARTCMD@";
-	}
 }

@@ -66,11 +66,6 @@
   <property name="jquery" location="htroot/jquery/"/>
   <property name="portalsearch" location="htroot/portalsearch/"/>
   <property name="img-2" location="htroot/yacy/ui/img-2"/>
-    
-    <!-- variables for installonlinux target-->
-  <property name="DESTDIR" value="DESTDIR"/>
-  <property name="PKGMANAGER" value="false"/>
-  <property name="RESTARTCMD" value="/etc/init.d/yacy restart"/>
 
   <!-- determining if the .git directory exists -->
   <condition property="isGit">
@@ -162,8 +157,6 @@
 
     <!-- YaCy root directory -->
     <filter token="REPL_YACY_ROOT_DIR" value="${yacyroot}"/>
-    <filter token="REPL_PKGMANAGER" value="${PKGMANAGER}"/>
-    <filter token="REPL_RESTARTCMD" value="${RESTARTCMD}"/>
 
     <!-- apply replacments -->
     <copy file="${src}/net/yacy/peers/operation/yacyBuildProperties.java.template" tofile="${src}/net/yacy/peers/operation/yacyBuildProperties.java" overwrite="true" filtering="true" />
