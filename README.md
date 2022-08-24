@@ -38,7 +38,7 @@ indexing performance.
 
 ## License
 
-This project is available as open source under the terms of the GPL 2.0 Or later. However, some elements are being licensed under GNU Lesser General Public License. For accurate information, please check individual files. As well as for accurate information regarding copyrights.
+This project is available as open source under the terms of the GPL 2.0 or later. However, some elements are being licensed under GNU Lesser General Public License. For accurate information, please check individual files. As well as for accurate information regarding copyrights.
 The (GPLv2+) source code used to build YaCy is distributed with the package (in /source and /htroot).
 
 
@@ -81,7 +81,7 @@ other program (double-click to start)
 
 ## The administration interface
 
-A web server us brought up after starting YaCy.
+A web server is brought up after starting YaCy.
 Open this URL in your web-browser:
 
    http://localhost:8090
@@ -137,7 +137,7 @@ The GC process will free the memory once in a while. If you have less than
 100000 pages you could try 200MB till you hit 1 million.
 [Here](http://localhost:8090/Performance_p.html) you can adjust it.
 Several million web pages may use several GB of disk space, but you can
-adjust it [Here](http://localhost:8090/ConfigHTCache_p.html) to fit your needs.
+adjust it [here](http://localhost:8090/ConfigHTCache_p.html) to fit your needs.
 
 
 ## Help develop YaCy
@@ -147,9 +147,9 @@ community software.
 
 To start developing YaCy in **Eclipse**:
 
-- Clone https://github.com/yacy/yacy_search_server.git using build-in Eclipse features (File -> Import -> Git) 
-- or Download source form this side (download button "Code" -> download as Zip -> and unpack)
-- Import a Gradle project (File -> Import -> Gradle -> Existing Gradle Project).
+- clone https://github.com/yacy/yacy_search_server.git using build-in Eclipse features (File -> Import -> Git) 
+- or download source from this site (download button "Code" -> download as Zip -> and unpack)
+- import a Gradle project (File -> Import -> Gradle -> Existing Gradle Project)
 - in the tab "Gradle Tasks" are tasks available to use build the project (e.g. build -> build  or application -> run)
 
 To start developing YaCy in **Netbeans**:
@@ -184,7 +184,7 @@ HTTP/JSON. You can discover these interfaces if you notice the orange "API" icon
 the upper right corner of some web pages in the YaCy web interface. Click it, and
 you will see the XML/JSON version of the respective webpage.
 You can also use the shell script provided in the /bin subdirectory.
-The shell scripts also calls the YaCy web interface. By cloning some of those
+The shell scripts also call the YaCy web interface. By cloning some of those
 scripts you can easily create more shell API access methods.
 
 ## Contact
