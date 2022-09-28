@@ -56,14 +56,17 @@ network.unit.remotecrawl.speed = 300
 
 # addresses of seed-list bootstrap locations
 network.unit.bootstrap.seedlist0 = http://sixcooler.de/yacy/seed.txt
-network.unit.bootstrap.seedlist1 = http://rptr.me/yacy/seed.txt
+network.unit.bootstrap.seedlist1 = https://sonst.mifritscher.de/yacy/seed.txt
 network.unit.bootstrap.seedlist2 = http://5.45.105.16/yacyseed
 network.unit.bootstrap.seedlist3 = http://yacy.v16.de/seed/seed.txt
 network.unit.bootstrap.seedlist4 = https://frank-siebert.de/seed.txt
-network.unit.bootstrap.seedlist5 = https://sonst.mifritscher.de/yacy/seed.txt
+network.unit.bootstrap.seedlist5 = http://seedlist.wertewesten.net/seed.txt
 network.unit.bootstrap.seedlist6 = https://search.joestr.at/www/seed.txt
 network.unit.bootstrap.seedlist7 = https://www.gumx.de:8091/seed.txt
 network.unit.bootstrap.seedlist8 = https://aahso.net/yacyseed
+network.unit.bootstrap.seedlist9 = https://lodwich.net/static/seeds/seed.txt
+network.unit.bootstrap.seedlist10 = https://tonibot.ddns.net:8892/other/seed.txt
+network.unit.bootstrap.seedlist11 = https://s1002.xpcom-online.de/yacy/seed2.txt
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
