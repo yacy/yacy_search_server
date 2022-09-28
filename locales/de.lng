@@ -953,30 +953,6 @@ Duration==Dauer
 #ID==ID
 #-----------------------------
 
-#File: ContentControl_p.html
-#---------------------------
-Content Control<==Inhaltskontrolle<
-Peer Content Control URL Filter==Peer Inhaltskontrolle URL Filter
-With this settings you can activate or deactivate content control on this peer.==Mit dieser Einstellung kann die Inhaltskontrolle auf diesem Peer an- oder abgeschalten werden.
-Use content control filtering:==Verwende Inhaltskontrollfilter:
->Enabled<==>Aktiviert<
-Enables or disables content control.==Schaltet Inhaltskontrolle an- oder ab.
-Use this table to create filter:==Verwenden Sie diese Tabelle, um Filter zu erzeugen:
-Define a table. Default:==Definieren Sie ein Tabelle. Standardeinstellung:
-Content Control SMW Import Settings==Inhaltskontrolle SMW Importeinstellungen
-With this settings you can define the content control import settings. You can define a==Mit diesen Einstellungen können Sie die Importeinstellungen für die Inhaltskontrolle definieren. Definieren Sie ein
-Semantic Media Wiki with the appropriate extensions.==Semantisches Media Wiki mit den passenden Erweiterungen.
-SMW import to content control list:==SMW Import für die Inhalts-Kontroll-Liste:
-Enable or disable constant background synchronization of content control list from SMW (Semantic Mediawiki). Requires restart!==Konstante Synchronisation der Inhalts-Kontroll-Liste vom SMW (Semantisches Medienwiki) im Hintergrund. Benötigt Neustart!
-SMW import base URL:==SMW Import Basis URL:
-Define base URL for SMW special page "Ask". Example: ==Definiere Basis URL für SMW Spezialseite "Ask". Beispiel: 
-SMW import target table:==SMW Import Ziele Tabelle:
-Define import target table. Default: contentcontrol==Definieren Import Ziel Tabelle. Standardeinstellung: contentcontrol
-Purge content control list on initial sync:==Verwerfe Inhalts-Kontroll-Listen bei der ersten Synchronisation:
-Purge content control list on initial synchronisation after startup.==Verwerfe Inhalts-Kontroll-Listen bei der ersten Synchronisation nach dem Start.
-"Submit"=="Absenden"
-#-----------------------------
-
 
 #File: CookieMonitorIncoming_p.html
 #---------------------------

@@ -1059,30 +1059,6 @@ Duration==Длительность
 #ID==ID
 #-----------------------------
 
-#File: ContentControl_p.html
-#---------------------------
-Content Control<==Управление контентом<
-Peer Content Control URL Filter==Управление контентом узла
-With this settings you can activate or deactivate content control on this peer.==Эти настройки позволяют включить или отключить управление контентом для вашего узла.
-Use content control filtering:==Использовать фильтр управления контентом:
->Enabled<==>Включить<
-Enables or disables content control.==Включение или отключение управления контентом.
-Use this table to create filter:==Использовать это поле для создания фильтра:
-Define a table. Default:==Задать значение поля. По-умолчанию:
-Content Control SMW Import Settings==Импорт настроек управления контентом SMW
-With this settings you can define the content control import settings. You can define a==Эти настройки позволяют задать параметры импорта настроек управления контентом 
-Semantic Media Wiki with the appropriate extensions.==Semantic Media Wiki с соответствующими расширениями.
-SMW import to content control list:== Импорт SMW в список управления контентом:
-Enable or disable constant background synchronization of content control list from SMW (Semantic Mediawiki). Requires restart!==Включение или отключение постоянной фоновой синхронизации списка управления контентом из SMW (Semantic Mediawiki). Потребуется перезапуск программы!
-SMW import base URL:==Ссылка на импортируемую базу SMW:
-Define base URL for SMW special page "Ask". Example: ==Укажите ссылку на базу SMW на специальной странице "Ask". Например: 
-SMW import target table:==Поле назначения импорта SMW:
-Define import target table. Default: contentcontrol==Укажите поле назначения импорта.  По-умолчанию: contentcontrol
-Purge content control list on initial sync:==Удалить список управления контентом в начале синхронизации:
-Purge content control list on initial synchronisation after startup.==Удалить список управления контентом в начале синхронизации после запуска программы.
-"Submit"=="Сохранить"
-#-----------------------------
-
 
 #File: CookieMonitorIncoming_p.html
 #---------------------------

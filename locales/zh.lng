@@ -1033,31 +1033,6 @@ For minTokenLen = 2 the quantRate value should not be below 0.24; for minTokenLe
 The quantRate is a measurement for the number of words that take part in a signature computation. The higher the number==quantRate是参与签名计算的单词数量的度量。 数字越高，越少
 #-----------------------------
 
-#File: ContentControl_p.html
-#---------------------------
-Content Control<==内容控制<
-Peer Content Control URL Filter==节点内容控制地址过滤器
-With this settings you can activate or deactivate content control on this peer==使用此设置，你可以激活或取消激活此YaCy节点上的内容控制
-Use content control filtering:==使用内容控制过滤:
->Enabled<==>已启用<
-Enables or disables content control==启用或禁用内容控制
-Use this table to create filter:==使用此表创建过滤器:
-Define a table. Default:==定义一个表格. 默认:
-Content Control SMW Import Settings==内容控制SMW导入设置
-With this settings you can define the content control import settings. You can define a==使用此设置,你可以定义内容控制导入设置. 你可以定义一个
-Semantic Media Wiki with the appropriate extensions==语义媒体百科与适当的扩展
-SMW import to content control list:==SMW导入到内容控制列表:
-Enable or disable constant background synchronization of content control list from SMW (Semantic Mediawiki). Requires restart!==启用或禁用来自SMW（Semantic Mediawiki）的内容控制列表的恒定后台同步。 需要重启！
-SMW import base URL:==SMW导入基URL:
-Define base URL for SMW special page "Ask". Example: ==为SMW特殊页面“Ask”定义基础地址.例:
-SMW import target table:==SMW导入目标表:
-Define import target table. Default: contentcontrol==定义导入目标表. 默认值:contentcontrol
-Purge content control list on initial sync:==在初始同步时清除内容控制列表:
-Purge content control list on initial synchronisation after startup.==重启后，清除初始同步的内容控制列表.
-"Submit"=="提交"
-Define base URL for SMW special page "Ask". Example:==为SMW特殊页面“Ask”定义基础地址.例:
-#-----------------------------
-
 #File: ContentIntegrationPHPBB3_p.html
 #---------------------------
 Content Integration: Retrieval from phpBB3 Databases==内容集成: 从phpBB3数据库中导入

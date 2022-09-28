@@ -714,13 +714,6 @@ Last Deploy==最後の展開
 Connection Tracking==接続の追跡
 #-----------------------------
 
-#File: ContentControl_p.html
-#---------------------------
-Content Control<==コンテントの制御<
-"Submit"=="確定する"
-#-----------------------------
-
-
 #File: CookieMonitorIncoming_p.html
 #---------------------------
 Incoming Cookies Monitor==着信したCookieのモニター

@@ -1370,16 +1370,6 @@ core.service.webgraph.tmp = false
 parserAugmentation = false
 parserAugmentation.RDFa = false
 
-# Content control settings
-contentcontrol.enabled = false
-contentcontrol.bookmarklist = contentcontrol
-contentcontrol.mandatoryfilterlist = yacy
-contentcontrol.smwimport.enabled = false
-contentcontrol.smwimport.baseurl = 
-contentcontrol.smwimport.purgelistoninit = true
-contentcontrol.smwimport.targetlist = contentcontrol
-contentcontrol.smwimport.defaultcategory = yacy
-
 # host browser settings
 # Allow the administrator to stack URLs to the local crawl queue from the host browser page, automatically (when a path is unknown) or manually through a "load and index" link
 browser.autoload = false

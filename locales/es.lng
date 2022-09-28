@@ -530,13 +530,6 @@ Duration==Duración
 ID==ID
 #-----------------------------
 
-#File: ContentControl_p.html
-#---------------------------
-Content Control<==Control de contenido<
->Enabled<==>Habilitado
-"Submit"=="Enviar"
-#-----------------------------
-
 
 #File: CookieMonitorIncoming_p.html
 #---------------------------

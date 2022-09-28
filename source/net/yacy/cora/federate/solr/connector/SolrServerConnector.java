@@ -26,31 +26,31 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.client.solrj.impl.XMLResponseParser;
+import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
+import org.apache.solr.client.solrj.request.LukeRequest;
+import org.apache.solr.client.solrj.request.UpdateRequest;
+import org.apache.solr.client.solrj.response.LukeResponse;
+import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.params.CommonParams;
+import org.apache.solr.common.params.ModifiableSolrParams;
+import org.apache.solr.common.util.NamedList;
+
 import net.yacy.cora.federate.solr.instance.ServerShard;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.search.schema.CollectionSchema;
 
-import org.apache.solr.common.SolrDocumentList;
-import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.params.ModifiableSolrParams;
-import org.apache.solr.common.util.NamedList;
-import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
-import org.apache.solr.client.solrj.impl.XMLResponseParser;
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.request.ContentStreamUpdateRequest;
-import org.apache.solr.client.solrj.request.LukeRequest;
-import org.apache.solr.client.solrj.request.UpdateRequest;
-import org.apache.solr.client.solrj.response.LukeResponse.FieldInfo;
-import org.apache.solr.client.solrj.response.LukeResponse;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.params.CommonParams;
-
 public abstract class SolrServerConnector extends AbstractSolrConnector implements SolrConnector {
 
     protected final static ConcurrentLog log = new ConcurrentLog(SolrServerConnector.class.getName());
-    public final static org.apache.lucene.analysis.CharArrayMap<Byte> classLoaderSynchro = new org.apache.lucene.analysis.CharArrayMap<Byte>(0, true);
+    public final static org.apache.lucene.analysis.CharArrayMap<Byte> classLoaderSynchro = new org.apache.lucene.analysis.CharArrayMap<>(0, true);
     // pre-instantiate this object to prevent sun.misc.Launcher$AppClassLoader deadlocks
     // this is a very nasty problem; solr instantiates objects dynamically which can cause deadlocks
     static {
@@ -69,7 +69,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public SolrClient getServer() {
         return this.server;
     }
-    
+
     @Override
     public void commit(final boolean softCommit) {
         if (this.server == null) return;
@@ -158,8 +158,8 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void deleteByIds(final Collection<String> ids) throws IOException {
         if (this.server == null) return;
-        List<String> l = new ArrayList<String>();
-        for (String s: ids) l.add(s);
+        final List<String> l = new ArrayList<>();
+        for (final String s: ids) l.add(s);
         synchronized (this.server) {
             try {
                 this.server.deleteById(l, -1);
@@ -247,7 +247,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     @Override
     public void add(final Collection<SolrInputDocument> solrdocs) throws IOException, SolrException {
         if (this.server == null) return;
-        for (SolrInputDocument solrdoc : solrdocs) {
+        for (final SolrInputDocument solrdoc : solrdocs) {
             if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
         }
         synchronized (this.server) {
@@ -278,8 +278,8 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                     this.server.add(solrdocs, -1);
                 } catch (final Throwable ee) {
                     ConcurrentLog.logException(ee);
-                    List<String> ids = new ArrayList<String>();
-                    for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                    final List<String> ids = new ArrayList<>();
+                    for (final SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                     log.warn(e.getMessage() + " IDs=" + ids.toString());
                     throw new IOException(ee);
                 }
@@ -300,11 +300,11 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public SolrDocumentList getDocumentListByParams(ModifiableSolrParams params) throws IOException {
         if (this.server == null) throw new IOException("server disconnected");
         // during the solr query we set the thread name to the query string to get more debugging info in thread dumps
-        String q = params.get(CommonParams.Q);
-        String fq = params.get(CommonParams.FQ);
-        String sort = params.get(CommonParams.SORT);
-        String fl = params.get(CommonParams.FL);
-        String threadname = Thread.currentThread().getName();
+        final String q = params.get(CommonParams.Q);
+        final String fq = params.get(CommonParams.FQ);
+        final String sort = params.get(CommonParams.SORT);
+        final String fl = params.get(CommonParams.FL);
+        final String threadname = Thread.currentThread().getName();
         QueryResponse rsp;
         int retry = 0;
         Throwable error = null;
@@ -322,13 +322,13 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                 clearCaches(); // prevent further OOM if this was caused by OOM
             }
             ConcurrentLog.severe("SolrServerConnector", "Failed to query remote Solr: " + error.getMessage() + ", query:" + q + (fq == null ? "" : ", fq = " + fq));
-            try {Thread.sleep(1000);} catch (InterruptedException e) {}
+            try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         }
         throw new IOException("Error executing query", error);
     }
-    
+
     // luke requests: these do not work for attached SolrCloud Server
-    
+
     public Collection<FieldInfo> getFields() throws SolrServerException {
         // get all fields contained in index
         return getIndexBrowser(false).getFieldInfo().values();
@@ -342,10 +342,10 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     public int getSegmentCount() {
         if (this.server == null) return 0;
         try {
-            LukeResponse lukeResponse = getIndexBrowser(false);
-            NamedList<Object> info = lukeResponse.getIndexInfo();
+            final LukeResponse lukeResponse = getIndexBrowser(false);
+            final NamedList<Object> info = lukeResponse.getIndexInfo();
             if (info == null) return 0;
-            Integer segmentCount = (Integer) info.get("segmentCount");
+            final Integer segmentCount = (Integer) info.get("segmentCount");
             if (segmentCount == null) return 1;
             return segmentCount.intValue();
         } catch (final Throwable e) {
@@ -356,31 +356,31 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
     }
 
     private int useluke = 0; // 3-value logic: 1=yes, -1=no, 0=dontknow
-    
+
     @Override
     public long getSize() {
         if (this.server == null) return 0;
         if (this.server instanceof ServerShard) {
             // the server can be a single shard; we don't know here
             // to test that, we submit requests to bots variants
-            if (useluke == 1) return getSizeLukeRequest();
-            if (useluke == -1) return getSizeQueryRequest();
-            long ls = getSizeLukeRequest();
-            long qs = getSizeQueryRequest();
+            if (this.useluke == 1) return getSizeLukeRequest();
+            if (this.useluke == -1) return getSizeQueryRequest();
+            final long ls = getSizeLukeRequest();
+            final long qs = getSizeQueryRequest();
             if (ls == 0 && qs == 0) {
                 // we don't know if this is caused by an error or not; don't change the useluke value
                 return 0;
             }
             if (ls == qs) {
-                useluke = 1;
+                this.useluke = 1;
                 return ls;
             }
-            useluke = -1;
+            this.useluke = -1;
             return qs;
         }
         return getSizeLukeRequest();
     }
-    
+
     private long getSizeQueryRequest() {
         if (this.server == null) return 0;
         try {
@@ -394,13 +394,13 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             return 0;
         }
     }
-    
+
     private long getSizeLukeRequest() {
         if (this.server == null) return 0;
         try {
-            LukeResponse lukeResponse = getIndexBrowser(false);
+            final LukeResponse lukeResponse = getIndexBrowser(false);
             if (lukeResponse == null) return 0;
-            Integer numDocs = lukeResponse.getNumDocs();
+            final Integer numDocs = lukeResponse.getNumDocs();
             if (numDocs == null) return 0;
             return numDocs.longValue();
         } catch (final Throwable e) {
@@ -409,7 +409,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
             return 0;
         }
     }
-    
+
     private LukeResponse getIndexBrowser(final boolean showSchema) throws SolrServerException {
         // get all fields contained in index
         final LukeRequest lukeRequest = new LukeRequest();
@@ -419,7 +419,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         LukeResponse lukeResponse = null;
         try {
             lukeResponse = lukeRequest.process(this.server);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new SolrServerException(e.getMessage());
         }
         return lukeResponse;

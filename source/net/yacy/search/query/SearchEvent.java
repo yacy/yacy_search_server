@@ -51,7 +51,6 @@ import java.util.regex.Pattern;
 
 import org.apache.solr.common.SolrDocument;
 
-import net.yacy.contentcontrol.ContentControlFilterUpdateThread;
 import net.yacy.cora.date.ISO8601Formatter;
 import net.yacy.cora.document.analysis.Classification;
 import net.yacy.cora.document.analysis.Classification.ContentDomain;
@@ -95,7 +94,6 @@ import net.yacy.peers.RemoteSearch;
 import net.yacy.peers.SeedDB;
 import net.yacy.peers.graphics.ProfilingGraph;
 import net.yacy.repository.Blacklist.BlacklistType;
-import net.yacy.repository.FilterEngine;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.search.EventTracker;
 import net.yacy.search.Switchboard;
@@ -110,10 +108,10 @@ import net.yacy.search.snippet.TextSnippet;
 import net.yacy.search.snippet.TextSnippet.ResultClass;
 
 public final class SearchEvent implements ScoreMapUpdatesListener {
-	
-	/** Supported protocols to be displayed in the protocol navigator.
-	 * (Using here a single String constant is faster than a unmodifiable Set instance) */
-	private static final String PROTOCOL_NAVIGATOR_SUPPORTED_VALUES = "http,https,smb,ftp,file";
+
+    /** Supported protocols to be displayed in the protocol navigator.
+     * (Using here a single String constant is faster than a unmodifiable Set instance) */
+    private static final String PROTOCOL_NAVIGATOR_SUPPORTED_VALUES = "http,https,smb,ftp,file";
 
     private static final int max_results_rwi = 3000;
     private static final int max_results_node = 150;
@@ -126,12 +124,12 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         } catch (final ParseException e) {
         }
     }
-    */
+     */
 
     public final static ConcurrentLog log = new ConcurrentLog("SEARCH");
 
     public static final int SNIPPET_MAX_LENGTH = 220;
-    
+
     /** Default count of words for topicnavigagtor */
     private static final int MAX_TOPWORDS = 12;
 
@@ -150,250 +148,250 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     private byte[] IAmaxcounthash, IAneardhthash;
     public Thread rwiProcess;
     public Thread localsolrsearch;
-    
+
     /** Offset of the next local Solr index request
      * Example : last local request with offset=10 and itemsPerPage=20, sets this attribute to 30. */
     private int localsolroffset;
-    
+
     /** counter for referenced that had been sorted out for other reasons */
     private final AtomicInteger expectedRemoteReferences, maxExpectedRemoteReferences;
 
     /** a counter for the appearance of location coordinates .*/
     public final ScoreMap<String> locationNavigator;
-    
+
     /** a counter for protocol types */
     public final ScoreMap<String> protocolNavigator;
-    
+
     /** a counter for file types */
     public final ConcurrentScoreMap<String> dateNavigator;
-    
+
     /** counters for Vocabularies; key is metatag.getVocabularyName() */
     public final Map<String, ScoreMap<String>> vocabularyNavigator;
-    
+
     /** if 0 no topicNavigator, holds expected number of terms for the topicNavigator */
     private final int topicNavigatorCount;
-    
+
     /** map of search custom/configured search navigators in addition to above standard navigators (which use special handling or display forms) */
     public final Map<String, Navigator> navigatorPlugins;
-    
-	/** Holds the total number of successful write operations performed on all the active navigators since their initialization. */
-	private final AtomicLong navGeneration = new AtomicLong();
-    
+
+    /** Holds the total number of successful write operations performed on all the active navigators since their initialization. */
+    private final AtomicLong navGeneration = new AtomicLong();
+
     private final LoaderDispatcher                        loader;
-    
+
     /** a set of word hashes that are used to match with the snippets */
     private final HandleSet                               snippetFetchWordHashes;
     /** a set of words that are used to match with the snippets */
     private final Set<String>                             snippetFetchWords;
     private final boolean                                 deleteIfSnippetFail;
-    private long                                          urlRetrievalAllTime;
-    private long                                          snippetComputationAllTime;
-    private ConcurrentHashMap<String, LinkedHashSet<String>> snippets;
+    private final long                                          urlRetrievalAllTime;
+    private final long                                          snippetComputationAllTime;
+    private final ConcurrentHashMap<String, LinkedHashSet<String>> snippets;
     private final boolean remote;
-    
+
     /** add received results to local index (defult=true) */
     public final boolean addResultsToLocalIndex;
-    
+
     /** Maximum size allowed (in kbytes) for a remote document result to be stored to local index */
     private long remoteStoredDocMaxSize;
     private SortedMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
-    
+
     /** reference score computation for the commonSense heuristic */
     private final ScoreMap<String> ref;
     private final long maxtime;
-    
+
     /** key = domhash (6 bytes); value = like stack */
     private final ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>> doubleDomCache;
-    
+
     /** flag counter */
     private final int[] flagcount;
     private final AtomicInteger feedersAlive, feedersTerminated, snippetFetchAlive;
     private boolean addRunning;
     private final AtomicInteger receivedRemoteReferences;
     private final ReferenceOrder order;
-    
+
     /** map for double-check; String/Long relation, addresses ranking number (backreference for deletion) */
     private final HandleSet urlhashes;
-    
+
     /** a map from tagging vocabulary names to tagging predicate uris */
     private final Map<String, String> taggingPredicates;
-    
+
     /** thats the bag where the RWI search process writes to. Contains both references from both local and remote RWIs. */
     private final WeakPriorityBlockingQueue<WordReferenceVars> rwiStack;
-    
+
     /** thats the bag where the solr results are written to */
     private final WeakPriorityBlockingQueue<URIMetadataNode> nodeStack;
-    
+
     /** thats the result list where the actual search result is waiting to be displayed */
     private final WeakPriorityBlockingQueue<URIMetadataNode>  resultList;
-    
+
     /** if this is true, then every entry in result List is polled immediately to prevent a re-ranking in the resultList. This is usefull if there is only one index source. */
     private final boolean pollImmediately;
     public  final boolean excludeintext_image;
-    
+
     // the following values are filled during the search process as statistics for the search
     // In the next comments "filtering" is doubles checking and applying eventual search query constraints/modifiers
-    
+
     /** the number of hits generated/ranked by the local search in rwi index, after filtering */
     public final AtomicInteger local_rwi_available;
-    
+
     /** the number of existing hits by the local search in rwi index, before any supplementary filtering */
     public final AtomicInteger local_rwi_stored;
-    
+
     /** the number of hits imported from remote peers (rwi/solr mixed + eventual site heuristics), after filtering */
     public final AtomicInteger remote_rwi_available;
-    
+
     /** the number of existing hits at remote sites, before any filtering */
     public final AtomicInteger remote_rwi_stored;
-    
+
     /** the number of peers which contributed to the remote search result */
     public final AtomicInteger remote_rwi_peerCount;
-    
+
     /** The number of results evicted from local solr results after filtering up to the current query offset */
     public final AtomicInteger local_solr_evicted;
-    
+
     /** the total number of existing hits by the local search in solr, before any supplementary filtering */
     public final AtomicInteger local_solr_stored;
-    
+
     /** the number of hits imported from remote peers (rwi/solr mixed), after filtering */
     public final AtomicInteger remote_solr_available;
-    
+
     /** the number of existing hits at remote site (rwi/solr mixed)*/
     public final AtomicInteger remote_solr_stored;
-    
+
     /** the number of peers which contributed to the remote search result */
     public final AtomicInteger remote_solr_peerCount;
-    
+
     /** Ensure only one {@link #resortCachedResults()} operation to be performed on this search event */
     public final Semaphore resortCacheAllowed;
 
-	/**
-	 * Called when a search navigator has been updated : update the overall
-	 * navGeneration counter to help then tracking changes and eventually refresh the yacysearchtrailer.
-	 */
-	@Override
-	public void updatedScoreMap() {
-		this.navGeneration.incrementAndGet();
-	}
-    
     /**
-     * @return the total number of results currently available and filtered (checking doubles and eventual query constraints/modifiers) from the different data sources 
+     * Called when a search navigator has been updated : update the overall
+     * navGeneration counter to help then tracking changes and eventually refresh the yacysearchtrailer.
+     */
+    @Override
+    public void updatedScoreMap() {
+        this.navGeneration.incrementAndGet();
+    }
+
+    /**
+     * @return the total number of results currently available and filtered (checking doubles and eventual query constraints/modifiers) from the different data sources
      */
     public int getResultCount() {
         return Math.max(
                 this.local_rwi_available.get() + this.remote_rwi_available.get() +
                 this.remote_solr_available.get() + Math.max(0, this.local_solr_stored.get() - this.local_solr_evicted.get()),
-                imageViewed.size() + sizeSpare()
-               );
+                this.imageViewed.size() + sizeSpare()
+                );
     }
-    
+
     /**
      * @return the total number of successful write operations performed on all the active navigators since their initialization.
      */
     public long getNavGeneration() {
-		return this.navGeneration.get();
-	}
-    
+        return this.navGeneration.get();
+    }
+
     /**
      * Set maximum size allowed (in kbytes) for a remote document result to be stored to local index.
-     * @param maxSize document content max size in kbytes. Zero or negative value means no limit. 
+     * @param maxSize document content max size in kbytes. Zero or negative value means no limit.
      */
     public void setRemoteDocStoredMaxSize(long maxSize) {
-    	this.remoteStoredDocMaxSize = maxSize;
+        this.remoteStoredDocMaxSize = maxSize;
     }
-    
+
     /**
      * @return maximum size allowed (in kbytes) for a remote document result to be stored to local index.
-     * Zero or negative value means no limit. 
+     * Zero or negative value means no limit.
      */
     public long getRemoteDocStoredMaxSize() {
-    	return this.remoteStoredDocMaxSize;
+        return this.remoteStoredDocMaxSize;
     }
-    
+
     protected SearchEvent(
-        final QueryParams query,
-        final SeedDB peers,
-        final WorkTables workTables,
-        final SortedSet<byte[]> preselectedPeerHashes,
-        final boolean generateAbstracts,
-        final LoaderDispatcher loader,
-        final int remote_maxcount,
-        final long remote_maxtime,
-        final boolean deleteIfSnippetFail,
-        final boolean addResultsToLocalIdx) {
+            final QueryParams query,
+            final SeedDB peers,
+            final WorkTables workTables,
+            final SortedSet<byte[]> preselectedPeerHashes,
+            final boolean generateAbstracts,
+            final LoaderDispatcher loader,
+            final int remote_maxcount,
+            final long remote_maxtime,
+            final boolean deleteIfSnippetFail,
+            final boolean addResultsToLocalIdx) {
 
         long ab = MemoryControl.available();
         if (ab < 1024 * 1024 * 200) {
-            int eb = SearchEventCache.size(); 
+            final int eb = SearchEventCache.size();
             SearchEventCache.cleanupEvents(false);
-            int en = SearchEventCache.size();
+            final int en = SearchEventCache.size();
             if (en < eb) {
                 log.info("Cleaned up search event cache (1) " + eb + "->" + en + ", " + (ab - MemoryControl.available()) / 1024 / 1024 + " MB freed");
             }
         }
         ab = MemoryControl.available();
-        int eb = SearchEventCache.size(); 
+        final int eb = SearchEventCache.size();
         SearchEventCache.cleanupEvents(Math.max(1, (int) (MemoryControl.available() / (1024 * 1024 * 120))));
-        int en = SearchEventCache.size();
+        final int en = SearchEventCache.size();
         if (en < eb) {
             log.info("Cleaned up search event cache (2) " + eb + "->" + en + ", " + (ab - MemoryControl.available()) / 1024 / 1024 + " MB freed");
         }
-        
+
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
         this.workTables = workTables;
         this.query = query;
         if(query != null) {
-        	/* Image counter will eventually grow up faster than offset, but must start first with the same value as query offset */
-        	this.imagePageCounter = query.offset;
+            /* Image counter will eventually grow up faster than offset, but must start first with the same value as query offset */
+            this.imagePageCounter = query.offset;
         }
         this.loader = loader;
-        this.nodeStack = new WeakPriorityBlockingQueue<URIMetadataNode>(max_results_node, false);
+        this.nodeStack = new WeakPriorityBlockingQueue<>(max_results_node, false);
         this.maxExpectedRemoteReferences = new AtomicInteger(0);
         this.expectedRemoteReferences = new AtomicInteger(0);
         this.excludeintext_image = Switchboard.getSwitchboard().getConfigBool("search.excludeintext.image", true);
-        
+
         // prepare configured search navigation
         final Set<String> navConfigs = Switchboard.getSwitchboard().getConfigSet("search.navigation");
-        
+
         boolean locationNavEnabled = false;
         boolean protocolNavEnabled = false;
         boolean topicsNavEnabled = false;
         boolean dateNavEnabled = false;
         for(final String navConfig : navConfigs) {
-        	final String navName = NavigatorPlugins.getNavName(navConfig);
-        	if("location".equals(navName)) {
-        		locationNavEnabled = true;
-        	} else if("protocol".equals(navName)) {
-        		protocolNavEnabled = true;
-        	} else if("topics".equals(navName)) {
-        		topicsNavEnabled = true;
-        	} else if("date".equals(navName)) {
-        		dateNavEnabled = true;
-        	}
+            final String navName = NavigatorPlugins.getNavName(navConfig);
+            if("location".equals(navName)) {
+                locationNavEnabled = true;
+            } else if("protocol".equals(navName)) {
+                protocolNavEnabled = true;
+            } else if("topics".equals(navName)) {
+                topicsNavEnabled = true;
+            } else if("date".equals(navName)) {
+                dateNavEnabled = true;
+            }
         }
-        
+
         this.locationNavigator = locationNavEnabled ? new ConcurrentScoreMap<>(this) : null;
         this.protocolNavigator = protocolNavEnabled ? new ConcurrentScoreMap<>(this) : null;
         this.dateNavigator = dateNavEnabled ? new ConcurrentScoreMap<>(this) : null;
         this.topicNavigatorCount = topicsNavEnabled ? MAX_TOPWORDS : 0;
-        this.vocabularyNavigator = new TreeMap<String, ScoreMap<String>>();
+        this.vocabularyNavigator = new TreeMap<>();
         // prepare configured search navigation (plugins)
         this.navigatorPlugins = NavigatorPlugins.initFromCfgStrings(navConfigs);
         if(this.navigatorPlugins != null) {
-        	for(final Navigator nav : this.navigatorPlugins.values()) {
-        		nav.setUpdatesListener(this);
-        	}
+            for(final Navigator nav : this.navigatorPlugins.values()) {
+                nav.setUpdatesListener(this);
+            }
         }
 
-        this.snippets = new ConcurrentHashMap<String, LinkedHashSet<String>>(); 
+        this.snippets = new ConcurrentHashMap<>();
         this.secondarySearchSuperviser = (this.query.getQueryGoal().getIncludeHashes().size() > 1) ? new SecondarySearchSuperviser(this) : null; // generate abstracts only for combined searches
         if (this.secondarySearchSuperviser != null) this.secondarySearchSuperviser.start();
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
-        this.IAResults = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
-        this.IACount = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
-        this.heuristics = new TreeMap<byte[], HeuristicResult>(Base64Order.enhancedCoder);
+        this.IAResults = new TreeMap<>(Base64Order.enhancedCoder);
+        this.IACount = new TreeMap<>(Base64Order.enhancedCoder);
+        this.heuristics = new TreeMap<>(Base64Order.enhancedCoder);
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.remote = (peers != null && peers.sizeConnected() > 0) && (this.query.domType == QueryParams.Searchdom.CLUSTER || (this.query.domType == QueryParams.Searchdom.GLOBAL && Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false)));
@@ -415,15 +413,15 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
         // do a soft commit for fresh results
         //query.getSegment().fulltext().commit(true);
-        
+
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchInclusion = null;
-        this.ref = new ConcurrentScoreMap<String>(this);
+        this.ref = new ConcurrentScoreMap<>(this);
         this.maxtime = query.maxtime;
-        this.rwiStack = new WeakPriorityBlockingQueue<WordReferenceVars>(max_results_rwi, false);
-        this.doubleDomCache = new ConcurrentHashMap<String, WeakPriorityBlockingQueue<WordReferenceVars>>();
+        this.rwiStack = new WeakPriorityBlockingQueue<>(max_results_rwi, false);
+        this.doubleDomCache = new ConcurrentHashMap<>();
         this.flagcount = new int[32];
         for ( int i = 0; i < 32; i++ ) {
             this.flagcount[i] = 0;
@@ -435,26 +433,26 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         this.receivedRemoteReferences = new AtomicInteger(0);
         this.order = new ReferenceOrder(this.query.ranking, this.query.targetlang);
         this.urlhashes = new RowHandleSet(Word.commonHashLength, Word.commonHashOrder, 100);
-        this.taggingPredicates = new HashMap<String, String>();
-        for (Tagging t: LibraryProvider.autotagging.getVocabularies()) {
+        this.taggingPredicates = new HashMap<>();
+        for (final Tagging t: LibraryProvider.autotagging.getVocabularies()) {
             this.taggingPredicates.put(t.getName(), t.getPredicate());
         }
 
         // start a local solr search
         if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-        	final boolean useSolrFacets = true;
-			this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
-					this.query.solrQuery(this.query.contentdom, this.query.isStrictContentDom(), useSolrFacets, this.excludeintext_image), this.query.offset,
-					this.query.itemsPerPage, null /* this peer */, 0, Switchboard.urlBlacklist, useSolrFacets, true);
+            final boolean useSolrFacets = true;
+            this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
+                    this.query.solrQuery(this.query.contentdom, this.query.isStrictContentDom(), useSolrFacets, this.excludeintext_image), this.query.offset,
+                    this.query.itemsPerPage, null /* this peer */, 0, Switchboard.urlBlacklist, useSolrFacets, true);
         }
         this.localsolroffset = this.query.offset + this.query.itemsPerPage;
-        
+
         // start a local RWI search concurrently
         this.rwiProcess = null;
         if (query.getSegment().connectedRWI() && !Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_DHT_OFF, false)) {
             // we start the local search only if this peer is doing a remote search or when it is doing a local search and the peer is old
-            rwiProcess = new RWIProcess(this.localsolrsearch);
-            rwiProcess.start();
+            this.rwiProcess = new RWIProcess(this.localsolrsearch);
+            this.rwiProcess.start();
         }
 
         if (this.remote) {
@@ -465,8 +463,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 this.primarySearchThreadsL = null;
                 this.nodeSearchThreads = null;
             } else {
-                this.primarySearchThreadsL = new ArrayList<RemoteSearch>();
-                this.nodeSearchThreads = new ArrayList<Thread>();
+                this.primarySearchThreadsL = new ArrayList<>();
+                this.nodeSearchThreads = new ArrayList<>();
                 // start this concurrently because the remote search needs an enumeration
                 // of the remote peers which may block in some cases when i.e. DHT is active
                 // at the same time.
@@ -474,20 +472,20 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                     @Override
                     public void run() {
                         RemoteSearch.primaryRemoteSearches(
-                        	SearchEvent.this,
-                            0, remote_maxcount,
-                            remote_maxtime,
-                            Switchboard.urlBlacklist,
-                            (SearchEvent.this.query.domType == QueryParams.Searchdom.GLOBAL) ? null : preselectedPeerHashes);
+                                SearchEvent.this,
+                                0, remote_maxcount,
+                                remote_maxtime,
+                                Switchboard.urlBlacklist,
+                                (SearchEvent.this.query.domType == QueryParams.Searchdom.GLOBAL) ? null : preselectedPeerHashes);
                     }
                 }.start();
             }
             if ( this.primarySearchThreadsL != null ) {
                 ConcurrentLog.fine("SEARCH_EVENT", "STARTING "
-                    + this.primarySearchThreadsL.size()
-                    + " THREADS TO CATCH EACH "
-                    + remote_maxcount
-                    + " URLs");
+                        + this.primarySearchThreadsL.size()
+                        + " THREADS TO CATCH EACH "
+                        + remote_maxcount
+                        + " URLs");
                 EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.REMOTESEARCH_START, "", this.primarySearchThreadsL.size(), System.currentTimeMillis() - timer), false);
                 // finished searching
                 ConcurrentLog.fine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + this.primarySearchThreadsL.size() + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
@@ -502,7 +500,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             if ( generateAbstracts ) {
                 // we need the results now
                 try {
-                    if (rwiProcess != null && query.getSegment().connectedRWI()) rwiProcess.join();
+                    if (this.rwiProcess != null && query.getSegment().connectedRWI()) this.rwiProcess.join();
                 } catch (final Throwable e ) {
                 }
                 // compute index abstracts
@@ -535,7 +533,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 // give process time to accumulate a certain amount of data
                 // before a reading process wants to get results from it
                 try {
-                    if (rwiProcess != null && query.getSegment().connectedRWI() && rwiProcess.isAlive()) rwiProcess.join(100);
+                    if (this.rwiProcess != null && query.getSegment().connectedRWI() && this.rwiProcess.isAlive()) this.rwiProcess.join(100);
                 } catch (final Throwable e ) {
                 }
                 // this will reduce the maximum waiting time until results are available to 100 milliseconds
@@ -547,14 +545,14 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         this.deleteIfSnippetFail = deleteIfSnippetFail;
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
-        this.resultList = new WeakPriorityBlockingQueue<URIMetadataNode>(Math.max(max_results_node, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
+        this.resultList = new WeakPriorityBlockingQueue<>(Math.max(max_results_node, 10 * query.itemsPerPage()), true); // this is the result, enriched with snippets, ranked and ordered by ranking
 
         // snippets do not need to match with the complete query hashes,
-        // only with the query minus the stopwords which had not been used for the search 
+        // only with the query minus the stopwords which had not been used for the search
         boolean filtered = false;
         // check if query contains stopword
         if (Switchboard.stopwordHashes != null) {
-            Iterator<byte[]> it = query.getQueryGoal().getIncludeHashes().iterator();
+            final Iterator<byte[]> it = query.getQueryGoal().getIncludeHashes().iterator();
             while (it.hasNext()) {
                 if (Switchboard.stopwordHashes.contains((it.next()))) {
                     filtered = true;
@@ -562,11 +560,11 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 }
             }
         }
-        this.snippetFetchWordHashes = query.getQueryGoal().getIncludeHashes().clone();        
+        this.snippetFetchWordHashes = query.getQueryGoal().getIncludeHashes().clone();
         if (filtered) { // remove stopwords
             this.snippetFetchWordHashes.excludeDestructive(Switchboard.stopwordHashes);
         }
-        
+
         this.snippetFetchWords = query.getQueryGoal().getIncludeWordsSet();
         // remove stopwords
         this.snippetFetchWords.removeAll(Switchboard.stopwords);
@@ -586,39 +584,39 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
      * A concurrent task to perform the current search query on the local RWI.
      */
     private class RWIProcess extends Thread {
-    
+
         final Thread waitForThread;
-        
+
         public RWIProcess(final Thread waitForThread) {
             super("SearchEvent.RWIProcess(" + (waitForThread != null ? waitForThread.getName() : "") + ")");
             this.waitForThread = waitForThread;
         }
-        
+
         /**
          * Query the local RWI and feed the search event with the obtained results.
          */
         @Override
         public void run() {
-    
-            if (query.getSegment().termIndex() == null) return; // nothing to do; this index is not used
-            
+
+            if (SearchEvent.this.query.getSegment().termIndex() == null) return; // nothing to do; this index is not used
+
             // do a search
             oneFeederStarted();
-    
+
             // sort the local containers and truncate it to a limited count,
             // so following sortings together with the global results will be fast
             try {
                 final long timer = System.currentTimeMillis();
                 TermSearch<WordReference> search =
-                    SearchEvent.this.query
+                        SearchEvent.this.query
                         .getSegment()
                         .termIndex()
                         .query(
                                 SearchEvent.this.query.getQueryGoal().getIncludeHashes(),
                                 SearchEvent.this.query.getQueryGoal().getExcludeHashes(),
-                            null,
-                            Segment.wordReferenceFactory,
-                            SearchEvent.this.query.maxDistance);
+                                null,
+                                Segment.wordReferenceFactory,
+                                SearchEvent.this.query.maxDistance);
                 SearchEvent.this.localSearchInclusion = search.inclusion();
                 ReferenceContainer<WordReference> index = search.joined();
                 if ( !index.isEmpty() ) {
@@ -626,22 +624,22 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                     if (this.waitForThread != null && this.waitForThread.isAlive()) {
                         this.waitForThread.join();
                     }
-                    
+
                     // add the index to the result
                     int successcount = addRWIs(index, true, "local index: " + SearchEvent.this.query.getSegment().getLocation(), index.size(), SearchEvent.this.maxtime);
                     if (successcount == 0 &&
-                        SearchEvent.this.query.getQueryGoal().getIncludeHashes().has(Segment.catchallHash) &&
-                        SearchEvent.this.query.modifier.sitehost != null && SearchEvent.this.query.modifier.sitehost.length() > 0
-                        ) {
+                            SearchEvent.this.query.getQueryGoal().getIncludeHashes().has(Segment.catchallHash) &&
+                            SearchEvent.this.query.modifier.sitehost != null && SearchEvent.this.query.modifier.sitehost.length() > 0
+                            ) {
                         // try again with sitehost
-                        String newGoal = Domains.getSmartSLD(SearchEvent.this.query.modifier.sitehost);
+                        final String newGoal = Domains.getSmartSLD(SearchEvent.this.query.modifier.sitehost);
                         search =
                                 SearchEvent.this.query
-                                    .getSegment()
-                                    .termIndex()
-                                    .query(
-                                            QueryParams.hashes2Set(ASCII.String(Word.word2hash(newGoal))),
-                                            SearchEvent.this.query.getQueryGoal().getExcludeHashes(),
+                                .getSegment()
+                                .termIndex()
+                                .query(
+                                        QueryParams.hashes2Set(ASCII.String(Word.word2hash(newGoal))),
+                                        SearchEvent.this.query.getQueryGoal().getExcludeHashes(),
                                         null,
                                         Segment.wordReferenceFactory,
                                         SearchEvent.this.query.maxDistance);
@@ -655,11 +653,11 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                             EventTracker.EClass.SEARCH,
                             new ProfilingGraph.EventSearch(
                                     SearchEvent.this.query.id(true),
-                                SearchEventType.JOIN,
-                                SearchEvent.this.query.getQueryGoal().getQueryString(false),
-                                successcount,
-                                System.currentTimeMillis() - timer),
-                                false);
+                                    SearchEventType.JOIN,
+                                    SearchEvent.this.query.getQueryGoal().getQueryString(false),
+                                    successcount,
+                                    System.currentTimeMillis() - timer),
+                            false);
                     SearchEvent.this.addFinalize();
                 }
             } catch (final Exception e ) {
@@ -671,11 +669,11 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     }
 
     public int addRWIs(
-        final ReferenceContainer<WordReference> index,
-        final boolean local,
-        final String resourceName,
-        final int fullResource,
-        final long maxtime) {
+            final ReferenceContainer<WordReference> index,
+            final boolean local,
+            final String resourceName,
+            final int fullResource,
+            final long maxtime) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         //Log.logInfo("SearchEvent", "added a container, size = " + index.size());
@@ -695,20 +693,20 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
         // normalize entries
         final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index, maxtime, local);
-        int is = index.size();
+        final int is = index.size();
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
-            this.query.id(true),
-            SearchEventType.NORMALIZING,
-            resourceName,
-            is,
-            System.currentTimeMillis() - timer), false);
+                this.query.id(true),
+                SearchEventType.NORMALIZING,
+                resourceName,
+                is,
+                System.currentTimeMillis() - timer), false);
         if (!local) this.receivedRemoteReferences.addAndGet(is);
 
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
 
         // apply all constraints
-        long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
+        final long timeout = maxtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         int successcounter = 0;
         try {
             WordReferenceVars iEntry;
@@ -716,7 +714,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             String acceptableAlternativeSitehash = null;
             if (this.query.modifier.sitehost != null && this.query.modifier.sitehost.length() > 0) try {
                 acceptableAlternativeSitehash = DigestURL.hosthash(this.query.modifier.sitehost.startsWith("www.") ? this.query.modifier.sitehost.substring(4) : "www." + this.query.modifier.sitehost, 80);
-            } catch (MalformedURLException e1) {}
+            } catch (final MalformedURLException e1) {}
             pollloop: while ( true ) {
                 remaining = timeout - System.currentTimeMillis();
                 if (remaining <= 0) {
@@ -738,9 +736,9 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                     if (log.isFine()) log.fine("dropped RWI: doublecheck");
                     continue pollloop;
                 }
-                
+
                 // increase flag counts
-                Bitfield flags = iEntry.flags();
+                final Bitfield flags = iEntry.flags();
                 for (int j = 0; j < 32; j++) {
                     if (flags.get(j)) this.flagcount[j]++;
                 }
@@ -753,37 +751,37 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
                 // check document domain
                 if (this.query.contentdom.getCode() > 0) {
-                	boolean domainMatch = true;
-                	if(this.query.isStrictContentDom()) {
-                		if((this.query.contentdom == ContentDomain.AUDIO && iEntry.getType() != Response.DT_AUDIO) || 
+                    boolean domainMatch = true;
+                    if(this.query.isStrictContentDom()) {
+                        if((this.query.contentdom == ContentDomain.AUDIO && iEntry.getType() != Response.DT_AUDIO) ||
                                 (this.query.contentdom == ContentDomain.VIDEO && iEntry.getType() != Response.DT_MOVIE) ||
                                 (this.query.contentdom == ContentDomain.IMAGE && iEntry.getType() != Response.DT_IMAGE) ||
                                 (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
-                                	domainMatch = false;    	
-                                }
-                	} else if((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
-                                (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
-                                (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
-                                (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
-                			domainMatch = false;
-                	}
-                	if(!domainMatch) {
-                		if (log.isFine()) {
-                			log.fine("dropped RWI: contentdom fail");
-                		}
-                		continue pollloop;
-                	}
+                            domainMatch = false;
+                        }
+                    } else if((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) ||
+                            (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
+                            (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
+                            (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
+                        domainMatch = false;
+                    }
+                    if(!domainMatch) {
+                        if (log.isFine()) {
+                            log.fine("dropped RWI: contentdom fail");
+                        }
+                        continue pollloop;
+                    }
                 }
-                
+
                 // check language
-				if (this.query.modifier.language != null && !this.query.modifier.language.isEmpty()
-						&& !this.query.modifier.language.equals(iEntry.getLanguageString())) {
-                	if (log.isFine()) {
-                		log.fine("dropped RWI: language constraint = " + this.query.modifier.language);
-                	}
-                	continue pollloop;
+                if (this.query.modifier.language != null && !this.query.modifier.language.isEmpty()
+                        && !this.query.modifier.language.equals(iEntry.getLanguageString())) {
+                    if (log.isFine()) {
+                        log.fine("dropped RWI: language constraint = " + this.query.modifier.language);
+                    }
+                    continue pollloop;
                 }
-                
+
                 // count domZones
                 //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
 
@@ -806,7 +804,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 this.urlhashes.putUnique(iEntry.urlhash());
                 rankingtryloop: while (true) {
                     try {
-                        this.rwiStack.put(new ReverseElement<WordReferenceVars>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
+                        this.rwiStack.put(new ReverseElement<>(iEntry, this.order.cardinal(iEntry))); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
                     } catch (final ArithmeticException e ) {
                         // this may happen if the concurrent normalizer changes values during cardinal computation
@@ -816,25 +814,24 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 }
                 // increase counter for statistics
                 if (local) this.local_rwi_available.incrementAndGet(); else this.remote_rwi_available.incrementAndGet();
-                
+
                 successcounter++;
             }
             if (System.currentTimeMillis() >= timeout) ConcurrentLog.warn("SearchEvent", "rwi normalization ended with timeout = " + maxtime);
 
-        } catch (final InterruptedException e ) {
-        } catch (final SpaceExceededException e ) {
+        } catch (final InterruptedException | SpaceExceededException e ) {
         }
 
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(
-            this.query.id(true),
-            SearchEventType.PRESORT,
-            resourceName,
-            index.size(),
-            System.currentTimeMillis() - timer), false);
+                this.query.id(true),
+                SearchEventType.PRESORT,
+                resourceName,
+                index.size(),
+                System.currentTimeMillis() - timer), false);
         return successcounter;
     }
-    
+
     public long getEventTime() {
         return this.eventTime;
     }
@@ -847,7 +844,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
         // stop all threads
         if (this.localsolrsearch != null) {
-            if (localsolrsearch.isAlive()) synchronized (this.localsolrsearch) {this.localsolrsearch.interrupt();}
+            if (this.localsolrsearch.isAlive()) synchronized (this.localsolrsearch) {this.localsolrsearch.interrupt();}
         }
         if (this.nodeSearchThreads != null) {
             for (final Thread search : this.nodeSearchThreads) {
@@ -924,11 +921,11 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             return this.heuristics.get(urlhash);
         }
     }
-    
+
     /**
      * Add result entries to this nodes stack and update eventual navigators counters.
      * @param nodeList a list of entries from a Solr instance
-     * @param facets a map from a field name to scored values (aka Solr facet). May be null : in that case the navigators counters are updated one by one when inserting each result in the nodes stack. 
+     * @param facets a map from a field name to scored values (aka Solr facet). May be null : in that case the navigators counters are updated one by one when inserting each result in the nodes stack.
      * @param solrsnippets a map from urlhash to snippet text
      * @param local true when the nodeList comes from the local Solr
      * @param resourceName the name of the data source to use for monitoring in the event tracker
@@ -936,16 +933,16 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
      * @param incrementNavigators when true, increment event navigators either with facet counts or with individual results
      */
     public void addNodes(
-        final List<URIMetadataNode> nodeList,
-        final Map<String, ReversibleScoreMap<String>> facets, 
-        final Map<String, LinkedHashSet<String>> solrsnippets,
-        final boolean local,
-        final String resourceName,
-        final int fullResource,
-        final boolean incrementNavigators) {
+            final List<URIMetadataNode> nodeList,
+            final Map<String, ReversibleScoreMap<String>> facets,
+            final Map<String, LinkedHashSet<String>> solrsnippets,
+            final boolean local,
+            final String resourceName,
+            final int fullResource,
+            final boolean incrementNavigators) {
 
         this.addBegin();
-        
+
         // check if all results have snippets
         /*
         for (URIMetadataNode node: nodeList) {
@@ -953,7 +950,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 log.logInfo("no snippet from Solr for " + node.url().toNormalform(true));
             }
         }
-        */
+         */
         this.snippets.putAll(solrsnippets);
         assert (nodeList != null);
         if (nodeList.isEmpty()) return;
@@ -969,7 +966,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         long timer = System.currentTimeMillis();
 
         // normalize entries
-        int is = nodeList.size();
+        final int is = nodeList.size();
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.NORMALIZING, resourceName, is, System.currentTimeMillis() - timer), false);
         if (!local) {
             this.receivedRemoteReferences.addAndGet(is);
@@ -980,23 +977,23 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
         // collect navigation information from Solr facets when available
         if(incrementNavigators) {
-        	incrNavigatorsFromSolrFacets(facets);
+            incrNavigatorsFromSolrFacets(facets);
         }
-        
+
         // apply all constraints
         try {
-            pollloop: for (URIMetadataNode iEntry: nodeList) {
-            	
+            pollloop: for (final URIMetadataNode iEntry: nodeList) {
+
                 // check url related eventual constraints (protocol, tld, sitehost, and filetype)
-            	final String matchingResult = QueryParams.matchesURL(this.query.modifier, this.query.tld, iEntry.url());
+                final String matchingResult = QueryParams.matchesURL(this.query.modifier, this.query.tld, iEntry.url());
                 if (!matchingResult.isEmpty()) {
                     if (log.isFine()) {
-                    	log.fine("dropped Node: " + matchingResult);
+                        log.fine("dropped Node: " + matchingResult);
                     }
                     updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
                     continue pollloop;
                 }
-            	
+
                 if ( !this.query.urlMask_isCatchall && this.query.urlMaskPattern != null) {
                     // check url mask, only when not redundant with query modifier and tld constraints
                     if (!iEntry.matches(this.query.urlMaskPattern)) {
@@ -1005,7 +1002,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                         continue pollloop;
                     }
                 }
-                
+
                 // doublecheck for urls
                 if (this.urlhashes.has(iEntry.hash())) {
                     if (log.isFine()) log.fine("dropped Node: double check");
@@ -1019,7 +1016,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 }
 
                 // check constraints
-                Bitfield flags = iEntry.flags();
+                final Bitfield flags = iEntry.flags();
                 if (!this.testFlags(flags)) {
                     if (log.isFine()) log.fine("dropped Node: flag test");
                     updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
@@ -1028,28 +1025,28 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
                 // check document domain
                 if (this.query.contentdom.getCode() > 0) {
-                	boolean domainMatch = true;
-                	if(this.query.isStrictContentDom()) {
+                    boolean domainMatch = true;
+                    if(this.query.isStrictContentDom()) {
                         if(this.query.contentdom != iEntry.getContentDomain()) {
-                        	domainMatch = false;
+                            domainMatch = false;
                         }
-                	} else if((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) || 
-                     (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
-                     (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
-                     (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
-                		domainMatch = false;
+                    } else if((this.query.contentdom == ContentDomain.AUDIO && !(flags.get(Tokenizer.flag_cat_hasaudio))) ||
+                            (this.query.contentdom == ContentDomain.VIDEO && !(flags.get(Tokenizer.flag_cat_hasvideo))) ||
+                            (this.query.contentdom == ContentDomain.IMAGE && !(flags.get(Tokenizer.flag_cat_hasimage))) ||
+                            (this.query.contentdom == ContentDomain.APP && !(flags.get(Tokenizer.flag_cat_hasapp)))) {
+                        domainMatch = false;
                     }
-                	if(!domainMatch) {
-                		if (log.isFine()) {
-                			log.fine("dropped Node: content domain does not match");
-                		}
-                		updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
-                		continue pollloop;
-                	}
+                    if(!domainMatch) {
+                        if (log.isFine()) {
+                            log.fine("dropped Node: content domain does not match");
+                        }
+                        updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
+                        continue pollloop;
+                    }
                 }
-                
+
                 // filter out media links in text search, if wanted
-                String ext = MultiProtocolURL.getFileExtension(iEntry.url().getFileName());
+                final String ext = MultiProtocolURL.getFileExtension(iEntry.url().getFileName());
                 if (this.query.contentdom == ContentDomain.TEXT && Classification.isImageExtension(ext) && this.excludeintext_image) {
                     if (log.isFine()) log.fine("dropped Node: file name domain does not match");
                     updateCountsOnSolrEntryToEvict(iEntry, facets, local, !incrementNavigators);
@@ -1097,12 +1094,12 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                         long score;
                         // determine nodestack ranking (will be altered by postranking)
                         // so far Solr score is used (with abitrary factor to get value similar to rwi ranking values)
-                        Float scorex = (Float) iEntry.getFieldValue("score"); // this is a special field containing the ranking score of a Solr search result
+                        final Float scorex = (Float) iEntry.getFieldValue("score"); // this is a special field containing the ranking score of a Solr search result
                         if (scorex != null && scorex > 0)
                             score = (long) ((1000000.0f * scorex) - iEntry.urllength()); // we modify the score here since the solr score is equal in many cases and then the order would simply depend on the url hash which would be silly
                         else
                             score = this.order.cardinal(iEntry);
-                        this.nodeStack.put(new ReverseElement<URIMetadataNode>(iEntry, score)); // inserts the element and removes the worst (which is smallest)
+                        this.nodeStack.put(new ReverseElement<>(iEntry, score)); // inserts the element and removes the worst (which is smallest)
                         break rankingtryloop;
                     } catch (final ArithmeticException e ) {
                         // this may happen if the concurrent normalizer changes values during cardinal computation
@@ -1111,12 +1108,12 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 }
                 // increase counter for statistics
                 if (!local) {
-                	this.remote_solr_available.incrementAndGet();
+                    this.remote_solr_available.incrementAndGet();
                 }
-                
+
                 // collect navigation information not available in facets
                 if(incrementNavigators) {
-                	incrNavigatorsFromSingleDocument(iEntry, facets);
+                    incrNavigatorsFromSingleDocument(iEntry, facets);
                 }
             }
         } catch (final SpaceExceededException e ) {
@@ -1128,157 +1125,157 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
      * Increment this event eventual navigators with the given facets processed by a Solr instance
      * @param facets facets counts from a Solr instance
      */
-	private void incrNavigatorsFromSolrFacets(final Map<String, ReversibleScoreMap<String>> facets) {
-		if(facets != null && !facets.isEmpty()) {
-	        /* Iterate over active navigator plugins to let them update the counters */
-			for (String s : this.navigatorPlugins.keySet()) {
-				Navigator navi = this.navigatorPlugins.get(s);
-				if (navi != null) {
-					navi.incFacet(facets);
-				}
-			}
+    private void incrNavigatorsFromSolrFacets(final Map<String, ReversibleScoreMap<String>> facets) {
+        if(facets != null && !facets.isEmpty()) {
+            /* Iterate over active navigator plugins to let them update the counters */
+            for (final String s : this.navigatorPlugins.keySet()) {
+                final Navigator navi = this.navigatorPlugins.get(s);
+                if (navi != null) {
+                    navi.incFacet(facets);
+                }
+            }
 
-			ReversibleScoreMap<String> fcts;
-			if (this.locationNavigator != null) {
-			    /* Is is still relevant? It looks like this nav is currently never filled, as a constraint on coordinates 
-				    * is expressed as a spatial filter not producing facets counts (see QueryParams.getFacetsFilterQueries()). */
-				fcts = facets.get(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
-				if (fcts != null) {
-					for (String coordinate: fcts) {
-						int hc = fcts.get(coordinate);
-						if (hc == 0) continue;
-						this.locationNavigator.inc(coordinate, hc);
-					}
-				}
-			}
-        
-			if (this.dateNavigator != null) {
-				fcts = facets.get(CollectionSchema.dates_in_content_dts.getSolrFieldName());
-				if (fcts != null) this.dateNavigator.inc(fcts);
-			}
+            ReversibleScoreMap<String> fcts;
+            if (this.locationNavigator != null) {
+                /* Is is still relevant? It looks like this nav is currently never filled, as a constraint on coordinates
+                 * is expressed as a spatial filter not producing facets counts (see QueryParams.getFacetsFilterQueries()). */
+                fcts = facets.get(CollectionSchema.coordinate_p_0_coordinate.getSolrFieldName());
+                if (fcts != null) {
+                    for (final String coordinate: fcts) {
+                        final int hc = fcts.get(coordinate);
+                        if (hc == 0) continue;
+                        this.locationNavigator.inc(coordinate, hc);
+                    }
+                }
+            }
 
-			if (this.protocolNavigator != null) {
-				fcts = facets.get(CollectionSchema.url_protocol_s.getSolrFieldName());
-				if (fcts != null) {
-					// remove all protocols that we don't know
-					Iterator<String> i = fcts.iterator();
-					while (i.hasNext()) {
-						String protocol = i.next();
-						if (PROTOCOL_NAVIGATOR_SUPPORTED_VALUES.indexOf(protocol) < 0) {
-							i.remove();
-						}
-					}
-					this.protocolNavigator.inc(fcts);
-				}
-			}
-        
-			// get the vocabulary navigation
-			Set<String> genericFacets = new LinkedHashSet<>();
-			for (Tagging v: LibraryProvider.autotagging.getVocabularies()) genericFacets.add(v.getName());
-				genericFacets.addAll(ProbabilisticClassifier.getContextNames());
-				for (String vocName: genericFacets) {
-					fcts = facets.get(CollectionSchema.VOCABULARY_PREFIX + vocName + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
-					if (fcts != null) {
-						ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
-						if (vocNav == null) {
-							vocNav = new ConcurrentScoreMap<String>();
-							this.vocabularyNavigator.put(vocName, vocNav);
-						}
-						vocNav.inc(fcts);
-					}
-				}
-			}
-	}
-	
+            if (this.dateNavigator != null) {
+                fcts = facets.get(CollectionSchema.dates_in_content_dts.getSolrFieldName());
+                if (fcts != null) this.dateNavigator.inc(fcts);
+            }
+
+            if (this.protocolNavigator != null) {
+                fcts = facets.get(CollectionSchema.url_protocol_s.getSolrFieldName());
+                if (fcts != null) {
+                    // remove all protocols that we don't know
+                    final Iterator<String> i = fcts.iterator();
+                    while (i.hasNext()) {
+                        final String protocol = i.next();
+                        if (PROTOCOL_NAVIGATOR_SUPPORTED_VALUES.indexOf(protocol) < 0) {
+                            i.remove();
+                        }
+                    }
+                    this.protocolNavigator.inc(fcts);
+                }
+            }
+
+            // get the vocabulary navigation
+            final Set<String> genericFacets = new LinkedHashSet<>();
+            for (final Tagging v: LibraryProvider.autotagging.getVocabularies()) genericFacets.add(v.getName());
+            genericFacets.addAll(ProbabilisticClassifier.getContextNames());
+            for (final String vocName: genericFacets) {
+                fcts = facets.get(CollectionSchema.VOCABULARY_PREFIX + vocName + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
+                if (fcts != null) {
+                    ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+                    if (vocNav == null) {
+                        vocNav = new ConcurrentScoreMap<>();
+                        this.vocabularyNavigator.put(vocName, vocNav);
+                    }
+                    vocNav.inc(fcts);
+                }
+            }
+        }
+    }
+
     /**
      * Increment this event eventual navigators with the given entry, only when the concerned field is not present in facets
      * @param doc a document entry from a Solr source
      * @param facets facets counts from a Solr instance
      */
-	private void incrNavigatorsFromSingleDocument(final URIMetadataNode doc,
-			final Map<String, ReversibleScoreMap<String>> facets) {
-		
-		/* Iterate over active navigator plugins to let them update the counters */
-		for (String s : this.navigatorPlugins.keySet()) {
-			Navigator navi = this.navigatorPlugins.get(s);
-			if (navi != null && facets == null || !facets.containsKey(navi.getIndexFieldName())) {
-				navi.incDoc(doc);
-			}
-		}
+    private void incrNavigatorsFromSingleDocument(final URIMetadataNode doc,
+            final Map<String, ReversibleScoreMap<String>> facets) {
 
-	    /* Note : would it be relevant to update here this.locationNavigator ? 
+        /* Iterate over active navigator plugins to let them update the counters */
+        for (final String s : this.navigatorPlugins.keySet()) {
+            final Navigator navi = this.navigatorPlugins.get(s);
+            if (navi != null && facets == null || !facets.containsKey(navi.getIndexFieldName())) {
+                navi.incDoc(doc);
+            }
+        }
+
+        /* Note : would it be relevant to update here this.locationNavigator ?
 		    		It looks like this nav is currently never filled */
 
-		if (this.dateNavigator != null) {
-			if (facets == null || !facets.containsKey(CollectionSchema.dates_in_content_dts.getSolrFieldName())) {
-				Date[] dates = doc.datesInContent();
-				if (dates != null) {
-					for (final Date date : dates) {
-						if (date != null) {
-							this.dateNavigator.inc(ISO8601Formatter.FORMATTER.format(date));
-						}
-					}
-				}
-			}
-		}
+        if (this.dateNavigator != null) {
+            if (facets == null || !facets.containsKey(CollectionSchema.dates_in_content_dts.getSolrFieldName())) {
+                final Date[] dates = doc.datesInContent();
+                if (dates != null) {
+                    for (final Date date : dates) {
+                        if (date != null) {
+                            this.dateNavigator.inc(ISO8601Formatter.FORMATTER.format(date));
+                        }
+                    }
+                }
+            }
+        }
 
-		if (this.protocolNavigator != null) {
-			if (facets == null || !facets.containsKey(CollectionSchema.url_protocol_s.getSolrFieldName())) {
-				final String protocol = doc.url().getProtocol();
-				// include only protocols supported protocols
-				if (protocol != null && PROTOCOL_NAVIGATOR_SUPPORTED_VALUES.indexOf(protocol) >= 0) {
-					this.protocolNavigator.inc(protocol);	
-				}
-			}
-		}
+        if (this.protocolNavigator != null) {
+            if (facets == null || !facets.containsKey(CollectionSchema.url_protocol_s.getSolrFieldName())) {
+                final String protocol = doc.url().getProtocol();
+                // include only protocols supported protocols
+                if (protocol != null && PROTOCOL_NAVIGATOR_SUPPORTED_VALUES.indexOf(protocol) >= 0) {
+                    this.protocolNavigator.inc(protocol);
+                }
+            }
+        }
 
-		// get the vocabulary navigation
-		if(this.vocabularyNavigator != null) {
-			Set<String> genericFacets = new LinkedHashSet<>();
-			for (Tagging v : LibraryProvider.autotagging.getVocabularies()) {
-				genericFacets.add(v.getName());
-			}
-			genericFacets.addAll(ProbabilisticClassifier.getContextNames());
-			for (String vocName : genericFacets) {
-				final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName + CollectionSchema.VOCABULARY_TERMS_SUFFIX;
-				if (facets == null || !facets.containsKey(fieldName)) {
-					incrementVocNavigator(doc, vocName, fieldName);
-				}
-			}
-		}
-	}
+        // get the vocabulary navigation
+        if(this.vocabularyNavigator != null) {
+            final Set<String> genericFacets = new LinkedHashSet<>();
+            for (final Tagging v : LibraryProvider.autotagging.getVocabularies()) {
+                genericFacets.add(v.getName());
+            }
+            genericFacets.addAll(ProbabilisticClassifier.getContextNames());
+            for (final String vocName : genericFacets) {
+                final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName + CollectionSchema.VOCABULARY_TERMS_SUFFIX;
+                if (facets == null || !facets.containsKey(fieldName)) {
+                    incrementVocNavigator(doc, vocName, fieldName);
+                }
+            }
+        }
+    }
 
-	/**
-	 * Increment a vocabulary navigator with the given document
-	 * @param doc a document entry. Must not be null.
-	 * @param vocName the name of the vocabulary. Must not be null.
-	 * @param fieldName the name of the field eventually holding the vocabulary information in the document entry
-	 */
-	protected void incrementVocNavigator(final URIMetadataNode doc, final String vocName, final String fieldName) {
-		final Object docValue = doc.getFieldValue(fieldName);
-		if(docValue instanceof String) {
-			ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
-			if (vocNav == null) {
-				vocNav = new ConcurrentScoreMap<String>();
-				this.vocabularyNavigator.put(vocName, vocNav);
-			}
-			vocNav.inc((String)docValue);
-		} else if(docValue instanceof Collection) {
-			if (!((Collection<?>) docValue).isEmpty()) {
-				ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
-				if (vocNav == null) {
-					vocNav = new ConcurrentScoreMap<String>();
-					this.vocabularyNavigator.put(vocName, vocNav);
-				}
-				for (final Object singleDocValue : (Collection<?>) docValue) {
-					if (singleDocValue instanceof String) {
-						vocNav.inc((String) singleDocValue);
-					}
-				}
-			}
-		}
-	}
-    
+    /**
+     * Increment a vocabulary navigator with the given document
+     * @param doc a document entry. Must not be null.
+     * @param vocName the name of the vocabulary. Must not be null.
+     * @param fieldName the name of the field eventually holding the vocabulary information in the document entry
+     */
+    protected void incrementVocNavigator(final URIMetadataNode doc, final String vocName, final String fieldName) {
+        final Object docValue = doc.getFieldValue(fieldName);
+        if(docValue instanceof String) {
+            ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+            if (vocNav == null) {
+                vocNav = new ConcurrentScoreMap<>();
+                this.vocabularyNavigator.put(vocName, vocNav);
+            }
+            vocNav.inc((String)docValue);
+        } else if(docValue instanceof Collection) {
+            if (!((Collection<?>) docValue).isEmpty()) {
+                ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+                if (vocNav == null) {
+                    vocNav = new ConcurrentScoreMap<>();
+                    this.vocabularyNavigator.put(vocName, vocNav);
+                }
+                for (final Object singleDocValue : (Collection<?>) docValue) {
+                    if (singleDocValue instanceof String) {
+                        vocNav.inc((String) singleDocValue);
+                    }
+                }
+            }
+        }
+    }
+
     public void addExpectedRemoteReferences(int x) {
         if ( x > 0 ) {
             this.maxExpectedRemoteReferences.addAndGet(x);
@@ -1306,14 +1303,14 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 rwi = this.rwiStack.poll();
                 if (rwi == null) return null;
                 if (!skipDoubleDom) {
-                    URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi);
+                    final URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi);
                     if (node == null) {
-                    	decrementCounts(rwi.getElement());
-                    	continue pollloop;
+                        decrementCounts(rwi.getElement());
+                        continue pollloop;
                     }
                     return node;
                 }
-        
+
                 // check doubledom
                 final String hosthash = rwi.getElement().hosthash();
                 m = this.doubleDomCache.get(hosthash);
@@ -1322,12 +1319,12 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                         m = this.doubleDomCache.get(hosthash);
                         if (m == null) {
                             // first appearance of dom. we create an entry to signal that one of that domain was already returned
-                            m = new WeakPriorityBlockingQueue<WordReferenceVars>(max_results_rwi, false);
+                            m = new WeakPriorityBlockingQueue<>(max_results_rwi, false);
                             this.doubleDomCache.put(hosthash, m);
-                            URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi);
+                            final URIMetadataNode node = this.query.getSegment().fulltext().getMetadata(rwi);
                             if (node == null) {
-                            	decrementCounts(rwi.getElement());
-                            	continue pollloop;
+                                decrementCounts(rwi.getElement());
+                                continue pollloop;
                             }
                             return node;
                         }
@@ -1338,13 +1335,13 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                     m.put(rwi);
                 }
             }
-    
+
             // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
             if (this.doubleDomCache.isEmpty()) {
                 //Log.logWarning("SearchEvent", "doubleDomCache.isEmpty");
                 return null;
             }
-    
+
             // find best entry from all caches
             WeakPriorityBlockingQueue.Element<WordReferenceVars> bestEntry = null;
             WeakPriorityBlockingQueue.Element<WordReferenceVars> o;
@@ -1370,7 +1367,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 //Log.logWarning("SearchEvent", "bestEntry == null (1)");
                 return null;
             }
-    
+
             // finally remove the best entry from the doubledom cache
             m = this.doubleDomCache.get(bestEntry.getElement().hosthash());
             if (m != null) {
@@ -1390,7 +1387,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             URIMetadataNode node = null;
             try {
                 node = this.query.getSegment().fulltext().getMetadata(bestEntry);
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 ConcurrentLog.logException(e);
             }
             if (node == null) {
@@ -1401,7 +1398,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             return node;
         }
     }
-    
+
     /**
      * get one metadata entry from the ranked results. This will be the 'best' entry so far according to the
      * applied ranking. If there are no more entries left or the timeout limit is reached then null is
@@ -1415,20 +1412,20 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         // returns from the current RWI list the best URL entry and removes this entry from the list
         URIMetadataNode page;
         mainloop: while ((page = pullOneRWI(skipDoubleDom)) != null) {
-        	
+
             // check url related eventual constraints (protocol, tld, sitehost, and filetype)
-        	final String matchingResult = QueryParams.matchesURL(this.query.modifier, this.query.tld, page.url());
+            final String matchingResult = QueryParams.matchesURL(this.query.modifier, this.query.tld, page.url());
             if (!matchingResult.isEmpty()) {
                 if (log.isFine()) {
-                	log.fine("dropped RWI: no match on " + matchingResult);
+                    log.fine("dropped RWI: no match on " + matchingResult);
                 }
                 decrementCounts(page.word());
                 continue;
             }
 
-			if (!this.query.urlMask_isCatchall && this.query.urlMaskPattern != null
-					&& !page.matches(this.query.urlMaskPattern)) {
-            	// check url mask, only when not redundant with query modifier and tld constraints
+            if (!this.query.urlMask_isCatchall && this.query.urlMaskPattern != null
+                    && !page.matches(this.query.urlMaskPattern)) {
+                // check url mask, only when not redundant with query modifier and tld constraints
                 if (log.isFine()) log.fine("dropped RWI: no match with urlMask");
                 decrementCounts(page.word());
                 continue;
@@ -1442,19 +1439,19 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             }
 
             // check content domain
-            ContentDomain contentDomain = page.getContentDomain();
+            final ContentDomain contentDomain = page.getContentDomain();
             if (this.query.contentdom.getCode() > 0 && (
-                (this.query.contentdom == Classification.ContentDomain.IMAGE && contentDomain != Classification.ContentDomain.IMAGE) ||
-                (this.query.contentdom == Classification.ContentDomain.AUDIO && contentDomain != Classification.ContentDomain.AUDIO) ||
-                (this.query.contentdom == Classification.ContentDomain.VIDEO && contentDomain != Classification.ContentDomain.VIDEO) ||
-                (this.query.contentdom == Classification.ContentDomain.APP && contentDomain != Classification.ContentDomain.APP)) && this.query.urlMask_isCatchall) {
+                    (this.query.contentdom == Classification.ContentDomain.IMAGE && contentDomain != Classification.ContentDomain.IMAGE) ||
+                    (this.query.contentdom == Classification.ContentDomain.AUDIO && contentDomain != Classification.ContentDomain.AUDIO) ||
+                    (this.query.contentdom == Classification.ContentDomain.VIDEO && contentDomain != Classification.ContentDomain.VIDEO) ||
+                    (this.query.contentdom == Classification.ContentDomain.APP && contentDomain != Classification.ContentDomain.APP)) && this.query.urlMask_isCatchall) {
                 if (log.isFine()) log.fine("dropped RWI: wrong contentdom = " + this.query.contentdom + ", domain = " + contentDomain);
                 decrementCounts(page.word());
                 continue;
             }
-            
+
             // filter out media links in text search, if wanted
-            String ext = MultiProtocolURL.getFileExtension(page.url().getFileName());
+            final String ext = MultiProtocolURL.getFileExtension(page.url().getFileName());
             if (this.query.contentdom == ContentDomain.TEXT && Classification.isImageExtension(ext) && this.excludeintext_image) {
                 if (log.isFine()) log.fine("dropped RWI: file name domain does not match");
                 continue;
@@ -1462,7 +1459,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
             // filter query modifiers variables (these are host, filetype, protocol, language, author, collection, dates_in_content(on,from,to,timezone) )
 
-            /* check again modifier constraint (language) with the language in the full metadata, 
+            /* check again modifier constraint (language) with the language in the full metadata,
              * that may differ from the one in the reverse word reference which is already checked in addRWIs()*/
             if (this.query.modifier.language != null && !this.query.modifier.language.equals(page.language())) {
                 if (log.isFine()) log.fine("dropped RWI: language constraint = " + this.query.modifier.language);
@@ -1478,9 +1475,9 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             }
 
             // check modifier constraint collection
-            // this is not available in pure RWI entries (but in local or via solr query received metadate/entries), 
+            // this is not available in pure RWI entries (but in local or via solr query received metadate/entries),
             if (this.query.modifier.collection != null) {
-                Collection<Object> docCols = page.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName()); // get multivalued value
+                final Collection<Object> docCols = page.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName()); // get multivalued value
                 if (docCols == null) { // no collection info
                     decrementCounts(page.word());
                     continue;
@@ -1504,25 +1501,15 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 continue;
             }
 
-            // content control
-            if (Switchboard.getSwitchboard().getConfigBool("contentcontrol.enabled", false)) {
-            	FilterEngine f = ContentControlFilterUpdateThread.getNetworkFilter();
-            	if (f != null && !f.isListed(page.url(), null)) {
-                    if (log.isFine()) log.fine("dropped RWI: url is blacklisted in contentcontrol");
-                    decrementCounts(page.word());
-                    continue;
-            	}
-            }
-
             final String pageurl = page.url().toNormalform(true);
             final String pageauthor = page.dc_creator();
             final String pagetitle = page.dc_title().toLowerCase();
 
             // check exclusion
             if (this.query.getQueryGoal().getExcludeSize() != 0 &&
-                ((QueryParams.anymatch(pagetitle, this.query.getQueryGoal().getExcludeWords()))
-                || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.getQueryGoal().getExcludeWords()))
-                || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.getQueryGoal().getExcludeWords())))) {
+                    ((QueryParams.anymatch(pagetitle, this.query.getQueryGoal().getExcludeWords()))
+                            || (QueryParams.anymatch(pageurl.toLowerCase(), this.query.getQueryGoal().getExcludeWords()))
+                            || (QueryParams.anymatch(pageauthor.toLowerCase(), this.query.getQueryGoal().getExcludeWords())))) {
                 if (log.isFine()) log.fine("dropped RWI: no match with query goal exclusion");
                 decrementCounts(page.word());
                 continue;
@@ -1551,75 +1538,75 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             // check geo coordinates
             double lat, lon;
             if (this.query.radius > 0.0d && this.query.lat != 0.0d && this.query.lon != 0.0d && (lat = page.lat()) != 0.0d && (lon = page.lon()) != 0.0d) {
-                double latDelta = this.query.lat - lat;
-                double lonDelta = this.query.lon - lon;
-                double distance = Math.sqrt(latDelta * latDelta + lonDelta * lonDelta); // pythagoras
+                final double latDelta = this.query.lat - lat;
+                final double lonDelta = this.query.lon - lon;
+                final double distance = Math.sqrt(latDelta * latDelta + lonDelta * lonDelta); // pythagoras
                 if (distance > this.query.radius) {
                     if (log.isFine()) log.fine("dropped RWI: radius constraint");
                     decrementCounts(page.word());
                     continue;
                 }
             }
-                
+
             // check vocabulary terms (metatags) {only available in Solr index as vocabulary_xxyyzzz_sxt field}
             // TODO: vocabulary is only valid and available in local Solr index (consider to auto-switch to Searchdom.LOCAL)
             if (this.query.metatags != null && !this.query.metatags.isEmpty()) {
-                tagloop: for (Tagging.Metatag tag : this.query.metatags) {
-                    SolrDocument sdoc = page;
+                tagloop: for (final Tagging.Metatag tag : this.query.metatags) {
+                    final SolrDocument sdoc = page;
                     if (sdoc != null) {
-                        Collection<Object> tagvalues = sdoc.getFieldValues(CollectionSchema.VOCABULARY_PREFIX + tag.getVocabularyName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
+                        final Collection<Object> tagvalues = sdoc.getFieldValues(CollectionSchema.VOCABULARY_PREFIX + tag.getVocabularyName() + CollectionSchema.VOCABULARY_TERMS_SUFFIX);
                         if (tagvalues != null && tagvalues.contains(tag.getObject())) {
-                            continue tagloop; // metatag exists check next tag (filter may consist of several tags)                            
-                        } 
+                            continue tagloop; // metatag exists check next tag (filter may consist of several tags)
+                        }
                     } // if we reach this point the metatag was not found (= drop entry)
                     if (log.isFine()) log.fine("dropped RWI: url not tagged with vocabulary " + tag.getVocabularyName());
                     decrementCounts(page.word());
                     continue mainloop;
                 }
             }
-            
+
             // from here: collect navigation information
             // TODO: it may be a little bit late here, to update navigator counters
 
             // iterate over active navigator plugins (the rwi metadata may contain the field the plugin counts)
-            for (String s : this.navigatorPlugins.keySet()) {
-                Navigator navi = this.navigatorPlugins.get(s);
+            for (final String s : this.navigatorPlugins.keySet()) {
+                final Navigator navi = this.navigatorPlugins.get(s);
                 if (navi != null) {
                     navi.incDoc(page);
                 }
             }
-            
+
             if(this.protocolNavigator != null && page.url() != null) {
-            	final String protocol = page.url().getProtocol();
-            	if(protocol != null) {
-            		this.protocolNavigator.inc(protocol);
-            	}
+                final String protocol = page.url().getProtocol();
+                if(protocol != null) {
+                    this.protocolNavigator.inc(protocol);
+                }
             }
-            
+
             if(this.dateNavigator != null) {
-				Date[] dates = page.datesInContent();
-				if (dates != null) {
-					for (final Date date : dates) {
-						if (date != null) {
-							this.dateNavigator.inc(ISO8601Formatter.FORMATTER.format(date));
-						}
-					}
-				}
+                final Date[] dates = page.datesInContent();
+                if (dates != null) {
+                    for (final Date date : dates) {
+                        if (date != null) {
+                            this.dateNavigator.inc(ISO8601Formatter.FORMATTER.format(date));
+                        }
+                    }
+                }
             }
-            
-    		// handle the vocabulary navigator
-			if (this.vocabularyNavigator != null) {
-				Set<String> genericFacets = new LinkedHashSet<>();
-				for (Tagging v : LibraryProvider.autotagging.getVocabularies()) {
-					genericFacets.add(v.getName());
-				}
-				genericFacets.addAll(ProbabilisticClassifier.getContextNames());
-				for (final String vocName : genericFacets) {
-					final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName
-							+ CollectionSchema.VOCABULARY_TERMS_SUFFIX;
-					incrementVocNavigator(page, vocName, fieldName);
-				}
-			}
+
+            // handle the vocabulary navigator
+            if (this.vocabularyNavigator != null) {
+                final Set<String> genericFacets = new LinkedHashSet<>();
+                for (final Tagging v : LibraryProvider.autotagging.getVocabularies()) {
+                    genericFacets.add(v.getName());
+                }
+                genericFacets.addAll(ProbabilisticClassifier.getContextNames());
+                for (final String vocName : genericFacets) {
+                    final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName
+                            + CollectionSchema.VOCABULARY_TERMS_SUFFIX;
+                    incrementVocNavigator(page, vocName, fieldName);
+                }
+            }
 
             return page; // accept url
         }
@@ -1630,21 +1617,21 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
      * Decrement statistics counts for the given RWI entry.
      * @param entry an RWI entry result
      */
-	private void decrementCounts(final WordReferenceVars entry) {
-		if(entry == null) {
-			return;
-		}
-		if (entry.local()) {
-			if(this.local_rwi_available.get() > 0) {
-				this.local_rwi_available.decrementAndGet();
-			}
-		} else {
-			if(this.remote_rwi_available.get() > 0) {
-				this.remote_rwi_available.decrementAndGet();
-			}
-		}
-	}
-	
+    private void decrementCounts(final WordReferenceVars entry) {
+        if(entry == null) {
+            return;
+        }
+        if (entry.local()) {
+            if(this.local_rwi_available.get() > 0) {
+                this.local_rwi_available.decrementAndGet();
+            }
+        } else {
+            if(this.remote_rwi_available.get() > 0) {
+                this.remote_rwi_available.decrementAndGet();
+            }
+        }
+    }
+
     /**
      * Update counters when evicting a Solr entry from results.
      * @param entry a Solr entry result to be evicted
@@ -1652,145 +1639,145 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
      * @param facets facets counts from Solr
      * @param navIncrementedEarlier when true, navigators have been incremented earlier with other facets or individual documents
      */
-	private void updateCountsOnSolrEntryToEvict(final URIMetadataNode entry,
-			final Map<String, ReversibleScoreMap<String>> facets, final boolean local,
-			final boolean navIncrementedEarlier) {
-		if (entry == null) {
-			return;
-		}
-		if (local) {
-			this.local_solr_evicted.incrementAndGet();
-			/*
-			 * No need to decrement remote_solr_available as this counter is only
-			 * incremented after all filterings have been applied
-			 */
-		}
+    private void updateCountsOnSolrEntryToEvict(final URIMetadataNode entry,
+            final Map<String, ReversibleScoreMap<String>> facets, final boolean local,
+            final boolean navIncrementedEarlier) {
+        if (entry == null) {
+            return;
+        }
+        if (local) {
+            this.local_solr_evicted.incrementAndGet();
+            /*
+             * No need to decrement remote_solr_available as this counter is only
+             * incremented after all filterings have been applied
+             */
+        }
 
-		/*
-		 * Update eventual navigators counters when relevant
-		 */
-		final boolean navIncrementedWithFacets = facets != null && !facets.isEmpty() && !navIncrementedEarlier;
-		ReversibleScoreMap<String> fcts;
-		
-		
-		/* Iterate over active navigator plugins to let them update the counters */
-		for (String s : this.navigatorPlugins.keySet()) {
-			Navigator navi = this.navigatorPlugins.get(s);
-			if (navi != null) {
-				if (navIncrementedWithFacets) {
-					fcts = facets.get(navi.getIndexFieldName());
-				} else {
-					fcts = null;
-				}
-				final Object value = entry.getFieldValue(navi.getIndexFieldName());
-				if (value != null) {
-					if(value instanceof Collection) {
-						for (final Object singleVal : (Collection<?>) value) {
-							if (singleVal instanceof String) {
-								final String singleStringVal = (String)singleVal;
-								if (navIncrementedEarlier || (fcts != null && fcts.containsKey(singleStringVal))) {
-									if (navi.get(singleStringVal) > 0) {
-										navi.dec(singleStringVal);
-									}
-								}
-							}
-						}
-					} else if(value instanceof String){
-						final String stringValue = (String)value;
-						if (navIncrementedEarlier || (fcts != null && fcts.containsKey(stringValue))) {
-							if (navi.get(stringValue) > 0) {
-								navi.dec(stringValue);
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		
-		/* Note : would it be relevant to update here this.locationNavigator ? 
-		 * It looks like this nav is currently never filled, as a constraint on coordinates 
-		 * is expressed as a spatial filter not producing facets counts (see QueryParams.getFacetsFilterQueries())
-		 */
+        /*
+         * Update eventual navigators counters when relevant
+         */
+        final boolean navIncrementedWithFacets = facets != null && !facets.isEmpty() && !navIncrementedEarlier;
+        ReversibleScoreMap<String> fcts;
 
-		if (this.dateNavigator != null) {
-			if (navIncrementedWithFacets) {
-				fcts = facets.get(CollectionSchema.dates_in_content_dts.getSolrFieldName());
-			} else {
-				fcts = null;
-			}
-			Date[] dates = entry.datesInContent();
-			if (dates != null) {
-				for (final Date date : dates) {
-					if (date != null) {
-						final String dateStr = ISO8601Formatter.FORMATTER.format(date);
-						if (navIncrementedEarlier || (fcts != null && fcts.containsKey(dateStr))) {
-							if (this.dateNavigator.get(dateStr) > 0) {
-								this.dateNavigator.dec(dateStr);
-							}
-						}
-					}
-				}
-			}
-		}
 
-		if (this.protocolNavigator != null) {
-			if (navIncrementedWithFacets) {
-				fcts = facets.get(CollectionSchema.url_protocol_s.getSolrFieldName());
-			} else {
-				fcts = null;
-			}
-			final String protocol = entry.url().getProtocol();
-			if (protocol != null) {
-				if (navIncrementedEarlier || (fcts != null && fcts.containsKey(protocol))) {
-					if (this.protocolNavigator.get(protocol) > 0) {
-						this.protocolNavigator.dec(protocol);
-					}
-				}
-			}
-		}
+        /* Iterate over active navigator plugins to let them update the counters */
+        for (final String s : this.navigatorPlugins.keySet()) {
+            final Navigator navi = this.navigatorPlugins.get(s);
+            if (navi != null) {
+                if (navIncrementedWithFacets) {
+                    fcts = facets.get(navi.getIndexFieldName());
+                } else {
+                    fcts = null;
+                }
+                final Object value = entry.getFieldValue(navi.getIndexFieldName());
+                if (value != null) {
+                    if(value instanceof Collection) {
+                        for (final Object singleVal : (Collection<?>) value) {
+                            if (singleVal instanceof String) {
+                                final String singleStringVal = (String)singleVal;
+                                if (navIncrementedEarlier || (fcts != null && fcts.containsKey(singleStringVal))) {
+                                    if (navi.get(singleStringVal) > 0) {
+                                        navi.dec(singleStringVal);
+                                    }
+                                }
+                            }
+                        }
+                    } else if(value instanceof String){
+                        final String stringValue = (String)value;
+                        if (navIncrementedEarlier || (fcts != null && fcts.containsKey(stringValue))) {
+                            if (navi.get(stringValue) > 0) {
+                                navi.dec(stringValue);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-		// get the vocabulary navigation
-		if (this.vocabularyNavigator != null) {
-			Set<String> genericFacets = new LinkedHashSet<>();
-			for (Tagging v : LibraryProvider.autotagging.getVocabularies()) {
-				genericFacets.add(v.getName());
-			}
-			genericFacets.addAll(ProbabilisticClassifier.getContextNames());
-			for (String vocName : genericFacets) {
-				final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName
-						+ CollectionSchema.VOCABULARY_TERMS_SUFFIX;
-				if (navIncrementedWithFacets) {
-					fcts = facets.get(fieldName);
-				} else {
-					fcts = null;
-				}
-				Object docValue = entry.getFieldValue(fieldName);
-				if (docValue instanceof String) {
-					if (navIncrementedEarlier || (fcts != null && fcts.containsKey((String) docValue))) {
-						ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
-						if (vocNav != null && vocNav.get((String) docValue) > 0) {
-							vocNav.dec((String) docValue);
-						}
-					}
-				} else if(docValue instanceof Collection) {
-					if (!((Collection<?>) docValue).isEmpty()) {
-						for (Object singleDocValue : (Collection<?>) docValue) {
-							if (singleDocValue instanceof String) {
-								if (navIncrementedEarlier || (fcts != null && fcts.containsKey((String) singleDocValue))) {
-									ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
-									if (vocNav != null && vocNav.get((String) singleDocValue) > 0) {
-										vocNav.dec((String) singleDocValue);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-    
+
+        /* Note : would it be relevant to update here this.locationNavigator ?
+         * It looks like this nav is currently never filled, as a constraint on coordinates
+         * is expressed as a spatial filter not producing facets counts (see QueryParams.getFacetsFilterQueries())
+         */
+
+        if (this.dateNavigator != null) {
+            if (navIncrementedWithFacets) {
+                fcts = facets.get(CollectionSchema.dates_in_content_dts.getSolrFieldName());
+            } else {
+                fcts = null;
+            }
+            final Date[] dates = entry.datesInContent();
+            if (dates != null) {
+                for (final Date date : dates) {
+                    if (date != null) {
+                        final String dateStr = ISO8601Formatter.FORMATTER.format(date);
+                        if (navIncrementedEarlier || (fcts != null && fcts.containsKey(dateStr))) {
+                            if (this.dateNavigator.get(dateStr) > 0) {
+                                this.dateNavigator.dec(dateStr);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (this.protocolNavigator != null) {
+            if (navIncrementedWithFacets) {
+                fcts = facets.get(CollectionSchema.url_protocol_s.getSolrFieldName());
+            } else {
+                fcts = null;
+            }
+            final String protocol = entry.url().getProtocol();
+            if (protocol != null) {
+                if (navIncrementedEarlier || (fcts != null && fcts.containsKey(protocol))) {
+                    if (this.protocolNavigator.get(protocol) > 0) {
+                        this.protocolNavigator.dec(protocol);
+                    }
+                }
+            }
+        }
+
+        // get the vocabulary navigation
+        if (this.vocabularyNavigator != null) {
+            final Set<String> genericFacets = new LinkedHashSet<>();
+            for (final Tagging v : LibraryProvider.autotagging.getVocabularies()) {
+                genericFacets.add(v.getName());
+            }
+            genericFacets.addAll(ProbabilisticClassifier.getContextNames());
+            for (final String vocName : genericFacets) {
+                final String fieldName = CollectionSchema.VOCABULARY_PREFIX + vocName
+                        + CollectionSchema.VOCABULARY_TERMS_SUFFIX;
+                if (navIncrementedWithFacets) {
+                    fcts = facets.get(fieldName);
+                } else {
+                    fcts = null;
+                }
+                final Object docValue = entry.getFieldValue(fieldName);
+                if (docValue instanceof String) {
+                    if (navIncrementedEarlier || (fcts != null && fcts.containsKey((String) docValue))) {
+                        final ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+                        if (vocNav != null && vocNav.get((String) docValue) > 0) {
+                            vocNav.dec((String) docValue);
+                        }
+                    }
+                } else if(docValue instanceof Collection) {
+                    if (!((Collection<?>) docValue).isEmpty()) {
+                        for (final Object singleDocValue : (Collection<?>) docValue) {
+                            if (singleDocValue instanceof String) {
+                                if (navIncrementedEarlier || (fcts != null && fcts.containsKey((String) singleDocValue))) {
+                                    final ScoreMap<String> vocNav = this.vocabularyNavigator.get(vocName);
+                                    if (vocNav != null && vocNav.get((String) singleDocValue) > 0) {
+                                        vocNav.dec((String) singleDocValue);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public long getURLRetrievalTime() {
         return this.urlRetrievalAllTime;
     }
@@ -1815,10 +1802,10 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 if (this.ref.size() <= ic) { // size matches return map directly
                     result = this.getTopics(/*ic, 500*/);
                 } else { // collect top most count topics
-                    result = new ConcurrentScoreMap<String>();
-                    Iterator<String> it = this.getTopics(/*ic, 500*/).keys(false);
+                    result = new ConcurrentScoreMap<>();
+                    final Iterator<String> it = this.getTopics(/*ic, 500*/).keys(false);
                     while (ic-- > 0 && it.hasNext()) {
-                        String word = it.next();
+                        final String word = it.next();
                         result.set(word, this.ref.get(word));
                     }
                 }
@@ -1836,20 +1823,20 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
      */
     public boolean drainStacksToResult(boolean concurrentSnippetFetch) {
         // we take one entry from both stacks at the same time
-        boolean solrSuccess = drainSolrStackToResult(concurrentSnippetFetch);
-        boolean rwiSuccess = drainRWIStackToResult(concurrentSnippetFetch);
+        final boolean solrSuccess = drainSolrStackToResult(concurrentSnippetFetch);
+        final boolean rwiSuccess = drainRWIStackToResult(concurrentSnippetFetch);
         return solrSuccess || rwiSuccess;
     }
 
     /**
      * Adds the retrieved results from local and remotes RWI to the result list and
      * computes the text snippets
-     * @param concurrentSnippetFetch when true, allow starting a concurrent task to fetch a snippet when no one is already available 
+     * @param concurrentSnippetFetch when true, allow starting a concurrent task to fetch a snippet when no one is already available
      * @return true when an entry has been effectively added to resultlist otherwise false
      */
-	private boolean drainRWIStackToResult(boolean concurrentSnippetFetch) {
-		boolean success = false;
-		if (SearchEvent.this.snippetFetchAlive.get() >= 10 || MemoryControl.shortStatus() || !concurrentSnippetFetch) {
+    private boolean drainRWIStackToResult(boolean concurrentSnippetFetch) {
+        boolean success = false;
+        if (SearchEvent.this.snippetFetchAlive.get() >= 10 || MemoryControl.shortStatus() || !concurrentSnippetFetch) {
             // too many concurrent processes
             final URIMetadataNode noderwi = pullOneFilteredFromRWI(true);
             if (noderwi != null) {
@@ -1857,7 +1844,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 success = true;
             }
         } else {
-            Thread t = new Thread("SearchEvent.drainStacksToResult.oneFilteredFromRWI") {
+            final Thread t = new Thread("SearchEvent.drainStacksToResult.oneFilteredFromRWI") {
                 @Override
                 public void run() {
                     SearchEvent.this.oneFeederStarted();
@@ -1869,7 +1856,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                                 addResult(getSnippet(noderwi, SearchEvent.this.query.snippetCacheStrategy), noderwi.score());
                             } catch (final Throwable e) {
                                 ConcurrentLog.logException(e);
-                            } finally {    
+                            } finally {
                                 SearchEvent.this.snippetFetchAlive.decrementAndGet();
                             }
                         }
@@ -1881,20 +1868,20 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             if (SearchEvent.this.query.snippetCacheStrategy == null) t.run(); else t.start(); //no need for concurrency if there is no latency
         }
         return success;
-	}
+    }
 
     /**
      * Adds the retrieved full text results from local and remotes Solr to the result list and
      * computes the text snippets
-     * @param concurrentSnippetFetch when true, allow starting a concurrent task to fetch a snippet when no one is already available 
+     * @param concurrentSnippetFetch when true, allow starting a concurrent task to fetch a snippet when no one is already available
      * @return true when an entry has been effectively added to resultlist otherwise false
      */
-	private boolean drainSolrStackToResult(boolean concurrentSnippetFetch) {
-		boolean success = false;
-		final Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
+    private boolean drainSolrStackToResult(boolean concurrentSnippetFetch) {
+        boolean success = false;
+        final Element<URIMetadataNode> localEntryElement = this.nodeStack.sizeQueue() > 0 ? this.nodeStack.poll() : null;
         final URIMetadataNode node = localEntryElement == null ? null : localEntryElement.getElement();
         if (node != null) {
-            LinkedHashSet<String> solrsnippetlines = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
+            final LinkedHashSet<String> solrsnippetlines = this.snippets.remove(ASCII.String(node.hash())); // we can remove this because it's used only once
             if (solrsnippetlines != null && solrsnippetlines.size() > 0) {
                 OpensearchResponseWriter.removeSubsumedTitle(solrsnippetlines, node.dc_title());
                 final TextSnippet solrsnippet = new TextSnippet(node.url(), OpensearchResponseWriter.getLargestSnippet(solrsnippetlines), true, ResultClass.SOURCE_SOLR, "");
@@ -1908,7 +1895,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                         false);
                 final String solrsnippetline = solrsnippet.descriptionline(this.getQuery().getQueryGoal());
                 final String yacysnippetline = yacysnippet.descriptionline(this.getQuery().getQueryGoal());
-                URIMetadataNode re = node.makeResultEntry(this.query.getSegment(), this.peers, solrsnippetline.length() >  yacysnippetline.length() ? solrsnippet : yacysnippet);
+                final URIMetadataNode re = node.makeResultEntry(this.query.getSegment(), this.peers, solrsnippetline.length() >  yacysnippetline.length() ? solrsnippet : yacysnippet);
                 addResult(re, localEntryElement.getWeight());
                 success = true;
             } else {
@@ -1938,12 +1925,12 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 }
             }
         }
-		return success;
-	}
-    
+        return success;
+    }
+
     /**
      * place the result to the result vector and apply post-ranking
-     * post-ranking is added to the current score, 
+     * post-ranking is added to the current score,
      * @param resultEntry to add
      * @param score current ranking
      */
@@ -1955,8 +1942,8 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         // final long ranking = ((long) (score * 128.f)) + postRanking(resultEntry, this.getTopicNavigator(MAX_TOPWORDS));
 
         resultEntry.setScore(ranking); // update the score of resultEntry for access by search interface / api
-        this.resultList.put(new ReverseElement<URIMetadataNode>(resultEntry, ranking)); // remove smallest in case of overflow
-        if (pollImmediately) this.resultList.poll(); // prevent re-ranking in case there is only a single index source which has already ranked entries.
+        this.resultList.put(new ReverseElement<>(resultEntry, ranking)); // remove smallest in case of overflow
+        if (this.pollImmediately) this.resultList.poll(); // prevent re-ranking in case there is only a single index source which has already ranked entries.
         this.addTopics(resultEntry);
     }
 
@@ -1965,26 +1952,26 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
         // for media search: prefer pages with many links
         switch (this.query.contentdom) {
-            case IMAGE:
-                r += rentry.limage() << this.query.ranking.coeff_cathasimage;
-                break;
-            case AUDIO:
-                r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
-                break;
-            case VIDEO:
-                r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
-                break;
-            case APP:
-                r += rentry.lapp() << this.query.ranking.coeff_cathasapp;
-                break;
-            default:
-                break;
+        case IMAGE:
+            r += rentry.limage() << this.query.ranking.coeff_cathasimage;
+            break;
+        case AUDIO:
+            r += rentry.laudio() << this.query.ranking.coeff_cathasaudio;
+            break;
+        case VIDEO:
+            r += rentry.lvideo() << this.query.ranking.coeff_cathasvideo;
+            break;
+        case APP:
+            r += rentry.lapp() << this.query.ranking.coeff_cathasapp;
+            break;
+        default:
+            break;
         }
 
         // apply citation count
         //System.out.println("POSTRANKING CITATION: references = " + rentry.referencesCount() + ", inbound = " + rentry.llocal() + ", outbound = " + rentry.lother());
         if (this.query.getSegment().connectedCitation()) {
-            int referencesCount = this.query.getSegment().urlCitation().count(rentry.hash());
+            final int referencesCount = this.query.getSegment().urlCitation().count(rentry.hash());
             r += (128 * referencesCount / (1 + 2 * rentry.llocal() + rentry.lother())) << this.query.ranking.coeff_citation;
         }
         // prefer hit with 'prefer' pattern
@@ -2002,11 +1989,11 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         // the token map is used (instead of urlcomps/descrcomps) to determine appearance in url/title and eliminate double occurances
         // (example Title="News News News News News News - today is party -- News News News News News News" to add one score instead of 12 * score !)
         for (final String urlcomp : urlcompmap) {
-            int tc = topwords.get(urlcomp);
+            final int tc = topwords.get(urlcomp);
             if (tc > 0) r += tc << this.query.ranking.coeff_urlcompintoplist;
         }
         for (final String descrcomp : descrcompmap) {
-            int tc = topwords.get(descrcomp);
+            final int tc = topwords.get(descrcomp);
             if (tc > 0) r += tc << this.query.ranking.coeff_descrcompintoplist;
         }
 
@@ -2019,7 +2006,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         }
         return r;
     }
-    
+
     public URIMetadataNode getSnippet(URIMetadataNode page, final CacheStrategy cacheStrategy) {
         if (page == null) return null;
 
@@ -2037,10 +2024,10 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         }
 
         // load snippet
-        ContentDomain contentDomain = page.getContentDomain();
+        final ContentDomain contentDomain = page.getContentDomain();
         if (contentDomain == Classification.ContentDomain.TEXT || contentDomain == Classification.ContentDomain.ALL) {
             // attach text snippet
-            long startTime = System.currentTimeMillis();
+            final long startTime = System.currentTimeMillis();
             final TextSnippet snippet = new TextSnippet(
                     this.loader,
                     page,
@@ -2075,7 +2062,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         }
         return page.makeResultEntry(this.query.getSegment(), this.peers, null); // result without snippet
     }
-    
+
     /**
      * This is the access point for the search interface to retrive ranked results.
      * for display.
@@ -2089,73 +2076,73 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         // (happens if a search pages is accessed a second time)
         final long finishTime = timeout == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + timeout;
         EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "started, item = " + item + ", available = " + this.getResultCount(), 0, 0), false);
-		
+
         // wait until a local solr is finished, we must do that to be able to check if we need more
-		if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {
-			try {
-				this.localsolrsearch.join(100);
-			} catch (final InterruptedException e) {
-				log.warn("Wait for local solr search was interrupted.");
-			}
-		}
-		if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && (this.localsolrsearch != null && this.localsolrsearch.isAlive())) {
-			try {
-				this.localsolrsearch.join();
-			} catch (final InterruptedException e) {
-				log.warn("Wait for local solr search was interrupted.");
-			}
-		}
-        if (this.remote && item >= this.localsolroffset && this.local_solr_stored.get() > item) {
-			/* Request mixing remote and local Solr results : load remaining local solr results now. 
-			 * For local only search, a new SearchEvent should be created, starting directly at the requested offset,
-			 * thus allowing to handle last pages of large resultsets
-			 */
-            int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
-            if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
-			if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
-				// Do not increment again navigators from the local Solr on next local pages retrieval, as facets counts scope is on the total results and should already have been added
-				final boolean useSolrFacets = (this.localsolrsearch == null);
-				final boolean incrementNavigators = false;
-				this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
-						this.query.solrQuery(this.query.contentdom, this.query.isStrictContentDom(), useSolrFacets, this.excludeintext_image),
-						this.localsolroffset, nextitems, null /* this peer */, 0, Switchboard.urlBlacklist, useSolrFacets, incrementNavigators);
-			}
-			this.localsolroffset += nextitems;
+        if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {
+            try {
+                this.localsolrsearch.join(100);
+            } catch (final InterruptedException e) {
+                log.warn("Wait for local solr search was interrupted.");
+            }
         }
-        
+        if (item >= this.localsolroffset && this.local_solr_stored.get() == 0 && (this.localsolrsearch != null && this.localsolrsearch.isAlive())) {
+            try {
+                this.localsolrsearch.join();
+            } catch (final InterruptedException e) {
+                log.warn("Wait for local solr search was interrupted.");
+            }
+        }
+        if (this.remote && item >= this.localsolroffset && this.local_solr_stored.get() > item) {
+            /* Request mixing remote and local Solr results : load remaining local solr results now.
+             * For local only search, a new SearchEvent should be created, starting directly at the requested offset,
+             * thus allowing to handle last pages of large resultsets
+             */
+            final int nextitems = item - this.localsolroffset + this.query.itemsPerPage; // example: suddenly switch to item 60, just 10 had been shown, 20 loaded.
+            if (this.localsolrsearch != null && this.localsolrsearch.isAlive()) {try {this.localsolrsearch.join();} catch (final InterruptedException e) {}}
+            if (!Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.DEBUG_SEARCH_LOCAL_SOLR_OFF, false)) {
+                // Do not increment again navigators from the local Solr on next local pages retrieval, as facets counts scope is on the total results and should already have been added
+                final boolean useSolrFacets = (this.localsolrsearch == null);
+                final boolean incrementNavigators = false;
+                this.localsolrsearch = RemoteSearch.solrRemoteSearch(this,
+                        this.query.solrQuery(this.query.contentdom, this.query.isStrictContentDom(), useSolrFacets, this.excludeintext_image),
+                        this.localsolroffset, nextitems, null /* this peer */, 0, Switchboard.urlBlacklist, useSolrFacets, incrementNavigators);
+            }
+            this.localsolroffset += nextitems;
+        }
+
         // now pull results as long as needed and as long as possible
-		if (this.remote && item < 10 && this.resultList.sizeAvailable() <= item) {
-			try {
-				Thread.sleep(100);
-			} catch (final InterruptedException e) {
-				log.warn("Remote search results wait was interrupted.");
-			}
-		}
-		
+        if (this.remote && item < 10 && this.resultList.sizeAvailable() <= item) {
+            try {
+                Thread.sleep(100);
+            } catch (final InterruptedException e) {
+                log.warn("Remote search results wait was interrupted.");
+            }
+        }
+
         final int resultListIndex;
         if (this.remote) {
-        	resultListIndex = item;
+            resultListIndex = item;
         } else {
-        	resultListIndex = item - (this.localsolroffset - this.query.itemsPerPage);
+            resultListIndex = item - (this.localsolroffset - this.query.itemsPerPage);
         }
         while ( this.resultList.sizeAvailable() <= resultListIndex &&
                 (this.rwiQueueSize() > 0 || this.nodeStack.sizeQueue() > 0 ||
-                (!this.isFeedingFinished() && System.currentTimeMillis() < finishTime))) {
-			if (!drainStacksToResult(true)) {
-				try {
-					Thread.sleep(10);
-				} catch (final InterruptedException e) {
-					log.warn("Search results wait was interrupted.");
-				}
-			}
+                        (!this.isFeedingFinished() && System.currentTimeMillis() < finishTime))) {
+            if (!drainStacksToResult(true)) {
+                try {
+                    Thread.sleep(10);
+                } catch (final InterruptedException e) {
+                    log.warn("Search results wait was interrupted.");
+                }
+            }
         }
-        
+
         // check if we have a success
         if (this.resultList.sizeAvailable() > resultListIndex) {
             // we have the wanted result already in the result array .. return that
             final URIMetadataNode re = this.resultList.element(resultListIndex).getElement();
             EventTracker.update(EventTracker.EClass.SEARCH, new ProfilingGraph.EventSearch(this.query.id(true), SearchEventType.ONERESULT, "fetched, item = " + item + ", available = " + this.getResultCount() + ": " + re.urlstring(), 0, 0), false);
-            
+
             /*
             if (this.localsolrsearch == null || (!this.localsolrsearch.isAlive() && this.local_solr_stored.get() > this.localsolroffset && (item + 1) % this.query.itemsPerPage == 0)) {
                 // at the end of a list, trigger a next solr search
@@ -2164,7 +2151,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
                 }
                 this.localsolroffset += this.query.itemsPerPage;
             }
-            */
+             */
             return re;
         }
 
@@ -2175,43 +2162,43 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
 
     /** Image results counter */
     private int imagePageCounter = 0;
-    private LinkedHashMap<String, ImageResult> imageViewed = new LinkedHashMap<String, ImageResult>();
-    private LinkedHashMap<String, ImageResult> imageSpareGood = new LinkedHashMap<String, ImageResult>();
-    private LinkedHashMap<String, ImageResult> imageSpareBad = new LinkedHashMap<String, ImageResult>();
+    private final LinkedHashMap<String, ImageResult> imageViewed = new LinkedHashMap<>();
+    private final LinkedHashMap<String, ImageResult> imageSpareGood = new LinkedHashMap<>();
+    private final LinkedHashMap<String, ImageResult> imageSpareBad = new LinkedHashMap<>();
     private ImageResult nthImage(int item) {
-        Object o = SetTools.nth(this.imageViewed.values(), item);
+        final Object o = SetTools.nth(this.imageViewed.values(), item);
         if (o == null) return null;
         return (ImageResult) o;
     }
     private boolean hasSpare() {
-        return imageSpareGood.size() > 0 || imageSpareBad.size() > 0;
+        return this.imageSpareGood.size() > 0 || this.imageSpareBad.size() > 0;
     }
     private boolean containsSpare(String id) {
-        return imageSpareGood.containsKey(id) || imageSpareBad.containsKey(id);
+        return this.imageSpareGood.containsKey(id) || this.imageSpareBad.containsKey(id);
     }
     private int sizeSpare() {
-        return imageSpareGood.size() + imageSpareBad.size();
+        return this.imageSpareGood.size() + this.imageSpareBad.size();
     }
     private ImageResult nextSpare() {
-        if (imageSpareGood.size() > 0) {
-            Map.Entry<String, ImageResult> next = imageSpareGood.entrySet().iterator().next();
-            imageViewed.put(next.getKey(), next.getValue());
-            imageSpareGood.remove(next.getKey());
+        if (this.imageSpareGood.size() > 0) {
+            final Map.Entry<String, ImageResult> next = this.imageSpareGood.entrySet().iterator().next();
+            this.imageViewed.put(next.getKey(), next.getValue());
+            this.imageSpareGood.remove(next.getKey());
             return next.getValue();
         }
-        if (imageSpareBad.size() > 0) {
-            Map.Entry<String, ImageResult> next = imageSpareBad.entrySet().iterator().next();
-            imageViewed.put(next.getKey(), next.getValue());
-            imageSpareBad.remove(next.getKey());
+        if (this.imageSpareBad.size() > 0) {
+            final Map.Entry<String, ImageResult> next = this.imageSpareBad.entrySet().iterator().next();
+            this.imageViewed.put(next.getKey(), next.getValue());
+            this.imageSpareBad.remove(next.getKey());
             return next.getValue();
         }
         return null;
     }
-    
+
     public ImageResult oneImageResult(final int item, final long timeout, final boolean strictContentDom) throws MalformedURLException {
-        if (item < imageViewed.size()) return nthImage(item);
-        if (imageSpareGood.size() > 0) return nextSpare(); // first put out all good spare, but no bad spare
-        URIMetadataNode doc = oneResult(imagePageCounter++, timeout); // we must use a different counter here because the image counter can be higher when one page filled up several spare
+        if (item < this.imageViewed.size()) return nthImage(item);
+        if (this.imageSpareGood.size() > 0) return nextSpare(); // first put out all good spare, but no bad spare
+        final URIMetadataNode doc = oneResult(this.imagePageCounter++, timeout); // we must use a different counter here because the image counter can be higher when one page filled up several spare
         // check if the match was made in the url or in the image links
         if (doc == null) {
             if (hasSpare()) return nextSpare();
@@ -2224,52 +2211,52 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         // boolean fakeImageHost = ms.url().getHost() != null && ms.url().getHost().indexOf("wikipedia") > 0; // pages with image extension from wikipedia do not contain image files but html files... I know this is a bad hack, but many results come from wikipedia and we must handle that
         // generalize above hack (regarding url with file extension but beeing a html (with html mime)
         if (doc.doctype() == Response.DT_IMAGE) {
-        	/* Icons are not always .ico files and should now be indexed in icons_urlstub_sxt. But this test still makes sense for older indexed documents, 
-        	 * or documents coming from previous versions peers */
+            /* Icons are not always .ico files and should now be indexed in icons_urlstub_sxt. But this test still makes sense for older indexed documents,
+             * or documents coming from previous versions peers */
             if (!doc.url().getFileName().endsWith(".ico")) { // we don't want favicons
                 final String id = ASCII.String(doc.hash());
                 // check image size
                 final Collection<Object> height = doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName());
                 final Collection<Object> width = doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName());
-                int h = height == null ? 0 : (Integer) height.iterator().next(); // might be -1 for unknown
-                int w = width == null ? 0 : (Integer) width.iterator().next();
+                final int h = height == null ? 0 : (Integer) height.iterator().next(); // might be -1 for unknown
+                final int w = width == null ? 0 : (Integer) width.iterator().next();
                 if ((h <= 0 || h > 16) && (w <= 0 || w > 16)) { // we don't want too small images (< 16x16)
-                    if (!imageViewed.containsKey(id) && !containsSpare(id)) imageSpareGood.put(id, new ImageResult(doc.url(), doc.url(), doc.mime(), doc.title(), w, h, 0));
+                    if (!this.imageViewed.containsKey(id) && !containsSpare(id)) this.imageSpareGood.put(id, new ImageResult(doc.url(), doc.url(), doc.mime(), doc.title(), w, h, 0));
                 }
             }
         } else if(!strictContentDom) {
-            Collection<Object> altO = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
-            Collection<Object> imgO = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
+            final Collection<Object> altO = doc.getFieldValues(CollectionSchema.images_alt_sxt.getSolrFieldName());
+            final Collection<Object> imgO = doc.getFieldValues(CollectionSchema.images_urlstub_sxt.getSolrFieldName());
             if (imgO != null && imgO.size() > 0 && imgO instanceof List<?>) {
-                List<Object> alt = altO == null ? null : (List<Object>) altO;
-                List<Object> img = (List<Object>) imgO;
-                List<String> prt = CollectionConfiguration.indexedList2protocolList(doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName()), img.size());
-                Collection<Object> heightO = doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName());
-                Collection<Object> widthO = doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName());
-                List<Object> height = heightO == null ? null : (List<Object>) heightO;
-                List<Object> width = widthO == null ? null : (List<Object>) widthO;
+                final List<Object> alt = altO == null ? null : (List<Object>) altO;
+                final List<Object> img = (List<Object>) imgO;
+                final List<String> prt = CollectionConfiguration.indexedList2protocolList(doc.getFieldValues(CollectionSchema.images_protocol_sxt.getSolrFieldName()), img.size());
+                final Collection<Object> heightO = doc.getFieldValues(CollectionSchema.images_height_val.getSolrFieldName());
+                final Collection<Object> widthO = doc.getFieldValues(CollectionSchema.images_width_val.getSolrFieldName());
+                final List<Object> height = heightO == null ? null : (List<Object>) heightO;
+                final List<Object> width = widthO == null ? null : (List<Object>) widthO;
                 for (int c = 0; c < img.size(); c++) {
-                    String image_urlstub =  (String) img.get(c);
-                	/* Icons are not always .ico files and should now be indexed in icons_urlstub_sxt. But this test still makes sense for older indexed documents, 
-                	 * or documents coming from previous versions peers */
+                    final String image_urlstub =  (String) img.get(c);
+                    /* Icons are not always .ico files and should now be indexed in icons_urlstub_sxt. But this test still makes sense for older indexed documents,
+                     * or documents coming from previous versions peers */
                     if (image_urlstub.endsWith(".ico")) continue; // we don't want favicons, makes the result look idiotic
                     try {
-                        int h = height == null ? 0 : (Integer) height.get(c);
-                        int w = width == null ? 0 : (Integer) width.get(c);
+                        final int h = height == null ? 0 : (Integer) height.get(c);
+                        final int w = width == null ? 0 : (Integer) width.get(c);
 
                         // check size good for display (parser may init unknown dimension with -1)
                         if (h > 0 && h <= 16) continue; // to small for display
                         if (w > 0 && w <= 16) continue; // to small for display
-                        
-                        DigestURL imageUrl = new DigestURL((prt != null && prt.size() > c ? prt.get(c) : "http") + "://" + image_urlstub);
-                        String id = ASCII.String(imageUrl.hash());
-                        if (!imageViewed.containsKey(id) && !containsSpare(id)) {
-                            String image_alt = (alt != null && alt.size() > c) ? (String) alt.get(c) : "";
-                            ImageResult imageResult = new ImageResult(doc.url(), imageUrl, "", image_alt, w, h, 0);
-                            boolean match = (query.getQueryGoal().matches(image_urlstub) || query.getQueryGoal().matches(image_alt));
-                            if (match) imageSpareGood.put(id, imageResult); else imageSpareBad.put(id, imageResult);
+
+                        final DigestURL imageUrl = new DigestURL((prt != null && prt.size() > c ? prt.get(c) : "http") + "://" + image_urlstub);
+                        final String id = ASCII.String(imageUrl.hash());
+                        if (!this.imageViewed.containsKey(id) && !containsSpare(id)) {
+                            final String image_alt = (alt != null && alt.size() > c) ? (String) alt.get(c) : "";
+                            final ImageResult imageResult = new ImageResult(doc.url(), imageUrl, "", image_alt, w, h, 0);
+                            final boolean match = (this.query.getQueryGoal().matches(image_urlstub) || this.query.getQueryGoal().matches(image_alt));
+                            if (match) this.imageSpareGood.put(id, imageResult); else this.imageSpareBad.put(id, imageResult);
                         }
-                    } catch (MalformedURLException e) {
+                    } catch (final MalformedURLException e) {
                         continue;
                     }
                 }
@@ -2297,76 +2284,76 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
             return this.imageUrl.toNormalform(false);
         }
     }
-    
+
     public ArrayList<WeakPriorityBlockingQueue.Element<URIMetadataNode>> completeResults(final long waitingtime) {
         final long timeout = waitingtime == Long.MAX_VALUE ? Long.MAX_VALUE : System.currentTimeMillis() + waitingtime;
         int i = 0;
-        
+
         while (this.resultList.sizeAvailable() < this.query.neededResults() && System.currentTimeMillis() < timeout) {
-            URIMetadataNode re = oneResult(i++, timeout - System.currentTimeMillis());
+            final URIMetadataNode re = oneResult(i++, timeout - System.currentTimeMillis());
             if (re == null) break;
         }
         return this.resultList.list(Math.min(this.query.neededResults(), this.resultList.sizeAvailable()));
     }
-    
-	/**
-	 * Re-sort results cached in the resultList and eventually include in that list
-	 * elements with higher ranks from the Solr and RWI stacks.
-	 */
-	public void resortCachedResults() {
-		/*
-		 * If stacks feeding is finished, drain as much as possible elements from stacks
-		 * while their ranking is higher than the last element in the result list
-		 */
-		if (isFeedingFinished() && this.resortCacheAllowed.tryAcquire()) {
-			/*
-			 * First put all elements of the resultList in its own sorted queue to have a
-			 * consistent sorting on the whole set
-			 */
-			this.resultList.requeueDrainedElements();
 
-			/*
-			 * Note : if the resultList is full (its maxSize has been reached) some elements
-			 * with the lowest ranking may be lost in this next step. Not really a problem
-			 * because they were not supposed to be here. If really necessary to keep them,
-			 * growing the maxSize of the resultList should be considered here.
-			 */
-			WeakPriorityBlockingQueue.Element<URIMetadataNode> initialLastResult = this.resultList.getLastInQueue();
+    /**
+     * Re-sort results cached in the resultList and eventually include in that list
+     * elements with higher ranks from the Solr and RWI stacks.
+     */
+    public void resortCachedResults() {
+        /*
+         * If stacks feeding is finished, drain as much as possible elements from stacks
+         * while their ranking is higher than the last element in the result list
+         */
+        if (isFeedingFinished() && this.resortCacheAllowed.tryAcquire()) {
+            /*
+             * First put all elements of the resultList in its own sorted queue to have a
+             * consistent sorting on the whole set
+             */
+            this.resultList.requeueDrainedElements();
 
-			/*
-			 * Drain stacks in two steps (Solr, then RWI), because one stack might still
-			 * contains higher ranked results when only lower ranked remain in the other
-			 */
+            /*
+             * Note : if the resultList is full (its maxSize has been reached) some elements
+             * with the lowest ranking may be lost in this next step. Not really a problem
+             * because they were not supposed to be here. If really necessary to keep them,
+             * growing the maxSize of the resultList should be considered here.
+             */
+            final WeakPriorityBlockingQueue.Element<URIMetadataNode> initialLastResult = this.resultList.getLastInQueue();
 
-			/*
-			 * Here we do not fetch snippets concurrently as we want to know immediately the
-			 * drained element position in the final result list
-			 */
-			boolean drained = drainSolrStackToResult(false);
-			WeakPriorityBlockingQueue.Element<URIMetadataNode> newLastResult = this.resultList.getLastInQueue();
+            /*
+             * Drain stacks in two steps (Solr, then RWI), because one stack might still
+             * contains higher ranked results when only lower ranked remain in the other
+             */
 
-			/*
-			 * Loop while at least one element has been added to the results list and is not
-			 * the last considering its final rank
-			 */
-			while (drained && newLastResult == initialLastResult) {
-				drained = drainSolrStackToResult(false);
-				newLastResult = this.resultList.getLastInQueue();
-			}
+            /*
+             * Here we do not fetch snippets concurrently as we want to know immediately the
+             * drained element position in the final result list
+             */
+            boolean drained = drainSolrStackToResult(false);
+            WeakPriorityBlockingQueue.Element<URIMetadataNode> newLastResult = this.resultList.getLastInQueue();
 
-			drained = drainRWIStackToResult(false);
-			newLastResult = this.resultList.getLastInQueue();
+            /*
+             * Loop while at least one element has been added to the results list and is not
+             * the last considering its final rank
+             */
+            while (drained && newLastResult == initialLastResult) {
+                drained = drainSolrStackToResult(false);
+                newLastResult = this.resultList.getLastInQueue();
+            }
 
-			/*
-			 * Loop while at least one element has been added to the results list and is not
-			 * the last considering its final rank
-			 */
-			while (drained && newLastResult == initialLastResult) {
-				drained = drainRWIStackToResult(false);
-				newLastResult = this.resultList.getLastInQueue();
-			}
-		}
-	}
+            drained = drainRWIStackToResult(false);
+            newLastResult = this.resultList.getLastInQueue();
+
+            /*
+             * Loop while at least one element has been added to the results list and is not
+             * the last considering its final rank
+             */
+            while (drained && newLastResult == initialLastResult) {
+                drained = drainRWIStackToResult(false);
+                newLastResult = this.resultList.getLastInQueue();
+            }
+        }
+    }
 
     /**
      * delete a specific entry from the search results
@@ -2390,17 +2377,17 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     public ReferenceOrder getOrder() {
         return this.order;
     }
-    
-	/**
-	 * Check whether feeding from all available data sources is finished (remote
-	 *         RWI and Solr requests, local RWI and Solr requests, Heuristics
-	 *         requests...) 
-	 * @return true when all available feeders on this search event are terminated 
-	 */
+
+    /**
+     * Check whether feeding from all available data sources is finished (remote
+     *         RWI and Solr requests, local RWI and Solr requests, Heuristics
+     *         requests...)
+     * @return true when all available feeders on this search event are terminated
+     */
     public boolean isFeedingFinished() {
         return
-            this.feedersTerminated.intValue() > (this.remote ? 1 : 0) &&
-            this.feedersAlive.get() == 0;
+                this.feedersTerminated.intValue() > (this.remote ? 1 : 0) &&
+                this.feedersAlive.get() == 0;
     }
 
     /**
@@ -2415,7 +2402,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     public void oneFeederStarted() {
         this.feedersAlive.incrementAndGet();
     }
-    
+
     public QueryParams getQuery() {
         return this.query;
     }
@@ -2435,7 +2422,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
     protected boolean addRunning() {
         return this.addRunning;
     }
-    
+
     public boolean rwiIsEmpty() {
         if ( !this.rwiStack.isEmpty() ) {
             return false;
@@ -2455,7 +2442,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         }
         return c;
     }
-    
+
     protected boolean testFlags(final Bitfield flags) {
         if (this.query.constraint == null) return true;
         // test if ientry matches with filter
@@ -2472,7 +2459,7 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         }
         return false;
     }
-    
+
     protected Map<byte[], ReferenceContainer<WordReference>> searchContainerMap() {
         // direct access to the result maps is needed for abstract generation
         // this is only available if execQuery() was called before
@@ -2536,12 +2523,12 @@ public final class SearchEvent implements ScoreMapUpdatesListener {
         for ( final String w : words ) {
             word = w.toLowerCase();
             if ( word.length() > 2
-                && "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off"
+                    && "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_zum_der_die_das_und_the_zur_bzw_mit_blog_wiki_aus_bei_off"
                     .indexOf(word) < 0
-                && !this.query.getQueryGoal().containsInclude(word)
-                && lettermatch.matcher(word).matches()
-                && !Switchboard.badwords.contains(word)
-                && !Switchboard.stopwords.contains(word) ) {
+                    && !this.query.getQueryGoal().containsInclude(word)
+                    && lettermatch.matcher(word).matches()
+                    && !Switchboard.badwords.contains(word)
+                    && !Switchboard.stopwords.contains(word) ) {
                 this.ref.inc(word);
             }
         }
