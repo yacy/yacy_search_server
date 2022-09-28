@@ -14,7 +14,6 @@
       <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.11.0"  />
       <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.11.2"/>
       <dependency org="com.google.guava" name="guava" rev="25.1-jre" conf="compile->master"/>
-      <dependency org="com.hazelcast" name="hazelcast" rev="4.2" />
       <dependency org="com.ibm.icu" name="icu4j" rev="63.1"/>
       <dependency org="com.jcraft" name="jsch" rev="0.1.54" />
       <dependency org="com.twelvemonkeys.imageio" name="imageio-core" rev="3.3.2"/>

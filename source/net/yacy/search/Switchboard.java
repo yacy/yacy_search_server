@@ -107,12 +107,6 @@ import org.json.JSONTokener;
 import com.cybozu.labs.langdetect.DetectorFactory;
 import com.cybozu.labs.langdetect.LangDetectException;
 import com.google.common.io.Files;
-import com.hazelcast.config.Config;
-import com.hazelcast.config.InterfacesConfig;
-import com.hazelcast.config.JoinConfig;
-import com.hazelcast.config.NetworkConfig;
-import com.hazelcast.core.Hazelcast;
-import com.hazelcast.core.HazelcastInstance;
 
 import net.yacy.cora.date.AbstractFormatter;
 import net.yacy.cora.date.GenericFormatter;
@@ -311,7 +305,6 @@ public final class Switchboard extends serverSwitch {
     public LinkedBlockingQueue<String> trail; // connect infos from cytag servlet
     public SeedDB peers;
     public Set<String> localcluster_scan;
-    public HazelcastInstance localcluster_hazelcast;
     public WorkTables tables;
     public Tray tray;
     private long lastStats = 0; // time when the last row was written to the stats table
@@ -651,23 +644,6 @@ public final class Switchboard extends serverSwitch {
                             return true;
                         }
                     }.start();
-                }
-
-                // initialize hazelcast
-                final InterfacesConfig interfacesConfig = new InterfacesConfig();
-                Domains.myIntranetIPs().forEach(ip -> interfacesConfig.addInterface(ip.getHostAddress()));
-                final NetworkConfig networkConfig = new NetworkConfig().setInterfaces(interfacesConfig);
-                final JoinConfig join = networkConfig.getJoin();
-                join.getMulticastConfig().setEnabled(true);
-                final Config config = new Config().setClusterName("YaCyP2P").setInstanceName("Peer").setNetworkConfig(networkConfig);
-                config.getCPSubsystemConfig().setCPMemberCount(3);
-                try {
-                    this.localcluster_hazelcast = Hazelcast.newHazelcastInstance(config);
-                    final String uuid = this.localcluster_hazelcast.getCluster().getLocalMember().getUuid().toString();
-                    this.localcluster_hazelcast.getMap("status").put(uuid, Memory.status());
-                } catch (final Exception e) {
-                    this.log.warn(e);
-                    this.localcluster_hazelcast = null;
                 }
 
                 // load domainList
