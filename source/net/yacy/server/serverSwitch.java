@@ -71,7 +71,7 @@ public class serverSwitch {
     private final ConcurrentMap<String, String> configRemoved;
     private final NavigableMap<String, BusyThread> workerThreads;
     private YaCyHttpServer httpserver; // implemented HttpServer
-    private ConcurrentMap<String, Integer> upnpPortMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Integer> upnpPortMap = new ConcurrentHashMap<>();
     private boolean isConnectedViaUpnp;
 
     public serverSwitch(final File dataPath, final File appPath, final String initPath, final String configPath) {
@@ -105,9 +105,9 @@ public class serverSwitch {
         }
 
         // overwrite configs with values from environment variables that start with "yacy_"
-        Properties sysprops = System.getProperties();
+        final Properties sysprops = System.getProperties();
         sysprops.forEach((key, value) -> {
-            String k = (String) key;
+            final String k = (String) key;
             if (k.startsWith("yacy.")) {
                 this.configProps.put(k.substring(5), (String) value);
             }
@@ -115,7 +115,7 @@ public class serverSwitch {
 
         // remove all values from config that do not appear in init
         this.configRemoved = new ConcurrentHashMap<String, String>();
-        Iterator<String> i = this.configProps.keySet().iterator();
+        final Iterator<String> i = this.configProps.keySet().iterator();
         String key;
         while (i.hasNext()) {
             key = i.next();
@@ -133,15 +133,15 @@ public class serverSwitch {
         // Read system properties and set all variables that have a prefix "yacy.".
         // This will make it possible that settings can be overwritten with environment variables.
         // Do this i.e. with "export YACY_PORT=8091 && ./startYACY.sh"
-        for (Map.Entry<Object, Object> entry: System.getProperties().entrySet()) {
-            String yacykey = (String) entry.getKey();
+        for (final Map.Entry<Object, Object> entry: System.getProperties().entrySet()) {
+            final String yacykey = (String) entry.getKey();
             if (yacykey.startsWith("YACY_")) {
                 key = yacykey.substring(5).toLowerCase().replace('_', '.');
                 if (this.configProps.containsKey(key)) this.configProps.put(key, (String) entry.getValue());
             }
         }
-        for (Map.Entry<String, String> entry: System.getenv().entrySet()) {
-            String yacykey = entry.getKey();
+        for (final Map.Entry<String, String> entry: System.getenv().entrySet()) {
+            final String yacykey = entry.getKey();
             if (yacykey.startsWith("YACY_")) {
                 key = yacykey.substring(5).toLowerCase().replace('_', '.');
                 if (this.configProps.containsKey(key)) this.configProps.put(key, entry.getValue());
@@ -169,7 +169,7 @@ public class serverSwitch {
      * get my public IP, either set statically or figure out dynamic This method
      * is deprecated because there may be more than one public IPs of this peer,
      * i.e. one IPv4 and one IPv6. Please use myPublicIPs() instead
-     * 
+     *
      * @return the public IP of this peer, if known
      */
     public String myPublicIP() {
@@ -188,26 +188,26 @@ public class serverSwitch {
     /**
      * Get all my public IPs. If there was a static IP assignment, only one,
      * that IP is returned.
-     * 
+     *
      * @return a set of IPs which are supposed to be my own public IPs
      */
     public Set<String> myPublicIPs() {
         // if a static IP was configured, we have to return it here ...
         final String staticIP = getConfig(SwitchboardConstants.SERVER_STATICIP, "");
         if (staticIP.length() > 0) {
-            HashSet<String> h = new HashSet<>();
+            final HashSet<String> h = new HashSet<>();
             h.add(staticIP);
             return h;
         }
 
-        Set<String> h = new LinkedHashSet<>();
-        for (InetAddress i : Domains.myPublicIPv6()) {
-            String s = i.getHostAddress();
+        final Set<String> h = new LinkedHashSet<>();
+        for (final InetAddress i : Domains.myPublicIPv6()) {
+            final String s = i.getHostAddress();
             if (Seed.isProperIP(s))
                 h.add(Domains.chopZoneID(s));
         }
-        for (InetAddress i : Domains.myPublicIPv4()) {
-            String s = i.getHostAddress();
+        for (final InetAddress i : Domains.myPublicIPv4()) {
+            final String s = i.getHostAddress();
             if (Seed.isProperIP(s))
                 h.add(Domains.chopZoneID(s));
         }
@@ -218,19 +218,19 @@ public class serverSwitch {
      * Gets public port. May differ from local port due to NATting. This method
      * will eventually removed once nobody used IPv4 anymore, but until then we
      * have to live with it.
-     * 
+     *
      * @param key
      *            original key from config (for example "port" or "port.ssl")
      * @param dflt
      *            default value which will be used if no value is found
      * @return the public port of this system on its IPv4 address
-     * 
+     *
      * @see #getLocalPort()
      */
     public int getPublicPort(final String key, final int dflt) {
 
-        if (isConnectedViaUpnp && upnpPortMap.containsKey(key)) {
-            return upnpPortMap.get(key).intValue();
+        if (this.isConnectedViaUpnp && this.upnpPortMap.containsKey(key)) {
+            return this.upnpPortMap.get(key).intValue();
         }
 
         // TODO: add way of setting and retrieving port for manual NAT
@@ -241,9 +241,9 @@ public class serverSwitch {
     /**
      * Wrapper for {@link #getConfigInt(String, int)} to have a more consistent
      * API.
-     * 
+     *
      * Default value 8090 will be used if no value is found in configuration.
-     * 
+     *
      * @return the local http port of this system
      * @see #getPublicPort(String, int)
      */
@@ -262,7 +262,7 @@ public class serverSwitch {
 
     /**
      * add whole map of key-value pairs to config
-     * 
+     *
      * @param otherConfigs
      */
     public void setConfig(final Map<String, String> otherConfigs) {
@@ -300,25 +300,25 @@ public class serverSwitch {
     }
 
     public void setConfig(final String key, final String[] value) {
-        StringBuilder sb = new StringBuilder();
-        if (value != null) for (String s: value) sb.append(',').append(s);
+        final StringBuilder sb = new StringBuilder();
+        if (value != null) for (final String s: value) sb.append(',').append(s);
         setConfig(key, sb.length() > 0 ? sb.substring(1) : "");
     }
 
-    public void setConfig(final String key, Set<String> value) {
-        String[] a = new String[value.size()];
+    public void setConfig(final String key, final Set<String> value) {
+        final String[] a = new String[value.size()];
         int c = 0;
-        for (String s: value) a[c++] = s;
+        for (final String s: value) a[c++] = s;
         setConfig(key, a);
     }
-    
+
     public void removeConfig(final String key) {
         this.configProps.remove(key);
     }
 
     /**
      * Gets a configuration parameter from the properties.
-     * 
+     *
      * @param key
      *            name of the configuration parameter
      * @param dflt
@@ -339,7 +339,7 @@ public class serverSwitch {
 
     /**
      * Gets a configuration parameter from the properties.
-     * 
+     *
      * @param key
      *            name of the configuration parameter
      * @param dflt
@@ -357,7 +357,7 @@ public class serverSwitch {
 
     /**
      * Gets a configuration parameter from the properties.
-     * 
+     *
      * @param key
      *            name of the configuration parameter
      * @param dflt
@@ -375,7 +375,7 @@ public class serverSwitch {
 
     public boolean isConnectedViaUpnp() {
 
-        return isConnectedViaUpnp;
+        return this.isConnectedViaUpnp;
     }
 
     public void setConnectedViaUpnp(final boolean isConnectedViaUpnp) {
@@ -383,22 +383,22 @@ public class serverSwitch {
         this.isConnectedViaUpnp = isConnectedViaUpnp;
 
         if (!isConnectedViaUpnp) {
-            upnpPortMap.clear();
+            this.upnpPortMap.clear();
         }
     }
 
     public void setUpnpPorts(final String key, final int port) {
 
-        upnpPortMap.put(key, Integer.valueOf(port));
+        this.upnpPortMap.put(key, Integer.valueOf(port));
     }
 
     public void removeUpnpPort(final String key) {
-        upnpPortMap.remove(key);
+        this.upnpPortMap.remove(key);
     }
 
     /**
      * Gets a configuration parameter from the properties.
-     * 
+     *
      * @param key
      *            name of the configuration parameter
      * @param dflt
@@ -418,7 +418,7 @@ public class serverSwitch {
 
     /**
      * Gets a configuration parameter from the properties.
-     * 
+     *
      * @param key
      *            name of the configuration parameter
      * @param dflt
@@ -438,7 +438,7 @@ public class serverSwitch {
      */
     public String[] getConfigArray(final String key, final String dflt) {
         return CommonPattern.COMMA.split(this.getConfig(key, dflt));
-    }    
+    }
 
     /**
      * get a configuration parameter set
@@ -446,14 +446,14 @@ public class serverSwitch {
      * @return a set of strings which had been separated by comma in the setting
      */
     public Set<String> getConfigSet(final String key) {
-        Set<String> h = new LinkedHashSet<>();
+        final Set<String> h = new LinkedHashSet<>();
         for (String s: getConfigArray(key, "")) {s = s.trim(); if (s.length() > 0) h.add(s.trim());}
         return h;
     }
-    
+
     /**
      * Create a File instance for a configuration setting specifying a path.
-     * 
+     *
      * @param key
      *            config key
      * @param dflt
@@ -470,7 +470,7 @@ public class serverSwitch {
 
     /**
      * return file at path from config entry "key", or fallback to default dflt
-     * 
+     *
      * @param key
      * @param dflt
      * @return
@@ -479,7 +479,7 @@ public class serverSwitch {
         return getFileByPath(key, dflt, this.appPath);
     }
 
-    private File getFileByPath(String key, String dflt, File prefix) {
+    private File getFileByPath(final String key, final String dflt, final File prefix) {
         final String path = getConfig(key, dflt).replace('\\', '/');
         final File f = new File(path);
         return (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(
@@ -494,7 +494,7 @@ public class serverSwitch {
      * write the changes to permanent storage (File)
      */
     private void saveConfig() {
-        ConcurrentMap<String, String> configPropsCopy = new ConcurrentHashMap<String, String>();
+        final ConcurrentMap<String, String> configPropsCopy = new ConcurrentHashMap<String, String>();
         configPropsCopy.putAll(this.configProps); // avoid concurrency problems
         FileUtils.saveMap(this.configFile, configPropsCopy, this.configComment);
     }
@@ -502,13 +502,13 @@ public class serverSwitch {
     /**
      * Gets configuration parameters which have been removed during
      * initialization.
-     * 
+     *
      * @return contains parameter name as key and parameter value as value
      */
     public ConcurrentMap<String, String> getRemoved() {
         return this.configRemoved;
     }
-    
+
     /**
      * @return the default configuration properties loaded form the
      *         defaults/yacy.init file. The properties are empty when the file can
@@ -519,9 +519,9 @@ public class serverSwitch {
         try (final FileInputStream fis = new FileInputStream(new File(this.appPath, "defaults/yacy.init"))) {
             config.load(fis);
         } catch (final FileNotFoundException e) {
-            log.severe("Could not find default configuration file defaults/yacy.init.");
+            this.log.severe("Could not find default configuration file defaults/yacy.init.");
         } catch (final IOException | IllegalArgumentException e) {
-            log.severe("Could not read configuration file.");
+            this.log.severe("Could not read configuration file.");
         }
         return config;
     }
@@ -671,7 +671,7 @@ public class serverSwitch {
     /**
      * Retrieve text data (e. g. config file) from file file may be an url or a
      * filename with path relative to rootPath parameter
-     * 
+     *
      * @param file
      *            url or filename
      * @param rootPath
@@ -690,7 +690,7 @@ public class serverSwitch {
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.USER_AGENT, ClientIdentification.yacyInternetCrawlerAgent.userAgent);
                     client.setHeader(reqHeader.entrySet());
-                    byte[] data = client.GETbytes(uri,
+                    final byte[] data = client.GETbytes(uri,
                                     getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin"),
                                     getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, ""), false);
                     if (data == null || data.length == 0) {
@@ -724,10 +724,10 @@ public class serverSwitch {
 
     /**
      * set/remember jetty server
-     * 
+     *
      * @param jettyserver
      */
-    public void setHttpServer(YaCyHttpServer jettyserver) {
+    public void setHttpServer(final YaCyHttpServer jettyserver) {
         this.httpserver = jettyserver;
     }
 

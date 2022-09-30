@@ -69,7 +69,6 @@ import net.yacy.data.TransactionManager;
 import net.yacy.data.Translator;
 import net.yacy.gui.YaCyApp;
 import net.yacy.gui.framework.Browser;
-import net.yacy.http.Jetty9HttpServerImpl;
 import net.yacy.http.YaCyHttpServer;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
@@ -293,7 +292,7 @@ public final class yacy {
             try {
                 // start http server
                 YaCyHttpServer httpServer;
-                httpServer = new Jetty9HttpServerImpl(port);
+                httpServer = new YaCyHttpServer(port);
                 httpServer.startupServer();
                 sb.setHttpServer(httpServer);
                 // TODO: this has no effect on Jetty (but needed to reflect configured value and limit is still used)
@@ -628,7 +627,7 @@ public final class yacy {
      *
      * @param dataHome data directory
      */
-    static private void preReadSavedConfigandInit(File dataHome) {
+    static private void preReadSavedConfigandInit(final File dataHome) {
         final File lockFile = new File(dataHome, "DATA/yacy.running");
         final String conf = "DATA/SETTINGS/yacy.conf";
 
@@ -688,7 +687,7 @@ public final class yacy {
      * @param args
      *            Given arguments from the command line.
      */
-    public static void main(String args[]) {
+    public static void main(final String args[]) {
 
         try {
             // check assertion status

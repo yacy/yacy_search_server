@@ -44,7 +44,7 @@ import org.eclipse.jetty.server.Request;
  * demands authentication for pages with _p. inside
  * and updates AccessTracker
  */
-public class Jetty9YaCySecurityHandler extends ConstraintSecurityHandler {
+public class YaCySecurityHandler extends ConstraintSecurityHandler {
 
      /**
      * create the constraint for the given path
