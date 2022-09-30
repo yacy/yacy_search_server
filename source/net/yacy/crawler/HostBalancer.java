@@ -70,7 +70,7 @@ public class HostBalancer implements Balancer {
 
     private final File hostsPath;
     private final boolean exceed134217727;
-    private final Map<String, HostQueue> queues;
+    private final ConcurrentHashMap<String, HostQueue> queues;
     private final Set<String> roundRobinHostHashes;
     private final int onDemandLimit;
 
@@ -283,12 +283,18 @@ public class HostBalancer implements Balancer {
      * @throws SpaceExceededException
      */
     @Override
-    public String push(final Request entry, CrawlProfile profile, final RobotsTxt robots) throws IOException, SpaceExceededException {
+    public String push(final Request entry, final CrawlProfile profile, final RobotsTxt robots) throws IOException, SpaceExceededException {
         if (this.has(entry.url().hash())) return "double occurrence";
         depthCache.put(entry.url().hash(), entry.depth());
         final String hosthash = entry.url().hosthash();
+
+        // try a concurrent push
+        HostQueue queue = this.queues.get(hosthash);
+        if (queue != null) return queue.push(entry, profile, robots);
+
+        // to prevent new double HostQueue creation, do this now synchronized
         synchronized (this) {
-            HostQueue queue = this.queues.get(hosthash);
+            queue = this.queues.get(hosthash);
             if (queue == null) {
                 queue = new HostQueue(this.hostsPath, entry.url(), this.queues.size() > this.onDemandLimit, this.exceed134217727);
                 this.queues.put(hosthash, queue);
@@ -311,7 +317,7 @@ public class HostBalancer implements Balancer {
      * @throws SpaceExceededException
      */
     @Override
-    public Request pop(boolean delay, CrawlSwitchboard cs, RobotsTxt robots) throws IOException {
+    public Request pop(final boolean delay, final CrawlSwitchboard cs, final RobotsTxt robots) throws IOException {
         tryagain: while (true) try {
             HostQueue rhq = null;
             String rhh = null;
@@ -551,7 +557,7 @@ public class HostBalancer implements Balancer {
      * @return a map of clear text strings of host names + ports to an integer array: {the size of the domain stack, guessed delta waiting time}
      */
     @Override
-    public Map<String, Integer[]> getDomainStackHosts(RobotsTxt robots) {
+    public Map<String, Integer[]> getDomainStackHosts(final RobotsTxt robots) {
         final Map<String, Integer[]> map = new TreeMap<>(); // we use a tree map to get a stable ordering
         for (final HostQueue hq: this.queues.values()) {
             final int delta = Latency.waitingRemainingGuessed(hq.getHost(), hq.getPort(), hq.getHostHash(), robots, ClientIdentification.yacyInternetCrawlerAgent);
@@ -568,7 +574,7 @@ public class HostBalancer implements Balancer {
      * @return a list of crawl loader requests
      */
     @Override
-    public List<Request> getDomainStackReferences(String host, int maxcount, long maxtime) {
+    public List<Request> getDomainStackReferences(final String host, final int maxcount, final long maxtime) {
         if (host == null) {
             return Collections.emptyList();
         }
