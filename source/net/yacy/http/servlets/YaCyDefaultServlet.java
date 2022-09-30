@@ -1,17 +1,17 @@
 //  YaCyDefaultServlet
 //  Copyright 2013 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 //  First released 2013 at http://yacy.net
-//  
+//
 //  This library is free software; you can redistribute it and/or
 //  modify it under the terms of the GNU Lesser General Public
 //  License as published by the Free Software Foundation; either
 //  version 2.1 of the License, or (at your option) any later version.
-//  
+//
 //  This library is distributed in the hope that it will be useful,
 //  but WITHOUT ANY WARRANTY; without even the implied warranty of
 //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 //  Lesser General Public License for more details.
-//  
+//
 //  You should have received a copy of the GNU Lesser General Public License
 //  along with this program in the file lgpl21.txt
 //  If not, see <http://www.gnu.org/licenses/>.
@@ -97,9 +97,9 @@ import net.yacy.server.http.TemplateEngine;
 import net.yacy.visualization.RasterPlotter;
 
 /**
- * YaCyDefaultServlet based on Jetty DefaultServlet.java 
+ * YaCyDefaultServlet based on Jetty DefaultServlet.java
  * handles static files and the YaCy servlets.
- * 
+ *
  * This interface impements the YaCy specific and standard Servlet routines
  * which should not have a dependency on the implemented Jetty version.
  * The Jetty version specific code is moved to the Jetty8HttpServerImpl.java implementation
@@ -116,9 +116,9 @@ import net.yacy.visualization.RasterPlotter;
  *
  *  dirAllowed        If true, directory listings are returned if no
  *                    welcome file is found. Else 403 Forbidden.
- *  
+ *
  *  welcomeFile       name of the welcome file (default is "index.html", "welcome.html")
- * 
+ *
  *  resourceBase      Set to replace the context resource base
  *
  * </PRE>
@@ -131,10 +131,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected boolean _dirAllowed = true;
     protected Resource _resourceBase;
     protected MimeTypes _mimeTypes;
-    protected String[] _welcomes;    
-    
+    protected String[] _welcomes;
+
     protected File _htLocalePath;
-    protected File _htDocsPath;    
+    protected File _htDocsPath;
     protected static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
     protected ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
     // settings for multipart/form-data
@@ -144,45 +144,45 @@ public class YaCyDefaultServlet extends HttpServlet  {
     /* ------------------------------------------------------------ */
     @Override
     public void init() throws UnavailableException {
-        Switchboard sb = Switchboard.getSwitchboard();
-        _htDocsPath = sb.htDocsPath;
-        _htLocalePath = sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
-        
-        _servletContext = getServletContext();
+        final Switchboard sb = Switchboard.getSwitchboard();
+        this._htDocsPath = sb.htDocsPath;
+        this._htLocalePath = sb.getDataPath("locale.translated_html", "DATA/LOCALE/htroot");
 
-        _mimeTypes = new MimeTypes(); 
-        String tmpstr = this.getServletContext().getInitParameter("welcomeFile");
-        if (tmpstr == null) { 
-            _welcomes = HTTPDFileHandler.defaultFiles;
+        this._servletContext = getServletContext();
+
+        this._mimeTypes = new MimeTypes();
+        final String tmpstr = this.getServletContext().getInitParameter("welcomeFile");
+        if (tmpstr == null) {
+            this._welcomes = HTTPDFileHandler.defaultFiles;
         } else {
-            _welcomes = new String[]{tmpstr,"index.html"};
+            this._welcomes = new String[]{tmpstr,"index.html"};
         }
-        _acceptRanges = getInitBoolean("acceptRanges", _acceptRanges);
-        _dirAllowed = getInitBoolean("dirAllowed", _dirAllowed);
+        this._acceptRanges = getInitBoolean("acceptRanges", this._acceptRanges);
+        this._dirAllowed = getInitBoolean("dirAllowed", this._dirAllowed);
 
         Resource.setDefaultUseCaches(false); // caching is handled internally (prevent double caching)
 
-        String rb = getInitParameter("resourceBase");
+        final String rb = getInitParameter("resourceBase");
         try {
             if (rb != null) {
-                _resourceBase = Resource.newResource(rb);
+                this._resourceBase = Resource.newResource(rb);
             } else {
-                _resourceBase = Resource.newResource(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT)); //default
+                this._resourceBase = Resource.newResource(sb.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT)); //default
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             ConcurrentLog.severe("FILEHANDLER", "YaCyDefaultServlet: resource base (htRootPath) missing");
             ConcurrentLog.logException(e);
             throw new UnavailableException(e.toString());
         }
         if (ConcurrentLog.isFine("FILEHANDLER")) {
-            ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: resource base = " + _resourceBase);
+            ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: resource base = " + this._resourceBase);
         }
-        templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
+        this.templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
     }
-    
+
     /* ------------------------------------------------------------ */
-    protected boolean getInitBoolean(String name, boolean dft) {
-        String value = getInitParameter(name);
+    protected boolean getInitBoolean(final String name, final boolean dft) {
+        final String value = getInitParameter(name);
         if (value == null || value.length() == 0) {
             return dft;
         }
@@ -202,20 +202,20 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @param pathInContext The path to find a resource for.
      * @return The resource to serve.
      */
-    public Resource getResource(String pathInContext) {
+    public Resource getResource(final String pathInContext) {
         Resource r = null;
         try {
-            if (_resourceBase != null) {
-                r = _resourceBase.addPath(pathInContext);
+            if (this._resourceBase != null) {
+                r = this._resourceBase.addPath(pathInContext);
             } else {
-                URL u = _servletContext.getResource(pathInContext);
+                final URL u = this._servletContext.getResource(pathInContext);
                 r = Resource.newResource(u);
             }
 
             if (ConcurrentLog.isFine("FILEHANDLER")) {
                 ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: Resource " + pathInContext + "=" + r);
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             // ConcurrentLog.logException(e);
         }
 
@@ -223,17 +223,17 @@ public class YaCyDefaultServlet extends HttpServlet  {
     }
 
     /* ------------------------------------------------------------ */
-    protected boolean hasDefinedRange(Enumeration<String> reqRanges) {
+    protected boolean hasDefinedRange(final Enumeration<String> reqRanges) {
         return (reqRanges != null && reqRanges.hasMoreElements());
     }
-    
-    /* ------------------------------------------------------------ */    
+
+    /* ------------------------------------------------------------ */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+    protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
-        String pathInfo; 
+        String pathInfo;
         Enumeration<String> reqRanges = null;
-        boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
+        final boolean included = request.getAttribute(RequestDispatcher.INCLUDE_REQUEST_URI) != null;
         if (included) {
             pathInfo = (String) request.getAttribute(RequestDispatcher.INCLUDE_PATH_INFO);
             if (pathInfo == null) {
@@ -248,11 +248,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 reqRanges = null;
             }
         }
-        
-        String pathInContext =  pathInfo == null ? "/" : pathInfo; // this is the path of the resource in _resourceBase (= path within htroot respective htDocs)
-        boolean endsWithSlash = pathInContext.endsWith(URIUtil.SLASH);
 
-        // Find the resource 
+        String pathInContext =  pathInfo == null ? "/" : pathInfo; // this is the path of the resource in _resourceBase (= path within htroot respective htDocs)
+        final boolean endsWithSlash = pathInContext.endsWith(URIUtil.SLASH);
+
+        // Find the resource
         Resource resource = null;
 
         try {
@@ -262,27 +262,32 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (reqRanges == null && !endsWithSlash) {
                 final int p = pathInContext.lastIndexOf('.');
                 if (p >= 0) {
-                    String pathofClass = pathInContext.substring(0, p) + ".class";
-                    Resource classresource = _resourceBase.addPath(pathofClass);
-                    // Does a class resource exist?
-                    if (classresource != null && classresource.exists() && !classresource.isDirectory()) {
+                    final Class<?> servletClass = rewriteClass(pathInContext);
+                    if (servletClass != null) {
                         hasClass = true;
+                    } else {
+                        final String pathofClass = pathInContext.substring(0, p) + ".class";
+                        final Resource classresource = this._resourceBase.addPath(pathofClass);
+                        // Does a class resource exist?
+                        if (classresource != null && classresource.exists() && !classresource.isDirectory()) {
+                            hasClass = true;
+                        }
                     }
                 }
             }
-            
+
             // find resource
             resource = getResource(pathInContext);
 
             if (!hasClass && (resource == null || !resource.exists()) && !pathInContext.contains("..")) {
                 // try to get this in the alternative htDocsPath
-                resource = Resource.newResource(new File(_htDocsPath, pathInContext));
+                resource = Resource.newResource(new File(this._htDocsPath, pathInContext));
             }
-            
+
             if (ConcurrentLog.isFine("FILEHANDLER")) {
                 ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: uri=" + request.getRequestURI() + " resource=" + resource);
             }
-            
+
             // Handle resource
             if (!hasClass && (resource == null || !resource.exists())) {
                 if (included) {
@@ -291,12 +296,12 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             } else if (!resource.isDirectory()) {
                 if (endsWithSlash && pathInContext.length() > 1) {
-                    String q = request.getQueryString();
+                    final String q = request.getQueryString();
                     pathInContext = pathInContext.substring(0, pathInContext.length() - 1);
                     if (q != null && q.length() != 0) {
                         pathInContext += "?" + q;
                     }
-                    response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(_servletContext.getContextPath(), pathInContext)));
+                    response.sendRedirect(response.encodeRedirectURL(URIUtil.addPaths(this._servletContext.getContextPath(), pathInContext)));
                 } else {
                     if (hasClass) { // this is a YaCy servlet, handle the template
                         handleTemplate(pathInfo, request, response);
@@ -310,15 +315,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 String welcome;
 
                 if (!endsWithSlash) {
-                    StringBuffer buf = request.getRequestURL();
+                    final StringBuffer buf = request.getRequestURL();
                     synchronized (buf) {
-                        int param = buf.lastIndexOf(";");
+                        final int param = buf.lastIndexOf(";");
                         if (param < 0) {
                             buf.append('/');
                         } else {
                             buf.insert(param, '/');
                         }
-                        String q = request.getQueryString();
+                        final String q = request.getQueryString();
                         if (q != null && q.length() != 0) {
                             buf.append('?');
                             buf.append(q);
@@ -331,7 +336,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     ConcurrentLog.fine("FILEHANDLER","welcome={}" + welcome);
 
                     // Forward to the index
-                    RequestDispatcher dispatcher = request.getRequestDispatcher(welcome);
+                    final RequestDispatcher dispatcher = request.getRequestDispatcher(welcome);
                     if (dispatcher != null) {
                         if (included) {
                             dispatcher.include(request, response);
@@ -345,7 +350,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     }
                 }
             }
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             ConcurrentLog.logException(e);
             if (!response.isCommitted()) {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
@@ -359,7 +364,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
     /* ------------------------------------------------------------ */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(final HttpServletRequest request, final HttpServletResponse response)
             throws ServletException, IOException {
         doGet(request, response);
     }
@@ -369,51 +374,51 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @see javax.servlet.http.HttpServlet#doTrace(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
     @Override
-    protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doTrace(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
     }
 
     /* ------------------------------------------------------------ */
     @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp)
+    protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
         resp.setHeader("Allow", "GET,HEAD,POST,OPTIONS");
     }
 
     /* ------------------------------------------------------------ */
     /**
-     * Finds a matching welcome file for the supplied path. 
-     * The filename to look is set as servlet context init parameter 
+     * Finds a matching welcome file for the supplied path.
+     * The filename to look is set as servlet context init parameter
      * default is "index.html"
      * @param pathInContext path in context
      * @return The path of the matching welcome file in context or null.
      */
-    protected String getWelcomeFile(String pathInContext) {
-        if (_welcomes == null) {
+    protected String getWelcomeFile(final String pathInContext) {
+        if (this._welcomes == null) {
             return null;
         }
-        for (String _welcome : _welcomes) {
-            String welcome_in_context = URIUtil.addPaths(pathInContext, _welcome);
-            Resource welcome = getResource(welcome_in_context);
+        for (final String _welcome : this._welcomes) {
+            final String welcome_in_context = URIUtil.addPaths(pathInContext, _welcome);
+            final Resource welcome = getResource(welcome_in_context);
             if (welcome != null && welcome.exists()) {
                 return _welcome;
             }
         }
         return null;
-    } 
+    }
     /* ------------------------------------------------------------ */
     /* Check modification date headers.
      * send a 304 response instead of content if not modified since
      */
-    protected boolean passConditionalHeaders(HttpServletRequest request, HttpServletResponse response, Resource resource)
+    protected boolean passConditionalHeaders(final HttpServletRequest request, final HttpServletResponse response, final Resource resource)
             throws IOException {
         try {
             if (!request.getMethod().equals(HttpMethod.HEAD.asString())) {
 
-                String ifms = request.getHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
+                final String ifms = request.getHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
                 if (ifms != null) {
 
-                    long ifmsl = request.getDateHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
+                    final long ifmsl = request.getDateHeader(HttpHeader.IF_MODIFIED_SINCE.asString());
                     if (ifmsl != -1) {
                         if (resource.lastModified() / 1000 <= ifmsl / 1000) {
                             response.reset();
@@ -425,7 +430,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
 
                 // Parse the if[un]modified dates and compare to resource
-                long date = request.getDateHeader(HttpHeader.IF_UNMODIFIED_SINCE.asString());
+                final long date = request.getDateHeader(HttpHeader.IF_UNMODIFIED_SINCE.asString());
 
                 if (date != -1) {
                     if (resource.lastModified() / 1000 > date / 1000) {
@@ -434,7 +439,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     }
                 }
             }
-        } catch (IllegalArgumentException iae) {
+        } catch (final IllegalArgumentException iae) {
             if (!response.isCommitted()) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, iae.getMessage());
                 return false;
@@ -445,25 +450,25 @@ public class YaCyDefaultServlet extends HttpServlet  {
     }
 
     /* ------------------------------------------------------------------- */
-    protected void sendDirectory(HttpServletRequest request,
-            HttpServletResponse response,
-            Resource resource,
-            String pathInContext)
+    protected void sendDirectory(final HttpServletRequest request,
+            final HttpServletResponse response,
+            final Resource resource,
+            final String pathInContext)
             throws IOException {
-        if (!_dirAllowed) {
+        if (!this._dirAllowed) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-         
-        String base = URIUtil.addPaths(request.getRequestURI(), URIUtil.SLASH);
 
-        String dir = resource.getListHTML(base, pathInContext.length() > 1, null);
+        final String base = URIUtil.addPaths(request.getRequestURI(), URIUtil.SLASH);
+
+        final String dir = resource.getListHTML(base, pathInContext.length() > 1, null);
         if (dir == null) {
             response.sendError(HttpServletResponse.SC_FORBIDDEN, "No directory");
             return;
         }
 
-        byte[] data = dir.getBytes(StandardCharsets.UTF_8);
+        final byte[] data = dir.getBytes(StandardCharsets.UTF_8);
         response.setContentType(MimeTypes.Type.TEXT_HTML_UTF_8.asString());
         response.setContentLength(data.length);
         response.setHeader(HeaderFramework.CACHE_CONTROL, "no-cache, no-store");
@@ -475,19 +480,19 @@ public class YaCyDefaultServlet extends HttpServlet  {
     /* ------------------------------------------------------------ */
     /**
      * send static content
-     * 
+     *
      * @param request
      * @param response
      * @param include  is a include file (send without changing/adding headers)
      * @param resource the static content
      * @param reqRanges
-     * @throws IOException 
+     * @throws IOException
      */
-    protected void sendData(HttpServletRequest request,
-            HttpServletResponse response,
-            boolean include,
-            Resource resource,
-            Enumeration<String> reqRanges)
+    protected void sendData(final HttpServletRequest request,
+            final HttpServletResponse response,
+            final boolean include,
+            final Resource resource,
+            final Enumeration<String> reqRanges)
             throws IOException {
 
         final long content_length = resource.length();
@@ -496,7 +501,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         OutputStream out;
         try {
             out = response.getOutputStream();
-        } catch (IllegalStateException e) {
+        } catch (final IllegalStateException e) {
             out = new WriterOutputStream(response.getWriter());
         }
 
@@ -513,7 +518,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
         // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
         response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
-        
+
         if (reqRanges == null || !reqRanges.hasMoreElements() || content_length < 0) {
             //  if there were no ranges, send entire entity
             if (include) {
@@ -541,7 +546,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             //  since were here now), send that range with a 216 response
             if (ranges.size() == 1) {
                 final InclusiveByteRange singleSatisfiableRange = ranges.iterator().next();
-                long singleLength = singleSatisfiableRange.getSize();
+                final long singleLength = singleSatisfiableRange.getSize();
                 writeHeaders(response, resource, singleLength);
                 response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
                 response.setHeader(HttpHeader.CONTENT_RANGE.asString(),
@@ -556,11 +561,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
             //  content-length header
             //
             writeHeaders(response, resource, -1);
-            String mimetype = response.getContentType();
+            final String mimetype = response.getContentType();
             if (mimetype == null) {
                 ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: Unknown mimetype for " + request.getRequestURI());
             }
-            MultiPartOutputStream multi = new MultiPartOutputStream(out);
+            final MultiPartOutputStream multi = new MultiPartOutputStream(out);
             response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
             // If the request has a "Request-Range" header then we need to
@@ -579,9 +584,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             // calculate the content-length
             int length = 0;
-            String[] header = new String[ranges.size()];
+            final String[] header = new String[ranges.size()];
             for (int i = 0; i < ranges.size(); i++) {
-                InclusiveByteRange ibr = ranges.get(i);
+                final InclusiveByteRange ibr = ranges.get(i);
                 header[i] = ibr.toHeaderRangeString(content_length);
                 length +=
                         ((i > 0) ? 2 : 0)
@@ -595,11 +600,11 @@ public class YaCyDefaultServlet extends HttpServlet  {
             response.setContentLength(length);
 
             for (int i = 0; i < ranges.size(); i++) {
-                InclusiveByteRange ibr = ranges.get(i);
+                final InclusiveByteRange ibr = ranges.get(i);
                 multi.startPart(mimetype, new String[]{HeaderFramework.CONTENT_RANGE + ": " + header[i]});
 
-                long start = ibr.getFirst();
-                long size = ibr.getSize();
+                final long start = ibr.getFirst();
+                final long size = ibr.getSize();
                 if (in != null) {
                     // Handle non cached resource
                     if (start < pos) {
@@ -626,10 +631,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
     }
 
     /* ------------------------------------------------------------ */
-    protected void writeHeaders(HttpServletResponse response, Resource resource, long count) {
+    protected void writeHeaders(final HttpServletResponse response, final Resource resource, final long count) {
         if (response.getContentType() == null) {
             final String extensionmime;
-            if ((extensionmime = _mimeTypes.getMimeByExtension(resource.getName())) != null) {
+            if ((extensionmime = this._mimeTypes.getMimeByExtension(resource.getName())) != null) {
                 response.setContentType(extensionmime);
             }
         }
@@ -640,7 +645,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             response.setDateHeader(HeaderFramework.LAST_MODIFIED, lml);
         }
         */
-        
+
         if (count != -1) {
             if (count < Integer.MAX_VALUE) {
                 response.setContentLength((int) count);
@@ -649,18 +654,22 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         }
 
-        if (_acceptRanges) {
+        if (this._acceptRanges) {
             response.setHeader(HeaderFramework.ACCEPT_RANGES, "bytes");
         }
     }
 
-    
+
     protected Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
     }
-    
+
+    protected Object invokeServlet(final Class<?> targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
+    }
+
     /**
-     * Returns the URL base for this peer, determined from request HTTP header "Host" when present. Use this when absolute URL rendering is required, 
+     * Returns the URL base for this peer, determined from request HTTP header "Host" when present. Use this when absolute URL rendering is required,
      * otherwise relative URLs should be preferred.<br/>
      * Note : this implementation lets the responsibility to any eventual Reverse Proxy to eventually rewrite the rendered absolute URL. Example Apache directive :
      * <code>Substitute "s|http://internal.yacypeer.com:8090/|http://www.example.com/yacy/|in"</code>.
@@ -686,35 +695,35 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 hostAndPort = Domains.LOCALHOST + ":8090";
             }
         }
-        
+
         if(header != null) {
-        	String protocolHeader = header.getScheme();
-        	
-    		/* Let's check this header has a valid value */
-        	if("http".equals(protocolHeader) || "https".equals(protocolHeader)) {
-        		protocol = protocolHeader.toLowerCase(Locale.ROOT);
-        	} else if(protocolHeader != null && !protocolHeader.isEmpty()) {
-    			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal protocol scheme header value : " + protocolHeader);
-    		}
-        	
-    		/* This peer can also be behind a reverse proxy requested using https, even if the request coming to this YaCy peer is http only
-    		 * Possible scenario (happens for example when YaCy is deployed on Heroku Platform) : User browser -> https://reverseProxy/yacyURL -> http://yacypeer/yacyURL
-    		 * In that case, absolute URLs rendered by this peer (in rss feeds for example) must effectively start with the https scheme */
-        	protocolHeader = header.get(HttpHeaders.X_FORWARDED_PROTO.toString(), "").toLowerCase(Locale.ROOT);
-        	
-    		/* Here we only allow an upgrade from HTTP to HTTPS, not the reverse (we don't want a forged HTTP header by an eventual attacker to force fallback to HTTP) */
-        	if("https".equals(protocolHeader)) {
-        		protocol = protocolHeader;
-        	} else if(!protocolHeader.isEmpty()) {
-    			ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal " + HttpHeaders.X_FORWARDED_PROTO.toString() + " header value : " + protocolHeader);
-    		}
+            String protocolHeader = header.getScheme();
+
+            /* Let's check this header has a valid value */
+            if("http".equals(protocolHeader) || "https".equals(protocolHeader)) {
+                protocol = protocolHeader.toLowerCase(Locale.ROOT);
+            } else if(protocolHeader != null && !protocolHeader.isEmpty()) {
+                ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal protocol scheme header value : " + protocolHeader);
+            }
+
+            /* This peer can also be behind a reverse proxy requested using https, even if the request coming to this YaCy peer is http only
+             * Possible scenario (happens for example when YaCy is deployed on Heroku Platform) : User browser -> https://reverseProxy/yacyURL -> http://yacypeer/yacyURL
+             * In that case, absolute URLs rendered by this peer (in rss feeds for example) must effectively start with the https scheme */
+            protocolHeader = header.get(HttpHeaders.X_FORWARDED_PROTO.toString(), "").toLowerCase(Locale.ROOT);
+
+            /* Here we only allow an upgrade from HTTP to HTTPS, not the reverse (we don't want a forged HTTP header by an eventual attacker to force fallback to HTTP) */
+            if("https".equals(protocolHeader)) {
+                protocol = protocolHeader;
+            } else if(!protocolHeader.isEmpty()) {
+                ConcurrentLog.warn("FILEHANDLER","YaCyDefaultServlet: illegal " + HttpHeaders.X_FORWARDED_PROTO.toString() + " header value : " + protocolHeader);
+            }
         }
-        
+
         return protocol + "://" + hostAndPort;
     }
 
-    private RequestHeader generateLegacyRequestHeader(HttpServletRequest request, String target, String targetExt) {
-        RequestHeader legacyRequestHeader = new RequestHeader(request);
+    private RequestHeader generateLegacyRequestHeader(final HttpServletRequest request, final String target, final String targetExt) {
+        final RequestHeader legacyRequestHeader = new RequestHeader(request);
 
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_PATH, target); // target may contain a server side include (SSI)
         legacyRequestHeader.put(HeaderFramework.CONNECTION_PROP_EXT, targetExt);
@@ -731,22 +740,22 @@ public class YaCyDefaultServlet extends HttpServlet  {
      */
     public File getLocalizedFile(final String path, final String localeSelection) throws IOException {
         if (!(localeSelection.equals("default"))) {
-            final File localePath = new File(_htLocalePath, localeSelection + '/' + path);
+            final File localePath = new File(this._htLocalePath, localeSelection + '/' + path);
             if (localePath.exists()) {
                 return localePath;  // avoid "NoSuchFile" troubles if the "localeSelection" is misspelled
             }
         }
 
-        File docsPath = new File(_htDocsPath, path);
+        final File docsPath = new File(this._htDocsPath, path);
         if (docsPath.exists()) {
             return docsPath;
         }
-        return _resourceBase.addPath(path).getFile();
+        return this._resourceBase.addPath(path).getFile();
     }
 
-    protected File rewriteClassFile(final File template) {
+    protected File rewriteClassFile(final File servletFile) {
         try {
-            String f = template.getCanonicalPath();
+            String f = servletFile.getCanonicalPath();
             final int p = f.lastIndexOf('.');
             if (p < 0) {
                 return null;
@@ -762,22 +771,39 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
     }
 
+    protected Class<?> rewriteClass(String target) {
+        assert target.charAt(0) == '/';
+        try {
+            final int p = target.lastIndexOf('.');
+            if (p < 0) {
+                return null;
+            }
+            target = target.substring(1, p);
+
+            final Class<?> servletClass = Class.forName("net.yacy.htroot." + target);
+
+            return servletClass;
+        } catch (final ClassNotFoundException e) {
+            return null;
+        }
+    }
+
     protected Method rewriteMethod(final File classFile) throws InvocationTargetException {
         Method m = null;
         // now make a class out of the stream
         try {
-            final SoftReference<Method> ref = templateMethodCache.get(classFile);
+            final SoftReference<Method> ref = this.templateMethodCache.get(classFile);
             if (ref != null) {
                 m = ref.get();
                 if (m == null) {
-                    templateMethodCache.remove(classFile);
+                    this.templateMethodCache.remove(classFile);
                 } else {
                     return m;
                 }
             }
 
             final Class<?> c = provider.loadClass(classFile);
-            
+
             final Class<?>[] params = (Class<?>[]) Array.newInstance(Class.class, 3);
             params[0]=  RequestHeader.class;
             params[1] = serverObjects.class;
@@ -785,10 +811,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
             m = c.getMethod("respond", params);
 
             if (MemoryControl.shortStatus()) {
-                templateMethodCache.clear();
+                this.templateMethodCache.clear();
             } else {
                 // store the method into the cache
-                templateMethodCache.put(classFile, new SoftReference<Method>(m));
+                this.templateMethodCache.put(classFile, new SoftReference<Method>(m));
             }
         } catch (final ClassNotFoundException e) {
             ConcurrentLog.severe("FILEHANDLER","YaCyDefaultServlet: class " + classFile + " is missing:" + e.getMessage());
@@ -800,34 +826,50 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return m;
     }
 
+    protected Method rewriteMethod(final Class<?> rewriteClass) throws InvocationTargetException {
+        Method m = null;
+        try {
+            final Class<?>[] params = (Class<?>[]) Array.newInstance(Class.class, 3);
+            params[0]=  RequestHeader.class;
+            params[1] = serverObjects.class;
+            params[2] = serverSwitch.class;
+            m = rewriteClass.getMethod("respond", params);
+        } catch (final NoSuchMethodException e) {
+            ConcurrentLog.severe("FILEHANDLER","YaCyDefaultServlet: method 'respond' not found in class " + rewriteClass.getName()  + ": " + e.getMessage());
+            throw new InvocationTargetException(e, "method 'respond' not found in class " + rewriteClass.getName()  + ": " + e.getMessage());
+        }
+        return m;
+    }
+
     /**
      * Handles a YaCy servlet template, reads the template and replaces the template
-     * items with actual values. Because of supported server side includes target 
+     * items with actual values. Because of supported server side includes target
      * might not be the same as request.getPathInfo
-     * 
+     *
      * @param target the path to the template
      * @param request the remote servlet request
      * @param response
      * @throws IOException
      * @throws ServletException
      */
-    protected void handleTemplate(String target,  HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        Switchboard sb = Switchboard.getSwitchboard();
+    protected void handleTemplate(final String target,  final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+        final Switchboard sb = Switchboard.getSwitchboard();
 
         String localeSelection = sb.getConfig("locale.language", "browser");
         if (localeSelection.endsWith("browser")) {
-            String lng = request.getLocale().getLanguage();
+            final String lng = request.getLocale().getLanguage();
             if (lng.equalsIgnoreCase("en")) { // because en is handled as "default" in localizer
                 localeSelection = "default";
             } else {
                 localeSelection = lng;
             }
         }
-        File targetFile = getLocalizedFile(target, localeSelection);
-        File targetClass = rewriteClassFile(_resourceBase.addPath(target).getFile());
-        String targetExt = target.substring(target.lastIndexOf('.') + 1);
+        final File targetLocalizedFile = getLocalizedFile(target, localeSelection);
+        final File targetClassFile = rewriteClassFile(this._resourceBase.addPath(target).getFile());
+        final Class<?> targetClass = rewriteClass(target);
+        final String targetExt = target.substring(target.lastIndexOf('.') + 1);
 
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         if (target.endsWith(".css")) {
             response.setDateHeader(HeaderFramework.LAST_MODIFIED, now);
             response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour (which is still often, others use 1 week, month or year)
@@ -846,15 +888,15 @@ public class YaCyDefaultServlet extends HttpServlet  {
             response.setHeader(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
         }
 
-        if ((targetClass != null)) {
-            serverObjects args = new serverObjects();
-            Enumeration<String> argNames = request.getParameterNames(); // on ssi jetty dispatcher merged local ssi query parameters
+        if ((targetClassFile != null || targetClass != null)) {
+            final serverObjects args = new serverObjects();
+            final Enumeration<String> argNames = request.getParameterNames(); // on ssi jetty dispatcher merged local ssi query parameters
             while (argNames.hasMoreElements()) {
-                String argName = argNames.nextElement();
+                final String argName = argNames.nextElement();
                 // standard attributes are just pushed as string
                 args.put(argName, request.getParameter(argName));
             }
-            RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
+            final RequestHeader legacyRequestHeader = generateLegacyRequestHeader(request, target, targetExt);
             // add multipart-form fields to parameter
             if (ServletFileUpload.isMultipartContent(request)) {
                 parseMultipart(request, args);
@@ -864,39 +906,47 @@ public class YaCyDefaultServlet extends HttpServlet  {
             try {
                 if (args.isEmpty()) {
                     // yacy servlets typically test for args != null (but not for args .isEmpty())
-                    tmp = invokeServlet(targetClass, legacyRequestHeader, null); 
+                    if (targetClass == null) {
+                        tmp = invokeServlet(targetClassFile, legacyRequestHeader, null);
+                    } else {
+                        tmp = invokeServlet(targetClass, legacyRequestHeader, null);
+                    }
                 } else {
-                    tmp = invokeServlet(targetClass, legacyRequestHeader, args);
+                    if (targetClass == null) {
+                        tmp = invokeServlet(targetClassFile, legacyRequestHeader, args);
+                    } else {
+                        tmp = invokeServlet(targetClass, legacyRequestHeader, args);
+                    }
                 }
-            } catch(InvocationTargetException e) {
-            	if(e.getCause() instanceof InvalidURLLicenceException) {
-                	/* A non authorized user is trying to fetch a image with a bad or already released license code */
-                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
-                	return;
+            } catch(final InvocationTargetException e) {
+                if(e.getCause() instanceof InvalidURLLicenceException) {
+                    /* A non authorized user is trying to fetch a image with a bad or already released license code */
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage());
+                    return;
                 }
-            	if(e.getCause() instanceof BadTransactionException) {
-                	/* A request for a protected page with server-side effects failed because the transaction is not valid :
-                	 * for example because missing or invalid transaction token*/
-                	response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage() 
-                			+ " If you sent this request with a web browser, please refresh the origin page.");
-                	return;
+                if(e.getCause() instanceof BadTransactionException) {
+                    /* A request for a protected page with server-side effects failed because the transaction is not valid :
+                     * for example because missing or invalid transaction token*/
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getCause().getMessage()
+                            + " If you sent this request with a web browser, please refresh the origin page.");
+                    return;
                 }
-				if (e.getCause() instanceof TemplateProcessingException) {
-					/* A template processing error occurred, and the HTTP status and message have been set */
-					response.sendError(((TemplateProcessingException) e.getCause()).getStatus(),
-							e.getCause().getMessage());
-					return;
-				}
-            	if(e.getCause() instanceof DisallowedMethodException) {
-                	/* The request was sent using an disallowed HTTP method */
-                	response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getCause().getMessage());
-                	return;
+                if (e.getCause() instanceof TemplateProcessingException) {
+                    /* A template processing error occurred, and the HTTP status and message have been set */
+                    response.sendError(((TemplateProcessingException) e.getCause()).getStatus(),
+                            e.getCause().getMessage());
+                    return;
                 }
-            	ConcurrentLog.logException(e);
-                throw new ServletException(targetFile.getAbsolutePath());
+                if(e.getCause() instanceof DisallowedMethodException) {
+                    /* The request was sent using an disallowed HTTP method */
+                    response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, e.getCause().getMessage());
+                    return;
+                }
+                ConcurrentLog.logException(e);
+                throw new ServletException(targetLocalizedFile.getAbsolutePath());
             } catch (IllegalArgumentException | IllegalAccessException e) {
                 ConcurrentLog.logException(e);
-                throw new ServletException(targetFile.getAbsolutePath());
+                throw new ServletException(targetLocalizedFile.getAbsolutePath());
             }
 
             if (tmp instanceof RasterPlotter || tmp instanceof EncodedImage || tmp instanceof Image) {
@@ -910,14 +960,14 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 } else if (tmp instanceof EncodedImage) {
                     final EncodedImage yp = (EncodedImage) tmp;
                     result = yp.getImage();
-                    /** When encodedImage is empty, return a code 500 rather than only an empty response 
+                    /** When encodedImage is empty, return a code 500 rather than only an empty response
                      * as it is better handled across different browsers */
                     if(result == null || result.length() == 0) {
-                    	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                    	if(result != null) {
-                    		result.close();
-                    	}
-                    	return;
+                        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                        if(result != null) {
+                            result.close();
+                        }
+                        return;
                     }
                     if (yp.isStatic()) { // static image never expires
                         response.setDateHeader(HeaderFramework.EXPIRES, now + 3600000); // expires in 1 hour
@@ -951,9 +1001,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
 
             if (tmp instanceof InputStream) {
-            	/* Images and favicons can also be written directly from an inputStream */
-            	updateRespHeadersForImages(target, response);
-            	
+                /* Images and favicons can also be written directly from an inputStream */
+                updateRespHeadersForImages(target, response);
+
                 writeInputStream(response, targetExt, (InputStream)tmp);
                 return;
             }
@@ -967,10 +1017,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
                 if (templatePatterns.getOutgoingHeader() != null) {
                     // handle responseHeader entries set by servlet
-                    ResponseHeader tmpouthdr = templatePatterns.getOutgoingHeader();
-                    for (String hdrkey : tmpouthdr.keySet()) {
+                    final ResponseHeader tmpouthdr = templatePatterns.getOutgoingHeader();
+                    for (final String hdrkey : tmpouthdr.keySet()) {
                         if (!HeaderFramework.STATUS_CODE.equals(hdrkey)) { // skip default init response status value (not std. )
-                            String val = tmpouthdr.get(hdrkey);
+                            final String val = tmpouthdr.get(hdrkey);
                             if (!response.containsHeader(hdrkey) && val != null) { // to be on the safe side, add only new hdr (mainly used for CORS_ALLOW_ORIGIN)
                                 response.setHeader(hdrkey, tmpouthdr.get(hdrkey));
                             }
@@ -978,7 +1028,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     }
                     // handle login cookie
                     if (tmpouthdr.getCookiesEntries() != null) {
-                        for (Cookie c : tmpouthdr.getCookiesEntries()) {
+                        for (final Cookie c : tmpouthdr.getCookiesEntries()) {
                             response.addCookie(c);
                         }
                     }
@@ -986,9 +1036,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             } else {
                 templatePatterns = new servletProperties((serverObjects) tmp);
             }
-            
+
             if(templatePatterns.containsKey(TransactionManager.TRANSACTION_TOKEN_PARAM)) {
-                /* The response contains a transaction token : we also write the transaction token as a custom header 
+                /* The response contains a transaction token : we also write the transaction token as a custom header
                  * to allow usage by external tools (such as curl or wget) without the need to parse HTML */
                 response.setHeader(HeaderFramework.X_YACY_TRANSACTION_TOKEN, templatePatterns.get(TransactionManager.TRANSACTION_TOKEN_PARAM));
             }
@@ -1015,8 +1065,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 return;
             }
 
-            if (targetFile.exists() && targetFile.isFile() && targetFile.canRead()) {
-                
+            if (targetLocalizedFile.exists() && targetLocalizedFile.isFile() && targetLocalizedFile.canRead()) {
+
                 sb.setConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, appendPath(sb.getConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, ""), target));
                 if (args != null && !args.isEmpty()) {
                     sb.setConfig("server.servlets.submitted", appendPath(sb.getConfig("server.servlets.submitted", ""), target));
@@ -1030,23 +1080,23 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put(servletProperties.PEER_STAT_MYTIME, GenericFormatter.SHORT_SECOND_FORMATTER.format());
                 templatePatterns.put(servletProperties.RELATIVE_BASE, YaCyDefaultServlet.getRelativeBase(target));
                 templatePatterns.put(SwitchboardConstants.REFERRER_META_POLICY, sb.getConfig(SwitchboardConstants.REFERRER_META_POLICY, SwitchboardConstants.REFERRER_META_POLICY_DEFAULT));
-                Seed myPeer = sb.peers.mySeed();
+                final Seed myPeer = sb.peers.mySeed();
                 templatePatterns.put("newpeer", myPeer.getAge() >= 1 ? 0 : 1);
                 templatePatterns.putHTML("newpeer_peerhash", myPeer.hash);
-                boolean authorized = sb.adminAuthenticated(legacyRequestHeader) >= 2;
+                final boolean authorized = sb.adminAuthenticated(legacyRequestHeader) >= 2;
                 templatePatterns.put("authorized", authorized ? 1 : 0); // used in templates and other html (e.g. to display lock/unlock symbol)
 
                 templatePatterns.put("simpleheadernavbar", sb.getConfig("decoration.simpleheadernavbar", "navbar-default"));
-                
+
                 // add navigation keys to enable or disable menu items
                 templatePatterns.put("navigation-p2p", sb.getConfigBool(SwitchboardConstants.NETWORK_UNIT_DHT, true) || !sb.isRobinsonMode() ? 1 : 0);
                 templatePatterns.put("navigation-p2p_authorized", authorized ? 1 : 0);
-                String submitted = sb.getConfig("server.servlets.submitted", "");
-                boolean crawler_enabled = true; /*
+                final String submitted = sb.getConfig("server.servlets.submitted", "");
+                final boolean crawler_enabled = true; /*
                         submitted.contains("Crawler_p") ||
                         submitted.contains("ConfigBasic") ||
                         submitted.contains("Load_RSS_p");*/
-                boolean advanced_enabled =
+                final boolean advanced_enabled =
                         crawler_enabled ||
                         submitted.contains("IndexImportMediawiki_p") ||
                         submitted.contains("CrawlStart");
@@ -1058,46 +1108,46 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 templatePatterns.put(SwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
                 templatePatterns.put(SwitchboardConstants.GREETING_IMAGE_ALT, sb.getConfig(SwitchboardConstants.GREETING_IMAGE_ALT, ""));
                 templatePatterns.put("clientlanguage", localeSelection);
-                
-                String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
+
+                final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
 
                 InputStream fis;
-                long fileSize = targetFile.length();
+                final long fileSize = targetLocalizedFile.length();
 
                 if (fileSize <= Math.min(4 * 1024 * 1204, MemoryControl.available() / 100)) {
                     // read file completely into ram, avoid that too many files are open at the same time
-                    fis = new ByteArrayInputStream(FileUtils.read(targetFile));
+                    fis = new ByteArrayInputStream(FileUtils.read(targetLocalizedFile));
                 } else {
-                    fis = new BufferedInputStream(new FileInputStream(targetFile));
+                    fis = new BufferedInputStream(new FileInputStream(targetLocalizedFile));
                 }
 
                 // set response header
                 response.setContentType(mimeType);
                 response.setStatus(HttpServletResponse.SC_OK);
-                ByteArrayOutputStream bas = new ByteArrayOutputStream(4096);
+                final ByteArrayOutputStream bas = new ByteArrayOutputStream(4096);
                 try {
-                	// apply templates
-                	TemplateEngine.writeTemplate(targetFile.getName(), fis, bas, templatePatterns);
-                	
+                    // apply templates
+                    TemplateEngine.writeTemplate(targetLocalizedFile.getName(), fis, bas, templatePatterns);
+
                     // handle SSI
                     parseSSI (bas.toByteArray(),request,response);
                 } finally {
-                	try {
-                		fis.close();
-                	} catch(IOException ignored) {
-                		ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: could not close target file " + targetFile.getName());
-                	}
-                	
-                	try {
-                		bas.close();
-                	} catch(IOException ignored) {
-                		/* Should never happen with a ByteArrayOutputStream */
-                	}
+                    try {
+                        fis.close();
+                    } catch(final IOException ignored) {
+                        ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: could not close target file " + targetLocalizedFile.getName());
+                    }
+
+                    try {
+                        bas.close();
+                    } catch(final IOException ignored) {
+                        /* Should never happen with a ByteArrayOutputStream */
+                    }
                 }
             }
         }
     }
-    
+
     /**
      * Returns the relative path prefix necessary to reach htroot from the deepest level of targetPath.<br>
      * Example : targetPath="api/citation.html" returns "../"
@@ -1106,20 +1156,20 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @return the relative path prefix, eventually empty
      */
     protected static String getRelativeBase(String targetPath) {
-    	StringBuilder relativeBase = new StringBuilder();
-    	if(targetPath != null) {
-    		/* Normalize target path : it is relative to htroot, starting with a slash or not */
-    		if(targetPath.startsWith("/")) {
-    			targetPath = targetPath.substring(1, targetPath.length());
-    		}
-    		
-    		int slashIndex = targetPath.indexOf('/', 0);
-    		while(slashIndex >= 0) {
-    			relativeBase.append("../");
-    			slashIndex = targetPath.indexOf('/', slashIndex + 1);
-    		}
-    	}
-    	return relativeBase.toString();
+        final StringBuilder relativeBase = new StringBuilder();
+        if(targetPath != null) {
+            /* Normalize target path : it is relative to htroot, starting with a slash or not */
+            if(targetPath.startsWith("/")) {
+                targetPath = targetPath.substring(1, targetPath.length());
+            }
+
+            int slashIndex = targetPath.indexOf('/', 0);
+            while(slashIndex >= 0) {
+                relativeBase.append("../");
+                slashIndex = targetPath.indexOf('/', slashIndex + 1);
+            }
+        }
+        return relativeBase.toString();
     }
 
     /**
@@ -1127,16 +1177,16 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @param target the query target
      * @param response servlet response to eventually update
      */
-	private void updateRespHeadersForImages(String target, HttpServletResponse response) {
-		if (target.equals("/ViewImage.png") || target.equals("/ViewFavicon.png")) {
-		    if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
-		        response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
-		    }
+    private void updateRespHeadersForImages(final String target, final HttpServletResponse response) {
+        if (target.equals("/ViewImage.png") || target.equals("/ViewFavicon.png")) {
+            if (response.containsHeader(HeaderFramework.LAST_MODIFIED)) {
+                response.getHeaders(HeaderFramework.LAST_MODIFIED).clear(); // if this field is present, the reload-time is a 10% fraction of ttl and other caching headers do not work
+            }
 
-		    // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
-		    response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
-		}
-	}
+            // cache-control: allow shared caching (i.e. proxies) and set expires age for cache
+            response.setHeader(HeaderFramework.CACHE_CONTROL, "public, max-age=" + Integer.toString(600)); // seconds; ten minutes
+        }
+    }
 
 
     /**
@@ -1146,31 +1196,31 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @param inStream
      * @throws IOException when a read/write error occured.
      */
-	private void writeInputStream(HttpServletResponse response, String targetExt, InputStream inStream)
-			throws IOException {
-		final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
-		response.setContentType(mimeType);
-		response.setStatus(HttpServletResponse.SC_OK);
-		byte[] buffer = new byte[4096];
-		int l, size = 0;
-		try {
-			while ((l = inStream.read(buffer)) > 0) {
-				response.getOutputStream().write(buffer, 0, l);
-				size += l;
-			}
-			response.setContentLength(size);
-		} catch(IOException e){
-			/** No need to log full stack trace (in most cases resource is not available because of a network error) */
-			ConcurrentLog.fine("FILEHANDLER", "YaCyDefaultServlet: resource content stream could not be written to response.");
-        	response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        	return;
-		} finally {
-			try {
-				inStream.close();
-			} catch(IOException ignored) {
-			}
-		}
-	}
+    private void writeInputStream(final HttpServletResponse response, final String targetExt, final InputStream inStream)
+            throws IOException {
+        final String mimeType = Classification.ext2mime(targetExt, MimeTypes.Type.TEXT_HTML.asString());
+        response.setContentType(mimeType);
+        response.setStatus(HttpServletResponse.SC_OK);
+        final byte[] buffer = new byte[4096];
+        int l, size = 0;
+        try {
+            while ((l = inStream.read(buffer)) > 0) {
+                response.getOutputStream().write(buffer, 0, l);
+                size += l;
+            }
+            response.setContentLength(size);
+        } catch(final IOException e){
+            /** No need to log full stack trace (in most cases resource is not available because of a network error) */
+            ConcurrentLog.fine("FILEHANDLER", "YaCyDefaultServlet: resource content stream could not be written to response.");
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            return;
+        } finally {
+            try {
+                inStream.close();
+            } catch(final IOException ignored) {
+            }
+        }
+    }
 
     /**
      * Append a path string to comma separated string of pathes if not already
@@ -1179,18 +1229,18 @@ public class YaCyDefaultServlet extends HttpServlet  {
      * @param path path to be appended
      * @return comma separated string of pathes including param path
      */
-    private String appendPath(String proplist, String path) {
+    private String appendPath(final String proplist, final String path) {
         if (proplist.length() == 0) return path;
         if (proplist.contains(path)) return proplist;
         return proplist + "," + path;
     }
-    
+
     /**
      * parse SSI line and include resource (<!--#include virtual="file.html" -->)
      */
-    protected void parseSSI(final byte[] in, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
-        ByteBuffer buffer = new ByteBuffer(in);
-        OutputStream out = response.getOutputStream();
+    protected void parseSSI(final byte[] in, final HttpServletRequest request, final HttpServletResponse response) throws IOException, ServletException {
+        final ByteBuffer buffer = new ByteBuffer(in);
+        final OutputStream out = response.getOutputStream();
         final byte[] inctxt ="<!--#include virtual=\"".getBytes();
         int offset = 0;
         int p = buffer.indexOf(inctxt, offset);
@@ -1202,10 +1252,10 @@ public class YaCyDefaultServlet extends HttpServlet  {
             final int rightquote = buffer.indexOf("\"".getBytes(), p + 23);
             if (rightquote > 0 && rightquote < end) {
                 final String path = buffer.toString(p + 22, rightquote - p - 22);
-                RequestDispatcher dispatcher = request.getRequestDispatcher(path);
+                final RequestDispatcher dispatcher = request.getRequestDispatcher(path);
                 try {
                     dispatcher.include(request, response);
-                } catch (IOException ex) {
+                } catch (final IOException ex) {
                     if (path.indexOf("yacysearch") < 0) ConcurrentLog.warn("FILEHANDLER", "YaCyDefaultServlet: parseSSI dispatcher problem - " + ex.getMessage() + ": " + path);
                     // this is probably a time-out; it may occur during search requests; for search requests we consider that normal
                 }
@@ -1240,18 +1290,18 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
         // check if we have enough memory
         if (!MemoryControl.request(request.getContentLength() * 3, false)) {
-        	throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
-        }                
-        ServletFileUpload upload = new ServletFileUpload(DISK_FILE_ITEM_FACTORY);
+            throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
+        }
+        final ServletFileUpload upload = new ServletFileUpload(DISK_FILE_ITEM_FACTORY);
         upload.setFileSizeMax(SIZE_FILE_THRESHOLD);
         try {
             // Parse the request to get form field items
-            List<FileItem> fileItems = upload.parseRequest(request);                 
+            final List<FileItem> fileItems = upload.parseRequest(request);
             // Process the uploaded file items
-            Iterator<FileItem> i = fileItems.iterator();
+            final Iterator<FileItem> i = fileItems.iterator();
             final BlockingQueue<Map.Entry<String, byte[]>> files = new LinkedBlockingQueue<>();
             while (i.hasNext()) {
-                FileItem item = i.next();
+                final FileItem item = i.next();
                 if (item.isFormField()) {
                     // simple text
                     if (item.getContentType() == null || !item.getContentType().contains("charset")) {
@@ -1268,21 +1318,21 @@ public class YaCyDefaultServlet extends HttpServlet  {
                     try {
                         filecontent = item.getInputStream();
                         files.put(new AbstractMap.SimpleEntry<String, byte[]>(item.getFieldName(), FileUtils.read(filecontent)));
-                    } catch (IOException e) {
+                    } catch (final IOException e) {
                         ConcurrentLog.info("FILEHANDLER", e.getMessage());
                     } finally {
-                        if (filecontent != null) try {filecontent.close();} catch (IOException e) {ConcurrentLog.info("FILEHANDLER", e.getMessage());}
+                        if (filecontent != null) try {filecontent.close();} catch (final IOException e) {ConcurrentLog.info("FILEHANDLER", e.getMessage());}
                     }
                 }
             }
             if (files.size() <= 1) { // TODO: should include additonal checks to limit parameter.size below rel. large SIZE_FILE_THRESHOLD
-                for (Map.Entry<String, byte[]> job: files) { // add the file content to parameter fieldname$file
-                    String n = job.getKey();
-                    byte[] v = job.getValue();
-                    String filename = args.get(n);
+                for (final Map.Entry<String, byte[]> job: files) { // add the file content to parameter fieldname$file
+                    final String n = job.getKey();
+                    final byte[] v = job.getValue();
+                    final String filename = args.get(n);
                     if (filename != null && filename.endsWith(".gz")) {
                         // transform this value into base64
-                        String b64 = Base64Order.standardCoder.encode(v);
+                        final String b64 = Base64Order.standardCoder.encode(v);
                         args.put(n + "$file", b64);
                         args.remove(n);
                         args.put(n, filename + ".base64");
@@ -1292,9 +1342,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
                 }
             } else {
                 // do this concurrently (this would all be superfluous if serverObjects could store byte[] instead only String)
-                int t = Math.min(files.size(), Runtime.getRuntime().availableProcessors());
+                final int t = Math.min(files.size(), Runtime.getRuntime().availableProcessors());
                 final Map.Entry<String, byte[]> POISON = new AbstractMap.SimpleEntry<>(null, null);
-                Thread[] p = new Thread[t];
+                final Thread[] p = new Thread[t];
                 for (int j = 0; j < t; j++) {
                     files.put(POISON);
                     p[j] = new Thread("YaCyDefaultServlet.parseMultipart-" + j) {
@@ -1302,23 +1352,23 @@ public class YaCyDefaultServlet extends HttpServlet  {
                         public void run() {
                             Map.Entry<String, byte[]> job;
                             try {while ((job = files.take()) != POISON) {
-                                String n = job.getKey();
-                                byte[] v = job.getValue();
-                                String filename = args.get(n);
-                                String b64 = Base64Order.standardCoder.encode(v);
+                                final String n = job.getKey();
+                                final byte[] v = job.getValue();
+                                final String filename = args.get(n);
+                                final String b64 = Base64Order.standardCoder.encode(v);
                                 synchronized (args) {
                                     args.put(n + "$file", b64);
                                     args.remove(n);
                                     args.put(n, filename + ".base64");
                                 }
-                            }} catch (InterruptedException e) {}
+                            }} catch (final InterruptedException e) {}
                         }
                     };
                     p[j].start();
                 }
                 for (int j = 0; j < t; j++) p[j].join();
             }
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             ConcurrentLog.info("FILEHANDLER", ex.getMessage());
         }
     }

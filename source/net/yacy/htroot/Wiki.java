@@ -1,3 +1,4 @@
+package net.yacy.htroot;
 // Wiki.java
 // -----------------------
 // part of the AnomicHTTPD caching proxy
