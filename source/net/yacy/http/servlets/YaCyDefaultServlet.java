@@ -773,18 +773,21 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
     protected Class<?> rewriteClass(String target) {
         assert target.charAt(0) == '/';
+        final int p = target.lastIndexOf('.');
+        if (p < 0) {
+            return null;
+        }
+        target = "net.yacy.htroot" + target.substring(0, p).replace('/', '.');
         try {
-            final int p = target.lastIndexOf('.');
-            if (p < 0) {
-                return null;
-            }
-            target = "net.yacy.htroot" + target.substring(0, p).replace('/', '.');
-
             final Class<?> servletClass = Class.forName(target);
-
             return servletClass;
         } catch (final ClassNotFoundException e) {
-            return null;
+            try {
+                final Class<?> servletClass = Class.forName(target + "_"); // for some targets we need alternative names
+                return servletClass;
+            } catch (final ClassNotFoundException ee) {
+                return null;
+            }
         }
     }
 

@@ -1,18 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry excluding="api/|env/|processing/domaingraph/applet/|yacy/|api/bookmarks/|api/bookmarks/posts/|api/bookmarks/tags/|api/bookmarks/xbel/|solr/|gsa/|solr/collection1/|api/blacklists/|proxymsg/|p2p/" kind="src" path="htroot"/>
-	<classpathentry excluding="bookmarks/|bookmarks/posts/|bookmarks/tags/|bookmarks/xbel/|blacklists/" kind="src" path="htroot/api"/>
-	<classpathentry excluding="posts/|tags/|xbel/" kind="src" path="htroot/api/bookmarks"/>
-	<classpathentry kind="src" path="htroot/api/blacklists"/>
-	<classpathentry kind="src" path="htroot/api/bookmarks/posts"/>
-	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
-	<classpathentry kind="src" path="htroot/api/bookmarks/xbel"/>
-	<classpathentry kind="src" path="htroot/env"/>
-	<classpathentry kind="src" path="htroot/p2p"/>
-	<classpathentry kind="src" path="htroot/proxymsg"/>
-	<classpathentry kind="src" path="htroot/yacy"/>
 	<classpathentry kind="src" path="source"/>
-	<classpathentry kind="src" path="test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="module" value="true"/>
