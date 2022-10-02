@@ -28,4 +28,4 @@ source/net/yacy/peers/operation/yacyBuildProperties.java
 /.settings/
 /.classpath
 /.project
-
+/ivy
