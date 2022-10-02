@@ -165,18 +165,7 @@
 
   </target>
 
-  <target name="compile-htroot" depends="init,resolve" description="compile YaCy servlets">
-    <!-- compile htroot, htroot/yacy and htroot/htdocsdefault -->
-    <javac srcdir="${htroot}/"
-           excludes="processing/**"
-           source="${javacSource}" target="${javacTarget}"
-           debug="true" debuglevel="lines,vars,source" includeantruntime="false" encoding="UTF-8">
-      <classpath refid="project.class.path" />
-      <compilerarg value="-Xlint"/>
-    </javac>
-  </target>
-  
-  <target name="compile" depends="compile-core, compile-htroot" description="compile YaCy core and YaCy servlets" />
+  <target name="compile" depends="compile-core" description="compile YaCy core and YaCy servlets" />
 
   <target name="all" depends="compile">
   </target>
@@ -309,7 +298,6 @@
            source="${javacSource}" target="${javacTarget}" encoding="UTF-8">
       <classpath>
         <pathelement location="${build}"/>
-        <pathelement location="${htroot}"/>
         <path refid="compile.path"/>
         <path refid="test.path"/>
       </classpath>
@@ -328,7 +316,6 @@
       <classpath>
         <pathelement location="${test}"/>
         <pathelement location="${build}"/>
-        <pathelement location="${htroot}"/>
     <fileset dir="${libt}" includes="**/*.jar" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
@@ -384,7 +371,6 @@
     <delete failonerror="false">
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
-      <fileset dir="${htroot}" includes="**/*.class" />
       <fileset dir="test/" includes="**/*.class" />
       <fileset dir="." includes="TEST-*" />
     </delete>
@@ -449,7 +435,6 @@
     <java classname="net.yacy.yacy" fork="yes">
       <classpath>
         <pathelement location="${build}"/>
-        <pathelement location="${htroot}"/>
         <pathelement location="${lib}" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
@@ -497,9 +482,6 @@
         <pathelement location="${build}"/>
       </classpath>
       <fileset dir="source" defaultexcludes="yes">
-        <include name="**/*.java" />
-      </fileset>
-      <fileset dir="htroot" defaultexcludes="yes">
         <include name="**/*.java" />
       </fileset>
     </javadoc>

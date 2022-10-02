@@ -29,7 +29,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.SoftReference;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -136,7 +135,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
     protected File _htLocalePath;
     protected File _htDocsPath;
     protected static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
-    protected ConcurrentHashMap<File, SoftReference<Method>> templateMethodCache = null;
+    protected ConcurrentHashMap<String, Method> templateMethodCache = null;
     // settings for multipart/form-data
     protected static final File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
     protected static final int SIZE_FILE_THRESHOLD = 1024 * 1024 * 1024; // 1GB is a lot but appropriate for multi-document pushed using the push_p.json servlet
@@ -177,7 +176,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
         if (ConcurrentLog.isFine("FILEHANDLER")) {
             ConcurrentLog.fine("FILEHANDLER","YaCyDefaultServlet: resource base = " + this._resourceBase);
         }
-        this.templateMethodCache = new ConcurrentHashMap<File, SoftReference<Method>>();
+        this.templateMethodCache = new ConcurrentHashMap<String, Method>();
     }
 
     /* ------------------------------------------------------------ */
@@ -262,8 +261,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (reqRanges == null && !endsWithSlash) {
                 final int p = pathInContext.lastIndexOf('.');
                 if (p >= 0) {
-                    final Class<?> servletClass = rewriteClass(pathInContext);
-                    if (servletClass != null) {
+                    final Method rewriteMethod = rewriteMethod(pathInContext);
+                    if (rewriteMethod != null) {
                         hasClass = true;
                     } else {
                         final String pathofClass = pathInContext.substring(0, p) + ".class";
@@ -659,13 +658,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
         }
     }
 
-
-    protected Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
-    }
-
-    protected Object invokeServlet(final Class<?> targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return rewriteMethod(targetClass).invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
+    protected Object invokeServlet(final Method targetMethod, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        return targetMethod.invoke(null, new Object[]{request, args, Switchboard.getSwitchboard()}); // add switchboard
     }
 
     /**
@@ -753,95 +747,46 @@ public class YaCyDefaultServlet extends HttpServlet  {
         return this._resourceBase.addPath(path).getFile();
     }
 
-    protected File rewriteClassFile(final File servletFile) {
-        try {
-            String f = servletFile.getCanonicalPath();
-            final int p = f.lastIndexOf('.');
-            if (p < 0) {
-                return null;
-            }
-            f = f.substring(0, p) + ".class";
-            final File cf = new File(f);
-            if (cf.exists()) {
-                return cf;
-            }
-            return null;
-        } catch (final IOException e) {
-            return null;
-        }
-    }
-
-    protected Class<?> rewriteClass(String target) {
+    private final Method rewriteMethod(final String target) {
         assert target.charAt(0) == '/';
+
+        final Method cachedMethod = this.templateMethodCache.get(target);
+        if (cachedMethod != null) return cachedMethod;
+
         final int p = target.lastIndexOf('.');
         if (p < 0) {
             return null;
         }
-        target = "net.yacy.htroot" + target.substring(0, p).replace('/', '.');
+        final String classname = "net.yacy.htroot" + target.substring(0, p).replace('/', '.');
         try {
-            final Class<?> servletClass = Class.forName(target);
-            return servletClass;
-        } catch (final ClassNotFoundException e) {
+            final Class<?> servletClass = Class.forName(classname);
+            final Method rewriteMethod = rewriteMethod(servletClass);
+            this.templateMethodCache.put(target, rewriteMethod);
+            return rewriteMethod;
+        } catch (final ClassNotFoundException | InvocationTargetException e) {
             try {
-                final Class<?> servletClass = Class.forName(target + "_"); // for some targets we need alternative names
-                return servletClass;
-            } catch (final ClassNotFoundException ee) {
+                final Class<?> servletClass = Class.forName(classname + "_"); // for some targets we need alternative names
+                final Method rewriteMethod = rewriteMethod(servletClass);
+                this.templateMethodCache.put(target, rewriteMethod);
+                return rewriteMethod;
+            } catch (final ClassNotFoundException | InvocationTargetException ee) {
                 return null;
             }
         }
     }
 
-    protected Method rewriteMethod(final File classFile) throws InvocationTargetException {
-        Method m = null;
-        // now make a class out of the stream
+    private final static Method rewriteMethod(final Class<?> rewriteClass) throws InvocationTargetException {
+        final Class<?>[] params = (Class<?>[]) Array.newInstance(Class.class, 3);
+        params[0] = RequestHeader.class;
+        params[1] = serverObjects.class;
+        params[2] = serverSwitch.class;
         try {
-            final SoftReference<Method> ref = this.templateMethodCache.get(classFile);
-            if (ref != null) {
-                m = ref.get();
-                if (m == null) {
-                    this.templateMethodCache.remove(classFile);
-                } else {
-                    return m;
-                }
-            }
-
-            final Class<?> c = provider.loadClass(classFile);
-
-            final Class<?>[] params = (Class<?>[]) Array.newInstance(Class.class, 3);
-            params[0]=  RequestHeader.class;
-            params[1] = serverObjects.class;
-            params[2] = serverSwitch.class;
-            m = c.getMethod("respond", params);
-
-            if (MemoryControl.shortStatus()) {
-                this.templateMethodCache.clear();
-            } else {
-                // store the method into the cache
-                this.templateMethodCache.put(classFile, new SoftReference<Method>(m));
-            }
-        } catch (final ClassNotFoundException e) {
-            ConcurrentLog.severe("FILEHANDLER","YaCyDefaultServlet: class " + classFile + " is missing:" + e.getMessage());
-            throw new InvocationTargetException(e, "class " + classFile + " is missing:" + e.getMessage());
-        } catch (final NoSuchMethodException e) {
-            ConcurrentLog.severe("FILEHANDLER","YaCyDefaultServlet: method 'respond' not found in class " + classFile + ": " + e.getMessage());
-            throw new InvocationTargetException(e, "method 'respond' not found in class " + classFile + ": " + e.getMessage());
-        }
-        return m;
-    }
-
-    protected Method rewriteMethod(final Class<?> rewriteClass) throws InvocationTargetException {
-        Method m = null;
-        try {
-            final Class<?>[] params = (Class<?>[]) Array.newInstance(Class.class, 3);
-            params[0]=  RequestHeader.class;
-            params[1] = serverObjects.class;
-            params[2] = serverSwitch.class;
-            m = rewriteClass.getMethod("respond", params);
+            final Method m = rewriteClass.getMethod("respond", params);
+            return m;
         } catch (final NoSuchMethodException e) {
             ConcurrentLog.severe("FILEHANDLER","YaCyDefaultServlet: method 'respond' not found in class " + rewriteClass.getName()  + ": " + e.getMessage());
             throw new InvocationTargetException(e, "method 'respond' not found in class " + rewriteClass.getName()  + ": " + e.getMessage());
         }
-        return m;
     }
 
     /**
@@ -868,8 +813,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             }
         }
         final File targetLocalizedFile = getLocalizedFile(target, localeSelection);
-        final File targetClassFile = rewriteClassFile(this._resourceBase.addPath(target).getFile());
-        final Class<?> targetClass = rewriteClass(target);
+        final Method targetMethod = rewriteMethod(target);
         final String targetExt = target.substring(target.lastIndexOf('.') + 1);
 
         final long now = System.currentTimeMillis();
@@ -891,7 +835,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
             response.setHeader(HeaderFramework.CORS_ALLOW_ORIGIN, "*");
         }
 
-        if ((targetClassFile != null || targetClass != null)) {
+        if (targetMethod != null) {
             final serverObjects args = new serverObjects();
             final Enumeration<String> argNames = request.getParameterNames(); // on ssi jetty dispatcher merged local ssi query parameters
             while (argNames.hasMoreElements()) {
@@ -909,17 +853,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             try {
                 if (args.isEmpty()) {
                     // yacy servlets typically test for args != null (but not for args .isEmpty())
-                    if (targetClass == null) {
-                        tmp = invokeServlet(targetClassFile, legacyRequestHeader, null);
-                    } else {
-                        tmp = invokeServlet(targetClass, legacyRequestHeader, null);
-                    }
+                    tmp = invokeServlet(targetMethod, legacyRequestHeader, null);
                 } else {
-                    if (targetClass == null) {
-                        tmp = invokeServlet(targetClassFile, legacyRequestHeader, args);
-                    } else {
-                        tmp = invokeServlet(targetClass, legacyRequestHeader, args);
-                    }
+                    tmp = invokeServlet(targetMethod, legacyRequestHeader, args);
                 }
             } catch(final InvocationTargetException e) {
                 if(e.getCause() instanceof InvalidURLLicenceException) {
