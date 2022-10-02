@@ -27,11 +27,15 @@
 // javac -classpath .:../../classes message.java
 // if the shell's current path is HTROOT/yacy
 
+package net.yacy.htroot.yacy;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.Date;
+
+import com.google.common.io.Files;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.document.encoding.UTF8;
@@ -49,8 +53,6 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.crypt;
 
-import com.google.common.io.Files;
-
 
 public final class message {
 
@@ -67,7 +69,7 @@ public final class message {
         prop.put("messagesize", "0");
         prop.put("attachmentsize", "0");
         prop.put("response", "-1"); // request rejected
-        
+
         if ((post == null) || (env == null)) return prop;
         if (!Protocol.authentifyRequest(post, env)) return prop;
 

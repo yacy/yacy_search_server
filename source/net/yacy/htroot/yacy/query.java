@@ -27,6 +27,8 @@
 // javac -classpath .:../../classes query.java
 // if the shell's current path is HTROOT
 
+package net.yacy.htroot.yacy;
+
 import java.io.IOException;
 
 import net.yacy.cora.date.GenericFormatter;

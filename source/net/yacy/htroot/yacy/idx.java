@@ -22,6 +22,8 @@
  *  If not, see <http://www.gnu.org/licenses/>.
  */
 
+package net.yacy.htroot.yacy;
+
 import java.util.Iterator;
 
 import net.yacy.cora.document.encoding.ASCII;

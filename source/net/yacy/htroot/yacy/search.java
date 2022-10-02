@@ -28,6 +28,8 @@
 // javac -classpath .:../../Classes search.java
 // if the shell's current path is htroot/yacy
 
+package net.yacy.htroot.yacy;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -119,7 +121,7 @@ public final class search {
         final boolean strictContentDom = post.getBoolean("strictContentDom");
         final String  filter = post.get("filter", ".*"); // a filter on the url
         final int timezoneOffset = post.getInt("timezoneOffset", 0);
-        QueryModifier modifier = new QueryModifier(timezoneOffset);
+        final QueryModifier modifier = new QueryModifier(timezoneOffset);
         modifier.sitehost = post.get("sitehost", ""); if (modifier.sitehost.isEmpty()) modifier.sitehost = null;
         modifier.sitehash = post.get("sitehash", ""); if (modifier.sitehash.isEmpty()) modifier.sitehash = null;
         modifier.author = post.get("author", ""); if (modifier.author.isEmpty()) modifier.author = null;
@@ -225,7 +227,7 @@ public final class search {
         if (query.isEmpty() && abstractSet != null) {
             // this is _not_ a normal search, only a request for index abstracts
             final Segment indexSegment = sb.index;
-            QueryGoal qg = new QueryGoal(abstractSet, new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0));
+            final QueryGoal qg = new QueryGoal(abstractSet, new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0));
             theQuery = new QueryParams(
                     qg,
                     modifier,
@@ -287,10 +289,10 @@ public final class search {
 
         } else {
             // retrieve index containers from search request
-            RowHandleSet allHashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            final RowHandleSet allHashes = new RowHandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             try {allHashes.putAll(queryhashes);} catch (final SpaceExceededException e) {}
             try {allHashes.putAll(excludehashes);} catch (final SpaceExceededException e) {}
-            QueryGoal qg = new QueryGoal(queryhashes, excludehashes);
+            final QueryGoal qg = new QueryGoal(queryhashes, excludehashes);
             theQuery = new QueryParams(
                     qg,
                     modifier,
@@ -325,7 +327,7 @@ public final class search {
             Network.log.info("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()) + " - " + theQuery.itemsPerPage() + " links");
             EventChannel.channels(EventChannel.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.getQueryGoal().getIncludeHashes()), ""));
             if (sb.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.remotesearch.play(-10.0f);
-            
+
             // make event
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.tables, null, abstracts.length() > 0, sb.loader, count, maxtime);
             if (theSearch.rwiProcess != null && theSearch.rwiProcess.isAlive()) try {theSearch.rwiProcess.join();} catch (final InterruptedException e) {}
@@ -384,7 +386,7 @@ public final class search {
             final long timer = System.currentTimeMillis();
             //final ScoreMap<String> topicNavigator = sb.index.connectedRWI() ? theSearch.getTopics(5, 100) : new ConcurrentScoreMap<String>();
             final ScoreMap<String> topicNavigator = theSearch.getTopics(); // as there is currently no index interaction in getTopics(), we can use it by default
-            
+
             final StringBuilder refstr = new StringBuilder(6000);
             final Iterator<String> navigatorIterator = topicNavigator.keys(false);
             int i = 0;
@@ -400,7 +402,7 @@ public final class search {
         prop.put("indexabstract", indexabstract.toString());
 
         // prepare result
-        int resultCount = theSearch == null ? 0 : theSearch.getResultCount(); // theSearch may be null if we searched only for abstracts
+        final int resultCount = theSearch == null ? 0 : theSearch.getResultCount(); // theSearch may be null if we searched only for abstracts
         if (resultCount == 0 || accu == null || accu.isEmpty()) {
 
             // no results

@@ -29,6 +29,8 @@
 // javac -classpath .:../../Classes hello.java
 // if the shell's current path is HTROOT
 
+package net.yacy.htroot.yacy;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;

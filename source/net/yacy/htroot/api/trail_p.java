@@ -22,6 +22,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+package net.yacy.htroot.api;
+
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
@@ -34,7 +36,7 @@ public class trail_p {
         final serverObjects prop = new serverObjects();
 
         int c = 0;
-        for (String t: sb.trail) {
+        for (final String t: sb.trail) {
             prop.put("trails_" + c++ + "_trail", t); // don't put in putHTML or putXML in, this is wrong!
         }
         prop.put("trails", c);

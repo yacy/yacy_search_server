@@ -26,6 +26,7 @@
 // You must compile this file with
 // javac -classpath .:../classes transferRWI.java
 
+package net.yacy.htroot.yacy;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -126,8 +127,8 @@ public final class transferRWI {
         result = "ok";
         final StringBuilder unknownURLs = new StringBuilder(6000);
 
-        double load = Memory.getSystemLoadAverage();
-        float maxload = sb.getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f);
+        final double load = Memory.getSystemLoadAverage();
+        final float maxload = sb.getConfigFloat(SwitchboardConstants.INDEX_DIST_LOADPREREQ, 2.0f);
         if (load > maxload) {
             // too high local load. this is bad but we must reject this to protect ourself!
             sb.getLog().info("Rejecting RWIs from peer " + otherPeerName + ", system has too high load = " + load + ", maxload = " + maxload);
@@ -187,7 +188,7 @@ public final class transferRWI {
             int received = 0;
             int blocked = 0;
             int count = 0;
-            Set<String> testids = new HashSet<String>();
+            final Set<String> testids = new HashSet<String>();
             while (it.hasNext()) {
                 estring = it.next();
                 count++;
@@ -231,7 +232,7 @@ public final class transferRWI {
                 testids.add(ASCII.String(urlHash));
                 received++;
             }
-            for (String id: testids) {
+            for (final String id: testids) {
                 try {
                     if (!sb.index.fulltext().exists(id)) {
                         unknownURL.put(ASCII.getBytes(id));

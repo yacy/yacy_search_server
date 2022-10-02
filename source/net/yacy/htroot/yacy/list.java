@@ -25,20 +25,20 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+package net.yacy.htroot.yacy;
 
 import java.io.File;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.cora.util.CommonPattern;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.peers.Seed;
 import net.yacy.peers.Protocol;
+import net.yacy.peers.Seed;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverCore;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
-
 
 public final class list {
 

@@ -26,6 +26,8 @@
 // You must compile this file with
 // javac -classpath .:../classes transferRWI.java
 
+package net.yacy.htroot.yacy;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -91,7 +93,7 @@ public final class transferURL {
             // read the urls from the other properties and store
             String urls;
             URIMetadataNode lEntry;
-            Map<String, URIMetadataNode> lEm = new HashMap<String, URIMetadataNode>();
+            final Map<String, URIMetadataNode> lEm = new HashMap<String, URIMetadataNode>();
             for (int i = 0; i < urlc; i++) {
 
                 // read new lurl-entry
@@ -143,9 +145,9 @@ public final class transferURL {
 
                 lEm.put(ASCII.String(lEntry.hash()), lEntry);
             }
-            
+
             doublecheck = 0;
-            for (String id : lEm.keySet()) {
+            for (final String id : lEm.keySet()) {
                 if (sb.index.exists(id)) {
                     doublecheck++;
                 } else {
@@ -170,7 +172,7 @@ public final class transferURL {
             Network.log.info("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
             EventChannel.channels(EventChannel.DHTRECEIVE).addMessage(new RSSMessage("Received " + received + ", blocked " + blocked + " URLs from peer " + otherPeerName, "", otherPeer.hash));
             if (sb.getConfigBool(SwitchboardConstants.DECORATION_AUDIO, false)) Audio.Soundclip.dhtin.play(-10.0f);
-            
+
             if (doublecheck > 0) {
             	Network.log.warn("Received " + doublecheck + "/" + urlc + " double URLs from peer " + otherPeerName); // double should not happen because we demanded only documents which we do not have yet
             	doublevalues = Integer.toString(doublecheck);

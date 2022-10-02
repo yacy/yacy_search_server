@@ -778,9 +778,9 @@ public class YaCyDefaultServlet extends HttpServlet  {
             if (p < 0) {
                 return null;
             }
-            target = target.substring(1, p);
+            target = "net.yacy.htroot" + target.substring(0, p).replace('/', '.');
 
-            final Class<?> servletClass = Class.forName("net.yacy.htroot." + target);
+            final Class<?> servletClass = Class.forName(target);
 
             return servletClass;
         } catch (final ClassNotFoundException e) {

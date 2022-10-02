@@ -24,6 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+package net.yacy.htroot.yacy;
+
 import java.io.IOException;
 
 import net.yacy.cora.date.GenericFormatter;
@@ -77,7 +79,7 @@ public class urls {
                 // find referrer, if there is one
                 try {
                     referrerURL = sb.getURL(entry.referrerhash());
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     referrerURL = null;
                     ConcurrentLog.logException(e);
                 }
@@ -123,7 +125,7 @@ public class urls {
                     prop.put("item_" + c + "_pubDate", GenericFormatter.SHORT_SECOND_FORMATTER.format(entry.moddate()));
                     prop.put("item_" + c + "_guid", ASCII.String(entry.hash()));
                     c++;
-                } catch (IOException e) {
+                } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 }
             }

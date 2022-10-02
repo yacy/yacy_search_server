@@ -27,6 +27,8 @@
 // javac -classpath .:../../classes hello.java
 // if the shell's current path is HTROOT
 
+package net.yacy.htroot.yacy;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
@@ -38,8 +40,8 @@ import net.yacy.cora.document.id.MultiProtocolURL;
 import net.yacy.cora.protocol.Domains;
 import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
-import net.yacy.peers.Network;
 import net.yacy.peers.DHTSelection;
+import net.yacy.peers.Network;
 import net.yacy.peers.Protocol;
 import net.yacy.peers.Seed;
 import net.yacy.peers.graphics.ProfilingGraph;
@@ -51,7 +53,7 @@ import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
 public final class hello {
-    
+
     // example:
     // http://localhost:8090/yacy/hello.html?count=1&seed=p|{Hash=sCJ6Tq8T0N9x,Port=8090,PeerType=junior}
     // http://localhost:8090/yacy/hello.html?count=10&seed=z|H4sIAAAAAAAAADWQW2vDMAyF_81eJork3GyGX-YxGigly2WFvZTQijbQJsHx1pWx_z7nMj1J4ug7B_2s6-GsP5q3G-G6vBz2e0iz8t6zfuBr7-5PUNanQfulhqyzTkuUCFXvmitrBJtq4ed3tkPTtRpXhIiRDAmq0uhHFIiQMduJ-NXYU9NCbrrP1vnjIdUqgk09uIK51V6rMBRIilAo2NajwzfhGcx8QUKsEIp5iCJo-eaTVUXPfPQ4k5dm4pp8NzaESsLzS-14QVNIMlA-ka2m1JuZJJWIBRwPo0GIIiYp4zCSkC5GQSLiJIah0p6X_rvlS-MTbWdhkCSBIni9jA_rfP3-Ae1Oye9dAQAA
@@ -162,8 +164,8 @@ public final class hello {
         int callbackRemain = Math.min(5, reportedips.size());
         final long callbackStart = System.currentTimeMillis();
         if (callbackRemain > 0 && reportedips.size() > 0) {
-            for (String reportedip: reportedips) {
-                int partialtimeout = ((int) (callbackStart + totalTimeout - System.currentTimeMillis())) / callbackRemain; // bad hack until a concurrent version is implemented
+            for (final String reportedip: reportedips) {
+                final int partialtimeout = ((int) (callbackStart + totalTimeout - System.currentTimeMillis())) / callbackRemain; // bad hack until a concurrent version is implemented
                 if (partialtimeout <= 0) break;
                 //ConcurrentLog.info("**hello-DEBUG**", "reportedip = " + reportedip + " is handled");
                 if (Seed.isProperIP(reportedip)) {
@@ -174,7 +176,7 @@ public final class hello {
                     try {
                     	MultiProtocolURL remoteBaseURL = remoteSeed.getPublicMultiprotocolURL(reportedip, preferHttps);
                     	callback = Protocol.queryRWICount(remoteBaseURL, remoteSeed, partialtimeout);
-                        if (callback[0] < 0 && remoteBaseURL.isHTTPS()) { 
+                        if (callback[0] < 0 && remoteBaseURL.isHTTPS()) {
                         	/* Failed using https : retry using http */
                         	remoteBaseURL = remoteSeed.getPublicMultiprotocolURL(reportedip, false);
         					callback = Protocol.queryRWICount(remoteBaseURL, remoteSeed, partialtimeout);
@@ -185,9 +187,9 @@ public final class hello {
                     //ConcurrentLog.info("**hello-DEBUG**", "reportedip = " + reportedip + " returns callback " + (callback == null ? "NULL" : callback[0]));
                     time_backping = System.currentTimeMillis() - time;
                     backping_method = "reportedip=" + reportedip;
-                    if (callback[0] >= 0) { 
-                    	success = true; 
-                    	break; 
+                    if (callback[0] >= 0) {
+                    	success = true;
+                    	break;
                     }
                     if (--callbackRemain <= 0) break; // no more tries left / restrict to a limited number of ips
                 }

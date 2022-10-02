@@ -26,8 +26,10 @@
 // You must compile this file with
 // javac -classpath .:../classes crawlOrder.java
 
+package net.yacy.htroot.yacy;
 
 import java.io.IOException;
+
 import net.yacy.cora.document.encoding.ASCII;
 import net.yacy.cora.federate.solr.FailCategory;
 import net.yacy.cora.protocol.RequestHeader;
