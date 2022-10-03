@@ -106,9 +106,6 @@
 
     <!-- apply replacments -->
   	<copy file="${defaults}/yacyBuild.properties.template" tofile="${defaults}/yacyBuild.properties" overwrite="true" filtering="true" />
-  	
-    <!-- copy log4j config file -->
-    <copy file="${src}/log4j.properties" tofile="${build}/log4j.properties" overwrite="true" filtering="false" /> <!-- @TODO: obsolete, contains no replace/filter pattern -->
 
   </target>
 
@@ -366,7 +363,6 @@
   <!-- make clean -->
   <target name="clean" description="make clean">
     <delete dir="${release_main}" failonerror="false"/>
-    <delete file="${build}/log4j.properties" failonerror="false"/>
     <delete file="${lib}/yacycore.jar" failonerror="false"/>
     <delete failonerror="false">
       <fileset dir="${src}" includes="**/*.class" />
