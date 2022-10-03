@@ -20,7 +20,7 @@ yacy.log
 /test/DATA/
 /javadoc/
 /build/
-source/net/yacy/peers/operation/yacyBuildProperties.java
+/defaults/yacyBuild.properties
 /.idea/
 .idea/
 *.iws

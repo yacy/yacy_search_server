@@ -105,8 +105,8 @@
     <filter token="REPL_REVISION_NR" value="${releaseNr}"/>
 
     <!-- apply replacments -->
-    <copy file="${src}/net/yacy/peers/operation/yacyBuildProperties.java.template" tofile="${src}/net/yacy/peers/operation/yacyBuildProperties.java" overwrite="true" filtering="true" />
-    
+  	<copy file="${defaults}/yacyBuild.properties.template" tofile="${defaults}/yacyBuild.properties" overwrite="true" filtering="true" />
+  	
     <!-- copy log4j config file -->
     <copy file="${src}/log4j.properties" tofile="${build}/log4j.properties" overwrite="true" filtering="false" /> <!-- @TODO: obsolete, contains no replace/filter pattern -->
 

@@ -1,0 +1,3 @@
+SVNRevision = @REPL_REVISION_NR@
+Version = @REPL_VERSION@
+
