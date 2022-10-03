@@ -25,7 +25,7 @@ COMMAND LINE OPTIONS (case sensitive):
 ; ----------------------------------------
 ; GENERAL
 
-Unicode true
+;Unicode true
 
 VIProductVersion "@REPL_VERSION@.0.0"
 VIAddVersionKey "ProductName" "YaCy"
