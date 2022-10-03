@@ -38,6 +38,8 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import javax.imageio.ImageIO;
 
@@ -145,11 +147,30 @@ public final class Tray {
             Tray.this.progressIcons = null;
 	    }
 	}
+	
+	private static Object applicationInstance;
+    private static Method setDockIconImage;
+
+    static {
+        Class<?> applicationClass = null;
+        try {
+            applicationClass = Class.forName("com.apple.eawt.Application");
+            final Method applicationGetApplication = applicationClass.getMethod("getApplication");
+            applicationInstance = applicationGetApplication.invoke(null);
+        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            ConcurrentLog.logException(e);
+        }
+        if (applicationClass != null) try {
+            setDockIconImage = applicationClass.getMethod("setDockIconImage", Class.forName("java.awt.Image"));
+        } catch (ClassNotFoundException | SecurityException | IllegalArgumentException | NoSuchMethodException e) {
+            ConcurrentLog.logException(e);
+        }
+    }
 
 	private static void setDockIcon(Image icon) {
-	    if (!OS.isMacArchitecture || Toolkits.setDockIconImage == null || Toolkits.applicationInstance == null) return;
+	    if (!OS.isMacArchitecture || setDockIconImage == null || applicationInstance == null) return;
 	    try {
-	        Toolkits.setDockIconImage.invoke(Toolkits.applicationInstance, icon);
+	        setDockIconImage.invoke(applicationInstance, icon);
         } catch (final Throwable e) {}
         // same as: Application.getApplication().setDockIconImage(i);
 	}
