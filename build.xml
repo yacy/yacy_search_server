@@ -90,11 +90,29 @@
     <property name="target-resolve-already-run" value="true" />
   </target>
 
+  <!-- find git version and write it to git.revision -->
+  <available file=".git" type="dir" property="git.present"/>
+  <target name="git.revision" description="Store git revision in ${repository.version}" if="git.present">
+    <exec executable="git" outputproperty="git.revision" failifexecutionfails="false" errorproperty="">
+      <arg value="describe"/>
+      <arg value="--tags"/>
+      <arg value="--always"/>
+      <arg value="--abbrev=7"/>
+      <arg value="HEAD"/>
+    </exec>
+    <condition property="repository.version" value="${git.revision}" else="unknown">
+      <and>
+        <isset property="git.revision"/>
+        <length string="${git.revision}" trim="yes" length="0" when="greater"/>
+      </and>
+    </condition>
+  </target>
+
   <!-- initializing all needed variables -->
-  <target name="init">
+  <target name="init" depends="git.revision">
     <loadproperties srcFile="build.properties" />
     <property name="stdReleaseFile" value="yacy_v${releaseVersion}_${releaseNr}.tar.gz"/>
-  	
+
     <mkdir dir="${data}"/>
     <mkdir dir="${release}"/>
 
@@ -102,15 +120,19 @@
     <echo message="YaCy Version number: ${releaseVersion}" />
     <filter token="REPL_VERSION" value="${releaseVersion}" />
 
-    <!-- YaCy Release <revision number -->
+    <!-- YaCy Release revision number -->
     <echo message="YaCy Release number: ${releaseNr}" />
     <filter token="REPL_REVISION_NR" value="${releaseNr}"/>
 
-    <!-- apply replacments -->
-  	<copy file="${defaults}/yacyBuild.properties.template" tofile="${defaults}/yacyBuild.properties" overwrite="true" filtering="true" />
+    <!-- GIT Release revision number -->
+    <echo message="GIT Release Tag: ${repository.version}" />
+    <filter token="REPL_REPVER" value="${repository.version}"/>
 
-  	<!-- prepare target -->
-  	<mkdir dir="${build}"/>
+    <!-- apply replacments -->
+    <copy file="${defaults}/yacyBuild.properties.template" tofile="${defaults}/yacyBuild.properties" overwrite="true" filtering="true" />
+
+    <!-- prepare target -->
+    <mkdir dir="${build}"/>
   </target>
 
   <target name="javadoc" depends="init" description="make javadoc for YaCy core">
