@@ -93,6 +93,8 @@
   <!-- initializing all needed variables -->
   <target name="init">
     <loadproperties srcFile="build.properties" />
+    <property name="stdReleaseFile" value="yacy_v${releaseVersion}_${releaseNr}.tar.gz"/>
+  	
     <mkdir dir="${data}"/>
     <mkdir dir="${release}"/>
 
@@ -107,6 +109,8 @@
     <!-- apply replacments -->
   	<copy file="${defaults}/yacyBuild.properties.template" tofile="${defaults}/yacyBuild.properties" overwrite="true" filtering="true" />
 
+  	<!-- prepare target -->
+  	<mkdir dir="${build}"/>
   </target>
 
   <target name="javadoc" depends="init" description="make javadoc for YaCy core">
