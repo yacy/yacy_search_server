@@ -12,5 +12,11 @@ jobs:
       with:
         java-version: '8'
         distribution: 'temurin'
-    - name: Build with ant
+    - name: Build linux release
       run: ant clean all dist
+    - name: set up makensis
+      uses: joncloud/makensis-action@v3.7
+      with:
+        arguments: "/V3"
+    - name: Create windows installer
+      run: ant distWinInstaller
