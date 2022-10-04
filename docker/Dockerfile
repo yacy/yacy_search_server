@@ -1,56 +1,47 @@
-# Build a docker image from latest YaCy sources
+# Docker image for YaCy
 
-# Base image : latest Debian stable official jdk 8 image from Docker
-FROM openjdk:8-stretch
+# build with
+# docker build -t yacy/yacy_search_server:latest -f Dockerfile ../
 
-# Install needed packages not in base image 
-# (curl for sh scripts in /bin, and wkhtmltopdf,imagemagick,xvfb and ghostscript to enable PDF and image snapshot generation)
-RUN apt-get update && apt-get install -yq curl wkhtmltopdf imagemagick xvfb ghostscript && \
-  rm -rf /var/lib/apt/lists/*
+# run with
+# docker run -d --name yacy -p 8090:8090 -p 8443:8443 -v yacy_data:/opt/yacy_search_server/DATA --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server:latest
 
-# trace java version
+
+
+## build app
+FROM eclipse-temurin:8-jdk-focal AS appbuilder
+
+RUN apt-get update && apt-get install -yq ant git curl wkhtmltopdf imagemagick xvfb ghostscript && rm -rf /var/lib/apt/lists/*
 RUN java -version
 
-# set current working dir
 WORKDIR /opt
-
-# All in one step to reduce image size growth :
-# - install ant package
-# - Compile with ant
-# - remove unnecessary and size consuming .git directory
-# - remove ant package
-
-# copy sources
 COPY . /opt/yacy_search_server/
 
-RUN rm -rf /opt/yacy_search_server/.git && \
-    apt-get update && \
-	apt-get install -yq ant && \
-	ant compile -f /opt/yacy_search_server/build.xml && \
-	apt-get purge -yq --auto-remove ant && \
-	apt-get clean && \
-	rm -rf /var/lib/apt/lists/*
+RUN ant compile -f /opt/yacy_search_server/build.xml && \
+    apt-get purge -yq --auto-remove ant && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /opt/yacy_search_server/.git
 
-RUN \
 # Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
-# > java -classpath classes net.yacy.cora.order.Digest -strfhex "admin:The YaCy access is limited to administrators. If you don't know the password, you can change it using <yacy-home>/bin/passwd.sh <new-password>:docker"
-	sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" /opt/yacy_search_server/defaults/yacy.init && \
-	sed -i "/adminAccountForLocalhost=/c\adminAccountForLocalhost=false" /opt/yacy_search_server/defaults/yacy.init && \
-# Intially enable HTTPS: this is the most secure option for remote administrator authentication
-	sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init && \
-# Create user and group yacy: this user will be used to run YaCy main process
-	adduser --system --group --no-create-home --disabled-password yacy && \
-# Set ownership of yacy install directory to yacy user/group
-	chown yacy:yacy -R /opt/yacy_search_server
+RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" /opt/yacy_search_server/defaults/yacy.init && \
+    sed -i "/adminAccountForLocalhost=/c\adminAccountForLocalhost=false" /opt/yacy_search_server/defaults/yacy.init && \
+    sed -i "/server.https=false/c\server.https=true" /opt/yacy_search_server/defaults/yacy.init
 
-# Expose HTTP and HTTPS default ports
+
+
+## build dist
+FROM eclipse-temurin:8-jre-focal
+LABEL maintainer="Michael Peter Christen <mc@yacy.net>"
+
+RUN apt-get update && apt-get install -yq wkhtmltopdf imagemagick xvfb ghostscript && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+COPY . /opt/yacy_search_server/
+COPY --from=appbuilder /opt/yacy_search_server /opt/yacy_search_server
+
+RUN adduser --system --group --no-create-home --disabled-password yacy && chown yacy:yacy -R /opt/yacy_search_server
 EXPOSE 8090 8443
-
-# Set data volume: yacy data and configuration will persist even after container stop or destruction
 VOLUME ["/opt/yacy_search_server/DATA"]
-
-# Next commands run as yacy as non-root user for improved security
 USER yacy
-
-# Start yacy as a foreground process (-f) to display console logs and to wait for yacy process
 CMD ["/bin/sh","/opt/yacy_search_server/startYACY.sh","-f"]
