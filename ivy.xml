@@ -81,7 +81,7 @@
       <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="9.4.34.v20201102" conf="compile->master"/>
       <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.34.v20201102" conf="compile->master"/>
       <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="9.4.34.v20201102" conf="compile->master"/>
-      <dependency org="org.jsoup" name="jsoup" rev="1.14.2"  />
+      <dependency org="org.jsoup" name="jsoup" rev="1.15.3"  />
       <dependency org="org.jwat" name="jwat-warc" rev="1.1.1"  />
       <dependency org="org.locationtech.spatial4j" name="spatial4j" rev="0.6"/>
       <!--NOT FOUND dependency org="org.restlet.jee" name="org.restlet" rev="2.2.1" / -->
