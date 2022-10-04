@@ -78,26 +78,26 @@ public class ConfigUpdate_p {
                 final String release = post.get("releasedownload", "");
                 if (!release.isEmpty()) {
                     try {
-                    	yacyRelease versionToDownload = new yacyRelease(new DigestURL(release));
+                        yacyRelease versionToDownload = new yacyRelease(new DigestURL(release));
 
-                    	// replace this version with version which contains public key
-                    	final yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);
-                    	final Set<yacyRelease> mostReleases = versionToDownload.isMainRelease() ? allReleases.main : allReleases.dev;
-                    	for (final yacyRelease rel : mostReleases) {
-                    		if (rel.equals(versionToDownload)) {
-                    			versionToDownload = rel;
-                    			break;
-                    		}
-                    	}
-                    	final File downloadedRelease = versionToDownload.downloadRelease();
-                    	if(downloadedRelease == null) {
-                    		prop.put("candeploy_downloadError", "1");
-                    		prop.putHTML("candeploy_downloadError_releasedownload", release);
-                    	}
+                        // replace this version with version which contains public key
+                        final yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);
+                        final Set<yacyRelease> mostReleases = versionToDownload.isMainRelease() ? allReleases.main : allReleases.dev;
+                        for (final yacyRelease rel : mostReleases) {
+                            if (rel.equals(versionToDownload)) {
+                                versionToDownload = rel;
+                                break;
+                            }
+                        }
+                        final File downloadedRelease = versionToDownload.downloadRelease();
+                        if(downloadedRelease == null) {
+                            prop.put("candeploy_downloadError", "1");
+                            prop.putHTML("candeploy_downloadError_releasedownload", release);
+                        }
                     } catch (final IOException e) {
-                    	ConcurrentLog.logException(e);
-                    	prop.put("candeploy_downloadError", "1");
-                    	prop.putHTML("candeploy_downloadError_releasedownload", release);
+                        ConcurrentLog.logException(e);
+                        prop.put("candeploy_downloadError", "1");
+                        prop.putHTML("candeploy_downloadError_releasedownload", release);
                     }
                 }
             }
@@ -112,8 +112,8 @@ public class ConfigUpdate_p {
                     try {
                         // only delete files from RELEASE directory
                         if (FileUtils.isInDirectory(new File(sb.releasePath, release), sb.releasePath)) {
-                        FileUtils.deletedelete(new File(sb.releasePath, release));
-                        FileUtils.deletedelete(new File(sb.releasePath, release + ".sig"));
+                            FileUtils.deletedelete(new File(sb.releasePath, release));
+                            FileUtils.deletedelete(new File(sb.releasePath, release + ".sig"));
                         } else {
                             sb.getLog().severe("AUTO-UPDATE: could not delete " + release + ": file not in release directory.");
                         }
@@ -141,9 +141,9 @@ public class ConfigUpdate_p {
                         prop.put("candeploy_autoUpdate", "4");
                     } else {
                         if(yacyRelease.deployRelease(downloaded)) {
-                        	sb.terminate(10, "manual release update to " + downloaded.getName());
-                        	sb.getLog().info("AUTO-UPDATE: deploy and restart initiated");
-                        	prop.put("candeploy_autoUpdate", "1");
+                            sb.terminate(10, "manual release update to " + downloaded.getName());
+                            sb.getLog().info("AUTO-UPDATE: deploy and restart initiated");
+                            prop.put("candeploy_autoUpdate", "1");
                         } else {
                             sb.getLog().info("AUTO-UPDATE: omitting update because an error occurred while trying to deploy the release..");
                             prop.put("candeploy_autoUpdate", "5");
@@ -163,7 +163,7 @@ public class ConfigUpdate_p {
         }
 
         // version information
-        final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
+        final String versionstring = yacyBuildProperties.getReleaseStub();
         prop.putHTML("candeploy_versionpp", versionstring);
         final boolean devenvironment = new File(sb.getAppPath(), ".git").exists();
         float thisVersion = Float.parseFloat(yacyBuildProperties.getVersion());
@@ -180,14 +180,14 @@ public class ConfigUpdate_p {
 
         prop.put("candeploy_deployenabled", (downloadedFilesNum == 0) ? "0" : ((devenvironment) ? "1" : "2")); // prevent that a developer-version is over-deployed
 
-        final NavigableSet<yacyRelease> downloadedReleases = new TreeSet<yacyRelease>();
+        final NavigableSet<yacyRelease> downloadedReleases = new TreeSet<>();
         for (final File downloaded : downloadedFiles) {
             try {
                 final yacyRelease release = new yacyRelease(downloaded);
                 downloadedReleases.add(release);
             } catch (final RuntimeException e) {
                 // not a valid release
-            	// can be also a restart- or deploy-file
+                // can be also a restart- or deploy-file
                 final File invalid = downloaded;
                 if (!(invalid.getName().endsWith(".bat") || invalid.getName().endsWith(".sh") || invalid.getName().endsWith(".sig"))) { // Windows & Linux don't like deleted scripts while execution!
                     invalid.deleteOnExit();
@@ -216,7 +216,7 @@ public class ConfigUpdate_p {
         final yacyRelease.DevAndMainVersions releasess = yacyRelease.allReleases(false, false);
         relcount = 0;
 
-        final ArrayList<yacyRelease> rlist = new ArrayList<yacyRelease>();
+        final ArrayList<yacyRelease> rlist = new ArrayList<>();
         final Set<yacyRelease> remoteDevReleases = releasess.dev;
         remoteDevReleases.removeAll(downloadedReleases);
         for (final yacyRelease release : remoteDevReleases) {

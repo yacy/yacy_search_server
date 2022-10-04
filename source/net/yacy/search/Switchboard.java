@@ -4497,7 +4497,7 @@ public final class Switchboard extends serverSwitch {
         mySeed.put(Seed.ICOUNT, Long.toString(this.index.RWICount())); // the minimum number of words that the peer has indexed (as it says)
         mySeed.put(Seed.SCOUNT, Integer.toString(this.peers.sizeConnected())); // the number of seeds that the peer has stored
         mySeed.put(Seed.CCOUNT, Float.toString(((int) ((this.peers.sizeConnected() + this.peers.sizeDisconnected() + this.peers.sizePotential()) * 60.0f / (uptime + 1.01f)) * 100.0f) / 100.0f)); // the number of clients that the peer connects (as connects/hour)
-        mySeed.put(Seed.VERSION, yacyBuildProperties.getLongVersion());
+        mySeed.put(Seed.VERSION, yacyBuildProperties.getReleaseStub());
         mySeed.setFlagDirectConnect(true);
         mySeed.setLastSeenUTC();
         mySeed.put(Seed.UTC, GenericFormatter.UTCDiffString());

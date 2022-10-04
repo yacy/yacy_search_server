@@ -79,10 +79,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
         if (thisVersion == null) {
             final Switchboard sb = Switchboard.getSwitchboard();
             if (sb == null) return null;
-            thisVersion = new yacyVersion(
-                "yacy" +
-                "_v" + yacyBuildProperties.getVersion() + "_" +
-                yacyBuildProperties.getSVNRevision() + ".tar.gz", null);
+            thisVersion = new yacyVersion(yacyBuildProperties.getReleaseStub() + ".tar.gz", null);
         }
         return thisVersion;
     }
@@ -134,17 +131,17 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
      *         "dev/00000" - If the input does not matcht the regular expression above
      */
     public static String[] combined2prettyVersion(final String ver) {
-         return combined2prettyVersion(ver, "");
-     }
+        return combined2prettyVersion(ver, "");
+    }
 
     public static String[] combined2prettyVersion(final String ver, final String computerName) {
         final Matcher matcher = yacyBuildProperties.versionMatcher.matcher(ver);
-         if (!matcher.find()) {
-             ConcurrentLog.warn("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");
-             return new String[]{"dev", "0000"};
-         }
+        if (!matcher.find()) {
+            ConcurrentLog.warn("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");
+            return new String[]{"dev", "0000"};
+        }
 
-         final String mainversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
+        final String mainversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
         String revision = matcher.group(2);
         for(int i=revision.length();i<4;++i) revision += "0";
         return new String[]{mainversion, revision};
@@ -166,7 +163,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
      */
     public static double versvn2combinedVersion(final double version, final int svn) {
         return (Math.rint((version*100000000.0) + (svn))/100000000);
-     }
+    }
 
     /**
      * Timestamp of this version

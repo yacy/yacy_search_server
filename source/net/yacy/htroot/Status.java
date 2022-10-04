@@ -58,9 +58,9 @@ public class Status
     private static final String PEERSTATUS = "peerStatus";
 
     public static serverObjects respond(
-        final RequestHeader header,
-        final serverObjects post,
-        final serverSwitch env) {
+            final RequestHeader header,
+            final serverObjects post,
+            final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
@@ -77,7 +77,7 @@ public class Status
 
         if ( post != null && !post.isEmpty() ) {
             if ( sb.adminAuthenticated(header) < 2 ) {
-            	prop.authenticationRequired();
+                prop.authenticationRequired();
                 return prop;
             }
             boolean redirect = false;
@@ -133,7 +133,7 @@ public class Status
 
         // password protection
         if ( (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty())
-            && (!sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) ) {
+                && (!sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) ) {
             prop.put("protection", "0"); // not protected
             prop.put("urgentSetPassword", "1");
         } else {
@@ -143,8 +143,8 @@ public class Status
         if ( sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false) ) {
             prop.put("unrestrictedLocalAccess", 1);
             if(sb.getConfig(SwitchboardConstants.SERVER_SERVLETS_CALLED, "").indexOf("ConfigAccounts_p.html", 0) < 0) {
-            	/* Encourage checking accounts config page to be sure that unrestricted local access is desired */
-            	prop.put("warningUnrestrictedLocalAccess", true);
+                /* Encourage checking accounts config page to be sure that unrestricted local access is desired */
+                prop.put("warningUnrestrictedLocalAccess", true);
             }
         }
 
@@ -157,7 +157,7 @@ public class Status
             }
             if ( !sb.observer.getMemoryAvailable() ) {
                 final String minFree =
-                    Formatter.bytesToString(sb.observer.getMinFreeMemory() * 1024L * 1024L);
+                        Formatter.bytesToString(sb.observer.getMinFreeMemory() * 1024L * 1024L);
                 prop.put("warningMemoryLow", "1");
                 prop.put("warningMemoryLow_minSpace", minFree);
             }
@@ -166,7 +166,7 @@ public class Status
 
         // version information
         //final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
-        final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
+        final String versionstring = yacyBuildProperties.getReleaseStub();
         prop.put("versionpp", versionstring);
         prop.put("java.version", System.getProperty("java.version"));
 
@@ -239,18 +239,18 @@ public class Status
             }
         }
         final String peerStatus =
-            ((sb.peers.mySeed() == null) ? Seed.PEERTYPE_VIRGIN : sb.peers.mySeed().get(
-                Seed.PEERTYPE,
-                Seed.PEERTYPE_VIRGIN));
+                ((sb.peers.mySeed() == null) ? Seed.PEERTYPE_VIRGIN : sb.peers.mySeed().get(
+                        Seed.PEERTYPE,
+                        Seed.PEERTYPE_VIRGIN));
 
         if ( Seed.PEERTYPE_VIRGIN.equals(peerStatus)
-            && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))
-            && !SwitchboardConstants.CLUSTER_MODE_PRIVATE_PEER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, ""))) {
+                && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))
+                && !SwitchboardConstants.CLUSTER_MODE_PRIVATE_PEER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, ""))) {
             prop.put(PEERSTATUS, "0");
             prop.put("urgentStatusVirgin", "1");
         } else if ( Seed.PEERTYPE_JUNIOR.equals(peerStatus)
-            && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))
-            && !SwitchboardConstants.CLUSTER_MODE_PRIVATE_PEER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, ""))) {
+                && "freeworld".equals(sb.getConfig(SwitchboardConstants.NETWORK_NAME, ""))
+                && !SwitchboardConstants.CLUSTER_MODE_PRIVATE_PEER.equals(sb.getConfig(SwitchboardConstants.CLUSTER_MODE, ""))) {
             prop.put(PEERSTATUS, "1");
             prop.put("warningStatusJunior", "1");
         } else if ( Seed.PEERTYPE_SENIOR.equals(peerStatus) ) {
@@ -266,9 +266,9 @@ public class Status
 
         final String seedUploadMethod = sb.getConfig("seedUploadMethod", "");
         if ( !"none".equalsIgnoreCase(seedUploadMethod)
-            || ("".equals(seedUploadMethod) && (sb.getConfig("seedFTPPassword", "").length() > 0 || sb
-                .getConfig("seedFilePath", "")
-                .length() > 0)) ) {
+                || ("".equals(seedUploadMethod) && (sb.getConfig("seedFTPPassword", "").length() > 0 || sb
+                        .getConfig("seedFilePath", "")
+                        .length() > 0)) ) {
             if ( "".equals(seedUploadMethod) ) {
                 if ( sb.getConfig("seedFTPPassword", "").length() > 0 ) {
                     sb.setConfig("seedUploadMethod", "Ftp");
@@ -289,8 +289,8 @@ public class Status
                 prop.putHTML("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
             prop.put(
-                "seedServer_lastUpload",
-                PeerActions.formatInterval(System.currentTimeMillis() - sb.peers.lastSeedUpload_timeStamp));
+                    "seedServer_lastUpload",
+                    PeerActions.formatInterval(System.currentTimeMillis() - sb.peers.lastSeedUpload_timeStamp));
         } else {
             prop.put(SEEDSERVER, "0"); // disabled
         }
@@ -347,18 +347,18 @@ public class Status
         prop.put("loaderQueuePercent", (loaderPercent > 100) ? 100 : loaderPercent);
 
         prop.putNum("localCrawlQueueSize", sb
-            .getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)
-            .getJobCount());
+                .getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)
+                .getJobCount());
         prop.put("localCrawlPaused", sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)
-            ? "1"
-            : "0");
+                ? "1"
+                        : "0");
 
         prop.putNum(
-            "remoteTriggeredCrawlQueueSize",
-            sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) != null ? sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount() : 0);
+                "remoteTriggeredCrawlQueueSize",
+                sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) != null ? sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount() : 0);
         prop.put(
-            "remoteTriggeredCrawlPaused",
-            sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? "1" : "0");
+                "remoteTriggeredCrawlPaused",
+                sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? "1" : "0");
 
         prop.putNum("stackCrawlQueueSize", sb.crawlStacker.size());
 

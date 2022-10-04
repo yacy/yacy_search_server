@@ -1,3 +1,7 @@
-SVNRevision = @REPL_REVISION_NR@
 Version = @REPL_VERSION@
-RepositoryVersion = @REPL_REPVER@
+RepositoryVersionDate = @REPL_REPVERDATE@
+RepositoryVersionTime = @REPL_REPVERTIME@
+RepositoryVersionHash = @REPL_REPVERHASH@
+ReleaseStub = @REPL_RELEASESTUB@
+dstamp = @REPL_DSTAMP@
+tstamp = @REPL_TSTAMP@

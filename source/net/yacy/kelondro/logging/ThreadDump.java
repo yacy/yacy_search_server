@@ -57,8 +57,8 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
     private static final Pattern multiDumpFilterPattern = Pattern.compile(multiDumpFilter);
 
     public static class StackTrace {
-        private String text;
-        private Thread.State state;
+        private final String text;
+        private final Thread.State state;
         public StackTrace(final String text, final Thread.State state) {
             this.state = state;
             this.text = text;
@@ -81,7 +81,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
     }
 
     public static class Lock {
-        private String id;
+        private final String id;
         public Lock(final String name) {
             this.id = name;
         }
@@ -122,7 +122,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
 
     /**
      * Try to get the thread dump from a yacy.log file which is available when YaCy is started with
-     * startYACY.sh -l 
+     * startYACY.sh -l
      * @param logFile the log file to read
      * @throws IOException when a read/write error occurred
      */
@@ -145,10 +145,10 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         if (sizeAfter <= sizeBefore) return;
 
         try(final RandomAccessFile raf = new RandomAccessFile(logFile, "r");) {
-        	raf.seek(sizeBefore);
-        	final byte[] b = new byte[(int) (sizeAfter - sizeBefore)];
-        	raf.readFully(b);
-        	
+            raf.seek(sizeBefore);
+            final byte[] b = new byte[(int) (sizeAfter - sizeBefore)];
+            raf.readFully(b);
+
             // import the thread dump;
             importText(new ByteArrayInputStream(b));
         }
@@ -179,7 +179,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         String line;
         String thread = null;
         int p;
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
         Thread.State state = null;
         Thread.State state0;
         while ((line = br.readLine()) != null) {
@@ -189,7 +189,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                 if (thread != null) {
                     put(new ThreadDump.StackTrace(thread, state), list);
                 }
-                list = new ArrayList<String>();
+                list = new ArrayList<>();
                 thread = null;
                 state = null;
                 continue;
@@ -262,7 +262,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
                 final String threaddump = sb.toString();
                 @SuppressWarnings("unlikely-arg-type")
                 List<String> threads = get(threaddump);
-                if (threads == null) threads = new ArrayList<String>();
+                if (threads == null) threads = new ArrayList<>();
                 Thread.State state = null;
                 for (final String t: threads) {
                     final int p = t.indexOf(statestatement);
@@ -303,8 +303,8 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         for (int i = size() + 10; i > 0; i--) {
             for (final Map.Entry<StackTrace, Integer> entry: locks.entrySet()) {
                 if (entry.getValue().intValue() == i) {
-                	bufferappend(buffer, plain, "holds lock for " + i + " threads:");
-                	final List<String> list = get(entry.getKey());
+                    bufferappend(buffer, plain, "holds lock for " + i + " threads:");
+                    final List<String> list = get(entry.getKey());
                     if (list == null) continue;
                     bufferappend(buffer, plain, "Thread= " + entry.getKey());
                     for (final String s: list) bufferappend(buffer, plain, "  " + (plain ? s : s.replaceAll("<", "&lt;").replaceAll(">", "&gt;")));
@@ -323,7 +323,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
             final boolean plain) {
 
         // collect single dumps
-        final Map<String, Integer> dumps = new HashMap<String, Integer>();
+        final Map<String, Integer> dumps = new HashMap<>();
         ThreadDump x;
         for (final Map<Thread, StackTraceElement[]> trace: stackTraces) {
             x = new ThreadDump(rootPath, trace, plain, Thread.State.RUNNABLE);
@@ -384,7 +384,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
 
 
     public List<Map.Entry<StackTrace, List<String>>> freerun() {
-        final List<Map.Entry<StackTrace, List<String>>> runner = new ArrayList<Map.Entry<StackTrace, List<String>>>();
+        final List<Map.Entry<StackTrace, List<String>>> runner = new ArrayList<>();
         runf: for (final Map.Entry<StackTrace, List<String>> entry: entrySet()) {
             // check if the thread is locked or holds a lock
             if (entry.getKey().state != Thread.State.RUNNABLE) continue runf;
@@ -402,7 +402,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
      */
     public Map<Lock, StackTrace> locks() {
         int p;
-        final Map<Lock, StackTrace> locks = new HashMap<Lock, StackTrace>();
+        final Map<Lock, StackTrace> locks = new HashMap<>();
         for (final Map.Entry<StackTrace, List<String>> entry: entrySet()) {
             for (final String s: entry.getValue()) {
                 if ((p = s.indexOf("locked <",0)) > 0) {
@@ -433,7 +433,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
 
     public Map<StackTrace, Integer> countLocks() {
         final Map<Lock, StackTrace> locks = locks();
-        final Map<StackTrace, Integer> count = new HashMap<StackTrace, Integer>();
+        final Map<StackTrace, Integer> count = new HashMap<>();
         for (final Map.Entry<Lock, StackTrace> entry: locks.entrySet()) {
             // look where the lock has an effect
             int c = 0;
@@ -461,8 +461,8 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         if (sleep > 0) try {Thread.sleep(sleep);} catch (final InterruptedException e) {}
         // Thread dump
         final Date dt = new Date();
-        final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
-        Runtime runtime = Runtime.getRuntime();
+        final String versionstring = yacyBuildProperties.getReleaseStub();
+        final Runtime runtime = Runtime.getRuntime();
 
         ThreadDump.bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
         ThreadDump.bufferappend(buffer, plain, "&nbsp;");
@@ -473,9 +473,9 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         ThreadDump.bufferappend(buffer, plain, "&nbsp;");
         ThreadDump.bufferappend(buffer, plain, "&nbsp;");
 
-        File appPath = sb.getAppPath();
+        final File appPath = sb.getAppPath();
         if (multiple) {
-            final ArrayList<Map<Thread,StackTraceElement[]>> traces = new ArrayList<Map<Thread,StackTraceElement[]>>();
+            final ArrayList<Map<Thread,StackTraceElement[]>> traces = new ArrayList<>();
             for (int i = 0; i < multipleCount; i++) {
                 try {
                     traces.add(ThreadDump.getAllStackTraces());
@@ -486,7 +486,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
             ThreadDump.appendStackTraceStats(appPath, buffer, traces, plain);
         } else {
             // write a thread dump to standard error output
-            File logFile = new File("yacy.log");
+            final File logFile = new File("yacy.log");
             if (ThreadDump.canProduceLockedBy(logFile)) {
                 try {
                     new ThreadDump(logFile).appendBlockTraces(buffer, plain);
@@ -511,10 +511,10 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
         ThreadDump.bufferappend(buffer, plain, "************* End Thread Dump " + dt + " *******************");
 
         ThreadDump.bufferappend(buffer, plain, "");
-        ThreadMXBean threadbean = ManagementFactory.getThreadMXBean();
+        final ThreadMXBean threadbean = ManagementFactory.getThreadMXBean();
         ThreadDump.bufferappend(buffer, plain, "Thread list from ThreadMXBean, " + threadbean.getThreadCount() + " threads:");
-        ThreadInfo[] threadinfo = threadbean.dumpAllThreads(true, true);
-        for (ThreadInfo ti: threadinfo) {
+        final ThreadInfo[] threadinfo = threadbean.dumpAllThreads(true, true);
+        for (final ThreadInfo ti: threadinfo) {
             ThreadDump.bufferappend(buffer, plain, ti.getThreadName());
         }
 

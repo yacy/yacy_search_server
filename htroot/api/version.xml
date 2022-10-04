@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
 <version>
-	<number>#[versionstring]#</number>
-	<svnRevision>#[svnRev]#</svnRevision>
-	<buildDate>19700101</buildDate>
+	<file>#[versionstring]#</file>
+    <buildDate>#[buildDate]#</buildDate>
+    <buildTime>#[buildTime]#</buildTime>
+    <buildDateTime>#[buildDateTime]#</buildDateTime>
+    <buildHash>#[buildDateTime]#</buildHash>
+    <buildVersion>#[buildVersion]#</buildVersion>
 </version>
