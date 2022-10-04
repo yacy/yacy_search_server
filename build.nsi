@@ -32,10 +32,10 @@ VIAddVersionKey "ProductName" "YaCy"
 VIAddVersionKey "LegalCopyright" "YaCy"
 VIAddVersionKey "FileVersion" "@REPL_VERSION@"
 VIAddVersionKey "FileDescription" "YaCy"
-VIAddVersionKey "OriginalFilename" "yacy_v@REPL_VERSION@_@REPL_REVISION_NR@.exe"
+VIAddVersionKey "OriginalFilename" "yacy_v@REPL_VERSION@_@REPL_REPVERDATE@@REPL_REPVERTIME@_@REPL_REPVERHASH@.exe"
 
 Name "YaCy @REPL_VERSION@"
-OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_REVISION_NR@.exe"
+OutFile "RELEASE\WINDOWS\yacy_v@REPL_VERSION@_@REPL_REPVERDATE@@REPL_REPVERTIME@_@REPL_REPVERHASH@.exe"
 
 ;default installation folder
 InstallDir "$PROFILE\YaCy"
