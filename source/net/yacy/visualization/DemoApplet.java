@@ -6,6 +6,7 @@ import java.awt.Graphics;
 
 
 
+@SuppressWarnings("removal")
 public class DemoApplet extends Applet implements Runnable {
     // can be run in eclipse with
     // Run -> Run As -> Java Applet

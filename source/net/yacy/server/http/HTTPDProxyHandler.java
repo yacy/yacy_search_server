@@ -178,7 +178,7 @@ public final class HTTPDProxyHandler {
         final String redirectorPath = sb.getConfig("externalRedirector", "");
         if (redirectorPath.length() > 0 && !redirectorEnabled) {
             try {
-                redirectorProcess=Runtime.getRuntime().exec(redirectorPath);
+                redirectorProcess=Runtime.getRuntime().exec(redirectorPath, null, null);
                 redirectorWriter = new PrintWriter(redirectorProcess.getOutputStream());
                 redirectorReader = new BufferedReader(new InputStreamReader(redirectorProcess.getInputStream()));
                 redirectorEnabled=true;
