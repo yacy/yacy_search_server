@@ -282,6 +282,7 @@ public class LibraryProvider {
         try {
             final ZipFile zip = new ZipFile(file);
             derewoTxtEntry = zip.getInputStream(zip.getEntry("derewo-v-100000t-2009-04-30-0.1"));
+            zip.close();
         } catch (final ZipException e ) {
             ConcurrentLog.logException(e);
             return list;

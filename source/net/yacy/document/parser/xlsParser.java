@@ -117,6 +117,7 @@ public class xlsParser extends AbstractParser implements Parser {
                 false,
                 sumInfo.getLastSaveDateTime())};
 
+            exceldoc.close();
             return retdocs;
 
         } catch (IOException ex1) {

@@ -478,6 +478,7 @@ public class apkParser extends AbstractParser implements Parser  {
             for (String s: resources) {
                 System.out.println(s);
             }
+            jf.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -153,7 +153,8 @@ public class MediawikiImporter extends Thread implements Importer {
         return (System.currentTimeMillis() - this.start) / 1000L;
     }
 
-    @Override
+    @SuppressWarnings("resource")
+	@Override
     public void run() {
         this.start = System.currentTimeMillis();
         final int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);

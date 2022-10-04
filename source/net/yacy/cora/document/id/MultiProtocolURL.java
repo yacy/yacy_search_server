@@ -2553,8 +2553,14 @@ public class MultiProtocolURL implements Serializable, Comparable<MultiProtocolU
     }
 
     public byte[] get(final ClientIdentification.Agent agent, final String username, final String pass) throws IOException {
-        if (isFile()) return read(new FileInputStream(getFSFile()));
-        if (isSMB()) return read(new SmbFileInputStream(getSmbFile()));
+        if (isFile()) {
+        	byte[] b = read(new FileInputStream(getFSFile()));
+        	return b;
+        }
+        if (isSMB()) {
+        	byte[] b = read(new SmbFileInputStream(getSmbFile()));
+        	return b;
+        }
         if (isFTP()) {
             final FTPClient client = new FTPClient();
             client.open(this.host, this.port < 0 ? 21 : this.port);

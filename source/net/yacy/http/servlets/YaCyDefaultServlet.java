@@ -280,6 +280,7 @@ public class YaCyDefaultServlet extends HttpServlet  {
 
             if (!hasClass && (resource == null || !resource.exists()) && !pathInContext.contains("..")) {
                 // try to get this in the alternative htDocsPath
+            	if (resource != null) resource.close();
                 resource = Resource.newResource(new File(this._htDocsPath, pathInContext));
             }
 
@@ -1035,7 +1036,8 @@ public class YaCyDefaultServlet extends HttpServlet  {
                         submitted.contains("Crawler_p") ||
                         submitted.contains("ConfigBasic") ||
                         submitted.contains("Load_RSS_p");*/
-                final boolean advanced_enabled =
+                @SuppressWarnings("unused")
+				final boolean advanced_enabled =
                         crawler_enabled ||
                         submitted.contains("IndexImportMediawiki_p") ||
                         submitted.contains("CrawlStart");

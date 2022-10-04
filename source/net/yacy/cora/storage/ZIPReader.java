@@ -138,5 +138,6 @@ public class ZIPReader extends AbstractMap<String, ZipEntry> implements Map<Stri
                 }
             }
         }
+        zfile.close();
     }
 }

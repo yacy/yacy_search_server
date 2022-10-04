@@ -47,7 +47,7 @@ public class StartFromJava {
             } while(!"STOP".equals(s));
 
             run.stop();
-
+            sc.close();
         } catch(Exception ex) {
             Logger.getLogger(StartFromJava.class.getName()).log(Level.SEVERE, null, ex);
         }

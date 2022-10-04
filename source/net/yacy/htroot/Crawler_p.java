@@ -879,12 +879,15 @@ public class Crawler_p {
         if((crawlingFileContent == null || crawlingFileContent.isEmpty()) && crawlingFile != null) {
             /* Let's report here detailed error to help user when he selected a wrong file */
             if(!crawlingFile.exists()) {
+            	writer.close();
                 throw new FileNotFoundException(crawlingFile.getAbsolutePath() +  " does not exists");
             }
             if(!crawlingFile.isFile()) {
+            	writer.close();
                 throw new FileNotFoundException(crawlingFile.getAbsolutePath() +  " exists but is not a regular file");
             }
             if(!crawlingFile.canRead()) {
+            	writer.close();
                 throw new IOException("Can not read : " + crawlingFile.getAbsolutePath());
             }
         }

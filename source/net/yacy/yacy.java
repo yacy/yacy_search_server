@@ -195,13 +195,19 @@ public final class yacy {
 
             f = new File(dataHome, "DATA/yacy.running");
             if (!f.createNewFile()) ConcurrentLog.severe("STARTUP", "WARNING: the file " + f + " can not be created!");
-            try { new FileOutputStream(f).write(Integer.toString(OS.getPID()).getBytes()); } catch (final Exception e) { } // write PID
+            try {
+            	FileOutputStream fos = new FileOutputStream(f);
+            	fos.write(Integer.toString(OS.getPID()).getBytes());
+            	fos.close();
+            } catch (final Exception e) { } // write PID
             f.deleteOnExit();
             FileChannel channel = null;
             FileLock lock = null;
             try {
-                channel = new RandomAccessFile(f,"rw").getChannel();
+            	RandomAccessFile raf = new RandomAccessFile(f,"rw");
+                channel = raf.getChannel();
                 lock = channel.tryLock(); // lock yacy.running
+                raf.close();
             } catch (final Exception e) { }
 
             final String conf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);

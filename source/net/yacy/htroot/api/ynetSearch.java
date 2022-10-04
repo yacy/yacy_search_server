@@ -48,7 +48,9 @@ public class ynetSearch {
                 // final String s = searchaddress+"&query="+post.get("search")+"&maximumRecords="+post.get("maximumRecords")+"&startRecord="+post.get("startRecord");
                 final URL url = new URL(s);
                 is = url.openStream();
-                final String httpout = new Scanner(is).useDelimiter( "\\Z" ).next();
+                Scanner scanner = new Scanner(is);
+                final String httpout = scanner.useDelimiter( "\\Z" ).next();
+                scanner.close();
                 prop.put("http", httpout);
             } catch (final Exception e ) {
                 prop.put("url", "error!");

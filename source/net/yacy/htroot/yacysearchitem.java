@@ -111,7 +111,7 @@ public class yacysearchitem {
 	final boolean authenticated = adminAuthenticated || user != null;
 
         final boolean extendedSearchRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.EXTENDED_SEARCH_RIGHT));
-        final boolean bookmarkRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
+        //final boolean bookmarkRights = adminAuthenticated || (user != null && user.hasRight(UserDB.AccessRight.BOOKMARK_RIGHT));
 
         final int item = post.getInt("item", -1);
         final RequestHeader.FileType fileType = header.fileType();

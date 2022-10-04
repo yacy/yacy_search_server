@@ -94,6 +94,7 @@ public class GeonamesLocation implements Locations {
             final ZipEntry ze = zf.getEntry(entryName);
             final InputStream is = zf.getInputStream(ze);
             reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            zf.close();
         } catch (final IOException e ) {
             log.warn(e);
             return;

@@ -108,7 +108,8 @@ public class WarcImporter extends Thread implements Importer {
      * @param f inputstream for the warc file
      * @throws IOException
      */
-    public void indexWarcRecords(InputStream f) throws IOException {
+    @SuppressWarnings("resource")
+	public void indexWarcRecords(InputStream f) throws IOException {
 
         byte[] content;
         job = this;
@@ -146,6 +147,7 @@ public class WarcImporter extends Thread implements Importer {
                                     bbuffer.append(c);
                                 }
                                 content = bbuffer.getBytes();
+                                bbuffer.close();
                             } else {
                                 content = new byte[(int) http.getPayloadLength()];
                                 istream.read(content, 0, content.length);

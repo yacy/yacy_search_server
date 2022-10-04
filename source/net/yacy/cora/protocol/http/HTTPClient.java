@@ -1105,8 +1105,9 @@ public class HTTPClient implements Closeable {
 //		}
         // Close out connection manager
         try {
-                HTTPClient.closeConnectionManager();
-        } catch (final InterruptedException e) {
+        	client.close();
+            HTTPClient.closeConnectionManager();
+        } catch (final InterruptedException | IOException e) {
                 e.printStackTrace();
         }
     }

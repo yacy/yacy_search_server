@@ -52,7 +52,8 @@ import net.yacy.server.serverSwitch;
 
 public class PerformanceQueues_p {
 
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    @SuppressWarnings("deprecation")
+	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();

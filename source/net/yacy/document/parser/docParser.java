@@ -27,6 +27,7 @@
 
 package net.yacy.document.parser;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -87,6 +88,7 @@ public class docParser extends AbstractParser implements Parser {
         try {
             contents.append(extractor.getText()); // extractor gets all text incl. headers/footers
         } catch (final Exception e) {
+        	try {extractor.close();} catch (IOException e1) {}
             throw new Parser.Failure("error in docParser, getText: " + e.getMessage(), location);
         }
         String title = (contents.length() > 240) ? contents.substring(0,240) : contents.toString().trim();
@@ -132,7 +134,7 @@ public class docParser extends AbstractParser implements Parser {
             false,
             extractor.getSummaryInformation().getLastSaveDateTime() // maybe null
             )};
-
+        try {extractor.close();} catch (IOException e1) {}
         return docs;
     }
 
@@ -161,6 +163,7 @@ public class docParser extends AbstractParser implements Parser {
         try {
             contents.append(extractor.getText());
         } catch (final Exception e) {
+        	try {extractor.close();} catch (IOException e1) {}
             throw new Parser.Failure("error in docParser, getText: " + e.getMessage(), location);
         }
         String title = (contents.length() > 240) ? contents.substring(0,240) : contents.toString().trim();
@@ -206,7 +209,7 @@ public class docParser extends AbstractParser implements Parser {
             false,
             extractor.getSummaryInformation().getLastSaveDateTime() // maybe null
             )};
-
+        try {extractor.close();} catch (IOException e1) {}
         return docs;
     }
 }

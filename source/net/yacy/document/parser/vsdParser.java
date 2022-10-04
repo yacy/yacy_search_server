@@ -85,6 +85,7 @@ public class vsdParser extends AbstractParser implements Parser {
                 final VisioTextExtractor extractor = new VisioTextExtractor(source);
             	contents = extractor.getText();
                 summary = extractor.getSummaryInformation();
+                extractor.close();
             } catch (final Exception e) {
             	ConcurrentLog.warn("vsdParser", e.getMessage());
             }

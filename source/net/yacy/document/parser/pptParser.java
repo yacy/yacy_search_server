@@ -28,6 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -122,6 +123,7 @@ public class pptParser extends AbstractParser implements Parser {
                 false,
                 pptExtractor.getSummaryInformation().getLastSaveDateTime() // may be null
                 )};
+            try {pptExtractor.close();} catch (IOException e1) {}
             return docs;
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;

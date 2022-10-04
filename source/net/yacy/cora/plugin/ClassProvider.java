@@ -25,8 +25,8 @@
 package net.yacy.cora.plugin;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
@@ -47,11 +47,12 @@ public class ClassProvider {
             URL[] urls;
             try {
                 urls = new URL[]{new URL("file", "", path)};
-                final ClassLoader cl = new URLClassLoader(urls);
+                final URLClassLoader cl = new URLClassLoader(urls);
                 c = cl.loadClass(classname);
-            } catch (final MalformedURLException e) {
-            } catch (final ClassNotFoundException e) {
-            }
+                cl.close();
+            } catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
+			}
         }
         return c;
     }

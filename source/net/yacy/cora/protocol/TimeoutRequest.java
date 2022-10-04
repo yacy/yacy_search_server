@@ -135,6 +135,7 @@ public class TimeoutRequest<E> {
                             return Boolean.TRUE;
                         }
                         //System.out.println("PING socket close = " + (System.currentTimeMillis() - time) + " ms (" + host + ":" + port + ")"); time = System.currentTimeMillis();
+                        socket.close();
                         return Boolean.FALSE;
                     } catch (final UnknownHostException e) {
                         //System.out.println("PING socket UnknownHostException = " + (System.currentTimeMillis() - time) + " ms (" + host + ":" + port + ")"); time = System.currentTimeMillis();
