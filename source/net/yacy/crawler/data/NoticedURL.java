@@ -127,14 +127,6 @@ public class NoticedURL {
         }
     }
 
-    @Override
-    protected void finalize() throws Throwable {
-        if ((this.coreStack != null) || (this.limitStack != null) || (this.remoteStack != null)) {
-            ConcurrentLog.warn("plasmaCrawlNURL", "NURL stack closed by finalizer");
-            this.close();
-        }
-    }
-
     public int size() {
         return ((this.coreStack == null) ? 0 : this.coreStack.size()) + ((this.limitStack == null) ? 0 : this.limitStack.size()) + ((this.remoteStack == null) ? 0 : this.remoteStack.size());
     }

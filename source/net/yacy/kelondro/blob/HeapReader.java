@@ -664,11 +664,6 @@ public class HeapReader {
         close(true);
     }
 
-    @Override
-    public void finalize() {
-        this.close();
-    }
-
     /**
      * ask for the length of the primary key
      * @return the length of the key

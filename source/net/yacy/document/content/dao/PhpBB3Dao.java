@@ -68,11 +68,6 @@ public class PhpBB3Dao implements Dao {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        close();
-    }
-
-    @Override
     public Date first() {
         Statement stmt = null;
         ResultSet rs = null;

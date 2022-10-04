@@ -144,11 +144,6 @@ public final class RandomAccessIO {
         if (this.ra != null) this.ra.close();
     }
 
-    @Override
-    protected final void finalize() throws Throwable {
-        if (this.ra != null) this.close();
-    }
-
     public final void deleteOnExit() {
         this.ra.deleteOnExit();
     }

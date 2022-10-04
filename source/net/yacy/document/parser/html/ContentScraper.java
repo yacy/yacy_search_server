@@ -172,10 +172,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             this.content = null;
         }
         @Override
-        public void finalize() {
-            this.close();
-        }
-        @Override
         public String toString() {
             return "<" + name + " " + opts + ">" + content + "</" + name + ">";
         }

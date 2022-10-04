@@ -253,9 +253,4 @@ public class Stack {
     public synchronized void close() {
         this.stack.close(true);
     }
-
-    @Override
-    public void finalize() {
-        this.close();
-    }
 }

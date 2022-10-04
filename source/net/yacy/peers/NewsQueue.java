@@ -103,11 +103,6 @@ public class NewsQueue implements Iterable<NewsDB.Record> {
         this.queueStack = null;
     }
 
-    @Override
-    protected void finalize() {
-        close();
-    }
-
     public int size() {
         return this.queueStack.size();
     }

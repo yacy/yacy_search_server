@@ -156,11 +156,6 @@ public class EmbeddedSolrConnector extends SolrServerConnector implements SolrCo
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        this.close();
-    }
-
-    @Override
     public synchronized void close() {
         if (this.core != null && !this.core.isClosed()) try {this.commit(false);} catch (final Throwable e) {ConcurrentLog.logException(e);}
         try {super.close();} catch (final Throwable e) {ConcurrentLog.logException(e);}

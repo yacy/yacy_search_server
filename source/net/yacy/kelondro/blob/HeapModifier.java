@@ -87,11 +87,6 @@ public class HeapModifier extends HeapReader implements BLOB {
         close(true);
     }
 
-    @Override
-    public void finalize() {
-        this.close();
-    }
-
     /**
      * remove a BLOB
      * @param key  the primary key

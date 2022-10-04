@@ -150,10 +150,6 @@ public class Handler implements IInArchive {
         }
     }
     
-    protected void finalize() throws Throwable {
-    	close();
-    }
-    
     public void close() throws IOException {
         if (_inStream != null) _inStream.close();
         _inStream = null;

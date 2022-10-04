@@ -129,11 +129,6 @@ public class NewsDB {
         this.news = null;
     }
 
-    @Override
-    protected void finalize() {
-        close();
-    }
-
     public int size() {
         return this.news.size();
     }

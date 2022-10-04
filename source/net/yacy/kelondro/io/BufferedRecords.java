@@ -93,11 +93,6 @@ public final class BufferedRecords {
         if (this.efs != null) this.efs.close();
     }
 
-    @Override
-    protected final synchronized void finalize() {
-        if (this.efs != null) close();
-    }
-
     public final void get(final long index, final byte[] b, final int start) throws IOException {
         final Long idx = Long.valueOf(index);
         final byte[] bb;

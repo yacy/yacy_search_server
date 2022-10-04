@@ -236,11 +236,6 @@ public class EmbeddedInstance implements SolrInstance {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        this.close();
-    }
-
-    @Override
     public synchronized void close() {
         for (final SolrCore core: this.cores.values()) core.close();
         if (this.coreContainer != null) try {

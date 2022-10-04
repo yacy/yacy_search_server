@@ -92,11 +92,6 @@ public class ImportDump {
             if (statement != null) try {statement.close();} catch (final SQLException e) {}
         }
     }
-
-    @Override
-    protected void finalize() throws Throwable {
-        close();
-    }
     
     public synchronized void close() {
         this.conn.close();

@@ -261,9 +261,4 @@ public class Stacks {
             se.stack.close();
         }
     }
-    
-    @Override
-    public void finalize() {
-        this.close();
-    }
 }

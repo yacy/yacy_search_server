@@ -594,11 +594,6 @@ public class Table implements Index, Iterable<Row.Entry> {
     }
 
     @Override
-    protected void finalize() {
-        if (this.file != null) close();
-    }
-
-    @Override
     public String filename() {
         return this.file.filename().toString();
     }

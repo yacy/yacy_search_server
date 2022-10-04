@@ -311,11 +311,6 @@ public final class Heap extends HeapModifier implements BLOB {
         this.close(true);
     }
     
-    @Override
-    public void finalize() {
-        this.close();
-    }
-    
     public int getBuffermax() {
         return this.buffermax;
     }

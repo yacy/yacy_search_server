@@ -170,9 +170,4 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         this.cachelen = 0;
     }
 
-    @Override
-    protected final void finalize() throws Throwable {
-        this.close();
-    }
-
 }
