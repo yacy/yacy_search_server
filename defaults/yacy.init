@@ -328,7 +328,7 @@ releases = DATA/RELEASE
 # the following mime-types are a blacklist for indexing:
 # parser.mime.deny: specifies mime-types that shall not be indexed
 parser.mime.deny=
-parser.extensions.deny=
+parser.extensions.deny=iso,apk,dmg
 # The audioTagParser is disabled by default as it needs to create a temporary file each time an audio resource is parsed
 # Audio file extensions and media types can be enabled in the ConfigParser_p.html page if this is not a problem with your install 
 parser.enableAudioTags=false
