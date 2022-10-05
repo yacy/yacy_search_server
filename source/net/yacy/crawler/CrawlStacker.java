@@ -124,6 +124,12 @@ public final class CrawlStacker implements WorkflowTask<Request>{
     public synchronized void close() {
         CrawlStacker.log.info("Shutdown. waiting for remaining " + this.size() + " crawl stacker job entries. please wait.");
         this.requestQueue.shutdown();
+        
+        // busy waiting for the queue to empty
+        for (int i = 0; i < 10; i++) {
+        	if (this.size() <= 0) break;
+        	try {Thread.sleep(1000);} catch (InterruptedException e) {}
+        }
 
         CrawlStacker.log.info("Shutdown. Closing stackCrawl queue.");
 

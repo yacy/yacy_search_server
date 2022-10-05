@@ -366,7 +366,7 @@ public final class Fulltext {
 
     public void putDocument(final SolrInputDocument doc) throws IOException {
         final SolrConnector connector = this.getDefaultConnector();
-        if (connector == null) return;
+        if (connector == null || connector.isClosed()) return;
         final String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
         final String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
         assert url != null && url.length() < 30000;

@@ -406,8 +406,8 @@ public final class yacy {
                 ConcurrentLog.severe("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);
                 //System.exit(1);
             }
-            if(lock != null) lock.release();
-            if(channel != null) channel.close();
+            if (lock != null && lock.isValid()) lock.release();
+            if (channel != null && channel.isOpen()) channel.close();
         } catch (final Exception ee) {
             ConcurrentLog.severe("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
