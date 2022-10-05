@@ -13,7 +13,7 @@
       <dependency org="com.cybozu.labs" name="langdetect" rev="1.1-20120112" conf="compile->master"/>
       <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.11.0"  />
       <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.13.4"/>
-      <dependency org="com.google.guava" name="guava" rev="31.1-jre" conf="compile->master"/>
+      <dependency org="com.google.guava" name="guava" rev="25.1-jre" conf="compile->master"/>
       <dependency org="com.ibm.icu" name="icu4j" rev="63.1"/>
       <dependency org="com.jcraft" name="jsch" rev="0.1.54" />
       <dependency org="com.twelvemonkeys.imageio" name="imageio-core" rev="3.8.3"/>
