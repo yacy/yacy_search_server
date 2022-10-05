@@ -51,7 +51,7 @@ net.yacy.crawler.robots.RobotsTxt.level = SEVERE
 # Properties for the GuiHandler
 net.yacy.kelondro.logging.GuiHandler.level = ALL
 net.yacy.kelondro.logging.GuiHandler.formatter=net.yacy.kelondro.logging.SimpleLogFormatter
-net.yacy.kelondro.logging.GuiHandler.size = 1000
+net.yacy.kelondro.logging.GuiHandler.size = 10000
 
 # Properties for the ConsoleOutErrHandler
 net.yacy.kelondro.logging.ConsoleOutErrHandler.level = ALL

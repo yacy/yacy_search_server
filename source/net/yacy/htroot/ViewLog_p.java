@@ -52,7 +52,7 @@ public class ViewLog_p {
         String[] log = new String[0];
         boolean reversed = true;
         boolean json = false;
-        int maxlines = 1000, lines = 1000;
+        int maxlines = 10000, lines = 10000;
         /* Usually a regex like this would make no sense, ".*" would be
          * sufficient, but ".*.*" makes it a little bit more convenient
          * for the user to input regexes like ".*FOO.*" in the HTML
@@ -83,13 +83,13 @@ public class ViewLog_p {
                 log = ((GuiHandler)handler).getLogLines(reversed,lines);
             } else if (handler instanceof LogalizerHandler) {
                 displaySubmenu = true;
-             }
+            }
         }
 
         prop.put("submenu", displaySubmenu ? "1" : "0");
         prop.put("reverseChecked", reversed ? "1" : "0");
         prop.put("lines", lines);
-        prop.put("maxlines",maxlines);
+        prop.put("maxlines", maxlines);
         prop.putHTML("filter", filter);
 
         // trying to compile the regular expression filter expression
@@ -108,8 +108,8 @@ public class ViewLog_p {
             final String nextLogLine = logLine.trim();
 
             if (filterMatcher != null) {
-            	filterMatcher.reset(nextLogLine);
-            	if (!filterMatcher.find()) continue;
+                filterMatcher.reset(nextLogLine);
+                if (!filterMatcher.find()) continue;
             }
 
             if (nextLogLine.startsWith("E ")) {

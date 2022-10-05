@@ -49,7 +49,7 @@ public final class ConcurrentLog {
 
     private final static Logger ConcurrentLogLogger = Logger.getLogger("ConcurrentLog");
     private final static Message POISON_MESSAGE = new Message();
-    private final static BlockingQueue<Message> logQueue = new ArrayBlockingQueue<Message>(500);
+    private final static BlockingQueue<Message> logQueue = new ArrayBlockingQueue<>(2000);
     private static Worker logRunnerThread = null;
     public static boolean backgroundRunner = false;
 
@@ -61,7 +61,7 @@ public final class ConcurrentLog {
         if (backgroundRunner && (logRunnerThread == null || !logRunnerThread.isAlive())) {
             logRunnerThread = new Worker();
             logRunnerThread.start();
-            //ConcurrentLogLogger.log(Level.INFO, "started ConcurrentLog.Worker.");
+            ConcurrentLogLogger.log(Level.INFO, "started ConcurrentLog.Worker.");
         }
     }
 
@@ -156,7 +156,7 @@ public final class ConcurrentLog {
     }
 
     public final boolean isFiner() {
-       return this.theLogger.isLoggable(Level.FINER);
+        return this.theLogger.isLoggable(Level.FINER);
     }
 
     public final void finest(final String message) {
@@ -181,7 +181,7 @@ public final class ConcurrentLog {
         if (thrown == null) return;
         enQueueLog(this.theLogger, Level.WARNING, thrown.getMessage(), thrown);
     }
-    */
+     */
 
     // static log messages
     public final static void logException(final Throwable thrown) {
@@ -352,7 +352,7 @@ public final class ConcurrentLog {
         @Override
         public void run() {
             Message entry;
-            Map<String, Logger> loggerCache = new HashMap<String, Logger>();
+            final Map<String, Logger> loggerCache = new HashMap<>();
             try {
                 while ((entry = logQueue.take()) != POISON_MESSAGE) {
                     if (entry.logger == null) {
@@ -415,7 +415,7 @@ public final class ConcurrentLog {
 
 
             // creating the logging directory if necessary
-            File logDirectory = logFile.getParentFile();
+            final File logDirectory = logFile.getParentFile();
             if(logDirectory != null) {
                 if (!logDirectory.exists()) {
                     if(!logDirectory.mkdirs()) {
@@ -447,7 +447,7 @@ public final class ConcurrentLog {
                     exceptionLog.severe(msg + "\n" + baos.toString(), e);
                     ConcurrentLogLogger.log(Level.SEVERE, e.getMessage(), e);
                     if (e instanceof InvocationTargetException) {
-                        Throwable target = ((InvocationTargetException) e).getTargetException();
+                        final Throwable target = ((InvocationTargetException) e).getTargetException();
                         ConcurrentLogLogger.log(Level.SEVERE, target.getMessage(), target);
                     }
                 }
@@ -470,9 +470,9 @@ public final class ConcurrentLog {
     }
 
     public static String stackTrace() {
-        Throwable t = new Throwable();
-        StackTraceElement[] e = t.getStackTrace();
-        StringBuilder sb = new StringBuilder(80);
+        final Throwable t = new Throwable();
+        final StackTraceElement[] e = t.getStackTrace();
+        final StringBuilder sb = new StringBuilder(80);
         for (int i = 2; i < e.length - 1; i++) {
             sb.append(e[i].toString()).append(" -> ");
         }
