@@ -52,6 +52,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -100,7 +101,8 @@ public class Domains {
     private static       List<Pattern> nameCacheNoCachingPatterns = Collections.synchronizedList(new LinkedList<Pattern>());
     public static long cacheHit_Hit = 0, cacheHit_Miss = 0, cacheHit_Insert = 0; // for statistics only; do not write
     public static long cacheMiss_Hit = 0, cacheMiss_Miss = 0, cacheMiss_Insert = 0; // for statistics only; do not write
-
+    private static AtomicLong dnsRequests = new AtomicLong(0);
+    
     private static Set<InetAddress> myHostAddresses = new HashSet<InetAddress>();
     private static Set<InetAddress> localHostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
     private static Set<InetAddress> publicIPv4HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
@@ -993,18 +995,27 @@ public class Domains {
                     }
                 }
                 Thread.currentThread().setName(oldName);
-                if (ip == null) try {
-                    ip = timeLimiter.callWithTimeout(new Callable<InetAddress>() {
-                        @Override
-                        public InetAddress call() throws Exception {
-                            return InetAddress.getByName(host);
-                        }
-                    }, 3000L, TimeUnit.MILLISECONDS);
-                    //ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
-                } catch (final InterruptedException | TimeoutException e) {
-                	// in case of a timeout - maybe cause of massive requests - do not fill NAME_CACHE_MISS
-                	LOOKUP_SYNC.remove(host);
-                    return null;
+                if (ip == null) {
+                	long activeRequests = dnsRequests.incrementAndGet();
+                	if (activeRequests > 50) {
+                		// throttle requests to remote DNS
+                		try {Thread.sleep(10 * (activeRequests - 50));} catch (InterruptedException e) {}
+                	}
+                	try {
+	                    ip = timeLimiter.callWithTimeout(new Callable<InetAddress>() {
+	                        @Override
+	                        public InetAddress call() throws Exception {
+	                            return InetAddress.getByName(host);
+	                        }
+	                    }, 3000L, TimeUnit.MILLISECONDS);
+	                    //ip = TimeoutRequest.getByName(host, 1000); // this makes the DNS request to backbone
+	                } catch (final InterruptedException | TimeoutException e) {
+	                	// in case of a timeout - maybe cause of massive requests - do not fill NAME_CACHE_MISS
+	                	LOOKUP_SYNC.remove(host);
+	                    return null;
+	                } finally {
+	                	dnsRequests.decrementAndGet();
+	                }
                 }
                 //.out.println("DNSLOOKUP-*LOOKUP* " + host + ", time = " + (System.currentTimeMillis() - t) + "ms");
             } catch (final Throwable e) {
