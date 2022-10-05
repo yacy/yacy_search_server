@@ -210,21 +210,26 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         if (solrdoc.containsKey("_version_")) solrdoc.setField("_version_",0L); // prevent Solr "version conflict"
         synchronized (this.server) {
             try {
-                this.server.add(solrdoc, -1);
+                this.server.add(solrdoc);
             } catch (final Throwable e) {
                 clearCaches(); // prevent further OOM if this was caused by OOM
                 ConcurrentLog.logException(e);
                 // catches "version conflict for": try this again and delete the document in advance
-                /*
                 // with possible partial update docs, don't try to delete index doc and reinsert solrdoc
                 // as this would result in a index doc with just the updated fields
                 try {
                     this.server.deleteById((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                 } catch (final SolrServerException e1) {
                     ConcurrentLog.logException(e1);
-                }*/
+                }
                 try {
-                    this.server.add(solrdoc, -1);
+                    this.server.commit();
+                } catch (final Throwable eee) {
+                    ConcurrentLog.logException(eee);
+                    // a time-out may occur here
+                }
+                try {
+                    this.server.add(solrdoc);
                 } catch (final Throwable ee) {
                     ConcurrentLog.logException(ee);
                     try {
@@ -234,7 +239,7 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                         // a time-out may occur here
                     }
                     try {
-                        this.server.add(solrdoc, -1);
+                        this.server.add(solrdoc);
                     } catch (final Throwable eee) {
                         ConcurrentLog.logException(eee);
                         throw new IOException(eee);
@@ -252,22 +257,21 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
         }
         synchronized (this.server) {
             try {
-                this.server.add(solrdocs, -1);
+                this.server.add(solrdocs);
             } catch (final Throwable e) {
                 clearCaches(); // prevent further OOM if this was caused by OOM
                 ConcurrentLog.logException(e);
                 // catches "version conflict for": try this again and delete the document in advance
-                /*
                 // with possible partial update docs, don't try to delete index doc and reinsert solrdoc
                 // as this would result in a index doc with just the updated fields
 
-                List<String> ids = new ArrayList<String>();
-                for (SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
+                List<String> ids = new ArrayList<>();
+                for (final SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                 try {
                     this.server.deleteById(ids);
                 } catch (final SolrServerException e1) {
                     ConcurrentLog.logException(e1);
-                }*/
+                }
                 try {
                     this.server.commit();
                 } catch (final Throwable eee) {
@@ -275,10 +279,10 @@ public abstract class SolrServerConnector extends AbstractSolrConnector implemen
                     // a time-out may occur here
                 }
                 try {
-                    this.server.add(solrdocs, -1);
+                    this.server.add(solrdocs);
                 } catch (final Throwable ee) {
                     ConcurrentLog.logException(ee);
-                    final List<String> ids = new ArrayList<>();
+                    ids = new ArrayList<>();
                     for (final SolrInputDocument solrdoc : solrdocs) ids.add((String) solrdoc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                     log.warn(e.getMessage() + " IDs=" + ids.toString());
                     throw new IOException(ee);
