@@ -26,7 +26,7 @@ Echo JRE Parameters:%javacmd%
 Echo Priority:%priority%
 Echo ***************************************************************************
 Echo.
-Echo If you see a message like "javaw" not found, you probably have to install Java.
+Echo If you see a message like "java" not found, you probably have to install Java.
 Echo.
 Echo You can download Java at http://java.com/
 Echo.
@@ -35,7 +35,7 @@ Rem commandline parameter added for -config option, like -config "port=8090" "ad
 Rem special parameter "adminAccount=admin:password" calculates and sets new admin-pwd
 Rem any parameter in yacy.conf can me modified this way (make sure to use correct upper/lower case)
 
-start %priority% javaw %javacmd% -classpath %CLASSPATH% net.yacy.yacy %1 %2 %3 %4 %5 %6 %7 %8 %9
+start %priority% java %javacmd% -classpath %CLASSPATH% net.yacy.yacy %1 %2 %3 %4 %5 %6 %7 %8 %9
 
 Echo You can close the console safely now.
 
