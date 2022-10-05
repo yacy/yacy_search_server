@@ -115,8 +115,9 @@ public class Memory {
      * @return the "recent cpu usage" for the whole operating environment;
      * a negative value if not available.
      */
+    @SuppressWarnings("deprecation")
     public static double getSystemCpuLoad() {
-        com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        final com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         return operatingSystemMXBean.getSystemCpuLoad();
     }
 
@@ -136,13 +137,13 @@ public class Memory {
      * a negative value if not available.
      */
     public static double getProcessCpuLoad() {
-        com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
+        final com.sun.management.OperatingSystemMXBean operatingSystemMXBean = (com.sun.management.OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
         return operatingSystemMXBean.getProcessCpuLoad();
     }
 
     public static Map<String, Object> status() {
-        Runtime runtime = Runtime.getRuntime();
-        Map<String, Object> status = new LinkedHashMap<>();
+        final Runtime runtime = Runtime.getRuntime();
+        final Map<String, Object> status = new LinkedHashMap<>();
         status.put("service", "Peer");
         status.put("assigned_memory", runtime.maxMemory());
         status.put("used_memory", runtime.totalMemory() - runtime.freeMemory());
@@ -153,7 +154,7 @@ public class Memory {
         status.put("load_system_load_average", Memory.getSystemLoadAverage());
         status.put("load_system_cpu_load", Memory.getSystemCpuLoad());
         status.put("load_process_cpu_load", Memory.getProcessCpuLoad());
-        YaCyHttpServer server = Switchboard.getSwitchboard().getHttpServer();
+        final YaCyHttpServer server = Switchboard.getSwitchboard().getHttpServer();
         status.put("server_threads", server == null ? 0 : server.getServerThreads());
         return status;
     }
@@ -163,7 +164,7 @@ public class Memory {
      * @return the number of deadlocked threads
      */
     public static long deadlocks() {
-        long[] deadlockIDs = ManagementFactory.getThreadMXBean().findDeadlockedThreads();
+        final long[] deadlockIDs = ManagementFactory.getThreadMXBean().findDeadlockedThreads();
         if (deadlockIDs == null) return 0;
         return deadlockIDs.length;
     }
@@ -172,10 +173,10 @@ public class Memory {
      * write deadlocked threads as to the log as warning
      */
     public static void logDeadlocks() {
-        long[] deadlockIDs = ManagementFactory.getThreadMXBean().findDeadlockedThreads();
+        final long[] deadlockIDs = ManagementFactory.getThreadMXBean().findDeadlockedThreads();
         if (deadlockIDs == null) return;
-        ThreadInfo[] infos = ManagementFactory.getThreadMXBean().getThreadInfo(deadlockIDs, true, true);
-        for (ThreadInfo ti : infos) {
+        final ThreadInfo[] infos = ManagementFactory.getThreadMXBean().getThreadInfo(deadlockIDs, true, true);
+        for (final ThreadInfo ti : infos) {
             ConcurrentLog.warn("DEADLOCKREPORT", ti.toString());
         }
     }

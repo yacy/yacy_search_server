@@ -41,7 +41,7 @@ import net.yacy.server.serverCore;
 
 public final class OS {
 
-	// constants for system identification
+    // constants for system identification
     public enum System {
         MacOSC,  // 'classic' Mac OS 7.6.1/8.*/9.*
         MacOSX,  // all Mac OS X
@@ -50,125 +50,129 @@ public final class OS {
         Unknown; // any other system
     }
 
-	// constants for file type identification (Mac only)
-	public static final String blankTypeString = "____";
+    // constants for file type identification (Mac only)
+    public static final String blankTypeString = "____";
 
-	// system-identification statics
-	private static final System  systemOS;
-	public static final boolean isMacArchitecture;
-	private static final boolean isUnixFS;
-	public static final boolean canExecUnix;
-	public static final boolean isWindows;
-	public static final boolean isWin32;
+    // system-identification statics
+    private static final System  systemOS;
+    public static final boolean isMacArchitecture;
+    private static final boolean isUnixFS;
+    public static final boolean canExecUnix;
+    public static final boolean isWindows;
+    public static final boolean isWin32;
 
-	// calculated system constants
-	public static int maxPathLength = 65535;
+    // calculated system constants
+    public static int maxPathLength = 65535;
 
-	// Macintosh-specific statics
-	public  static final Map<String, String> macFSTypeCache = new HashMap<String, String>();
-	public  static final Map<String, String> macFSCreatorCache = new HashMap<String, String>();
+    // Macintosh-specific statics
+    public  static final Map<String, String> macFSTypeCache = new HashMap<>();
+    public  static final Map<String, String> macFSCreatorCache = new HashMap<>();
 
-	// static initialization
-	static {
-		// check operation system type
-		final Properties sysprop = java.lang.System.getProperties();
-		final String sysname = sysprop.getProperty("os.name","").toLowerCase(Locale.ROOT);
-		if (sysname.startsWith("mac os x")) systemOS = System.MacOSX;
-		else if (sysname.startsWith("mac os")) systemOS = System.MacOSC;
-		else if (sysname.startsWith("windows")) systemOS = System.Windows;
-		else if ((sysname.startsWith("linux")) || (sysname.startsWith("unix"))) systemOS = System.Unix;
-		else systemOS = System.Unknown;
+    // static initialization
+    static {
+        // check operation system type
+        final Properties sysprop = java.lang.System.getProperties();
+        final String sysname = sysprop.getProperty("os.name","").toLowerCase(Locale.ROOT);
+        if (sysname.startsWith("mac os x")) systemOS = System.MacOSX;
+        else if (sysname.startsWith("mac os")) systemOS = System.MacOSC;
+        else if (sysname.startsWith("windows")) systemOS = System.Windows;
+        else if ((sysname.startsWith("linux")) || (sysname.startsWith("unix"))) systemOS = System.Unix;
+        else systemOS = System.Unknown;
 
-		isMacArchitecture = ((systemOS == System.MacOSC) || (systemOS == System.MacOSX));
-		isUnixFS = ((systemOS == System.MacOSX) || (systemOS == System.Unix));
-		canExecUnix = ((isUnixFS) || (!((systemOS == System.MacOSC) || (systemOS == System.Windows))));
-		isWindows = (systemOS == System.Windows);
-		isWin32 = (isWindows && java.lang.System.getProperty("os.arch", "").contains("x86"));
+        isMacArchitecture = ((systemOS == System.MacOSC) || (systemOS == System.MacOSX));
+        isUnixFS = ((systemOS == System.MacOSX) || (systemOS == System.Unix));
+        canExecUnix = ((isUnixFS) || (!((systemOS == System.MacOSC) || (systemOS == System.Windows))));
+        isWindows = (systemOS == System.Windows);
+        isWin32 = (isWindows && java.lang.System.getProperty("os.arch", "").contains("x86"));
 
-		// set up maximum path length according to system
-		if (isWindows) maxPathLength = 255; else maxPathLength = 65535;
-	}
+        // set up maximum path length according to system
+        if (isWindows) maxPathLength = 255; else maxPathLength = 65535;
+    }
 
-	public static String infoString() {
-		String s = "System=";
-		if (systemOS == System.Unknown) s += "unknown";
-		else if (systemOS == System.MacOSC) s += "Mac OS Classic";
-		else if (systemOS == System.MacOSX) s += "Mac OS X";
-		else if (systemOS == System.Unix) s += "Unix/Linux";
-		else if (systemOS == System.Windows) s += "Windows";
-		else s += "unknown";
-		if (isMacArchitecture) s += ", Mac System Architecture";
-		if (isUnixFS) s += ", has Unix-like File System";
-		if (canExecUnix) s += ", can execute Unix-Shell Commands";
-		return s;
-	}
+    public static String infoString() {
+        String s = "System=";
+        if (systemOS == System.Unknown) s += "unknown";
+        else if (systemOS == System.MacOSC) s += "Mac OS Classic";
+        else if (systemOS == System.MacOSX) s += "Mac OS X";
+        else if (systemOS == System.Unix) s += "Unix/Linux";
+        else if (systemOS == System.Windows) s += "Windows";
+        else s += "unknown";
+        if (isMacArchitecture) s += ", Mac System Architecture";
+        if (isUnixFS) s += ", has Unix-like File System";
+        if (canExecUnix) s += ", can execute Unix-Shell Commands";
+        return s;
+    }
 
-	/** generates a 2-character string containing information about the OS-type*/
-	public static String infoKey() {
-		String s = "";
-		if (systemOS == System.Unknown) s += "o";
-		else if (systemOS == System.MacOSC) s += "c";
-		else if (systemOS == System.MacOSX) s += "x";
-		else if (systemOS == System.Unix) s += "u";
-		else if (systemOS == System.Windows) s += "w";
-		else s += "o";
-		if (isMacArchitecture) s += "m";
-		if (isUnixFS) s += "f";
-		if (canExecUnix) s += "e";
-		return s;
-	}
+    /** generates a 2-character string containing information about the OS-type*/
+    public static String infoKey() {
+        String s = "";
+        if (systemOS == System.Unknown) s += "o";
+        else if (systemOS == System.MacOSC) s += "c";
+        else if (systemOS == System.MacOSX) s += "x";
+        else if (systemOS == System.Unix) s += "u";
+        else if (systemOS == System.Windows) s += "w";
+        else s += "o";
+        if (isMacArchitecture) s += "m";
+        if (isUnixFS) s += "f";
+        if (canExecUnix) s += "e";
+        return s;
+    }
 
-	public static void deployScript(final File scriptFile, final String theScript) throws IOException {
-		FileUtils.copy(UTF8.getBytes(theScript), scriptFile);
-		if(!isWindows){ // set executable
-			try {
-				Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
-			} catch (final InterruptedException e) {
-				ConcurrentLog.severe("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
-				throw new IOException(e.getMessage());
-			}
-		}
-	}
+    @SuppressWarnings("deprecation")
+    public static void deployScript(final File scriptFile, final String theScript) throws IOException {
+        FileUtils.copy(UTF8.getBytes(theScript), scriptFile);
+        if(!isWindows){ // set executable
+            try {
+                Runtime.getRuntime().exec("chmod 755 " + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
+            } catch (final InterruptedException e) {
+                ConcurrentLog.severe("DEPLOY", "deploy of script file failed. file = " + scriptFile.getAbsolutePath(), e);
+                throw new IOException(e.getMessage());
+            }
+        }
+    }
 
-	/**
-	 * use a hack to get the current process PID
-	 * @return the PID of the current java process or -1 if the PID cannot be obtained
-	 */
-	public static int getPID() {
+    /**
+     * use a hack to get the current process PID
+     * @return the PID of the current java process or -1 if the PID cannot be obtained
+     */
+    public static int getPID() {
         final String pids = ManagementFactory.getRuntimeMXBean().getName();
         final int p = pids.indexOf('@');
         return p >= 0 ? NumberTools.parseIntDecSubstring(pids, 0, p) : -1;
-	}
+    }
 
-	public static void execAsynchronous(final File scriptFile) throws IOException {
-		// runs a script as separate thread
-		String starterFileExtension = null;
-		String script = null;
-		if(isWindows){
-			starterFileExtension = ".starter.bat";
-			// use /K to debug, /C for release
-			script = "start /MIN CMD /C \"" + scriptFile.getAbsolutePath() + "\"";
-		} else { // unix/linux
-			starterFileExtension = ".starter.sh";
-			script = "#!/bin/sh" + serverCore.LF_STRING + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + " &" + serverCore.LF_STRING;
-		}
-		final File starterFile = new File(scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + starterFileExtension);
-		deployScript(starterFile, script);
-		try {
-			Runtime.getRuntime().exec(starterFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
-		} catch (final InterruptedException e) {
-			throw new IOException(e.getMessage());
-		}
-		FileUtils.deletedelete(starterFile);
-	}
+    @SuppressWarnings("deprecation")
+    public static void execAsynchronous(final File scriptFile) throws IOException {
+        // runs a script as separate thread
+        String starterFileExtension = null;
+        String script = null;
+        if(isWindows){
+            starterFileExtension = ".starter.bat";
+            // use /K to debug, /C for release
+            script = "start /MIN CMD /C \"" + scriptFile.getAbsolutePath() + "\"";
+        } else { // unix/linux
+            starterFileExtension = ".starter.sh";
+            script = "#!/bin/sh" + serverCore.LF_STRING + scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + " &" + serverCore.LF_STRING;
+        }
+        final File starterFile = new File(scriptFile.getAbsolutePath().replaceAll(" ", "\\ ") + starterFileExtension);
+        deployScript(starterFile, script);
+        try {
+            Runtime.getRuntime().exec(starterFile.getAbsolutePath().replaceAll(" ", "\\ ")).waitFor();
+        } catch (final InterruptedException e) {
+            throw new IOException(e.getMessage());
+        }
+        FileUtils.deletedelete(starterFile);
+    }
 
+    @SuppressWarnings("deprecation")
     public static List<String> execSynchronous(final String command) throws IOException {
         // runs a unix/linux command and returns output as Vector of Strings
         // this method blocks until the command is executed
         final Process p = Runtime.getRuntime().exec(command);
         return readStreams(p);
     }
-    
+
+    @SuppressWarnings("deprecation")
     public static List<String> execSynchronous(final String[] command) throws IOException {
         // runs a unix/linux command and returns output as Vector of Strings
         // this method blocks until the command is executed
@@ -184,40 +188,40 @@ public final class OS {
      */
     public static List<String> readStreams(final Process p) throws IOException {
         String line;
-		final List<String> output = new ArrayList<>();
-		
-		if(p == null) {
-			return output;
-		}
-		
-		try (final InputStreamReader streamReader = new InputStreamReader(p.getInputStream());
-				final BufferedReader in = new BufferedReader(streamReader);) {
-			while ((line = in.readLine()) != null) {
-				output.add(line);
-			}
-		}
-		
-		try (final InputStreamReader streamReader = new InputStreamReader(p.getErrorStream());
-				final BufferedReader in = new BufferedReader(streamReader);) {
-			while ((line = in.readLine()) != null) {
-				output.add(line);
-			}
-		}
+        final List<String> output = new ArrayList<>();
+
+        if(p == null) {
+            return output;
+        }
+
+        try (final InputStreamReader streamReader = new InputStreamReader(p.getInputStream());
+                final BufferedReader in = new BufferedReader(streamReader);) {
+            while ((line = in.readLine()) != null) {
+                output.add(line);
+            }
+        }
+
+        try (final InputStreamReader streamReader = new InputStreamReader(p.getErrorStream());
+                final BufferedReader in = new BufferedReader(streamReader);) {
+            while ((line = in.readLine()) != null) {
+                output.add(line);
+            }
+        }
         return output;
     }
 
-	public static void main(final String[] args) {
+    public static void main(final String[] args) {
         try {
-            List<String> v = execSynchronous("/usr/local/bin/wkhtmltoimage");
-            for (String r: v) java.lang.System.out.println(r);
-        } catch (IOException e) {
+            final List<String> v = execSynchronous("/usr/local/bin/wkhtmltoimage");
+            for (final String r: v) java.lang.System.out.println(r);
+        } catch (final IOException e) {
         }
         /*
 		if (args[0].equals("-m")) {
 			java.lang.System.out.println("Maximum possible memory: " + Integer.toString(getWin32MaxHeap()) + "m");
 		}
-		*/
-	}
+         */
+    }
 
 }
 

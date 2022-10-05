@@ -33,7 +33,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
 /**
  * This class provides methods to import blacklists from an XML file (see
@@ -54,13 +53,15 @@ public class XMLBlacklistImporter extends DefaultHandler {
      * @throws java.io.IOException if input can't be read
      * @throws org.xml.sax.SAXException if XML can't be parsed
      */
+    @SuppressWarnings("deprecation")
     public synchronized ListAccumulator parse(InputSource input) throws IOException, SAXException {
 
-        XMLReader reader = XMLReaderFactory.createXMLReader();
+        @SuppressWarnings("deprecation")
+        final XMLReader reader = org.xml.sax.helpers.XMLReaderFactory.createXMLReader();
         reader.setContentHandler(this);
         reader.parse(input);
 
-        return ba;
+        return this.ba;
     }
 
     /**
@@ -104,7 +105,7 @@ public class XMLBlacklistImporter extends DefaultHandler {
      */
     @Override
     public void startDocument() {
-        ba = new ListAccumulator();
+        this.ba = new ListAccumulator();
     }
 
     /**
@@ -127,24 +128,24 @@ public class XMLBlacklistImporter extends DefaultHandler {
     public void startElement(final String uri, final String localName, final String qName, final Attributes attributes) {
 
         if (qName.equalsIgnoreCase("list")) {
-            currentListName = attributes.getValue("name");
-            ba.addList(currentListName);
-            
+            this.currentListName = attributes.getValue("name");
+            this.ba.addList(this.currentListName);
+
             int attributesLength = 0;
 
             if ((attributesLength = attributes.getLength()) > 1) {
                 for (int i = 0; i < attributesLength; i++) {
                     if (!attributes.getQName(i).equals("name")) {
-                        ba.addPropertyToCurrent(attributes.getQName(i), attributes.getValue(i));
+                        this.ba.addPropertyToCurrent(attributes.getQName(i), attributes.getValue(i));
                     }
                 }
             }
         }
-        
+
         if (qName.equalsIgnoreCase("item")) {
-            lastText = new StringBuilder();
+            this.lastText = new StringBuilder();
         }
-        
+
     }
 
     /**
@@ -162,7 +163,7 @@ public class XMLBlacklistImporter extends DefaultHandler {
     @Override
     public void endElement(final String uri, final String localName, final String qName) throws SAXException {
         if (qName.equalsIgnoreCase("item")) {
-            ba.addEntryToCurrent(lastText.toString());
+            this.ba.addEntryToCurrent(this.lastText.toString());
         }
     }
 
@@ -175,8 +176,8 @@ public class XMLBlacklistImporter extends DefaultHandler {
      */
     @Override
     public void characters(char[] ch, int start, int length) throws SAXException {
-        if (lastText == null) lastText = new StringBuilder();
-        lastText.append(ch, start, length);
+        if (this.lastText == null) this.lastText = new StringBuilder();
+        this.lastText.append(ch, start, length);
     }
 
 }

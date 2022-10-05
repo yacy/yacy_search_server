@@ -37,7 +37,7 @@
    support gzip-ed encoding. We also do not support unrealistic
    'expires' values that would force a cache to be flushed immediately
    pragma non-cache attributes are supported
-*/
+ */
 
 
 package net.yacy.server.http;
@@ -67,6 +67,7 @@ import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -89,6 +90,7 @@ import net.yacy.repository.Blacklist.BlacklistType;
 import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 
+@SuppressWarnings("deprecation")
 public final class HTTPDProxyHandler {
 
 
@@ -108,7 +110,7 @@ public final class HTTPDProxyHandler {
     // creating a logger
     private static final ConcurrentLog log = new ConcurrentLog("PROXY");
 
-	/**
+    /**
      * Do logging configuration for special proxy access log file
      */
     static {
@@ -117,77 +119,77 @@ public final class HTTPDProxyHandler {
         sb = Switchboard.getSwitchboard();
         if (sb != null) {
 
-        // set timeout
-        timeout = sb.getConfigInt("proxy.clientTimeout", 60000);
+            // set timeout
+            timeout = sb.getConfigInt("proxy.clientTimeout", 60000);
 
-        // do logger initialization
-        try {
-            log.info("Configuring proxy access logging ...");
+            // do logger initialization
+            try {
+                log.info("Configuring proxy access logging ...");
 
-            // getting the logging manager
-            final LogManager manager = LogManager.getLogManager();
-            final String className = HTTPDProxyHandler.class.getName();
+                // getting the logging manager
+                final LogManager manager = LogManager.getLogManager();
+                final String className = HTTPDProxyHandler.class.getName();
 
-            // determining if proxy access logging is enabled
-            final String enabled = manager.getProperty(className + ".logging.enabled");
-            if ("true".equalsIgnoreCase(enabled)) {
+                // determining if proxy access logging is enabled
+                final String enabled = manager.getProperty(className + ".logging.enabled");
+                if ("true".equalsIgnoreCase(enabled)) {
 
-                // reading out some needed configuration properties
-                int limit = 1024*1024, count = 20;
-                String pattern = manager.getProperty(className + ".logging.FileHandler.pattern");
-                if (pattern == null) pattern = "DATA/LOG/proxyAccess%u%g.log";
-                // make pattern absolute
-                if (!new File(pattern).isAbsolute()) pattern = new File(sb.getDataPath(), pattern).getAbsolutePath();
+                    // reading out some needed configuration properties
+                    int limit = 1024*1024, count = 20;
+                    String pattern = manager.getProperty(className + ".logging.FileHandler.pattern");
+                    if (pattern == null) pattern = "DATA/LOG/proxyAccess%u%g.log";
+                    // make pattern absolute
+                    if (!new File(pattern).isAbsolute()) pattern = new File(sb.getDataPath(), pattern).getAbsolutePath();
 
-                final String limitStr = manager.getProperty(className + ".logging.FileHandler.limit");
-                if (limitStr != null) try { limit = Integer.parseInt(limitStr); } catch (final NumberFormatException e) {}
+                    final String limitStr = manager.getProperty(className + ".logging.FileHandler.limit");
+                    if (limitStr != null) try { limit = Integer.parseInt(limitStr); } catch (final NumberFormatException e) {}
 
-                final String countStr = manager.getProperty(className + ".logging.FileHandler.count");
-                if (countStr != null) try { count = Integer.parseInt(countStr); } catch (final NumberFormatException e) {}
+                    final String countStr = manager.getProperty(className + ".logging.FileHandler.count");
+                    if (countStr != null) try { count = Integer.parseInt(countStr); } catch (final NumberFormatException e) {}
 
-                // creating the proxy access logger
-                final Logger proxyLogger = Logger.getLogger("PROXY.access");
-                proxyLogger.setUseParentHandlers(false);
-                proxyLogger.setLevel(Level.FINEST);
+                    // creating the proxy access logger
+                    final Logger proxyLogger = Logger.getLogger("PROXY.access");
+                    proxyLogger.setUseParentHandlers(false);
+                    proxyLogger.setLevel(Level.FINEST);
 
-                final FileHandler txtLog = new FileHandler(pattern, limit, count, true);
-                txtLog.setFormatter(new ProxyLogFormatter());
-                txtLog.setLevel(Level.FINEST);
-                proxyLogger.addHandler(txtLog);
+                    final FileHandler txtLog = new FileHandler(pattern, limit, count, true);
+                    txtLog.setFormatter(new ProxyLogFormatter());
+                    txtLog.setLevel(Level.FINEST);
+                    proxyLogger.addHandler(txtLog);
 
-                log.info("Proxy access logging configuration done." +
-                                  "\n\tFilename: " + pattern +
-                                  "\n\tLimit: " + limitStr +
-                                  "\n\tCount: " + countStr);
-            } else {
-                log.info("Proxy access logging is deactivated.");
+                    log.info("Proxy access logging configuration done." +
+                            "\n\tFilename: " + pattern +
+                            "\n\tLimit: " + limitStr +
+                            "\n\tCount: " + countStr);
+                } else {
+                    log.info("Proxy access logging is deactivated.");
+                }
+            } catch (final Exception e) {
+                log.severe("Unable to configure proxy access logging.",e);
             }
-        } catch (final Exception e) {
-            log.severe("Unable to configure proxy access logging.",e);
-        }
 
-        // load the yellow-list
-        final String f = sb.getConfig("proxyYellowList", null);
-        if (f != null) {
-            yellowList = FileUtils.loadList(new File(f));
-            log.config("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
+            // load the yellow-list
+            final String f = sb.getConfig("proxyYellowList", null);
+            if (f != null) {
+                yellowList = FileUtils.loadList(new File(f));
+                log.config("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
+            } else {
+                yellowList = null;
+            }
+
+            final String redirectorPath = sb.getConfig("externalRedirector", "");
+            if (redirectorPath.length() > 0 && !redirectorEnabled) {
+                try {
+                    redirectorProcess=Runtime.getRuntime().exec(redirectorPath, null, null);
+                    redirectorWriter = new PrintWriter(redirectorProcess.getOutputStream());
+                    redirectorReader = new BufferedReader(new InputStreamReader(redirectorProcess.getInputStream()));
+                    redirectorEnabled=true;
+                } catch (final IOException e) {
+                    System.out.println("redirector not Found");
+                }
+            }
         } else {
             yellowList = null;
-        }
-
-        final String redirectorPath = sb.getConfig("externalRedirector", "");
-        if (redirectorPath.length() > 0 && !redirectorEnabled) {
-            try {
-                redirectorProcess=Runtime.getRuntime().exec(redirectorPath, null, null);
-                redirectorWriter = new PrintWriter(redirectorProcess.getOutputStream());
-                redirectorReader = new BufferedReader(new InputStreamReader(redirectorProcess.getInputStream()));
-                redirectorEnabled=true;
-            } catch (final IOException e) {
-                System.out.println("redirector not Found");
-            }
-        }
-        } else {
-        	yellowList = null;
         }
     }
 
@@ -342,25 +344,25 @@ public final class HTTPDProxyHandler {
             // case 1 and case 3
             if (cachedResponseHeader == null) {
                 if (log.isFinest()) log.finest(reqID + " page not in cache: fulfill request from web");
-                    fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond, agent);
+                fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond, agent);
             } else {
-            	final Request request = new Request(
-            			null,
+                final Request request = new Request(
+                        null,
                         url,
                         requestHeader.referer() == null ? null : requestHeader.referer().hash(),
-                        "",
-                        cachedResponseHeader.lastModified(),
-                        sb.crawler.defaultProxyProfile.handle(),
-                        0,
-                        sb.crawler.defaultProxyProfile.timezoneOffset());
+                                "",
+                                cachedResponseHeader.lastModified(),
+                                sb.crawler.defaultProxyProfile.handle(),
+                                0,
+                                sb.crawler.defaultProxyProfile.timezoneOffset());
                 final Response response = new Response(
-                		request,
+                        request,
                         requestHeader,
                         cachedResponseHeader,
                         sb.crawler.defaultProxyProfile,
                         true,
                         null
-                );
+                        );
                 final byte[] cacheContent = Cache.getContent(url.hash());
                 if (cacheContent != null && response.isFreshForProxy()) {
                     if (log.isFinest()) log.finest(reqID + " fulfill request from cache");
@@ -433,9 +435,9 @@ public final class HTTPDProxyHandler {
 
             // remove yacy-subdomain-path, when accessing /env
             if ((yAddress != null)
-            		&& (remotePath.startsWith("/env"))
-            		&& (yAddress.indexOf('/') != -1)
-               ) yAddress = yAddress.substring(0, yAddress.indexOf('/'));
+                    && (remotePath.startsWith("/env"))
+                    && (yAddress.indexOf('/') != -1)
+                    ) yAddress = yAddress.substring(0, yAddress.indexOf('/'));
 
             modifyProxyHeaders(requestHeader, httpVer);
 
@@ -448,17 +450,17 @@ public final class HTTPDProxyHandler {
             try (final HTTPClient client = new HTTPClient(agent, timeout)) {
                 client.setHeader(requestHeader.entrySet());
                 client.setRedirecting(false);
-            	client.GET(getUrl, false);
+                client.GET(getUrl, false);
                 if (log.isFinest()) log.finest(reqID +"    response status: "+ client.getHttpResponse().getStatusLine());
 
-                int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
+                final int statusCode = client.getHttpResponse().getStatusLine().getStatusCode();
                 final ResponseHeader responseHeader = new ResponseHeader(statusCode, client.getHttpResponse().getAllHeaders());
                 // determine if it's an internal error of the httpc
                 if (responseHeader.isEmpty()) {
-                	throw new Exception(client.getHttpResponse().getStatusLine().toString());
+                    throw new Exception(client.getHttpResponse().getStatusLine().toString());
                 }
 
-                ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, statusCode, respond);
+                final ChunkedOutputStream chunkedOut = setTransferEncoding(conProp, responseHeader, statusCode, respond);
 
                 // the cache does either not exist or is (supposed to be) stale
                 long sizeBeforeDelete = -1;
@@ -475,19 +477,19 @@ public final class HTTPDProxyHandler {
 
                 // reserver cache entry
                 final Request request = new Request(
-            			null,
+                        null,
                         url,
                         requestHeader.referer() == null ? null : requestHeader.referer().hash(),
-                        "",
-                        responseHeader.lastModified(),
-                        sb.crawler.defaultProxyProfile.handle(),
-                        0,
-                        sb.crawler.defaultProxyProfile.timezoneOffset());
+                                "",
+                                responseHeader.lastModified(),
+                                sb.crawler.defaultProxyProfile.handle(),
+                                0,
+                                sb.crawler.defaultProxyProfile.timezoneOffset());
 
                 // handle incoming cookies
                 handleIncomingCookies(responseHeader, host, ip);
 
-//                prepareResponseHeader(responseHeader, res.getHttpVer());
+                //                prepareResponseHeader(responseHeader, res.getHttpVer());
                 prepareResponseHeader(responseHeader, client.getHttpResponse().getProtocolVersion().toString());
 
                 // sending the respond header back to the client
@@ -506,7 +508,7 @@ public final class HTTPDProxyHandler {
 
                 if (hasBody(client.getHttpResponse().getStatusLine().getStatusCode())) {
 
-                    OutputStream outStream = chunkedOut != null ? chunkedOut : respond;
+                    final OutputStream outStream = chunkedOut != null ? chunkedOut : respond;
                     final Response response = new Response(
                             request,
                             requestHeader,
@@ -514,7 +516,7 @@ public final class HTTPDProxyHandler {
                             sb.crawler.defaultProxyProfile,
                             true,
                             null
-                    );
+                            );
                     final String storeError = response.shallStoreCacheForProxy();
                     final boolean storeHTCache = response.profile().storeHTCache();
                     final String supportError = TextParser.supports(response.url(), response.getMimeType());
@@ -530,14 +532,14 @@ public final class HTTPDProxyHandler {
                              * c) the content should be indexed
                              */
                             ((storeHTCache) || (supportError != null))
-                    ) {
+                            ) {
                         // we don't write actually into a file, only to RAM, and schedule writing the file.
-//                        int l = res.getResponseHeader().size();
-                    	final int l = responseHeader.size();
+                        //                        int l = res.getResponseHeader().size();
+                        final int l = responseHeader.size();
                         final ByteArrayOutputStream byteStream = new ByteArrayOutputStream((l < 32) ? 32 : l);
 
                         final OutputStream toClientAndMemory = new MultiOutputStream(new OutputStream[] {outStream, byteStream});
-//                        FileUtils.copy(res.getDataAsStream(), toClientAndMemory);
+                        //                        FileUtils.copy(res.getDataAsStream(), toClientAndMemory);
                         client.writeTo(toClientAndMemory);
                         // cached bytes
                         byte[] cacheArray;
@@ -627,7 +629,7 @@ public final class HTTPDProxyHandler {
             final ResponseHeader cachedResponseHeader,
             final byte[] cacheEntry,
             OutputStream respond
-    ) throws IOException {
+            ) throws IOException {
 
         final String httpVer = (String) conProp.get(HeaderFramework.CONNECTION_PROP_HTTP_VER);
         final String clienthttpVer; // the http version of the client connection
@@ -721,12 +723,12 @@ public final class HTTPDProxyHandler {
             requestHeader.put(HeaderFramework.USER_AGENT, generateUserAgent(requestHeader));
         }
 
-	// only gzip-encoding is supported, remove other encodings (e. g. deflate)
+        // only gzip-encoding is supported, remove other encodings (e. g. deflate)
         if ((requestHeader.get(HeaderFramework.ACCEPT_ENCODING,"")).indexOf(HeaderFramework.CONTENT_ENCODING_GZIP,0) != -1) {
             requestHeader.put(HeaderFramework.ACCEPT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
-	} else {
+        } else {
             requestHeader.put(HeaderFramework.ACCEPT_ENCODING, "");
-	}
+        }
 
         addXForwardedForHeader(conProp, requestHeader);
     }
@@ -782,7 +784,7 @@ public final class HTTPDProxyHandler {
                 if (httpVer.equals(HeaderFramework.HTTP_VERSION_0_9) || httpVer.equals(HeaderFramework.HTTP_VERSION_1_0)) {
                     forceConnectionClose(conProp);
                 } else {
-                chunkedOut = new ChunkedOutputStream(respond);
+                    chunkedOut = new ChunkedOutputStream(respond);
                 }
                 responseHeader.remove(HeaderFramework.CONTENT_LENGTH);
             }
@@ -933,12 +935,12 @@ public final class HTTPDProxyHandler {
                         errorMessage = "IP address of the destination host could not be determined";
                     }
                 } else if ((exceptionMsg != null) &&
-                  (
-                     (exceptionMsg.indexOf("socket write error",0)>=0) ||
-                     (exceptionMsg.indexOf("Read timed out",0) >= 0) ||
-                     (exceptionMsg.indexOf("Broken pipe",0) >= 0) ||
-                     (exceptionMsg.indexOf("server has closed connection",0) >= 0)
-                  )) {
+                        (
+                                (exceptionMsg.indexOf("socket write error",0)>=0) ||
+                                (exceptionMsg.indexOf("Read timed out",0) >= 0) ||
+                                (exceptionMsg.indexOf("Broken pipe",0) >= 0) ||
+                                (exceptionMsg.indexOf("server has closed connection",0) >= 0)
+                                )) {
                     errorMessage = exceptionMsg;
                     ConcurrentLog.logException(e);
                 } else {
@@ -983,7 +985,7 @@ public final class HTTPDProxyHandler {
         final serverObjects detailedErrorMsgMap = new serverObjects();
 
         // generic toplevel domains
-        final HashSet<String> topLevelDomains = new HashSet<String>(Arrays.asList(new String[]{
+        final HashSet<String> topLevelDomains = new HashSet<>(Arrays.asList(new String[]{
                 "aero", // Fluggesellschaften/Luftfahrt
                 "arpa", // Einrichtung des ARPANet
                 "biz",  // Business
@@ -1012,8 +1014,8 @@ public final class HTTPDProxyHandler {
         }));
 
         // getting some connection properties
-        DigestURL orgurl = (DigestURL) conProp.get(HeaderFramework.CONNECTION_PROP_DIGESTURL);
-        int orgHostPort = orgurl.getPort();
+        final DigestURL orgurl = (DigestURL) conProp.get(HeaderFramework.CONNECTION_PROP_DIGESTURL);
+        final int orgHostPort = orgurl.getPort();
         String orgHostName = orgurl.getHost();
         if (orgHostName == null) orgHostName = "unknown";
         orgHostName = orgHostName.toLowerCase(Locale.ROOT);
@@ -1025,7 +1027,7 @@ public final class HTTPDProxyHandler {
         detailedErrorMsgMap.put("hostName", orgHostName);
 
         // guessing hostnames
-        final HashSet<String> testHostNames = new HashSet<String>();
+        final HashSet<String> testHostNames = new HashSet<>();
         String testHostName = null;
         if (!orgHostName.startsWith("www.")) {
             testHostName = "www." + orgHostName;
@@ -1042,7 +1044,7 @@ public final class HTTPDProxyHandler {
             if (addr != null) testHostNames.add(testHostName);
         }
 
-        int pos = orgHostName.lastIndexOf('.');
+        final int pos = orgHostName.lastIndexOf('.');
         if (pos != -1) {
             final Iterator<String> iter = topLevelDomains.iterator();
             while (iter.hasNext()) {
@@ -1142,7 +1144,7 @@ public final class HTTPDProxyHandler {
         logMessage.append(' ');
 
         // Method
-        HttpServletRequest origrequest = (HttpServletRequest) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST);
+        final HttpServletRequest origrequest = (HttpServletRequest) conProp.get(HeaderFramework.CONNECTION_PROP_CLIENT_HTTPSERVLETREQUEST);
         final String requestMethod = origrequest.getMethod();
         logMessage.append(requestMethod);
         logMessage.append(' ');

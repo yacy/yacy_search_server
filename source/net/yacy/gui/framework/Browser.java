@@ -37,7 +37,7 @@ import net.yacy.cora.util.ConcurrentLog;
 
 public class Browser {
 
- // constants for system identification
+    // constants for system identification
     public static final int systemMacOSC  =  0; // 'classic' Mac OS 7.6.1/8.*/9.*
     public static final int systemMacOSX  =  1; // all Mac OS X
     public static final int systemUnix    =  2; // all Unix/Linux type systems
@@ -100,7 +100,7 @@ public class Browser {
             openBrowserClassic(url);
         }
     }
-    
+
     public static void openBrowserClassic(final String url) {
         try {
             if (systemOS == systemMacOSX) {
@@ -113,12 +113,12 @@ public class Browser {
                 throw new RuntimeException("System unknown");
             }
         } catch (final Throwable e) {
-        	ConcurrentLog.warn("BROWSER", "Could not open browser : " + e.getMessage() != null ? e.getMessage() : e.toString());
+            ConcurrentLog.warn("BROWSER", "Could not open browser : " + e.getMessage() != null ? e.getMessage() : e.toString());
         }
     }
 
     private static void openBrowserMac(final String url) throws Exception {
-        Process p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open location \"" + url + "\""});
+        final Process p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open location \"" + url + "\""});
         p.waitFor();
         if (p.exitValue() != 0) {
             throw new RuntimeException("Mac Exec Error: " + errorResponse(p));
@@ -131,12 +131,13 @@ public class Browser {
      * @throws Exception when an error occured
      */
     private static void openDefaultUnixBrowser(final String url) throws Exception {
-    	/* Use the freedesktop xdg-open to open url with the default browser.
-    	 * xdg-open is included in xdg-utils tools set (https://www.freedesktop.org/wiki/Software/xdg-utils/)
-    	 * It is part of the LSB (Linux Standard Base) and therefore included in all recent Linux Distributions supporting it
-    	 * (see https://www.linuxbase.org/navigator/browse/cmd_single.php?cmd=list-by-name&Section=ABI&Cname=xdg-open) */
-        String cmd = "xdg-open " + url;
-        Process p = Runtime.getRuntime().exec(cmd);
+        /* Use the freedesktop xdg-open to open url with the default browser.
+         * xdg-open is included in xdg-utils tools set (https://www.freedesktop.org/wiki/Software/xdg-utils/)
+         * It is part of the LSB (Linux Standard Base) and therefore included in all recent Linux Distributions supporting it
+         * (see https://www.linuxbase.org/navigator/browse/cmd_single.php?cmd=list-by-name&Section=ABI&Cname=xdg-open) */
+        final String cmd = "xdg-open " + url;
+        @SuppressWarnings("deprecation")
+        final Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
         if (p.exitValue() != 0) {
             throw new RuntimeException("Unix Exec Error/xdg-open: " + errorResponse(p));
@@ -152,7 +153,8 @@ public class Browser {
             cmd = "rundll32 url.dll,FileProtocolHandler \"" + url + "\"";
         }
         //cmd = "cmd.exe /c start javascript:document.location='" + url + "'";
-        Process p = Runtime.getRuntime().exec(cmd);
+        @SuppressWarnings("deprecation")
+        final Process p = Runtime.getRuntime().exec(cmd);
         p.waitFor();
         if (p.exitValue() != 0) {
             throw new RuntimeException("EXEC ERROR: " + errorResponse(p));
@@ -183,15 +185,15 @@ public class Browser {
      * @param args
      */
     public static void main(final String[] args) {
-		try {
-			if (args.length > 0 && "-u".equals(args[0])) {
-				openBrowser(args[1]);
-			} else {
-				System.out.println("Usage java " + Browser.class.getCanonicalName() + " -u [URL]");
-			}
-		} finally {
-			ConcurrentLog.shutdown();
-		}
-		System.out.println("The End!");
-	}
+        try {
+            if (args.length > 0 && "-u".equals(args[0])) {
+                openBrowser(args[1]);
+            } else {
+                System.out.println("Usage java " + Browser.class.getCanonicalName() + " -u [URL]");
+            }
+        } finally {
+            ConcurrentLog.shutdown();
+        }
+        System.out.println("The End!");
+    }
 }
