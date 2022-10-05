@@ -51,7 +51,6 @@ import org.apache.solr.common.SolrException;
 import org.apache.solr.common.SolrException.ErrorCode;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.SolrConfig;
-import org.apache.solr.schema.IndexSchema;
 
 import net.yacy.cora.date.GenericFormatter;
 import net.yacy.cora.date.ISO8601Formatter;
@@ -90,7 +89,7 @@ import net.yacy.search.schema.WebgraphSchema;
 public final class Fulltext {
 
     private static final String SOLR_PATH = "solr_8_8_1"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
-//    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2", "solr_5_5", "solr_6_6"};
+    //    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2", "solr_5_5", "solr_6_6"};
 
     // class objects
     private final File                    segmentPath;
@@ -99,7 +98,7 @@ public final class Fulltext {
     private       InstanceMirror          solrInstances;
 
     /** Synchronization lock for solrInstances property */
-    private ReentrantLock solrInstancesLock;
+    private final ReentrantLock solrInstancesLock;
 
     private final CollectionConfiguration collectionConfiguration;
     private final WebgraphConfiguration   webgraphConfiguration;
@@ -138,7 +137,7 @@ public final class Fulltext {
     }
 
     public void connectLocalSolr() throws IOException {
-        File solrLocation = new File(this.segmentPath, SOLR_PATH);
+        final File solrLocation = new File(this.segmentPath, SOLR_PATH);
 
         // migrate old solr to new
         /*
@@ -151,13 +150,12 @@ public final class Fulltext {
                 }
             }
         }
-        */
+         */
 
-        EmbeddedInstance localCollectionInstance = new EmbeddedInstance(new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"), solrLocation, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
-        SolrConfig config = localCollectionInstance.getDefaultCore().getSolrConfig();
-        String versionValue = config.getVal(IndexSchema.LUCENE_MATCH_VERSION_PARAM, true);
-        Version luceneVersion = SolrConfig.parseLuceneVersionString(versionValue);
-        String lvn = luceneVersion.major + "_" + luceneVersion.minor + "_" + luceneVersion.bugfix;
+        final EmbeddedInstance localCollectionInstance = new EmbeddedInstance(new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"), solrLocation, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
+        final SolrConfig config = localCollectionInstance.getDefaultCore().getSolrConfig();
+        final Version luceneVersion = config.luceneMatchVersion;
+        final String lvn = luceneVersion.major + "_" + luceneVersion.minor + "_" + luceneVersion.bugfix;
         assert SOLR_PATH.endsWith(lvn) : "luceneVersion = " + lvn + ", solrPath = " + SOLR_PATH + ", check defaults/solr/solrconfig.xml";
 
         ConcurrentLog.info("Fulltext", "using lucene version " + lvn);
@@ -204,7 +202,7 @@ public final class Fulltext {
                         SwitchboardConstants.REMOTE_SOLR_BINARY_RESPONSE_ENABLED_DEFAULT);
             }
             return this.solrInstances.getDefaultRemoteConnector(useBinaryResponseWriter);
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return null;
         }
     }
@@ -256,9 +254,9 @@ public final class Fulltext {
         }
         this.solrInstancesLock.lock();
         try {
-            EmbeddedInstance instance = this.solrInstances.getEmbedded();
+            final EmbeddedInstance instance = this.solrInstances.getEmbedded();
             if (instance != null) {
-                for (String name: instance.getCoreNames()) {
+                for (final String name: instance.getCoreNames()) {
                     this.solrInstances.getEmbeddedConnector(name).clear();
                 }
                 this.commit(false);
@@ -272,9 +270,9 @@ public final class Fulltext {
     public void clearRemoteSolr() throws IOException {
         this.solrInstancesLock.lock();
         try {
-            ShardInstance instance = this.solrInstances.getRemote();
+            final ShardInstance instance = this.solrInstances.getRemote();
             if (instance != null) {
-                for (String name: instance.getCoreNames()) {
+                for (final String name: instance.getCoreNames()) {
                     this.solrInstances.getRemoteConnector(name).clear();
                 }
             }
@@ -291,11 +289,11 @@ public final class Fulltext {
     private long collectionSizeLastAccess = 0;
     private long collectionSizeLastValue = 0;
     public long collectionSize() {
-        long t = System.currentTimeMillis();
+        final long t = System.currentTimeMillis();
         if (t - this.collectionSizeLastAccess < 1000) return this.collectionSizeLastValue;
-        SolrConnector sc = getDefaultConnector();
+        final SolrConnector sc = getDefaultConnector();
         if (sc == null) return 0;
-        long size = sc.getSize();
+        final long size = sc.getSize();
         this.collectionSizeLastAccess = t;
         this.collectionSizeLastValue = size;
         return size;
@@ -311,14 +309,14 @@ public final class Fulltext {
     public void close() {
         try {
             this.solrInstances.close();
-        } catch (Throwable e) {
+        } catch (final Throwable e) {
             ConcurrentLog.logException(e);
         }
     }
 
     private long lastCommit = 0;
     public void commit(boolean softCommit) {
-        long t = System.currentTimeMillis();
+        final long t = System.currentTimeMillis();
         if (this.lastCommit + 10000 > t) return;
         this.lastCommit = t;
         getDefaultConnector().commit(softCommit);
@@ -338,10 +336,10 @@ public final class Fulltext {
      */
     public URIMetadataNode getMetadata(final WeakPriorityBlockingQueue.Element<WordReferenceVars> element) {
         if (element == null) return null;
-        WordReferenceVars wre = element.getElement();
+        final WordReferenceVars wre = element.getElement();
         if (wre == null) return null; // all time was already wasted in takeRWI to get another element
-        long score = element.getWeight();
-        URIMetadataNode node = getMetadata(wre.urlhash(), wre, score);
+        final long score = element.getWeight();
+        final URIMetadataNode node = getMetadata(wre.urlhash(), wre, score);
         return node;
     }
 
@@ -351,11 +349,11 @@ public final class Fulltext {
     }
 
     private URIMetadataNode getMetadata(final byte[] urlHash, final WordReferenceVars wre, final long score) {
-        String u = ASCII.String(urlHash);
+        final String u = ASCII.String(urlHash);
 
         // get the metadata from Solr
         try {
-            SolrDocument doc = this.getDefaultConnector().getDocumentById(u);
+            final SolrDocument doc = this.getDefaultConnector().getDocumentById(u);
             if (doc != null) {
                 return new URIMetadataNode(doc, wre, score);
             }
@@ -367,10 +365,10 @@ public final class Fulltext {
     }
 
     public void putDocument(final SolrInputDocument doc) throws IOException {
-        SolrConnector connector = this.getDefaultConnector();
+        final SolrConnector connector = this.getDefaultConnector();
         if (connector == null) return;
-        String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
-        String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+        final String id = (String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName());
+        final String url = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
         assert url != null && url.length() < 30000;
         ConcurrentLog.info("Fulltext", "indexing: " + id + " " + url);
         try {
@@ -396,16 +394,16 @@ public final class Fulltext {
      * deprecated method to store document metadata, use Solr documents wherever possible
      */
     public void putMetadata(final URIMetadataNode entry) throws IOException {
-        byte[] idb = entry.hash();
-        String id = ASCII.String(idb);
+        final byte[] idb = entry.hash();
+        final String id = ASCII.String(idb);
         try {
             // because node entries are richer than metadata entries we must check if they exist to prevent that they are overwritten
-            SolrDocument doc = this.getDefaultConnector().getDocumentById(id, CollectionSchema.collection_sxt.getSolrFieldName());
+            final SolrDocument doc = this.getDefaultConnector().getDocumentById(id, CollectionSchema.collection_sxt.getSolrFieldName());
             if (doc == null || !doc.containsKey(CollectionSchema.collection_sxt.getSolrFieldName())) {
                 // document does not exist
                 putDocument(getDefaultConfiguration().metadata2solr(entry));
             } else {
-                Collection<Object> collections = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
+                final Collection<Object> collections = doc.getFieldValues(CollectionSchema.collection_sxt.getSolrFieldName());
                 // collection dht is used to identify metadata from full crawled documents (if "dht" exists don't overwrite rich crawldata with metadata
                 if (!collections.contains("dht")) return;
 
@@ -427,24 +425,24 @@ public final class Fulltext {
      */
     public void deleteStaleDomainHashes(final Set<String> hosthashes, Date freshdate) {
         // delete in solr
-        Date now = new Date();
+        final Date now = new Date();
         deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_id_s.getSolrFieldName(), hosthashes,
                 (freshdate == null || freshdate.after(now)) ? null :
-                (CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
+                    (CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
         if (this.writeWebgraph) deleteDomainWithConstraint(this.getWebgraphConnector(), WebgraphSchema.source_host_id_s.getSolrFieldName(), hosthashes,
                 (freshdate == null || freshdate.after(now)) ? null :
-                (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
+                    (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
     }
 
     public void deleteStaleDomainNames(final Set<String> hostnames, Date freshdate) {
 
-        Date now = new Date();
+        final Date now = new Date();
         deleteDomainWithConstraint(this.getDefaultConnector(), CollectionSchema.host_s.getSolrFieldName(), hostnames,
                 (freshdate == null || freshdate.after(now)) ? null :
-                (CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
+                    (CollectionSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
         if (this.writeWebgraph) deleteDomainWithConstraint(this.getWebgraphConnector(), WebgraphSchema.source_host_s.getSolrFieldName(), hostnames,
                 (freshdate == null || freshdate.after(now)) ? null :
-                (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
+                    (WebgraphSchema.load_date_dt.getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(freshdate) + "]"));
     }
 
     /**
@@ -457,16 +455,17 @@ public final class Fulltext {
 
     private static void deleteDomainWithConstraint(SolrConnector connector, String fieldname, final Set<String> hosthashes, String constraintQuery) {
         if (hosthashes == null || hosthashes.size() == 0) return;
-        int subsetscount = 1 + (hosthashes.size() / 255); // if the list is too large, we get a "too many boolean clauses" exception
+        final int subsetscount = 1 + (hosthashes.size() / 255); // if the list is too large, we get a "too many boolean clauses" exception
         int c = 0;
         @SuppressWarnings("unchecked")
+        final
         List<String>[] subsets = (List<String>[]) Array.newInstance(ArrayList.class, subsetscount);
-        for (int i = 0; i < subsetscount; i++) subsets[i] = new ArrayList<String>();
-        for (String hosthash: hosthashes) subsets[c++ % subsetscount].add(hosthash);
-        for (List<String> subset: subsets) {
+        for (int i = 0; i < subsetscount; i++) subsets[i] = new ArrayList<>();
+        for (final String hosthash: hosthashes) subsets[c++ % subsetscount].add(hosthash);
+        for (final List<String> subset: subsets) {
             try {
-                StringBuilder query = new StringBuilder();
-                for (String hosthash: subset) {
+                final StringBuilder query = new StringBuilder();
+                for (final String hosthash: subset) {
                     if (query.length() > 0) query.append(" OR ");
                     //query.append(CollectionSchema.host_id_s.getSolrFieldName()).append(":\"").append(hosthash).append(":\"");
                     query.append("({!cache=false raw f=").append(fieldname).append('}').append(hosthash).append(")");
@@ -478,7 +477,7 @@ public final class Fulltext {
     }
 
     public void deleteOldDocuments(final long deltaToNow, final boolean loaddate) {
-        Date deleteageDate = new Date(System.currentTimeMillis() - deltaToNow);
+        final Date deleteageDate = new Date(System.currentTimeMillis() - deltaToNow);
         final String collection1Query = (loaddate ? CollectionSchema.load_date_dt : CollectionSchema.last_modified).getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(deleteageDate) + "]";
         final String webgraphQuery = (loaddate ? WebgraphSchema.load_date_dt : WebgraphSchema.last_modified).getSolrFieldName() + ":[* TO " + ISO8601Formatter.FORMATTER.format(deleteageDate) + "]";
         try {
@@ -502,10 +501,10 @@ public final class Fulltext {
         final AtomicInteger count = new AtomicInteger(0);
         final BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(collectionQuery, null, 0, 1000000, Long.MAX_VALUE, 100, 1, false, CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName());
         try {
-            Set<String> deleteIDs = new HashSet<String>();
+            final Set<String> deleteIDs = new HashSet<>();
             SolrDocument doc;
             while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
+                final String u = (String) doc.getFieldValue(CollectionSchema.sku.getSolrFieldName());
                 if (u.startsWith(basepath)) {
                     deleteIDs.add((String) doc.getFieldValue(CollectionSchema.id.getSolrFieldName()));
                     count.incrementAndGet();
@@ -526,7 +525,7 @@ public final class Fulltext {
         try {
             this.getDefaultConnector().deleteByIds(deleteIDs);
             if (this.writeWebgraph) { // Webgraph.id is combination of sourceHash+targetHash+hexCounter, to be successful use source_id_s and/or target_id_s
-                for (String id : deleteIDs) {
+                for (final String id : deleteIDs) {
                     /* Add quotes around the url hash to prevent Solr logging a ParseException stack trace when the hash start with a '-' character */
                     this.getWebgraphConnector().deleteByQuery(WebgraphSchema.source_id_s.name() + ":\"" + id  + "\"");
                 }
@@ -545,7 +544,7 @@ public final class Fulltext {
     public boolean remove(final byte[] urlHash) {
         if (urlHash == null) return false;
         try {
-            String id = ASCII.String(urlHash);
+            final String id = ASCII.String(urlHash);
             this.getDefaultConnector().deleteById(id);
             if (this.writeWebgraph) { // Webgraph.id is combination of sourceHash+targetHash+hexCounter, to be successful use source_id_s and/or target_id_s
                 /* Add quotes around the url hash to prevent Solr logging a ParseException stack trace when the hash start with a '-' character */
@@ -573,8 +572,8 @@ public final class Fulltext {
     }
 
     public List<File> dumpFiles() {
-        EmbeddedInstance esc = this.solrInstances.getEmbedded();
-        ArrayList<File> zips = new ArrayList<File>();
+        final EmbeddedInstance esc = this.solrInstances.getEmbedded();
+        final ArrayList<File> zips = new ArrayList<>();
         if (esc == null) {
             ConcurrentLog.warn("Fulltext", "HOT DUMP selected solr0 == NULL, no dump list!");
             return zips;
@@ -588,7 +587,7 @@ public final class Fulltext {
             return zips;
         }
         ConcurrentLog.info("Fulltext", "HOT DUMP dump path = " + this.archivePath.toString());
-        for (String p: this.archivePath.list()) {
+        for (final String p: this.archivePath.list()) {
             if (p.endsWith("zip")) zips.add(new File(this.archivePath, p));
         }
         return zips;
@@ -699,12 +698,12 @@ public final class Fulltext {
     public Export export(Fulltext.ExportFormat format, String filter, String query, final int maxseconds, File path, boolean dom, boolean text) throws IOException {
 
         // modify query according to maxseconds
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         if (maxseconds > 0) {
-            long from = now - maxseconds * 1000L;
-            String nowstr = new Date(now).toInstant().toString();
-            String fromstr = new Date(from).toInstant().toString();
-            String dateq = CollectionSchema.load_date_dt.getSolrFieldName() + ":[" + fromstr + " TO " + nowstr + "]";
+            final long from = now - maxseconds * 1000L;
+            final String nowstr = new Date(now).toInstant().toString();
+            final String fromstr = new Date(from).toInstant().toString();
+            final String dateq = CollectionSchema.load_date_dt.getSolrFieldName() + ":[" + fromstr + " TO " + nowstr + "]";
             query = query == null || AbstractSolrConnector.CATCHALL_QUERY.equals(query) ? dateq : query + " AND " + dateq;
         } else {
             query = query == null? AbstractSolrConnector.CATCHALL_QUERY : query;
@@ -714,9 +713,9 @@ public final class Fulltext {
         SolrDocumentList firstdoclist, lastdoclist;
         Object firstdateobject, lastdateobject;
         firstdoclist = this.getDefaultConnector().getDocumentListByQuery(
-               query, CollectionSchema.load_date_dt.getSolrFieldName() + " asc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
+                query, CollectionSchema.load_date_dt.getSolrFieldName() + " asc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
         lastdoclist = this.getDefaultConnector().getDocumentListByQuery(
-               query, CollectionSchema.load_date_dt.getSolrFieldName() + " desc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
+                query, CollectionSchema.load_date_dt.getSolrFieldName() + " desc", 0, 1,CollectionSchema.load_date_dt.getSolrFieldName());
 
         final long doccount;
         final Date firstdate, lastdate;
@@ -729,16 +728,16 @@ public final class Fulltext {
                 /* Finally no document to export was found */
                 throw new IOException("number of exported documents == 0");
             }
-               /* we use default date values just to generate a proper dump file path */
-               firstdate = new Date(0);
-               lastdate = new Date(0);
+            /* we use default date values just to generate a proper dump file path */
+            firstdate = new Date(0);
+            lastdate = new Date(0);
 
         } else {
             doccount = firstdoclist.getNumFound();
 
             // create the export name
-            SolrDocument firstdoc = firstdoclist.get(0);
-            SolrDocument lastdoc = lastdoclist.get(0);
+            final SolrDocument firstdoc = firstdoclist.get(0);
+            final SolrDocument lastdoc = lastdoclist.get(0);
             firstdateobject = firstdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
             lastdateobject = lastdoc.getFieldValue(CollectionSchema.load_date_dt.getSolrFieldName());
 
@@ -787,7 +786,7 @@ public final class Fulltext {
     }
 
     public static void main(String args[]) {
-        Date firstdate = null;
+        final Date firstdate = null;
         System.out.println(GenericFormatter.SHORT_MINUTE_FORMATTER.format(firstdate));
     }
 
@@ -799,7 +798,8 @@ public final class Fulltext {
         private final File f;
         private final Pattern pattern;
         private int count;
-        private String failure, query;
+        private String failure;
+        private final String query;
         private final ExportFormat format;
         private final boolean dom, text;
 
@@ -824,17 +824,17 @@ public final class Fulltext {
                 if (parentf != null) {
                     parentf.mkdirs();
                 }
-            } catch(Exception e) {
+            } catch(final Exception e) {
                 ConcurrentLog.logException(e);
                 this.failure = e.getMessage();
                 return;
             }
 
             try (/* Resources automatically closed by this try-with-resources statement */
-                final OutputStream os = new FileOutputStream(this.format == ExportFormat.solr ? new File(this.f.getAbsolutePath() + ".gz") : this.f);
-                final OutputStream wrappedStream = ((this.format == ExportFormat.solr)) ? new GZIPOutputStream(os, 65536){{this.def.setLevel(Deflater.BEST_COMPRESSION);}} : os;
-                final PrintWriter pw =  new PrintWriter(new BufferedOutputStream(wrappedStream));
-            ) {
+                    final OutputStream os = new FileOutputStream(this.format == ExportFormat.solr ? new File(this.f.getAbsolutePath() + ".gz") : this.f);
+                    final OutputStream wrappedStream = ((this.format == ExportFormat.solr)) ? new GZIPOutputStream(os, 65536){{this.def.setLevel(Deflater.BEST_COMPRESSION);}} : os;
+                    final PrintWriter pw =  new PrintWriter(new BufferedOutputStream(wrappedStream));
+                    ) {
                 if (this.format == ExportFormat.html) {
                     pw.println("<html><head></head><body>");
                 }
@@ -859,8 +859,8 @@ public final class Fulltext {
                     pw.println("<result>");
                 }
                 if (this.dom) {
-                    Map<String, ReversibleScoreMap<String>> scores = Fulltext.this.getDefaultConnector().getFacets(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 100000000, CollectionSchema.host_s.getSolrFieldName());
-                    ReversibleScoreMap<String> stats = scores.get(CollectionSchema.host_s.getSolrFieldName());
+                    final Map<String, ReversibleScoreMap<String>> scores = Fulltext.this.getDefaultConnector().getFacets(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", 100000000, CollectionSchema.host_s.getSolrFieldName());
+                    final ReversibleScoreMap<String> stats = scores.get(CollectionSchema.host_s.getSolrFieldName());
                     for (final String host: stats) {
                         if (this.pattern != null && !this.pattern.matcher(host).matches()) continue;
                         if (this.format == ExportFormat.text) pw.println(host);
@@ -869,23 +869,23 @@ public final class Fulltext {
                     }
                 } else {
                     if (this.format == ExportFormat.solr || this.format == ExportFormat.elasticsearch || (this.text && this.format == ExportFormat.text)) {
-                        BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true);
+                        final BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true);
                         SolrDocument doc;
                         while ((doc = docs.take()) != AbstractSolrConnector.POISON_DOCUMENT) {
-                            String url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
+                            final String url = getStringFrom(doc.getFieldValue(CollectionSchema.sku.getSolrFieldName()));
                             if (this.pattern != null && !this.pattern.matcher(url).matches()) continue;
-                            CRIgnoreWriter sw = new CRIgnoreWriter();
+                            final CRIgnoreWriter sw = new CRIgnoreWriter();
                             if (this.text) sw.write((String) doc.getFieldValue(CollectionSchema.text_t.getSolrFieldName()));
                             if (this.format == ExportFormat.solr) EnhancedXMLResponseWriter.writeDoc(sw, doc);
                             if (this.format == ExportFormat.elasticsearch) FlatJSONResponseWriter.writeDoc(sw, doc);
                             sw.close();
                             if (this.format == ExportFormat.elasticsearch) pw.println("{\"index\":{}}");
-                            String d = sw.toString();
+                            final String d = sw.toString();
                             pw.println(d);
                             this.count++;
                         }
                     } else {
-                        BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true,
+                        final BlockingQueue<SolrDocument> docs = Fulltext.this.getDefaultConnector().concurrentDocumentsByQuery(this.query + " AND " + CollectionSchema.httpstatus_i.getSolrFieldName() + ":200", null, 0, 100000000, Long.MAX_VALUE, 100, 1, true,
                                 CollectionSchema.id.getSolrFieldName(), CollectionSchema.sku.getSolrFieldName(), CollectionSchema.title.getSolrFieldName(),
                                 CollectionSchema.author.getSolrFieldName(), CollectionSchema.description_txt.getSolrFieldName(), CollectionSchema.size_i.getSolrFieldName(), CollectionSchema.last_modified.getSolrFieldName());
                         SolrDocument doc;

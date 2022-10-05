@@ -41,24 +41,24 @@
       <dependency org="org.apache.httpcomponents" name="httpclient" rev="4.5.12"/>
       <dependency org="org.apache.httpcomponents" name="httpmime" rev="4.5.12"/>
       <dependency org="org.apache.james" name="apache-mime4j" rev="0.6"/>
-      <dependency org="org.apache.lucene" name="lucene-analyzers-phonetic" rev="8.8.1" />
-      <dependency org="org.apache.lucene" name="lucene-backward-codecs" rev="8.8.1" />
-      <dependency org="org.apache.lucene" name="lucene-classification" rev="8.8.1" />
-      <dependency org="org.apache.lucene" name="lucene-codecs" rev="8.8.1" />
-      <dependency org="org.apache.lucene" name="lucene-grouping" rev="8.8.1" />
-      <dependency org="org.apache.lucene" name="lucene-highlighter" rev="8.8.1" />
-      <dependency org="org.apache.lucene" name="lucene-join" rev="8.8.1" />
-      <dependency org="org.apache.lucene" name="lucene-memory" rev="8.8.1" />
-      <dependency org="org.apache.lucene" name="lucene-misc" rev="8.8.1" />
-      <dependency org="org.apache.lucene" name="lucene-queries" rev="8.8.1" />
-      <dependency org="org.apache.lucene" name="lucene-queryparser" rev="8.8.1" conf="compile->master"/>
-      <dependency org="org.apache.lucene" name="lucene-spatial-extras" rev="8.8.1" conf="compile->master"/>
-      <dependency org="org.apache.lucene" name="lucene-suggest" rev="8.8.1"/>
+      <dependency org="org.apache.lucene" name="lucene-analyzers-phonetic" rev="8.9.0" />
+      <dependency org="org.apache.lucene" name="lucene-backward-codecs" rev="8.9.0" />
+      <dependency org="org.apache.lucene" name="lucene-classification" rev="8.9.0" />
+      <dependency org="org.apache.lucene" name="lucene-codecs" rev="8.9.0" />
+      <dependency org="org.apache.lucene" name="lucene-grouping" rev="8.9.0" />
+      <dependency org="org.apache.lucene" name="lucene-highlighter" rev="8.9.0" />
+      <dependency org="org.apache.lucene" name="lucene-join" rev="8.9.0" />
+      <dependency org="org.apache.lucene" name="lucene-memory" rev="8.9.0" />
+      <dependency org="org.apache.lucene" name="lucene-misc" rev="8.9.0" />
+      <dependency org="org.apache.lucene" name="lucene-queries" rev="8.9.0" />
+      <dependency org="org.apache.lucene" name="lucene-queryparser" rev="8.9.0" conf="compile->master"/>
+      <dependency org="org.apache.lucene" name="lucene-spatial-extras" rev="8.9.0" conf="compile->master"/>
+      <dependency org="org.apache.lucene" name="lucene-suggest" rev="8.9.0"/>
       <dependency org="org.apache.pdfbox" name="pdfbox" rev="2.0.15"  />
       <dependency org="org.apache.poi" name="poi" rev="3.17"  />
       <dependency org="org.apache.poi" name="poi-scratchpad" rev="3.17"  />
-      <dependency org="org.apache.solr" name="solr-core" rev="8.8.1" conf="compile->master"/>
-      <dependency org="org.apache.solr" name="solr-solrj" rev="8.8.1" conf="compile->master" />
+      <dependency org="org.apache.solr" name="solr-core" rev="8.9.0" conf="compile->master"/>
+      <dependency org="org.apache.solr" name="solr-solrj" rev="8.9.0" conf="compile->master" />
       <dependency org="org.apache.zookeeper" name="zookeeper" rev="3.4.14" conf="compile->master" />
       <dependency org="org.bitlet" name="weupnp" rev="0.1.4"  />
       <dependency org="org.bouncycastle" name="bcmail-jdk15on" rev="1.69" />
