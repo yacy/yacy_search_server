@@ -67,17 +67,22 @@ public class JsonListImporter extends Thread implements Importer {
     private InputStream source;
     private final String name;
 
+    private final File inputFile;
     private final long sourceSize;
     private long lineCount, startTime, consumed;
-    private boolean abort = false;
+    private boolean abort;
+    private final boolean deletewhendone;
 
-    public JsonListImporter(final File f) throws IOException {
-       super("JsonListImporter - from file " + f.getName());
+    public JsonListImporter(final File inputFile, final boolean deletewhendone) throws IOException {
+       super("JsonListImporter - from file " + inputFile.getName());
        this.lineCount = 0;
        this.consumed = 0;
-       this.name = f.getName();
-       this.sourceSize = f.length();
-       this.source = new FileInputStream(f);
+       this.inputFile = inputFile;
+       this.name = inputFile.getName();
+       this.sourceSize = inputFile.length();
+       this.abort = false;
+       this.deletewhendone = deletewhendone;
+       this.source = new FileInputStream(inputFile);
        if (this.name.endsWith(".gz")) this.source = new GZIPInputStream(this.source);
     }
 
@@ -254,6 +259,8 @@ public class JsonListImporter extends Thread implements Importer {
         for (int t = 0; t < indexer.length; t++) {
             try {indexer[t].join(10000);} catch (final InterruptedException e) {}
         }
+
+        if (this.deletewhendone) this.inputFile.delete();
 
         log.info("finished processing json surrogate: " + ((System.currentTimeMillis() - this.startTime) / 1000) + " seconds");
     }
