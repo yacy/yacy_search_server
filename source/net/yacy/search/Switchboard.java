@@ -2165,7 +2165,7 @@ public final class Switchboard extends serverSwitch {
                 this.log.warn("IO Error processing warc file " + infile);
             }
             return moved;
-        } else if (s.endsWith(".jsonlist") || s.endsWith(".flatjson")) {
+        } else if (s.endsWith(".jsonlist") || s.endsWith(".jsonlist.gz") || s.endsWith(".flatjson")) {
             return this.processSurrogateJson(infile, outfile);
         }
         InputStream is = null;
@@ -2216,7 +2216,7 @@ public final class Switchboard extends serverSwitch {
         final long starttime = System.currentTimeMillis();
 
         boolean moved = false;
-        FileInputStream fis = null;
+        InputStream fis = null;
         BufferedReader br = null;
 
         // start indexer threads which mostly care about tokenization and facet + synonym enrichment
@@ -2255,16 +2255,16 @@ public final class Switchboard extends serverSwitch {
         }
 
         try {
-            fis = new FileInputStream(infile);
-            final InputStream is = new BufferedInputStream(fis);
-            br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8));
+            fis = infile.getName().endsWith(".gz") ? new GZIPInputStream(new FileInputStream(infile)) : new FileInputStream(infile);
+            final InputStream bis = new BufferedInputStream(fis);
+            br = new BufferedReader(new InputStreamReader(bis, StandardCharsets.UTF_8));
             String line;
             while ((line = br.readLine()) != null) {
                 final JSONTokener jt = new JSONTokener(line);
                 final JSONObject json = new JSONObject(jt);
                 if ((json.opt("index") != null && json.length() == 1) || json.length() == 0) continue;
                 final SolrInputDocument surrogate = new SolrInputDocument();
-                for (final String key: json.keySet()) {
+                jsonreader: for (final String key: json.keySet()) {
                     final Object o = json.opt(key);
                     if (o == null) continue;
                     if (o instanceof JSONArray) {
@@ -2282,7 +2282,9 @@ public final class Switchboard extends serverSwitch {
                             }
                             CollectionSchema.inboundlinks_urlstub_sxt.add(surrogate, urlstub);
                             CollectionSchema.inboundlinks_protocol_sxt.add(surrogate, protocol);
-                        } else if (key.equals("outboundlinks_sxt")) {
+                            continue jsonreader;
+                        }
+                        if (key.equals("outboundlinks_sxt")) {
                             // compute outboundlinks_urlstub_sxt and outboundlinks_protocol_sxt
                             final List<Object> urlstub = new ArrayList<>();
                             final List<Object> protocol = new ArrayList<>();
@@ -2293,7 +2295,9 @@ public final class Switchboard extends serverSwitch {
                             }
                             CollectionSchema.outboundlinks_urlstub_sxt.add(surrogate, urlstub);
                             CollectionSchema.outboundlinks_protocol_sxt.add(surrogate, protocol);
-                        } else if (key.equals("images_sxt")) {
+                            continue jsonreader;
+                        }
+                        if (key.equals("images_sxt")) {
                             // compute images_urlstub_sxt and images_protocol_sxt
                             final List<Object> urlstub = new ArrayList<>();
                             final List<Object> protocol = new ArrayList<>();
@@ -2304,35 +2308,52 @@ public final class Switchboard extends serverSwitch {
                             }
                             CollectionSchema.images_urlstub_sxt.add(surrogate, urlstub);
                             CollectionSchema.images_protocol_sxt.add(surrogate, protocol);
-                        } else {
-                            final List<Object> list = new ArrayList<>();
-                            for (int i = 0; i < a.length(); i++) list.add(a.get(i));
-                            final CollectionSchema schema = CollectionSchema.valueOf(key);
-                            schema.add(surrogate, list);
+                            continue jsonreader;
                         }
-                    } else {
+
+                        // prepare to read key type
                         CollectionSchema ctype = null;
-                        try {ctype = CollectionSchema.valueOf(key);} catch (final IllegalArgumentException e) {}
+                        try {ctype = CollectionSchema.valueOf(key);} catch (final Exception e) {
+                            this.log.warn("unknown key for CollectionSchema: " + key);
+                            continue jsonreader;
+                        }
+                        final List<Object> list = new ArrayList<>();
+                        for (int i = 0; i < a.length(); i++) list.add(a.get(i));
+                        ctype.add(surrogate, list);
+                    } else {
+                        // first handle exceptional keys / maybe patch for other systems + other names
                         if (key.equals("url_s") || key.equals("sku")) {
-                            ctype = CollectionSchema.sku;
                             // patch yacy grid altered schema (yacy grid does not have IDs any more, but they can be re-computed here)
                             final DigestURL durl = new DigestURL(o.toString());
                             final String id = ASCII.String(durl.hash());
                             surrogate.setField(CollectionSchema.sku.getSolrFieldName(), durl.toNormalform(true));
                             surrogate.setField(CollectionSchema.id.getSolrFieldName(), id);
                             surrogate.setField(CollectionSchema.host_id_s.getSolrFieldName(), id.substring(6));
-                        } else if (key.equals("referrer_url_s")) {
+                            continue jsonreader;
+                        }
+                        if (key.equals("referrer_url_s")) {
                             final DigestURL durl = new DigestURL(o.toString());
                             final String id = ASCII.String(durl.hash());
                             surrogate.setField(CollectionSchema.referrer_id_s.getSolrFieldName(), id);
-                        } else if (ctype != null && ctype.getType() == SolrType.date) {
+                            continue jsonreader;
+                        }
+
+                        // prepare to read key type
+                        CollectionSchema ctype = null;
+                        try {ctype = CollectionSchema.valueOf(key);} catch (final Exception e) {
+                            this.log.warn("unknown key for CollectionSchema: " + key);
+                            continue jsonreader;
+                        }
+                        if (ctype != null && ctype.getType() == SolrType.date) {
                             // patch date into something that Solr can understand
                             final String d = o.toString(); // i.e. Wed Apr 01 02:00:00 CEST 2020
                             final Date dd = d == null || d.length() == 0 ? null : AbstractFormatter.parseAny(d);
                             if (dd != null) surrogate.setField(ctype.getSolrFieldName(), ISO8601Formatter.FORMATTER.format(dd)); // solr dateTime is ISO8601 format
-                        } else {
-                            surrogate.setField(key, o.toString());
+                            continue jsonreader;
                         }
+
+                        // regular situation, just read content of field
+                        surrogate.setField(key, o.toString());
                     }
                 }
 
@@ -2522,7 +2543,9 @@ public final class Switchboard extends serverSwitch {
                             || surrogate.endsWith(".warc")
                             || surrogate.endsWith(".warc.gz")
                             || surrogate.endsWith(".jsonlist")
-                            || surrogate.endsWith(".flatjson") ) {
+                            || surrogate.endsWith(".jsonlist.gz")
+                            || surrogate.endsWith(".flatjson")
+                            || surrogate.endsWith(".flatjson.gz") ) {
                         // read the surrogate file and store entry in index
                         if ( this.processSurrogate(surrogate) ) {
                             return true;
