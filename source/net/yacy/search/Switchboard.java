@@ -2206,7 +2206,7 @@ public final class Switchboard extends serverSwitch {
         // see https://github.com/yacy/yacy_grid_parser/blob/master/README.md
         this.log.info("processing json surrogate " + infile);
         try {
-            final JsonListImporter importer = new JsonListImporter(infile, false);
+            final JsonListImporter importer = new JsonListImporter(infile, false, false);
             importer.run();
         } catch (final IOException e) {
             this.log.warn(e);

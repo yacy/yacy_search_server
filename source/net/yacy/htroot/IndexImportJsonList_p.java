@@ -58,7 +58,7 @@ public class IndexImportJsonList_p {
                         final File sourcefile = new File(filename);
                         if (sourcefile.exists()) {
                             try {
-                                final JsonListImporter wi = new JsonListImporter(sourcefile, false);
+                                final JsonListImporter wi = new JsonListImporter(sourcefile, false, false);
                                 wi.start();
                                 prop.put("import_thread", "started");
                             } catch (final IOException ex) {
@@ -72,14 +72,25 @@ public class IndexImportJsonList_p {
                         }
                     } else {
                         final String urlstr = post.get("url");
+/*
+                                final HTTPClient client = new HTTPClient(ClientIdentification.yacyInternetCrawlerAgent);
+                                final byte[] b = client.GETbytes(urlstr, null, null, true);
+                                final File tempfile = File.createTempFile("jsonlistimporter", "");
+                                final FileOutputStream fos = new FileOutputStream(tempfile);
+                                fos.write(b);
+                                fos.close();
+                                client.close();
+ */
                         if (urlstr != null && urlstr.length() > 0) {
                             try {
                                 final URL url = new URL(urlstr);
-                                final File tempfile = File.createTempFile("jsonlistimporter", "");
+                                final String tempfilename = "jsonlistimporter";
+                                final boolean gz = urlstr.endsWith(".gz");
+                                final File tempfile = File.createTempFile(tempfilename, "");
                                 final FileOutputStream fos = new FileOutputStream(tempfile);
                                 fos.getChannel().transferFrom(Channels.newChannel(url.openStream()), 0, Long.MAX_VALUE);
                                 fos.close();
-                                final JsonListImporter wi = new JsonListImporter(tempfile, true);
+                                final JsonListImporter wi = new JsonListImporter(tempfile, gz, true);
                                 wi.start();
                                 prop.put("import_thread", "started");
                             } catch (final IOException ex) {

@@ -73,7 +73,7 @@ public class JsonListImporter extends Thread implements Importer {
     private boolean abort;
     private final boolean deletewhendone;
 
-    public JsonListImporter(final File inputFile, final boolean deletewhendone) throws IOException {
+    public JsonListImporter(final File inputFile, final boolean gz, final boolean deletewhendone) throws IOException {
        super("JsonListImporter - from file " + inputFile.getName());
        this.lineCount = 0;
        this.consumed = 0;
@@ -83,7 +83,7 @@ public class JsonListImporter extends Thread implements Importer {
        this.abort = false;
        this.deletewhendone = deletewhendone;
        this.source = new FileInputStream(inputFile);
-       if (this.name.endsWith(".gz")) this.source = new GZIPInputStream(this.source);
+       if (this.name.endsWith(".gz") || gz) this.source = new GZIPInputStream(this.source);
     }
 
     @Override
@@ -97,6 +97,7 @@ public class JsonListImporter extends Thread implements Importer {
 
     public void processSurrogateJson() throws IOException {
         this.startTime = System.currentTimeMillis();
+        job = this;
 
         // start indexer threads which mostly care about tokenization and facet + synonym enrichment
         final int concurrency = Runtime.getRuntime().availableProcessors();
