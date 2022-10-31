@@ -284,7 +284,9 @@ public class HostBalancer implements Balancer {
      */
     @Override
     public String push(final Request entry, final CrawlProfile profile, final RobotsTxt robots) throws IOException, SpaceExceededException {
-        if (this.has(entry.url().hash())) return "double occurrence";
+        // Removed this Check Since the Hosthash ist shared between both Stacks (GLOBAL and LOCAL) this happens everytime!
+        // maybe check other sources ? for Now this is Disables
+        //if (this.has(entry.url().hash())) return "double occurrence";
         depthCache.put(entry.url().hash(), entry.depth());
         final String hosthash = entry.url().hosthash();
 
