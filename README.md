@@ -45,6 +45,7 @@ The (GPLv2+) source code used to build YaCy is distributed with the package (in 
 ## Where is the documentation?
 
 - [Homepage](https://yacy.net)
+- [Documentation / FAQ](https://yacy.net/faq/)
 - [International Forum](https://community.searchlab.eu)
 - [German wiki](https://wiki.yacy.net/index.php/De:Start)
 - [Esperanto wiki](https://wiki.yacy.net/index.php/Eo:Start)
@@ -176,6 +177,15 @@ git clone https://github.com/yacy/yacy_search_server
 Compiling YaCy:
 - You need Java 1.8 and ant
 - See `ant -p` for the available ant targets
+
+```
+ant clean dist
+```
+resulting tar.gz with YaCy package will be located in RELEASE/ directory.
+Move it into desired location and unpack with:
+```
+tar zfvx yacy_v1.version_release_number_different_each_time.tar.gz
+```
 
 ## APIs and attaching software
 
