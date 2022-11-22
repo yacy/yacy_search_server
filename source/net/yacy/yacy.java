@@ -82,6 +82,8 @@ import net.yacy.search.SwitchboardConstants;
 import net.yacy.server.serverSwitch;
 import net.yacy.utils.translation.TranslatorXliff;
 
+import org.freedesktop.BaseDirectory;
+
 
 /**
  * This is the main class of YaCy. Several threads are started from here:
@@ -745,6 +747,13 @@ public final class yacy {
             File dataRoot = applicationRoot;
             //System.out.println("args.length=" + args.length);
             //System.out.print("args=["); for (int i = 0; i < args.length; i++) System.out.print(args[i] + ", "); System.out.println("]");
+
+            // check if dataRoot is writable. if not, use ~/.cache/yacy
+            if (!dataRoot.canWrite()) {
+                dataRoot = new File(BaseDirectory.get(BaseDirectory.XDG_CACHE_HOME), "yacy");
+                System.out.println("applicationRoot is not writable. setting dataRoot to " + dataRoot);
+            }
+
             if ((args.length >= 1) && (args[0].toLowerCase(Locale.ROOT).equals("-startup") || args[0].equals("-start"))) {
                 // normal start-up of yacy
                 if (args.length > 1) {

@@ -1,0 +1,16 @@
+<ivysettings>
+  <settings defaultResolver="default-chain"/>
+  <resolvers>
+    <chain name="default-chain">
+      <!-- default resolver
+        <ibiblio name="maven.org" m2compatible="true" root="https://repo1.maven.org/maven2"/>
+      -->
+      <ibiblio name="maven.org" m2compatible="true"/>
+      <!-- resolver for github
+        example use in ivy.xml: https://github.com/omajid/xdg-java
+        <dependency org="com.github.omajid" name="xdg-java" rev="7c623b86e6b99bef0a72db86318663ad3c0270e5" conf="compile->master"/>
+      -->
+      <ibiblio name="jitpack.io" m2compatible="true" root="https://jitpack.io/"/>
+    </chain>
+  </resolvers>
+</ivysettings>
