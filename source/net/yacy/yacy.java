@@ -725,7 +725,7 @@ public final class yacy {
 
             // try to find the application root path within a Mac application
             // call com.apple.eio.FileManager.getPathToApplicationBundle();
-            if (!OS.isWindows) { // prevent that YaCy always starts with an exception message on none Apple systems
+            if (OS.isMacArchitecture) { // prevent that YaCy always starts with an exception message on none Apple systems
                 try {
                     // these methods will cause a warning: remove them with --illegal-access=permit
                     final Class<?> comAppleEioFileManagerClass = Class.forName("com.apple.eio.FileManager");
