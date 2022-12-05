@@ -370,7 +370,15 @@ public class Html2Image {
             // i.e. convert -density 300 -trim yacy.pdf[0] -trim -resize 1024x -crop x1024+0+0 -quality 75% yacy-convert-300.jpg
             // note: both -trim are necessary, otherwise it is trimmed only on one side. The [0] selects the first page of the pdf
             final String command = convertCmd + " -alpha remove -density " + density + " -trim " + pdf.getAbsolutePath() + "[0] -trim -resize " + width + "x -crop x" + height + "+0+0 -quality " + quality + "% " + image.getAbsolutePath();
-            List<String> message = OS.execSynchronous(command);
+            List<String> message = OS.execSynchronous(new String[] {
+                    convertCmd,
+                    "-alpha", "remove", "-density", Integer.toString(density),
+                    "-trim", pdf.getAbsolutePath() + "[0]", "-trim",
+                    "-resize" + Integer.toString(width) + "x",
+                    "-crop x" + Integer.toString(height) + "+0+0",
+                    "-quality", Integer.toString(quality) + "%",
+                    image.getAbsolutePath()
+            });
             if (image.exists()) return true;
             ConcurrentLog.warn("Html2Image", "failed to create image with command: " + command);
             for (final String m: message) ConcurrentLog.warn("Html2Image", ">> " + m);

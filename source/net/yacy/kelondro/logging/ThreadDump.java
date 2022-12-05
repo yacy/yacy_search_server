@@ -137,7 +137,7 @@ public class ThreadDump extends HashMap<ThreadDump.StackTrace, List<String>> imp
             final int pid = OS.getPID();
 
             // call kill -3 (SIGQUIT) on the pid to request a core dump from the current process
-            if (pid >= 0) try {OS.execSynchronous("kill -3 " + pid);} catch (final IOException e) {}
+            if (pid >= 0) try {OS.execSynchronous(new String[]{"kill", "-3", Integer.toString(pid)});} catch (final IOException e) {}
         }
 
         // read the log from the dump
