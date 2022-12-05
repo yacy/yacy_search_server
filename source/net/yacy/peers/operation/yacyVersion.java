@@ -16,7 +16,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
 
     private double releaseNr;
     private final String dateStamp;
-    private int svn;
+    private long svn;
     private String git;
     private final boolean mainRelease;
 
@@ -65,15 +65,16 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
         }
         if (comp.length > 2) {
             try {
-                this.svn = Integer.parseInt(comp[2]);
+                this.svn = Long.parseLong(comp[2]);
                 this.git = "";
             } catch (final NumberFormatException e) {
                 // this is not a number, so it is a new release name using an git version hash
-                this.svn = 0;
+                // to have an easy way to compare versions constructed that way, we make a fake svn number using the date
+                this.svn = Long.parseLong(this.dateStamp);
                 this.git = comp[2];
             }
         } else {
-            this.svn = 0; // we migrate to git
+            this.svn = 0L; // we migrate to git
             this.git = "";
         }
         // finished! we parsed a relase string
@@ -110,7 +111,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
         if (r != 0) return r;
         r = v0.getDateStamp().compareTo(v1.getDateStamp());
         if (r != 0) return r;
-        return (Integer.valueOf(v0.getSvn())).compareTo(Integer.valueOf(v1.getSvn()));
+        return (Long.valueOf(v0.getSvn())).compareTo(Long.valueOf(v1.getSvn()));
     }
 
     @Override
@@ -183,8 +184,12 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
      * SVN revision of release
      * @return svn revision as integer
      */
-    public int getSvn() {
+    public long getSvn() {
         return this.svn;
+    }
+
+    public String getGit() {
+        return this.git;
     }
 
     /**
@@ -205,7 +210,9 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
 
     public double getReleaseGitNr() {
         // combine release number with git number
-        return this.getReleaseNr() + ((getSvn()) / 10000000.0d);
+        double d = getSvn() / 10000000.0d;
+        if (d > 0.0d) d = d / 10000.0d; // long numbers constructed from dates which are four more digits long
+        return this.getReleaseNr() + d;
     }
 
     public String getName() {
