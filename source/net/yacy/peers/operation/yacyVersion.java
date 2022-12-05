@@ -17,6 +17,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
     private double releaseNr;
     private final String dateStamp;
     private int svn;
+    private String git;
     private final boolean mainRelease;
 
     private final String name;
@@ -27,6 +28,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
      *  <ul>
      *  <li>yacy_dev_v${releaseVersion}_${DSTAMP}_${releaseNr}.tar.gz</li>
      *  <li>yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.tar.gz</li>
+     *  <li>yacy_v1.926_202212010112_d6731e3e3.tar.gz</li>
      *  </ul>
      *  i.e. yacy_v0.51_20070321_3501.tar.gz
      * @param release
@@ -58,17 +60,21 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
         this.mainRelease = ((int) (getReleaseNr() * 100)) % 10 == 0 || (host != null && host.endsWith("yacy.net"));
         //System.out.println("Release version " + this.releaseNr + " is " + ((this.mainRelease) ? "main" : "std"));
         this.dateStamp = comp[1];
-        if (getDateStamp().length() != 8) {
-            throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[1] + "' should be a 8-digit date string");
+        if (this.dateStamp.length() != 8 && this.dateStamp.length() != 12) {
+            throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[1] + "' should be a 8 or 12-digit date string");
         }
         if (comp.length > 2) {
             try {
                 this.svn = Integer.parseInt(comp[2]);
+                this.git = "";
             } catch (final NumberFormatException e) {
-                throw new RuntimeException("release file name '" + release + "' is not valid, '" + comp[2] + "' should be a integer number");
+                // this is not a number, so it is a new release name using an git version hash
+                this.svn = 0;
+                this.git = comp[2];
             }
         } else {
             this.svn = 0; // we migrate to git
+            this.git = "";
         }
         // finished! we parsed a relase string
     }
