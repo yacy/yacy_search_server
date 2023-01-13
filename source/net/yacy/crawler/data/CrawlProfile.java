@@ -306,33 +306,33 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (ext != null) putAll(ext);
         this.doms = new ConcurrentHashMap<String, AtomicInteger>();
         String jsonString = ext.get(CrawlAttribute.IGNORE_DIV_CLASS_NAME.key);
-    	JSONArray a;
-    	if(jsonString == null) {
-    		a = new JSONArray();
-    	} else {
-    		try {
-    			a = new JSONArray(new JSONTokener(jsonString));
-    		} catch(final JSONException e) {
-    			ConcurrentLog.logException(e);
-    			a = new JSONArray();
-    		}
-    	}
+        JSONArray a;
+        if(jsonString == null) {
+            a = new JSONArray();
+        } else {
+            try {
+                a = new JSONArray(new JSONTokener(jsonString));
+            } catch(final JSONException e) {
+                ConcurrentLog.logException(e);
+                a = new JSONArray();
+            }
+        }
         this.ignore_class_name = new HashSet<String>();
         for (int i = 0; i < a.length(); i++) try {
             this.ignore_class_name.add(a.getString(i));
         } catch (JSONException e) {}
         jsonString = ext.get(CrawlAttribute.SCRAPER.key);
         if (jsonString == null || jsonString.length() == 0) {
-        	this.scraper = new VocabularyScraper();
+            this.scraper = new VocabularyScraper();
         } else {
-        	VocabularyScraper loadedScraper;
-        	try {
-        		loadedScraper = new VocabularyScraper(jsonString);
-        	} catch(final JSONException e) {
-        		ConcurrentLog.logException(e);
-        		loadedScraper = new VocabularyScraper();	
-        	}
-    		this.scraper = loadedScraper;
+            VocabularyScraper loadedScraper;
+            try {
+                loadedScraper = new VocabularyScraper(jsonString);
+            } catch(final JSONException e) {
+                ConcurrentLog.logException(e);
+                loadedScraper = new VocabularyScraper();    
+            }
+            this.scraper = loadedScraper;
         }
     }
 
@@ -485,22 +485,22 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return this.crawlerurlmustmatch;
     }
     
-	/**
-	 * Render the urlMustMatchPattern as a String of limited size, suffixing it with
-	 * "..." when it is truncated. Used to prevent unnecessary growth of the logs,
-	 * and to prevent exceeding the field size limit for
-	 * CollectionSchema.failreason_s (32k) when the pattern is present in a fail doc
-	 * added to the Solr index.
-	 * 
-	 * @return the urlMustMatchPattern formatted as a String of limited size
-	 */
+    /**
+     * Render the urlMustMatchPattern as a String of limited size, suffixing it with
+     * "..." when it is truncated. Used to prevent unnecessary growth of the logs,
+     * and to prevent exceeding the field size limit for
+     * CollectionSchema.failreason_s (32k) when the pattern is present in a fail doc
+     * added to the Solr index.
+     * 
+     * @return the urlMustMatchPattern formatted as a String of limited size
+     */
     public String formattedUrlMustMatchPattern() {
-    	String patternStr = urlMustMatchPattern().toString();
-    	if(patternStr.length() > 1000) {
-    		/* The pattern may be quite large when using the 'From Link-List of URL' crawl start point. */
-    		patternStr = patternStr.substring(0, Math.min(patternStr.length(), 1000)) + "...";
-    	}
-    	return patternStr;
+        String patternStr = urlMustMatchPattern().toString();
+        if(patternStr.length() > 1000) {
+            /* The pattern may be quite large when using the 'From Link-List of URL' crawl start point. */
+            patternStr = patternStr.substring(0, Math.min(patternStr.length(), 1000)) + "...";
+        }
+        return patternStr;
     }
 
     /**
@@ -517,47 +517,47 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return this.crawlerurlmustnotmatch;
     }
     
-	/**
-	 * Get the pattern on the URL a document must match to allow adding its embedded links to the crawl stack
-	 * 
-	 * @return a {@link Pattern} instance, defaulting to
-	 *         {@link CrawlProfile#MATCH_ALL_PATTERN} when the regular expression
-	 *         string is not set or its syntax is incorrect
-	 */
+    /**
+     * Get the pattern on the URL a document must match to allow adding its embedded links to the crawl stack
+     * 
+     * @return a {@link Pattern} instance, defaulting to
+     *         {@link CrawlProfile#MATCH_ALL_PATTERN} when the regular expression
+     *         string is not set or its syntax is incorrect
+     */
     public Pattern getCrawlerOriginUrlMustMatchPattern() {
-		if (this.crawlerOriginUrlMustMatch == null) {
-			/* Cache the compiled pattern for faster next calls */
-			final String patternStr = get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key);
-			try {
-				this.crawlerOriginUrlMustMatch = (patternStr == null
-						|| patternStr.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN
-								: Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
-			} catch (final PatternSyntaxException e) {
-				this.crawlerOriginUrlMustMatch = CrawlProfile.MATCH_ALL_PATTERN;
-			}
-		}
+        if (this.crawlerOriginUrlMustMatch == null) {
+            /* Cache the compiled pattern for faster next calls */
+            final String patternStr = get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key);
+            try {
+                this.crawlerOriginUrlMustMatch = (patternStr == null
+                        || patternStr.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN
+                                : Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
+            } catch (final PatternSyntaxException e) {
+                this.crawlerOriginUrlMustMatch = CrawlProfile.MATCH_ALL_PATTERN;
+            }
+        }
         return this.crawlerOriginUrlMustMatch;
     }
     
-	/**
-	 * Get the pattern on the URL a document must not match to allow adding its embedded links to the crawl stack
-	 * 
-	 * @return a {@link Pattern} instance, defaulting to
-	 *         {@link CrawlProfile#MATCH_NEVER_PATTERN} when the regular expression
-	 *         string is not set or its syntax is incorrect
-	 */
+    /**
+     * Get the pattern on the URL a document must not match to allow adding its embedded links to the crawl stack
+     * 
+     * @return a {@link Pattern} instance, defaulting to
+     *         {@link CrawlProfile#MATCH_NEVER_PATTERN} when the regular expression
+     *         string is not set or its syntax is incorrect
+     */
     public Pattern getCrawlerOriginUrlMustNotMatchPattern() {
-		if (this.crawlerOriginUrlMustNotMatch == null) {
-			/* Cache the compiled pattern for faster next calls */
-			final String patternStr = get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key);
-			try {
-				this.crawlerOriginUrlMustNotMatch = (patternStr == null
-						|| patternStr.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN
-								: Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
-			} catch (final PatternSyntaxException e) {
-				this.crawlerOriginUrlMustNotMatch = CrawlProfile.MATCH_NEVER_PATTERN;
-			}
-		}
+        if (this.crawlerOriginUrlMustNotMatch == null) {
+            /* Cache the compiled pattern for faster next calls */
+            final String patternStr = get(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTNOTMATCH.key);
+            try {
+                this.crawlerOriginUrlMustNotMatch = (patternStr == null
+                        || patternStr.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN
+                                : Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
+            } catch (final PatternSyntaxException e) {
+                this.crawlerOriginUrlMustNotMatch = CrawlProfile.MATCH_NEVER_PATTERN;
+            }
+        }
         return this.crawlerOriginUrlMustNotMatch;
     }
 
@@ -672,47 +672,47 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return this.indexcontentmustnotmatch;
     }
     
-	/**
-	 * Get the Pattern on media type that documents must match in order to be indexed
-	 * 
-	 * @return a {@link Pattern} instance, defaulting to
-	 *         {@link CrawlProfile#MATCH_ALL_PATTERN} when the regular expression
-	 *         string is not set or its syntax is incorrect
-	 */
+    /**
+     * Get the Pattern on media type that documents must match in order to be indexed
+     * 
+     * @return a {@link Pattern} instance, defaulting to
+     *         {@link CrawlProfile#MATCH_ALL_PATTERN} when the regular expression
+     *         string is not set or its syntax is incorrect
+     */
     public Pattern getIndexMediaTypeMustMatchPattern() {
-		if (this.indexMediaTypeMustMatch == null) {
-			/* Cache the compiled pattern for faster next calls */
-			final String patternStr = get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key);
-			try {
-				this.indexMediaTypeMustMatch = (patternStr == null
-						|| patternStr.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN
-								: Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
-			} catch (final PatternSyntaxException e) {
-				this.indexMediaTypeMustMatch = CrawlProfile.MATCH_ALL_PATTERN;
-			}
-		}
+        if (this.indexMediaTypeMustMatch == null) {
+            /* Cache the compiled pattern for faster next calls */
+            final String patternStr = get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key);
+            try {
+                this.indexMediaTypeMustMatch = (patternStr == null
+                        || patternStr.equals(CrawlProfile.MATCH_ALL_STRING)) ? CrawlProfile.MATCH_ALL_PATTERN
+                                : Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
+            } catch (final PatternSyntaxException e) {
+                this.indexMediaTypeMustMatch = CrawlProfile.MATCH_ALL_PATTERN;
+            }
+        }
         return this.indexMediaTypeMustMatch;
     }
     
-	/**
-	 * Get the Pattern on media type that documents must not match in order to be indexed
-	 * 
-	 * @return a {@link Pattern} instance, defaulting to
-	 *         {@link CrawlProfile#MATCH_NEVER_PATTERN} when the regular expression
-	 *         string is not set or its syntax is incorrect
-	 */
+    /**
+     * Get the Pattern on media type that documents must not match in order to be indexed
+     * 
+     * @return a {@link Pattern} instance, defaulting to
+     *         {@link CrawlProfile#MATCH_NEVER_PATTERN} when the regular expression
+     *         string is not set or its syntax is incorrect
+     */
     public Pattern getIndexMediaTypeMustNotMatchPattern() {
-		if (this.indexMediaTypeMustNotMatch == null) {
-			/* Cache the compiled pattern for faster next calls */
-			final String patternStr = get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key);
-			try {
-				this.indexMediaTypeMustNotMatch = (patternStr == null
-						|| patternStr.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN
-								: Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
-			} catch (final PatternSyntaxException e) {
-				this.indexMediaTypeMustNotMatch = CrawlProfile.MATCH_NEVER_PATTERN;
-			}
-		}
+        if (this.indexMediaTypeMustNotMatch == null) {
+            /* Cache the compiled pattern for faster next calls */
+            final String patternStr = get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key);
+            try {
+                this.indexMediaTypeMustNotMatch = (patternStr == null
+                        || patternStr.equals(CrawlProfile.MATCH_NEVER_STRING)) ? CrawlProfile.MATCH_NEVER_PATTERN
+                                : Pattern.compile(patternStr, Pattern.CASE_INSENSITIVE);
+            } catch (final PatternSyntaxException e) {
+                this.indexMediaTypeMustNotMatch = CrawlProfile.MATCH_NEVER_PATTERN;
+            }
+        }
         return this.indexMediaTypeMustNotMatch;
     }
     
@@ -734,29 +734,29 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
     }
 
-	/**
-	 * @return true when URLs of unsupported resources (no parser available or denied format) should
-	 *         be indexed as links (with metadata only on URL and not on content).
-	 */
+    /**
+     * @return true when URLs of unsupported resources (no parser available or denied format) should
+     *         be indexed as links (with metadata only on URL and not on content).
+     */
     public boolean isIndexNonParseableUrls() {
         final String r = get(CrawlAttribute.DIRECT_DOC_BY_URL.key);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
     
-	/**
-	 * @return true when the crawler must always cross check the eventual URL file
-	 *         extension against the actual Media Type, even when file extension is
-	 *         unknown or unsupported. False when the crawler should not load URLs
-	 *         with an unknown or unsupported file extension.
-	 */
-	public boolean isCrawlerAlwaysCheckMediaType() {
-		final String r = get(CrawlAttribute.CRAWLER_ALWAYS_CHECK_MEDIA_TYPE.key);
-		if (r == null) {
-			return false;
-		}
-		return (r.equals(Boolean.TRUE.toString()));
-	}
+    /**
+     * @return true when the crawler must always cross check the eventual URL file
+     *         extension against the actual Media Type, even when file extension is
+     *         unknown or unsupported. False when the crawler should not load URLs
+     *         with an unknown or unsupported file extension.
+     */
+    public boolean isCrawlerAlwaysCheckMediaType() {
+        final String r = get(CrawlAttribute.CRAWLER_ALWAYS_CHECK_MEDIA_TYPE.key);
+        if (r == null) {
+            return false;
+        }
+        return (r.equals(Boolean.TRUE.toString()));
+    }
 
     public CacheStrategy cacheStrategy() {
         final String r = get(CrawlAttribute.CACHE_STRAGEGY.key);
@@ -952,7 +952,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     }
 
     public void putProfileEntry(
-    		final String CRAWL_PROFILE_PREFIX,
+            final String CRAWL_PROFILE_PREFIX,
             final serverObjects prop,
             final boolean active,
             final boolean dark,
@@ -1022,22 +1022,22 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
 
     }
     
-	public static void main(String[] args) {
-    	// test to convert the key set from set to string and back
-    	Set<String> a = new HashSet<>();
-    	a.add("eins"); a.add("zwei"); a.add("drei");
-    	JSONArray j = new JSONArray(a);
-    	String s = j.toString();
-    	System.out.println(s);
-    	JSONTokener o = new JSONTokener(s);
-    	try {
-        	j = new JSONArray(o);
-        	System.out.println(j);
-        	Set<String> h = new HashSet<String>();
+    public static void main(String[] args) {
+        // test to convert the key set from set to string and back
+        Set<String> a = new HashSet<>();
+        a.add("eins"); a.add("zwei"); a.add("drei");
+        JSONArray j = new JSONArray(a);
+        String s = j.toString();
+        System.out.println(s);
+        JSONTokener o = new JSONTokener(s);
+        try {
+            j = new JSONArray(o);
+            System.out.println(j);
+            Set<String> h = new HashSet<String>();
             for (int i = 0; i < j.length(); i++) h.add(j.getString(i));
-        	System.out.println(h);
-    	} catch (JSONException e) {
-    	    e.printStackTrace();
-    	}
+            System.out.println(h);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

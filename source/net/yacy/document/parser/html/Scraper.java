@@ -26,26 +26,26 @@ package net.yacy.document.parser.html;
 
 public interface Scraper {
 
-	/**
-	 * @param tag
-	 *            a tag name
-	 * @return true when the tag name belongs to the first category of tags
-	 *         according to the Scraper implementation, and is therefore candidate
-	 *         for processing by
-	 *         {@link #scrapeTag0(net.yacy.document.parser.html.ContentScraper.Tag)}
-	 *         implementation
-	 */
+    /**
+     * @param tag
+     *            a tag name
+     * @return true when the tag name belongs to the first category of tags
+     *         according to the Scraper implementation, and is therefore candidate
+     *         for processing by
+     *         {@link #scrapeTag0(net.yacy.document.parser.html.ContentScraper.Tag)}
+     *         implementation
+     */
     public boolean isTag0(String tag);
 
-	/**
-	 * @param tag
-	 *            a tag name
-	 * @return true when the tag name belongs to the second category of tags
-	 *         according to the Scraper implementation, and is therefore candidate
-	 *         for processing by
-	 *         {@link #scrapeTag0(net.yacy.document.parser.html.ContentScraper.Tag)}
-	 *         implementation
-	 */
+    /**
+     * @param tag
+     *            a tag name
+     * @return true when the tag name belongs to the second category of tags
+     *         according to the Scraper implementation, and is therefore candidate
+     *         for processing by
+     *         {@link #scrapeTag0(net.yacy.document.parser.html.ContentScraper.Tag)}
+     *         implementation
+     */
     public boolean isTag1(String tag);
 
     /**
@@ -73,14 +73,16 @@ public interface Scraper {
      */
     public void scrapeAnyTagOpening(ContentScraper.Tag tag);
     
-	/**
-	 * @param tag
-	 *            a parsed tag
-	 * @param parentTag the eventual parent tag
-	 * @return true when the tag should be ignored according to the scraper
-	 *         implementation rules
-	 */
-    public boolean shouldIgnoreTag(final ContentScraper.Tag tag, final ContentScraper.Tag parentTag);
+    /**
+     * @param tag
+     *            a parsed tag
+     * @param parentTag the eventual parent tag
+     * @return true when the tag should be ignored according to the scraper
+     *         implementation rules
+     */
+    public TagValency tagValency(final ContentScraper.Tag tag, final ContentScraper.Tag parentTag);
+    
+    public TagValency defaultValency();
 
     public void scrapeComment(final char[] comment);
 

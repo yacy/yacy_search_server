@@ -64,14 +64,14 @@ public final class TransformerWriter extends Writer {
     private boolean inComment;
     private boolean binaryUnsuspect;
     private final boolean passbyIfBinarySuspect;
-    
+
     public TransformerWriter(
             final OutputStream outStream,
             final Charset charSet,
             final Scraper scraper,
             final boolean passbyIfBinarySuspect
     ) {
-    	this(outStream, charSet, scraper, passbyIfBinarySuspect, 64);
+        this(outStream, charSet, scraper, passbyIfBinarySuspect, 64);
     }
 
     public TransformerWriter(
@@ -229,7 +229,7 @@ public final class TransformerWriter extends Writer {
             // we are not collection tag text -> case (1) - (3)
             // case (1): this is not a tag opener/closer
             if (this.scraper != null && content.length > 0) {
-            	this.scraper.scrapeText(content, null);
+                this.scraper.scrapeText(content, null);
             }
             return content;
         }
@@ -283,24 +283,24 @@ public final class TransformerWriter extends Writer {
 
     private char[] filterTagOpening(final String tagname, final char[] content) {
         final CharBuffer charBuffer = new CharBuffer(ContentScraper.MAX_DOCSIZE, content);
-        ContentScraper.Tag tag = new ContentScraper.Tag(tagname, charBuffer.propParser());
+        ContentScraper.Tag tag = new ContentScraper.Tag(tagname, this.scraper.defaultValency(), charBuffer.propParser());
         charBuffer.close();
         
         final ContentScraper.Tag parentTag;
         if(this.tagStack.size() > 0) {
-        	parentTag = this.tagStack.lastElement();
+            parentTag = this.tagStack.lastElement();
         } else {
-        	parentTag = null;
+            parentTag = null;
         }
         
         /* Check scraper ignoring rules */
-		if (this.scraper != null && this.scraper.shouldIgnoreTag(tag, parentTag)) {
-			tag.setIgnore(true);
-		}
+        if (this.scraper != null) {
+            tag.setValency(this.scraper.tagValency(tag, parentTag));
+        }
         
         /* Apply processing relevant for any kind of tag opening */
         if(this.scraper != null) {
-        	this.scraper.scrapeAnyTagOpening(tag);
+            this.scraper.scrapeAnyTagOpening(tag);
         }
         
         if (this.scraper != null && this.scraper.isTag0(tagname)) {
