@@ -1,6 +1,2 @@
-/target/
-/.classpath
-/.project
-/.settings/
-/.gitignore
 /build/
+/dist/

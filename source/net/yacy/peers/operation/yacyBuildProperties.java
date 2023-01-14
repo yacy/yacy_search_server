@@ -20,31 +20,31 @@ public final class yacyBuildProperties {
     }
 
     public static String getVersion() {
-        return props.getProperty("Version", "0.1");
+        return props == null ? "0.1" : props.getProperty("Version", "0.1");
     }
 
     public static String getRepositoryVersionDate() {
-        return props.getProperty("RepositoryVersionDate", "20220101");
+        return props == null ? "20220101" : props.getProperty("RepositoryVersionDate", "20220101");
     }
 
     public static String getRepositoryVersionTime() {
-        return props.getProperty("RepositoryVersionTime", "0000");
+        return props == null ? "0000" : props.getProperty("RepositoryVersionTime", "0000");
     }
 
     public static String getRepositoryVersionHash() {
-        return props.getProperty("RepositoryVersionHash", "0");
+        return props == null ? "0" : props.getProperty("RepositoryVersionHash", "0");
     }
 
     public static String getReleaseStub() {
-        return props.getProperty("ReleaseStub", "yacy_v0.1_202201010000_000000000");
+        return props == null ? "yacy_v0.1_202201010000_000000000" : props.getProperty("ReleaseStub", "yacy_v0.1_202201010000_000000000");
     }
 
     public static String getDstamp() {
-        return props.getProperty("dstamp", "20220101");
+        return props == null ? "20220101" : props.getProperty("dstamp", "20220101");
     }
 
     public static String getTstamp() {
-        return props.getProperty("tstamp", "0000");
+        return props == null ? "0000" : props.getProperty("tstamp", "0000");
     }
 
     public static final Pattern versionMatcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z");

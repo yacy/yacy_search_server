@@ -17,7 +17,7 @@ The core class for efficient I/O:
 net.yacy.visualization
 ----------------------
 Has NO dependencies
-The core class for image drawing that is used in visialization servlets.
+The core class for image drawing that is used in visualization servlets.
 This package contains system-independent drawing class that provides
 a unique way to draw graphs and charts and write onto these images with
 a tiny 5x5 font.
@@ -49,7 +49,7 @@ the WWW.
 net.sbbi.upnp
 -------------
 Has NO dependencies, a "homeless" package (see explanation below).
-Provides UPnP functions for bootstraping the YaCy p2p network.
+Provides UPnP functions for bootstrapping the YaCy p2p network.
 
 org.apache.tools.tar
 --------------------
@@ -63,4 +63,4 @@ Provides un-tar functions for the net.yacy.document.
 YaCy contains 'homeless' packages not meeting the necessary maintenance
 required for Linux release packaging. It was integrated
 in the YaCy package structure because it is needed in the YaCy search
-application, but cannot be found in a public available Deban/Fedora package.
+application, but cannot be found in a public available Debian/Fedora package.

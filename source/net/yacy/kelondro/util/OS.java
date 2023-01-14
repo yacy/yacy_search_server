@@ -118,7 +118,6 @@ public final class OS {
         return s;
     }
 
-    @SuppressWarnings("deprecation")
     public static void deployScript(final File scriptFile, final String theScript) throws IOException {
         FileUtils.copy(UTF8.getBytes(theScript), scriptFile);
         if(!isWindows){ // set executable
@@ -141,7 +140,6 @@ public final class OS {
         return p >= 0 ? NumberTools.parseIntDecSubstring(pids, 0, p) : -1;
     }
 
-    @SuppressWarnings("deprecation")
     public static void execAsynchronous(final File scriptFile) throws IOException {
         // runs a script as separate thread
         String starterFileExtension = null;
@@ -164,15 +162,6 @@ public final class OS {
         FileUtils.deletedelete(starterFile);
     }
 
-    @SuppressWarnings("deprecation")
-    public static List<String> execSynchronous(final String command) throws IOException {
-        // runs a unix/linux command and returns output as Vector of Strings
-        // this method blocks until the command is executed
-        final Process p = Runtime.getRuntime().exec(command);
-        return readStreams(p);
-    }
-
-    @SuppressWarnings("deprecation")
     public static List<String> execSynchronous(final String[] command) throws IOException {
         // runs a unix/linux command and returns output as Vector of Strings
         // this method blocks until the command is executed
@@ -212,14 +201,15 @@ public final class OS {
 
     public static void main(final String[] args) {
         try {
-            final List<String> v = execSynchronous("/usr/local/bin/wkhtmltoimage");
+            final List<String> v = execSynchronous(new String[]{"/usr/local/bin/wkhtmltoimage"});
             for (final String r: v) java.lang.System.out.println(r);
         } catch (final IOException e) {
+            e.printStackTrace();
         }
         /*
-		if (args[0].equals("-m")) {
-			java.lang.System.out.println("Maximum possible memory: " + Integer.toString(getWin32MaxHeap()) + "m");
-		}
+        if (args[0].equals("-m")) {
+            java.lang.System.out.println("Maximum possible memory: " + Integer.toString(getWin32MaxHeap()) + "m");
+        }
          */
     }
 

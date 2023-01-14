@@ -37,18 +37,25 @@ import net.yacy.cora.document.id.DigestURL;
  *
  */
 public class yacyUpdateLocation {
+
     private final DigestURL locationURL;
     private final PublicKey publicKey;
 
     public yacyUpdateLocation(DigestURL locationURL, PublicKey publicKey) {
-	this.locationURL = locationURL;
-	this.publicKey = publicKey;
+        this.locationURL = locationURL;
+        this.publicKey = publicKey;
     }
 
     public DigestURL getLocationURL() {
-	return this.locationURL;
+        return this.locationURL;
     }
+
     public PublicKey getPublicKey() {
-	return this.publicKey;
+        return this.publicKey;
     }
+
+    public String toString() {
+        return this.locationURL.toString();
+    }
+
 }

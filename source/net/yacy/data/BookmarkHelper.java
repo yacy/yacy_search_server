@@ -60,6 +60,7 @@ import net.yacy.data.BookmarksDB.Bookmark;
 import net.yacy.data.BookmarksDB.Tag;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.util.FileUtils;
@@ -117,12 +118,12 @@ public class BookmarkHelper {
     // --------------------------------------
 
     public static int importFromBookmarks(final BookmarksDB db, final DigestURL baseURL, final String input, final String tag, final boolean importPublic){
-		// convert string to input stream
-		final ByteArrayInputStream byteIn = new ByteArrayInputStream(UTF8.getBytes(input));
-		final InputStreamReader reader = new InputStreamReader(byteIn, StandardCharsets.UTF_8);
+        // convert string to input stream
+        final ByteArrayInputStream byteIn = new ByteArrayInputStream(UTF8.getBytes(input));
+        final InputStreamReader reader = new InputStreamReader(byteIn, StandardCharsets.UTF_8);
 
-		// import stream
-		return importFromBookmarks(db, baseURL, reader, tag, importPublic);
+        // import stream
+        return importFromBookmarks(db, baseURL, reader, tag, importPublic);
     }
 
     private static int importFromBookmarks(final BookmarksDB db, final DigestURL baseURL, final InputStreamReader input, final String tag, final boolean importPublic){
@@ -135,7 +136,7 @@ public class BookmarkHelper {
         final Set<String> tags=ListManager.string2set(tag); //this allow multiple default tags
         try {
             //load the links
-            final ContentScraper scraper = new ContentScraper(baseURL, 10000, new HashSet<String>(), new VocabularyScraper(), 0);
+            final ContentScraper scraper = new ContentScraper(baseURL, 10000, new HashSet<String>(), TagValency.EVAL, new VocabularyScraper(), 0);
             //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
             final Writer writer = new TransformerWriter(null, null, scraper, false);
             FileUtils.copy(input,writer);

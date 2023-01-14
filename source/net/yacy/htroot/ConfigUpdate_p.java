@@ -66,7 +66,6 @@ public class ConfigUpdate_p {
             prop.put("candeploy", "0");
         }
 
-
         prop.put("candeploy_configCommit", "0");
         prop.put("candeploy_autoUpdate", "0");
         prop.put("candeploy_downloadsAvailable", "0");

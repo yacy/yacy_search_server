@@ -66,6 +66,7 @@ import net.yacy.data.WorkTables;
 import net.yacy.document.Document;
 import net.yacy.document.VocabularyScraper;
 import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.index.RowHandleSet;
 import net.yacy.kelondro.util.FileUtils;
@@ -733,8 +734,13 @@ public class Crawler_p {
                                 } else {
                                     /* No restriction on domains or subpath : we scrape now links and asynchronously push them to the crawlStacker */
                                     final String crawlingFileContent = post.get("crawlingFile$file", "");
-                                    final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000,
-                                            new HashSet<String>(), new VocabularyScraper(), profile.timezoneOffset());
+                                    final ContentScraper scraper = new ContentScraper(
+                                            new DigestURL(crawlingFile),
+                                            10000000,
+                                            new HashSet<String>(),
+                                            TagValency.EVAL,
+                                            new VocabularyScraper(),
+                                            profile.timezoneOffset());
                                     final FileCrawlStarterTask crawlStarterTask = new FileCrawlStarterTask(crawlingFile, crawlingFileContent, scraper, profile,
                                             sb.crawlStacker, sb.peers.mySeed().hash.getBytes());
                                     sb.crawler.putActive(handle, profile);
@@ -874,20 +880,20 @@ public class Crawler_p {
             final String crawlingFileContent) throws MalformedURLException, IOException, FileNotFoundException {
         List<AnchorURL> hyperlinks_from_file;
         // check if the crawl filter works correctly
-        final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new HashSet<String>(), new VocabularyScraper(), timezoneOffset);
+        final ContentScraper scraper = new ContentScraper(new DigestURL(crawlingFile), 10000000, new HashSet<String>(), TagValency.EVAL, new VocabularyScraper(), timezoneOffset);
         final Writer writer = new TransformerWriter(null, null, scraper, false);
         if((crawlingFileContent == null || crawlingFileContent.isEmpty()) && crawlingFile != null) {
             /* Let's report here detailed error to help user when he selected a wrong file */
             if(!crawlingFile.exists()) {
-            	writer.close();
+                writer.close();
                 throw new FileNotFoundException(crawlingFile.getAbsolutePath() +  " does not exists");
             }
             if(!crawlingFile.isFile()) {
-            	writer.close();
+                writer.close();
                 throw new FileNotFoundException(crawlingFile.getAbsolutePath() +  " exists but is not a regular file");
             }
             if(!crawlingFile.canRead()) {
-            	writer.close();
+                writer.close();
                 throw new IOException("Can not read : " + crawlingFile.getAbsolutePath());
             }
         }
