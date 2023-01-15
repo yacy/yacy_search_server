@@ -43,6 +43,7 @@ import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.NoticedURL;
 import net.yacy.crawler.retrieval.Request;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.search.Switchboard;
 import net.yacy.search.schema.CollectionSchema;
@@ -355,7 +356,8 @@ public class RecrawlBusyThread extends AbstractBusyThread {
                 true, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                 true, true, true, false, -1, false, true, CrawlProfile.MATCH_NEVER_STRING, CacheStrategy.IFFRESH,
                 "robot_" + CrawlSwitchboard.CRAWL_PROFILE_RECRAWL_JOB,
-                ClientIdentification.yacyInternetCrawlerAgentName, null, null, 0);
+                ClientIdentification.yacyInternetCrawlerAgentName, 
+                TagValency.EVAL, null, null, 0);
         return profile;
     }
 

@@ -48,6 +48,7 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.search.Switchboard;
 
 public class Response {
@@ -853,7 +854,7 @@ public class Response {
         // 4) proxy-load (initiator is "------------")
         // 5) local prefetch/crawling (initiator is own seedHash)
         // 6) local fetching for global crawling (other known or unknown initiator)
-    	// 7) local surrogates processing (can not be known here : crawl profile is required)
+        // 7) local surrogates processing (can not be known here : crawl profile is required)
         EventOrigin processCase = EventOrigin.UNKNOWN;
         // FIXME the equals seems to be incorrect: String.equals(boolean)
         if (initiator() == null || initiator().length == 0 || ASCII.String(initiator()).equals("------------")) {
@@ -873,9 +874,13 @@ public class Response {
         final String supportError = TextParser.supports(url(), this.responseHeader == null ? null : this.responseHeader.getContentType());
         if (supportError != null) throw new Parser.Failure("no parser support:" + supportError, url());
         try {
-            return TextParser.parseSource(url(), this.responseHeader == null ? null : this.responseHeader.getContentType(), this.responseHeader == null ? StandardCharsets.UTF_8.name() : this.responseHeader.getCharacterEncoding(), new HashSet<String>(), new VocabularyScraper(), this.request.timezoneOffset(), this.request.depth(), this.content);
+            return TextParser.parseSource(
+                    url(), this.responseHeader == null ? null : this.responseHeader.getContentType(),
+                    this.responseHeader == null ? StandardCharsets.UTF_8.name() : this.responseHeader.getCharacterEncoding(),
+                    TagValency.EVAL, new HashSet<String>(),
+                    new VocabularyScraper(), this.request.timezoneOffset(), this.request.depth(), this.content);
         } catch(Parser.Failure e) {
-        	throw e;
+            throw e;
         } catch (final Exception e) {
             return null;
         }

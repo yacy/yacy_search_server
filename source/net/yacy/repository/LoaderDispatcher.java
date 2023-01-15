@@ -709,7 +709,16 @@ public final class LoaderDispatcher {
         final String supportError = TextParser.supports(url, responseHeader.getContentType());
         if (supportError != null) throw new IOException("no parser support: " + supportError);
         try {
-            documents = TextParser.parseSource(url, responseHeader.getContentType(), responseHeader.getCharacterEncoding(), response.profile().ignoreDivClassName(), response.profile().scraper(), timezoneOffset, response.depth(), response.getContent());
+            documents = TextParser.parseSource(
+                    url,
+                    responseHeader.getContentType(),
+                    responseHeader.getCharacterEncoding(),
+                    response.profile().defaultValency(),
+                    response.profile().valencySwitchTagNames(),
+                    response.profile().scraper(),
+                    timezoneOffset,
+                    response.depth(),
+                    response.getContent());
             if (documents == null) throw new IOException("document == null");
         } catch (final Exception e) {
             throw new IOException("parser error: " + e.getMessage());

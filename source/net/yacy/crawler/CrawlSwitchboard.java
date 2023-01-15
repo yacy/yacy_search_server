@@ -51,6 +51,7 @@ import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.data.CrawlQueues;
 import net.yacy.crawler.data.NoticedURL.StackType;
 import net.yacy.crawler.retrieval.Request;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowHandleSet;
@@ -60,7 +61,7 @@ import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 
 public final class CrawlSwitchboard {
-	
+    
     public static final String CRAWL_PROFILE_AUTOCRAWL_DEEP = "autocrawlDeep";
     public static final String CRAWL_PROFILE_AUTOCRAWL_SHALLOW = "autocrawlShallow";
     public static final String CRAWL_PROFILE_RECRAWL_JOB = "recrawlJob";
@@ -75,7 +76,7 @@ public final class CrawlSwitchboard {
 
     public static Set<String> DEFAULT_PROFILES = new HashSet<String>();
     static {
-    	DEFAULT_PROFILES.add(CRAWL_PROFILE_AUTOCRAWL_DEEP);
+        DEFAULT_PROFILES.add(CRAWL_PROFILE_AUTOCRAWL_DEEP);
         DEFAULT_PROFILES.add(CRAWL_PROFILE_AUTOCRAWL_SHALLOW);
         DEFAULT_PROFILES.add(CRAWL_PROFILE_RECRAWL_JOB);
         DEFAULT_PROFILES.add(CRAWL_PROFILE_PROXY);
@@ -93,11 +94,11 @@ public final class CrawlSwitchboard {
 
     // Default time cycle in minutes before an indexed URL by a given crawl profile can be accepted for recrawl */
 
-	/**
-	 * The default recrawl time cycle in minutes for recrawl jobs. The recrawl date
-	 * limit can be set up by the recrawl job selection query, but a default limit
-	 * prevent unwanted overload on targets)
-	 */
+    /**
+     * The default recrawl time cycle in minutes for recrawl jobs. The recrawl date
+     * limit can be set up by the recrawl job selection query, but a default limit
+     * prevent unwanted overload on targets)
+     */
     public static final long CRAWL_PROFILE_RECRAWL_JOB_RECRAWL_CYCLE = 60L; // on hour
     public static final long CRAWL_PROFILE_PROXY_RECRAWL_CYCLE = 60L * 24L; // one day
     public static final long CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L; // 30 days
@@ -139,7 +140,7 @@ public final class CrawlSwitchboard {
             try {
                 p = new CrawlProfile(this.profilesActiveCrawls.get(handle));
             } catch (final IOException | SpaceExceededException | RuntimeException e ) {
-            	ConcurrentLog.warn("CrawlProfiles", "Could not load profile " + handle, e);
+                ConcurrentLog.warn("CrawlProfiles", "Could not load profile " + handle, e);
                 p = null;
             }
             if ( p == null ) {
@@ -275,16 +276,15 @@ public final class CrawlSwitchboard {
     public RowHandleSet getURLHashes(final byte[] profileKey) {
         return this.profilesActiveCrawlsCounter.get(ASCII.String(profileKey));
     }
-    
-    
+
     private void initActiveCrawlProfiles() {
-    	final Switchboard sb = Switchboard.getSwitchboard();
-    	
-    	// generate new default entry for deep auto crawl
-    	this.defaultAutocrawlDeepProfile =
-    	    new CrawlProfile(
-    	        CRAWL_PROFILE_AUTOCRAWL_DEEP,
-    	        CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
+        final Switchboard sb = Switchboard.getSwitchboard();
+
+        // generate new default entry for deep auto crawl
+        this.defaultAutocrawlDeepProfile =
+            new CrawlProfile(
+                CRAWL_PROFILE_AUTOCRAWL_DEEP,
+                CrawlProfile.MATCH_ALL_STRING,   //crawlerUrlMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //crawlerUrlMustNotMatch
                 CrawlProfile.MATCH_ALL_STRING,   //crawlerIpMustMatch
                 CrawlProfile.MATCH_NEVER_STRING, //crawlerIpMustNotMatch
@@ -308,12 +308,13 @@ public final class CrawlSwitchboard {
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_AUTOCRAWL_DEEP,
                 ClientIdentification.yacyInternetCrawlerAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
-    	this.profilesActiveCrawls.put(
-    	    UTF8.getBytes(this.defaultAutocrawlDeepProfile.handle()),
-    	    this.defaultAutocrawlDeepProfile);
-    	// generate new default entry for shallow auto crawl
+        this.profilesActiveCrawls.put(
+            UTF8.getBytes(this.defaultAutocrawlDeepProfile.handle()),
+            this.defaultAutocrawlDeepProfile);
+        // generate new default entry for shallow auto crawl
         this.defaultAutocrawlShallowProfile =
             new CrawlProfile(
                 CRAWL_PROFILE_AUTOCRAWL_SHALLOW,
@@ -341,6 +342,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_AUTOCRAWL_SHALLOW,
                 ClientIdentification.yacyInternetCrawlerAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
         this.profilesActiveCrawls.put(
@@ -364,7 +366,7 @@ public final class CrawlSwitchboard {
                 true,
                 CrawlProfile.getRecrawlDate(CRAWL_PROFILE_PROXY_RECRAWL_CYCLE),
                 -1,
-				false, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
+                false, true, true, false, // crawlingQ, followFrames, obeyHtmlRobotsNoindex, obeyHtmlRobotsNofollow,
                 sb.getConfigBool(SwitchboardConstants.PROXY_INDEXING_LOCAL_TEXT, true),
                 sb.getConfigBool(SwitchboardConstants.PROXY_INDEXING_LOCAL_MEDIA, true),
                 true,
@@ -373,6 +375,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_PROXY,
                 ClientIdentification.yacyProxyAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
         this.profilesActiveCrawls.put(
@@ -405,6 +408,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFFRESH,
                 "robot_" + CRAWL_PROFILE_REMOTE,
                 ClientIdentification.yacyInternetCrawlerAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
         this.profilesActiveCrawls.put(
@@ -437,6 +441,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_TEXT,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
         this.profilesActiveCrawls.put(
@@ -469,6 +474,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
         this.profilesActiveCrawls.put(
@@ -509,6 +515,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_GREEDY_LEARNING_TEXT,
                 ClientIdentification.browserAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
         this.profilesActiveCrawls.put(
@@ -541,6 +548,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
         this.profilesActiveCrawls.put(
@@ -573,6 +581,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.IFEXIST,
                 "robot_" + CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
         this.profilesActiveCrawls.put(
@@ -605,6 +614,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.NOCACHE,
                 "robot_" + CRAWL_PROFILE_SURROGATE,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
         this.profilesActiveCrawls.put(
@@ -640,6 +650,7 @@ public final class CrawlSwitchboard {
                 CacheStrategy.NOCACHE,
                 collection,
                 ClientIdentification.yacyIntranetCrawlerAgentName,
+                TagValency.EVAL,
                 null, null,
                 0);
         this.profilesActiveCrawls.put(UTF8.getBytes(genericPushProfile.handle()), genericPushProfile);

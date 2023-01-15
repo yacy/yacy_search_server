@@ -51,6 +51,7 @@ import net.yacy.document.parser.docParser;
 import net.yacy.document.parser.genericParser;
 import net.yacy.document.parser.gzipParser;
 import net.yacy.document.parser.gzipParser.GZIPOpeningStreamException;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.linkScraperParser;
 import net.yacy.document.parser.mmParser;
@@ -184,7 +185,8 @@ public final class TextParser {
             final DigestURL location,
             final String mimeType,
             final String charset,
-            final Set<String> ignore_class_name,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
@@ -201,7 +203,7 @@ public final class TextParser {
                 throw new Parser.Failure(errorMsg, location);
             }
             sourceStream = new BufferedInputStream(new FileInputStream(sourceFile));
-            docs = parseSource(location, mimeType, charset, ignore_class_name, scraper, timezoneOffset, depth, sourceFile.length(), sourceStream);
+            docs = parseSource(location, mimeType, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, sourceFile.length(), sourceStream);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof Parser.Failure) throw (Parser.Failure) e;
@@ -218,7 +220,8 @@ public final class TextParser {
             final DigestURL location,
             String mimeType,
             final String charset,
-            final Set<String> ignore_class_name,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
@@ -236,7 +239,7 @@ public final class TextParser {
         }
         assert !idioms.isEmpty() : "no parsers applied for url " + location.toNormalform(true);
 
-        final Document[] docs = parseSource(location, mimeType, idioms, charset, ignore_class_name, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE);
+        final Document[] docs = parseSource(location, mimeType, idioms, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE);
 
         return docs;
     }
@@ -248,7 +251,8 @@ public final class TextParser {
             final DigestURL location,
             String mimeType,
             final String charset,
-            final Set<String> ignoreClassNames,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
@@ -261,14 +265,15 @@ public final class TextParser {
         final Set<Parser> idioms = new HashSet<>();
         idioms.add(TextParser.genericIdiom);
 
-        return parseSource(location, mimeType, idioms, charset, ignoreClassNames, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE);
+        return parseSource(location, mimeType, idioms, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, content, Integer.MAX_VALUE, Long.MAX_VALUE);
     }
 
     private static Document[] parseSource(
             final DigestURL location,
             String mimeType,
             final String charset,
-            final Set<String> ignore_class_name,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
@@ -330,7 +335,7 @@ public final class TextParser {
                     CloseShieldInputStream nonCloseInputStream = new CloseShieldInputStream(markableStream);
 
                     try {
-                        return parseSource(location, mimeType, parser, charset, ignore_class_name, scraper, timezoneOffset,
+                        return parseSource(location, mimeType, parser, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset,
                                 nonCloseInputStream, maxLinks, maxBytes);
                     } catch (final Parser.Failure e) {
                         /* Try to reset the marked stream. If the failed parser has consumed too many bytes :
@@ -378,11 +383,11 @@ public final class TextParser {
         int maxBytesToRead = -1;
         if(maxBytes < Integer.MAX_VALUE) {
             /* Load at most maxBytes + 1 :
-		       - to let parsers not supporting Parser.parseWithLimits detect the maxBytes size is exceeded and end with a Parser.Failure
-		       - but let parsers supporting Parser.parseWithLimits perform partial parsing of maxBytes content */
+               - to let parsers not supporting Parser.parseWithLimits detect the maxBytes size is exceeded and end with a Parser.Failure
+               - but let parsers supporting Parser.parseWithLimits perform partial parsing of maxBytes content */
             maxBytesToRead = (int)maxBytes + 1;
         }
-        if(contentLength >= 0 && contentLength < maxBytesToRead) {
+        if (contentLength >= 0 && contentLength < maxBytesToRead) {
             maxBytesToRead = (int)contentLength;
         }
 
@@ -392,16 +397,23 @@ public final class TextParser {
         } catch (final IOException e) {
             throw new Parser.Failure(e.getMessage(), location);
         }
-        final Document[] docs = parseSource(location, mimeType, idioms, charset, ignore_class_name, scraper, timezoneOffset, depth, b, maxLinks, maxBytes);
+        final Document[] docs = parseSource(location, mimeType, idioms, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, b, maxLinks, maxBytes);
 
         return docs;
     }
 
-    public static Document[] parseSource(final DigestURL location, String mimeType, final String charset,
-            final Set<String> ignore_class_name,
-            final VocabularyScraper scraper, final int timezoneOffset, final int depth, final long contentLength,
+    public static Document[] parseSource(
+            final DigestURL location,
+            String mimeType,
+            final String charset,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
+            final VocabularyScraper scraper,
+            final int timezoneOffset,
+            final int depth,
+            final long contentLength,
             final InputStream sourceStream) throws Parser.Failure {
-        return parseSource(location, mimeType, charset, ignore_class_name, scraper, timezoneOffset, depth, contentLength, sourceStream,
+        return parseSource(location, mimeType, charset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, depth, contentLength, sourceStream,
                 Integer.MAX_VALUE, Long.MAX_VALUE);
     }
 
@@ -424,10 +436,19 @@ public final class TextParser {
      * @return a list of documents that result from parsing the source, with empty or null text.
      * @throws Parser.Failure when the parser processing failed
      */
-    public static Document[] parseWithLimits(final DigestURL location, String mimeType, final String charset, final Set<String> ignoreClassNames,
-            final int timezoneOffset, final int depth, final long contentLength, final InputStream sourceStream, int maxLinks,
+    public static Document[] parseWithLimits(
+            final DigestURL location,
+            String mimeType,
+            final String charset,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
+            final int timezoneOffset,
+            final int depth,
+            final long contentLength,
+            final InputStream sourceStream,
+            int maxLinks,
             long maxBytes) throws Parser.Failure{
-        return parseSource(location, mimeType, charset, ignoreClassNames, new VocabularyScraper(), timezoneOffset, depth, contentLength,
+        return parseSource(location, mimeType, charset, defaultValency, valencySwitchTagNames, new VocabularyScraper(), timezoneOffset, depth, contentLength,
                 sourceStream, maxLinks, maxBytes);
     }
 
@@ -449,10 +470,11 @@ public final class TextParser {
      * @return a list of documents that result from parsing the source, with empty or null text.
      * @throws Parser.Failure when the parser processing failed
      */
-    public static Document[] parseWithLimits(final DigestURL location, String mimeType, final String charset,
+    public static Document[] parseWithLimits(
+            final DigestURL location, String mimeType, final String charset,
             final int timezoneOffset, final int depth, final long contentLength, final InputStream sourceStream, int maxLinks,
             long maxBytes) throws Parser.Failure{
-        return parseSource(location, mimeType, charset, new HashSet<String>(), new VocabularyScraper(), timezoneOffset, depth, contentLength,
+        return parseSource(location, mimeType, charset, TagValency.EVAL, new HashSet<String>(), new VocabularyScraper(), timezoneOffset, depth, contentLength,
                 sourceStream, maxLinks, maxBytes);
     }
 
@@ -475,7 +497,8 @@ public final class TextParser {
             final String mimeType,
             final Parser parser,
             final String charset,
-            final Set<String> ignore_class_name,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final InputStream sourceStream,
@@ -491,11 +514,11 @@ public final class TextParser {
         try {
             final Document[] docs;
             if(parser.isParseWithLimitsSupported()) {
-                docs = parser.parseWithLimits(location, mimeType, documentCharset, ignore_class_name, scraper, timezoneOffset, sourceStream, maxLinks, maxBytes);
+                docs = parser.parseWithLimits(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, sourceStream, maxLinks, maxBytes);
             } else {
                 /* Parser do not support partial parsing within limits : let's control it here*/
                 final InputStream limitedSource = new StrictLimitInputStream(sourceStream, maxBytes);
-                docs = parser.parse(location, mimeType, documentCharset, ignore_class_name, scraper, timezoneOffset, limitedSource);
+                docs = parser.parse(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, limitedSource);
             }
             return docs;
         } catch(final Parser.Failure e) {
@@ -524,7 +547,8 @@ public final class TextParser {
             final String mimeType,
             final Set<Parser> parsers,
             final String charset,
-            final Set<String> ignore_class_name,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
             final VocabularyScraper scraper,
             final int timezoneOffset,
             final int depth,
@@ -552,13 +576,13 @@ public final class TextParser {
                 }
                 try {
                     if(parser.isParseWithLimitsSupported()) {
-                        docs = parser.parseWithLimits(location, mimeType, documentCharset, ignore_class_name, scraper, timezoneOffset, bis, maxLinks, maxBytes);
+                        docs = parser.parseWithLimits(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, bis, maxLinks, maxBytes);
                     } else {
                         /* Partial parsing is not supported by this parser : check content length now */
                         if(sourceArray.length > maxBytes) {
                             throw new Parser.Failure("Content size is over maximum size of " + maxBytes + "", location);
                         }
-                        docs = parser.parse(location, mimeType, documentCharset, ignore_class_name, scraper, timezoneOffset, bis);
+                        docs = parser.parse(location, mimeType, documentCharset, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, bis);
                     }
                 } catch (final Parser.Failure e) {
                     if(parser instanceof gzipParser && e.getCause() instanceof GZIPOpeningStreamException &&

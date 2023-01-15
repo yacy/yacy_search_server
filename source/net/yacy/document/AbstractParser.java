@@ -32,6 +32,7 @@ import java.util.Set;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.util.ConcurrentLog;
+import net.yacy.document.parser.html.TagValency;
 
 public abstract class AbstractParser implements Parser {
 
@@ -41,20 +42,20 @@ public abstract class AbstractParser implements Parser {
     protected final Set<String> SUPPORTED_MIME_TYPES = new LinkedHashSet<String>(); 
     protected final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     private   final String name;
-    
+
     /**
      * initialize a parser with a name
      * @param name
      */
     public AbstractParser(final String name) {
-	    this.name = name;
-	}
+        this.name = name;
+    }
 
     /*
      *  The following abstract implementations create a circular call which would cause an endless loop when called.
      *  They are both here because one of them must be overridden by the implementing class.
      */
-    
+
     @Override
     public Document[] parse(
             DigestURL url,
@@ -64,7 +65,7 @@ public abstract class AbstractParser implements Parser {
             int timezoneOffset,
             InputStream source
             ) throws Parser.Failure, InterruptedException {
-    	return parse(url, mimeType, charset, new HashSet<String>(), scraper, timezoneOffset, source);
+        return parse(url, mimeType, charset, TagValency.EVAL, new HashSet<String>(), scraper, timezoneOffset, source);
     }
 
     @Override
@@ -72,15 +73,15 @@ public abstract class AbstractParser implements Parser {
             DigestURL url,
             String mimeType,
             String charset,
-            Set<String> ignore_class_name,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
             VocabularyScraper scraper,
             int timezoneOffset,
             InputStream source
             ) throws Parser.Failure, InterruptedException {
-    	return parse(url, mimeType, charset, scraper, timezoneOffset, source);
+        return parse(url, mimeType, charset, scraper, timezoneOffset, source);
     }
-    
-    
+
     /*
      *  The following abstract implementations create a circular call which would cause an endless loop when called.
      *  They are both here because one of them must be overridden by the implementing class.
@@ -88,32 +89,33 @@ public abstract class AbstractParser implements Parser {
 
     @Override
     public Document[] parseWithLimits(
-    		final DigestURL location,
-    		final String mimeType,
-    		final String charset,
-    		final VocabularyScraper scraper,
-    		final int timezoneOffset,
-    		final InputStream source,
-    		final int maxLinks,
-    		final long maxBytes) throws UnsupportedOperationException, Failure, InterruptedException {
-    	return parseWithLimits(location, mimeType, charset, new HashSet<String>(), scraper, timezoneOffset, source, maxLinks, maxBytes);
+            final DigestURL location,
+            final String mimeType,
+            final String charset,
+            final VocabularyScraper scraper,
+            final int timezoneOffset,
+            final InputStream source,
+            final int maxLinks,
+            final long maxBytes) throws UnsupportedOperationException, Failure, InterruptedException {
+        return parseWithLimits(location, mimeType, charset, TagValency.EVAL, new HashSet<String>(), scraper, timezoneOffset, source, maxLinks, maxBytes);
     }
-    
+
     @Override
     public Document[] parseWithLimits(
-    		DigestURL location,
-    		String mimeType,
-    		String charset,
-    		final Set<String> ignore_class_name,
-    		VocabularyScraper scraper,
-    		int timezoneOffset,
-    		InputStream source,
-    		int maxLinks,
-    		long maxBytes)
-    		throws Failure, InterruptedException, UnsupportedOperationException {
-    	return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, maxLinks, maxBytes);
+            DigestURL location,
+            String mimeType,
+            String charset,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
+            VocabularyScraper scraper,
+            int timezoneOffset,
+            InputStream source,
+            int maxLinks,
+            long maxBytes)
+            throws Failure, InterruptedException, UnsupportedOperationException {
+        return parseWithLimits(location, mimeType, charset, scraper, timezoneOffset, source, maxLinks, maxBytes);
     }
-    
+
     /**
      * return the name of the parser
      */
@@ -164,12 +166,11 @@ public abstract class AbstractParser implements Parser {
         if (t != null) c.add(t);
         return c;
     }
-    
+
     @Override
     public boolean isParseWithLimitsSupported() {
-    	/* Please override on subclasses when parseWithLimits is supported */
-    	return false;
+        /* Please override on subclasses when parseWithLimits is supported */
+        return false;
     }
-    
 
 }

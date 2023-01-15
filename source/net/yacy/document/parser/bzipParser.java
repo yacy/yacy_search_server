@@ -45,6 +45,7 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.kelondro.util.FileUtils;
 
 /**
@@ -52,7 +53,7 @@ import net.yacy.kelondro.util.FileUtils;
  * Unzips and parses the content and adds it to the created main document
  */
 public class bzipParser extends AbstractParser implements Parser {
-	
+    
     public bzipParser() {
         super("Bzip 2 UNIX Compressed File Parser");
         this.SUPPORTED_EXTENSIONS.add("bz2");
@@ -70,7 +71,8 @@ public class bzipParser extends AbstractParser implements Parser {
             final DigestURL location,
             final String mimeType,
             final String charset,
-            Set<String> ignore_class_name,
+            final TagValency defaultValency, 
+            final Set<String> valencySwitchTagNames,
             final VocabularyScraper scraper, 
             final int timezoneOffset,
             final InputStream source)
@@ -99,25 +101,25 @@ public class bzipParser extends AbstractParser implements Parser {
             out = null;
 
         } catch(Exception e) {
-        	if (tempFile != null) {
-        		FileUtils.deletedelete(tempFile);
-        	}
-        	throw new Parser.Failure("Unexpected error while parsing bzip file. " + e.getMessage(), location);
+            if (tempFile != null) {
+                FileUtils.deletedelete(tempFile);
+            }
+            throw new Parser.Failure("Unexpected error while parsing bzip file. " + e.getMessage(), location);
         } finally {
-        	if(zippedContent != null) {
-        		try {
-					zippedContent.close();
-				} catch (IOException ignored) {
-					log.warn("Could not close bzip input stream");
-				}
-        	}
-        	if(out != null) {
-        		try {
-					out.close();
-				} catch (IOException e) {
-					throw new Parser.Failure("Unexpected error while parsing bzip file. " + e.getMessage(), location);
-				}
-        	}
+            if(zippedContent != null) {
+                try {
+                    zippedContent.close();
+                } catch (IOException ignored) {
+                    log.warn("Could not close bzip input stream");
+                }
+            }
+            if(out != null) {
+                try {
+                    out.close();
+                } catch (IOException e) {
+                    throw new Parser.Failure("Unexpected error while parsing bzip file. " + e.getMessage(), location);
+                }
+            }
         }
         try {
              // create maindoc for this bzip container, register with supplied url & mime
@@ -125,7 +127,7 @@ public class bzipParser extends AbstractParser implements Parser {
             // creating a new parser class to parse the unzipped content
             final String contentfilename = BZip2Utils.getUncompressedFilename(location.getFileName());
             final String mime = TextParser.mimeOf(MultiProtocolURL.getFileExtension(contentfilename));
-            final Document[] docs = TextParser.parseSource(location, mime, null, ignore_class_name, scraper, timezoneOffset, 999, tempFile);
+            final Document[] docs = TextParser.parseSource(location, mime, null, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, 999, tempFile);
             if (docs != null) maindoc.addSubDocuments(docs);
         } catch (final Exception e) {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
@@ -140,7 +142,7 @@ public class bzipParser extends AbstractParser implements Parser {
     
     @Override
     public boolean isParseWithLimitsSupported() {
-    	return true;
+        return true;
     }
     
     /**
@@ -151,9 +153,9 @@ public class bzipParser extends AbstractParser implements Parser {
      * @param parser instance of bzipParser that is registered as the parser origin of the document
      * @return a Document instance
      */
-	public static Document createMainDocument(final DigestURL location, final String mimeType, final String charset, final bzipParser parser) {
-		final String filename = location.getFileName();
-		Document maindoc = new Document(
+    public static Document createMainDocument(final DigestURL location, final String mimeType, final String charset, final bzipParser parser) {
+        final String filename = location.getFileName();
+        Document maindoc = new Document(
                 location,
                 mimeType,
                 charset,
@@ -172,49 +174,48 @@ public class bzipParser extends AbstractParser implements Parser {
                 null,
                 false,
                 new Date());
-		return maindoc;
-	}
-	
-	/**
-	 * Parse content in an open stream uncompressing on the fly a bzipped resource.
-	 * @param location the URL of the bzipped resource 
-	 * @param charset the charset name if known
-	 * @param timezoneOffset the local time zone offset
-	 * @param compressedInStream an open stream uncompressing on the fly the compressed content
-	 * @param maxLinks
-	 *            the maximum total number of links to parse and add to the
-	 *            result documents
-	 * @param maxBytes
-	 *            the maximum number of content bytes to process
-	 * @return a list of documents that result from parsing the source, with
-	 *         empty or null text.
-	 * @throws Parser.Failure
-	 *             when the parser processing failed
-	 */
-	public Document[] parseCompressedInputStream(final DigestURL location, final String charset, final int timezoneOffset, final int depth,
-			final InputStream compressedInStream, final int maxLinks, final long maxBytes) throws Failure {
+        return maindoc;
+    }
+
+    /**
+     * Parse content in an open stream uncompressing on the fly a bzipped resource.
+     * @param location the URL of the bzipped resource 
+     * @param charset the charset name if known
+     * @param timezoneOffset the local time zone offset
+     * @param compressedInStream an open stream uncompressing on the fly the compressed content
+     * @param maxLinks
+     *            the maximum total number of links to parse and add to the
+     *            result documents
+     * @param maxBytes
+     *            the maximum number of content bytes to process
+     * @return a list of documents that result from parsing the source, with
+     *         empty or null text.
+     * @throws Parser.Failure
+     *             when the parser processing failed
+     */
+    public Document[] parseCompressedInputStream(final DigestURL location, final String charset, final int timezoneOffset, final int depth,
+            final InputStream compressedInStream, final int maxLinks, final long maxBytes) throws Failure {
         // creating a new parser class to parse the unzipped content
-		final String compressedFileName = location.getFileName();
+        final String compressedFileName = location.getFileName();
         final String contentfilename = BZip2Utils.getUncompressedFilename(compressedFileName);
         final String mime = TextParser.mimeOf(MultiProtocolURL.getFileExtension(contentfilename));
         try {
-        	/* Use the uncompressed file name for sub parsers to not unnecessarily use again the gzipparser */
-    		final String locationPath = location.getPath();
-        	final String contentPath = locationPath.substring(0, locationPath.length() - compressedFileName.length()) + contentfilename;
-			final DigestURL contentLocation = new DigestURL(location.getProtocol(), location.getHost(), location.getPort(), contentPath);
-			
-	        /* Rely on the supporting parsers to respect the maxLinks and maxBytes limits on compressed content */
-	        return TextParser.parseWithLimits(contentLocation, mime, charset, timezoneOffset, depth, -1, compressedInStream, maxLinks, maxBytes);
-		} catch (MalformedURLException e) {
-			throw new Parser.Failure("Unexpected error while parsing gzip file. " + e.getMessage(), location);
-		}
-	}
-		
-    
+            /* Use the uncompressed file name for sub parsers to not unnecessarily use again the gzipparser */
+            final String locationPath = location.getPath();
+            final String contentPath = locationPath.substring(0, locationPath.length() - compressedFileName.length()) + contentfilename;
+            final DigestURL contentLocation = new DigestURL(location.getProtocol(), location.getHost(), location.getPort(), contentPath);
+
+            /* Rely on the supporting parsers to respect the maxLinks and maxBytes limits on compressed content */
+            return TextParser.parseWithLimits(contentLocation, mime, charset, timezoneOffset, depth, -1, compressedInStream, maxLinks, maxBytes);
+        } catch (MalformedURLException e) {
+            throw new Parser.Failure("Unexpected error while parsing gzip file. " + e.getMessage(), location);
+        }
+    }
+
     @Override
     public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String charset, final VocabularyScraper scraper,
-    		final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes)
-    		throws Parser.Failure {
+            final int timezoneOffset, final InputStream source, final int maxLinks, final long maxBytes)
+            throws Parser.Failure {
         Document maindoc = null;
         BZip2CompressorInputStream zippedContent = null;
         try {
@@ -222,23 +223,23 @@ public class bzipParser extends AbstractParser implements Parser {
             zippedContent = new BZip2CompressorInputStream(source);
 
         } catch(Exception e) {
-        	throw new Parser.Failure("Unexpected error while parsing bzip file. " + e.getMessage(), location);
+            throw new Parser.Failure("Unexpected error while parsing bzip file. " + e.getMessage(), location);
         } 
-        
+
         try {
              // create maindoc for this bzip container, register with supplied url & mime
             maindoc = createMainDocument(location, mimeType, charset, this);
             // creating a new parser class to parse the unzipped content
             final Document[] docs = parseCompressedInputStream(location, null, timezoneOffset, 999, zippedContent, maxLinks, maxBytes);
             if (docs != null) {
-            	maindoc.addSubDocuments(docs);
-            	if(docs.length > 0 && docs[0].isPartiallyParsed()) {
-            		maindoc.setPartiallyParsed(true);
-            	}
+                maindoc.addSubDocuments(docs);
+                if(docs.length > 0 && docs[0].isPartiallyParsed()) {
+                    maindoc.setPartiallyParsed(true);
+                }
             }
         } catch (final Exception e) {
             if (e instanceof Parser.Failure) {
-            	throw (Parser.Failure) e;
+                throw (Parser.Failure) e;
             }
 
             throw new Parser.Failure("Unexpected error while parsing bzip file. " + e.getMessage(),location);

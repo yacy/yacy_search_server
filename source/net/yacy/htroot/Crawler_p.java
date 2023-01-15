@@ -626,6 +626,7 @@ public class Crawler_p {
                             cachePolicy,
                             collection,
                             agentName,
+                            TagValency.EVAL,
                             ignoreclassname,
                             new VocabularyScraper(vocabulary_scraper),
                             timezoneOffset);
