@@ -969,28 +969,22 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final int domlistlength) {
         boolean terminateButton = active && !CrawlSwitchboard.DEFAULT_PROFILES.contains(this.name());
         boolean deleteButton = !active;
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_status", terminateButton ? 1 : deleteButton ? 0 : 2);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", terminateButton);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", this.handle());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", deleteButton);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", this.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_handle", this.handle());
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_name", this.name());
-        //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_collection", this.get(COLLECTIONS)); // TODO: remove, replace with 'collections'
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_collections", this.get(CrawlAttribute.COLLECTIONS.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_agentName", this.get(CrawlAttribute.AGENT_NAME.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_userAgent", this.getAgent().userAgent);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", this.depth());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_directDocByURL", this.isIndexNonParseableUrls() ? 1 : 0);
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_recrawlIfOlder", this.recrawlIfOlder() == Long.MAX_VALUE ? "eternity" : (new Date(this.recrawlIfOlder()).toString()));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerNoLimitURLMustMatch", this.get(CrawlAttribute.CRAWLER_URL_NODEPTHLIMITMATCH.key));
         prop.put(CRAWL_PROFILE_PREFIX + count + "_domMaxPages", this.domMaxPages());
-        //prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (this.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(this.domMaxPages())); // TODO: remove, replace with 'domMaxPages'
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingQ", this.crawlingQ() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_followFrames", this.followFrames() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_obeyHtmlRobotsNoindex", this.obeyHtmlRobotsNoindex() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_obeyHtmlRobotsNofollow", this.obeyHtmlRobotsNofollow() ? 1 : 0);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexText", this.indexText() ? 1 : 0);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", this.indexMedia() ? 1 : 0);
-        //prop.put(CRAWL_PROFILE_PREFIX + count + "_storeCache", this.storeHTCache() ? 1 : 0); // TODO: remove, replace with 'storeHTCache'
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_storeHTCache", this.storeHTCache() ? 1 : 0);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", this.remoteIndexing() ? 1 : 0);
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_cacheStrategy", this.get(CrawlAttribute.CACHE_STRAGEGY.key));
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlerAlwaysCheckMediaType", this.isCrawlerAlwaysCheckMediaType());
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerURLMustMatch", this.get(CrawlAttribute.CRAWLER_URL_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerURLMustNotMatch", this.get(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key));
@@ -999,7 +993,6 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerIPMustMatch", this.get(CrawlAttribute.CRAWLER_IP_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerIPMustNotMatch", this.get(CrawlAttribute.CRAWLER_IP_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerCountryMustMatch", this.get(CrawlAttribute.CRAWLER_COUNTRY_MUSTMATCH.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerNoLimitURLMustMatch", this.get(CrawlAttribute.CRAWLER_URL_NODEPTHLIMITMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexURLMustMatch", this.get(CrawlAttribute.INDEXING_URL_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexURLMustNotMatch", this.get(CrawlAttribute.INDEXING_URL_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexContentMustMatch", this.get(CrawlAttribute.INDEXING_CONTENT_MUSTMATCH.key));
@@ -1008,15 +1001,21 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, this.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, this.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, this.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key));
-        //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_mustmatch", this.urlMustMatchPattern().toString()); // TODO: remove, replace with crawlerURLMustMatch
-        //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", this.urlMustNotMatchPattern().toString()); // TODO: remove, replace with crawlerURLMustNotMatch
-        //prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (this.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(this.recrawlIfOlder())); // TODO: remove, replace with recrawlIfOlder
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterDepth", "inactive");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_status", terminateButton ? 1 : deleteButton ? 0 : 2);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", terminateButton);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", this.handle());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", deleteButton);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", this.handle());
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_recrawlIfOlder", this.recrawlIfOlder() == Long.MAX_VALUE ? "eternity" : (new Date(this.recrawlIfOlder()).toString()));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_storeHTCache", this.storeHTCache() ? 1 : 0);
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_cacheStrategy", this.get(CrawlAttribute.CACHE_STRAGEGY.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_agentName", this.get(CrawlAttribute.AGENT_NAME.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_MAXDEPTH.key, this.get(CrawlAttribute.SNAPSHOTS_MAXDEPTH.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_REPLACEOLD.key, this.get(CrawlAttribute.SNAPSHOTS_REPLACEOLD.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key, this.get(CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_LOADIMAGE.key, this.get(CrawlAttribute.SNAPSHOTS_LOADIMAGE.key));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", this.remoteIndexing() ? 1 : 0);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexText", this.indexText() ? 1 : 0);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", this.indexMedia() ? 1 : 0);
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.COLLECTIONS.key, this.get(CrawlAttribute.COLLECTIONS.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.DEFAULT_VALENCY.key, this.get(CrawlAttribute.DEFAULT_VALENCY.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.VALENCY_SWITCH_TAG_NAME.key, this.get(CrawlAttribute.VALENCY_SWITCH_TAG_NAME.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.TIMEZONEOFFSET.key, this.get(CrawlAttribute.TIMEZONEOFFSET.key));
 
         int i = 0;
         if (active && this.domMaxPages() > 0 && this.domMaxPages() != Integer.MAX_VALUE) {
