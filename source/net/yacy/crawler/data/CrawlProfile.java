@@ -128,7 +128,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         INDEX_MEDIA                  ("indexMedia",                 false, CrawlAttribute.BOOLEAN, "Index Media"),
         COLLECTIONS                  ("collections",                false, CrawlAttribute.STRING,  "Collections (comma-separated list)"),
         DEFAULT_VALENCY              ("default_valency",            false, CrawlAttribute.STRING,  "default tag valency"),
-        VALENCY_SWITCH_TAG_NAME      ("valency_switch_tag_name",    false, CrawlAttribute.STRING,  "DIV Class names when default valency shall be switched"),
+        VALENCY_SWITCH_TAG_NAMES     ("valency_switch_tag_names",   false, CrawlAttribute.STRING,  "DIV Class names when default valency shall be switched"),
         SCRAPER                      ("scraper",                    false, CrawlAttribute.STRING,  "Declaration for Vocabulary Scraper"),
         TIMEZONEOFFSET               ("timezoneOffset",             true,  CrawlAttribute.INTEGER, "Time Zone of Crawl Start Agent");
 
@@ -290,7 +290,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         this.valencySwitchTagNames = valencySwitchTagNames == null ? new HashSet<String>() : valencySwitchTagNames;
         String jsonString = new JSONArray(valencySwitchTagNames).toString();
         put(CrawlAttribute.DEFAULT_VALENCY.key, defaultValency.name());
-        put(CrawlAttribute.VALENCY_SWITCH_TAG_NAME.key, jsonString);
+        put(CrawlAttribute.VALENCY_SWITCH_TAG_NAMES.key, jsonString);
         this.scraper = scraper == null ? new VocabularyScraper() : scraper;
         jsonString = this.scraper.toString();
         assert jsonString != null && jsonString.length() > 0 && jsonString.charAt(0) == '{' : "jsonString = " + jsonString;
@@ -312,7 +312,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         this.doms = new ConcurrentHashMap<String, AtomicInteger>();
         String defaultValency = ext.get(CrawlAttribute.DEFAULT_VALENCY.key);
         this.defaultValency = defaultValency == null || defaultValency.length() == 0 ? TagValency.EVAL : TagValency.valueOf(defaultValency);
-        String jsonString = ext.get(CrawlAttribute.VALENCY_SWITCH_TAG_NAME.key);
+        String jsonString = ext.get(CrawlAttribute.VALENCY_SWITCH_TAG_NAMES.key);
         JSONArray a;
         if (jsonString == null) {
             a = new JSONArray();
@@ -1014,7 +1014,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", this.indexMedia() ? 1 : 0);
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.COLLECTIONS.key, this.get(CrawlAttribute.COLLECTIONS.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.DEFAULT_VALENCY.key, this.get(CrawlAttribute.DEFAULT_VALENCY.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.VALENCY_SWITCH_TAG_NAME.key, this.get(CrawlAttribute.VALENCY_SWITCH_TAG_NAME.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.VALENCY_SWITCH_TAG_NAMES.key, this.get(CrawlAttribute.VALENCY_SWITCH_TAG_NAMES.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.TIMEZONEOFFSET.key, this.get(CrawlAttribute.TIMEZONEOFFSET.key));
 
         int i = 0;
