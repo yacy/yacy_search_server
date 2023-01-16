@@ -369,6 +369,13 @@ public class CrawlStartExpert {
             }
         }
 
+        // Check Canonical?
+        if (post == null) {
+            prop.put("noindexWhenCanonicalUnequalURLChecked", 1);
+        } else {
+            prop.put("noindexWhenCanonicalUnequalURLChecked",
+                    post.getBoolean("noindexWhenCanonicalUnequalURL") ? 1 : 0);
+        }
 
         // ---------- Clean-Up before Crawl Start
         // delete if older settings: number value

@@ -316,6 +316,7 @@ public class Crawler_p {
                 final String indexUrlMustNotMatch = post.get("indexmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
                 final String indexContentMustMatch = post.get("indexcontentmustmatch", CrawlProfile.MATCH_ALL_STRING);
                 final String indexContentMustNotMatch = post.get("indexcontentmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+                final boolean noindexWhenCanonicalUnequalURL = "on".equals(post.get("noindexWhenCanonicalUnequalURL", "off"));
 
                 final boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
                 env.setConfig("crawlOrder", crawlOrder);
@@ -614,6 +615,7 @@ public class Crawler_p {
                             indexUrlMustNotMatch,
                             indexContentMustMatch,
                             indexContentMustNotMatch,
+                            noindexWhenCanonicalUnequalURL,
                             newcrawlingdepth,
                             directDocByURL,
                             crawlingIfOlder,

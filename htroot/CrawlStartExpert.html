@@ -412,6 +412,9 @@
             <table style="border-width: 0px">
             <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
             <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
+            <tr>
+              <td colspan="2"><input type="checkbox" name="noindexWhenCanonicalUnequalURL" id="noindexWhenCanonicalUnequalURL" #(noindexWhenCanonicalUnequalURLChecked)#::checked="checked"#(/noindexWhenCanonicalUnequalURLChecked)#/> No Indexing when Canonical present and Canonical != URL</td>
+            </tr>
             </table>
             </dd>
             <dt>Filter on Content of Document<br/>(all visible text, including camel-case-tokenized url and title)</dt>
@@ -470,7 +473,7 @@
                     <tr>
                         <td style="width:110px"><img src="env/grafics/minus.gif" alt=""> must-not-match</td>
                         <td>
-                            <input name="indexSolrQueryMustNotMatch" id="indexSolrQueryMustNotMatch" type="text" size="55" maxlength="100000" value="#[indexSolrQueryMustNotMatch]#" aria-describedby="indexSolrQueryInfo" />
+                            <input name="indexSolrQueryMustNotMatch" id="indexSolrQueryMustNotMatch" type="text" size="55" maxlength="100000" value="#[indexSolrQueryMustNotMatch]#" aria-describedby="indexSolrQueryInfo" enabled="false"/>
                         </td>
                     </tr>
                     #(/embeddedSolrConnected)#

@@ -150,6 +150,7 @@ public class QuickCrawlLink_p {
                         CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                         CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                         CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
+                        false,
                         CrawlingDepth,
                         true,
                         CrawlProfile.getRecrawlDate(60 * 24 * 30), // recrawlIfOlder (minutes); here: one month

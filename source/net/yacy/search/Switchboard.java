@@ -3152,28 +3152,73 @@ public final class Switchboard extends serverSwitch {
                 return new IndexingQueueEntry(in.queueEntry, in.documents, null);
             }
         }
-        if (!(profile.indexUrlMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN || profile.indexUrlMustMatchPattern().matcher(urls).matches()) ||
-                (profile.indexUrlMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.indexUrlMustNotMatchPattern().matcher(urls).matches())) {
-            if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern());
+
+        // check mustmatch pattern
+        Pattern mustmatchurl = profile.indexUrlMustMatchPattern();
+        if (mustmatchurl != CrawlProfile.MATCH_ALL_PATTERN && !mustmatchurl.matcher(urls).matches()) {
+            String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + mustmatchurl.pattern();
+            if (this.log.isInfo()) this.log.info(info);
             // create a new errorURL DB entry
-            this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "indexing prevented by regular expression on url; indexUrlMustMatchPattern = " + profile.indexUrlMustMatchPattern().pattern() + ", indexUrlMustNotMatchPattern = " + profile.indexUrlMustNotMatchPattern().pattern(), -1);
+            this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, info, -1);
+            return new IndexingQueueEntry(in.queueEntry, in.documents, null);
+        }
+
+        // check mustnotmatch
+        Pattern mustnotmatchurl = profile.indexUrlMustNotMatchPattern();
+        if (mustnotmatchurl != CrawlProfile.MATCH_NEVER_PATTERN && mustnotmatchurl.matcher(urls).matches()) {
+            String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on url; indexUrlMustNotMatchPattern = " + mustnotmatchurl;
+            if (this.log.isInfo()) this.log.info(info);
+            // create a new errorURL DB entry
+            this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, info, -1);
             return new IndexingQueueEntry(in.queueEntry, in.documents, null);
         }
 
         // check which files may take part in the indexing process
         final List<Document> doclist = new ArrayList<>();
         docloop: for (final Document document : in.documents) {
+
+            // check canonical
+            if (profile.noindexWhenCanonicalUnequalURL()) {
+                AnchorURL canonical = document.getCanonical();
+                DigestURL source = document.dc_source();
+                if (canonical != null && source != null) {
+                    String canonical_norm = canonical.toNormalform(true);
+                    String source_norm = source.toNormalform(true);
+                    if (!canonical_norm.equals(source_norm)) {
+                        String info = "Not Condensed Resource '" + urls + "': denied, canonical != source; canonical = " +canonical_norm + "; source = " + source_norm;
+                        if (this.log.isInfo()) this.log.info(info);
+                        // create a new errorURL DB entry
+                        this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, info, -1);
+                        continue docloop;
+                    }
+                }
+            }
+
+            // check indexing denied flags
             if (document.indexingDenied() && profile.obeyHtmlRobotsNoindex() && !this.isIntranetMode()) {
                 if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': denied by document-attached noindexing rule");
                 // create a new errorURL DB entry
                 this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "denied by document-attached noindexing rule", -1);
                 continue docloop;
             }
-            if (!(profile.indexContentMustMatchPattern() == CrawlProfile.MATCH_ALL_PATTERN || profile.indexContentMustMatchPattern().matcher(document.getTextString()).matches()) ||
-                    (profile.indexContentMustNotMatchPattern() != CrawlProfile.MATCH_NEVER_PATTERN && profile.indexContentMustNotMatchPattern().matcher(document.getTextString()).matches())) {
-                if (this.log.isInfo()) this.log.info("Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern());
+
+            // check content pattern must-match
+            Pattern mustmatchcontent = profile.indexContentMustMatchPattern();
+            if (mustmatchcontent != CrawlProfile.MATCH_ALL_PATTERN && !mustmatchcontent.matcher(document.getTextString()).matches()) {
+                String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustMatchPattern = " + mustmatchcontent.pattern() ;
+                if (this.log.isInfo()) this.log.info(info);
                 // create a new errorURL DB entry
-                this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, "indexing prevented by regular expression on content; indexContentMustMatchPattern = " + profile.indexContentMustMatchPattern().pattern() + ", indexContentMustNotMatchPattern = " + profile.indexContentMustNotMatchPattern().pattern(), -1);
+                this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, info, -1);
+                continue docloop;
+            }
+
+            // check content pattern must-not-match
+            Pattern mustnotmatchcontent = profile.indexContentMustNotMatchPattern();
+            if (mustnotmatchcontent != CrawlProfile.MATCH_NEVER_PATTERN && mustnotmatchcontent.matcher(document.getTextString()).matches()) {
+                String info = "Not Condensed Resource '" + urls + "': indexing prevented by regular expression on content; indexContentMustNotMatchPattern = " + mustnotmatchcontent.pattern();
+                if (this.log.isInfo()) this.log.info(info);
+                // create a new errorURL DB entry
+                this.crawlQueues.errorURL.push(in.queueEntry.url(), in.queueEntry.depth(), profile, FailCategory.FINAL_PROCESS_CONTEXT, info, -1);
                 continue docloop;
             }
 

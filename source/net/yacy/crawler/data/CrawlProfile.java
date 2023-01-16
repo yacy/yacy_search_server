@@ -115,6 +115,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         INDEXING_MEDIA_TYPE_MUSTNOTMATCH("indexMediaTypeMustNotMatch", false, CrawlAttribute.STRING, "Indexing Media Type (MIME) Must-Not-Match Filter"),
         INDEXING_SOLR_QUERY_MUSTMATCH("indexSolrQueryMustMatch",    false, CrawlAttribute.STRING,  "Indexing Solr Query Must-Match Filter"),
         INDEXING_SOLR_QUERY_MUSTNOTMATCH("indexSolrQueryMustNotMatch", false, CrawlAttribute.STRING,  "Indexing Solr Query Must-Not-Match Filter"),
+        NOINDEX_WHEN_CANONICAL_UNEQUAL_URL("noindexWhenCanonicalUnequalURL", false, CrawlAttribute.STRING,  "No Indexing for Documents with Canonical != URL"),
         RECRAWL_IF_OLDER             ("recrawlIfOlder",             false, CrawlAttribute.INTEGER, "Recrawl If Older"),
         STORE_HTCACHE                ("storeHTCache",               false, CrawlAttribute.BOOLEAN, "Store in HTCache"),
         CACHE_STRAGEGY               ("cacheStrategy",              false, CrawlAttribute.STRING,  "Cache Strategy (NOCACHE,IFFRESH,IFEXIST,CACHEONLY)"),
@@ -223,6 +224,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final String crawlerCountryMustMatch, final String crawlerNoDepthLimitMatch,
                  final String indexUrlMustMatch, final String indexUrlMustNotMatch,
                  final String indexContentMustMatch, final String indexContentMustNotMatch,
+                 final boolean noindexWhenCanonicalUnequalURL,
                  final int depth,
                  final boolean directDocByURL,
                  final Date recrawlIfOlder /*date*/,
@@ -300,6 +302,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
         put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY);
         put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY);
+        put(CrawlAttribute.NOINDEX_WHEN_CANONICAL_UNEQUAL_URL.key, noindexWhenCanonicalUnequalURL);
     }
 
     /**
@@ -851,6 +854,12 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return (r.equals(Boolean.TRUE.toString()));
     }
 
+    public boolean noindexWhenCanonicalUnequalURL() {
+        final String r = get(CrawlAttribute.NOINDEX_WHEN_CANONICAL_UNEQUAL_URL.key);
+        if (r == null) return true;
+        return (r.equals(Boolean.TRUE.toString()));
+    }
+
     public boolean storeHTCache() {
         final String r = get(CrawlAttribute.STORE_HTCACHE.key);
         if (r == null) return false;
@@ -997,6 +1006,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexURLMustNotMatch", this.get(CrawlAttribute.INDEXING_URL_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexContentMustMatch", this.get(CrawlAttribute.INDEXING_CONTENT_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexContentMustNotMatch", this.get(CrawlAttribute.INDEXING_CONTENT_MUSTNOTMATCH.key));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.NOINDEX_WHEN_CANONICAL_UNEQUAL_URL, noindexWhenCanonicalUnequalURL() ? 1 : 0);
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, this.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, this.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, this.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key));

@@ -175,10 +175,10 @@ public class Response {
         int p = mime.indexOf('/');
         if (p < 0) return new String[]{mime};
         if (doctype == DT_TEXT) return new String[]{"text" + mime.substring(p)};
-    	if (doctype == DT_IMAGE) return new String[]{"image" + mime.substring(p)};
-    	if (doctype == DT_AUDIO) return new String[]{"audio" + mime.substring(p)};
-    	if (doctype == DT_MOVIE) return new String[]{"video" + mime.substring(p)};
-    	return new String[]{mime};
+        if (doctype == DT_IMAGE) return new String[]{"image" + mime.substring(p)};
+        if (doctype == DT_AUDIO) return new String[]{"audio" + mime.substring(p)};
+        if (doctype == DT_MOVIE) return new String[]{"video" + mime.substring(p)};
+        return new String[]{mime};
     }
 
     public static final int QUEUE_STATE_FRESH             = 0;
@@ -235,16 +235,16 @@ public class Response {
      * @return the original request that produced this response
      */
     public Request getRequest() {
-		return request;
-	}
+        return request;
+    }
 
     public ResponseHeader getResponseHeader() {
         return this.responseHeader;
     }
     
     public RequestHeader getRequestHeader() {
-		return this.requestHeader;
-	}
+        return this.requestHeader;
+    }
 
     public boolean fromCache() {
         return this.fromCache;
@@ -260,11 +260,11 @@ public class Response {
         return this.request.name();
     }
 
-	/**
-	 * @return the requested URL that produced this response. When redirection(s)
-	 *         occurred, this is not the initial URL, but the last redirection
-	 *         target.
-	 */
+    /**
+     * @return the requested URL that produced this response. When redirection(s)
+     *         occurred, this is not the initial URL, but the last redirection
+     *         target.
+     */
     public DigestURL url() {
         return this.request.url();
     }
@@ -745,11 +745,11 @@ public class Response {
         // -ranges in request
         // we checked that in shallStoreCache
 
-		/*
-		 * Eventually check if a parser supports the media yype. Depending on the crawl
-		 * profile, the indexingDocumentProcessor can eventually index only URL metadata
-		 * using the generic parser for unsupported media types
-		 */
+        /*
+         * Eventually check if a parser supports the media yype. Depending on the crawl
+         * profile, the indexingDocumentProcessor can eventually index only URL metadata
+         * using the generic parser for unsupported media types
+         */
         if (this.responseHeader != null && !profile().isIndexNonParseableUrls()) {
             final String mimeType = this.responseHeader.getContentType();
             final String parserError = TextParser.supportsMime(mimeType);

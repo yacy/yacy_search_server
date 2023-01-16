@@ -91,12 +91,12 @@ public class Document {
     /** links to icons that belongs to the document (mapped by absolute URL) */
     private Map<DigestURL, IconEntry> icons;
     
-	/**
-	 * URLs of linked data item types/classes referenced by the document (for example in
-	 * HTML with standard annotations such as RDFa, microdata, microformats or
-	 * JSON-LD)
-	 */
-	private Set<DigestURL> linkedDataTypes;
+    /**
+     * URLs of linked data item types/classes referenced by the document (for example in
+     * HTML with standard annotations such as RDFa, microdata, microformats or
+     * JSON-LD)
+     */
+    private Set<DigestURL> linkedDataTypes;
     private boolean resorted;
     private final Set<String> languages;
     private boolean indexingDenied;
@@ -131,13 +131,13 @@ public class Document {
         this.parserObject = parserObject;
         this.keywords = new LinkedHashSet<String>();
         if (keywords != null) {
-        	Collections.addAll(this.keywords, keywords);
+           Collections.addAll(this.keywords, keywords);
         }
         this.titles = (titles == null) ? new ArrayList<String>(1) : titles;
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
         this.sections =  new LinkedList<String>() ;
         if (sections != null) {
-        	Collections.addAll(this.sections, sections);
+           Collections.addAll(this.sections, sections);
         }
         this.descriptions = (abstrcts == null) ? new ArrayList<String>() : abstrcts;
         if (lat >= -90.0d && lat <= 90.0d && lon >= -180.0d && lon <= 180.0d) {
@@ -216,13 +216,21 @@ public class Document {
         }
         this.scraperObject = scraper;
     }
+    
+    public AnchorURL getCanonical() {
+        final Object scraper = this.getScraperObject();
+        if (!(scraper instanceof ContentScraper)) return null;
+        final ContentScraper html = (ContentScraper) scraper;
+        AnchorURL canonical = html.getCanonical();
+        return canonical;
+    }
 
     public Set<String> getContentLanguages() {
         return this.languages;
     }
 
     public String getFileName() {
-    	return this.source.getFileName();
+       return this.source.getFileName();
     }
 
     public Map<String, Set<String>> getGenericFacets() {
@@ -233,15 +241,15 @@ public class Document {
      * @return true when this document is the result of a partially parsed resource, for example due to resource content size exceeding a given limit
      */
     public boolean isPartiallyParsed() {
-		return this.partiallyParsed;
-	}
+        return this.partiallyParsed;
+    }
     
     /**
      * @param partiallyParsed set to true to indicates this document is the result of a partially parsed resource, for example due to resource content size exceeding a given limit
      */
     public void setPartiallyParsed(final boolean partiallyParsed) {
-		this.partiallyParsed = partiallyParsed;
-	}
+        this.partiallyParsed = partiallyParsed;
+    }
     
     /**
      * compute a set of languages that this document contains
@@ -637,13 +645,13 @@ dc_rights
             // we add artificial hyperlinks to the hyperlink set
             // that can be calculated from given hyperlinks and imagelinks
             
-			/*
-			 * Should we also include icons ? with
-			 * this.hyperlinks.putAll(allReflinks(this.icons.keySet())); It is
-			 * problematic as allReflinks will modify icons set set, removing those whose URL is
-			 * starting with "/www" but it is not desired for icons such as
-			 * www.wikipedia.org/static/favicon/wikipedia.ico
-			 */
+            /*
+             * Should we also include icons ? with
+             * this.hyperlinks.putAll(allReflinks(this.icons.keySet())); It is
+             * problematic as allReflinks will modify icons set set, removing those whose URL is
+             * starting with "/www" but it is not desired for icons such as
+             * www.wikipedia.org/static/favicon/wikipedia.ico
+             */
 
             this.hyperlinks.putAll(allReflinks(this.images.values()));
             this.hyperlinks.putAll(allReflinks(this.audiolinks.keySet()));
@@ -804,16 +812,16 @@ dc_rights
             }
             InputStream textStream = doc.getTextStream();
             try {
-            	FileUtils.copy(textStream, (ByteArrayOutputStream) this.text);
+               FileUtils.copy(textStream, (ByteArrayOutputStream) this.text);
             } finally {
-            	try {
-                	if(textStream != null) {
-                		/* textStream can be a FileInputStream : we must close it to ensure releasing system resource */
-                		textStream.close();
-                	}
-            	} catch(IOException e) {
-            		ConcurrentLog.warn("DOCUMENT", "Could not close text input stream");
-            	}
+               try {
+                   if(textStream != null) {
+                       /* textStream can be a FileInputStream : we must close it to ensure releasing system resource */
+                       textStream.close();
+                   }
+               } catch(IOException e) {
+                   ConcurrentLog.warn("DOCUMENT", "Could not close text input stream");
+               }
             }
 
             this.anchors.addAll(doc.getAnchors());
@@ -826,41 +834,41 @@ dc_rights
      * @return links to icons that belongs to the document (mapped by absolute URL)
      */
     public Map<DigestURL, IconEntry> getIcons() {
-		return icons;
-	}
+        return icons;
+    }
     
     /**
      * Set links to icons that belongs to the document (mapped by absolute URL)
      * @param icons
      */
     public void setIcons(final Map<DigestURL, IconEntry> icons) {
-    	/* Better to ensure now icons property will not be null */
-    	if(icons != null) {
-    		this.icons = icons;	
-    	} else {
-    		this.icons = new HashMap<>();
-    	}
-	}
+       /* Better to ensure now icons property will not be null */
+       if(icons != null) {
+           this.icons = icons;    
+       } else {
+           this.icons = new HashMap<>();
+       }
+    }
     
-	/**
-	 * @return URLs of linked data item types/classes referenced by the document (for example in
-	 * HTML with standard annotations such as RDFa, microdata, microformats or
-	 * JSON-LD)
-	 */
+    /**
+     * @return URLs of linked data item types/classes referenced by the document (for example in
+     * HTML with standard annotations such as RDFa, microdata, microformats or
+     * JSON-LD)
+     */
     public Set<DigestURL> getLinkedDataTypes() {
-		return this.linkedDataTypes;
-	}
+        return this.linkedDataTypes;
+    }
     
-	/**
-	 * @return URLs of linked data item types/classes referenced by the document
-	 */
+    /**
+     * @return URLs of linked data item types/classes referenced by the document
+     */
     public void setLinkedDataTypes(final Set<DigestURL> linkedDataTypes) {
-    	if(linkedDataTypes != null) {
-    		/* Ensure non null property */
-    		this.linkedDataTypes = linkedDataTypes;
-    	} else {
-    		this.linkedDataTypes.clear();
-    	}
+       if(linkedDataTypes != null) {
+           /* Ensure non null property */
+           this.linkedDataTypes = linkedDataTypes;
+       } else {
+           this.linkedDataTypes.clear();
+       }
     }
     
 
@@ -1034,14 +1042,14 @@ dc_rights
                 } catch (final IOException e) {
                     ConcurrentLog.logException(e);
                 } finally {
-                	try {
-                    	if(textStream != null) {
-                    		/* textStream can be a FileInputStream : we must close it to ensure releasing system resource */
-                    		textStream.close();
-                    	}
-					} catch (IOException e) {
-						ConcurrentLog.warn("DOCUMENT", "Could not close text input stream");
-					}
+                   try {
+                       if(textStream != null) {
+                           /* textStream can be a FileInputStream : we must close it to ensure releasing system resource */
+                           textStream.close();
+                       }
+                    } catch (IOException e) {
+                        ConcurrentLog.warn("DOCUMENT", "Could not close text input stream");
+                    }
                 }
             }
             anchors.addAll(doc.getAnchors());
@@ -1098,7 +1106,7 @@ dc_rights
     public final static String IFRAME_MARKER = "iframe";
     public final static String FRAME_MARKER = "frame";
     public final static String EMBED_MARKER = "embed";
-    
+
     public static Map<AnchorURL, String> getHyperlinks(final Document[] documents, boolean includeNofollow) {
         final Map<AnchorURL, String> result = new HashMap<>();
         for (final Document d: documents) {

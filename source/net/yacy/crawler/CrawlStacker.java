@@ -488,7 +488,7 @@ public final class CrawlStacker implements WorkflowTask<Request>{
         // check if ip is local ip address
         final String urlRejectReason = this.urlInAcceptedDomain(url);
         if (urlRejectReason != null) {
-            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("denied_(" + urlRejectReason + ")");
+            if (CrawlStacker.log.isFine()) CrawlStacker.log.fine("URL not in accepted Domain (" + urlRejectReason + ")");
             return "denied_(" + urlRejectReason + ")";
         }
 
