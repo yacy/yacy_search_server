@@ -902,10 +902,14 @@ public class HTTPClient implements Closeable {
             }
             this.httpResponse.setHeader(HeaderFramework.RESPONSE_TIME_MILLIS, Long.toString(System.currentTimeMillis() - time));
         } catch (final Throwable e) {
+            long runtime = System.currentTimeMillis() - time;
             close();
             throw new IOException("Client can't execute: "
                     + (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
-                    + " duration=" + Long.toString(System.currentTimeMillis() - time) + " for url " + uri);
+                    + ", timeout=" + this.timeout
+                    + ", duration=" + Long.toString(runtime)
+                    + ", concurrent=" + Boolean.toString(concurrent)
+                    + ", url=" + uri);
         } finally {
             /* Restore the thread initial name */
             Thread.currentThread().setName(initialThreadName);
