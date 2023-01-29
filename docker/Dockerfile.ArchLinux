@@ -43,14 +43,24 @@ USER root
 # install the package
 RUN pacman -U --noconfirm /tmp/qt5-webkit/qt5-webkit*.pkg.tar.zst && \
 rm -rf /tmp/qt5-webkit
+USER build
 # build package for wkhtmltopdf from AUR
 RUN git clone https://aur.archlinux.org/wkhtmltopdf.git && \
 cd wkhtmltopdf && \
-MAKEFLAGS="-j$(nproc)" makepkg --noconfirm && \
+MAKEFLAGS="-j$(nproc)" makepkg --noconfirm --skippgpcheck && \
 cd ..
 USER root
 # install the package
-RUN pacman -U --noconfirm /tmp/wkhtmltopdf/wkhtmltox*.pkg.tar.zst && \
+RUN pacman -U --noconfirm /tmp/wkhtmltopdf/wkhtmltopdf*.pkg.tar.zst && \
 rm -rf /tmp/wkhtmltopdf
-
-
+WORKDIR /opt
+# download the latest version of yacy
+RUN curl "https://codeload.github.com/yacy/yacy_search_server/zip/refs/heads/master" --output yacy.zip && \
+pacman -S unzip --noconfirm && \
+pacman -Scc --noconfirm && \
+unzip yacy.zip && \
+rm yacy.zip && \
+mv yacy_search_server-master yacy && \
+cd yacy && \
+ant compile -f build.xml && \
+rm -rf /opt/yacy/.github
