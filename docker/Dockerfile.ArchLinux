@@ -64,3 +64,15 @@ mv yacy_search_server-master yacy && \
 cd yacy && \
 ant compile -f build.xml && \
 rm -rf /opt/yacy/.github
+# Set initial admin password: "yacy" (encoded with custom yacy md5 function net.yacy.cora.order.Digest.encodeMD5Hex())
+RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a0987a4aba1ec46d63c" /opt/yacy/defaults/yacy.init && \
+    sed -i "/adminAccountForLocalhost=/c\adminAccountForLocalhost=false" /opt/yacy/defaults/yacy.init && \
+    sed -i "/server.https=false/c\server.https=true" /opt/yacy/defaults/yacy.init
+# add the yacy user
+RUN useradd --no-create-home --system yacy && \
+usermod -L yacy && \
+chown -R yacy:yacy /opt/yacy
+EXPOSE 8090 8443
+VOLUME ["/opt/yacy/DATA"]
+USER yacy
+CMD ["/bin/sh","/opt/yacy/startYACY.sh","-f"]
