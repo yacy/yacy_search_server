@@ -55,6 +55,7 @@ import net.yacy.cora.util.CommonPattern;
 import net.yacy.cora.util.ConcurrentLog;
 import net.yacy.crawler.CrawlSwitchboard;
 import net.yacy.document.VocabularyScraper;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.search.query.QueryParams;
 import net.yacy.search.schema.CollectionSchema;
@@ -69,19 +70,19 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
 
     /** Regular expression pattern matching everything */
     public static final String  MATCH_ALL_STRING    = ".*";
-    
+
     /** Regular expression pattern matching nothing */
     public static final String  MATCH_NEVER_STRING  = "";
-    
+
     /** Empty Solr query */
     public static final String  SOLR_EMPTY_QUERY  = "";
-    
+
     /** Match all Solr query */
     public static final String  SOLR_MATCH_ALL_QUERY  = AbstractSolrConnector.CATCHALL_QUERY;
-    
+
     /** Regular expression matching everything */
     public static final Pattern MATCH_ALL_PATTERN   = Pattern.compile(MATCH_ALL_STRING);
-    
+
     /** Regular expression matching nothing */
     public static final Pattern MATCH_NEVER_PATTERN = Pattern.compile(MATCH_NEVER_STRING);
 
@@ -114,6 +115,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         INDEXING_MEDIA_TYPE_MUSTNOTMATCH("indexMediaTypeMustNotMatch", false, CrawlAttribute.STRING, "Indexing Media Type (MIME) Must-Not-Match Filter"),
         INDEXING_SOLR_QUERY_MUSTMATCH("indexSolrQueryMustMatch",    false, CrawlAttribute.STRING,  "Indexing Solr Query Must-Match Filter"),
         INDEXING_SOLR_QUERY_MUSTNOTMATCH("indexSolrQueryMustNotMatch", false, CrawlAttribute.STRING,  "Indexing Solr Query Must-Not-Match Filter"),
+        NOINDEX_WHEN_CANONICAL_UNEQUAL_URL("noindexWhenCanonicalUnequalURL", false, CrawlAttribute.STRING,  "No Indexing for Documents with Canonical != URL"),
         RECRAWL_IF_OLDER             ("recrawlIfOlder",             false, CrawlAttribute.INTEGER, "Recrawl If Older"),
         STORE_HTCACHE                ("storeHTCache",               false, CrawlAttribute.BOOLEAN, "Store in HTCache"),
         CACHE_STRAGEGY               ("cacheStrategy",              false, CrawlAttribute.STRING,  "Cache Strategy (NOCACHE,IFFRESH,IFEXIST,CACHEONLY)"),
@@ -126,14 +128,15 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         INDEX_TEXT                   ("indexText",                  false, CrawlAttribute.BOOLEAN, "Index Text"),
         INDEX_MEDIA                  ("indexMedia",                 false, CrawlAttribute.BOOLEAN, "Index Media"),
         COLLECTIONS                  ("collections",                false, CrawlAttribute.STRING,  "Collections (comma-separated list)"),
-        IGNORE_DIV_CLASS_NAME        ("ignore_class_name",      false, CrawlAttribute.STRING,  "Ignore DIV Class names"),
+        DEFAULT_VALENCY              ("default_valency",            false, CrawlAttribute.STRING,  "default tag valency"),
+        VALENCY_SWITCH_TAG_NAMES     ("valency_switch_tag_names",   false, CrawlAttribute.STRING,  "DIV Class names when default valency shall be switched"),
         SCRAPER                      ("scraper",                    false, CrawlAttribute.STRING,  "Declaration for Vocabulary Scraper"),
         TIMEZONEOFFSET               ("timezoneOffset",             true,  CrawlAttribute.INTEGER, "Time Zone of Crawl Start Agent");
-        
+
         public static final int BOOLEAN = 0;
         public static final int INTEGER = 1;
         public static final int STRING = 2;
-        
+
         public final String key, label;
         public final boolean readonly;
         public final int type;
@@ -143,39 +146,39 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             this.type = type;
             this.label = label;
         }
-        
+
         @Override
         public String toString() {
             return this.key;
         }
   }
-    
-    
+
     private Pattern crawlerurlmustmatch = null, crawlerurlmustnotmatch = null;
-    
+
     /** Pattern on the URL a document must match to allow adding its embedded links to the crawl stack */
     private Pattern crawlerOriginUrlMustMatch = null;
-    
+
     /** Pattern on the URL a document must not match to allow adding its embedded links to the crawl stack */
     private Pattern crawlerOriginUrlMustNotMatch = null;
-    
+
     private Pattern crawleripmustmatch = null, crawleripmustnotmatch = null;
     private Pattern crawlernodepthlimitmatch = null;
     private Pattern indexurlmustmatch = null, indexurlmustnotmatch = null;
     private Pattern indexcontentmustmatch = null, indexcontentmustnotmatch = null;
-    
+
     /** Pattern on the media type documents must match before being indexed 
      * @see CollectionSchema#content_type */
     private Pattern indexMediaTypeMustMatch = null;
-    
+
     /** Pattern on the media type documents must not match before being indexed
      * @see CollectionSchema#content_type  */
     private Pattern indexMediaTypeMustNotMatch = null;
-    
+
     private Pattern snapshotsMustnotmatch = null;
 
     private final Map<String, AtomicInteger> doms;
-    private final Set<String> ignore_class_name;
+    private final TagValency defaultValency;
+    private final Set<String> valencySwitchTagNames;
     private final VocabularyScraper scraper;
 
     /**
@@ -221,6 +224,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final String crawlerCountryMustMatch, final String crawlerNoDepthLimitMatch,
                  final String indexUrlMustMatch, final String indexUrlMustNotMatch,
                  final String indexContentMustMatch, final String indexContentMustNotMatch,
+                 final boolean noindexWhenCanonicalUnequalURL,
                  final int depth,
                  final boolean directDocByURL,
                  final Date recrawlIfOlder /*date*/,
@@ -238,7 +242,8 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                  final CacheStrategy cacheStrategy,
                  final String collections,
                  final String userAgentName,
-                 final Set<String> ignore_class_name,
+                 final TagValency defaultValency,
+                 final Set<String> valencySwitchTagNames,
                  final VocabularyScraper scraper,
                  final int timezoneOffset) {
         super(40);
@@ -252,40 +257,42 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(CrawlAttribute.NAME.key,             name);
         put(CrawlAttribute.AGENT_NAME.key, userAgentName);
         put(CrawlAttribute.CRAWLER_ALWAYS_CHECK_MEDIA_TYPE.key, true);
-        put(CrawlAttribute.CRAWLER_URL_MUSTMATCH.key,     (crawlerUrlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerUrlMustMatch);
-        put(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key,  (crawlerUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerUrlMustNotMatch);
-        put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key, (crawlerUrlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerUrlMustMatch);
-        put(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key,  (crawlerUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerUrlMustNotMatch);
-        put(CrawlAttribute.CRAWLER_IP_MUSTMATCH.key,      (crawlerIpMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerIpMustMatch);
-        put(CrawlAttribute.CRAWLER_IP_MUSTNOTMATCH.key,   (crawlerIpMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerIpMustNotMatch);
-        put(CrawlAttribute.CRAWLER_COUNTRY_MUSTMATCH.key, (crawlerCountryMustMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerCountryMustMatch);
+        put(CrawlAttribute.CRAWLER_URL_MUSTMATCH.key,         (crawlerUrlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerUrlMustMatch);
+        put(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key,      (crawlerUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerUrlMustNotMatch);
+        put(CrawlAttribute.CRAWLER_ORIGIN_URL_MUSTMATCH.key,  (crawlerUrlMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerUrlMustMatch);
+        put(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key,      (crawlerUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerUrlMustNotMatch);
+        put(CrawlAttribute.CRAWLER_IP_MUSTMATCH.key,          (crawlerIpMustMatch == null) ? CrawlProfile.MATCH_ALL_STRING : crawlerIpMustMatch);
+        put(CrawlAttribute.CRAWLER_IP_MUSTNOTMATCH.key,       (crawlerIpMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerIpMustNotMatch);
+        put(CrawlAttribute.CRAWLER_COUNTRY_MUSTMATCH.key,     (crawlerCountryMustMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerCountryMustMatch);
         put(CrawlAttribute.CRAWLER_URL_NODEPTHLIMITMATCH.key, (crawlerNoDepthLimitMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : crawlerNoDepthLimitMatch);
-        put(CrawlAttribute.INDEXING_URL_MUSTMATCH.key, (indexUrlMustMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : indexUrlMustMatch);
-        put(CrawlAttribute.INDEXING_URL_MUSTNOTMATCH.key, (indexUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : indexUrlMustNotMatch);
-        put(CrawlAttribute.INDEXING_CONTENT_MUSTMATCH.key, (indexContentMustMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : indexContentMustMatch);
+        put(CrawlAttribute.INDEXING_URL_MUSTMATCH.key,        (indexUrlMustMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : indexUrlMustMatch);
+        put(CrawlAttribute.INDEXING_URL_MUSTNOTMATCH.key,     (indexUrlMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : indexUrlMustNotMatch);
+        put(CrawlAttribute.INDEXING_CONTENT_MUSTMATCH.key,    (indexContentMustMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : indexContentMustMatch);
         put(CrawlAttribute.INDEXING_CONTENT_MUSTNOTMATCH.key, (indexContentMustNotMatch == null) ? CrawlProfile.MATCH_NEVER_STRING : indexContentMustNotMatch);
-        put(CrawlAttribute.DEPTH.key,            depth);
-        put(CrawlAttribute.DIRECT_DOC_BY_URL.key, directDocByURL);
-        put(CrawlAttribute.RECRAWL_IF_OLDER.key, recrawlIfOlder == null ? Long.MAX_VALUE : recrawlIfOlder.getTime());
-        put(CrawlAttribute.DOM_MAX_PAGES.key,    domMaxPages);
-        put(CrawlAttribute.CRAWLING_Q.key,       crawlingQ); // crawling of urls with '?'
-        put(CrawlAttribute.FOLLOW_FRAMES.key,    followFrames); // load pages contained in frames or ifames
-        put(CrawlAttribute.OBEY_HTML_ROBOTS_NOINDEX.key, obeyHtmlRobotsNoindex); // if false, then a meta robots tag containing 'noindex' is ignored
+        put(CrawlAttribute.DEPTH.key,                     depth);
+        put(CrawlAttribute.DIRECT_DOC_BY_URL.key,         directDocByURL);
+        put(CrawlAttribute.RECRAWL_IF_OLDER.key,          recrawlIfOlder == null ? Long.MAX_VALUE : recrawlIfOlder.getTime());
+        put(CrawlAttribute.DOM_MAX_PAGES.key,             domMaxPages);
+        put(CrawlAttribute.CRAWLING_Q.key,                crawlingQ); // crawling of urls with '?'
+        put(CrawlAttribute.FOLLOW_FRAMES.key,             followFrames); // load pages contained in frames or ifames
+        put(CrawlAttribute.OBEY_HTML_ROBOTS_NOINDEX.key,  obeyHtmlRobotsNoindex); // if false, then a meta robots tag containing 'noindex' is ignored
         put(CrawlAttribute.OBEY_HTML_ROBOTS_NOFOLLOW.key, obeyHtmlRobotsNofollow);
-        put(CrawlAttribute.INDEX_TEXT.key,       indexText);
-        put(CrawlAttribute.INDEX_MEDIA.key,      indexMedia);
-        put(CrawlAttribute.STORE_HTCACHE.key,    storeHTCache);
-        put(CrawlAttribute.REMOTE_INDEXING.key,  remoteIndexing);
-        put(CrawlAttribute.SNAPSHOTS_MAXDEPTH.key, snapshotsMaxDepth);
-        put(CrawlAttribute.SNAPSHOTS_LOADIMAGE.key, snapshotsLoadImage);
-        put(CrawlAttribute.SNAPSHOTS_REPLACEOLD.key, snapshotsReplaceOld);
-        put(CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key, snapshotsMustnotmatch);
-        put(CrawlAttribute.CACHE_STRAGEGY.key,   cacheStrategy.toString());
-        put(CrawlAttribute.COLLECTIONS.key,      CommonPattern.SPACE.matcher(collections.trim()).replaceAll(""));
+        put(CrawlAttribute.INDEX_TEXT.key,                indexText);
+        put(CrawlAttribute.INDEX_MEDIA.key,               indexMedia);
+        put(CrawlAttribute.STORE_HTCACHE.key,             storeHTCache);
+        put(CrawlAttribute.REMOTE_INDEXING.key,           remoteIndexing);
+        put(CrawlAttribute.SNAPSHOTS_MAXDEPTH.key,        snapshotsMaxDepth);
+        put(CrawlAttribute.SNAPSHOTS_LOADIMAGE.key,       snapshotsLoadImage);
+        put(CrawlAttribute.SNAPSHOTS_REPLACEOLD.key,      snapshotsReplaceOld);
+        put(CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key,    snapshotsMustnotmatch);
+        put(CrawlAttribute.CACHE_STRAGEGY.key,            cacheStrategy.toString());
+        put(CrawlAttribute.COLLECTIONS.key,               CommonPattern.SPACE.matcher(collections.trim()).replaceAll(""));
         // we transform the ignore_class_name and scraper information into a JSON Array
-        this.ignore_class_name = ignore_class_name == null ? new HashSet<String>() : ignore_class_name;
-        String jsonString = new JSONArray(ignore_class_name).toString();
-        put(CrawlAttribute.IGNORE_DIV_CLASS_NAME.key, jsonString);
+        this.defaultValency = defaultValency;
+        this.valencySwitchTagNames = valencySwitchTagNames == null ? new HashSet<String>() : valencySwitchTagNames;
+        String jsonString = new JSONArray(valencySwitchTagNames).toString();
+        put(CrawlAttribute.DEFAULT_VALENCY.key, defaultValency.name());
+        put(CrawlAttribute.VALENCY_SWITCH_TAG_NAMES.key, jsonString);
         this.scraper = scraper == null ? new VocabularyScraper() : scraper;
         jsonString = this.scraper.toString();
         assert jsonString != null && jsonString.length() > 0 && jsonString.charAt(0) == '{' : "jsonString = " + jsonString;
@@ -295,6 +302,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         put(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, CrawlProfile.MATCH_NEVER_STRING);
         put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, CrawlProfile.SOLR_MATCH_ALL_QUERY);
         put(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, CrawlProfile.SOLR_EMPTY_QUERY);
+        put(CrawlAttribute.NOINDEX_WHEN_CANONICAL_UNEQUAL_URL.key, noindexWhenCanonicalUnequalURL);
     }
 
     /**
@@ -305,9 +313,11 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         super(ext == null ? 1 : ext.size());
         if (ext != null) putAll(ext);
         this.doms = new ConcurrentHashMap<String, AtomicInteger>();
-        String jsonString = ext.get(CrawlAttribute.IGNORE_DIV_CLASS_NAME.key);
+        String defaultValency = ext.get(CrawlAttribute.DEFAULT_VALENCY.key);
+        this.defaultValency = defaultValency == null || defaultValency.length() == 0 ? TagValency.EVAL : TagValency.valueOf(defaultValency);
+        String jsonString = ext.get(CrawlAttribute.VALENCY_SWITCH_TAG_NAMES.key);
         JSONArray a;
-        if(jsonString == null) {
+        if (jsonString == null) {
             a = new JSONArray();
         } else {
             try {
@@ -317,9 +327,9 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
                 a = new JSONArray();
             }
         }
-        this.ignore_class_name = new HashSet<String>();
+        this.valencySwitchTagNames = new HashSet<String>();
         for (int i = 0; i < a.length(); i++) try {
-            this.ignore_class_name.add(a.getString(i));
+            this.valencySwitchTagNames.add(a.getString(i));
         } catch (JSONException e) {}
         jsonString = ext.get(CrawlAttribute.SCRAPER.key);
         if (jsonString == null || jsonString.length() == 0) {
@@ -336,14 +346,18 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
     }
 
-    public Set<String> ignoreDivClassName() {
-        return this.ignore_class_name;
+    public TagValency defaultValency() {
+        return this.defaultValency;
+    }
+
+    public Set<String> valencySwitchTagNames() {
+        return this.valencySwitchTagNames;
     }
 
     public VocabularyScraper scraper() {
         return this.scraper;
     }
-    
+
     public void domInc(final String domain) {
         if (domain == null) return; // may be correct for file system crawls
         final AtomicInteger dp = this.doms.get(domain);
@@ -427,7 +441,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         //if (r == null) return null;
         return r;
     }
-    
+
     private Map<String, Pattern> cmap = null;
 
     /**
@@ -440,7 +454,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         this.cmap = collectionParser(r);
         return this.cmap;
     }
-    
+
     public static Map<String, Pattern> collectionParser(String collectionString) {
         if (collectionString == null || collectionString.length() == 0) return new HashMap<String, Pattern>();
         String[] cs = CommonPattern.COMMA.split(collectionString);
@@ -470,7 +484,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         final String r = get(CrawlAttribute.COLLECTIONS.key);
         return r == null || r.length() == 0 || "user".equals(r) ? name() : r;
     }
-    
+
     /**
      * Gets the regex which must be matched by URLs in order to be crawled.
      * @return regex which must be matched
@@ -484,7 +498,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
         return this.crawlerurlmustmatch;
     }
-    
+
     /**
      * Render the urlMustMatchPattern as a String of limited size, suffixing it with
      * "..." when it is truncated. Used to prevent unnecessary growth of the logs,
@@ -516,7 +530,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
         return this.crawlerurlmustnotmatch;
     }
-    
+
     /**
      * Get the pattern on the URL a document must match to allow adding its embedded links to the crawl stack
      * 
@@ -538,7 +552,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
         return this.crawlerOriginUrlMustMatch;
     }
-    
+
     /**
      * Get the pattern on the URL a document must not match to allow adding its embedded links to the crawl stack
      * 
@@ -601,7 +615,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (list.length == 1 && list.length == 0) list = new String[0];
         return list;
     }
-    
+
     /**
      * If the regex matches with the url, then there is no depth limit on the crawl (it overrides depth == 0)
      * @return regex which must be matched
@@ -643,7 +657,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
         return this.indexurlmustnotmatch;
     }
-    
+
     /**
      * Gets the regex which must be matched by URLs in order to be indexed.
      * @return regex which must be matched
@@ -671,7 +685,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
         return this.indexcontentmustnotmatch;
     }
-    
+
     /**
      * Get the Pattern on media type that documents must match in order to be indexed
      * 
@@ -693,7 +707,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
         return this.indexMediaTypeMustMatch;
     }
-    
+
     /**
      * Get the Pattern on media type that documents must not match in order to be indexed
      * 
@@ -715,9 +729,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         }
         return this.indexMediaTypeMustNotMatch;
     }
-    
-    
-    
+
     /**
      * Gets depth of crawl job (or height of the tree which will be
      * created by the crawler).
@@ -743,7 +755,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     /**
      * @return true when the crawler must always cross check the eventual URL file
      *         extension against the actual Media Type, even when file extension is
@@ -772,7 +784,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
     public void setCacheStrategy(final CacheStrategy newStrategy) {
         put(CrawlAttribute.CACHE_STRAGEGY.key, newStrategy.toString());
     }
-    
+
     /**
      * Gets the minimum date that an entry must have to be re-crawled.
      * @return time in ms representing a date
@@ -842,18 +854,24 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         return (r.equals(Boolean.TRUE.toString()));
     }
 
+    public boolean noindexWhenCanonicalUnequalURL() {
+        final String r = get(CrawlAttribute.NOINDEX_WHEN_CANONICAL_UNEQUAL_URL.key);
+        if (r == null) return true;
+        return (r.equals(Boolean.TRUE.toString()));
+    }
+
     public boolean storeHTCache() {
         final String r = get(CrawlAttribute.STORE_HTCACHE.key);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     public boolean remoteIndexing() {
         final String r = get(CrawlAttribute.REMOTE_INDEXING.key);
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     public int snapshotMaxdepth() {
         final String r = get(CrawlAttribute.SNAPSHOTS_MAXDEPTH.key);
         if (r == null) return -1;
@@ -866,7 +884,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             return -1;
         }
     }
-    
+
     public boolean snapshotLoadImage() {
         final String r = get(CrawlAttribute.SNAPSHOTS_LOADIMAGE.key);
         if (r == null) return false;
@@ -878,7 +896,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if (r == null) return false;
         return (r.equals(Boolean.TRUE.toString()));
     }
-    
+
     public Pattern snapshotsMustnotmatch() {
         if (this.snapshotsMustnotmatch == null) {
             final String r = get(CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key);
@@ -887,7 +905,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             } catch (final PatternSyntaxException e) { this.snapshotsMustnotmatch = CrawlProfile.MATCH_NEVER_PATTERN; }
         }
         return this.snapshotsMustnotmatch;
-    }    
+    }
 
     public int timezoneOffset() {
         final String timezoneOffset = get(CrawlAttribute.TIMEZONEOFFSET.key);
@@ -898,7 +916,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             return 0;
         }
     }
-    
+
     /**
      * get a recrawl date for a given age in minutes
      * @param oldTimeMinutes
@@ -946,7 +964,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         if ("http".equals(protocol) || "https".equals(protocol)) protocol = "https?+";
         return new StringBuilder(host.length() + 20).append(protocol).append("://(www.)?").append(Pattern.quote(host.toLowerCase(Locale.ROOT))).append(url.getPath()).append(".*").toString();
     }
-    
+
     public boolean isPushCrawlProfile() {
         return this.name().startsWith(CrawlProfile.CRAWL_PROFILE_PUSH_STUB);
     }
@@ -960,28 +978,22 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
             final int domlistlength) {
         boolean terminateButton = active && !CrawlSwitchboard.DEFAULT_PROFILES.contains(this.name());
         boolean deleteButton = !active;
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_status", terminateButton ? 1 : deleteButton ? 0 : 2);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", terminateButton);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", this.handle());
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", deleteButton);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", this.handle());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_dark", dark ? "1" : "0");
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_handle", this.handle());
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_name", this.name());
-        //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_collection", this.get(COLLECTIONS)); // TODO: remove, replace with 'collections'
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_collections", this.get(CrawlAttribute.COLLECTIONS.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_agentName", this.get(CrawlAttribute.AGENT_NAME.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_userAgent", this.getAgent().userAgent);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_depth", this.depth());
         prop.put(CRAWL_PROFILE_PREFIX + count + "_directDocByURL", this.isIndexNonParseableUrls() ? 1 : 0);
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_recrawlIfOlder", this.recrawlIfOlder() == Long.MAX_VALUE ? "eternity" : (new Date(this.recrawlIfOlder()).toString()));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerNoLimitURLMustMatch", this.get(CrawlAttribute.CRAWLER_URL_NODEPTHLIMITMATCH.key));
         prop.put(CRAWL_PROFILE_PREFIX + count + "_domMaxPages", this.domMaxPages());
-        //prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomMaxPages", (this.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(this.domMaxPages())); // TODO: remove, replace with 'domMaxPages'
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingQ", this.crawlingQ() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_followFrames", this.followFrames() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_obeyHtmlRobotsNoindex", this.obeyHtmlRobotsNoindex() ? 1 : 0);
         prop.put(CRAWL_PROFILE_PREFIX + count + "_obeyHtmlRobotsNofollow", this.obeyHtmlRobotsNofollow() ? 1 : 0);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexText", this.indexText() ? 1 : 0);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", this.indexMedia() ? 1 : 0);
-        //prop.put(CRAWL_PROFILE_PREFIX + count + "_storeCache", this.storeHTCache() ? 1 : 0); // TODO: remove, replace with 'storeHTCache'
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_storeHTCache", this.storeHTCache() ? 1 : 0);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", this.remoteIndexing() ? 1 : 0);
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_cacheStrategy", this.get(CrawlAttribute.CACHE_STRAGEGY.key));
         prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlerAlwaysCheckMediaType", this.isCrawlerAlwaysCheckMediaType());
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerURLMustMatch", this.get(CrawlAttribute.CRAWLER_URL_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerURLMustNotMatch", this.get(CrawlAttribute.CRAWLER_URL_MUSTNOTMATCH.key));
@@ -990,25 +1002,31 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerIPMustMatch", this.get(CrawlAttribute.CRAWLER_IP_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerIPMustNotMatch", this.get(CrawlAttribute.CRAWLER_IP_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerCountryMustMatch", this.get(CrawlAttribute.CRAWLER_COUNTRY_MUSTMATCH.key));
-        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_crawlerNoLimitURLMustMatch", this.get(CrawlAttribute.CRAWLER_URL_NODEPTHLIMITMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexURLMustMatch", this.get(CrawlAttribute.INDEXING_URL_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexURLMustNotMatch", this.get(CrawlAttribute.INDEXING_URL_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexContentMustMatch", this.get(CrawlAttribute.INDEXING_CONTENT_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_indexContentMustNotMatch", this.get(CrawlAttribute.INDEXING_CONTENT_MUSTNOTMATCH.key));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.NOINDEX_WHEN_CANONICAL_UNEQUAL_URL, noindexWhenCanonicalUnequalURL() ? 1 : 0);
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key, this.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key, this.get(CrawlAttribute.INDEXING_MEDIA_TYPE_MUSTNOTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key, this.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTMATCH.key));
         prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key, this.get(CrawlAttribute.INDEXING_SOLR_QUERY_MUSTNOTMATCH.key));
-        //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_mustmatch", this.urlMustMatchPattern().toString()); // TODO: remove, replace with crawlerURLMustMatch
-        //prop.putXML(CRAWL_PROFILE_PREFIX + count + "_mustnotmatch", this.urlMustNotMatchPattern().toString()); // TODO: remove, replace with crawlerURLMustNotMatch
-        //prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingIfOlder", (this.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(this.recrawlIfOlder())); // TODO: remove, replace with recrawlIfOlder
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_crawlingDomFilterDepth", "inactive");
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_status", terminateButton ? 1 : deleteButton ? 0 : 2);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton", terminateButton);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_terminateButton_handle", this.handle());
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton", deleteButton);
-        prop.put(CRAWL_PROFILE_PREFIX + count + "_deleteButton_handle", this.handle());
-        
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_recrawlIfOlder", this.recrawlIfOlder() == Long.MAX_VALUE ? "eternity" : (new Date(this.recrawlIfOlder()).toString()));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_storeHTCache", this.storeHTCache() ? 1 : 0);
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_cacheStrategy", this.get(CrawlAttribute.CACHE_STRAGEGY.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_agentName", this.get(CrawlAttribute.AGENT_NAME.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_MAXDEPTH.key, this.get(CrawlAttribute.SNAPSHOTS_MAXDEPTH.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_REPLACEOLD.key, this.get(CrawlAttribute.SNAPSHOTS_REPLACEOLD.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key, this.get(CrawlAttribute.SNAPSHOTS_MUSTNOTMATCH.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.SNAPSHOTS_LOADIMAGE.key, this.get(CrawlAttribute.SNAPSHOTS_LOADIMAGE.key));
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_remoteIndexing", this.remoteIndexing() ? 1 : 0);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexText", this.indexText() ? 1 : 0);
+        prop.put(CRAWL_PROFILE_PREFIX + count + "_indexMedia", this.indexMedia() ? 1 : 0);
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.COLLECTIONS.key, this.get(CrawlAttribute.COLLECTIONS.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.DEFAULT_VALENCY.key, this.get(CrawlAttribute.DEFAULT_VALENCY.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.VALENCY_SWITCH_TAG_NAMES.key, this.get(CrawlAttribute.VALENCY_SWITCH_TAG_NAMES.key));
+        prop.putXML(CRAWL_PROFILE_PREFIX + count + "_" + CrawlAttribute.TIMEZONEOFFSET.key, this.get(CrawlAttribute.TIMEZONEOFFSET.key));
+
         int i = 0;
         if (active && this.domMaxPages() > 0 && this.domMaxPages() != Integer.MAX_VALUE) {
             String item;
@@ -1021,7 +1039,7 @@ public class CrawlProfile extends ConcurrentHashMap<String, String> implements M
         prop.put(CRAWL_PROFILE_PREFIX+count+"_crawlingDomFilterContent", i);
 
     }
-    
+
     public static void main(String[] args) {
         // test to convert the key set from set to string and back
         Set<String> a = new HashSet<>();

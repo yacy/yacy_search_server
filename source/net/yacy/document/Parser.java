@@ -28,6 +28,7 @@ import java.util.Set;
 
 import net.yacy.cora.document.id.DigestURL;
 import net.yacy.cora.document.id.MultiProtocolURL;
+import net.yacy.document.parser.html.TagValency;
 
 public interface Parser {
 
@@ -63,72 +64,87 @@ public interface Parser {
             int timezoneOffset,
             InputStream source
             ) throws Parser.Failure, InterruptedException;
-    
+
     public Document[] parse(
             DigestURL url,
             String mimeType,
             String charset,
-            Set<String> ignore_class_name,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
             VocabularyScraper scraper,
             int timezoneOffset,
             InputStream source
             ) throws Parser.Failure, InterruptedException;
-    
+
     /**
-	 * Parse an input stream, eventually terminating processing when a total of
-	 * maxLinks URLS (anchors, images links, media links...) have been reached,
-	 * or when maxBytes content bytes have been processed, thus potentially
-	 * resulting in partially parsed documents (with
-	 * {@link Document#isPartiallyParsed()} returning true). Some parser
-	 * implementations will not support parsing within maxLinks or maxBytes
-	 * limits : make sure to check this by calling fist
-	 * {@link #isParseWithLimitsSupported()}, or a UnsupportedOperationException
-	 * could be thrown.
-	 * 
-	 * @param url
-	 *            the URL of the source
-	 * @param mimeType
-	 *            the mime type of the source, if known
-	 * @param charset
-	 *            the charset name of the source, if known
-	 * @param scraper
-	 *            an entity scraper to detect facets from text annotation
-	 *            context
-	 * @param timezoneOffset
-	 *            the local time zone offset
-	 * @param source
-	 *            a input stream
-	 * @param maxLinks
-	 *            the maximum total number of links to parse and add to the
-	 *            result documents
-	 * @param maxBytes
-	 *            the maximum number of content bytes to process
-	 * @return a list of documents that result from parsing the source, with
-	 *         empty or null text.
-	 * @throws Parser.Failure
-	 *             when the parser processing failed
-	 * @throws InterruptedException
-	 *             when the processing was interrupted before termination
-	 * @throws UnsupportedOperationException
-	 *             when the parser implementation doesn't support parsing within
-	 *             limits
-	 */
-	public Document[] parseWithLimits(DigestURL url, String mimeType, String charset,
-			VocabularyScraper scraper,
-			int timezoneOffset, InputStream source, int maxLinks, long maxBytes)
-			throws Parser.Failure, InterruptedException, UnsupportedOperationException;
+    * Parse an input stream, eventually terminating processing when a total of
+    * maxLinks URLS (anchors, images links, media links...) have been reached,
+    * or when maxBytes content bytes have been processed, thus potentially
+    * resulting in partially parsed documents (with
+    * {@link Document#isPartiallyParsed()} returning true). Some parser
+    * implementations will not support parsing within maxLinks or maxBytes
+    * limits : make sure to check this by calling fist
+    * {@link #isParseWithLimitsSupported()}, or a UnsupportedOperationException
+    * could be thrown.
+    * 
+    * @param url
+    *            the URL of the source
+    * @param mimeType
+    *            the mime type of the source, if known
+    * @param charset
+    *            the charset name of the source, if known
+    * @param scraper
+    *            an entity scraper to detect facets from text annotation
+    *            context
+    * @param timezoneOffset
+    *            the local time zone offset
+    * @param source
+    *            a input stream
+    * @param maxLinks
+    *            the maximum total number of links to parse and add to the
+    *            result documents
+    * @param maxBytes
+    *            the maximum number of content bytes to process
+    * @return a list of documents that result from parsing the source, with
+    *         empty or null text.
+    * @throws Parser.Failure
+    *             when the parser processing failed
+    * @throws InterruptedException
+    *             when the processing was interrupted before termination
+    * @throws UnsupportedOperationException
+    *             when the parser implementation doesn't support parsing within
+    *             limits
+    */
+    public Document[] parseWithLimits(
+            DigestURL url,
+            String mimeType,
+            String charset,
+            VocabularyScraper scraper,
+            int timezoneOffset,
+            InputStream source,
+            int maxLinks,
+            long maxBytes)
+                    throws Parser.Failure, InterruptedException, UnsupportedOperationException;
 
 
-    public Document[] parseWithLimits(final DigestURL location, final String mimeType, final String documentCharset,
-    		final Set<String> ignore_class_name, final VocabularyScraper vocscraper,
-    		final int timezoneOffset, final InputStream sourceStream, final int maxLinks, final long maxBytes)
-    				throws Parser.Failure, InterruptedException, UnsupportedOperationException;
+    public Document[] parseWithLimits(
+            final DigestURL location,
+            final String mimeType,
+            final String documentCharset,
+            final TagValency defaultValency,
+            final Set<String> valencySwitchTagNames,
+            final VocabularyScraper vocscraper,
+            final int timezoneOffset,
+            final InputStream sourceStream,
+            final int maxLinks,
+            final long maxBytes)
+                    throws Parser.Failure, InterruptedException, UnsupportedOperationException;
 
-	/**
-	 * @return true when the parser implementation supports the
-	 *         parseWithLimits() operation.
-	 */
-	public boolean isParseWithLimitsSupported();
+    /**
+    * @return true when the parser implementation supports the
+    *         parseWithLimits() operation.
+    */
+    public boolean isParseWithLimitsSupported();
 
     // methods to that shall make it possible to put Parser objects into a hashtable
 

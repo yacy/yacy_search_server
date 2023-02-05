@@ -44,6 +44,7 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.kelondro.util.FileUtils;
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.IInStream;
@@ -63,7 +64,8 @@ public class sevenzipParser extends AbstractParser implements Parser {
             final DigestURL location,
             final String mimeType,
             final String charset,
-            final Set<String> ignore_class_name,
+            final TagValency defaultValency, 
+            final Set<String> valencySwitchTagNames,
             final int timezoneOffset,
             final IInStream source) throws Parser.Failure, InterruptedException {
 
@@ -94,7 +96,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
         } catch (final IOException e) {
             throw new Parser.Failure("error opening 7zip archive: " + e.getMessage(), location);
         }
-        final SZParserExtractCallback aec = new SZParserExtractCallback(AbstractParser.log, archive, doc, location.getFile(), ignore_class_name, timezoneOffset);
+        final SZParserExtractCallback aec = new SZParserExtractCallback(AbstractParser.log, archive, doc, location.getFile(), defaultValency, valencySwitchTagNames, timezoneOffset);
         AbstractParser.log.fine("processing archive contents...");
         try {
             archive.Extract(null, -1, 0, aec);
@@ -116,10 +118,11 @@ public class sevenzipParser extends AbstractParser implements Parser {
             final DigestURL location,
             final String mimeType,
             final String charset,
-            final Set<String> ignore_class_name,
+            final TagValency defaultValency, 
+            final Set<String> valencySwitchTagNames,
             final int timezoneOffset,
             final byte[] source) throws Parser.Failure, InterruptedException {
-        return parse(location, mimeType, charset, ignore_class_name, timezoneOffset, new ByteArrayIInStream(source));
+        return parse(location, mimeType, charset, defaultValency, valencySwitchTagNames, timezoneOffset, new ByteArrayIInStream(source));
     }
 
     @Override
@@ -127,14 +130,15 @@ public class sevenzipParser extends AbstractParser implements Parser {
             final DigestURL location,
             final String mimeType,
             final String charset,
-            Set<String> ignore_class_name,
+            final TagValency defaultValency, 
+            final Set<String> valencySwitchTagNames,
             final VocabularyScraper scraper, 
             final int timezoneOffset,
             final InputStream source) throws Parser.Failure, InterruptedException {
         try {
             final ByteArrayOutputStream cfos = new ByteArrayOutputStream();
             FileUtils.copy(source, cfos);
-            return new Document[]{parse(location, mimeType, charset, ignore_class_name, timezoneOffset, cfos.toByteArray())};
+            return new Document[]{parse(location, mimeType, charset, defaultValency, valencySwitchTagNames, timezoneOffset, cfos.toByteArray())};
         } catch (final IOException e) {
             throw new Parser.Failure("error processing 7zip archive: " + e.getMessage(), location);
         }
@@ -148,7 +152,8 @@ public class sevenzipParser extends AbstractParser implements Parser {
          private ByteArrayOutputStream cfos = null;
          private final Document doc;
          private final String prefix;
-         private Set<String> ignore_class_name;
+         private final TagValency defaultValency;
+         private Set<String> valencySwitchTagNames;
          private final int timezoneOffset;
 
          public SZParserExtractCallback(
@@ -156,13 +161,15 @@ public class sevenzipParser extends AbstractParser implements Parser {
                  final IInArchive handler,
                  final Document doc,
                  final String prefix,
-                 final Set<String> ignore_class_name,
+                 final TagValency defaultValency, 
+                 final Set<String> valencySwitchTagNames,
                  final int timezoneOffset) {
              super.Init(handler);
              this.log = logger;
              this.doc = doc;
              this.prefix = prefix;
-             this.ignore_class_name = ignore_class_name;
+             this.defaultValency = defaultValency;
+             this.valencySwitchTagNames = valencySwitchTagNames;
              this.timezoneOffset = timezoneOffset;
          }
 
@@ -205,7 +212,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
                      // below for reversion of the effects
                      final AnchorURL url = AnchorURL.newAnchor(this.doc.dc_source(), this.prefix + "/" + super.filePath);
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
-                     theDocs = TextParser.parseSource(url, mime, null, this.ignore_class_name, new VocabularyScraper(), timezoneOffset, this.doc.getDepth() + 1, this.cfos.toByteArray());
+                     theDocs = TextParser.parseSource(url, mime, null,this.defaultValency, this.valencySwitchTagNames, new VocabularyScraper(), timezoneOffset, this.doc.getDepth() + 1, this.cfos.toByteArray());
 
                      this.doc.addSubDocuments(theDocs);
                  }

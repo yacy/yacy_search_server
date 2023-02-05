@@ -45,6 +45,7 @@ import net.yacy.document.Document;
 import net.yacy.document.LibraryProvider;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.search.schema.CollectionConfiguration;
 import net.yacy.search.schema.WebgraphConfiguration;
@@ -162,24 +163,24 @@ public class DocumentIndex extends Segment {
         }
         InputStream sourceStream = null;
         try {
-        	sourceStream = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
-            documents = TextParser.parseSource(url, null, null, new HashSet<String>(), new VocabularyScraper(), timezoneOffset, 0, length, sourceStream);
+            sourceStream = url.getInputStream(ClientIdentification.yacyInternetCrawlerAgent);
+            documents = TextParser.parseSource(url, null, null, TagValency.EVAL, new HashSet<String>(), new VocabularyScraper(), timezoneOffset, 0, length, sourceStream);
         } catch (final Exception e ) {
             throw new IOException("cannot parse " + url.toNormalform(false) + ": " + e.getMessage());
         } finally {
-        	if(sourceStream != null) {
-        		try {
-        			sourceStream.close();
-        		} catch(IOException e) {
-        			ConcurrentLog.warn("DocumentIndex", "Could not close source stream : " + e.getMessage());
-        		}
-        	}
+            if(sourceStream != null) {
+                try {
+                    sourceStream.close();
+                } catch(IOException e) {
+                    ConcurrentLog.warn("DocumentIndex", "Could not close source stream : " + e.getMessage());
+                }
+            }
         }
         //Document document = Document.mergeDocuments(url, null, documents);
         final SolrInputDocument[] rows = new SolrInputDocument[documents.length];
         int c = 0;
         for ( final Document document : documents ) {
-        	if (document == null) continue;
+            if (document == null) continue;
             final Condenser condenser = new Condenser(document, null, true, true, LibraryProvider.dymLib, true, true, 0);
             rows[c++] =
                 super.storeDocument(

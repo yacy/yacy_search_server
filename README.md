@@ -53,7 +53,7 @@ The (GPLv2+) source code used to build YaCy is distributed with the package (in 
 - [French wiki](https://wiki.yacy.net/index.php/Fr:Start)
 - [Spanish wiki](https://wiki.yacy.net/index.php/Es:Start)
 - [Russian wiki](https://wiki.yacy.net/index.php/Ru:Start)
-- [Video tutorials in English](https://yacy.net/en/Tutorials.html) and [video tutorials in German](https://yacy.net/de/Lehrfilme.html)
+- [Video tutorials](https://www.youtube.com/@YaCyTutorials/videos)
 
 All these have (YaCy) search functionality combining all these locations into one search result.
 

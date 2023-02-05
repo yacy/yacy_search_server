@@ -369,6 +369,13 @@ public class CrawlStartExpert {
             }
         }
 
+        // Check Canonical?
+        if (post == null) {
+            prop.put("noindexWhenCanonicalUnequalURLChecked", 1);
+        } else {
+            prop.put("noindexWhenCanonicalUnequalURLChecked",
+                    post.getBoolean("noindexWhenCanonicalUnequalURL") ? 1 : 0);
+        }
 
         // ---------- Clean-Up before Crawl Start
         // delete if older settings: number value
@@ -588,12 +595,28 @@ public class CrawlStartExpert {
         prop.put("list", agentNames.size());
         prop.put("defaultAgentName", sb.isIntranetMode() ? ClientIdentification.yacyIntranetCrawlerAgentName : ClientIdentification.yacyInternetCrawlerAgentName);
 
-        // ---------- Ignore Class Name
-        if (post != null && post.containsKey("ignoreclassname")) {
-            prop.put("ignoreclassname",
-                    post.get("ignoreclassname", ""));
+        // ---------- Valency Switch Tag Names
+        if (post != null && post.containsKey("valency_switch_tag_names")) {
+            prop.put("valency_switch_tag_names", post.get("valency_switch_tag_names", ""));
         } else {
-            prop.put("ignoreclassname", "");
+            prop.put("valency_switch_tag_names", "");
+        }
+        if (post != null && post.containsKey("default_valency")) {
+            final String default_valency = post.get("default_valency", "");
+            if (default_valency.equalsIgnoreCase("EVAL")){
+                prop.put("default_valency_eval", 1);
+                prop.put("default_valency_ignore", 0);
+            } else if (default_valency.equalsIgnoreCase("IGNORE")) {
+                prop.put("default_valency_eval", 0);
+                prop.put("default_valency_ignore", 1);
+                prop.put("default_valency_ignore", 0);
+            } else {
+                prop.put("default_valency_eval", 1);
+                prop.put("default_valency_ignore", 0);
+            }
+        } else {
+            prop.put("default_valency_eval", 1);
+            prop.put("default_valency_ignore", 0);
         }
 
         // ---------- Enrich Vocabulary

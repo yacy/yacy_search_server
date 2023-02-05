@@ -412,6 +412,9 @@
             <table style="border-width: 0px">
             <tr><td style="width:110px"><img src="env/grafics/plus.gif" alt=""> must-match</td><td><input name="indexmustmatch" id="indexmustmatch" type="text" size="55" maxlength="100000" value="#[indexmustmatch]#" onblur="if (this.value=='') this.value='.*';"/> (must not be empty)</td></tr>
             <tr><td><img src="env/grafics/minus.gif" alt=""> must-not-match</td><td><input name="indexmustnotmatch" id="indexmustnotmatch" type="text" size="55" maxlength="100000" value="#[indexmustnotmatch]#" /></td></tr>
+            <tr>
+              <td colspan="2"><input type="checkbox" name="noindexWhenCanonicalUnequalURL" id="noindexWhenCanonicalUnequalURL" #(noindexWhenCanonicalUnequalURLChecked)#::checked="checked"#(/noindexWhenCanonicalUnequalURLChecked)#/> No Indexing when Canonical present and Canonical != URL</td>
+            </tr>
             </table>
             </dd>
             <dt>Filter on Content of Document<br/>(all visible text, including camel-case-tokenized url and title)</dt>
@@ -470,7 +473,7 @@
                     <tr>
                         <td style="width:110px"><img src="env/grafics/minus.gif" alt=""> must-not-match</td>
                         <td>
-                            <input name="indexSolrQueryMustNotMatch" id="indexSolrQueryMustNotMatch" type="text" size="55" maxlength="100000" value="#[indexSolrQueryMustNotMatch]#" aria-describedby="indexSolrQueryInfo" />
+                            <input name="indexSolrQueryMustNotMatch" id="indexSolrQueryMustNotMatch" type="text" size="55" maxlength="100000" value="#[indexSolrQueryMustNotMatch]#" aria-describedby="indexSolrQueryInfo" enabled="false"/>
                         </td>
                     </tr>
                     #(/embeddedSolrConnected)#
@@ -480,12 +483,24 @@
         </fieldset>
         <fieldset>
           <legend>Content Filter</legend>
-          <p>These are limitations on parts of a document. The filter will be applied after a web page was loaded.</p>
+          <p>These are limitations on parts of a document. The filter will be applied after a web page was loaded.
+          You can choose to:</p>
           <dl>
+            <dt>Evaluate by default</dt>
+            <dd><input type="radio" name="default_valency" id="default_valency_eval" value="EVAL" #(default_valency_eval)#::checked="checked"#(/default_valency_eval)#/>
+            Use all words in document by default until a CSS class as listed below appears; then ignore all
+            </dd>
+            <dt>Ignore by default</dt>
+            <dd><input type="radio" name="default_valency" id="default_valency_ignore" value="IGNORE" #(default_valency_ignore)#::checked="checked"#(/default_valency_ignore)#/>
+            Ignore all words in document by default until a CSS class as listed below appears, then evaluate all
+            </dd>
             <dt>Filter div or nav class names</dt>
             <dd>
             <table style="border-width: 0px">
-            <tr><td style="width:110px">set of CSS class names</td><td><input name="ignoreclassname" id="ignoreclassname" type="text" size="55" maxlength="100000" value="#[ignoreclassname]#" onblur="if (this.value=='') this.value='';"/></td><td>comma-separated list of &lt;div&gt; or &lt;nav&gt; element class names which should be filtered out</td></tr>
+              <tr>
+                <td><input name="valency_switch_tag_names" id="valency_switch_tag_names" type="text" size="55" maxlength="100000" value="#[valency_switch_tag_names]#" onblur="if (this.value=='') this.value='';"/></td>
+                <td>comma-separated list of &lt;div&gt; or &lt;nav&gt; element class names which should be filtered out/in according to switch above.</td>
+              </tr>
             </table>
             </dd>
           </dl>

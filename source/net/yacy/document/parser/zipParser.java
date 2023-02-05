@@ -39,6 +39,7 @@ import net.yacy.document.Document;
 import net.yacy.document.Parser;
 import net.yacy.document.TextParser;
 import net.yacy.document.VocabularyScraper;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -72,7 +73,8 @@ public class zipParser extends AbstractParser implements Parser {
             final DigestURL location,
             final String mimeType,
             final String charset,
-            final Set<String> ignore_class_name,
+            final TagValency defaultValency, 
+            final Set<String> valencySwitchTagNames,
             final VocabularyScraper scraper, 
             final int timezoneOffset,
             final InputStream source)
@@ -121,7 +123,7 @@ public class zipParser extends AbstractParser implements Parser {
                     FileUtils.copy(zis, tmp, entry.getSize());
                     final DigestURL virtualURL = DigestURL.newURL(location, "#" + name);
                     //this.log.logInfo("ZIP file parser: " + virtualURL.toNormalform(false, false));
-                    final Document[] docs = TextParser.parseSource(virtualURL, mime, null, ignore_class_name, scraper, timezoneOffset, 999, tmp);
+                    final Document[] docs = TextParser.parseSource(virtualURL, mime, null, defaultValency, valencySwitchTagNames, scraper, timezoneOffset, 999, tmp);
                     if (docs == null) continue;
                     maindoc.addSubDocuments(docs);
                 } catch (final Parser.Failure e) {

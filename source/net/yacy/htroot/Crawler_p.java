@@ -316,6 +316,7 @@ public class Crawler_p {
                 final String indexUrlMustNotMatch = post.get("indexmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
                 final String indexContentMustMatch = post.get("indexcontentmustmatch", CrawlProfile.MATCH_ALL_STRING);
                 final String indexContentMustNotMatch = post.get("indexcontentmustnotmatch", CrawlProfile.MATCH_NEVER_STRING);
+                final boolean noindexWhenCanonicalUnequalURL = "on".equals(post.get("noindexWhenCanonicalUnequalURL", "off"));
 
                 final boolean crawlOrder = post.get("crawlOrder", "off").equals("on");
                 env.setConfig("crawlOrder", crawlOrder);
@@ -485,13 +486,18 @@ public class Crawler_p {
                 final boolean snapshotsReplaceOld = post.getBoolean("snapshotsReplaceOld");
                 final String snapshotsMustnotmatch = post.get("snapshotsMustnotmatch", "");
 
-                final String ignoreclassname_s = post.get("ignoreclassname");
-                final Set<String> ignoreclassname = new HashSet<>();
-                if (ignoreclassname_s != null) {
-                    final String[] ignoreclassname_a = ignoreclassname_s.trim().split(",");
-                    for (int i = 0; i < ignoreclassname_a.length; i++) {
-                        ignoreclassname.add(ignoreclassname_a[i].trim());
+                final String valency_switch_tag_names_s = post.get("valency_switch_tag_names");
+                final Set<String> valency_switch_tag_names = new HashSet<>();
+                if (valency_switch_tag_names_s != null) {
+                    final String[] valency_switch_tag_name_a = valency_switch_tag_names_s.trim().split(",");
+                    for (int i = 0; i < valency_switch_tag_name_a.length; i++) {
+                        valency_switch_tag_names.add(valency_switch_tag_name_a[i].trim());
                     }
+                }
+                final String default_valency_radio = post.get("default_valency");
+                TagValency default_valency = TagValency.EVAL;
+                if (default_valency_radio != null && default_valency_radio.equals("IGNORE")) {
+                    default_valency = TagValency.IGNORE;
                 }
 
                 // get vocabulary scraper info
@@ -609,6 +615,7 @@ public class Crawler_p {
                             indexUrlMustNotMatch,
                             indexContentMustMatch,
                             indexContentMustNotMatch,
+                            noindexWhenCanonicalUnequalURL,
                             newcrawlingdepth,
                             directDocByURL,
                             crawlingIfOlder,
@@ -626,7 +633,8 @@ public class Crawler_p {
                             cachePolicy,
                             collection,
                             agentName,
-                            ignoreclassname,
+                            default_valency,
+                            valency_switch_tag_names,
                             new VocabularyScraper(vocabulary_scraper),
                             timezoneOffset);
 

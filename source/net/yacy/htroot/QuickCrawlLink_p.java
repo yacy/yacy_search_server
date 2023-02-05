@@ -43,6 +43,7 @@ import net.yacy.cora.protocol.HeaderFramework;
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.crawler.data.CrawlProfile;
 import net.yacy.crawler.retrieval.Request;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.search.Switchboard;
 import net.yacy.search.SwitchboardConstants;
 import net.yacy.search.index.Segment;
@@ -149,6 +150,7 @@ public class QuickCrawlLink_p {
                         CrawlProfile.MATCH_NEVER_STRING, //indexUrlMustNotMatch
                         CrawlProfile.MATCH_ALL_STRING,   //indexContentMustMatch
                         CrawlProfile.MATCH_NEVER_STRING, //indexContentMustNotMatch
+                        false,
                         CrawlingDepth,
                         true,
                         CrawlProfile.getRecrawlDate(60 * 24 * 30), // recrawlIfOlder (minutes); here: one month
@@ -161,7 +163,7 @@ public class QuickCrawlLink_p {
                         CacheStrategy.IFFRESH,
                         collection,
                         ClientIdentification.yacyIntranetCrawlerAgentName,
-                        null, null,
+                        TagValency.EVAL, null, null,
                         timezoneOffset);
                 sb.crawler.putActive(pe.handle().getBytes(), pe);
             } catch (final Exception e) {

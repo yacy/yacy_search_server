@@ -132,7 +132,7 @@ public class HTTPClient implements Closeable {
     /** Default maximum time in seconds to keep alive an idle connection in the pool */
     private static final int DEFAULT_POOLED_CONNECTION_TIME_TO_LIVE = 30;
 
-    private static final RequestConfig DFLTREQUESTCONFIG = initRequestConfig();
+    private static RequestConfig DFLTREQUESTCONFIG = initRequestConfig(default_timeout);
 
     /** Use the custom YaCyDigestScheme for HTTP Digest Authentication */
     private static final Lookup<AuthSchemeProvider> AUTHSCHEMEREGISTRY = RegistryBuilder.<AuthSchemeProvider>create()
@@ -198,15 +198,15 @@ public class HTTPClient implements Closeable {
         setTimout(timeout);
     }
 
-    private static RequestConfig initRequestConfig() {
+    private static RequestConfig initRequestConfig(int timeout) {
         final RequestConfig.Builder builder = RequestConfig.custom();
         // IMPORTANT - if not set to 'false' then servers do not process the request until a time-out of 2 seconds
         builder.setExpectContinueEnabled(false);
         // timeout in milliseconds until a connection is established in milliseconds
-        builder.setConnectionRequestTimeout(default_timeout);
-        builder.setConnectTimeout(default_timeout);
+        builder.setConnectionRequestTimeout(timeout);
+        builder.setConnectTimeout(timeout);
         // SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
-        builder.setSocketTimeout(default_timeout);
+        builder.setSocketTimeout(timeout);
         // ignore cookies, cause this may cause segfaults in default cookiestore and is not needed
         builder.setCookieSpec(CookieSpecs.IGNORE_COOKIES);
         builder.setRedirectsEnabled(true);
@@ -265,7 +265,7 @@ public class HTTPClient implements Closeable {
                 // Defines whether the socket can be bound even though a previous connection is still in a timeout state.
                 .setSoReuseAddress(true)
                 // SO_TIMEOUT: maximum period inactivity between two consecutive data packets in milliseconds
-                .setSoTimeout(3000)
+                .setSoTimeout(default_timeout)
                 // conserve bandwidth by minimizing the number of segments that are sent
                 .setTcpNoDelay(false)
                 .build();
@@ -343,6 +343,7 @@ public class HTTPClient implements Closeable {
         this.reqConfBuilder.setSocketTimeout(timeout);
         this.reqConfBuilder.setConnectTimeout(timeout);
         this.reqConfBuilder.setConnectionRequestTimeout(timeout);
+        DFLTREQUESTCONFIG = initRequestConfig(timeout);
     }
 
     /**
@@ -901,10 +902,14 @@ public class HTTPClient implements Closeable {
             }
             this.httpResponse.setHeader(HeaderFramework.RESPONSE_TIME_MILLIS, Long.toString(System.currentTimeMillis() - time));
         } catch (final Throwable e) {
+            long runtime = System.currentTimeMillis() - time;
             close();
             throw new IOException("Client can't execute: "
                     + (e.getCause() == null ? e.getMessage() : e.getCause().getMessage())
-                    + " duration=" + Long.toString(System.currentTimeMillis() - time) + " for url " + uri);
+                    + ", timeout=" + this.timeout
+                    + ", duration=" + Long.toString(runtime)
+                    + ", concurrent=" + Boolean.toString(concurrent)
+                    + ", url=" + uri);
         } finally {
             /* Restore the thread initial name */
             Thread.currentThread().setName(initialThreadName);
