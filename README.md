@@ -47,6 +47,7 @@ The (GPLv2+) source code used to build YaCy is distributed with the package (in 
 
 - [Homepage](https://yacy.net)
 - [International Forum](https://community.searchlab.eu)
+- [English wiki](https://wiki.yacy.net/index.php/En:Start)
 - [German wiki](https://wiki.yacy.net/index.php/De:Start)
 - [Esperanto wiki](https://wiki.yacy.net/index.php/Eo:Start)
 - [French wiki](https://wiki.yacy.net/index.php/Fr:Start)
