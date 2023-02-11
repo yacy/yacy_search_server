@@ -153,7 +153,7 @@ public class ConfigUser_p {
                 } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                 }
-                final YaCyHttpServer jhttpserver = (YaCyHttpServer) sb.getHttpServer();
+                final YaCyHttpServer jhttpserver = sb.getHttpServer();
                 jhttpserver.resetUser(entry.getUserName());
             } else {
                 prop.put("error", "1");
@@ -164,7 +164,7 @@ public class ConfigUser_p {
             prop.putHTML("username", username);
         } else if (post.containsKey("delete")) {
             sb.userDB.removeEntry(post.get("username"));
-            final YaCyHttpServer jhttpserver = (YaCyHttpServer) sb.getHttpServer();
+            final YaCyHttpServer jhttpserver = sb.getHttpServer();
             jhttpserver.removeUser(post.get("username"));
             prop.put(serverObjects.ACTION_LOCATION, "ConfigAccountList_p.html"); // jump back to user list
         }
