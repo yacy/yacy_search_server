@@ -1,4 +1,4 @@
-<project name="YaCy" default="all" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:if="ant:if" xmlns:unless="ant:unless">
+<project name="YaCy" default="compile" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant" xmlns:if="ant:if" xmlns:unless="ant:unless">
   <description>
     YaCy - a Peer to Peer Web Search Engine
   </description>
@@ -45,19 +45,17 @@
   <property name="locales" location="locales"/>
   <property name="skins" location="skins"/>
   <property name="release" location="RELEASE"/>
-  <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
   <property name="release_main" location="${release}/MAIN"/>
   <property name="release_windows" location="${release}/WINDOWS"/>
   <property name="release_mac" location="${release}/MAC"/>
   <property name="defaults" location="defaults"/>
-  <property name="RDFaParser" location="RDFaParser"/>
 
   <!-- defining all needed directory names for packing search widget-->
   <property name="jquery" location="htroot/jquery/"/>
   <property name="portalsearch" location="htroot/portalsearch/"/>
   <property name="img-2" location="htroot/yacy/ui/img-2"/>
 
-  <target name="install-ivy" description="--> install ivy">
+  <target name="install-ivy" description="install ivy">
     <local name="ivy.download.dir"/><property name="ivy.download.dir" value="${basedir}/ivy" />
     <local name="ivy.download.file"/><property name="ivy.download.file" value="${ivy.download.dir}/ivy.jar" />
     <local name="ivy.download.version"/><property name="ivy.install.version" value="2.5.0"/>
@@ -80,7 +78,7 @@
     <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpath="${ivy.jar.file}"/>
   </target>
 
-  <target name="resolve" depends="install-ivy" description="--> retrieve dependencies with Ivy" unless="target-resolve-already-run">
+  <target name="resolve" depends="install-ivy" description="retrieve dependencies with Ivy" unless="target-resolve-already-run">
     <!-- The recommended way is to [conf] in the retrieve pattern instead of two calls to retrieve.
          We can move there in a following step.
          ${lib} just happens to be equal to ${ivy.lib.dir}.
@@ -166,7 +164,7 @@
         <path refid="compile.path" />
     </path>
 
-  <target name="compile-core" depends="init,resolve" description="compile YaCy core">
+  <target name="compile" depends="init,resolve" description="compile YaCy core">
     <!-- compile the core sources -->
     <echo message="project.class.path: ${toString:project.class.path}" />
     <javac srcdir="${src}/" destdir="${build}"
@@ -196,11 +194,6 @@
       </manifest>
     </jar>
 
-  </target>
-
-  <target name="compile" depends="compile-core" description="compile YaCy core and YaCy servlets" />
-
-  <target name="all" depends="compile">
   </target>
 
   <target name="copyMain4Dist" depends="compile">      
