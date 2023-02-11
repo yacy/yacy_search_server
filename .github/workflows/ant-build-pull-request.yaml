@@ -13,4 +13,4 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
     - name: Build with ant
-      run: ant clean all dist
+      run: ant clean compile dist
