@@ -99,22 +99,8 @@ public class NetworkPicture {
         }
 
         //too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
-        if ( width < 320 ) {
-            width = 320;
-        }
-        if ( width > 1920 ) {
-            width = 1920;
-        }
-        if ( height < 240 ) {
-            height = 240;
-        }
-        if ( height > 1280 ) {
-            height = 1280;
-        }
-        if ( !authorized ) {
-            width = Math.min(1280, width);
-            height = Math.min(1280, height);
-        }
+        width  = Math.min(2048, Math.max(320, width));
+        height = Math.min(1280, Math.max(240, height));
         if ( passiveLimit > 1000000 ) {
             passiveLimit = 1000000;
         }
