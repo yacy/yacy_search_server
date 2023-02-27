@@ -12,7 +12,7 @@ ENV PATH="/usr/lib/jvm/default/bin:${PATH}"
 # set the JAVA_HOME variable
 ENV JAVA_HOME="/usr/lib/jvm/default"
 WORKDIR /opt
-RUN curl "https://downloads.apache.org/ant/source/apache-ant-1.10.12-src.tar.gz" --output ant-src.tar.gz && \
+RUN curl "https://downloads.apache.org/ant/source/apache-ant-1.10.13-src.tar.gz" --output ant-src.tar.gz && \
 tar -xzf ant-src.tar.gz && \
 rm ant-src.tar.gz && \
 mv apache-ant-* ant-src && \
