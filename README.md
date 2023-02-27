@@ -1,6 +1,7 @@
 # YaCy
 [![Gitter](https://badges.gitter.im/yacy/yacy_search_server.svg)](https://gitter.im/yacy/yacy_search_server?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://travis-ci.org/yacy/yacy_search_server.svg?branch=master)](https://travis-ci.com/yacy/yacy_search_server)
+[![Install Link](https://img.shields.io/badge/install-stable-blue.svg)](https://yacy.net/download_installation/)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
@@ -46,12 +47,13 @@ The (GPLv2+) source code used to build YaCy is distributed with the package (in 
 
 - [Homepage](https://yacy.net)
 - [International Forum](https://community.searchlab.eu)
+- [English wiki](https://wiki.yacy.net/index.php/En:Start)
 - [German wiki](https://wiki.yacy.net/index.php/De:Start)
 - [Esperanto wiki](https://wiki.yacy.net/index.php/Eo:Start)
 - [French wiki](https://wiki.yacy.net/index.php/Fr:Start)
 - [Spanish wiki](https://wiki.yacy.net/index.php/Es:Start)
 - [Russian wiki](https://wiki.yacy.net/index.php/Ru:Start)
-- [Video tutorials in English](https://yacy.net/en/Tutorials.html) and [video tutorials in German](https://yacy.net/de/Lehrfilme.html)
+- [Video tutorials](https://www.youtube.com/@YaCyTutorials/videos)
 
 All these have (YaCy) search functionality combining all these locations into one search result.
 
