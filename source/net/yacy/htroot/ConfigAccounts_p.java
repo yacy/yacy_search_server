@@ -82,7 +82,7 @@ public class ConfigAccounts_p {
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5,  sb.encodeDigestAuth(user, pw1));
                 env.setConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,user);
                 // make sure server accepts new credentials
-                final YaCyHttpServer jhttpserver = (YaCyHttpServer)sb.getHttpServer();
+                final YaCyHttpServer jhttpserver = sb.getHttpServer();
                 if (!user.equals(oldusername)) jhttpserver.removeUser(oldusername);
                 jhttpserver.resetUser(user);
             } else {
