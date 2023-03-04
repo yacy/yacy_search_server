@@ -5,6 +5,7 @@ on: push
 jobs:
   build:
     runs-on: self-hosted
+    if: "github.repository == 'yacy/yacy_search_server'
     steps:
     - uses: actions/checkout@master
     - name: Set up JDK 8
