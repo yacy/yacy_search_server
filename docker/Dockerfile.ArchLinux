@@ -1,7 +1,7 @@
 FROM archlinux:latest
 # update the system and clean up
 RUN pacman -Syu --noconfirm && pacman -Scc --noconfirm
-RUN pacman -Sy java-runtime-common --noconfirm && pacman -Scc --noconfirm
+RUN pacman -Sy java-runtime-common wget --noconfirm && pacman -Scc --noconfirm
 # download latest version of graalvm and move it to /lib/jvm/java-{javaversion}-graalvm
 RUN bash <(curl -sL https://get.graalvm.org/jdk) --no-progress && \
 JAVAVERSION=$(ls ./ | grep graalvm | cut -d'-' -f3 | sed 's/java//g') && \
@@ -17,6 +17,8 @@ tar -xzf ant-src.tar.gz && \
 rm ant-src.tar.gz && \
 mv apache-ant-* ant-src && \
 cd ant-src && \
+wget -O fetch.xml "https://raw.githubusercontent.com/apache/ant/541a1d2448af3e95134f79a970a608403deab00a/fetch.xml" && \
+wget -O lib/libraries.properties "https://raw.githubusercontent.com/apache/ant/541a1d2448af3e95134f79a970a608403deab00a/lib/libraries.properties" && \
 mkdir /opt/ant && \
 sh build.sh -f fetch.xml -Ddest=optional && \
 sh build.sh -Ddist.dir=/opt/ant dist && \
