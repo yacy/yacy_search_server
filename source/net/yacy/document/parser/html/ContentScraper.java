@@ -80,10 +80,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     // statics: for initialization of the HTMLFilterAbstractScraper
     /** Set of tag names processed as singletons (no end tag, or not processing the eventual end tag) */
-    private static final Set<String> linkTags0 = new HashSet<String>(12,0.99f);
-    
+    private static final Set<String> linkTags0 = new HashSet<>(12,0.99f);
+
     /** Set of tag names processed by pairs of start and end tag */
-    private static final Set<String> linkTags1 = new HashSet<String>(15,0.99f);
+    private static final Set<String> linkTags1 = new HashSet<>(15,0.99f);
 
     private static final Pattern LB = Pattern.compile("\n");
 
@@ -147,19 +147,19 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         public Properties opts;
         public CharBuffer content;
         private TagValency tv;
-        public Tag(final String name, TagValency defaultValency) {
+        public Tag(final String name, final TagValency defaultValency) {
             this.name = name;
             this.tv = defaultValency;
             this.opts = new Properties();
             this.content = new CharBuffer(MAX_TAGSIZE);
         }
-        public Tag(final String name, TagValency defaultValency, final Properties opts) {
+        public Tag(final String name, final TagValency defaultValency, final Properties opts) {
             this.name = name;
             this.tv = defaultValency;
             this.opts = opts;
             this.content = new CharBuffer(MAX_TAGSIZE);
         }
-        public Tag(final String name, TagValency defaultValency, final Properties opts, final CharBuffer content) {
+        public Tag(final String name, final TagValency defaultValency, final Properties opts, final CharBuffer content) {
             this.name = name;
             this.tv = defaultValency;
             this.opts = opts;
@@ -173,9 +173,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         @Override
         public String toString() {
-            return "<" + name + " " + opts + ">" + content + "</" + name + ">";
+            return "<" + this.name + " " + this.opts + ">" + this.content + "</" + this.name + ">";
         }
-        
+
         /** @return true when this tag should be ignored from scraping */
         public boolean isIgnore() {
             return this.tv == TagValency.IGNORE;
@@ -201,18 +201,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final List<AnchorURL> anchors;
     private final SizeLimitedMap<DigestURL, String> rss, css;
     private final SizeLimitedMap<AnchorURL, EmbedEntry> embeds; // urlhash/embed relation
-    private final List<ImageEntry> images; 
+    private final List<ImageEntry> images;
     private final SizeLimitedSet<AnchorURL> script, frames, iframes;
-    
+
     /**
      * URLs of linked data item types referenced from HTML content with standard
      * annotations such as RDFa, microdata, microformats or JSON-LD
      */
     private final SizeLimitedSet<DigestURL> linkedDataTypes;
-    
+
     private final SizeLimitedMap<String, String> metas;
     private final SizeLimitedMap<String, DigestURL> hreflang, navigation;
-    private LinkedHashSet<String> titles;
+    private final LinkedHashSet<String> titles;
     private final List<String> articles;
     private final List<Date> startDates, endDates;
     //private String headline;
@@ -223,16 +223,16 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final EventListenerList htmlFilterEventListeners;
     private double lon, lat;
     private AnchorURL canonical, publisher;
-    
+
     /** The maximum number of URLs to process and store in the anchors property. */
     private final int maxAnchors;
-    
+
     private final VocabularyScraper vocabularyScraper;
-    
+
     /** Set of CSS class names whose matching div elements may switch from IGNORE to EVAL or vice versa */
     private final Set<String> valencySwitchTagNames;
     private final TagValency defaultValency;
-    
+
     private final int timezoneOffset;
     private int breadcrumbs;
 
@@ -249,13 +249,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * evaluation scores: count appearance of specific attributes
      */
     private final Evaluation evaluationScores;
-    
+
     /** Set to true when a limit on content size scraped has been exceeded */
     private boolean contentSizeLimitExceeded;
-    
+
     /** Set to true when the maxAnchors limit has been exceeded */
     private boolean maxAnchorsExceeded;
-    
+
     /**
      * Create an ContentScraper instance
      * @param root the document root url
@@ -274,7 +274,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final Set<String> valencySwitchTagNames,
             final TagValency defaultValency,
             final VocabularyScraper vocabularyScraper,
-            int timezoneOffset) {
+            final int timezoneOffset) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
@@ -285,31 +285,31 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.defaultValency = defaultValency;
         this.timezoneOffset = timezoneOffset;
         this.evaluationScores = new Evaluation();
-        this.rss = new SizeLimitedMap<DigestURL, String>(maxLinks);
-        this.css = new SizeLimitedMap<DigestURL, String>(maxLinks);
-        this.anchors = new ArrayList<AnchorURL>();
-        this.images = new ArrayList<ImageEntry>();
+        this.rss = new SizeLimitedMap<>(maxLinks);
+        this.css = new SizeLimitedMap<>(maxLinks);
+        this.anchors = new ArrayList<>();
+        this.images = new ArrayList<>();
         this.icons = new HashMap<>();
-        this.embeds = new SizeLimitedMap<AnchorURL, EmbedEntry>(maxLinks);
-        this.frames = new SizeLimitedSet<AnchorURL>(maxLinks);
-        this.iframes = new SizeLimitedSet<AnchorURL>(maxLinks);
+        this.embeds = new SizeLimitedMap<>(maxLinks);
+        this.frames = new SizeLimitedSet<>(maxLinks);
+        this.iframes = new SizeLimitedSet<>(maxLinks);
         this.linkedDataTypes = new SizeLimitedSet<>(maxLinks);
-        this.metas = new SizeLimitedMap<String, String>(maxLinks);
-        this.hreflang = new SizeLimitedMap<String, DigestURL>(maxLinks);
-        this.navigation = new SizeLimitedMap<String, DigestURL>(maxLinks);
-        this.script = new SizeLimitedSet<AnchorURL>(maxLinks);
-        this.titles = new LinkedHashSet<String>();
-        this.articles = new ArrayList<String>();
+        this.metas = new SizeLimitedMap<>(maxLinks);
+        this.hreflang = new SizeLimitedMap<>(maxLinks);
+        this.navigation = new SizeLimitedMap<>(maxLinks);
+        this.script = new SizeLimitedSet<>(maxLinks);
+        this.titles = new LinkedHashSet<>();
+        this.articles = new ArrayList<>();
         this.startDates = new ArrayList<>();
         this.endDates = new ArrayList<>();
         this.headlines = (List<String>[]) Array.newInstance(ArrayList.class, 6);
-        for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<String>();
-        this.bold = new ClusteredScoreMap<String>(false);
-        this.italic = new ClusteredScoreMap<String>(false);
-        this.underline = new ClusteredScoreMap<String>(false);
-        this.li = new ArrayList<String>();
-        this.dt = new ArrayList<String>();
-        this.dd = new ArrayList<String>();
+        for (int i = 0; i < this.headlines.length; i++) this.headlines[i] = new ArrayList<>();
+        this.bold = new ClusteredScoreMap<>(false);
+        this.italic = new ClusteredScoreMap<>(false);
+        this.underline = new ClusteredScoreMap<>(false);
+        this.li = new ArrayList<>();
+        this.dt = new ArrayList<>();
+        this.dd = new ArrayList<>();
         this.content = new CharBuffer(MAX_DOCSIZE, 1024);
         this.htmlFilterEventListeners = new EventListenerList();
         this.lon = 0.0d;
@@ -322,7 +322,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         this.maxAnchorsExceeded = false;
         this.maxAnchors = maxAnchors;
     }
-    
+
     /**
      * Create an ContentScraper instance
      * @param root the document root url
@@ -336,14 +336,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final Set<String> valencySwitchTagNames,
             final TagValency defaultValency,
             final VocabularyScraper vocabularyScraper,
-            int timezoneOffset) {
+            final int timezoneOffset) {
         this(root, Integer.MAX_VALUE, maxLinks, valencySwitchTagNames, defaultValency, vocabularyScraper, timezoneOffset);
     }
 
+    @Override
     public TagValency defaultValency() {
         return this.defaultValency;
     }
-    
+
     @Override
     public void finish() {
         this.content.trimToSize();
@@ -360,8 +361,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             }
         }
         int p, pl, q, s = 0;
-        char[] newtext = CharacterCoding.html2unicode(new String(newtext0)).toCharArray();
-        
+        final char[] newtext = CharacterCoding.html2unicode(new String(newtext0)).toCharArray();
+
         // match evaluation pattern
         this.evaluationScores.match(Element.text, newtext);
 
@@ -430,13 +431,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         // find absolute URLs inside text
         final Object[] listeners = this.htmlFilterEventListeners.getListenerList();
-        List<ContentScraperListener> anchorListeners = new ArrayList<>();
+        final List<ContentScraperListener> anchorListeners = new ArrayList<>();
         for (int i = 0; i < listeners.length; i += 2) {
             if (listeners[i] == ContentScraperListener.class) {
                 anchorListeners.add((ContentScraperListener)listeners[i+1]);
             }
         }
-        
+
         if(!this.maxAnchorsExceeded) {
             int maxLinksToDetect = this.maxAnchors - this.anchors.size();
             if(maxLinksToDetect < Integer.MAX_VALUE) {
@@ -449,7 +450,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 this.anchors.remove(this.anchors.size() -1);
             }
         }
-        
+
         // append string to content
         if (!b.isEmpty()) {
             this.content.append(b);
@@ -458,12 +459,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     private final static Pattern protp = Pattern.compile("smb://|ftp://|http://|https://");
-    
+
     /** A regular expression pattern matching any whitespace character */
     private final static Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
-    
+
     /**
-     * Try to detect and parse absolute URLs in text (at most maxURLs) , then update the urls collection and fire anchorAdded event on listeners. Any parameter can be null. 
+     * Try to detect and parse absolute URLs in text (at most maxURLs) , then update the urls collection and fire anchorAdded event on listeners. Any parameter can be null.
      * @param text the text to parse
      * @param urls a mutable collection of URLs to fill.
      * @param listeners a collection of listeners to trigger.
@@ -480,17 +481,17 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         AnchorURL url;
         final Matcher urlSchemeMatcher = protp.matcher(text);
         final Matcher whiteSpaceMatcher = WHITESPACE_PATTERN.matcher(text);
-        
+
         long detectedURLsCount = 0;
         while (offset < text.length() && detectedURLsCount < maxURLs) {
             if(!urlSchemeMatcher.find(offset)) {
                 break;
             }
             schemePosition = urlSchemeMatcher.start();
-            
+
             hasWhiteSpace = whiteSpaceMatcher.find(urlSchemeMatcher.end());
             urlString = text.substring(schemePosition, hasWhiteSpace ? whiteSpaceMatcher.start() : text.length());
-            
+
             if (urlString.endsWith(".")) {
                 urlString = urlString.substring(0, urlString.length() - 1); // remove the '.' that was appended above
             }
@@ -499,7 +500,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             urlString = removeUnpairedBrackets(urlString, '(', ')');
             urlString = removeUnpairedBrackets(urlString, '{', '}');
                urlString = removeUnpairedBrackets(urlString, '[', ']');
-            
+
             offset = schemePosition + urlString.length();
             try {
                 url = new AnchorURL(urlString);
@@ -508,7 +509,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     urls.add(url);
                 }
                 if(listeners != null) {
-                    for(ContentScraperListener listener : listeners) {
+                    for(final ContentScraperListener listener : listeners) {
                         listener.anchorAdded(url.toNormalform(false));
                     }
                 }
@@ -516,9 +517,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         return detectedURLsCount;
     }
-    
+
     /**
-     * Try to detect and parse absolute URLs in text, then update the urls collection and fire anchorAdded event on listeners. Any parameter can be null. 
+     * Try to detect and parse absolute URLs in text, then update the urls collection and fire anchorAdded event on listeners. Any parameter can be null.
      * @param text the text to parse
      * @param urls a mutable collection of URLs to fill.
      * @param listeners a collection of listeners to trigger.
@@ -530,7 +531,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     /**
      * Analyze bracket pairs found in the string and eventually
      * return a truncated version of that string when one or more pairs are incomplete
-     * 
+     *
      * @param str
      *            the string to analyze
      * @param openingMark
@@ -566,7 +567,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 break;
             }
         }
-        
+
         if (depth > 0) {
             /* One or more unpaired opening marks : truncate at the first opening level */
             if(lastUnpairedOpeningIndex >= 0) {
@@ -592,11 +593,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             return null;
         }
     }
-    
+
     /**
      * Parse the eventual microdata itemtype attribute of a tag and extract its
      * valid URL tokens when the itemscope attribute is present.
-     * 
+     *
      * @param tagAttributes parsed HTML tag attributes.
      * @return a set of URLs eventually empty when no itemtype attribute is present
      *         or when its value is not valid
@@ -629,14 +630,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         return types;
     }
-    
+
     private void checkOpts(final Tag tag) {
         // vocabulary classes
         final String classprop = tag.opts.getProperty("class", EMPTY_STRING);
         this.vocabularyScraper.check(this.root, classprop, tag.content);
-        
+
         // itemprop microdata property (standard definition at https://www.w3.org/TR/microdata/#dfn-attr-itemprop)
-        String itemprop = tag.opts.getProperty("itemprop");
+        final String itemprop = tag.opts.getProperty("itemprop");
         if (itemprop != null) {
             String propval = tag.opts.getProperty("content"); // value for <meta itemprop="" content=""> see https://html.spec.whatwg.org/multipage/microdata.html#values
             if (propval == null) propval = tag.opts.getProperty("datetime"); // html5 + schema.org#itemprop example: <time itemprop="startDate" datetime="2016-01-26">today</time> while each prop is optional
@@ -654,41 +655,41 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     case "startDate": // <meta itemprop="startDate" content="2016-04-21T20:00">
                         try {
                             // parse ISO 8601 date
-                            Date startDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
+                            final Date startDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
                             this.startDates.add(startDate);
-                        } catch (ParseException e) {}
+                        } catch (final ParseException e) {}
                         break;
                     case "endDate":
                         try {
                             // parse ISO 8601 date
-                            Date endDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
+                            final Date endDate = ISO8601Formatter.FORMATTER.parse(propval, this.timezoneOffset).getTime();
                             this.endDates.add(endDate);
-                        } catch (ParseException e) {}
+                        } catch (final ParseException e) {}
                         break;
                 }
             }
         }
     }
-    
+
     /**
      * Parses sizes icon link attribute. (see
      * http://www.w3.org/TR/html5/links.html#attr-link-sizes) Eventual
      * duplicates are removed.
-     * 
+     *
      * @param sizesAttr
      *            sizes attribute string, may be null
      * @return a set of sizes eventually empty.
      */
-    public static Set<Dimension> parseSizes(String sizesAttr) {
-        Set<Dimension> sizes = new HashSet<Dimension>();
-        Set<String> tokens = parseSpaceSeparatedTokens(sizesAttr);
-        for (String token : tokens) {
+    public static Set<Dimension> parseSizes(final String sizesAttr) {
+        final Set<Dimension> sizes = new HashSet<>();
+        final Set<String> tokens = parseSpaceSeparatedTokens(sizesAttr);
+        for (final String token : tokens) {
             /*
              * "any" keyword may be present, but doesn't have to produce a
              * dimension result
              */
             if (token != null) {
-                Matcher matcher = IconEntry.SIZE_PATTERN.matcher(token);
+                final Matcher matcher = IconEntry.SIZE_PATTERN.matcher(token);
                 if (matcher.matches()) {
                     /* With given pattern no NumberFormatException can occur */
                     sizes.add(new Dimension(Integer.parseInt(matcher.group(1)), Integer.parseInt(matcher.group(2))));
@@ -702,30 +703,30 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      * Parses a space separated tokens attribute value (see
      * http://www.w3.org/TR/html5/infrastructure.html#space-separated-tokens).
      * Eventual duplicates are removed.
-     * 
+     *
      * @param attr
      *            attribute string, may be null
      * @return a set of tokens eventually empty
      */
     public static Set<String> parseSpaceSeparatedTokens(final String attr) {
-        Set<String> tokens = new HashSet<>();
+        final Set<String> tokens = new HashSet<>();
         /* Check attr string is not empty to avoid adding a single empty string
          * in result */
         if (attr != null && !attr.trim().isEmpty()) {
-            String[] items = attr.trim().split(CommonPattern.SPACES.pattern());
+            final String[] items = attr.trim().split(CommonPattern.SPACES.pattern());
             Collections.addAll(tokens, items);
         }
         return tokens;
     }
-    
+
     /**
      * Retain only icon relations (standard and non standard) from tokens .
      * @param relTokens relationship tokens (parsed from a rel attribute)
      * @return a Set of icon relations, eventually empty
      */
-    public Set<String> retainIconRelations(Collection<String> relTokens) {
-        HashSet<String> iconRels = new HashSet<>();
-        for(String token : relTokens) {
+    public Set<String> retainIconRelations(final Collection<String> relTokens) {
+        final HashSet<String> iconRels = new HashSet<>();
+        for(final String token : relTokens) {
             if(IconLinkRelations.isIconRel(token)) {
                 iconRels.add(token.toLowerCase(Locale.ENGLISH));
             }
@@ -803,7 +804,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             final String href  = tag.opts.getProperty("href", EMPTY_STRING);
             if (href.length() > 0) {
                 tag.opts.put("name", areatitle);
-                AnchorURL url = absolutePath(href);
+                final AnchorURL url = absolutePath(href);
                 if(url != null) {
                     tag.opts.put("href", url.toNormalform(true));
                     url.setAll(tag.opts);
@@ -816,21 +817,21 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
             if (newLink != null) {
                 tag.opts.put("href", newLink.toNormalform(true));
-                String rel = tag.opts.getProperty("rel", EMPTY_STRING);
+                final String rel = tag.opts.getProperty("rel", EMPTY_STRING);
                 /* Rel attribute is supposed to be a set of space-separated tokens */
-                Set<String> relTokens = parseSpaceSeparatedTokens(rel);
+                final Set<String> relTokens = parseSpaceSeparatedTokens(rel);
 
                 final String linktitle = tag.opts.getProperty("title", EMPTY_STRING);
                 final String type = tag.opts.getProperty("type", EMPTY_STRING);
                 final String hreflang = tag.opts.getProperty("hreflang", EMPTY_STRING);
 
-                Set<String> iconRels = retainIconRelations(relTokens);
+                final Set<String> iconRels = retainIconRelations(relTokens);
                 /* Distinguish icons from images. It will enable for example to later search only images and no icons */
                 if (!iconRels.isEmpty()) {
-                    String sizesAttr = tag.opts.getProperty("sizes", EMPTY_STRING);
-                    Set<Dimension> sizes = parseSizes(sizesAttr);
+                    final String sizesAttr = tag.opts.getProperty("sizes", EMPTY_STRING);
+                    final Set<Dimension> sizes = parseSizes(sizesAttr);
                     IconEntry icon = this.icons.get(newLink);
-                    /* There is already an icon with same URL for this document : 
+                    /* There is already an icon with same URL for this document :
                      * they may have different rel attribute or different sizes (multi sizes ico file) or this may be a duplicate */
                     if(icon != null) {
                         icon.getRel().addAll(iconRels);
@@ -880,7 +881,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if(tag.name.equalsIgnoreCase("param")) {
             final String name = tag.opts.getProperty("name", EMPTY_STRING);
             if (name.equalsIgnoreCase("movie")) {
-                AnchorURL url = absolutePath(tag.opts.getProperty("value", EMPTY_STRING));
+                final AnchorURL url = absolutePath(tag.opts.getProperty("value", EMPTY_STRING));
                 if(url != null) {
                     tag.opts.put("value", url.toNormalform(true));
                     url.setAll(tag.opts);
@@ -918,7 +919,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         checkOpts(tag);
         // System.out.println("ScrapeTag1: tag.tagname=" + tag.tagname + ", opts=" + tag.opts.toString() + ", text=" + UTF8.String(text));
         if (tag.name.equalsIgnoreCase("a") && tag.content.length() < 2048) {
-            String href = tag.opts.getProperty("href", EMPTY_STRING);
+            final String href = tag.opts.getProperty("href", EMPTY_STRING);
             AnchorURL url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
                 if (followDenied()) {
@@ -939,7 +940,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
            this.evaluationScores.match(Element.divid, id);
            final String itemtype = tag.opts.getProperty("itemtype", EMPTY_STRING);
            if (itemtype.equals("http://data-vocabulary.org/Breadcrumb")) {
-               breadcrumbs++;
+               this.breadcrumbs++;
            }
         } else if ((tag.name.equalsIgnoreCase("h1")) && (tag.content.length() < 1024)) {
             h = cleanLine(CharacterCoding.html2unicode(stripAllTags(tag.content.getChars())));
@@ -990,7 +991,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         } else if (tag.name.equalsIgnoreCase("script")) {
             final String src = tag.opts.getProperty("src", EMPTY_STRING);
             if (src.length() > 0) {
-                AnchorURL absoluteSrc = absolutePath(src);
+                final AnchorURL absoluteSrc = absolutePath(src);
                 if(absoluteSrc != null) {
                     this.script.add(absoluteSrc);
                 }
@@ -1005,16 +1006,16 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             h = tag.opts.getProperty("datetime"); // TODO: checkOpts() also parses datetime property if in combination with schema.org itemprop=startDate/endDate
             if (h != null) { // datetime property is optional
                 try {
-                    Date startDate = ISO8601Formatter.FORMATTER.parse(h, this.timezoneOffset).getTime();
+                    final Date startDate = ISO8601Formatter.FORMATTER.parse(h, this.timezoneOffset).getTime();
                     this.startDates.add(startDate);
-                } catch (ParseException ex) { }
+                } catch (final ParseException ex) { }
             }
         }
 
         // fire event
         this.fireScrapeTag1(tag.name, tag.opts, tag.content.getChars());
     }
-    
+
     /**
      * Scraping operation applied to any kind of tag opening, being either singleton
      * or paired tag, not restricted to tags listed in
@@ -1030,11 +1031,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             this.linkedDataTypes.addAll(parseMicrodataItemType(tag.opts));
         }
     }
-    
+
     @Override
     public TagValency tagValency(final Tag tag, final Tag parentTag) {
         if (parentTag != null && parentTag.tv != this.defaultValency) return parentTag.tv;
-        
+
         if (this.valencySwitchTagNames != null &&
             tag != null &&
             (TagName.div.name().equals(tag.name) || TagName.nav.name().equals(tag.name))) {
@@ -1044,12 +1045,12 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
         return this.defaultValency;
     }
-    
+
     /**
      * Add an anchor to the anchors list, and trigger any eventual listener
      * @param anchor anchor to add. Must not be null.
      */
-    protected void addAnchor(AnchorURL anchor) {
+    protected void addAnchor(final AnchorURL anchor) {
         if(this.anchors.size() >= this.maxAnchors) {
             this.maxAnchorsExceeded = true;
         } else {
@@ -1067,7 +1068,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public List<String> getTitles() {
 
         // some documents have a title tag as meta tag
-        String s = this.metas.get("title");
+        final String s = this.metas.get("title");
         if (s != null && s.length() > 0) {
             this.titles.add(s);
         }
@@ -1083,7 +1084,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
 
         // extract headline from file name
-        ArrayList<String> t = new ArrayList<String>();
+        final ArrayList<String> t = new ArrayList<>();
         t.addAll(this.titles);
         return t;
     }
@@ -1094,7 +1095,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     public String[] getBold() {
-        final List<String> a = new ArrayList<String>();
+        final List<String> a = new ArrayList<>();
         final Iterator<String> i = this.bold.keys(false);
         while (i.hasNext()) a.add(i.next());
         return a.toArray(new String[a.size()]);
@@ -1107,7 +1108,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     public String[] getItalic() {
-        final List<String> a = new ArrayList<String>();
+        final List<String> a = new ArrayList<>();
         final Iterator<String> i = this.italic.keys(false);
         while (i.hasNext()) a.add(i.next());
         return a.toArray(new String[a.size()]);
@@ -1120,7 +1121,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     public String[] getUnderline() {
-        final List<String> a = new ArrayList<String>();
+        final List<String> a = new ArrayList<>();
         final Iterator<String> i = this.underline.keys(false);
         while (i.hasNext()) a.add(i.next());
         return a.toArray(new String[a.size()]);
@@ -1143,18 +1144,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public String[] getDd() {
         return this.dd.toArray(new String[this.dd.size()]);
     }
-    
+
     public List<Date> getStartDates() {
         return this.startDates;
     }
-    
+
     public List<Date> getEndDates() {
         return this.endDates;
     }
 
     public DigestURL[] getFlash() {
         String ext;
-        ArrayList<DigestURL> f = new ArrayList<DigestURL>();
+        final ArrayList<DigestURL> f = new ArrayList<>();
         for (final DigestURL url: this.anchors) {
             ext = MultiProtocolURL.getFileExtension(url.getFileName());
             if (ext == null) continue;
@@ -1176,7 +1177,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public int breadcrumbCount() {
         return this.breadcrumbs;
     }
-    
+
     public String getText() {
         try {
             return this.content.trim().toString();
@@ -1214,7 +1215,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // returns a url (String) / name (String) relation
         return this.iframes;
     }
-    
+
     /**
      * @return URLs of linked data item types referenced from HTML content with standard
      *         annotations such as RDFa, microdata, microformats or JSON-LD
@@ -1234,11 +1235,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public DigestURL getPublisherLink() {
         return this.publisher;
     }
-    
+
     public Map<String, DigestURL> getHreflang() {
         return this.hreflang;
     }
-    
+
     public Map<String, DigestURL> getNavigation() {
         return this.navigation;
     }
@@ -1265,28 +1266,28 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public Map<DigestURL, IconEntry> getIcons() {
         return this.icons;
     }
-    
+
     /**
      * @return true when the limit on content size scraped has been exceeded
      */
     public boolean isContentSizeLimitExceeded() {
         return this.contentSizeLimitExceeded;
     }
-    
+
     /**
      * @param contentSizeLimitExceeded set to true when a limit on content size scraped has been exceeded
      */
     public void setContentSizeLimitExceeded(final boolean contentSizeLimitExceeded) {
         this.contentSizeLimitExceeded = contentSizeLimitExceeded;
     }
-    
+
     /**
      * @return true when the maxAnchors limit has been exceeded
      */
     public boolean isMaxAnchorsExceeded() {
         return this.maxAnchorsExceeded;
     }
-    
+
     /**
      * @return true when at least one limit on content size, anchors number or links number has been exceeded
      */
@@ -1296,7 +1297,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 || this.hreflang.isLimitExceeded() || this.navigation.isLimitExceeded() || this.script.isLimitExceeded()
                 || this.frames.isLimitExceeded() || this.iframes.isLimitExceeded() || this.linkedDataTypes.isLimitExceeded();
     }
-    
+
     /*
     DC in html example:
     <meta name="DC.title" lang="en" content="Expressing Dublin Core in HTML/XHTML meta and link elements" />
@@ -1312,7 +1313,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (s.indexOf("noindex",0) >= 0) return true;
         return false;
     }
-    
+
     public boolean followDenied() {
         final String s = this.metas.get("robots");
         if (s == null) return false;
@@ -1323,7 +1324,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     public List<String> getDescriptions() {
         String s = this.metas.get("description");
         if (s == null) s = this.metas.get("dc.description");
-        List<String> descriptions = new ArrayList<String>();
+        final List<String> descriptions = new ArrayList<>();
         if (s == null) return descriptions;
         descriptions.add(s);
         return descriptions;
@@ -1351,14 +1352,14 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     private final static Pattern commaSepPattern = Pattern.compile(" |,");
     private final static Pattern semicSepPattern = Pattern.compile(" |;");
-    
+
     public Set<String> getContentLanguages() {
         // i.e. <meta name="DC.language" content="en" scheme="DCTERMS.RFC3066">
         // or <meta http-equiv="content-language" content="en">
         String s = this.metas.get("content-language");
         if (s == null) s = this.metas.get("dc.language");
         if (s == null) return null;
-        final Set<String> hs = new HashSet<String>();
+        final Set<String> hs = new HashSet<>();
         final String[] cl = commaSepPattern.split(s);
         int p;
         for (int i = 0; i < cl.length; i++) {
@@ -1378,9 +1379,32 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (s.isEmpty()) {
             return new String[0];
         }
-        if (s.contains(",")) return commaSepPattern.split(s);
-        if (s.contains(";")) return semicSepPattern.split(s);
-        return s.split("\\s");
+        String[] k = null;
+        if (s.contains(","))
+            k = commaSepPattern.split(s);
+        else if (s.contains(";"))
+            k = semicSepPattern.split(s);
+        else
+            k = s.split("\\s");
+
+        // trim the Strings
+        for (int i = 0; i < k.length; i++)
+            k[i] = k[i].trim();
+
+        // remove empty strings
+        int p = 0;
+        while (p < k.length) {
+            if (k[p].length() == 0) {
+                final String[] k1 = new String[k.length - 1];
+                System.arraycopy(k, 0, k1, 0, p);
+                System.arraycopy(k, p + 1, k1, p, k1.length - p);
+                k = k1;
+            } else {
+                p++;
+            }
+        }
+
+        return k;
     }
 
     public int getRefreshSeconds() {
@@ -1406,34 +1430,34 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (s.toLowerCase().startsWith("url=")) return s.substring(4).trim();
         return EMPTY_STRING;
     }
-    
+
     public Date getDate() {
         String content;
-        
+
         // <meta name="date" content="YYYY-MM-DD..." />
         content = this.metas.get("date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
 
         // <meta name="DC.date.modified" content="YYYY-MM-DD" />
         content = this.metas.get("dc.date.modified");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
-        
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+
         // <meta name="DC.date.created" content="YYYY-MM-DD" />
         content = this.metas.get("dc.date.created");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
-        
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+
         // <meta name="DC.date" content="YYYY-MM-DD" />
         content = this.metas.get("dc.date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
-        
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+
         // <meta name="DC:date" content="YYYY-MM-DD" />
         content = this.metas.get("dc:date");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
-        
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+
         // <meta http-equiv="last-modified" content="YYYY-MM-DD" />
         content = this.metas.get("last-modified");
-        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (ParseException e) {}
-        
+        if (content != null) try {return ISO8601Formatter.FORMATTER.parse(content, this.timezoneOffset).getTime();} catch (final ParseException e) {}
+
         return new Date();
     }
 
@@ -1482,7 +1506,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     public String[] getEvaluationModelScoreNames(final String modelName) {
-        final List<String> a = new ArrayList<String>();
+        final List<String> a = new ArrayList<>();
         final ClusteredScoreMap<String> scores = this.evaluationScores.getScores(modelName);
         if (scores != null) {
             final Iterator<String> i = scores.keys(false);
@@ -1537,7 +1561,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     public void print() {
-        for (String t: this.titles) {
+        for (final String t: this.titles) {
             System.out.println("TITLE    :" + t);
         }
         for (int i = 0; i < 4; i++) {
@@ -1596,7 +1620,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             }
         }
     }
-    
+
     /**
      * Fire addAnchor event to any listener implemening {@link ContentScraperListener} interface
      * @param url anchor url
@@ -1617,11 +1641,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
         // scrape document to look up charset
         final ScraperInputStream htmlFilter = new ScraperInputStream(
-                new ByteArrayInputStream(page), 
-                StandardCharsets.UTF_8.name(), 
+                new ByteArrayInputStream(page),
+                StandardCharsets.UTF_8.name(),
                 new HashSet<String>(), TagValency.EVAL,
-                new VocabularyScraper(), 
-                new DigestURL("http://localhost"), 
+                new VocabularyScraper(),
+                new DigestURL("http://localhost"),
                 false, maxLinks, timezoneOffset);
         String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         htmlFilter.close();
@@ -1629,11 +1653,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
         // scrape content
         final ContentScraper scraper = new ContentScraper(
-                new DigestURL("http://localhost"), 
-                maxLinks, 
-                new HashSet<String>(), 
-                TagValency.EVAL, 
-                new VocabularyScraper(), 
+                new DigestURL("http://localhost"),
+                maxLinks,
+                new HashSet<String>(),
+                TagValency.EVAL,
+                new VocabularyScraper(),
                 timezoneOffset);
         final Writer writer = new TransformerWriter(null, null, scraper, false);
         FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));

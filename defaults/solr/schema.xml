@@ -76,7 +76,7 @@
         <!-- content of author-tag -->
         <field name="author" type="text_general" indexed="true" stored="true"/>
 
-        <!-- content of keywords tag; words are separated by space -->
+        <!-- content of keywords tag; words are separated by comma, semicolon or spacee -->
         <field name="keywords" type="text_general" indexed="true" stored="true"/>
         
         <!-- all visible text -->

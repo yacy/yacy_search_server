@@ -24,15 +24,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import net.yacy.cora.federate.solr.SchemaDeclaration;
-import net.yacy.cora.federate.solr.SolrType;
-
 import org.apache.poi.ss.formula.atp.DateParser;
 import org.apache.poi.ss.formula.eval.EvaluationException;
 import org.apache.solr.common.SolrInputDocument;
 
+import net.yacy.cora.federate.solr.SchemaDeclaration;
+import net.yacy.cora.federate.solr.SolrType;
+
 public enum CollectionSchema implements SchemaDeclaration {
-    
+
     // mandatory
     id(SolrType.string, true, true, false, false, false, "primary key of document, the URL hash **mandatory field**", true),
     sku(SolrType.string, true, true, false, true, true, "url of document", true), // a 'sku' is a stock-keeping unit, a unique identifier and a default field in unmodified solr.
@@ -55,7 +55,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     outboundlinks_urlstub_sxt(SolrType.string, true, true, true, false, true, "external links, the url only without the protocol", true), // needed to enhance the crawler
     images_urlstub_sxt(SolrType.string, true, true, true, false, true, "all image links without the protocol and '://'", true),
     images_protocol_sxt(SolrType.string, true, true, true, false, false, "all image link protocols", true), // for correct assembly of image url  images_protocol_sxt + images_urlstub_sxt is needed
-    
+
     // optional but recommended, part of index distribution
     fresh_date_dt(SolrType.date, true, true, false, false, false, "date until resource shall be considered as fresh"),
     referrer_id_s(SolrType.string, true, true, false, false, false, "id of the referrer to this document, discovered during crawling"),// byte[] referrerHash();
@@ -64,7 +64,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     audiolinkscount_i(SolrType.num_integer, true, true, false, false, false, "number of links to audio resources"),// int laudio();
     videolinkscount_i(SolrType.num_integer, true, true, false, false, false, "number of links to video resources"),// int lvideo();
     applinkscount_i(SolrType.num_integer, true, true, false, false, false, "number of links to application resources"),// int lapp();
-    
+
     // optional but recommended
     title_exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of title, used to compute title_unique_b"),
     title_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if title is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same title, the unique-flag is set to false"),
@@ -97,7 +97,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     description_txt(SolrType.text_general, true, true, true, false, true, "content of description-tag(s)"),
     description_exact_signature_l(SolrType.num_long, true, true, false, false, false, "the 64 bit hash of the org.apache.solr.update.processor.Lookup3Signature of description, used to compute description_unique_b"),
     description_unique_b(SolrType.bool, true, true, false, false, false, "flag shows if description is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same description, the unique-flag is set to false"),
-    keywords(SolrType.text_general, true, true, false, false, true, "content of keywords tag; words are separated by space"),
+    keywords(SolrType.text_general, true, true, false, false, true, "content of keywords tag; words are separated by comma, semicolon or space"),
     charset_s(SolrType.string, true, true, false, false, false, "character encoding"),
     wordcount_i(SolrType.num_integer, true, true, false, false, false, "number of words in visible area"),
     linkscount_i(SolrType.num_integer, true, true, false, false, false, "number of all outgoing links; including linksnofollowcount_i"),
@@ -116,7 +116,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     h4_txt(SolrType.text_general, true, true, true, false, true, "h4 header"),
     h5_txt(SolrType.text_general, true, true, true, false, true, "h5 header"),
     h6_txt(SolrType.text_general, true, true, true, false, true, "h6 header"),
-    
+
     // unused, delete candidates
     @Deprecated
     md5_s(SolrType.string, true, true, false, false, false, "the md5 of the raw source"),// String md5();
@@ -150,13 +150,13 @@ public enum CollectionSchema implements SchemaDeclaration {
     metagenerator_t(SolrType.text_general, true, true, false, false, false, "content of <meta name=\"generator\" content=#content#> tag"),
     inboundlinks_anchortext_txt(SolrType.text_general, true, true, true, false, true, "internal links, the visible anchor text"),
     outboundlinks_anchortext_txt(SolrType.text_general, true, true, true, false, true, "external links, the visible anchor text"),
-    
+
     icons_urlstub_sxt(SolrType.string, true, true, true, false, true, "all icon links without the protocol and '://'"),
     /** All icon links protocols : split from icons_urlstub to provide some compression, as http protocol is implied as default and not stored */
     icons_protocol_sxt(SolrType.string, true, true, true, false, false, "all icon links protocols"),
     icons_rel_sxt(SolrType.string, true, true, true, false, false, "all icon links relationships space separated (e.g.. 'icon apple-touch-icon')"),
     icons_sizes_sxt(SolrType.string, true, true, true, false, false, "all icon sizes space separated (e.g. '16x16 32x32')"),
-    
+
     images_text_t(SolrType.text_general, true, true, false, false, true, "all text/words appearing in image alt texts or the tokenized url"),
     images_alt_sxt(SolrType.string, true, true, true, false, true, "all image link alt tag"), // no need to index this; don't turn it into a txt field; use images_text_t instead
     images_height_val(SolrType.num_integer, true, true, true, false, false, "size of images:height"),
@@ -192,7 +192,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     navigation_url_sxt(SolrType.string, true, true, true, false, false, "page navigation url, see http://googlewebmastercentral.blogspot.de/2011/09/pagination-with-relnext-and-relprev.html"),
     navigation_type_sxt(SolrType.string, true, true, true, false, false, "page navigation rel property value, can contain one of {top,up,next,prev,first,last}"),
     publisher_url_s(SolrType.string, true, true, false, false, false, "publisher url as defined in http://support.google.com/plus/answer/1713826?hl=de"),
-    
+
     url_protocol_s(SolrType.string, true, true, false, false, false, "the protocol of the url"),
     url_file_name_s(SolrType.string, true, true, false, false, true, "the file name (which is the string after the last '/' and before the query part from '?' on) without the file extension"),
     url_file_name_tokens_t(SolrType.text_general, true, true, false, false, true, "tokens generated from url_file_name_s which can be used for better matching and result boosting"),
@@ -228,15 +228,15 @@ public enum CollectionSchema implements SchemaDeclaration {
     opengraph_type_s(SolrType.text_general, true, true, false, false, false, "Open Graph Metadata from og:type metadata field, see http://ogp.me/ns#"),
     opengraph_url_s(SolrType.text_general, true, true, false, false, false, "Open Graph Metadata from og:url metadata field, see http://ogp.me/ns#"),
     opengraph_image_s(SolrType.text_general, true, true, false, false, false, "Open Graph Metadata from og:image metadata field, see http://ogp.me/ns#"),
-    
+
     // link structure for ranking
     cr_host_count_i(SolrType.num_integer, true, true, false, false, false, "the number of documents within a single host"),
     cr_host_chance_d(SolrType.num_double, true, true, false, false, false, "the chance to click on this page when randomly clicking on links within on one host"),
     cr_host_norm_i(SolrType.num_integer, true, true, false, false, false, "normalization of chance: 0 for lower halve of cr_host_count_i urls, 1 for 1/2 of the remaining and so on. the maximum number is 10"),
-    
+
     // custom rating; values to influence the ranking in combination with boost rules
     rating_i(SolrType.num_integer, true, true, false, false, false, "custom rating; to be set with external rating information"),
-    
+
     // special values; can only be used if '_val' type is defined in schema file; this is not standard
     bold_val(SolrType.num_integer, true, true, true, false, false, "number of occurrences of texts in bold_txt"),
     italic_val(SolrType.num_integer, true, true, true, false, false, "number of occurrences of texts in italic_txt"),
@@ -254,7 +254,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     ext_title_txt(SolrType.text_general, true, true, true, false, false, "names matching title expressions"),
     ext_title_val(SolrType.num_integer, true, true, true, false, false, "number of matching title expressions"),
     vocabularies_sxt(SolrType.string, true, true, true, false, false, "collection of all vocabulary names that have a matcher in the document - use this to boost with vocabularies");
-    
+
     public final static String CORE_NAME = "collection1"; // this was the default core name up to Solr 4.4.0. This default name was stored in CoreContainer.DEFAULT_DEFAULT_CORE_NAME but was removed in Solr 4.5.0
 
     public final static String VOCABULARY_PREFIX = "vocabulary_"; // collects all terms that appear for each vocabulary
@@ -262,15 +262,15 @@ public enum CollectionSchema implements SchemaDeclaration {
     public final static String VOCABULARY_COUNT_SUFFIX = "_i"; // suffix for the term counter (>=1) that start with VOCABULARY_PREFIX - middle part is vocabulary name
     public final static String VOCABULARY_LOGCOUNT_SUFFIX = "_log_i"; // log2(VOCABULARY_COUNT)] -- can be used for ranking boosts based on the number of occurrences
     public final static String VOCABULARY_LOGCOUNTS_SUFFIX = "_log_val"; // all integers from [0 to log2(VOCABULARY_COUNT)] -- can be used for ranking boosts based on the number of occurrences
-    
+
     private String solrFieldName = null; // solr field name in custom solr schema, defaults to solcell schema field name (= same as this.name() )
     private final SolrType type;
     private final boolean indexed, stored, searchable, multiValued, omitNorms, docValues;
     private String comment;
-    
+
     /** When true, the field must be enabled for proper YaCy operation */
     private boolean mandatory = false;
-    
+
     private CollectionSchema(final SolrType type, final boolean indexed, final boolean stored, final boolean multiValued, final boolean omitNorms, final boolean searchable, final String comment) {
         this(type, indexed, stored, multiValued, omitNorms, searchable, comment, false);
     }
@@ -286,10 +286,10 @@ public enum CollectionSchema implements SchemaDeclaration {
         this.mandatory = mandatory;
         this.docValues = (type == SolrType.string || type == SolrType.date || type.name().startsWith("num_"));
         // verify our naming scheme
-        String name = this.name();
-        int p = name.indexOf('_');
+        final String name = this.name();
+        final int p = name.indexOf('_');
         if (p > 0) {
-            String ext = name.substring(p + 1);
+            final String ext = name.substring(p + 1);
             assert !ext.equals("i") || (type == SolrType.num_integer && !multiValued) : name;
             assert !ext.equals("l") || (type == SolrType.num_long && !multiValued) : name;
             assert !ext.equals("b") || (type == SolrType.bool && !multiValued) : name;
@@ -305,7 +305,7 @@ public enum CollectionSchema implements SchemaDeclaration {
         }
         assert type.appropriateName(this) : "bad configuration: " + this.name();
     }
-    
+
     /**
      * Returns the YaCy default or (if available) custom field name for Solr
      * @return SolrFieldname String
@@ -320,7 +320,7 @@ public enum CollectionSchema implements SchemaDeclaration {
      * @param theValue = the field name
      */
     @Override
-    public final void setSolrFieldName(String theValue) {
+    public final void setSolrFieldName(final String theValue) {
         // make sure no empty string is assigned
         if ( (theValue != null) && (!theValue.isEmpty()) ) {
             this.solrFieldName = theValue.toLowerCase(Locale.ROOT);
@@ -358,7 +358,7 @@ public enum CollectionSchema implements SchemaDeclaration {
     public final boolean isSearchable() {
         return this.searchable;
     }
-    
+
     @Override
     public boolean isDocValue() {
     	return this.docValues;
@@ -368,12 +368,12 @@ public enum CollectionSchema implements SchemaDeclaration {
     public final String getComment() {
         return this.comment;
     }
-    
+
     @Override
     public final boolean isMandatory() {
     	return this.mandatory;
     }
-    
+
     @Override
     public final void add(final SolrInputDocument doc, final String value) {
         assert !this.isMultiValued();
@@ -444,11 +444,11 @@ public enum CollectionSchema implements SchemaDeclaration {
         } else if (this.type == SolrType.date) {
             assert (value.iterator().next() instanceof String) || (value.iterator().next() instanceof Date) : "type: " + value.iterator().next().getClass().getName();
             if (value.iterator().next() instanceof String) {
-                Date[] da = new Date[value.size()];
+                final Date[] da = new Date[value.size()];
                 for (int i = 0; i < value.size(); i++) {
                     try {
                         da[i] = DateParser.parseDate((String) value.get(i)).getTime();
-                    } catch (EvaluationException e) {
+                    } catch (final EvaluationException e) {
                         da[i] = null;
                     }
                 }

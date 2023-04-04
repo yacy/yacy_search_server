@@ -180,7 +180,7 @@ description_txt
 ## flag shows if description is unique within all indexable documents of the same host with status code 200; if yes and another document appears with same description, the unique-flag is set to false, boolean
 #description_unique_b
 
-## content of keywords tag; words are separated by space
+## content of keywords tag; words are separated by comma, semicolon or space
 keywords
 
 ## character encoding, string
