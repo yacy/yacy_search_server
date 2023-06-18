@@ -126,8 +126,10 @@
           <li id="header_profile"><a href="ViewProfile.html?hash=localhash">About This Page</a></li>
           <li id="header_jslicense"><a href="jslicense.html" data-jslicense="1">JavaScript information</a></li>
           <li class="divider" role="separator"></li>
+          <li id="header_faq"><a href="https://yacy.net/faq/" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Documentation / FAQ</a></li>
+          <li id="header_wiki"><a href="https://wiki.yacy.net/index.php/En:Start" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;YaCy wiki (legacy)</a></li>
           <li id="header_tutorial"><a href="https://www.youtube.com/user/YaCyTutorials/videos" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;YaCy Tutorials</a></li>
-          <li id="header_download"><a href="https://yacy.net" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
+          <li id="header_download"><a href="https://yacy.net/download_installation/" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Download YaCy</a></li>
           <li id="header_community"><a href="https://community.searchlab.eu" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Community (Web Forums)</a></li>
           <li id="header_git"><a href="https://github.com/yacy/yacy_search_server" target="_blank"><i>external</i>&nbsp;&nbsp;&nbsp;Git Repository</a></li>
           </ul>
