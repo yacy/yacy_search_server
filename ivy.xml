@@ -11,14 +11,14 @@
         <exclude module="junit"/>
       </dependency>
       <dependency org="com.cybozu.labs" name="langdetect" rev="1.1-20120112" conf="compile->master"/>
-      <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.11.0"  />
-      <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.13.4"/>
-      <dependency org="com.google.guava" name="guava" rev="25.1-jre" conf="compile->master"/>
-      <dependency org="com.ibm.icu" name="icu4j" rev="63.1"/>
-      <dependency org="com.jcraft" name="jsch" rev="0.1.54" />
-      <dependency org="com.twelvemonkeys.imageio" name="imageio-core" rev="3.8.3"/>
-      <dependency org="com.twelvemonkeys.imageio" name="imageio-bmp" rev="3.8.3" />
-      <dependency org="com.twelvemonkeys.imageio" name="imageio-tiff" rev="3.8.3"/>
+      <dependency org="com.drewnoakes" name="metadata-extractor" rev="2.18.0"  />
+      <dependency org="com.fasterxml.jackson.core" name="jackson-databind" rev="2.13.5"/>
+      <dependency org="com.google.guava" name="guava" rev="28.0-jre" conf="compile->master"/>
+      <dependency org="com.ibm.icu" name="icu4j" rev="73.2"/>
+      <dependency org="com.jcraft" name="jsch" rev="0.1.55" />
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-core" rev="3.9.4"/>
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-bmp" rev="3.9.4" />
+      <dependency org="com.twelvemonkeys.imageio" name="imageio-tiff" rev="3.9.4"/>
       <dependency org="commons-codec" name="commons-codec" rev="1.15" />
       <dependency org="commons-io" name="commons-io" rev="2.8.0" />
       <dependency org="commons-logging" name="commons-logging" rev="1.2" />
@@ -54,7 +54,7 @@
       <dependency org="org.apache.lucene" name="lucene-queryparser" rev="8.9.0" conf="compile->master"/>
       <dependency org="org.apache.lucene" name="lucene-spatial-extras" rev="8.9.0" conf="compile->master"/>
       <dependency org="org.apache.lucene" name="lucene-suggest" rev="8.9.0"/>
-      <dependency org="org.apache.pdfbox" name="pdfbox" rev="2.0.27"  />
+      <dependency org="org.apache.pdfbox" name="pdfbox" rev="2.0.29"  />
       <dependency org="org.apache.poi" name="poi" rev="3.17"  />
       <dependency org="org.apache.poi" name="poi-scratchpad" rev="3.17"  />
       <dependency org="org.apache.solr" name="solr-core" rev="8.9.0" conf="compile->master"/>
@@ -65,22 +65,22 @@
       <dependency org="org.codehaus.woodstox" name="woodstox-core-asl" rev="4.4.1">
         <exclude module="stax-api" />
       </dependency>
-      <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.41.v20210516" />
-      <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.41.v20210516" conf="compile->master" />
-      <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.41.v20210516" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.41.v20210516"/>
-      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="9.4.41.v20210516"/>
-      <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.4.41.v20210516"/>
-      <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.4.41.v20210516"/>
-      <dependency org="org.eclipse.jetty" name="jetty-servlets" rev="9.4.41.v20210516"/>
-      <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.4.41.v20210516">
+      <dependency org="org.eclipse.jetty" name="jetty-client" rev="9.4.51.v20230217" />
+      <dependency org="org.eclipse.jetty" name="jetty-deploy" rev="9.4.51.v20230217" conf="compile->master" />
+      <dependency org="org.eclipse.jetty" name="jetty-jmx" rev="9.4.51.v20230217" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-http" rev="9.4.51.v20230217"/>
+      <dependency org="org.eclipse.jetty" name="jetty-proxy" rev="9.4.51.v20230217"/>
+      <dependency org="org.eclipse.jetty" name="jetty-security" rev="9.4.51.v20230217"/>
+      <dependency org="org.eclipse.jetty" name="jetty-server" rev="9.4.51.v20230217"/>
+      <dependency org="org.eclipse.jetty" name="jetty-servlets" rev="9.4.51.v20230217"/>
+      <dependency org="org.eclipse.jetty" name="jetty-servlet" rev="9.4.51.v20230217">
         <exclude module="jetty-util-ajax" />
       </dependency>
-      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.41.v20210516"  />
-      <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.41.v20210516"  />
-      <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="9.4.41.v20210516" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.41.v20210516" conf="compile->master"/>
-      <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="9.4.41.v20210516" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty" name="jetty-util" rev="9.4.51.v20230217"  />
+      <dependency org="org.eclipse.jetty" name="jetty-webapp" rev="9.4.51.v20230217"  />
+      <dependency org="org.eclipse.jetty.http2" name="http2-client" rev="9.4.51.v20230217" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-common" rev="9.4.51.v20230217" conf="compile->master"/>
+      <dependency org="org.eclipse.jetty.http2" name="http2-http-client-transport" rev="9.4.51.v20230217" conf="compile->master"/>
       <dependency org="org.jsoup" name="jsoup" rev="1.15.3"  />
       <dependency org="org.jwat" name="jwat-warc" rev="1.1.3"  />
       <dependency org="org.locationtech.spatial4j" name="spatial4j" rev="0.8"/>

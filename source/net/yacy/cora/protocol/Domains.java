@@ -73,15 +73,15 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 public class Domains {
-    
+
     private final static ConcurrentLog log = new ConcurrentLog(Domains.class.getName());
-    
+
     public  static final String LOCALHOST = "localhost"; // replace with IPv6 0:0:0:0:0:0:0:1 ?
     private static       String LOCALHOST_NAME = LOCALHOST; // this will be replaced with the actual name of the local host
 
     private static Class<?> InetAddressLocatorClass;
     private static Method InetAddressLocatorGetLocaleInetAddressMethod;
-    private static final Set<String> ccSLD_TLD = new HashSet<String>();
+    private static final Set<String> ccSLD_TLD = new HashSet<>();
     private static final String PRESENT = "";
     private static final String LOCALHOST_IPv4_PATTERN = "(127\\..*)";
     private static final String LOCALHOST_IPv6_PATTERN = "((\\[?fe80\\:.*)|(\\[?0\\:0\\:0\\:0\\:0\\:0\\:0\\:1.*)|(\\[?\\:\\:1))(/.*|%.*|\\z)";
@@ -102,12 +102,12 @@ public class Domains {
     public static long cacheHit_Hit = 0, cacheHit_Miss = 0, cacheHit_Insert = 0; // for statistics only; do not write
     public static long cacheMiss_Hit = 0, cacheMiss_Miss = 0, cacheMiss_Insert = 0; // for statistics only; do not write
     private static AtomicLong dnsRequests = new AtomicLong(0);
-    
-    private static Set<InetAddress> myHostAddresses = new HashSet<InetAddress>();
-    private static Set<InetAddress> localHostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
-    private static Set<InetAddress> publicIPv4HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
-    private static Set<InetAddress> publicIPv6HostAddresses = new HashSet<InetAddress>(); // subset of myHostAddresses
-    private static Set<String> localHostNames = new HashSet<String>(); // subset of myHostNames
+
+    private static Set<InetAddress> myHostAddresses = new HashSet<>();
+    private static Set<InetAddress> localHostAddresses = new HashSet<>(); // subset of myHostAddresses
+    private static Set<InetAddress> publicIPv4HostAddresses = new HashSet<>(); // subset of myHostAddresses
+    private static Set<InetAddress> publicIPv6HostAddresses = new HashSet<>(); // subset of myHostAddresses
+    private static Set<String> localHostNames = new HashSet<>(); // subset of myHostNames
     private static Thread domaininit = null;
     static {
         localHostNames.add(LOCALHOST);
@@ -118,7 +118,7 @@ public class Domains {
         localHostNames.add(LOCALHOST_NAME);
 
         try {
-            InetAddress localHostAddress = InetAddress.getLocalHost();
+            final InetAddress localHostAddress = InetAddress.getLocalHost();
             if (localHostAddress != null) myHostAddresses.add(localHostAddress);
         } catch (final UnknownHostException e) {}
         try {
@@ -126,7 +126,7 @@ public class Domains {
             if (moreAddresses != null) myHostAddresses.addAll(Arrays.asList(moreAddresses));
         } catch (final UnknownHostException e) {}
 
-        for (InetAddress a: myHostAddresses) {
+        for (final InetAddress a: myHostAddresses) {
             if (a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress() || a.isSiteLocalAddress()) {
                 localHostAddresses.add(a);
             }
@@ -163,8 +163,8 @@ public class Domains {
 
                 // fill a cache of local host names
                 for (final InetAddress a: myHostAddresses) {
-                    String hostaddressP = chopZoneID(a.getHostAddress());
-                    Set<String> hns = new LinkedHashSet<>();
+                    final String hostaddressP = chopZoneID(a.getHostAddress());
+                    final Set<String> hns = new LinkedHashSet<>();
                     // generate alternative representations of IPv6 addresses which are needed to check access on the interface (i.e. localhost check)
                     if (hostaddressP.indexOf("::") < 0) {
                         hns.add(hostaddressP.replaceFirst(":0:0:0:0:0:0:", "::"));
@@ -176,13 +176,13 @@ public class Domains {
                     }
                     hns.add(hostaddressP);
                     final String hostname = getHostName(a);
-                    for (String hostaddress: hns) {
+                    for (final String hostaddress: hns) {
                         if (hostaddress.contains("::0:") || hostaddress.contains(":0::")) continue; // not common (but possible); we skip that
                         // we write the local tests into variables to be able to debug these values
-                        boolean isAnyLocalAddress  = a.isAnyLocalAddress();
-                        boolean isLinkLocalAddress = a.isLinkLocalAddress(); // true i.e. for localhost/fe80:0:0:0:0:0:0:1%1, myhost.local/fe80:0:0:0:223:dfff:fedf:30ce%7
-                        boolean isLoopbackAddress  = a.isLoopbackAddress();  // true i.e. for localhost/0:0:0:0:0:0:0:1, localhost/127.0.0.1
-                        boolean isSiteLocalAddress = a.isSiteLocalAddress(); // true i.e. for myhost.local/192.168.1.33
+                        final boolean isAnyLocalAddress  = a.isAnyLocalAddress();
+                        final boolean isLinkLocalAddress = a.isLinkLocalAddress(); // true i.e. for localhost/fe80:0:0:0:0:0:0:1%1, myhost.local/fe80:0:0:0:223:dfff:fedf:30ce%7
+                        final boolean isLoopbackAddress  = a.isLoopbackAddress();  // true i.e. for localhost/0:0:0:0:0:0:0:1, localhost/127.0.0.1
+                        final boolean isSiteLocalAddress = a.isSiteLocalAddress(); // true i.e. for myhost.local/192.168.1.33
                         if (isAnyLocalAddress || isLinkLocalAddress || isLoopbackAddress || isSiteLocalAddress) {
                             ConcurrentLog.info("Domain Init", "local host address: " + hostaddress + " (local)");
                             localHostAddresses.add(a);
@@ -197,11 +197,12 @@ public class Domains {
                         }
                     }
                 }
+                ConcurrentLog.info("Domain Init", "finished");
             }
         };
         domaininit.start();
     }
-    
+
     /**
      * ! ! !   A T T E N T I O N   A T T E N T I O N   A T T E N T I O N   ! ! !
      *
@@ -491,27 +492,27 @@ public class Domains {
          "ZW=Zimbabwe",
          "YT=Mayotte"
      };
-     
+
      private static final String[] TLD_Infrastructure = {
          "ARPA=operationally-critical infrastructural identifier spaces",
      };
-     
+
      private static final String[] TLD_GenericRestricted = {
     		 "BIZ=Business",
              "NAME=Individuals",
              "PRO=Credentialed professionals",
      };
-     
+
 	/**
 	 * Country-Code top-level domains (ccTLD) recently added by the ICANN. A
 	 * different list is used here so they can continue to be categorized with the
 	 * TLD_Generic_ID without modifying URL hash computation.
 	 */
      private static final String[] TLD_RecentCountryCodes = {
-    		 "cw=Curaçao", // TLD Manager : University of Curacao 
-    		 "sx=Sint Maarten" // TLD Manager : SX Registry SA B.V. 
+    		 "cw=Curaçao", // TLD Manager : University of Curacao
+    		 "sx=Sint Maarten" // TLD Manager : SX Registry SA B.V.
      };
-     
+
      private static final String[] TLD_OpenNIC = {
          // domains from the OpenNIC project, http://www.opennicproject.org, see also http://wiki.opennic.glue/OpenNICNamespaces
          "GLUE=OpenNIC Internal Architectural use",
@@ -679,9 +680,9 @@ public class Domains {
      }
 
     /**
-     * Map top-level domains (lower caes) to TLD category identifiers. 
+     * Map top-level domains (lower caes) to TLD category identifiers.
      */
-    private static Map<String, Integer> TLDID = new ConcurrentHashMap<String, Integer>();
+    private static Map<String, Integer> TLDID = new ConcurrentHashMap<>();
     //private static HashMap<String, String> TLDName = new HashMap<String, String>();
 
     private static void insertTLDProps(final String[] TLDList, final int id) {
@@ -720,7 +721,7 @@ public class Domains {
         insertTLDProps(TLD_MiddleEastWestAsia,  TLD_MiddleEastWestAsia_ID);
         insertTLDProps(TLD_NorthAmericaOceania, TLD_NorthAmericaOceania_ID);
         insertTLDProps(TLD_Africa,              TLD_Africa_ID);
-        for(GenericTLD tld : GenericTLD.values()) {
+        for(final GenericTLD tld : GenericTLD.values()) {
         	TLDID.put(tld.getDomainName(), TLD_Generic_ID);
         }
 		/*
@@ -729,17 +730,17 @@ public class Domains {
 		 * be modified
 		 */
         insertTLDProps(TLD_RecentCountryCodes,   TLD_Generic_ID);
-        for(InternationalizedCountryCodeTLD tld : InternationalizedCountryCodeTLD.values()) {
+        for(final InternationalizedCountryCodeTLD tld : InternationalizedCountryCodeTLD.values()) {
         	TLDID.put(tld.getDomainName(), TLD_Generic_ID);
         }
         insertTLDProps(TLD_GenericRestricted,   TLD_Generic_ID);
         insertTLDProps(TLD_Infrastructure,   TLD_Generic_ID);
-        for(SponsoredTLD tld : SponsoredTLD.values()) {
+        for(final SponsoredTLD tld : SponsoredTLD.values()) {
         	TLDID.put(tld.getDomainName(), TLD_Generic_ID);
         }
-        
+
         insertTLDProps(TLD_OpenNIC,   TLD_Generic_ID);
-        
+
         // the id=7 (TLD_Local_ID) is used to flag local addresses
     }
 
@@ -787,7 +788,7 @@ public class Domains {
         host = host.toLowerCase(Locale.ROOT).trim();
 
         // trying to resolve host by doing a name cache lookup
-        InetAddress ip = NAME_CACHE_HIT.get(host);
+        final InetAddress ip = NAME_CACHE_HIT.get(host);
         if (ip != null) {
             cacheHit_Hit++;
             return ip;
@@ -808,7 +809,7 @@ public class Domains {
 
     public static List<Pattern> makePatterns(final String patternList) throws PatternSyntaxException {
     	final String[] entries = (patternList != null) ? CommonPattern.COMMA.split(patternList) : new String[0];
-    	final List<Pattern> patterns = new ArrayList<Pattern>(entries.length);
+    	final List<Pattern> patterns = new ArrayList<>(entries.length);
     	for (final String entry : entries) {
             patterns.add(Pattern.compile(entry.trim()));
         }
@@ -841,7 +842,7 @@ public class Domains {
         NAME_CACHE_HIT.insertIfAbsent(host, i);
         cacheHit_Insert++;
     }
-    
+
 	final private static ExecutorService getByNameService = Executors
 			.newCachedThreadPool(new NamePrefixThreadFactory("InetAddress.getByName"));
 
@@ -857,26 +858,26 @@ public class Domains {
         // normalize
         if (target == null || target.isEmpty()) return null;
         target = target.toLowerCase(Locale.ROOT).trim(); // we can lowercase this because host names are case-insensitive
-        
+
         // extract the address (host:port) part (applies if this is an url)
         int p = target.indexOf("://");
         if (p > 0) target = target.substring(p + 3);
         p = target.indexOf('/');
         if (p > 0) target = target.substring(0, p);
-        
+
         // IPv4 / host heuristics
-        p = target.lastIndexOf(':');        
+        p = target.lastIndexOf(':');
         if ( p < 0 ) {
             p = target.lastIndexOf('%');
             if (p > 0) target = target.substring(0, p);
             return target;
         }
-        
+
         // the ':' at pos p may be either a port divider or a part of an IPv6 address
         if ( p > target.lastIndexOf(']')) { // if after ] it's a port divider (not IPv6 part)
             target = target.substring(0, p );
         }
-        
+
         // may be IPv4 or IPv6, we chop off brackets if exist
         if (target.charAt(0) == '[') target = target.substring(1);
         if (target.charAt(target.length() - 1) == ']') target = target.substring(0, target.length() - 1);
@@ -890,19 +891,19 @@ public class Domains {
      * like http:// to return correct default port). If no port is given, default
      * ports are returned. On missing protocol, port=80 is assumed.
      * @param target url (must start with protocol)
-     * @return port number 
+     * @return port number
      */
     public static int stripToPort(String target) {
         int port = 80; // default port
-        
+
         // normalize
         if (target == null || target.isEmpty()) return port;
         target = target.toLowerCase(Locale.ROOT).trim(); // we can lowercase this because host names are case-insensitive
-        
+
         // extract the address (host:port) part (applies if this is an url)
         int p = target.indexOf("://");
         if (p > 0) {
-            String protocol = target.substring(0, p);
+            final String protocol = target.substring(0, p);
             target = target.substring(p + 3);
             if ("https".equals(protocol)) port = 443;
             if ("ftp".equals(protocol)) port = 21;
@@ -910,9 +911,9 @@ public class Domains {
         }
         p = target.indexOf('/');
         if (p > 0) target = target.substring(0, p);
-        
+
         // IPv4 / host heuristics
-        p = target.lastIndexOf(':');        
+        p = target.lastIndexOf(':');
         if ( p < 0 ) return port;
 
         // the ':' must be a port divider or part of ipv6
@@ -921,7 +922,7 @@ public class Domains {
         }
         return port;
     }
-    
+
     /**
      * resolve a host address using a local DNS cache and a DNS lookup if necessary
      * @param clienthost
@@ -936,7 +937,7 @@ public class Domains {
             NAME_CACHE_HIT.clear();
             NAME_CACHE_MISS.clear();
         }
-        
+
         if (host0.endsWith(".yacyh")) {
             // that should not happen here
             return null;
@@ -984,7 +985,7 @@ public class Domains {
             //if (!matchesList(host, nameCacheNoCachingPatterns)) System.out.println("DNSLOOKUP " + host);
             try {
                 //final long t = System.currentTimeMillis();
-                String oldName = Thread.currentThread().getName();
+                final String oldName = Thread.currentThread().getName();
                 Thread.currentThread().setName("Domains: DNS resolve of '" + host + "'"); // thread dump show which host is resolved
                 if (InetAddresses.isInetAddress(host)) {
                     try {
@@ -996,10 +997,10 @@ public class Domains {
                 }
                 Thread.currentThread().setName(oldName);
                 if (ip == null) {
-                	long activeRequests = dnsRequests.incrementAndGet();
+                	final long activeRequests = dnsRequests.incrementAndGet();
                 	if (activeRequests > 50) {
                 		// throttle requests to remote DNS
-                		try {Thread.sleep(10 * (activeRequests - 50));} catch (InterruptedException e) {}
+                		try {Thread.sleep(10 * (activeRequests - 50));} catch (final InterruptedException e) {}
                 	}
                 	try {
 	                    ip = timeLimiter.callWithTimeout(new Callable<InetAddress>() {
@@ -1094,12 +1095,12 @@ public class Domains {
 
     public static Set<String> myPublicIPs() {
         // use a LinkedHashSet to get an order of IPs where the IPv4 are preferred to get a better compatibility with older implementations
-        Set<String> h = new LinkedHashSet<>(publicIPv4HostAddresses.size() + publicIPv6HostAddresses.size());
-        for (InetAddress i: publicIPv4HostAddresses) h.add(i.getHostAddress());
-        for (InetAddress i: publicIPv6HostAddresses) h.add(i.getHostAddress());
+        final Set<String> h = new LinkedHashSet<>(publicIPv4HostAddresses.size() + publicIPv6HostAddresses.size());
+        for (final InetAddress i: publicIPv4HostAddresses) h.add(i.getHostAddress());
+        for (final InetAddress i: publicIPv6HostAddresses) h.add(i.getHostAddress());
         return h;
     }
-    
+
     /**
      * Get all IPv4 addresses which are assigned to the local host but are public IP addresses.
      * These should be the possible addresses which can be used to access this peer.
@@ -1108,7 +1109,7 @@ public class Domains {
     public static Set<InetAddress> myPublicIPv4() {
         return publicIPv4HostAddresses;
     }
-    
+
     /**
      * Get all IPv6 addresses which are assigned to the local host but are public IP addresses.
      * These should be the possible addresses which can be used to access this peer.
@@ -1126,16 +1127,16 @@ public class Domains {
         while (domaininit == null || domaininit.isAlive()) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         return localHostAddresses;
     }
-    
+
     public static Set<InetAddress> myIPv4IntranetIPs() {
-        Set<InetAddress> in = new HashSet<>();
-        for (InetAddress a: myIntranetIPs()) if (a instanceof Inet4Address) in.add(a);
+        final Set<InetAddress> in = new HashSet<>();
+        for (final InetAddress a: myIntranetIPs()) if (a instanceof Inet4Address) in.add(a);
         return in;
     }
-    
+
     public static Set<InetAddress> myIPv4IntranetNonLocalhostIPs() {
-        Set<InetAddress> in = new HashSet<>();
-        for (InetAddress a: myIPv4IntranetIPs()) if (((Inet4Address) a).getAddress()[0] != 127) in.add(a);
+        final Set<InetAddress> in = new HashSet<>();
+        for (final InetAddress a: myIPv4IntranetIPs()) if (((Inet4Address) a).getAddress()[0] != 127) in.add(a);
         return in;
     }
 
@@ -1159,7 +1160,7 @@ public class Domains {
      */
     public static boolean isThisHostIP(final Set<String> hostNames) {
         if ((hostNames == null) || (hostNames.isEmpty())) return false;
-        for (String hostName: hostNames) {
+        for (final String hostName: hostNames) {
             if (hostName.indexOf(':') > 0) return false; // IPv6 addresses do not count because they are always host IPs
             if (isThisHostIP(Domains.dnsResolve(hostName))) return true;
         }
@@ -1182,11 +1183,11 @@ public class Domains {
         return (isLocal(host, hostaddress)) ? TLD_Local_ID : TLD_Generic_ID;
     }
 
-    public static String chopZoneID(String ip) {
-        int i = ip.indexOf('%');
+    public static String chopZoneID(final String ip) {
+        final int i = ip.indexOf('%');
         return i < 0 ? ip : ip.substring(0, i);
     }
-    
+
     /**
      * check the host ip string against localhost names
      * @param host
@@ -1213,7 +1214,7 @@ public class Domains {
                 INTRANET_PATTERNS.matcher(host).matches()) ||
                 localHostNames.contains(host);
     }
-    
+
     /**
      * check if the given host is a local address.
      * the hostaddress is optional and shall be given if the address is already known
@@ -1259,7 +1260,7 @@ public class Domains {
     private static boolean isLocal(final InetAddress a) {
         final boolean
             localp = noLocalCheck || // DO NOT REMOVE THIS! it is correct to return true if the check is off
-            a == null || // TODO returning true here after dns resolution failed can make hash generation inconsistent on some hosts 
+            a == null || // TODO returning true here after dns resolution failed can make hash generation inconsistent on some hosts
                          // (hash is marked with TLD_LOCAL_ID when host name is not found within timeout, but then is marked again with TLD_Generic when the host name is found within timeout on another request)
             a.isAnyLocalAddress() ||
             a.isLinkLocalAddress() ||
@@ -1305,11 +1306,7 @@ public class Domains {
         if (isLocal(address.getHostAddress(), address, false)) return null;
         try {
             return (Locale) InetAddressLocatorGetLocaleInetAddressMethod.invoke(null, new Object[]{address});
-        } catch (final IllegalArgumentException e) {
-            return null;
-        } catch (final IllegalAccessException e) {
-            return null;
-        } catch (final InvocationTargetException e) {
+        } catch (final IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             return null;
         }
     }
@@ -1323,11 +1320,11 @@ public class Domains {
      */
     public static String getDNC(final String host) {
         if (host == null || host.length() == 0) return "";
-        int p0 = host.lastIndexOf('.');
+        final int p0 = host.lastIndexOf('.');
         if (p0 < 0) return host.toLowerCase(Locale.ROOT);
-        int p1 = host.lastIndexOf('.', p0 - 1);
+        final int p1 = host.lastIndexOf('.', p0 - 1);
         if (p1 < 0) return host.substring(p0 + 1).toLowerCase(Locale.ROOT);
-        String ccSLDTLD = host.substring(p1 + 1).toLowerCase(Locale.ROOT);
+        final String ccSLDTLD = host.substring(p1 + 1).toLowerCase(Locale.ROOT);
         return ccSLD_TLD.contains(ccSLDTLD) ? ccSLDTLD : host.substring(p0 + 1).toLowerCase(Locale.ROOT);
     }
 
@@ -1337,16 +1334,16 @@ public class Domains {
      * @param host
      * @return the SLD or the Third Level Domain, if the SLD is a ccSLD
      */
-    public static String getSmartSLD(String host) {        
+    public static String getSmartSLD(final String host) {
         if (host == null || host.length() == 0) return "";
-        int p0 = host.lastIndexOf('.');
+        final int p0 = host.lastIndexOf('.');
         if (p0 < 0) return host.toLowerCase(Locale.ROOT); // no subdomain present
-        int p1 = host.lastIndexOf('.', p0 - 1);
+        final int p1 = host.lastIndexOf('.', p0 - 1);
         if (p1 < 0) return host.substring(0, p0).toLowerCase(Locale.ROOT); // no third-level domain present, just use the second level
-        String ccSLDTLD = host.substring(p1 + 1).toLowerCase(Locale.ROOT);
+        final String ccSLDTLD = host.substring(p1 + 1).toLowerCase(Locale.ROOT);
         if (!ccSLD_TLD.contains(ccSLDTLD)) return host.substring(p1 + 1, p0).toLowerCase(Locale.ROOT); // because the ccSLDTLD is not contained in the list of knwon ccSDL, we use the SLD from p1 to p0
         // the third level domain is the correct one
-        int p2 = host.lastIndexOf('.', p1 - 1);
+        final int p2 = host.lastIndexOf('.', p1 - 1);
         if (p2 < 0) return host.substring(0, p1).toLowerCase(Locale.ROOT);
         return host.substring(p2 + 1, p1);
     }

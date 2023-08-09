@@ -29,3 +29,4 @@ yacy.log
 /.classpath
 /.project
 /ivy
+/lib

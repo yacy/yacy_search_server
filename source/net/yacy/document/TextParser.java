@@ -51,7 +51,6 @@ import net.yacy.document.parser.docParser;
 import net.yacy.document.parser.genericParser;
 import net.yacy.document.parser.gzipParser;
 import net.yacy.document.parser.gzipParser.GZIPOpeningStreamException;
-import net.yacy.document.parser.html.TagValency;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.document.parser.linkScraperParser;
 import net.yacy.document.parser.mmParser;
@@ -62,7 +61,6 @@ import net.yacy.document.parser.pptParser;
 import net.yacy.document.parser.psParser;
 import net.yacy.document.parser.rssParser;
 import net.yacy.document.parser.rtfParser;
-import net.yacy.document.parser.sevenzipParser;
 import net.yacy.document.parser.sidAudioParser;
 import net.yacy.document.parser.tarParser;
 import net.yacy.document.parser.torrentParser;
@@ -70,6 +68,7 @@ import net.yacy.document.parser.vcfParser;
 import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
+import net.yacy.document.parser.html.TagValency;
 import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.document.parser.images.metadataImageParser;
 import net.yacy.document.parser.images.svgParser;
@@ -115,7 +114,6 @@ public final class TextParser {
         initParser(new psParser());
         initParser(new rssParser());
         initParser(new rtfParser());
-        initParser(new sevenzipParser());
         initParser(new sidAudioParser());
         initParser(new svgParser());
         initParser(new tarParser());
@@ -404,7 +402,7 @@ public final class TextParser {
 
     public static Document[] parseSource(
             final DigestURL location,
-            String mimeType,
+            final String mimeType,
             final String charset,
             final TagValency defaultValency,
             final Set<String> valencySwitchTagNames,
@@ -438,7 +436,7 @@ public final class TextParser {
      */
     public static Document[] parseWithLimits(
             final DigestURL location,
-            String mimeType,
+            final String mimeType,
             final String charset,
             final TagValency defaultValency,
             final Set<String> valencySwitchTagNames,
@@ -446,8 +444,8 @@ public final class TextParser {
             final int depth,
             final long contentLength,
             final InputStream sourceStream,
-            int maxLinks,
-            long maxBytes) throws Parser.Failure{
+            final int maxLinks,
+            final long maxBytes) throws Parser.Failure{
         return parseSource(location, mimeType, charset, defaultValency, valencySwitchTagNames, new VocabularyScraper(), timezoneOffset, depth, contentLength,
                 sourceStream, maxLinks, maxBytes);
     }
@@ -471,9 +469,9 @@ public final class TextParser {
      * @throws Parser.Failure when the parser processing failed
      */
     public static Document[] parseWithLimits(
-            final DigestURL location, String mimeType, final String charset,
-            final int timezoneOffset, final int depth, final long contentLength, final InputStream sourceStream, int maxLinks,
-            long maxBytes) throws Parser.Failure{
+            final DigestURL location, final String mimeType, final String charset,
+            final int timezoneOffset, final int depth, final long contentLength, final InputStream sourceStream, final int maxLinks,
+            final long maxBytes) throws Parser.Failure{
         return parseSource(location, mimeType, charset, TagValency.EVAL, new HashSet<String>(), new VocabularyScraper(), timezoneOffset, depth, contentLength,
                 sourceStream, maxLinks, maxBytes);
     }
