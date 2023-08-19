@@ -1,0 +1,4 @@
+#{results}#
+<!--#include virtual="yacysearchitem.txt?item=#[item]#&eventID=#[eventID]#" -->
+#{/results}#
+<!--#include virtual="yacysearchtrailer.txt?eventID=#[eventID]#" -->
