@@ -230,6 +230,7 @@
       <fileset dir=".">
         <include name="startYACY.sh"/>
         <include name="stopYACY.sh"/>
+        <include name="restartYACY.sh"/>
         <include name="killYACY.sh"/>
         <include name="updateYACY.sh"/>
         <include name="restart.sh"/>
