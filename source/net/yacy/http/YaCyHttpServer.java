@@ -69,20 +69,24 @@ public class YaCyHttpServer {
     /**
      * @param port TCP Port to listen for http requests
      */
-    public YaCyHttpServer(final int port, String host) {
+    public YaCyHttpServer(final int port, final String host) {
         final Switchboard sb = Switchboard.getSwitchboard();
 
         this.server = new Server();
 
         final int cores = ProcessorUtils.availableProcessors();
         final int acceptors = Math.max(1, Math.min(4, cores/2)); // original: Math.max(1, Math.min(4,cores/8));
-        final HttpConnectionFactory hcf = new HttpConnectionFactory();
+
+        final HttpConfiguration httpConfig = new HttpConfiguration();
+        httpConfig.setRequestHeaderSize(16384);
+        final HttpConnectionFactory hcf = new HttpConnectionFactory(httpConfig);
         final ServerConnector connector = new ServerConnector(this.server, null, null, null, acceptors, -1, hcf);
         connector.setPort(port);
         connector.setHost(host);
         connector.setName("httpd-" + host + ":" + Integer.toString(port));
         connector.setIdleTimeout(9000); // timout in ms when no bytes send / received
         connector.setAcceptQueueSize(128);
+
 
         this.server.addConnector(connector);
 
@@ -325,8 +329,6 @@ public class YaCyHttpServer {
             public void run() {
                 if (milsec > 0) try {
                     Thread.sleep(milsec);
-                } catch (final InterruptedException e) {
-                    ConcurrentLog.logException(e);
                 } catch (final Exception e) {
                     ConcurrentLog.logException(e);
                 }
