@@ -159,7 +159,7 @@ Section "check Java 8 installed" Sec_Java_id
     Retry:
 	ReadRegStr $InstalledJREVersion HKLM "SOFTWARE\JavaSoft\Java Runtime Environment" "CurrentVersion"
 
-	${If} $InstalledJREVersion != "1.8"
+	${If} $InstalledJREVersion != "11"
 		MessageBox MB_ICONEXCLAMATION|MB_YESNO "$(yacyNoJavaFoundOpenBrowser)" IDNO ContinueWithoutJava
 		ExecShell open "https://adoptium.net/de/temurin/releases/?version=8"
 

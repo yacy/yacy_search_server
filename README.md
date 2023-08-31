@@ -61,7 +61,7 @@ All these have (YaCy) search functionality combining all these locations into on
 
 ## Dependencies? What other software do I need?
 
-You need Java 1.8 or later to run YaCy. (No Apache, Tomcat or MySQL or anything else)
+You need Java 11 or later to run YaCy. (No Apache, Tomcat or MySQL or anything else)
 
 YaCy also runs on IcedTea 3.
 See https://icedtea.classpath.org
@@ -178,7 +178,7 @@ git clone https://github.com/yacy/yacy_search_server
 ```
 
 Compiling YaCy:
-- You need Java 1.8 and ant
+- You need Java 11 and ant
 - See `ant -p` for the available ant targets
 ```
 ant clean dist
