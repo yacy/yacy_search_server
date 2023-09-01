@@ -169,10 +169,10 @@ public final class SetTools {
     @SuppressWarnings("unchecked")
     private static <A, B> SortedMap<A, B> joinConstructiveByEnumeration(final SortedMap<A, B> map1, final SortedMap<A, B> map2, final boolean concatStrings) {
         // implement pairwise enumeration
-        final Comparator<? super A> comp = map1.comparator();
+        final Comparator<? super A> comp = map1.comparator() == null ? (Comparator<? super A>) Comparator.naturalOrder() : map1.comparator();
         final Iterator<Map.Entry<A, B>> mi1 = map1.entrySet().iterator();
         final Iterator<Map.Entry<A, B>> mi2 = map2.entrySet().iterator();
-        final SortedMap<A, B> result = new TreeMap<A, B>(map1.comparator());
+        final SortedMap<A, B> result = new TreeMap<A, B>(comp);
         int c;
         if ((mi1.hasNext()) && (mi2.hasNext())) {
             Map.Entry<A, B> mentry1 = mi1.next();
@@ -263,6 +263,8 @@ public final class SetTools {
      * @return true if the small set is completely included in the large set
      */
     public static <A> boolean totalInclusion(final Iterator<A> small, final Set<A> large) {
+        if (small == null) return true;
+        if (large == null) return false;
         while (small.hasNext()) {
             if (!large.contains(small.next())) return false;
         }
@@ -276,6 +278,8 @@ public final class SetTools {
      * @return true if the small set is completely included in the large set
      */
     public static boolean totalInclusion(final HandleSet small, final HandleSet large) {
+        if (small == null) return true;
+        if (large == null) return false;
         for (byte[] handle: small) {
             if (!large.has(handle)) return false;
         }
