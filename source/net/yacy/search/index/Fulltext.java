@@ -88,8 +88,10 @@ import net.yacy.search.schema.WebgraphSchema;
 
 public final class Fulltext {
 
-    private static final String SOLR_PATH = "solr_8_8_1"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
-    //    private static final String SOLR_OLD_PATH[] = new String[]{"solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47", "solr_4_9", "solr_4_10", "solr_5_2", "solr_5_5", "solr_6_6"};
+    private static final String SOLR_PATH = "solr_8_11_2"; // the number should be identical to the number in the property luceneMatchVersion in solrconfig.xml
+    private static final String SOLR_OLD_PATH[] = new String[]{
+            "solr_36", "solr_40", "solr_44", "solr_45", "solr_46", "solr_47",
+            "solr_4_9", "solr_4_10", "solr_5_2", "solr_5_5", "solr_6_6", "solr_8_8_1"};
 
     // class objects
     private final File                    segmentPath;
@@ -140,17 +142,15 @@ public final class Fulltext {
         final File solrLocation = new File(this.segmentPath, SOLR_PATH);
 
         // migrate old solr to new
-        /*
         for (String oldVersion: SOLR_OLD_PATH) {
             File oldLocation = new File(this.segmentPath, oldVersion);
             if (oldLocation.exists()) {
-                if(!oldLocation.renameTo(solrLocation)) {
+                if (!oldLocation.renameTo(solrLocation)) {
                     ConcurrentLog.severe("Fulltext", "Failed renaming old Solr location ("
                             + oldLocation.getAbsolutePath() + ") to new location : " + solrLocation.getAbsolutePath());
                 }
             }
         }
-         */
 
         final EmbeddedInstance localCollectionInstance = new EmbeddedInstance(new File(new File(Switchboard.getSwitchboard().appPath, "defaults"), "solr"), solrLocation, CollectionSchema.CORE_NAME, new String[]{CollectionSchema.CORE_NAME, WebgraphSchema.CORE_NAME});
         final SolrConfig config = localCollectionInstance.getDefaultCore().getSolrConfig();
