@@ -83,25 +83,52 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         this.buffer = null;
     }
 
+    /**
+     * Enumeration implementation for unsieved words.
+     * This class provides an enumeration of words (in the form of StringBuilders) that haven't been sieved or filtered.
+     */
     private class unsievedWordsEnum implements Enumeration<StringBuilder> {
-        // returns an enumeration of StringBuilder Objects
-        private StringBuilder buffer = null;
+        // Buffer to hold the next element in the enumeration.
+        private StringBuilder buffer;
+
+        // Sentence reader instance to read sentences.
         private SentenceReader sr;
+
+        // List to hold tokenized words from the sentence.
         private List<StringBuilder> s;
+
+        // Index to traverse the tokenized words list.
         private int sIndex;
 
+        /**
+         * Constructor initializes the enumeration with a SentenceReader.
+         *
+         * @param sr0 The SentenceReader instance.
+         */
         public unsievedWordsEnum(final SentenceReader sr0) {
             assert sr0 != null;
             this.sr = sr0;
             this.s = new ArrayList<StringBuilder>();
             this.sIndex = 0;
+
+            // Populate the buffer with the first word.
             this.buffer = nextElement0();
         }
 
+        /**
+         * Pre-process method of the SentenceReader.
+         *
+         * @param x The boolean value for pre-processing.
+         */
         public void pre(final boolean x) {
             this.sr.pre(x);
         }
 
+        /**
+         * Utility method to fetch the next unsieved word.
+         *
+         * @return The next word, or null if no more words are available.
+         */
         private StringBuilder nextElement0() {
             StringBuilder r;
             StringBuilder sb;
@@ -112,26 +139,60 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
             }
             while (this.s.isEmpty()) {
                 if (!this.sr.hasNext()) return null;
-                r = this.sr.next(); // read next sentence (incl. ending punctuation)
+
+                // Read the next sentence, including ending punctuation.
+                r = this.sr.next();
                 if (r == null) return null;
                 r = trim(r);
-                sb = new StringBuilder(20);
+
+                // Tokenize the sentence into words and punctuation marks.
+                sb = new StringBuilder(20); // Initialize StringBuilder to capture tokens (words or punctuation) from the sentence.
+
+                // A variable to track whether the previous character was a digit separator within a number.
+                boolean wasDigitSep = false;
+
+                // Iterate through each character in the sentence to tokenize it.
                 for (int i = 0; i < r.length(); i++) { // tokenize one sentence
                     c = r.charAt(i);
+
+                    // Check if the current character is a digit separator within a number.
+                    if (SentenceReader.digitsep(c) && i > 0 && Character.isDigit(r.charAt(i - 1)) && (i < r.length() - 1) && Character.isDigit(r.charAt(i + 1))) {
+                        sb.append(c);   // Add the digit separator to the current token.
+                        wasDigitSep = true; // Set the flag to true.
+                        continue; // Continue to the next character without further checks.
+                    }
+
+                    // Check if the current character is a punctuation.
+                    // Punctuation checks are prioritized over invisibles due to simplicity and speed.
                     if (SentenceReader.punctuation(c)) { // punctuation check is simple/quick, do it before invisible
+                        // If the current token (sb) has content, add it to the list of tokens.
+                        if (sb.length() > 0 && !wasDigitSep) {
+                            this.s.add(sb);
+                            sb = new StringBuilder(1); // Prepare to capture the punctuation.
+                        }
+                        sb.append(c); // Add the punctuation to the token.
+                        this.s.add(sb); // Add the punctuation token to the list.
+                        sb = new StringBuilder(20); // Reset token builder for the next token.
+                        wasDigitSep = false; // Reset the digit separator flag.
+                    }
+
+                    // Check if the current character is invisible.
+                    // Note: This check currently has overlap with punctuation check.
+                    else if (SentenceReader.invisible(c)) { // ! currently punctuation again checked by invisible()
+                        // If the current token (sb) has content, add it to the list and reset the token builder.
                         if (sb.length() > 0) {
                             this.s.add(sb);
-                            sb = new StringBuilder(1);
+                            sb = new StringBuilder(20);
                         }
-                        sb.append(c);
-                        this.s.add(sb);
-                        sb = new StringBuilder(20);
-                    } else if (SentenceReader.invisible(c)) { // ! currently punctuation again checked by invisible()
-                        if (sb.length() > 0) {this.s.add(sb); sb = new StringBuilder(20);}
-                    } else {
+                        wasDigitSep = false; // Reset the digit separator flag.
+                    }
+                    // If the character is not punctuation or invisible, add it to the current token.
+                    else {
                         sb = sb.append(c);
                     }
                 }
+
+                // If there's any content left in the token builder after processing the sentence, add it to the list.
                 if (sb.length() > 0) {
                     this.s.add(sb);
                     sb = null;

@@ -27,6 +27,11 @@ package net.yacy.document;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import net.yacy.cora.order.Base64Order;
+import net.yacy.kelondro.data.word.Word;
 
 /**
  * Read sentences from a given text.
@@ -129,6 +134,10 @@ public class SentenceReader implements Iterator<StringBuilder>, Iterable<StringB
         return c == '.' || c == '!' || c == '?';
     }
 
+    public final static boolean digitsep(final char c) {
+        return c == '.' || c == ',';
+    }
+
     @Override
     public boolean hasNext() {
         return this.buffer != null;
@@ -169,10 +178,19 @@ public class SentenceReader implements Iterator<StringBuilder>, Iterable<StringB
     }
 
     public static void main(String[] args) {
-        String s = "a b ccc d";
+        String s = "a b 1.5 ccc 4,7 d. so o et, qu.";
         SentenceReader sr = new SentenceReader(s);
-        for (StringBuilder a: sr) {
-            System.out.println(a);
+        for (StringBuilder a: sr) System.out.println(a);
+        sr = new SentenceReader(s);
+
+        WordTokenizer words = new WordTokenizer(sr, null);
+        try {
+            while (words.hasMoreElements()) {
+                System.out.println(words.nextElement().toString());
+            }
+        } finally {
+            words.close();
+            words = null;
         }
     }
 }
