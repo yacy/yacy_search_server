@@ -59,7 +59,7 @@ public final class Identificator {
      */
     public void add(final String word) {
         if (word == null || this.detector == null) {
-        	return;
+            return;
         }
         this.detector.append(" " + word); // detector internally caches text up to maxtextlen = default = 10000 chars
     }
@@ -71,24 +71,24 @@ public final class Identificator {
      * @return 2 char language code (ISO 639-1)
      */
     public String getLanguage() {
-    	if(this.detector != null) {
-    		try {
-    			ArrayList<Language> probabilities = this.detector.getProbabilities();
-    			if(probabilities.isEmpty()) return null;
-    			this.language = this.detector.getProbabilities().get(0);
-    		} catch (LangDetectException e) {
-    			// this contains mostly the message "no features in text"
-    			//ConcurrentLog.logException(e);
-    			return null;
-    		}
-    		// Return language only if probability is higher than 30% to account for missing language profiles
-    		if (this.language.prob > 0.3) {
-    			if (this.language.lang.length() == 2) {
-    				return this.language.lang;
-    			}
-    			return this.language.lang.substring(0,2);
-    		}
-    	}
+        if(this.detector != null) {
+            try {
+                ArrayList<Language> probabilities = this.detector.getProbabilities();
+                if(probabilities.isEmpty()) return null;
+                this.language = this.detector.getProbabilities().get(0);
+            } catch (LangDetectException e) {
+                // this contains mostly the message "no features in text"
+                //ConcurrentLog.logException(e);
+                return null;
+            }
+            // Return language only if probability is higher than 30% to account for missing language profiles
+            if (this.language.prob > 0.3) {
+                if (this.language.lang.length() == 2) {
+                    return this.language.lang;
+                }
+                return this.language.lang.substring(0,2);
+            }
+        }
 
         return null;
 

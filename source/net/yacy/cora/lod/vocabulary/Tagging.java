@@ -47,27 +47,27 @@ public class Tagging {
 
     public final static String DEFAULT_NAMESPACE= "http://yacy.net/autotagging#";
     public final static String DEFAULT_PREFIX = "tags";
-    
+
     /** Default value for the property matchFromLinkedData */
     public final static boolean DEFAULT_MATCH_FROM_LINKED_DATA = false;
 
     private final String navigatorName;
     private final Map<String, String> synonym2term;
-    
+
     /** Terms associated to TagginEntry instances each having a synonym and an eventual object link */
     private final Map<String, TaggingEntry> term2entries;
-    
+
     private File propFile;
-    
+
     /** true if the vocabulary shall generate a navigation facet */
     private boolean isFacet;
-    
-	/**
-	 * True when this vocabulary terms should only be matched from linked data types
-	 * annotations (with microdata, RDFa, microformats...) instead of clear text
-	 * words
-	 */
-	private boolean matchFromLinkedData;
+
+    /**
+     * True when this vocabulary terms should only be matched from linked data types
+     * annotations (with microdata, RDFa, microformats...) instead of clear text
+     * words
+     */
+    private boolean matchFromLinkedData;
 
     private String predicate, namespace, objectspace;
 
@@ -142,55 +142,55 @@ public class Tagging {
 
             String term, v;
             String[] tags;
-        	vocloop: for (Map.Entry<String, SOTuple> e: table.entrySet()) {
-			    if (e.getValue().getSynonymsCSV() == null || e.getValue().getSynonymsCSV().isEmpty()) {
-			        term = normalizeKey(e.getKey());
-			        v = normalizeTerm(e.getKey());
-			        this.synonym2term.put(v, term);
-			        if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) {
-			        	this.term2entries.put(term, new TaggingEntryWithObjectLink(v, e.getValue().getObjectlink()));
-			        } else {
-			        	this.term2entries.put(term, new SynonymTaggingEntry(v));
-			        }
-			        	
-			        continue vocloop;
-			    }
-			    term = normalizeKey(e.getKey());
-			    tags = e.getValue().getSynonymsList();
-			    final Set<String> synonyms = new HashSet<String>();
-			    synonyms.add(term);
-			    tagloop: for (String synonym: tags) {
-			        if (synonym.isEmpty()) continue tagloop;
-				    synonyms.add(synonym);
-			    	synonym = normalizeTerm(synonym);
-			        if (synonym.isEmpty()) continue tagloop;
-				    synonyms.add(synonym);
-			        this.synonym2term.put(synonym, term);
-			        this.term2entries.put(term, new SynonymTaggingEntry(synonym));
-			    }
-			    final String synonym = normalizeTerm(term);
-			    this.synonym2term.put(synonym, term);
-                if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) {
-                	this.term2entries.put(term, new TaggingEntryWithObjectLink(synonym, e.getValue().getObjectlink()));
-                } else {
-                	this.term2entries.put(term, new SynonymTaggingEntry(synonym));
+            vocloop: for (Map.Entry<String, SOTuple> e: table.entrySet()) {
+                if (e.getValue().getSynonymsCSV() == null || e.getValue().getSynonymsCSV().isEmpty()) {
+                    term = normalizeKey(e.getKey());
+                    v = normalizeTerm(e.getKey());
+                    this.synonym2term.put(v, term);
+                    if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) {
+                        this.term2entries.put(term, new TaggingEntryWithObjectLink(v, e.getValue().getObjectlink()));
+                    } else {
+                        this.term2entries.put(term, new SynonymTaggingEntry(v));
+                    }
+                        
+                    continue vocloop;
                 }
-			    synonyms.add(synonym);
-			}
+                term = normalizeKey(e.getKey());
+                tags = e.getValue().getSynonymsList();
+                final Set<String> synonyms = new HashSet<String>();
+                synonyms.add(term);
+                tagloop: for (String synonym: tags) {
+                    if (synonym.isEmpty()) continue tagloop;
+                    synonyms.add(synonym);
+                    synonym = normalizeTerm(synonym);
+                    if (synonym.isEmpty()) continue tagloop;
+                    synonyms.add(synonym);
+                    this.synonym2term.put(synonym, term);
+                    this.term2entries.put(term, new SynonymTaggingEntry(synonym));
+                }
+                final String synonym = normalizeTerm(term);
+                this.synonym2term.put(synonym, term);
+                if (e.getValue().getObjectlink() != null && e.getValue().getObjectlink().length() > 0) {
+                    this.term2entries.put(term, new TaggingEntryWithObjectLink(synonym, e.getValue().getObjectlink()));
+                } else {
+                    this.term2entries.put(term, new SynonymTaggingEntry(synonym));
+                }
+                synonyms.add(synonym);
+            }
         } else {
             try (
-            	/* Resources automatically closed by this try-with-resources statement */
-            	final FileOutputStream outStream = new FileOutputStream(propFile);
-            	final BufferedWriter w = new BufferedWriter(new OutputStreamWriter(outStream, StandardCharsets.UTF_8.name()));
+                /* Resources automatically closed by this try-with-resources statement */
+                final FileOutputStream outStream = new FileOutputStream(propFile);
+                final BufferedWriter w = new BufferedWriter(new OutputStreamWriter(outStream, StandardCharsets.UTF_8.name()));
             ) {
-            	if (objectspace != null && objectspace.length() > 0) w.write("#objectspace:" + objectspace + "\n");
-            	for (final Map.Entry<String, SOTuple> e: table.entrySet()) {
-            		String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
-            		String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
-            		w.write(e.getKey() + (s == null || s.isEmpty() ? "" : ":" + e.getValue().getSynonymsCSV()) + (o == null || o.isEmpty() || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
-            	}
+                if (objectspace != null && objectspace.length() > 0) w.write("#objectspace:" + objectspace + "\n");
+                for (final Map.Entry<String, SOTuple> e: table.entrySet()) {
+                    String s = e.getValue() == null ? "" : e.getValue().getSynonymsCSV();
+                    String o = e.getValue() == null ? "" : e.getValue().getObjectlink();
+                    w.write(e.getKey() + (s == null || s.isEmpty() ? "" : ":" + e.getValue().getSynonymsCSV()) + (o == null || o.isEmpty() || o.equals(objectspace + e.getKey()) ? "" : "#" + o) + "\n");
+                }
             }
-	        init();
+            init();
         }
     }
 
@@ -207,7 +207,7 @@ public class Tagging {
                 g = geo.iterator().next();
                 this.term2entries.put(loc, new LocationTaggingEntry(syn, g));
             } else {
-            	this.term2entries.put(loc, new SynonymTaggingEntry(syn));
+                this.term2entries.put(loc, new SynonymTaggingEntry(syn));
             }
         }
     }
@@ -255,9 +255,9 @@ public class Tagging {
                     v = normalizeTerm(pl[0]);
                     this.synonym2term.put(v, term);
                     if (pl[2] != null && pl[2].length() > 0) {
-                    	this.term2entries.put(term, new TaggingEntryWithObjectLink(v, pl[2]));
+                        this.term2entries.put(term, new TaggingEntryWithObjectLink(v, pl[2]));
                     } else {
-                    	this.term2entries.put(term, new SynonymTaggingEntry(v));
+                        this.term2entries.put(term, new SynonymTaggingEntry(v));
                     }
                     continue vocloop;
                 }
@@ -278,9 +278,9 @@ public class Tagging {
                 String synonym = normalizeTerm(term);
                 this.synonym2term.put(synonym, term);
                 if (pl[2] != null && pl[2].length() > 0) {
-                	this.term2entries.put(term, new TaggingEntryWithObjectLink(synonym, pl[2]));
+                    this.term2entries.put(term, new TaggingEntryWithObjectLink(synonym, pl[2]));
                 } else {
-                	this.term2entries.put(term, new SynonymTaggingEntry(synonym));
+                    this.term2entries.put(term, new SynonymTaggingEntry(synonym));
                 }
                 synonyms.add(synonym);
             }
@@ -293,30 +293,30 @@ public class Tagging {
     public boolean isFacet() {
         return this.isFacet;
     }
-    
+
     public void setFacet(boolean isFacet) {
         this.isFacet = isFacet;
     }
-    
-	/**
-	 * @return true when this vocabulary terms should be matched from linked data
-	 *         types annotations (with microdata, RDFa, microformats...) instead of
-	 *         clear text words
-	 */
+
+    /**
+     * @return true when this vocabulary terms should be matched from linked data
+     *         types annotations (with microdata, RDFa, microformats...) instead of
+     *         clear text words
+     */
     public boolean isMatchFromLinkedData() {
-		return this.matchFromLinkedData;
-	}
-    
-	/**
-	 * @param facetFromLinkedData
-	 *            true when this vocabulary terms should be matched from linked
-	 *            data types annotations (with microdata, RDFa, microformats...)
-	 *            instead of clear text words
-	 */
-    public void setMatchFromLinkedData(final boolean facetFromLinkedData) {
-    	this.matchFromLinkedData = facetFromLinkedData;
+        return this.matchFromLinkedData;
     }
-    
+
+    /**
+     * @param facetFromLinkedData
+     *            true when this vocabulary terms should be matched from linked
+     *            data types annotations (with microdata, RDFa, microformats...)
+     *            instead of clear text words
+     */
+    public void setMatchFromLinkedData(final boolean facetFromLinkedData) {
+        this.matchFromLinkedData = facetFromLinkedData;
+    }
+
     public int size() {
         return this.term2entries.size();
     }
@@ -430,7 +430,7 @@ public class Tagging {
                 r.put(e.getKey(), s);
             }
             if (e.getValue() != null && e.getValue().getSynonym() != null && e.getValue().getSynonym().length() != 0) {
-            	s.add(e.getValue().getSynonym());
+                s.add(e.getValue().getSynonym());
             }
         }
         for (Map.Entry<String, String> e: this.synonym2term.entrySet()) {
@@ -448,11 +448,11 @@ public class Tagging {
         Map<String, Set<String>> r = reconstructionSets();
         Map<String, SOTuple> map = new TreeMap<String, SOTuple>();
         for (Map.Entry<String, Set<String>> e: r.entrySet()) {
-        	TaggingEntry entry = this.term2entries.get(e.getKey());
-        	String objectLink = null;
-        	if(entry != null) {
-        		objectLink = entry.getObjectLink();
-        	}
+            TaggingEntry entry = this.term2entries.get(e.getKey());
+            String objectLink = null;
+            if(entry != null) {
+                objectLink = entry.getObjectLink();
+            }
             map.put(e.getKey(), new SOTuple(e.getValue().toArray(new String[e.getValue().size()]), objectLink == null ? "" : objectLink));
         }
         return map;
@@ -461,7 +461,7 @@ public class Tagging {
     public String getObjectlink(String term) {
         TaggingEntry entry = this.term2entries.get(term);
         if(entry != null) {
-        	return entry.getObjectLink();
+            return entry.getObjectLink();
         }
         return null;
     }
@@ -531,11 +531,11 @@ public class Tagging {
     public String getObjectspace() {
         return this.objectspace;
     }
-    
+
     private final static Pattern PATTERN_SPACESLASHPLUS = Pattern.compile(" (/|\\+)");
     private final static Pattern PATTERN_SLASHPLUS = Pattern.compile("/|\\+");
     private final static Pattern PATTERN_SPACESPACE = Pattern.compile("  ");
-    
+
     private final String normalizeKey(String k) {
         k = k.trim();
         // remove symbols that are bad in a query attribute
@@ -557,37 +557,37 @@ public class Tagging {
         return this.propFile;
     }
 
-	/**
-	 * @param word
-	 *            a synonym to look for
-	 * @return a Metatag instance with the matching term, or null when the synonym
-	 *         is not in this vocabulary.
-	 */
+    /**
+     * @param word
+     *            a synonym to look for
+     * @return a Metatag instance with the matching term, or null when the synonym
+     *         is not in this vocabulary.
+     */
     public Metatag getMetatagFromSynonym(final String word) {
         String printname = this.synonym2term.get(word);
         if (printname == null) return null;
         return new Metatag(printname);
     }
-    
-	/**
-	 * @param term
-	 *            a term to look for
-	 * @return a Metatag instance with the matching term, or null when it is not in
-	 *         this vocabulary.
-	 */
+
+    /**
+     * @param term
+     *            a term to look for
+     * @return a Metatag instance with the matching term, or null when it is not in
+     *         this vocabulary.
+     */
     public Metatag getMetatagFromTerm(final String term) {
         TaggingEntry entry = this.term2entries.get(term);
         if(entry == null) {
-        	return null;
+            return null;
         }
         return new Metatag(term);
     }
 
-	/**
-	 * @param word
-	 *            the object of the Metatag
-	 * @return a new Metatag instance related to this vocabulary
-	 */
+    /**
+     * @param word
+     *            the object of the Metatag
+     * @return a new Metatag instance related to this vocabulary
+     */
     public Metatag buildMetatagFromTerm(final String word) {
         return new Metatag(word);
     }
@@ -632,15 +632,15 @@ public class Tagging {
      * The metatag is created in a tagging environment, which already contains the
      * subject and the predicate. The metatag is the object of the RDF triple.
      */
-	public class Metatag {
-	    private final String object;
-	    private Metatag(String object) {
-	        this.object = object;
-	    }
+    public class Metatag {
+        private final String object;
+        private Metatag(String object) {
+            this.object = object;
+        }
 
-	    public String getVocabularyName() {
-	        return Tagging.this.navigatorName;
-	    }
+        public String getVocabularyName() {
+            return Tagging.this.navigatorName;
+        }
 
         public String getPredicate() {
             return Tagging.this.predicate;
@@ -650,22 +650,22 @@ public class Tagging {
             return this.object;
         }
 
-	    @Override
-	    public String toString() {
-	        return Tagging.this.navigatorName + ":" + encodePrintname(this.object);
-	    }
+        @Override
+        public String toString() {
+            return Tagging.this.navigatorName + ":" + encodePrintname(this.object);
+        }
 
-	    @Override
-	    public boolean equals(Object m) {
-	        Metatag m0 = (Metatag) m;
-	        return Tagging.this.navigatorName.equals(m0.getVocabularyName()) && this.object.equals(m0.object);
-	    }
+        @Override
+        public boolean equals(Object m) {
+            Metatag m0 = (Metatag) m;
+            return Tagging.this.navigatorName.equals(m0.getVocabularyName()) && this.object.equals(m0.object);
+        }
 
-	    @Override
-	    public int hashCode() {
-	        return Tagging.this.navigatorName.hashCode() + this.object.hashCode();
-	    }
-	}
+        @Override
+        public int hashCode() {
+            return Tagging.this.navigatorName.hashCode() + this.object.hashCode();
+        }
+    }
 
     public static final String encodePrintname(String printname) {
         return CommonPattern.SPACE.matcher(printname).replaceAll("_");

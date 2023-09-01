@@ -85,24 +85,24 @@ public class AutotaggingLibrary {
             }
         }
     }
-    
-	/**
-	 * Create a new Autotagging instance from the provided vocabularies. Can be used
-	 * for example for testing purpose.
-	 */
+
+    /**
+     * Create a new Autotagging instance from the provided vocabularies. Can be used
+     * for example for testing purpose.
+     */
     protected AutotaggingLibrary(final Map<String, Tagging> vocabularies) {
-    	if(vocabularies != null) {
-    		this.vocabularies = vocabularies;
-    	} else {
-    		this.vocabularies = new ConcurrentHashMap<String, Tagging>();
-    	}
-    	this.allTags = new ConcurrentHashMap<String, Object>();
-    	this.autotaggingPath = null;
-    	for(final Tagging voc : this.vocabularies.values()) {
+        if(vocabularies != null) {
+            this.vocabularies = vocabularies;
+        } else {
+            this.vocabularies = new ConcurrentHashMap<String, Tagging>();
+        }
+        this.allTags = new ConcurrentHashMap<String, Object>();
+        this.autotaggingPath = null;
+        for(final Tagging voc : this.vocabularies.values()) {
             for (final String t: voc.tags()) {
                 this.allTags.put(t, PRESENT);
             }
-    	}
+        }
     }
 
     public File getVocabularyFile(String name) {
@@ -159,11 +159,11 @@ public class AutotaggingLibrary {
     }
 
     public int size() {
-    	return this.vocabularies.size();
+        return this.vocabularies.size();
     }
 
     public boolean isEmpty() {
-    	return this.vocabularies.isEmpty();
+        return this.vocabularies.isEmpty();
     }
 
     /**
@@ -171,8 +171,8 @@ public class AutotaggingLibrary {
      * @return
      */
     public int getMaxWordsInTerm() {
-    	//TODO: calculate from database
-    	return 4;
+        //TODO: calculate from database
+        return 4;
     }
 
     /**
@@ -195,70 +195,70 @@ public class AutotaggingLibrary {
         return null;
     }
     
-	/**
-	 * Search in the active vocabularies matching linked data for Metatag entries with objectspace + term
-	 * matching the given term URL. Returns at most one Metatag instance per
-	 * vocabulary.
-	 * 
-	 * @param termURL
-	 *            the vocabulary term identifier (an absolute URL) to search
-	 * @return a set of matching Metatag instances eventually empty
-	 */
-	public Set<Tagging.Metatag> getTagsFromTermURL(final DigestURL termURL) {
-		final Set<Tagging.Metatag> tags = new HashSet<>();
-		if (termURL == null || this.vocabularies.isEmpty()) {
-			return tags;
-		}
-		final String termURLStr = termURL.toNormalform(false);
-		String termNamespace = null;
+    /**
+     * Search in the active vocabularies matching linked data for Metatag entries with objectspace + term
+     * matching the given term URL. Returns at most one Metatag instance per
+     * vocabulary.
+     * 
+     * @param termURL
+     *            the vocabulary term identifier (an absolute URL) to search
+     * @return a set of matching Metatag instances eventually empty
+     */
+    public Set<Tagging.Metatag> getTagsFromTermURL(final DigestURL termURL) {
+        final Set<Tagging.Metatag> tags = new HashSet<>();
+        if (termURL == null || this.vocabularies.isEmpty()) {
+            return tags;
+        }
+        final String termURLStr = termURL.toNormalform(false);
+        String termNamespace = null;
 
-		/* If the objectLink URL has a fragment, this should be the vocabulary term */
-		String term = termURL.getRef();
-		if (term == null) {
-			/*
-			 * No fragment in the URL : the term should then be the last segment of the URL
-			 */
-			term = termURL.getFileName();
-			if (StringUtils.isNotEmpty(term)) {
-				final int lastPathSeparatorPos = termURLStr.lastIndexOf("/");
-				if (lastPathSeparatorPos > 0) {
-					termNamespace = termURLStr.substring(0, lastPathSeparatorPos + 1);
-				}
-			}
-		} else {
-			final int fragmentPos = termURLStr.indexOf("#");
-			if (fragmentPos > 0) {
-				termNamespace = termURLStr.substring(0, fragmentPos + 1);
-			}
-		}
-		if (StringUtils.isNotEmpty(term) && termNamespace != null) {
-			final String alternativeTermNamespace;
-			/*
-			 * http://example.org/ and https://example.org/ are considered equivalent forms
-			 * for the namespace URL
-			 */
-			if (termURL.isHTTP()) {
-				alternativeTermNamespace = "https" + termNamespace.substring("http".length());
-			} else if (termURL.isHTTPS()) {
-				alternativeTermNamespace = "http" + termNamespace.substring("https".length());
-			} else {
-				alternativeTermNamespace = null;
-			}
+        /* If the objectLink URL has a fragment, this should be the vocabulary term */
+        String term = termURL.getRef();
+        if (term == null) {
+            /*
+             * No fragment in the URL : the term should then be the last segment of the URL
+             */
+            term = termURL.getFileName();
+            if (StringUtils.isNotEmpty(term)) {
+                final int lastPathSeparatorPos = termURLStr.lastIndexOf("/");
+                if (lastPathSeparatorPos > 0) {
+                    termNamespace = termURLStr.substring(0, lastPathSeparatorPos + 1);
+                }
+            }
+        } else {
+            final int fragmentPos = termURLStr.indexOf("#");
+            if (fragmentPos > 0) {
+                termNamespace = termURLStr.substring(0, fragmentPos + 1);
+            }
+        }
+        if (StringUtils.isNotEmpty(term) && termNamespace != null) {
+            final String alternativeTermNamespace;
+            /*
+             * http://example.org/ and https://example.org/ are considered equivalent forms
+             * for the namespace URL
+             */
+            if (termURL.isHTTP()) {
+                alternativeTermNamespace = "https" + termNamespace.substring("http".length());
+            } else if (termURL.isHTTPS()) {
+                alternativeTermNamespace = "http" + termNamespace.substring("https".length());
+            } else {
+                alternativeTermNamespace = null;
+            }
 
-			for (final Tagging vocabulary : this.vocabularies.values()) {
-				if (vocabulary != null && vocabulary.isMatchFromLinkedData()) {
-					if ((termNamespace.equals(vocabulary.getObjectspace())) || (alternativeTermNamespace != null
-							&& alternativeTermNamespace.equals(vocabulary.getObjectspace()))) {
-						final Tagging.Metatag tag = vocabulary.getMetatagFromTerm(term);
-						if (tag != null) {
-							tags.add(tag);
-						}
-					}
-				}
-			}
-		}
-		return tags;
-	}
+            for (final Tagging vocabulary : this.vocabularies.values()) {
+                if (vocabulary != null && vocabulary.isMatchFromLinkedData()) {
+                    if ((termNamespace.equals(vocabulary.getObjectspace())) || (alternativeTermNamespace != null
+                            && alternativeTermNamespace.equals(vocabulary.getObjectspace()))) {
+                        final Tagging.Metatag tag = vocabulary.getMetatagFromTerm(term);
+                        if (tag != null) {
+                            tags.add(tag);
+                        }
+                    }
+                }
+            }
+        }
+        return tags;
+    }
 
     public Tagging.Metatag metatag(String vocName, String term) {
         Tagging tagging = this.vocabularies.get(vocName);

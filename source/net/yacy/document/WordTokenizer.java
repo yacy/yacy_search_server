@@ -37,7 +37,7 @@ import net.yacy.kelondro.data.word.Word;
 
 
 public class WordTokenizer implements Enumeration<StringBuilder> {
- // this enumeration removes all words that contain either wrong characters or are too short
+    // this enumeration removes all words that contain either wrong characters or are too short
 
     private StringBuilder buffer = null;
     private unsievedWordsEnum e;
@@ -78,9 +78,9 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
     }
 
     public synchronized void close() {
-    	this.e.close();
-    	this.e = null;
-    	this.buffer = null;
+        this.e.close();
+        this.e = null;
+        this.buffer = null;
     }
 
     private class unsievedWordsEnum implements Enumeration<StringBuilder> {
@@ -189,29 +189,29 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         final SortedMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
         WordTokenizer words = new WordTokenizer(new SentenceReader(sentence), null);
         try {
-	        int pos = 0;
-	        StringBuilder word;
-	        byte[] hash;
-	        Integer oldpos;
-	        while (words.hasMoreElements() && maxlength-- > 0) {
-	            word = words.nextElement();
-	            hash = Word.word2hash(word);
+            int pos = 0;
+            StringBuilder word;
+            byte[] hash;
+            Integer oldpos;
+            while (words.hasMoreElements() && maxlength-- > 0) {
+                word = words.nextElement();
+                hash = Word.word2hash(word);
 
-	            // don't overwrite old values, that leads to too far word distances
-	            oldpos = map.put(hash, LargeNumberCache.valueOf(pos));
-	            if (oldpos != null) {
-	                map.put(hash, oldpos);
-	            }
+                // don't overwrite old values, that leads to too far word distances
+                oldpos = map.put(hash, LargeNumberCache.valueOf(pos));
+                if (oldpos != null) {
+                    map.put(hash, oldpos);
+                }
 
-	            pos += word.length() + 1;
-	        }
-	        return map;
+                pos += word.length() + 1;
+            }
+            return map;
         } finally {
-        	words.close();
-        	words = null;
+            words.close();
+            words = null;
         }
     }
-    
+
     /**
      * Tokenize the given sentence and generate a word-wordPos mapping
      * @param sentence the sentence to be tokenized
@@ -221,24 +221,24 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
         final SortedMap<String, Integer> map = new TreeMap<String, Integer>();
         WordTokenizer words = new WordTokenizer(new SentenceReader(sentence), null);
         try {
-	        int pos = 0;
-	        String word;
-	        Integer oldpos;
-	        while (words.hasMoreElements() && maxlength-- > 0) {
-	            word = words.nextElement().toString().toLowerCase(Locale.ENGLISH);
+            int pos = 0;
+            String word;
+            Integer oldpos;
+            while (words.hasMoreElements() && maxlength-- > 0) {
+                word = words.nextElement().toString().toLowerCase(Locale.ENGLISH);
 
-	            // don't overwrite old values, that leads to too far word distances
-	            oldpos = map.put(word, LargeNumberCache.valueOf(pos));
-	            if (oldpos != null) {
-	                map.put(word, oldpos);
-	            }
+                // don't overwrite old values, that leads to too far word distances
+                oldpos = map.put(word, LargeNumberCache.valueOf(pos));
+                if (oldpos != null) {
+                    map.put(word, oldpos);
+                }
 
-	            pos += word.length() + 1;
-	        }
-	        return map;
+                pos += word.length() + 1;
+            }
+            return map;
         } finally {
-        	words.close();
-        	words = null;
+            words.close();
+            words = null;
         }
     }
 }

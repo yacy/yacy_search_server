@@ -111,17 +111,17 @@ public class Word {
 
     // create a word hash
     public static final byte[] word2hash(final String word) {
-    	final String wordlc = word.toLowerCase(Locale.ENGLISH);
-    	byte[] h = hashCache.get(wordlc);
+        final String wordlc = word.toLowerCase(Locale.ENGLISH);
+        byte[] h = hashCache.get(wordlc);
         if (h != null) return h;
         // calculate the hash
-    	h = commonHashOrder.encodeSubstring(Digest.encodeMD5Raw(wordlc), commonHashLength);
-    	while (h[0] == highByte && h[1] == highByte && h[2] == highByte && h[3] == highByte && h[4] == highByte) {
-    	    // ensure that word hashes do not start with hash '_____' which is a key for an extra hash range for private usage on the local peer
-    	    // statistically we are inside this loop only every 2^^30 calls of word2hash (which means almost never)
-    	    System.arraycopy(h, 1, h, 0, commonHashLength - 1);
-    	    h[commonHashLength - 1] = lowByte;
-    	}
+        h = commonHashOrder.encodeSubstring(Digest.encodeMD5Raw(wordlc), commonHashLength);
+        while (h[0] == highByte && h[1] == highByte && h[2] == highByte && h[3] == highByte && h[4] == highByte) {
+            // ensure that word hashes do not start with hash '_____' which is a key for an extra hash range for private usage on the local peer
+            // statistically we are inside this loop only every 2^^30 calls of word2hash (which means almost never)
+            System.arraycopy(h, 1, h, 0, commonHashLength - 1);
+            h[commonHashLength - 1] = lowByte;
+        }
         assert h[2] != '@';
         if (MemoryControl.shortStatus()) {
             hashCache.clear();
