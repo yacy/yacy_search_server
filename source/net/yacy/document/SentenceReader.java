@@ -178,7 +178,7 @@ public class SentenceReader implements Iterator<StringBuilder>, Iterable<StringB
     }
 
     public static void main(String[] args) {
-        String s = "a b 1.5 ccc 4,7 d. so o et, qu.";
+        String s = "a b 1.5 ccc 4,7 d. so o et, qu. 4.7Ohm 2.54inch.";
         SentenceReader sr = new SentenceReader(s);
         for (StringBuilder a: sr) System.out.println(a);
         sr = new SentenceReader(s);

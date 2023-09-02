@@ -162,6 +162,15 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
                         continue; // Continue to the next character without further checks.
                     }
 
+                    // Transition from digit (or digit separator) to a letter. Save the number as a token and start a new token for the word.
+                    if (wasDigitSep && Character.isLetter(c)) {
+                        if (sb.length() > 0) {
+                            this.s.add(sb);
+                            sb = new StringBuilder(20);
+                        }
+                        wasDigitSep = false;
+                    }
+
                     // Check if the current character is a punctuation.
                     // Punctuation checks are prioritized over invisibles due to simplicity and speed.
                     if (SentenceReader.punctuation(c)) { // punctuation check is simple/quick, do it before invisible
@@ -189,6 +198,11 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
                     // If the character is not punctuation or invisible, add it to the current token.
                     else {
                         sb = sb.append(c);
+                        // Check for transition from number to word, e.g., "4.7Ohm"
+                        if (i < r.length() - 1 && Character.isDigit(c) && Character.isLetter(r.charAt(i + 1))) {
+                            this.s.add(sb);
+                            sb = new StringBuilder(20); // Start capturing the word as a new token.
+                        }
                     }
                 }
 
