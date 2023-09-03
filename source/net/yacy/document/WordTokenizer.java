@@ -155,6 +155,12 @@ public class WordTokenizer implements Enumeration<StringBuilder> {
                 for (int i = 0; i < r.length(); i++) { // tokenize one sentence
                     c = r.charAt(i);
 
+                    // Check if the character is a minus sign and is followed by a letter or a digit. Treat it as part of the word/number.
+                    if (c == '-' && i < r.length() - 1 && (Character.isLetter(r.charAt(i + 1)) || Character.isDigit(r.charAt(i + 1)))) {
+                        sb.append(c);
+                        continue;  // Skip further checks and continue to the next character.
+                    }
+
                     // Check if the current character is a digit separator within a number.
                     if (SentenceReader.digitsep(c) && i > 0 && Character.isDigit(r.charAt(i - 1)) && (i < r.length() - 1) && Character.isDigit(r.charAt(i + 1))) {
                         sb.append(c);   // Add the digit separator to the current token.

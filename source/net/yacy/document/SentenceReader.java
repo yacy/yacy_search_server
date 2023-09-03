@@ -27,11 +27,6 @@ package net.yacy.document;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import net.yacy.cora.order.Base64Order;
-import net.yacy.kelondro.data.word.Word;
 
 /**
  * Read sentences from a given text.
@@ -127,15 +122,28 @@ public class SentenceReader implements Iterator<StringBuilder>, Iterable<StringB
                 || type == Character.MODIFIER_LETTER
                 || type == Character.OTHER_LETTER
                 || type == Character.TITLECASE_LETTER
-                || punctuation(c));
+                || punctuation(c) || digitsep(c));
     }
 
     public final static boolean punctuation(final char c) {
-        return c == '.' || c == '!' || c == '?';
+        switch (c) {
+            case '.':
+            case '!':
+            case '?':
+                return true;
+            default:
+                return false;
+        }
     }
 
     public final static boolean digitsep(final char c) {
-        return c == '.' || c == ',';
+        switch (c) {
+            case '.':
+            case ',':
+                return true;
+            default:
+                return false;
+        }
     }
 
     @Override
@@ -178,7 +186,7 @@ public class SentenceReader implements Iterator<StringBuilder>, Iterable<StringB
     }
 
     public static void main(String[] args) {
-        String s = "a b 1.5 ccc 4,7 d. so o et, qu. 4.7Ohm 2.54inch.";
+        String s = "a b 1.5 ccc -4,7 d. so -o et, qu. 4.7Ohm 2.54inch.";
         SentenceReader sr = new SentenceReader(s);
         for (StringBuilder a: sr) System.out.println(a);
         sr = new SentenceReader(s);
