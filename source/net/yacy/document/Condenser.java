@@ -61,10 +61,10 @@ public final class Condenser extends Tokenizer {
 
     private long fuzzy_signature = 0, exact_signature = 0; // signatures for double-check detection
     private String fuzzy_signature_text = null; // signatures for double-check detection
-    
+
     private final Identificator languageIdentificator;
     public LinkedHashSet<Date> dates_in_content;
-    
+
     public Condenser(
             final Document document,
             final VocabularyScraper scraper,
@@ -76,14 +76,14 @@ public final class Condenser extends Tokenizer {
             final int timezoneOffset
             ) {
         super(document.dc_source(), indexText ? document.getTextString() : "", meaningLib, doAutotagging, scraper);
-        
+
         final String initialThreadName = Thread.currentThread().getName();
         Thread.currentThread().setName("condenser-" + document.dc_identifier()); // for debugging
-        
+
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
         this.dates_in_content = new LinkedHashSet<Date>();
-        
+
         // construct flag set for document
         ContentDomain contentDomain = document.getContentDomain();
         if (contentDomain == ContentDomain.IMAGE || !document.getImages().isEmpty())     this.RESULT_FLAGS.set(flag_cat_hasimage, true);
@@ -196,9 +196,9 @@ public final class Condenser extends Tokenizer {
                 }
             }
         }
-        
+
         if(doAutotagging) {
-        	extractAutoTagsFromLinkedDataTypes(document.getLinkedDataTypes(), LibraryProvider.autotagging);
+            extractAutoTagsFromLinkedDataTypes(document.getLinkedDataTypes(), LibraryProvider.autotagging);
         }
 
         // extend the tags in the document object with autotagging tags
@@ -224,36 +224,36 @@ public final class Condenser extends Tokenizer {
         /* Restore the current thread initial name */
         Thread.currentThread().setName(initialThreadName);
     }
-    
-	/**
-	 * Search for tags matching the given linked data types identifiers (absolute
-	 * URLs) in the given autotagging library. Then fill this instance "tags" map
-	 * with the eventually matching tags found.
-	 * 
-	 * @param linkedDataTypes
-	 *            a set of linked data typed items identifiers (absolute URLs) to
-	 *            search
-	 * @param tagLibrary
-	 *            the autotagging library holding vocabularies to search in
-	 */
-	protected void extractAutoTagsFromLinkedDataTypes(final Set<DigestURL> linkedDataTypes,
-			final AutotaggingLibrary tagLibrary) {
-		if (linkedDataTypes == null || tagLibrary == null) {
-			return;
-		}
-		for (final DigestURL linkedDataType : linkedDataTypes) {
-			final Set<Metatag> tags = tagLibrary.getTagsFromTermURL(linkedDataType);
-			for (final Metatag tag : tags) {
-				final String navigatorName = tag.getVocabularyName();
-				Set<Tagging.Metatag> tagset = this.tags.get(navigatorName);
-				if (tagset == null) {
-					tagset = new HashSet<Metatag>();
-					this.tags.put(navigatorName, tagset);
-				}
-				tagset.add(tag);
-			}
-		}
-	}
+
+    /**
+     * Search for tags matching the given linked data types identifiers (absolute
+     * URLs) in the given autotagging library. Then fill this instance "tags" map
+     * with the eventually matching tags found.
+     * 
+     * @param linkedDataTypes
+     *            a set of linked data typed items identifiers (absolute URLs) to
+     *            search
+     * @param tagLibrary
+     *            the autotagging library holding vocabularies to search in
+     */
+    protected void extractAutoTagsFromLinkedDataTypes(final Set<DigestURL> linkedDataTypes,
+            final AutotaggingLibrary tagLibrary) {
+        if (linkedDataTypes == null || tagLibrary == null) {
+            return;
+        }
+        for (final DigestURL linkedDataType : linkedDataTypes) {
+            final Set<Metatag> tags = tagLibrary.getTagsFromTermURL(linkedDataType);
+            for (final Metatag tag : tags) {
+                final String navigatorName = tag.getVocabularyName();
+                Set<Tagging.Metatag> tagset = this.tags.get(navigatorName);
+                if (tagset == null) {
+                    tagset = new HashSet<Metatag>();
+                    this.tags.put(navigatorName, tagset);
+                }
+                tagset.add(tag);
+            }
+        }
+    }
 
     private void insertTextToWords(
             final SentenceReader text,
@@ -267,24 +267,24 @@ public final class Condenser extends Tokenizer {
         Word wprop;
         WordTokenizer wordenum = new WordTokenizer(text, meaningLib);
         try {
-	        int pip = 0;
-	        while (wordenum.hasMoreElements()) {
-	            word = wordenum.nextElement().toString();
-	            if (useForLanguageIdentification) this.languageIdentificator.add(word); // langdetect is case sensitive
+            int pip = 0;
+            while (wordenum.hasMoreElements()) {
+                word = wordenum.nextElement().toString();
+                if (useForLanguageIdentification) this.languageIdentificator.add(word); // langdetect is case sensitive
                     if (word.length() < 2) continue;
                     word = word.toLowerCase(Locale.ENGLISH);
-	            wprop = this.words.get(word);
-	            if (wprop == null) wprop = new Word(0, pip, phrase);
-	            if (wprop.flags == null) wprop.flags = flagstemplate.clone();
-	            wprop.flags.set(flagpos, true);
-	            this.words.put(word, wprop);
-	            pip++;
-	            this.RESULT_NUMB_WORDS++;
-	            //this.RESULT_DIFF_WORDS++;
+                wprop = this.words.get(word);
+                if (wprop == null) wprop = new Word(0, pip, phrase);
+                if (wprop.flags == null) wprop.flags = flagstemplate.clone();
+                wprop.flags.set(flagpos, true);
+                this.words.put(word, wprop);
+                pip++;
+                this.RESULT_NUMB_WORDS++;
+                //this.RESULT_DIFF_WORDS++;
                 }
         } finally {
-        	wordenum.close();
-        	wordenum = null;
+            wordenum.close();
+            wordenum = null;
         }
     }
 
@@ -303,11 +303,11 @@ public final class Condenser extends Tokenizer {
     public String fuzzySignatureText() {
         return this.fuzzy_signature_text;
     }
-    
+
     public long exactSignature() {
         return this.exact_signature;
     }
-    
+
     public String language() {
         return this.languageIdentificator.getLanguage();
     }
@@ -322,7 +322,7 @@ public final class Condenser extends Tokenizer {
 
     public static void main(final String[] args) {
         // read a property file and convert them into configuration lines
-    	FileInputStream inStream = null;
+        FileInputStream inStream = null;
         try {
             final File f = new File(args[0]);
             final Properties p = new Properties();
@@ -346,13 +346,13 @@ public final class Condenser extends Tokenizer {
         } catch (final IOException e) {
             ConcurrentLog.logException(e);
         } finally {
-        	if(inStream != null) {
-        		try {
-					inStream.close();
-				} catch (IOException e) {
-					ConcurrentLog.logException(e);
-				}
-        	}
+            if(inStream != null) {
+                try {
+                    inStream.close();
+                } catch (IOException e) {
+                    ConcurrentLog.logException(e);
+                }
+            }
         }
 
     }

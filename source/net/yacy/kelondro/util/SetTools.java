@@ -58,9 +58,9 @@ public final class SetTools {
     public static int log2a(int x) {
         // this computes 1 + log2
         // it is the number of bits in x, not the logarithm by 2
-    	int l = 0;
-    	while (x > 0) {x = x >>> 1; l++;}
-    	return l;
+        int l = 0;
+        while (x > 0) {x = x >>> 1; l++;}
+        return l;
     }
 
     // ------------------------------------------------------------------------------------------------
@@ -169,16 +169,16 @@ public final class SetTools {
     @SuppressWarnings("unchecked")
     private static <A, B> SortedMap<A, B> joinConstructiveByEnumeration(final SortedMap<A, B> map1, final SortedMap<A, B> map2, final boolean concatStrings) {
         // implement pairwise enumeration
-        final Comparator<? super A> comp = map1.comparator();
+        final Comparator<? super A> comp = map1.comparator() == null ? (Comparator<? super A>) Comparator.naturalOrder() : map1.comparator();
         final Iterator<Map.Entry<A, B>> mi1 = map1.entrySet().iterator();
         final Iterator<Map.Entry<A, B>> mi2 = map2.entrySet().iterator();
-        final SortedMap<A, B> result = new TreeMap<A, B>(map1.comparator());
+        final SortedMap<A, B> result = new TreeMap<A, B>(comp);
         int c;
         if ((mi1.hasNext()) && (mi2.hasNext())) {
             Map.Entry<A, B> mentry1 = mi1.next();
             Map.Entry<A, B> mentry2 = mi2.next();
             while (true) {
-            	c = comp.compare(mentry1.getKey(), mentry2.getKey());
+                c = comp.compare(mentry1.getKey(), mentry2.getKey());
                 if (c < 0) {
                     if (mi1.hasNext()) mentry1 = mi1.next(); else break;
                 } else if (c > 0) {
@@ -201,7 +201,7 @@ public final class SetTools {
 
     // now the same for set-set
     public static <A> SortedSet<A> joinConstructive(final SortedSet<A> set1, final SortedSet<A> set2) {
-    	// comparators must be equal
+        // comparators must be equal
         if ((set1 == null) || (set2 == null)) return null;
         if (set1.comparator() != set2.comparator()) return null;
         if (set1.isEmpty() || set2.isEmpty()) return new TreeSet<A>(set1.comparator());
@@ -214,46 +214,46 @@ public final class SetTools {
 
         // start most efficient method
         if (stepsEnum > stepsTest) {
-        	if (set1.size() < set2.size()) return joinConstructiveByTest(set1.iterator(), set2);
-        	return joinConstructiveByTest(set2.iterator(), set1);
+            if (set1.size() < set2.size()) return joinConstructiveByTest(set1.iterator(), set2);
+            return joinConstructiveByTest(set2.iterator(), set1);
         }
         return joinConstructiveByEnumeration(set1, set2);
     }
 
     public static <A> SortedSet<A> joinConstructiveByTest(final Iterator<A> small, final SortedSet<A> large) {
-    	final SortedSet<A> result = new TreeSet<A>(large.comparator());
-    	A o;
-    	while (small.hasNext()) {
-    		o = small.next();
-    		if (large.contains(o)) result.add(o);
-    	}
-    	return result;
+        final SortedSet<A> result = new TreeSet<A>(large.comparator());
+        A o;
+        while (small.hasNext()) {
+            o = small.next();
+            if (large.contains(o)) result.add(o);
+        }
+        return result;
     }
 
     private static <A> SortedSet<A> joinConstructiveByEnumeration(final SortedSet<A> set1, final SortedSet<A> set2) {
-    	// implement pairwise enumeration
-    	final Comparator<? super A> comp = set1.comparator();
-    	final Iterator<A> mi = set1.iterator();
-    	final Iterator<A> si = set2.iterator();
-    	final SortedSet<A> result = new TreeSet<A>(set1.comparator());
-    	int c;
-    	if ((mi.hasNext()) && (si.hasNext())) {
-    		A mobj = mi.next();
-    		A sobj = si.next();
-    		while (true) {
-    			c = comp.compare(mobj, sobj);
-    			if (c < 0) {
-    				if (mi.hasNext()) mobj = mi.next(); else break;
-    			} else if (c > 0) {
-    				if (si.hasNext()) sobj = si.next(); else break;
-    			} else {
-    				result.add(mobj);
-    				if (mi.hasNext()) mobj = mi.next(); else break;
-    				if (si.hasNext()) sobj = si.next(); else break;
-    			}
-    		}
-    	}
-    	return result;
+        // implement pairwise enumeration
+        final Comparator<? super A> comp = set1.comparator();
+        final Iterator<A> mi = set1.iterator();
+        final Iterator<A> si = set2.iterator();
+        final SortedSet<A> result = new TreeSet<A>(set1.comparator());
+        int c;
+        if ((mi.hasNext()) && (si.hasNext())) {
+            A mobj = mi.next();
+            A sobj = si.next();
+            while (true) {
+                c = comp.compare(mobj, sobj);
+                if (c < 0) {
+                    if (mi.hasNext()) mobj = mi.next(); else break;
+                } else if (c > 0) {
+                    if (si.hasNext()) sobj = si.next(); else break;
+                } else {
+                    result.add(mobj);
+                    if (mi.hasNext()) mobj = mi.next(); else break;
+                    if (si.hasNext()) sobj = si.next(); else break;
+                }
+            }
+        }
+        return result;
     }
 
     /**
@@ -263,6 +263,8 @@ public final class SetTools {
      * @return true if the small set is completely included in the large set
      */
     public static <A> boolean totalInclusion(final Iterator<A> small, final Set<A> large) {
+        if (small == null) return true;
+        if (large == null) return false;
         while (small.hasNext()) {
             if (!large.contains(small.next())) return false;
         }
@@ -276,6 +278,8 @@ public final class SetTools {
      * @return true if the small set is completely included in the large set
      */
     public static boolean totalInclusion(final HandleSet small, final HandleSet large) {
+        if (small == null) return true;
+        if (large == null) return false;
         for (byte[] handle: small) {
             if (!large.has(handle)) return false;
         }
@@ -289,23 +293,23 @@ public final class SetTools {
      * @return true if any element of the first set is part of the second set or vice-versa
      */
     public static <A> boolean anymatch(final SortedSet<A> set1, final SortedSet<A> set2) {
-		// comparators must be equal
-		if ((set1 == null) || (set2 == null)) return false;
-		if (set1.comparator() != set2.comparator()) return false;
-		if (set1.isEmpty() || set2.isEmpty()) return false;
+        // comparators must be equal
+        if ((set1 == null) || (set2 == null)) return false;
+        if (set1.comparator() != set2.comparator()) return false;
+        if (set1.isEmpty() || set2.isEmpty()) return false;
 
-		// decide which method to use
-		final int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
-		final int low = ((set1.size() > set2.size()) ? set2.size() : set1.size());
-		final int stepsEnum = 10 * (high + low - 1);
-		final int stepsTest = 12 * log2a(high) * low;
+        // decide which method to use
+        final int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
+        final int low = ((set1.size() > set2.size()) ? set2.size() : set1.size());
+        final int stepsEnum = 10 * (high + low - 1);
+        final int stepsTest = 12 * log2a(high) * low;
 
-		// start most efficient method
-		if (stepsEnum > stepsTest) {
-			return (set1.size() < set2.size()) ? anymatchByTest(set1.iterator(), set2) : anymatchByTest(set2.iterator(), set1);
-		}
-		return anymatchByEnumeration(set1, set2);
-	}
+        // start most efficient method
+        if (stepsEnum > stepsTest) {
+            return (set1.size() < set2.size()) ? anymatchByTest(set1.iterator(), set2) : anymatchByTest(set2.iterator(), set1);
+        }
+        return anymatchByEnumeration(set1, set2);
+    }
 
     /**
      * test if the intersection of two sets is not empty
@@ -545,7 +549,7 @@ public final class SetTools {
         } catch (final IOException e) {
         } finally {
             if (br != null) try{br.close();}catch(final Exception e){
-            	ConcurrentLog.warn("SetTools", "Could not close input stream on file " + file);
+                ConcurrentLog.warn("SetTools", "Could not close input stream on file " + file);
             }
         }
         return list;
@@ -577,52 +581,52 @@ public final class SetTools {
         for (Object o: c) if (i++ == n) return o;
         return null;
     }
-    
+
     // ------------------------------------------------------------------------------------------------
 
 
     public static void main(final String[] args) {
-	final SortedMap<String, String> m = new TreeMap<String, String>();
-	final SortedMap<String, String> s = new TreeMap<String, String>();
-	m.put("a", "a");
-	m.put("x", "x");
-	m.put("f", "f");
-	m.put("h", "h");
-	m.put("w", "w");
-	m.put("7", "7");
-	m.put("t", "t");
-	m.put("k", "k");
-	m.put("y", "y");
-	m.put("z", "z");
-	s.put("a", "a");
-	s.put("b", "b");
-	s.put("c", "c");
-	s.put("k", "k");
-	s.put("l", "l");
-	s.put("m", "m");
-	s.put("n", "n");
-	s.put("o", "o");
-	s.put("p", "p");
-	s.put("q", "q");
-	s.put("r", "r");
-	s.put("s", "s");
-	s.put("t", "t");
-	s.put("x", "x");
-	System.out.println("Compare " + m.toString() + " with " + s.toString());
-	System.out.println("Join=" + joinConstructiveByEnumeration(m, s, true));
-	System.out.println("Join=" + joinConstructiveByTest(m, s, true));
-	System.out.println("Join=" + joinConstructiveByTest(m, s, true));
-	System.out.println("Join=" + joinConstructive(m, s, true));
-	//System.out.println("Exclude=" + excludeConstructiveByTestMapInSet(m, s.keySet()));
+    final SortedMap<String, String> m = new TreeMap<String, String>();
+    final SortedMap<String, String> s = new TreeMap<String, String>();
+    m.put("a", "a");
+    m.put("x", "x");
+    m.put("f", "f");
+    m.put("h", "h");
+    m.put("w", "w");
+    m.put("7", "7");
+    m.put("t", "t");
+    m.put("k", "k");
+    m.put("y", "y");
+    m.put("z", "z");
+    s.put("a", "a");
+    s.put("b", "b");
+    s.put("c", "c");
+    s.put("k", "k");
+    s.put("l", "l");
+    s.put("m", "m");
+    s.put("n", "n");
+    s.put("o", "o");
+    s.put("p", "p");
+    s.put("q", "q");
+    s.put("r", "r");
+    s.put("s", "s");
+    s.put("t", "t");
+    s.put("x", "x");
+    System.out.println("Compare " + m.toString() + " with " + s.toString());
+    System.out.println("Join=" + joinConstructiveByEnumeration(m, s, true));
+    System.out.println("Join=" + joinConstructiveByTest(m, s, true));
+    System.out.println("Join=" + joinConstructiveByTest(m, s, true));
+    System.out.println("Join=" + joinConstructive(m, s, true));
+    //System.out.println("Exclude=" + excludeConstructiveByTestMapInSet(m, s.keySet()));
 
-	/*
-	for (int low = 0; low < 10; low++)
-	    for (int high = 0; high < 100; high=high + 10) {
-		int stepsEnum = 10 * high;
-		int stepsTest = 12 * log2(high) * low;
-		System.out.println("low=" + low + ", high=" + high + ", stepsEnum=" + stepsEnum + ", stepsTest=" + stepsTest + "; best method is " + ((stepsEnum < stepsTest) ? "joinByEnumeration" : "joinByTest"));
-	    }
-	*/
+    /*
+    for (int low = 0; low < 10; low++)
+        for (int high = 0; high < 100; high=high + 10) {
+        int stepsEnum = 10 * high;
+        int stepsTest = 12 * log2(high) * low;
+        System.out.println("low=" + low + ", high=" + high + ", stepsEnum=" + stepsEnum + ", stepsTest=" + stepsTest + "; best method is " + ((stepsEnum < stepsTest) ? "joinByEnumeration" : "joinByTest"));
+        }
+    */
 
     }
 

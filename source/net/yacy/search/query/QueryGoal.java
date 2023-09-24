@@ -52,8 +52,8 @@ public class QueryGoal {
     private static char space = ' ';
     private static char sq = '\'';
     private static char dq = '"';
-    private static String seps = ".:;#*`,!$%()=?^<>/&_";
-    
+    private static String seps = ":;#*`!$%()=?^<>/&_";
+
     public String query_original;
     private HandleSet include_hashes, exclude_hashes;
     private final NormalizedWords include_words, exclude_words;
@@ -66,12 +66,12 @@ public class QueryGoal {
         public NormalizedWords() {
             super(NaturalOrder.naturalComparator);
         }
-        
+
         public NormalizedWords(String[] rawWords) {
             super(NaturalOrder.naturalComparator);
             for (String word: rawWords) super.add(word.toLowerCase(Locale.ENGLISH));
         }
-        
+
         public NormalizedWords(Collection<String> rawWords) {
             super(NaturalOrder.naturalComparator);
             for (String word: rawWords) super.add(word.toLowerCase(Locale.ENGLISH));
@@ -122,33 +122,33 @@ public class QueryGoal {
 
         // parse first quoted strings
         parseQuery(query_words, this.include_strings, this.exclude_strings);
-        
+
         // .. end then take these strings apart to generate word lists
         for (String s: this.include_strings) parseQuery(s, this.include_words, this.include_words);
         for (String s: this.exclude_strings) parseQuery(s, this.exclude_words, this.exclude_words);
 
         WordCache.learn(this.include_words);
         WordCache.learn(this.exclude_words);
-        
+
         this.include_hashes = null;
         this.exclude_hashes = null;
     }
 
-    
 /*
  * EBNF of a query
  * 
  * query      = {whitespace, phrase}, [whitespace]
  * whitespace = space, {space}
  * space      = ' '
- * phrase     = ['-'], string
+ * phrase     = ['-']|['+'], string
  * string     = {any character without sq, dq and whitespace} | sq, {any character without sq}, sq | dq, {any character without dq}, dq
  * sq         = '\''
  * dq         = '"'
  */
     private static void parseQuery(String s, Collection<String> include_string, Collection<String> exclude_string) {
+
         while (s.length() > 0) {
-            // parse query
+            // parse whitespace
             int p = 0;
             while (p < s.length() && s.charAt(p) == space) p++;
             s = s.substring(p);
@@ -164,7 +164,7 @@ public class QueryGoal {
                 s = s.substring(1);
             }
             if (s.length() == 0) return;
-            
+
             // parse string
             char stop = space;
             if (s.charAt(0) == dq) {
@@ -174,11 +174,26 @@ public class QueryGoal {
                 stop = s.charAt(0);
                 s = s.substring(1);
             }
-            p = 0;
-            while (p < s.length() && s.charAt(p) != stop) p++;
-            String string = s.substring(0, p);
-            p++; // go behind the stop character (eats up space, sq and dq)
+
+            if (stop == space) {
+                // For non-quoted strings, just skip to the next token
+                while (p < s.length() && s.charAt(p) != stop) p++;
+            } else {
+                // For quoted strings, find the closing quote
+                while (p < s.length() && s.charAt(p) != stop) p++;
+
+                // Consume the closing quote
+                if (p < s.length() && s.charAt(p) == stop) p++;
+            }
+
+            String string;
+            if (stop == space) {
+                string = s.substring(0, p);
+            } else {
+                string = s.substring(0, p - 1);  // Exclude the closing quote
+            }
             s = p < s.length() ? s.substring(p) : "";
+            p++; // go behind the stop character (eats up space, sq and dq)
             if (string.length() > 0) {
                 if (inc) {
                     if (!include_string.contains(string)) include_string.add(string);
@@ -187,6 +202,7 @@ public class QueryGoal {
                 }
             }
         }
+
         // in case that the include_string contains several entries including 1-char tokens and also more-than-1-char tokens,
         // then remove the 1-char tokens to prevent that we are to strict. This will make it possible to be a bit more fuzzy
         // in the search where it is appropriate
@@ -249,14 +265,14 @@ public class QueryGoal {
         assert this.exclude_hashes == null || this.exclude_words.size() == 0 || this.exclude_hashes.size() == this.exclude_words.size();
         return this.exclude_hashes == null ? this.exclude_words.size() : this.exclude_hashes.size();
     }
-    
+
     /**
      * @return an iterator on the set of words to be included in the search result
      */
     public Iterator<String> getIncludeWords() {
         return this.include_words.iterator();
     }
-    
+
     /**
      * @return a copy of the set of words to be included in the search result
      */
@@ -270,14 +286,14 @@ public class QueryGoal {
     public Iterator<String> getExcludeWords() {
         return this.exclude_words.iterator();
     }
-    
+
     /**
      * @return a copy of the set of words to be excluded from the search result
      */
     public Set<String> getExcludeWordsSet() {
         return new NormalizedWords(this.exclude_words);
     }
-   
+
     /**
      * @return a list of include strings which reproduces the original order of the search words and quotation
      */
@@ -291,7 +307,7 @@ public class QueryGoal {
     public Iterator<String> getExcludeStrings() {
         return this.exclude_strings.iterator();
     }
-   
+
     public void removeIncludeWords(Set<String> words) {
         if (!words.isEmpty()) {
             SetTools.excludeDestructiveByTestSmallInLarge(this.exclude_words, words); //remove stopwords
@@ -299,7 +315,7 @@ public class QueryGoal {
             if (include_hashes != null) for (String word: words) this.include_hashes.remove(Word.word2hash(word));
         }
     }
-    
+
     /**
      * the include string may be useful (and better) for highlight/snippet computation 
      * @return the query string containing only the positive literals (includes) and without whitespace characters
@@ -310,32 +326,32 @@ public class QueryGoal {
         for (String s: this.include_strings) sb.append(s).append(' ');
         return sb.toString().substring(0, sb.length() - 1);
     }
-    
+
     public boolean isCatchall() {
         if (this.include_hashes != null && this.include_hashes.has(Segment.catchallHash)) return true;
         if (this.include_strings == null || this.include_strings.size() != 1) return false;
         return (this.include_strings.contains(Segment.catchallString));
     }
-    
+
     public boolean containsInclude(String word) {
         if (word == null || word.length() == 0) return false;
-        
+
         String t = word.toLowerCase(Locale.ENGLISH);
         return this.include_strings.contains(t) || this.include_words.contains(t);
     }
-    
+
     public boolean matches(String text) {
         if (text == null || text.length() == 0) return false;
-        
+
         // parse special requests
         if (isCatchall()) return true;
-        
+
         String t = text.toLowerCase(Locale.ENGLISH);
         for (String i: this.include_strings) if (t.indexOf(i.toLowerCase()) < 0) return false;
         for (String e: this.exclude_strings) if (t.indexOf(e.toLowerCase()) >= 0) return false;
         return true;
     }
-       
+
     public void filterOut(final SortedSet<String> blueList) {
         // filter out words that appear in this set
         // this is applied to the queryHashes
@@ -366,7 +382,7 @@ public class QueryGoal {
             fqs.add("-" + CollectionSchema.content_type.getSolrFieldName() + ":(image/*)");
             fqs.add("-" + CollectionSchema.url_file_ext_s.getSolrFieldName() + ":(jpg OR png OR gif)");
         }
-        
+
         return fqs;
     }
 
@@ -374,7 +390,7 @@ public class QueryGoal {
 
         // parse special requests
         if (isCatchall()) return new StringBuilder(AbstractSolrConnector.CATCHALL_QUERY);
-        
+
         // add goal query
         return getGoalQuery();
     }
@@ -397,15 +413,15 @@ public class QueryGoal {
 
         // add filter to prevent that results come from failed urls
         fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
-		StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName()).append(":(image/*)");
-		if (!strict) {
-			filter.append(" OR ").append(CollectionSchema.images_urlstub_sxt.getSolrFieldName())
-					.append(AbstractSolrConnector.CATCHALL_DTERM);
-		}
-		fqs.add(filter.toString());
+        StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName()).append(":(image/*)");
+        if (!strict) {
+            filter.append(" OR ").append(CollectionSchema.images_urlstub_sxt.getSolrFieldName())
+                    .append(AbstractSolrConnector.CATCHALL_DTERM);
+        }
+        fqs.add(filter.toString());
         return fqs;
     }
-    
+
     /**
      * Generate Solr filter queries to receive valid audio content results.
      *
@@ -416,18 +432,18 @@ public class QueryGoal {
      * @return Solr filter queries for audio content URLs
      */
     public List<String> collectionAudioFilterQuery(final boolean strict) {
-		final ArrayList<String> fqs = new ArrayList<>();
+        final ArrayList<String> fqs = new ArrayList<>();
 
-		// add filter to prevent that results come from failed urls
-		fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
-		StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName()).append(":(audio/*)");
-		if (!strict) {
-			filter.append(" OR ").append(CollectionSchema.audiolinkscount_i.getSolrFieldName()).append(":[1 TO *]");
-		}
-		fqs.add(filter.toString());
-		return fqs;
+        // add filter to prevent that results come from failed urls
+        fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
+        StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName()).append(":(audio/*)");
+        if (!strict) {
+            filter.append(" OR ").append(CollectionSchema.audiolinkscount_i.getSolrFieldName()).append(":[1 TO *]");
+        }
+        fqs.add(filter.toString());
+        return fqs;
     }
-    
+
     /**
      * Generate Solr filter queries to receive valid video content results.
      *
@@ -441,15 +457,15 @@ public class QueryGoal {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
-		fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
-		StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName()).append(":(video/*)");
-		if (!strict) {
-			filter.append(" OR ").append(CollectionSchema.videolinkscount_i.getSolrFieldName()).append(":[1 TO *]");
-		}
-		fqs.add(filter.toString());
-		return fqs;
+        fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
+        StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName()).append(":(video/*)");
+        if (!strict) {
+            filter.append(" OR ").append(CollectionSchema.videolinkscount_i.getSolrFieldName()).append(":[1 TO *]");
+        }
+        fqs.add(filter.toString());
+        return fqs;
     }
-    
+
     /**
      * Generate Solr filter queries to receive valid application specific content results.
      *
@@ -463,26 +479,26 @@ public class QueryGoal {
         final ArrayList<String> fqs = new ArrayList<>();
 
         // add filter to prevent that results come from failed urls
-		fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
-		StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName())
-				.append(":(application/*)");
-		if (!strict) {
-			filter.append(" OR ").append(CollectionSchema.applinkscount_i.getSolrFieldName()).append(":[1 TO *]");
-		}
-		fqs.add(filter.toString());
-		return fqs;
+        fqs.add(CollectionSchema.httpstatus_i.getSolrFieldName() + ":" + HttpStatus.SC_OK);
+        StringBuilder filter = new StringBuilder(CollectionSchema.content_type.getSolrFieldName())
+                .append(":(application/*)");
+        if (!strict) {
+            filter.append(" OR ").append(CollectionSchema.applinkscount_i.getSolrFieldName()).append(":[1 TO *]");
+        }
+        fqs.add(filter.toString());
+        return fqs;
     }
-    
+
     public StringBuilder collectionImageQuery(final QueryModifier modifier) {
         final StringBuilder q = new StringBuilder(80);
-        
+
         // parse special requests
         if (isCatchall()) return new StringBuilder(AbstractSolrConnector.CATCHALL_QUERY);
 
         // add goal query
         StringBuilder w = getGoalQuery();
         q.append(w);
-        
+
         // combine these queries for all relevant fields
         if (w.length() > 0) {
             String hostname = modifier == null || modifier.sitehost == null || modifier.sitehost.length() == 0 ? null : Domains.getSmartSLD(modifier.sitehost);
@@ -493,10 +509,10 @@ public class QueryGoal {
             q.append('(').append(CollectionSchema.text_t.getSolrFieldName()).append(':').append(w).append(')');
             q.append(')');
         }
-        
+
         return q;
     }
-    
+
     private StringBuilder getGoalQuery() {
         int wc = 0;
         StringBuilder w = new StringBuilder(80);

@@ -9,7 +9,7 @@
 
 
 ## build app
-FROM eclipse-temurin:8-jdk-focal AS appbuilder
+FROM eclipse-temurin:11-jdk-jammy AS appbuilder
 
 RUN apt-get update && apt-get install -yq ant git curl wkhtmltopdf imagemagick xvfb ghostscript && rm -rf /var/lib/apt/lists/*
 RUN java -version
@@ -31,7 +31,7 @@ RUN sed -i "/adminAccountBase64MD5=/c\adminAccountBase64MD5=MD5:8cffbc0d66567a09
 
 
 ## build dist
-FROM eclipse-temurin:8-jre-focal
+FROM eclipse-temurin:11-jre-jammy
 LABEL maintainer="Michael Peter Christen <mc@yacy.net>"
 
 RUN apt-get update && apt-get install -yq wkhtmltopdf imagemagick xvfb ghostscript && rm -rf /var/lib/apt/lists/*

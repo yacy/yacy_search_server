@@ -12,6 +12,5 @@
 			<attribute name="module" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/J7Zip-modified-1.0.2.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

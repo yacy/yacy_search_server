@@ -73,11 +73,11 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     // available chars: b,e,j,q
 
     /**
-	 * object for termination of concurrent blocking queue processing
-	 */
+     * object for termination of concurrent blocking queue processing
+     */
     protected static final Row.Entry poisonRowEntry = urlEntryRow.newEntry();
-    
-	// static properties
+
+    // static properties
     private static final int col_urlhash       =  0; // h 12 the url hash b64-encoded
     private static final int col_lastModified  =  1; // a  2 last-modified time of the document where word appears
     private static final int col_freshUntil    =  2; // s  2 TTL for the word, so it can be removed easily if the TTL is short
@@ -207,7 +207,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
                         this.entry.setCol(col_posinphrase, word.posInPhrase);
                         this.entry.setCol(col_posofphrase, word.numOfPhrase);
     }
-    
+
     public WordReferenceRow(final String external) {
         this.entry = urlEntryRow.newEntry(external, true);
     }
