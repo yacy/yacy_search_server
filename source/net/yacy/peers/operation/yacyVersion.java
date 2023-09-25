@@ -155,7 +155,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
             mainVersion = releaseStubMatcher.group(1);
             revision = releaseStubMatcher.group(3);
         } else {
-            ConcurrentLog.warn("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string '" + mainVersion + "/" + revision + "' instead");
+            ConcurrentLog.warn("STARTUP", "Peer '" + computerName + "': wrong format of version-string: '" + ver + "'. Using default string '" + mainVersion + "/" + revision + "' instead");
         }
 
         return new String[]{mainVersion, revision};
