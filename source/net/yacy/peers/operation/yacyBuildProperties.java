@@ -49,4 +49,5 @@ public final class yacyBuildProperties {
 
     public static final Pattern versionMatcher = Pattern.compile("\\A(\\d+\\.\\d{1,3})(\\d{0,5})\\z");
 
+    public static final Pattern releaseStubVersionMatcher = Pattern.compile("yacy_v(\\d+.\\d{1,3})_(\\d{12})_([0-9a-f]{9})");
 }
