@@ -158,7 +158,7 @@ To start developing YaCy in **Eclipse**:
 
 This will build YaCy in Eclipse. To run YaCy:
 - Package Explorer -> YaCy: navigate to source -> net.yacy
-- right-click on yacy.java -> Run as -> 
+- right-click on yacy.java -> Run as -> Java Application
 
 
 To start developing YaCy in **Netbeans**:
