@@ -129,29 +129,36 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
     }
 
     /**
-     * Converts combined version-string to a pretty string, e.g. "0.435/01818" or "dev/01818" (development version) or "dev/00000" (in case of wrong input)
+     * Converts combined version-string to a pretty string, e.g. "1.926/3230df6e2", "0.435/01818" or "dev/01818" (development version) or "dev/00000" (in case of wrong input)
      *
-     * @param ver Combined version string matching regular expression:  "\A(\d+\.\d{3})(\d{4}|\d{5})\z" <br>
-     *  (i.e.: start of input, 1 or more digits in front of decimal point, decimal point followed by 3 digits as major version, 4 or 5 digits for SVN-Version, end of input)
-     * @return If the major version is &lt; 0.11  - major version is separated from SVN-version by '/', e.g. "0.435/01818" <br>
-     *         If the major version is &gt;= 0.11 - major version is replaced by "dev" and separated SVN-version by '/', e.g."dev/01818" <br>
-     *         "dev/00000" - If the input does not matcht the regular expression above
+     * @param combinedVersion Combined version string matching regular expression: "yacy_v(\d+.\d{1,3})_(\d{12})_([0-9a-f]{9})" or "\A(\d+\.\d{1,3})(\d{0,5})\z"
+     * @return If the combined version matches a release stub - "1.926/3230df6e2" <br>
+     *         If the major version is &lt; 0.11  - major version is replaced by "dev" and separated SVN-version by '/', e.g."dev/01818" <br>
+     *         If the major version is &gt;= 0.11 - major version is separated from SVN-version by '/', e.g. "0.435/01818" <br>
+     *         "dev/00000" - If the input does not match either regular expression above
      */
-    public static String[] combined2prettyVersion(final String ver) {
-        return combined2prettyVersion(ver, "");
+    public static String[] combined2prettyVersion(final String combinedVersion) {
+        return combined2prettyVersion(combinedVersion, "");
     }
 
     public static String[] combined2prettyVersion(final String ver, final String computerName) {
         final Matcher matcher = yacyBuildProperties.versionMatcher.matcher(ver);
-        if (!matcher.find()) {
-            ConcurrentLog.warn("STARTUP", "Peer '"+computerName+"': wrong format of version-string: '" + ver + "'. Using default string 'dev/00000' instead");
-            return new String[]{"dev", "0000"};
+        final Matcher releaseStubMatcher = yacyBuildProperties.releaseStubVersionMatcher.matcher(ver);
+
+        String mainVersion = "dev";
+        String revision = "00000";
+
+        if (matcher.find()) {
+            mainVersion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
+            revision = matcher.group(2);
+        } else if (releaseStubMatcher.find()){
+            mainVersion = releaseStubMatcher.group(1);
+            revision = releaseStubMatcher.group(3);
+        } else {
+            ConcurrentLog.warn("STARTUP", "Peer '" + computerName + "': wrong format of version-string: '" + ver + "'. Using default string '" + mainVersion + "/" + revision + "' instead");
         }
 
-        final String mainversion = (Double.parseDouble(matcher.group(1)) < 0.11 ? "dev" : matcher.group(1));
-        String revision = matcher.group(2);
-        for(int i=revision.length();i<4;++i) revision += "0";
-        return new String[]{mainversion, revision};
+        return new String[]{mainVersion, revision};
     }
 
     public static int revision(final String ver) {

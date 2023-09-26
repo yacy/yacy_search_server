@@ -118,12 +118,12 @@ public class Array {
                 (x.compare(_c, _b) < 0 ? b : x.compare(_c, _a) < 0 ? c : a));
     }
 
-    private static class P extends ArrayList<Integer> implements Sortable<Integer> {
+    private static class P implements Sortable<Integer> {
 
-        private static final long serialVersionUID = 1L;
+        private ArrayList<Integer> list;
 
         public P() {
-            super();
+            this.list = new ArrayList<Integer>();
         }
 
         @Override
@@ -138,20 +138,29 @@ public class Array {
 
         @Override
         public void swap(final int i, final int j, Integer buffer) {
-            buffer = this.get(i);
-            this.set(i, this.get(j));
-            this.set(j, buffer);
+            buffer = this.list.get(i);
+            this.list.set(i, this.list.get(j));
+            this.list.set(j, buffer);
         }
 
         @Override
         public void delete(final int i) {
-            this.remove(i);
+            this.list.remove(i);
         }
 
         @Override
         public Integer get(final int i, final boolean clone) {
-            return this.get(i);
+            return this.list.get(i);
         }
+
+		@Override
+		public int size() {
+			return list.size();
+		}
+
+		public void add(int nextInt) {
+			this.list.add(nextInt);
+		}
 
     }
 
@@ -185,7 +194,7 @@ public class Array {
         sort(test);
         final long t1 = System.currentTimeMillis();
         System.out.println("sort = " + (t1 - t0) + "ms");
-        //uniq(test);
+        uniq(test);
         final long t2 = System.currentTimeMillis();
         System.out.println("uniq = " + (t2 - t1) + "ms");
         System.out.println("result: " + test.size());
