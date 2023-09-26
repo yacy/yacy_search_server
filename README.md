@@ -153,8 +153,13 @@ To start developing YaCy in **Eclipse**:
 
 - clone https://github.com/yacy/yacy_search_server.git using build-in Eclipse features (File -> Import -> Git) 
 - or download source from this site (download button "Code" -> download as Zip -> and unpack)
-- import a Gradle project (File -> Import -> Gradle -> Existing Gradle Project)
-- in the tab "Gradle Tasks" are tasks available to use build the project (e.g. build -> build  or application -> run)
+- Open Help -> Eclipse Marketplace -> Search for "ivy" -> Install "Apache IvyDE"
+- right-click on the YaCy project in the package explorer -> Ivy -> resolve
+
+This will build YaCy in Eclipse. To run YaCy:
+- Package Explorer -> YaCy: navigate to source -> net.yacy
+- right-click on yacy.java -> Run as -> 
+
 
 To start developing YaCy in **Netbeans**:
 
@@ -178,7 +183,7 @@ git clone https://github.com/yacy/yacy_search_server
 ```
 
 Compiling YaCy:
-- You need Java 11 and ant
+- You need Java 11, ivy and ant
 - See `ant -p` for the available ant targets
 ```
 ant clean dist
