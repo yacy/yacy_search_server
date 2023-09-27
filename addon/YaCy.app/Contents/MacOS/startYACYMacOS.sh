@@ -5,4 +5,4 @@
 # This data directory is set in conforming to OS X File System Programming Guide 
 # see : https://developer.apple.com/library/ios/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/MacOSXDirectories/MacOSXDirectories.html
 
-"`dirname $0`"/startYACY.sh -s "'Library/Application Support/net.yacy.YaCy'"
+"`dirname $0`"/startYACY.sh -s 'Library/Application Support/net.yacy.YaCy'
