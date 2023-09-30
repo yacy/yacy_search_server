@@ -1,41 +1,45 @@
-# YaCy
+<div align="center">
+<h1 align="center">YaCy</h1>
+
+Search Engine Software
+
 [![Gitter](https://badges.gitter.im/yacy/yacy_search_server.svg)](https://gitter.im/yacy/yacy_search_server?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Build Status](https://github.com/yacy/yacy_search_server/actions/workflows/ant-build-selfhosted.yaml/badge.svg)](https://github.com/yacy/yacy_search_server/actions/workflows/ant-build-selfhosted.yaml)
 [![Install Link](https://img.shields.io/badge/install-stable-blue.svg)](https://yacy.net/download_installation/)
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+![Web Search](./screenshots/screenshot_web_search.png)
+![Crawl Start](./screenshots/screenshot_expert_crawl_start.png)
+![Index Browser](./screenshots/screenshot_index_browser.png)
+</div>
 
-## What is this?
 
-The YaCy search engine software provides results from a network of independent peers,
-instead of a central server. It is a distributed network where no single entity decides
-what to list or order it appears in.
+## What is YaCy?
 
-User privacy is central to YaCy, and it runs on each user's computer, where search terms are
-hashed before they being sent to the network. Everyone can create their individual
-search indexes and rankings, and a truly customized search portal.
-
-Each YaCy user is either part of a large search network (search indexes can be
-exchanged with other installation over a built-in peer-to-peer network protocol)
-or the user runs YaCy to produce a personal search portal that is either public or private.
+YaCy is a full search engine application containing a server hosting a search index,
+a web application to provide a nice user front-end for searches and index creation
+and a production-ready web crawler with a scheduler to keep a search index fresh.
 
 YaCy search portals can also be placed in an intranet environment, making
 it a replacement for commercial enterprise search solutions. A network
 scanner makes it easy to discover all available HTTP, FTP and SMB servers.
 
-To create a web index, YaCy has a web crawler for 
-everybody, free of censorship and central data retention:
-- Search the web (automatically using all other YaCy peers)
-- Co-operative crawling; support for other crawlers
-- Intranet indexing and search
-- Set up your own search portal
-- All users have equal rights
-- Comprehensive concept to anonymize the users' index
+Running a personal Search Engine is a great tool for privacy; indeed YaCy
+was created with the privacy aspect as priority motivation for the project.
 
-To be able to perform a search using the YaCy network, every user has to set up
-their own node. More users means higher index capacity and better distributed
-indexing performance.
+You can also use YaCy with a customized search page in your own web applications.
 
+## Large-Scale Web Search with a Peer-to-Peer Network
+
+Each YaCy peer can be part of a large search network where search indexes can be
+exchanged with other YaCy installation over a built-in peer-to-peer network protocol.
+
+This is the default operation that enables new users to instantly access
+a large-scale search cluster, operated only by YaCy users.
+
+You can opt-out from the YaCy cluster operation by choosing a different operation
+mode in the web interface. You can also opt-out from the network in individual searches,
+turning the use of YaCy a completely privacy-aware tool - in this operation mode search
+results are computed from the local index only.
 
 ## License
 
