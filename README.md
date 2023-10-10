@@ -1,155 +1,95 @@
-# YaCy
-[![Gitter](https://badges.gitter.im/yacy/yacy_search_server.svg)](https://gitter.im/yacy/yacy_search_server?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+<div align="center">
+<h1 align="center">YaCy</h1>
+
+Search Engine Software
+
+
+[![YaCy Home Page](https://img.shields.io/badge/YaCy%20Home%20Page-5090D0)](https://yacy.net)
+[![YaCy Discourse Forums](https://img.shields.io/discourse/status?server=https%3A%2F%2Fcommunity.searchlab.eu%2F&label=YaCy%20Discourse%20Forums)](https://community.searchlab.eu/)
+[![become a Github Sponsor](https://img.shields.io/badge/Become_a_Github_Sponsor-for_YaCy-green)](https://github.com/sponsors/Orbiter)
+[![become a Patreon Member](https://img.shields.io/badge/Become_a_Patreon_Member-for_YaCy-green)](https://www.patreon.com/bePatron?u=185903)
 [![Build Status](https://github.com/yacy/yacy_search_server/actions/workflows/ant-build-selfhosted.yaml/badge.svg)](https://github.com/yacy/yacy_search_server/actions/workflows/ant-build-selfhosted.yaml)
 [![Install Link](https://img.shields.io/badge/install-stable-blue.svg)](https://yacy.net/download_installation/)
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+![Web Search](./screenshots/screenshot_web_search.png)
+![Crawl Start](./screenshots/screenshot_expert_crawl_start.png)
+![Index Browser](./screenshots/screenshot_index_browser.png)
+</div>
 
-## What is this?
 
-The YaCy search engine software provides results from a network of independent peers,
-instead of a central server. It is a distributed network where no single entity decides
-what to list or order it appears in.
+## What is YaCy?
 
-User privacy is central to YaCy, and it runs on each user's computer, where search terms are
-hashed before they being sent to the network. Everyone can create their individual
-search indexes and rankings, and a truly customized search portal.
-
-Each YaCy user is either part of a large search network (search indexes can be
-exchanged with other installation over a built-in peer-to-peer network protocol)
-or the user runs YaCy to produce a personal search portal that is either public or private.
+YaCy is a full search engine application containing a server hosting a search index,
+a web application to provide a nice user front-end for searches and index creation
+and a production-ready web crawler with a scheduler to keep a search index fresh.
 
 YaCy search portals can also be placed in an intranet environment, making
 it a replacement for commercial enterprise search solutions. A network
 scanner makes it easy to discover all available HTTP, FTP and SMB servers.
 
-To create a web index, YaCy has a web crawler for 
-everybody, free of censorship and central data retention:
-- Search the web (automatically using all other YaCy peers)
-- Co-operative crawling; support for other crawlers
-- Intranet indexing and search
-- Set up your own search portal
-- All users have equal rights
-- Comprehensive concept to anonymize the users' index
+Running a personal Search Engine is a great tool for privacy; indeed YaCy
+was created with the privacy aspect as priority motivation for the project.
 
-To be able to perform a search using the YaCy network, every user has to set up
-their own node. More users means higher index capacity and better distributed
-indexing performance.
+You can also use YaCy with a customized search page in your own web applications.
 
+## Large-Scale Web Search with a Peer-to-Peer Network
 
-## License
+Each YaCy peer can be part of a large search network where search indexes can be
+exchanged with other YaCy installation over a built-in peer-to-peer network protocol.
 
-This project is available as open source under the terms of the GPL 2.0 or later. However, some elements are being licensed under GNU Lesser General Public License. For accurate information, please check individual files. As well as for accurate information regarding copyrights.
-The (GPLv2+) source code used to build YaCy is distributed with the package (in /source and /htroot).
+This is the default operation that enables new users to instantly access
+a large-scale search cluster, operated only by YaCy users.
 
+You can opt-out from the YaCy cluster operation by choosing a different operation
+mode in the web interface. You can also opt-out from the network in individual searches,
+turning the use of YaCy a completely privacy-aware tool - in this operation mode search
+results are computed from the local index only.
 
-## Where is the documentation?
+## Installation
 
-- [Homepage](https://yacy.net)
-- [International Forum](https://community.searchlab.eu)
-- [Documentation / FAQ](https://yacy.net/faq/)
-- [English wiki](https://wiki.yacy.net/index.php/En:Start)
-- [German wiki](https://wiki.yacy.net/index.php/De:Start)
-- [Esperanto wiki](https://wiki.yacy.net/index.php/Eo:Start)
-- [French wiki](https://wiki.yacy.net/index.php/Fr:Start)
-- [Spanish wiki](https://wiki.yacy.net/index.php/Es:Start)
-- [Russian wiki](https://wiki.yacy.net/index.php/Ru:Start)
-- [Video tutorials](https://www.youtube.com/@YaCyTutorials/videos)
-- [javadoc documentation](https://yacy.net/api/javadoc/) for developers
+We recommend to compile YaCy yourself and install it from the git sources.
+Pre-compiled YaCy packages exist but are not generated on a regular basis.
+To get a ready-to-run production package, run YaCy from Docker.
 
-All these have (YaCy) search functionality combining all these locations into one search result.
+### Compile and run YaCy from git sources
 
-## Dependencies? What other software do I need?
+You need Java 11 or later to run YaCy, nothing else. The following works with linux and with MacOS:
 
-You need Java 11 or later to run YaCy. (No Apache, Tomcat or MySQL or anything else)
-
-YaCy also runs on IcedTea 3.
-See https://icedtea.classpath.org
-
-## Start and stop it
-
-Startup and shutdown:
-
-- GNU/Linux and OpenBSD:
-   - Start by running `./startYACY.sh`
-   - Stop by running `./stopYACY.sh`
-
-- Windows:
-   - Start by double-clicking `startYACY.bat`
-   - Stop by double-clicking `stopYACY.bat`
-
-- macOS:
-Please use the Mac app and start or stop it like any
-other program (double-click to start)
-
-
-## The administration interface
-
-A web server is brought up after starting YaCy.
-Open this URL in your web-browser:
-
-   http://localhost:8090
-
-This presents you with the personal search and administration interface.
-
-
-## (Headless) YaCy server installation
-
-YaCy will authorize users automatically if they
-access the server from its localhost. After about 10 minutes a random
-password is generated, and then it is no longer possible to log in from
-a remote location. If you install YaCy on a server that is not your
-workstation you must set an admin account immediately after the first start-up.
-Open:
-
-    http://<remote-server-address>:8090/ConfigAccounts_p.html
-
-and set an admin account.
-
-## YaCy in a virtual machine or a container
-
-Use virtualization software like VirtualBox or VMware. 
-
-The following container technologies can deploy locally, on remote machines you own, or in the 'cloud' using a provider by clicking "Deploy" at the top of the page:
-
-### Docker
-
-More details in the [docker/Readme.md](docker/Readme.md).
-
-### [Heroku](https://www.heroku.com/)
-
-PaaS (Platform as a service)
-More details in [Heroku.md](Heroku.md).
-
-## Port 8090 is bad, people are not allowed to access that port
-
-You can forward port 80 to 8090 with iptables:
-```bash
-iptables -t nat -A PREROUTING -p tcp --dport 80 -j REDIRECT --to-port 8090
+```
+git clone --depth 1 https://github.com/yacy/yacy_search_server.git
+cd yacy_search_server
+ant clean all
 ```
 
-On some operating systems, access to the ports you are using must be granted first:
-```bash
-iptables -I INPUT -m tcp -p tcp --dport 8090 -j ACCEPT
+To start YaCy, run
+
+```
+./startYACY.sh
 ```
 
-## Scaling, RAM and disk space
+The administration interface is then available in your web browser at `http://localhost:8090`.
+Some of the web pages are protected and need an administration account; these pages are usually
+also available without a password from the localhost, but remote access needs a log-in.
+The default admin account name is `admin` and the default password is `yacy`.
+Please change it after installation using the ``http://<server-address>:8090/ConfigAccounts_p.html`` service.
 
-You can have many millions web pages in your own search index.
-By default, 600MB RAM is available to the Java process.
-The GC process will free the memory once in a while. If you have less than
-100000 pages you could try 200MB till you hit 1 million.
-[Here](http://localhost:8090/Performance_p.html) you can adjust it.
-Several million web pages may use several GB of disk space, but you can
-adjust it [here](http://localhost:8090/ConfigHTCache_p.html) to fit your needs.
+Stop YaCy on the console with
+```
+./stopYACY.sh
+```
 
+### Run YaCy using Docker
+
+The Official YaCy Image is `yacy/yacy_search_server:latest`. It is hosted on Dockerhub at [https://hub.docker.com/r/yacy/yacy_search_server](https://hub.docker.com/r/yacy/yacy_search_server)
+
+To install YaCy in intel-based environments, run:
+
+```
+docker run -d --name yacy_search_server -p 8090:8090 -p 8443:8443 -v yacy_search_server_data:/opt/yacy_search_server/DATA --restart unless-stopped --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server:latest
+```
+then open http://localhost:8090 in your web-browser.
 
 ## Help develop YaCy
-
-Join the large number of contributors that make YaCy what it is;
-community software.
-
-To start developing YaCy in **Eclipse**:
 
 - clone https://github.com/yacy/yacy_search_server.git using build-in Eclipse features (File -> Import -> Git) 
 - or download source from this site (download button "Code" -> download as Zip -> and unpack)
@@ -160,39 +100,9 @@ This will build YaCy in Eclipse. To run YaCy:
 - Package Explorer -> YaCy: navigate to source -> net.yacy
 - right-click on yacy.java -> Run as -> Java Application
 
-
-To start developing YaCy in **Netbeans**:
-
-- clone https://github.com/yacy/yacy_search_server.git (Team → Git → Clone)
-    - if you checked "scan for project" you'll be asked to open the project
-- Open the project (File → Open Project)
-- you may directly use all the Netbeans build feature.
-
-To join our development community, got to https://community.searchlab.eu
+Join our development community, got to https://community.searchlab.eu
 
 Send pull requests to https://github.com/yacy/yacy_search_server
-
-
-## Compile from source
-
-The source code is bundled with every YaCy release. You can also get YaCy
-from https://github.com/yacy/yacy_search_server by cloning the repository.
-
-```
-git clone https://github.com/yacy/yacy_search_server
-```
-
-Compiling YaCy:
-- You need Java 11, ivy and ant
-- See `ant -p` for the available ant targets
-```
-ant clean dist
-```
-resulting tar.gz with YaCy package will be located in RELEASE/ directory.
-Move it into desired location and unpack with:
-```
-tar zfvx yacy_v1.version_release_number_different_each_time.tar.gz
-``` 
 
 ## APIs and attaching software
 
@@ -203,6 +113,11 @@ you will see the XML/JSON version of the respective webpage.
 You can also use the shell script provided in the /bin subdirectory.
 The shell scripts also call the YaCy web interface. By cloning some of those
 scripts you can easily create more shell API access methods.
+
+## License
+
+This project is available as open source under the terms of the GPL 2.0 or later. However, some elements are being licensed under GNU Lesser General Public License. For accurate information, please check individual files. As well as for accurate information regarding copyrights.
+The (GPLv2+) source code used to build YaCy is distributed with the package (in /source and /htroot).
 
 ## Contact
 
