@@ -52,7 +52,11 @@ public class Steering {
 			if(ss != null && ((Switchboard) ss).verifyAuthentication(header)) {
 				/* YaCyDefaultServlet will detect it and then also fill the custom HTTP response header used by the JavaScript shutdown and restart actions
 				 * or any external API requesting tool */
-				prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+		        try {
+		            prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+		        } catch (IllegalArgumentException e) {
+		            ((Switchboard) ss).log.fine("access by unauthorized or unknown user: no transaction token delivered");
+		        }
 				/* Also add to the Steering.html page info block for eventual display of this page without parameter */
 				prop.put("info_" + TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
 			} else {

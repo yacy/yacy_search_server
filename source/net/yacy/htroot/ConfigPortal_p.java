@@ -179,7 +179,11 @@ public class ConfigPortal_p {
         }
 
         /* Acquire a transaction token for the next POST form submission */
-        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        try {
+            prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        } catch (IllegalArgumentException e) {
+            sb.log.fine("access by unauthorized or unknown user: no transaction token delivered");
+        }
 
         prop.putHTML(SwitchboardConstants.GREETING, sb.getConfig(SwitchboardConstants.GREETING, ""));
         prop.putHTML(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));

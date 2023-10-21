@@ -56,7 +56,11 @@ public class IndexDeletion_p {
         final serverObjects prop = new serverObjects();
 
         /* Acquire a transaction token for the next POST form submission */
-        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        try {
+            prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        } catch (IllegalArgumentException e) {
+            sb.log.fine("access by unauthorized or unknown user: no transaction token delivered");
+        }
 
         final SolrConnector defaultConnector = sb.index.fulltext().getDefaultConnector();
         final SolrConnector webgraphConnector = sb.index.fulltext().getWebgraphConnector();

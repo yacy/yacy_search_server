@@ -54,9 +54,12 @@ public class ConfigAccounts_p {
         final serverObjects prop = new serverObjects();
 
         /* Acquire a transaction token for the next POST form submission */
-        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
-
         final Switchboard sb = (Switchboard) env;
+        try {
+            prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        } catch (IllegalArgumentException e) {
+            sb.log.fine("access by unauthorized or unknown user: no transaction token delivered");
+        }
         UserDB.Entry entry = null;
 
         // admin password

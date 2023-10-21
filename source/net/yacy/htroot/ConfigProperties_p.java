@@ -37,6 +37,7 @@ import java.util.List;
 
 import net.yacy.cora.protocol.RequestHeader;
 import net.yacy.data.TransactionManager;
+import net.yacy.search.Switchboard;
 import net.yacy.server.serverObjects;
 import net.yacy.server.serverSwitch;
 
@@ -47,7 +48,11 @@ public class ConfigProperties_p {
         final serverObjects prop = new serverObjects();
 
         /* Acquire a transaction token for the next POST form submission */
-        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        try {
+            prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        } catch (IllegalArgumentException e) {
+            Switchboard.getSwitchboard().log.fine("access by unauthorized or unknown user: no transaction token delivered");
+        }
 
         String key = "";
         String value = "";
