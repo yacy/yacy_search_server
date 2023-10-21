@@ -77,7 +77,14 @@ public class ConfigBasic {
         }
 
         /* For authenticated users only : acquire a transaction token for the next POST form submission */
-        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        try {
+            prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        } catch (IllegalArgumentException e) {
+            // In case that the user is not authenticated, the transaction manager throws an exception.
+            // This is not an error and to be considered normal operation in case that the user is actually
+            // not authenticated. In such a case we simply do not include the transaction token.
+            sb.log.fine("access by unauthorized or unknown user: no transaction token delivered");
+        }
 
         if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {
         	new OnePeerPingBusyThread(sb.yc).start();
