@@ -69,13 +69,6 @@ public class ConfigBasic {
         final File langPath = new File(sb.getAppPath("locale.source", "locales").getAbsolutePath());
         String lang = env.getConfig("locale.language", "browser");
 
-        final int authentication = sb.adminAuthenticated(header);
-        if (authentication < 2) {
-            // must authenticate
-        	prop.authenticationRequired();
-            return prop;
-        }
-
         /* For authenticated users only : acquire a transaction token for the next POST form submission */
         try {
             prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
@@ -87,7 +80,7 @@ public class ConfigBasic {
         }
 
         if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {
-        	new OnePeerPingBusyThread(sb.yc).start();
+            new OnePeerPingBusyThread(sb.yc).start();
         }
 
         String peerName = sb.peers.mySeed().getName();
@@ -95,32 +88,40 @@ public class ConfigBasic {
         boolean ssl = env.getConfigBool("server.https", false);
         boolean upnp = false;
         if (post != null) {
-        	/* Settings will be modified : check this is a valid transaction using HTTP POST method */
-        	TransactionManager.checkPostTransaction(header, post);
+
+            final int authentication = sb.adminAuthenticated(header);
+            if (authentication < 2) {
+                // must authenticate
+                prop.authenticationRequired();
+                return prop;
+            }
+
+            /* Settings will be modified : check this is a valid transaction using HTTP POST method */
+            TransactionManager.checkPostTransaction(header, post);
 
             // store this call as api call
-        	if(post.containsKey("set")) {
-        		sb.tables.recordAPICall(post, "ConfigBasic.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "basic settings");
-        	}
+            if(post.containsKey("set")) {
+                sb.tables.recordAPICall(post, "ConfigBasic.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "basic settings");
+            }
 
-        	// language settings
-        	if(post.containsKey("language")  && !lang.equals(post.get("language", "default"))) {
-            	if(new TranslatorXliff().changeLang(env, langPath, post.get("language", "default") + ".lng")) {
-            		prop.put("changedLanguage", "1");
-            	}
-        	}
+            // language settings
+            if(post.containsKey("language")  && !lang.equals(post.get("language", "default"))) {
+                if(new TranslatorXliff().changeLang(env, langPath, post.get("language", "default") + ".lng")) {
+                    prop.put("changedLanguage", "1");
+                }
+            }
 
-        	// port settings
-        	if(post.getInt("port", 0) > 1023) {
+            // port settings
+            if(post.getInt("port", 0) > 1023) {
                 port = post.getLong("port", 8090);
                 ssl = post.getBoolean("withssl");
-        	}
+            }
 
-        	// peer name settings
-        	peerName = post.get("peername", "");
+            // peer name settings
+            peerName = post.get("peername", "");
 
-        	// UPnP config
-        	if(post.containsKey("port")) { // hack to allow checkbox
+            // UPnP config
+            if(post.containsKey("port")) { // hack to allow checkbox
                 upnp = post.containsKey("enableUpnp");
                 if (upnp && !sb.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false)) {
                     UPnP.addPortMappings();
@@ -129,15 +130,15 @@ public class ConfigBasic {
                 if (!upnp) {
                     UPnP.deletePortMappings();
                 }
-        	}
+            }
         }
 
         if (ssl) {
-        	prop.put("withsslenabled_sslport", env.getHttpServer().getSslPort());
+            prop.put("withsslenabled_sslport", env.getHttpServer().getSslPort());
         }
 
         if (peerName != null && peerName.length() > 0) {
-        	peerName = peerName.replace(' ', '-');
+            peerName = peerName.replace(' ', '-');
         }
 
         // check if peer name already exists
@@ -189,64 +190,77 @@ public class ConfigBasic {
             prop.put("reconnect", "0");
         }
 
+        // set a warning in case that the default password was not changed
+        String currpw = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
+        String dfltpw = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5_DEFAULT, "");
+        prop.put("changedfltpw", currpw.equals(dfltpw) ? "1" : "0");
+
         // set a use case
         prop.put("setUseCase_switchError", 0);
         prop.put("setUseCase_switchWarning", 0);
         String networkName = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "");
         if (post != null && post.containsKey("usecase")) {
-        	/* Settings will be modified : check this is a valid transaction using HTTP POST method */
-        	TransactionManager.checkPostTransaction(header, post);
 
-			final boolean hasNonEmptyRemoteSolr = sb.index.fulltext().connectedRemoteSolr()
-					&& (sb.index.fulltext().collectionSize() > 0 || sb.index.fulltext().webgraphSize() > 0);
+            final int authentication = sb.adminAuthenticated(header);
+            if (authentication < 2) {
+                // must authenticate
+                prop.authenticationRequired();
+                return prop;
+            }
+
+            /* Settings will be modified : check this is a valid transaction using HTTP POST method */
+            TransactionManager.checkPostTransaction(header, post);
+
+            final boolean hasNonEmptyRemoteSolr = sb.index.fulltext().connectedRemoteSolr()
+                    && (sb.index.fulltext().collectionSize() > 0 || sb.index.fulltext().webgraphSize() > 0);
             if ("freeworld".equals(post.get("usecase", "")) && !"freeworld".equals(networkName)) {
-            	if("intranet".equals(networkName) && hasNonEmptyRemoteSolr) {
-            		/* One or more non empty remote Solr(s) attached : disallow switching from intranet to another network to prevent disclosure of indexed private documents */
-            		prop.put("setUseCase_switchError", 1);
-            	} else {
-                	if(hasNonEmptyRemoteSolr) {
-                		/* One or more non empty remote Solr(s) attached : warn the user even if not coming from intranet as indexed documents may be irrelevant for the new mode */
-                		prop.put("setUseCase_switchWarning", 2);
-                	}
-            		// switch to freeworld network
-            		sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, true);
-            		sb.switchNetwork("defaults/yacy.network.freeworld.unit");
-            		// switch to p2p mode
-            		sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
-            		sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
-            		sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true);
-            		// set default behavior for search verification
-            		sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh"); // nocache,iffresh,ifexist,cacheonly,false
-            		sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
-            	}
+                if("intranet".equals(networkName) && hasNonEmptyRemoteSolr) {
+                    /* One or more non empty remote Solr(s) attached : disallow switching from intranet to another network to prevent disclosure of indexed private documents */
+                    prop.put("setUseCase_switchError", 1);
+                } else {
+                    if(hasNonEmptyRemoteSolr) {
+                        /* One or more non empty remote Solr(s) attached : warn the user even if not coming from intranet as indexed documents may be irrelevant for the new mode */
+                        prop.put("setUseCase_switchWarning", 2);
+                    }
+                    // switch to freeworld network
+                    sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, true);
+                    sb.switchNetwork("defaults/yacy.network.freeworld.unit");
+                    // switch to p2p mode
+                    sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
+                    sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+                    sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, true);
+                    // set default behavior for search verification
+                    sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "iffresh"); // nocache,iffresh,ifexist,cacheonly,false
+                    sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "true");
+                }
             }
             if ("portal".equals(post.get("usecase", "")) && !"webportal".equals(networkName)) {
-            	if("intranet".equals(networkName) && hasNonEmptyRemoteSolr) {
-            		/* One or more non empty remote Solr(s) attached : disallow switching from intranet to another network to prevent disclosure of indexed private documents */
-            		prop.put("setUseCase_switchError", 1);
-            	} else {
-                	if(hasNonEmptyRemoteSolr) {
-                		/* One or more non empty remote Solr(s) attached : warn the user even if not coming from intranet as indexed documents may be irrelevant for the new mode */
-                		prop.put("setUseCase_switchWarning", 2);
-                	}
+                if("intranet".equals(networkName) && hasNonEmptyRemoteSolr) {
+                    /* One or more non empty remote Solr(s) attached : disallow switching from intranet to another network to prevent disclosure of indexed private documents */
+                    prop.put("setUseCase_switchError", 1);
+                } else {
+                    if(hasNonEmptyRemoteSolr) {
+                        /* One or more non empty remote Solr(s) attached : warn the user even if not coming from intranet as indexed documents may be irrelevant for the new mode */
+                        prop.put("setUseCase_switchWarning", 2);
+                    }
 
-            		// switch to webportal network
-            		sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, false);
-            		sb.switchNetwork("defaults/yacy.network.webportal.unit");
-            		// switch to robinson mode
-            		sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
-            		sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
-            		sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false);
-            		// set default behavior for search verification
-            		sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "ifexist"); // nocache,iffresh,ifexist,cacheonly,false
-            		sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");
-            	}
+                    // switch to webportal network
+                    sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, false);
+                    sb.switchNetwork("defaults/yacy.network.webportal.unit");
+                    // switch to robinson mode
+                    sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
+                    sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+                    sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW_SEARCH, false);
+                    // set default behavior for search verification
+                    sb.setConfig(SwitchboardConstants.SEARCH_VERIFY, "ifexist"); // nocache,iffresh,ifexist,cacheonly,false
+                    sb.setConfig(SwitchboardConstants.SEARCH_VERIFY_DELETE, "false");
+                }
             }
             if ("intranet".equals(post.get("usecase", "")) && !"intranet".equals(networkName)) {
-            	if(hasNonEmptyRemoteSolr) {
-            		/* One or more non empty remote Solr(s) attached : warn the user as the indexed documents may be public external resources out of scope for intranet/localhost domain. */
-            		prop.put("setUseCase_switchWarning", 1);
-            	}
+                if(hasNonEmptyRemoteSolr) {
+                    /* One or more non empty remote Solr(s) attached : warn the user as the indexed documents may be public external resources out of scope for intranet/localhost domain. */
+                    prop.put("setUseCase_switchWarning", 1);
+                }
                 // switch to intranet network
                 sb.setConfig(SwitchboardConstants.CORE_SERVICE_RWI, false);
                 sb.switchNetwork("defaults/yacy.network.intranet.unit");
@@ -325,7 +339,7 @@ public class ConfigBasic {
         prop.put("lang_ja", "0");
         prop.put("lang_el", "0");
         prop.put("lang_it", "0");
-		prop.put("lang_es", "0");
+        prop.put("lang_es", "0");
         if ("default".equals(lang)) {
             prop.put("lang_en", "1");
         } else {
@@ -343,7 +357,7 @@ public class ConfigBasic {
             prop.put("active_it", l.contains("it") ? "2" : "1");
             prop.put("active_ru", l.contains("ru") ? "2" : "1");
             prop.put("active_uk", l.contains("uk") ? "2" : "1");
-			prop.put("active_es", l.contains("es") ? "2" : "1");
+            prop.put("active_es", l.contains("es") ? "2" : "1");
             prop.put("active_en", "2");
 
         } else {
@@ -357,7 +371,7 @@ public class ConfigBasic {
             prop.put("active_ja", "0");
             prop.put("active_el", "0");
             prop.put("active_it", "0");
-			prop.put("active_es", "0");
+            prop.put("active_es", "0");
         }
         return prop;
     }
