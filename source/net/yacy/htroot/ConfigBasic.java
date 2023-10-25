@@ -192,7 +192,7 @@ public class ConfigBasic {
 
         // set a warning in case that the default password was not changed
         String currpw = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
-        String dfltpw = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5_DEFAULT, "");
+        String dfltpw = SwitchboardConstants.ADMIN_ACCOUNT_B64MD5_DEFAULT;
         prop.put("changedfltpw", currpw.equals(dfltpw) ? "1" : "0");
 
         // set a use case
