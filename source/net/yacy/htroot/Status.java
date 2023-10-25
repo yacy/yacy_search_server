@@ -131,14 +131,10 @@ public class Status
             prop.put("privateStatusTable", "");
         }
 
-        // password protection
-        if ( (sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty())
-                && (!sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) ) {
-            prop.put("protection", "0"); // not protected
-            prop.put("urgentSetPassword", "1");
-        } else {
-            prop.put("protection", "1"); // protected
-        }
+        // password protection: set a warning in case that the default password was not changed
+        String currpw = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
+        String dfltpw = SwitchboardConstants.ADMIN_ACCOUNT_B64MD5_DEFAULT;
+        prop.put("protection", currpw.equals(dfltpw) ? "0" : "1");
 
         if ( sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false) ) {
             prop.put("unrestrictedLocalAccess", 1);

@@ -63,18 +63,14 @@ public class TransactionManager {
      */
     private static String getUserName(final RequestHeader header) {
         String userName = header.getRemoteUser();
+        if (userName == null) userName = "admin"; // set a default to be able to create a transaction token
         Switchboard sb = Switchboard.getSwitchboard();
 
         if (sb != null) {
             final String adminAccountBase64MD5 = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
             final String adminAccountUserName = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
-            if (adminAccountBase64MD5.equals(sb.emptyPasswordAdminAccount)) {
-                // admin users with empty passwords do not need to authentify, thus do not have
-                // this header present. We just consider the name is "admin"
-                userName = adminAccountUserName;
-            }
 
-            if (userName == null && header.accessFromLocalhost()) {
+            if (header.accessFromLocalhost()) {
 
                 if (sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) {
                     /* Unauthenticated local access as administrator can be enabled */
@@ -134,7 +130,7 @@ public class TransactionManager {
         /* Check this comes from an authenticated user */
         final String userName = getUserName(header);
         if (userName == null) {
-                throw new IllegalArgumentException("User is not authenticated");
+            throw new IllegalArgumentException("User is not authenticated");
         }
 
         /* Produce a token by signing a message with the server secret key : 
