@@ -53,7 +53,14 @@ To get a ready-to-run production package, run YaCy from Docker.
 
 ### Compile and run YaCy from git sources
 
-You need Java 11 or later to run YaCy, nothing else. The following works with linux and with MacOS:
+You need Java 11 or later to run YaCy and ant to build YaCy.
+This would install the requirements on debian:
+
+```
+sudo apt-get install openjdk-11-jdk-headless ant
+```
+
+Then clone the repository and build the application:
 
 ```
 git clone --depth 1 https://github.com/yacy/yacy_search_server.git

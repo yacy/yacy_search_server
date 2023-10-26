@@ -50,8 +50,9 @@ public final class SwitchboardConstants {
 
     // this holds the credential "MD5:" + Digest.encodeMD5Hex(adminAccountUserName + ":" + adminRealm + ":" + password)
     // or the depreciated old style MapTools.encodeMD5Hex( Base64Order.standardCoder.encode(adminAccountUserName + ":" + password) )
-    public static final String ADMIN_ACCOUNT_B64MD5         = "adminAccountBase64MD5";
     public static final String ADMIN_ACCOUNT_USER_NAME      = "adminAccountUserName"; // by default 'admin'
+    public static final String ADMIN_ACCOUNT_B64MD5         = "adminAccountBase64MD5"; // by default the encoding of 'yacy' (MD5:8cffbc0d66567a0987a4aba1ec46d63c)
+    public static final String ADMIN_ACCOUNT_B64MD5_DEFAULT = "MD5:8cffbc0d66567a0987a4aba1ec46d63c"; // use this to check if the default setting was overwritten
     public static final String ADMIN_ACCOUNT_FOR_LOCALHOST  = "adminAccountForLocalhost";
     public static final String ADMIN_ACCOUNT_All_PAGES      = "adminAccountAllPages";
     public static final String ADMIN_REALM                  = "adminRealm";
@@ -64,7 +65,7 @@ public final class SwitchboardConstants {
     public static final String SERVER_PUBLICPORT            = "publicPort";
 
     public static final String PUBLIC_SEARCHPAGE            = "publicSearchpage";
-    
+
     public static final int   CRAWLJOB_SYNC = 0;
     public static final int   CRAWLJOB_STATUS = 1;
     // 20_dhtdistribution

@@ -54,9 +54,12 @@ public class ConfigAccounts_p {
         final serverObjects prop = new serverObjects();
 
         /* Acquire a transaction token for the next POST form submission */
-        prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
-
         final Switchboard sb = (Switchboard) env;
+        try {
+            prop.put(TransactionManager.TRANSACTION_TOKEN_PARAM, TransactionManager.getTransactionToken(header));
+        } catch (IllegalArgumentException e) {
+            sb.log.fine("access by unauthorized or unknown user: no transaction token delivered");
+        }
         UserDB.Entry entry = null;
 
         // admin password
@@ -109,9 +112,10 @@ public class ConfigAccounts_p {
             }
         }
 
-        if (env.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "").isEmpty() && !env.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_FOR_LOCALHOST, false)) {
-            prop.put("passwordNotSetWarning", 1);
-        }
+        // set a warning in case that the default password was not changed
+        String currpw = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
+        String dfltpw = SwitchboardConstants.ADMIN_ACCOUNT_B64MD5_DEFAULT;
+        prop.put("changedfltpw", currpw.equals(dfltpw) ? "1" : "0");
 
         prop.put(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES + ".checked", sb.getConfigBool(SwitchboardConstants.ADMIN_ACCOUNT_All_PAGES, false) ? 1 : 0);
         prop.put("localhost.checked", (localhostAccess) ? 1 : 0);

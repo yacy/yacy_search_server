@@ -316,7 +316,6 @@ public final class Switchboard extends serverSwitch {
     private boolean startupAction = true; // this is set to false after the first event
     private static Switchboard sb;
     public HashMap<String, Object[]> crawlJobsStatus = new HashMap<>();
-    public String emptyPasswordAdminAccount;
 
     public Switchboard(final File dataPath, final File appPath, final String initPath, final String configPath) {
         super(dataPath, appPath, initPath, configPath);
@@ -448,9 +447,6 @@ public final class Switchboard extends serverSwitch {
                 ProbabilisticClassifier.initialize(Switchboard.this.classificationPath);
             }
         }.start();
-
-        // define the "non-password password"
-        this.emptyPasswordAdminAccount = this.encodeDigestAuth(this.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME,"admin"), "");
 
         // init the language detector
         this.log.config("Loading language profiles");
@@ -3907,13 +3903,10 @@ public final class Switchboard extends serverSwitch {
     /**
      * check authentication status for request access shall be granted if return value >= 2; these are the
      * cases where an access is granted to protected pages:
-     * - a password is not configured: auth-level 2
      * - access from localhost is granted and access comes from localhost: auth-level 3
-     * - a password is configured and access comes from localhost and the realm-value
+     * - access comes from localhost and the realm-value
      *   of a http-authentify String is equal to the stored base64MD5: auth-level 3
-     * - an empty password is configured an access comes from anywhere: auth-level 3
-     *   This may be used in cluster installations where the cluster has an outside protection but inside is none needed.
-     * - a password is configured and access comes with matching http-authentify: auth-level 4
+     * - access comes with matching http-authentify: auth-level 4
      *
      * @param requestHeader
      *  - requestHeader.AUTHORIZATION = B64encode("adminname:password") or = B64encode("adminname:valueOf_Base64MD5cft")
@@ -3929,19 +3922,6 @@ public final class Switchboard extends serverSwitch {
         if (requestHeader.isUserInRole(UserDB.AccessRight.ADMIN_RIGHT.toString())) {
             if (this.adminAuthenticationLastAccess + 60000 > System.currentTimeMillis()) // 1 minute
                 return 4; // hard-authenticated, quick return
-        }
-
-        // authorization in case that there is no account stored
-        final String adminAccountUserName = this.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
-        final String adminAccountBase64MD5 = this.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
-        if ( adminAccountBase64MD5.isEmpty() ) {
-            this.adminAuthenticationLastAccess = System.currentTimeMillis();
-            return 2; // no password stored; this should not happen for older peers
-        }
-
-        // authorization in case that administrators have stored an empty password; this authorizes all users as admin regardless of the give auth
-        if (adminAccountBase64MD5.equals(this.emptyPasswordAdminAccount)) {
-            return 3; // everyone is admin from everywhere
         }
 
         // authorization for localhost, only if flag is set to grant localhost access as admin
@@ -3980,6 +3960,8 @@ public final class Switchboard extends serverSwitch {
         }
 
         // authorization by encoded password, only for localhost access
+        final String adminAccountUserName = this.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");
+        final String adminAccountBase64MD5 = this.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
         final String pass = Base64Order.standardCoder.encodeString(adminAccountUserName + ":" + adminAccountBase64MD5);
         if ( accessFromLocalhost && (pass.equals(realmValue)) ) { // assume realmValue as is in cfg
             this.adminAuthenticationLastAccess = System.currentTimeMillis();

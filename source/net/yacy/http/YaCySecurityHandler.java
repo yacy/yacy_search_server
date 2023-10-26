@@ -84,10 +84,6 @@ public class YaCySecurityHandler extends ConstraintSecurityHandler {
         // Pages suffixed with "_p" are by the way always considered protected
         protectedPage = protectedPage || (pathInContext.indexOf("_p.") > 0);
 
-        // ..except that the password for the admin account is empty
-        final String adminAccountBase64MD5 = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
-        protectedPage = protectedPage && !adminAccountBase64MD5.equals(sb.emptyPasswordAdminAccount);
-
         // check "/gsa" and "/solr" if not publicSearchpage
         if (!protectedPage && !sb.getConfigBool(SwitchboardConstants.PUBLIC_SEARCHPAGE, true)) { 
             protectedPage = pathInContext.startsWith("/solr/") || pathInContext.startsWith("/gsa/");
@@ -98,6 +94,7 @@ public class YaCySecurityHandler extends ConstraintSecurityHandler {
                 return null;
             } else if (accessFromLocalhost) {
                 // last chance to authorize using the admin from localhost
+                final String adminAccountBase64MD5 = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_B64MD5, "");
                 final String credentials = request.getHeader(RequestHeader.AUTHORIZATION);
                 if (credentials != null && credentials.length() < 120 && credentials.startsWith("Basic ")) { // Basic credentials are short "Basic " + b64(user:pwd)
                     final String foruser = sb.getConfig(SwitchboardConstants.ADMIN_ACCOUNT_USER_NAME, "admin");

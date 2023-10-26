@@ -14,22 +14,17 @@
     <div>Processors: #[processors]#</div>
     <div>Load: #[load]#</div>
     <div>Threads: #[processesCurrentInclDaemon]#/#[processesCurrentOnlyDaemon]#, peak:#[processesPeak]#, total:#[processesTotal]#</div>
-    
+
     </dd>
     <dt>Protection</dt>
     <dd>#(protection)#
-      <strong>Password is missing.</strong>
+      <strong>Default password is not changed</strong>
+      <a href="ConfigAccounts_p.html">[Configure]</a>
       ::
       password-protected
       #(/protection)#
-
-      #(unrestrictedLocalAccess)#
-      ::
-      <br />Unrestricted access from localhost.
-      #(/unrestrictedLocalAccess)#
-      <a href="ConfigAccounts_p.html">[Configure]</a>
     </dd>
-    
+
     <dt>Address</dt>
     <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: <a href="ConfigBasic.html">enabled</a> (port <a href="Settings_p.html?page=ProxyAccess">#[sslPort]#</a>)#(/sslSupport)#<br />
     #(peerAddress)#
@@ -38,12 +33,12 @@
       Public Address: http://#[address]#<br/>
       YaCy Address: http://#[peername]#.yacy
       #(/peerAddress)#</dd>
-    
+
     #(portForwarding)#::
     <dt>Port Forwarding Host</dt>
     <dd>#[host]#:#[port]# (#(status)#broken::connected#(/status)#)</dd>
     #(/portForwarding)#
-    
+
     <dt>Proxy</dt>
     <dd>Transparent <a href="Settings_p.html?page=ProxyAccess">#(info_isTransparentProxy)#on::off#(/info_isTransparentProxy)#</a>&nbsp;&nbsp;
         URL <a href="Settings_p.html?page=UrlProxyAccess">#(info_proxyURL)#on::off#(/info_proxyURL)#</a></dd>
@@ -56,7 +51,7 @@
     Enabled <a href="Status.html?popup=false">[Disable]</a>
     #(/popup)#
     </dd>
-    
+
     <dt>Tray-Icon</dt>
     <dd>
     #(tray)#
@@ -67,7 +62,7 @@
     <a href="ConfigProperties_p.html" onclick="alert('Set\ntray.icon.force = true\n\nWARNING:\nYou do this on your own risk. If you do this without YaCy running on a desktop-pc, this will possibly break startup. In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf');">Experimental</a>
     #(/tray)#
     </dd>
-      
+
     <dt><a href="PerformanceMemory_p.html">Memory Usage</a></dt>
     <dd><table border="0" cellspacing="0">
     <tr><td>RAM used:</td><td align="right">#[usedMemory]#</td></tr>
@@ -75,13 +70,13 @@
     <tr><td>DISK used:</td><td align="right">(approx.) #[usedDisk]#</td></tr>
     <tr><td>DISK free:</td><td align="right">#[freeDisk]#</td></tr>
     </table></dd>
-    
+
     <dt>Traffic [<a href="Status.html?ResetTraffic=">Reset</a>]</dt>
     <dd>Proxy: #[trafficProxy]#<br/>Crawler: #[trafficCrawler]#</dd>
-    
+
     <dt><a href="Connections_p.html">Incoming Connections</a></dt>
     <dd>Active: #[connectionsActive]# | Max: <a href="PerformanceQueues_p.html#ThreadPoolSettings">#[connectionsMax]#</a></dd>
-    
+
     <dt><a href="Crawler_p.html">Queues</a></dt>
     <dd>
     <a href="IndexCreateLoaderQueue_p.html">Loader Queue</a>:
@@ -110,7 +105,7 @@
       </tr>  
       </table>
     </dd>
-    
+
     <dt>Seed server</dt>
     <dd>
     #(seedServer)#
@@ -124,7 +119,7 @@
       Last upload: #[lastUpload]# ago.
     #(/seedServer)#
     </dd>
-    
+
   </dl>
 </fieldset>
 </div>
