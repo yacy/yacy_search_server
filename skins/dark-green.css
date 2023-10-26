@@ -1,22 +1,5 @@
-/* dark-green skin by okybaca, based on 28c3 skin */
-
-/*
-The following colours must be defined:
-#000000
-#A3CC8B
-#38A535
-#E08040
-#333333
-#222222
-#FFCCCC
-#888888
-#990000
-#009900
-#000099
-#FFFFFF
-#008000
-#800000
-*/
+/* dark-green skin 
+ * based on 28c3, modyfied by okybaca */
 
 body {
   background-color:#000000;
@@ -67,7 +50,6 @@ h3 {
   -khtml-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
-
   background-color:#c8ff00;
   color:#000000;
 }
@@ -200,7 +182,18 @@ div.ProgressBarFill {
   background-color:#333333;
 }
 
+
+/* portal front page */
+
+h2.yacy {
+color:#C8FF00;
+}
+
+
+
 /* Searchresults */
+
+
 
 fieldset.maininput, fieldset.yacys { 
   background-color:#333333;
@@ -208,7 +201,7 @@ fieldset.maininput, fieldset.yacys {
   -khtml-border-radius: 5px;
   -moz-border-radius: 5px;
   border-radius: 5px;
-  color:#E08040;
+  color:#9BEE06;
 }
 
 form.search.small h2 {
@@ -221,11 +214,12 @@ form.search.small h2 {
 
 .searchresults h4 a {
   font-size:1.2em;
-  font-weight:normal
-  color:#FFFFFF;
+  font-weight:normal;
+  color:#00FF00;
 }
 .searchresults h4 a:hover {
-  color:#FFFFFF;
+  color:#000000;
+  background:#00FF00;
 }
 
 .snippetLoaded strong {
@@ -233,10 +227,12 @@ form.search.small h2 {
 }
 
 .searchresults .url a {
-  color:#008000;
+  color:#6CAE45;
 }
 .searchresults .url a:hover {
-  color:#800000;
+  color:#000000;
+  background:#00FF00;
+
 }
 
 
@@ -284,7 +280,7 @@ body#ViewLog pre {
 
 fieldset {
   background-color:#333333;
-  color:#000000;
+  color:#A3CC8B;
   border:0px solid #333333;
   -webkit-border-radius: 5px;
   -khtml-border-radius: 5px;
@@ -292,10 +288,10 @@ fieldset {
   border-radius: 5px;
 }
 
-/* input, select, textarea, button {
+input, select, textarea, button {
   color: black;
-  background-color: white;
-} */
+/*  background-color: white;*/
+} 
 
 legend {
   background-color:#38A535;
