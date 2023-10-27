@@ -28,6 +28,8 @@ import java.io.RandomAccessFile;
  * implementation, can be improved.
  *
  * @author Arunesh Mathur <aruneshmathur1990 at gmail.com>
+ * @author Michael Christen
+ *         bugfix to long parsing (return value was int)
  */
 
 public class RandomAcessFileZIMInputStream extends InputStream {
@@ -41,7 +43,7 @@ public class RandomAcessFileZIMInputStream extends InputStream {
     }
 
     // TODO: Remove the parameter buffer
-    public int readTwoLittleEndianBytesValue(final byte[] buffer) throws IOException {
+    public int readTwoLittleEndianBytesInt(final byte[] buffer) throws IOException {
         if (buffer.length < 2) {
             throw new OutOfMemoryError("buffer too small");
         } else {
@@ -51,7 +53,7 @@ public class RandomAcessFileZIMInputStream extends InputStream {
     }
 
     // TODO: Remove the parameter buffer
-    public int readFourLittleEndianBytesValue(final byte[] buffer) throws IOException {
+    public int readFourLittleEndianBytesInt(final byte[] buffer) throws IOException {
         if (buffer.length < 4) {
             throw new OutOfMemoryError("buffer too small");
         } else {
@@ -61,30 +63,30 @@ public class RandomAcessFileZIMInputStream extends InputStream {
     }
 
     // TODO: Remove the parameter buffer
-    public int readEightLittleEndianBytesValue(final byte[] buffer)
+    public long readEightLittleEndianBytesLong(final byte[] buffer)
             throws IOException {
         if (buffer.length < 8) {
             throw new OutOfMemoryError("buffer too small");
         } else {
             this.mRAFReader.read(buffer, 0, 8);
-            return Utilities.toEightLittleEndianInteger(buffer);
+            return Utilities.toEightLittleEndianLong(buffer);
         }
     }
 
     // TODO: Remove the parameter buffer
-    public int readSixteenLittleEndianBytesValue(final byte[] buffer)
+    public long readSixteenLittleEndianBytesLong(final byte[] buffer)
             throws IOException {
         if (buffer.length < 16) {
             throw new OutOfMemoryError("buffer too small");
         } else {
             this.mRAFReader.read(buffer, 0, 16);
-            return Utilities.toSixteenLittleEndianInteger(buffer);
+            return Utilities.toSixteenLittleEndianLong(buffer);
         }
     }
 
     // Reads characters from the current position into a String and stops when a
     // '\0' is encountered
-    public String readString() throws IOException {
+    public String readZeroTerminatedString() throws IOException {
         final StringBuffer sb = new StringBuffer();
         /*
          * int i; byte[] buffer = new byte[100]; while (true) {
@@ -92,8 +94,7 @@ public class RandomAcessFileZIMInputStream extends InputStream {
          * (buffer[i] == '\0') { break; } sb.append((char) buffer[i]); } if (i
          * != buffer.length) break; } return sb.toString();
          */
-        int b;
-        b = this.mRAFReader.read();
+        int b = this.mRAFReader.read();
         while (b != '\0') {
             sb.append((char) b);
             b = this.mRAFReader.read();

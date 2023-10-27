@@ -20,45 +20,46 @@ package org.openzim;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Arunesh Mathur
- *
  *         A ZIM file implementation that stores the Header and the MIMETypeList
  *
+ * @author Michael Christen
+ *         Proof-Reading, unclustering, refactoring,
+ *         naming adoption to https://wiki.openzim.org/wiki/ZIM_file_format,
+ *         change of Exception handling, 
+ *         extension to more attributes as defined in spec (bugfix for mime type loading)
+ *         int/long bugfix (did reading of long values with int variables, causing negative offsets)
  */
 public class ZIMFile extends File {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
 
-    private Header mHeader;
+    // Header values
+    public final int  header_magicNumber;
+    public final int  header_majorVersion;
+    public final int  header_minorVersion;
+    public final long header_uuid;
+    public final int  header_entryCount;
+    public final int  header_clusterCount;
+    public final long header_urlPtrPos;
+    public final long header_titlePtrPos;
+    public final long header_clusterPtrPos;
+    public final long header_mimeListPos;
+    public final int  header_mainPage;
+    public final int  header_layoutPage;
+    public final long header_checksumPos;
 
-    private List<String> mMIMETypeList; // Can be removed if not needed
+    // content cache
+    public final List<String> mimeList;
 
-    public ZIMFile(final String path) {
+    public ZIMFile(final String path) throws IOException {
         super(path);
-
-        try {
-            readHeader();
-        } catch (final FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void readHeader() throws FileNotFoundException {
-
-        // Helpers
-        int len = 0;
-        StringBuffer mimeBuffer = null;
-
-        // The byte[] that will help us in reading bytes out of the file
-        final byte[] buffer = new byte[16];
 
         // Check whether the file exists
         if (!(this.exists())) {
@@ -67,132 +68,45 @@ public class ZIMFile extends File {
         }
 
         // The reader that will be used to read contents from the file
-
-        final RandomAcessFileZIMInputStream reader = new RandomAcessFileZIMInputStream(
-                new RandomAccessFile(this, "r"));
-
-        // The ZIM file header
-        this.mHeader = new Header();
+        final RandomAcessFileZIMInputStream reader = new RandomAcessFileZIMInputStream(new RandomAccessFile(this, "r"));
+        final byte[] buffer = new byte[16];
 
         // Read the contents of the header
-        try {
-            this.mHeader.magicNumber = reader.readFourLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.magicNumber);
+        this.header_magicNumber   = reader.readFourLittleEndianBytesInt(buffer);     //  4
+        this.header_majorVersion  = reader.readTwoLittleEndianBytesInt(buffer);      //  2
+        this.header_minorVersion  = reader.readTwoLittleEndianBytesInt(buffer);      //  4
+        this.header_uuid          = reader.readSixteenLittleEndianBytesLong(buffer); // 16
+        this.header_entryCount    = reader.readFourLittleEndianBytesInt(buffer);     //  4
+        this.header_clusterCount  = reader.readFourLittleEndianBytesInt(buffer);     //  4
+        this.header_urlPtrPos     = reader.readEightLittleEndianBytesLong(buffer);   //  8
+        this.header_titlePtrPos   = reader.readEightLittleEndianBytesLong(buffer);   //  8
+        this.header_clusterPtrPos = reader.readEightLittleEndianBytesLong(buffer);   //  8
+        this.header_mimeListPos   = reader.readEightLittleEndianBytesLong(buffer);   //  8
+        this.header_mainPage      = reader.readFourLittleEndianBytesInt(buffer);     //  4
+        this.header_layoutPage    = reader.readFourLittleEndianBytesInt(buffer);     //  4
+        this.header_checksumPos   = reader.readEightLittleEndianBytesLong(buffer);   //  8 [FIX!]
 
-            this.mHeader.version = reader.readFourLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.version);
-
-            this.mHeader.uuid = reader.readSixteenLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.uuid); reader.read(buffer, 0, 4);
-
-            this.mHeader.articleCount = reader
-                    .readFourLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.articleCount);
-
-            this.mHeader.clusterCount = reader
-                    .readFourLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.clusterCount);
-
-            this.mHeader.urlPtrPos = reader.readEightLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.urlPtrPos);
-
-            this.mHeader.titlePtrPos = reader
-                    .readEightLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.titlePtrPos);
-
-            this.mHeader.clusterPtrPos = reader
-                    .readEightLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.clusterPtrPos);
-
-            this.mHeader.mimeListPos = reader
-                    .readEightLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.mimeListPos);
-
-            this.mHeader.mainPage = reader.readFourLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.mainPage);
-
-            this.mHeader.layoutPage = reader.readFourLittleEndianBytesValue(buffer);
-            // System.out.println(mHeader.layoutPage);
-
-            // Initialise the MIMETypeList
-            this.mMIMETypeList = new ArrayList<>();
-            while (true) {
+        // Initialise the MIMETypeList
+        int len = 0;
+        StringBuffer mimeBuffer = null;
+        this.mimeList = new ArrayList<>();
+        while (true) {
+            reader.read(buffer, 0, 1); // read only one byte to check if this is a zero
+            len = 0;
+            mimeBuffer = new StringBuffer();
+            while (buffer[0] != '\0') {
+                mimeBuffer.append((char) buffer[0]);
                 reader.read(buffer, 0, 1);
-                len = 0;
-                mimeBuffer = new StringBuffer();
-                while (buffer[0] != '\0') {
-                    mimeBuffer.append((char) buffer[0]);
-                    reader.read(buffer, 0, 1);
-                    len++;
-                }
-                if (len == 0) {
-                    break;
-                }
-                this.mMIMETypeList.add(mimeBuffer.toString());
-                // System.out.println(mimeBuffer);
+                len++;
             }
-
-        } catch (final Exception e) {
-            e.printStackTrace();
+            if (len == 0) {
+                break;
+            }
+            String mimeType = mimeBuffer.toString();
+            System.out.println(mimeType);
+            this.mimeList.add(mimeType);
         }
-    }
 
-    public int getVersion() {
-        return this.mHeader.version;
-    }
-
-    public int getUuid() {
-        return this.mHeader.uuid;
-    }
-
-    public int getArticleCount() {
-        return this.mHeader.articleCount;
-    }
-
-    public int getClusterCount() {
-        return this.mHeader.clusterCount;
-    }
-
-    public int getUrlPtrPos() {
-        return this.mHeader.urlPtrPos;
-    }
-
-    public int getTitlePtrPos() {
-        return this.mHeader.titlePtrPos;
-    }
-
-    public int getClusterPtrPos() {
-        return this.mHeader.clusterPtrPos;
-    }
-
-    public String getMIMEType(final int mimeNumber) {
-        return this.mMIMETypeList.get(mimeNumber);
-    }
-
-    public int getHeaderSize() {
-        return this.mHeader.mimeListPos;
-    }
-
-    public int getMainPage() {
-        return this.mHeader.mainPage;
-    }
-
-    public int getLayoutPage() {
-        return this.mHeader.layoutPage;
-    }
-
-    public class Header {
-        int magicNumber;
-        int version;
-        int uuid;
-        int articleCount;
-        int clusterCount;
-        int urlPtrPos;
-        int titlePtrPos;
-        int clusterPtrPos;
-        int mimeListPos;
-        int mainPage;
-        int layoutPage;
     }
 
 }
