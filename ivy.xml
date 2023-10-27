@@ -55,7 +55,7 @@
       <dependency org="org.apache.lucene" name="lucene-queryparser" rev="8.11.2" conf="compile->master"/>
       <dependency org="org.apache.lucene" name="lucene-spatial-extras" rev="8.11.2" conf="compile->master"/>
       <dependency org="org.apache.lucene" name="lucene-suggest" rev="8.11.2"/>
-      <dependency org="org.apache.pdfbox" name="pdfbox" rev="2.0.29"  />
+      <dependency org="org.apache.pdfbox" name="pdfbox" rev="3.0.0"  />
       <dependency org="org.apache.poi" name="poi" rev="3.17"  />
       <dependency org="org.apache.poi" name="poi-scratchpad" rev="3.17"  />
       <dependency org="org.apache.solr" name="solr-core" rev="8.11.2" conf="compile->master"/>

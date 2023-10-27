@@ -43,6 +43,7 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.ImageView;
 
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.ImageType;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -211,7 +212,7 @@ public class Html2Image {
      *                    call termination. Beyond this limit the process is killed.
      * @return true when the destination file was successfully written
      */
-    public static boolean writeWkhtmltopdf(String url, String proxy, String userAgent, final String acceptLanguage, final File destination, final long maxSeconds) {
+    public static boolean writeWkhtmltopdf(final String url, final String proxy, final String userAgent, final String acceptLanguage, final File destination, final long maxSeconds) {
         boolean success = false;
         for (final boolean ignoreErrors: new boolean[]{false, true}) {
             success = writeWkhtmltopdfInternal(url, proxy, destination, userAgent, acceptLanguage, ignoreErrors, maxSeconds);
@@ -352,7 +353,7 @@ public class Html2Image {
 
         // convert pdf to jpg using internal pdfbox capability
         if (convertCmd == null) {
-            try (final PDDocument pdoc = PDDocument.load(pdf);) {
+            try (final PDDocument pdoc = Loader.loadPDF(pdf);) {
 
                 final BufferedImage bi = new PDFRenderer(pdoc).renderImageWithDPI(0, density, ImageType.RGB);
 
@@ -432,7 +433,7 @@ public class Html2Image {
      * @param size
      * @throws IOException
      */
-    public static void writeSwingImage(String url, Dimension size, File destination) throws IOException {
+    public static void writeSwingImage(final String url, final Dimension size, final File destination) throws IOException {
 
         // set up a pane for rendering
         final JEditorPane htmlPane = new JEditorPane();
@@ -453,7 +454,7 @@ public class Html2Image {
             public ViewFactory getViewFactory() {
                 return new HTMLFactory() {
                     @Override
-                    public View create(Element elem) {
+                    public View create(final Element elem) {
                         final View view = super.create(elem);
                         if (view instanceof ImageView) {
                             ((ImageView) view).setLoadsSynchronously(true);
@@ -467,7 +468,7 @@ public class Html2Image {
         htmlPane.setContentType("text/html");
         htmlPane.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
-            public void propertyChange(PropertyChangeEvent evt) {
+            public void propertyChange(final PropertyChangeEvent evt) {
             }
         });
 
@@ -501,7 +502,7 @@ public class Html2Image {
      * 	</li>
      * </ol>
      */
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         final String usageMessage = "Usage : java " + Html2Image.class.getName()
                 + " <url> <target-file[.pdf|.jpg|.png]> [wkhtmltopdf|swing]";
         int exitStatus = 0;
