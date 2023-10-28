@@ -18,7 +18,6 @@
 
 package org.openzim;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -55,8 +54,8 @@ public class ZIMTest {
 
             // print article c-1
             DirectoryEntry directory_entry = zReader.getDirectoryInfo(c - 1);
-            ByteArrayOutputStream articleStream = zReader.getArticleData(directory_entry);
-            String article = articleStream == null ? "NULL" : articleStream.toString(StandardCharsets.UTF_8.name());
+            byte[] articleBytes = zReader.getArticleData(directory_entry);
+            String article = articleBytes == null ? "NULL" : new String(articleBytes, StandardCharsets.UTF_8);
             System.out.println(article);
         } catch (final IOException e) {
             e.printStackTrace();

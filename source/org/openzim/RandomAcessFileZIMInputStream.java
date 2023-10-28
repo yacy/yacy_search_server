@@ -29,78 +29,69 @@ import java.io.RandomAccessFile;
  *
  * @author Arunesh Mathur <aruneshmathur1990 at gmail.com>
  * @author Michael Christen
- *         bugfix to long parsing (return value was int)
+ *         bugfix to long parsing (return value was int),
+ *         moved conditions for exceptions to asserts,
+ *         refactoring and merge with Utilities
  */
-
 public class RandomAcessFileZIMInputStream extends InputStream {
 
     private final RandomAccessFile mRAFReader;
-
     private long mMarked = -1;
+    private final byte[] buffer2 = new byte[2];
+    private final byte[] buffer4 = new byte[4];
+    private final byte[] buffer8 = new byte[8];
 
     public RandomAcessFileZIMInputStream(final RandomAccessFile reader) {
         this.mRAFReader = reader;
     }
 
-    // TODO: Remove the parameter buffer
-    public int readTwoLittleEndianBytesInt(final byte[] buffer) throws IOException {
-        if (buffer.length < 2) {
-            throw new OutOfMemoryError("buffer too small");
-        } else {
-            this.mRAFReader.read(buffer, 0, 2);
-            return Utilities.toTwoLittleEndianInteger(buffer);
-        }
+    public int readTwoLittleEndianBytesInt() throws IOException {
+        this.mRAFReader.read(buffer2, 0, 2);
+        return toTwoLittleEndianInteger(buffer2);
     }
 
-    // TODO: Remove the parameter buffer
-    public int readFourLittleEndianBytesInt(final byte[] buffer) throws IOException {
-        if (buffer.length < 4) {
-            throw new OutOfMemoryError("buffer too small");
-        } else {
-            this.mRAFReader.read(buffer, 0, 4);
-            return Utilities.toFourLittleEndianInteger(buffer);
-        }
+    public int readFourLittleEndianBytesInt() throws IOException {
+        this.mRAFReader.read(buffer4, 0, 4);
+        return toFourLittleEndianInteger(buffer4);
     }
 
-    // TODO: Remove the parameter buffer
-    public long readEightLittleEndianBytesLong(final byte[] buffer)
-            throws IOException {
-        if (buffer.length < 8) {
-            throw new OutOfMemoryError("buffer too small");
-        } else {
-            this.mRAFReader.read(buffer, 0, 8);
-            return Utilities.toEightLittleEndianLong(buffer);
-        }
+    public long readEightLittleEndianBytesLong() throws IOException {
+        this.mRAFReader.read(buffer8, 0, 8);
+        return toEightLittleEndianLong(buffer8);
     }
 
-    // TODO: Remove the parameter buffer
-    public long readSixteenLittleEndianBytesLong(final byte[] buffer)
-            throws IOException {
-        if (buffer.length < 16) {
-            throw new OutOfMemoryError("buffer too small");
-        } else {
-            this.mRAFReader.read(buffer, 0, 16);
-            return Utilities.toSixteenLittleEndianLong(buffer);
-        }
+    private static int toTwoLittleEndianInteger(final byte[] buffer) {
+        return ((buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8));
+    }
+
+    public static int toFourLittleEndianInteger(final byte[] buffer) { // TODO: make private
+        return
+              ((buffer[0] & 0xFF)        | ((buffer[1] & 0xFF) << 8)
+            | ((buffer[2] & 0xFF) << 16) | ((buffer[3] & 0xFF) << 24));
+    }
+
+    private static long toEightLittleEndianLong(final byte[] buffer) {
+        return // cast to long required otherwise this is again an integer
+              ((long)(buffer[0] & 0xFF)        | ((long)(buffer[1] & 0xFF) << 8)
+            | ((long)(buffer[2] & 0xFF) << 16) | ((long)(buffer[3] & 0xFF) << 24)
+            | ((long)(buffer[4] & 0xFF) << 32) | ((long)(buffer[5] & 0xFF) << 40)
+            | ((long)(buffer[6] & 0xFF) << 48) | ((long)(buffer[7] & 0xFF) << 56));
+    }
+
+    public static void skipFully(final InputStream stream, final long bytes) throws IOException {
+        for (long i = stream.skip(bytes); i < bytes; i += stream.skip(bytes - i));
     }
 
     // Reads characters from the current position into a String and stops when a
     // '\0' is encountered
     public String readZeroTerminatedString() throws IOException {
-        final StringBuffer sb = new StringBuffer();
-        /*
-         * int i; byte[] buffer = new byte[100]; while (true) {
-         * mRAFReader.read(buffer); for (i = 0; i < buffer.length; i++) { if
-         * (buffer[i] == '\0') { break; } sb.append((char) buffer[i]); } if (i
-         * != buffer.length) break; } return sb.toString();
-         */
+        final StringBuilder sb = new StringBuilder();
         int b = this.mRAFReader.read();
         while (b != '\0') {
             sb.append((char) b);
             b = this.mRAFReader.read();
         }
         return sb.toString();
-
     }
 
     @Override

@@ -44,7 +44,6 @@ public class ZIMFile extends File {
     public final int  header_magicNumber;
     public final int  header_majorVersion;
     public final int  header_minorVersion;
-    public final long header_uuid;
     public final int  header_entryCount;
     public final int  header_clusterCount;
     public final long header_urlPtrPos;
@@ -69,34 +68,33 @@ public class ZIMFile extends File {
 
         // The reader that will be used to read contents from the file
         final RandomAcessFileZIMInputStream reader = new RandomAcessFileZIMInputStream(new RandomAccessFile(this, "r"));
-        final byte[] buffer = new byte[16];
 
         // Read the contents of the header
-        this.header_magicNumber   = reader.readFourLittleEndianBytesInt(buffer);     //  4
-        this.header_majorVersion  = reader.readTwoLittleEndianBytesInt(buffer);      //  2
-        this.header_minorVersion  = reader.readTwoLittleEndianBytesInt(buffer);      //  4
-        this.header_uuid          = reader.readSixteenLittleEndianBytesLong(buffer); // 16
-        this.header_entryCount    = reader.readFourLittleEndianBytesInt(buffer);     //  4
-        this.header_clusterCount  = reader.readFourLittleEndianBytesInt(buffer);     //  4
-        this.header_urlPtrPos     = reader.readEightLittleEndianBytesLong(buffer);   //  8
-        this.header_titlePtrPos   = reader.readEightLittleEndianBytesLong(buffer);   //  8
-        this.header_clusterPtrPos = reader.readEightLittleEndianBytesLong(buffer);   //  8
-        this.header_mimeListPos   = reader.readEightLittleEndianBytesLong(buffer);   //  8
-        this.header_mainPage      = reader.readFourLittleEndianBytesInt(buffer);     //  4
-        this.header_layoutPage    = reader.readFourLittleEndianBytesInt(buffer);     //  4
-        this.header_checksumPos   = reader.readEightLittleEndianBytesLong(buffer);   //  8 [FIX!]
+        this.header_magicNumber   = reader.readFourLittleEndianBytesInt();     //  4
+        this.header_majorVersion  = reader.readTwoLittleEndianBytesInt();      //  2
+        this.header_minorVersion  = reader.readTwoLittleEndianBytesInt();      //  4
+        RandomAcessFileZIMInputStream.skipFully(reader, 16); // skip the uuid, this is not used
+        this.header_entryCount    = reader.readFourLittleEndianBytesInt();     //  4
+        this.header_clusterCount  = reader.readFourLittleEndianBytesInt();     //  4
+        this.header_urlPtrPos     = reader.readEightLittleEndianBytesLong();   //  8
+        this.header_titlePtrPos   = reader.readEightLittleEndianBytesLong();   //  8
+        this.header_clusterPtrPos = reader.readEightLittleEndianBytesLong();   //  8
+        this.header_mimeListPos   = reader.readEightLittleEndianBytesLong();   //  8
+        this.header_mainPage      = reader.readFourLittleEndianBytesInt();     //  4
+        this.header_layoutPage    = reader.readFourLittleEndianBytesInt();     //  4
+        this.header_checksumPos   = reader.readEightLittleEndianBytesLong();   //  8 [FIX!]
 
         // Initialise the MIMETypeList
         int len = 0;
         StringBuffer mimeBuffer = null;
         this.mimeList = new ArrayList<>();
         while (true) {
-            reader.read(buffer, 0, 1); // read only one byte to check if this is a zero
+            int b = reader.read(); // read only one byte to check if this is a zero
             len = 0;
             mimeBuffer = new StringBuffer();
-            while (buffer[0] != '\0') {
-                mimeBuffer.append((char) buffer[0]);
-                reader.read(buffer, 0, 1);
+            while (b != '\0') {
+                mimeBuffer.append((char) b);
+                b = reader.read();
                 len++;
             }
             if (len == 0) {
