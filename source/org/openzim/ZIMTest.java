@@ -20,7 +20,6 @@ package org.openzim;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import org.openzim.ZIMReader.DirectoryEntry;
 
@@ -40,12 +39,10 @@ public class ZIMTest {
             final ZIMReader zReader = new ZIMReader(file);
 
             // print a list of urls and titles
-            final List<String> urls = zReader.getURLListByURL();
-            final List<String> titles = zReader.getURLListByTitle();
-            int c = Math.min(10, titles.size());
+            int c = Math.min(10, file.header_entryCount);
             for (int i = 0; i < c; i++) {
-                System.out.println("URL by URL   " + i + ": " + urls.get(i));
-                System.out.println("URL by Title " + i + ": " + titles.get(i));
+                System.out.println("URL by URL   " + i + ": " + zReader.getURLByURLOrder(i));
+                System.out.println("URL by Title " + i + ": " + zReader.getURLByTitleOrder(i));
                 DirectoryEntry entry = zReader.getDirectoryInfo(i);
                 System.out.println("URL   by Pos " + i + ": " + entry.url);
                 System.out.println("Title by Pos " + i + ": " + entry.title);

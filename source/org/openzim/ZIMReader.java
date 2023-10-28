@@ -18,14 +18,15 @@
 
 package org.openzim;
 
-import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.tukaani.xz.SingleXZInputStream;
+import com.github.luben.zstd.ZstdInputStream;
 
 /**
  * @author Arunesh Mathur
@@ -36,7 +37,9 @@ import org.tukaani.xz.SingleXZInputStream;
  *         naming adoption to https://wiki.openzim.org/wiki/ZIM_file_format,
  *         change of Exception handling, 
  *         extension to more attributes as defined in spec (bugfix for mime type loading)
- *         bugfix to long parsing (prevented reading of large files)
+ *         bugfix to long parsing (prevented reading of large files),
+ *         added extended cluster size parsing
+ *         added ZStandard compression parsing (cluster type 5)
  */
 public class ZIMReader {
 
@@ -110,91 +113,53 @@ public class ZIMReader {
         return this.mFile;
     }
 
-    // get a URL list that is sorted by the urls
-    public List<String> getURLListByURL() throws IOException {
-
-        int i = 0, mimeType;
-
-        // The list that will eventually return the list of URL's
-        final ArrayList<String> returnList = new ArrayList<>();
+    public String getURLByURLOrder(int entryNumber) throws IOException {
 
         // Move to the spot where URL's are listed
-        this.mReader.seek(this.mFile.header_urlPtrPos);
+        this.mReader.seek(this.mFile.header_urlPtrPos + 8L * entryNumber);
 
-        for (i = 0; i < this.mFile.header_entryCount; i++) {
+        // The position of URL i
+        long pos = this.mReader.readEightLittleEndianBytesLong();
 
-            // The position of URL i
-            long pos = this.mReader.readEightLittleEndianBytesLong();
+        // Move to the position of URL i
+        this.mReader.seek(pos);
 
-            // Mark the current position that we need to return to
-            this.mReader.mark();
+        // Article or Redirect entry?
+        int mimeType = this.mReader.readTwoLittleEndianBytesInt();
 
-            // Move to the position of URL i
-            this.mReader.seek(pos);
-
-            // Article or Redirect entry?
-            mimeType = this.mReader.readTwoLittleEndianBytesInt();
-
-            if (mimeType == 65535) {
-                this.mReader.seek(pos + 12);
-                returnList.add(this.mReader.readZeroTerminatedString());
-            } else {
-                this.mReader.seek(pos + 16);
-                returnList.add(this.mReader.readZeroTerminatedString());
-            }
-
-            this.mReader.reset();
+        if (mimeType == 65535) {
+            this.mReader.seek(pos + 12);
+            return this.mReader.readZeroTerminatedString();
+        } else {
+            this.mReader.seek(pos + 16);
+            return this.mReader.readZeroTerminatedString();
         }
-
-        return returnList;
     }
 
-    // get a URL list that is sorted by the entry titles
-    public List<String> getURLListByTitle() throws IOException {
-
-        int i = 0, mimeType, articleNumber;
-
-        // The list that will eventually return the list of URL's
-        final ArrayList<String> returnList = new ArrayList<>();
-
-        // Get the UrlPtrPos or one time storage
-        long urlPtrPos = this.mFile.header_urlPtrPos;
+    public String getURLByTitleOrder(int entryNumber) throws IOException {
 
         // Move to the spot where URL's are listed
-        this.mReader.seek(this.mFile.header_titlePtrPos);
+        this.mReader.seek(this.mFile.header_titlePtrPos + 8L * entryNumber);
 
-        for (i = 0; i < this.mFile.header_entryCount; i++) {
+        // The articleNumber of the position of URL i
+        int articleNumber = this.mReader.readFourLittleEndianBytesInt();
 
-            // The articleNumber of the position of URL i
-            articleNumber = this.mReader.readFourLittleEndianBytesInt();
+        this.mReader.seek(this.mFile.header_urlPtrPos + (8L * (articleNumber)));
 
-            // Mark the current position that we need to return to
-            this.mReader.mark();
+        // The position of URL i
+        long pos = this.mReader.readEightLittleEndianBytesLong();
+        this.mReader.seek(pos);
 
-            this.mReader.seek(urlPtrPos + (8L * (articleNumber)));
+        // Article or Redirect entry?
+        int mimeType = this.mReader.readTwoLittleEndianBytesInt();
 
-            // The position of URL i
-            long pos = this.mReader.readEightLittleEndianBytesLong();
-            this.mReader.seek(pos);
-
-            // Article or Redirect entry?
-            mimeType = this.mReader.readTwoLittleEndianBytesInt();
-
-            if (mimeType == 65535) {
-                this.mReader.seek(pos + 12);
-                final String url = this.mReader.readZeroTerminatedString();
-                returnList.add(url);
-            } else {
-                this.mReader.seek(pos + 16);
-                final String url = this.mReader.readZeroTerminatedString();
-                returnList.add(url);
-            }
-
-            // Return to the marked position
-            this.mReader.reset();
+        if (mimeType == 65535) {
+            this.mReader.seek(pos + 12);
+            return this.mReader.readZeroTerminatedString();
+        } else {
+            this.mReader.seek(pos + 16);
+            return this.mReader.readZeroTerminatedString();
         }
-
-        return returnList;
     }
 
     // position must be the seek position for the title in the Title Pointer List
@@ -291,7 +256,7 @@ public class ZIMReader {
         final ArticleEntry article = (ArticleEntry) directoryInfo;
 
         // Move to the cluster entry in the clusterPtrPos
-        this.mReader.seek(this.mFile.header_clusterPtrPos + article.cluster_number * 8);
+        this.mReader.seek(this.mFile.header_clusterPtrPos + article.cluster_number * 8L);
 
         // Read the location of the cluster
         final long clusterPos = this.mReader.readEightLittleEndianBytesLong();
@@ -302,78 +267,74 @@ public class ZIMReader {
         // Read the first byte, for compression information
         final int compressionType = this.mReader.read();
 
-        // Reference declaration
-        int firstOffset, numberOfBlobs, offset1, offset2, location, differenceOffset;
-
         // Check the compression type that was read
-        if (compressionType == 1) {
-
-            // The first four bytes are the offset of the zeroth blob
-            firstOffset = this.mReader.readFourLittleEndianBytesInt();
-
-            // The number of blobs
-            numberOfBlobs = firstOffset / 4;
-
-            // The blobNumber has to be lesser than the numberOfBlobs
-            assert article.blob_number < numberOfBlobs;
-            if (article.blob_number == 0) {
-                // The first offset is what we read earlier
-                offset1 = firstOffset;
-            } else {
-                location = (article.blob_number - 1) * 4;
-                RandomAccessFileZIMInputStream.skipFully(this.mReader, location);
-                offset1 = this.mReader.readFourLittleEndianBytesInt();
-            }
-
-            offset2 = this.mReader.readFourLittleEndianBytesInt();
-            differenceOffset = offset2 - offset1;
-            byte[] entry = new byte[differenceOffset];
-            RandomAccessFileZIMInputStream.skipFully(this.mReader, (offset1 - 4 * (article.blob_number + 2)));
-            this.mReader.read(entry, 0, differenceOffset);
-
-            return entry;
+        // type = 1 uncompressed
+        if (compressionType <= 1 || compressionType == 8 || compressionType == 9) {
+            boolean extended = compressionType > 1;
+            return readClusterEntry(this.mReader, article.blob_number, extended);
         }
         // 2 for zlib and 3 for bzip2 (removed)
 
         // LZMA2 compressed data
-        if (compressionType == 4) {
-
-            // Read the first 4 bytes to find out the number of artciles
-            byte[] buffer = new byte[4];
-
+        if (compressionType == 4 || compressionType == 12) {
+            boolean extended = compressionType == 12;
             // Create a dictionary with size 40MiB, the zimlib uses this size while creating
-            SingleXZInputStream xzReader= new SingleXZInputStream(this.mReader, 4194304);
-
-            // The first four bytes are the offset of the zeroth blob
-            firstOffset = this.mReader.readFourLittleEndianBytesInt();
-
-            // The number of blobs
-            numberOfBlobs = firstOffset / 4;
-
-            // The blobNumber has to be lesser than the numberOfBlobs
-            assert article.blob_number < numberOfBlobs;
-            if (article.blob_number == 0) {
-                // The first offset is what we read earlier
-                offset1 = firstOffset;
-            } else {
-                location = (article.blob_number - 1) * 4;
-                RandomAccessFileZIMInputStream.skipFully(xzReader, location);
-                xzReader.read(buffer);
-                offset1 = RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
-            }
-
-            xzReader.read(buffer);
-            offset2 = RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
-            differenceOffset = offset2 - offset1;
-            byte[] entry = new byte[differenceOffset];
-            RandomAccessFileZIMInputStream.skipFully(xzReader, (offset1 - 4 * (article.blob_number + 2)));
-            xzReader.read(entry, 0, differenceOffset);
-
-            return entry;
+            SingleXZInputStream xzReader= new SingleXZInputStream(this.mReader, 41943040);
+            return readClusterEntry(xzReader, article.blob_number, extended);
         }
 
-        // case 5: zstd compressed (missing!)
+        // Zstandard compressed data
+        if (compressionType == 5 || compressionType == 13) {
+            boolean extended = compressionType == 13;
+            ZstdInputStream zReader = new ZstdInputStream(this.mReader);
+            return readClusterEntry(zReader, article.blob_number, extended);
+        }
+
         return null;
+    }
+
+    private static byte[] readClusterEntry(InputStream is, int blob_number, boolean extended) throws IOException {
+
+        // Read the first 4(8) bytes to find out the number of articles
+        byte[] buffer = new byte[extended ? 8 : 4];
+
+        // The first four (eight) bytes are the offset of the zeroth blob
+        is.read(buffer);
+        long firstOffset = extended? RandomAccessFileZIMInputStream.toEightLittleEndianLong(buffer) : RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
+
+        // The number of blobs can be computed by the offset
+        // the actual number is one less because there is one more offset entry than the actual number
+        // to identify the end of the last blob.
+        long numberOfBlobs1 = extended ? firstOffset / 8 : firstOffset / 4;
+
+        // The blobNumber has to be lesser than the numberOfBlobs - 1
+        // the blob numbers start with 0 even if the documentation states it is "the first blob".
+        assert blob_number < numberOfBlobs1 - 1;
+        long offset1;
+        if (blob_number == 0) {
+            // The first offset is what we read earlier
+            offset1 = firstOffset;
+        } else {
+            // skip one less than required to get to the offset entry because the first entry is already read
+            RandomAccessFileZIMInputStream.skipFully(is, (blob_number - 1) * (extended ? 8 : 4));
+            is.read(buffer);
+            offset1 = extended? RandomAccessFileZIMInputStream.toEightLittleEndianLong(buffer) : RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
+        }
+        is.read(buffer);
+        long offset2 = extended? RandomAccessFileZIMInputStream.toEightLittleEndianLong(buffer) : RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
+        long blob_size = offset2 - offset1;
+        byte[] entry = new byte[(int) blob_size]; // TODO: we should be able to read blobs larger than MAXINT
+        // we must do two skip steps: first to the end of the offset list and second to the start of the blob
+        // - the whole number of offset list entries is numberOfBlobs1, which includes the extra entry for the end offset
+        // - the number of offset entries that we alreay read now is article.blob_number + 2 (in any case at least 2)
+        // - the remaining number of offset entries to skip is therefore numberOfBlobs1 - (article.blob_number + 2)
+        // - the addon skip of number of bytes to the start of the entry is offset1 - firstoffset with firstoffset = 4 * numberOfBlobs1
+        // - the full skip length is 4 * (numberOfBlobs1 - (article.blob_number + 2)) + offset1 - 4 * numberOfBlobs1
+        //   = offset1 - 4 * (article.blob_number + 2)
+        RandomAccessFileZIMInputStream.skipFully(is, (offset1 - (extended ? 8 : 4) * (blob_number + 2)));
+        is.read(entry, 0, entry.length);
+
+        return entry;
     }
 
 }

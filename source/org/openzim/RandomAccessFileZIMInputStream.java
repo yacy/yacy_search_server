@@ -18,6 +18,7 @@
 
 package org.openzim;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -70,7 +71,7 @@ public class RandomAccessFileZIMInputStream extends InputStream {
             | ((buffer[2] & 0xFF) << 16) | ((buffer[3] & 0xFF) << 24));
     }
 
-    private static long toEightLittleEndianLong(final byte[] buffer) {
+    public static long toEightLittleEndianLong(final byte[] buffer) {
         return // cast to long required otherwise this is again an integer
               ((long)(buffer[0] & 0xFF)        | ((long)(buffer[1] & 0xFF) << 8)
             | ((long)(buffer[2] & 0xFF) << 16) | ((long)(buffer[3] & 0xFF) << 24)
@@ -85,13 +86,12 @@ public class RandomAccessFileZIMInputStream extends InputStream {
     // Reads characters from the current position into a String and stops when a
     // '\0' is encountered
     public String readZeroTerminatedString() throws IOException {
-        final StringBuilder sb = new StringBuilder();
-        int b = this.mRAFReader.read();
-        while (b != '\0') {
-            sb.append((char) b);
-            b = this.mRAFReader.read();
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        int b;
+        while ((b = this.mRAFReader.read()) != '\0' && b != -1) {
+            buffer.write(b);
         }
-        return sb.toString();
+        return buffer.toString("UTF-8");
     }
 
     @Override

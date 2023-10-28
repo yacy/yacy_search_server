@@ -98,5 +98,6 @@
       <dependency org="org.hamcrest" name="hamcrest" rev="2.2" conf="test->default"/>
       <dependency org="org.hamcrest" name="hamcrest-core" rev="2.2" conf="test->default"/>
       <dependency org="org.hamcrest" name="hamcrest-library" rev="2.2" conf="test->default"/>
+      <dependency org="com.github.luben" name="zstd-jni" rev="1.5.5-6"></dependency>
     </dependencies>
 </ivy-module>
