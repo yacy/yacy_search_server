@@ -18,12 +18,8 @@
 
 package org.openzim;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.tukaani.xz.SingleXZInputStream;
 import com.github.luben.zstd.ZstdInputStream;
@@ -44,7 +40,6 @@ import com.github.luben.zstd.ZstdInputStream;
 public class ZIMReader {
 
     private final ZIMFile mFile;
-    private RandomAccessFileZIMInputStream mReader;
 
     public static abstract class DirectoryEntry {
 
@@ -102,116 +97,83 @@ public class ZIMReader {
 
     public ZIMReader(final ZIMFile file) {
         this.mFile = file;
-        try {
-            this.mReader = new RandomAccessFileZIMInputStream(new RandomAccessFile(this.mFile, "r"));
-        } catch (final FileNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     public ZIMFile getZIMFile() {
         return this.mFile;
     }
 
-    public String getURLByURLOrder(int entryNumber) throws IOException {
-
-        // Move to the spot where URL's are listed
-        this.mReader.seek(this.mFile.header_urlPtrPos + 8L * entryNumber);
+    public String getURLByURLOrder(final int entryNumber) throws IOException {
 
         // The position of URL i
-        long pos = this.mReader.readEightLittleEndianBytesLong();
+        long pos = this.mFile.getURLPtr(entryNumber);
 
         // Move to the position of URL i
-        this.mReader.seek(pos);
+        this.mFile.mReader.seek(pos);
 
         // Article or Redirect entry?
-        int mimeType = this.mReader.readTwoLittleEndianBytesInt();
+        int mimeType = this.mFile.mReader.readTwoLittleEndianBytesInt();
 
         if (mimeType == 65535) {
-            this.mReader.seek(pos + 12);
-            return this.mReader.readZeroTerminatedString();
+            this.mFile.mReader.seek(pos + 12);
+            return this.mFile.mReader.readZeroTerminatedString();
         } else {
-            this.mReader.seek(pos + 16);
-            return this.mReader.readZeroTerminatedString();
+            this.mFile.mReader.seek(pos + 16);
+            return this.mFile.mReader.readZeroTerminatedString();
         }
     }
 
-    public String getURLByTitleOrder(int entryNumber) throws IOException {
-
-        // Move to the spot where URL's are listed
-        this.mReader.seek(this.mFile.header_titlePtrPos + 8L * entryNumber);
+    public String getURLByTitleOrder(final int entryNumber) throws IOException {
 
         // The articleNumber of the position of URL i
-        int articleNumber = this.mReader.readFourLittleEndianBytesInt();
-
-        this.mReader.seek(this.mFile.header_urlPtrPos + (8L * (articleNumber)));
-
-        // The position of URL i
-        long pos = this.mReader.readEightLittleEndianBytesLong();
-        this.mReader.seek(pos);
+        int articleNumber = this.mFile.getTitlePtr(entryNumber);
+        long pos = this.mFile.getURLPtr(articleNumber);
+        this.mFile.mReader.seek(pos);
 
         // Article or Redirect entry?
-        int mimeType = this.mReader.readTwoLittleEndianBytesInt();
+        int mimeType = this.mFile.mReader.readTwoLittleEndianBytesInt();
 
         if (mimeType == 65535) {
-            this.mReader.seek(pos + 12);
-            return this.mReader.readZeroTerminatedString();
+            this.mFile.mReader.seek(pos + 12);
+            return this.mFile.mReader.readZeroTerminatedString();
         } else {
-            this.mReader.seek(pos + 16);
-            return this.mReader.readZeroTerminatedString();
+            this.mFile.mReader.seek(pos + 16);
+            return this.mFile.mReader.readZeroTerminatedString();
         }
-    }
-
-    // position must be the seek position for the title in the Title Pointer List
-    private DirectoryEntry getDirectoryInfoAtTitlePosition(final long position) throws IOException {
-
-        // At the appropriate position in the titlePtrPos
-        this.mReader.seek(position);
-
-        // Get value of article at index
-        int pointer_to_the_URL_pointer = this.mReader.readFourLittleEndianBytesInt();
-
-        // Move to the position in urlPtrPos
-        this.mReader.seek(this.mFile.header_urlPtrPos + 8 * pointer_to_the_URL_pointer);
-
-        // Get value of article in urlPtrPos
-        long pointer_to_the_directory_entry = this.mReader.readEightLittleEndianBytesLong();
-
-        // Go to the location of the directory entry
-        this.mReader.seek(pointer_to_the_directory_entry);
-
-        // read the Content Entry
-        final int type = this.mReader.readTwoLittleEndianBytesInt(); // 2, 0xffff for redirect
-        this.mReader.read();                                         // 1, ignore, parameter length not used
-        final char namespace = (char) this.mReader.read();           // 1
-        this.mReader.readFourLittleEndianBytesInt();                 // 4, ignore, revision not used
-
-        // Article or Redirect entry
-        if (type == 65535) {
-            final int redirectIndex = this.mReader.readFourLittleEndianBytesInt();
-            final String url = this.mReader.readZeroTerminatedString();
-            String title = this.mReader.readZeroTerminatedString();
-            title = title.equals("") ? url : title;
-            return new RedirectEntry(type, namespace, redirectIndex,
-                    url, title, (position - this.mFile.header_urlPtrPos) / 8);
-        } else {
-            final int cluster_number = this.mReader.readFourLittleEndianBytesInt(); // 4
-            final int blob_number = this.mReader.readFourLittleEndianBytesInt();    // 4
-            final String url = this.mReader.readZeroTerminatedString();             // zero terminated
-            String title = this.mReader.readZeroTerminatedString();                 // zero terminated
-            title = title.equals("") ? url : title;
-
-            return new ArticleEntry(
-                    type, namespace,
-                    cluster_number, blob_number,
-                    url, title, (position - this.mFile.header_urlPtrPos) / 8);
-        }
-
     }
 
     public DirectoryEntry getDirectoryInfo(final int entryNumber) throws IOException {
-        if (entryNumber >= this.mFile.header_entryCount) throw new IOException("entryNumber exceeds entryCount");
-        return getDirectoryInfoAtTitlePosition(this.mFile.header_titlePtrPos + 4 * entryNumber);
+
+        // Get value of article at index
+        int pointer_to_the_URL_pointer = this.mFile.getTitlePtr(entryNumber);
+
+        // Get value of article in urlPtrPos
+        long pointer_to_the_directory_entry = this.mFile.getURLPtr(pointer_to_the_URL_pointer);
+
+        // Go to the location of the directory entry
+        this.mFile.mReader.seek(pointer_to_the_directory_entry);
+
+        // read the Content Entry
+        final int type = this.mFile.mReader.readTwoLittleEndianBytesInt(); // 2, 0xffff for redirect
+        this.mFile.mReader.read();                                         // 1, ignore, parameter length not used
+        final char namespace = (char) this.mFile.mReader.read();           // 1
+        this.mFile.mReader.readFourLittleEndianBytesInt();                 // 4, ignore, revision not used
+
+        // Article or Redirect entry
+        if (type == 65535) {
+            final int redirectIndex = this.mFile.mReader.readFourLittleEndianBytesInt();
+            final String url = this.mFile.mReader.readZeroTerminatedString();
+            String title = this.mFile.mReader.readZeroTerminatedString();
+            title = title.equals("") ? url : title;
+            return new RedirectEntry(type, namespace, redirectIndex, url, title, entryNumber);
+        } else {
+            final int cluster_number = this.mFile.mReader.readFourLittleEndianBytesInt(); // 4
+            final int blob_number = this.mFile.mReader.readFourLittleEndianBytesInt();    // 4
+            final String url = this.mFile.mReader.readZeroTerminatedString();             // zero terminated
+            String title = this.mFile.mReader.readZeroTerminatedString();                 // zero terminated
+            title = title.equals("") ? url : title;
+            return new ArticleEntry(type, namespace, cluster_number, blob_number, url, title, entryNumber);
+        }
     }
 
     // Gives the minimum required information needed for the given articleName
@@ -221,23 +183,21 @@ public class ZIMReader {
         DirectoryEntry entry;
         String cmpStr;
         final int numberOfArticles = this.mFile.header_entryCount;
-        long beg = this.mFile.header_titlePtrPos, end = beg + (numberOfArticles * 4), mid;
+        int beg = 0, end = numberOfArticles, mid;
 
         articleName = namespace + "/" + articleName;
 
         while (beg <= end) {
-            mid = beg + 4 * (((end - beg) / 4) / 2);
-            entry = getDirectoryInfoAtTitlePosition(mid);
+            mid = beg + ((end - beg) / 2);
+            entry = getDirectoryInfo(mid);
             if (entry == null) {
                 return null;
             }
-            cmpStr = entry.namespace + "/" + entry.url;
+            cmpStr = entry.namespace + "/" + entry.title;
             if (articleName.compareTo(cmpStr) < 0) {
-                end = mid - 4;
-
+                end = mid - 1;
             } else if (articleName.compareTo(cmpStr) > 0) {
-                beg = mid + 4;
-
+                beg = mid + 1;
             } else {
                 return entry;
             }
@@ -256,22 +216,22 @@ public class ZIMReader {
         final ArticleEntry article = (ArticleEntry) directoryInfo;
 
         // Move to the cluster entry in the clusterPtrPos
-        this.mReader.seek(this.mFile.header_clusterPtrPos + article.cluster_number * 8L);
+        this.mFile.mReader.seek(this.mFile.header_clusterPtrPos + article.cluster_number * 8L);
 
         // Read the location of the cluster
-        final long clusterPos = this.mReader.readEightLittleEndianBytesLong();
+        final long clusterPos = this.mFile.mReader.readEightLittleEndianBytesLong();
 
         // Move to the cluster
-        this.mReader.seek(clusterPos);
+        this.mFile.mReader.seek(clusterPos);
 
         // Read the first byte, for compression information
-        final int compressionType = this.mReader.read();
+        final int compressionType = this.mFile.mReader.read();
 
         // Check the compression type that was read
         // type = 1 uncompressed
         if (compressionType <= 1 || compressionType == 8 || compressionType == 9) {
             boolean extended = compressionType > 1;
-            return readClusterEntry(this.mReader, article.blob_number, extended);
+            return readClusterEntry(this.mFile.mReader, article.blob_number, extended);
         }
         // 2 for zlib and 3 for bzip2 (removed)
 
@@ -279,14 +239,14 @@ public class ZIMReader {
         if (compressionType == 4 || compressionType == 12) {
             boolean extended = compressionType == 12;
             // Create a dictionary with size 40MiB, the zimlib uses this size while creating
-            SingleXZInputStream xzReader= new SingleXZInputStream(this.mReader, 41943040);
+            SingleXZInputStream xzReader= new SingleXZInputStream(this.mFile.mReader, 41943040);
             return readClusterEntry(xzReader, article.blob_number, extended);
         }
 
         // Zstandard compressed data
         if (compressionType == 5 || compressionType == 13) {
             boolean extended = compressionType == 13;
-            ZstdInputStream zReader = new ZstdInputStream(this.mReader);
+            ZstdInputStream zReader = new ZstdInputStream(this.mFile.mReader);
             return readClusterEntry(zReader, article.blob_number, extended);
         }
 
@@ -332,7 +292,7 @@ public class ZIMReader {
         // - the full skip length is 4 * (numberOfBlobs1 - (article.blob_number + 2)) + offset1 - 4 * numberOfBlobs1
         //   = offset1 - 4 * (article.blob_number + 2)
         RandomAccessFileZIMInputStream.skipFully(is, (offset1 - (extended ? 8 : 4) * (blob_number + 2)));
-        is.read(entry, 0, entry.length);
+        RandomAccessFileZIMInputStream.readFully(is, entry);
 
         return entry;
     }

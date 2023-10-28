@@ -65,10 +65,16 @@ public class RandomAccessFileZIMInputStream extends InputStream {
         return ((buffer[0] & 0xFF) | ((buffer[1] & 0xFF) << 8));
     }
 
-    public static int toFourLittleEndianInteger(final byte[] buffer) { // TODO: make private
+    public static int toFourLittleEndianInteger(final byte[] buffer) {
         return
               ((buffer[0] & 0xFF)        | ((buffer[1] & 0xFF) << 8)
             | ((buffer[2] & 0xFF) << 16) | ((buffer[3] & 0xFF) << 24));
+    }
+
+    public static int toFourLittleEndianInteger(final byte[] buffer, int pos) {
+        return
+              ((buffer[pos    ] & 0xFF)        | ((buffer[pos + 1] & 0xFF) << 8)
+            | ((buffer[pos + 2] & 0xFF) << 16) | ((buffer[pos + 3] & 0xFF) << 24));
     }
 
     public static long toEightLittleEndianLong(final byte[] buffer) {
@@ -77,6 +83,14 @@ public class RandomAccessFileZIMInputStream extends InputStream {
             | ((long)(buffer[2] & 0xFF) << 16) | ((long)(buffer[3] & 0xFF) << 24)
             | ((long)(buffer[4] & 0xFF) << 32) | ((long)(buffer[5] & 0xFF) << 40)
             | ((long)(buffer[6] & 0xFF) << 48) | ((long)(buffer[7] & 0xFF) << 56));
+    }
+
+    public static long toEightLittleEndianLong(final byte[] buffer, int pos) {
+        return // cast to long required otherwise this is again an integer
+              ((long)(buffer[pos    ] & 0xFF)        | ((long)(buffer[pos + 1] & 0xFF) << 8)
+            | ((long)(buffer[pos + 2] & 0xFF) << 16) | ((long)(buffer[pos + 3] & 0xFF) << 24)
+            | ((long)(buffer[pos + 4] & 0xFF) << 32) | ((long)(buffer[pos + 5] & 0xFF) << 40)
+            | ((long)(buffer[pos + 6] & 0xFF) << 48) | ((long)(buffer[pos + 7] & 0xFF) << 56));
     }
 
     public static void skipFully(final InputStream stream, final long bytes) throws IOException {
@@ -97,6 +111,27 @@ public class RandomAccessFileZIMInputStream extends InputStream {
     @Override
     public int read() throws IOException {
         return this.mRAFReader.read();
+    }
+
+    @Override
+    public int read(byte b[], int off, int len) throws IOException {
+        return this.mRAFReader.read(b, off, len);
+    }
+
+    public static byte[] readFully(final InputStream is, final int len) throws IOException {
+        byte[] b = new byte[len];
+        int c = 0;
+        while (c < len) {
+            c = c + is.read(b, c, len - c);
+        }
+        return b;
+    }
+
+    public static void readFully(final InputStream is, final byte[] b) throws IOException {
+        int c = 0;
+        while (c < b.length) {
+            c = c + is.read(b, c, b.length - c);
+        }
     }
 
     public RandomAccessFile getRandomAccessFile() {
