@@ -67,13 +67,13 @@ public class ZIMFile extends File {
         }
 
         // The reader that will be used to read contents from the file
-        final RandomAcessFileZIMInputStream reader = new RandomAcessFileZIMInputStream(new RandomAccessFile(this, "r"));
+        final RandomAccessFileZIMInputStream reader = new RandomAccessFileZIMInputStream(new RandomAccessFile(this, "r"));
 
         // Read the contents of the header
         this.header_magicNumber   = reader.readFourLittleEndianBytesInt();     //  4
         this.header_majorVersion  = reader.readTwoLittleEndianBytesInt();      //  2
         this.header_minorVersion  = reader.readTwoLittleEndianBytesInt();      //  4
-        RandomAcessFileZIMInputStream.skipFully(reader, 16); // skip the uuid, this is not used
+        RandomAccessFileZIMInputStream.skipFully(reader, 16); // skip the uuid, this is not used
         this.header_entryCount    = reader.readFourLittleEndianBytesInt();     //  4
         this.header_clusterCount  = reader.readFourLittleEndianBytesInt();     //  4
         this.header_urlPtrPos     = reader.readEightLittleEndianBytesLong();   //  8

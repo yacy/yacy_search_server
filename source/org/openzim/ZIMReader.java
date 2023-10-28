@@ -41,7 +41,7 @@ import org.tukaani.xz.SingleXZInputStream;
 public class ZIMReader {
 
     private final ZIMFile mFile;
-    private RandomAcessFileZIMInputStream mReader;
+    private RandomAccessFileZIMInputStream mReader;
 
     public static abstract class DirectoryEntry {
 
@@ -100,7 +100,7 @@ public class ZIMReader {
     public ZIMReader(final ZIMFile file) {
         this.mFile = file;
         try {
-            this.mReader = new RandomAcessFileZIMInputStream(new RandomAccessFile(this.mFile, "r"));
+            this.mReader = new RandomAccessFileZIMInputStream(new RandomAccessFile(this.mFile, "r"));
         } catch (final FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -321,14 +321,14 @@ public class ZIMReader {
                 offset1 = firstOffset;
             } else {
                 location = (article.blob_number - 1) * 4;
-                RandomAcessFileZIMInputStream.skipFully(this.mReader, location);
+                RandomAccessFileZIMInputStream.skipFully(this.mReader, location);
                 offset1 = this.mReader.readFourLittleEndianBytesInt();
             }
 
             offset2 = this.mReader.readFourLittleEndianBytesInt();
             differenceOffset = offset2 - offset1;
             byte[] entry = new byte[differenceOffset];
-            RandomAcessFileZIMInputStream.skipFully(this.mReader, (offset1 - 4 * (article.blob_number + 2)));
+            RandomAccessFileZIMInputStream.skipFully(this.mReader, (offset1 - 4 * (article.blob_number + 2)));
             this.mReader.read(entry, 0, differenceOffset);
 
             return entry;
@@ -357,16 +357,16 @@ public class ZIMReader {
                 offset1 = firstOffset;
             } else {
                 location = (article.blob_number - 1) * 4;
-                RandomAcessFileZIMInputStream.skipFully(xzReader, location);
+                RandomAccessFileZIMInputStream.skipFully(xzReader, location);
                 xzReader.read(buffer);
-                offset1 = RandomAcessFileZIMInputStream.toFourLittleEndianInteger(buffer);
+                offset1 = RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
             }
 
             xzReader.read(buffer);
-            offset2 = RandomAcessFileZIMInputStream.toFourLittleEndianInteger(buffer);
+            offset2 = RandomAccessFileZIMInputStream.toFourLittleEndianInteger(buffer);
             differenceOffset = offset2 - offset1;
             byte[] entry = new byte[differenceOffset];
-            RandomAcessFileZIMInputStream.skipFully(xzReader, (offset1 - 4 * (article.blob_number + 2)));
+            RandomAccessFileZIMInputStream.skipFully(xzReader, (offset1 - 4 * (article.blob_number + 2)));
             xzReader.read(entry, 0, differenceOffset);
 
             return entry;

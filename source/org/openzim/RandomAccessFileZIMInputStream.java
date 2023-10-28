@@ -33,7 +33,7 @@ import java.io.RandomAccessFile;
  *         moved conditions for exceptions to asserts,
  *         refactoring and merge with Utilities
  */
-public class RandomAcessFileZIMInputStream extends InputStream {
+public class RandomAccessFileZIMInputStream extends InputStream {
 
     private final RandomAccessFile mRAFReader;
     private long mMarked = -1;
@@ -41,7 +41,7 @@ public class RandomAcessFileZIMInputStream extends InputStream {
     private final byte[] buffer4 = new byte[4];
     private final byte[] buffer8 = new byte[8];
 
-    public RandomAcessFileZIMInputStream(final RandomAccessFile reader) {
+    public RandomAccessFileZIMInputStream(final RandomAccessFile reader) {
         this.mRAFReader = reader;
     }
 
