@@ -1373,7 +1373,7 @@ YaCy Search Network==R&eacute;seau de recherche YaCy
 >YaCy Network<==>R&eacute;seau YaCy<
 The information that is presented on this page can also be retrieved as XML.==Les informations pr&eacute;sent&eacute;es ici peuvent &ecirc;tre obtenues au format XML.
 Click the API icon to see the XML.==Cliquez sur l'ic&ocirc;ne API pour afficher le XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Vous trouverez <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">ici</a> la liste compl&egrave;te des APIs.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==Vous trouverez <a href="https://wiki.yacy.net/index.php/Dev:API">ici</a> la liste compl&egrave;te des APIs.
 Network Overview==Aper&ccedil;u du r&eacute;seau
 Active&nbsp;Peers==Noeuds actifs
 Passive&nbsp;Peers==Noeuds passifs
@@ -2560,7 +2560,7 @@ If a line starts with a space, it will be displayed in a non-proportional font.=
 YaCy Interactive Search==YaCy Recherche interactive
 #This page uses the JSON search API to display search results as you type.==Diese Seite verwendet die JSON Such API, um die Suchergebnisse beim Tippen anzuzeigen.
 #Click the API icon to see an example call to the native API.==Klicken Sie auf die API Sprechblase, um einen Beispielaufruf der nativen API zu sehen.
-#To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+#To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="https://wiki.yacy.net/index.php/Dev:API">API Seite im Wiki</a>.
 >total results==>Total des r&eacute;sultats
 &nbsp;topwords:==&nbsp;Top mots:
 >Name==>Nom

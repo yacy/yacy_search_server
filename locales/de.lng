@@ -275,7 +275,7 @@ YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Lesezeichen
 
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Die Liste der Lesezeichen kann auch als RSS Feed abgerufen werden. Dies ist auch beim Auswählen eines bestimmten Tags möglich.
 Click the API icon to load the RSS from the current selection.==Klicken Sie auf die API Sprechblase, um einen RSS Feed der aktuellen Auswahl zu laden.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.
 <h3>Bookmarks==<h3>Lesezeichen
 Bookmarks (==Lesezeichen (
 #Login==Login
@@ -2242,7 +2242,7 @@ YaCy Search Network==YaCy Suche Netzwerk
 YaCy Network<==YaCy Netzwerk<
 The information that is presented on this page can also be retrieved as XML.==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden.
 Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.
 Network Overview==Netzwerkübersicht
 Active&nbsp;Peers==Aktive Peers
 Passive&nbsp;Peers==Passive Peers
@@ -3499,7 +3499,7 @@ You can edit your profile <a href="ConfigProfile_p.html">here</a>==Sie können I
 <html lang="en">==<html lang="de">
 The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
 Click the API icon to see the RDF Ontology definition for this vocabulary.==Klicken Sie auf das API Symbol, um die RDF Ontology Definition für diese Vokabelliste anzuzeigen.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API Seite im Wiki</a>.
 Vocabulary Administration==Vokabel Administration
 Vocabularies can be used to produce a search navigation. A vocabulary must be created before content is indexed.==Vokabeln können genutzt werden, um eine Suchnavigation zu erzeugen. Eine Vokabelliste muss erzeugt werden bevor der Inhalt indexiert wird.
 The vocabulary is used to annotate the indexed content with a reference to the object that is denoted by the term of the vocabulary.==Die Vokabelliste wird benutzt, um den indexierten Inhalt mit einer Referenz auf das Objekt zu versehen dass in der Bedeutung der Vokabel hinterlegt ist.
