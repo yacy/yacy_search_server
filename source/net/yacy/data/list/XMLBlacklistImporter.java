@@ -36,7 +36,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 /**
  * This class provides methods to import blacklists from an XML file (see
- * http://www.yacy-websuche.de/wiki/index.php/Dev:APIblacklists
+ * https://wiki.yacy.net/index.php/Dev:APIblacklists
  * for examples) and to return this data as a {@link ListAccumulator} object.
  */
 public class XMLBlacklistImporter extends DefaultHandler {
