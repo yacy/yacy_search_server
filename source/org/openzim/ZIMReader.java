@@ -215,11 +215,8 @@ public class ZIMReader {
         // This is now an article, so thus we can cast to ArticleEntry
         final ArticleEntry article = (ArticleEntry) directoryInfo;
 
-        // Move to the cluster entry in the clusterPtrPos
-        this.mFile.mReader.seek(this.mFile.header_clusterPtrPos + article.cluster_number * 8L);
-
         // Read the location of the cluster
-        final long clusterPos = this.mFile.mReader.readEightLittleEndianBytesLong();
+        final long clusterPos = this.mFile.geClusterPtr(article.cluster_number);
 
         // Move to the cluster
         this.mFile.mReader.seek(clusterPos);
