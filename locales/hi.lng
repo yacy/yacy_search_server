@@ -226,7 +226,7 @@ here.==यहां.
 YaCy '#[clientname]#': Bookmarks==यासी '#[clientname]#': बुकमार्क्स
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==यह बुकमार्क्स की सूचि आरएसएस फीड्स में  पुनः प्राप्त की जा सकती है . आप एक विशिष्ट टैग का चयन करते हैं तो यह भी किया जा सकता है..
 Click the API icon to load the RSS from the current selection.==मौजूदा चयन से आरएसएस लोड करने के लिए एपीआई आइकन पर क्लिक करें.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==एपीआई की लिस्ट देखने के लिए विजिट करे  <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">एपीआई विकी पेज </a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==एपीआई की लिस्ट देखने के लिए विजिट करे  <a href="https://wiki.yacy.net/index.php/Dev:API">एपीआई विकी पेज </a>.
 <h3>Bookmarks==<h3>बुकमार्क्स 
 Bookmarks (==बुकमार्क्स  (
 #Login==लॉग इन 

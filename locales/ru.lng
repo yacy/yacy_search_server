@@ -311,7 +311,7 @@ YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Закладки
 
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Список закладок можно также получить как RSS-ленту. Это может быть сделано при выборе конкретного тега .
 Click the API icon to load the RSS from the current selection.==Нажмите на иконку API для загрузки RSS из текущего выделения.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списка всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">wiki-страницу API</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списка всех API, пожалуйста, посетите <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">wiki-страницу API</a>.
 <h3>Bookmarks==<h3>Закладки
 Bookmarks (==Закладки (
 #Login==Логин
@@ -1773,7 +1773,7 @@ document containg <a href="http://www.w3.org/RDF/" target="_blank">RDF</a> annot
 The XHTML+RDFa data format is both a XML content format and a HTML display format and is considered as an important <a href="http://www.w3.org/2001/sw/" target="_blank">Semantic Web</a> content format.==Формат данных XHTML+RDFa в виде XML-содержания и HTML-отображения, рассматривается в качестве важного формата <a href="http://www.w3.org/2001/sw/" target="_blank">семантической сети</a>.
 The same content can also be retrieved as pure <a href="api/yacydoc.xml?urlhash=#[urlhash]#">XML metadata</a> with DC tag name vocabulary.==Некоторое содержимое может быть также получено в виде <a href="api/yacydoc.xml?urlhash=">XML-метаданных</a> с словарём тэгов имён DC.
 Click the API icon to see an example call to the search rss API.==Нажмите на иконку для просмотра API примера поиска по rss-ленте.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списка всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">страницу API wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списка всех API, пожалуйста, посетите <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">страницу API wiki</a>.
 URL Database Administration==Управление базой данных ссылок
 #URL References Administration==Управление URL-ссылками
 The local index currently contains #[ucount]# URL references==Локальный индекс содержит на данный момент #[ucount]# ссылок
@@ -2356,7 +2356,7 @@ YaCy Search Network==Мониторинг сети YaCy
 YaCy Network<==Сеть YaCy<
 The information that is presented on this page can also be retrieved as XML.==Информация, указанная на этой странице, также может быть получена как XML.
 Click the API icon to see the XML.==Нажмите на иконку API, чтобы увидеть XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списка всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">страницу в Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списка всех API, пожалуйста, посетите <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">страницу в Wiki</a>.
 Network Overview==Обзор сети
 Active&nbsp;Principal&nbsp;and&nbsp;Senior&nbsp;Peers==Активные главные и старшие узлы
 Passive&nbsp;Senior&nbsp;Peers==Пассивные старшие узлы
@@ -3648,7 +3648,7 @@ You can edit your profile <a href="ConfigProfile_p.html">here</a>==Вы може
 YaCy '#[clientname]#': Federated Index==YaCy '#[clientname]#': Управление словарём
 The information that is presented on this page can also be retrieved as XML==Информация представленная на этой странице, также может быть получена в виде XML.
 Click the API icon to see the RDF Ontology definition for this vocabulary.==Нажмите на иконку API для просмотра определения онтологии RDF для этого словаря.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списка всех API, пожалуйста, посетите <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">страницу API Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==Для просмотра списка всех API, пожалуйста, посетите <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">страницу API Wiki</a>.
 Vocabulary Administration==Управление словарём
 Vocabularies can be used to produce a search navigation. A vocabulary must be created before content is indexed.==Словари могут использоваться при выполнении навигации по поиску. Словарь должен быть создан до индексации содержимого сайта.
 The vocabulary is used to annotate the indexed content with a reference to the object that is denoted by the term of the vocabulary.==Словарь используется для комментирования проиндексированного содержимого с ссылкой на объект, которому присвоено значение из словаря.

@@ -49,6 +49,8 @@ results are computed from the local index only.
 
 We recommend to compile YaCy yourself and install it from the git sources.
 Pre-compiled YaCy packages exist but are not generated on a regular basis.
+Automaticaly built latest developer release is available at
+[release.yacy.net](https://release.yacy.net/).
 To get a ready-to-run production package, run YaCy from Docker.
 
 ### Compile and run YaCy from git sources
@@ -95,6 +97,9 @@ To install YaCy in intel-based environments, run:
 docker run -d --name yacy_search_server -p 8090:8090 -p 8443:8443 -v yacy_search_server_data:/opt/yacy_search_server/DATA --restart unless-stopped --log-opt max-size=200m --log-opt max-file=2 yacy/yacy_search_server:latest
 ```
 then open http://localhost:8090 in your web-browser.
+
+For building Docker image from latest sources, see [docker/Readme.md](docker/Readme.md).
+
 
 ## Help develop YaCy
 

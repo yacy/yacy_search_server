@@ -678,7 +678,7 @@
        <source>Click the API icon to load the RSS from the current selection.</source>
     </trans-unit>
     <trans-unit id="68813072" xml:space="preserve" approved="no" translate="yes">
-       <source>To see a list of all APIs, please visit the &lt;a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank"&gt;API wiki page&lt;/a&gt;.</source>
+       <source>To see a list of all APIs, please visit the &lt;a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank"&gt;API wiki page&lt;/a&gt;.</source>
     </trans-unit>
     <trans-unit id="cb18d8a6" xml:space="preserve" approved="no" translate="yes">
        <source>&lt;h3&gt;Bookmarks</source>
@@ -4369,7 +4369,7 @@
        <source>Click the API icon to see an example call to the search rss API.</source>
     </trans-unit>
     <trans-unit id="68813072" xml:space="preserve" approved="no" translate="yes">
-       <source>To see a list of all APIs, please visit the &lt;a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank"&gt;API wiki page&lt;/a&gt;.</source>
+       <source>To see a list of all APIs, please visit the &lt;a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank"&gt;API wiki page&lt;/a&gt;.</source>
     </trans-unit>
     <trans-unit id="4171bdd2" xml:space="preserve" approved="no" translate="yes">
        <source>URL Database Administration</source>
@@ -5830,7 +5830,7 @@
        <source>Click the API icon to see the XML.</source>
     </trans-unit>
     <trans-unit id="68813072" xml:space="preserve" approved="no" translate="yes">
-       <source>To see a list of all APIs, please visit the &lt;a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank"&gt;API wiki page&lt;/a&gt;.</source>
+       <source>To see a list of all APIs, please visit the &lt;a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank"&gt;API wiki page&lt;/a&gt;.</source>
     </trans-unit>
     <trans-unit id="cffbaf6b" xml:space="preserve" approved="no" translate="yes">
        <source>Network Overview</source>
@@ -9335,7 +9335,7 @@
        <source>Click the API icon to see the RDF Ontology definition for this vocabulary.</source>
     </trans-unit>
     <trans-unit id="68813072" xml:space="preserve" approved="no" translate="yes">
-       <source>To see a list of all APIs, please visit the &lt;a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank"&gt;API wiki page&lt;/a&gt;.</source>
+       <source>To see a list of all APIs, please visit the &lt;a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank"&gt;API wiki page&lt;/a&gt;.</source>
     </trans-unit>
     <trans-unit id="1990fad8" xml:space="preserve" approved="no" translate="yes">
        <source>Vocabulary Administration</source>
