@@ -232,7 +232,7 @@ YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': Закладки
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Список закладок може також бути отриманий як RSS. Це можливо також при виборі конкретних ключових слів.
 
 Click the API icon to load the RSS from the current selection.==Натисніть на піктограму API для завантаження RSS з поточного вибору.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Для перегляду списку всіх API, будь-ласка, відвідайте <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">сторінку API у Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==Для перегляду списку всіх API, будь-ласка, відвідайте <a href="https://wiki.yacy.net/index.php/Dev:API">сторінку API у Wiki</a>.
 
 <h3>Bookmarks==<h3>Закладки
 Bookmarks (==Закладки (
@@ -1995,7 +1995,7 @@ YaCy Search Network==Пошукова мережа YaCy
 YaCy Network<==Мережа YaCy<
 The information that is presented on this page can also be retrieved as XML.==Інформацію на цій сторінці також можна отримати в форматі XML.
 Click the API icon to see the XML.==Натисніть значок API для відображення XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Для перегляду списку всіх API, будь-ласка, відвідайте <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">сторінку API у Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==Для перегляду списку всіх API, будь-ласка, відвідайте <a href="https://wiki.yacy.net/index.php/Dev:API">сторінку API у Wiki</a>.
 Network Overview==Огляд мережі
 Active&nbsp;Peers==Активні&nbsp;вузли
 Passive&nbsp;Peers==Пасивні&nbsp;вузли
@@ -3011,7 +3011,7 @@ Call Count<==Виклики<
 Scheduled actions are executed after the next execution date has arrived within a time frame of #[tfminutes]# minutes.==Заплановані дії виконуються в межах тимчасове вікна в #[tfminutes]# хвилин, коли наступна дата виконання буде досягнута.
 The information that is presented on this page can also be retrieved as XML.==Інформацію на цій сторінці також можна отримати в форматі XML.
 Click the API icon to see the XML.==Натисніть значок API для відображення XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Для перегляду списку всіх API, будь-ласка, відвідайте <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">сторінку API у Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==Для перегляду списку всіх API, будь-ласка, відвідайте <a href="https://wiki.yacy.net/index.php/Dev:API">сторінку API у Wiki</a>.
 #-----------------------------
 
 #File: Table_RobotsTxt_p.html
@@ -3019,7 +3019,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 Table Viewer==Перегляд таблиці
 The information that is presented on this page can also be retrieved as XML.==Інформацію на цій сторінці також можна отримати в форматі XML.
 Click the API icon to see the XML.==Натисніть значок API для відображення XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Щоб побачити список усіх API, будь ласка, відвідайте <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">вікі-сторінку API</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==Щоб побачити список усіх API, будь ласка, відвідайте <a href="https://wiki.yacy.net/index.php/Dev:API">вікі-сторінку API</a>.
 >robots.txt table<==>Таблиця robots.txt<
 #-----------------------------
 
@@ -3242,7 +3242,7 @@ The data that is visualized here can also be retrieved in a XML file, which list
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==З властивістю GET "about" можна витягувати тільки зв’язки відносно сервера, поданого в полі аргументу "about".
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==З властивістю GET "latest" можна отримати список посилань, що був розрахований протягом поточної роботи YaCy. І з кожним викликом, тільки оновлення до наступного списку посилань.
 Click the API icon to see the XML file.==Натисніть значок API для перегляду XML-файлу.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Щоб переглянути список усіх API, будь ласка, відвідайте <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">вікі-сторінку API</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==Щоб переглянути список усіх API, будь ласка, відвідайте <a href="https://wiki.yacy.net/index.php/Dev:API">вікі-сторінку API</a>.
 
 Web Structure==Структура мережі
 host<==хост<
@@ -3346,7 +3346,7 @@ YaCy Interactive Search==Живий пошук YaCy
 This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.==Результати пошуку можна отримати також у вигляді RSS/<a href="http://www.opensearch.org">opensearch</a>.
 The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==Формат запитів подібний до <a href="http://www.loc.gov/standards/sru/">SRU</a>.
 Click the API icon to see an example call to the search rss API.==Щиглик API, щоб побачити зразок виклику пошукового API RSS.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Щоб побачити список усіх API, будь ласка, відвідайте <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">вікі-сторінку API</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==Щоб побачити список усіх API, будь ласка, відвідайте <a href="https://wiki.yacy.net/index.php/Dev:API">вікі-сторінку API</a>.
 loading from local index...==завантаження з місцевого індексу...
 e="Search"==e="Пошук"
 #-----------------------------
@@ -3357,7 +3357,7 @@ Search Page==Сторінка пошуку
 This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.==Ці результати пошуку також доступні у вигляді RSS/<a href="http://www.opensearch.org">opensearch</a>.
 The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==Формат запиту схожий на <a href="http://www.loc.gov/standards/sru/">SRU</a>.
 Click the API icon to see an example call to the search rss API.==Клацніть по значку API, щоб побачити зразок виклику пошукового API RSS.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Щоб побачити список усіх API, будь ласка, відвідайте <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">вікі-сторінку API</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==Щоб побачити список усіх API, будь ласка, відвідайте <a href="https://wiki.yacy.net/index.php/Dev:API">вікі-сторінку API</a>.
 Did you mean:==Можливо, ви мали на увазі:
 "Search"=="Пошук"
 'Search'=='Пошук'

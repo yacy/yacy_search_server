@@ -294,7 +294,7 @@ YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': ブックマーク
 
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==ブックマークのリストはRSS フィードとして取得する事もできます. あなたが特定のタグを選択する時にこれを行う事もできます.
 Click the API icon to load the RSS from the current selection.==現在選択されているものからRSSを読み込むにはAPIのアイコンをクリックして下さい.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==全てのAPIの一覧を見る為には、<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki ページ</a>を訪問して下さい.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==全てのAPIの一覧を見る為には、<a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki ページ</a>を訪問して下さい.
 <h3>Bookmarks==<h3>ブックマーク
 Bookmarks (==ブックマーク (
 #Login==ログイン

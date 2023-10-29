@@ -263,12 +263,12 @@ here.==在这里.
 start autosearch of new bookmarks==开始自动搜索新书签
 This starts a search of new or modified bookmarks since startup==开始搜索自从启动以来新的或修改的书签
 Every peer online will be ask for results.==每个在线的节点都会被索要结果。
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==要查看所有API的列表，请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>。
-To see a list of all APIs==要查看所有API的列表，请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>。
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==要查看所有API的列表，请访问<a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>。
+To see a list of all APIs==要查看所有API的列表，请访问<a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>。
 YaCy '#[clientname]#': Bookmarks==YaCy '#[clientname]#': 书签
 The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==书签列表也能用作RSS订阅.当你选择某个标签时你也可执行这个操作.
 Click the API icon to load the RSS from the current selection.==点击API图标以从当前选择书签中载入RSS.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==获取所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==获取所有API, 请访问<a href="https://wiki.yacy.net/index.php/Dev:API">API Wiki</a>.
 <h3>Bookmarks==<h3>书签
 Bookmarks (==书签(
 Login==登录
@@ -3567,7 +3567,7 @@ To see a list of all APIs, please visit the==To see a list of all APIs, please v
 Table Viewer==表格查看器
 The information that is presented on this page can also be retrieved as XML.==此页信息也可表示为XML.
 Click the API icon to see the XML.==点击API图标查看XML.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==查看所有API, 请访问<a href="https://wiki.yacy.net/index.php/Dev:API">API Wiki</a>.
 API wiki page==API百科页面
 To see a list of all APIs, please visit the==要查看所有API的列表，请访问
 >robots.txt table<==>robots.txt列表<
@@ -3845,7 +3845,7 @@ The data that is visualized here can also be retrieved in a XML file, which list
 With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==使用GET属性'about'仅能获得带有'about'参数的域关联关系.
 With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==使用GET属性'latest'能获得当前的关联关系列表, 并且每一次调用都只能更新下一级关联关系列表.
 Click the API icon to see the XML file.==点击API图标查看XML文件.
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==查看所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Wiki</a>.
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API">API wiki page</a>.==查看所有API, 请访问<a href="https://wiki.yacy.net/index.php/Dev:API">API Wiki</a>.
 Web Structure==网页结构
 host<==服务器<
 depth<==深度<
@@ -3951,7 +3951,7 @@ YaCy Interactive Search==YaCy交互搜索
 This search result can also be retrieved as RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a> output.==此搜索结果能以RSS/<a href="http://www.opensearch.org" target="_blank">opensearch</a>被形式检索。
 The query format is similar to <a href="http://www.loc.gov/standards/sru/" target="_blank">SRU</a>.==请求的格式与<a href="http://www.loc.gov/standards/sru/" target="_blank">SRU</a>相似。
 Click the API icon to see an example call to the search rss API.==点击API图标查看调用rss API的示例。
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==查看所有API, 请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API百科页面</a>。
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==查看所有API, 请访问<a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API百科页面</a>。
 >loading from local index...<==>从本地索引加载...<
 "Search"=="搜索"
 "Search..."=="搜索中..."
@@ -3962,7 +3962,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 YaCy '#[clientname]#': Location Search==YaCy '#[clientname]#':位置搜索
 The information that is presented on this page can also be retrieved as XML==此页面上显示的信息也可以作为XML检索
 Click the API icon to see the XML.==单击 API 图标以查看 XML。
-To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki page</a>.==要查看所有 API 的列表，请访问<a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API" target="_blank">API wiki</a>页面。
+To see a list of all APIs, please visit the <a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki page</a>.==要查看所有 API 的列表，请访问<a href="https://wiki.yacy.net/index.php/Dev:API" target="_blank">API wiki</a>页面。
 >search<==>搜索<
 #-----------------------------
 
